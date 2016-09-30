@@ -41,6 +41,7 @@
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
+			unselectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
@@ -56,26 +57,22 @@
 			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				/*
 				if (multiMode) {
-					this.displaySelectedObjects(selectedObjects);
+					this.displaySelectedObjects(selectedObjects, unselectedObjects);
 				}
-				else {
-					this.displaySelectedObjects([]);
-				}
-				*/
 			}
 
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
+					unselectedObjects = [];
 					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						selectedObjects.splice(objectIndex, 1);
+						unselectedObjects.push(selectedObjects.splice(objectIndex, 1));
 					}
-					this.displaySelectedObjects(selectedObjects);
+					this.displaySelectedObjects(selectedObjects, unselectedObjects);
 
 					if (selectedObjects.length > 0) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -92,7 +89,7 @@
 
 			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
 				selectedObjects = this.initialSelectedObjects;
-				this.displaySelectedObjects(selectedObjects);
+				this.displaySelectedObjects(selectedObjects, unselectedObjects);
 			}
 		};
 
@@ -103,14 +100,15 @@
 			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 		};
 
-		this.displaySelectedObjects = function (selectedObjects) {
+		this.displaySelectedObjects = function (selectedObjects, unselectObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				ids: selectedObjects
+				highlight_ids: selectedObjects,
+				unhighlight_ids: unselectObjects
 			};
-			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
+			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
 	}
 }());

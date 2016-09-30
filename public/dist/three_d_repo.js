@@ -3505,6 +3505,38 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
+		/**
+		 * This is copied from selectParts()
+		 * @param highlightPart
+		 * @param unhighlightPart
+		 * @param zoom
+		 * @param colour
+		 */
+		this.selectAndUnselectParts = function(highlightPart, unhighlightPart, zoom, colour) {
+			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
+
+			if (zoom) {
+				for (i = 0; i < highlightPart.length; i++) {
+					highlightPart[i].fit();
+				}
+				for (i = 0; i < unhighlightPart.length; i++) {
+					unhighlightPart[i].fit();
+				}
+			}
+
+			for (i = 0; i < highlightPart.length; i++) {
+				highlightPart[i].setEmissiveColor(colour, "both");
+			}
+
+			for (i = 0; i < unhighlightPart.length; i++) {
+				unhighlightPart[i].resetColor();
+			}
+
+			self.oldPart = highlightPart;
+		};
+
 		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
@@ -3529,25 +3561,83 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
+			if (!this.multiSelectMode) {
+				var nameSpaceName = null;
+
+				/*
+				 if (account && project) {
+				 nameSpaceName = account + "__" + project;
+				 }
+				 */
+
+				if (!ids) {
+					ids = [];
+				}
+
+				// If we pass in a single id, then we might be selecting
+				// an old-style Group in X3DOM rather than multipart.
+				ids = Array.isArray(ids) ? ids: [ids];
+
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var fullPartsList = [];
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								fullPartsList.push(parts);
+							}
+						}
+					}
+
+					self.selectParts(fullPartsList, zoom, colour);
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						self.setApp(object[0], colour);
+					}
+				}
+
+				if (ids.length === 0)
+				{
+					self.setApp(null);
+				}
+			}
+		};
+
+		/**
+		 * This is copied from highlightObjects()
+		 * @param account
+		 * @param project
+		 * @param highlight_ids
+		 * @param unhighlight_ids
+		 * @param zoom
+		 * @param colour
+		 */
+		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
-			/*
-			if (account && project) {
-				nameSpaceName = account + "__" + project;
-			}
-			*/
-
-			if (!ids) {
-				ids = [];
-			}
-
-			// If we pass in a single id, then we might be selecting
-			// an old-style Group in X3DOM rather than multipart.
-			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
+				var fullHighlightPartsList = [];
+				var fullUnhighlightPartsList = [];
 				var nsMultipartNodes;
 
 				// If account and project have been specified
@@ -3561,30 +3651,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
+						if (highlightParts && highlightParts.ids.length > 0) {
+							fullHighlightPartsList.push(highlightParts);
+						}
 
-						if (parts && parts.ids.length > 0) {
-							fullPartsList.push(parts);
+						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
+						if (unhighlightParts && unhighlightParts.ids.length > 0) {
+							fullUnhighlightPartsList.push(unhighlightParts);
 						}
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom, colour);
-			}
-
-			for(var i = 0; i < ids.length; i++)
-			{
-				var id = ids[i];
-				var object = document.querySelectorAll("[id$='" + id + "']");
-
-				if (object[0]) {
-					self.setApp(object[0], colour);
-				}
-			}
-
-			if (ids.length === 0)
-			{
-				self.setApp(null);
+				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
 			}
 		};
 
@@ -4469,6 +4548,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			this.multiSelectMode = on;
 			if (on) {
 				element.style.cursor = "crosshair";
+				// Clear any single selection
+				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
+					self.oldPart[0].resetColor();
+				}
 			} else {
 				element.style.cursor = "-webkit-grab";
 			}
@@ -4659,6 +4742,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
+	HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
@@ -16904,6 +16988,7 @@ var Oculus = {};
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
+			unselectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
@@ -16919,26 +17004,22 @@ var Oculus = {};
 			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				/*
 				if (multiMode) {
-					this.displaySelectedObjects(selectedObjects);
+					this.displaySelectedObjects(selectedObjects, unselectedObjects);
 				}
-				else {
-					this.displaySelectedObjects([]);
-				}
-				*/
 			}
 
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
+					unselectedObjects = [];
 					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						selectedObjects.splice(objectIndex, 1);
+						unselectedObjects.push(selectedObjects.splice(objectIndex, 1));
 					}
-					this.displaySelectedObjects(selectedObjects);
+					this.displaySelectedObjects(selectedObjects, unselectedObjects);
 
 					if (selectedObjects.length > 0) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -16955,7 +17036,7 @@ var Oculus = {};
 
 			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
 				selectedObjects = this.initialSelectedObjects;
-				this.displaySelectedObjects(selectedObjects);
+				this.displaySelectedObjects(selectedObjects, unselectedObjects);
 			}
 		};
 
@@ -16966,14 +17047,15 @@ var Oculus = {};
 			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 		};
 
-		this.displaySelectedObjects = function (selectedObjects) {
+		this.displaySelectedObjects = function (selectedObjects, unselectObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				ids: selectedObjects
+				highlight_ids: selectedObjects,
+				unhighlight_ids: unselectObjects
 			};
-			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
+			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
 	}
 }());
@@ -17705,6 +17787,15 @@ var Oculus = {};
 								event.value.account,
 								event.value.project,
 								event.value.id ? [event.value.id] : event.value.ids,
+								event.value.zoom,
+								event.value.colour
+							);
+						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
+							v.viewer.highlightAndUnhighlightObjects(
+								event.value.account,
+								event.value.project,
+								event.value.highlight_ids,
+								event.value.unhighlight_ids,
 								event.value.zoom,
 								event.value.colour
 							);
