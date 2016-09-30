@@ -13461,8 +13461,19 @@ angular.module('3drepo')
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
+				console.log(666, event);
 				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
-					vm.errorMessage = event.value.error.message;
+					if (event.value.error.status === 500) {
+						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
+					}
+					else {
+						if (event.value.error.value === 61) {
+							vm.errorMessage = "Please click on the link in the verify email sent to your account";
+						}
+						else {
+							vm.errorMessage = event.value.error.message;
+						}
+					}
 				}
 			}
 		});
