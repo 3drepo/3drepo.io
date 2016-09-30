@@ -3768,7 +3768,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					{
 
 						self.scene.appendChild(newViewPoint);
-						console.log("Failed to find parent group: " + parentGroup);
+						console.error("Failed to find parent group: " + parentGroup);
 					}
 
 				}
@@ -3874,7 +3874,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 			else
 			{
-				console.log("Could not find viewpoint." + id);
+				console.error("Could not find viewpoint." + id);
 			}
 
 			self.loadViewpoint = id;
@@ -4143,7 +4143,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			{
 				var vpname = account + "__"+ project + "_issueViewpoint";
 				var groupName = self.getViewpointGroupAndName(name);
-				console.log("done");
 				var at = [pos[0] + viewDir[0], pos[1] + viewDir[1], pos[2] + viewDir[2]];
 				self.createViewpoint(vpname, pos, at, up, account + "__" + project, true);
 				self.setCurrentViewpoint(vpname);
@@ -4343,7 +4342,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			var origViewTrans = null;
 			
-			console.log("account : "+ account + " project: " + project);
 			if(account && project)
 			{
 				var groups = document.getElementsByTagName("Group");
@@ -4357,7 +4355,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					}
 				}
 
-				console.log(origViewTrans);
 			}
 
 			var viewMat = self.getViewMatrix().inverse();
@@ -4383,13 +4380,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if(origViewTrans)
 			{
 				var transInv = origViewTrans.inverse();
-				console.log(transInv);
 				viewRight = transInv.multMatrixVec(viewRight);
 				viewUp = transInv.multMatrixVec(viewUp);
 				viewDir = transInv.multMatrixVec(viewDir);
-				console.log("position before: ["+viewPos.x+","+viewPos.y+","+viewPos.z+"]");
 				viewPos = transInv.multMatrixPnt(viewPos);
-				console.log("position after: ["+viewPos.x+","+viewPos.y+","+viewPos.z+"]");
 				lookAt = transInv.multMatrixVec(lookAt);
 
 			}
