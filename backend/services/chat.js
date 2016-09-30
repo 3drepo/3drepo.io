@@ -15,123 +15,88 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-module.exports.init = function (session, listener) {
+module.exports.createApp = function (http, serverConfig){
 	"use strict";
 
-	let systemLogger = require("../logger.js").systemLogger;
+	let config = require('../config');
+	let session = require('./session').session(config);
+	let amqp = require('amqplib');
 
+	let log_iface = require("../logger.js");
+	let middlewares = require('../routes/middlewares');
+	let systemLogger = log_iface.systemLogger;
+
+	let io = require("socket.io")(http, { path: serverConfig.chat_path });
 	let sharedSession = require("express-socket.io-session");
-	let config = require("../config.js");
 
-	let socketio = require("socket.io")(listener, { path: config.api_server.chat_path });
-	let dbInterface = require("../db/db_interface.js");
-
-	let issueMonitoring   = {};
-	let projectMonitoring = {};
-
-	socketio.use(sharedSession(session, { autoSave: true }));
-
-	socketio.sockets.on("connection", function (socket) {
-
-		socket.on("error", function(err) {
-			if (err) {
-				systemLogger.logError(err.stack);
-			}
-			});
-
-		socket.on("new_issue", function(data) {
-			let username = socket.handshake.session.user.username;
-
-			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
-				if (!err.value)
-				{
-					let proj_account_key = data.account + "__" + data.project;
-
-					if (projectMonitoring[proj_account_key])
-					{
-						for(let i = 0; i < projectMonitoring[proj_account_key].length; i++)
-						{
-							let clientSocket = projectMonitoring[proj_account_key][i];
-
-							if (clientSocket !== socket) {
-								clientSocket.emit("new_issue", data);
-							}
-						}
-					}
-				} else {
-					systemLogger.logError("User " + username + " does not have access to read this issue.");
-				}
-			});
-		});
-
-		socket.on("open_issue", function(data) {
-			let username = socket.handshake.session.user.username;
-
-			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
-				if (!err.value)
-				{
-					if (!issueMonitoring[data.id]) {
-						issueMonitoring[data.id] = [];
-					}
-
-					issueMonitoring[data.id].push(socket);
-
-				} else {
-					systemLogger.logError("User " + username + " does not have access to read this issue.");
-				}
-			});
-		});
-
-		socket.on("watch_project", function(data) {
-			let username = socket.handshake.session.user.username;
-
-			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
-				let proj_account_key = data.account + "__" + data.project;
-
-				if (!err.value)
-				{
-					if (!projectMonitoring[proj_account_key]) {
-						projectMonitoring[proj_account_key] = [];
-					}
-
-					projectMonitoring[proj_account_key].push(socket);
-
-				} else {
-					systemLogger.logError("User " + username + " does not have access to read this issue.");
-				}
-			});
-		});
-
-		socket.on("post_comment", function(data)
-		{
-			let username = socket.handshake.session.user.username;
-
-			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
-				if (!err.value)
-				{
-					if (issueMonitoring[data.id])
-					{
-						// Clean up the data to send back to the client
-						delete data.account;
-						delete data.project;
-						data.owner = username;
-
-						for(let i = 0; i < issueMonitoring[data.id].length; i++)
-						{
-							let clientSocket = issueMonitoring[data.id][i];
-
-							if (clientSocket !== socket){
-								clientSocket.emit("post_comment", data);
-							}
-						}
-					}
-				} else {
-					systemLogger.logError("User " + username + " does not have access to post to this issue.");
-				}
-			});
+	io.use(sharedSession(session, { autoSave: true }));
+	io.use((socket, next) => {
+		// init the singleton db connection
+		let DB = require("../db/db")(systemLogger);
+		DB.getDB("admin").then( db => {
+			// set db to singleton modelFactory class
+			require("../models/factory/modelFactory").setDB(db);
+			next();
+		}).catch( err => {
+			systemLogger.logError('Chat server - DB init error - ' + err.message);
 		});
 	});
+
+	if(!config.cn_queue){
+		return;
+	}
+
+	middlewares.createQueueInstance().then(queue => {
+
+		socket(queue);
+
+	}).catch(err => {
+		systemLogger.logError('Chat server - Queue init error - ' + err.message);
+	});
+
+
+	function socket(queue){
+
+		//consume event queue and fire msg to clients if they have subscribed related event
+		queue.consumeEventMessage(msg => {
+			if(msg.event && msg.account && msg.project){
+				io.to(`${msg.account}::${msg.project}`).emit(`${msg.account}::${msg.project}::${msg.event}`, msg.data);
+			}
+		});
+
+		//on client connect	
+		io.on('connection', socket => {
+
+			if(!socket.handshake.session.user){
+
+				return;
+			}
+
+			let username = socket.handshake.session.user.username;
+
+			systemLogger.logInfo(`${username} is in chat`, { username });
+
+			socket.on('join', data => {
+				//check permission if the user have permission to join room
+				middlewares.hasReadAccessToProjectHelper(username, data.account, data.project).then(hasAccess => {
+
+					if(hasAccess){
+						socket.join(`${data.account}::${data.project}`);
+						systemLogger.logInfo(`${username} has joined room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+					} else {
+						systemLogger.logError(`${username} has no access to join room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+					}
+				});
+				
+			});
+
+			socket.on('leave', data => {
+				socket.leave(`${data.account}::${data.project}`);
+				systemLogger.logInfo(`${username} has left room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+			});
+
+		});
+
+	}
 };
 

@@ -263,21 +263,34 @@ function hasCollaboratorQuota(req, res, next){
 	});
 }
 
-function connectQueue(req, res, next){
+function createQueueInstance(){
 	'use strict';
 
 	// init ampq and import queue object
 	let importQueue = require('../services/queue');
+	let log_iface = require("../logger.js");
+	let systemLogger = log_iface.systemLogger;
+
+	return importQueue.connect(config.cn_queue.host, {
+
+		shared_storage: config.cn_queue.shared_storage,
+		logger: systemLogger,
+		callback_queue: config.cn_queue.callback_queue,
+		worker_queue: config.cn_queue.worker_queue,
+		event_queue: config.cn_queue.event_queue
+
+	}).then(() => importQueue);
+	
+
+
+}
+function connectQueue(req, res, next){
+	'use strict';
+
+	// init ampq and import queue object
 	if(config.cn_queue){
 
-		importQueue.connect(config.cn_queue.host, {
-
-			sharedSpacePath: config.cn_queue.shared_storage,
-			logger: req[C.REQ_REPO].logger,
-			callbackQName: config.cn_queue.callback_queue,
-			workerQName: config.cn_queue.worker_queue
-
-		}).then(() => {
+		createQueueInstance().then(() => {
 			next();
 		}).catch(err => {
 			responseCodes.respond("Express Middleware - AMPQ", req, res, next, err);
@@ -332,7 +345,8 @@ var middlewares = {
 	isSubContractorInvitedHelper,
 	loggedIn,
 	checkRole,
-	hasReadAccessToProjectHelper
+	hasReadAccessToProjectHelper,
+	createQueueInstance
 };
 
 module.exports = middlewares;

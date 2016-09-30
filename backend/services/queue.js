@@ -40,15 +40,18 @@ ImportQueue.prototype.connect = function(url, options) {
         return Promise.resolve();
     }
 
-    if(!options.sharedSpacePath){
-        return Promise.reject({ message: 'Please define sharedSpacePath in options'});
+
+    if(!options.shared_storage){
+        return Promise.reject({ message: 'Please define shared_storage in queue config'});
     } else if(!options.logger){
         return Promise.reject({ message: 'Please define logger in options'});
-    } else if(!options.callbackQName){
-        return Promise.reject({ message: 'Please define callbackQName in options'});
-    } else if(!options.workerQName){
-        return Promise.reject({ message: 'Please define workerQName in options'});
-    } 
+    } else if(!options.callback_queue){
+        return Promise.reject({ message: 'Please define callback_queue in queue config'});
+    } else if(!options.worker_queue){
+        return Promise.reject({ message: 'Please define worker_queue in queue config'});
+    } else if (!options.event_queue){
+        return Promise.reject({ message: 'Please define event_queue in queue config'});
+    }
 
 
     return amqp.connect(url).then( conn => {
@@ -64,11 +67,12 @@ ImportQueue.prototype.connect = function(url, options) {
     }).then(channel => {
 
         this.channel = channel;
-        this.sharedSpacePath = options.sharedSpacePath;
+        this.sharedSpacePath = options.shared_storage;
         this.logger = options.logger;
-        this.callbackQName = options.callbackQName;
-        this.workerQName = options.workerQName;
+        this.callbackQName = options.callback_queue;
+        this.workerQName = options.worker_queue;
         this.deferedObjs = {};
+        this.eventQueueName = options.event_queue;
 
         return this._consumeCallbackQueue();
 
@@ -342,5 +346,36 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
         }, { noAck: true });
     });
 };
+
+
+ImportQueue.prototype.insertEventMessage = function(msg){
+    'use strict';
+
+    msg = JSON.stringify(msg);
+
+    return this.channel.assertQueue(this.eventQueueName, { durable: true }).then(() => {
+        return this.channel.sendToQueue(
+            this.eventQueueName, 
+            new Buffer(msg), 
+            {
+                persistent: true 
+            }
+        );
+    });
+}
+
+ImportQueue.prototype.consumeEventMessage = function(callback){
+    'use strict';
+
+    let self = this;
+
+    return this.channel.assertQueue(this.eventQueueName, { durable: true }).then(() => {
+        return this.channel.consume(this.eventQueueName, function(rep) {
+
+            callback(JSON.parse(rep.content));
+            
+        }, { noAck: true });
+    });
+}
 
 module.exports = new ImportQueue();
