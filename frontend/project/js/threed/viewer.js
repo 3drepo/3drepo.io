@@ -960,7 +960,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				}
 				else
+				{
 					self.scene.appendChild(newViewPoint);
+				}
 
 				if (from && at && up) {
 					var q = ViewerUtil.getAxisAngle(from, at, up);
@@ -1523,15 +1525,33 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function() {
+		this.getCurrentViewpointInfo = function(account, project) {
 			var viewPoint = {};
 
-			var origViewTrans = self.getViewArea()._scene.getViewpoint().getCurrentTransform();
+			var origViewTrans = null;
+			
+			console.log("account : "+ account + " project: " + project);
+			if(account && project)
+			{
+				var groups = document.getElementsByTagName("Group");
+				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+				for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+				{
+					if(groups[gIdx].hasAttribute("id") && groups[gIdx].id == fullParentGroupName)
+					{
+						origViewTrans = groups[gIdx]._x3domNode.getCurrentTransform();
+						break;
+					}
+				}
+
+				console.log(origViewTrans);
+			}
+
 			var viewMat = self.getViewMatrix().inverse();
 
 			var viewRight = viewMat.e0();
 			var viewUp = viewMat.e1();
-			var viewDir = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
+			var viewDir = viewMat.e2(); // Because OpenGL points out of screen
 			var viewPos = viewMat.e3();
 
 			var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
@@ -1541,10 +1561,27 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (center) {
 				lookAt = center.subtract(viewPos);
 			} else {
-				lookAt = viewPos.add(viewDir);
+				lookAt = viewPos.add(viewDir.multiply(-1));
 			}
 
 			var projMat = self.getProjectionMatrix();
+			
+			//transform the vectors to the right space if TransformMatrix is present.
+			if(origViewTrans)
+			{
+				var transInv = origViewTrans.inverse();
+				console.log(transInv);
+				viewRight = transInv.multMatrixVec(viewRight);
+				viewUp = transInv.multMatrixVec(viewUp);
+				viewDir = transInv.multMatrixVec(viewDir);
+				console.log("position before: ["+viewPos.x+","+viewPos.y+","+viewPos.z+"]");
+				viewPos = transInv.multMatrixPnt(viewPos);
+				console.log("position after: ["+viewPos.x+","+viewPos.y+","+viewPos.z+"]");
+				lookAt = transInv.multMatrixVec(lookAt);
+
+			}
+				
+			viewDir= viewDir.multiply(-1);
 
 			// More viewing direction than lookAt to sync with Assimp
 			viewPoint.up = [viewUp.x, viewUp.y, viewUp.z];
@@ -1555,6 +1592,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.unityHeight = 2.0 / projMat._00;
 			viewPoint.fov = Math.atan((1 / projMat._00)) * 2.0;
 			viewPoint.aspect_ratio = viewPoint.fov / projMat._11;
+
 
 			var f = projMat._23 / (projMat._22 + 1);
 			var n = (f * projMat._23) / (projMat._23 - 2 * f);

@@ -117,7 +117,7 @@
 
 			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 
-			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
+			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {account: issue.account, project: issue.project, promise: viewpointPromise});
 
 			viewpointPromise.promise.then(function (viewpoint) {
 				data = {
