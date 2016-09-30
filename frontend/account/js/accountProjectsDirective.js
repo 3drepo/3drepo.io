@@ -38,12 +38,12 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
+			// existingProjectToUpload,
+			// existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -52,17 +52,18 @@
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
+		vm.units = server_config.units;
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		// existingProjectFileUploader.addEventListener(
+		// 	"change",
+		// 	function () {
+		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
+		// 		$scope.$apply();
+		// 	},
+		// 	false
+		// );
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -90,6 +91,9 @@
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+					// Always show user account
+					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 				}
 			}
 		});
@@ -107,6 +111,7 @@
 		 * Watch new project data
 		 */
 		$scope.$watch("vm.newProjectData", function (newValue) {
+
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
 					(angular.isUndefined(newValue.name) || (angular.isDefined(newValue.name) && (newValue.name === "")));
@@ -115,6 +120,8 @@
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+
+				vm.newProjectButtonDisabled = !newValue.unit;
 			}
 		}, true);
 
@@ -142,6 +149,8 @@
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.tag = null;
+			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
@@ -178,6 +187,13 @@
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);
@@ -205,12 +221,12 @@
 		 *
 		 * @param {Object} project
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
-		};
+		// vm.uploadFile = function (project) {
+		// 	console.log(project);
+		// 	existingProjectFileUploader.value = "";
+		// 	existingProjectToUpload = project;
+		// 	existingProjectFileUploader.click();
+		// };
 
 		/**
 		 * Upload a file
@@ -339,7 +355,7 @@
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
 				});
 			}
 		}

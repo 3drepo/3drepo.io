@@ -5,15 +5,14 @@
 
 	md-list#accountList(flex, ng-if="vm.projectsExist")
 		// Accounts
-		// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
-		div(ng-repeat="account in vm.accounts", flex, ng-if="account.projects.length!==0")
+		div(ng-repeat="account in vm.accounts", flex, ng-if="account.showAccount")
 			div(layout="row", layout-align="start center")
 				md-list-item(flex="100", layout-fill)
 					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
 						md-button.md-icon-button(aria-label="Folder")
 							md-icon.angular-material-icons {{account.showProjectsIcon}}
 						p {{account.account}}
-				spen(flex)
+				span(flex)
 				.accountRight
 					md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
 						md-icon.angular-material-icons.md-accent playlist_add
@@ -31,6 +30,7 @@
 				quota="vm.quota"
 				subscriptions="vm.subscriptions")
 			md-divider
+
 
 	div(ng-if="!vm.projectsExist")
 		.cardInfo(layout="row", layout-align="center center")

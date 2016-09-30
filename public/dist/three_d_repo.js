@@ -1003,8 +1003,11 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		var self = this;
 
-		if(settings && settings.hasOwnProperty("mapTile")){
+		if(settings && settings.hasOwnProperty("mapTile") && settings.mapTile.lat && settings.mapTile.lon){
 			// set origin BNG
+			settings.mapTile.lat = parseFloat(settings.mapTile.lat);
+			settings.mapTile.lon = parseFloat(settings.mapTile.lon);
+			settings.mapTile.y = parseInt(settings.mapTile.y);
 			this.settings = settings;
 			this.originBNG = OsGridRef.latLonToOsGrid(new LatLon(this.settings.mapTile.lat, this.settings.mapTile.lon));
 			this.meterPerPixel = 1;
@@ -5346,7 +5349,8 @@ var ViewerManager = {};
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService) {
 		var vm = this,
 			federationToDeleteIndex,
-			accountsToUse;
+			userAccount, // For creating federations
+			accountsToUse; // For listing federations
 
 		// Init
 		vm.federationOptions = {
@@ -5355,6 +5359,8 @@ var ViewerManager = {};
 			delete: {label: "Delete", icon: "delete"}
 		};
 
+		vm.units = server_config.units;
+		
 		/*
 		 * Watch accounts input
 		 */
@@ -5366,7 +5372,17 @@ var ViewerManager = {};
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].fedProjects.length > 0) {
+
+						if (i === 0) {
+							vm.accounts[i].showProjects = true;
+							accountsToUse.push(vm.accounts[i]);
+							if (vm.accounts[i].fedProjects.length > 0) {
+								vm.showInfo = false;
+							}
+							userAccount = vm.accounts[i];
+						}
+						else if (vm.accounts[i].fedProjects.length > 0) {
+							vm.accounts[i].showProjects = true;
 							accountsToUse.push(vm.accounts[i]);
 							vm.showInfo = false;
 						}
@@ -5383,7 +5399,7 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.newFederationData", function () {
 			if (vm.federationOriginalData === null) {
-				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.project)) || (vm.newFederationData.project === "");
+				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.project)) || (vm.newFederationData.project === "" || !vm.newFederationData.unit);
 			}
 			else {
 				vm.newFederationButtonDisabled = angular.equals(vm.newFederationData, vm.federationOriginalData);
@@ -5396,7 +5412,7 @@ var ViewerManager = {};
 		 * @param event
 		 */
 		vm.setupNewFederation = function (event) {
-			vm.accountsToUse = angular.copy(accountsToUse);
+			vm.userAccount = angular.copy(userAccount);
 			vm.federationOriginalData = null;
 			vm.newFederationData = {
 				desc: "",
@@ -5427,20 +5443,18 @@ var ViewerManager = {};
 		/**
 		 * Add a project to a federation
 		 *
-		 * @param accountIndex
 		 * @param projectIndex
 		 */
-		vm.addToFederation = function (accountIndex, projectIndex) {
+		vm.addToFederation = function (projectIndex) {
 			vm.showRemoveWarning = false;
 
 			vm.newFederationData.subProjects.push({
-				accountIndex: accountIndex,
-				database: vm.accountsToUse[accountIndex].account,
+				database: vm.userAccount.account,
 				projectIndex: projectIndex,
-				project: vm.accountsToUse[accountIndex].projects[projectIndex].project
+				project: vm.userAccount.projects[projectIndex].project
 			});
 
-			vm.accountsToUse[accountIndex].projects[projectIndex].federated = true;
+			vm.userAccount.projects[projectIndex].federated = true;
 		};
 
 		/**
@@ -5449,8 +5463,7 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.removeFromFederation = function (index) {
-			var i, j, iLength, jLength,
-				exit = false,
+			var i, length,
 				item;
 
 			// Cannot have existing federation with no sub projects
@@ -5459,14 +5472,10 @@ var ViewerManager = {};
 			}
 			else {
 				item = vm.newFederationData.subProjects.splice(index, 1);
-				for (i = 0, iLength = vm.accountsToUse.length; (i < iLength) && !exit; i += 1) {
-					if (vm.accountsToUse[i].account === item[0].database) {
-						for (j = 0, jLength = vm.accountsToUse[i].projects.length; (j < jLength) && !exit; j += 1) {
-							if (vm.accountsToUse[i].projects[j].project === item[0].project) {
-								vm.accountsToUse[i].projects[j].federated = false;
-								exit = true;
-							}
-						}
+				for (i = 0, length = vm.userAccount.projects.length; i < length; i += 1) {
+					if (vm.userAccount.projects[i].project === item[0].project) {
+						vm.userAccount.projects[i].federated = false;
+						break;
 					}
 				}
 			}
@@ -5482,6 +5491,8 @@ var ViewerManager = {};
 				promise = UtilsService.doPost(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
+					vm.showInfo = false;
+					vm.newFederationData.timestamp = (new Date()).toString();
 					vm.accountsToUse[0].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
 				});
@@ -5490,6 +5501,7 @@ var ViewerManager = {};
 				promise = UtilsService.doPut(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
+					vm.federationOriginalData.subProjects = vm.newFederationData.subProjects;
 					vm.closeDialog();
 				});
 			}
@@ -5500,10 +5512,22 @@ var ViewerManager = {};
 		};
 
 		/**
-		 * Open the federation in the viewer
+		 * Open the federation in the viewer if it has sub projects otherwise open edit dialog
+		 *
+		 * @param {Object} event
+		 * @param {Object} accountIndex
+		 * @param {Number} projectIndex
 		 */
-		vm.viewFederation = function (account, index) {
-			$location.path("/" + account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search({});
+
+		vm.viewFederation = function (event, accountIndex, projectIndex) {
+			console.log(vm.accountsToUse[accountIndex]);
+			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedProjects[projectIndex].hasOwnProperty("subProjects")) {
+				setupEditFederation(event, projectIndex);
+			}
+			else {
+				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedProjects[projectIndex].project, "_self").search({});
+			}
+
 		};
 
 		/**
@@ -5511,20 +5535,20 @@ var ViewerManager = {};
 		 *
 		 * @param event
 		 * @param option
-		 * @param index
+		 * @param federationIndex
 		 */
-		vm.doFederationOption = function (event, option, index) {
+		vm.doFederationOption = function (event, option, federationIndex) {
 			switch (option) {
 				case "edit":
-					setupEditFederation(event, index);
+					setupEditFederation(event, federationIndex);
 					break;
 
 				case "team":
-					setupEditTeam(event, index);
+					setupEditTeam(event, federationIndex);
 					break;
 
 				case "delete":
-					setupDelete(event, index);
+					setupDelete(event, federationIndex);
 					break;
 			}
 		};
@@ -5537,6 +5561,7 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.accountsToUse[0].fedProjects.splice(federationToDeleteIndex, 1);
+					vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[0].fedProjects.length === 0));
 					vm.closeDialog();
 				}
 				else {
@@ -5546,27 +5571,40 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * Toggle display of projects for an account
+		 *
+		 * @param {Number} index
+		 */
+		vm.toggleProjectsList = function (index) {
+			vm.accountsToUse[index].showProjects = !vm.accountsToUse[index].showProjects;
+			vm.accountsToUse[index].showProjectsIcon = vm.accountsToUse[index].showProjects ? "folder_open" : "folder";
+		};
+
+		/**
 		 * Edit a federation
 		 *
 		 * @param event
-		 * @param index
+		 * @param projectIndex
 		 */
-		function setupEditFederation (event, index) {
-			var i, j, k, iLength, jLength, kLength;
+		function setupEditFederation (event, projectIndex) {
+			var i, j, iLength, jLength;
 
 			vm.showRemoveWarning = false;
 
-			vm.accountsToUse = angular.copy(accountsToUse);
-			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[index];
+			vm.userAccount = angular.copy(userAccount);
+			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[projectIndex];
 			vm.newFederationData = angular.copy(vm.federationOriginalData);
+			if (!vm.newFederationData.hasOwnProperty("subProjects")) {
+				vm.newFederationData.subProjects = [];
+			}
 
 			// Disable projects in the projects list that are federated
-			for (i = 0, iLength = vm.accountsToUse.length; i < iLength; i += 1) {
-				for (j = 0, jLength = vm.accountsToUse[i].projects.length; j < jLength; j += 1) {
-					vm.accountsToUse[i].projects[j].federated = false;
-					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
-						if (vm.federationOriginalData.subProjects[k].project === vm.accountsToUse[i].projects[j].project) {
-							vm.accountsToUse[i].projects[j].federated = true;
+			for (i = 0, iLength = vm.userAccount.projects.length; i < iLength; i += 1) {
+				vm.userAccount.projects[i].federated = false;
+				if (vm.federationOriginalData.hasOwnProperty("subProjects")) {
+					for (j = 0, jLength = vm.federationOriginalData.subProjects.length; j < jLength; j += 1) {
+						if (vm.federationOriginalData.subProjects[j].project === vm.userAccount.projects[i].project) {
+							vm.userAccount.projects[i].federated = true;
 						}
 					}
 				}
@@ -6065,9 +6103,11 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
+
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
+
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -6077,20 +6117,29 @@ var ViewerManager = {};
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
+
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			projectsetting: {label: "Settings", icon: "settings"},
+			revision: {label: "Revisions", icon: "settings_backup_restore"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
+
+		if(vm.project.timestamp && !vm.project.federate){
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+		}
+
 		checkFileUploading();
 
 		/*
 		 * Watch changes in upload file
 		 */
+
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 			}
 		});
 
@@ -6101,7 +6150,7 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					vm.uploadFile();
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6109,12 +6158,6 @@ var ViewerManager = {};
 			}
 		};
 
-		/**
-		 * Call parent upload function
-		 */
-		vm.uploadFile = function () {
-			vm.onUploadFile({project: vm.project});
-		};
 
 		/**
 		 * Handle project option selection
@@ -6124,8 +6167,23 @@ var ViewerManager = {};
 		 */
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
+				case "projectsetting":
+					console.log('Settings clicked');
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
+					break;
+
 				case "upload":
-					vm.uploadFile();
+					vm.uploadErrorMessage = null;
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					//vm.uploadFile();
+					break;
+
+				case "download":
+					window.open(
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project.name + "/download/latest"),
+						'_blank' 
+					);
 					break;
 
 				case "team":
@@ -6134,6 +6192,11 @@ var ViewerManager = {};
 
 				case "delete":
 					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+
+				case "revision":
+					getRevision();
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
 					break;
 			}
 		};
@@ -6154,18 +6217,70 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * When users click select file
+		 */
+		vm.selectFile = function(){
+			vm.file = document.createElement('input');
+			vm.file.setAttribute('type', 'file');
+			vm.file.click();
+
+			vm.file.addEventListener("change", function () {
+				vm.selectedFile = vm.file.files[0];
+				$scope.$apply();
+			});
+		}
+
+		/**
+		 * When users click upload after selecting
+		 */
+		vm.uploadFile = function () {
+			//vm.onUploadFile({project: vm.project});
+			
+			vm.uploadErrorMessage = null;
+
+			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
+				vm.uploadErrorMessage = 'Invalid revision name';
+			} else {
+				getRevision().then(function(revisions){
+
+					if(vm.tag){
+						revisions.forEach(function(rev){
+							if(rev.tag === vm.tag){
+								vm.uploadErrorMessage = 'Revision name already exists';
+							}
+						});
+					}
+
+					if(!vm.uploadErrorMessage){
+						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						vm.closeDialog();
+					}
+				});
+			}
+
+
+		};
+
+		/**
+		* Go to the specified revision
+		*/
+		vm.goToRevision = function(revId){
+			console.log(revId);
+			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
+		}
+
+		/**
 		 * Upload file/model to project
 		 *
 		 * @param file
 		 */
-		function uploadFileToProject (file) {
+		function uploadFileToProject(file, tag, desc) {
 			var promise,
 				formData;
 
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
-				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
@@ -6187,12 +6302,25 @@ var ViewerManager = {};
 						});
 					}
 					else {
+
+						vm.uploadFileName = file.name;
+
 						formData = new FormData();
 						formData.append("file", file);
+
+						if(tag){
+							formData.append('tag', tag);
+						}
+
+						if(desc){
+							formData.append('desc', desc);
+						}
+
 						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+
 						promise.then(function (response) {
 							console.log("uploadModel", response);
-							if ((response.data.status === 400) || (response.data.status === 404)) {
+							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
 									vm.fileUploadInfo = "Unsupported file format";
@@ -6200,6 +6328,10 @@ var ViewerManager = {};
 								else if (response.data.value === 66) {
 									vm.fileUploadInfo = "Insufficient quota for model";
 								}
+								else {
+									vm.fileUploadInfo = response.data.message;
+								}
+								
 								vm.showUploading = false;
 								vm.showFileUploadInfo = true;
 								$timeout(function () {
@@ -6247,6 +6379,8 @@ var ViewerManager = {};
 							vm.project.timestamp = new Date();
 							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
+							// clear revisions cache
+							vm.revisions = null;
 						}
 						else {
 							if (response.data.hasOwnProperty("errorReason")) {
@@ -6267,6 +6401,7 @@ var ViewerManager = {};
 			}, 1000);
 		}
 
+
 		/**
 		 * Set up team of project
 		 *
@@ -6275,6 +6410,18 @@ var ViewerManager = {};
 		function setupEditTeam (event) {
 			vm.item = vm.project;
 			UtilsService.showDialog("teamDialog.html", $scope, event);
+
+		}
+
+		function getRevision(){
+			if(!vm.revisions){
+				return RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
+					vm.revisions = revisions;
+					return Promise.resolve(revisions);
+				});
+			} else {
+				return Promise.resolve(vm.revisions);
+			}
 		}
 
 	}
@@ -6320,12 +6467,12 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
+			// existingProjectToUpload,
+			// existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -6334,17 +6481,18 @@ var ViewerManager = {};
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
+		vm.units = server_config.units;
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		// existingProjectFileUploader.addEventListener(
+		// 	"change",
+		// 	function () {
+		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
+		// 		$scope.$apply();
+		// 	},
+		// 	false
+		// );
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -6372,6 +6520,9 @@ var ViewerManager = {};
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+					// Always show user account
+					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 				}
 			}
 		});
@@ -6389,6 +6540,7 @@ var ViewerManager = {};
 		 * Watch new project data
 		 */
 		$scope.$watch("vm.newProjectData", function (newValue) {
+
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
 					(angular.isUndefined(newValue.name) || (angular.isDefined(newValue.name) && (newValue.name === "")));
@@ -6397,6 +6549,8 @@ var ViewerManager = {};
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+
+				vm.newProjectButtonDisabled = !newValue.unit;
 			}
 		}, true);
 
@@ -6424,6 +6578,8 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.tag = null;
+			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
@@ -6460,6 +6616,13 @@ var ViewerManager = {};
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);
@@ -6487,12 +6650,12 @@ var ViewerManager = {};
 		 *
 		 * @param {Object} project
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
-		};
+		// vm.uploadFile = function (project) {
+		// 	console.log(project);
+		// 	existingProjectFileUploader.value = "";
+		// 	existingProjectToUpload = project;
+		// 	existingProjectFileUploader.click();
+		// };
 
 		/**
 		 * Upload a file
@@ -6621,9 +6784,113 @@ var ViewerManager = {};
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
 				});
 			}
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountProjectsetting", accountProjectsetting);
+
+	function accountProjectsetting() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountProjectsetting.html',
+			scope: {
+				account: "=",
+				showPage: "&",
+				subscriptions: "="
+			},
+			controller: AccountProjectsettingCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountProjectsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+
+	function AccountProjectsettingCtrl($scope, $location, UtilsService, StateManager) {
+		var vm = this,
+			promise;
+
+		/**
+		 * Go back to the repos page
+		 */
+
+
+		vm.goBack = function () {
+			$location.search("project", null);
+			vm.showPage({page: "repos"});
+		};
+
+		vm.units = server_config.units
+
+		vm.mapTile = {};
+		vm.projectName = $location.search().proj;
+
+
+		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		.then(function (response) {
+
+			if (response.status === 200 && response.data.properties) {
+
+				if(response.data.properties.mapTile){
+
+					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
+					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
+					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
+					vm.projectType = response.data.type;
+				}
+
+				response.data.properties.unit && (vm.unit = response.data.properties.unit);
+				
+
+			} else {
+				vm.message = response.data.message;
+			}
+
+
+		});
+
+		vm.save = function(){
+
+			var data = {
+				mapTile: vm.mapTile,
+				unit: vm.unit
+			};
+
+			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			.then(function(response){
+				if(response.status === 200){
+					vm.message = 'Saved';
+				} else {
+					vm.message = response.data.message;
+				}
+
+
+			})
 		}
 	}
 }());
@@ -6802,7 +7069,8 @@ var ViewerManager = {};
 		obj.newProject = function (projectData) {
 			var data = {
 				desc: "",
-				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
+				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
+				unit: projectData.unit
 			};
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
@@ -9244,47 +9512,6 @@ var ViewerManager = {};
 }());
 
 /**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("cookiesText", cookiesText);
-
-	function cookiesText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "cookiesText.html",
-			controller: CookiesTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	CookiesTextCtrl.$inject = [];
-
-	function CookiesTextCtrl () {
-		var vm = this;
-	}
-}());
-
-/**
  *	Copyright (C) 2015 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -10936,9 +11163,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -10952,17 +11179,15 @@ var ViewerManager = {};
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
 		vm.pointerEvents = "auto";
-
+		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
-		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "terms"},
-			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"},
-			{title: "Pricing", value: "pricing"},
-			{title: "Contact", value: "contact"}
-		];
-		vm.goToAccount = false;
+		vm.legalDisplays = [];
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.legalDisplays = serverConfig.legal;
+		}
+		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Contact", page: "contact"});
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
@@ -11988,7 +12213,8 @@ angular.module('3drepo')
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			pinHighlightColour = [1.0000, 0.7, 0.0],
+			issueViewerMoveComplete = false;
 
 		/*
 		 * Init
@@ -12005,11 +12231,12 @@ angular.module('3drepo')
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, {callback: viewerMove});
 
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project);
+		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -12473,6 +12700,7 @@ angular.module('3drepo')
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
 			vm.selectedIndex = index;
+			vm.selectedIssue.rev_id = vm.revision;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -12504,8 +12732,10 @@ angular.module('3drepo')
 			}
 
 			// Wait for camera to stop before showing a scribble
+			issueViewerMoveComplete = false;
 			$timeout(function () {
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+				issueViewerMoveComplete = true;
 			}, 1100);
 		};
 
@@ -12530,8 +12760,13 @@ angular.module('3drepo')
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
 							project: vm.project,
-							scribble: png
+							scribble: png,
 						};
+
+						if(vm.revision){
+							issue.rev_id = vm.revision;
+						}
+
 						if (selectedObjectId !== null) {
 							issue.objectId = selectedObjectId;
 							issue.pickedPos = pickedPos;
@@ -12771,6 +13006,15 @@ angular.module('3drepo')
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
 		}
+
+		/**
+		 * If the issue has a scribble deselect it if the user moves the camera
+		 */
+		function viewerMove () {
+			if ((vm.selectedIssue !== null) && (vm.selectedIssue.scribble !== null) && issueViewerMoveComplete) {
+				vm.hideItem = true;
+			}
+		}
 	}
 }());
 
@@ -12854,10 +13098,16 @@ angular.module('3drepo')
 			}
 		};
 
-		obj.getIssues = function(account, project) {
+		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+
+			if(revision){
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+			}
+			
 
 			$http.get(url)
 				.then(
@@ -12891,7 +13141,14 @@ angular.module('3drepo')
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			}
+			
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
@@ -12905,6 +13162,7 @@ angular.module('3drepo')
 					assigned_roles: userRoles,
 					scribble: issue.scribble
 				};
+
 				config = {withCredentials: true};
 
 				if (issue.pickedPos !== null) {
@@ -12940,11 +13198,18 @@ angular.module('3drepo')
 		 * @returns {*}
 		 */
 		function doPut(issue, data) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
-				config = {
-					withCredentials: true
-				};
+			var deferred = $q.defer();
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+			}
+				
+			var config = {
+				withCredentials: true
+			};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
 					deferred.resolve(response.data);
@@ -13196,8 +13461,19 @@ angular.module('3drepo')
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
+				console.log(666, event);
 				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
-					vm.errorMessage = event.value.error.message;
+					if (event.value.error.status === 500) {
+						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
+					}
+					else {
+						if (event.value.error.value === 61) {
+							vm.errorMessage = "Please click on the link in the verify email sent to your account";
+						}
+						else {
+							vm.errorMessage = event.value.error.message;
+						}
+					}
 				}
 			}
 		});
@@ -13231,16 +13507,20 @@ angular.module('3drepo')
 		return {
 			restrict: "EA",
 			templateUrl: "measure.html",
-			scope: {},
+			scope: {
+				account: '=',
+				project: '=',
+				settings: '='
+			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
 
-	function MeasureCtrl ($scope, $element, EventService) {
+	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
@@ -13252,9 +13532,13 @@ angular.module('3drepo')
 		vm.show = false;
 		vm.distance = false;
 		vm.allowMove = false;
+		vm.units = server_config.units;
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
+
+		//console.log('measure scope', $scope);
+		vm.unit = vm.settings.unit;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
@@ -13285,7 +13569,7 @@ angular.module('3drepo')
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
 				if (event.value.hasOwnProperty("position")) {
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;
@@ -15262,47 +15546,6 @@ var Oculus = {};
 }());
 
 /**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("privacyText", privacyText);
-
-	function privacyText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "privacyText.html",
-			controller: PrivacyTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	PrivacyTextCtrl.$inject = [];
-
-	function PrivacyTextCtrl () {
-		var vm = this;
-	}
-}());
-
-/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -15640,6 +15883,7 @@ var Oculus = {};
 			]
 		});
 
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
@@ -15660,6 +15904,7 @@ var Oculus = {};
 				});
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -15716,9 +15961,10 @@ var Oculus = {};
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
 				}
 				else {
 					// Remove measure display
@@ -15762,18 +16008,23 @@ var Oculus = {};
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
-				function(json) {
-					deferred.resolve({
-						account     : account,
-						project		: project,
-						name        : name,
-						owner		: json.owner,
-						description	: json.desc,
-						type		: json.type,
-						settings 	: json.properties
-					});
+			$http.get(url).then(function(res){
+				var data = res.data;
+				console.log('getProjectInfo data', data);
+				deferred.resolve({
+					account     : account,
+					project		: project,
+					owner		: data.owner,
+					description	: data.desc,
+					type		: data.type,
+					settings 	: data.properties
+				}, function(){
+					deferred.resolve();
 				});
+			});
+
+
+			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {
@@ -15927,9 +16178,9 @@ var Oculus = {};
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
 		var v = this;
 
@@ -16403,6 +16654,135 @@ var Oculus = {};
     }
 }());
 
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("revisions", revisions);
+
+	function revisions () {
+		return {
+			restrict: 'E',
+			templateUrl: 'revisions.html',
+			scope: {
+				account: "=",
+				project: "=",
+				revision: "=",
+			},
+			controller: revisionsCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+		};
+	}
+
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+		var vm = this;
+
+		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+			vm.revisions = revisions;
+		});
+
+		$scope.$watch("vm.revisions", function () {
+			
+			if(!vm.revision){
+				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+				vm.revisions[0].current = true;
+
+			} else {
+				vm.revisions && vm.revisions.forEach(function(rev, i){
+					if(rev.tag === vm.revision){
+						vm.revName = vm.revision;
+						vm.revisions[i].current = true;
+					} else if(rev._id === vm.revision){
+						vm.revName = $filter('revisionDate')(rev.timestamp);
+						vm.revisions[i].current = true;
+
+					}
+				});
+			}
+
+		});
+
+		vm.openDialog = function(){
+
+			if(!vm.revisions){
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					vm.revisions = revisions;
+				});
+			}
+
+			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+		}
+
+		/**
+		* Go to the specified revision
+		*/
+		vm.goToRevision = function(revId){
+
+			UtilsService.closeDialog();
+			$location.path("/" + vm.account + "/" + vm.project + "/" + revId , "_self");
+
+		}
+
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
+
+	}
+
+
+}());
+
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.factory("RevisionsService", RevisionsService);
+
+	RevisionsService.$inject = ["UtilsService"];
+
+	function RevisionsService(UtilsService) {
+
+		function listAll(account, project){
+			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+				if(response.status === 200){
+					return Promise.resolve(response.data);
+				} else {
+					return Promise.reject(response.data);
+				}
+			});
+		}
+
+		function isTagFormatInValid(tag){
+			return tag && !tag.match(server_config.tagRegExp);
+		}
+
+		return { 
+			listAll: listAll,
+			isTagFormatInValid: isTagFormatInValid
+		};
+	}
+}());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -16615,7 +16995,10 @@ var Oculus = {};
 	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
-			promise;
+			promise,
+			agreeToText = "",
+			haveReadText = "",
+			legalItem;
 
 		/*
 		 * Init
@@ -16628,6 +17011,7 @@ var Oculus = {};
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
+		vm.showLegalText = false;
 
 		/*
 		 * Auth stuff
@@ -16638,6 +17022,41 @@ var Oculus = {};
 				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
 					vm.useReCapthca = true;
 				}
+			}
+		}
+
+		// Legal text
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.showLegalText = true;
+			vm.legalText = "";
+			for (legalItem in serverConfig.legal) {
+				if (serverConfig.legal.hasOwnProperty(legalItem)) {
+					if (serverConfig.legal[legalItem].type === "agreeTo") {
+						if (agreeToText === "") {
+							agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+						else {
+							agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+					}
+					else if (serverConfig.legal[legalItem].type === "haveRead") {
+						if (haveReadText === "") {
+							haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+						else {
+							haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+					}
+				}
+			}
+
+			vm.legalText = agreeToText;
+			if (vm.legalText !== "") {
+				vm.legalText += " and ";
+			}
+			vm.legalText += haveReadText;
+			if (vm.legalText !== "") {
+				vm.legalText += ".";
 			}
 		}
 
@@ -16749,6 +17168,10 @@ var Oculus = {};
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+
+		function getLegalTextFromLegalItem (legalItem) {
+			return "<a target='_blank' href='/" + legalItem.page + "'>" + legalItem.title + "</a>";
+		}
 	}
 }());
 
@@ -16794,47 +17217,6 @@ var Oculus = {};
 		vm.home = function () {
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("termsText", termsText);
-
-	function termsText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "termsText.html",
-			controller: TermsTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	TermsTextCtrl.$inject = [];
-
-	function TermsTextCtrl () {
-		var vm = this;
 	}
 }());
 
@@ -17627,9 +18009,9 @@ var Oculus = {};
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
-			ts.revision = revision ? revision : "head";
+			//ts.revision = revision ? revision : "head";
 
-			if (ts.branch === "master")
+			if (!revision)
 			{
 				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
 			} else {
@@ -17922,6 +18304,12 @@ var Oculus = {};
 			return function(input) {
 				var date = new Date(input);
 				return date.toISOString().substr(0,10);
+			};
+		})
+
+		.filter("revisionDate", function () {
+			return function(input) {
+				return moment(input).format('DD/MM/YYYY HH:mm');
 			};
 		});
 

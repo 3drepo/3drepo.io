@@ -30,18 +30,23 @@
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
-				function(json) {
-					deferred.resolve({
-						account     : account,
-						project		: project,
-						name        : name,
-						owner		: json.owner,
-						description	: json.desc,
-						type		: json.type,
-						settings 	: json.properties
-					});
+			$http.get(url).then(function(res){
+				var data = res.data;
+				console.log('getProjectInfo data', data);
+				deferred.resolve({
+					account     : account,
+					project		: project,
+					owner		: data.owner,
+					description	: data.desc,
+					type		: data.type,
+					settings 	: data.properties
+				}, function(){
+					deferred.resolve();
 				});
+			});
+
+
+			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {

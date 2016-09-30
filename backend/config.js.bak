@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.1.1";
+	const VERSION="1.3.2";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -157,7 +157,16 @@
 	// Database configuration
 	config.db          = coalesce(config.db, {});
 	config.db.host     = coalesce(config.db.host, config.host);
+	config.db.host     = (config.db.host.constructor === Array) ? config.db.host : [config.db.host];
+
 	config.db.port     = coalesce(config.db.port, 27017); // Default mongo port
+	config.db.port     = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
+
+	if (config.db.port.length !== config.db.host.length)
+	{
+		console.log("Incorrect number of hosts and ports");
+		process.exit(1);
+	}
 
 	config.db.username = coalesce(config.db.username, "username");
 	config.db.password = coalesce(config.db.password, "password");
@@ -199,6 +208,27 @@
 	//upload size limit
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
+
+	//get frontend base url
+	config.getBaseURL = function(useNonPublicPort){
+
+		let frontEndServerConfig = config.servers.find(server => server.service === 'frontend');
+
+		let port = '';
+
+		if(useNonPublicPort){
+			//use non public port, for html templates generated for phamtom to generate pdf
+			port = ':' + (config.using_ssl ? default_https_port : default_http_port);
+
+		} else if (config.using_ssl && frontEndServerConfig.public_port !== 443 || !config.using_ssl && frontEndServerConfig.public_port !== 80){
+			//do not show :port in url if port is 80 for http or 443 for https to make the url in email looks pretty
+			port = ':' + frontEndServerConfig.public_port;
+		}
+
+		let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+
+		return baseUrl;
+	};
 
 	module.exports = config;
 })();

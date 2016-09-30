@@ -19,10 +19,23 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Schema = mongoose.Schema;
+var utils = require("../utils");
+
 
 var schema = Schema({
 	_id: Object
 });
+
+
+if (!schema.options.toJSON){
+	schema.options.toJSON = {};
+}
+
+schema.options.toJSON.transform = function (doc, ret) {
+	ret._id = utils.uuidToString(doc._id);
+	return ret;
+};
+
 
 var Scene = ModelFactory.createClass(
 	'Scene', 

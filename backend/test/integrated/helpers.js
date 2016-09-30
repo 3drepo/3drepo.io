@@ -60,6 +60,7 @@ function signUpAndLoginAndCreateProject(params){
 	let expect = params.expect;
 	let project = params.project;
 	let noBasicPlan = params.noBasicPlan;
+	let unit = params.unit;
 
 	signUpAndLogin({
 		server, request, agent, expect, User, systemLogger,
@@ -74,7 +75,7 @@ function signUpAndLoginAndCreateProject(params){
 
 			//create a project
 			agent.post(`/${username}/${project}`)
-			.send({ type, desc })
+			.send({ type, desc, unit })
 			.expect(200, function(err, res){
 				done(err, agent);
 			});

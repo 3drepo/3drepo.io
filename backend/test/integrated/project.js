@@ -42,6 +42,7 @@ describe('Project', function () {
 	let projectFed = 'projectFed1';
 	let desc = 'desc';
 	let type = 'type';
+	let unit = 'm';
 
 	before(function(done){
 
@@ -74,7 +75,7 @@ describe('Project', function () {
 	it('should be created successfully', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(200, function(err ,res) {
 
 			expect(res.body.project).to.equal(project);
@@ -87,6 +88,7 @@ describe('Project', function () {
 			.expect(200, function(err, res){
 				expect(res.body.desc).to.equal(desc);
 				expect(res.body.type).to.equal(type);
+				expect(res.body.properties.unit).to.equal(unit);
 				done(err);
 			})
 			
@@ -94,66 +96,55 @@ describe('Project', function () {
 	});
 
 
-	it('(fedration) should be created successfully', function(done){
-		this.timeout(5000);
+	it('should fail if no unit specified', function(done){
 
-		let q = require('../../services/queue');
-		let corId;
+		agent.post(`/${username}/${project}_no_unit`)
+		.send({ desc, type })
+		.expect(400, function(err ,res) {
 
-		//fake a response from bouncer;
-		setTimeout(function(){
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-			}).then(res => {
-				corId = res.properties.correlationId;
-				return q.channel.assertQueue(q.callbackQName, { durable: true });
-			}).then(() => {
-				//send fake job done message to the queue;
-				return q.channel.sendToQueue(q.callbackQName, 
-					new Buffer(JSON.stringify({ value: 0})), 
-					{
-						correlationId: corId, 
-						persistent: true 
-					}
-				);
-			}).catch(err => {
-				throw err;
-			});
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NO_UNIT.value);
+			done(err);
+			
+		});
+	});
 
-		}, 1000);
+	it('update settings should be successful', function(done){
 
-		agent.post(`/${username}/${projectFed}`)
-		.send({ 
-			desc, 
-			type, 
-			subProjects:[{
-				"database": "testing",
-				"project": "testproject"
-			}] 
-		})
-		.expect(200, function(err ,res) {
+		let body = {
 
-			expect(res.body.project).to.equal(projectFed);
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				unit: 'cm'
+
+		};
+		
+		agent.put(`/${username}/${project}/settings`)
+		.send(body).expect(200, function(err ,res) {
+
+			expect(res.body.properties).to.deep.equal(body);
 
 			if(err){
 				return done(err);
 			}
 
-			agent.get(`/${username}/${projectFed}.json`)
+			agent.get(`/${username}/${project}.json`)
 			.expect(200, function(err, res){
-				expect(res.body.desc).to.equal(desc);
-				expect(res.body.type).to.equal(type);
+				expect(res.body.properties).to.deep.equal(body);
 				done(err);
 			})
 			
 		});
 	});
 
+
+
 	it('should return error message if project name already exists', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
 			done(err);
@@ -177,7 +168,7 @@ describe('Project', function () {
 			}
 
 			agent.post(`/${username}/${projectName}`)
-			.send({ desc, type })
+			.send({ desc, type, unit })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
 				done(err);
@@ -191,7 +182,7 @@ describe('Project', function () {
 	it('should return error message if project name contains spaces', function(done){
 
 		agent.post('/' + username + '/you%20are%20genius')
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
 			done(err);
@@ -202,10 +193,40 @@ describe('Project', function () {
 	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
 
 		agent.post(`/${username} + '_someonelese' /${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
 		});
+	});
+
+	describe('Download latest file', function(){ 
+
+		let username = 'testing';
+		let password = 'testing';
+		let project = 'testproject';
+
+		before(function(done){
+			async.series([
+				function logout(done){
+					agent.post('/logout').send({}).expect(200, done);
+				},
+				function login(done){
+					agent.post('/login').send({
+						username, password
+					}).expect(200, done);
+				}
+			], done);
+		});
+
+		it('should success and get the latest file', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, function(err, res){
+
+				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
+				
+				done(err);
+			});
+		});
+
 	});
 
 

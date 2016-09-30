@@ -1,8 +1,8 @@
 .md-whiteframe-1dp(ng-if="vm.show")
 	md-toolbar
 	md-content(layout="column")
-		p L: {{vm.totalDistance}}
-		p(style="color:red;") X: {{vm.axisDistance[0]}}
-		p(style="color:lime;") Y: {{vm.axisDistance[2]}}
-		p(style="color:blue;") Z: {{vm.axisDistance[1]}}
-		p(ng-if="vm.distance") Distance: {{vm.distance}}
+		p L: {{vm.totalDistance}} {{vm.unit}}
+		p(style="color:red;") X: {{vm.axisDistance[0]}} {{vm.unit}}
+		p(style="color:lime;") Y: {{vm.axisDistance[2]}} {{vm.unit}}
+		p(style="color:blue;") Z: {{vm.axisDistance[1]}} {{vm.unit}}
+		p(ng-if="vm.distance") Distance: {{vm.distance}} {{vm.unit}}

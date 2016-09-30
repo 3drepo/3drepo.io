@@ -39,7 +39,10 @@
 	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
-			promise;
+			promise,
+			agreeToText = "",
+			haveReadText = "",
+			legalItem;
 
 		/*
 		 * Init
@@ -52,6 +55,7 @@
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
+		vm.showLegalText = false;
 
 		/*
 		 * Auth stuff
@@ -62,6 +66,41 @@
 				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
 					vm.useReCapthca = true;
 				}
+			}
+		}
+
+		// Legal text
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.showLegalText = true;
+			vm.legalText = "";
+			for (legalItem in serverConfig.legal) {
+				if (serverConfig.legal.hasOwnProperty(legalItem)) {
+					if (serverConfig.legal[legalItem].type === "agreeTo") {
+						if (agreeToText === "") {
+							agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+						else {
+							agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+					}
+					else if (serverConfig.legal[legalItem].type === "haveRead") {
+						if (haveReadText === "") {
+							haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+						else {
+							haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+					}
+				}
+			}
+
+			vm.legalText = agreeToText;
+			if (vm.legalText !== "") {
+				vm.legalText += " and ";
+			}
+			vm.legalText += haveReadText;
+			if (vm.legalText !== "") {
+				vm.legalText += ".";
 			}
 		}
 
@@ -172,6 +211,10 @@
 			else {
 				vm.registerErrorMessage = "Please fill all fields";
 			}
+		}
+
+		function getLegalTextFromLegalItem (legalItem) {
+			return "<a target='_blank' href='/" + legalItem.page + "'>" + legalItem.title + "</a>";
 		}
 	}
 }());

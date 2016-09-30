@@ -163,15 +163,26 @@ var responseCodes = {
 
 	BILLING_NOT_FOUND: { value: 100, message: 'Billing not found', status: 404 },
 	PAYPAL_ERROR: { value: 101, status: 400 },
+	NO_FILE_FOUND: { value: 102, message: 'No file can be downloaded', status: 404},
+
+	PROJECT_NO_UNIT: { value: 103, status: 400, message: 'Unit is not specified'},
+
+	TREE_NOT_FOUND: {value: 104, message: 'Model fulltree not found in stash', status: 404},
+	REPOERR_FED_GEN_FAIL: {value: 105, message: 'Failed to create federation', status: 400},
+
 	INVALID_VAT: {value: 106, status: 400, message: 'Invalid VAT number'},
 	NO_CONTACT_EMAIL: { value: 107, status: 400, message: 'contact.email is not defined in config'},
+	DUPLICATE_TAG : { value: 108, status: 400, message: 'Revision name already exists'},
+	INVALID_TAG_NAME: {value : 109, status: 400, message: 'Invalid revision name'},
 
-	REPOERR_FED_GEN_FAIL: {value: 103, message: 'Failed to create federation', status: 400},
-	TREE_NOT_FOUND: {value: 104, message: 'Model fulltree not found in stash', status: 404},
+	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
+	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
+	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
+
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
-			value: 42,
+			value: 900,
 			status: 400 ,
 			message: err.message || 'Validation failed'
 		};
@@ -188,7 +199,7 @@ var responseCodes = {
 		//other error
 		return {
 			value: 1000,
-			message: mongoErr.message,
+			message: 'System error. Please try again later.',
 			dbErr: mongoErr,
 			status: 500
 		};
@@ -199,7 +210,8 @@ var responseCodes = {
 
 		return {
 			value: 2000,
-			message: JSON.stringify(message),
+			message: 'System error. Please try again later.',
+			system_message: JSON.stringify(message),
 			status: 500
 		};
 	},
@@ -231,9 +243,14 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 106, 107, 1000, 2000, 3000, 4000];
+var valid_values = [900, 1000, 2000, 3000, 4000];
+
+Object.keys(responseCodes).forEach(key => {
+	if(typeof responseCodes[key].value !== 'undefined'){
+		valid_values.push(responseCodes[key].value);
+	}
+});
+
 
 
 var mimeTypes = {

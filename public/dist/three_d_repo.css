@@ -33,7 +33,6 @@ account-dir #account #accountItem {
 }
 
 account-dir .userContent .cardInfo {
-  margin: 0 0 10px;
   text-align: left;
 }
 
@@ -437,6 +436,37 @@ account-team #accountTeamSubHeader {
   margin: 20px 20px 0;;
 }
 
+
+/** Account Project Setting ******************************************************************************************/
+account-projectsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-projectsetting #project {
+  margin: -10px 0 10px;
+}
+account-projectsetting #project md-icon {
+  margin: 0 !important;
+}
+
+account-projectsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-projectsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-projectsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-projectsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
 /** Federation Dialog *************************************************************************************************/
 #federationDialog #federationDivider {
   width: 1px;
@@ -487,14 +517,36 @@ account-federations .md-list-item-text {
 }
 
 account-federations .federationProjectsList {
-  margin: 0 0 10px 70px;
+  margin: -20px 0 10px 100px;
   color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
 }
 
 account-federations .federationTimestamp {
   color: rgba(0,0,0,.3);
-  margin-left: 20px;
 }
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations .federation {
+  padding-left: 30px;
+}
+
+account-federations #federationInfoRight p:only-child {
+  margin-right: 20px;
+}
+
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -1043,6 +1095,9 @@ cookies-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 /** Docs **************************************************************************************************************/
 docs .typesList {
@@ -1357,7 +1412,21 @@ md-dialog md-toolbar {
     min-height: 40px;
 }
 
+/** Legal *************************************************************************************************************/
+#legal {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+}
 
+#legal .md-toolbar-tools img {
+    width: 150px;
+}
+
+#legal #legalText {
+    padding: 10px 50px;
+}
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -1929,6 +1998,10 @@ privacy-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+
 }
 
 register-verify .databaseError {
@@ -1939,6 +2012,86 @@ register-verify .databaseError {
 
 register-verify md-input-container {
     margin: 5px 0 -15px;
+}
+
+/** Revisions dropdown in 3dviewer ***********************************************************************************/
+revisions {
+    z-index: 2;
+    position: absolute;
+    color: white;
+    text-shadow: 1px 1px#666666;
+    font-size: 14px;
+    width: 250px;
+    top: 90px;
+    left: 50%;
+    font-weight: bold;
+    margin-left: -125px;
+    text-align: center;
+}
+
+.revisions-dropdown .angular-material-icons{
+  color: white;
+}
+
+.revisions-dropdown{
+  cursor:pointer;
+}
+
+/** Revisions Dialog *************************************************************************************************/
+.revisionsDialog {
+  width: 40%;
+}
+
+.revisionsDialog .revision-name-and-author {
+  display: inline-block;
+  width:60%;
+  align-self: flex-start;
+}
+
+.revisionsDialog .revision {
+  font-size:19px;
+  line-height: normal;
+}
+
+.revisionsDialog .desc {
+  line-height: normal;
+  margin-top: 10px;
+}
+
+.revisionsDialog .author {
+  font-size:13px;
+  line-height: normal;
+}
+
+.revisionsDialog .timestamp {
+  display: inline-block;
+  width:40%;
+  align-self: flex-start;
+  text-align: right;
+}
+
+.revisionsDialog .desc {
+  font-size:12px;
+  color: grey;
+}
+
+.revisionsDialog .revision-first-row{
+   display: flex;
+   width: 100%
+}
+.revisionsDialog .revision-item{
+  padding-top: 10px;
+  padding-bottom:15px;
+  width:100%;
+}
+
+.revisionsDialog .current{
+  background-color: #ffffe0;
+}
+
+.revisionsDialog span.current{
+    font-style: italic;
+    font-size: 12px;
 }
 right-panel {
     position: absolute;
@@ -2034,6 +2187,9 @@ terms-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 tree .virtualRepeatInfiniteScroll {
   overflow-y: auto;

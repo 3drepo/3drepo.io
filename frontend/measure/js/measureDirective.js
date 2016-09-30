@@ -25,16 +25,20 @@
 		return {
 			restrict: "EA",
 			templateUrl: "measure.html",
-			scope: {},
+			scope: {
+				account: '=',
+				project: '=',
+				settings: '='
+			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
 
-	function MeasureCtrl ($scope, $element, EventService) {
+	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
@@ -46,9 +50,13 @@
 		vm.show = false;
 		vm.distance = false;
 		vm.allowMove = false;
+		vm.units = server_config.units;
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
+
+		//console.log('measure scope', $scope);
+		vm.unit = vm.settings.unit;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
@@ -79,7 +87,7 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
 				if (event.value.hasOwnProperty("position")) {
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;

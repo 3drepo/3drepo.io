@@ -85,6 +85,15 @@ function Utils() {
     };
 
     /*******************************************************************************
+    * Test if a given string conforms a valid UUID format
+    * @returns {Boolean}
+    *******************************************************************************/
+    this.isUUID = function(uuid) {
+       return Boolean (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
+    };
+
+
+    /*******************************************************************************
       * Coalesce function
       * @param {Object} variable - variable to coalesce
       * @param {Object} value - value to return if object is null or undefined
@@ -271,20 +280,6 @@ function Utils() {
         return `${req.method} ${req._parsedUrl.pathname}`;
     };
 
-
-    this.getBaseURL = function(){
-
-        let config = require('./config');
-        let apiServerConfig = config.servers.find(server => server.service === 'api');
-        let port = '';
-        if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
-            port = ':' + apiServerConfig.public_port;
-        }
-
-        let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
-
-        return baseUrl;
-    };
 }
 
 module.exports = new Utils();

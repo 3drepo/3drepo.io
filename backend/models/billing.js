@@ -21,9 +21,9 @@ var moment = require('moment');
 var fs = require('fs');
 var jade = require('jade');
 var phantom = require('phantom');
-var utils = require("../utils");
 var config = require('../config');
 var Subscriptions = require('./subscription');
+var systemLogger = require("../logger.js").systemLogger;
 
 var schema = mongoose.Schema({
 	invoiceNo: String,
@@ -131,6 +131,8 @@ schema.methods.generatePDF = function(){
 
 	let ph;
 	let page;
+	let htmlPath = `${config.invoice_dir}/${this.id}.html`;
+	let pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
 
 	if(!config.invoice_dir){
 		return Promise.reject({ message: 'invoice dir is not set in config file'});
@@ -138,7 +140,8 @@ schema.methods.generatePDF = function(){
 
 	return new Promise((resolve, reject) => {
 		
-		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: utils.getBaseURL()}, function(err, html){
+		let useNonPublicPort = true;
+		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: config.getBaseURL(useNonPublicPort)}, function(err, html){
 			if(err){
 				reject(err);
 			} else {
@@ -149,7 +152,7 @@ schema.methods.generatePDF = function(){
 	}).then(html => {
 
 		return new Promise((resolve, reject) => {
-			fs.writeFile(`${config.invoice_dir}/${this.id}.html`, html, { flag: 'a+'}, err => {
+			fs.writeFile(htmlPath, html, { flag: 'a+'}, err => {
 				if(err){
 					reject(err);
 				} else {
@@ -170,16 +173,61 @@ schema.methods.generatePDF = function(){
 
 		page = _page;
 		page.property('viewportSize', { width: 1200 , height: 1553 });
-		return page.open(`file://${config.invoice_dir}/${this.id}.html`);
+		return page.open(`file://${htmlPath}`);
 
 	}).then(() => {
 
-		return page.render(`${config.invoice_dir}/${this.id}.pdf`);
+		return page.render(pdfPath);
 		
 	}).then(() => {
 
 		ph && ph.exit();
-		return Promise.resolve(`${config.invoice_dir}/${this.id}.pdf`);
+
+		let pdfRS = fs.createReadStream(pdfPath);
+		let bufs = [];
+
+		return new Promise((resolve, reject) => {
+
+			pdfRS.on('data', function(d){ bufs.push(d); });
+			pdfRS.on('end', function(){
+				resolve(Buffer.concat(bufs));
+			});
+			pdfRS.on('err', err => {
+				reject(err);
+			});
+		});
+
+	}).then(pdf => {
+
+		fs.unlink(htmlPath, function(err){
+			if(err){
+				systemLogger.logError('error while deleting tmp invoice html file',{
+					message: err.message,
+					err: err,
+					file: htmlPath
+				});
+			} else {
+				systemLogger.logInfo('tmp html invoice deleted',{
+					file: htmlPath
+				});
+			}
+		});
+
+		fs.unlink(pdfPath, function(err){
+			if(err){
+				systemLogger.logError('error while deleting tmp invoice pdf file',{
+					message: err.message,
+					err: err,
+					file: pdfPath
+				});
+			} else {
+				systemLogger.logInfo('tmp pdf invoice deleted',{
+					file: pdfPath
+				});
+			}
+		});
+
+		return Promise.resolve(pdf);
 
 	}).catch( err => {
 
@@ -196,22 +244,7 @@ schema.methods.getPDF = function(options){
 
 	if(options.regenerate || !this.pdf){
 
-		return this.generatePDF().then(pdfPath => {
-
-			let pdfRS = fs.createReadStream(pdfPath);
-			let bufs = [];
-
-			return new Promise((resolve, reject) => {
-
-				pdfRS.on('data', function(d){ bufs.push(d); });
-				pdfRS.on('end', function(){
-					resolve(Buffer.concat(bufs));
-				});
-				pdfRS.on('err', err => {
-					reject(err);
-				});
-			});
-		});
+		return this.generatePDF();
 
 	} else {
 		//console.log('from cache')

@@ -22,6 +22,7 @@ var utils = require("../utils");
 var C = require("../constants");
 
 var stringToUUID = utils.stringToUUID;
+var uuidToString = utils.uuidToString;
 
 var Schema = mongoose.Schema;
 
@@ -41,11 +42,31 @@ var historySchema = Schema({
 		current: []
 });
 
-
-// get the head of a branch
-historySchema.statics.findByBranch = function(dbColOptions, branch){
+historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
+// list revisions by branch
+historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 	
 	var query = {};
+	if(branch === C.MASTER_BRANCH_NAME){
+		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+	} else {
+		query.shared_id = stringToUUID(branch);
+	}
+
+	return History.find(
+		dbColOptions, 
+		query, 
+		projection, 
+		{sort: {timestamp: -1}}
+	);
+};
+
+// get the head of a branch
+historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
+	
+	var query = {};
+	projection = projection || {};
+
 	if(branch === C.MASTER_BRANCH_NAME){
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
 	} else {
@@ -55,15 +76,23 @@ historySchema.statics.findByBranch = function(dbColOptions, branch){
 	return History.findOne(
 		dbColOptions, 
 		query, 
-		{}, 
+		projection, 
 		{sort: {timestamp: -1}}
 	);
 };
 
-historySchema.statics.findByUID = function(dbColOptions, revId){
+historySchema.statics.findByUID = function(dbColOptions, revId, projection){
 
-	return History.findOne(dbColOptions, { _id: stringToUUID(revId)});
-	
+	projection = projection || {};
+	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
+
+};
+
+historySchema.statics.findByTag = function(dbColOptions, tag, projection){
+
+	projection = projection || {};
+	return History.findOne(dbColOptions, { tag }, projection);
+
 };
 
 // add an item to current
@@ -74,6 +103,27 @@ historySchema.methods.addToCurrent = function(id) {
 // remove an item from current
 historySchema.methods.removeFromCurrent = function(id) {
 	this.current.remove(id);
+};
+
+historySchema.statics.clean = function(histories){
+	'use strict';
+
+	let cleaned = [];
+
+	histories.forEach(history => {
+		cleaned.push(history.clean());
+	});
+
+	return cleaned;
+};
+
+historySchema.methods.clean = function(){
+	'use strict';
+
+	let clean = this.toObject();
+	clean._id = uuidToString(clean._id);
+	clean.name = clean._id;
+	return clean;
 };
 
 //

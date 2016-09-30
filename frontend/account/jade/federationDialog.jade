@@ -13,6 +13,13 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.project", ng-disabled="vm.federationOriginalData")
 					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers and underscore only
 
+			div(ng-if="!vm.federationOriginalData" layout="row", flex)
+				md-input-container(flex="50")
+					label Unit
+					md-select(ng-model="vm.newFederationData.unit")
+						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+
 			md-divider
 
 			// List
@@ -20,20 +27,20 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				// Available
 				div(layout="column", flex)
 					p(layout="row", layout-align="center center") Available
-					md-list(ng-repeat="(accountIndex, account) in vm.accountsToUse")
+					md-list
 						//md-list-item(ng-click="vm.toggleShowProjects($index)")
 							md-icon.angular-material-icons {{account.showProjectsIcon}}
 							p {{account.account}}
-						md-list(ng-if="account.showProjects")
+						md-list
 							md-list-item.federationProject(
-							ng-repeat="project in account.projects"
+							ng-repeat="project in vm.userAccount.projects"
 							style="opacity:{{project.federated? 0.2 : 1.0}}")
 								md-icon.angular-material-icons dashboard
 								p {{project.project}}
 								span(flex)
 								md-button.md-icon-button(
 								aria-label="Add"
-								ng-click="vm.addToFederation(accountIndex, $index)"
+								ng-click="vm.addToFederation($index)"
 								ng-if="!project.federated")
 									md-icon.angular-material-icons.md-accent add_circle
 
@@ -60,4 +67,4 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 			// Save/Cancel
 			#federationSave(layout="row", layout-align="start center")
 				md-button.md-raised.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.saveFederation()") Save
-				md-button.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.closeDialog()") Cancel
+				md-button.md-accent(ng-click="vm.closeDialog()") Cancel

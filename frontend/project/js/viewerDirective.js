@@ -52,9 +52,9 @@
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
 		var v = this;
 

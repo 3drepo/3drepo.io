@@ -34,7 +34,6 @@ var Subscription = require('./subscription');
 var config = require('../config');
 var vat = require('./vat');
 var Counter = require('./counter');
-var fs = require('fs');
 var addressMeta = require('./addressMeta');
 
 var getSubscription = Subscription.getSubscription;
@@ -342,7 +341,7 @@ schema.statics.verify = function(username, token, options){
 			var ProjectHelper = require('./helper/project');
 
 			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError(JSON.stringify(err));
+				systemLogger.logError('Failed to import toy project', err && err.stack ? err.stack : err);
 			});
 		}
 
@@ -568,7 +567,7 @@ schema.methods.listAccounts = function(){
 						});
 						
 						account.quota.spaceUsed = totalSize;
-					} else {
+					} else if(account.quota) {
 						account.quota.spaceUsed = 0;
 					}
 				})
@@ -1166,24 +1165,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			createBill.then(billing => {
 
 				if(billing){
-					return billing.generatePDF().then(pdfPath => {
-
-						let pdfRS = fs.createReadStream(pdfPath);
-						let bufs = [];
-
-						return new Promise((resolve, reject) => {
-
-							pdfRS.on('data', function(d){ bufs.push(d); });
-							pdfRS.on('end', function(){
-								resolve(Buffer.concat(bufs));
-							});
-							pdfRS.on('err', err => {
-								reject(err);
-							});
-						});
-
-
-					}).then(pdf => {
+					return billing.generatePDF().then(pdf => {
 
 						billing.pdf = pdf;
 						// also save the pdf to database for ref.
