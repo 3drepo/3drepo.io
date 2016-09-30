@@ -103,7 +103,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
 
 	}).then(() => {
-		
+
 		return Role.findByRoleID(`${account}.${project}.viewer`);
 
 	}).then(role =>{
@@ -137,10 +137,10 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	}).then(setting => {
 
 		setting = setting || ProjectSetting.createInstance({
-			account: account, 
+			account: account,
 			project: project
 		});
-		
+
 		setting._id = project;
 		setting.owner = username;
 		setting.desc = desc;
@@ -151,7 +151,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		});
 
 		return setting.save();
-		
+
 	});
 }
 
@@ -175,7 +175,9 @@ function importToyJSON(db, project){
 	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
 	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
 
-	let host = config.db.host;
+	let host = config.db.host[0];
+	let port = config.db.port[0];
+
 	let username = config.db.username;
 	let password = config.db.password;
 
@@ -188,8 +190,8 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
-			{ 
+			`mongoimport -j 8 --host ${host} --port ${port} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			{
 				cwd: __dirname
 			}, function (err) {
 				if(err){
@@ -205,15 +207,15 @@ function importToyJSON(db, project){
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
 		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
-		
+
 		jsonBucket.find().forEach(file => {
-			
+
 			let newFileName = file.filename;
 			newFileName = newFileName.split('/');
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -221,7 +223,7 @@ function importToyJSON(db, project){
 
 		//rename src stash
 		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
-		
+
 		srcBucket.find().forEach(file => {
 
 			let newFileName = file.filename;
@@ -229,7 +231,7 @@ function importToyJSON(db, project){
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -250,11 +252,10 @@ function importToyProject(username){
 	let account = username;
 	let desc = '';
 	let type = 'sample';
-	
+
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-	
 	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
@@ -276,7 +277,7 @@ function importToyProject(username){
 		projectSetting.status = 'ok';
 		projectSetting.errorReason = undefined;
 		projectSetting.markModified('errorReason');
-		
+
 		return projectSetting.save();
 
 	}).catch(err => {
@@ -319,7 +320,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		}
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -407,7 +408,7 @@ function removeCollaborator(username, email, account, project, role){
 
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -443,13 +444,13 @@ function removeCollaborator(username, email, account, project, role){
 
 function createFederatedProject(account, project, subProjects){
 	'use strict';
-	
+
 	let federatedJSON = {
 		database: account,
 		project: project,
 		subProjects: []
 	};
-	
+
 	let error;
 
 	let addSubProjects = [];
@@ -481,7 +482,7 @@ function createFederatedProject(account, project, subProjects){
 	if(subProjects.length === 0) {
 		return Promise.resolve();
 	}
-	
+
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
 		return importQueue.createFederatedProject(account, federatedJSON);
@@ -491,7 +492,7 @@ function createFederatedProject(account, project, subProjects){
 			return Promise.reject(convertToErrorCode(err.errCode));
 		}
 		return Promise.reject(err);
-		
+
 	});
 
 }
@@ -535,7 +536,7 @@ function getFullTree(account, project, branch, rev, username){
 
 			status = 'NO_ACCESS';
 			return Promise.resolve([]);
-		
+
 		} else {
 
 			revId = utils.uuidToString(history._id);
@@ -596,7 +597,7 @@ function getFullTree(account, project, branch, rev, username){
 
 		let resetPath = function(node, parentPath){
 			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path; 
+				child.path = parentPath + '__' + child.path;
 				child.children && resetPath(child.children, child.path);
 			});
 		};
@@ -615,11 +616,11 @@ function getFullTree(account, project, branch, rev, username){
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
-				} 
+				}
 
 			});
 		});
-		
+
 		return Promise.resolve({tree, status});
 
 	});
@@ -659,7 +660,7 @@ function searchTree(account, project, branch, rev, searchString, username){
 	}).then(objs => {
 
 		objs.forEach((obj, i) => {
-			
+
 			objs[i] = obj.toJSON();
 			objs[i].account = account;
 			objs[i].project = project;
@@ -739,10 +740,10 @@ function listSubProjects(account, project, branch){
 		});
 
 		return Promise.resolve(subProjects);
-	
+
 	});
 }
-	
+
 
 function downloadLatest(account, project){
 	'use strict';
@@ -758,7 +759,7 @@ function downloadLatest(account, project){
 		// change file name
 		let filename = file.filename.split('_');
 		let ext = '';
-		
+
 		if (filename.length > 1){
 			ext = '.' + filename.pop();
 		}
@@ -769,7 +770,7 @@ function downloadLatest(account, project){
 			readStream: bucket.openDownloadStream(file._id),
 			meta: file
 		});
-		
+
 	});
 }
 

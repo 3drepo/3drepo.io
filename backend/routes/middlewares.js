@@ -32,6 +32,8 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
+// init ampq and import queue object
+var importQueue = require('../services/queue');
 
 function getAccessToProject(username, account, project){
 	'use strict';
@@ -266,8 +268,6 @@ function hasCollaboratorQuota(req, res, next){
 function connectQueue(req, res, next){
 	'use strict';
 
-	// init ampq and import queue object
-	let importQueue = require('../services/queue');
 	if(config.cn_queue){
 
 		importQueue.connect(config.cn_queue.host, {
