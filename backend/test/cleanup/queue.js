@@ -9,11 +9,14 @@ if(config.cn_queue){
 
 	q.connect(config.cn_queue.host, {
 
-		sharedSpacePath: config.cn_queue.shared_storage,
-		logger: systemLogger,
-		callbackQName: config.cn_queue.callback_queue,
-		workerQName: config.cn_queue.worker_queue 
 
+		shared_storage: config.cn_queue.shared_storage,
+		logger: systemLogger,
+		callback_queue: config.cn_queue.callback_queue,
+		worker_queue: config.cn_queue.worker_queue,
+		event_queue: config.cn_queue.event_queue,
+		event_queue_message_ttl: config.cn_queue.event_queue_message_ttl
+		
 	}).then(() => {
 
 		return q.channel.assertQueue(q.workerQName, { durable: true });
