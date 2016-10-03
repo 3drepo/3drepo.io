@@ -60,8 +60,8 @@ module.exports.createApp = function (http, serverConfig){
 
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
-			if(msg.event && msg.account && msg.project && msg.emitter){
 
+			if(msg.event && msg.account && msg.project){
 				//it is to avoid emitter getting its own message
 				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				emitter.to(`${msg.account}::${msg.project}`).emit(`${msg.account}::${msg.project}::${msg.event}`, msg.data);
@@ -87,9 +87,17 @@ module.exports.createApp = function (http, serverConfig){
 
 					if(hasAccess){
 						socket.join(`${data.account}::${data.project}`);
-						systemLogger.logInfo(`${username} has joined room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+						systemLogger.logInfo(`${username} has joined room ${data.account}::${data.project}`, { 
+							username, 
+							account: data.account, 
+							project: data.project 
+						});
 					} else {
-						systemLogger.logError(`${username} has no access to join room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+						systemLogger.logError(`${username} has no access to join room ${data.account}::${data.project}`, { 
+							username, 
+							account: data.account, 
+							project: data.project 
+						});
 					}
 				});
 				
@@ -97,11 +105,14 @@ module.exports.createApp = function (http, serverConfig){
 
 			socket.on('leave', data => {
 				socket.leave(`${data.account}::${data.project}`);
-				systemLogger.logInfo(`${username} has left room ${data.account}::${data.project}`, { username, account: data.account, project: data.project });
+				systemLogger.logInfo(`${username} has left room ${data.account}::${data.project}`, { 
+					username, 
+					account: data.account, 
+					project: data.project 
+				});
 			});
 
 		});
 
 	}
 };
-

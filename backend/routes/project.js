@@ -32,7 +32,7 @@ var convertToErrorCode = ProjectHelpers.convertToErrorCode;
 var fs = require('fs');
 var systemLogger = require("../logger.js").systemLogger;
 var History = require('../models/history');
-
+var ChatEvent = require('../models/chatEvent');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -337,6 +337,21 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				//let username = req.session.user.username;
 
+				let sendChatEvent = projectSetting => {
+					ChatEvent.projectUploaded(
+						null, 
+						req.params.account, 
+						req.params.project, 
+						projectSetting
+					).catch(err => {
+						systemLogger.logError('Error while inserting chat event', {
+							account: req.params.account,
+							project: req.params.project,
+							event: 'projectUploaded',
+							error: err
+						});
+					});
+				};
 				//check dup tag first
 
 				(req.body.tag ? History.findByTag({account, project}, req.body.tag, {_id: 1}) : Promise.resolve()).then(tag => {
@@ -450,6 +465,8 @@ function uploadProject(req, res, next){
 					projectSetting.errorReason = undefined;
 					projectSetting.markModified('errorReason');
 					
+					sendChatEvent(projectSetting);
+
 					return projectSetting.save();					
 
 				}).catch(err => {
@@ -459,12 +476,11 @@ function uploadProject(req, res, next){
 					if(projectSetting){
 						projectSetting.status = 'failed';
 						projectSetting.save();
+
+						sendChatEvent(projectSetting);
 					}
 
 					err.stack ? req[C.REQ_REPO].logger.logError(err.stack) : req[C.REQ_REPO].logger.logError(err);
-
-		
-
 				});
 				
 
