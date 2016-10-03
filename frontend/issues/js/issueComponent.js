@@ -35,7 +35,8 @@
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
-					setInitialSelectedObjects: "&"
+					setInitialSelectedObjects: "&",
+					userRoles: "<"
 				}
 			}
 		);
@@ -86,16 +87,27 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
+			var i, length;
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
+					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
+					// Issue owner or user with same role as issue creator role can update issue
 					this.canUpdate = (this.account === this.issueData.owner);
+					if (!this.canUpdate) {
+						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
+							if (this.userRoles[i] === this.issueData.creator_role) {
+								this.canUpdate = true;
+								break;
+							}
+						}
+					}
 				}
 				else {
 					this.issueData = {
@@ -347,7 +359,7 @@
 				objectId: null,
 				name: self.issueData.name,
 				viewpoint: viewpoint,
-				creator_role: "Test",
+				creator_role: self.userRoles[0],
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
