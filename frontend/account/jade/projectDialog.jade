@@ -18,6 +18,7 @@ md-dialog.newProjectDialog(aria-label="New project")
 				input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
 			md-input-container(ng-if="vm.newProjectFileSelected")
 				input(placeholder="Revision name", ng-model="vm.tag")
+				.inputHint Letters, numbers and underscore only
 			md-input-container(ng-if="vm.newProjectFileSelected")
 				textarea(placeholder="Revision description", ng-model="vm.desc")
 			md-input-container
