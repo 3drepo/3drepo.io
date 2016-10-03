@@ -327,25 +327,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (targetParent === self.viewer) {
 					self.setDiffColors(null);
 				}
-				console.log("@onloaded, event name: " + objEvent.target.tagName.toUpperCase());
-				console.log(objEvent);
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					var nameSpace = objEvent.target.nameSpaceName;
 
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 
-					console.log("onloaded, namespace is : " + nameSpace);
 					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
 					{
 						self.groupNodes={};
 						//loaded x3dom file for current project, figure out the groups
 						var groups = document.getElementsByTagName("Group");
-						console.log(groups);
 						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
 						{
 							self.groupNodes[groups[gIdx].id] = groups[gIdx];
 						}
-						console.log(self.groupNodes);
 					}
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 					if (self.multipartNodes.indexOf(objEvent.target) === -1)
@@ -946,41 +941,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.loadViewpoint = null;
 
-		this.createViewpoint = function(name, from, at, up, parentGroup, modifyIfExist) {
+		this.createViewpoint = function(name, from, at, up ) {
 			var groupName = self.getViewpointGroupAndName(name);
 			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
-				if(parentGroup)
-				{
-
-					var groups = document.getElementsByTagName("Group");
-					var found = false;
-					var fullParentGroupName = self.account + "__"+ self.project + "__" + parentGroup;
-					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
-					{
-						if(groups[gIdx].hasAttribute("id") && groups[gIdx].id == fullParentGroupName)
-						{
-							found = true;
-							groups[gIdx].appendChild(newViewPoint);
-							break;
-						}
-						
-					}
-
-					if(!found)
-					{
-
-						self.scene.appendChild(newViewPoint);
-						console.error("Failed to find parent group: " + parentGroup);
-					}
-
-				}
-				else
-				{
-					self.scene.appendChild(newViewPoint);
-				}
+				
+				self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
 					var q = ViewerUtil.getAxisAngle(from, at, up);
@@ -1008,33 +976,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewpoints[groupName.group][groupName.name] = name;
 				self.viewpointsNames[name] = newViewPoint;
 
-			} else {
-				if (modifyIfExist && Object.keys(self.viewpointsNames).indexOf(name) !== -1) {
-					var newViewPoint = self.viewpointsNames[name];
-					if (from && at && up) {
-						var q = ViewerUtil.getAxisAngle(from, at, up);
-						newViewPoint.setAttribute("orientation", q.join(","));
-					}
-
-					if(from)
-					{
-						newViewPoint.setAttribute("position", from.join(","));
-					}	
-
-					if(from && at)
-					{
-						var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
-						newViewPoint.setAttribute("centerofrotation", centre.join(","));
-
-					}
+			} else
+			{
 					
-				}
-				else
-				{
-					
-					console.error("Tried to create viewpoint with duplicate name: " + name);
-				}
+				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
+			
 		};
 
 		this.setCurrentViewpointIdx = function(idx) {
@@ -1344,94 +1291,97 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+			var origViewTrans = null;
 			if(account && project)
 			{
-				var vpname = account + "__"+ project + "_issueViewpoint";
-				var groupName = self.getViewpointGroupAndName(name);
-				var at = [pos[0] + viewDir[0], pos[1] + viewDir[1], pos[2] + viewDir[2]];
-				self.createViewpoint(vpname, pos, at, up, account + "__" + project, true);
-				self.setCurrentViewpoint(vpname);
+				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+				var parentGroup = self.groupNodes[fullParentGroupName];
+				if(parentGroup)
+				{
+					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
+				}
+
 			}
-			else
+
+			if (!viewDir)
 			{
-				if (!viewDir)
-				{
-					viewDir = self.getCurrentViewpointInfo().view_dir;
-				}
-
-				if (!up)
-				{
-					up = self.getCurrentViewpointInfo().up;
-				}
-				up = ViewerUtil.normalize(up);
-
-				var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
-				var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
-				var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-				var x3domAt   = x3domFrom.add(x3domView.normalize());
-
-				var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
-
-				var currViewpointNode = self.getCurrentViewpoint();
-				var currViewpoint = currViewpointNode._x3domNode;
-
-				if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
-					self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
-					self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
-				}
-
-				var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
-
-				if (!animate && rollerCoasterMode)
-				{
-					self.rollerCoasterMatrix = viewMatrix;
-				} else {
-					currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
-				}
-
-				var x3domCenter = null;
-
-				if (!centerOfRotation)
-				{
-					var canvasWidth  = self.getViewArea()._doc.canvas.width;
-					var canvasHeight = self.getViewArea()._doc.canvas.height;
-
-					self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-
-					if (self.pickObject.pickPos)
-					{
-						x3domCenter = self.pickObject.pickPos;
-	
-					} else {
-						var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
-						var bbox = self.getScene()._x3domNode.getVolume();
-
-						if(ry.intersect(bbox.min, bbox.max))
-						{
-							x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
-						} else {
-							x3domCenter = x3domAt;
-						}
-					}
-				} else {
-					x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
-				}
-
-				if (animate) {
-					currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
-					self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
-				}
-	
-				currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
-
+				viewDir = self.getCurrentViewpointInfo().view_dir;
 			}
 
+			if (!up)
+			{
+				up = self.getCurrentViewpointInfo().up;
+			}
+			up = ViewerUtil.normalize(up);
 
+			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
+			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
 
+			//transform the vectors to the right space if TransformMatrix is present.
+			if(origViewTrans)
+			{
+				x3domUp = origViewTrans.multMatrixVec(x3domUp);
+				x3domView = origViewTrans.multMatrixVec(x3domView);
+				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
+
+			}
+			
+			var x3domAt   = x3domFrom.add(x3domView.normalize());
+
+			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
+
+			var currViewpointNode = self.getCurrentViewpoint();
+			var currViewpoint = currViewpointNode._x3domNode;
+
+			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
+				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
+				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
+			}
+
+			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
+
+			if (!animate && rollerCoasterMode)
+			{
+				self.rollerCoasterMatrix = viewMatrix;
+			} else {
+				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
+			}
+
+			var x3domCenter = null;
+
+			if (!centerOfRotation)
+			{
+				var canvasWidth  = self.getViewArea()._doc.canvas.width;
+				var canvasHeight = self.getViewArea()._doc.canvas.height;
+
+				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
+				if (self.pickObject.pickPos)
+				{
+					x3domCenter = self.pickObject.pickPos;
+				} else {
+					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
+					var bbox = self.getScene()._x3domNode.getVolume();
+					if(ry.intersect(bbox.min, bbox.max))
+					{
+						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
+					} else {
+						x3domCenter = x3domAt;
+					}
+				}
+			} else {
+				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
+			}
+	
+			if (animate) {
+				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
+				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+			}
+		
+			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
 
 			self.setNavMode(self.currentNavMode);
 			self.getViewArea()._doc.needRender = true;
-
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
 			}
@@ -1549,15 +1499,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			
 			if(account && project)
 			{
-				var groups = document.getElementsByTagName("Group");
 				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+				var parentGroup = self.groupNodes[fullParentGroupName];
+				if(parentGroup)
 				{
-					if(groups[gIdx].hasAttribute("id") && groups[gIdx].id == fullParentGroupName)
-					{
-						origViewTrans = groups[gIdx]._x3domNode.getCurrentTransform();
-						break;
-					}
+					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
 				}
 
 			}

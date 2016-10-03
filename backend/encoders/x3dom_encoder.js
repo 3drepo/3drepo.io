@@ -318,6 +318,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				federateTransformNode.appendChild(inlineNode);
 
 				var groupNode = xmlDoc.createElement("Group");
+				groupNode.setAttribute("onload", "onLoaded(event);");
 				groupNode.setAttribute("id", account + "__"+child.project);
 				groupNode.appendChild(federateTransformNode);
 				xmlNode.appendChild(groupNode);
@@ -932,9 +933,9 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 				
 		var groupNode = xmlDoc.createElement("Group");
 		groupNode.setAttribute("id", account + "__" + project);
+		groupNode.setAttribute('onload', 'onLoaded(event);');
 		var projOffset = null;
 		dbInterface.getCoordOffset(account, project, branch, full, function(err, offs) {
-			console.log("here!");
 			if(err.value == 0)
 				projOffset = offs;
 
