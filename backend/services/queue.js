@@ -51,6 +51,8 @@ ImportQueue.prototype.connect = function(url, options) {
         return Promise.reject({ message: 'Please define worker_queue in queue config'});
     } else if (!options.event_queue){
         return Promise.reject({ message: 'Please define event_queue in queue config'});
+    } else if (!options.event_queue_message_ttl){
+        return Promise.reject({ message: 'Please define event_queue_message_ttl in queue config'});
     }
 
 
@@ -73,6 +75,7 @@ ImportQueue.prototype.connect = function(url, options) {
         this.workerQName = options.worker_queue;
         this.deferedObjs = {};
         this.eventQueueName = options.event_queue;
+        this.eventQueueMessageTtl = options.event_queue_message_ttl;
 
         return this._consumeCallbackQueue();
 
@@ -353,7 +356,12 @@ ImportQueue.prototype.insertEventMessage = function(msg){
 
     msg = JSON.stringify(msg);
 
-    return this.channel.assertQueue(this.eventQueueName, { durable: true }).then(() => {
+    return this.channel.assertQueue(this.eventQueueName, {
+     
+        durable: true, 
+        messageTtl: this.eventQueueMessageTtl
+
+    }).then(() => {
         return this.channel.sendToQueue(
             this.eventQueueName, 
             new Buffer(msg), 
@@ -367,7 +375,12 @@ ImportQueue.prototype.insertEventMessage = function(msg){
 ImportQueue.prototype.consumeEventMessage = function(callback){
     'use strict';
 
-    return this.channel.assertQueue(this.eventQueueName, { durable: true }).then(() => {
+    return this.channel.assertQueue(this.eventQueueName, {
+        
+        durable: true, 
+        messageTtl: this.eventQueueMessageTtl
+
+    }).then(() => {
         return this.channel.consume(this.eventQueueName, function(rep) {
 
             callback(JSON.parse(rep.content));
