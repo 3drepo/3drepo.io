@@ -98,6 +98,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.rootName = "model";
 		this.inlineRoots = {};
+		this.groupNodes = null;
 		this.multipartNodes = [];
 		this.multipartNodesByProject = {};
 
@@ -326,9 +327,26 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (targetParent === self.viewer) {
 					self.setDiffColors(null);
 				}
-
+				console.log("@onloaded, event name: " + objEvent.target.tagName.toUpperCase());
+				console.log(objEvent);
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
+					var nameSpace = objEvent.target.nameSpaceName;
+
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
+
+					console.log("onloaded, namespace is : " + nameSpace);
+					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
+					{
+						self.groupNodes={};
+						//loaded x3dom file for current project, figure out the groups
+						var groups = document.getElementsByTagName("Group");
+						console.log(groups);
+						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+						{
+							self.groupNodes[groups[gIdx].id] = groups[gIdx];
+						}
+						console.log(self.groupNodes);
+					}
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 					if (self.multipartNodes.indexOf(objEvent.target) === -1)
 					{
