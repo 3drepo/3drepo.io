@@ -442,6 +442,31 @@ schema.methods.updateComment = function(commentIndex, data){
 			}
 		}).then(() => {
 			return this.save();
+		}).then(() => {
+
+			let issue = this.toObject();
+			let eventData = {
+				_id: uuidToString(issue._id),
+				account: this._dbcolOptions.account,
+				project: this._dbcolOptions.project,
+				issue: data,
+				issue_id : uuidToString(issue._id),
+				number: issue.number,
+				owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
+				created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
+			};
+
+			ChatEvent.newComment(data.owner, this._dbcolOptions.account, this._dbcolOptions.project, eventData).catch(err => {
+				systemLogger.logError('Error while inserting chat event', {
+					account: this._dbcolOptions.account,
+					project: this._dbcolOptions.project,
+					event: 'newComment',
+					issue: eventData._id,
+					error: err
+				});
+			});
+
+			return this;
 		});
 
 
