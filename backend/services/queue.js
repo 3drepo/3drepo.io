@@ -362,12 +362,10 @@ ImportQueue.prototype.insertEventMessage = function(msg){
             }
         );
     });
-}
+};
 
 ImportQueue.prototype.consumeEventMessage = function(callback){
     'use strict';
-
-    let self = this;
 
     return this.channel.assertQueue(this.eventQueueName, { durable: true }).then(() => {
         return this.channel.consume(this.eventQueueName, function(rep) {
@@ -376,6 +374,6 @@ ImportQueue.prototype.consumeEventMessage = function(callback){
             
         }, { noAck: true });
     });
-}
+};
 
 module.exports = new ImportQueue();

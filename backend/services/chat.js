@@ -20,8 +20,7 @@ module.exports.createApp = function (http, serverConfig){
 
 	let config = require('../config');
 	let session = require('./session').session(config);
-	let amqp = require('amqplib');
-
+	
 	let log_iface = require("../logger.js");
 	let middlewares = require('../routes/middlewares');
 	let systemLogger = log_iface.systemLogger;
@@ -55,12 +54,17 @@ module.exports.createApp = function (http, serverConfig){
 	});
 
 
+	let userToSocket = {};
+
 	function socket(queue){
 
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
-			if(msg.event && msg.account && msg.project){
-				io.to(`${msg.account}::${msg.project}`).emit(`${msg.account}::${msg.project}::${msg.event}`, msg.data);
+			if(msg.event && msg.account && msg.project && msg.emitter){
+
+				//it is to avoid emitter getting its own message
+				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
+				emitter.to(`${msg.account}::${msg.project}`).emit(`${msg.account}::${msg.project}::${msg.event}`, msg.data);
 			}
 		});
 
@@ -68,11 +72,12 @@ module.exports.createApp = function (http, serverConfig){
 		io.on('connection', socket => {
 
 			if(!socket.handshake.session.user){
-
 				return;
 			}
 
 			let username = socket.handshake.session.user.username;
+
+			userToSocket[username] = socket;
 
 			systemLogger.logInfo(`${username} is in chat`, { username });
 

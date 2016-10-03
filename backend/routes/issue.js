@@ -35,8 +35,8 @@ router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, lis
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
 
 router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
 router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);

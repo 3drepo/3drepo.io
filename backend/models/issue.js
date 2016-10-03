@@ -29,6 +29,9 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
+var ChatEvent = require('./chatEvent');
+var log_iface = require("../logger.js");
+var systemLogger = log_iface.systemLogger;
 
 var schema = Schema({
 	_id: Object,
@@ -385,7 +388,20 @@ schema.statics.createIssue = function(dbColOptions, data){
 		return issue.save().then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
-			return Promise.resolve(issue.clean(settings.type));
+
+			let cleaned = issue.clean(settings.type);
+			
+			ChatEvent.newIssue(data.owner, dbColOptions.account, dbColOptions.project, cleaned).catch(err => {
+				systemLogger.logError('Error while inserting chat event', {
+					account: dbColOptions.account,
+					project: dbColOptions.project,
+					event: 'newIssue',
+					issue: cleaned._id,
+					error: err
+				});
+			});
+
+			return Promise.resolve(cleaned);
 		});
 
 	});
