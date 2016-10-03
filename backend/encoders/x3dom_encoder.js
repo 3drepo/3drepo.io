@@ -930,17 +930,14 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var globalCoordOffset = null;
 		var globalCoordPromise = deferred();
 				
-		var inlineNode = xmlDoc.createElement("Inline");
-		inlineNode.setAttribute("nameSpaceName", account + "__" + project);
-
+		var groupNode = xmlDoc.createElement("Group");
+		groupNode.setAttribute("id", account + "__" + project);
 		var projOffset = null;
 		dbInterface.getCoordOffset(account, project, branch, full, function(err, offs) {
 			console.log("here!");
 			if(err.value == 0)
 				projOffset = offs;
 
-			var inlineNode = xmlDoc.createElement("Group");
-			inlineNode.setAttribute("id", account + "__" + project);
 	
 			if(projOffset)
 			{
@@ -953,15 +950,15 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 	            offsetTransform2.setAttribute("translation", projOffset.join(" "));
 
     	    	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
-    	        inlineNode.appendChild(offsetTransform2);
-				offsetTransform.appendChild(inlineNode);
+    	        groupNode.appendChild(offsetTransform2);
+				offsetTransform.appendChild(groupNode);
 				sceneRoot.root.appendChild(offsetTransform);
 				
 			}
 			else
 			{
 
-    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, inlineNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
 	
 				//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
 				if (globalCoordOffset) {
@@ -969,7 +966,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 					var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
     		        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
 
-					offsetTransform.appendChild(inlineNode);
+					offsetTransform.appendChild(groupNode);
 	    	    	sceneRoot.root.appendChild(offsetTransform);
 	        	}
 			}
