@@ -33,10 +33,13 @@ var ClipPlane = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+	 * @param {parentNode} node to append the clipping plane onto
 	 */
-	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection) {
+	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection, parentNode) {
 		var self = this;
 
+		console.log("creating clipping plane...");
+		console.log(parentNode);
 		// Public properties
 
 		/**
@@ -253,11 +256,26 @@ var ClipPlane = {};
 
 		// Attach to the root node of the viewer
 		viewer.getScene().appendChild(coordinateFrame);
-		volume = viewer.runtime.getBBox(viewer.getScene());
+		if(parentNode)
+		{
+			volume = viewer.runtime.getBBox(parentNode);
+		}
+		else
+		{
+			volume = viewer.runtime.getBBox(viewer.getScene());
+		}
 
 		// Move the plane to finish construction
 		this.changeAxis(axis);
-		viewer.getScene().appendChild(clipPlaneElem);
+		if(parentNode)
+		{
+			parentNode.appendChild(clipPlaneElem);
+			
+		}
+		else
+		{
+			viewer.getScene().appendChild(clipPlaneElem);
+		}
 		this.movePlane(percentage);
 
 	};

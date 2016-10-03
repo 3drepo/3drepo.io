@@ -32,7 +32,9 @@
 			},
 			controller: ClipCtrl,
 			controllerAs: 'vm',
-			bindToController: true
+			bindToController: true,
+			account: null,
+			project: null
 		};
 	}
 
@@ -51,17 +53,22 @@
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
+		vm.account = null;
+		vm.project = null;
 		vm.onContentHeightRequest({height: 130});
 
-		function initClippingPlane () {
+		function initClippingPlane (account, project) {
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
 				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+				console.log("firing add clipping plane event: ("+ account +","+ project +")");
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
-					percentage: initPosition
+					percentage: initPosition,
+					account: vm.account,
+					project: vm.project
 				});
 			});
 		}
@@ -138,9 +145,12 @@
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
+					console.log("caught set clipping plane event... account: " + event.value.account + "," + event.value.project);
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
+					vm.project = event.value.project;
+					vm.account = event.value.account;
 					initClippingPlane();
 					vm.visible = true;
 				} else {

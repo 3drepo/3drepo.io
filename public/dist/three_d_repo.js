@@ -332,10 +332,13 @@ var ClipPlane = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+	 * @param {parentNode} node to append the clipping plane onto
 	 */
-	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection) {
+	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection, parentNode) {
 		var self = this;
 
+		console.log("creating clipping plane...");
+		console.log(parentNode);
 		// Public properties
 
 		/**
@@ -552,17 +555,33 @@ var ClipPlane = {};
 
 		// Attach to the root node of the viewer
 		viewer.getScene().appendChild(coordinateFrame);
-		volume = viewer.runtime.getBBox(viewer.getScene());
+		if(parentNode)
+		{
+			volume = viewer.runtime.getBBox(parentNode);
+		}
+		else
+		{
+			volume = viewer.runtime.getBBox(viewer.getScene());
+		}
 
 		// Move the plane to finish construction
 		this.changeAxis(axis);
-		viewer.getScene().appendChild(clipPlaneElem);
+		if(parentNode)
+		{
+			parentNode.appendChild(clipPlaneElem);
+			
+		}
+		else
+		{
+			viewer.getScene().appendChild(clipPlaneElem);
+		}
 		this.movePlane(percentage);
 
 	};
 
 
 }());
+
 /* global x3dom */
 /**
  **  Copyright (C) 2014 3D Repo Ltd
@@ -3140,8 +3159,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (targetParent === self.viewer) {
 					self.setDiffColors(null);
 				}
-				console.log("@onloaded, event name: " + objEvent.target.tagName.toUpperCase());
-				console.log(objEvent);
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					var nameSpace = objEvent.target.nameSpaceName;
 
@@ -4564,11 +4581,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+		 * @param {string} account - name of database (optional)
+		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
+		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
+			console.log("adding clipping plane, account: " + account + ", project: " + project);
+			console.trace();	
+			var parentGroup = null;
+			if(account && project){				
+				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+				parentGroup = self.groupNodes[fullParentGroupName];
+			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;
@@ -8717,7 +8743,9 @@ var ViewerManager = {};
 			},
 			controller: ClipCtrl,
 			controllerAs: 'vm',
-			bindToController: true
+			bindToController: true,
+			account: null,
+			project: null
 		};
 	}
 
@@ -8736,17 +8764,22 @@ var ViewerManager = {};
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
+		vm.account = null;
+		vm.project = null;
 		vm.onContentHeightRequest({height: 130});
 
-		function initClippingPlane () {
+		function initClippingPlane (account, project) {
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
 				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+				console.log("firing add clipping plane event: ("+ account +","+ project +")");
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
-					percentage: initPosition
+					percentage: initPosition,
+					account: vm.account,
+					project: vm.project
 				});
 			});
 		}
@@ -8823,9 +8856,12 @@ var ViewerManager = {};
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
+					console.log("caught set clipping plane event... account: " + event.value.account + "," + event.value.project);
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
+					vm.project = event.value.project;
+					vm.account = event.value.account;
 					initClippingPlane();
 					vm.visible = true;
 				} else {
@@ -12214,8 +12250,11 @@ angular.module('3drepo')
 					project: vm.selectedIssue.project
 				});
 
+				console.log("setting clipping planes...: " + vm.selectedIssue.account + ", " + vm.selectedIssue.project);
 				EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
-					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes
+					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes,
+					account: vm.selectedIssue.account, 
+					project: vm.selectedIssue.project
 				});
 			}
 
@@ -15824,11 +15863,13 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
+							console.log("event received: add clipping plane...");
 							v.viewer.addClippingPlane(
 								event.value.axis,
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1);
+								event.value.clipDirection ? event.value.clipDirection : -1,
+								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {

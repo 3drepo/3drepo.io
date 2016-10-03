@@ -576,8 +576,11 @@
 					project: vm.selectedIssue.project
 				});
 
+				console.log("setting clipping planes...: " + vm.selectedIssue.account + ", " + vm.selectedIssue.project);
 				EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
-					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes
+					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes,
+					account: vm.selectedIssue.account, 
+					project: vm.selectedIssue.project
 				});
 			}
 

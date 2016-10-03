@@ -1749,11 +1749,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+		 * @param {string} account - name of database (optional)
+		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
+		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
+			console.log("adding clipping plane, account: " + account + ", project: " + project);
+			console.trace();	
+			var parentGroup = null;
+			if(account && project){				
+				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+				parentGroup = self.groupNodes[fullParentGroupName];
+			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;
