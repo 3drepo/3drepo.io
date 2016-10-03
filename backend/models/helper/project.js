@@ -110,15 +110,15 @@ function createAndAssignRole(project, account, username, desc, type) {
 			}
 
 			setting = ProjectSetting.createInstance({
-				account: account, 
+				account: account,
 				project: project
 			});
-			
+
 			setting._id = project;
 			setting.owner = username;
 			setting.desc = desc;
 			setting.type = type;
-			
+
 			return setting.save();
 		});
 
@@ -145,7 +145,9 @@ function importToyJSON(db, project){
 	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
 	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
 
-	let host = config.db.host;
+	let host = config.db.host[0];
+	let port = config.db.port[0];
+
 	let username = config.db.username;
 	let password = config.db.password;
 
@@ -158,8 +160,8 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
-			{ 
+			`mongoimport -j 8 --host ${host} --port ${port} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			{
 				cwd: __dirname
 			}, function (err) {
 				if(err){
@@ -175,15 +177,15 @@ function importToyJSON(db, project){
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
 		let jsonBucket = stash.getGridFSBucket({ account: db, project: project }, 'json_mpc');
-		
+
 		jsonBucket.find().forEach(file => {
-			
+
 			let newFileName = file.filename;
 			newFileName = newFileName.split('/');
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -191,7 +193,7 @@ function importToyJSON(db, project){
 
 		//rename src stash
 		let srcBucket = stash.getGridFSBucket({ account: db, project: project }, 'src');
-		
+
 		srcBucket.find().forEach(file => {
 
 			let newFileName = file.filename;
@@ -199,7 +201,7 @@ function importToyJSON(db, project){
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -220,11 +222,11 @@ function importToyProject(username){
 	let account = username;
 	let desc = '';
 	let type = 'sample';
-	
+
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-	
+
 	return createAndAssignRole(project, account, username, desc, type).then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
@@ -246,7 +248,7 @@ function importToyProject(username){
 		projectSetting.status = 'ok';
 		projectSetting.errorReason = undefined;
 		projectSetting.markModified('errorReason');
-		
+
 		return projectSetting.save();
 
 	}).catch(err => {
@@ -289,7 +291,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		}
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -377,7 +379,7 @@ function removeCollaborator(username, email, account, project, role){
 
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
