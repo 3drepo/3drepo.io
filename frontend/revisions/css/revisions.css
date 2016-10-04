@@ -19,7 +19,8 @@ revisions {
 }
 
 .revisions-dropdown{
-  cursor:pointer;
+    cursor:pointer;
+    outline: none
 }
 
 /** Revisions Dialog *************************************************************************************************/

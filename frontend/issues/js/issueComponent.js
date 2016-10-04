@@ -60,6 +60,7 @@
 		this.submitDisabled = true;
 		this.pinData = null;
 		this.showAdditional = true;
+		this.editingDescription = false;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -108,6 +109,9 @@
 							}
 						}
 					}
+
+					// Can edit description if no comments
+					this.canEditDescription = (this.issueData.comments.length === 0);
 				}
 				else {
 					this.issueData = {
@@ -206,31 +210,34 @@
 		};
 
 		/**
-		 * Show viewpoint and screen shot if there is one
+		 * Show viewpoint
+		 * @param event
 		 * @param viewpoint
 		 */
-		this.showViewpointAndScreenShot = function (viewpoint) {
-			var data;
-
-			// Viewpoint
-			data = {
-				position : viewpoint.position,
-				view_dir : viewpoint.view_dir,
-				up: viewpoint.up
-			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
-
-			// Screen shot
-			if (angular.isDefined(viewpoint.screenshot)) {
-				self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
-				$mdDialog.show({
-					controller: function () {
-						this.dialogCaller = self;
-					},
-					controllerAs: "vm",
-					templateUrl: "issueScreenShotDialog.html"
-				});
+		this.showViewpoint = function (event, viewpoint) {
+			if (event.type === "click") {
+				var data = {
+					position : viewpoint.position,
+					view_dir : viewpoint.view_dir,
+					up: viewpoint.up
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 			}
+		};
+
+		/**
+		 * Show screen shot
+		 * @param viewpoint
+		 */
+		this.showScreenShot = function (viewpoint) {
+			self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+			$mdDialog.show({
+				controller: function () {
+					this.dialogCaller = self;
+				},
+				controllerAs: "vm",
+				templateUrl: "issueScreenShotDialog.html"
+			});
 		};
 
 		/**
@@ -295,6 +302,27 @@
 		this.toggleShowAdditional = function () {
 			this.showAdditional = !this.showAdditional;
 			setContentHeight();
+		};
+
+		/**
+		 * Edit or save description
+		 * @param event
+		 */
+		this.toggleEditDescription = function (event) {
+			event.stopPropagation();
+			if (this.editingDescription) {
+				this.editingDescription = false;
+				var data = {
+					desc: self.issueData.desc
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (data) {
+						console.log(data);
+					});
+			}
+			else {
+				this.editingDescription = true;
+			}
 		};
 
 		/**

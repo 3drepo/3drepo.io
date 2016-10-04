@@ -259,7 +259,7 @@ issues-list .issueListItem *:hover {
   cursor: inherit;
 }
 
-issues-list .issueListItemFocused {
+issues-list .issueListItemFocus {
   background: rgba(0,69,148,.1);
 }
 
@@ -327,6 +327,10 @@ issue-comp .issueCompItemContainer div {
   outline: none;
 }
 
+issue-comp #issueCompTitle {
+  margin-bottom: 20px;
+}
+
 issue-comp #issueCompStatus {
   margin: 0 0 10px;
 }
@@ -343,10 +347,11 @@ issue-comp .issueCompThumbnail {
   position: relative;
   display: inline-block;
 }
-issue-comp .issueCompThumbnail:hover {
+issue-comp .issueCompThumbnailImage:hover {
   cursor: pointer;
+  outline: solid 1px rgba(0, 0, 0, 0.2);
 }
-issue-comp .issueCompThumbnail img {
+issue-comp .issueCompThumbnailImage {
   width: 100%;
 }
 
@@ -367,22 +372,28 @@ issue-comp .issueCompComment {
   margin: 10px 0;
 }
 
+issue-comp #issueCompDescriptionText,
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
 }
 
-issue-comp .issueCompCommentActions {
+issue-comp .issueCompTextActions {
   z-index: 2;
 }
 
+issue-comp #issueCompDescription {
+  outline: none;
+  margin-bottom: 20px;
+}
+
 issue-comp .issueCompComment:hover,
-issue-comp .issueDescriptionWithScreenShot:hover {
+issue-comp #issueCompDescription:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
   outline: solid 1px rgba(0, 0, 0, 0.2);
 }
 issue-comp .issueCompComment *:hover,
-issue-comp .issueDescriptionWithScreenShot *:hover {
+issue-comp #issueCompDescription *:hover {
   cursor: pointer;
 }
 

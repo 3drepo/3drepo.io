@@ -50,7 +50,8 @@
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = true,
-			showClosed = false;
+			showClosed = false,
+			focusedIssueIndex = null;
 
 		// Init
 		this.UtilsService = UtilsService;
@@ -105,24 +106,50 @@
 			// Keys down - check for down followed by up
 			if (changes.hasOwnProperty("keysDown") &&
 				(changes.keysDown.currentValue.length === 0) &&
-				(changes.keysDown.previousValue.length === 1) &&
-				(selectedIssueIndex !== null)) {
-
+				(changes.keysDown.previousValue.length === 1)) {
+				// Up/Down arrow
 				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
-					if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
-						selectedIssue.selected = false;
-						selectedIssueIndex += 1;
+					// Handle focused issue
+					if (focusedIssueIndex !== null) {
+						if ((changes.keysDown.previousValue[0] === downArrow) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
+							if (selectedIssue !== null) {
+								selectedIssue.selected = false;
+								selectedIssue.focus = false;
+							}
+							this.issuesToShow[focusedIssueIndex].focus = false;
+							focusedIssueIndex += 1;
+							selectedIssueIndex = focusedIssueIndex;
+						}
+						else if ((changes.keysDown.previousValue[0] === upArrow) && (focusedIssueIndex !== 0)) {
+							if (selectedIssue !== null) {
+								selectedIssue.selected = false;
+								selectedIssue.focus = false;
+							}
+							this.issuesToShow[focusedIssueIndex].focus = false;
+							focusedIssueIndex -= 1;
+							selectedIssueIndex = focusedIssueIndex;
+						}
 					}
-					else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
-						selectedIssue.selected = false;
-						selectedIssueIndex -= 1;
+					// Handle selected issue
+					else if (selectedIssueIndex !== null) {
+						if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+							selectedIssue.selected = false;
+							selectedIssueIndex += 1;
+						}
+						else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
+							selectedIssue.selected = false;
+							selectedIssueIndex -= 1;
+						}
+						deselectPin(selectedIssue);
 					}
-					deselectPin(selectedIssue);
+
 					selectedIssue = this.issuesToShow[selectedIssueIndex];
 					selectedIssue.selected = true;
+					selectedIssue.focus = true;
 					showIssue(selectedIssue);
 					setSelectedIssueIndex(selectedIssue);
 				}
+				// Right arrow
 				else if (changes.keysDown.previousValue[0] === rightArrow) {
 					self.editIssue(selectedIssue);
 				}
@@ -175,27 +202,48 @@
 		 */
 		this.select = function (event, issue) {
 			if (event.type === "click") {
-				if (selectedIssue === null) {
+				if ((selectedIssue === null) || (selectedIssue._id === issue._id)) {
 					selectedIssue = issue;
 					selectedIssue.selected = true;
+					selectedIssue.focus = true;
 					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
-				}
-				else if (selectedIssue._id === issue._id) {
-					selectedIssue.selected = false;
-					deselectPin(selectedIssue);
-					selectedIssue = null;
 					setSelectedIssueIndex(selectedIssue);
 				}
 				else {
 					selectedIssue.selected = false;
+					selectedIssue.focus = false;
 					deselectPin(selectedIssue);
 					selectedIssue = issue;
 					selectedIssue.selected = true;
+					selectedIssue.focus = true;
 					showIssue(selectedIssue);
 					setSelectedIssueIndex(selectedIssue);
 				}
 			}
+		};
+
+		/**
+		 * Set focus on issue
+		 * @param event
+		 * @param issue
+		 * @param index
+		 */
+		this.setFocus = function (event, issue, index) {
+			if (selectedIssue !== null) {
+				selectedIssue.focus = false;
+			}
+			focusedIssueIndex = index;
+			issue.focus = true;
+		};
+
+		/**
+		 * Remove focus from issue
+		 * @param event
+		 * @param issue
+		 */
+		this.removeFocus = function (event, issue) {
+			focusedIssueIndex = null;
+			issue.focus = false;
 		};
 
 		/**
