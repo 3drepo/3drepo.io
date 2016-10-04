@@ -113,9 +113,10 @@ html(lang="en" ng-app="3drepo")
 							label(flex="10", class="ng-binding flex-10") £#{billing.taxAmount}
 							label#billingTotalValue(class="ng-binding") £#{billing.amount}
 
+						md-divider(flex="none", class="flex-none")
+						p You next regular monthly payment £#{billing.nextPaymentAmount} will be billed on #{billing.nextPaymentDate}
 						if billing.B2B_EU
 							#billingReverseCharge(flex)
-								md-divider(flex="none", class="flex-none")
 								p
 									| This invoice may be subject to the
 									=" "

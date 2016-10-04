@@ -101,6 +101,7 @@ schema.methods.clean = function(options) {
 	let billing = this.toObject();
 	billing.info.country = addressMeta.countries.find(c => c.code === billing.info.countryCode).name;
 	billing.taxAmount = parseFloat(billing.taxAmount).toFixed(2);
+	billing.nextPaymentAmount = parseFloat(billing.nextPaymentAmount).toFixed(2);
 	billing.amount  = parseFloat(billing.amount).toFixed(2);
 	billing.netAmount  = (Math.round((parseFloat(billing.amount) - parseFloat(billing.taxAmount)) * 100) / 100).toFixed(2);
 	billing.taxPercentage = (Math.round(parseFloat(billing.taxAmount) / parseFloat(billing.netAmount) * 100) / 100 * 100);
@@ -114,6 +115,8 @@ schema.methods.clean = function(options) {
 		billing.proRata = true;
 	}
 
+	billing.nextPaymentDate = moment(billing.nextPaymentDate).utc().format('YYYY-MM-DD');
+	
 	if(!options.skipDate) {
 		billing.createdAt = moment(billing.createdAt).utc().format('DD-MM-YYYY HH:mm');
 		billing.periodStart = moment(billing.periodStart).utc().format('YYYY-MM-DD');
