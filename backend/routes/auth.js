@@ -32,6 +32,7 @@
 	//var crypto = require('crypto');
 	var Billing = require('../models/billing');
 	var Subscription = require('../models/subscription');
+	var moment = require('moment');
 
 	router.post("/login", login);
 	router.post("/logout", logout);
@@ -506,7 +507,7 @@
 
 			res.writeHead(200, {
 				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="invoice-${billing.invoiceNo}.pdf"`,
+				'Content-disposition': `inline; filename="${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf"`,
 				'Content-Length': pdf.length
 			});
 
