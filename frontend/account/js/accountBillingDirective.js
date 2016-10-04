@@ -128,7 +128,7 @@
 
 			if (angular.isDefined(vm.billings)) {
 				for (i = 0, length = vm.billings.length; i < length; i += 1) {
-					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Paid";
 				}
 			}
 		});

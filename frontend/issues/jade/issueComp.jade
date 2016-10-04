@@ -21,7 +21,7 @@
 	// Status
 	.issueCompItemContainer(layout="column")
 		div(layout="row", layout-align="start center")
-			md-button.md-icon-button(aria-label="Status Toggle", ng-click="$ctrl.toggleShowAdditional()")
+			md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle", ng-click="$ctrl.toggleShowAdditional()")
 				md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") keyboard_arrow_right
 				md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") keyboard_arrow_down
 		div(layout="row", ng-if="$ctrl.showAdditional")

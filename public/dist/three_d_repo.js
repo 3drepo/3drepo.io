@@ -5102,7 +5102,7 @@ var ViewerManager = {};
 
 			if (angular.isDefined(vm.billings)) {
 				for (i = 0, length = vm.billings.length; i < length; i += 1) {
-					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Paid";
 				}
 			}
 		});
@@ -13496,6 +13496,7 @@ angular.module('3drepo')
 		 */
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
+			vm.event = null; // To clear any events so they aren't registered
 			vm.toShow = "showIssue";
 			vm.setContentHeight();
 			vm.onShowItem();
@@ -13630,8 +13631,8 @@ angular.module('3drepo')
 
 	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
-			selectedIssue = null,
-			selectedIssueIndex = null,
+			focusedIssue = null,
+			focusedIssueIndex = null,
 			issuesListItemHeight = 150,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
@@ -13666,10 +13667,10 @@ angular.module('3drepo')
 						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
 							this.issuesToShow[i] = updatedIssue;
 						}
-						// Get a possible selected issue
-						if (this.issuesToShow[i].selected) {
-							selectedIssue = this.issuesToShow[i];
-							setSelectedIssueIndex(selectedIssue);
+						// Get a possible focused issue
+						if (this.issuesToShow[i].focused) {
+							focusedIssue = this.issuesToShow[i];
+							setFocusedIssueIndex(focusedIssue);
 						}
 					}
 					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
@@ -13692,25 +13693,25 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("keysDown") &&
 				(changes.keysDown.currentValue.length === 0) &&
 				(changes.keysDown.previousValue.length === 1) &&
-				(selectedIssueIndex !== null)) {
+				(focusedIssueIndex !== null)) {
 
 				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
-					if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
-						selectedIssue.selected = false;
-						selectedIssueIndex += 1;
+					if ((changes.keysDown.previousValue[0] === downArrow) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
+						focusedIssue.focused = false;
+						focusedIssueIndex += 1;
 					}
-					else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
-						selectedIssue.selected = false;
-						selectedIssueIndex -= 1;
+					else if ((changes.keysDown.previousValue[0] === upArrow) && (focusedIssueIndex !== 0)) {
+						focusedIssue.focused = false;
+						focusedIssueIndex -= 1;
 					}
-					deselectPin(selectedIssue);
-					selectedIssue = this.issuesToShow[selectedIssueIndex];
-					selectedIssue.selected = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
+					deselectPin(focusedIssue);
+					focusedIssue = this.issuesToShow[focusedIssueIndex];
+					focusedIssue.focused = true;
+					showIssue(focusedIssue);
+					setFocusedIssueIndex(focusedIssue);
 				}
 				else if (changes.keysDown.previousValue[0] === rightArrow) {
-					self.editIssue(selectedIssue);
+					self.editIssue(focusedIssue);
 				}
 			}
 
@@ -13755,32 +13756,42 @@ angular.module('3drepo')
 		};
 
 		/**
-		 * Select issue
+		 * Focus issue
 		 * @param event
 		 * @param issue
 		 */
-		this.select = function (event, issue) {
-			if (event.type === "click") {
-				if (selectedIssue === null) {
-					selectedIssue = issue;
-					selectedIssue.selected = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
+		this.focus = function (event, issue) {
+			if (event.type === "mouseover") {
+				if (focusedIssue === null) {
+					focusedIssue = issue;
+					focusedIssue.focused = true;
+					setFocusedIssueIndex(focusedIssue);
 				}
-				else if (selectedIssue._id === issue._id) {
-					selectedIssue.selected = false;
-					deselectPin(selectedIssue);
-					selectedIssue = null;
-					setSelectedIssueIndex(selectedIssue);
+				else if (focusedIssue._id === issue._id) {
+					focusedIssue.focused = false;
+					deselectPin(focusedIssue);
+					focusedIssue = null;
+					setFocusedIssueIndex(focusedIssue);
 				}
 				else {
-					selectedIssue.selected = false;
-					deselectPin(selectedIssue);
-					selectedIssue = issue;
-					selectedIssue.selected = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
+					focusedIssue.focused = false;
+					focusedIssue.selected = false;
+					deselectPin(focusedIssue);
+					focusedIssue = issue;
+					focusedIssue.focused = true;
+					setFocusedIssueIndex(focusedIssue);
 				}
+			}
+		};
+
+		/**
+		 * Select issue
+		 * @param event
+		 */
+		this.select = function (event) {
+			if (event.type === "click") {
+				showIssue(focusedIssue);
+				focusedIssue.selected = true;
 			}
 		};
 
@@ -13792,21 +13803,21 @@ angular.module('3drepo')
 		};
 
 		/**
-		 * Set the selected issue index
-		 * @param selectedIssue
+		 * Set the focused issue index
+		 * @param focusedIssue
 		 */
-		function setSelectedIssueIndex (selectedIssue) {
+		function setFocusedIssueIndex (focusedIssue) {
 			var i, length;
 
-			if (selectedIssue !== null) {
+			if (focusedIssue !== null) {
 				for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
-					if (self.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
+					if (self.issuesToShow[i]._id === focusedIssue._id) {
+						focusedIssueIndex = i;
 					}
 				}
 			}
 			else {
-				selectedIssueIndex = null;
+				focusedIssueIndex = null;
 			}
 		}
 
@@ -13880,9 +13891,9 @@ angular.module('3drepo')
 
 			for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
 				if (self.issuesToShow[i]._id === issueId) {
-					selectedIssue = self.issuesToShow[i];
-					setSelectedIssueIndex(selectedIssue);
-					self.onEditIssue({issue: selectedIssue});
+					focusedIssue = self.issuesToShow[i];
+					setFocusedIssueIndex(focusedIssue);
+					self.onEditIssue({issue: focusedIssue});
 					break;
 				}
 			}

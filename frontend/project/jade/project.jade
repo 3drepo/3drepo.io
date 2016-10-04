@@ -1,7 +1,7 @@
 //.container-fluid#project(global ng-if="!vm.state.bid4free")
 
 // tabindex is required for ng-keydown to work on a div/directive
-div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
+#project(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
 		viewermanager
 

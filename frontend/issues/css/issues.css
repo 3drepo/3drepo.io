@@ -253,11 +253,14 @@ issues-list .issueListItem {
   outline: none;
 }
 issues-list .issueListItem:hover {
-  background: rgba(0,69,148,.1);
   cursor: pointer;
 }
 issues-list .issueListItem *:hover {
   cursor: inherit;
+}
+
+issues-list .issueListItemFocused {
+  background: rgba(0,69,148,.1);
 }
 
 issues-list .issueListItem div:first-child {
@@ -383,6 +386,9 @@ issue-comp .issueDescriptionWithScreenShot *:hover {
   cursor: pointer;
 }
 
+issue-comp #additionalInfoButton {
+  margin: 0 0 0 -8px;
+}
 
 /** Issue Screen Shot  ************************************************************************************************/
 #issueScreenShotDialog {
