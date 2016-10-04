@@ -322,34 +322,39 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
     'use strict';
 
     let self = this;
+    let queue;
+    
+	return this.channel.assertExchange(this.callbackQName, 'direct', { durable: true }).then(() => {
 
-	this.channel.assertExchange(this.callbackQName, 'direct', { durable: true });
+        return this.channel.assertQueue('', { exclusive: true });
 
-    return this.channel.assertQueue('', { exclusive: true }).then((q) => {
-		var queue = q.queue;
-		console.log("QUEUE : " + q.queue);
+    }).then((q) => {
 
-		return this.channel.bindQueue(queue, this.callbackQName, this.uid).then(() => {
-			return this.channel.consume(queue, function(rep) {
-				self.logger.logInfo('Job request id ' + rep.properties.correlationId + ' returned with: ' + rep.content);
+		queue = q.queue;
+		return this.channel.bindQueue(queue, this.callbackQName, this.uid);
 
-				let defer = self.deferedObjs[rep.properties.correlationId];
+	}).then(() => {
 
-				let resErrorCode = parseInt(JSON.parse(rep.content).value);
+        return this.channel.consume(queue, function(rep) {
 
-				if(defer && resErrorCode === 0){
-					defer.resolve();
-				} else if (defer) {
-					defer.reject(resErrorCode);
-				} else {
-					self.logger.logError('Job done but cannot find corresponding defer object with cor id ' + rep.properties.correlationId);
-				}
+            self.logger.logInfo('Job request id ' + rep.properties.correlationId + ' returned with: ' + rep.content);
 
-				defer && delete self.deferedObjs[rep.properties.correlationId];
+            let defer = self.deferedObjs[rep.properties.correlationId];
 
-			}, { noAck: true });
-		});
-	});
+            let resErrorCode = parseInt(JSON.parse(rep.content).value);
+
+            if(defer && resErrorCode === 0){
+                defer.resolve();
+            } else if (defer) {
+                defer.reject(resErrorCode);
+            } else {
+                self.logger.logError('Job done but cannot find corresponding defer object with cor id ' + rep.properties.correlationId);
+            }
+
+            defer && delete self.deferedObjs[rep.properties.correlationId];
+
+        }, { noAck: true });
+    });
 };
 
 module.exports = new ImportQueue();
