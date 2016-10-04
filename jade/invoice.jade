@@ -57,6 +57,9 @@ html(lang="en" ng-app="3drepo")
 								p.md-display-1.ng-binding 
 														| #{billing.pending ? 'Order confirmation': 'Invoice'}
 
+								if !billing.pending
+									span PayPal transaction ID: #{billing.transactionId}
+
 							//span(flex)
 							//md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
 
