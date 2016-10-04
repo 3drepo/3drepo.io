@@ -940,8 +940,11 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 				projOffset = offs;
 
 	
-			if(projOffset)
+			if(projOffset && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
 			{
+
+				console.log("have project offset!!!");
+				console.log(projOffset);
     	       	var offsetTransform = xmlDoc.createElement("Transform");
 				var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
 	            offsetTransform.setAttribute("translation", offsetTrans.join(" "));
@@ -962,6 +965,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
     	    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
 	
 				//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
+				console.log(globalCoordOffset);
 				if (globalCoordOffset) {
 	            	var offsetTransform = xmlDoc.createElement("Transform");
 					var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
