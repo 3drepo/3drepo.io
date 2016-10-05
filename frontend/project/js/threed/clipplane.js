@@ -262,7 +262,6 @@ var ClipPlane = {};
 
 			var plane = new x3dom.fields.SFVec4f(normal.x, normal.y, normal.z, -this.distance);
 
-			console.log("new plane: " + plane.toGL());
 
 
 			// Update the clipping element plane equation
