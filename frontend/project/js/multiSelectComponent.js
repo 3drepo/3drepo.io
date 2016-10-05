@@ -41,7 +41,7 @@
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
-			unselectedObjects = [],
+			deselectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
@@ -54,25 +54,32 @@
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
-				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
-				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				if (multiMode) {
-					this.displaySelectedObjects(selectedObjects, unselectedObjects);
+			// Keys down
+			if (changes.hasOwnProperty("keysDown")) {
+				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+					multiMode = true;
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+				}
+				else if (multiMode &&
+						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+					multiMode = false;
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				}
 			}
 
+			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					unselectedObjects = [];
+					deselectedObjects = [];
 					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						unselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+						deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
 					}
-					this.displaySelectedObjects(selectedObjects, unselectedObjects);
+					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
 					if (selectedObjects.length > 0) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -82,14 +89,18 @@
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-					selectedObjects = [];
-					self.setSelectedObjects({selectedObjects: null});
+					if (selectedObjects.length > 0) {
+						this.displaySelectedObjects([], selectedObjects);
+						selectedObjects = [];
+						self.setSelectedObjects({selectedObjects: null});
+					}
 				}
 			}
 
+			// Initialise selected objects
 			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
 				selectedObjects = this.initialSelectedObjects;
-				this.displaySelectedObjects(selectedObjects, unselectedObjects);
+				this.displaySelectedObjects(selectedObjects, deselectedObjects);
 			}
 		};
 
@@ -100,13 +111,18 @@
 			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 		};
 
-		this.displaySelectedObjects = function (selectedObjects, unselectObjects) {
+		/**
+		 * Highlight and unhighlight objects
+		 * @param selectedObjects
+		 * @param deselectedObjects
+		 */
+		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
 				highlight_ids: selectedObjects,
-				unhighlight_ids: unselectObjects
+				unhighlight_ids: deselectedObjects
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};

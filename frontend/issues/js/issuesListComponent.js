@@ -104,14 +104,12 @@
 			}
 
 			// Keys down - check for down followed by up
-			if (changes.hasOwnProperty("keysDown") &&
-				(changes.keysDown.currentValue.length === 0) &&
-				(changes.keysDown.previousValue.length === 1)) {
+			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
-				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
+				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
 					// Handle focused issue
 					if (focusedIssueIndex !== null) {
-						if ((changes.keysDown.previousValue[0] === downArrow) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
 							if (selectedIssue !== null) {
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
@@ -120,7 +118,7 @@
 							focusedIssueIndex += 1;
 							selectedIssueIndex = focusedIssueIndex;
 						}
-						else if ((changes.keysDown.previousValue[0] === upArrow) && (focusedIssueIndex !== 0)) {
+						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (focusedIssueIndex !== 0)) {
 							if (selectedIssue !== null) {
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
@@ -132,11 +130,11 @@
 					}
 					// Handle selected issue
 					else if (selectedIssueIndex !== null) {
-						if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
 							selectedIssue.selected = false;
 							selectedIssueIndex += 1;
 						}
-						else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
+						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (selectedIssueIndex !== 0)) {
 							selectedIssue.selected = false;
 							selectedIssueIndex -= 1;
 						}
@@ -150,7 +148,7 @@
 					setSelectedIssueIndex(selectedIssue);
 				}
 				// Right arrow
-				else if (changes.keysDown.previousValue[0] === rightArrow) {
+				else if (changes.keysDown.currentValue.indexOf(rightArrow) !== -1) {
 					self.editIssue(selectedIssue);
 				}
 			}

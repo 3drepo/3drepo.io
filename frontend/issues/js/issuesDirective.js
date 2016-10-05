@@ -129,7 +129,6 @@
 		 */
 		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
-			console.log(666, data);
 			vm.projectUserRoles = data;
 		});
 

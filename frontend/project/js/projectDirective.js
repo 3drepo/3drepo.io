@@ -284,25 +284,30 @@
 		 * @param event
 		 */
 		vm.keyAction = function (event) {
-			var i;
-			// Recreate list
-			var tmp = vm.keysDown;
-			delete vm.keysDown;
-			vm.keysDown = angular.copy(tmp);
+			var i,
+				tmp;
 
 			// Update list, but avoid repeat
 			if (event.type === "keydown") {
 				if (vm.keysDown.indexOf(event.which) === -1) {
+					// Recreate list so that it changes are registered in components
+					tmp = vm.keysDown;
+					delete vm.keysDown;
+					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
 				}
 			}
 			else if (event.type === "keyup") {
-				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)
+				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
 				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
 						vm.keysDown.splice(i, 1);
 					}
 				}
+				// Recreate list so that it changes are registered in components
+				tmp = vm.keysDown;
+				delete vm.keysDown;
+				vm.keysDown = angular.copy(tmp);
 			}
 		};
 

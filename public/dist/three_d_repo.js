@@ -13395,7 +13395,6 @@ angular.module('3drepo')
 		 */
 		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
-			console.log(666, data);
 			vm.projectUserRoles = data;
 		});
 
@@ -13719,14 +13718,12 @@ angular.module('3drepo')
 			}
 
 			// Keys down - check for down followed by up
-			if (changes.hasOwnProperty("keysDown") &&
-				(changes.keysDown.currentValue.length === 0) &&
-				(changes.keysDown.previousValue.length === 1)) {
+			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
-				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
+				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
 					// Handle focused issue
 					if (focusedIssueIndex !== null) {
-						if ((changes.keysDown.previousValue[0] === downArrow) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
 							if (selectedIssue !== null) {
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
@@ -13735,7 +13732,7 @@ angular.module('3drepo')
 							focusedIssueIndex += 1;
 							selectedIssueIndex = focusedIssueIndex;
 						}
-						else if ((changes.keysDown.previousValue[0] === upArrow) && (focusedIssueIndex !== 0)) {
+						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (focusedIssueIndex !== 0)) {
 							if (selectedIssue !== null) {
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
@@ -13747,11 +13744,11 @@ angular.module('3drepo')
 					}
 					// Handle selected issue
 					else if (selectedIssueIndex !== null) {
-						if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
 							selectedIssue.selected = false;
 							selectedIssueIndex += 1;
 						}
-						else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
+						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (selectedIssueIndex !== 0)) {
 							selectedIssue.selected = false;
 							selectedIssueIndex -= 1;
 						}
@@ -13765,7 +13762,7 @@ angular.module('3drepo')
 					setSelectedIssueIndex(selectedIssue);
 				}
 				// Right arrow
-				else if (changes.keysDown.previousValue[0] === rightArrow) {
+				else if (changes.keysDown.currentValue.indexOf(rightArrow) !== -1) {
 					self.editIssue(selectedIssue);
 				}
 			}
@@ -16877,7 +16874,7 @@ var Oculus = {};
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
-			unselectedObjects = [],
+			deselectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
@@ -16890,25 +16887,32 @@ var Oculus = {};
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
-				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
-				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				if (multiMode) {
-					this.displaySelectedObjects(selectedObjects, unselectedObjects);
+			// Keys down
+			if (changes.hasOwnProperty("keysDown")) {
+				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+					multiMode = true;
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+				}
+				else if (multiMode &&
+						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+					multiMode = false;
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				}
 			}
 
+			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					unselectedObjects = [];
+					deselectedObjects = [];
 					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						unselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+						deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
 					}
-					this.displaySelectedObjects(selectedObjects, unselectedObjects);
+					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
 					if (selectedObjects.length > 0) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -16918,14 +16922,18 @@ var Oculus = {};
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-					selectedObjects = [];
-					self.setSelectedObjects({selectedObjects: null});
+					if (selectedObjects.length > 0) {
+						this.displaySelectedObjects([], selectedObjects);
+						selectedObjects = [];
+						self.setSelectedObjects({selectedObjects: null});
+					}
 				}
 			}
 
+			// Initialise selected objects
 			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
 				selectedObjects = this.initialSelectedObjects;
-				this.displaySelectedObjects(selectedObjects, unselectedObjects);
+				this.displaySelectedObjects(selectedObjects, deselectedObjects);
 			}
 		};
 
@@ -16936,13 +16944,18 @@ var Oculus = {};
 			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 		};
 
-		this.displaySelectedObjects = function (selectedObjects, unselectObjects) {
+		/**
+		 * Highlight and unhighlight objects
+		 * @param selectedObjects
+		 * @param deselectedObjects
+		 */
+		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
 				highlight_ids: selectedObjects,
-				unhighlight_ids: unselectObjects
+				unhighlight_ids: deselectedObjects
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
@@ -17234,25 +17247,30 @@ var Oculus = {};
 		 * @param event
 		 */
 		vm.keyAction = function (event) {
-			var i;
-			// Recreate list
-			var tmp = vm.keysDown;
-			delete vm.keysDown;
-			vm.keysDown = angular.copy(tmp);
+			var i,
+				tmp;
 
 			// Update list, but avoid repeat
 			if (event.type === "keydown") {
 				if (vm.keysDown.indexOf(event.which) === -1) {
+					// Recreate list so that it changes are registered in components
+					tmp = vm.keysDown;
+					delete vm.keysDown;
+					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
 				}
 			}
 			else if (event.type === "keyup") {
-				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)
+				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
 				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
 						vm.keysDown.splice(i, 1);
 					}
 				}
+				// Recreate list so that it changes are registered in components
+				tmp = vm.keysDown;
+				delete vm.keysDown;
+				vm.keysDown = angular.copy(tmp);
 			}
 		};
 
