@@ -179,7 +179,8 @@ var responseCodes = {
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
 
-
+	INVALID_USERNAME: {value: 115, message: 'Invalid username', status: 400},
+	
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 900,

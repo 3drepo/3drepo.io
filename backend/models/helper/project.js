@@ -775,7 +775,7 @@ function downloadLatest(account, project){
 }
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var projectNameRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
+var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
 
 module.exports = {
 	createAndAssignRole,
