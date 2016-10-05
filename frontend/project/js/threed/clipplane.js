@@ -203,7 +203,6 @@ var ClipPlane = {};
 				distance = self.distance;
 			} else {
 				distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-				self.distance = distance;
 			}
 
 			console.log("distance: " + distance);
@@ -387,15 +386,15 @@ var ClipPlane = {};
 		// Move the plane to finish construction
 		this.changeAxis(axis);
 
+		viewer.getScene().appendChild(clipPlaneElem);
 
 		this.movePlane(percentage);
 
-
+		console.log("here");
 		console.log(parentNode);
 		if(parentNode)
 			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform());
 
-		viewer.getScene().appendChild(clipPlaneElem);
 
 	};
 

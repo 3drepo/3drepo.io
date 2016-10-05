@@ -502,7 +502,6 @@ var ClipPlane = {};
 				distance = self.distance;
 			} else {
 				distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-				self.distance = distance;
 			}
 
 			console.log("distance: " + distance);
@@ -545,8 +544,6 @@ var ClipPlane = {};
 
 			var point = min;
 			point[axisIDX] = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-
-
 
 			
 			normal = matrix.multMatrixVec(normal);
@@ -688,15 +685,15 @@ var ClipPlane = {};
 		// Move the plane to finish construction
 		this.changeAxis(axis);
 
+		viewer.getScene().appendChild(clipPlaneElem);
 
 		this.movePlane(percentage);
 
-
+		console.log("here");
 		console.log(parentNode);
 		if(parentNode)
 			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform());
 
-		viewer.getScene().appendChild(clipPlaneElem);
 
 	};
 
@@ -8866,7 +8863,8 @@ var ViewerManager = {};
 			controllerAs: 'vm',
 			bindToController: true,
 			account: null,
-			project: null
+			project: null,
+			disableRedefinition: false
 		};
 	}
 
@@ -8906,10 +8904,20 @@ var ViewerManager = {};
 		}
 
 		function moveClippingPlane(sliderPosition) {
-			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
+			if(vm.account && vm.project)
 			{
-				percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
-			});
+				vm.account = null;
+				vm.project = null;
+				initClippingPlane();	
+			}
+			else
+			{
+				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
+				{
+					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
+				});
+
+			}
 		}
 
 		/*
@@ -8947,7 +8955,7 @@ var ViewerManager = {};
 			{
 				vm.visible = newValue;
 
-				if (newValue)
+				if (newValue )
 				{
 					initClippingPlane();
 				} else {
@@ -8960,9 +8968,12 @@ var ViewerManager = {};
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if (angular.isDefined(newValue) && vm.show) {
+			if (angular.isDefined(newValue) && vm.show ) {
+				console.log("selected axis: " + newValue);
+				vm.project = null;
+				vm.account = null;
 				initClippingPlane();
-				vm.sliderPosition = vm.sliderMin;
+				//vm.sliderPosition = vm.sliderMin;
 			}
 		});
 
@@ -8970,14 +8981,16 @@ var ViewerManager = {};
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
+			console.log("Slider position: " + newValue);
 			if (angular.isDefined(newValue) && vm.show) {
+				console.log("slider position: " + newValue);
 				moveClippingPlane(newValue);
 			}
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-					console.log("caught set clipping plane event... account: " + event.value.account + "," + event.value.project);
+				console.log("Setting clipping plane event...");
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;

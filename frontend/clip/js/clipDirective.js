@@ -34,7 +34,8 @@
 			controllerAs: 'vm',
 			bindToController: true,
 			account: null,
-			project: null
+			project: null,
+			disableRedefinition: false
 		};
 	}
 
@@ -74,10 +75,20 @@
 		}
 
 		function moveClippingPlane(sliderPosition) {
-			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
+			if(vm.account && vm.project)
 			{
-				percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
-			});
+				vm.account = null;
+				vm.project = null;
+				initClippingPlane();	
+			}
+			else
+			{
+				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
+				{
+					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
+				});
+
+			}
 		}
 
 		/*
@@ -115,7 +126,7 @@
 			{
 				vm.visible = newValue;
 
-				if (newValue)
+				if (newValue )
 				{
 					initClippingPlane();
 				} else {
@@ -128,9 +139,12 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if (angular.isDefined(newValue) && vm.show) {
+			if (angular.isDefined(newValue) && vm.show ) {
+				console.log("selected axis: " + newValue);
+				vm.project = null;
+				vm.account = null;
 				initClippingPlane();
-				vm.sliderPosition = vm.sliderMin;
+				//vm.sliderPosition = vm.sliderMin;
 			}
 		});
 
@@ -138,14 +152,16 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
+			console.log("Slider position: " + newValue);
 			if (angular.isDefined(newValue) && vm.show) {
+				console.log("slider position: " + newValue);
 				moveClippingPlane(newValue);
 			}
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-					console.log("caught set clipping plane event... account: " + event.value.account + "," + event.value.project);
+				console.log("Setting clipping plane event...");
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
