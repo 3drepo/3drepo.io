@@ -71,9 +71,9 @@ var responseCodes = {
 	HEAD_REVISION_NOT_FOUND: { value: 28, message: "Head revision not found", status: 404 },
 
 	FILE_IMPORT_PROCESS_ERR: { value: 29, message: "Failed to process file", status: 400 },
-	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Failed to process file: Invalid arguments", status: 500 },
-	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Failed to process file: Unknown error", status: 500 },
-	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Failed to process file: Unknown command", status: 500 },
+	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Invalid arguments", status: 500 },
+	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Unknown error", status: 500 },
+	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Unknown command", status: 500 },
 	QUEUE_CONN_ERR: { value: 33, message: "Failed to establish connection to queue", status: 404 },
 	QUEUE_INTERNAL_ERR: { value: 34, message: "Failed preprocessing for queue dispatch", status: 500 },
 	QUEUE_NO_CONFIG: { value: 35, message: "Server has no queue configuration", status: 404 },
@@ -121,7 +121,7 @@ var responseCodes = {
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
 
-	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Failed to process file: Format not supported", status: 400 },
+	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Format not supported", status: 400 },
 
 	SIZE_LIMIT: {value: 69, message: 'Single file size exceeded system limit', status: 400},
 	INVALID_PROJECT_NAME: {value: 70, message: 'Invalid project name', status: 400},
@@ -180,7 +180,8 @@ var responseCodes = {
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
 
 	INVALID_USERNAME: {value: 115, message: 'Invalid username', status: 400},
-	
+	FILE_NO_EXT: { value: 116, message: "Filename must have extension", status: 400 },
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 900,

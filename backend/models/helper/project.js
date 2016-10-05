@@ -776,6 +776,15 @@ function downloadLatest(account, project){
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var acceptedFormat = [
+	'x','obj','3ds','md3','md2','ply',
+	'mdl','ase','hmp','smd','mdc','md5',
+	'stl','lxo','nff','raw','off','ac',
+	'bvh','irrmesh','irr','q3d','q3s','b3d',
+	'dae','ter','csm','3d','lws','xml','ogex',
+	'ms3d','cob','scn','blend','pk3','ndo',
+	'ifc','xgl','zgl','fbx','assbin'
+];
 
 module.exports = {
 	createAndAssignRole,
@@ -789,5 +798,6 @@ module.exports = {
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	projectNameRegExp
+	projectNameRegExp,
+	acceptedFormat
 };
