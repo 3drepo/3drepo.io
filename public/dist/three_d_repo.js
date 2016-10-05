@@ -535,6 +535,7 @@ var ClipPlane = {};
 			setOutlineCoordinates();
 		};
 
+
 		/**
 		 * Transform the clipping plane by the given matrix
 		 * @param {sfmatrix4f} matrix - transformation matrix to apply to clipping plane
@@ -581,15 +582,15 @@ var ClipPlane = {};
 				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, min.z)],
 				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, min.z)],
 				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
 				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
 				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
 				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
 				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-				[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
 				];
 
 			var outline = [];
@@ -618,9 +619,7 @@ var ClipPlane = {};
 
 			}
 
-
-			outline.push(outline[0]);
-
+			outline.push(outline[0]);	
 			outlineCoords.setAttribute("point",
 				outline.map(function(item) {
 					return item.join(" ");
