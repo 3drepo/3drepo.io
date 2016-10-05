@@ -29,7 +29,8 @@
 		Server      = require("mongodb").Server,
 		Db          = require("mongodb").Db,
 		GridStore   = require("mongodb").GridStore,
-		Binary      = require("mongodb").Binary;
+		Binary      = require("mongodb").Binary,
+		ReplSet     = require("mongodb").ReplSet;
 
 	//var C = require("../constants.js");
 	var systemLogger = require("../logger.js").systemLogger;
@@ -48,11 +49,25 @@
 
 		self.dbConns  = {};
 
-		var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
+		let serverConfig = {};
+		let opts = { auto_reconnect: true };
+
+		if (self.host.length === 1)
+		{
+			serverConfig = new Server(self.host[0], self.port[0], opts);
+		} else {
+			let replSet = [];
+
+			for(let host in self.host)
 			{
-				auto_reconnect: true
-			}),
-		{ safe : false });
+				systemLogger.logInfo("Add replica set member " + self.host[host] + ":" + self.port[host]);
+				replSet.push(new Server(self.host[host], self.port[host]));
+			}
+
+			serverConfig = new ReplSet(replSet, opts);
+		}
+
+		var authDBConn = new Db("admin", serverConfig, { safe : false });
 
 		authDBConn.open(function(err, dbConn) {
 			if(err) {
@@ -69,8 +84,20 @@
 
 	MongoDBObject.prototype.getURL = function(database)
 	{
-		//console.log("mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin")
-		return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
+		// Generate connection string that could include multiple hosts that
+		// represent a replica set.
+		let connectString = "mongodb://" + this.username + ":" + this.password + "@";
+		let hostPorts = [];
+
+		for(let host in this.host)
+		{
+			hostPorts.push(this.host[host] + ":" + this.port[host]);
+		}
+
+		connectString += hostPorts.join(",");
+		connectString += "/" + database + "?authSource=admin";
+
+		return connectString;
 	};
 
 	MongoDBObject.prototype.open = function(database, callback, forgetMe)

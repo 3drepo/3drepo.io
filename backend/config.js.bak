@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.2.1";
+	const VERSION="1.2.2";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -157,7 +157,16 @@
 	// Database configuration
 	config.db          = coalesce(config.db, {});
 	config.db.host     = coalesce(config.db.host, config.host);
+	config.db.host     = (config.db.host.constructor === Array) ? config.db.host : [config.db.host];
+
 	config.db.port     = coalesce(config.db.port, 27017); // Default mongo port
+	config.db.port     = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
+
+	if (config.db.port.length !== config.db.host.length)
+	{
+		console.log("Incorrect number of hosts and ports");
+		process.exit(1);
+	}
 
 	config.db.username = coalesce(config.db.username, "username");
 	config.db.password = coalesce(config.db.password, "password");

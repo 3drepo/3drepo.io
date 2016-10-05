@@ -701,7 +701,7 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					callback(responseCodes.OK, user);
 				});
 				*/
-				
+
 				// get project timestamp (if any)
 				var promises = [];
 				user.projects.forEach(project => {
@@ -2142,13 +2142,13 @@ DBInterface.prototype.storeIssue = function(dbName, project, owner, issueId, dat
 							data.typePrefix  = settings.length ? settings[0].type : undefined;
 							//return base64 version
 							data.scribble = scribbleBase64;
-							callback(responseCodes.OK, { 
+							callback(responseCodes.OK, {
 								_id: uuidToString(data._id),
-								account: dbName, 
-								project: project, 
-								issue_id : uuidToString(data._id), 
-								number : data.number, 
-								created : data.created, 
+								account: dbName,
+								project: project,
+								issue_id : uuidToString(data._id),
+								number : data.number,
+								created : data.created,
 								scribble: scribbleBase64,
 								issue: data,
 							});
@@ -3092,8 +3092,6 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 			return callback(err);
 		}
 
-		console.log(roles);
-
 		if (!roles || roles.length === 0) {
 			//no roles under this user, no point trying to find privileges
 			return callback(responseCodes.OK, []);
@@ -3101,8 +3099,8 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 
 		dbConn(self.logger).dbCallback(adminDB, function (err, dbConn) {
 			var command = { rolesInfo : roles, showPrivileges: true };
+
 			//Given the roles, get the privilege information
-			console.log(command);
 			dbConn.command(command, function (err, docs) {
 				if (err) {
 					return callback(responseCodes.DB_ERROR(err));
@@ -3120,8 +3118,6 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 					privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
 				}
 				self.logger.logDebug(privileges.length + " privileges found.");
-
-				console.log(privileges);
 
 				callback(responseCodes.OK, privileges);
 			});
