@@ -195,6 +195,7 @@ var ClipPlane = {};
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
+
 			self.percentage = percentage;
 			var distance = 0.0;
 
@@ -202,8 +203,10 @@ var ClipPlane = {};
 				distance = self.distance;
 			} else {
 				distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+				self.distance = distance;
 			}
 
+			console.log("distance: " + distance);
 			// Update the clipping element plane equation
 			clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
 
@@ -229,6 +232,122 @@ var ClipPlane = {};
 
 			setOutlineCoordinates();
 		};
+
+		/**
+		 * Transform the clipping plane by the given matrix
+		 * @param {sfmatrix4f} matrix - transformation matrix to apply to clipping plane
+		 */
+		this.transformClipPlane = function(matrix)
+		{
+
+			var axisIDX = "XYZ".indexOf(this.axis);
+			var min = volume.min.toGL();
+			var max = volume.max.toGL();
+
+			var point = min;
+			point[axisIDX] = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+
+			
+			normal = matrix.multMatrixVec(normal);
+
+			normal.normalize();
+
+			var pntX3dom = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+			pntX3dom = matrix.multMatrixPnt(pntX3dom);
+			this.distance = normal.dot(pntX3dom) * BBOX_SCALE;
+
+			var plane = new x3dom.fields.SFVec4f(normal.x, normal.y, normal.z, -this.distance);
+
+			console.log("new plane: " + plane.toGL());
+
+
+			//random point on the plane
+			var planePnt = null;
+			if(normal.z != 0)
+			{
+				planePnt = new x3dom.fields.SFVec3f(0, 0, plane.w/normal.z);
+			}
+			else if(normal.y != 0)
+			{
+				planePnt = new x3dom.fields.SFVec3f(0, plane.w/normal.y, 0);
+			}
+			else if(normal.x != 0)
+			{
+				planePnt = new x3dom.fields.SFVec3f(plane.w/normal.x, 0, 0);
+			}
+			else
+			{
+				console.error("Failed to find plane point, normal direction is 0 0 0!");
+			}
+
+
+			// Update the clipping element plane equation
+			clipPlaneElem.setAttribute("plane", plane.toGL().join(" "));
+
+
+			//determine the outline of the clipping plane by intersection with the global bounding box	
+			var fullVolume = viewer.runtime.getBBox(viewer.getScene());
+			var min = fullVolume.min.multiply(BBOX_SCALE);
+			var max = fullVolume.max.multiply(BBOX_SCALE);
+
+			//[pointA, pointB]
+			var bboxOutline = [
+				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, min.z)],
+				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, min.z)],
+				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
+				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
+				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
+				[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
+				[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+				[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+				];
+
+			var outline = [];
+			
+			for(var i = 0; i < bboxOutline.length; ++i)
+			{
+
+				var lineDir = bboxOutline[i][1].subtract(bboxOutline[i][0]);
+				lineDir = lineDir.normalize();
+				var dotProd =lineDir.dot(normal); 
+				if(Math.abs(dotProd) > 0.000001)
+				{
+					//dot product isn't zero -> has single point intersection
+					var d = (planePnt.subtract(bboxOutline[i][0])).dot(normal) / dotProd;
+					var intersectPnt = lineDir.multiply(d).add(bboxOutline[i][0]);
+					
+					//the intersection point must lie within the global bbox
+					if(intersectPnt.x >= min.x && intersectPnt.x <= max.x 
+							&& intersectPnt.y >= min.y && intersectPnt.y <= max.y 
+							&& intersectPnt.z >= min.z && intersectPnt.z <= max.z)
+					{
+						outline.push(intersectPnt.toGL());	
+					}	
+			/*		console.log("["+i+"] has intersection point.");
+					console.log("min:" +  min.toGL() + " max:  " + max.toGL());
+					console.log("line vector: " + lineDir.toGL());
+					console.log("normal: " + normal.toGL());
+					console.log ("d - " + d);
+					console.log("line points: " + bboxOutline[i][0].toGL() + " , " + bboxOutline[i][1].toGL());
+					console.log("planePnt points: " + planePnt.toGL());
+					console.log("plane: " + plane.toGL());
+				    console.log("intersecting point" + intersectPnt.toGL());*/
+				}
+//				console.log("["+i+"] dot Product: " + dotProd);
+			}
+
+//			console.log("outline size: " + outline.length + " bbox length: " + bboxOutline.length);
+//			console.log(outline);
+
+			outlineCoords.setAttribute("point",
+				outline.map(function(item) {
+					return item.join(" ");
+				}).join(","));
+		}
 
 		/**
 		 * Destroy me and everything connected with me
@@ -267,16 +386,16 @@ var ClipPlane = {};
 
 		// Move the plane to finish construction
 		this.changeAxis(axis);
-		if(parentNode)
-		{
-			parentNode.appendChild(clipPlaneElem);
-			
-		}
-		else
-		{
-			viewer.getScene().appendChild(clipPlaneElem);
-		}
+
+
 		this.movePlane(percentage);
+
+
+		console.log(parentNode);
+		if(parentNode)
+			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform());
+
+		viewer.getScene().appendChild(clipPlaneElem);
 
 	};
 
