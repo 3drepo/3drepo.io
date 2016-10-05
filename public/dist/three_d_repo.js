@@ -526,7 +526,7 @@ var ClipPlane = {};
 			normal.z = (axis === "Z") ? this.clipDirection : 0;
 
 			// Reset plane to the start
-			this.movePlane(1.0);
+			this.movePlane(self.percentage);
 
 			setOutlineCoordinates();
 		};
@@ -8918,7 +8918,6 @@ var ViewerManager = {};
 			{
 				vm.account = null;
 				vm.project = null;
-				console.log("init(move clip)");
 				initClippingPlane();	
 			}
 			else
@@ -8968,7 +8967,6 @@ var ViewerManager = {};
 
 				if (newValue )
 				{
-					console.log("init(visible)");
 					initClippingPlane();
 				} else {
 					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
@@ -8985,7 +8983,6 @@ var ViewerManager = {};
 				{
 					vm.account = null;
 					vm.project = null;
-					console.log("init(select axis)");
 					initClippingPlane();	
 				}
 				else
@@ -9003,16 +9000,13 @@ var ViewerManager = {};
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			console.log("Slider position: " + newValue);
 			if (angular.isDefined(newValue) && vm.show) {
-				console.log("slider position: " + newValue);
 				moveClippingPlane(newValue);
 			}
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-				console.log("Setting clipping plane event...");
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
@@ -9022,7 +9016,6 @@ var ViewerManager = {};
 					if(vm.visible)
 					{
 
-						console.log("init(in event)");
 						initClippingPlane(event.value.account, event.value.project); 
 					}
 					else

@@ -227,7 +227,7 @@ var ClipPlane = {};
 			normal.z = (axis === "Z") ? this.clipDirection : 0;
 
 			// Reset plane to the start
-			this.movePlane(1.0);
+			this.movePlane(self.percentage);
 
 			setOutlineCoordinates();
 		};
