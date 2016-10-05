@@ -379,6 +379,7 @@ issue-comp .issueCompCommentTitle {
 
 issue-comp .issueCompTextActions {
   z-index: 2;
+  margin-right: -18px;
 }
 
 issue-comp #issueCompDescription {
@@ -399,6 +400,14 @@ issue-comp #issueCompDescription *:hover {
 
 issue-comp #additionalInfoButton {
   margin: 0 0 0 -8px;
+}
+
+issue-comp #issueCompAdditional {
+  margin-top: -20px;
+}
+
+issue-comp #issueCompFooter {
+  margin-top: -40px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

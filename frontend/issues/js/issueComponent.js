@@ -50,7 +50,8 @@
 			currentActionIndex = null,
 			editingCommentIndex = null,
 			commentViewpoint,
-			issueSelectedObjects = null;
+			issueSelectedObjects = null,
+			aboutToBeDestroyed = false;
 
 		/*
 		 * Init
@@ -79,8 +80,8 @@
 		];
 		this.actions = [
 			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
-			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
+			{icon: "place", action: "pin", label: "Pin", color: "", hidden: this.data},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: "", hidden: this.data}
 		];
 
 		/**
@@ -145,11 +146,16 @@
 
 		/**
 		 * Save a comment if one was being typed before close
+		 * Cancel editing comment
 		 */
 		this.$onDestroy = function () {
+			aboutToBeDestroyed = true;
 			if (this.comment) {
 				IssuesService.updatedIssue = self.issueData; // So that issues list is notified
 				saveComment();
+			}
+			if (editingCommentIndex !== null) {
+				this.issueData.comments[editingCommentIndex].editing = false;
 			}
 		};
 
@@ -183,25 +189,20 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (editingCommentIndex !== null) {
-					updateComment();
-				}
-				else {
-					if (self.data.owner === self.account) {
-						if ((this.data.priority !== this.issueData.priority) ||
-							(this.data.status !== this.issueData.status)) {
-							updateIssue();
-							if (typeof this.comment !== "undefined") {
-								saveComment();
-							}
-						}
-						else {
+				if (self.data.owner === self.account) {
+					if ((this.data.priority !== this.issueData.priority) ||
+						(this.data.status !== this.issueData.status)) {
+						updateIssue();
+						if (typeof this.comment !== "undefined") {
 							saveComment();
 						}
 					}
 					else {
 						saveComment();
 					}
+				}
+				else {
+					saveComment();
 				}
 			}
 			else {
@@ -447,8 +448,7 @@
 		 * Save screen shot viewpoint or current viewpoint
 		 */
 		function saveComment () {
-			var	screenShot,
-				viewpointPromise = $q.defer();
+			var	viewpointPromise = $q.defer();
 
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
@@ -495,7 +495,10 @@
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			self.submitDisabled = true;
-			setContentHeight();
+			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
+			if (!aboutToBeDestroyed) {
+				setContentHeight();
+			}
 		}
 
 		/**
@@ -519,28 +522,19 @@
 		 */
 		this.toggleEditComment = function(event, index) {
 			event.stopPropagation();
-			editingCommentIndex = (editingCommentIndex === null) ? index : null;
-			this.editCommentColor = (editingCommentIndex === null) ? "" : highlightBackground;
-			if (editingCommentIndex === null) {
-				this.comment = "";
-			} else {
-				this.comment = this.issueData.comments[this.issueData.comments.length - 1].comment;
+			if (this.issueData.comments[index].editing) {
+				editingCommentIndex = null;
+				this.issueData.comments[index].editing = false;
+				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
+					.then(function(response) {
+						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+					});
+			}
+			else {
+				editingCommentIndex = index;
+				this.issueData.comments[index].editing = true;
 			}
 		};
-
-		/**
-		 * Update a comment
-		 */
-		function updateComment () {
-			IssuesService.editComment(self.issueData, self.comment, editingCommentIndex)
-				.then(function(response) {
-					self.issueData.comments[editingCommentIndex].comment = self.comment;
-					self.issueData.comments[editingCommentIndex].timeStamp = IssuesService.getPrettyTime(response.data.created);
-					self.comment = "";
-					editingCommentIndex = null;
-					this.editCommentColor = "";
-				});
-		}
 
 		/**
 		 * A screen shot has been saved
@@ -587,7 +581,7 @@
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 435,
+				newIssueHeight = 375,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,

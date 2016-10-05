@@ -22,7 +22,7 @@
 				label {{$ctrl.data.timeStamp}}
 
 	// Status
-	.issueCompItemContainer(layout="column")
+	.issueCompItemContainer#issueCompAdditional(layout="column")
 		div(layout="row", layout-align="start center")
 			md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle", ng-click="$ctrl.toggleShowAdditional()")
 				md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") keyboard_arrow_right
@@ -70,7 +70,9 @@
 			.issueCompComment(ng-click="$ctrl.showViewpoint($event, comment.viewpoint)", layout="column", layout-align="start", flex)
 				// Text and actions
 				div(layout='row', layout-align="space-between", flex)
-					label.issueCompCommentTitle {{comment.comment}}
+					label.issueCompCommentTitle(ng-if="!comment.editing") {{comment.comment}}
+					md-input-container(flex, ng-if="comment.editing")
+						textarea(ng-model="comment.comment", aria-label="Description", tdr-focus="true")
 					.issueCompTextActions(layout="row", ng-if="!comment.sealed")
 						md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditComment($event, $index)")
 							md-tooltip(md-direction="bottom") edit
@@ -105,13 +107,13 @@
 			img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
 
 	// Footer
-	.issueCompItemContainer(layout="row", layout-align="space-between center")
+	.issueCompItemContainer#issueCompFooter(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
 			ng-repeat="action in $ctrl.actions"
 			aria-label="{{action.icon}}"
 			ng-click="$ctrl.doAction($index)"
-			ng-disabled="action.disabled")
+			ng-if="!action.hidden")
 				md-tooltip(md-direction="bottom") {{action.label}}
 				md-icon.angular-material-icons(style="color:{{action.color}}") {{action.icon}}
 

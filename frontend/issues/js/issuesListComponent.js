@@ -84,6 +84,7 @@
 						// Get a possible selected issue
 						if (this.issuesToShow[i].selected) {
 							selectedIssue = this.issuesToShow[i];
+							focusedIssueIndex = i;
 							setSelectedIssueIndex(selectedIssue);
 						}
 					}
