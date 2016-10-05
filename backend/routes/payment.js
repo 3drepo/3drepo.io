@@ -10,11 +10,12 @@ var config = require('../config');
 var systemLogger = require("../logger.js").systemLogger;
 var paypal = require('../models/payment').paypal;
 var C = require("../constants");
+var Billing = require('../models/billing');
 // var moment = require('moment');
 // var getSubscription = require('../models/subscription').getSubscription;
 
 // endpoints for paypal IPN message
-router.post("/paypal/food", activateSubscription);
+router.post("/paypal/food", handleIPN);
 
 //capture a pre-approve payment
 router.post("/paypal/execute", executeAgreement);
@@ -40,7 +41,7 @@ function executeAgreement(req, res, next){
 			return new Promise((resolve, reject) => {
 				paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
 
-					console.log(billingAgreement);
+					//console.log(billingAgreement);
 
 					if (err) {
 						reject(err);
@@ -94,7 +95,7 @@ function executeAgreement(req, res, next){
 //payment_status
 //initial_payment_status
 
-function activateSubscription(req, res, next){
+function handleIPN(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
@@ -109,7 +110,7 @@ function activateSubscription(req, res, next){
 	let paymentOrSubscriptionSuccess = isPaymentIPN && paymentInfo.payment_status === 'Completed';
 	//let paymentPending = isPaymentIPN && paymentInfo.payment_status === 'Pending';
 	let paymentFailed = paymentInfo.txn_type === 'recurring_payment_failed' || paymentInfo.txn_type === 'recurring_payment_skipped';
-
+	let isPaymentRefunded = paymentInfo.payment_status === 'Refunded';
 
 	let url = config.paypal.ipnValidateUrl;
 
@@ -146,7 +147,7 @@ function activateSubscription(req, res, next){
 				currency: paymentInfo.currency_code,
 				amount: isSubscriptionInitIPN ? paymentInfo.initial_payment_amount : paymentInfo.mc_gross,
 				createBilling: true,
-				ipnDate: new Date(paymentInfo.time_created),
+				ipnDate: new Date(paymentInfo.payment_date || paymentInfo.time_created),
 				nextPaymentDate:  new Date(paymentInfo.next_payment_date),
 				taxAmount: paymentInfo.tax,
 				nextAmount: paymentInfo.amount_per_cycle,
@@ -181,12 +182,38 @@ function activateSubscription(req, res, next){
 			return User.findBillingUserByBillingId(billingAgreementId).then(user => {
 
 				if(!user){
-					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`});
+					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`, ipn: paymentInfo});
 				}
 
 				systemLogger.logInfo('Billing agreement suspended', { billingAgreementId, user: user.user });
 
 				Mailer.sendSubscriptionSuspendedEmail(user.customData.email, { billingUser: user.customData.billingUser });
+
+			});
+
+		} else if (isPaymentRefunded){
+
+			return User.findBillingUserByBillingId(billingAgreementId).then(user => {
+
+				if(!user){
+					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`, ipn: paymentInfo});
+				}
+
+				Billing.createRefund(user, {
+					billingAgreementId: billingAgreementId,
+					raw: paymentInfo,
+					gateway: 'PAYPAL',
+					currency: paymentInfo.currency_code,
+					amount: paymentInfo.mc_gross,
+					transactionId: paymentInfo.txn_id,
+					paymentDate: new Date(paymentInfo.payment_date)
+
+				}).then(() => {
+					systemLogger.logInfo('Created and sent refund invoice to user', { billingAgreementId, user: user.user });
+				}).catch(err => {
+					console.log(err.stack);
+					systemLogger.logError('Error while creating refund notice', {err: err, user: user.user, ipn: paymentInfo} );
+				});
 
 			});
 

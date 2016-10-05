@@ -5001,7 +5001,15 @@ var ViewerManager = {};
 
 			if (angular.isDefined(vm.billings)) {
 				for (i = 0, length = vm.billings.length; i < length; i += 1) {
-					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+
+					if(vm.billings[i].type === 'refund'){
+						vm.billings[i].status = 'Completed';
+						vm.billings[i].description = 'Refund';
+					} else {
+						vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Paid";
+						vm.billings[i].description = vm.billings[i].items[0].description;
+					}
+
 				}
 			}
 		});

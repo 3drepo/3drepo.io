@@ -24,6 +24,9 @@ var phantom = require('phantom');
 var config = require('../config');
 var Subscriptions = require('./subscription');
 var systemLogger = require("../logger.js").systemLogger;
+var Counter = require('./counter');
+var Mailer = require('../mailer/mailer');
+var vat = require('./vat');
 
 var schema = mongoose.Schema({
 	invoiceNo: String,
@@ -33,6 +36,7 @@ var schema = mongoose.Schema({
 	createdAt: Date,
 	currency: String,
 	amount: String,
+	type: { type: String, default: 'invoice', enum: ['invoice', 'refund']},
 	items: [{
 		name: String,
 		description:  String, 
@@ -67,6 +71,11 @@ schema.statics.findByAccount = function(account){
 	return this.find({account}, {}, {raw: 0, pdf: 0}, {sort: {createdAt: -1}});
 };
 
+schema.statics.findLastestByAgreementId = function(account, billingAgreementId){
+	return this.findOne({account}, { billingAgreementId }, {raw: 0, pdf: 0}, {sort: {createdAt: -1}});
+};
+
+
 schema.statics.findByInvoiceNo = function(account, invoiceNo){
 	return this.findOne({account}, { invoiceNo});
 };
@@ -77,7 +86,6 @@ schema.statics.findByTransactionId = function(account, transactionId){
 
 schema.statics.hasPendingBill = function(account, billingAgreementId){
 	return this.count({account}, {billingAgreementId: billingAgreementId, pending: true}).then( count => {
-		console.log('count', count);
 		return Promise.resolve(count > 0);
 	});
 };
@@ -92,38 +100,134 @@ schema.statics.findAndRemovePendingBill = function(account, billingAgreementId){
 	}); 
 };
 
+schema.statics.createRefund = function(user, data){
+	'use strict';
+
+	let lastBill;
+	let billing;
+
+	return this.findLastestByAgreementId(user.user, data.billingAgreementId).then(bill => {
+		
+		lastBill = bill;
+		return Counter.findAndIncRefundNumber();
+
+	}).then(counter => {
+
+		return Promise.resolve('CN-' + counter.count);
+
+	}).then(invoiceNo => {
+
+		billing = Billing.createInstance({ account: user.user });
+
+		billing.info = (lastBill && lastBill.info) || user.customData.billingInfo;
+		billing.raw = data.raw;
+		billing.gateway = data.gateway;
+		billing.createdAt = new Date();
+		billing.currency = data.currency;
+		billing.amount = data.amount;
+		billing.taxAmount = 
+			(
+				parseFloat(data.amount) - 
+				Math.round(
+					(parseFloat(data.amount) / (1 + vat.getByCountryCode(billing.info.countryCode, billing.info.vat))) * 100
+				) / 100
+			).toFixed(2);
+
+		billing.billingAgreementId = data.billingAgreementId;
+		billing.invoiceNo = invoiceNo;
+		billing.type = 'refund';
+		billing.transactionId = data.transactionId;
+
+		let amount = data.amount.substr(1);
+		if(data.currency === 'GBP'){
+			amount = '£' + amount;
+		} else {
+			amount = data.currency + ' ' + amount;
+		}
+
+		return billing.generatePDF().then(pdf => {
+
+			billing.pdf = pdf;
+			// also save the pdf to database for ref.
+			return billing.save();
+
+		}).then(() => {
+
+			let attachments = [{
+				filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
+				content: billing.pdf
+			}];
+
+			Mailer.sendPaymentRefundedEmail(user.customData.email, { 
+				amount: amount
+			}, attachments);
+
+			//make a copy to sales
+			Mailer.sendPaymentReceivedEmailToSales({
+				account: user.account,
+				amount: data.currency  + amount,
+				email: user.customData.email,
+				invoiceNo: billing.invoiceNo,
+				type: billing.type
+			}, attachments);
+
+			return billing;
+		});
+
+
+
+
+	});
+};
+
 schema.methods.clean = function(options) {
 	'use strict';
 
 	let euCountryCodes = addressMeta.euCountriesCode;
 
 	options = options || {};
+
 	let billing = this.toObject();
+
+	let k = 1;
+	if(billing.type === 'refund'){
+		k = -1;
+	}
+
 	billing.info.country = addressMeta.countries.find(c => c.code === billing.info.countryCode).name;
-	billing.taxAmount = parseFloat(billing.taxAmount).toFixed(2);
-	billing.nextPaymentAmount = parseFloat(billing.nextPaymentAmount).toFixed(2);
-	billing.amount  = parseFloat(billing.amount).toFixed(2);
+	billing.amount  = (parseFloat(billing.amount) * k).toFixed(2);
+	billing.taxAmount = (parseFloat(billing.taxAmount) * k).toFixed(2);
 	billing.netAmount  = (Math.round((parseFloat(billing.amount) - parseFloat(billing.taxAmount)) * 100) / 100).toFixed(2);
 	billing.taxPercentage = (Math.round(parseFloat(billing.taxAmount) / parseFloat(billing.netAmount) * 100) / 100 * 100);
-	billing.unitPrice = (Math.round(parseFloat(billing.netAmount) / billing.items.length * 1000) / 1000).toFixed(3);
-	
-	if(billing.unitPrice.substr(-1) === '0'){
-		billing.unitPrice = billing.unitPrice.slice(0, -1);
+
+	if(billing.type === 'invoice'){
+
+		billing.nextPaymentAmount = parseFloat(billing.nextPaymentAmount).toFixed(2);
+		billing.unitPrice = (Math.round(parseFloat(billing.netAmount) / billing.items.length * 1000) / 1000).toFixed(3);
+		
+		if(billing.unitPrice.substr(-1) === '0'){
+			billing.unitPrice = billing.unitPrice.slice(0, -1);
+		}
+
+		if(billing.unitPrice !== Subscriptions.getSubscription(billing.items[0].name).amount.toFixed(2)){
+			billing.proRata = true;
+		}
+
+		billing.nextPaymentDate = moment(billing.nextPaymentDate).utc().format('YYYY-MM-DD');
+		
+		if(!options.skipDate) {
+			billing.periodStart = moment(billing.periodStart).utc().format('YYYY-MM-DD');
+			billing.periodEnd = moment(billing.periodEnd).utc().format('YYYY-MM-DD');
+		}
+
+		billing.B2B_EU = (euCountryCodes.indexOf(billing.info.countryCode) !== -1) && (billing.info.hasOwnProperty("vat"));
+
 	}
 
-	if(billing.unitPrice !== Subscriptions.getSubscription(billing.items[0].name).amount.toFixed(2)){
-		billing.proRata = true;
-	}
-
-	billing.nextPaymentDate = moment(billing.nextPaymentDate).utc().format('YYYY-MM-DD');
-	
 	if(!options.skipDate) {
 		billing.createdAt = moment(billing.createdAt).utc().format('DD-MM-YYYY HH:mm');
-		billing.periodStart = moment(billing.periodStart).utc().format('YYYY-MM-DD');
-		billing.periodEnd = moment(billing.periodEnd).utc().format('YYYY-MM-DD');
 	}
 
-	billing.B2B_EU = (euCountryCodes.indexOf(billing.info.countryCode) !== -1) && (billing.info.hasOwnProperty("vat"));
 	return billing;
 };
 
@@ -144,7 +248,13 @@ schema.methods.generatePDF = function(){
 	return new Promise((resolve, reject) => {
 		
 		let useNonPublicPort = true;
-		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: config.getBaseURL(useNonPublicPort)}, function(err, html){
+
+		let template = './jade/invoice.jade';
+		if(this.type === 'refund'){
+			template = './jade/refund.jade';
+		}
+
+		jade.renderFile(template, {billing : cleaned, baseURL: config.getBaseURL(useNonPublicPort)}, function(err, html){
 			if(err){
 				reject(err);
 			} else {

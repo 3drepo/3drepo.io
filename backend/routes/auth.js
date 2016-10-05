@@ -476,7 +476,13 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			res.render("invoice.jade", {billing : billing.clean(), baseURL: config.getBaseURL()});
+			let template = 'invoice.jade';
+			
+			if(billing.type === 'refund'){
+				template = 'refund.jade';
+			}
+
+			res.render(template, {billing : billing.clean(), baseURL: config.getBaseURL()});
 			
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -507,7 +513,7 @@
 
 			res.writeHead(200, {
 				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf"`,
+				'Content-disposition': `inline; filename="${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_${billing.type}-${billing.invoiceNo}.pdf"`,
 				'Content-Length': pdf.length
 			});
 

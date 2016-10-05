@@ -21,6 +21,9 @@ var html = data => `
 	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
 	your account verified.
 	<br><br> We will reattempt to collect your recurring payments again within five days.
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 var subject = 'Your payment to 3D Repo is failed';
