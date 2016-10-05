@@ -63,7 +63,11 @@
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
 				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-				console.log("firing add clipping plane event: ("+ account +","+ project +")");
+				if(account && project)
+				{
+					vm.account = account;
+					vm.project = project;
+				}	
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
@@ -140,11 +144,20 @@
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			if (angular.isDefined(newValue) && vm.show ) {
-				console.log("selected axis: " + newValue);
-				vm.project = null;
-				vm.account = null;
-				initClippingPlane();
-				//vm.sliderPosition = vm.sliderMin;
+				if(vm.account && vm.project)
+				{
+					vm.account = null;
+					vm.project = null;
+					initClippingPlane();	
+				}
+				else
+				{
+					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
+					{
+						axis: translateAxis(newValue)
+					});
+
+				}
 			}
 		});
 
@@ -152,23 +165,26 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			console.log("Slider position: " + newValue);
 			if (angular.isDefined(newValue) && vm.show) {
-				console.log("slider position: " + newValue);
 				moveClippingPlane(newValue);
 			}
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-				console.log("Setting clipping plane event...");
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					vm.project = event.value.project;
 					vm.account = event.value.account;
-					initClippingPlane();
-					vm.visible = true;
+					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
+					if(vm.visible)
+					{
+
+						initClippingPlane(event.value.account, event.value.project); 
+					}
+					else
+						vm.visible=true; 
 				} else {
 					vm.visible = false;
 					vm.sliderPosition = 0.0;

@@ -4723,6 +4723,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.clippingPlanes[0].movePlane(percentage);
 		};
 
+		this.changeAxisClippingPlane = function(axis) {
+			// Only supports a single clipping plane at the moment.
+			self.clippingPlanes[0].changeAxis(axis);
+		};
+
 		/**
 		 * Clear out all clipping planes
 		 */
@@ -4884,6 +4889,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
 	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
 	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
+	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
 
@@ -8892,7 +8898,11 @@ var ViewerManager = {};
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
 				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-				console.log("firing add clipping plane event: ("+ account +","+ project +")");
+				if(account && project)
+				{
+					vm.account = account;
+					vm.project = project;
+				}	
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
@@ -8908,6 +8918,7 @@ var ViewerManager = {};
 			{
 				vm.account = null;
 				vm.project = null;
+				console.log("init(move clip)");
 				initClippingPlane();	
 			}
 			else
@@ -8957,6 +8968,7 @@ var ViewerManager = {};
 
 				if (newValue )
 				{
+					console.log("init(visible)");
 					initClippingPlane();
 				} else {
 					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
@@ -8969,11 +8981,21 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			if (angular.isDefined(newValue) && vm.show ) {
-				console.log("selected axis: " + newValue);
-				vm.project = null;
-				vm.account = null;
-				initClippingPlane();
-				//vm.sliderPosition = vm.sliderMin;
+				if(vm.account && vm.project)
+				{
+					vm.account = null;
+					vm.project = null;
+					console.log("init(select axis)");
+					initClippingPlane();	
+				}
+				else
+				{
+					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
+					{
+						axis: translateAxis(newValue)
+					});
+
+				}
 			}
 		});
 
@@ -8996,8 +9018,15 @@ var ViewerManager = {};
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					vm.project = event.value.project;
 					vm.account = event.value.account;
-					initClippingPlane();
-					vm.visible = true;
+					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
+					if(vm.visible)
+					{
+
+						console.log("init(in event)");
+						initClippingPlane(event.value.account, event.value.project); 
+					}
+					else
+						vm.visible=true; 
 				} else {
 					vm.visible = false;
 					vm.sliderPosition = 0.0;
@@ -15997,7 +16026,6 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
-							console.log("event received: add clipping plane...");
 							v.viewer.addClippingPlane(
 								event.value.axis,
 								event.value.distance ? event.value.distance : 0,
@@ -16006,6 +16034,8 @@ var Oculus = {};
 								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
+						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
+							v.viewer.changeAxisClippingPlane(event.value.axis);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,

@@ -1773,6 +1773,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.clippingPlanes[0].movePlane(percentage);
 		};
 
+		this.changeAxisClippingPlane = function(axis) {
+			// Only supports a single clipping plane at the moment.
+			self.clippingPlanes[0].changeAxis(axis);
+		};
+
 		/**
 		 * Clear out all clipping planes
 		 */
@@ -1934,6 +1939,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
 	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
 	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
+	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
 
