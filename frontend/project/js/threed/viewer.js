@@ -1754,8 +1754,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
-			console.log("adding clipping plane, account: " + account + ", project: " + project);
-			console.trace();	
 			var parentGroup = null;
 			if(account && project){				
 				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;

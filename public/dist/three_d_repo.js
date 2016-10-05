@@ -561,7 +561,6 @@ var ClipPlane = {};
 
 			var plane = new x3dom.fields.SFVec4f(normal.x, normal.y, normal.z, -this.distance);
 
-			console.log("new plane: " + plane.toGL());
 
 
 			// Update the clipping element plane equation
@@ -619,6 +618,7 @@ var ClipPlane = {};
 
 			}
 
+			//FIXME: not sure if the order of the outline will always work in this case...
 			outline.push(outline[0]);	
 			outlineCoords.setAttribute("point",
 				outline.map(function(item) {
@@ -4686,8 +4686,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
-			console.log("adding clipping plane, account: " + account + ", project: " + project);
-			console.trace();	
 			var parentGroup = null;
 			if(account && project){				
 				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
@@ -12388,7 +12386,6 @@ angular.module('3drepo')
 					project: vm.selectedIssue.project
 				});
 
-				console.log("setting clipping planes...: " + vm.selectedIssue.account + ", " + vm.selectedIssue.project);
 				EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
 					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes,
 					account: vm.selectedIssue.account, 
