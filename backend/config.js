@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.2.3";
+	const VERSION="1.5.1";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -229,6 +229,9 @@
 
 		return baseUrl;
 	};
+
+	//avatar size limit
+	config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
 
 	module.exports = config;
 })();

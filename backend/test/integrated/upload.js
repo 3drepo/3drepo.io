@@ -39,6 +39,7 @@ describe('Uploading a project', function () {
 
 	let desc = 'desc';
 	let type = 'type';
+	let unit = 'meter';
 
 	before(function(done){
 
@@ -47,7 +48,7 @@ describe('Uploading a project', function () {
 
 			helpers.signUpAndLoginAndCreateProject({
 				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type, noBasicPlan: true,
+				username, password, email, project, desc, type, noBasicPlan: true, unit,
 				done: function(err, _agent){
 					agent = _agent;
 					done(err);
@@ -59,10 +60,15 @@ describe('Uploading a project', function () {
 	});
 
 	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
-			done();
+
+		let q = require('../../services/queue');
+		q.channel.purgeQueue(q.workerQName).then(() => {
+			server.close(function(){
+				console.log('API test server is closed');
+				done();
+			});
 		});
+
 	});
 
 	describe('without quota', function(){
@@ -175,7 +181,7 @@ describe('Uploading a project', function () {
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy')
 			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+				expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
 				done(err);
 			});
 

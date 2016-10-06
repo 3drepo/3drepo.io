@@ -85,6 +85,15 @@ function Utils() {
     };
 
     /*******************************************************************************
+    * Test if a given string conforms a valid UUID format
+    * @returns {Boolean}
+    *******************************************************************************/
+    this.isUUID = function(uuid) {
+       return Boolean (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
+    };
+
+
+    /*******************************************************************************
       * Coalesce function
       * @param {Object} variable - variable to coalesce
       * @param {Object} value - value to return if object is null or undefined

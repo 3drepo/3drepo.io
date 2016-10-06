@@ -1,0 +1,7 @@
+md-dialog#issueScreenShotDialog(aria-label="Screen Shot")
+	issues-screen-shot(
+	send-event="vm.dialogCaller.sendEvent({type: type, value: value})"
+	close="vm.closeScreenShot()"
+	screen-shot-save="vm.dialogCaller.screenShotSave({screenShot: screenShot})"
+	screen-shot="vm.dialogCaller.screenShot"
+	layout-fill)

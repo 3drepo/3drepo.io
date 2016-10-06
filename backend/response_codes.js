@@ -17,6 +17,7 @@
 
 var C = require("./constants");
 var _ = require('lodash');
+var config = require('./config');
 
 var responseCodes = {
 	// User error codes
@@ -71,9 +72,9 @@ var responseCodes = {
 	HEAD_REVISION_NOT_FOUND: { value: 28, message: "Head revision not found", status: 404 },
 
 	FILE_IMPORT_PROCESS_ERR: { value: 29, message: "Failed to process file", status: 400 },
-	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Failed to process file: Invalid arguments", status: 500 },
-	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Failed to process file: Unknown error", status: 500 },
-	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Failed to process file: Unknown command", status: 500 },
+	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Invalid arguments", status: 500 },
+	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Unknown error", status: 500 },
+	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Unknown command", status: 500 },
 	QUEUE_CONN_ERR: { value: 33, message: "Failed to establish connection to queue", status: 404 },
 	QUEUE_INTERNAL_ERR: { value: 34, message: "Failed preprocessing for queue dispatch", status: 500 },
 	QUEUE_NO_CONFIG: { value: 35, message: "Server has no queue configuration", status: 404 },
@@ -121,7 +122,7 @@ var responseCodes = {
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
 
-	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Failed to process file: Format not supported", status: 400 },
+	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Format not supported", status: 400 },
 
 	SIZE_LIMIT: {value: 69, message: 'Single file size exceeded system limit', status: 400},
 	INVALID_PROJECT_NAME: {value: 70, message: 'Invalid project name', status: 400},
@@ -155,7 +156,7 @@ var responseCodes = {
 	USER_IN_COLLABORATOR_LIST: {value: 94, message: 'This user is currently in collaborator list of a project', status: 400 },
 	SUBSCRIPTION_CANNOT_REMOVE_SELF: {value: 95, message: 'You cannot remove yourself', status: 400 },
 
-	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400}, 
+	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400},
 	EXECUTE_AGREEMENT_ERROR: { value: 97, message: 'Failed to get payment from PayPal', status: 400 },
 
 	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Your current quota usage exceeds the requested change.', status: 400 },
@@ -163,12 +164,38 @@ var responseCodes = {
 
 	BILLING_NOT_FOUND: { value: 100, message: 'Billing not found', status: 404 },
 	PAYPAL_ERROR: { value: 101, status: 400 },
+	NO_FILE_FOUND: { value: 102, message: 'No file can be downloaded', status: 404},
+
+	PROJECT_NO_UNIT: { value: 103, status: 400, message: 'Unit is not specified'},
+
+	TREE_NOT_FOUND: {value: 104, message: 'Model fulltree not found in stash', status: 404},
+	REPOERR_FED_GEN_FAIL: {value: 105, message: 'Failed to create federation', status: 400},
+
 	INVALID_VAT: {value: 106, status: 400, message: 'Invalid VAT number'},
 	NO_CONTACT_EMAIL: { value: 107, status: 400, message: 'contact.email is not defined in config'},
 
+	DUPLICATE_TAG : { value: 108, status: 400, message: 'Revision name already exists'},
+	INVALID_TAG_NAME: {value : 109, status: 400, message: 'Invalid revision name'},
+
+	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
+	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
+	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
+
+	AVATAR_SIZE_LIMIT: {value: 113, status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB`},
+	INVALID_USERNAME: {value: 114, message: 'Invalid username', status: 400},
+	FILE_NO_EXT: { value: 115, message: "Filename must have extension", status: 400 },
+
+	SCREENSHOT_NOT_FOUND: {value: 116, message: 'Screenshot not found', status: 404},
+	ISSUE_INVALID_STATUS: {value: 117, message: 'Invalid issue status', status: 400},
+	ISSUE_INVALID_PRIORITY: {value: 118, message: 'Invalid issue priority', status: 400},
+	ISSUE_SAME_STATUS: {value: 119, message: 'New status is the same as current status', status: 400},
+	ISSUE_SAME_PRIORITY: {value: 120, message: 'New priority is the same as current priority', status: 400},
+	MESH_NOT_FOUND: {value: 121, message: 'Mesh not found', status: 400},
+	GROUP_ID_NOT_FOUND_IN_MESH: {value: 122, message: 'Group ID not found in mesh', status: 400},
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
-			value: 42,
+			value: 900,
 			status: 400 ,
 			message: err.message || 'Validation failed'
 		};
@@ -185,7 +212,7 @@ var responseCodes = {
 		//other error
 		return {
 			value: 1000,
-			message: mongoErr.message,
+			message: 'System error. Please try again later.',
 			dbErr: mongoErr,
 			status: 500
 		};
@@ -196,7 +223,8 @@ var responseCodes = {
 
 		return {
 			value: 2000,
-			message: JSON.stringify(message),
+			message: 'System error. Please try again later.',
+			system_message: JSON.stringify(message),
 			status: 500
 		};
 	},
@@ -228,9 +256,13 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 106, 107, 1000, 2000, 3000, 4000];
+var valid_values = [900, 1000, 2000, 3000, 4000];
+
+Object.keys(responseCodes).forEach(key => {
+	if(typeof responseCodes[key].value !== 'undefined'){
+		valid_values.push(responseCodes[key].value);
+	}
+});
 
 var mimeTypes = {
 	"src"  : "text/plain",
@@ -242,7 +274,7 @@ var mimeTypes = {
 	"jpg"  : "image/jpg"
 };
 
-responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
+responseCodes.respond = function(place, req, res, next, resCode, extraInfo, format)
 {
 	"use strict";
 
@@ -289,10 +321,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 	} else {
 
 		if(Buffer.isBuffer(extraInfo)){
-
 			res.status(resCode.status);
 
-			var contentType = mimeTypes[req.params.format];
+			var contentType = mimeTypes[format || req.params.format];
 
 			if (contentType)
 			{
@@ -304,11 +335,11 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 			//res.setHeader("Content-Length", extraInfo.length);
 			length = extraInfo.length;
-			
+
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
-			
+
 		} else {
 
 			length = typeof extraInfo === 'string' ? extraInfo.length : JSON.stringify(extraInfo).length;

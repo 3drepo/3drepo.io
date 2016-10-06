@@ -7,7 +7,7 @@ html(lang="en" ng-app="3drepo")
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 
-		title 3D Repo
+		title 3D Repo | Online BIM collaboration platform
 
 		script(type="text/javascript", src="/public/plugins/base/config.js")
 
@@ -73,6 +73,11 @@ html(lang="en" ng-app="3drepo")
 		// Frontend plugin JADE Files
 		each j in frontendJade
 			script(type="text/ng-template", id=j.id)
+				!= renderMe(j.path, locals)
+
+		// Legal pages
+		each j in legalTemplates
+			script(type="text/ng-template", id=j.page+".html")
 				!= renderMe(j.path, locals)
 
 		home

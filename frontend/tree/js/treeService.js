@@ -30,9 +30,9 @@
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
-			ts.revision = revision ? revision : "head";
+			//ts.revision = revision ? revision : "head";
 
-			if (ts.branch === "master")
+			if (!revision)
 			{
 				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
 			} else {

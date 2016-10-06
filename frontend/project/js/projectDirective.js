@@ -50,7 +50,11 @@
 			issueArea,
 			issuesCardIndex = 0;
 
+		/*
+		 * Init
+		 */
 		vm.pointerEvents = "auto";
+		vm.keysDown = [];
 
 		/*
 		 * Get the project element
@@ -58,21 +62,6 @@
 		$timeout(function () {
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
-
-		/*
-		panelCard.left.push({
-			type: "tree",
-			title: "Tree",
-			show: true,
-			help: "Model elements shown in a tree structure",
-			icon: "device_hub",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "filter", visible: true}
-			]
-		});
-		*/
 
 		panelCard.left.push({
 			type: "issues",
@@ -120,6 +109,20 @@
 			add: true
 		});
 
+		 panelCard.left.push({
+			 type: "tree",
+			 title: "Tree",
+			 show: false,
+			 help: "Model elements shown in a tree structure",
+			 icon: "device_hub",
+			 minHeight: 80,
+			 fixedHeight: false,
+			 options: [
+			 	{type: "filter", visible: true}
+			 ]
+		 });
+
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -141,6 +144,7 @@
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",
@@ -178,10 +182,12 @@
 			]
 		});
 
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
 				// Add filtering options for the Issues card menu
+				/*
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
 						panelCard.left[issuesCardIndex].menu.push(
@@ -196,8 +202,10 @@
 						);
 					}
 				});
+				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings;
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -229,6 +237,8 @@
 			var parent = angular.element($element[0].querySelector("#project")),
 				element;
 
+			vm.event = event;
+
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
 					issueArea = angular.element("<issue-area></issue-area>");
@@ -254,9 +264,10 @@
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
 				}
 				else {
 					// Remove measure display
@@ -264,6 +275,69 @@
 					element.remove();
 				}
 			}
-		})
+		});
+
+		/**
+		 * Keep a list of keys held down
+		 * For changes to be registered by directives and especially components the list needs to be recreated
+		 *
+		 * @param event
+		 */
+		vm.keyAction = function (event) {
+			var i,
+				tmp;
+
+			// Update list, but avoid repeat
+			if (event.type === "keydown") {
+				if (vm.keysDown.indexOf(event.which) === -1) {
+					// Recreate list so that it changes are registered in components
+					tmp = vm.keysDown;
+					delete vm.keysDown;
+					vm.keysDown = angular.copy(tmp);
+					vm.keysDown.push(event.which);
+				}
+			}
+			else if (event.type === "keyup") {
+				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
+				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+					if (vm.keysDown[i] === event.which) {
+						vm.keysDown.splice(i, 1);
+					}
+				}
+				// Recreate list so that it changes are registered in components
+				tmp = vm.keysDown;
+				delete vm.keysDown;
+				vm.keysDown = angular.copy(tmp);
+			}
+		};
+
+		/**
+		 * Get the current multi selection
+		 * @param selectedObjects
+		 */
+		vm.setSelectedObjects = function (selectedObjects) {
+			vm.selectedObjects = selectedObjects;
+		};
+
+		/**
+		 * Initalise the list of selected objects
+		 * @param data
+		 */
+		vm.setInitialSelectedObjects = function (data) {
+			vm.initialSelectedObjects = data.selectedObjects;
+			// Set the value to null so that it will be registered again
+			$timeout(function () {
+				vm.initialSelectedObjects = null;
+			});
+		};
+
+		/**
+		 * Send event
+		 * @param type
+		 * @param value
+		 */
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
+		};
 	}
 }());

@@ -159,11 +159,13 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account/:project", require("../routes/mesh"));
 	//texture handler
 	app.use("/:account/:project", require("../routes/texture"));
-
-
+	
+	//history handler
+	app.use("/:account/:project", require("../routes/history"));
 
 	app.use("/", routes.router);
 
-
+	console.log('config url', config.apiUrls);
+	console.log('config url', config.url);
 	return app;
 };

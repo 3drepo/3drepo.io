@@ -245,6 +245,8 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 };
 
+schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
+
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
@@ -258,6 +260,11 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 	if(customData && (!customData.email || !customData.email.match(emailRegex))){
 		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+	}
+
+
+	if(!this.usernameRegExp.test(username)){
+		return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 	}
 
 	['firstName', 'lastName', 'email'].forEach(key => {
@@ -341,7 +348,7 @@ schema.statics.verify = function(username, token, options){
 			var ProjectHelper = require('./helper/project');
 
 			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError('Failed to import toy project', err);
+				systemLogger.logError('Failed to import toy project', err && err.stack ? err.stack : err);
 			});
 		}
 
@@ -492,13 +499,13 @@ schema.methods.listAccounts = function(){
 
 	this.roles.forEach(role => {
 		if(role.role === 'admin'){
-			accounts.push({ account: role.db, projects: [] });
+			accounts.push({ account: role.db, projects: [], fedProjects: [] });
 		}
 	});
 
 	//backward compatibility, user has access to database with the name same as their username
 	if(!_.find(accounts, account => account.account === this.user)){
-		accounts.push({ account: this.user, projects: [] });
+		accounts.push({ account: this.user, projects: [], fedProjects: [] });
 	}
 	
 	// group projects by accounts
@@ -512,17 +519,30 @@ schema.methods.listAccounts = function(){
 
 				account = {
 					account: project.account,
-					projects: []
+					projects: [],
+					fedProjects: []
 				};
 
 				accounts.push(account);
 			}
 
-			account.projects.push({
-				project: project.project,
-				timestamp: project.timestamp,
-				status: project.status,
-			});
+			if(project.federate){
+				account.fedProjects.push({
+					project: project.project,
+					timestamp: project.timestamp,
+					status: project.status,
+					federate: project.federate,
+					subProjects: project.subProjects
+				});
+			} else {
+				account.projects.push({
+					project: project.project,
+					timestamp: project.timestamp,
+					status: project.status,
+					subProjects: project.subProjects
+				});
+			}
+
 
 		});
 
@@ -590,6 +610,8 @@ schema.methods.listAccounts = function(){
 schema.methods.listProjects = function(options){
 	'use strict';
 
+	var ProjectHelper = require('./helper/project');
+
 	return this.getPrivileges().then(privs => {
 
 		// This is the collection that we check for
@@ -655,10 +677,26 @@ schema.methods.listProjects = function(options){
 
 					if(setting){
 						projects[index].status = setting.status;
+						projects[index].federate = setting.federate;
 					}
 
 					return Promise.resolve();
 					
+				}).then(() => {
+
+					
+					if(projects[index].federate){
+						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, 'master');
+					}
+
+					return Promise.resolve();
+
+				}).then(subProjects => {
+
+					if(subProjects){
+						projects[index].subProjects = subProjects;
+					}
+
 				}).catch(() => Promise.resolve())
 			);
 		});
@@ -1149,7 +1187,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 				if(billing && billing.pdf){
 					attachments = [{
-						filename: `invoice-${billing.invoiceNo}.pdf`,
+						filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
 						content: billing.pdf
 					}];
 				}

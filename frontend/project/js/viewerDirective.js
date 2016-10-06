@@ -52,9 +52,9 @@
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
 		var v = this;
 
@@ -148,6 +148,14 @@
 
 				v.collision  = new Collision(v.viewer);
 
+				v.branch = "master";
+				v.revision = "head";
+
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
+				function (json, status)
+				{
+					v.viewer.applyModelProperties(v.account, v.project, json);
+				});
 			});
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
@@ -166,6 +174,11 @@
 				v.oculus.switchVR();
 			});
 		};
+
+		$scope.$watch(v.branch, function(blah)
+		{
+			console.log(JSON.stringify(blah));
+		});
 
 		$scope.$watch(v.eventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
@@ -246,6 +259,15 @@
 								event.value.zoom,
 								event.value.colour
 							);
+						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
+							v.viewer.highlightAndUnhighlightObjects(
+								event.value.account,
+								event.value.project,
+								event.value.highlight_ids,
+								event.value.unhighlight_ids,
+								event.value.zoom,
+								event.value.colour
+							);
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
@@ -268,10 +290,11 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo(
-									event.value.account,
-									event.value.project
-								));
+								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
+							}
+						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
+							if (angular.isDefined(event.value.promise)) {
+								event.value.promise.resolve(v.manager.getCurrentViewer().runtime.getScreenshot());
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
@@ -284,6 +307,8 @@
 								view: event.value.view,
 								up: event.value.up
 							});
+						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+							v.viewer.setMultiSelectMode(event.value);
 						}
 					});
 				}

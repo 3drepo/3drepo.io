@@ -32,12 +32,13 @@
         };
     }
 
-    RightPanelCtrl.$inject = ["$scope", "EventService"];
+    RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
-    function RightPanelCtrl ($scope, EventService) {
+    function RightPanelCtrl ($scope, $timeout, EventService) {
         var vm = this,
             addIssueMode = null,
             measureMode = false,
+            autoMetaData = true,
             highlightBackground = "#FF9800";
 
         /*
@@ -62,6 +63,10 @@
             }
         };
         vm.measureBackground = "";
+        vm.metaBackground = highlightBackground;
+        $timeout(function () {
+            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
+        });
 
         /*
          * Setup event watch
@@ -115,6 +120,9 @@
             }
         };
 
+        /**
+         * Toggle measuring tool
+         */
         vm.toggleMeasure = function () {
             // Turn off issue mode
             if (addIssueMode !== null) {
@@ -124,6 +132,15 @@
             measureMode = !measureMode;
             vm.measureBackground = measureMode ? highlightBackground : "";
             EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
+        };
+
+        /**
+         * Toggle meta data auto display
+         */
+        vm.toggleAutoMetaData = function () {
+            autoMetaData = !autoMetaData;
+            vm.metaBackground = autoMetaData ? highlightBackground : "";
+            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
         };
     }
 }());

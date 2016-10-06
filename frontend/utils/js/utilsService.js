@@ -76,6 +76,7 @@
          * Handle POST requests
          * @param data
          * @param url
+         * @param headers
          * @returns {*}
          */
         obj.doPost = function (data, url, headers) {
@@ -186,6 +187,10 @@
          */
         obj.closeDialog = function () {
             $mdDialog.cancel();
+        };
+
+        obj.getServerUrl = function (url) {
+            return serverConfig.apiUrl(serverConfig.GET_API, url);
         };
 
         return obj;

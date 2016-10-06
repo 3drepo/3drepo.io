@@ -30,7 +30,10 @@
 				project:  "=",
 				branch:   "=",
 				revision: "=",				
-                position: "@"
+                position: "@",
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
             },
             controller: PanelCtrl,
             controllerAs: "vm",

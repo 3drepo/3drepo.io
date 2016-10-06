@@ -123,39 +123,14 @@ panel-card .statusIcon {
   width: 30px;
 }
 
-panel-card #filterContainer {
-  max-width: 50%;
-}
-
-panel-card .cardInfo {
-  text-align: center;
-  padding: 15px;
-  background: #E8EAF6;
-  margin: 15px;
-  border-radius: 4px;
-}
-panel-card .cardInfo p {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.7);
-  word-wrap: break-word;
-}
-
-panel-card .cardInfo md-icon {
-  margin: 0;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
 /** Panel Card Filter ****************************************************************************************************/
 panel-card-filter input {
-  background: rgb(63,81,181);
+  background: rgb(0,69,148);
   border: none;
   color: white;
   border-bottom: 1px solid white;
   outline: none;
-  margin-top: -5px;
-  font-size: 18px;
+  font-size: 16px;
 }
 panel-card-filter md-icon {
   margin-left: -16px;

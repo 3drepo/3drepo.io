@@ -29,8 +29,25 @@ var schema = mongoose.Schema({
 	type: String,
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
+	federate: Boolean,
 	permissions: [Number],
-	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
+	properties: {
+		"pinSize" : Number,
+		"avatarHeight" : Number,
+		"visibilityLimit" : Number,
+		"speed" : Number,
+		"zNear" : Number,
+		"zFar" : Number,
+		"unit": String, //cm, m, ft, mm
+
+		"mapTile": {
+			lat: Number,
+			lon: Number,
+			y: Number
+		}
+
+	},
+	//bid_4_free only fields
 	info: mongoose.Schema({
 
 		name: String,
@@ -49,29 +66,18 @@ var schema = mongoose.Schema({
 	}]
 });
 
-schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
+schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
 
-
-schema.methods.updateMapTileCoors = function(updateObj){
+schema.methods.updateProperties = function(updateObj){
 	'use strict';
 
-	let mapTilesProp = this.constructor.mapTilesProp;
-
-	this.properties = this.properties || {};
-	this.properties.mapTile = this.properties.mapTile || {};
-
-	mapTilesProp.forEach(key => {
-
-		if(updateObj[key]){
-			this.properties.mapTile[key] = updateObj[key];
-		}
+	Object.keys(updateObj).forEach(key => {
+		this.properties[key] = updateObj[key];
 	});
 
-	// this is needed since properties didn't have a strict schema, need to tell mongoose this is changed
-	this.markModified('properties');
-	return this.save();
-
 };
+
+
 
 schema.methods.findCollaborator = function(user, role){
 	'use strict';

@@ -1,96 +1,3 @@
-tree span {
-  outline: none;
-  margin: 0;
-}
-tree span .fa {
-  color: #5C6BC0;
-  font-size: 14px;
-  padding: 0 2px 0 0;
-}
-
-tree .treeNodes p {
-  outline: none;
-  width: 100%;
-  word-break: break-all;
-  word-wrap: break-word;
-  line-height: 18px;
-  margin: -2px 0 0 0;
-  font-size: 14px;
-  padding: 2px;
-}
-tree .treeNodes p:hover {
-  cursor: pointer;
-}
-
-tree md-checkbox {
-  margin-right: 8px !important;
-}
-
-.angular-ui-tree-handle {
-  cursor: default;
-  display: inline-block;
-  font-weight: normal;
-}
-
-tree .treeButton {
-  outline: none;
-  width: 45px;
-  text-align: center;
-  padding-top: 1px;
-}
-tree .treeButton md-icon {
-  font-size: 20px;
-  position: relative;
-}
-tree .treeButton md-icon .treeIconCheck {
-  position: absolute;
-  left: 3px;
-  font-size: 11px;
-  top: 5px;
-}
-tree .treeButton md-icon  .treeIconDot {
-  position: absolute;
-  left: 6px;
-  font-size: 6px;
-  top: 7px;
-}
-tree .treeButton .treeButtonDisabled {
-  color: #CCCCCC;
-}
-tree .treeButton:hover {
-  cursor: pointer;
-}
-
-tree .treeNodeSelected {
-  background: #C5CAE9;
-  padding: 2px;
-  border-radius: 4px;
-}
-
-/** Tree Node *********************************************************************************************************/
-
-.tree-node-unselected {
-  background: #FFFFFF;
-}
-.tree-node-selected {
-  background: #E8EAF6;
-}
-.tree-node:hover {
-  cursor: default;
-}
-.tree-node span {
-  padding-right: 5px;
-}
-
-.tree-node button {
-  padding: 0;
-}
-.tree-node .md-button {
-  border-radius: 0;
-}
-
-/** Tree filter list **************************************************************************************************/
-
 tree .virtualRepeatInfiniteScroll {
   overflow-y: auto;
   overflow-x: hidden;
@@ -104,13 +11,89 @@ tree .virtualRepeatInfiniteScroll .vertical-container {
 
 tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
-  padding: 8px 0 8px;
+  padding: 0 0;
+  min-height: 1px;
 }
 
-#treeFilterItemName {
-  margin-left: 20px;
+tree span {
+  outline: none;
+  margin: 0;
+}
+tree span .fa {
+  color: #5C6BC0;
+  font-size: 14px;
+  padding: 0 2px 0 0;
 }
 
-.viewerSelected {
-  color: #F00;
+tree .treeNodes p {
+  outline: none;
+  word-break: break-all;
+  word-wrap: break-word;
+  margin: 8px 0 8px -5px;
+  font-size: 14px;
+}
+
+tree .treeNode {
+  outline: none;
+}
+tree .treeNode:hover {
+  cursor: pointer;
+  background: rgba(0,69,148,.1);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+tree .treeNodeSelected {
+  background: rgba(0,69,148, 0.2);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+tree md-checkbox {
+  margin-right: 8px !important;
+}
+
+.angular-ui-tree-handle {
+  cursor: default;
+  display: inline-block;
+  font-weight: normal;
+}
+
+tree .treeButtonDisabled {
+  color: #CCCCCC !important;
+}
+
+tree .expandButton {
+  margin-left: 0 !important;
+}
+
+tree .noAccessButton {
+  margin-left: 0 !important;
+  opacity: 0.5;
+}
+tree .noAccessName {
+  opacity: 0.5;
+}
+tree .noAccessName:hover {
+  cursor: default !important;
+}
+
+tree .toggleButton {
+  margin-right: 0 !important;
+}
+
+tree .parentOfInvisible {
+  color: #999 !important;
+}
+
+/** Tree filter list **************************************************************************************************/
+tree .filterNode {
+  height: 41px;
+}
+
+tree .filterNode div {
+  height: 100%;
+}
+
+tree .filterListNodeName {
+  margin-left: 15px !important;
 }

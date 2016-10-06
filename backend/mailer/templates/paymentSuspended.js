@@ -22,6 +22,9 @@ var html = data => `
 	<br>
 	Please click on the following link if you would like to subscribe again.
 	<br><a href="${data.url}">${data.url}</a>
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 var subject = 'Your 3D Repo subscription is suspended';

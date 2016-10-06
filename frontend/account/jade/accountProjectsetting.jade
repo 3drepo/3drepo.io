@@ -1,0 +1,45 @@
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Setting", flex)
+		md-toolbar
+			.md-toolbar-tools
+				md-button.md-icon-button(ng-click="vm.goBack()")
+					md-icon.angular-material-icons(aria-label="Close dialog") arrow_back
+				h2 Project Settings
+		.userContent
+
+			div(layout="row")
+				md-input-container(flex)
+					label Project name
+					input(type="text", ng-model="vm.projectName", disabled)
+				md-input-container(flex)
+
+			div(layout="row")
+				md-input-container(flex)
+					label Project type
+					input(type="text", ng-model="vm.projectType", disabled)
+				md-input-container(flex)
+
+			div(layout="row")
+				md-input-container(flex)
+					label Latitude
+					input(type="text", ng-model="vm.mapTile.lat")
+				md-input-container(flex)
+					label Longitude
+					input(type="text", ng-model="vm.mapTile.lon")
+
+			div(layout="row")
+				md-input-container(flex)
+					label Sea level
+					input(type="text", ng-model="vm.mapTile.y")
+				md-input-container(flex)
+
+			div(layout="row")
+				md-input-container(flex)
+					label Unit
+					md-select(ng-model="vm.unit", required)
+						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+				md-input-container(flex)
+
+			div(layout="row")
+				md-button.md-raised.md-accent(ng-click="vm.save()") Save
+				p {{vm.message}}

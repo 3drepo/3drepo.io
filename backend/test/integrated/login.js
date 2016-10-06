@@ -30,7 +30,7 @@ describe('Login', function () {
 	let User = require('../../models/user');
 	let server;
 	let username = 'login_username';
-	let username_not_verified = 'login_username_not_verified';
+	let username_not_verified = 'login_nonverified';
 	let password = 'password';
 	let email = suf => `test3drepo_login_${suf}@mailinator.com`;
 

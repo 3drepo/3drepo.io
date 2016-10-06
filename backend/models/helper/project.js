@@ -19,12 +19,19 @@ var Role = require('../role');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
-//var importQueue = require('../../services/queue');
+var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var History = require('../history');
+var Scene = require('../scene');
+var Ref = require('../ref');
+var utils = require("../../utils");
 var stash = require('./stash');
+var Ref = require('../ref');
+var middlewares = require('../../routes/middlewares');
+var C = require("../../constants");
 
 
 /*******************************************************************************
@@ -57,6 +64,9 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 9:
+        	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
+        	break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
@@ -65,19 +75,38 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type) {
+
+function createAndAssignRole(project, account, username, desc, type, unit, subProjects, federate) {
 	'use strict';
 
 
-	if(!project.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
+	}
+
+
+	if(!unit){
+		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
 	}
 
 	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
-	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
+
+	return ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+		}
+
+		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
+
+	}).then(() => {
+
+		return Role.findByRoleID(`${account}.${project}.viewer`);
+
+	}).then(role =>{
 
 		if(role){
 			return Promise.resolve();
@@ -103,24 +132,25 @@ function createAndAssignRole(project, account, username, desc, type) {
 
 	}).then(() => {
 
-		return ProjectSetting.findById({account, project}, project).then(setting => {
+		return ProjectSetting.findById({account, project}, project);
 
-			if(setting){
-				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
-			}
+	}).then(setting => {
 
-			setting = ProjectSetting.createInstance({
-				account: account,
-				project: project
-			});
-
-			setting._id = project;
-			setting.owner = username;
-			setting.desc = desc;
-			setting.type = type;
-
-			return setting.save();
+		setting = setting || ProjectSetting.createInstance({
+			account: account,
+			project: project
 		});
+
+		setting._id = project;
+		setting.owner = username;
+		setting.desc = desc;
+		setting.type = type;
+		setting.federate = federate;
+		setting.updateProperties({
+			unit
+		});
+
+		return setting.save();
 
 	});
 }
@@ -176,7 +206,7 @@ function importToyJSON(db, project){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
-		let jsonBucket = stash.getGridFSBucket({ account: db, project: project }, 'json_mpc');
+		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
 
 		jsonBucket.find().forEach(file => {
 
@@ -192,7 +222,7 @@ function importToyJSON(db, project){
 		});
 
 		//rename src stash
-		let srcBucket = stash.getGridFSBucket({ account: db, project: project }, 'src');
+		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
 
 		srcBucket.find().forEach(file => {
 
@@ -226,8 +256,7 @@ function importToyProject(username){
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-
-	return createAndAssignRole(project, account, username, desc, type).then(setting => {
+	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
 
@@ -411,10 +440,463 @@ function removeCollaborator(username, email, account, project, role){
 	});
 }
 
+
+
+function createFederatedProject(account, project, subProjects){
+	'use strict';
+
+	let federatedJSON = {
+		database: account,
+		project: project,
+		subProjects: []
+	};
+
+	let error;
+
+	let addSubProjects = [];
+
+	subProjects.forEach(subProject => {
+
+		if(subProject.database !== account){
+			error = responseCodes.FED_MODEL_IN_OTHER_DB;
+		}
+
+		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
+			if(setting && setting.federate){
+				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+
+			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
+				federatedJSON.subProjects.push({
+					database: subProject.database,
+					project: subProject.project
+				});
+			}
+		}));
+
+	});
+
+	if(error){
+		return Promise.reject(error);
+	}
+
+	if(subProjects.length === 0) {
+		return Promise.resolve();
+	}
+
+	//console.log(federatedJSON);
+	return Promise.all(addSubProjects).then(() => {
+		return importQueue.createFederatedProject(account, federatedJSON);
+	}).catch(err => {
+		//catch here to provide custom error message
+		if(err.errCode){
+			return Promise.reject(convertToErrorCode(err.errCode));
+		}
+		return Promise.reject(err);
+
+	});
+
+}
+
+function getModelProperties(account, project, branch, rev, username){
+	'use strict';
+
+	let subProperties;
+	let revId, modelPropertiesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, project }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, project }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, project }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getModelProps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getModelProps.push(
+				getModelProperties(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						properties: obj.properties,
+						owner: ref.owner,
+						project: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getModelProps);
+
+	}).then(_subProperties => {
+
+		subProperties = _subProperties;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
+
+	}).then(buf => {
+		let properties;
+
+		if(buf){
+			properties = JSON.parse(buf);
+		} else if (!status && !buf){
+			properties = {};
+		}
+
+		if (!properties.hiddenNodes)
+		{
+			properties.hiddenNodes = [];
+		}
+
+		subProperties.forEach(subProperty => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+
+			if (subProperty.properties.hiddenNodes)
+			{
+				properties.hiddenNodes = properties.hiddenNodes.concat(subProperty.properties.hiddenNodes);
+			}
+		});
+
+		return Promise.resolve({properties, status});
+
+	});
+}
+
+function getFullTree(account, project, branch, rev, username){
+	'use strict';
+
+	let revId, treeFileName;
+	let subTrees;
+	let status;
+	let history;
+	let getHistory;
+
+	if(rev && utils.isUUID(rev)){
+
+		getHistory = History.findByUID({ account, project }, rev);
+
+	} else if (rev && !utils.isUUID(rev)) {
+
+		getHistory = History.findByTag({ account, project }, rev);
+
+	} else if (branch) {
+
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
+
+	return getHistory.then(_history => {
+
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+
+	}).then(granted => {
+
+		if(!history){
+
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+
+		} else if (!granted) {
+
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+
+		} else {
+
+			revId = utils.uuidToString(history._id);
+			treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+
+			return Ref.find({ account, project }, filter);
+
+		}
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTrees = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getTrees.push(
+				getFullTree(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						tree: obj.tree,
+						status: obj.status,
+						_rid: utils.uuidToString(ref._rid),
+						_id: utils.uuidToString(ref._id)
+					});
+				})
+			);
+		});
+
+		return Promise.all(getTrees);
+
+	}).then(_subTrees => {
+
+		subTrees = _subTrees;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
+
+	}).then(buf => {
+
+		let tree;
+
+		if(buf){
+			tree = JSON.parse(buf);
+		} else if (!status && !buf){
+			status = 'NOT_FOUND';
+		}
+
+		let resetPath = function(node, parentPath){
+			node.children && node.children.forEach(child => {
+				child.path = parentPath + '__' + child.path;
+				child.children && resetPath(child.children, child.path);
+			});
+		};
+
+		subTrees.forEach(subTree => {
+
+			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
+
+				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
+				if (targetChild){
+
+					if(subTree && subTree.tree && subTree.tree.nodes){
+						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
+						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
+						targetChild.children = [subTree.tree.nodes];
+					}
+
+					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
+				}
+
+			});
+		});
+
+		return Promise.resolve({tree, status});
+
+	});
+}
+
+function searchTree(account, project, branch, rev, searchString, username){
+	'use strict';
+
+	let getHistory;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({account, project}, rev);
+	} else if (rev && !utils.isUUID(rev)){
+		getHistory = History.findByTag({account, project}, rev);
+	} else {
+		getHistory = History.findByBranch({account, project}, branch);
+	}
+
+	let items = [];
+	let history;
+
+	let search = () => getHistory.then(_history => {
+
+		history = _history;
+
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
+		let filter = {
+			_id: {'$in': history.current },
+			name: new RegExp(searchString, 'i')
+		};
+
+		return Scene.find({account, project}, filter, { name: 1 });
+
+	}).then(objs => {
+
+		objs.forEach((obj, i) => {
+
+			objs[i] = obj.toJSON();
+			objs[i].account = account;
+			objs[i].project = project;
+			items.push(objs[i]);
+
+		});
+
+		let filter = {
+			_id: {'$in': history.current },
+			type: 'ref'
+		};
+
+		return Ref.find({account, project}, filter);
+
+	}).then(refs => {
+
+		let promises = [];
+
+		refs.forEach(ref => {
+
+			let refRev, refBranch;
+
+			if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			promises.push(searchTree(ref.owner, ref.project, refBranch, refRev, searchString, username));
+		});
+
+		return Promise.all(promises);
+
+	}).then(results => {
+
+		results.forEach(objs => {
+			items = items.concat(objs);
+		});
+
+		return Promise.resolve(items);
+
+	});
+
+	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+		if(granted){
+			return search();
+		} else {
+			return Promise.resolve([]);
+		}
+	});
+
+}
+
+function listSubProjects(account, project, branch){
+	'use strict';
+
+	let subProjects = [];
+
+	return History.findByBranch({ account, project }, branch).then(history => {
+
+
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		refs.forEach(ref => {
+			subProjects.push({
+				database: ref.owner,
+				project: ref.project
+			});
+		});
+
+		return Promise.resolve(subProjects);
+
+	});
+}
+
+
+function downloadLatest(account, project){
+	'use strict';
+
+	let bucket =  stash.getGridFSBucket(account, `${project}.history`);
+
+	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+
+		if(!file){
+			return Promise.reject(responseCodes.NO_FILE_FOUND);
+		}
+
+		// change file name
+		let filename = file.filename.split('_');
+		let ext = '';
+
+		if (filename.length > 1){
+			ext = '.' + filename.pop();
+		}
+
+		file.filename = filename.join('_').substr(36) + ext;
+
+		return Promise.resolve({
+			readStream: bucket.openDownloadStream(file._id),
+			meta: file
+		});
+
+	});
+}
+
+var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var acceptedFormat = [
+	'x','obj','3ds','md3','md2','ply',
+	'mdl','ase','hmp','smd','mdc','md5',
+	'stl','lxo','nff','raw','off','ac',
+	'bvh','irrmesh','irr','q3d','q3s','b3d',
+	'dae','ter','csm','3d','lws','xml','ogex',
+	'ms3d','cob','scn','blend','pk3','ndo',
+	'ifc','xgl','zgl','fbx','assbin'
+];
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
-	removeCollaborator
+	removeCollaborator,
+	createFederatedProject,
+	listSubProjects,
+	getFullTree,
+	getModelProperties,
+	searchTree,
+	downloadLatest,
+	fileNameRegExp,
+	projectNameRegExp,
+	acceptedFormat
 };

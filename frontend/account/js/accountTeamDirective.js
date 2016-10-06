@@ -27,6 +27,7 @@
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
+				item: "=",
 				showPage: "&",
 				subscriptions: "="
 			},
@@ -52,20 +53,17 @@
 		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
-		if ($location.search().hasOwnProperty("proj")) {
-			vm.projectName = $location.search().proj;
-
-			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.members = response.data;
-					if (angular.isDefined("vm.subscriptions")) {
-						setupTeam();
-					}
+		console.log(vm.item);
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.members = response.data;
+				if (angular.isDefined("vm.subscriptions")) {
+					setupTeam();
 				}
-			});
-		}
+			}
+		});
 
 		/*
 		 * Watch changes to the new member name
@@ -92,7 +90,7 @@
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -116,7 +114,7 @@
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -141,6 +139,10 @@
 
 		vm.goToPage = function (page) {
 			StateManager.setQuery({page: page});
+		};
+
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
 		};
 
 		/**
