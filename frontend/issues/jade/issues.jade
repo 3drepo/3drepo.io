@@ -8,47 +8,37 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-div(ng-switch="vm.toShow")
+#issuesAddButton(ng-if="vm.showAddButton", layout-margin)
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
+		md-icon.angular-material-icons add
+
+#issuesContent(ng-switch="vm.toShow")
 	// Issues list
-	md-list(ng-switch-when="showIssues")
-		div(ng-repeat="issue in vm.issuesToShow")
-			.issueHeader
-				issue-header(
-					index="$index"
-					issue-data="issue"
-					on-click="vm.showSelectedIssue(index, pinSelect)"
-					show-info="issue.showInfo"
-					info-text="vm.infoText"
-					on-hide-info="vm.hideInfo()"
-					md-ink-ripple)
-			md-divider
+	issues-list(
+	ng-switch-when="showIssues"
+	account="vm.account"
+	project="vm.project"
+	tabindex="0"
+	all-issues="vm.issues"
+	filter-text="vm.filterText"
+	send-event="vm.sendEvent(type, value)"
+	event="vm.event"
+	on-edit-issue="vm.editIssue(issue)"
+	keys-down="vm.keysDown"
+	non-list-select="vm.selectIssue"
+	content-height="vm.setContentHeight(height)"
+	menu-option="vm.selectedMenuOption")
 
 	// Issue
-	issue(
-		ng-switch-when="showIssue"
-		index="vm.selectedIndex"
-		data="vm.selectedIssue"
-		auto-save-comment="vm.autoSaveComment"
-		on-comment-saved="vm.commentSaved()"
-		on-comment-auto-saved="vm.commentAutoSaved(index)"
-		available-roles="vm.availableRoles"
-		project-user-roles="vm.projectUserRoles",
-		on-issue-assign-change="vm.issueAssignChange()"
-		on-toggle-close-issue="vm.toggleCloseIssue(issue)")
+	issue-comp(
+	ng-switch-when="showIssue"
+	account="vm.account"
+	project="vm.project"
+	data="vm.issueToEdit"
+	keys-down="vm.keysDown"
+	exit="vm.editIssueExit(issue)"
+	send-event="vm.sendEvent(type, value)"
+	event="vm.event"
+	issue-created="vm.issueCreated(issue)"
+	content-height="vm.setContentHeight(height)")
 
-	// Add issue
-	#issuesAddContainer(ng-switch-when="showAdd")
-		md-input-container.md-block(md-no-float="")
-			label Title
-			input#issueAddTitle(ng-model="vm.title")
-		md-input-container.md-block(md-no-float="")
-			label Comment
-			textarea(ng-model="vm.comment")
-		div(layout="row", layout-align="start center")
-			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
-			md-progress-circular(md-diameter="20px", ng-if="vm.savingIssue")
-			md-button.md-primary(ng-click="vm.cancelAddIssue()") Cancel
-
-	// Info
-	.cardInfo(ng-switch-when="showInfo")
-		p {{vm.issuesInfo}}

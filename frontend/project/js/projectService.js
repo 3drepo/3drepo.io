@@ -32,7 +32,6 @@
 
 			$http.get(url).then(function(res){
 				var data = res.data;
-				console.log('getProjectInfo data', data);
 				deferred.resolve({
 					account     : account,
 					project		: project,

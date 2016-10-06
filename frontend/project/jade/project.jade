@@ -1,27 +1,33 @@
-.container-fluid#project(global ng-if="!vm.state.bid4free")
+//.container-fluid#project(global ng-if="!vm.state.bid4free")
+
+// tabindex is required for ng-keydown to work on a div/directive
+div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)", tabindex="0")
 	#project-viewport-container.row
 		viewermanager
 
 	#projectUI
 		revisions(
-			account="vm.account"
-			project="vm.project"
-			revision="vm.revision"
-		)
+		account="vm.account"
+		project="vm.project"
+		revision="vm.revision")
+
 		panel#leftPanel(
-			account="vm.account"
-			project="vm.project"
-			branch="vm.branch"
-			revision="vm.revision"
-			position="left"
-			style="pointer-events:{{vm.pointerEvents}}")
+		account="vm.account"
+		project="vm.project"
+		branch="vm.branch"
+		revision="vm.revision"
+		position="left"
+		style="pointer-events:{{vm.pointerEvents}}"
+		keys-down="vm.keysDown")
+
 		panel#rightPanel(
-			account="vm.account"
-			project="vm.project"
-			branch="vm.branch"
-			revision="vm.revision"
-			position="right"
-			style="pointer-events:{{vm.pointerEvents}}")
+		account="vm.account"
+		project="vm.project"
+		branch="vm.branch"
+		revision="vm.revision"
+		position="right"
+		style="pointer-events:{{vm.pointerEvents}}")
+
 		right-panel(style="pointer-events:{{vm.pointerEvents}}")
 		bottom-buttons(style="pointer-events:{{vm.pointerEvents}}")
 		qr-code-reader

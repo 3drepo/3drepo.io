@@ -189,6 +189,10 @@
             $mdDialog.cancel();
         };
 
+        obj.getServerUrl = function (url) {
+            return serverConfig.apiUrl(serverConfig.GET_API, url);
+        };
+
         return obj;
     }
 }());

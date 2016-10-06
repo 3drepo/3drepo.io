@@ -185,6 +185,14 @@ var responseCodes = {
 	INVALID_USERNAME: {value: 114, message: 'Invalid username', status: 400},
 	FILE_NO_EXT: { value: 115, message: "Filename must have extension", status: 400 },
 
+	SCREENSHOT_NOT_FOUND: {value: 116, message: 'Screenshot not found', status: 404},
+	ISSUE_INVALID_STATUS: {value: 117, message: 'Invalid issue status', status: 400},
+	ISSUE_INVALID_PRIORITY: {value: 118, message: 'Invalid issue priority', status: 400},
+	ISSUE_SAME_STATUS: {value: 119, message: 'New status is the same as current status', status: 400},
+	ISSUE_SAME_PRIORITY: {value: 120, message: 'New priority is the same as current priority', status: 400},
+	MESH_NOT_FOUND: {value: 121, message: 'Mesh not found', status: 400},
+	GROUP_ID_NOT_FOUND_IN_MESH: {value: 122, message: 'Group ID not found in mesh', status: 400},
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 900,
@@ -266,7 +274,7 @@ var mimeTypes = {
 	"jpg"  : "image/jpg"
 };
 
-responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
+responseCodes.respond = function(place, req, res, next, resCode, extraInfo, format)
 {
 	"use strict";
 
@@ -313,10 +321,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 	} else {
 
 		if(Buffer.isBuffer(extraInfo)){
-
 			res.status(resCode.status);
 
-			var contentType = mimeTypes[req.params.format];
+			var contentType = mimeTypes[format || req.params.format];
 
 			if (contentType)
 			{

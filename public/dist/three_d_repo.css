@@ -1439,7 +1439,7 @@ md-dialog md-toolbar {
 
 issues #issuesAddContainer {
   position: relative;
-  margin: 10px;
+  margin: 15px;
 }
 issues #issuesAddContainer .md-dialog-container {
   top: 0 !important;
@@ -1462,10 +1462,6 @@ issues .issueHeader {
 issues .issueHeader:hover {
   background-color: #EEEEEE;
   cursor: pointer;
-}
-
-issues textarea {
-  min-height: 70px !important;
 }
 
 issues md-list {
@@ -1501,6 +1497,18 @@ issues #addAlert #addAlertBackground #addAlertInfo {
 }
 issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
+}
+
+issues #issuesAddButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+issues #issuesContent {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /** Issue *************************************************************************************************************/
@@ -1674,6 +1682,194 @@ issue-area #scribbleDisplay img {
   left: -200%;
   right: -200%;
 }
+
+/** Issues List *******************************************************************************************************/
+issues-list .issueListItem {
+  height: 150px;
+  position: relative;
+  outline: none;
+}
+issues-list .issueListItem:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+issues-list .issueListItem *:hover {
+  cursor: inherit;
+}
+
+issues-list .issueListItem div:first-child {
+  outline: none;
+}
+
+issues-list #issuesListItemContent {
+  padding: 10px;
+}
+
+issues-list #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+issues-list #issuesListItemTitle,
+issues-list #issuesListItemInfo {
+  margin-bottom: 10px;
+}
+
+issues-list #issuesListItemInfo label,
+issues-list #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issues-list #issuesListItemDescription {
+  height: 70px;
+}
+issues-list #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+issues-list #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+  outline: none;
+}
+issues-list #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
+
+issues-list .issueListItemThumbnail {
+  margin-left: -15px;
+}
+
+/** Issue Comp ********************************************************************************************************/
+issue-comp #issueCompAll {
+  outline: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+issue-comp .issueCompItemContainer {
+  padding: 10px;
+}
+issue-comp .issueCompItemContainer div {
+  outline: none;
+}
+
+issue-comp #issueCompStatus {
+  margin: 0 0 10px;
+}
+
+issue-comp textarea {
+  min-height: 70px !important;
+}
+
+issue-comp .issueCompItemStatus {
+  margin-right: 5px;
+}
+
+issue-comp .issueCompThumbnail {
+  position: relative;
+  display: inline-block;
+}
+issue-comp .issueCompThumbnail:hover {
+  cursor: pointer;
+}
+issue-comp .issueCompThumbnail img {
+  width: 100%;
+}
+
+issue-comp .issueCompIssueOwner {
+  margin-top: -30px;
+}
+
+issue-comp .issueCompCommentOwner {
+  margin-bottom: 10px;
+}
+
+issue-comp .issueCompIssueOwner label,
+issue-comp .issueCompCommentOwner label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp .issueCompComment {
+  margin: 10px 0;
+}
+
+issue-comp .issueCompCommentTitle {
+  margin: 10px 0;
+}
+
+issue-comp .issueCompCommentActions {
+  z-index: 2;
+}
+
+issue-comp .issueCommentWithScreenShot:hover,
+issue-comp .issueDescriptionWithScreenShot:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+  outline: solid 1px rgba(0, 0, 0, 0.2);
+}
+issue-comp .issueCommentWithScreenShot *:hover,
+issue-comp .issueDescriptionWithScreenShot *:hover {
+  cursor: pointer;
+}
+
+
+/** Issue Screen Shot  ************************************************************************************************/
+#issueScreenShotDialog {
+  width:80%;
+  height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
+  max-height: calc(80% + 40px);
+  overflow: hidden;
+}
+
+issues-screen-shot #issueScreenShotActions {
+  position: absolute;
+  bottom: 5px;
+  display: block;
+  width: 176px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+}
+
+issues-screen-shot #issueScreenShotFAIcon {
+  font-size: 24px;
+}
+
+issues-screen-shot #issueScreenShotContent {
+  overflow: hidden;
+  height: calc(100% - 40px);
+}
+
+issues-screen-shot #scribbleCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+issues-screen-shot #issueScreenShotImage {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+issues-screen-shot #issueScreenShotPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
 login {
   position: absolute;
   top: 0;
@@ -1858,26 +2054,6 @@ panel-card #helpButton {
 panel-card .statusIcon {
   outline: none;
   width: 30px;
-}
-
-panel-card .cardInfo {
-  text-align: center;
-  padding: 15px;
-  background: rgba(0,69,148,.1);
-  margin: 15px;
-  border-radius: 4px;
-}
-panel-card .cardInfo p {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.7);
-  word-wrap: break-word;
-}
-
-panel-card .cardInfo md-icon {
-  margin: 0;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
 }
 
 /** Panel Card Filter ****************************************************************************************************/

@@ -44,7 +44,7 @@
 
 		var send = function (type, value) {
 			sendInternal(type, value);
-			nextEventService.send(type, value);
+			//nextEventService.send(type, value);
 		};
 
 		var sendErrorInternal = function(type, value) {
@@ -55,7 +55,7 @@
 
 		var sendError = function(type, value) {
 			sendErrorInternal(type, value);
-			nextEventService.sendError(type, value);
+			//nextEventService.sendError(type, value);
 		};
 
 		return {
