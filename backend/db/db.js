@@ -58,7 +58,9 @@
 		} else {
 			let replSet = [];
 
+			/* jshint ignore:start */
 			for(let host in self.host)
+			/* jshint ignore:end */
 			{
 				systemLogger.logInfo("Add replica set member " + self.host[host] + ":" + self.port[host]);
 				replSet.push(new Server(self.host[host], self.port[host]));
@@ -89,7 +91,9 @@
 		let connectString = "mongodb://" + this.username + ":" + this.password + "@";
 		let hostPorts = [];
 
+		/* jshint ignore:start */
 		for(let host in this.host)
+		/* jshint ignore:end */
 		{
 			hostPorts.push(this.host[host] + ":" + this.port[host]);
 		}
