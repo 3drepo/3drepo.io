@@ -21,8 +21,10 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var utils = require('../utils');
 var uuid = require('node-uuid');
-
+var _ = require('lodash');
 var Schema = mongoose.Schema;
+var Mesh = require('./mesh');
+var responseCodes = require('../response_codes.js');
 
 var groupSchema = Schema({
 	// no extra attributes
@@ -50,18 +52,66 @@ groupSchema.methods.updateAttrs = function(data){
 
 	let parents = data.parents;
 
-	if(parents){
+	if(!parents){
+		return Promise.resolve();
+	}
+
+	let currentParents = [];
+
+	this.parents.forEach(parent => {
+		currentParents.push(utils.uuidToString(parent));
+	});
+
+
+	let newParents = _.difference(parents, currentParents);
+
+	let addPromises = [];
+
+	newParents.forEach(id => addPromises.push(
+		Mesh.addGroup(
+			this._dbcolOptions.account,
+			this._dbcolOptions.project,
+			id,
+			utils.uuidToString(this._id)
+		)
+	));
+
+	return Promise.all(addPromises).then(() =>{
+
+		let removeParents = _.difference(currentParents, parents);
+		let removePromises = [];
+
+		removeParents.forEach(id => removePromises.push(
+			Mesh.removeGroup(
+				this._dbcolOptions.account,
+				this._dbcolOptions.project,
+				id,
+				utils.uuidToString(this._id)
+			)
+		));
+
+		return Promise.all(removePromises);
+
+	}).then(() => {
+
 		parents.forEach((p, index) => {
 			parents[index] = stringToUUID(p);
 		});
-	}
+
+		this.name = data.name || this.name;
+		this.parents = parents || this.parents;
+		this.color = data.color || this.color;
+
+		this.markModified('parents');
+		return this.save();
+
+	});
 
 
-	this.name = data.name || this.name;
-	this.parents = parents || this.parents;
-	this.color = data.color || this.color;
 
-	this.markModified('parents');
+
+
+
 
 };
 
@@ -75,9 +125,8 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 
 	group._id = stringToUUID(uuid.v1());
-	group.updateAttrs(data);
+	return group.updateAttrs(data);
 	
-	return group;
 };
 
 groupSchema.methods.clean = function(){
@@ -92,6 +141,32 @@ groupSchema.methods.clean = function(){
 
 	return cleaned;
 
+};
+
+
+groupSchema.statics.deleteGroup = function(dbCol, id){
+	'use strict';
+
+	return Group.findOneAndRemove(dbCol, { _id : stringToUUID(id)}).then(group => {
+
+		if(!group){
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
+
+		let removePromises = [];
+
+		group.parents.forEach(meshId => removePromises.push(
+			Mesh.removeGroup(
+				dbCol.account,
+				dbCol.project,
+				utils.uuidToString(meshId),
+				id
+			)
+		));
+
+		return Promise.all(removePromises);
+
+	});
 };
 
 var Group = ModelFactory.createClass(

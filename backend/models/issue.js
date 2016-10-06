@@ -382,12 +382,18 @@ schema.statics.getBCFZipReadStream = function(account, project, username, branch
 
 	let projection = {};
 	let noClean = true;
+	let settings;
 
-	return this.findByProjectName({account, project}, username, branch, revId, projection, noClean).then(issues => {
+	return ProjectSetting.findById({account, project}, project).then(_settings => {
+
+		settings = _settings;
+		return this.findByProjectName({account, project}, username, branch, revId, projection, noClean);
+
+	}).then(issues => {
 
 		issues.forEach(issue => {
 
-			let bcf = issue.getBCFMarkup();
+			let bcf = issue.getBCFMarkup(_.get(settings, 'properties.unit'));
 
 			zip.append(new Buffer(bcf.markup, 'utf8'), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
@@ -549,10 +555,22 @@ schema.statics.createIssue = function(dbColOptions, data){
 					flag: 1
 				};
 
-				issue.thumbnail = {
-					flag: 1,
-					content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
-				};
+				let content = this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true);
+
+				if(content){
+					issue.thumbnail = {
+						flag: 1,
+						content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
+					};
+				} else {
+					systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
+						account: dbColOptions.account, 
+						project: dbColOptions.project, 
+						issueId: utils.uuidToString(issue._id), 
+						viewpointId: utils.uuidToString(data.viewpoint.guid)
+					});
+				}
+
 			}
 
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
@@ -659,8 +677,6 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 	let img = gd.createFromPngPtr(pngBuffer);
 	let sourceX, sourceY, sourceWidth, sourceHeight;
 
-	console.log(destWidth, img.width);
-
 	if(!img){
 
 		return;
@@ -701,13 +717,7 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 };
 
 schema.methods.updateAttr = function(attr, value){
-
-	if(this.isClosed()){
-		throw responseCodes.ISSUE_CLOSED_ALREADY;
-	} else {
-		this[attr] = value;
-	}
-	
+	this[attr] = value;
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -839,11 +849,7 @@ schema.methods.changeStatus = function(status){
 schema.methods.changePriority = function(priority){
 	'use strict';
 
-	if(this.isClosed()){
-
-		throw responseCodes.ISSUE_CLOSED_ALREADY;
-
-	} else if (priorityEnum.indexOf(priority) === -1){
+	if (priorityEnum.indexOf(priority) === -1){
 
 		throw responseCodes.ISSUE_INVALID_PRIORITY;
 
@@ -947,7 +953,7 @@ schema.methods.generateViewpointGUID = function(){
 	}
 };
 
-schema.methods.getBCFMarkup = function(){
+schema.methods.getBCFMarkup = function(unit){
 	'use strict';
 
 	this.generateViewpointGUID();
@@ -956,6 +962,16 @@ schema.methods.getBCFMarkup = function(){
 	
 	let viewpointEntries = [];
 	let snapshotEntries = [];
+
+	let scale = 1;
+
+	if(unit === 'cm'){
+		scale = 0.01;
+	} else if (unit === 'mm') {
+		scale = 0.001;
+	} else if (unit === 'ft') {
+		scale = 0.3048;
+	}
 
 	let markup = {
 		Markup:{
@@ -1058,9 +1074,9 @@ schema.methods.getBCFMarkup = function(){
 					},
 					'PerspectiveCamera':{
 						CameraViewPoint:{
-							X: vp.look_at[0],
-							Y: vp.look_at[1],
-							Z: vp.look_at[2]
+							X: vp.position[0] * scale,
+							Y: vp.position[1] * scale,
+							Z: vp.position[2] * scale
 						},
 						CameraDirection:{
 							X: vp.view_dir[0],
@@ -1072,7 +1088,7 @@ schema.methods.getBCFMarkup = function(){
 							Y: vp.up[1],
 							Z: vp.up[2]
 						},
-						FieldOfView: vp.fov
+						FieldOfView: vp.fov * 180 / Math.PI
 					}
 				}
 			};
@@ -1112,9 +1128,9 @@ schema.methods.getBCFMarkup = function(){
 					},
 					'PerspectiveCamera':{
 						CameraViewPoint:{
-							X: this.viewpoint.look_at[0],
-							Y: this.viewpoint.look_at[1],
-							Z: this.viewpoint.look_at[2]
+							X: this.viewpoint.position[0] * scale,
+							Y: this.viewpoint.position[1] * scale,
+							Z: this.viewpoint.position[2] * scale
 						},
 						CameraDirection:{
 							X: this.viewpoint.view_dir[0],
@@ -1126,7 +1142,7 @@ schema.methods.getBCFMarkup = function(){
 							Y: this.viewpoint.up[1],
 							Z: this.viewpoint.up[2]
 						},
-						FieldOfView: this.viewpoint.fov
+						FieldOfView: this.viewpoint.fov * 180 / Math.PI
 					}
 				}
 			})
@@ -1179,268 +1195,303 @@ schema.statics.importBCF = function(account, project, zipPath){
 	'use strict';
 
 	let self = this;
+	let settings;
 
-	return new Promise((resolve, reject) => {
+	return ProjectSetting.findById({account, project}, project).then(_settings => {
+		settings = _settings;
 
-		let files = {};
-		let promises = [];
+	}).then(() => {
 
-		function handleZip(err, zipfile) {
-			if(err){
-				return reject(err);
-			}
+		return new Promise((resolve, reject) => {
 
-			zipfile.readEntry();
-
-			zipfile.on('entry', entry => handleEntry(zipfile, entry));
-
-			zipfile.on('error', err => reject(err));
-
-			zipfile.on('end', () => {
-
-				Promise.all(promises).then(() => {
-
-					let createIssueProms = [];
-
-					Object.keys(files).forEach(guid => {
-
-						let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
-							if(count <= 0) {
-								return createIssue(guid);
-							} else {
-								console.log('duplicate issue');
-								return Promise.resolve();
-							}
-						});
-
-						createIssueProms.push(promise);
-
-					});
-
-					return Promise.all(createIssueProms);
-
-				}).then(() => {
-					resolve();
-				}).catch(err => {
-					reject(err);
-				});
-			});
-
-		}
-
-		function parseViewpoints(issueGuid, issueFiles, vps){
-
-			let viewpoints = {};
+			let files = {};
 			let promises = [];
 
-			vps && vps.forEach(vp => {
-
-				if(!_.get(vp, '@.Guid')){
-					return;
-				}
-				
-				let vpFile = issueFiles[`${issueGuid}/${_.get(vp, 'Viewpoint[0]._')}`];
-
-				viewpoints[vp['@'].Guid] = {
-					snapshot: issueFiles[`${issueGuid}/${_.get(vp, 'Snapshot[0]._')}`],
-				};
-
-				vpFile && promises.push(parseXmlString(vpFile.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(xml => {
-					viewpoints[vp['@'].Guid].viewpointXml = xml;
-					viewpoints[vp['@'].Guid].Index = _.get(vp, 'Index');
-					viewpoints[vp['@'].Guid].Viewpoint = _.get(vp, 'Viewpoint');
-					viewpoints[vp['@'].Guid].Snapshot = _.get(vp, 'Snapshot');
-				}));
-
-			});
-			
-			return Promise.all(promises).then(() => viewpoints);
-		}
-
-		function createIssue(guid){
-
-			let issueFiles = files[guid];
-			let markupBuf = issueFiles[`${guid}/markup.bcf`];
-			let xml;
-			let issue;
-
-			if(!markupBuf){
-				return Promise.resolve();
-			}
-
-			return parseXmlString(markupBuf.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(_xml => {
-
-				xml = _xml;
-
-				issue = Issue.createInstance({account, project});
-				issue._id = stringToUUID(guid);
-				issue.extras = {};
-
-				if(xml.Markup){
-					
-					issue.extras.Header = _.get(xml, 'Markup.Header');
-					issue.topic_type = _.get(xml, 'Markup.Topic[0].@.TopicType');
-					issue.status =_.get(xml, 'Markup.Topic[0].@.TopicStatus');
-					issue.extras.ReferenceLink = _.get(xml, 'Topic[0].ReferenceLink');
-					issue.name = _.get(xml, 'Markup.Topic[0].Title[0]._');
-					issue.priority =  _.get(xml, 'Markup.Topic[0].Priority[0]._');
-					issue.extras.Index =  _.get(xml, 'Markup.Topic[0].Index[0]._');
-					issue.extras.Labels =  _.get(xml, 'Markup.Topic[0].Labels[0]._');
-					issue.created = moment(_.get(xml, 'Markup.Topic[0].CreationDate[0]._')).format('x');
-					issue.owner = _.get(xml, 'Markup.Topic[0].CreationAuthor[0]._');
-					issue.extras.ModifiedDate = _.get(xml, 'Markup.Topic[0].ModifiedDate[0]._');
-					issue.extras.ModifiedAuthor = _.get(xml, 'Markup.Topic[0].ModifiedAuthor[0]._');
-					issue.extras.DueDate = _.get(xml, 'Markup.Topic[0].DueDate[0]._');
-					issue.extras.AssignedTo = _.get(xml, 'Markup.Topic[0].AssignedTo[0]._');
-					issue.desc = _.get(xml, 'Markup.Topic[0].Description[0]._');
-					issue.extras.BimSnippet = _.get(xml, 'Markup.Topic[0].BimSnippet');
-					issue.extras.DocumentReference = _.get(xml, 'Markup.Topic[0].DocumentReference');
-					issue.extras.RelatedTopic = _.get(xml, 'Markup.Topic[0].RelatedTopic');
-					issue.markModified('extras');
-
+			function handleZip(err, zipfile) {
+				if(err){
+					return reject(err);
 				}
 
-				_.get(xml ,'Markup.Comment') && xml.Markup.Comment.forEach(comment => {
-					let obj = {
-						guid: _.get(comment, '@.Guid') ? utils.stringToUUID(_.get(comment, '@.Guid')) : utils.generateUUID(),
-						created: moment(_.get(comment, 'Date[0]._')).format('x'),
-						owner: _.get(comment, 'Author[0]._'),
-						comment: _.get(comment, 'Comment[0]._'),
-						sealed: true,
-						viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
-						extras: {}
-					};
+				zipfile.readEntry();
 
-					obj.extras.ModifiedDate = _.get(comment, 'ModifiedDate');
-					obj.extras.ModifiedAuthor = _.get(comment, 'ModifiedAuthor');
+				zipfile.on('entry', entry => handleEntry(zipfile, entry));
 
-					issue.comments.push(obj);
+				zipfile.on('error', err => reject(err));
+
+				zipfile.on('end', () => {
+
+					Promise.all(promises).then(() => {
+
+						let createIssueProms = [];
+
+						Object.keys(files).forEach(guid => {
+
+							let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
+								if(count <= 0) {
+									return createIssue(guid);
+								} else {
+									console.log('duplicate issue');
+									return Promise.resolve();
+								}
+							});
+
+							createIssueProms.push(promise);
+
+						});
+
+						return Promise.all(createIssueProms);
+
+					}).then(() => {
+						resolve();
+					}).catch(err => {
+						reject(err);
+					});
 				});
 
-				return parseViewpoints(guid, issueFiles, xml.Markup.Viewpoints);
+			}
 
-			}).then(viewpoints => {
+			function parseViewpoints(issueGuid, issueFiles, vps){
 
-				let thumbnailGenerated;
+				let viewpoints = {};
+				let promises = [];
 
-				Object.keys(viewpoints).forEach(guid => {
+				vps && vps.forEach(vp => {
 
-					if(!viewpoints[guid].viewpointXml){
+					if(!_.get(vp, '@.Guid')){
 						return;
 					}
+					
+					let vpFile = issueFiles[`${issueGuid}/${_.get(vp, 'Viewpoint[0]._')}`];
 
-					let extras = {};
-					let vpXML = viewpoints[guid].viewpointXml;
-
-					extras.Components = _.get(vpXML, 'VisualizationInfo.Components');
-					extras.Spaces = _.get(vpXML, 'VisualizationInfo.Spaces');
-					extras.SpaceBoundaries = _.get(vpXML, 'VisualizationInfo.SpaceBoundaries');
-					extras.Openings = _.get(vpXML, 'VisualizationInfo.Openings');
-					extras.OrthogonalCamera = _.get(vpXML, 'VisualizationInfo.OrthogonalCamera');
-					extras.Lines = _.get(vpXML, 'VisualizationInfo.Lines');
-					extras.ClippingPlanes = _.get(vpXML, 'VisualizationInfo.ClippingPlanes');
-					extras.Bitmap = _.get(vpXML, 'VisualizationInfo.Bitmap');
-					extras.Index = viewpoints[guid].Viewpoint;
-					extras.Snapshot = viewpoints[guid].Snapshot;
-
-					console.log(viewpoints[guid]);
-
-					let screenshotObj = viewpoints[guid].snapshot ? {
-						flag: 1,
-						content: viewpoints[guid].snapshot,
-					} : undefined;
-
-					//take the first screenshot as thumbnail
-					if(!thumbnailGenerated && screenshotObj){
-
-						issue.thumbnail = {
-							flag: 1,
-							content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
-						};
-
-						thumbnailGenerated = true;
-					}
-
-					let vp = {
-						guid: utils.stringToUUID(guid),
-						extras: extras,
-						screenshot: screenshotObj
-
+					viewpoints[vp['@'].Guid] = {
+						snapshot: issueFiles[`${issueGuid}/${_.get(vp, 'Snapshot[0]._')}`],
 					};
 
-					if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
-						vp.up = [
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
-						],
-						vp.view_dir = [
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
-						],
-						vp.look_at = [
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')),
-							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._'))
-						],
-						vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'));
-					}
+					vpFile && promises.push(parseXmlString(vpFile.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(xml => {
+						viewpoints[vp['@'].Guid].viewpointXml = xml;
+						viewpoints[vp['@'].Guid].Index = _.get(vp, 'Index');
+						viewpoints[vp['@'].Guid].Viewpoint = _.get(vp, 'Viewpoint');
+						viewpoints[vp['@'].Guid].Snapshot = _.get(vp, 'Snapshot');
+					}));
 
-					issue.viewpoints.push(vp);
 				});
-
-				return issue.save();
-
-			});
-
-		}
-
-		// read each item zip file, put them in files object
-		function handleEntry(zipfile, entry) {
-
-			let paths = entry.fileName.split('/');
-			console.log(paths);
-			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
-
-			if(guid && !files[guid]){
-				files[guid] = {};
+				
+				return Promise.all(promises).then(() => viewpoints);
 			}
 
-			// if entry is a file and start with guid
-			if(!entry.fileName.endsWith('/') && guid){
+			function createIssue(guid){
 
-				promises.push(new Promise( (resolve, reject) => {
-					zipfile.openReadStream(entry, (err, rs) => {
-						if(err){
-							return reject(err);
-						} else {
+				let issueFiles = files[guid];
+				let markupBuf = issueFiles[`${guid}/markup.bcf`];
+				let xml;
+				let issue;
 
-							let bufs = [];
+				if(!markupBuf){
+					return Promise.resolve();
+				}
 
-							rs.on('data', d => bufs.push(d) );
+				return parseXmlString(markupBuf.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(_xml => {
 
-							rs.on('end', () => {
-								let buf = Buffer.concat(bufs);
-								files[guid][entry.fileName] = buf;
-								resolve();
-							});
+					xml = _xml;
 
-							rs.on('error', err =>{
-								reject(err);
-							});
-						}
+					issue = Issue.createInstance({account, project});
+					issue._id = stringToUUID(guid);
+					issue.extras = {};
+
+					if(xml.Markup){
+						
+						issue.extras.Header = _.get(xml, 'Markup.Header');
+						issue.topic_type = _.get(xml, 'Markup.Topic[0].@.TopicType');
+						issue.status =_.get(xml, 'Markup.Topic[0].@.TopicStatus');
+						issue.extras.ReferenceLink = _.get(xml, 'Topic[0].ReferenceLink');
+						issue.name = _.get(xml, 'Markup.Topic[0].Title[0]._');
+						issue.priority =  _.get(xml, 'Markup.Topic[0].Priority[0]._');
+						issue.extras.Index =  _.get(xml, 'Markup.Topic[0].Index[0]._');
+						issue.extras.Labels =  _.get(xml, 'Markup.Topic[0].Labels[0]._');
+						issue.created = moment(_.get(xml, 'Markup.Topic[0].CreationDate[0]._')).format('x');
+						issue.owner = _.get(xml, 'Markup.Topic[0].CreationAuthor[0]._');
+						issue.extras.ModifiedDate = _.get(xml, 'Markup.Topic[0].ModifiedDate[0]._');
+						issue.extras.ModifiedAuthor = _.get(xml, 'Markup.Topic[0].ModifiedAuthor[0]._');
+						issue.extras.DueDate = _.get(xml, 'Markup.Topic[0].DueDate[0]._');
+						issue.extras.AssignedTo = _.get(xml, 'Markup.Topic[0].AssignedTo[0]._');
+						issue.desc = _.get(xml, 'Markup.Topic[0].Description[0]._');
+						issue.extras.BimSnippet = _.get(xml, 'Markup.Topic[0].BimSnippet');
+						issue.extras.DocumentReference = _.get(xml, 'Markup.Topic[0].DocumentReference');
+						issue.extras.RelatedTopic = _.get(xml, 'Markup.Topic[0].RelatedTopic');
+						issue.markModified('extras');
+
+					}
+
+					_.get(xml ,'Markup.Comment') && xml.Markup.Comment.forEach(comment => {
+						let obj = {
+							guid: _.get(comment, '@.Guid') ? utils.stringToUUID(_.get(comment, '@.Guid')) : utils.generateUUID(),
+							created: moment(_.get(comment, 'Date[0]._')).format('x'),
+							owner: _.get(comment, 'Author[0]._'),
+							comment: _.get(comment, 'Comment[0]._'),
+							sealed: true,
+							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
+							extras: {}
+						};
+
+						obj.extras.ModifiedDate = _.get(comment, 'ModifiedDate');
+						obj.extras.ModifiedAuthor = _.get(comment, 'ModifiedAuthor');
+
+						issue.comments.push(obj);
 					});
-				}));
-			} 
 
-			zipfile.readEntry();
+					return parseViewpoints(guid, issueFiles, xml.Markup.Viewpoints);
 
-		}
+				}).then(viewpoints => {
 
-		yauzl.open(zipPath, {lazyEntries: true}, handleZip);
+					let thumbnailGenerated;
+
+					Object.keys(viewpoints).forEach(guid => {
+
+						if(!viewpoints[guid].viewpointXml){
+							return;
+						}
+
+						let extras = {};
+						let vpXML = viewpoints[guid].viewpointXml;
+
+						extras.Components = _.get(vpXML, 'VisualizationInfo.Components');
+						extras.Spaces = _.get(vpXML, 'VisualizationInfo.Spaces');
+						extras.SpaceBoundaries = _.get(vpXML, 'VisualizationInfo.SpaceBoundaries');
+						extras.Openings = _.get(vpXML, 'VisualizationInfo.Openings');
+						extras.OrthogonalCamera = _.get(vpXML, 'VisualizationInfo.OrthogonalCamera');
+						extras.Lines = _.get(vpXML, 'VisualizationInfo.Lines');
+						extras.ClippingPlanes = _.get(vpXML, 'VisualizationInfo.ClippingPlanes');
+						extras.Bitmap = _.get(vpXML, 'VisualizationInfo.Bitmap');
+						extras.Index = viewpoints[guid].Viewpoint;
+						extras.Snapshot = viewpoints[guid].Snapshot;
+
+						let screenshotObj = viewpoints[guid].snapshot ? {
+							flag: 1,
+							content: viewpoints[guid].snapshot,
+						} : undefined;
+
+						//take the first screenshot as thumbnail
+						if(!thumbnailGenerated && screenshotObj){
+
+							let content = self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true);
+
+							if(content){
+
+								issue.thumbnail = {
+									flag: 1,
+									content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
+								};
+
+								thumbnailGenerated = true;
+
+							} else {
+								systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
+									account, 
+									project, 
+									issueId: utils.uuidToString(issue._id), 
+									viewpointId: guid
+								});
+							}
+						}
+
+						let vp = {
+							guid: utils.stringToUUID(guid),
+							extras: extras,
+							screenshot: screenshotObj
+
+						};
+
+						let scale = 1;
+						let unit = _.get(settings, 'properties.unit');
+						if(unit === 'cm'){
+							scale = 100;
+						} else if (unit === 'mm'){
+							scale = 1000;
+						} else if (_unit === 'ft'){
+							scale = 3.28084;
+						}	
+
+						if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
+							vp.up = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
+							],
+							vp.view_dir = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
+							],
+							vp.position = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')) * scale,
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale
+							],
+
+							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
+						}
+
+						issue.viewpoints.push(vp);
+					});
+
+					return issue.save();
+
+				});
+
+			}
+
+			// read each item zip file, put them in files object
+			function handleEntry(zipfile, entry) {
+
+				let paths;
+
+				if(entry.fileName.indexOf('\\') !== -1){
+					//give tolerance to file path using \ instead of /
+					paths = entry.fileName.split('\\');
+				} else {
+					paths = entry.fileName.split('/');
+				}
+
+				let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
+
+				if(guid && !files[guid]){
+					files[guid] = {};
+				}
+
+				// if entry is a file and start with guid
+				if(!entry.fileName.endsWith('/') && !entry.fileName.endsWith('\\') && guid){
+
+					promises.push(new Promise( (resolve, reject) => {
+						zipfile.openReadStream(entry, (err, rs) => {
+							if(err){
+								return reject(err);
+							} else {
+
+								let bufs = [];
+
+								rs.on('data', d => bufs.push(d) );
+
+								rs.on('end', () => {
+									let buf = Buffer.concat(bufs);
+									files[guid][paths.join('/')] = buf;
+									resolve();
+								});
+
+								rs.on('error', err =>{
+									reject(err);
+								});
+							}
+						});
+					}));
+				} 
+
+				zipfile.readEntry();
+
+			}
+
+			yauzl.open(zipPath, {lazyEntries: true}, handleZip);
+		});
 	});
-
 };
 
 var Issue = ModelFactory.createClass(

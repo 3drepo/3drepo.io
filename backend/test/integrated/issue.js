@@ -432,47 +432,47 @@ describe('Creating an issue', function () {
 	});
 
 
-	it('change or commenting should fail if status is closed', function(done){
+	// it('change or commenting should fail if status is closed', function(done){
 
-		let issue = Object.assign({"name":"Issue test"}, baseIssue, {status: 'closed'});
-		let issueId;
+	// 	let issue = Object.assign({"name":"Issue test"}, baseIssue, {status: 'closed'});
+	// 	let issueId;
 
-		async.series([
-			function(done){
-				agent.post(`/${username}/${project}/issues.json`)
-				.send(issue)
-				.expect(200 , function(err, res){
-					issueId = res.body._id;
-					return done(err);
+	// 	async.series([
+	// 		function(done){
+	// 			agent.post(`/${username}/${project}/issues.json`)
+	// 			.send(issue)
+	// 			.expect(200 , function(err, res){
+	// 				issueId = res.body._id;
+	// 				return done(err);
 					
-				});
-			},
-			function(done){
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send({ desc: 'desc'})
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-					done(err);
-				});
-			},
-			function(done){
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send({ topic_type: 'desc'})
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-					done(err);
-				});
-			},
-			function(done){
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send({ priority: 'high'})
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-					done(err);
-				});
-			},
-		], done);
-	});
+	// 			});
+	// 		},
+	// 		function(done){
+	// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+	// 			.send({ desc: 'desc'})
+	// 			.expect(400, function(err, res){
+	// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+	// 				done(err);
+	// 			});
+	// 		},
+	// 		function(done){
+	// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+	// 			.send({ topic_type: 'desc'})
+	// 			.expect(400, function(err, res){
+	// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+	// 				done(err);
+	// 			});
+	// 		},
+	// 		function(done){
+	// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+	// 			.send({ priority: 'high'})
+	// 			.expect(400, function(err, res){
+	// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+	// 				done(err);
+	// 			});
+	// 		},
+	// 	], done);
+	// });
 
 	describe('and then sealing a comment', function(){
 
