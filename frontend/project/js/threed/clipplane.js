@@ -269,7 +269,9 @@ var ClipPlane = {};
 			//The clip outline doesn't need translation, it should be in the right place
 			//set it to move by a bit so it's not cut off by the clipping plane.
 			
-			coordinateFrame.setAttribute("translation", "-1 -1 -1");
+
+			var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
+			coordinateFrame.setAttribute("translation", translation.join(" "));
 
 
 			//determine the outline of the clipping plane by intersection with the global bounding box	
