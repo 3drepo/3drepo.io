@@ -190,6 +190,75 @@ var ClipPlane = {};
 			);
 		};
 
+
+		/**
+		 * Given a list of vertices, return its outline
+		 */
+		this.determineOutline = function(vertices)
+		{
+			var min = vertices[0].slice();
+			var max = vertices[0].slice();
+
+			for(var i = 1; i < vertices.length; ++i)
+			{
+				for(var j = 0; j < 3; ++j)
+				{
+					if(min[j] > vertices[i][j])
+					{
+						min[j] = vertices[i][j]
+					}
+
+
+					if(max[j] < vertices[i][j])
+					{
+						max[j] = vertices[i][j]
+					}
+				}
+			}
+
+			var centrePnt = new x3dom.fields.SFVec3f((max[0]+min[0])/2.0, (max[1]+min[1])/2.0,(max[2]+min[2])/2.0);
+
+			var outline = [vertices[0], null, null, null];
+
+			var basePnt = new x3dom.fields.SFVec3f(vertices[0][0], vertices[0][1], vertices[0][2]);
+			var baseToCen = basePnt.subtract(centrePnt);
+
+
+
+			//There are only 4 vertices, taking first as base point, 2 would be perpendicular and 1 would not.
+			for(var i = 1; i < vertices.length; ++i)
+			{	
+				var currentPnt = new x3dom.fields.SFVec3f(vertices[i][0], vertices[i][1], vertices[i][2]);
+				var curToCen = currentPnt.subtract(centrePnt);
+				var dotProd = Math.abs(baseToCen.normalize().dot(curToCen.normalize()));
+				if(Math.abs(dotProd - 1.0) < 0.01)
+				{
+
+					//not perpendicular, must be the opposite point
+					outline[2] = vertices[i];
+
+				}
+				else
+				{
+					//the vectors are perpendicular
+					//this must be 2 or 4
+					if(outline[1])
+					{
+						outline[3] = vertices[i];
+					}
+					else
+					{
+						outline[1] = vertices[i];
+					}
+				}
+			}
+
+			outline.push(vertices[0]);
+
+			return outline;
+		}
+
+
 		/**
 		 * Move the clipping plane
 		 * @param {number} percentage - Percentage of entire clip volume to move across
@@ -321,8 +390,9 @@ var ClipPlane = {};
 
 			}
 
-			//FIXME: not sure if the order of the outline will always work in this case...
-			outline.push(outline[0]);	
+			outline = this.determineOutline(outline);
+
+
 			outlineCoords.setAttribute("point",
 				outline.map(function(item) {
 					return item.join(" ");
