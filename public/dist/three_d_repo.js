@@ -4403,10 +4403,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				{
 					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
 				}
-				else
-				{
-					console.log("Failed to find parent...");
-				}
 
 			}
 
@@ -4426,7 +4422,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
 
 			//transform the vectors to the right space if TransformMatrix is present.
-			console.log(origViewTrans);
 			if(origViewTrans)
 			{
 				x3domUp = origViewTrans.multMatrixVec(x3domUp);
@@ -9874,7 +9869,6 @@ var ViewerManager = {};
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					console.log("setting clipping planes: ["+event.value.account+" | "+event.value.project+"]");
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					vm.project = event.value.project;
@@ -12507,10 +12501,17 @@ angular.module('3drepo')
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
 					up: viewpoint.up,
-					account: self.account,
-					project: self.project
+					account: self.issueData.account,
+					project: self.issueData.project
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				data = {
+					clippingPlanes: viewpoint.clippingPlanes,
+					account: self.issueData.account,
+					project: self.issueData.project
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -13991,7 +13992,6 @@ angular.module('3drepo')
 				project: issue.project
 			});
 
-			console.log("sending clipping plane");
 			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				account: issue.account,
@@ -17197,7 +17197,6 @@ var Oculus = {};
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
 					console.log("SEND: " + type + " : " + JSON.stringify(value));
-					console.trace();
 					currentEvent = {type: type, value: value};
 				}
 			});

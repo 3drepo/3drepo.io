@@ -221,10 +221,17 @@
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
 					up: viewpoint.up,
-					account: self.account,
-					project: self.project
+					account: self.issueData.account,
+					project: self.issueData.project
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				data = {
+					clippingPlanes: viewpoint.clippingPlanes,
+					account: self.issueData.account,
+					project: self.issueData.project
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
 		};
 
