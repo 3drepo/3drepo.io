@@ -614,7 +614,7 @@
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 375,
+				newIssueHeight = 425,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,

@@ -4660,14 +4660,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
 
-				self.highlightPin(id); //This was preventing changing the colour of the pin
+				//self.highlightPin(id); This was preventing changing the colour of the pin
 				// Replace with
-				/*
 				callback(self.EVENT.CHANGE_PIN_COLOUR, {
 					id: id,
 					colours: [[1.0, 0.7, 0.0]]
 				});
-				*/
 
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
@@ -12499,7 +12497,7 @@ angular.module('3drepo')
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 375,
+				newIssueHeight = 425,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
