@@ -13512,6 +13512,35 @@ angular.module('3drepo')
 		};
 
 		/**
+		* import bcf
+		* @param file
+		*/
+		vm.importBcf = function(file){
+
+			$scope.$apply();
+
+			vm.importingBCF = true;
+
+			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+
+				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
+
+			}).then(function(data){
+
+				vm.importingBCF = false;
+				vm.issues = (data === "") ? [] : data;
+
+			}).catch(function(err){
+
+				vm.importingBCF = false;
+				console.log('Error while importing bcf', err);
+				
+			});
+
+
+		}
+
+		/**
 		 * Set up editing issue
 		 * @param issue
 		 */
@@ -13643,7 +13672,8 @@ angular.module('3drepo')
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<"
+					menuOption: "<",
+					importBcf: "&"
 				}
 			}
 		);
@@ -13784,6 +13814,20 @@ angular.module('3drepo')
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+				}
+				else if (this.menuOption.value === "exportBCF") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
+				}
+				else if (this.menuOption.value === "importBCF") {
+
+					var file = document.createElement('input');
+					file.setAttribute('type', 'file');
+					file.setAttribute('accept', '.zip,.bcfzip');
+					file.click();
+
+					file.addEventListener("change", function () {
+						self.importBcf({file: file.files[0]});
+					});
 				}
 				setupIssuesToShow();
 				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
@@ -14117,9 +14161,9 @@ angular.module('3drepo')
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
 		var self = this,
 			url = "",
 			data = {},
@@ -14480,6 +14524,29 @@ angular.module('3drepo')
 			}
 
 			return statusIcon;
+		};
+
+		/**
+		* Import bcf
+		*/
+		obj.importBcf = function(account, project, file){
+
+			var deferred = $q.defer();
+			var formData = new FormData();
+			formData.append("file", file);
+
+			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+				
+				console.log(res);
+				if(res.status === 200){
+					deferred.resolve();
+				} else {
+					deferred.reject(res.data);
+				}
+
+			});
+
+			return deferred.promise;
 		};
 
 		Object.defineProperty(
@@ -17033,7 +17100,21 @@ var Oculus = {};
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print",
+					icon: "fa-print"
+				},
+				{
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-upload"
+				},
+				{
+					value: "exportBCF",
+					label: "Export BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-download",
 					divider: true
 				},
 				{
