@@ -31,10 +31,10 @@ let responseCodes = require("../../response_codes.js");
 describe('Verify', function () {
 	let User = require('../../models/user');
 	let server;
-	let username = 'verify_username';
-	let username_not_verified = 'verify_username_not_verified';
-	let username_double_verified = 'verify_username_double_verified';
-	let username_expired_token = 'verify_username_expired';
+	let username = 'v_username';
+	let username_not_verified = 'v_name_not_verified';
+	let username_double_verified = 'v_name_db_verified';
+	let username_expired_token = 'v_name_expired';
 
 	let password = 'password';
 	let email = suf => `test3drepo_verification_${suf}@mailinator.com`;

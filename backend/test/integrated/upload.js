@@ -181,7 +181,7 @@ describe('Uploading a project', function () {
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy')
 			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+				expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
 				done(err);
 			});
 

@@ -245,6 +245,8 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 };
 
+schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
+
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
@@ -258,6 +260,11 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 	if(customData && (!customData.email || !customData.email.match(emailRegex))){
 		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+	}
+
+
+	if(!this.usernameRegExp.test(username)){
+		return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 	}
 
 	['firstName', 'lastName', 'email'].forEach(key => {

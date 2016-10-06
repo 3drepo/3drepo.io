@@ -31,6 +31,8 @@ module.exports.createApp = function(serverConfig)
 	let favicon = require("serve-favicon");
 	let History = require('../models/history');
 	let ProjectHelper = require('../models/helper/project');
+	let User = require('../models/user');
+
 	//let systemLogger = require("../logger.js").systemLogger;
 
 
@@ -137,6 +139,9 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nserver_config.fileNameRegExp = " + ProjectHelper.fileNameRegExp.toString() + ";";
 
+		params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
+
+		params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
 
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
