@@ -50,6 +50,34 @@ schema.statics.findAndIncInvoiceNumber = function(){
 	});
 };
 
+
+//inc counter and return the number atomically
+schema.statics.findAndIncRefundNumber = function(){
+
+
+	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
+
+	return new Promise((resolve, reject) => {
+
+		DB({}).dbCallback("admin", function(err, db) {
+
+			db.db('admin')
+			.collection('counters')
+			.findOneAndUpdate(
+				{ type: 'refund' },
+				{ '$inc': {'count': 1 }},
+				{ upsert : true, returnOriginal: false }
+			).then(doc => {
+				resolve(doc.value);
+			}).catch(err => {
+				reject(err);
+			});
+		});
+
+
+	});
+};
+
 var Counter = ModelFactory.createClass(
 	'Counter',
 	schema,

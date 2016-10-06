@@ -20,6 +20,9 @@ var html = data => `
 	<br>
 	Your payment of ${data.amount} is confirmed and you can start uploading projects in your 
 	${data.account} repository.
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 var subject = 'Your payment to 3D Repo is confirmed';

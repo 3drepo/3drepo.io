@@ -20,6 +20,9 @@ var html = data => `
 	<br>
 	Your project ${data.project} has been processed successfully without errors and is now ready.<br><br>
 	<a href="${data.url}">Go to my project</a>
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 var subject = data => `Your project ${data.project} is now ready`;

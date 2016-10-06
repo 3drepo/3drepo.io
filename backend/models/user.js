@@ -1187,7 +1187,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 				if(billing && billing.pdf){
 					attachments = [{
-						filename: `invoice-${billing.invoiceNo}.pdf`,
+						filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
 						content: billing.pdf
 					}];
 				}

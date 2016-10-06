@@ -21,6 +21,9 @@ var html = data => `
 	You've been invited to ${data.action} the project - ${data.project}
 	<br><br>
 	<a href="${data.url}">Go to project ${data.project}</a>
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 var subject = data => `${data.project} - Invitation to ${data.action}`;
