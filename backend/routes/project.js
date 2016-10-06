@@ -56,8 +56,10 @@ router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToPr
 
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 //search master tree
 router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
@@ -184,13 +186,13 @@ function getProjectSetting(req, res, next){
 
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
-		
+
 		whitelist.forEach(key => {
 			resObj[key] = setting[key];
 		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
-		
+
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -200,7 +202,7 @@ function getProjectSetting(req, res, next){
 
 function createProject(req, res, next){
 	'use strict';
-	
+
 	let responsePlace = utils.APIInfo(req);
 	let project = req.params.project;
 	let account = req.params.account;
@@ -226,11 +228,11 @@ function updateProject(req, res, next){
 	let account = req.params.account;
 
 	let promise = Promise.resolve();
-	
+
 	if(req.body.subProjects && req.body.subProjects.length > 0){
 
 		promise = ProjectSetting.findById({account}, project).then(setting => {
-			
+
 			if(!setting) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else if (!setting.federate){
@@ -314,7 +316,7 @@ function uploadProject(req, res, next){
 
 	if (config.cn_queue) {
 
-		var upload = multer({ 
+		var upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: fileFilter,
 		});
@@ -322,13 +324,10 @@ function uploadProject(req, res, next){
 		upload.single("file")(req, res, function (err) {
 			if (err) {
 				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
-			
+
 			} else if(!req.file.size){
 				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-			
-			} else if(req.body.tag && !req.body.tag.match(History.tagRegExp)){
-				return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_TAG_NAME, responseCodes.INVALID_TAG_NAME);
-			
+
 			} else {
 
 				let projectSetting;
@@ -340,7 +339,7 @@ function uploadProject(req, res, next){
 				//check dup tag first
 
 				(req.body.tag ? History.findByTag({account, project}, req.body.tag, {_id: 1}) : Promise.resolve()).then(tag => {
-					
+
 					if(tag){
 						responseCodes.respond(responsePlace, req, res, next, responseCodes.DUPLICATE_TAG, responseCodes.DUPLICATE_TAG);
 						return Promise.reject(responseCodes.DUPLICATE_TAG);
@@ -409,8 +408,8 @@ function uploadProject(req, res, next){
 					};
 
 					return importQueue.importFile(
-						req.file.path, 
-						req.file.originalname, 
+						req.file.path,
+						req.file.originalname,
 						req.params.account,
 						req.params.project,
 						req.session.user.username,
@@ -436,7 +435,7 @@ function uploadProject(req, res, next){
 
 
 						return Promise.reject(err);
-						
+
 					});
 
 				}).then(obj => {
@@ -449,8 +448,8 @@ function uploadProject(req, res, next){
 					projectSetting.status = 'ok';
 					projectSetting.errorReason = undefined;
 					projectSetting.markModified('errorReason');
-					
-					return projectSetting.save();					
+
+					return projectSetting.save();
 
 				}).catch(err => {
 					// import failed for some reason(s)...
@@ -463,19 +462,19 @@ function uploadProject(req, res, next){
 
 					err.stack ? req[C.REQ_REPO].logger.logError(err.stack) : req[C.REQ_REPO].logger.logError(err);
 
-		
+
 
 				});
-				
+
 
 			}
 		});
 
 	} else {
 		responseCodes.respond(
-			responsePlace, 
-			req, res, next, 
-			responseCodes.QUEUE_NO_CONFIG, 
+			responsePlace,
+			req, res, next,
+			responseCodes.QUEUE_NO_CONFIG,
 			{}
 		);
 	}
@@ -495,7 +494,7 @@ function listCollaborators(req, res ,next){
 		}
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.collaborators);
-		
+
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -531,8 +530,6 @@ function removeCollaborator(req, res ,next){
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
-
-
 }
 
 
@@ -559,6 +556,26 @@ function getProjectTree(req, res, next){
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
+
+function getModelProperties(req, res, next) {
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.getModelProperties(account, project, branch, req.params.rev, username).then(properties => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 
 
 function searchProjectTree(req, res, next){

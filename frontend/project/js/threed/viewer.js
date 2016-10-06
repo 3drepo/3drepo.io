@@ -1050,6 +1050,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
+		this.applyModelProperties = function(account, project, properties)
+		{
+			if (properties.properties)
+			{
+				if (properties.properties.hiddenNodes)
+				{
+					self.switchObjectVisibility(
+						null,
+						null,
+						null,
+						properties.properties.hiddenNodes
+					);
+				}
+			}
+		}
+
 		this.lookAtObject = function(obj) {
 			self.runtime.fitObject(obj, true);
 		};
