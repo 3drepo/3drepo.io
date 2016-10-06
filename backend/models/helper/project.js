@@ -497,43 +497,102 @@ function createFederatedProject(account, project, subProjects){
 
 }
 
-function getModelProperties(account, project, branch, username){
+function getModelProperties(account, project, branch, rev, username){
 	'use strict';
 
+	let subProperties;
 	let revId, modelPropertiesFileName;
+	let getHistory, history;
 	let status;
 
-	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, project }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, project }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
 
-		if(granted){
-			return History.findByBranch({ account, project }, branch);
-		} else {
-			status = 'NO_ACCESS';
-			return Promise.resolve();
-		}
-
-	}).then(history => {
-
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+	}).then(granted => {
 		if(!history){
-			!status && (status = 'NOT_FOUND');
-			return Promise.resolve({});
-		}
-
-		revId = utils.uuidToString(history._id);
-		modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
-		console.log("FILENAME: " + modelPropertiesFileName);
-		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
-	}).then(buf => {
-
-		let tree;
-
-		if (buf) {
-			tree = JSON.parse(buf);
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
 		} else {
-			tree = {};
+			revId = utils.uuidToString(history._id);
+			modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, project }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getModelProps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getModelProps.push(
+				getModelProperties(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						properties: obj.properties,
+						owner: ref.owner,
+						project: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getModelProps);
+
+	}).then(_subProperties => {
+
+		subProperties = _subProperties;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
+
+	}).then(buf => {
+		let properties;
+
+		if(buf){
+			properties = JSON.parse(buf);
+		} else if (!status && !buf){
+			properties = {};
 		}
 
-		return Promise.resolve({tree, status});
+		if (!properties.hiddenNodes)
+		{
+			properties.hiddenNodes = [];
+		}
+
+		subProperties.forEach(subProperty => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+
+			if (subProperty.properties.hiddenNodes)
+			{
+				properties.hiddenNodes = properties.hiddenNodes.concat(subProperty.properties.hiddenNodes);
+			}
+		});
+
+		return Promise.resolve({properties, status});
+
 	});
 }
 
@@ -813,7 +872,7 @@ function downloadLatest(account, project){
 	});
 }
 
-var fileNameRegExp = /[ *."\/\\[\]:;|=,<>]/g;
+var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
 
 module.exports = {
@@ -825,5 +884,9 @@ module.exports = {
 	createFederatedProject,
 	listSubProjects,
 	getFullTree,
-	getModelProperties
+	getModelProperties,
+	searchTree,
+	downloadLatest,
+	fileNameRegExp,
+	projectNameRegExp
 };

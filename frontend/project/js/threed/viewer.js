@@ -1052,15 +1052,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.applyModelProperties = function(account, project, properties)
 		{
-			if (properties.tree)
+			if (properties.properties)
 			{
-				if (properties.tree.hiddenNodes)
+				if (properties.properties.hiddenNodes)
 				{
 					self.switchObjectVisibility(
-						account,
-						project,
 						null,
-						properties.tree.hiddenNodes
+						null,
+						null,
+						properties.properties.hiddenNodes
 					);
 				}
 			}

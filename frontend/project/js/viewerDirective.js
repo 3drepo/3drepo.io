@@ -151,7 +151,7 @@
 				v.branch = "master";
 				v.revision = "head";
 
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
 				function (json, status)
 				{
 					v.viewer.applyModelProperties(v.account, v.project, json);

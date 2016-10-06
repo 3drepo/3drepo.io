@@ -59,6 +59,7 @@ router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAc
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 //search master tree
 router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
@@ -556,6 +557,26 @@ function getProjectTree(req, res, next){
 	});
 }
 
+function getModelProperties(req, res, next) {
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.getModelProperties(account, project, branch, req.params.rev, username).then(properties => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+
 
 function searchProjectTree(req, res, next){
 	'use strict';
@@ -597,20 +618,6 @@ function downloadLatest(req, res, next){
 		res.writeHead(200, headers);
 		file.readStream.pipe(res);
 
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function getModelProperties(req, res, next) {
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-	let username = req.session.user.username;
-
-	ProjectHelpers.getModelProperties(account, project, 'master', username).then(properties => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
