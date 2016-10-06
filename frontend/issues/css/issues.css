@@ -375,7 +375,6 @@ issue-comp .issueCompComment {
   margin: 10px 0;
 }
 
-issue-comp #issueCompDescriptionText,
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
 }
@@ -409,8 +408,14 @@ issue-comp #issueCompAdditional {
   margin-top: -20px;
 }
 
-issue-comp #issueCompFooter {
-  margin-top: -40px;
+issue-comp #issueCompNewComment {
+  margin-bottom: -40px;
+}
+
+issue-comp #descriptionAndComments {
+  overflow-y:auto;
+  overflow-x:hidden;
+  background: #f0f0f0;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

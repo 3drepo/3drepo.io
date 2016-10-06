@@ -2883,6 +2883,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.runtime = null;
 		this.fullscreen = false;
 		this.multiSelectMode = false;
+		this.pinDropMode = false;
 
 		this.clickingEnabled = false;
 
@@ -3561,7 +3562,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
-			if (!this.multiSelectMode) {
+			if (!this.multiSelectMode && !this.pinDropMode) {
 				var nameSpaceName = null;
 
 				/*
@@ -4547,7 +4548,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
 			if (on) {
-				element.style.cursor = "crosshair";
+				element.style.cursor = "default";
 				// Clear any single selection
 				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
 					self.oldPart[0].resetColor();
@@ -4555,6 +4556,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				element.style.cursor = "-webkit-grab";
 			}
+		};
+
+		/**
+		 * Pin drop mode
+		 * @param on
+		 */
+		this.setPinDropMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			this.pinDropMode = on;
+			element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};
 
 		/****************************************************************************
@@ -12000,18 +12011,28 @@ angular.module('3drepo')
 			}
 
 			// Selected objects
-			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
+				(currentActionIndex !== null) && (this.actions[currentActionIndex].action === "multi")) {
 				issueSelectedObjects = this.selectedObjects;
 			}
 
 			// Event
-			if ((changes.hasOwnProperty("event") && this.event)) {
-				// After a pin has been placed highlight any saved selected objects
-				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(this.actions[currentActionIndex].action === "pin") &&
+			if ((changes.hasOwnProperty("event") && this.event) && (currentActionIndex !== null)) {
+				/*
+				if ((this.actions[currentActionIndex].action === "pin") &&
+					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
 					(issueSelectedObjects !== null)) {
 					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+				else if ((this.actions[currentActionIndex].action === "multi") &&
+						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
+				}
+				*/
+				if ((this.actions[currentActionIndex].action === "multi") &&
+					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
 				}
 			}
 		};
@@ -12028,6 +12049,10 @@ angular.module('3drepo')
 			}
 			if (editingCommentIndex !== null) {
 				this.issueData.comments[editingCommentIndex].editing = false;
+			}
+			// Get out of pin drop mode
+			if ((currentActionIndex !== null) && (this.actions[currentActionIndex].action === "pin")) {
+				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
 		};
 
@@ -12118,25 +12143,41 @@ angular.module('3drepo')
 		 * @param index
 		 */
 		this.doAction = function (index) {
+			var data;
+
+			// Handle previous action
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
 			}
 			else if (currentActionIndex === index) {
+				switch (this.actions[currentActionIndex].action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
 				this.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
+				self.action = null;
 			}
 			else {
+				switch (this.actions[currentActionIndex].action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
 				this.actions[currentActionIndex].color = "";
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			if (currentActionIndex === null) {
-				self.action = null;
-				issueSelectedObjects = null;
-			}
-			else {
+			// New action
+			if (currentActionIndex !== null) {
+				this.actions[currentActionIndex].color = highlightBackground;
 				self.action = this.actions[currentActionIndex].action;
 
 				switch (this.actions[currentActionIndex].action) {
@@ -12148,7 +12189,6 @@ angular.module('3drepo')
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
-
 					case "multi":
 						if (issueSelectedObjects !== null) {
 							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
@@ -12156,6 +12196,10 @@ angular.module('3drepo')
 						else {
 							issueSelectedObjects = this.selectedObjects;
 						}
+						break;
+					case "pin":
+						data =
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
 			}
@@ -12453,7 +12497,7 @@ angular.module('3drepo')
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 375,
+				newIssueHeight = 425,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
@@ -12921,7 +12965,7 @@ angular.module('3drepo')
 				pickedPos = null,
 				pickedNorm = null;
 
-			if (changes.hasOwnProperty("event")) {
+			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
 					(changes.event.currentValue.value.hasOwnProperty("id"))) {
 					removePin();
@@ -16767,6 +16811,7 @@ var Oculus = {};
 			MEASURE_MODE: "EVENT_MEASURE_MODE",
 			MULTI_SELECT_MODE: "EVENT_MULTI_SELECT_MODE",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
+			PIN_DROP_MODE: "EVENT_PIN_DROP_MODE",
 			PIN_SELECTED: "EVENT_PIN_SELECTED",
 			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
 			PANEL_CARD_ADD_MODE: "EVENT_PANEL_CARD_ADD_MODE",
@@ -17821,6 +17866,8 @@ var Oculus = {};
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							v.viewer.setMultiSelectMode(event.value);
+						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+							v.viewer.setPinDropMode(event.value);
 						}
 					});
 				}
