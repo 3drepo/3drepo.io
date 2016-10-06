@@ -5203,6 +5203,7 @@ var ViewerManager = {};
 				vm.lastName        = null;
 				vm.email           = null;
 				vm.projectsGrouped = null;
+				vm.avatarUrl = null;
 			}
 		});
 
@@ -5279,6 +5280,7 @@ var ViewerManager = {};
 				vm.firstName = response.data.firstName;
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
+				vm.hasAvatar = response.data.hasAvatar;
 
 				// Pre-populate billing name if it doesn't exist with profile name
 				vm.billingAddress = {};
@@ -5300,6 +5302,7 @@ var ViewerManager = {};
 					}
 				}
 			});
+
 		}
 	}
 }());
@@ -5673,7 +5676,8 @@ var ViewerManager = {};
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				itemToShow: "="
+				itemToShow: "=",
+				hasAvatar: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -5681,11 +5685,12 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountInfoCtrl.$inject = ["$location"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
 
-	function AccountInfoCtrl ($location) {
+	function AccountInfoCtrl ($location, $scope, serverConfig, UtilsService) {
 		var vm = this;
 		
+		console.log('accountinfo', $scope)
 		/*
 		 * Init
 		 */
@@ -5705,6 +5710,55 @@ var ViewerManager = {};
 			vm.itemToShow = item;
 			$location.search({}).search("page", item);
 		};
+
+
+		function getAvatarUrl(){
+			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + '?' + new Date().valueOf();
+		}
+
+		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){
+
+			if(vm.username && vm.hasAvatar){
+				vm.avatarUrl = getAvatarUrl();
+			}
+
+		});
+
+
+		
+
+		vm.upload = function(){
+
+			var file = document.createElement('input');
+
+			file.setAttribute('type', 'file');
+			file.setAttribute('accept', '.gif,.jpg,.jpeg,.png');
+			file.click();
+
+			file.addEventListener("change", function () {
+
+				vm.uploadingAvatar = true;
+				var formData = new FormData();
+				formData.append("file", file.files[0]);
+
+				UtilsService.doPost(formData, vm.username + "/avatar", {'Content-Type': undefined}).then(function(res){
+					vm.uploadingAvatar = false;
+					
+					console.log(res);
+					if(res.status === 200){
+						vm.avatarUrl = getAvatarUrl();
+					} else {
+						console.log('Upload avatar error', res.data);
+					}
+
+				});
+
+				$scope.$apply();
+
+			});
+		}
+
+
 	}
 }());
 
@@ -17279,8 +17333,12 @@ var Oculus = {};
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
 			highlightSelectedViewerObject = true,
+<<<<<<< HEAD
 			clickedHidden = {}, // Nodes that have actually been clicked to hide
 			clickedShown = {}; // Nodes that have actually been clicked to show
+=======
+			clickedHidden = {}; // Nodes that have actually been clicked to hide
+>>>>>>> origin/ISSUE_243
 
 		/*
 		 * Init
@@ -17318,12 +17376,20 @@ var Oculus = {};
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
+<<<<<<< HEAD
 		 * @param {Array} nodesToShow
+=======
+		 * @param {Number} nodesToShow
+>>>>>>> origin/ISSUE_243
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
+<<<<<<< HEAD
 				nodeMinHeight = 42,
+=======
+				nodeMinHeight = 48,
+>>>>>>> origin/ISSUE_243
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 
@@ -17348,11 +17414,15 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+<<<<<<< HEAD
 			/*
+=======
+>>>>>>> origin/ISSUE_243
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
+<<<<<<< HEAD
 			*/
 			// Only make the top node visible if it does not have a toggleState
 			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
@@ -17360,6 +17430,11 @@ var Oculus = {};
 			}
 		}
 
+=======
+
+		}
+
+>>>>>>> origin/ISSUE_243
 		/**
 		 * Set the toggle state of a node
 		 * @param {Object} node Node to change the visibility for
@@ -17443,6 +17518,7 @@ var Oculus = {};
 						}
 
 						for (i = 0; i < numChildren; i += 1) {
+<<<<<<< HEAD
 							// For federation - handle node of project that cannot be viewed or has been deleted
 							// That node will be below level 0 only
 							if ((vm.nodesToShow[index].level === 0) &&
@@ -17482,6 +17558,23 @@ var Oculus = {};
 										break;
 									}
 								}
+=======
+							vm.nodesToShow[index].children[i].expanded = false;
+
+							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// If the child node was not clicked hidden set its toggle state to visible
+							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
+
+							// Determine if child node has childern
+							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
+							if("children" in vm.nodesToShow[index].children[i]) {
+								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
+							}
+							else {
+								vm.nodesToShow[index].children[i].hasChildren = false;
+>>>>>>> origin/ISSUE_243
 							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
@@ -17546,21 +17639,36 @@ var Oculus = {};
 							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
 						}
 
+<<<<<<< HEAD
 						// Determine if child node has childern
 						if ("children" in vm.nodesToShow[i].children[j]) {
+=======
+						// Only set the toggle state once when the node is listed
+						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
+							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
+						}
+
+						if("children" in vm.nodesToShow[i].children[j]) {
+>>>>>>> origin/ISSUE_243
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						}
 						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
 						}
 
+<<<<<<< HEAD
 						// Set current selected node
+=======
+>>>>>>> origin/ISSUE_243
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 							currentSelectedNode = vm.nodesToShow[i].children[j];
 						}
 
+<<<<<<< HEAD
 						// Determine if more expansion is required
+=======
+>>>>>>> origin/ISSUE_243
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
@@ -17601,10 +17709,15 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
+<<<<<<< HEAD
 					if (vm.currentFilterItemSelected !== null) {
 						vm.currentFilterItemSelected.class = "";
 						vm.currentFilterItemSelected = null;
 					}
+=======
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
+>>>>>>> origin/ISSUE_243
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -17634,7 +17747,10 @@ var Oculus = {};
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
 					updateClickedHidden(vm.nodesToShow[i]);
+<<<<<<< HEAD
 					updateClickedShown(vm.nodesToShow[i]);
+=======
+>>>>>>> origin/ISSUE_243
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -17932,6 +18048,7 @@ var Oculus = {};
 		}
 
 		/**
+<<<<<<< HEAD
 		 * If a node was clicked to show, add it to a list of similar nodes
 		 *
 		 * @param {Object} node
@@ -17967,6 +18084,8 @@ var Oculus = {};
 		}
 
 		/**
+=======
+>>>>>>> origin/ISSUE_243
 		 * Check if a node was clicked to hide
 		 *
 		 * @param {Object} node

@@ -114,6 +114,7 @@
 				vm.lastName        = null;
 				vm.email           = null;
 				vm.projectsGrouped = null;
+				vm.avatarUrl = null;
 			}
 		});
 
@@ -190,6 +191,7 @@
 				vm.firstName = response.data.firstName;
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
+				vm.hasAvatar = response.data.hasAvatar;
 
 				// Pre-populate billing name if it doesn't exist with profile name
 				vm.billingAddress = {};
@@ -211,6 +213,7 @@
 					}
 				}
 			});
+
 		}
 	}
 }());

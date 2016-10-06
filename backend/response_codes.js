@@ -17,6 +17,7 @@
 
 var C = require("./constants");
 var _ = require('lodash');
+var config = require('./config');
 
 var responseCodes = {
 	// User error codes
@@ -155,7 +156,7 @@ var responseCodes = {
 	USER_IN_COLLABORATOR_LIST: {value: 94, message: 'This user is currently in collaborator list of a project', status: 400 },
 	SUBSCRIPTION_CANNOT_REMOVE_SELF: {value: 95, message: 'You cannot remove yourself', status: 400 },
 
-	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400}, 
+	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400},
 	EXECUTE_AGREEMENT_ERROR: { value: 97, message: 'Failed to get payment from PayPal', status: 400 },
 
 	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Your current quota usage exceeds the requested change.', status: 400 },
@@ -172,6 +173,7 @@ var responseCodes = {
 
 	INVALID_VAT: {value: 106, status: 400, message: 'Invalid VAT number'},
 	NO_CONTACT_EMAIL: { value: 107, status: 400, message: 'contact.email is not defined in config'},
+
 	DUPLICATE_TAG : { value: 108, status: 400, message: 'Revision name already exists'},
 	INVALID_TAG_NAME: {value : 109, status: 400, message: 'Invalid revision name'},
 
@@ -179,6 +181,7 @@ var responseCodes = {
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
 
+	AVATAR_SIZE_LIMIT: {value: 113, status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB`},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -250,8 +253,6 @@ Object.keys(responseCodes).forEach(key => {
 		valid_values.push(responseCodes[key].value);
 	}
 });
-
-
 
 var mimeTypes = {
 	"src"  : "text/plain",
@@ -325,11 +326,11 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 			//res.setHeader("Content-Length", extraInfo.length);
 			length = extraInfo.length;
-			
+
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
-			
+
 		} else {
 
 			length = typeof extraInfo === 'string' ? extraInfo.length : JSON.stringify(extraInfo).length;

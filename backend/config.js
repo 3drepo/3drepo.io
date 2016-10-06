@@ -230,5 +230,8 @@
 		return baseUrl;
 	};
 
+	//avatar size limit
+	config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
+
 	module.exports = config;
 })();

@@ -206,7 +206,15 @@ account-info .accountInfoPage .md-button {
 
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
-	width: 100%;
+  height:150px;
+  background: #E8EAF6;
+  margin: auto;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.avatar-upload{
+  cursor: pointer;
 }
 
 /** Account Menu ******************************************************************************************************/
@@ -2222,7 +2230,11 @@ tree .treeNodes p {
   outline: none;
   word-break: break-all;
   word-wrap: break-word;
+<<<<<<< HEAD
   margin: 8px 0 8px -5px;
+=======
+  margin: 0 0 0 -5px;
+>>>>>>> origin/ISSUE_243
   font-size: 14px;
 }
 
@@ -2231,6 +2243,7 @@ tree .treeNode {
 }
 tree .treeNode:hover {
   cursor: pointer;
+<<<<<<< HEAD
   background: rgba(0,69,148,.1);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
@@ -2239,6 +2252,16 @@ tree .treeNodeSelected {
   background: rgba(0,69,148, 0.2);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
+=======
+  background: #F0F0F0;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
+tree .treeNodeDivider {
+  margin-top: 4px;
+>>>>>>> origin/ISSUE_243
 }
 
 tree md-checkbox {
@@ -2251,6 +2274,7 @@ tree md-checkbox {
   font-weight: normal;
 }
 
+<<<<<<< HEAD
 tree .treeButtonDisabled {
   color: #CCCCCC !important;
 }
@@ -2268,6 +2292,21 @@ tree .noAccessName {
 }
 tree .noAccessName:hover {
   cursor: default !important;
+=======
+
+tree .treeButtonDisabled {
+  color: #CCCCCC !important;
+}
+
+
+tree .treeNodeSelected {
+  background: rgba(0,69,148, 0.2);
+  border-radius: 2px;
+}
+
+tree .expandButton {
+  margin-left: 0 !important;
+>>>>>>> origin/ISSUE_243
 }
 
 tree .toggleButton {
@@ -2285,6 +2324,19 @@ tree .filterNode {
 
 tree .filterNode div {
   height: 100%;
+<<<<<<< HEAD
+=======
+  width: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
+  cursor: default;
+  padding: 4px 0;
+}
+
+tree .filterListNodeName {
+  margin-left: 15px !important;
+>>>>>>> origin/ISSUE_243
 }
 
 tree .filterListNodeName {

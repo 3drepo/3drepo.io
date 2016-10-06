@@ -6,10 +6,11 @@
 
 		#accountInfoContent(layout="column")
 			div(layout="row", flex="none")
-				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
-				#noAvatarIcon(flex, layout="row")
-					//md-icon(ng-if="!vm.hasAvatar", class="fa fa-user")
-					md-icon.angular-material-icons(ng-if="!vm.hasAvatar") person
+				img.account-avatar-image(ng-if="vm.avatarUrl && !vm.uploadingAvatar", src='{{vm.avatarUrl}}', ng-click="vm.upload()")
+				md-progress-circular.avatarUploadIcon(md-mode="indeterminate", md-diameter="55", ng-if="vm.uploadingAvatar")
+				#noAvatarIcon(ng-if="!vm.avatarUrl && !vm.uploadingAvatar", flex, layout="row")
+					//md-icon(class="fa fa-user", ng-click="vm.upload()")
+					md-icon.angular-material-icons.avatar-upload(ng-if="!vm.hasAvatar", ng-click="vm.upload()") person
 			md-list
 				md-list-item.md-2-line
 					div.md-list-item-text
