@@ -220,7 +220,9 @@
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
-					up: viewpoint.up
+					up: viewpoint.up,
+					account: self.account,
+					project: self.project
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 			}

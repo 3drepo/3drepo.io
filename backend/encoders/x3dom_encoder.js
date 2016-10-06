@@ -901,6 +901,7 @@ exports.render = function (account, project, doc, logger){
 
 	var xmlDoc = X3D_Header();
 
+	console.log("rendering..");
 	if (!doc.mRootNode){
 		throw responseCodes.ROOT_NODE_NOT_FOUND;
 	}
@@ -916,8 +917,49 @@ exports.render = function (account, project, doc, logger){
 	var globalCoordOffset = null;
 	var globalCoordPromise = deferred();
 	var dbInterface = {};
+	
+	var groupNode = xmlDoc.createElement("Group");
+	groupNode.setAttribute("id", account + "__" + project);
+	groupNode.setAttribute('onload', 'onLoaded(event);');
+	var projOffset = null;
+	projOffset = doc.mRootNode.coordOffset;
+	console.log(projOffset);
+	console.log("!!!!!");
+	
+	if(projOffset && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
+	{
 
-	X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', logger);
+       	var offsetTransform = xmlDoc.createElement("Transform");
+		var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
+        offsetTransform.setAttribute("translation", offsetTrans.join(" "));
+
+
+      	var offsetTransform2 = xmlDoc.createElement("Transform");
+        offsetTransform2.setAttribute("translation", projOffset.join(" "));
+
+   	   	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+   		groupNode.appendChild(offsetTransform2);
+		offsetTransform.appendChild(groupNode);
+		sceneRoot.root.appendChild(offsetTransform);
+				
+	}
+	else
+	{
+
+    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+	
+		//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
+		if (globalCoordOffset) {
+           	var offsetTransform = xmlDoc.createElement("Transform");
+			var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
+   	        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
+
+			offsetTransform.appendChild(groupNode);
+        	sceneRoot.root.appendChild(offsetTransform);
+       	}
+	}
+
+
 	var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
 
 	X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
@@ -1005,8 +1047,6 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 	    	    	sceneRoot.root.appendChild(offsetTransform);
 	        	}
 			}
-
-
 
 
 			/*

@@ -289,12 +289,17 @@
 			data = {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up
+				up: issue.viewpoint.up,
+				account: issue.account,
+				project: issue.project
+
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 
 			data = {
-				clippingPlanes: issue.viewpoint.clippingPlanes
+				clippingPlanes: issue.viewpoint.clippingPlanes,
+				account: issue.account,
+				project: issue.project
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 
