@@ -34,16 +34,16 @@
         };
     }
 
-    RegisterRequestCtrl.$inject = ["$scope", "$location", "$window"];
+    RegisterRequestCtrl.$inject = ["$scope", "$window"];
 
-    function RegisterRequestCtrl ($scope, $location, $window) {
+    function RegisterRequestCtrl ($scope, $window) {
         var vm = this;
 
         /*
          * Watch state
          */
         $scope.$watch("vm.state", function (newValue) {
-            console.log(newValue);
+            //console.log(newValue);
         });
 
         vm.goToLoginPage = function () {

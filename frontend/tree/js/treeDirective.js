@@ -58,7 +58,8 @@
 			currentScrolledToNode = null,
 			highlightSelectedViewerObject = true,
 			clickedHidden = {}, // Nodes that have actually been clicked to hide
-			clickedShown = {}; // Nodes that have actually been clicked to show
+			clickedShown = {}, // Nodes that have actually been clicked to show
+			multiSelectMode = false;
 
 		/*
 		 * Init
@@ -351,11 +352,11 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				setContentHeight(vm.nodesToShow);
 				// Redraw the tree
 				$timeout(function () {
 					vm.showNodes = true;
 				});
-				setContentHeight(vm.nodesToShow);
 			}
 		}
 
@@ -389,6 +390,9 @@
 					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 				highlightSelectedViewerObject = !event.value.on;
+			}
+			else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+				multiSelectMode = event.value;
 			}
 		});
 

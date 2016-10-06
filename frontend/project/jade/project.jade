@@ -1,8 +1,8 @@
 //.container-fluid#project(global ng-if="!vm.state.bid4free")
 
 // tabindex is required for ng-keydown to work on a div/directive
-div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)", tabindex="0")
-	#project-viewport-container.row
+#project(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
+	#project-viewport-container.row(tabindex="0", tdr-focus="true")
 		viewermanager
 
 	#projectUI
@@ -18,7 +18,9 @@ div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)", tabindex
 		revision="vm.revision"
 		position="left"
 		style="pointer-events:{{vm.pointerEvents}}"
-		keys-down="vm.keysDown")
+		keys-down="vm.keysDown"
+		selected-objects="vm.selectedObjects"
+		set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 		panel#rightPanel(
 		account="vm.account"
@@ -32,3 +34,11 @@ div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)", tabindex
 		bottom-buttons(style="pointer-events:{{vm.pointerEvents}}")
 		qr-code-reader
 
+multi-select(
+account="vm.account"
+project="vm.project"
+keys-down="vm.keysDown"
+send-event="vm.sendEvent(type, value)"
+event="vm.event"
+set-selected-objects="vm.setSelectedObjects(selectedObjects)"
+initial-selected-objects="vm.initialSelectedObjects")

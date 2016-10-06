@@ -37,25 +37,31 @@
 		var currentError = {};
 
 		var sendInternal = function(type, value) {
+			/*
 			$timeout(function() {
 				currentEvent = {type:type, value: value};
 			});
+			*/
+			currentEvent = {type:type, value: value};
 		};
 
 		var send = function (type, value) {
-			sendInternal(type, value);
-			//nextEventService.send(type, value);
+			//sendInternal(type, value);
+			nextEventService.send(type, value);
 		};
 
 		var sendErrorInternal = function(type, value) {
+			/*
 			$timeout(function() {
 				currentError = {type: type, value: value};
 			});
+			*/
+			currentError = {type: type, value: value};
 		};
 
 		var sendError = function(type, value) {
-			sendErrorInternal(type, value);
-			//nextEventService.sendError(type, value);
+			//sendErrorInternal(type, value);
+			nextEventService.sendError(type, value);
 		};
 
 		return {

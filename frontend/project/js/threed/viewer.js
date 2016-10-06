@@ -677,40 +677,49 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 			}
 
-			// Don't unhighlight previous selection when in multi select mode
-			if (!this.multiSelectMode) {
-				if (self.oldPart) {
-					for (i = 0; i < self.oldPart.length; i++) {
-						self.oldPart[i].resetColor();
-					}
+			if (self.oldPart) {
+				for (i = 0; i < self.oldPart.length; i++) {
+					self.oldPart[i].resetColor();
 				}
 			}
 
-			// Either toggle object or select new object(s)
-			if (self.oldPart &&
-				(self.oldPart[0].ids.length === 1) &&
-				(part[0].ids.length === 1) &&
-				(self.oldPart[0].ids[0] === part[0].ids[0])) {
-				// Toggle single selection
-				self.oldPart[0].resetColor();
-				delete self.oldPart;
-			}
-			else {
-				// Store current selection
-				self.oldPart = part;
-
-				for (i = 0; i < part.length; i++) {
-					part[i].setEmissiveColor(colour, "both");
-				}
-			}
-
-			/*
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
 				part[i].setEmissiveColor(colour, "both");
 			}
-			 */
+		};
+
+		/**
+		 * This is copied from selectParts()
+		 * @param highlightPart
+		 * @param unhighlightPart
+		 * @param zoom
+		 * @param colour
+		 */
+		this.selectAndUnselectParts = function(highlightPart, unhighlightPart, zoom, colour) {
+			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
+
+			if (zoom) {
+				for (i = 0; i < highlightPart.length; i++) {
+					highlightPart[i].fit();
+				}
+				for (i = 0; i < unhighlightPart.length; i++) {
+					unhighlightPart[i].fit();
+				}
+			}
+
+			for (i = 0; i < highlightPart.length; i++) {
+				highlightPart[i].setEmissiveColor(colour, "both");
+			}
+
+			for (i = 0; i < unhighlightPart.length; i++) {
+				unhighlightPart[i].resetColor();
+			}
+
+			self.oldPart = highlightPart;
 		};
 
 		this.clickObject = function(objEvent) {
@@ -737,25 +746,83 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
+			if (!this.multiSelectMode) {
+				var nameSpaceName = null;
+
+				/*
+				 if (account && project) {
+				 nameSpaceName = account + "__" + project;
+				 }
+				 */
+
+				if (!ids) {
+					ids = [];
+				}
+
+				// If we pass in a single id, then we might be selecting
+				// an old-style Group in X3DOM rather than multipart.
+				ids = Array.isArray(ids) ? ids: [ids];
+
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var fullPartsList = [];
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								fullPartsList.push(parts);
+							}
+						}
+					}
+
+					self.selectParts(fullPartsList, zoom, colour);
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						self.setApp(object[0], colour);
+					}
+				}
+
+				if (ids.length === 0)
+				{
+					self.setApp(null);
+				}
+			}
+		};
+
+		/**
+		 * This is copied from highlightObjects()
+		 * @param account
+		 * @param project
+		 * @param highlight_ids
+		 * @param unhighlight_ids
+		 * @param zoom
+		 * @param colour
+		 */
+		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
-			/*
-			if (account && project) {
-				nameSpaceName = account + "__" + project;
-			}
-			*/
-
-			if (!ids) {
-				ids = [];
-			}
-
-			// If we pass in a single id, then we might be selecting
-			// an old-style Group in X3DOM rather than multipart.
-			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
+				var fullHighlightPartsList = [];
+				var fullUnhighlightPartsList = [];
 				var nsMultipartNodes;
 
 				// If account and project have been specified
@@ -769,30 +836,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
+						if (highlightParts && highlightParts.ids.length > 0) {
+							fullHighlightPartsList.push(highlightParts);
+						}
 
-						if (parts && parts.ids.length > 0) {
-							fullPartsList.push(parts);
+						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
+						if (unhighlightParts && unhighlightParts.ids.length > 0) {
+							fullUnhighlightPartsList.push(unhighlightParts);
 						}
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom, colour);
-			}
-
-			for(var i = 0; i < ids.length; i++)
-			{
-				var id = ids[i];
-				var object = document.querySelectorAll("[id$='" + id + "']");
-
-				if (object[0]) {
-					self.setApp(object[0], colour);
-				}
-			}
-
-			if (ids.length === 0)
-			{
-				self.setApp(null);
+				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
 			}
 		};
 
@@ -1693,6 +1749,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			this.multiSelectMode = on;
 			if (on) {
 				element.style.cursor = "crosshair";
+				// Clear any single selection
+				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
+					self.oldPart[0].resetColor();
+				}
 			} else {
 				element.style.cursor = "-webkit-grab";
 			}
@@ -1883,6 +1943,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
+	HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 

@@ -53,7 +53,6 @@
 		vm.captchaKey = serverConfig.captcha_client_key;
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
-		vm.useRegister = false;
 		vm.registering = false;
 		vm.showLegalText = false;
 
@@ -61,11 +60,8 @@
 		 * Auth stuff
 		 */
 		if (serverConfig.hasOwnProperty("auth")) {
-			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
-				vm.useRegister = true;
-				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
-					vm.useReCapthca = true;
-				}
+			if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+				vm.useReCapthca = true;
 			}
 		}
 
@@ -167,13 +163,18 @@
 		 */
 		function doRegister() {
 			var data,
-				allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
+			doRegister = true,
+			allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
 				if (allowedFormat.test(vm.newUser.username)) {
-					if (vm.newUser.tcAgreed) {
+					if (vm.showLegalText) {
+						doRegister = vm.newUser.tcAgreed;
+					}
+
+					if (doRegister) {
 						data = {
 							email: vm.newUser.email,
 							password: vm.newUser.password
@@ -197,7 +198,9 @@
 								vm.registerErrorMessage = response.data.message;
 							}
 							vm.registering = false;
-							grecaptcha.reset(); // reset reCaptcha
+							if (vm.useReCapthca) {
+								grecaptcha.reset(); // reset reCaptcha
+							}
 						});
 					}
 					else {
