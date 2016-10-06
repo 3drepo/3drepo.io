@@ -122,19 +122,8 @@
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 
-	// Multi and Pin
+	// Action components
 	div(ng-switch="$ctrl.action")
-		//issues-multi(
-			ng-switch-when="multi"
-			account="$ctrl.account"
-			project="$ctrl.project"
-			selected-object="$ctrl.selectedObject"
-			keys-down="$ctrl.keysDown"
-			clear="vm.clearMulti"
-			send-event="$ctrl.sendEvent({type: type, value: value})"
-			event="$ctrl.event"
-			set-multi="$ctrl.setMulti({data: data})")
-
 		issues-pin(
 		ng-switch-when="pin"
 		account="$ctrl.account"

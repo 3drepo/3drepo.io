@@ -128,18 +128,28 @@
 			}
 
 			// Selected objects
-			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
+				(currentActionIndex !== null) && (this.actions[currentActionIndex].action === "multi")) {
 				issueSelectedObjects = this.selectedObjects;
 			}
 
 			// Event
-			if ((changes.hasOwnProperty("event") && this.event)) {
-				// After a pin has been placed highlight any saved selected objects
-				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(this.actions[currentActionIndex].action === "pin") &&
+			if ((changes.hasOwnProperty("event") && this.event) && (currentActionIndex !== null)) {
+				/*
+				if ((this.actions[currentActionIndex].action === "pin") &&
+					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
 					(issueSelectedObjects !== null)) {
 					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+				else if ((this.actions[currentActionIndex].action === "multi") &&
+						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
+				}
+				*/
+				if ((this.actions[currentActionIndex].action === "multi") &&
+					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
 				}
 			}
 		};
@@ -156,6 +166,10 @@
 			}
 			if (editingCommentIndex !== null) {
 				this.issueData.comments[editingCommentIndex].editing = false;
+			}
+			// Get out of pin drop mode
+			if ((currentActionIndex !== null) && (this.actions[currentActionIndex].action === "pin")) {
+				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
 		};
 
@@ -246,25 +260,41 @@
 		 * @param index
 		 */
 		this.doAction = function (index) {
+			var data;
+
+			// Handle previous action
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
 			}
 			else if (currentActionIndex === index) {
+				switch (this.actions[currentActionIndex].action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
 				this.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
+				self.action = null;
 			}
 			else {
+				switch (this.actions[currentActionIndex].action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
 				this.actions[currentActionIndex].color = "";
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			if (currentActionIndex === null) {
-				self.action = null;
-				issueSelectedObjects = null;
-			}
-			else {
+			// New action
+			if (currentActionIndex !== null) {
+				this.actions[currentActionIndex].color = highlightBackground;
 				self.action = this.actions[currentActionIndex].action;
 
 				switch (this.actions[currentActionIndex].action) {
@@ -276,7 +306,6 @@
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
-
 					case "multi":
 						if (issueSelectedObjects !== null) {
 							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
@@ -284,6 +313,10 @@
 						else {
 							issueSelectedObjects = this.selectedObjects;
 						}
+						break;
+					case "pin":
+						data =
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
 			}
