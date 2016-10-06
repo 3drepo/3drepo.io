@@ -1329,7 +1329,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							owner: _.get(comment, 'Author[0]._'),
 							comment: _.get(comment, 'Comment[0]._'),
 							sealed: true,
-							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
+							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0]._')) ? utils.stringToUUID(_.get(comment, 'Viewpoint[0]._')) : undefined,
 							extras: {}
 						};
 
@@ -1407,7 +1407,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							scale = 100;
 						} else if (unit === 'mm'){
 							scale = 1000;
-						} else if (_unit === 'ft'){
+						} else if (unit === 'ft'){
 							scale = 3.28084;
 						}	
 
