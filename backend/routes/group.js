@@ -24,7 +24,6 @@ var responseCodes = require('../response_codes.js');
 var Group = require('../models/group');
 var utils = require('../utils');
 // var uuid = require('node-uuid');
-var stringToUUID = utils.stringToUUID;
 // var uuidToString = utils.uuidToString;
 //var mongo    = require("mongodb");
 
@@ -85,9 +84,9 @@ function createGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	let group = Group.createGroup(getDbColOptions(req), req.body);
+	let create = Group.createGroup(getDbColOptions(req), req.body);
 
-	group.save().then(group => {
+	create.then(group => {
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
 		next();
@@ -103,7 +102,7 @@ function deleteGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.findOneAndRemove(getDbColOptions(req), { _id : stringToUUID(req.params.id)}).then( () => {
+	Group.deleteGroup(getDbColOptions(req), req.params.id).then(() => {
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { 'status': 'success'});
 		//next();	
@@ -124,8 +123,7 @@ function updateGroup(req, res, next){
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			group.updateAttrs(req.body);
-			return group.save();
+			return group.updateAttrs(req.body);
 		}
 
 	}).then(group => {

@@ -252,6 +252,35 @@
 		};
 
 		/**
+		* import bcf
+		* @param file
+		*/
+		vm.importBcf = function(file){
+
+			$scope.$apply();
+
+			vm.importingBCF = true;
+
+			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+
+				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
+
+			}).then(function(data){
+
+				vm.importingBCF = false;
+				vm.issues = (data === "") ? [] : data;
+
+			}).catch(function(err){
+
+				vm.importingBCF = false;
+				console.log('Error while importing bcf', err);
+				
+			});
+
+
+		}
+
+		/**
 		 * Set up editing issue
 		 * @param issue
 		 */

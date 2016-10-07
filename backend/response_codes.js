@@ -183,6 +183,8 @@ var responseCodes = {
 	ISSUE_INVALID_PRIORITY: {value: 115, message: 'Invalid issue priority', status: 400},
 	ISSUE_SAME_STATUS: {value: 116, message: 'New status is the same as current status', status: 400},
 	ISSUE_SAME_PRIORITY: {value: 117, message: 'New priority is the same as current priority', status: 400},
+	MESH_NOT_FOUND: {value: 118, message: 'Mesh not found', status: 400},
+	GROUP_ID_NOT_FOUND_IN_MESH: {value: 119, message: 'Group ID not found in mesh', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {

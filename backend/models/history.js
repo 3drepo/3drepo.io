@@ -122,6 +122,7 @@ historySchema.methods.clean = function(){
 
 	let clean = this.toObject();
 	clean._id = uuidToString(clean._id);
+	clean.name = clean._id;
 	return clean;
 };
 

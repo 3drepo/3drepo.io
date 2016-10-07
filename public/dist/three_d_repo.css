@@ -1503,6 +1503,9 @@ issues #issuesContent {
   overflow-x: hidden;
 }
 
+issues .importBCFLoading {
+  margin: 10px auto;
+}
 /** Issue *************************************************************************************************************/
 issue {
   display: block;
