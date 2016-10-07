@@ -923,12 +923,9 @@ exports.render = function (account, project, doc, logger){
 	groupNode.setAttribute('onload', 'onLoaded(event);');
 	var projOffset = null;
 	projOffset = doc.mRootNode.coordOffset;
-	console.log(projOffset);
-	console.log("!!!!!");
 	
-	if(projOffset && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
+	if(projOffset.length > 0 && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
 	{
-
        	var offsetTransform = xmlDoc.createElement("Transform");
 		var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
         offsetTransform.setAttribute("translation", offsetTrans.join(" "));
@@ -947,7 +944,7 @@ exports.render = function (account, project, doc, logger){
 	{
 
     	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
-	
+
 		//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
 		if (globalCoordOffset) {
            	var offsetTransform = xmlDoc.createElement("Transform");
