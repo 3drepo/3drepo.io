@@ -718,7 +718,7 @@ var ClipPlane = {};
 				res.distance = newValues.distance;
 			}
 
-
+			console.log(res);
 			return res;
 		}
 
@@ -4697,8 +4697,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			   
 			if(origViewTrans)
 			{
-				console.log("original view point is : "+  origViewTrans.toGL());
-				console.log("original view point(inversed) is : "+  origViewTrans.inverse().toGL());
 				for(var i = 0; i < self.clippingPlanes.length; ++i)
 				{
 					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
@@ -12803,7 +12801,7 @@ angular.module('3drepo')
 					});
 			}
 			else {
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
@@ -12893,7 +12891,7 @@ angular.module('3drepo')
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);

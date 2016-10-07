@@ -1661,8 +1661,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			   
 			if(origViewTrans)
 			{
-				console.log("original view point is : "+  origViewTrans.toGL());
-				console.log("original view point(inversed) is : "+  origViewTrans.inverse().toGL());
 				for(var i = 0; i < self.clippingPlanes.length; ++i)
 				{
 					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
