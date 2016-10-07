@@ -93,7 +93,6 @@
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -229,7 +228,7 @@
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
 					account: self.issueData.account,
-					project: self.issueData.project
+					project: self.issueData.project,
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
@@ -327,7 +326,6 @@
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
-						console.log(data);
 					});
 			}
 			else {
@@ -409,7 +407,6 @@
 			};
 			// Pin data
 			if (self.pinData !== null) {
-				console.log("picked position: "+  self.pinData.pickedPos );
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
 			}
@@ -419,7 +416,6 @@
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
-					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
@@ -448,7 +444,6 @@
 			};
 			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
-					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
 				});
 		}
@@ -463,7 +458,6 @@
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
-						console.log(response);
 						afterNewComment(response.data.issue);
 					});
 			}
@@ -472,7 +466,6 @@
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
-							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -496,7 +489,6 @@
 			if (self.issueData.comments.length > 1) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
-						console.log(response);
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 					});
 			}

@@ -235,6 +235,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
 							v.viewer.addClippingPlane(
 								event.value.axis,
+								event.value.normal,
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1,

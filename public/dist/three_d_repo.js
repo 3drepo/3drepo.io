@@ -334,7 +334,7 @@ var ClipPlane = {};
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 * @param {parentNode} node to append the clipping plane onto
 	 */
-	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection, parentNode) {
+	ClipPlane = function(id, viewer, axis, normal, colour, distance, percentage, clipDirection, parentNode) {
 		var self = this;
 
 		// Public properties
@@ -343,7 +343,7 @@ var ClipPlane = {};
 		 * Axis on which the clipping plane is based
 		 * @type {string}
 		 */
-		this.axis = "X";
+		this.axis = axis;
 
 		/**
 		 * Value representing the direction of clipping
@@ -364,6 +364,13 @@ var ClipPlane = {};
 		 * @type {number}
 		 */
 		this.distance = distance;
+		
+		/**
+		 * Normal vector to the clipping plane
+		 * @private
+		 * @type {SFVec3f}
+		 */
+		this.normal = (normal == undefined)? [0,0,0] : normal ;
 
 		/**
 		 * Volume containing the clipping plane
@@ -385,12 +392,6 @@ var ClipPlane = {};
 		 */
 		var clipPlaneElem = document.createElement("ClipPlane");
 
-		/**
-		 * Normal vector to the clipping plane
-		 * @private
-		 * @type {SFVec3f}
-		 */
-		var normal = new x3dom.fields.SFVec3f(0, 0, 0);
 
 		/**
 		 * Coordinate frame for clipping plane
@@ -570,16 +571,12 @@ var ClipPlane = {};
 
 
 			self.percentage = percentage;
-			var distance = 0.0;
 
-			if (self.distance) {
-				distance = self.distance;
-			} else {
-				distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-			}
+			var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+			self.distance = distance;
 
 			// Update the clipping element plane equation
-			clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
+			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + distance);
 
 			var translation = [0, 0, 0];
 			translation[axisIDX] = -distance * this.clipDirection;
@@ -593,12 +590,15 @@ var ClipPlane = {};
 		this.changeAxis = function(axis) {
 			this.axis = axis.toUpperCase();
 
-			// When the axis is change the normal to the plane is changed
-			normal.x = (axis === "X") ? this.clipDirection : 0;
-			normal.y = (axis === "Y") ? this.clipDirection : 0;
-			normal.z = (axis === "Z") ? this.clipDirection : 0;
 
-			// Reset plane to the start
+			// When the axis is change the normal to the plane is changed
+			this.normal = [ (axis === "X") ? this.clipDirection : 0,
+					(axis === "Y") ? this.clipDirection : 0,
+					(axis === "Z") ? this.clipDirection : 0];
+
+			
+			console.trace();
+
 			this.movePlane(self.percentage);
 
 			setOutlineCoordinates();
@@ -609,93 +609,118 @@ var ClipPlane = {};
 		 * Transform the clipping plane by the given matrix
 		 * @param {sfmatrix4f} matrix - transformation matrix to apply to clipping plane
 		 */
-		this.transformClipPlane = function(matrix)
+		this.transformClipPlane = function(matrix, writeProperties)
 		{
 
-			var axisIDX = "XYZ".indexOf(this.axis);
 			var min = volume.min.toGL();
 			var max = volume.max.toGL();
-
 			var point = min;
-			point[axisIDX] = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
 
-			
-			normal = matrix.multMatrixVec(normal);
+			var normal_x3d = new x3dom.fields.SFVec3f(this.normal[0], this.normal[1], this.normal[2]);
+			point = normal_x3d.multiply(-this.distance).toGL();
 
-			normal.normalize();
+			normal_x3d = matrix.multMatrixVec(normal_x3d);
+			normal_x3d.normalize();
 
 			var planePnt = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
 			planePnt = matrix.multMatrixPnt(planePnt);
-			this.distance = normal.dot(planePnt) * BBOX_SCALE;
-
-			var plane = new x3dom.fields.SFVec4f(normal.x, normal.y, normal.z, -this.distance);
-
-
-
-			// Update the clipping element plane equation
-			clipPlaneElem.setAttribute("plane", plane.toGL().join(" "));
-			//The clip outline doesn't need translation, it should be in the right place
-			//set it to move by a bit so it's not cut off by the clipping plane.
+			var distance = -normal_x3d.dot(planePnt) * BBOX_SCALE;
 			
 
-			var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
-			coordinateFrame.setAttribute("translation", translation.join(" "));
+			var plane = new x3dom.fields.SFVec4f(normal_x3d.x, normal_x3d.y, normal_x3d.z, distance);
 
 
-			//determine the outline of the clipping plane by intersection with the global bounding box	
+			if(writeProperties)
+			{				
 
-			var min = sceneBbox.min.multiply(BBOX_SCALE);
-			var max = sceneBbox.max.multiply(BBOX_SCALE);
-
-			//[pointA, pointB]
-			var bboxOutline = [
-				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, min.z)],
-				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, min.z)],
-				[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
-				[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-				[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-				[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-				];
-
-			var outline = [];
+				// Update the clipping element plane equation
+				clipPlaneElem.setAttribute("plane", plane.toGL().join(" "));
+				//The clip outline doesn't need translation, it should be in the right place
+				//set it to move by a bit so it's not cut off by the clipping plane.
 			
-			for(var i = 0; i < bboxOutline.length; ++i)
-			{
 
-				var lineDir = bboxOutline[i][1].subtract(bboxOutline[i][0]);
-				lineDir = lineDir.normalize();
-				var dotProd =lineDir.dot(normal); 
-				if(Math.abs(dotProd) > 0.000001)
+				var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
+				coordinateFrame.setAttribute("translation", translation.join(" "));
+	
+				this.axis = ""; //overwrite axis as the transformed clipping plane is not guaranteed to be aligned.
+				this.normal = normal_x3d.toGL();
+				this.distance = distance;
+
+			
+
+				//determine the outline of the clipping plane by intersection with the global bounding box	
+
+				var min = sceneBbox.min.multiply(BBOX_SCALE);
+				var max = sceneBbox.max.multiply(BBOX_SCALE);
+	
+				//[pointA, pointB]
+				var bboxOutline = [
+					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, min.z)],
+					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, min.z)],
+					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
+					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
+					[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+					[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
+					[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
+					[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+					[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
+					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
+					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
+					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
+					];
+
+				var outline = [];
+			
+				for(var i = 0; i < bboxOutline.length; ++i)
 				{
-					//dot product isn't zero -> has single point intersection
-					var d = (planePnt.subtract(bboxOutline[i][0])).dot(normal) / dotProd;
-					var intersectPnt = lineDir.multiply(d).add(bboxOutline[i][0]);
-					
-					//the intersection point must lie within the global bbox
-					if(intersectPnt.x >= min.x && intersectPnt.x <= max.x 
-							&& intersectPnt.y >= min.y && intersectPnt.y <= max.y 
-							&& intersectPnt.z >= min.z && intersectPnt.z <= max.z)
-					{
-						outline.push(intersectPnt.toGL());	
-					}	
 
+					var lineDir = bboxOutline[i][1].subtract(bboxOutline[i][0]);
+					lineDir = lineDir.normalize();
+					var dotProd =lineDir.dot(normal_x3d); 
+					if(Math.abs(dotProd) > 0.000001)
+					{
+						//dot product isn't zero -> has single point intersection
+						var d = (planePnt.subtract(bboxOutline[i][0])).dot(normal_x3d) / dotProd;
+						var intersectPnt = lineDir.multiply(d).add(bboxOutline[i][0]);
+						
+						//the intersection point must lie within the global bbox
+						if(intersectPnt.x >= min.x && intersectPnt.x <= max.x 
+								&& intersectPnt.y >= min.y && intersectPnt.y <= max.y 
+								&& intersectPnt.z >= min.z && intersectPnt.z <= max.z)
+						{
+							outline.push(intersectPnt.toGL());	
+						}	
+
+					}
+	
 				}
 
-			}
+				outline = this.determineOutline(outline);
 
-			outline = this.determineOutline(outline);
-
-
-			outlineCoords.setAttribute("point",
+				outlineCoords.setAttribute("point",
 				outline.map(function(item) {
 					return item.join(" ");
 				}).join(","));
+			}
+
+
+			return {axis: "", normal: normal_x3d.toGL(), distance: distance};
+		}
+
+		this.getProperties = function(matrix)
+		{
+
+			var res = JSON.parse(JSON.stringify(this));
+			if(matrix)
+			{
+				var newValues = this.transformClipPlane(matrix, false);	
+				res.axis = newValues.axis;
+				res.normal  = newValues.normal;
+				res.distance = newValues.distance;
+			}
+
+
+			return res;
 		}
 
 		/**
@@ -736,17 +761,18 @@ var ClipPlane = {};
 			
 		}
 
-
-
 		// Move the plane to finish construction
-		this.changeAxis(axis);
+		if(axis != "")
+		{			
+			this.changeAxis(axis);
+			this.movePlane(percentage);
+		}
 
 		viewer.getScene().appendChild(clipPlaneElem);
 
-		this.movePlane(percentage);
 
 		if(parentNode)
-			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform());
+			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
 
 
 	};
@@ -3557,6 +3583,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			{
 				trans = parentGroup._x3domNode.getCurrentTransform();
 			}
+			else
+			{
+				console.error("Cannot find parent group: " + fullParentGroupName);
+			}
 			return trans;
 		}
 		this.getProjectionMatrix = function() {
@@ -4666,7 +4696,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.far = f;
 			viewPoint.near = n;
 
-			viewPoint.clippingPlanes = self.clippingPlanes;
+			viewPoint.clippingPlanes = [];
+			   
+			if(origViewTrans)
+			{
+				console.log("original view point is : "+  origViewTrans.toGL());
+				console.log("original view point(inversed) is : "+  origViewTrans.inverse().toGL());
+				for(var i = 0; i < self.clippingPlanes.length; ++i)
+				{
+					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
+				}
+			}
+			else
+			{
+				viewPoint.clippingPlanes = self.clippingPlanes;
+			}
+
 
 			return viewPoint;
 		};
@@ -4862,6 +4907,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
 				var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx].axis,
+					clippingPlanes[clipidx].normal,
 					clippingPlanes[clipidx].distance,
 					clippingPlanes[clipidx].percentage,
 					clippingPlanes[clipidx].clipDirection
@@ -4871,14 +4917,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		/**
 		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips
+		 * @param {string} axis - Axis through which the plane clips (overrides normal)
+		 * @param {number} normal - the normal of the plane 
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 		 * @param {string} account - name of database (optional)
 		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
+		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
 			if(account && project){				
@@ -4886,7 +4933,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				parentGroup = self.groupNodes[fullParentGroupName];
 			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;
@@ -9755,9 +9802,10 @@ var ViewerManager = {};
 		vm.visible = false;
 		vm.account = null;
 		vm.project = null;
+		vm.normal = null;
 		vm.onContentHeightRequest({height: 130});
 
-		function initClippingPlane (account, project) {
+		function initClippingPlane (account, project, normal, distance) {
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
@@ -9767,10 +9815,17 @@ var ViewerManager = {};
 					vm.account = account;
 					vm.project = project;
 				}	
+
+				if(normal)
+					vm.normal = normal;
+				if(distance)
+					vm.distance = distance;
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
-					axis: translateAxis(vm.selectedAxis),
+					axis: vm.selectedAxis? translateAxis(vm.selectedAxis) : "",
+					normal: vm.normal,
 					percentage: initPosition,
+					distance: vm.distance,
 					account: vm.account,
 					project: vm.project
 				});
@@ -9782,6 +9837,7 @@ var ViewerManager = {};
 			{
 				vm.account = null;
 				vm.project = null;
+				vm.normal = null;
 				initClippingPlane();	
 			}
 			else
@@ -9842,11 +9898,12 @@ var ViewerManager = {};
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if (angular.isDefined(newValue) && vm.show ) {
+			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
 				if(vm.account && vm.project)
 				{
 					vm.account = null;
 					vm.project = null;
+					vm.normal = null;
 					initClippingPlane();	
 				}
 				else
@@ -9864,7 +9921,8 @@ var ViewerManager = {};
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (angular.isDefined(newValue) && vm.show) {
+			if (vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
+				vm.distance = 0; //reset the distance
 				moveClippingPlane(newValue);
 			}
 		});
@@ -9872,15 +9930,18 @@ var ViewerManager = {};
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
+					var axis = event.value.clippingPlanes[0].axis;
+					vm.selectedAxis   = axis == ""?axis : translateAxis(axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					vm.project = event.value.project;
 					vm.account = event.value.account;
+					vm.normal = event.value.clippingPlanes[0].normal;
+					vm.distance = event.value.clippingPlanes[0].distance;
 					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
 					if(vm.visible)
 					{
 
-						initClippingPlane(event.value.account, event.value.project); 
+						initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
 					}
 					else
 						vm.visible=true; 
@@ -12376,7 +12437,6 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -12512,7 +12572,7 @@ angular.module('3drepo')
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
 					account: self.issueData.account,
-					project: self.issueData.project
+					project: self.issueData.project,
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
@@ -12610,7 +12670,6 @@ angular.module('3drepo')
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
-						console.log(data);
 					});
 			}
 			else {
@@ -12692,7 +12751,6 @@ angular.module('3drepo')
 			};
 			// Pin data
 			if (self.pinData !== null) {
-				console.log("picked position: "+  self.pinData.pickedPos );
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
 			}
@@ -12702,7 +12760,6 @@ angular.module('3drepo')
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
-					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
@@ -12731,7 +12788,6 @@ angular.module('3drepo')
 			};
 			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
-					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
 				});
 		}
@@ -12746,7 +12802,6 @@ angular.module('3drepo')
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
-						console.log(response);
 						afterNewComment(response.data.issue);
 					});
 			}
@@ -12755,7 +12810,6 @@ angular.module('3drepo')
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
-							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -12779,7 +12833,6 @@ angular.module('3drepo')
 			if (self.issueData.comments.length > 1) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
-						console.log(response);
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 					});
 			}
@@ -14341,7 +14394,7 @@ angular.module('3drepo')
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				account: issue.account,
-				project: issue.project
+				project: issue.project,
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 
@@ -18136,6 +18189,7 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
 							v.viewer.addClippingPlane(
 								event.value.axis,
+								event.value.normal,
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1,

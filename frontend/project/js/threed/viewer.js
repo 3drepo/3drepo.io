@@ -544,6 +544,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			{
 				trans = parentGroup._x3domNode.getCurrentTransform();
 			}
+			else
+			{
+				console.error("Cannot find parent group: " + fullParentGroupName);
+			}
 			return trans;
 		}
 		this.getProjectionMatrix = function() {
@@ -1653,7 +1657,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.far = f;
 			viewPoint.near = n;
 
-			viewPoint.clippingPlanes = self.clippingPlanes;
+			viewPoint.clippingPlanes = [];
+			   
+			if(origViewTrans)
+			{
+				console.log("original view point is : "+  origViewTrans.toGL());
+				console.log("original view point(inversed) is : "+  origViewTrans.inverse().toGL());
+				for(var i = 0; i < self.clippingPlanes.length; ++i)
+				{
+					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
+				}
+			}
+			else
+			{
+				viewPoint.clippingPlanes = self.clippingPlanes;
+			}
+
 
 			return viewPoint;
 		};
@@ -1849,6 +1868,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
 				var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx].axis,
+					clippingPlanes[clipidx].normal,
 					clippingPlanes[clipidx].distance,
 					clippingPlanes[clipidx].percentage,
 					clippingPlanes[clipidx].clipDirection
@@ -1858,14 +1878,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		/**
 		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips
+		 * @param {string} axis - Axis through which the plane clips (overrides normal)
+		 * @param {number} normal - the normal of the plane 
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 		 * @param {string} account - name of database (optional)
 		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, distance, percentage, clipDirection, account, project) {
+		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
 			if(account && project){				
@@ -1873,7 +1894,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				parentGroup = self.groupNodes[fullParentGroupName];
 			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;

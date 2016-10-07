@@ -299,7 +299,7 @@
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				account: issue.account,
-				project: issue.project
+				project: issue.project,
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 
