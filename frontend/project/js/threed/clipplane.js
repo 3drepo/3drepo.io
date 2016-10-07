@@ -298,7 +298,6 @@ var ClipPlane = {};
 					(axis === "Z") ? this.clipDirection : 0];
 
 			
-			console.trace();
 
 			this.movePlane(self.percentage);
 
