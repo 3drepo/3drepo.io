@@ -12,6 +12,8 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
 		md-icon.angular-material-icons add
 
+md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
+
 #issuesContent(ng-switch="vm.toShow")
 	// Issues list
 	issues-list(
@@ -22,6 +24,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	all-issues="vm.issues"
 	filter-text="vm.filterText"
 	send-event="vm.sendEvent(type, value)"
+	import-bcf="vm.importBcf(file)"
 	event="vm.event"
 	on-edit-issue="vm.editIssue(issue)"
 	keys-down="vm.keysDown"
@@ -45,4 +48,5 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	selected-objects="vm.selectedObjects"
 	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
 	user-roles="vm.projectUserRoles")
+
 

@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
 		var self = this,
 			url = "",
 			data = {},
@@ -384,6 +384,29 @@
 			}
 
 			return statusIcon;
+		};
+
+		/**
+		* Import bcf
+		*/
+		obj.importBcf = function(account, project, file){
+
+			var deferred = $q.defer();
+			var formData = new FormData();
+			formData.append("file", file);
+
+			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+				
+				console.log(res);
+				if(res.status === 200){
+					deferred.resolve();
+				} else {
+					deferred.reject(res.data);
+				}
+
+			});
+
+			return deferred.promise;
 		};
 
 		Object.defineProperty(

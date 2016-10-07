@@ -897,12 +897,28 @@ schema.methods.clean = function(typePrefix){
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
 
 	cleaned.viewpoints.forEach((vp, i) => {
+
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
 			cleaned.viewpoints[i].screenshotSmall = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshotSmall.png';
 		}
+
+		if(cleaned.viewpoints[i].up.length === 0){
+			cleaned.viewpoints[i].up = [1,0,0];
+		}
+
+		if(cleaned.viewpoints[i].position.length === 0){
+			cleaned.viewpoints[i].position = [0,0,0];
+		}
+
+		if(cleaned.viewpoints[i].view_dir.length === 0){
+			cleaned.viewpoints[i].view_dir = [1,0,0];
+		}
+
+		cleaned.viewpoints[i].fov = cleaned.viewpoints[i].fov || 1;
+
 	});
 
 	if(_.get(cleaned, `thumbnail.flag`)){
@@ -910,16 +926,30 @@ schema.methods.clean = function(typePrefix){
 	}
 
 	cleaned.comments.forEach( (comment, i) => {
+
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
 		if(cleaned.comments[i].viewpoint){
-			cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
+			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
+
+			if(i > 0 && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
+				//hide repeated screenshot if consecutive comments relate to the same viewpoint
+				cleaned.comments[i].viewpoint.screenshot = null;
+				cleaned.comments[i].viewpoint.screenshotSmall = null;
+			}
+
 		} else {
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 		
 	});
+
+	if( cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
+		cleaned.comments[0].viewpoint.screenshot = null;
+		cleaned.comments[0].viewpoint.screenshotSmall = null;
+	}
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');
@@ -1019,7 +1049,9 @@ schema.methods.getBCFMarkup = function(unit){
 			},
 			'Author': comment.owner,
 			'Comment': comment.comment,
-			'Viewpoint': utils.uuidToString(comment.viewpoint),
+			'Viewpoint': {
+				'@': {Guid: utils.uuidToString(comment.viewpoint)}
+			},
 			'Date': moment(comment.created).utc().format()
 		};
 
@@ -1220,26 +1252,54 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 				zipfile.on('end', () => {
 
-					Promise.all(promises).then(() => {
+					let issueCounter;
+
+					Issue.count({account, project}).then(count => {
+
+						issueCounter = count;
+
+					}).then(() => {
+
+						return Promise.all(promises);
+
+					}).then(() => {
 
 						let createIssueProms = [];
-
+						
 						Object.keys(files).forEach(guid => {
-
-							let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
-								if(count <= 0) {
-									return createIssue(guid);
-								} else {
-									console.log('duplicate issue');
-									return Promise.resolve();
-								}
-							});
-
-							createIssueProms.push(promise);
-
+							createIssueProms.push(createIssue(guid));
 						});
 
 						return Promise.all(createIssueProms);
+
+					}).then(issues => {
+							
+						let saveIssueProms = [];
+
+						// sort issues by date and add number
+						issues = issues.sort((a, b) => {
+							a.created > b.created;
+						});
+
+						issues.forEach(issue => {
+
+							saveIssueProms.push(
+								Issue.count({account, project}, { _id: issue._id}).then(count => {
+
+									if(count <= 0) {
+										issue.number = ++issueCounter;
+										return issue.save();
+									} else {
+										console.log('duplicate issue');
+										return Promise.resolve();
+									}
+
+								})
+							);
+						});
+
+						return Promise.all(saveIssueProms);
+				
 
 					}).then(() => {
 						resolve();
@@ -1329,7 +1389,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							owner: _.get(comment, 'Author[0]._'),
 							comment: _.get(comment, 'Comment[0]._'),
 							sealed: true,
-							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
+							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(_.get(comment, 'Viewpoint[0].@.Guid')) : undefined,
 							extras: {}
 						};
 
@@ -1407,7 +1467,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							scale = 100;
 						} else if (unit === 'mm'){
 							scale = 1000;
-						} else if (_unit === 'ft'){
+						} else if (unit === 'ft'){
 							scale = 3.28084;
 						}	
 
@@ -1416,17 +1476,17 @@ schema.statics.importBCF = function(account, project, zipPath){
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
-							],
+							];
 							vp.view_dir = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
-							],
+							];
 							vp.position = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')) * scale,
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale
-							],
+							];
 
 							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
 						}
@@ -1434,7 +1494,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 						issue.viewpoints.push(vp);
 					});
 
-					return issue.save();
+					return issue;
 
 				});
 

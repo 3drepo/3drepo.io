@@ -35,7 +35,8 @@
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<"
+					menuOption: "<",
+					importBcf: "&"
 				}
 			}
 		);
@@ -176,6 +177,20 @@
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+				}
+				else if (this.menuOption.value === "exportBCF") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
+				}
+				else if (this.menuOption.value === "importBCF") {
+
+					var file = document.createElement('input');
+					file.setAttribute('type', 'file');
+					file.setAttribute('accept', '.zip,.bcfzip');
+					file.click();
+
+					file.addEventListener("change", function () {
+						self.importBcf({file: file.files[0]});
+					});
 				}
 				setupIssuesToShow();
 				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
