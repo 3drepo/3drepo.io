@@ -914,12 +914,25 @@ schema.methods.clean = function(typePrefix){
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
 		if(cleaned.comments[i].viewpoint){
-			cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
+			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
+
+			if(i > 0 && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
+				//hide repeated screenshot if consecutive comments relate to the same viewpoint
+				cleaned.comments[i].viewpoint.screenshot = null;
+				cleaned.comments[i].viewpoint.screenshotSmall = null;
+			}
+
 		} else {
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 		
 	});
+
+	if( cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
+		cleaned.comments[0].viewpoint.screenshot = null;
+		cleaned.comments[0].viewpoint.screenshotSmall = null;
+	}
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');
@@ -1220,26 +1233,54 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 				zipfile.on('end', () => {
 
-					Promise.all(promises).then(() => {
+					let issueCounter;
+
+					Issue.count({account, project}).then(count => {
+
+						issueCounter = count;
+
+					}).then(() => {
+
+						return Promise.all(promises);
+
+					}).then(() => {
 
 						let createIssueProms = [];
-
+						
 						Object.keys(files).forEach(guid => {
-
-							let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
-								if(count <= 0) {
-									return createIssue(guid);
-								} else {
-									console.log('duplicate issue');
-									return Promise.resolve();
-								}
-							});
-
-							createIssueProms.push(promise);
-
+							createIssueProms.push(createIssue(guid));
 						});
 
 						return Promise.all(createIssueProms);
+
+					}).then(issues => {
+							
+						let saveIssueProms = [];
+
+						// sort issues by date and add number
+						issues = issues.sort((a, b) => {
+							a.created > b.created;
+						});
+
+						issues.forEach(issue => {
+
+							saveIssueProms.push(
+								Issue.count({account, project}, { _id: issue._id}).then(count => {
+
+									if(count <= 0) {
+										issue.number = ++issueCounter;
+										return issue.save();
+									} else {
+										console.log('duplicate issue');
+										return Promise.resolve();
+									}
+
+								})
+							);
+						});
+
+						return Promise.all(saveIssueProms);
+				
 
 					}).then(() => {
 						resolve();
@@ -1434,7 +1475,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 						issue.viewpoints.push(vp);
 					});
 
-					return issue.save();
+					return issue;
 
 				});
 
