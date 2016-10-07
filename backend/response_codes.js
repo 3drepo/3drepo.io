@@ -181,6 +181,7 @@ var responseCodes = {
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
 
+
 	AVATAR_SIZE_LIMIT: {value: 113, status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB`},
 	INVALID_USERNAME: {value: 114, message: 'Invalid username', status: 400},
 	FILE_NO_EXT: { value: 115, message: "Filename must have extension", status: 400 },
@@ -192,6 +193,10 @@ var responseCodes = {
 	ISSUE_SAME_PRIORITY: {value: 120, message: 'New priority is the same as current priority', status: 400},
 	MESH_NOT_FOUND: {value: 121, message: 'Mesh not found', status: 400},
 	GROUP_ID_NOT_FOUND_IN_MESH: {value: 122, message: 'Group ID not found in mesh', status: 400},
+
+
+	PROJECT_NAME_TOO_LONG: {value: 123, message: "Project name cannot be longer than 60 characters", status: 400},
+
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
