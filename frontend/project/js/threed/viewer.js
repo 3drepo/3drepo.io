@@ -535,6 +535,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getViewMatrix();
 		};
 
+		this.getParentTransformation = function(account, project)
+		{
+			var trans = null;
+			var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+			var parentGroup = self.groupNodes[fullParentGroupName];
+			if(parentGroup)
+			{
+				trans = parentGroup._x3domNode.getCurrentTransform();
+			}
+			return trans;
+		}
 		this.getProjectionMatrix = function() {
 			return self.getViewArea().getProjectionMatrix();
 		};
@@ -605,23 +616,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-					var projectInline = self.inlineRoots[inlineTransName];
-					var trans = projectInline._x3domNode.getCurrentTransform();
-
                     console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: trans,
+						trans: self.getParentTransformation(account, project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
+
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm
+						normal: pickingInfo.pickNorm,
+						trans: self.getParentTransformation(self.account, self.project)
 					});
 				}
 			}
@@ -1390,12 +1399,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var origViewTrans = null;
 			if(account && project)
 			{
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				var parentGroup = self.groupNodes[fullParentGroupName];
-				if(parentGroup)
-				{
-					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
-				}
+					origViewTrans = self.getParentTransformation(account, project);
 
 			}
 
@@ -1595,12 +1599,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			
 			if(account && project)
 			{
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				var parentGroup = self.groupNodes[fullParentGroupName];
-				if(parentGroup)
-				{
-					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
-				}
+				origViewTrans = self.getParentTransformation(account, project);
 
 			}
 
@@ -1924,16 +1923,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = null;
-				var projectNameSpace = account + "__" + project;
+				var trans = self.getParentTransformation(account, project);
 
-				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
-				{
-					var projectInline = self.inlineRoots[account + "__" + project];
-					trans = projectInline._x3domNode.getCurrentTransform();
-				}
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
 			}
 		};
 
@@ -1951,11 +1943,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
-					up: pin.viewpoint.up
+					up: pin.viewpoint.up,
+					account: pin.account,
+					project: pin.project
 				});
 
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
-					clippingPlanes: pin.viewpoint.clippingPlanes
+					clippingPlanes: pin.viewpoint.clippingPlanes,
+					account: pin.account,
+					project: pin.project
+
 				});
 			}
 		};

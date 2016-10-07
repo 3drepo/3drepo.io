@@ -409,6 +409,7 @@
 			};
 			// Pin data
 			if (self.pinData !== null) {
+				console.log("picked position: "+  self.pinData.pickedPos );
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
 			}

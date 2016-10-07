@@ -2515,8 +2515,10 @@ var Pin = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+	 * @param {string} account - database it came from
+	 * @param {string} project - name of the project
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
+	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, project) {
 		var self = this;
 
 		self.id = id;
@@ -2527,6 +2529,8 @@ var Pin = {};
 		self.trans = trans;
 		self.scale = scale;
 		self.viewpoint = viewpoint;
+		self.account = account;
+		self.project = project;
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;
@@ -2575,6 +2579,8 @@ var Pin = {};
 		this.createBasicPinShape(self.modelTransform, "ALWAYS", GHOST_OPACITY, true);
 		this.createBasicPinShape(self.modelTransform, "LESS", OPAQUE_OPACITY, false);
 
+		console.log("creating a child under this guy");
+		console.log(self.element);
 		self.element.appendChild(parent);
 	};
 
@@ -3542,6 +3548,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getViewMatrix();
 		};
 
+		this.getParentTransformation = function(account, project)
+		{
+			var trans = null;
+			var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+			var parentGroup = self.groupNodes[fullParentGroupName];
+			if(parentGroup)
+			{
+				trans = parentGroup._x3domNode.getCurrentTransform();
+			}
+			return trans;
+		}
 		this.getProjectionMatrix = function() {
 			return self.getViewArea().getProjectionMatrix();
 		};
@@ -3612,23 +3629,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-					var projectInline = self.inlineRoots[inlineTransName];
-					var trans = projectInline._x3domNode.getCurrentTransform();
-
                     console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: trans,
+						trans: self.getParentTransformation(account, project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
+
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm
+						normal: pickingInfo.pickNorm,
+						trans: self.getParentTransformation(self.account, self.project)
 					});
 				}
 			}
@@ -4397,12 +4412,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var origViewTrans = null;
 			if(account && project)
 			{
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				var parentGroup = self.groupNodes[fullParentGroupName];
-				if(parentGroup)
-				{
-					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
-				}
+					origViewTrans = self.getParentTransformation(account, project);
 
 			}
 
@@ -4602,12 +4612,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			
 			if(account && project)
 			{
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				var parentGroup = self.groupNodes[fullParentGroupName];
-				if(parentGroup)
-				{
-					origViewTrans = parentGroup._x3domNode.getCurrentTransform();
-				}
+				origViewTrans = self.getParentTransformation(account, project);
 
 			}
 
@@ -4931,16 +4936,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = null;
-				var projectNameSpace = account + "__" + project;
+				var trans = self.getParentTransformation(account, project);
 
-				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
-				{
-					var projectInline = self.inlineRoots[account + "__" + project];
-					trans = projectInline._x3domNode.getCurrentTransform();
-				}
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
 			}
 		};
 
@@ -4958,11 +4956,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
-					up: pin.viewpoint.up
+					up: pin.viewpoint.up,
+					account: pin.account,
+					project: pin.project
 				});
 
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
-					clippingPlanes: pin.viewpoint.clippingPlanes
+					clippingPlanes: pin.viewpoint.clippingPlanes,
+					account: pin.account,
+					project: pin.project
+
 				});
 			}
 		};
@@ -12689,6 +12692,7 @@ angular.module('3drepo')
 			};
 			// Pin data
 			if (self.pinData !== null) {
+				console.log("picked position: "+  self.pinData.pickedPos );
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
 			}
@@ -13344,26 +13348,32 @@ angular.module('3drepo')
 					(changes.event.currentValue.value.hasOwnProperty("id"))) {
 					removePin();
 
-					// Add pin
-					// Convert data to arrays
-					angular.forEach(changes.event.currentValue.value.position, function (value) {
-						pickedPos = changes.event.currentValue.value.position;
-						position.push(value);
-					});
-					angular.forEach(changes.event.currentValue.value.normal, function (value) {
-						pickedNorm = changes.event.currentValue.value.normal;
-						normal.push(value);
-					});
+
+					var trans = changes.event.currentValue.value.trans;
+					position = changes.event.currentValue.value.position;
+					normal = changes.event.currentValue.value.normal;
+
+					if(trans)
+					{
+						console.log("position before:" + position.toGL());
+						position = trans.inverse().multMatrixPnt(position);
+						console.log("position after:" + position.toGL());
+					}
+					else
+					{
+						console.log("no trans");
+					}
+
 
 					data = {
 						id: newPinId,
 						account: self.account,
 						project: self.project,
-						position: position,
-						norm: normal,
+						position: position.toGL(),
+						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
+						pickedPos: position,
+						pickedNorm: normal,
 						colours: [[200, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
@@ -13382,6 +13392,7 @@ angular.module('3drepo')
 		}
 	}
 }());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

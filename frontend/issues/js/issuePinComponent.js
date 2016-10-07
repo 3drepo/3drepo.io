@@ -58,26 +58,32 @@
 					(changes.event.currentValue.value.hasOwnProperty("id"))) {
 					removePin();
 
-					// Add pin
-					// Convert data to arrays
-					angular.forEach(changes.event.currentValue.value.position, function (value) {
-						pickedPos = changes.event.currentValue.value.position;
-						position.push(value);
-					});
-					angular.forEach(changes.event.currentValue.value.normal, function (value) {
-						pickedNorm = changes.event.currentValue.value.normal;
-						normal.push(value);
-					});
+
+					var trans = changes.event.currentValue.value.trans;
+					position = changes.event.currentValue.value.position;
+					normal = changes.event.currentValue.value.normal;
+
+					if(trans)
+					{
+						console.log("position before:" + position.toGL());
+						position = trans.inverse().multMatrixPnt(position);
+						console.log("position after:" + position.toGL());
+					}
+					else
+					{
+						console.log("no trans");
+					}
+
 
 					data = {
 						id: newPinId,
 						account: self.account,
 						project: self.project,
-						position: position,
-						norm: normal,
+						position: position.toGL(),
+						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
+						pickedPos: position,
+						pickedNorm: normal,
 						colours: [[200, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
