@@ -597,7 +597,6 @@ var ClipPlane = {};
 					(axis === "Z") ? this.clipDirection : 0];
 
 			
-			console.trace();
 
 			this.movePlane(self.percentage);
 
@@ -2605,8 +2604,6 @@ var Pin = {};
 		this.createBasicPinShape(self.modelTransform, "ALWAYS", GHOST_OPACITY, true);
 		this.createBasicPinShape(self.modelTransform, "LESS", OPAQUE_OPACITY, false);
 
-		console.log("creating a child under this guy");
-		console.log(self.element);
 		self.element.appendChild(parent);
 	};
 
