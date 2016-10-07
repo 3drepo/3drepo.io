@@ -47,7 +47,7 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null,
+			currentAction = null,
 			editingCommentIndex = null,
 			commentViewpoint,
 			issueSelectedObjects = null,
@@ -78,11 +78,11 @@
 			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
 		];
-		this.actions = [
-			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
-			{icon: "place", action: "pin", label: "Pin", color: "", hidden: this.data},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: "", hidden: this.data}
-		];
+		this.actions = {
+			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
+			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
+			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
+		};
 
 		/**
 		 * Monitor changes to parameters
@@ -129,25 +129,25 @@
 
 			// Selected objects
 			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
-				(currentActionIndex !== null) && (this.actions[currentActionIndex].action === "multi")) {
+				(currentAction !== null) && (currentAction === "multi")) {
 				issueSelectedObjects = this.selectedObjects;
 			}
 
 			// Event
-			if ((changes.hasOwnProperty("event") && this.event) && (currentActionIndex !== null)) {
+			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
 				/*
-				if ((this.actions[currentActionIndex].action === "pin") &&
+				if ((this.actions[currentAction].action === "pin") &&
 					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
 					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
 					(issueSelectedObjects !== null)) {
 					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
 				}
-				else if ((this.actions[currentActionIndex].action === "multi") &&
+				else if ((this.actions[currentAction].action === "multi") &&
 						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
 					issueSelectedObjects = null;
 				}
 				*/
-				if ((this.actions[currentActionIndex].action === "multi") &&
+				if ((currentAction === "multi") &&
 					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
 					issueSelectedObjects = null;
 				}
@@ -168,7 +168,7 @@
 				this.issueData.comments[editingCommentIndex].editing = false;
 			}
 			// Get out of pin drop mode
-			if ((currentActionIndex !== null) && (this.actions[currentActionIndex].action === "pin")) {
+			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
 		};
@@ -257,17 +257,17 @@
 
 		/**
 		 * Do an action
-		 * @param index
+		 * @param action
 		 */
-		this.doAction = function (index) {
+		this.doAction = function (action) {
 			var data;
 
 			// Handle previous action
-			if (currentActionIndex === null) {
-				currentActionIndex = index;
+			if (currentAction === null) {
+				currentAction = action;
 			}
-			else if (currentActionIndex === index) {
-				switch (this.actions[currentActionIndex].action) {
+			else if (currentAction === action) {
+				switch (action) {
 					case "multi":
 						issueSelectedObjects = this.selectedObjects;
 						break;
@@ -275,12 +275,12 @@
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 						break;
 				}
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
+				this.actions[currentAction].color = "";
+				currentAction = null;
 				self.action = null;
 			}
 			else {
-				switch (this.actions[currentActionIndex].action) {
+				switch (action) {
 					case "multi":
 						issueSelectedObjects = this.selectedObjects;
 						break;
@@ -288,16 +288,16 @@
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 						break;
 				}
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = index;
+				this.actions[currentAction].color = "";
+				currentAction = action;
 			}
 
 			// New action
-			if (currentActionIndex !== null) {
-				this.actions[currentActionIndex].color = highlightBackground;
-				self.action = this.actions[currentActionIndex].action;
+			if (currentAction !== null) {
+				this.actions[currentAction].color = highlightBackground;
+				self.action = action;
 
-				switch (this.actions[currentActionIndex].action) {
+				switch (currentAction) {
 					case "screen_shot":
 						delete this.screenShot; // Remove any clicked on screen shot
 						$mdDialog.show({
@@ -455,6 +455,10 @@
 					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
 
+					// Hide some actions
+					self.actions.pin.hidden = true;
+					self.actions.multi.hidden = true;
+
 					self.submitDisabled = true;
 					setContentHeight();
 			});
@@ -607,8 +611,8 @@
 			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
-				self.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
+				self.actions[currentAction].color = "";
+				currentAction = null;
 			};
 		}
 
