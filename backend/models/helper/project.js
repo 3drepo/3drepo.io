@@ -80,6 +80,10 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	'use strict';
 
 
+	if(project.length > 60){
+		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
+	}
+
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}

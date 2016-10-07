@@ -181,6 +181,7 @@ var responseCodes = {
 
 	INVALID_USERNAME: {value: 115, message: 'Invalid username', status: 400},
 	FILE_NO_EXT: { value: 116, message: "Filename must have extension", status: 400 },
+	PROJECT_NAME_TOO_LONG: {value: 117, message: "Project name cannot be longer than 60 characters", status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
