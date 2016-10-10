@@ -32,11 +32,13 @@
 					sendEvent: "&",
 					event: "<",
 					onEditIssue: "&",
+					onSelectIssue: "&",
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
 					menuOption: "<",
-					importBcf: "&"
+					importBcf: "&",
+					selectedIssue: "<"
 				}
 			}
 		);
@@ -52,7 +54,8 @@
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = true,
 			showClosed = false,
-			focusedIssueIndex = null;
+			focusedIssueIndex = null,
+			rightArrowDown = false;
 
 		// Init
 		this.UtilsService = UtilsService;
@@ -82,12 +85,14 @@
 						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
 							this.issuesToShow[i] = updatedIssue;
 						}
+						/*
 						// Get a possible selected issue
 						if (this.issuesToShow[i].selected) {
 							selectedIssue = this.issuesToShow[i];
 							focusedIssueIndex = i;
 							setSelectedIssueIndex(selectedIssue);
 						}
+						*/
 					}
 					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 					showPins();
@@ -129,7 +134,9 @@
 							focusedIssueIndex -= 1;
 							selectedIssueIndex = focusedIssueIndex;
 						}
+						this.select(event, this.issuesToShow[selectedIssueIndex]);
 					}
+
 					// Handle selected issue
 					else if (selectedIssueIndex !== null) {
 						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
@@ -141,29 +148,16 @@
 							selectedIssueIndex -= 1;
 						}
 						deselectPin(selectedIssue);
+						this.select(event, this.issuesToShow[selectedIssueIndex]);
 					}
-
-					selectedIssue = this.issuesToShow[selectedIssueIndex];
-					selectedIssue.selected = true;
-					selectedIssue.focus = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
 				}
-				// Right arrow
+				// Right arrow - do action on key up
 				else if (changes.keysDown.currentValue.indexOf(rightArrow) !== -1) {
-					self.editIssue(selectedIssue);
+					rightArrowDown = true;
 				}
-			}
-
-			// Non list select
-			if (changes.hasOwnProperty("nonListSelect") && this.nonListSelect) {
-				this.select(event, this.nonListSelect);
-			}
-
-			// Event
-			if (changes.hasOwnProperty("event") && this.event) {
-				if (this.event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-					pinClicked(this.event.value.id);
+				else if (rightArrowDown && (changes.keysDown.currentValue.indexOf(rightArrow) === -1)) {
+					rightArrowDown = false;
+					self.editIssue(selectedIssue);
 				}
 			}
 
@@ -205,7 +199,24 @@
 						break;
 					}
 				}
+			}
 
+			// Selected issue
+			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
+					// To clear any previously selected issue
+					this.issuesToShow[i].selected = false;
+					this.issuesToShow[i].focus = false;
+
+					// Set up the current selected iss
+					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+						selectedIssue = this.issuesToShow[i];
+						selectedIssue.selected = true;
+						selectedIssue.focus = true;
+						focusedIssueIndex = i;
+						selectedIssueIndex = i;
+					}
+				}
 			}
 		};
 
@@ -233,6 +244,7 @@
 					showIssue(selectedIssue);
 					setSelectedIssueIndex(selectedIssue);
 				}
+				this.onSelectIssue({issue: selectedIssue});
 			}
 		};
 
@@ -344,23 +356,6 @@
 					colours: [[0.5, 0, 0]]
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
-			}
-		}
-
-		/**
-		 * Pin clicked in viewer
-		 * @param issueId
-		 */
-		function pinClicked (issueId) {
-			var i, length;
-
-			for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
-				if (self.issuesToShow[i]._id === issueId) {
-					selectedIssue = self.issuesToShow[i];
-					setSelectedIssueIndex(selectedIssue);
-					self.onEditIssue({issue: selectedIssue});
-					break;
-				}
 			}
 		}
 
@@ -494,7 +489,7 @@
 							account: self.account,
 							project: self.project
 						};
-						IssuesService.addPin(pinData, [[0.78, 0, 0]], self.allIssues[i].viewpoint);
+						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
 					}
 				}
 			}
