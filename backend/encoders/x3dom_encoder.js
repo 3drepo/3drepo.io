@@ -942,7 +942,6 @@ exports.render = function (account, project, doc, logger){
 	}
 	else
 	{
-
     	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
 
 		//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
@@ -954,6 +953,11 @@ exports.render = function (account, project, doc, logger){
 			offsetTransform.appendChild(groupNode);
         	sceneRoot.root.appendChild(offsetTransform);
        	}
+		else
+		{
+			//No offset what so ever - legacy imports
+        	sceneRoot.root.appendChild(groupNode);
+		}
 	}
 
 
