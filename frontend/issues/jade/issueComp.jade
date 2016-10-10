@@ -117,12 +117,12 @@ div(flex, layout="column", layout-fill)
 		.issueCompItemContainer(layout="row", layout-align="space-between center")
 			div
 				md-button.md-icon-button(
-				ng-repeat="action in $ctrl.actions"
-				aria-label="{{action.icon}}"
-				ng-click="$ctrl.doAction($index)"
-				ng-if="!action.hidden")
-					md-tooltip(md-direction="bottom") {{action.label}}
-					md-icon.angular-material-icons(style="color:{{action.color}}") {{action.icon}}
+				ng-repeat="(action, actionData) in $ctrl.actions"
+				aria-label="{{action}}"
+				ng-click="$ctrl.doAction(action)"
+				ng-if="!actionData.hidden")
+					md-tooltip(md-direction="bottom") {{actionData.label}}
+					md-icon.angular-material-icons(style="color:{{actionData.color}}") {{actionData.icon}}
 
 			div
 				md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()")

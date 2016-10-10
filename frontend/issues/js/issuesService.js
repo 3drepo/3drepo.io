@@ -138,17 +138,6 @@
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					/*
-					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = issue.account;
-					response.data.issue.project = issue.project;
-					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-					response.data.issue.creator_role = issue.creator_role;
-					response.data.issue.scribble = issue.scribble;
-
-					response.data.issue.title = generateTitle(response.data.issue);
-					self.removePin();
-					*/
 					deferred.resolve(response);
 				});
 
