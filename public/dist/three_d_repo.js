@@ -340,23 +340,10 @@ var ClipPlane = {};
 		// Public properties
 
 		/**
-		 * Axis on which the clipping plane is based
-		 * @type {string}
-		 */
-		this.axis = axis;
-
-		/**
 		 * Value representing the direction of clipping
 		 * @type {number}
 		 */
 		this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
-
-		/**
-		 * Value representing the percentage distance from the origin of
-		 * the clip plane
-		 * @type {number}
-		 */
-		this.percentage = (percentage === undefined) ? 1.0 : percentage;
 
 		/**
 		 * Value representing the distance from the origin of
@@ -452,11 +439,11 @@ var ClipPlane = {};
 		/**
 		 * Set the coordinates of the clipping plane outline
 		 */
-		var setOutlineCoordinates = function() {
+		var setOutlineCoordinates = function(axis) {
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			var axisIDX = "XYZ".indexOf(self.axis);
+			var axisIDX = "XYZ".indexOf(axis);
 			var outline = [
 				[0, 0, 0],
 				[0, 0, 0],
@@ -563,46 +550,32 @@ var ClipPlane = {};
 		 * Move the clipping plane
 		 * @param {number} percentage - Percentage of entire clip volume to move across
 		 */
-		this.movePlane = function(percentage) {
-			// Update the transform containing the clipping plane
-			var axisIDX = "XYZ".indexOf(this.axis);
-			var min = volume.min.multiply(BBOX_SCALE).toGL();
-			var max = volume.max.multiply(BBOX_SCALE).toGL();
+		this.movePlane = function(axis, percentage) {
+			console.log("moving plane: " + axis + " percentage " + percentage);
 
-
-			self.percentage = percentage;
-
-			var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-			self.distance = distance;
-
-			// Update the clipping element plane equation
-			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + distance);
-
-			var translation = [0, 0, 0];
-			translation[axisIDX] = -distance * this.clipDirection;
-			coordinateFrame.setAttribute("translation", translation.join(","));
-		};
-
-		/**
-		 * Change the clipping axis
-		 * @param {string} axis - Axis on which the clipping plane acts
-		 */
-		this.changeAxis = function(axis) {
-			this.axis = axis.toUpperCase();
-
-
+			axis = axis.toUpperCase();
 			// When the axis is change the normal to the plane is changed
 			this.normal = [ (axis === "X") ? this.clipDirection : 0,
 					(axis === "Y") ? this.clipDirection : 0,
 					(axis === "Z") ? this.clipDirection : 0];
 
-			
+			// Update the transform containing the clipping plane
+			var axisIDX = "XYZ".indexOf(axis);
+			var min = volume.min.multiply(BBOX_SCALE).toGL();
+			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			this.movePlane(self.percentage);
 
-			setOutlineCoordinates();
+			self.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+
+			// Update the clipping element plane equation
+			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + self.distance);
+
+			var translation = [0, 0, 0];
+			translation[axisIDX] = -self.distance * this.clipDirection;
+			coordinateFrame.setAttribute("translation", translation.join(","));
+
+			setOutlineCoordinates(axis);
 		};
-
 
 		/**
 		 * Transform the clipping plane by the given matrix
@@ -641,7 +614,6 @@ var ClipPlane = {};
 				var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
 				coordinateFrame.setAttribute("translation", translation.join(" "));
 	
-				this.axis = ""; //overwrite axis as the transformed clipping plane is not guaranteed to be aligned.
 				this.normal = normal_x3d.toGL();
 				this.distance = distance;
 
@@ -703,7 +675,7 @@ var ClipPlane = {};
 			}
 
 
-			return {axis: "", normal: normal_x3d.toGL(), distance: distance};
+			return {normal: normal_x3d.toGL(), distance: distance};
 		}
 
 		this.getProperties = function(matrix)
@@ -713,12 +685,11 @@ var ClipPlane = {};
 			if(matrix)
 			{
 				var newValues = this.transformClipPlane(matrix, false);	
-				res.axis = newValues.axis;
 				res.normal  = newValues.normal;
 				res.distance = newValues.distance;
 			}
 
-			console.log(res);
+
 			return res;
 		}
 
@@ -762,9 +733,9 @@ var ClipPlane = {};
 
 		// Move the plane to finish construction
 		if(axis != "")
-		{			
-			this.changeAxis(axis);
-			this.movePlane(percentage);
+		{		
+			console.log("axis is: " + axis);	
+			this.movePlane(axis, percentage);
 		}
 
 		viewer.getScene().appendChild(clipPlaneElem);
@@ -4934,9 +4905,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(percentage) {
+		this.moveClippingPlane = function(axis, percentage) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(percentage);
+			self.clippingPlanes[0].movePlane(axis, percentage);
 		};
 
 		this.changeAxisClippingPlane = function(axis) {
@@ -9793,7 +9764,7 @@ var ViewerManager = {};
 		vm.sliderStep = 0.1;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
-		vm.selectedAxis = vm.axes[0];
+		vm.selectedAxis = "";
 		vm.visible = false;
 		vm.account = null;
 		vm.project = null;
@@ -9817,7 +9788,7 @@ var ViewerManager = {};
 					vm.distance = distance;
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
-					axis: vm.selectedAxis? translateAxis(vm.selectedAxis) : "",
+					axis: translateAxis(vm.selectedAxis),
 					normal: vm.normal,
 					percentage: initPosition,
 					distance: vm.distance,
@@ -9839,6 +9810,7 @@ var ViewerManager = {};
 			{
 				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
 				{
+					axis: translateAxis(vm.selectedAxis),
 					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
 				});
 
@@ -9867,8 +9839,12 @@ var ViewerManager = {};
 				return "Z";
 			} else if (axis === "Z") {
 				return "Y";
-			} else {
+			} else if(axis === "X") {
 				return "X";
+			}
+			else
+			{
+				return "";
 			}
 		}
 
@@ -9905,7 +9881,8 @@ var ViewerManager = {};
 				{
 					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
 					{
-						axis: translateAxis(newValue)
+						axis: translateAxis(newValue),
+						percentage: (vm.sliderMax - vm.sliderPosition) / vm.sliderMax
 					});
 
 				}
@@ -9925,21 +9902,29 @@ var ViewerManager = {};
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					var axis = event.value.clippingPlanes[0].axis;
-					vm.selectedAxis   = axis == ""?axis : translateAxis(axis);
-					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
-					vm.project = event.value.project;
-					vm.account = event.value.account;
-					vm.normal = event.value.clippingPlanes[0].normal;
-					vm.distance = event.value.clippingPlanes[0].distance;
 					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(vm.visible)
+					if(!event.value.clippingPlanes[0].normal)
+					{
+						//This is most likely old issue format. 
+						console.error("Trying to set clipping plane with no normal value.");
+
+					}
+					else 
 					{
 
-						initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
+						//vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
+						vm.project = event.value.project;
+						vm.account = event.value.account;
+						vm.normal = event.value.clippingPlanes[0].normal;
+						vm.distance = event.value.clippingPlanes[0].distance;
+						if(vm.visible)
+						{
+
+							initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
+						}
+						else
+							vm.visible=true; 
 					}
-					else
-						vm.visible=true; 
 				} else {
 					vm.visible = false;
 					vm.sliderPosition = 0.0;
@@ -18190,9 +18175,12 @@ var Oculus = {};
 								event.value.clipDirection ? event.value.clipDirection : -1,
 								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.percentage);
+							console.log("percentage is: " + event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							v.viewer.changeAxisClippingPlane(event.value.axis);
+							console.log(event.value);
+							console.log("percentage is: " + event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,

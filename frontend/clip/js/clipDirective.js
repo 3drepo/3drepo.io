@@ -52,7 +52,7 @@
 		vm.sliderStep = 0.1;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
-		vm.selectedAxis = vm.axes[0];
+		vm.selectedAxis = "";
 		vm.visible = false;
 		vm.account = null;
 		vm.project = null;
@@ -76,7 +76,7 @@
 					vm.distance = distance;
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
-					axis: vm.selectedAxis? translateAxis(vm.selectedAxis) : "",
+					axis: translateAxis(vm.selectedAxis),
 					normal: vm.normal,
 					percentage: initPosition,
 					distance: vm.distance,
@@ -98,6 +98,7 @@
 			{
 				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
 				{
+					axis: translateAxis(vm.selectedAxis),
 					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
 				});
 
@@ -126,8 +127,12 @@
 				return "Z";
 			} else if (axis === "Z") {
 				return "Y";
-			} else {
+			} else if(axis === "X") {
 				return "X";
+			}
+			else
+			{
+				return "";
 			}
 		}
 
@@ -164,7 +169,8 @@
 				{
 					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
 					{
-						axis: translateAxis(newValue)
+						axis: translateAxis(newValue),
+						percentage: (vm.sliderMax - vm.sliderPosition) / vm.sliderMax
 					});
 
 				}
@@ -184,21 +190,29 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					var axis = event.value.clippingPlanes[0].axis;
-					vm.selectedAxis   = axis == ""?axis : translateAxis(axis);
-					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
-					vm.project = event.value.project;
-					vm.account = event.value.account;
-					vm.normal = event.value.clippingPlanes[0].normal;
-					vm.distance = event.value.clippingPlanes[0].distance;
 					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(vm.visible)
+					if(!event.value.clippingPlanes[0].normal)
+					{
+						//This is most likely old issue format. 
+						console.error("Trying to set clipping plane with no normal value.");
+
+					}
+					else 
 					{
 
-						initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
+						//vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
+						vm.project = event.value.project;
+						vm.account = event.value.account;
+						vm.normal = event.value.clippingPlanes[0].normal;
+						vm.distance = event.value.clippingPlanes[0].distance;
+						if(vm.visible)
+						{
+
+							initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
+						}
+						else
+							vm.visible=true; 
 					}
-					else
-						vm.visible=true; 
 				} else {
 					vm.visible = false;
 					vm.sliderPosition = 0.0;

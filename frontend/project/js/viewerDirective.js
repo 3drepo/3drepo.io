@@ -241,9 +241,9 @@
 								event.value.clipDirection ? event.value.clipDirection : -1,
 								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							v.viewer.changeAxisClippingPlane(event.value.axis);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,

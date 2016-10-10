@@ -1898,9 +1898,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(percentage) {
+		this.moveClippingPlane = function(axis, percentage) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(percentage);
+			self.clippingPlanes[0].movePlane(axis, percentage);
 		};
 
 		this.changeAxisClippingPlane = function(axis) {

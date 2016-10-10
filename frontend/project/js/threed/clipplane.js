@@ -41,23 +41,10 @@ var ClipPlane = {};
 		// Public properties
 
 		/**
-		 * Axis on which the clipping plane is based
-		 * @type {string}
-		 */
-		this.axis = axis;
-
-		/**
 		 * Value representing the direction of clipping
 		 * @type {number}
 		 */
 		this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
-
-		/**
-		 * Value representing the percentage distance from the origin of
-		 * the clip plane
-		 * @type {number}
-		 */
-		this.percentage = (percentage === undefined) ? 1.0 : percentage;
 
 		/**
 		 * Value representing the distance from the origin of
@@ -153,11 +140,11 @@ var ClipPlane = {};
 		/**
 		 * Set the coordinates of the clipping plane outline
 		 */
-		var setOutlineCoordinates = function() {
+		var setOutlineCoordinates = function(axis) {
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			var axisIDX = "XYZ".indexOf(self.axis);
+			var axisIDX = "XYZ".indexOf(axis);
 			var outline = [
 				[0, 0, 0],
 				[0, 0, 0],
@@ -264,46 +251,30 @@ var ClipPlane = {};
 		 * Move the clipping plane
 		 * @param {number} percentage - Percentage of entire clip volume to move across
 		 */
-		this.movePlane = function(percentage) {
-			// Update the transform containing the clipping plane
-			var axisIDX = "XYZ".indexOf(this.axis);
-			var min = volume.min.multiply(BBOX_SCALE).toGL();
-			var max = volume.max.multiply(BBOX_SCALE).toGL();
-
-
-			self.percentage = percentage;
-
-			var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
-			self.distance = distance;
-
-			// Update the clipping element plane equation
-			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + distance);
-
-			var translation = [0, 0, 0];
-			translation[axisIDX] = -distance * this.clipDirection;
-			coordinateFrame.setAttribute("translation", translation.join(","));
-		};
-
-		/**
-		 * Change the clipping axis
-		 * @param {string} axis - Axis on which the clipping plane acts
-		 */
-		this.changeAxis = function(axis) {
-			this.axis = axis.toUpperCase();
-
-
+		this.movePlane = function(axis, percentage) {
+			axis = axis.toUpperCase();
 			// When the axis is change the normal to the plane is changed
 			this.normal = [ (axis === "X") ? this.clipDirection : 0,
 					(axis === "Y") ? this.clipDirection : 0,
 					(axis === "Z") ? this.clipDirection : 0];
 
-			
+			// Update the transform containing the clipping plane
+			var axisIDX = "XYZ".indexOf(axis);
+			var min = volume.min.multiply(BBOX_SCALE).toGL();
+			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			this.movePlane(self.percentage);
 
-			setOutlineCoordinates();
+			self.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+
+			// Update the clipping element plane equation
+			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + self.distance);
+
+			var translation = [0, 0, 0];
+			translation[axisIDX] = -self.distance * this.clipDirection;
+			coordinateFrame.setAttribute("translation", translation.join(","));
+
+			setOutlineCoordinates(axis);
 		};
-
 
 		/**
 		 * Transform the clipping plane by the given matrix
@@ -342,7 +313,6 @@ var ClipPlane = {};
 				var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
 				coordinateFrame.setAttribute("translation", translation.join(" "));
 	
-				this.axis = ""; //overwrite axis as the transformed clipping plane is not guaranteed to be aligned.
 				this.normal = normal_x3d.toGL();
 				this.distance = distance;
 
@@ -404,7 +374,7 @@ var ClipPlane = {};
 			}
 
 
-			return {axis: "", normal: normal_x3d.toGL(), distance: distance};
+			return {normal: normal_x3d.toGL(), distance: distance};
 		}
 
 		this.getProperties = function(matrix)
@@ -414,7 +384,6 @@ var ClipPlane = {};
 			if(matrix)
 			{
 				var newValues = this.transformClipPlane(matrix, false);	
-				res.axis = newValues.axis;
 				res.normal  = newValues.normal;
 				res.distance = newValues.distance;
 			}
@@ -463,9 +432,8 @@ var ClipPlane = {};
 
 		// Move the plane to finish construction
 		if(axis != "")
-		{			
-			this.changeAxis(axis);
-			this.movePlane(percentage);
+		{		
+			this.movePlane(axis, percentage);
 		}
 
 		viewer.getScene().appendChild(clipPlaneElem);
