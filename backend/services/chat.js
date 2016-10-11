@@ -64,7 +64,19 @@ module.exports.createApp = function (http, serverConfig){
 			if(msg.event && msg.account && msg.project){
 				//it is to avoid emitter getting its own message
 				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
-				emitter.to(`${msg.account}::${msg.project}`).emit(`${msg.account}::${msg.project}::${msg.event}`, msg.data);
+				
+				let extraPrefix = '';
+
+				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0){
+					msg.extraKeys.forEach(key => {
+						extraPrefix += `::${key}`;
+					});
+				}
+
+				let eventName = `${msg.account}::${msg.project}${extraPrefix}::${msg.event}`;
+				console.log('eventName', eventName);
+
+				emitter.to(`${msg.account}::${msg.project}`).emit(eventName, msg.data);
 			}
 		});
 

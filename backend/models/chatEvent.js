@@ -17,7 +17,7 @@
 
 var Queue = require('../services/queue');
 
-function insertEventQueue(event, emitter, account, project, data){
+function insertEventQueue(event, emitter, account, project, extraKeys, data){
 	'use strict';
 
 	let msg = {
@@ -25,6 +25,7 @@ function insertEventQueue(event, emitter, account, project, data){
 		emitter,
 		account,
 		project,
+		extraKeys,
 		data
 
 	};
@@ -34,17 +35,17 @@ function insertEventQueue(event, emitter, account, project, data){
 
 function newIssue(emitter, account, project, data){
 	'use strict';
-	return insertEventQueue('newIssue', emitter, account, project, data);
+	return insertEventQueue('newIssue', emitter, account, project, null, data);
 }
 
-function newComment(emitter, account, project, data){
+function newComment(emitter, account, project, issueId, data){
 	'use strict';
-	return insertEventQueue('newComment', emitter, account, project, data);
+	return insertEventQueue('newComment', emitter, account, project, [issueId], data);
 }
 
 function projectUploaded(emitter, account, project, data){
 	'use strict';
-	return insertEventQueue('projectUploaded', emitter, account, project, data);
+	return insertEventQueue('projectUploaded', emitter, account, project, null, data);
 }
 
 module.exports = {
