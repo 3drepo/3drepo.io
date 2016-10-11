@@ -317,6 +317,10 @@ function importBCF(req, res, next){
 		cb(null, true);
 	}
 
+	if(!config.bcf_dir){
+		return responseCodes.respond(place, req, res, next, { message: 'config.bcf_dir is not defined'});
+	}
+
 	var upload = multer({ 
 		dest: config.bcf_dir,
 		fileFilter: fileFilter,
@@ -330,6 +334,7 @@ function importBCF(req, res, next){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
+			console.log('file', req.file.path);
 			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {

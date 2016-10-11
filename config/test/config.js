@@ -107,5 +107,6 @@ module.exports = {
 		debug: {
 			skipNonGBChecking: true
 		}
-	}
+	},
+	bcf_dir: '/tmp'
 }
