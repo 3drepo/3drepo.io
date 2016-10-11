@@ -80,6 +80,10 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	'use strict';
 
 
+	if(project.length > 60){
+		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
+	}
+
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
@@ -103,7 +107,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
 
 	}).then(() => {
-		
+
 		return Role.findByRoleID(`${account}.${project}.viewer`);
 
 	}).then(role =>{
@@ -137,10 +141,10 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	}).then(setting => {
 
 		setting = setting || ProjectSetting.createInstance({
-			account: account, 
+			account: account,
 			project: project
 		});
-		
+
 		setting._id = project;
 		setting.owner = username;
 		setting.desc = desc;
@@ -151,7 +155,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		});
 
 		return setting.save();
-		
+
 	});
 }
 
@@ -175,7 +179,9 @@ function importToyJSON(db, project){
 	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
 	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
 
-	let host = config.db.host;
+	let host = config.db.host[0];
+	let port = config.db.port[0];
+
 	let username = config.db.username;
 	let password = config.db.password;
 
@@ -188,8 +194,8 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
-			{ 
+			`mongoimport -j 8 --host ${host} --port ${port} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			{
 				cwd: __dirname
 			}, function (err) {
 				if(err){
@@ -205,15 +211,15 @@ function importToyJSON(db, project){
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
 		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
-		
+
 		jsonBucket.find().forEach(file => {
-			
+
 			let newFileName = file.filename;
 			newFileName = newFileName.split('/');
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -221,7 +227,7 @@ function importToyJSON(db, project){
 
 		//rename src stash
 		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
-		
+
 		srcBucket.find().forEach(file => {
 
 			let newFileName = file.filename;
@@ -229,7 +235,7 @@ function importToyJSON(db, project){
 			newFileName[1] = db;
 			newFileName = newFileName.join('/');
 			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash', 
+				err && systemLogger.logError('error while renaming sample project stash',
 					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
 				);
 			});
@@ -250,11 +256,10 @@ function importToyProject(username){
 	let account = username;
 	let desc = '';
 	let type = 'sample';
-	
+
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-	
 	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
@@ -276,7 +281,7 @@ function importToyProject(username){
 		projectSetting.status = 'ok';
 		projectSetting.errorReason = undefined;
 		projectSetting.markModified('errorReason');
-		
+
 		return projectSetting.save();
 
 	}).catch(err => {
@@ -319,7 +324,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		}
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -407,7 +412,7 @@ function removeCollaborator(username, email, account, project, role){
 
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -443,13 +448,13 @@ function removeCollaborator(username, email, account, project, role){
 
 function createFederatedProject(account, project, subProjects){
 	'use strict';
-	
+
 	let federatedJSON = {
 		database: account,
 		project: project,
 		subProjects: []
 	};
-	
+
 	let error;
 
 	let addSubProjects = [];
@@ -481,7 +486,7 @@ function createFederatedProject(account, project, subProjects){
 	if(subProjects.length === 0) {
 		return Promise.resolve();
 	}
-	
+
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
 		return importQueue.createFederatedProject(account, federatedJSON);
@@ -491,11 +496,109 @@ function createFederatedProject(account, project, subProjects){
 			return Promise.reject(convertToErrorCode(err.errCode));
 		}
 		return Promise.reject(err);
-		
+
 	});
 
 }
 
+function getModelProperties(account, project, branch, rev, username){
+	'use strict';
+
+	let subProperties;
+	let revId, modelPropertiesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, project }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, project }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, project }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getModelProps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getModelProps.push(
+				getModelProperties(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						properties: obj.properties,
+						owner: ref.owner,
+						project: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getModelProps);
+
+	}).then(_subProperties => {
+
+		subProperties = _subProperties;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
+
+	}).then(buf => {
+		let properties;
+
+		if(buf){
+			properties = JSON.parse(buf);
+		} else if (!status && !buf){
+			properties = {};
+		}
+
+		if (!properties.hiddenNodes)
+		{
+			properties.hiddenNodes = [];
+		}
+
+		subProperties.forEach(subProperty => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+
+			if (subProperty.properties.hiddenNodes)
+			{
+				properties.hiddenNodes = properties.hiddenNodes.concat(subProperty.properties.hiddenNodes);
+			}
+		});
+
+		return Promise.resolve({properties, status});
+
+	});
+}
 
 function getFullTree(account, project, branch, rev, username){
 	'use strict';
@@ -535,7 +638,7 @@ function getFullTree(account, project, branch, rev, username){
 
 			status = 'NO_ACCESS';
 			return Promise.resolve([]);
-		
+
 		} else {
 
 			revId = utils.uuidToString(history._id);
@@ -596,7 +699,7 @@ function getFullTree(account, project, branch, rev, username){
 
 		let resetPath = function(node, parentPath){
 			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path; 
+				child.path = parentPath + '__' + child.path;
 				child.children && resetPath(child.children, child.path);
 			});
 		};
@@ -615,11 +718,11 @@ function getFullTree(account, project, branch, rev, username){
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
-				} 
+				}
 
 			});
 		});
-		
+
 		return Promise.resolve({tree, status});
 
 	});
@@ -659,7 +762,7 @@ function searchTree(account, project, branch, rev, searchString, username){
 	}).then(objs => {
 
 		objs.forEach((obj, i) => {
-			
+
 			objs[i] = obj.toJSON();
 			objs[i].account = account;
 			objs[i].project = project;
@@ -739,10 +842,10 @@ function listSubProjects(account, project, branch){
 		});
 
 		return Promise.resolve(subProjects);
-	
+
 	});
 }
-	
+
 
 function downloadLatest(account, project){
 	'use strict';
@@ -758,7 +861,7 @@ function downloadLatest(account, project){
 		// change file name
 		let filename = file.filename.split('_');
 		let ext = '';
-		
+
 		if (filename.length > 1){
 			ext = '.' + filename.pop();
 		}
@@ -769,12 +872,23 @@ function downloadLatest(account, project){
 			readStream: bucket.openDownloadStream(file._id),
 			meta: file
 		});
-		
+
 	});
 }
 
-var fileNameRegExp = /[ *"\/\\[\]:;|=,<>]/g;
-var projectNameRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
+
+var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var acceptedFormat = [
+	'x','obj','3ds','md3','md2','ply',
+	'mdl','ase','hmp','smd','mdc','md5',
+	'stl','lxo','nff','raw','off','ac',
+	'bvh','irrmesh','irr','q3d','q3s','b3d',
+	'dae','ter','csm','3d','lws','xml','ogex',
+	'ms3d','cob','scn','blend','pk3','ndo',
+	'ifc','xgl','zgl','fbx','assbin'
+];
+
 
 module.exports = {
 	createAndAssignRole,
@@ -785,8 +899,10 @@ module.exports = {
 	createFederatedProject,
 	listSubProjects,
 	getFullTree,
+	getModelProperties,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	projectNameRegExp
+	projectNameRegExp,
+	acceptedFormat
 };

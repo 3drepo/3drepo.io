@@ -17,6 +17,7 @@
 
 var C = require("./constants");
 var _ = require('lodash');
+var config = require('./config');
 
 var responseCodes = {
 	// User error codes
@@ -71,9 +72,9 @@ var responseCodes = {
 	HEAD_REVISION_NOT_FOUND: { value: 28, message: "Head revision not found", status: 404 },
 
 	FILE_IMPORT_PROCESS_ERR: { value: 29, message: "Failed to process file", status: 400 },
-	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Failed to process file: Invalid arguments", status: 500 },
-	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Failed to process file: Unknown error", status: 500 },
-	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Failed to process file: Unknown command", status: 500 },
+	FILE_IMPORT_INVALID_ARGS: { value: 30, message: "Invalid arguments", status: 500 },
+	FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: "Unknown error", status: 500 },
+	FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: "Unknown command", status: 500 },
 	QUEUE_CONN_ERR: { value: 33, message: "Failed to establish connection to queue", status: 404 },
 	QUEUE_INTERNAL_ERR: { value: 34, message: "Failed preprocessing for queue dispatch", status: 500 },
 	QUEUE_NO_CONFIG: { value: 35, message: "Server has no queue configuration", status: 404 },
@@ -121,7 +122,7 @@ var responseCodes = {
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
 
-	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Failed to process file: Format not supported", status: 400 },
+	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Format not supported", status: 400 },
 
 	SIZE_LIMIT: {value: 69, message: 'Single file size exceeded system limit', status: 400},
 	INVALID_PROJECT_NAME: {value: 70, message: 'Invalid project name', status: 400},
@@ -155,7 +156,7 @@ var responseCodes = {
 	USER_IN_COLLABORATOR_LIST: {value: 94, message: 'This user is currently in collaborator list of a project', status: 400 },
 	SUBSCRIPTION_CANNOT_REMOVE_SELF: {value: 95, message: 'You cannot remove yourself', status: 400 },
 
-	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400}, 
+	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400},
 	EXECUTE_AGREEMENT_ERROR: { value: 97, message: 'Failed to get payment from PayPal', status: 400 },
 
 	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Your current quota usage exceeds the requested change.', status: 400 },
@@ -172,12 +173,29 @@ var responseCodes = {
 
 	INVALID_VAT: {value: 106, status: 400, message: 'Invalid VAT number'},
 	NO_CONTACT_EMAIL: { value: 107, status: 400, message: 'contact.email is not defined in config'},
+
 	DUPLICATE_TAG : { value: 108, status: 400, message: 'Revision name already exists'},
 	INVALID_TAG_NAME: {value : 109, status: 400, message: 'Invalid revision name'},
 
 	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
+
+
+	AVATAR_SIZE_LIMIT: {value: 113, status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB`},
+	INVALID_USERNAME: {value: 114, message: 'Invalid username', status: 400},
+	FILE_NO_EXT: { value: 115, message: "Filename must have extension", status: 400 },
+
+	SCREENSHOT_NOT_FOUND: {value: 116, message: 'Screenshot not found', status: 404},
+	ISSUE_INVALID_STATUS: {value: 117, message: 'Invalid issue status', status: 400},
+	ISSUE_INVALID_PRIORITY: {value: 118, message: 'Invalid issue priority', status: 400},
+	ISSUE_SAME_STATUS: {value: 119, message: 'New status is the same as current status', status: 400},
+	ISSUE_SAME_PRIORITY: {value: 120, message: 'New priority is the same as current priority', status: 400},
+	MESH_NOT_FOUND: {value: 121, message: 'Mesh not found', status: 400},
+	GROUP_ID_NOT_FOUND_IN_MESH: {value: 122, message: 'Group ID not found in mesh', status: 400},
+
+
+	PROJECT_NAME_TOO_LONG: {value: 123, message: "Project name cannot be longer than 60 characters", status: 400},
 
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
@@ -251,8 +269,6 @@ Object.keys(responseCodes).forEach(key => {
 	}
 });
 
-
-
 var mimeTypes = {
 	"src"  : "text/plain",
 	"gltf" : "application/json",
@@ -263,7 +279,7 @@ var mimeTypes = {
 	"jpg"  : "image/jpg"
 };
 
-responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
+responseCodes.respond = function(place, req, res, next, resCode, extraInfo, format)
 {
 	"use strict";
 
@@ -310,10 +326,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 	} else {
 
 		if(Buffer.isBuffer(extraInfo)){
-
 			res.status(resCode.status);
 
-			var contentType = mimeTypes[req.params.format];
+			var contentType = mimeTypes[format || req.params.format];
 
 			if (contentType)
 			{
@@ -325,11 +340,11 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 			//res.setHeader("Content-Length", extraInfo.length);
 			length = extraInfo.length;
-			
+
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
-			
+
 		} else {
 
 			length = typeof extraInfo === 'string' ? extraInfo.length : JSON.stringify(extraInfo).length;

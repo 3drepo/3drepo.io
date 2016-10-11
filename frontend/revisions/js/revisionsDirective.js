@@ -29,7 +29,11 @@
 		});
 
 		$scope.$watch("vm.revisions", function () {
-			
+
+			if(!vm.revisions || !vm.revisions[0]){
+				return;
+			}
+
 			if(!vm.revision){
 				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
 				vm.revisions[0].current = true;

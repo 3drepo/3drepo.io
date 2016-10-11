@@ -178,7 +178,7 @@
             data.preserveScope = (data.scope !== null);
             data.targetEvent = (angular.isDefined(event)) ? event : null;
             data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
-            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : true;
+            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
             $mdDialog.show(data);
         };
 
@@ -187,6 +187,10 @@
          */
         obj.closeDialog = function () {
             $mdDialog.cancel();
+        };
+
+        obj.getServerUrl = function (url) {
+            return serverConfig.apiUrl(serverConfig.GET_API, url);
         };
 
         return obj;

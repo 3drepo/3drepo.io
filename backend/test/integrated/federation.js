@@ -81,7 +81,7 @@ describe('Federated Project', function () {
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
-		let corId;
+		let corId, appId;
 
 		//fake a response from bouncer;
 		setTimeout(function(){
@@ -90,10 +90,13 @@ describe('Federated Project', function () {
 				return q.channel.get(q.workerQName);
 			}).then(res => {
 				corId = res.properties.correlationId;
-				return q.channel.assertQueue(q.callbackQName, { durable: true });
+				appId = res.properties.appId;
+				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 			}).then(() => {
 				//send fake job done message to the queue;
-				return q.channel.sendToQueue(q.callbackQName, 
+				return q.channel.publish(
+					q.callbackQName,
+					appId,
 					new Buffer(JSON.stringify({ value: 0})), 
 					{
 						correlationId: corId, 
@@ -263,7 +266,7 @@ describe('Federated Project', function () {
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
-		let corId;
+		let corId, appId;
 
 		//fake a response from bouncer;
 		setTimeout(function(){
@@ -274,8 +277,10 @@ describe('Federated Project', function () {
 				return q.channel.get(q.workerQName);
 
 			}).then(res => {
-				corId = res.properties.correlationId;
 				
+				corId = res.properties.correlationId;
+				appId = res.properties.appId;
+
 				let json = fs.readFileSync(config.cn_queue.shared_storage + '/' + corId + '/obj.json', {
 					encoding: 'utf8'
 				});
@@ -286,11 +291,13 @@ describe('Federated Project', function () {
 
 				expect(json.subProjects.length).to.equal(1);
 
-				return q.channel.assertQueue(q.callbackQName, { durable: true });
+				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 
 			}).then(() => {
 				//send fake job done message to the queue;
-				return q.channel.sendToQueue(q.callbackQName, 
+				return q.channel.publish(
+					q.callbackQName,
+					appId,
 					new Buffer(JSON.stringify({ value: 0})), 
 					{
 						correlationId: corId, 
@@ -390,7 +397,7 @@ describe('Federated Project', function () {
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
-		let corId;
+		let corId, appId;
 
 		//fake a response from bouncer;
 		setTimeout(function(){
@@ -399,10 +406,13 @@ describe('Federated Project', function () {
 				return q.channel.get(q.workerQName);
 			}).then(res => {
 				corId = res.properties.correlationId;
-				return q.channel.assertQueue(q.callbackQName, { durable: true });
+				appId = res.properties.appId;
+				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 			}).then(() => {
 				//send fake job done message to the queue;
-				return q.channel.sendToQueue(q.callbackQName, 
+				return q.channel.publish(
+					q.callbackQName,
+					appId,
 					new Buffer(JSON.stringify({ value: 0})), 
 					{
 						correlationId: corId, 

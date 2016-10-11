@@ -32,6 +32,8 @@
 	//var crypto = require('crypto');
 	var Billing = require('../models/billing');
 	var Subscription = require('../models/subscription');
+	var multer = require("multer");
+	var moment = require('moment');
 
 	router.post("/login", login);
 	router.post("/logout", logout);
@@ -40,7 +42,8 @@
 
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
-	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
+	router.get("/:account/avatar", middlewares.hasReadAccessToAccount, getAvatar);
+	router.post("/:account/avatar", middlewares.hasReadAccessToAccount, uploadAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
 	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
@@ -271,6 +274,53 @@
 		});
 	}
 
+	function uploadAvatar(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+
+
+
+		//check space and format
+		function fileFilter(req, file, cb){
+
+			let acceptedFormat = ['png', 'jpg', 'gif'];
+
+			let format = file.originalname.split('.');
+			format = format.length <= 1 ? '' : format.splice(-1)[0];
+
+			let size = parseInt(req.headers['content-length']);
+
+			if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+				return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if(size > config.avatarSizeLimit){
+				return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
+			}
+
+			return cb(null, true);
+		}
+
+		var upload = multer({
+			storage: multer.memoryStorage(),
+			fileFilter: fileFilter
+		});
+
+		upload.single("file")(req, res, function (err) {
+			if (err) {
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			} else {
+				User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+					user.customData.avatar = { data: req.file.buffer};
+					return user.save();
+				}).then(() => {
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'success' });
+				}).catch(err => {
+					responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+				});
+			}
+		});
+	}
+
 	function resetPassword(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 
@@ -321,7 +371,8 @@
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
 				email: user.customData.email,
-				billingInfo: user.customData.billingInfo
+				billingInfo: user.customData.billingInfo,
+				hasAvatar: user.customData.avatar ? true : false
 			});
 
 		}).catch(err => {
@@ -370,7 +421,7 @@
 	// 	let password = crypto.randomBytes(64).toString('hex');
 
 	// 	//first create the ghost user
-	// 	let checkPlan = User.getSubscription(req.body.plan) ? 
+	// 	let checkPlan = User.getSubscription(req.body.plan) ?
 	// 		Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
 
@@ -391,7 +442,7 @@
 	// 		}
 
 	// 	}).then(dbUser => {
-			
+
 	// 		//create a subscription token in this ghost user
 	// 		let billingUser = req.params.account;
 	// 		return dbUser.createSubscriptionToken(req.body.plan, billingUser);
@@ -455,7 +506,7 @@
 
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByAccount(req.params.account).then(billings => {
-			
+
 			billings.forEach((billing, i) => {
 				billings[i] = billing.clean({skipDate: true});
 			});
@@ -470,13 +521,19 @@
 
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(billing => {
-			
+
 			if(!billing){
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			res.render("invoice.jade", {billing : billing.clean(), baseURL: config.getBaseURL()});
-			
+			let template = 'invoice.jade';
+
+			if(billing.type === 'refund'){
+				template = 'refund.jade';
+			}
+
+			res.render(template, {billing : billing.clean(), baseURL: config.getBaseURL()});
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
@@ -493,20 +550,20 @@
 		}
 
 		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_billing => {
-			
+
 			billing = _billing;
 			if(!billing){
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
 			return billing.getPDF({regenerate: regenerate});
-		
+
 		}).then(pdf => {
 
 
 			res.writeHead(200, {
 				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="invoice-${billing.invoiceNo}.pdf"`,
+				'Content-disposition': `inline; filename="${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_${billing.type}-${billing.invoiceNo}.pdf"`,
 				'Content-Length': pdf.length
 			});
 
@@ -521,9 +578,9 @@
 
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account).then(dbUser => {
-			
+
 			let userData = {};
-			
+
 			if(req.body.email){
 				userData.email = req.body.email;
 			} else if(req.body.user) {
@@ -543,7 +600,7 @@
 
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account).then(dbUser => {
-			
+
 			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
 
 		}).then(subscription => {

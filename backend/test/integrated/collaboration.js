@@ -179,7 +179,7 @@ describe('Sharing/Unsharing a project', function () {
 
 		it('and the viewer should NOT be able to see raise issue', function(done){
 			agent.post(`/${username}/${project}/issues.json`)
-			.send({ data: {} })
+			.send({})
 			.expect(401 , done);
 		});
 
@@ -267,7 +267,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('and the viewer should NOT be able to see raise issue', function(done){
 				agent.post(`/${username}/${project}/issues.json`)
-				.send({ data: {} })
+				.send({ })
 				.expect(401 , done);
 			});
 		});
@@ -363,6 +363,8 @@ describe('Sharing/Unsharing a project', function () {
 
 			let issue = { 
 				"name": "issue",
+				"status": "open",
+				"priority": "medium",
 				"viewpoint":{
 					"up":[0,1,0],
 					"position":[38,38 ,125.08011914810137],
@@ -382,7 +384,7 @@ describe('Sharing/Unsharing a project', function () {
 			};
 
 			agent.post(`/${username}/${project}/issues.json`)
-			.send({ data: JSON.stringify(issue) })
+			.send(issue)
 			.expect(200 , done);
 		});
 
@@ -470,7 +472,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('and the editor should NOT be able to raise issue', function(done){
 				agent.post(`/${username}/${project}/issues.json`)
-				.send({ data: {} })
+				.send({})
 				.expect(401 , done);
 			});
 		});

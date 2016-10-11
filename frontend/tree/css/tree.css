@@ -32,12 +32,20 @@ tree .treeNodes p {
   margin: 8px 0 8px -5px;
   font-size: 14px;
 }
-tree .treeNodes p:hover {
+
+tree .treeNode {
+  outline: none;
+}
+tree .treeNode:hover {
   cursor: pointer;
-  background: #F0F0F0;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
+  background: rgba(0,69,148,.1);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+tree .treeNodeSelected {
+  background: rgba(0,69,148, 0.2);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
 }
 
 tree md-checkbox {
@@ -50,15 +58,8 @@ tree md-checkbox {
   font-weight: normal;
 }
 
-
 tree .treeButtonDisabled {
   color: #CCCCCC !important;
-}
-
-
-tree .treeNodeSelected {
-  background: rgba(0,69,148, 0.2);
-  border-radius: 2px;
 }
 
 tree .expandButton {

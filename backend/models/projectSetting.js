@@ -38,7 +38,8 @@ var schema = mongoose.Schema({
 		"speed" : Number,
 		"zNear" : Number,
 		"zFar" : Number,
-		"unit": String,
+		"unit": String, //cm, m, ft, mm
+
 		"mapTile": {
 			lat: Number,
 			lon: Number,
@@ -46,7 +47,6 @@ var schema = mongoose.Schema({
 		}
 
 	},
-
 	//bid_4_free only fields
 	info: mongoose.Schema({
 

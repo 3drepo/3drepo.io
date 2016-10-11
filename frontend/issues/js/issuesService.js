@@ -21,10 +21,11 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService) {
-		var url = "",
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
+		var self = this,
+			url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -33,7 +34,8 @@
 			availableRoles = [],
 			userRoles = [],
 			obj = {},
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			updatedIssue = null;
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -70,7 +72,7 @@
 			return prettyTime;
 		};
 
-		var generateTitle = function(issue) {
+		obj.generateTitle = function(issue) {
 			if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
@@ -92,9 +94,11 @@
 			$http.get(url)
 				.then(
 					function(data) {
+						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+							data.data[i].title = self.generateTitle(data.data[i]);
 
 							if (data.data[i].hasOwnProperty("comments")) {
 								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
@@ -104,7 +108,7 @@
 								}
 							}
 
-							data.data[i].title = generateTitle(data.data[i]);
+							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
 					},
 					function() {
@@ -116,59 +120,38 @@
 		};
 
 		obj.saveIssue = function (issue) {
-			var self = this,
-				dataToSend,
-				deferred = $q.defer(),
-				viewpointPromise = $q.defer();
+			var deferred = $q.defer(),
+				url;
 
-			var url;
-
-			if(issue.rev_id){
+			if (issue.rev_id){
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 			}
-			
 
-			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
+			config = {withCredentials: true};
 
-			viewpointPromise.promise.then(function (viewpoint) {
-				data = {
-					object_id: issue.objectId,
-					name: issue.name,
-					viewpoint: viewpoint,
-					scale: 1.0,
-					creator_role: issue.creator_role,
-					assigned_roles: userRoles,
-					scribble: issue.scribble
-				};
+			if (issue.pickedPos !== null) {
+				issue.position = issue.pickedPos.toGL();
+				issue.norm = issue.pickedNorm.toGL();
+			}
 
-				config = {withCredentials: true};
-
-				if (issue.pickedPos !== null) {
-					data.position = issue.pickedPos.toGL();
-					data.norm = issue.pickedNorm.toGL();
-				}
-
-				dataToSend = {data: JSON.stringify(data)};
-
-				$http.post(url, dataToSend, config)
-					.then(function successCallback(response) {
-						console.log(response);
-						response.data.issue._id = response.data.issue_id;
-						response.data.issue.account = issue.account;
-						response.data.issue.project = issue.project;
-						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-						response.data.issue.creator_role = issue.creator_role;
-						response.data.issue.scribble = issue.scribble;
-
-						response.data.issue.title = generateTitle(response.data.issue);
-						self.removePin();
-						deferred.resolve(response.data.issue);
-					});
-			});
+			$http.post(url, issue, config)
+				.then(function successCallback(response) {
+					deferred.resolve(response);
+				});
 
 			return deferred.promise;
+		};
+
+		/**
+		 * Update issue
+		 * @param issue
+		 * @param data
+		 * @returns {*}
+		 */
+		obj.updateIssue = function (issue, data) {
+			return doPut(issue, data);
 		};
 
 		/**
@@ -187,12 +170,11 @@
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
 			}
 				
-			var config = {
-				withCredentials: true
-			};
-			$http.put(url, {data: JSON.stringify(data)}, config)
+			var config = {withCredentials: true};
+
+			$http.put(url, data, config)
 				.then(function (response) {
-					deferred.resolve(response.data);
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}
@@ -218,10 +200,10 @@
 			);
 		};
 
-		obj.saveComment = function(issue, comment) {
+		obj.saveComment = function(issue, comment, viewpoint) {
 			return doPut(issue, {
 				comment: comment,
-				number: issue.number
+				viewpoint: viewpoint
 			});
 		};
 
@@ -244,7 +226,7 @@
 			});
 		};
 
-		obj.setComment = function(issue, commentIndex) {
+		obj.sealComment = function(issue, commentIndex) {
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
@@ -362,11 +344,87 @@
 			return roleColor;
 		};
 
+		/**
+		 * Set the status icon style and colour
+		 */
+		obj.getStatusIcon = function (issue) {
+			var statusIcon = {};
+
+			if (issue.status === "closed") {
+				statusIcon.icon = "check_circle";
+				statusIcon.colour = "#004594";
+			}
+			else {
+				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
+				switch (issue.priority) {
+					case "none":
+						statusIcon.colour = "#7777777";
+						break;
+					case "low":
+						statusIcon.colour = "#4CAF50";
+						break;
+					case "medium":
+						statusIcon.colour = "#FF9800";
+						break;
+					case "high":
+						statusIcon.colour = "#F44336";
+						break;
+				}
+			}
+
+			return statusIcon;
+		};
+
+		/**
+		* Import bcf
+		*/
+		obj.importBcf = function(account, project, file){
+
+			var deferred = $q.defer();
+			var formData = new FormData();
+			formData.append("file", file);
+
+			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+				
+				console.log(res);
+				if(res.status === 200){
+					deferred.resolve();
+				} else {
+					deferred.reject(res.data);
+				}
+
+			});
+
+			return deferred.promise;
+		};
+
 		Object.defineProperty(
 			obj,
 			"newPinId",
 			{
 				get: function () {return newPinId;}
+			}
+		);
+
+		// Getter setter for updatedIssue
+		Object.defineProperty(
+			obj,
+			"updatedIssue",
+			{
+				get: function () {
+					var tmpUpdatedIssue;
+					if (updatedIssue === null) {
+						return null;
+					}
+					else {
+						tmpUpdatedIssue = updatedIssue;
+						updatedIssue = null;
+						return tmpUpdatedIssue;
+					}
+				},
+				set: function(issue) {
+					updatedIssue = issue;
+				}
 			}
 		);
 

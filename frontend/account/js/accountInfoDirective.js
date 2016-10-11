@@ -30,7 +30,8 @@
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				itemToShow: "="
+				itemToShow: "=",
+				hasAvatar: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -38,11 +39,12 @@
 		};
 	}
 
-	AccountInfoCtrl.$inject = ["$location"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
 
-	function AccountInfoCtrl ($location) {
+	function AccountInfoCtrl ($location, $scope, serverConfig, UtilsService) {
 		var vm = this;
 		
+		console.log('accountinfo', $scope)
 		/*
 		 * Init
 		 */
@@ -62,5 +64,54 @@
 			vm.itemToShow = item;
 			$location.search({}).search("page", item);
 		};
+
+
+		function getAvatarUrl(){
+			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + '?' + new Date().valueOf();
+		}
+
+		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){
+
+			if(vm.username && vm.hasAvatar){
+				vm.avatarUrl = getAvatarUrl();
+			}
+
+		});
+
+
+		
+
+		vm.upload = function(){
+
+			var file = document.createElement('input');
+
+			file.setAttribute('type', 'file');
+			file.setAttribute('accept', '.gif,.jpg,.jpeg,.png');
+			file.click();
+
+			file.addEventListener("change", function () {
+
+				vm.uploadingAvatar = true;
+				var formData = new FormData();
+				formData.append("file", file.files[0]);
+
+				UtilsService.doPost(formData, vm.username + "/avatar", {'Content-Type': undefined}).then(function(res){
+					vm.uploadingAvatar = false;
+					
+					console.log(res);
+					if(res.status === 200){
+						vm.avatarUrl = getAvatarUrl();
+					} else {
+						console.log('Upload avatar error', res.data);
+					}
+
+				});
+
+				$scope.$apply();
+
+			});
+		}
+
+
 	}
 }());

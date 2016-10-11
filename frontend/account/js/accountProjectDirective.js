@@ -170,6 +170,19 @@
 
 			vm.file.addEventListener("change", function () {
 				vm.selectedFile = vm.file.files[0];
+
+				var names = vm.selectedFile.name.split('.');
+				vm.uploadButtonDisabled = false;
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				}
+
 				$scope.$apply();
 			});
 		}
@@ -201,8 +214,6 @@
 					}
 				});
 			}
-
-
 		};
 
 		/**

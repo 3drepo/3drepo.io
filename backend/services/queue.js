@@ -16,7 +16,7 @@
  */
 
 /***************************************************************************
-*  @file Contains functionality to dispatch work to the 
+*  @file Contains functionality to dispatch work to the
  *       queue via amqp protocol. A compute node with a worker must be running
  *       to fulfil the tasks in order for the work to be done.
 ****************************************************************************/
@@ -24,13 +24,14 @@
 var amqp = require('amqplib');
 var fs = require('fs.extra');
 var uuid = require('node-uuid');
+var shortid = require('shortid');
 
 
 function ImportQueue() {}
 
 /*******************************************************************************
  * Create a connection and a channel in ampq and init variables
- * @param {url} url - ampq connection string 
+ * @param {url} url - ampq connection string
  * @param {options} options - defines sharedSpacePath, logger, callbackQName and workerQName
  *******************************************************************************/
 ImportQueue.prototype.connect = function(url, options) {
@@ -40,6 +41,9 @@ ImportQueue.prototype.connect = function(url, options) {
         return Promise.resolve();
     }
 
+
+
+    this.uid = shortid.generate();
 
     if(!options.shared_storage){
         return Promise.reject({ message: 'Please define shared_storage in queue config'});
@@ -59,7 +63,7 @@ ImportQueue.prototype.connect = function(url, options) {
     return amqp.connect(url).then( conn => {
 
         this.conn = conn;
-        
+
         conn.on('close', () => {
             this.conn = null;
         });
@@ -104,17 +108,17 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
     let newPath;
     let newFileDir;
-    let jsonFilename = `${this.sharedSpacePath}/${corID}.json`; 
+    let jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
     return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
-    
+
         newPath = obj.filePath;
         newFileDir = obj.newFileDir;
 
         let json = {
             file: newPath,
             database: databaseName,
-            project: projectName,   
+            project: projectName,
             owner: userName,
         };
 
@@ -142,7 +146,7 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
         //let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
         let msg = `import -f ${jsonFilename}`;
         return this._dispatchWork(corID, msg);
-    
+
     }).then(() => {
 
         return new Promise((resolve, reject) => {
@@ -178,7 +182,7 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
             } else {
                 reject(err);
             }
-            
+
         });
 
     }).then(() => {
@@ -239,12 +243,12 @@ ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newF
     'use strict';
 
     var ProjectHelper = require('../models/helper/project');
-    
+
     newFileName = newFileName.replace(ProjectHelper.fileNameRegExp, '_');
 
     let newFileDir = this.sharedSpacePath + "/" + corID + "/";
     let filePath = newFileDir + newFileName;
-    
+
     return new Promise((resolve, reject) => {
         fs.mkdir(newFileDir, function (err){
             if (err) {
@@ -280,20 +284,20 @@ ImportQueue.prototype._dispatchWork = function(corID, msg){
     return this.channel.assertQueue(this.workerQName, { durable: true }).then( _info => {
 
         info = _info;
-        
-        return this.channel.sendToQueue(this.workerQName, 
-            new Buffer(msg), 
+
+        return this.channel.sendToQueue(this.workerQName,
+            new Buffer(msg),
             {
-                correlationId: corID, 
-                replyTo: this.callbackQName, 
-                persistent: true 
+                correlationId: corID,
+				appId: this.uid,
+                persistent: true
             }
         );
 
     }).then( () => {
 
         this.logger.logInfo(
-            'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName,
+            'Sent work to queue[' + this.workerQName + ']: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName,
             {
                 corID: corID.toString()
             }
@@ -326,11 +330,22 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
     'use strict';
 
     let self = this;
+    let queue;
+    
+	return this.channel.assertExchange(this.callbackQName, 'direct', { durable: true }).then(() => {
 
-    return this.channel.assertQueue(this.callbackQName, { durable: true }).then(() => {
-        return this.channel.consume(this.callbackQName, function(rep) {
+        return this.channel.assertQueue('', { exclusive: true });
+
+    }).then((q) => {
+
+		queue = q.queue;
+		return this.channel.bindQueue(queue, this.callbackQName, this.uid);
+
+	}).then(() => {
+
+        return this.channel.consume(queue, function(rep) {
+
             self.logger.logInfo('Job request id ' + rep.properties.correlationId + ' returned with: ' + rep.content);
-            
 
             let defer = self.deferedObjs[rep.properties.correlationId];
 
@@ -345,7 +360,7 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
             }
 
             defer && delete self.deferedObjs[rep.properties.correlationId];
-            
+
         }, { noAck: true });
     });
 };

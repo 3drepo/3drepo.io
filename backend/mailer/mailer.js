@@ -114,10 +114,14 @@ function sendPaymentReceivedEmailToSales(data, attachments){
 
 	let template = require('./templates/paymentReceived');
 	
+	if(data.type === 'refund'){
+		template = require('./templates/paymentRefunded');
+	}
+
 	let salesTemplate = {
 		html: template.html,
 		subject: function(data){
-			return `[Invoice ${data.invoiceNo}] ${data.email}`;
+			return `[${data.type}] [${data.invoiceNo}] ${data.email}`;
 		}
 	};
 
@@ -151,6 +155,14 @@ function sendPaymentFailedEmail(to, data){
 
 	let template = require('./templates/paymentFailed');
 	return sendEmail(template, to, data);
+
+}
+
+function sendPaymentRefundedEmail(to, data, attachments){
+	'use strict';
+
+	let template = require('./templates/paymentRefunded');
+	return sendEmail(template, to, data, attachments);
 
 }
 
@@ -194,5 +206,6 @@ module.exports = {
 	sendPaymentErrorEmail,
 	sendProjectInvitation,
 	sendSubscriptionSuspendedEmail,
-	sendPaymentReceivedEmailToSales
+	sendPaymentReceivedEmailToSales,
+	sendPaymentRefundedEmail
 }

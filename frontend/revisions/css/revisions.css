@@ -19,7 +19,8 @@ revisions {
 }
 
 .revisions-dropdown{
-  cursor:pointer;
+    cursor:pointer;
+    outline: none
 }
 
 /** Revisions Dialog *************************************************************************************************/
@@ -27,54 +28,17 @@ revisions {
   width: 40%;
 }
 
-.revisionsDialog .revision-name-and-author {
-  display: inline-block;
-  width:60%;
-  align-self: flex-start;
+.revisionsDialog md-list {
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-.revisionsDialog .revision {
-  font-size:19px;
-  line-height: normal;
+.revisionsDialog .revisionsDialogText {
+    margin: 5px 5px;
 }
 
-.revisionsDialog .desc {
-  line-height: normal;
-  margin-top: 10px;
-}
-
-.revisionsDialog .author {
-  font-size:13px;
-  line-height: normal;
-}
-
-.revisionsDialog .timestamp {
-  display: inline-block;
-  width:40%;
-  align-self: flex-start;
-  text-align: right;
-}
-
-.revisionsDialog .desc {
-  font-size:12px;
-  color: grey;
-}
-
-.revisionsDialog .revision-first-row{
-   display: flex;
-   width: 100%
-}
-.revisionsDialog .revision-item{
-  padding-top: 10px;
-  padding-bottom:15px;
-  width:100%;
-}
-
-.revisionsDialog .current{
-  background-color: #ffffe0;
-}
-
-.revisionsDialog span.current{
-    font-style: italic;
-    font-size: 12px;
+.revisionsDialog .revisionsDialogInfo {
+    color: rgba(0, 0, 0, 0.5);
+    margin: -35px 0 0;
 }

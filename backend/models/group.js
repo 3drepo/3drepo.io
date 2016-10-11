@@ -16,41 +16,35 @@
  */
 
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
+
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var utils = require('../utils');
 var uuid = require('node-uuid');
-
+var _ = require('lodash');
 var Schema = mongoose.Schema;
+var Mesh = require('./mesh');
+var responseCodes = require('../response_codes.js');
 
-var groupSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		// no extra attributes
-		_id: Object,
-		type: { type: String, default: 'group'},
-		parents: [],
-		color: [Number]
-	})
-);
+var groupSchema = Schema({
+	// no extra attributes
+	_id: Object,
+	parents: [],
+	issue_id: Object,
+	color: [Number]
+});
 
-
-groupSchema.statics = {};
-groupSchema.methods = {};
 
 
 groupSchema.statics.findByUID = function(dbCol, uid){
 	'use strict';
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid), type: 'group' });
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) });
 };
 
 groupSchema.statics.listGroups = function(dbCol){
 	'use strict';
 
-	//TO-DO : get head history-> current, and do type: group, _id: {$in: current}
-
-	return this.find(dbCol, { type : 'group'});
+	return this.find(dbCol, {});
 };
 
 groupSchema.methods.updateAttrs = function(data){
@@ -58,18 +52,66 @@ groupSchema.methods.updateAttrs = function(data){
 
 	let parents = data.parents;
 
-	if(parents){
+	if(!parents){
+		return Promise.resolve();
+	}
+
+	let currentParents = [];
+
+	this.parents.forEach(parent => {
+		currentParents.push(utils.uuidToString(parent));
+	});
+
+
+	let newParents = _.difference(parents, currentParents);
+
+	let addPromises = [];
+
+	newParents.forEach(id => addPromises.push(
+		Mesh.addGroup(
+			this._dbcolOptions.account,
+			this._dbcolOptions.project,
+			id,
+			utils.uuidToString(this._id)
+		)
+	));
+
+	return Promise.all(addPromises).then(() =>{
+
+		let removeParents = _.difference(currentParents, parents);
+		let removePromises = [];
+
+		removeParents.forEach(id => removePromises.push(
+			Mesh.removeGroup(
+				this._dbcolOptions.account,
+				this._dbcolOptions.project,
+				id,
+				utils.uuidToString(this._id)
+			)
+		));
+
+		return Promise.all(removePromises);
+
+	}).then(() => {
+
 		parents.forEach((p, index) => {
 			parents[index] = stringToUUID(p);
 		});
-	}
+
+		this.name = data.name || this.name;
+		this.parents = parents || this.parents;
+		this.color = data.color || this.color;
+
+		this.markModified('parents');
+		return this.save();
+
+	});
 
 
-	this.name = data.name || this.name;
-	this.parents = parents || this.parents;
-	this.color = data.color || this.color;
 
-	this.markModified('parents');
+
+
+
 
 };
 
@@ -83,25 +125,55 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 
 	group._id = stringToUUID(uuid.v1());
-	group.shared_id = stringToUUID(uuid.v1());
-	group.api = 1;
-
-	group.updateAttrs(data);
+	return group.updateAttrs(data);
 	
-	return group;
 };
 
-// extend statics method
-groupSchema.statics = _.extend({}, repoBase.statics, groupSchema.statics);
+groupSchema.methods.clean = function(){
+	'use strict';
 
-// extend instance method
-groupSchema.methods = _.extend({}, repoBase.methods, groupSchema.methods);
+	let cleaned = this.toObject();
+	cleaned._id = uuidToString(cleaned._id);
+	cleaned.issue_id = cleaned.issue_id && uuidToString(cleaned.issue_id);
+	cleaned.parents.forEach((parent, i) => {
+		cleaned.parents[i] = uuidToString(parent);
+	});
+
+	return cleaned;
+
+};
+
+
+groupSchema.statics.deleteGroup = function(dbCol, id){
+	'use strict';
+
+	return Group.findOneAndRemove(dbCol, { _id : stringToUUID(id)}).then(group => {
+
+		if(!group){
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
+
+		let removePromises = [];
+
+		group.parents.forEach(meshId => removePromises.push(
+			Mesh.removeGroup(
+				dbCol.account,
+				dbCol.project,
+				utils.uuidToString(meshId),
+				id
+			)
+		));
+
+		return Promise.all(removePromises);
+
+	});
+};
 
 var Group = ModelFactory.createClass(
 	'Group', 
 	groupSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.project}.groups`;
 	}
 );
 

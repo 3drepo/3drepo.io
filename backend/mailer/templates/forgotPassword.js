@@ -22,6 +22,9 @@ var html = data => `
 	You've requested to reset your password, please click on the following link to reset your password.<br>
 	<br>
 	<a href="${data.url}">Reset My Password</a>
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 module.exports =  {

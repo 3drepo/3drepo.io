@@ -32,6 +32,8 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
+// init ampq and import queue object
+var importQueue = require('../services/queue');
 
 function getAccessToProject(username, account, project){
 	'use strict';
@@ -283,8 +285,8 @@ function createQueueInstance(){
 	}).then(() => importQueue);
 	
 
-
 }
+
 function connectQueue(req, res, next){
 	'use strict';
 

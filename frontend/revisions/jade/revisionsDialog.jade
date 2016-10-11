@@ -6,15 +6,34 @@ md-dialog.revisionsDialog(aria-label="Revisions")
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-list
-		md-list-item(layout-fill, md-ink-ripple, ng-repeat="rev in vm.revisions", ng-click="vm.goToRevision(rev.tag || rev._id, rev.current)", ng-class="rev.current ? 'current' : ''")
-			div.revision-item
-				div.revision-first-row
-					div.revision-name-and-author
-						div.revision(ng-if="rev.tag") {{rev.tag}} 
+		//md-list-item(
+			ng-repeat="rev in vm.revisions"
+			ng-click="vm.goToRevision(rev.tag || rev._id, rev.current)"
+			ng-class="rev.current ? 'current' : ''")
+			.revision-item
+				.revision-first-row
+					.revision-name-and-author
+						.revision(ng-if="rev.tag") {{rev.tag}}
 							span.current(ng-if="rev.current") (current revision)
-						div.revision(ng-if="!rev.tag") {{rev._id}} 
+						.revision(ng-if="!rev.tag") {{rev._id}}
 							span.current(ng-if="rev.current") (current revision)
-						div.author {{rev.author}}
-					div.timestamp {{rev.timestamp | revisionDate }}
-				div.desc {{rev.desc}}
+						.author {{rev.author}}
+					.timestamp {{rev.timestamp | revisionDate }}
+				.desc {{rev.desc}}
+			md-divider
+
+		md-list-item(
+		ng-repeat="rev in vm.revisions"
+		ng-click="vm.goToRevision(rev.tag || rev._id, rev.current)"
+		ng-class="rev.current ? 'current' : ''")
+			div(layout="column", flex)
+				p(ng-if="rev.tag") {{rev.tag}}
+				p(ng-if="!rev.tag") {{rev._id}}
+				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
+					p {{rev.author}}
+					p(ng-if="rev.current") (current revision)
+					p {{rev.timestamp | revisionDate }}
+				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
+					p {{rev.desc}}
+
 			md-divider

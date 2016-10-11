@@ -23,6 +23,9 @@ var html = data => `
 	and agreeing to 3D Repo's Terms of Service.<br> 
 	<br>
 	<a href="${data.url}">Confirm Email Address</a>
+	<br><br>
+	Best,<br>
+	3D Repo
 `;
 
 module.exports =  {
