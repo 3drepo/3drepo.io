@@ -13781,6 +13781,7 @@ angular.module('3drepo')
 		// Init
 		this.UtilsService = UtilsService;
 		this.IssuesService = IssuesService;
+		this.setFocus = setFocus;
 
 		/**
 		 * Monitor changes to parameters
@@ -13835,6 +13836,9 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
 				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
+					// This is done to overcome the problem where focus is sometimes set on an issue when the scroll bar moves
+					this.setFocus = null;
+
 					// Handle focused issue
 					if (focusedIssueIndex !== null) {
 						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
@@ -13971,20 +13975,24 @@ angular.module('3drepo')
 
 		/**
 		 * Set focus on issue
-		 * @param event
 		 * @param issue
 		 * @param index
 		 */
-		this.setFocus = function (event, issue, index) {
+		function setFocus (issue, index) {
 			if (selectedIssue !== null) {
 				selectedIssue.focus = false;
 			}
 			focusedIssueIndex = index;
 			issue.focus = true;
-		};
+		}
 
-		this.test = function (event, issue, index) {
-			console.log(666);
+		/**
+		 * Allow set focus
+		 */
+		this.initSetFocus = function () {
+			if (this.setFocus === null) {
+				this.setFocus = setFocus;
+			}
 		};
 
 		/**
