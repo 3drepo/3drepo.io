@@ -538,6 +538,77 @@ describe('Enrolling to a subscription', function () {
 	});
 
 
+	describe('and then refund', function(){
+
+		before(function(done){
+			let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+			let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+
+			let fakePaymentMsg = 'mc_gross=-120.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
+			+ '&protection_eligibility=Eligible&payment_cycle=Monthly&payer_id=6TCR69539GDR8&address_street=123 123&payment_date=' + paymentDate
+			+ '&payment_status=Refunded&product_name=This month\'s pro-rata: £120. Regualr monthly recurring payment £360, starts on 4th Aug 2016&'
+			+ 'charset=UTF-8&recurring_payment_id=' + billingId + '&address_zip=123&first_name=PAy&mc_fee=-8.67&address_country_code=GB&address_name='
+			+ 'PAy Me&notify_version=3.8&amount_per_cycle=360.00&reason_code=refund&currency_code=GBP&business=test3drepo@example.org&address_country'
+			+ '=United Kingdom&address_city=123&verify_sign=AcE2uah9fzGQIYibH799J4hdOjH.AHrml.KEiNJ1j85nY5ztJqJh5hDw&payer_email=test3drepopayer@example.org'
+			+ '&parent_txn_id=21K54591EX9972912&initial_payment_amount=0.00&profile_status=Active&amount=360.00&txn_id=4G401246NU073361P&payment_type=instant'
+			+ '&last_name=Me&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G&mc_currency=GBP&residence_country=GB'
+			+ '&test_ipn=1&transaction_subject=This month\'s pro-rata: £120. Regualr monthly recurring payment £360, starts on 4th Aug 2016&payment_gross='
+			+ '&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=5d3ce7c954739';
+
+
+			async.series([
+
+				function(done){
+					agent.post(`/payment/paypal/food`)
+					.send(fakePaymentMsg)
+					.expect(200, function(err, res){
+						setTimeout(function(){
+							if(err){
+								done(err);
+							} else {
+								done();
+							}
+						}, 500);
+					});
+				}, 
+
+				function(done){
+
+					agent.post('/login')
+					.send({ username, password})
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(username);
+						done(err);
+					});
+			
+				}
+			], done);
+
+		});
+
+		after(function(done){
+			agent.post('/logout')
+			.send({})
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
+		it('should have credit note created with number CN-1', function(done){
+			agent.get(`/${username}/billings`)
+			.expect(200, function(err, res){
+			
+				expect(res.body).to.be.an('array');
+				let cn = res.body.find( bill => bill.invoiceNo === 'CN-1');
+				expect(cn).to.exist;
+
+				done(err);
+			});
+		});
+
+	});
+
+
 	describe('second user pays', function(){
 		before(function(done){
 			agent.post('/login')
@@ -657,6 +728,9 @@ describe('Enrolling to a subscription', function () {
 
 			});
 		});
-	})
+	});
+
+
+
 
 });
