@@ -32,9 +32,6 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-// init ampq and import queue object
-var importQueue = require('../services/queue');
-
 function getAccessToProject(username, account, project){
 	'use strict';
 
@@ -279,8 +276,7 @@ function createQueueInstance(){
 		logger: systemLogger,
 		callback_queue: config.cn_queue.callback_queue,
 		worker_queue: config.cn_queue.worker_queue,
-		event_queue: config.cn_queue.event_queue,
-		event_queue_message_ttl: config.cn_queue.event_queue_message_ttl
+		event_exchange: config.cn_queue.event_exchange
 
 	}).then(() => importQueue);
 	
