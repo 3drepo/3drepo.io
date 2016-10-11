@@ -37,9 +37,9 @@
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager"];
 
-	function AccountTeamCtrl($scope, $location, UtilsService, StateManager) {
+	function AccountTeamCtrl($scope, $location, $timeout, UtilsService, StateManager) {
 		var vm = this,
 			promise;
 
@@ -52,8 +52,8 @@
 		vm.addDisabled = false;
 		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
+		vm.showList = true;
 
-		console.log(vm.item);
 		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
 		promise.then(function (response) {
 			console.log(response);
@@ -92,7 +92,6 @@
 
 			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					vm.members.push(data);
 					for (i = 0, length = vm.collaborators.length; i < length; i += 1) {
@@ -102,8 +101,16 @@
 						}
 					}
 					vm.searchText = null;
+					vm.selectedUser = null;
 					vm.addDisabled = (vm.collaborators.length === 0);
 					vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
+
+					// This is done to refresh the list as splicing the array causes an empty list
+					vm.showList = false;
+					$timeout(function () {
+						vm.showList = true;
+						$scope.$apply();
+					});
 				}
 			});
 		};
@@ -116,7 +123,6 @@
 		vm.removeMember = function (index) {
 			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					var member = vm.members.splice(index, 1);
 					vm.collaborators.push(member[0]);

@@ -94,6 +94,8 @@
 					// Always show user account
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
+					// Only show add project menu for user account
+					vm.accounts[i].canAddProject = (i === 0);
 				}
 			}
 		});

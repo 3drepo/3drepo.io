@@ -40,11 +40,11 @@
 						section
 							md-subheader
 								div Licenses ({{vm.numLicenses}} assigned, {{vm.numLicenses}} total)
-						md-list-item(ng-repeat="license in vm.licenses")
-							md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-							.md-list-item-text(flex)
-								p {{license.user}}
-							span(flex)
+						md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
+							div(layout="row", layout-align="start center", flex)
+								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
+								.md-list-item-text(flex)
+									p {{license.user}}
 							div(layout="row", layout-align="end center")
 								p#accountLicenseMessage {{license.deleteMessage}}
 								md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-if="license.showRemove")
@@ -53,10 +53,10 @@
 						// Unassigned
 						md-list#accountLicensesUnassigned
 							md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
-								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-								.md-list-item-text
-									p Unassigned
-								span(flex)
+								div(layout="row", layout-align="start center", flex)
+									md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
+									.md-list-item-text
+										p Unassigned
 								md-button.md-icon-button(aria-label="Remove")
 									md-icon.angular-material-icons remove_circle
 

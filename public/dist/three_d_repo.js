@@ -6190,6 +6190,7 @@ var ViewerManager = {};
 			scope: {
 				account: "=",
 				project: "=",
+				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
 				onShowPage: "&",
@@ -6215,7 +6216,8 @@ var ViewerManager = {};
 	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
 
 		var vm = this,
-			infoTimeout = 4000;
+			infoTimeout = 4000,
+			isUserAccount = (vm.account === vm.userAccount);
 
 		// Init
 		vm.project.name = vm.project.project;
@@ -6223,18 +6225,17 @@ var ViewerManager = {};
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
-
+		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload"},
-			projectsetting: {label: "Settings", icon: "settings"},
-			revision: {label: "Revisions", icon: "settings_backup_restore"},
-			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			team: {label: "Team", icon: "group", hidden: !isUserAccount},
+			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
+			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
 		};
-
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 
 		checkFileUploading();
 
@@ -6363,17 +6364,14 @@ var ViewerManager = {};
 					}
 				});
 			}
-
-
 		};
 
 		/**
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			console.log(revId);
 			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
-		}
+		};
 
 		/**
 		 * Upload file/model to project
@@ -6629,6 +6627,8 @@ var ViewerManager = {};
 					// Always show user account
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
+					// Only show add project menu for user account
+					vm.accounts[i].canAddProject = (i === 0);
 				}
 			}
 		});
@@ -7282,9 +7282,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager"];
 
-	function AccountTeamCtrl($scope, $location, UtilsService, StateManager) {
+	function AccountTeamCtrl($scope, $location, $timeout, UtilsService, StateManager) {
 		var vm = this,
 			promise;
 
@@ -7297,8 +7297,8 @@ var ViewerManager = {};
 		vm.addDisabled = false;
 		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
+		vm.showList = true;
 
-		console.log(vm.item);
 		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
 		promise.then(function (response) {
 			console.log(response);
@@ -7337,7 +7337,6 @@ var ViewerManager = {};
 
 			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					vm.members.push(data);
 					for (i = 0, length = vm.collaborators.length; i < length; i += 1) {
@@ -7347,8 +7346,16 @@ var ViewerManager = {};
 						}
 					}
 					vm.searchText = null;
+					vm.selectedUser = null;
 					vm.addDisabled = (vm.collaborators.length === 0);
 					vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
+
+					// This is done to refresh the list as splicing the array causes an empty list
+					vm.showList = false;
+					$timeout(function () {
+						vm.showList = true;
+						$scope.$apply();
+					});
 				}
 			});
 		};
@@ -7361,7 +7368,6 @@ var ViewerManager = {};
 		vm.removeMember = function (index) {
 			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					var member = vm.members.splice(index, 1);
 					vm.collaborators.push(member[0]);
@@ -18859,11 +18865,18 @@ var Oculus = {};
 		 * Initialise the tree nodes to show to the first node
 		 */
 		function initNodesToShow () {
+			var i;
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
 			vm.nodesToShow[0].expanded = false;
-			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+			if (vm.nodesToShow[0].children) {
+				vm.nodesToShow[0].hasChildren = true;
+				vm.expand(vm.nodesToShow[0].children[0]._id);
+			}
+			else {
+				vm.nodesToShow[0].hasChildren = false;
+			}
 			/*
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {

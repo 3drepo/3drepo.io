@@ -28,6 +28,7 @@
 			scope: {
 				account: "=",
 				project: "=",
+				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
 				onShowPage: "&",
@@ -53,7 +54,8 @@
 	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
 
 		var vm = this,
-			infoTimeout = 4000;
+			infoTimeout = 4000,
+			isUserAccount = (vm.account === vm.userAccount);
 
 		// Init
 		vm.project.name = vm.project.project;
@@ -61,18 +63,17 @@
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
-
+		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload"},
-			projectsetting: {label: "Settings", icon: "settings"},
-			revision: {label: "Revisions", icon: "settings_backup_restore"},
-			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			team: {label: "Team", icon: "group", hidden: !isUserAccount},
+			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
+			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
 		};
-
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 
 		checkFileUploading();
 
@@ -201,17 +202,14 @@
 					}
 				});
 			}
-
-
 		};
 
 		/**
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			console.log(revId);
 			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
-		}
+		};
 
 		/**
 		 * Upload file/model to project
