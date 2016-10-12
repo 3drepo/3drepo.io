@@ -1751,6 +1751,10 @@ issues-list .issueListItemThumbnail {
   margin-left: -15px;
 }
 
+issues-list #issuesListContainer {
+  outline: none;
+}
+
 /** Issue Comp ********************************************************************************************************/
 issue-comp #issueCompAll {
   outline: none;
