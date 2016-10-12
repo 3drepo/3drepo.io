@@ -18865,14 +18865,15 @@ var Oculus = {};
 		 * Initialise the tree nodes to show to the first node
 		 */
 		function initNodesToShow () {
-			var i;
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].selected = false;
 			if (vm.nodesToShow[0].children) {
 				vm.nodesToShow[0].hasChildren = true;
-				vm.expand(vm.nodesToShow[0].children[0]._id);
+				// Show the first set of children using the expand function but deselect the child used for this
+				expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0);
+				vm.nodesToShow[0].children[0].selected = false;
 			}
 			else {
 				vm.nodesToShow[0].hasChildren = false;
