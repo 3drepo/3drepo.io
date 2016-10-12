@@ -47,9 +47,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -240,6 +240,28 @@
 			if (angular.isDefined(newValue)) {
 				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
 			}
+		});
+
+
+		/*
+		 * Watch for new issues
+		 */
+		NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
+
+			issue.title = IssuesService.generateTitle(issue);
+			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+			vm.issues.unshift(issue);
+			vm.issues = vm.issues.slice(0);
+
+			$scope.$apply();
+		});
+
+		/*
+		* Unsubscribe notifcation on destroy
+		*/
+		$scope.$on('$destroy', function(){
+			NotificationService.unsubscribe.newIssue(vm.account, vm.project);
 		});
 
 		/**
