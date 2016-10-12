@@ -19,7 +19,7 @@ div(layout="row", layout-align="start center", flex)
 
 		p.projectTimestamp {{vm.project.timestampPretty}}
 
-		md-menu(md-position-mode="target-right target")
+		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
 			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)", ng-disabled="vm.project.uploading")
 				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 			md-menu-content(width="3")

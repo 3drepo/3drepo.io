@@ -44,17 +44,19 @@
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
-			accountsToUse; // For listing federations
+			accountsToUse, // For listing federations
+			dialogCloseToId;
 
 		// Init
 		vm.federationOptions = {
 			edit: {label: "Edit", icon: "edit"},
 			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
+			delete: {label: "Delete", icon: "delete", color: "#F44336"}
 		};
-
 		vm.units = server_config.units;
-		
+		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
+		dialogCloseToId = "#" + vm.dialogCloseTo;
+
 		/*
 		 * Watch accounts input
 		 */
@@ -113,7 +115,7 @@
 				type: "",
 				subProjects: []
 			};
-			UtilsService.showDialog("federationDialog.html", $scope, event);
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		};
 
 		/**
@@ -304,7 +306,7 @@
 				}
 			}
 
-			UtilsService.showDialog("federationDialog.html", $scope, event);
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		/**
@@ -319,7 +321,7 @@
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project;
-			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		/**
@@ -330,7 +332,7 @@
 		 */
 		function setupEditTeam (event, index) {
 			vm.item = vm.accountsToUse[0].fedProjects[index];
-			UtilsService.showDialog("teamDialog.html", $scope, event);
+			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 	}
 }());

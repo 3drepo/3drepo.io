@@ -5456,17 +5456,19 @@ var ViewerManager = {};
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
-			accountsToUse; // For listing federations
+			accountsToUse, // For listing federations
+			dialogCloseToId;
 
 		// Init
 		vm.federationOptions = {
 			edit: {label: "Edit", icon: "edit"},
 			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
+			delete: {label: "Delete", icon: "delete", color: "#F44336"}
 		};
-
 		vm.units = server_config.units;
-		
+		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
+		dialogCloseToId = "#" + vm.dialogCloseTo;
+
 		/*
 		 * Watch accounts input
 		 */
@@ -5525,7 +5527,7 @@ var ViewerManager = {};
 				type: "",
 				subProjects: []
 			};
-			UtilsService.showDialog("federationDialog.html", $scope, event);
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		};
 
 		/**
@@ -5716,7 +5718,7 @@ var ViewerManager = {};
 				}
 			}
 
-			UtilsService.showDialog("federationDialog.html", $scope, event);
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		/**
@@ -5731,7 +5733,7 @@ var ViewerManager = {};
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project;
-			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		/**
@@ -5742,7 +5744,7 @@ var ViewerManager = {};
 		 */
 		function setupEditTeam (event, index) {
 			vm.item = vm.accountsToUse[0].fedProjects[index];
-			UtilsService.showDialog("teamDialog.html", $scope, event);
+			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 	}
 }());
@@ -6217,10 +6219,13 @@ var ViewerManager = {};
 
 		var vm = this,
 			infoTimeout = 4000,
-			isUserAccount = (vm.account === vm.userAccount);
+			isUserAccount = (vm.account === vm.userAccount),
+			dialogCloseToId;
 
 		// Init
 		vm.project.name = vm.project.project;
+		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
+		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.project.timestamp !== null) {
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
@@ -6303,7 +6308,7 @@ var ViewerManager = {};
 
 				case "revision":
 					getRevision();
-					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					break;
 			}
 		};
@@ -6513,8 +6518,7 @@ var ViewerManager = {};
 		 */
 		function setupEditTeam (event) {
 			vm.item = vm.project;
-			UtilsService.showDialog("teamDialog.html", $scope, event);
-
+			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		function getRevision(){
@@ -12881,60 +12885,6 @@ angular.module('3drepo')
 		vm.openAssignedRolesMenu = function($mdOpenMenu, event) {
 			originatorEv = event;
 			$mdOpenMenu(event);
-		};
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("issueHeader", issueHeader);
-
-	function issueHeader() {
-		return {
-			restrict: "EA",
-			templateUrl: "issueHeader.html",
-			scope: {
-				index: "=",
-				issueData: "=",
-				onClick: "&",
-				showInfo: "=",
-				infoText: "=",
-				onHideInfo: "&"
-			},
-			controller: IssueHeaderCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
-
-	IssueHeaderCtrl.$inject = [];
-
-	function IssueHeaderCtrl() {
-		var vm = this;
-
-		vm.click = function () {
-			if (angular.isDefined(vm.onClick)) {
-				vm.onClick({index: vm.index, pinSelect: false});
-			}
 		};
 	}
 }());
@@ -20012,8 +19962,9 @@ var Oculus = {};
          * @param {Boolean} clickOutsideToClose
          * @param {Object} parent
          * @param {Boolean} fullscreen
+         * @param {String} closeTo
          */
-        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen) {
+        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
             // Allow the dialog to have cancel ability
             scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
 
@@ -20029,6 +19980,7 @@ var Oculus = {};
             data.targetEvent = (angular.isDefined(event)) ? event : null;
             data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
             data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
+            data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
             $mdDialog.show(data);
         };
 

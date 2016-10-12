@@ -55,10 +55,13 @@
 
 		var vm = this,
 			infoTimeout = 4000,
-			isUserAccount = (vm.account === vm.userAccount);
+			isUserAccount = (vm.account === vm.userAccount),
+			dialogCloseToId;
 
 		// Init
 		vm.project.name = vm.project.project;
+		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
+		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.project.timestamp !== null) {
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
@@ -141,7 +144,7 @@
 
 				case "revision":
 					getRevision();
-					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					break;
 			}
 		};
@@ -351,8 +354,7 @@
 		 */
 		function setupEditTeam (event) {
 			vm.item = vm.project;
-			UtilsService.showDialog("teamDialog.html", $scope, event);
-
+			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		function getRevision(){

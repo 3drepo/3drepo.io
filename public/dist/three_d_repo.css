@@ -1567,63 +1567,6 @@ issue .issueOpenContainer {
   margin-top: 10px;
 }
 
-/** Issue Header ******************************************************************************************************/
-issue-header {
-  margin: 0;
-  padding: 0;
-}
-
-issue-header p {
-  margin: 0;
-  padding: 0;
-  line-height: 32px;
-}
-
-issue-header .issueTitle {
-  outline: none;
-}
-
-issue-header .issueTitle .issueTitleInfo {
-  margin-top: -10px;
-}
-issue-header .issueTitle .issueTitleInfo p {
-  color: rgba(0,0,0,0.35);
-  font-size: 14px;
-}
-
-issue-header .issueTitle button {
-  min-height: 0;
-  height: 100%;
-}
-issue-header .issueRoleMarkers {
-  width: 10px;
-}
-
-issue-header .issueStatusMarker {
-  margin-top: 10px;
-  margin-left: 6px;
-  width: 20px;
-}
-issue-header .issueStatusMarker .issueOpen {
-  color: #4CAF50;
-}
-issue-header .issueStatusMarker .issueClosed {
-  color: #F44336;
-}
-
-issue-header .issueInfo {
-  position: absolute;
-  top: 0;
-  background: #E8F5E9;
-  padding: 0 5px 0 10px;
-  width: 100%;
-  height: 100%;
-}
-issue-header h5 {
-  color: rgba(0, 0, 0, 0.7);
-  margin-left: 5px;
-}
-
 /** Issue Area ********************************************************************************************************/
 issue-area {
   position: absolute;
