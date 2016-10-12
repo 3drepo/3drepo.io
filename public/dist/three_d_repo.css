@@ -1817,7 +1817,6 @@ issue-comp .issueCompCommentTitle {
 
 issue-comp .issueCompTextActions {
   z-index: 2;
-  margin-right: -18px;
 }
 
 issue-comp #issueCompDescription {
