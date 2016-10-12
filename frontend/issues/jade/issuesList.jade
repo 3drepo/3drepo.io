@@ -9,7 +9,7 @@
 		ng-mouseleave="$ctrl.removeFocus($event, issue)"
 		ng-class="{issueListItemFocus: issue.focus}")
 			#issuesListItemContent(layout='row')
-				.issueListItemThumbnail(flex="40", layout="column", layout-align="center center", ng-if="issue.thumbnail")
+				.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
 					img(ng-src="{{$ctrl.UtilsService.getServerUrl(issue.thumbnail)}}")
 				div(flex, layout="column")
 					label#issuesListItemTitle(flex="none") {{issue.title}}

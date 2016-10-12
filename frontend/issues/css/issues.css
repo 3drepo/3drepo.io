@@ -251,7 +251,6 @@ issue-area #scribbleDisplay img {
 
 /** Issues List *******************************************************************************************************/
 issues-list .issueListItem {
-  height: 150px;
   position: relative;
   outline: none;
 }
@@ -280,9 +279,8 @@ issues-list #issuesListItemTitle {
   overflow: hidden;
 }
 
-issues-list #issuesListItemTitle,
 issues-list #issuesListItemInfo {
-  margin-bottom: 10px;
+  margin-top: 5px;
 }
 
 issues-list #issuesListItemInfo label,
@@ -314,7 +312,7 @@ issues-list #issuesListItemEnter md-icon {
 }
 
 issues-list .issueListItemThumbnail {
-  margin-left: -15px;
+  margin-right: 10px;
 }
 
 issues-list #issuesListContainer {
