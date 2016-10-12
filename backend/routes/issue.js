@@ -141,7 +141,7 @@ function updateIssue(req, res, next){
 			issue_id : issueId,
 			number: issue.number,
 			owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
-			created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
+			created: issue.created
 		};
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
@@ -334,7 +334,6 @@ function importBCF(req, res, next){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
-			console.log('file', req.file.path);
 			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {

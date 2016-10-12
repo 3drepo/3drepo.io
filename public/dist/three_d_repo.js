@@ -11672,7 +11672,6 @@ angular.module('3drepo')
 	"use strict";
 
 	var socket = io('http://example.org:3000', {path: '/yay'});
-	
 	var joined = [];
 
 	function joinRoom(account, project){
@@ -11691,21 +11690,34 @@ angular.module('3drepo')
 		socket.on(account + '::' + project + '::newIssue', function(issue){
 			callback(issue);
 		});
-
 	}
 
 	function unsubscribeNewIssue(account, project){
-
 		socket.off(account + '::' + project + '::newIssue');
+	}
 
-	};
+
+	function subscribeNewComment(account, project, issueId, callback){
+	
+		console.log('new comment sub', account, project, issueId)
+		joinRoom(account, project);
+		socket.on(account + '::' + project + '::' + issueId + '::newComment', function(issue){
+			callback(issue);
+		});
+	}
+
+	function unsubscribeNewComment(account, project, issueId, callback){
+		socket.off(account + '::' + project + '::' + issueId + '::newComment');
+	}
 
 	return {
 		subscribe: {
-			newIssue: subscribeNewIssue
+			newIssue: subscribeNewIssue,
+			newComment: subscribeNewComment
 		},
 		unsubscribe:{
-			newIssue: unsubscribeNewIssue
+			newIssue: unsubscribeNewIssue,
+			newComment: unsubscribeNewComment
 		}
 	}
 });
@@ -12107,9 +12119,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12159,7 +12171,6 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -12237,6 +12248,9 @@ angular.module('3drepo')
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
+
+			//unsubscribe on destroy
+			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
@@ -12598,6 +12612,9 @@ angular.module('3drepo')
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			self.submitDisabled = true;
+
+			commentAreaScrollToBottom();
+
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
 				setContentHeight();
@@ -12723,6 +12740,35 @@ angular.module('3drepo')
 
 			self.contentHeight({height: height});
 		}
+
+		function commentAreaScrollToBottom(){
+
+			$timeout(function(){
+				var commentArea = document.getElementById('descriptionAndComments');
+				commentArea.scrollTop = commentArea.scrollHeight;
+			});
+		}
+
+		/*
+		* Watch for new comments
+		*/
+		NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+			self.issueData.comments.push({
+				comment: comment.comment,
+				owner: comment.owner,
+				timeStamp: IssuesService.getPrettyTime(comment.created),
+				viewpoint: comment.viewpoint
+			});
+
+			$scope.$apply();
+
+			commentAreaScrollToBottom();
+
+			if (!aboutToBeDestroyed) {
+				setContentHeight();
+			}
+		})
 	}
 }());
 /**
@@ -13746,8 +13792,6 @@ angular.module('3drepo')
 		 */
 		NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
 
-			console.log('sub', vm.account + '::' + vm.project + '::newIssue');
-
 			issue.title = IssuesService.generateTitle(issue);
 			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
 
@@ -13761,10 +13805,7 @@ angular.module('3drepo')
 		* Unsubscribe notifcation on destroy
 		*/
 		$scope.$on('$destroy', function(){
-
-			console.log('directive destroy');
 			NotificationService.unsubscribe.newIssue(vm.account, vm.project);
-
 		});
 
 		/**
@@ -14791,7 +14832,6 @@ angular.module('3drepo')
 
 			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {

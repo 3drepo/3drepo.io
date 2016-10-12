@@ -41,9 +41,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -93,7 +93,6 @@
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -171,6 +170,9 @@
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
+
+			//unsubscribe on destroy
+			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
@@ -532,6 +534,9 @@
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			self.submitDisabled = true;
+
+			commentAreaScrollToBottom();
+
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
 				setContentHeight();
@@ -657,5 +662,34 @@
 
 			self.contentHeight({height: height});
 		}
+
+		function commentAreaScrollToBottom(){
+
+			$timeout(function(){
+				var commentArea = document.getElementById('descriptionAndComments');
+				commentArea.scrollTop = commentArea.scrollHeight;
+			});
+		}
+
+		/*
+		* Watch for new comments
+		*/
+		NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+			self.issueData.comments.push({
+				comment: comment.comment,
+				owner: comment.owner,
+				timeStamp: IssuesService.getPrettyTime(comment.created),
+				viewpoint: comment.viewpoint
+			});
+
+			$scope.$apply();
+
+			commentAreaScrollToBottom();
+
+			if (!aboutToBeDestroyed) {
+				setContentHeight();
+			}
+		})
 	}
 }());

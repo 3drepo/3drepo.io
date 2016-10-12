@@ -20,7 +20,6 @@ angular.module('3drepo')
 	"use strict";
 
 	var socket = io('http://example.org:3000', {path: '/yay'});
-	
 	var joined = [];
 
 	function joinRoom(account, project){
@@ -39,19 +38,34 @@ angular.module('3drepo')
 		socket.on(account + '::' + project + '::newIssue', function(issue){
 			callback(issue);
 		});
-
 	}
 
 	function unsubscribeNewIssue(account, project){
 		socket.off(account + '::' + project + '::newIssue');
-	};
+	}
+
+
+	function subscribeNewComment(account, project, issueId, callback){
+	
+		console.log('new comment sub', account, project, issueId)
+		joinRoom(account, project);
+		socket.on(account + '::' + project + '::' + issueId + '::newComment', function(issue){
+			callback(issue);
+		});
+	}
+
+	function unsubscribeNewComment(account, project, issueId, callback){
+		socket.off(account + '::' + project + '::' + issueId + '::newComment');
+	}
 
 	return {
 		subscribe: {
-			newIssue: subscribeNewIssue
+			newIssue: subscribeNewIssue,
+			newComment: subscribeNewComment
 		},
 		unsubscribe:{
-			newIssue: unsubscribeNewIssue
+			newIssue: unsubscribeNewIssue,
+			newComment: unsubscribeNewComment
 		}
 	}
 });

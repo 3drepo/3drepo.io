@@ -820,19 +820,10 @@ schema.methods.updateComment = function(commentIndex, data){
 		}).then(issue => {
 
 			issue = issue.clean();
+			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
+			let eventData = comment;
 
-			let eventData = {
-				_id: issue._id,
-				account: this._dbcolOptions.account,
-				project: this._dbcolOptions.project,
-				issue: data,
-				issue_id : issue._id,
-				number: issue.number,
-				owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
-				created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
-			};
-
-			ChatEvent.newComment(data.owner, this._dbcolOptions.account, this._dbcolOptions.project, eventData._id, eventData).catch(err => {
+			ChatEvent.newComment(comment.owner, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData).catch(err => {
 				systemLogger.logError('Error while inserting chat event', {
 					account: this._dbcolOptions.account,
 					project: this._dbcolOptions.project,
@@ -842,7 +833,7 @@ schema.methods.updateComment = function(commentIndex, data){
 				});
 			});
 			
-			return issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
+			return comment
 
 		});
 

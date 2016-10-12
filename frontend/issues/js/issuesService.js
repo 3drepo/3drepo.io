@@ -386,7 +386,6 @@
 
 			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {
