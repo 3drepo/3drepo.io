@@ -765,7 +765,7 @@ schema.methods.updateAttrs = function(data){
 		ChatEvent.issueChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
 
 		return this;
-	})
+	});
 
 };
 
@@ -835,7 +835,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 			let eventData = comment;
 
-			ChatEvent.newComment(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData)
+			ChatEvent.newComment(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
 			return comment;
 		});
 
