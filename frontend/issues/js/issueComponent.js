@@ -41,9 +41,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService"];
+	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
-	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService) {
+	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -95,6 +95,13 @@
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					
+					this.issueData.comments.forEach(function(comment){
+						if(comment.owner !== Auth.getUsername()){
+							comment.sealed = true;
+						}
+					});
+
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
@@ -512,9 +519,20 @@
 		 * Process after new comment saved
 		 * @param comment
 		 */
-		function afterNewComment (comment) {
+		function afterNewComment(comment, noDeleteInput) {
+			// mark all other comments sealed
+			self.issueData.comments.forEach(function(comment){
+				comment.sealed = true;
+			});
+
+			console.log('comment.owner !== Auth.getUsername()', comment.owner, Auth.getUsername())
+			if(comment.owner !== Auth.getUsername()){
+				comment.sealed = true;
+			}
+
 			// Add new comment to issue
 			self.issueData.comments.push({
+				sealed: comment.sealed,
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
@@ -522,21 +540,24 @@
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
-			if (self.issueData.comments.length > 1) {
-				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
-					.then(function(response) {
-						console.log(response);
-						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
-					});
+			// This logic now moved to backend
+			// if (self.issueData.comments.length > 1) {
+			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+			// 		.then(function(response) {
+			// 			console.log(response);
+			// 			self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+			// 		});
+			// }
+
+			if(!noDeleteInput){
+				delete self.comment;
+				delete self.commentThumbnail;
+				IssuesService.updatedIssue = self.issueData;
+				self.submitDisabled = true;
 			}
 
-			delete self.comment;
-			delete self.commentThumbnail;
-			IssuesService.updatedIssue = self.issueData;
-			self.submitDisabled = true;
 
 			commentAreaScrollToBottom();
-
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
 				setContentHeight();
@@ -676,20 +697,11 @@
 		*/
 		NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
-			self.issueData.comments.push({
-				comment: comment.comment,
-				owner: comment.owner,
-				timeStamp: IssuesService.getPrettyTime(comment.created),
-				viewpoint: comment.viewpoint
-			});
+			afterNewComment(comment, true);
 
+			//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
 			$scope.$apply();
-
 			commentAreaScrollToBottom();
-
-			if (!aboutToBeDestroyed) {
-				setContentHeight();
-			}
 		})
 	}
 }());

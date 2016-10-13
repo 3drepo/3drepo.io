@@ -805,6 +805,12 @@ schema.methods.updateComment = function(commentIndex, data){
 
 				this.viewpoints.push(data.viewpoint);
 
+				this.comments.forEach(comment => {
+					if(!comment.sealed){
+						comment.sealed = true;
+					}
+				});
+
 				this.comments.push({ 
 					owner: data.owner,
 					comment: data.comment, 
