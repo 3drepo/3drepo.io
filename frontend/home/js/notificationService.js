@@ -22,6 +22,23 @@ angular.module('3drepo')
 	var socket = io('http://example.org:3000', {path: '/yay'});
 	var joined = [];
 
+	socket.on('reconnect', function(){
+		console.log('Rejoining all rooms on reconnect');
+
+		var lastJoined = joined.slice(0);
+		joined = [];
+		
+		lastJoined.forEach(function(room){
+
+			room = room.split('::');
+
+			var account = room[0];
+			var project = room[1];
+
+			joinRoom(account, project);
+		});
+	});
+
 	function joinRoom(account, project){
 		
 		var room =  account + '::' + project;

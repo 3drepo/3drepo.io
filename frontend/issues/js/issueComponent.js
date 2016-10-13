@@ -84,6 +84,8 @@
 			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
 		};
 
+		this.notificationStarted = false;
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -470,6 +472,8 @@
 
 					self.submitDisabled = true;
 					setContentHeight();
+
+					startNotification();
 			});
 		}
 
@@ -692,16 +696,27 @@
 			});
 		}
 
-		/*
-		* Watch for new comments
-		*/
-		NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
-			afterNewComment(comment, true);
+		function startNotification(){
+			if(self.data && !self.notificationStarted){
 
-			//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
-			$scope.$apply();
-			commentAreaScrollToBottom();
-		})
+				self.notificationStarted = true;
+				/*
+				* Watch for new comments
+				*/
+				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+					afterNewComment(comment, true);
+
+					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+			}
+		}
+
+		startNotification();
+
+
 	}
 }());

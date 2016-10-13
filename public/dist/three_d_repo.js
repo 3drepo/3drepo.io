@@ -11674,6 +11674,23 @@ angular.module('3drepo')
 	var socket = io('http://example.org:3000', {path: '/yay'});
 	var joined = [];
 
+	socket.on('reconnect', function(){
+		console.log('Rejoining all rooms on reconnect');
+
+		var lastJoined = joined.slice(0);
+		joined = [];
+		
+		lastJoined.forEach(function(room){
+
+			room = room.split('::');
+
+			var account = room[0];
+			var project = room[1];
+
+			joinRoom(account, project);
+		});
+	});
+
 	function joinRoom(account, project){
 		
 		var room =  account + '::' + project;
@@ -12162,6 +12179,8 @@ angular.module('3drepo')
 			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
 		};
 
+		this.notificationStarted = false;
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -12548,6 +12567,8 @@ angular.module('3drepo')
 
 					self.submitDisabled = true;
 					setContentHeight();
+
+					startNotification();
 			});
 		}
 
@@ -12770,17 +12791,28 @@ angular.module('3drepo')
 			});
 		}
 
-		/*
-		* Watch for new comments
-		*/
-		NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
-			afterNewComment(comment, true);
+		function startNotification(){
+			if(self.data && !self.notificationStarted){
 
-			//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
-			$scope.$apply();
-			commentAreaScrollToBottom();
-		})
+				self.notificationStarted = true;
+				/*
+				* Watch for new comments
+				*/
+				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+					afterNewComment(comment, true);
+
+					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+			}
+		}
+
+		startNotification();
+
+
 	}
 }());
 /**
