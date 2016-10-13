@@ -125,8 +125,16 @@
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
 			vm.nodesToShow[0].expanded = false;
-			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+			if (vm.nodesToShow[0].children) {
+				vm.nodesToShow[0].hasChildren = true;
+				// Show the first set of children using the expand function but deselect the child used for this
+				expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0);
+				vm.nodesToShow[0].children[0].selected = false;
+			}
+			else {
+				vm.nodesToShow[0].hasChildren = false;
+			}
 			/*
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {

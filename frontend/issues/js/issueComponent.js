@@ -51,7 +51,8 @@
 			editingCommentIndex = null,
 			commentViewpoint,
 			issueSelectedObjects = null,
-			aboutToBeDestroyed = false;
+			aboutToBeDestroyed = false,
+			textInputHasFocus = false;
 
 		/*
 		 * Init
@@ -89,7 +90,9 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var i, length;
+			var i, length,
+				leftArrow = 37;
+
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -149,6 +152,12 @@
 				if ((currentAction === "multi") &&
 					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
 					issueSelectedObjects = null;
+				}
+			}
+
+			if (changes.hasOwnProperty("keysDown")) {
+				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
+					this.exit();
 				}
 			}
 		};
@@ -364,6 +373,14 @@
 			else {
 				this.editingDescription = true;
 			}
+		};
+
+		/**
+		 * Register if text input has focus or not
+		 * @param focus
+		 */
+		this.textInputHasFocus = function (focus) {
+			textInputHasFocus = focus;
 		};
 
 		/**

@@ -19,12 +19,12 @@ div(layout="row", layout-align="start center", flex)
 
 		p.projectTimestamp {{vm.project.timestampPretty}}
 
-		md-menu(md-position-mode="target-right target")
+		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
 			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)", ng-disabled="vm.project.uploading")
 				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 			md-menu-content(width="3")
-				md-menu-item(ng-repeat="(key, value) in vm.projectOptions")
+				md-menu-item(ng-repeat="(key, value) in vm.projectOptions", ng-if="!value.hidden")
 					md-button(ng-click="vm.doProjectOption($event, key)")
 						div(layout="row", flex)
-							p(flex) {{value.label}}
-							md-icon.angular-material-icons(md-menu-align-target) {{value.icon}}
+							p(flex, style="color:{{value.color}}") {{value.label}}
+							md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}

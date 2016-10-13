@@ -139,6 +139,11 @@ account-projects .userContent {
   padding: 0 !important;
 }
 
+account-projects .accountProjectsSharedIcon {
+  margin: 0 0 0 20px;
+  color: rgba(0, 0, 0, 0.3);
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile md-input-container {
   margin-right: 5px;
