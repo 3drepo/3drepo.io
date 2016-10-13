@@ -142,7 +142,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 			md-button.md-icon-button(
 			ng-repeat="(action, actionData) in $ctrl.actions"
 			aria-label="{{action}}"
-			ng-click="$ctrl.doAction(action)"
+			ng-click="$ctrl.doAction($event, action)"
 			ng-if="!actionData.hidden")
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.color}}") {{actionData.icon}}

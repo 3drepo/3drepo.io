@@ -12156,9 +12156,10 @@ angular.module('3drepo')
 
 		/**
 		 * Do an action
+		 * @param event
 		 * @param action
 		 */
-		this.doAction = function (action) {
+		this.doAction = function (event, action) {
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -12200,7 +12201,8 @@ angular.module('3drepo')
 						$mdDialog.show({
 							controller: ScreenShotDialogController,
 							controllerAs: "vm",
-							templateUrl: "issueScreenShotDialog.html"
+							templateUrl: "issueScreenShotDialog.html",
+							targetEvent: event
 						});
 						break;
 					case "multi":
@@ -12539,7 +12541,7 @@ angular.module('3drepo')
 					height += additionalInfoHeight;
 				}
 				// Description text
-				if (self.issueData.hasOwnProperty("desc")) {
+				if (self.canEditDescription || self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
 				// New comment thumbnail

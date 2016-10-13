@@ -269,9 +269,10 @@
 
 		/**
 		 * Do an action
+		 * @param event
 		 * @param action
 		 */
-		this.doAction = function (action) {
+		this.doAction = function (event, action) {
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -313,7 +314,8 @@
 						$mdDialog.show({
 							controller: ScreenShotDialogController,
 							controllerAs: "vm",
-							templateUrl: "issueScreenShotDialog.html"
+							templateUrl: "issueScreenShotDialog.html",
+							targetEvent: event
 						});
 						break;
 					case "multi":
@@ -652,7 +654,7 @@
 					height += additionalInfoHeight;
 				}
 				// Description text
-				if (self.issueData.hasOwnProperty("desc")) {
+				if (self.canEditDescription || self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
 				// New comment thumbnail
