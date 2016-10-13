@@ -235,11 +235,15 @@
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
 							v.viewer.addClippingPlane(
 								event.value.axis,
+								event.value.normal,
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1);
+								event.value.clipDirection ? event.value.clipDirection : -1,
+								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
+						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
+							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -281,11 +285,13 @@
 								event.value.up,
 								event.value.look_at,
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
-								event.value.rollerCoasterMode
+								event.value.rollerCoasterMode,
+								event.value.account,
+								event.value.project
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo());
+								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {

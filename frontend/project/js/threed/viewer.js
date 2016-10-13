@@ -100,6 +100,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.rootName = "model";
 		this.inlineRoots = {};
+		this.groupNodes = null;
 		this.multipartNodes = [];
 		this.multipartNodesByProject = {};
 
@@ -328,9 +329,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (targetParent === self.viewer) {
 					self.setDiffColors(null);
 				}
-
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
+					var nameSpace = objEvent.target.nameSpaceName;
+
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
+
+					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
+					{
+						self.groupNodes={};
+						//loaded x3dom file for current project, figure out the groups
+						var groups = document.getElementsByTagName("Group");
+						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+						{
+							self.groupNodes[groups[gIdx].id] = groups[gIdx];
+						}
+					}
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 					if (self.multipartNodes.indexOf(objEvent.target) === -1)
 					{
@@ -523,6 +536,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getViewMatrix();
 		};
 
+		this.getParentTransformation = function(account, project)
+		{
+			var trans = null;
+			var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+			var parentGroup = self.groupNodes[fullParentGroupName];
+			if(parentGroup)
+			{
+				trans = parentGroup._x3domNode.getCurrentTransform();
+			}
+			else
+			{
+				console.error("Cannot find parent group: " + fullParentGroupName);
+			}
+			return trans;
+		}
 		this.getProjectionMatrix = function() {
 			return self.getViewArea().getProjectionMatrix();
 		};
@@ -593,23 +621,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-					var projectInline = self.inlineRoots[inlineTransName];
-					var trans = projectInline._x3domNode.getCurrentTransform();
-
                     console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: trans,
+						trans: self.getParentTransformation(account, project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
+
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm
+						normal: pickingInfo.pickNorm,
+						trans: self.getParentTransformation(self.account, self.project)
 					});
 				}
 			}
@@ -1009,19 +1035,33 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.loadViewpoint = null;
 
-		this.createViewpoint = function(name, from, at, up) {
+		this.createViewpoint = function(name, from, at, up ) {
 			var groupName = self.getViewpointGroupAndName(name);
-
 			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
+				
 				self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
-					var q = self.getAxisAngle(from, at, up);
+					var q = ViewerUtil.getAxisAngle(from, at, up);
 					newViewPoint.setAttribute("orientation", q.join(","));
 				}
+
+				if(from)
+				{
+					newViewPoint.setAttribute("position", from.join(","));
+
+				}
+
+				if(from && at)
+				{
+					var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
+					newViewPoint.setAttribute("centerofrotation", centre.join(","));
+
+				}
+
 
 				if (!self.viewpoints[groupName.group]) {
 					self.viewpoints[groupName.group] = {};
@@ -1030,9 +1070,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewpoints[groupName.group][groupName.name] = name;
 				self.viewpointsNames[name] = newViewPoint;
 
-			} else {
+			} else
+			{
+					
 				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
+			
 		};
 
 		this.setCurrentViewpointIdx = function(idx) {
@@ -1074,6 +1117,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 
 				return;
+			}
+			else
+			{
+				console.error("Could not find viewpoint." + id);
 			}
 
 			self.loadViewpoint = id;
@@ -1349,11 +1396,18 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode);
+		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode) {
+		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+			var origViewTrans = null;
+			if(account && project)
+			{
+					origViewTrans = self.getParentTransformation(account, project);
+
+			}
+
 			if (!viewDir)
 			{
 				viewDir = self.getCurrentViewpointInfo().view_dir;
@@ -1368,6 +1422,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
 			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
+
+			//transform the vectors to the right space if TransformMatrix is present.
+			if(origViewTrans)
+			{
+				x3domUp = origViewTrans.multMatrixVec(x3domUp);
+				x3domView = origViewTrans.multMatrixVec(x3domView);
+				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
+
+			}
+			
 			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
@@ -1397,15 +1461,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var canvasHeight = self.getViewArea()._doc.canvas.height;
 
 				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-
 				if (self.pickObject.pickPos)
 				{
 					x3domCenter = self.pickObject.pickPos;
-
 				} else {
 					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
 					var bbox = self.getScene()._x3domNode.getVolume();
-
 					if(ry.intersect(bbox.min, bbox.max))
 					{
 						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
@@ -1416,17 +1477,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
-
+	
 			if (animate) {
 				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
 				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			}
-
+		
 			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
 
 			self.setNavMode(self.currentNavMode);
 			self.getViewArea()._doc.needRender = true;
-
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
 			}
@@ -1537,15 +1597,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function() {
+		this.getCurrentViewpointInfo = function(account, project) {
 			var viewPoint = {};
 
-			var origViewTrans = self.getViewArea()._scene.getViewpoint().getCurrentTransform();
+			var origViewTrans = null;
+			
+			if(account && project)
+			{
+				origViewTrans = self.getParentTransformation(account, project);
+
+			}
+
 			var viewMat = self.getViewMatrix().inverse();
 
 			var viewRight = viewMat.e0();
 			var viewUp = viewMat.e1();
-			var viewDir = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
+			var viewDir = viewMat.e2(); // Because OpenGL points out of screen
 			var viewPos = viewMat.e3();
 
 			var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
@@ -1555,10 +1622,24 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (center) {
 				lookAt = center.subtract(viewPos);
 			} else {
-				lookAt = viewPos.add(viewDir);
+				lookAt = viewPos.add(viewDir.multiply(-1));
 			}
 
 			var projMat = self.getProjectionMatrix();
+			
+			//transform the vectors to the right space if TransformMatrix is present.
+			if(origViewTrans)
+			{
+				var transInv = origViewTrans.inverse();
+				viewRight = transInv.multMatrixVec(viewRight);
+				viewUp = transInv.multMatrixVec(viewUp);
+				viewDir = transInv.multMatrixVec(viewDir);
+				viewPos = transInv.multMatrixPnt(viewPos);
+				lookAt = transInv.multMatrixVec(lookAt);
+
+			}
+				
+			viewDir= viewDir.multiply(-1);
 
 			// More viewing direction than lookAt to sync with Assimp
 			viewPoint.up = [viewUp.x, viewUp.y, viewUp.z];
@@ -1570,13 +1651,27 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.fov = Math.atan((1 / projMat._00)) * 2.0;
 			viewPoint.aspect_ratio = viewPoint.fov / projMat._11;
 
+
 			var f = projMat._23 / (projMat._22 + 1);
 			var n = (f * projMat._23) / (projMat._23 - 2 * f);
 
 			viewPoint.far = f;
 			viewPoint.near = n;
 
-			viewPoint.clippingPlanes = self.clippingPlanes;
+			viewPoint.clippingPlanes = [];
+			   
+			if(origViewTrans)
+			{
+				for(var i = 0; i < self.clippingPlanes.length; ++i)
+				{
+					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
+				}
+			}
+			else
+			{
+				viewPoint.clippingPlanes = self.clippingPlanes;
+			}
+
 
 			return viewPoint;
 		};
@@ -1782,6 +1877,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
 				var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx].axis,
+					clippingPlanes[clipidx].normal,
 					clippingPlanes[clipidx].distance,
 					clippingPlanes[clipidx].percentage,
 					clippingPlanes[clipidx].clipDirection
@@ -1791,23 +1887,36 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		/**
 		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips
+		 * @param {string} axis - Axis through which the plane clips (overrides normal)
+		 * @param {number} normal - the normal of the plane 
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+		 * @param {string} account - name of database (optional)
+		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
+		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
+			var parentGroup = null;
+			if(account && project){				
+				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+				parentGroup = self.groupNodes[fullParentGroupName];
+			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(percentage) {
+		this.moveClippingPlane = function(axis, percentage) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(percentage);
+			self.clippingPlanes[0].movePlane(axis, percentage);
+		};
+
+		this.changeAxisClippingPlane = function(axis) {
+			// Only supports a single clipping plane at the moment.
+			self.clippingPlanes[0].changeAxis(axis);
 		};
 
 		/**
@@ -1844,16 +1953,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = null;
-				var projectNameSpace = account + "__" + project;
+				var trans = self.getParentTransformation(account, project);
 
-				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
-				{
-					var projectInline = self.inlineRoots[account + "__" + project];
-					trans = projectInline._x3domNode.getCurrentTransform();
-				}
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
 			}
 		};
 
@@ -1871,11 +1973,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
-					up: pin.viewpoint.up
+					up: pin.viewpoint.up,
+					account: pin.account,
+					project: pin.project
 				});
 
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
-					clippingPlanes: pin.viewpoint.clippingPlanes
+					clippingPlanes: pin.viewpoint.clippingPlanes,
+					account: pin.account,
+					project: pin.project
+
 				});
 			}
 		};
@@ -1974,6 +2081,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
 	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
 	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
+	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
 

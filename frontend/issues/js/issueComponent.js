@@ -93,7 +93,6 @@
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -234,9 +233,18 @@
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
-					up: viewpoint.up
+					up: viewpoint.up,
+					account: self.issueData.account,
+					project: self.issueData.project
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				data = {
+					clippingPlanes: viewpoint.clippingPlanes,
+					account: self.issueData.account,
+					project: self.issueData.project,
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -351,7 +359,6 @@
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
-						console.log(data);
 					});
 			}
 			else {
@@ -368,7 +375,7 @@
 				data;
 
 			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
@@ -442,7 +449,6 @@
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
-					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
@@ -475,7 +481,6 @@
 			};
 			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
-					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
 				});
 		}
@@ -490,16 +495,14 @@
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
-						console.log(response);
 						afterNewComment(response.data.issue);
 					});
 			}
 			else {
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
-							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -523,7 +526,6 @@
 			if (self.issueData.comments.length > 1) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
-						console.log(response);
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 					});
 			}
@@ -587,7 +589,7 @@
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);

@@ -338,11 +338,15 @@
 			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up
+				up: issue.viewpoint.up,
+				account: issue.account,
+				project: issue.project
 			});
 
 			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
-				clippingPlanes: issue.viewpoint.clippingPlanes
+				clippingPlanes: issue.viewpoint.clippingPlanes,
+				account: issue.account,
+				project: issue.project
 			});
 
 			// Remove highlight from any multi objects
