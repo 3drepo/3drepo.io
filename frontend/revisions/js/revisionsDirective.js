@@ -53,7 +53,7 @@
 
 		});
 
-		vm.openDialog = function(){
+		vm.openDialog = function(event){
 
 			if(!vm.revisions){
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
@@ -62,7 +62,7 @@
 			}
 
 			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
-		}
+		};
 
 		/**
 		* Go to the specified revision

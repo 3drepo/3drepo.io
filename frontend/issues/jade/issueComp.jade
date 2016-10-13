@@ -58,7 +58,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 						ng-blur="$ctrl.textInputHasFocus(false)")
 				#issueCompDescription(ng-if="$ctrl.data", layout="column", ng-click="$ctrl.showViewpoint($event, $ctrl.issueData.viewpoint)")
 					div(layout='row', layout-align="space-between", flex)
-						label(ng-if="!$ctrl.editingDescription") {{$ctrl.issueData.desc}}
+						label(ng-if="!$ctrl.editingDescription", ng-bind-html="$ctrl.issueData.desc | linky:'_blank'") {{$ctrl.issueData.desc}}
 						md-input-container(flex, ng-if="$ctrl.editingDescription")
 							textarea(
 							ng-model="$ctrl.issueData.desc"
@@ -83,15 +83,19 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 				.issueCompComment(ng-click="$ctrl.showViewpoint($event, comment.viewpoint)", layout="column", layout-align="start", flex)
 					// Text and actions
 					div(layout='row', layout-align="space-between", flex)
-						label.issueCompCommentTitle(ng-if="!comment.editing") {{comment.comment}}
+						label.issueCompCommentTitle(
+						flex
+						ng-if="!comment.editing"
+						ng-bind-html="comment.comment | linky:'_blank'") {{comment.comment}}
 						md-input-container(flex, ng-if="comment.editing")
 							textarea(
 							ng-model="comment.comment"
+							flex
 							aria-label="Description"
 							tdr-focus="true"
 							ng-focus="$ctrl.textInputHasFocus(true)"
 							ng-blur="$ctrl.textInputHasFocus(false)")
-						.issueCompTextActions(layout="row", ng-if="!comment.sealed")
+						.issueCompTextActions(layout="row", ng-if="!comment.sealed", flex="none")
 							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditComment($event, $index)")
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit
@@ -118,41 +122,39 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 
 	md-divider
 
-	div
-		// New comment
-		.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", flex, ng-if="$ctrl.data")
-			md-input-container.issueComp(flex)
-				label Comment
-				textarea(
-				ng-model="$ctrl.comment"
-				ng-change="$ctrl.commentChange()"
-				ng-focus="$ctrl.textInputHasFocus(true)"
-				ng-blur="$ctrl.textInputHasFocus(false)")
-			.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
-				img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
+	// New comment
+	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="$ctrl.data")
+		md-input-container.issueComp(flex)
+			label Comment
+			textarea(
+			ng-model="$ctrl.comment"
+			ng-change="$ctrl.commentChange()"
+			ng-focus="$ctrl.textInputHasFocus(true)"
+			ng-blur="$ctrl.textInputHasFocus(false)")
+		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
+			img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
 
-		// Footer
-		.issueCompItemContainer(layout="row", layout-align="space-between center")
-			div
-				md-button.md-icon-button(
-				ng-repeat="(action, actionData) in $ctrl.actions"
-				aria-label="{{action}}"
-				ng-click="$ctrl.doAction(action)"
-				ng-if="!actionData.hidden")
-					md-tooltip(md-direction="bottom") {{actionData.label}}
-					md-icon.angular-material-icons(style="color:{{actionData.color}}") {{actionData.icon}}
+	md-divider
 
-			div
-				md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()")
-					md-tooltip(md-direction="bottom") Submit
-					md-icon.angular-material-icons save
+	// Footer
+	.issueCompItemContainer(layout="row", layout-align="space-between center")
+		div
+			md-button.md-icon-button(
+			ng-repeat="(action, actionData) in $ctrl.actions"
+			aria-label="{{action}}"
+			ng-click="$ctrl.doAction(action)"
+			ng-if="!actionData.hidden")
+				md-tooltip(md-direction="bottom") {{actionData.label}}
+				md-icon.angular-material-icons(style="color:{{actionData.color}}") {{actionData.icon}}
+		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()")
+			md-tooltip(md-direction="bottom") Submit
+			md-icon.angular-material-icons save
 
 	// Action components
-	div(ng-switch="$ctrl.action")
-		issues-pin(
-		ng-switch-when="pin"
-		account="$ctrl.account"
-		project="$ctrl.project"
-		send-event="$ctrl.sendEvent({type: type, value: value})"
-		event="$ctrl.event"
-		set-pin="$ctrl.setPin({data: data})")
+	issues-pin(
+	account="$ctrl.account"
+	project="$ctrl.project"
+	send-event="$ctrl.sendEvent({type: type, value: value})"
+	event="$ctrl.event"
+	set-pin="$ctrl.setPin({data: data})"
+	clear-pin="$ctrl.clearPin")

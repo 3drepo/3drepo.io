@@ -223,7 +223,7 @@ issues-list #issuesListItemTitle {
 }
 
 issues-list #issuesListItemInfo {
-  margin-top: 5px;
+  margin: 5px 0;
 }
 
 issues-list #issuesListItemInfo label,
@@ -239,6 +239,7 @@ issues-list #issuesListItemDescription label {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  word-break: break-all;
 }
 
 issues-list #issuesListItemEnter {
@@ -322,6 +323,7 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
+  word-break: break-all;
 }
 
 issue-comp .issueCompTextActions {
@@ -331,6 +333,9 @@ issue-comp .issueCompTextActions {
 issue-comp #issueCompDescription {
   outline: none;
   margin-bottom: 20px;
+}
+issue-comp #issueCompDescription label {
+  word-break: break-all;
 }
 
 issue-comp .issueCompComment:hover,
@@ -353,7 +358,6 @@ issue-comp #issueCompAdditional {
 }
 
 issue-comp #issueCompNewComment {
-  margin-bottom: -40px;
 }
 
 issue-comp #descriptionAndComments {

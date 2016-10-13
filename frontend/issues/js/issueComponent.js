@@ -63,6 +63,8 @@
 		this.pinData = null;
 		this.showAdditional = true;
 		this.editingDescription = false;
+		this.clearPin = false;
+
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -179,6 +181,7 @@
 			// Get out of pin drop mode
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+				this.clearPin = true;
 			}
 		};
 
@@ -269,8 +272,6 @@
 		 * @param action
 		 */
 		this.doAction = function (action) {
-			var data;
-
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -324,7 +325,6 @@
 						}
 						break;
 					case "pin":
-						data =
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
@@ -361,6 +361,7 @@
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
 						console.log(data);
+						IssuesService.updatedIssue = self.issueData;
 					});
 			}
 			else {
@@ -582,6 +583,7 @@
 				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
 					.then(function(response) {
 						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+						IssuesService.updatedIssue = self.issueData;
 					});
 			}
 			else {
@@ -636,12 +638,12 @@
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
-				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
 				thumbnailHeight = 170,
+				issueMinHeight = 520,
 				height = issueMinHeight;
 
 			if (self.data) {

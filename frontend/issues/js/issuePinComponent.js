@@ -28,7 +28,8 @@
 					project: "<",
 					sendEvent: "&",
 					event: "<",
-					setPin: "&"
+					setPin: "&",
+					clearPin: "<"
 				}
 			}
 		);
@@ -37,7 +38,8 @@
 
 	function IssuesPinCtrl (EventService) {
 		var self = this,
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			pinDropMode = false;
 
 		// Init
 		this.setPin({data: null});
@@ -55,7 +57,8 @@
 
 			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
-					(changes.event.currentValue.value.hasOwnProperty("id"))) {
+					(changes.event.currentValue.value.hasOwnProperty("id")) &&
+					pinDropMode) {
 					removePin();
 
 					// Add pin
@@ -78,7 +81,7 @@
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: pickedPos,
 						pickedNorm: pickedNorm,
-						colours: [[200, 0, 0]]
+						colours: [[0.5, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
@@ -86,6 +89,13 @@
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					removePin();
 				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.value;
+				}
+			}
+
+			if (changes.hasOwnProperty("clearPin") && changes.clearPin.currentValue) {
+				removePin();
 			}
 		};
 

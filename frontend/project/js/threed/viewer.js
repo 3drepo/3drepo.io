@@ -1732,15 +1732,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			if (on) {
-				element.style.cursor = "default";
-				// Clear any single selection
-				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
-					self.oldPart[0].resetColor();
-				}
-			} else {
-				element.style.cursor = "-webkit-grab";
-			}
+			element.style.cursor =  on ? "default" : "-webkit-grab";
 		};
 
 		/**

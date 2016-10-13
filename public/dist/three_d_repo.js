@@ -4547,15 +4547,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			if (on) {
-				element.style.cursor = "default";
-				// Clear any single selection
-				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
-					self.oldPart[0].resetColor();
-				}
-			} else {
-				element.style.cursor = "-webkit-grab";
-			}
+			element.style.cursor =  on ? "default" : "-webkit-grab";
 		};
 
 		/**
@@ -11958,6 +11950,8 @@ angular.module('3drepo')
 		this.pinData = null;
 		this.showAdditional = true;
 		this.editingDescription = false;
+		this.clearPin = false;
+
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -12074,6 +12068,7 @@ angular.module('3drepo')
 			// Get out of pin drop mode
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+				this.clearPin = true;
 			}
 		};
 
@@ -12164,8 +12159,6 @@ angular.module('3drepo')
 		 * @param action
 		 */
 		this.doAction = function (action) {
-			var data;
-
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -12219,7 +12212,6 @@ angular.module('3drepo')
 						}
 						break;
 					case "pin":
-						data =
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
@@ -12256,6 +12248,7 @@ angular.module('3drepo')
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
 						console.log(data);
+						IssuesService.updatedIssue = self.issueData;
 					});
 			}
 			else {
@@ -12477,6 +12470,7 @@ angular.module('3drepo')
 				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
 					.then(function(response) {
 						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+						IssuesService.updatedIssue = self.issueData;
 					});
 			}
 			else {
@@ -12531,12 +12525,12 @@ angular.module('3drepo')
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
-				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
 				thumbnailHeight = 170,
+				issueMinHeight = 520,
 				height = issueMinHeight;
 
 			if (self.data) {
@@ -12919,7 +12913,8 @@ angular.module('3drepo')
 					project: "<",
 					sendEvent: "&",
 					event: "<",
-					setPin: "&"
+					setPin: "&",
+					clearPin: "<"
 				}
 			}
 		);
@@ -12928,7 +12923,8 @@ angular.module('3drepo')
 
 	function IssuesPinCtrl (EventService) {
 		var self = this,
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			pinDropMode = false;
 
 		// Init
 		this.setPin({data: null});
@@ -12946,7 +12942,8 @@ angular.module('3drepo')
 
 			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
-					(changes.event.currentValue.value.hasOwnProperty("id"))) {
+					(changes.event.currentValue.value.hasOwnProperty("id")) &&
+					pinDropMode) {
 					removePin();
 
 					// Add pin
@@ -12969,7 +12966,7 @@ angular.module('3drepo')
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: pickedPos,
 						pickedNorm: pickedNorm,
-						colours: [[200, 0, 0]]
+						colours: [[0.5, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
@@ -12977,6 +12974,13 @@ angular.module('3drepo')
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					removePin();
 				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.value;
+				}
+			}
+
+			if (changes.hasOwnProperty("clearPin") && changes.clearPin.currentValue) {
+				removePin();
 			}
 		};
 
@@ -13345,11 +13349,7 @@ angular.module('3drepo')
 			rolesPromise,
 			projectUserRolesPromise,
 			issue,
-			selectedObjectId = null,
-			pickedPos = null,
-			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0],
-			selectedIssue = null;
+			pinHighlightColour = [1.0000, 0.7, 0.0];
 
 		/*
 		 * Init
@@ -13588,7 +13588,7 @@ angular.module('3drepo')
 		vm.editIssue = function (issue) {
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue !== null) {
+			if (vm.selectedIssue) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -13620,6 +13620,7 @@ angular.module('3drepo')
 		 */
 		vm.issueCreated = function (issue) {
 			vm.issues.unshift(issue);
+			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -13726,7 +13727,7 @@ angular.module('3drepo')
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 150,
+			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = true,
@@ -16977,7 +16978,8 @@ var Oculus = {};
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
-			multiMode = false;
+			multiMode = false,
+			pinDropMode = false;
 
 		// Init
 		this.setSelectedObjects({selectedObjects: null});
@@ -16990,42 +16992,53 @@ var Oculus = {};
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					if (selectedObjects.length === 1) {
+						self.setSelectedObjects({selectedObjects: selectedObjects});
+					}
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (multiMode &&
-						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
 			}
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					deselectedObjects = [];
-					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
-					if (objectIndex === -1) {
-						selectedObjects.push(changes.event.currentValue.value.id);
-					}
-					else {
-						deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
-					}
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+					if (multiMode) {
+						// Collect objects in multi mode
+						deselectedObjects = [];
+						objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
+						if (objectIndex === -1) {
+							selectedObjects.push(changes.event.currentValue.value.id);
+						}
+						else {
+							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+						}
+						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
-					if (selectedObjects.length > 0) {
-						self.setSelectedObjects({selectedObjects: selectedObjects});
+						if (selectedObjects.length > 0) {
+							self.setSelectedObjects({selectedObjects: selectedObjects});
+						}
+						else {
+							self.setSelectedObjects({selectedObjects: null});
+						}
 					}
 					else {
-						self.setSelectedObjects({selectedObjects: null});
+						// Can only select one object at a time when not in multi mode
+						selectedObjects = [changes.event.currentValue.value.id];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					if (selectedObjects.length > 0) {
-						this.displaySelectedObjects([], selectedObjects);
 						selectedObjects = [];
 						self.setSelectedObjects({selectedObjects: null});
 					}
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.type;
 				}
 			}
 
@@ -18173,7 +18186,7 @@ var Oculus = {};
 
 		});
 
-		vm.openDialog = function(){
+		vm.openDialog = function(event){
 
 			if(!vm.revisions){
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
@@ -18182,7 +18195,7 @@ var Oculus = {};
 			}
 
 			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
-		}
+		};
 
 		/**
 		* Go to the specified revision
