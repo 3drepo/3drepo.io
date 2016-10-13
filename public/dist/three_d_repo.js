@@ -11679,7 +11679,7 @@ angular.module('3drepo')
 
 		var lastJoined = joined.slice(0);
 		joined = [];
-		
+
 		lastJoined.forEach(function(room){
 
 			room = room.split('::');
@@ -11695,48 +11695,87 @@ angular.module('3drepo')
 		
 		var room =  account + '::' + project;
 		if(joined.indexOf(room) === -1){
-			console.log('join room');
+
 			socket.emit('join', {account: account, project: project});
 			joined.push(room);
 		}
 	}
 
-	function subscribeNewIssue(account, project, callback){
-	
+	function getEventName(account, project, keys, event){
+
+		keys = keys || [];
+		var keyString = '';
+		
+		if(keys.length){
+			keyString =  '::' + keys.join('::');
+		}
+
+		return account + '::' + project +  keyString + '::' + event;
+	}
+
+	function subscribe(account, project, keys, event, callback){
+
 		joinRoom(account, project);
-		socket.on(account + '::' + project + '::newIssue', function(issue){
-			callback(issue);
-		});
+		socket.on(getEventName(account, project, keys, event), callback);
+	}
+
+	function subscribeNewIssue(account, project, callback){
+		subscribe(account, project, [], 'newIssue', callback);
 	}
 
 	function unsubscribeNewIssue(account, project){
-		socket.off(account + '::' + project + '::newIssue');
+		socket.off(getEventName(account, project, [], 'newIssue'));
 	}
-
 
 	function subscribeNewComment(account, project, issueId, callback){
-	
-		console.log('new comment sub', account, project, issueId)
-		joinRoom(account, project);
-		socket.on(account + '::' + project + '::' + issueId + '::newComment', function(issue){
-			callback(issue);
-		});
+		subscribe(account, project, [issueId], 'newComment', callback);
 	}
 
-	function unsubscribeNewComment(account, project, issueId, callback){
-		socket.off(account + '::' + project + '::' + issueId + '::newComment');
+	function unsubscribeNewComment(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'newComment'));
+	}
+
+	function subscribeCommentChanged(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentChanged', callback);
+	}
+
+	function unsubscribeCommentChanged(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'commentChanged'));
+	}
+
+	function subscribeCommentDeleted(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentDeleted', callback);
+	}
+
+	function unsubscribeCommentDeleted(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'commentDeleted'));
+	}
+
+	function subscribeIssueChanged(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'issueChanged', callback);
+	}
+
+	function unsubscribeIssueChanged(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'issueChanged'));
 	}
 
 	return {
 		subscribe: {
 			newIssue: subscribeNewIssue,
-			newComment: subscribeNewComment
+			newComment: subscribeNewComment,
+			commentChanged: subscribeCommentChanged,
+			commentDeleted: subscribeCommentDeleted,
+			issueChanged: subscribeIssueChanged
+
 		},
 		unsubscribe:{
 			newIssue: unsubscribeNewIssue,
-			newComment: unsubscribeNewComment
+			newComment: unsubscribeNewComment,
+			commentChanged: unsubscribeCommentChanged,
+			commentDeleted: unsubscribeCommentDeleted,
+			issueChanged: unsubscribeIssueChanged
 		}
-	}
+	};
 });
 
 
@@ -12277,6 +12316,9 @@ angular.module('3drepo')
 
 			//unsubscribe on destroy
 			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
@@ -12624,7 +12666,6 @@ angular.module('3drepo')
 				comment.sealed = true;
 			});
 
-			console.log('comment.owner !== Auth.getUsername()', comment.owner, Auth.getUsername())
 			if(comment.owner !== Auth.getUsername()){
 				comment.sealed = true;
 			}
@@ -12632,6 +12673,7 @@ angular.module('3drepo')
 			// Add new comment to issue
 			self.issueData.comments.push({
 				sealed: comment.sealed,
+				guid: comment.guid,
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
@@ -12796,6 +12838,7 @@ angular.module('3drepo')
 			if(self.data && !self.notificationStarted){
 
 				self.notificationStarted = true;
+
 				/*
 				* Watch for new comments
 				*/
@@ -12806,6 +12849,55 @@ angular.module('3drepo')
 					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
 					$scope.$apply();
 					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment changed
+				*/
+				NotificationService.subscribe.commentChanged(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var comment = self.issueData.comments.find(function(comment){
+						return comment.guid === newComment.guid;
+					});
+
+					comment.comment = newComment.comment;
+
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.commentDeleted(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var deleteIndex;
+					self.issueData.comments.forEach(function(comment, i){
+						if (comment.guid === newComment.guid){
+							deleteIndex = i;
+						}
+					});
+
+					self.issueData.comments.splice(deleteIndex, 1);
+					
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
+
+					console.log('new issue data', issue);
+
+					self.issueData.topic_type = issue.topic_type;
+					self.issueData.desc = issue.desc;
+					self.issueData.priority = issue.priority;
+					self.issueData.status = issue.status;
+
+					$scope.$apply();
+
 				});
 			}
 		}

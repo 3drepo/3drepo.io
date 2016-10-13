@@ -85,6 +85,7 @@ function updateIssue(req, res, next){
 	//let data = JSON.parse(req.body.data);
 	let data = req.body;
 	data.owner = req.session.user.username;
+	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
@@ -121,12 +122,14 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
-			data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
-			data.hasOwnProperty('priority') && issue.changePriority(data.priority);
-			data.hasOwnProperty('status') && issue.changeStatus(data.status);
+			//data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
+			//data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
+			//data.hasOwnProperty('priority') && issue.changePriority(data.priority);
+			//data.hasOwnProperty('status') && issue.changeStatus(data.status);
+
+			action = issue.updateAttrs(data);
 			
-			action = issue.save();
+			//action = issue.save();
 		}
 
 		return action;

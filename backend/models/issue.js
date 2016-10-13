@@ -617,15 +617,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			let cleaned = issue.clean(settings.type);
 			
-			ChatEvent.newIssue(data.owner, dbColOptions.account, dbColOptions.project, cleaned).catch(err => {
-				systemLogger.logError('Error while inserting chat event', {
-					account: dbColOptions.account,
-					project: dbColOptions.project,
-					event: 'newIssue',
-					issue: cleaned._id,
-					error: err
-				});
-			});
+			ChatEvent.newIssue(data.owner, dbColOptions.account, dbColOptions.project, cleaned);
 
 			return Promise.resolve(cleaned);
 		});
@@ -759,8 +751,22 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 };
 
-schema.methods.updateAttr = function(attr, value){
-	this[attr] = value;
+schema.methods.updateAttrs = function(data){
+	'use strict';
+
+	data.hasOwnProperty('topic_type') && (this.topic_type = data.topic_type);
+	data.hasOwnProperty('desc') && (this.desc = data.desc);
+	data.hasOwnProperty('priority') && this.changePriority(data.priority);
+	data.hasOwnProperty('status') && this.changeStatus(data.status);
+
+	return this.save().then(() => {
+
+		let issue = this.clean();
+		ChatEvent.issueChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
+
+		return this;
+	})
+
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -829,18 +835,8 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 			let eventData = comment;
 
-			ChatEvent.newComment(comment.owner, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData).catch(err => {
-				systemLogger.logError('Error while inserting chat event', {
-					account: this._dbcolOptions.account,
-					project: this._dbcolOptions.project,
-					event: 'newComment',
-					issue: eventData._id,
-					error: err
-				});
-			});
-			
-			return comment
-
+			ChatEvent.newComment(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData)
+			return comment;
 		});
 
 
@@ -865,7 +861,12 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		return this.save().then(issue => {
 			issue = issue.clean();
-			return issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+
+			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+			let eventData = comment;
+
+			ChatEvent.commentChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			return comment;
 		});
 	}
 
@@ -889,8 +890,20 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
+	let comment = this.clean().comments[commentIndex];
 	this.comments[commentIndex].remove();
-	return this.save();
+
+	return this.save().then(() => {
+
+		let issue = this.clean();
+		ChatEvent.commentDeleted(
+			data.requester, 
+			this._dbcolOptions.account, 
+			this._dbcolOptions.project, 
+			issue._id, comment);
+
+		return issue;
+	});
 };
 
 schema.methods.isClosed = function(){

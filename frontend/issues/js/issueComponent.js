@@ -182,6 +182,9 @@
 
 			//unsubscribe on destroy
 			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
@@ -529,7 +532,6 @@
 				comment.sealed = true;
 			});
 
-			console.log('comment.owner !== Auth.getUsername()', comment.owner, Auth.getUsername())
 			if(comment.owner !== Auth.getUsername()){
 				comment.sealed = true;
 			}
@@ -537,6 +539,7 @@
 			// Add new comment to issue
 			self.issueData.comments.push({
 				sealed: comment.sealed,
+				guid: comment.guid,
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
@@ -701,6 +704,7 @@
 			if(self.data && !self.notificationStarted){
 
 				self.notificationStarted = true;
+
 				/*
 				* Watch for new comments
 				*/
@@ -711,6 +715,55 @@
 					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
 					$scope.$apply();
 					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment changed
+				*/
+				NotificationService.subscribe.commentChanged(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var comment = self.issueData.comments.find(function(comment){
+						return comment.guid === newComment.guid;
+					});
+
+					comment.comment = newComment.comment;
+
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.commentDeleted(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var deleteIndex;
+					self.issueData.comments.forEach(function(comment, i){
+						if (comment.guid === newComment.guid){
+							deleteIndex = i;
+						}
+					});
+
+					self.issueData.comments.splice(deleteIndex, 1);
+					
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
+
+					console.log('new issue data', issue);
+
+					self.issueData.topic_type = issue.topic_type;
+					self.issueData.desc = issue.desc;
+					self.issueData.priority = issue.priority;
+					self.issueData.status = issue.status;
+
+					$scope.$apply();
+
 				});
 			}
 		}

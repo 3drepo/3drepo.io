@@ -43,13 +43,32 @@ function newComment(emitter, account, project, issueId, data){
 	return insertEventQueue('newComment', emitter, account, project, [issueId], data);
 }
 
+function commentChanged(emitter, account, project, issueId, data){
+	'use strict';
+	return insertEventQueue('commentChanged', emitter, account, project, [issueId], data);
+}
+
+function commentDeleted(emitter, account, project, issueId, data){
+	'use strict';
+	return insertEventQueue('commentDeleted', emitter, account, project, [issueId], data);
+}
+
+
 function projectUploaded(emitter, account, project, data){
 	'use strict';
 	return insertEventQueue('projectUploaded', emitter, account, project, null, data);
 }
 
+function issueChanged(emitter, account, project, issueId, data){
+	'use strict';
+	return insertEventQueue('issueChanged', emitter, account, project, [issueId], data);
+}
+
 module.exports = {
 	newIssue,
 	newComment,
-	projectUploaded
+	commentChanged,
+	commentDeleted,
+	projectUploaded,
+	issueChanged
 };

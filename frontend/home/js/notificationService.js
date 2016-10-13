@@ -27,7 +27,7 @@ angular.module('3drepo')
 
 		var lastJoined = joined.slice(0);
 		joined = [];
-		
+
 		lastJoined.forEach(function(room){
 
 			room = room.split('::');
@@ -43,48 +43,87 @@ angular.module('3drepo')
 		
 		var room =  account + '::' + project;
 		if(joined.indexOf(room) === -1){
-			console.log('join room');
+
 			socket.emit('join', {account: account, project: project});
 			joined.push(room);
 		}
 	}
 
-	function subscribeNewIssue(account, project, callback){
-	
+	function getEventName(account, project, keys, event){
+
+		keys = keys || [];
+		var keyString = '';
+		
+		if(keys.length){
+			keyString =  '::' + keys.join('::');
+		}
+
+		return account + '::' + project +  keyString + '::' + event;
+	}
+
+	function subscribe(account, project, keys, event, callback){
+
 		joinRoom(account, project);
-		socket.on(account + '::' + project + '::newIssue', function(issue){
-			callback(issue);
-		});
+		socket.on(getEventName(account, project, keys, event), callback);
+	}
+
+	function subscribeNewIssue(account, project, callback){
+		subscribe(account, project, [], 'newIssue', callback);
 	}
 
 	function unsubscribeNewIssue(account, project){
-		socket.off(account + '::' + project + '::newIssue');
+		socket.off(getEventName(account, project, [], 'newIssue'));
 	}
-
 
 	function subscribeNewComment(account, project, issueId, callback){
-	
-		console.log('new comment sub', account, project, issueId)
-		joinRoom(account, project);
-		socket.on(account + '::' + project + '::' + issueId + '::newComment', function(issue){
-			callback(issue);
-		});
+		subscribe(account, project, [issueId], 'newComment', callback);
 	}
 
-	function unsubscribeNewComment(account, project, issueId, callback){
-		socket.off(account + '::' + project + '::' + issueId + '::newComment');
+	function unsubscribeNewComment(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'newComment'));
+	}
+
+	function subscribeCommentChanged(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentChanged', callback);
+	}
+
+	function unsubscribeCommentChanged(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'commentChanged'));
+	}
+
+	function subscribeCommentDeleted(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentDeleted', callback);
+	}
+
+	function unsubscribeCommentDeleted(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'commentDeleted'));
+	}
+
+	function subscribeIssueChanged(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'issueChanged', callback);
+	}
+
+	function unsubscribeIssueChanged(account, project, issueId){
+		socket.off(getEventName(account, project, [issueId], 'issueChanged'));
 	}
 
 	return {
 		subscribe: {
 			newIssue: subscribeNewIssue,
-			newComment: subscribeNewComment
+			newComment: subscribeNewComment,
+			commentChanged: subscribeCommentChanged,
+			commentDeleted: subscribeCommentDeleted,
+			issueChanged: subscribeIssueChanged
+
 		},
 		unsubscribe:{
 			newIssue: unsubscribeNewIssue,
-			newComment: unsubscribeNewComment
+			newComment: unsubscribeNewComment,
+			commentChanged: unsubscribeCommentChanged,
+			commentDeleted: unsubscribeCommentDeleted,
+			issueChanged: unsubscribeIssueChanged
 		}
-	}
+	};
 });
 
 

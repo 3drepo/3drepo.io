@@ -74,8 +74,6 @@ module.exports.createApp = function (http, serverConfig){
 				}
 
 				let eventName = `${msg.account}::${msg.project}${extraPrefix}::${msg.event}`;
-				console.log('eventName', eventName);
-
 				emitter.to(`${msg.account}::${msg.project}`).emit(eventName, msg.data);
 			}
 		});
