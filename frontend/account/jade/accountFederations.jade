@@ -28,15 +28,15 @@
 							md-icon.angular-material-icons edit
 						#federationInfoRight(layout="row")
 							p.federationTimestamp {{federation.timestamp | prettyDate:true}}
-							md-menu(md-position-mode="target-right target", ng-if="accountIndex===0")
+							md-menu(md-position-mode="target-right target", ng-if="accountIndex===0", id="{{vm.dialogCloseTo}}")
 								md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
 									md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 								md-menu-content(width="3")
 									md-menu-item(ng-repeat="(key, value) in vm.federationOptions")
 										md-button(ng-click="vm.doFederationOption($event, key, federationIndex)")
 											div(layout="row", flex)
-												p(flex) {{value.label}}
-												md-icon.angular-material-icons(md-menu-align-target) {{value.icon}}
+												p(flex, style="color:{{value.color}}") {{value.label}}
+												md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
 
 					// Projects list
 					p.federationProjectsList

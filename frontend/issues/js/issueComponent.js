@@ -51,7 +51,8 @@
 			editingCommentIndex = null,
 			commentViewpoint,
 			issueSelectedObjects = null,
-			aboutToBeDestroyed = false;
+			aboutToBeDestroyed = false,
+			textInputHasFocus = false;
 
 		/*
 		 * Init
@@ -91,7 +92,9 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var i, length;
+			var i, length,
+				leftArrow = 37;
+
 			// Data
 
 			if (changes.hasOwnProperty("data")) {
@@ -111,7 +114,7 @@
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					this.canUpdate = (this.account === this.issueData.owner);
+					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
 							if (this.userRoles[i] === this.issueData.creator_role) {
@@ -160,6 +163,12 @@
 				if ((currentAction === "multi") &&
 					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
 					issueSelectedObjects = null;
+				}
+			}
+
+			if (changes.hasOwnProperty("keysDown")) {
+				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
+					this.exit();
 				}
 			}
 		};
@@ -222,7 +231,18 @@
 
 
 			if (self.data) {
-				if (self.data.owner === Auth.getUsername()) {
+
+				var canUpdate = (Auth.getUsername() === self.data.owner);
+				if (!canUpdate) {
+					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
+						if (self.userRoles[i] === self.data.creator_role) {
+							canUpdate = true;
+							break;
+						}
+					}
+				}
+
+				if (canUpdate) {
 					if ((this.data.priority !== this.issueData.priority) ||
 						(this.data.status !== this.issueData.status)) {
 						updateIssue();
@@ -253,9 +273,18 @@
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
-					up: viewpoint.up
+					up: viewpoint.up,
+					account: self.issueData.account,
+					project: self.issueData.project
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				data = {
+					clippingPlanes: viewpoint.clippingPlanes,
+					account: self.issueData.account,
+					project: self.issueData.project,
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -370,12 +399,19 @@
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
-						console.log(data);
 					});
 			}
 			else {
 				this.editingDescription = true;
 			}
+		};
+
+		/**
+		 * Register if text input has focus or not
+		 * @param focus
+		 */
+		this.textInputHasFocus = function (focus) {
+			textInputHasFocus = focus;
 		};
 
 		/**
@@ -387,7 +423,7 @@
 				data;
 
 			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
@@ -461,7 +497,6 @@
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
-					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
@@ -496,7 +531,6 @@
 			};
 			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
-					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
 				});
 		}
@@ -511,16 +545,14 @@
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
-						console.log(response);
 						afterNewComment(response.data.issue);
 					});
 			}
 			else {
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
-							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -566,6 +598,7 @@
 				delete self.commentThumbnail;
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
+
 			}
 
 
@@ -625,7 +658,7 @@
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);

@@ -186,6 +186,8 @@ function getSceneObject(account, project, history){
 				});
 
 				getCoordOffSets.push(promise);
+			} else {
+				objs[i].coordOffset = (history && history.coordOffset) || [0,0,0];
 			}
 		});
 

@@ -40,8 +40,10 @@ var Pin = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+	 * @param {string} account - database it came from
+	 * @param {string} project - name of the project
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
+	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, project) {
 		var self = this;
 
 		self.id = id;
@@ -52,6 +54,8 @@ var Pin = {};
 		self.trans = trans;
 		self.scale = scale;
 		self.viewpoint = viewpoint;
+		self.account = account;
+		self.project = project;
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;

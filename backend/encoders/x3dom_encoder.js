@@ -289,9 +289,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			}
 
 			globalCoordPromise.promise.then((globalCoordOffset) => {
-				var adjustedOffset = vecSub(child.coordOffset, globalCoordOffset);
 				var federateTransformNode = xmlDoc.createElement("Transform");
-				federateTransformNode.setAttribute("translation", adjustedOffset.join(" "));
+               	federateTransformNode.setAttribute("translation", child.coordOffset.join(" "));
 
 				var inlineNode = xmlDoc.createElement("Inline");
 
@@ -317,7 +316,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				}
 
 				federateTransformNode.appendChild(inlineNode);
-				xmlNode.appendChild(federateTransformNode);
+
+				var groupNode = xmlDoc.createElement("Group");
+				groupNode.setAttribute("onload", "onLoaded(event);");
+				groupNode.setAttribute("id", account + "__"+child.project);
+				groupNode.appendChild(federateTransformNode);
+				xmlNode.appendChild(groupNode);
 
 				var childGlobalCoordPromise = deferred();
 
@@ -897,6 +901,7 @@ exports.render = function (account, project, doc, logger){
 
 	var xmlDoc = X3D_Header();
 
+	console.log("rendering..");
 	if (!doc.mRootNode){
 		throw responseCodes.ROOT_NODE_NOT_FOUND;
 	}
@@ -912,8 +917,50 @@ exports.render = function (account, project, doc, logger){
 	var globalCoordOffset = null;
 	var globalCoordPromise = deferred();
 	var dbInterface = {};
+	
+	var groupNode = xmlDoc.createElement("Group");
+	groupNode.setAttribute("id", account + "__" + project);
+	groupNode.setAttribute('onload', 'onLoaded(event);');
+	var projOffset = null;
+	projOffset = doc.mRootNode.coordOffset;
+	
+	if(projOffset.length > 0 && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
+	{
+       	var offsetTransform = xmlDoc.createElement("Transform");
+		var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
+        offsetTransform.setAttribute("translation", offsetTrans.join(" "));
 
-	X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', logger);
+
+      	var offsetTransform2 = xmlDoc.createElement("Transform");
+        offsetTransform2.setAttribute("translation", projOffset.join(" "));
+
+   	   	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+   		groupNode.appendChild(offsetTransform2);
+		offsetTransform.appendChild(groupNode);
+		sceneRoot.root.appendChild(offsetTransform);
+				
+	}
+	else
+	{
+    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+
+		//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
+		if (globalCoordOffset) {
+           	var offsetTransform = xmlDoc.createElement("Transform");
+			var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
+   	        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
+
+			offsetTransform.appendChild(groupNode);
+        	sceneRoot.root.appendChild(offsetTransform);
+       	}
+		else
+		{
+			//No offset what so ever - legacy imports
+        	sceneRoot.root.appendChild(groupNode);
+		}
+	}
+
+
 	var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
 
 	X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
@@ -959,43 +1006,85 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var mat = mathjs.eye(4);
 		var globalCoordOffset = null;
 		var globalCoordPromise = deferred();
+				
+		var groupNode = xmlDoc.createElement("Group");
+		groupNode.setAttribute("id", account + "__" + project);
+		groupNode.setAttribute('onload', 'onLoaded(event);');
+		var projOffset = null;
+		dbInterface.getCoordOffset(account, project, branch, full, function(err, offs) {
+			if(err.value == 0)
+				projOffset = offs;
 
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
-
-		/*
-		// Compute the scene bounding box.
-		// Should be a better way of doing this.
-		for (var meshId in doc['meshes']) {
-			var mesh = doc['meshes'][meshId];
-			var bbox = repoNodeMesh.extractBoundingBox(mesh);
-
-			if (sceneBBoxMin.length)
+	
+			if(projOffset && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
 			{
-				for(var idx = 0; idx < 3; idx++)
-				{
-					sceneBBoxMin[idx] = Math.min(sceneBBoxMin[idx], bbox.min[idx]);
-					sceneBBoxMax[idx] = Math.max(sceneBBoxMax[idx], bbox.max[idx]);
-				}
-			} else {
-				sceneBBoxMin = bbox.min.slice(0);
-				sceneBBoxMax = bbox.max.slice(0);
+
+    	       	var offsetTransform = xmlDoc.createElement("Transform");
+				var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
+	            offsetTransform.setAttribute("translation", offsetTrans.join(" "));
+
+
+    	       	var offsetTransform2 = xmlDoc.createElement("Transform");
+	            offsetTransform2.setAttribute("translation", projOffset.join(" "));
+
+    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+    	        groupNode.appendChild(offsetTransform2);
+				offsetTransform.appendChild(groupNode);
+				sceneRoot.root.appendChild(offsetTransform);
+				
 			}
-		}
+			else
+			{
 
-		var bbox	= {};
-		bbox.min	= sceneBBoxMin;
-		bbox.max	= sceneBBoxMax;
-		bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
-		bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
-		*/
+    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+	
+				//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
+				if (globalCoordOffset) {
+	            	var offsetTransform = xmlDoc.createElement("Transform");
+					var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
+    		        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
 
-		var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
+					offsetTransform.appendChild(groupNode);
+	    	    	sceneRoot.root.appendChild(offsetTransform);
+	        	}
+			}
 
-		//X3D_AddGroundPlane(xmlDoc, bbox);
-		X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
-		//X3D_AddLights(xmlDoc, bbox);
 
-		return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+			/*
+			// Compute the scene bounding box.
+			// Should be a better way of doing this.
+			for (var meshId in doc['meshes']) {
+				var mesh = doc['meshes'][meshId];
+				var bbox = repoNodeMesh.extractBoundingBox(mesh);
+
+				if (sceneBBoxMin.length)
+				{
+					for(var idx = 0; idx < 3; idx++)
+					{
+		i				sceneBBoxMin[idx] = Math.min(sceneBBoxMin[idx], bbox.min[idx]);
+						sceneBBoxMax[idx] = Math.max(sceneBBoxMax[idx], bbox.max[idx]);
+					}
+				} else {
+					sceneBBoxMin = bbox.min.slice(0);
+					sceneBBoxMax = bbox.max.slice(0);
+				}
+			}
+
+			var bbox	= {};
+			bbox.min	= sceneBBoxMin;
+			bbox.max	= sceneBBoxMax;
+			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
+			bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+			*/
+
+			var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
+
+			//X3D_AddGroundPlane(xmlDoc, bbox);
+			X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
+			//X3D_AddLights(xmlDoc, bbox);
+
+			return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+		});
 	});
 };
 

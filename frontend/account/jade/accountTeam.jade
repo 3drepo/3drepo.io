@@ -49,7 +49,7 @@ md-content(layout-margin)
 
 			div(ng-if="!vm.noLicensesAssigned")
 				md-autocomplete(
-				md-no-cache="vm.noCache"
+				ng-if="vm.showList"
 				md-selected-item="vm.selectedUser"
 				md-search-text="vm.searchText"
 				md-items="user in vm.querySearch(vm.searchText)"
@@ -62,9 +62,6 @@ md-content(layout-margin)
 						span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.user}}
 					md-not-found
 						span No user matching "{{ctrl.searchText}}" was found.
-				//md-radio-group#accountTeamMemberRoleGroup(ng-model="vm.memberRole", layout="row", layout-align="start center")
-					md-radio-button.md-accent(value="collaborator", ng-disabled="vm.addDisabled") Collaborator
-					md-radio-button.md-accent(value="viewer", ng-disabled="vm.addDisabled") Viewer
 				md-button.md-raised.md-accent#accountTeamAdd(ng-click="vm.addMember()", ng-disabled="vm.addDisabled") Add
 
 			md-divider(ng-if="!vm.noLicensesAssigned")
