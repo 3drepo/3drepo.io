@@ -35,9 +35,9 @@ var archiver = require('archiver');
 var yauzl = require("yauzl");
 var xml2js = require('xml2js');
 var _ = require('lodash');
-var gd = require('node-gd');
 var systemLogger = require("../logger.js").systemLogger;
 var Group = require('./group');
+var gm = require('gm');
 
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -548,35 +548,17 @@ schema.statics.createIssue = function(dbColOptions, data){
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			
-			if(data.viewpoint.screenshot){
-
-				data.viewpoint.screenshot = {
-					content: new Buffer(data.viewpoint.screenshot, 'base64'),
-					flag: 1
-				};
-
-				let content = this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true);
-
-				if(content){
-					issue.thumbnail = {
-						flag: 1,
-						content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
-					};
-				} else {
-					systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
-						account: dbColOptions.account, 
-						project: dbColOptions.project, 
-						issueId: utils.uuidToString(issue._id), 
-						viewpointId: utils.uuidToString(data.viewpoint.guid)
-					});
-				}
-
-			}
-
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer(data.viewpoint.scribble, 'base64'),
 				flag: 1
 			});
+
+			if(data.viewpoint.screenshot){
+				data.viewpoint.screenshot = {
+					content: new Buffer(data.viewpoint.screenshot, 'base64'),
+					flag: 1
+				};
+			}
 
 			issue.viewpoints.push(data.viewpoint);
 		}
@@ -586,6 +568,35 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.norm = data.norm || issue.norm;
 		issue.creator_role = data.creator_role || issue.creator_role;
 		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
+
+
+		if(data.viewpoint.screenshot){
+
+			return this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
+				systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
+					account: dbColOptions.account, 
+					project: dbColOptions.project, 
+					issueId: utils.uuidToString(issue._id), 
+					viewpointId: utils.uuidToString(data.viewpoint.guid),
+					err: err
+				});
+			});
+		
+		} else {
+
+			return Promise.resolve();
+		}
+
+
+	}).then(image => {
+
+
+		if(image){
+			issue.thumbnail = {
+				flag: 1,
+				content: image
+			};
+		}
 
 		return issue.save().then(issue => {
 
@@ -637,21 +648,20 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			
-			let resized = this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365);
-		
-
-			this.findOneAndUpdate(dbColOptions, 
-				{ _id: stringToUUID(uid), 'viewpoints.guid': stringToUUID(vid)},
-				{ '$set': { 'viewpoints.$.screenshot.resizedContent': resized } }
-			).catch( err => {
-				systemLogger.logError('error while saving resized screenshot',{
-					issueId: uid,
-					viewpointId: vid,
-					err: err,
+			return this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365).then(resized => {
+				this.findOneAndUpdate(dbColOptions, 
+					{ _id: stringToUUID(uid), 'viewpoints.guid': stringToUUID(vid)},
+					{ '$set': { 'viewpoints.$.screenshot.resizedContent': resized } }
+				).catch( err => {
+					systemLogger.logError('error while saving resized screenshot',{
+						issueId: uid,
+						viewpointId: vid,
+						err: err,
+					});
 				});
-			});
 
-			return resized;
+				return resized;
+			});
 		}
 	});
 };
@@ -673,47 +683,63 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
 	'use strict';
 
+	let image, sourceX, sourceY, sourceWidth, sourceHeight;
 
-	let img = gd.createFromPngPtr(pngBuffer);
-	let sourceX, sourceY, sourceWidth, sourceHeight;
+	return new Promise((resolve, reject) => {
 
-	if(!img){
+		image = gm(pngBuffer).size((err, size) => {
+			if(err){
+				reject(err);
+			} else {
+				resolve(size);
+			}
+		});
 
-		return;
+	}).then(size => {
 
-	} else if(img.width <= destWidth) {
+		destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
 
-		return pngBuffer;
+		if(size.width <= destWidth){
 
-	} else if (!crop){
+			return pngBuffer;
 
-		sourceX = 0;
-		sourceY = 0;
-		sourceWidth = img.width;
-		sourceHeight = img.height;
+		} else if (!crop){
 
-	} else if(img.width > img.height){
-		
-		sourceY = 0;
-		sourceHeight = img.height;
-		sourceX = Math.round(img.width / 2 - img.height / 2);
-		sourceWidth = sourceHeight;
+			sourceX = 0;
+			sourceY = 0;
+			sourceWidth = size.width;
+			sourceHeight = size.height;
 
-	} else {
+		} else if (size.width > size.height){
+			
+			sourceY = 0;
+			sourceHeight = size.height;
+			sourceX = Math.round(size.width / 2 - size.height / 2);
+			sourceWidth = sourceHeight;
 
-		sourceX = 0;
-		sourceWidth = img.width;
-		sourceY = (img.height / 2 - img.width / 2);
-		sourceHeight = sourceWidth;
-	}
-	
-	destHeight = destHeight || Math.floor(destWidth / img.width * img.height);
+			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
 
-	let destImg  = gd.createTrueColorSync(destWidth, destHeight);
-	img.copyResampled(destImg, 0, 0, sourceX, sourceY, destWidth, destHeight, sourceWidth, sourceHeight);
+		} else {
 
-	return new Buffer(destImg.pngPtr(), 'binary');
-	
+			sourceX = 0;
+			sourceWidth = size.width;
+			sourceY = (size.height / 2 - size.width / 2);
+			sourceHeight = sourceWidth;
+
+			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
+		}
+
+		return new Promise((resolve, reject) => {
+			image.resize(destWidth, destHeight, "!").toBuffer('PNG', (err, buffer) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(buffer);
+				}
+			});
+		});
+	});
+
 };
 
 schema.methods.updateAttr = function(attr, value){
@@ -897,12 +923,28 @@ schema.methods.clean = function(typePrefix){
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
 
 	cleaned.viewpoints.forEach((vp, i) => {
+
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
 			cleaned.viewpoints[i].screenshotSmall = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshotSmall.png';
 		}
+
+		if(cleaned.viewpoints[i].up.length === 0){
+			cleaned.viewpoints[i].up = [1,0,0];
+		}
+
+		if(cleaned.viewpoints[i].position.length === 0){
+			cleaned.viewpoints[i].position = [0,0,0];
+		}
+
+		if(cleaned.viewpoints[i].view_dir.length === 0){
+			cleaned.viewpoints[i].view_dir = [1,0,0];
+		}
+
+		cleaned.viewpoints[i].fov = cleaned.viewpoints[i].fov || 1;
+
 	});
 
 	if(_.get(cleaned, `thumbnail.flag`)){
@@ -910,16 +952,30 @@ schema.methods.clean = function(typePrefix){
 	}
 
 	cleaned.comments.forEach( (comment, i) => {
+
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
 		if(cleaned.comments[i].viewpoint){
-			cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
+			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
+
+			if(i > 0 && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
+				//hide repeated screenshot if consecutive comments relate to the same viewpoint
+				cleaned.comments[i].viewpoint.screenshot = null;
+				cleaned.comments[i].viewpoint.screenshotSmall = null;
+			}
+
 		} else {
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 		
 	});
+
+	if( cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
+		cleaned.comments[0].viewpoint.screenshot = null;
+		cleaned.comments[0].viewpoint.screenshotSmall = null;
+	}
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');
@@ -1019,7 +1075,9 @@ schema.methods.getBCFMarkup = function(unit){
 			},
 			'Author': comment.owner,
 			'Comment': comment.comment,
-			'Viewpoint': utils.uuidToString(comment.viewpoint),
+			'Viewpoint': {
+				'@': {Guid: utils.uuidToString(comment.viewpoint)}
+			},
 			'Date': moment(comment.created).utc().format()
 		};
 
@@ -1220,26 +1278,55 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 				zipfile.on('end', () => {
 
-					Promise.all(promises).then(() => {
+					let issueCounter;
+
+					Issue.count({account, project}).then(count => {
+
+						issueCounter = count;
+
+					}).then(() => {
+
+						return Promise.all(promises);
+
+					}).then(() => {
 
 						let createIssueProms = [];
-
+						
 						Object.keys(files).forEach(guid => {
-
-							let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
-								if(count <= 0) {
-									return createIssue(guid);
-								} else {
-									console.log('duplicate issue');
-									return Promise.resolve();
-								}
-							});
-
-							createIssueProms.push(promise);
-
+							createIssueProms.push(createIssue(guid));
 						});
 
 						return Promise.all(createIssueProms);
+
+					}).then(issues => {
+							
+						let saveIssueProms = [];
+
+						// sort issues by date and add number
+						issues = issues.sort((a, b) => {
+							return a.created > b.created;
+						});
+
+	
+						issues.forEach(issue => {
+
+							saveIssueProms.push(
+								Issue.count({account, project}, { _id: issue._id}).then(count => {
+
+									if(count <= 0) {
+										issue.number = ++issueCounter;
+										return issue.save();
+									} else {
+										console.log('duplicate issue');
+										return Promise.resolve();
+									}
+
+								})
+							);
+						});
+
+						return Promise.all(saveIssueProms);
+				
 
 					}).then(() => {
 						resolve();
@@ -1329,7 +1416,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							owner: _.get(comment, 'Author[0]._'),
 							comment: _.get(comment, 'Comment[0]._'),
 							sealed: true,
-							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
+							viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(_.get(comment, 'Viewpoint[0].@.Guid')) : undefined,
 							extras: {}
 						};
 
@@ -1343,9 +1430,9 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 				}).then(viewpoints => {
 
-					let thumbnailGenerated;
+					let vpGuids = Object.keys(viewpoints);
 
-					Object.keys(viewpoints).forEach(guid => {
+					vpGuids.forEach(guid => {
 
 						if(!viewpoints[guid].viewpointXml){
 							return;
@@ -1370,29 +1457,6 @@ schema.statics.importBCF = function(account, project, zipPath){
 							content: viewpoints[guid].snapshot,
 						} : undefined;
 
-						//take the first screenshot as thumbnail
-						if(!thumbnailGenerated && screenshotObj){
-
-							let content = self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true);
-
-							if(content){
-
-								issue.thumbnail = {
-									flag: 1,
-									content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
-								};
-
-								thumbnailGenerated = true;
-
-							} else {
-								systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
-									account, 
-									project, 
-									issueId: utils.uuidToString(issue._id), 
-									viewpointId: guid
-								});
-							}
-						}
 
 						let vp = {
 							guid: utils.stringToUUID(guid),
@@ -1407,7 +1471,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							scale = 100;
 						} else if (unit === 'mm'){
 							scale = 1000;
-						} else if (_unit === 'ft'){
+						} else if (unit === 'ft'){
 							scale = 3.28084;
 						}	
 
@@ -1416,17 +1480,17 @@ schema.statics.importBCF = function(account, project, zipPath){
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
-							],
+							];
 							vp.view_dir = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
-							],
+							];
 							vp.position = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')) * scale,
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale
-							],
+							];
 
 							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
 						}
@@ -1434,8 +1498,36 @@ schema.statics.importBCF = function(account, project, zipPath){
 						issue.viewpoints.push(vp);
 					});
 
-					return issue.save();
+					//take the first screenshot as thumbnail
+					if(vpGuids.length > 0){
+						
+						return self.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
 
+							systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated', {
+								account, 
+								project, 
+								issueId: utils.uuidToString(issue._id), 
+								viewpointId: vpGuids[0],
+								err: err
+							});
+
+							return Promise.resolve();
+						});
+
+					} else {
+						return Promise.resolve();
+					}
+
+				}).then(image => {
+
+					if(image){
+						issue.thumbnail = {
+							flag: 1,
+							content: image
+						};
+					}
+
+					return issue;
 				});
 
 			}

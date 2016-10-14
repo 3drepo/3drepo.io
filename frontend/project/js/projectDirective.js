@@ -75,7 +75,21 @@
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print",
+					icon: "fa-print"
+				},
+				{
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-upload"
+				},
+				{
+					value: "exportBCF",
+					label: "Export BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-download",
 					divider: true
 				},
 				{

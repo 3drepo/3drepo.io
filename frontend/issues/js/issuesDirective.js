@@ -143,7 +143,18 @@
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
+			var i, length;
+
 			vm.event = event;
+
+			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+				for (i = 0, length = vm.issues.length; i < length; i += 1) {
+					if (vm.issues[i]._id === event.value.id) {
+						vm.editIssue(vm.issues[i]);
+						break;
+					}
+				}
+			}
 		});
 
 		/**
@@ -252,18 +263,57 @@
 		};
 
 		/**
+		* import bcf
+		* @param file
+		*/
+		vm.importBcf = function(file){
+
+			$scope.$apply();
+
+			vm.importingBCF = true;
+
+			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+
+				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
+
+			}).then(function(data){
+
+				vm.importingBCF = false;
+				vm.issues = (data === "") ? [] : data;
+
+			}).catch(function(err){
+
+				vm.importingBCF = false;
+				console.log('Error while importing bcf', err);
+				
+			});
+
+
+		}
+
+		/**
 		 * Set up editing issue
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-			vm.issueToEdit = issue;
 			vm.event = null; // To clear any events so they aren't registered
-			vm.toShow = "showIssue";
-			vm.setContentHeight();
 			vm.onShowItem();
-			if (angular.isUndefined(issue) && (selectedIssue !== null)) {
-				deselectPin(selectedIssue._id);
+			if (vm.selectedIssue !== null) {
+				deselectPin(vm.selectedIssue._id);
 			}
+			vm.selectedIssue = issue;
+			vm.toShow = "showIssue";
+		};
+
+		/**
+		 * Select issue
+		 * @param issue
+		 */
+		vm.selectIssue = function (issue) {
+			if ((vm.selectedIssue !== null) && (vm.selectedIssue._id !== issue._id)) {
+				deselectPin(vm.selectedIssue._id);
+			}
+			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -281,17 +331,6 @@
 		vm.issueCreated = function (issue) {
 			vm.issues.unshift(issue);
 		};
-
-		/**
-		 * Remove the temporary pin used for adding an issue
-		 */
-		function removeAddPin () {
-			IssuesService.removePin(IssuesService.newPinId);
-			selectedObjectId = null;
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-			pickedPos = null;
-			pickedNorm = null;
-		}
 
 		/**
 		 * Show issue details

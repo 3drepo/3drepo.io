@@ -1,0 +1,2500 @@
+/** Account ***********************************************************************************************************/
+account-dir #account {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+account-dir #logo {
+  background: #3F51B5;
+}
+
+account-dir #noAvatarIcon {
+  background: rgba(0,69,148,.1);
+  height: 150px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1)
+}
+account-dir #noAvatarIcon md-icon {
+  font-size: 150px;
+  width: 150px;
+  height: 150px;
+  color: rgb(0,69,148);
+}
+
+account-dir .dataContainer {
+  border: solid 1px rgba(0,0,0,0.2);
+  margin-top: 20px;
+}
+
+account-dir #account #accountItem {
+  width: 44%;
+}
+
+account-dir .userContent .cardInfo {
+  text-align: left;
+}
+
+/** Account Projects **************************************************************************************************/
+account-projects #accountList {
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+account-projects md-list {
+  padding: 0;
+}
+
+account-projects .account,
+account-projects .project {
+  outline: none;
+  padding-left: 10px;
+}
+account-projects .account:hover,
+account-projects .project:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-projects .projects {
+  margin-left: 40px;
+}
+
+account-projects .projects .projectName,
+account-projects .projects md-icon {
+  color: #4CAF50;
+}
+account-projects .projects md-icon {
+  margin: 0 !important;
+}
+account-projects .projects .projectTimestamp {
+  color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
+}
+account-projects .projects p {
+  margin: 0;
+}
+
+account-projects #existingProjectFileUploader,
+account-projects #newProjectFileUploader {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+account-projects .accountRight,
+account-projects .projectRight {
+  margin-right: 10px !important;
+}
+
+account-projects #newDatabaseButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+account-projects .md-whiteframe-1dp {
+  border-radius: 4px;
+  background: #FFF;
+}
+account-projects md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  height: 40px;
+  min-height: 40px;
+}
+
+account-projects .cardInfo md-progress-circular {
+  margin-left: 5px;
+}
+
+account-projects .projectUploadInfo {
+  margin-right: 20px;
+}
+
+account-projects .projectUploadFilename {
+  color: rgba(0,0,0,0.5);
+  margin: 0 !important;
+}
+
+account-projects .projectUploadInfo {
+  color: rgba(0,0,0,0.7);
+  margin: 0 0 0 10px !important;
+}
+
+account-projects .projectUploadIcon {
+  width: 15px;
+  height: 15px;
+  margin-left: 10px;
+}
+
+account-projects .projectRight .projectUploaded {
+  margin-top: -10px !important;
+  color: rgba(0,0,0,0.5);
+}
+
+account-projects .userContent {
+  padding: 0 !important;
+}
+
+/** Account Profile ***************************************************************************************************/
+account-profile md-input-container {
+  margin-right: 5px;
+}
+
+account-profile .updateContainer {
+  margin: -20px 0 0;
+}
+
+account-profile .md-title {
+  margin: -10px 0 20px;
+}
+
+account-profile md-divider {
+  margin: 20px 0 20px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+  margin-left: 70px;
+  width: 400px;
+  margin-right: 60px;
+}
+
+account-info #accountInfoContent {
+  max-height: calc(100vh - 190px);
+}
+account-info #accountInfoContent md-list {
+  overflow-y: auto;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
+  margin: 10px 0;
+}
+account-info md-input-container input,
+account-info md-input-container label {
+  font-size: initial;
+  color: rgba(0,0,0,0.7) !important;
+}
+
+account-info p {
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
+}
+
+/*
+account-info .accountInfoPage {
+  min-height: 50px;
+}
+account-info .accountInfoPage .md-button {
+  min-height: 50px!important;
+  height: 50px;
+}
+*/
+
+/** Avatar Image ******************************************************************************************************/
+.account-avatar-image {
+  height:150px;
+  background: #E8EAF6;
+  margin: auto;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.avatar-upload{
+  cursor: pointer;
+}
+
+/** Account Menu ******************************************************************************************************/
+account-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  padding-right: 6px;
+}
+account-menu md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-size: 30px !important;
+  outline: none;
+}
+
+#accountMenuContent {
+  border-radius: 4px;
+}
+#accountMenuContent md-menu-item > .md-button {
+  display: block;
+}
+
+/** New Project Dialog ************************************************************************************************/
+.newProjectDialog {
+  min-width: 350px;
+  min-height: 350px;
+  overflow: hidden;
+}
+
+.newProjectDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newProjectDialog #projectDialogFilenameContainer {
+  margin: 0 0 0 16px;
+}
+.newProjectDialog #projectDialogFilenameIntro {
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 5px 0 0;
+}
+.newProjectDialog #projectDialogFilename {
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
+
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+  margin: 0;
+}
+.deleteDialog #deleteName {
+  color: rgba(0 ,0, 0, 0.9);
+}
+
+.deleteDialog #deleteWarning {
+  color: #F44336;
+  margin: 0;
+}
+
+.deleteDialog #deleteError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** New Database Dialog ***********************************************************************************************/
+.newDatabaseDialog {
+  min-width: 350px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.newDatabaseDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newDatabaseDialog .databaseDialogInfo {
+  font-weight: normal;
+  color: rgba(0,0,0,0.7);
+}
+
+/** Account Billing ***************************************************************************************************/
+account-billing md-input-container {
+  margin-right: 10px;
+}
+
+account-billing .userContent {
+  max-height: calc(100vh - 270px) !important;
+}
+
+account-billing .md-button {
+  margin-bottom: 20px;
+}
+
+account-billing #accountBillingSubscription md-select {
+  margin-bottom: 24px;
+}
+account-billing #accountBillingSubscription .md-button {
+  margin-top: 10px;
+}
+
+account-billing #accountBillingHistory section {
+  margin-left: -10px;
+}
+account-billing #accountBillingHistory .md-subheader ._md-subheader-inner {
+  padding: 16px 10px;
+}
+account-billing #accountBillingHistory .md-subheader label {
+  margin-right: 10px;
+}
+
+account-billing .accountBillingHistoryListItem {
+  font-size: 14px;
+}
+account-billing .accountBillingHistoryListItem md-input-container {
+  margin-right: 10px;
+}
+account-billing .accountBillingHistoryListItem .md-button {
+  margin-top: 15px;
+}
+
+account-billing .accountBillingSave img {
+  height: 20px;
+  margin-top: 17px;
+}
+
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/** Account Licenses *********************************************************************************************/
+account-licenses .licenseIcon {
+  margin: 0 10px !important;
+}
+
+account-licenses #accountLicensesAdd {
+  margin-top: -10px;
+}
+account-licenses #accountLicensesAdd md-input-container {
+  margin-bottom: 0;
+}
+account-licenses #accountLicensesAdd .md-button {
+  margin-bottom: 30px;
+}
+
+account-licenses #accountLicensesUnassigned {
+  opacity: 0.4;
+  margin-top: -5px;
+}
+
+account-licenses #accountLicenseMessage {
+  margin: 0;
+  opacity: 0.8;
+}
+
+account-licenses #accountLicensesList {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+account-licenses #accountLicensesBillingPage {
+  margin-top: 30px;
+}
+
+/** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
+account-team .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-team #project {
+  margin: -10px 0 10px;
+}
+account-team #project md-icon {
+  margin: 0 !important;
+}
+
+account-team #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-team #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-team #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-team #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Collaborator Dialog ***********************************************************************************************/
+#collaboratorDialog {
+  width: 400px;
+}
+
+#collaboratorDialog .collaboratorIcon {
+  margin: 0 10px;
+}
+
+/** PayPal Dialog *****************************************************************************************************/
+#paypalDialog .userContent .cardInfo {
+  text-align: left;
+}
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
+}
+
+
+/** Account Project Setting ******************************************************************************************/
+account-projectsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-projectsetting #project {
+  margin: -10px 0 10px;
+}
+account-projectsetting #project md-icon {
+  margin: 0 !important;
+}
+
+account-projectsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-projectsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-projectsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-projectsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Federation Dialog *************************************************************************************************/
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: -20px 0 10px 100px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+}
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations .federation {
+  padding-left: 30px;
+}
+
+account-federations #federationInfoRight p:only-child {
+  margin-right: 20px;
+}
+
+/* Done to counter bootstrap styling. This should really be set in a top level style file */
+.md-datepicker-input-mask {
+  width: 308px;
+}
+
+/** Bid ***************************************************************************************************************/
+
+bid4free {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background: #E8EAF6;
+  overflow-y: hidden;
+}
+
+bid4free .bidInfo {
+  width: 100%;
+  height: 100%;
+}
+
+bid4free .bidInfo .bidInfoSubContractor {
+  height: 100%;
+  padding: 30px 20px 20px;
+}
+
+bid4free md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+bid4free .bidHeader {
+  width: 100%;
+  margin-bottom: 50px;
+}
+bid4free .bidHeader.md-whiteframe-1dp {
+  border-radius: 4px;
+}
+bid4free .bidHeader md-toolbar {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+bid4free .bidContent {
+  padding: 30px 20px 20px;
+}
+
+bid4free md-list-item p {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.010em;
+  outline: none;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+bid4free .md-whiteframe-1dp {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background: #FFFFFF;
+}
+
+bid4free .bidInfoCardContent {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+bid4free .bidInfoCardContent .bidInfoCardLabel {
+  color: rgba(0,0,0,0.5);
+  margin-left: 5px;
+}
+
+bid4free .md-toolbar-tools,
+bid4free .md-toolbar-tools md-icon {
+  color: #C5CAE9;
+}
+
+bid4free .md-toolbar-tools md-icon {
+  font-size: 20px;
+}
+
+bid4free .packageContent {
+  overflow-y: auto;
+}
+
+bid4free .packageContent .bidDatePicker {
+  margin: -20px 0 20px;
+}
+bid4free .packageContent .bidDatePicker h5 {
+  color: rgba(0,0,0,0.5);
+}
+
+bid4free .bidInfoListTitle {
+  color: rgba(0,0,0,0.5);
+}
+
+bid4free .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+bid4free .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+bid4free .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/** Project Summary ***************************************************************************************************/
+
+.projectSummaryInput {
+  padding: 0 10px;
+}
+
+/** Packages **********************************************************************************************************/
+
+/** Package Summary ***************************************************************************************************/
+
+bid4free .packageSummaryInput {
+  padding: 0 10px;
+}
+
+.packageSummaryList {
+  overflow-y: auto;
+}
+
+bid4free .packageContent .fileUploader {
+  margin-top: 10px;
+  padding: 0 20px;
+  height: 250px;
+}
+
+/** Invite ************************************************************************************************************/
+bid4free .bidInvite .bidInviteContent {
+  width: 100%;
+  height: 400px;
+}
+bid4free .bidInvite .bidInviteContent md-list-item md-icon {
+  font-size: 1.5em;
+}
+bid4free .bidInvite .bidInviteIcon {
+  font-size: 1.5em;
+  margin: 15px;
+}
+
+bid4free .packageInvite {
+  padding: 0 20px;
+}
+
+/** Bid Image *********************************************************************************************************/
+bid-image md-content {
+  outline: none;
+  overflow: hidden;
+}
+bid-image md-content:hover {
+  cursor: pointer;
+}
+
+bid-image .bidThumbnailImage {
+  width: 100%;
+}
+
+/** Bid Docs **********************************************************************************************************/
+bid-docs md-icon {
+  font-size: 20px !important;
+  color: #9FA8DA;
+}
+
+.boqListTitles {
+  font-weight: bold;
+}
+
+.boqListRight {
+  text-align: right;
+}
+
+.bidDocsDialog {
+  min-width: 850px;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+.bidDocsDialog .md-toolbar-tools {
+  color: #FFEB3B;
+}
+
+.bidDocsDialog .bidDocsIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+  color: #FFEB3B;
+}
+
+.bidDocsDialog .bidDocsSow p {
+  max-width: 800px;
+}
+
+.bidDocsDialog .bidDocsUnderline {
+  text-decoration: underline;
+}
+.bidDocsDialog .bidDocsBold {
+  font-weight: bold;
+}
+
+.bidDocsDialog iframe {
+  min-width: 850px;
+  min-height: 600px;
+  border: none;
+}
+
+.bidDocsDialog .predefinedDocs {
+  overflow-y: auto;
+}
+
+/** Bid Summary *******************************************************************************************************/
+bid-summary md-list {
+  overflow-y: scroll;
+}
+
+bid-summary .bidSummaryPackageSelect {
+  margin: 30px 10px 10px 10px;
+}
+.md-datepicker-input-mask {
+  width: 308px; }
+
+/** Bid ************************************************************************************************************** */
+bid {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  padding-top: 20px;
+  background: #E8EAF6; }
+  bid .bidInfo {
+    width: 100%;
+    height: 100%; }
+    bid .bidInfo .bidInfoSubContractor {
+      height: 100%; }
+  bid md-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px; }
+  bid .bidHeader {
+    width: 100%;
+    margin-bottom: 50px; }
+    bid .bidHeader .md-whiteframe-1dp {
+      border-radius: 4px; }
+
+/*# sourceMappingURL=bid4FreeTest.css.map */
+
+bid4free-workspace {
+  display: block;
+  background: #E8EAF6;
+  margin: 20px; }
+  bid4free-workspace .md-whiteframe-1dp {
+    border-radius: 4px; }
+  bid4free-workspace md-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px; }
+  bid4free-workspace .bid4freeWorkspaceContainer {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    height: 100%; }
+  bid4free-workspace md-content {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px; }
+  bid4free-workspace md-tabs {
+    height: calc(100vh - 115px); }
+  bid4free-workspace md-tab-content {
+    overflow: hidden; }
+  bid4free-workspace md-radio-button {
+    display: inline; }
+  bid4free-workspace md-radio-button > * {
+    padding-right: 10px; }
+  bid4free-workspace .sectionInput > md-input-container,
+  bid4free-workspace .sectionInput > md-radio-group,
+  bid4free-workspace .itemInput > label,
+  bid4free-workspace .itemInput > md-radio-group {
+    font-size: 16px; }
+  bid4free-workspace .sectionInput .sectionInputRadioGroup {
+    margin-top: -16px; }
+  bid4free-workspace .sectionInput .md-button {
+    margin-top: -8px; }
+  bid4free-workspace .sectionInput .tableTitlesInput {
+    margin-top: -20px; }
+  bid4free-workspace .sectionInput .saveSection {
+    margin-top: -20px;
+    margin-bottom: 10px; }
+  bid4free-workspace .sections {
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 310px); }
+    bid4free-workspace .sections .section {
+      border-bottom: solid 1px rgba(0, 0, 0, 0.12); }
+    bid4free-workspace .sections .tableTitles {
+      margin-top: 20px;
+      color: rgba(0, 0, 0, 0.6); }
+    bid4free-workspace .sections .keyvalueValue {
+      margin: 10px 0 -10px 0;
+      overflow: hidden; }
+  bid4free-workspace .items label {
+    font-weight: normal;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 14px; }
+  bid4free-workspace .addNewItem {
+    margin-bottom: 20px; }
+  bid4free-workspace .boqTotal {
+    padding: 0 10px 20px; }
+    bid4free-workspace .boqTotal h3 {
+      padding: 0;
+      margin: 0; }
+  bid4free-workspace .boqList {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0; }
+  bid4free-workspace .boqListTitles {
+    font-weight: bold;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+  bid4free-workspace .boqListInput {
+    margin: -12px 0 0 0;
+    padding: 0;
+    height: 20px; }
+    bid4free-workspace .boqListInput input {
+      text-align: center; }
+  bid4free-workspace .saveContainer label {
+    margin-top: 5px;
+    color: #66BB6A; }
+  bid4free-workspace .saveContainer md-icon {
+    font-size: 25px !important; }
+
+billing {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(250, 250, 250);
+    z-index: 2;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+billing #billingMainContent {
+    width: 90%
+}
+
+billing #billingGap1 {
+    height: 100px;
+}
+
+billing p,
+billing label {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+billing .md-toolbar-tools img {
+    width: 150px;
+}
+
+billing #billingList {
+    padding: 20px;
+}
+
+billing #billingCompanyAddress {
+    margin-top: 50px;
+}
+
+billing #billingClientAddress {
+    margin: 10px 0 40px;
+}
+
+billing .billingInfoTitle {
+    font-weight: bold;
+}
+
+billing #billingProductInfo {
+    margin: 10px 0 40px;
+}
+
+billing #billingReverseCharge {
+    margin-top: 40px;
+    font-size: 14px;
+    line-height: 30px;
+}
+
+billing #billingPeriod {
+    color: rgba(0,0,0,.4);
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+billing #billingInvoiceLogo {
+    width: 200px
+}
+
+billing #billingTotalValue {
+    font-weight: bold;
+}
+bottom-buttons {
+  display: block;
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  width: 260px;
+  margin: auto;
+  text-align: center;
+}
+
+bottom-buttons #leftButtons {
+  position: absolute;
+  left: 20px;
+  top: 8px;
+}
+bottom-buttons #leftButtons span {
+  outline: none;
+}
+
+bottom-buttons #rightButtons {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+}
+bottom-buttons #rightButtons span {
+  outline: none;
+}
+
+bottom-buttons #showButtonIcon {
+  font-size: 25px;
+  margin-top: -5px;
+}
+
+bottom-buttons .actionButton md-icon {
+  color: #FFFFFF !important;
+  font-size: 25px;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+bottom-buttons .viewingOptionButtons {
+  position: absolute;
+  right: 15px;
+  top: -120px;
+}
+
+bottom-buttons label {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-weight: bold;
+  font-size: 14px;
+}
+bottom-buttons label:hover {
+  cursor: pointer;
+}
+
+.bottomButtonIconCardboard {
+  font-size: 20px !important;
+  margin-left: -4px;
+}
+.bottomButtonIconWalk {
+  margin-left: 0;
+}
+.bottomButtonIconHelicopter {
+  margin-left: -5px;
+  font-size: 22px !important;
+}
+
+building {
+  display: block;
+  width: 100%;
+  padding: 20px 0 10px;
+}
+
+
+
+
+clip {
+  display: block;
+  width: 100%;
+  padding: 20px 0 10px;
+}
+
+clip md-radio-button .md-label {
+  margin-right: 30px;
+}
+
+clip #clipAxislabel {
+  margin-right: 10px;
+}
+
+.clipSlider {
+  margin-top: 20px;
+}
+.clipSlider md-slider {
+  width: 200px;
+  padding-right: 20px;
+}
+.clipSlider input {
+  width: 50px;
+}
+
+contact md-input-container textarea {
+    min-height: 100px !important;
+}
+
+contact #contactSendButton {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+contact md-input-container {
+    margin: 0;
+}
+
+contact #contact3DRepo p {
+    margin: 5px;
+}
+contact #contact3DRepo .contact3DRepoLabel {
+    color: rgba(0, 0, 0, 0.4);
+}
+contact #contact3DRepo #contactEmailButton {
+    margin-left: 0;
+    text-transform: lowercase;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+contact #contactDivider {
+    width: 2px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+}
+cookies .md-toolbar-tools img {
+    width: 150px;
+}
+
+cookies-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+/** Docs **************************************************************************************************************/
+docs .typesList {
+  padding: 0;
+}
+docs .typesList h4 {
+  font-size: 20px;
+  margin: 0;
+  color: rgba(0,0,0,0.6);
+}
+
+docs #docItem md-divider {
+  margin-top: 10px;
+}
+
+docs md-icon {
+  margin: 0 10px 2px 0 !important;
+  font-size: large !important;
+  color: #7986CB;
+}
+
+docs .docsLoadInfo {
+  padding: 15px;
+}
+
+docs .dataItem {
+  padding: 0 15px;
+  outline: none;
+}
+
+docs .metadataKey,
+docs .metadataValue {
+  word-wrap: break-word;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+docs .metadataKey {
+  margin: 5px 0 5px 5px;
+  color: rgba(0,0,0,0.6);
+}
+docs .metadataValue {
+  margin: 5px 0;
+  color: rgba(0,0,0,0.9);
+}
+
+docs .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+docs .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+docs .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+docs .docsListBackground1 {
+  background: rgb(240,240,240);;
+}
+docs .docsListBackground2 {
+  background: rgb(250,250,250);
+}
+
+/** Docs Dialog *******************************************************************************************************/
+.docsDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.docsDialog .docIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+}
+
+.docsDialog .documentContainer {
+  position: absolute;
+  top: 64px;
+}
+
+.docsDialog iframe {
+  border-style: none;
+  min-width: 850px;
+  min-height: 600px;
+}
+
+groups md-list {
+  padding: 0;
+}
+
+groups #groupsAdd #addGroupTitle {
+  margin: 10px 0 20px 5px;
+}
+groups #groupsAdd md-input-container {
+  margin: 0;
+}
+groups #groupsAdd #groupsSave {
+  margin: 20px 0;
+}
+
+groups md-list-item button {
+  padding: 0 !important;
+}
+groups md-list-item p {
+  margin: 8px 20px !important;
+}
+
+groups #groupsList md-list-item {
+  padding: 0;
+  height: 55px;
+}
+groups #groupsList .group {
+  outline: none;
+}
+groups #groupsList .group:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+groups .groupColourBar {
+  width: 10px;
+}
+
+groups #groupHeader {
+  height: 52px;
+}
+
+groups #groupHeader p {
+  margin: 17px 20px;
+}
+
+groups #groupColour {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid #DDDDDD;
+}
+
+groups #groupsGroup md-switch {
+  margin-left: 15px;
+}
+
+groups #groupsGroup #deleteGroup {
+  margin: 20px 0 0 10px;
+}
+
+groups #groupsGroup #deleteGroupButton {
+  margin: 0;
+}
+
+groups #groupsGroup #deleteGroup p {
+  margin-top: 5px;
+  color: rgba(0,0,0,0.5);
+  font-size: 14px;
+}
+
+groups #groupsGroup md-checkbox {
+  margin: 0;
+}
+
+home {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+home #homeBackground {
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0
+}
+
+home #homeLogo {
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    width: 250px;
+    top: 10px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    outline: none;
+}
+home #homeLogo:hover {
+    cursor: pointer;
+}
+home #homeLogo img {
+    width: inherit;
+    pointer-events: inherit;
+    outline: none;
+}
+
+home .homeUserContent {
+    padding-top: 120px;
+}
+
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
+    border-radius: 4px;
+    background: rgb(250, 250, 250);;
+}
+
+home .homeUserContent md-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    height: 40px;
+    min-height: 40px;
+}
+
+home .homeUserContent .userContent {
+    padding: 20px;
+    max-height: calc(100vh - 230px);
+    overflow-x: hidden;
+}
+
+home .homeUserContent .userContent h3 {
+    color: rgba(0, 0, 0, 0.7);
+    font-weight: normal;
+}
+
+home .homeUserContent .userContent md-progress-circular {
+    margin-left: 10px;
+}
+
+home .homeUserContent md-tabs-wrapper {
+    background: #FFFFFF;
+}
+
+.cardInfo {
+    text-align: center;
+    padding: 15px;
+    background: rgba(0,69,148,.1);
+    margin: 15px;
+    border-radius: 4px;
+}
+.cardInfo p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+}
+.cardInfo md-icon {
+    margin: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+home #legalLinks {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 2;
+}
+home #legalLinks a {
+    font-size: 12px;
+    margin: 10px 10px 5px;
+    opacity: 0.7;
+}
+
+home md-radio-button ._md-label {
+    line-height: 1.7;
+}
+
+.inputHint {
+    position: absolute;
+    left: 2px;
+    right: auto;
+    bottom: 7px;
+    font-size: 12px;
+    line-height: 14px;
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+    color: grey;
+}
+
+@media print
+{
+    .noPrint, .noPrint *
+    {
+        display: none !important;
+    }
+}
+
+/** Legal Dialog ******************************************************************************************************/
+.legalDialog {
+    width: calc(100vw - 50%);
+    min-height: calc(100vh - 25%);
+    overflow: hidden;
+}
+
+.legalDialog md-content {
+    padding: 20px;
+}
+
+/** Dialog ************************************************************************************************************/
+md-dialog {
+    background: rgb(250, 250, 250);
+}
+
+md-dialog md-toolbar {
+    height: 40px;
+    min-height: 40px;
+}
+
+/** Legal *************************************************************************************************************/
+#legal {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+#legal .md-toolbar-tools img {
+    width: 150px;
+}
+
+#legal #legalText {
+    padding: 10px 50px;
+}
+/** Issues ************************************************************************************************************/
+
+issues #issuesAddContainer {
+  position: relative;
+  margin: 15px;
+}
+issues #issuesAddContainer .md-dialog-container {
+  top: 0 !important;
+  height: 200px !important;
+}
+issues #issuesAddContainer .md-dialog-backdrop {
+  height: 205px !important;
+}
+issues #issuesAddContainer md-input-container {
+  margin-bottom: 0;
+}
+issues #issuesAddContainer h4 {
+  margin-left: 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+issues .issueHeader {
+  position: relative;
+}
+issues .issueHeader:hover {
+  background-color: #EEEEEE;
+  cursor: pointer;
+}
+
+issues md-list {
+  padding: 0;
+}
+
+issues .issuesInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+issues .issuesInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+issues #addAlert {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+issues #addAlert #addAlertBackground {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+}
+issues #addAlert #addAlertBackground #addAlertInfo {
+  background: #FFFFFF;
+  border-radius: 4px;
+}
+issues #addAlert #addAlertBackground #addAlertInfo .md-button {
+  background: #EEEEEE;
+}
+
+issues #issuesAddButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+issues #issuesContent {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+issues .importBCFLoading {
+  margin: 10px auto;
+}
+/** Issue *************************************************************************************************************/
+issue {
+  display: block;
+}
+
+issue md-list-item .md-button,
+issue md-list-item .md-button .md-ripple-container {
+  border-radius: 0;
+}
+
+issue h3,
+issue h4 {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+issue .issueCommentsContainer {
+  padding: 0 15px 0 25px
+}
+issue .issueCommentsContainer md-list-item {
+  padding: 0 !important;
+}
+
+issue .issueCommentsContainer md-list-item .commentModifyButton {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin: 0 0 0 20px;
+  outline: none;
+}
+issue .issueCommentsContainer .issueCommentInfo {
+  position: relative;
+}
+issue .issueCommentsContainer .issueCommentInfo p {
+  color: rgba(0,0,0,0.35) !important;
+}
+issue .issueCommentsContainer .issueCommentsFooter {
+  margin-top: -15px;
+  padding-bottom: 10px;
+  /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
+}
+
+md-list-item.issueRole {
+  padding: 0;
+}
+md-list-item .issueAssignColourMarker {
+  display: block;
+  width: 10px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+issue .issueOpenContainer {
+  margin-top: 10px;
+}
+
+/** Issue Header ******************************************************************************************************/
+issue-header {
+  margin: 0;
+  padding: 0;
+}
+
+issue-header p {
+  margin: 0;
+  padding: 0;
+  line-height: 32px;
+}
+
+issue-header .issueTitle {
+  outline: none;
+}
+
+issue-header .issueTitle .issueTitleInfo {
+  margin-top: -10px;
+}
+issue-header .issueTitle .issueTitleInfo p {
+  color: rgba(0,0,0,0.35);
+  font-size: 14px;
+}
+
+issue-header .issueTitle button {
+  min-height: 0;
+  height: 100%;
+}
+issue-header .issueRoleMarkers {
+  width: 10px;
+}
+
+issue-header .issueStatusMarker {
+  margin-top: 10px;
+  margin-left: 6px;
+  width: 20px;
+}
+issue-header .issueStatusMarker .issueOpen {
+  color: #4CAF50;
+}
+issue-header .issueStatusMarker .issueClosed {
+  color: #F44336;
+}
+
+issue-header .issueInfo {
+  position: absolute;
+  top: 0;
+  background: #E8F5E9;
+  padding: 0 5px 0 10px;
+  width: 100%;
+  height: 100%;
+}
+issue-header h5 {
+  color: rgba(0, 0, 0, 0.7);
+  margin-left: 5px;
+}
+
+/** Issue Area ********************************************************************************************************/
+issue-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+issue-area #issueAreaCanvas {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+issue-area #issueAreaCentre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -20px 0 0 -20px;
+  pointer-events: none;
+}
+
+issue-area #issueAreaButtons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+issue-area #issueAreaButtons md-icon {
+  font-size: 30px;
+  margin-top: -7px;
+  margin-left: -4px;
+}
+
+issue-area #issueAreaPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+issue-area #scribbleDisplay {
+  position:absolute;
+  width:100%;
+  height:100%;
+  overflow:hidden
+}
+/* Influenced by Itay answer - http://stackoverflow.com/a/18674144/782358 */
+issue-area #scribbleDisplay img {
+  position: absolute;
+  margin: auto;
+  height: 100%;
+  width: auto;
+  left: -200%;
+  right: -200%;
+}
+
+/** Issues List *******************************************************************************************************/
+issues-list .issueListItem {
+  height: 150px;
+  position: relative;
+  outline: none;
+}
+issues-list .issueListItem:hover {
+  cursor: pointer;
+}
+issues-list .issueListItem *:hover {
+  cursor: inherit;
+}
+
+issues-list .issueListItemFocus {
+  background: rgba(0,69,148,.1);
+}
+
+issues-list .issueListItem div:first-child {
+  outline: none;
+}
+
+issues-list #issuesListItemContent {
+  padding: 10px;
+}
+
+issues-list #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+issues-list #issuesListItemTitle,
+issues-list #issuesListItemInfo {
+  margin-bottom: 10px;
+}
+
+issues-list #issuesListItemInfo label,
+issues-list #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issues-list #issuesListItemDescription {
+  height: 70px;
+}
+issues-list #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+issues-list #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+  outline: none;
+}
+issues-list #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
+
+issues-list .issueListItemThumbnail {
+  margin-left: -15px;
+}
+
+/** Issue Comp ********************************************************************************************************/
+issue-comp #issueCompAll {
+  outline: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+issue-comp .issueCompItemContainer {
+  padding: 10px;
+}
+issue-comp .issueCompItemContainer div {
+  outline: none;
+}
+
+issue-comp #issueCompTitle {
+  margin-bottom: 20px;
+}
+
+issue-comp #issueCompStatus {
+  margin: 0 0 10px;
+}
+
+issue-comp textarea {
+  min-height: 70px !important;
+}
+
+issue-comp .issueCompItemStatus {
+  margin-right: 5px;
+}
+
+issue-comp .issueCompThumbnail {
+  position: relative;
+  display: inline-block;
+}
+issue-comp .issueCompThumbnailImage:hover {
+  cursor: pointer;
+  outline: solid 1px rgba(0, 0, 0, 0.2);
+}
+issue-comp .issueCompThumbnailImage {
+  width: 100%;
+}
+
+issue-comp .issueCompIssueOwner {
+  margin-top: -10px;
+}
+
+issue-comp .issueCompCommentOwner {
+  margin-bottom: 10px;
+}
+
+issue-comp .issueCompIssueOwner label,
+issue-comp .issueCompCommentOwner label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp .issueCompComment {
+  margin: 10px 0;
+}
+
+issue-comp .issueCompCommentTitle {
+  margin: 10px 0;
+}
+
+issue-comp .issueCompTextActions {
+  z-index: 2;
+  margin-right: -18px;
+}
+
+issue-comp #issueCompDescription {
+  outline: none;
+  margin-bottom: 20px;
+}
+
+issue-comp .issueCompComment:hover,
+issue-comp #issueCompDescription:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+  outline: solid 1px rgba(0, 0, 0, 0.2);
+}
+issue-comp .issueCompComment *:hover,
+issue-comp #issueCompDescription *:hover {
+  cursor: pointer;
+}
+
+issue-comp #additionalInfoButton {
+  margin: 0 0 0 -8px;
+}
+
+issue-comp #issueCompAdditional {
+  margin-top: -20px;
+}
+
+issue-comp #issueCompNewComment {
+  margin-bottom: -40px;
+}
+
+issue-comp #descriptionAndComments {
+  overflow-y:auto;
+  overflow-x:hidden;
+  background: #f0f0f0;
+}
+
+/** Issue Screen Shot  ************************************************************************************************/
+#issueScreenShotDialog {
+  width:80%;
+  height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
+  max-height: calc(80% + 40px);
+  overflow: hidden;
+}
+
+issues-screen-shot #issueScreenShotActions {
+  position: absolute;
+  bottom: 5px;
+  display: block;
+  width: 176px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+}
+
+issues-screen-shot #issueScreenShotFAIcon {
+  font-size: 24px;
+}
+
+issues-screen-shot #issueScreenShotContent {
+  overflow: hidden;
+  height: calc(100% - 40px);
+}
+
+issues-screen-shot #scribbleCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+issues-screen-shot #issueScreenShotImage {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+issues-screen-shot #issueScreenShotPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+login {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+login .homeUserContent md-toolbar {
+  height: 40px;
+  min-height: 40px;
+}
+
+login #loginVersion{
+  color: rgba(0, 0, 0 , 0.3);
+  font-size: 14px;
+  margin: 10px 0 0;
+}
+
+login .loginError {
+  color: #F44336;
+  margin: 5px 0 5px;
+  font-weight: normal;
+}
+
+login .loginLinks {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+login #loginHiddenInputs {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+}
+tdr-measure {
+    position: absolute;
+}
+
+tdr-measure .md-whiteframe-1dp {
+    background: #FFFFFF;
+    border-radius: 2px;
+}
+
+tdr-measure .md-whiteframe-1dp md-toolbar {
+    height: 10px;
+    min-height: 10px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+tdr-measure .md-whiteframe-1dp md-content {
+    padding: 5px 10px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+tdr-measure .md-whiteframe-1dp md-content p {
+    margin: 5px 0;
+    color: rgba(0,0,0,0.7);
+}
+
+/** Panel *************************************************************************************************************/
+
+panel  {
+  display: block;
+  position: absolute;
+  top: 20px;
+  width: 470px;
+  z-index: 2;
+}
+
+panel #items {
+  position: absolute;
+  width: 400px;
+  pointer-events: inherit;
+}
+
+panel #buttons {
+  position: absolute;
+  top: 50px;
+  pointer-events: inherit;
+}
+panel #buttons .panelButtonGroup {
+  margin-bottom: 20px;
+}
+panel #buttons .panelButtonGroup button {
+  margin-bottom: 2px;
+}
+panel #buttons .panelButtonGroup label {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/** Panels ************************************************************************************************************/
+
+.active {
+	pointer-events: all;
+}
+
+#leftPanel {
+  left: 0;
+  pointer-events: none;
+}
+#leftPanel #items {
+  right: 0;
+}
+#leftPanel #buttons {
+  left: 0;
+}
+
+#rightPanel {
+  right: 0;
+  pointer-events: none;
+}
+#rightPanel #items {
+  left: 0;
+}
+#rightPanel #buttons {
+  right: 0;
+}
+
+/** Panel Card ********************************************************************************************************/
+
+panel-card {
+  display: block;
+  position: relative;
+}
+
+panel-card md-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  height: 100%;
+}
+
+panel-card .md-whiteframe-1dp {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background: white;
+}
+
+panel-card md-toolbar {
+  min-height: 40px;
+  height: 40px;
+  outline: none;
+  /*-webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  -moz-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);*/
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+panel-card md-toolbar .md-toolbar-tools {
+  padding-right: 0;
+  min-height: 40px;
+  height: 40px;
+}
+panel-card md-toolbar #options .md-button {
+  margin: 0 4px;
+}
+
+panel-card .md-menu {
+  padding: 0;
+}
+
+panel-card #panelCardContainer {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+}
+
+panel-card #helpButton {
+  position: absolute;
+  top: -20px;
+  right: -36px;
+  opacity: 0.75;
+}
+
+panel-card .statusIcon {
+  outline: none;
+  width: 30px;
+}
+
+/** Panel Card Filter ****************************************************************************************************/
+panel-card-filter input {
+  background: rgb(0,69,148);
+  border: none;
+  color: white;
+  border-bottom: 1px solid white;
+  outline: none;
+  font-size: 16px;
+}
+panel-card-filter md-icon {
+  margin-left: -16px;
+  font-size: 18px !important;
+  outline: none;
+}
+panel-card-filter md-icon:hover {
+  cursor: pointer;
+}
+
+
+/** Panel Card Add ****************************************************************************************************/
+panel-card-add {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+/** Panel Card Option Erase *******************************************************************************************/
+panel-card-option-erase md-icon {
+  font-size: 24px !important;
+}
+
+/** Panel Card Option *******************************************************************************************/
+panel-card-option-scribble md-icon,
+panel-card-option-erase md-icon,
+panel-card-option-pin md-icon {
+  color: inherit !important;
+}
+password-change md-progress-circular {
+    margin-left: 5px;
+}
+
+password-forgot md-progress-circular {
+    margin-left: 5px;
+}
+
+password-forgot md-input-container {
+    margin-bottom: 0;
+}
+
+password-forgot p {
+    margin-top: 0;
+}
+pricing md-content.md-whiteframe-1dp,
+pricing md-content.md-whiteframe-8dp {
+    margin: 0 20px;
+}
+
+pricing md-toolbar h2 {
+    font-weight: bold !important;
+}
+
+pricing md-divider {
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+pricing #pricingMiddlePanelTitle {
+    color: #FFFFFF;
+}
+
+pricing .pricingIcon {
+    font-size: 40px;
+    color: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    width: 40px;
+}
+pricing .pricingIcon#pricingAdvancedIcon {
+    color: #FF9800;
+}
+
+pricing .pricingPrice {
+    height: 100px;
+}
+pricing .pricingPriceTitle {
+    margin: 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingPriceSubtitle {
+    margin-top: -10px;
+    color: rgba(0,0,0,.6) !important;
+}
+
+pricing .pricingInfo {
+    height: 350px;
+    display: block;
+    overflow: auto;
+    width: 100%;
+}
+pricing .pricingInfo .pricingInfoLine {
+    margin: 10px 0;
+}
+pricing .pricingInfo .pricingInfoLine h3 {
+    margin: 0 0 0 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingInfo .pricingInfoLine md-icon {
+    margin: 0 5px 0 0;
+    color: #C8E6C9;
+}
+
+pricing .pricingContent {
+    max-height: 600px !important;
+    height: calc(100vh - 200px);
+    overflow: auto;
+}
+
+privacy .md-toolbar-tools img {
+    width: 150px;
+}
+
+privacy-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+
+}
+
+register-verify .databaseError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+register-verify md-input-container {
+    margin: 5px 0 -15px;
+}
+
+/** Revisions dropdown in 3dviewer ***********************************************************************************/
+revisions {
+    z-index: 2;
+    position: absolute;
+    color: white;
+    text-shadow: 1px 1px#666666;
+    font-size: 14px;
+    width: 250px;
+    top: 90px;
+    left: 50%;
+    font-weight: bold;
+    margin-left: -125px;
+    text-align: center;
+}
+
+.revisions-dropdown .angular-material-icons{
+  color: white;
+}
+
+.revisions-dropdown{
+    cursor:pointer;
+    outline: none
+}
+
+/** Revisions Dialog *************************************************************************************************/
+.revisionsDialog {
+  width: 40%;
+}
+
+.revisionsDialog md-list {
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.revisionsDialog .revisionsDialogText {
+    margin: 5px 5px;
+}
+
+.revisionsDialog .revisionsDialogInfo {
+    color: rgba(0, 0, 0, 0.5);
+    margin: -35px 0 0;
+}
+right-panel {
+    position: absolute;
+    top: 70px;
+    right: 0;
+}
+
+right-panel #rightPanelButtons .rightPanelButtonGroup {
+    margin-bottom: 20px;
+}
+
+right-panel #rightPanelButtons .md-button {
+    margin-bottom: 2px;
+}
+
+right-panel #rightPanelButtons .fa {
+    font-size: 24px;
+}
+
+right-panel #rightPanelButtons label {
+    color: #FFFFFF;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    font-weight: bold;
+    font-size: 14px;
+}
+sign-up .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+sign-up-form #tc {
+    width: 300px;
+    margin: -15px 0 0 2px;
+}
+sign-up-form #tc md-checkbox {
+    margin : 0;
+}
+sign-up-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+sign-up-form #tc a {
+    font-size: 12px;
+}
+sign-up-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+    margin: -3px 0 20px 10px;
+}
+sign-up-form #tc a {
+    outline: none;
+}
+
+sign-up-form #loginCaptcha {
+    margin: 10px 30px 10px 0;
+}
+
+sign-up-form #registerWait {
+    height: 30px;
+}
+sign-up-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+sign-up-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+sign-up-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+sign-up-form .rc-anchor-light {
+    background: red;
+}
+
+sign-up-form #signUpFormHiddenInputs {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+}
+terms .md-toolbar-tools img {
+    width: 150px;
+}
+
+terms-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+tree .virtualRepeatInfiniteScroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .vertical-container {
+  height: 100%;
+  width: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
+  cursor: default;
+  padding: 0 0;
+  min-height: 1px;
+}
+
+tree span {
+  outline: none;
+  margin: 0;
+}
+tree span .fa {
+  color: #5C6BC0;
+  font-size: 14px;
+  padding: 0 2px 0 0;
+}
+
+tree .treeNodes p {
+  outline: none;
+  word-break: break-all;
+  word-wrap: break-word;
+  margin: 8px 0 8px -5px;
+  font-size: 14px;
+}
+
+tree .treeNode {
+  outline: none;
+}
+tree .treeNode:hover {
+  cursor: pointer;
+  background: rgba(0,69,148,.1);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+tree .treeNodeSelected {
+  background: rgba(0,69,148, 0.2);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+tree md-checkbox {
+  margin-right: 8px !important;
+}
+
+.angular-ui-tree-handle {
+  cursor: default;
+  display: inline-block;
+  font-weight: normal;
+}
+
+tree .treeButtonDisabled {
+  color: #CCCCCC !important;
+}
+
+tree .expandButton {
+  margin-left: 0 !important;
+}
+
+tree .noAccessButton {
+  margin-left: 0 !important;
+  opacity: 0.5;
+}
+tree .noAccessName {
+  opacity: 0.5;
+}
+tree .noAccessName:hover {
+  cursor: default !important;
+}
+
+tree .toggleButton {
+  margin-right: 0 !important;
+}
+
+tree .parentOfInvisible {
+  color: #999 !important;
+}
+
+/** Tree filter list **************************************************************************************************/
+tree .filterNode {
+  height: 41px;
+}
+
+tree .filterNode div {
+  height: 100%;
+}
+
+tree .filterListNodeName {
+  margin-left: 15px !important;
+}
+
+/** TDR Progress ******************************************************************************************************/
+tdr-progress {
+  display: block;
+  padding: 20px 40px 0 40px;
+}
+
+tdr-progress p {
+  margin-top: 10px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/** Colour Picker *****************************************************************************************************/
+.tdrColourPickerColour {
+  display: block;
+  border-radius: 4px;
+  border: 1px solid #DDD;
+}
+
+.tdrColourPickerLabel {
+  margin-left: 10px;
+}
+
+.tdrColourPickerSlider {
+  margin-left: 20px;
+}

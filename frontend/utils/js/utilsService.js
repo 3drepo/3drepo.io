@@ -162,8 +162,9 @@
          * @param {Boolean} clickOutsideToClose
          * @param {Object} parent
          * @param {Boolean} fullscreen
+         * @param {String} closeTo
          */
-        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen) {
+        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
             // Allow the dialog to have cancel ability
             scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
 
@@ -178,7 +179,8 @@
             data.preserveScope = (data.scope !== null);
             data.targetEvent = (angular.isDefined(event)) ? event : null;
             data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
-            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : true;
+            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
+            data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
             $mdDialog.show(data);
         };
 

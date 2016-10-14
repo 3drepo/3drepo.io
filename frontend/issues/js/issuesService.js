@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
 		var self = this,
 			url = "",
 			data = {},
@@ -138,17 +138,6 @@
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					/*
-					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = issue.account;
-					response.data.issue.project = issue.project;
-					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-					response.data.issue.creator_role = issue.creator_role;
-					response.data.issue.scribble = issue.scribble;
-
-					response.data.issue.title = generateTitle(response.data.issue);
-					self.removePin();
-					*/
 					deferred.resolve(response);
 				});
 
@@ -384,6 +373,29 @@
 			}
 
 			return statusIcon;
+		};
+
+		/**
+		* Import bcf
+		*/
+		obj.importBcf = function(account, project, file){
+
+			var deferred = $q.defer();
+			var formData = new FormData();
+			formData.append("file", file);
+
+			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+				
+				console.log(res);
+				if(res.status === 200){
+					deferred.resolve();
+				} else {
+					deferred.reject(res.data);
+				}
+
+			});
+
+			return deferred.promise;
 		};
 
 		Object.defineProperty(

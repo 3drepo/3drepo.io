@@ -325,6 +325,9 @@ function uploadProject(req, res, next){
 			} else if(!req.file.size){
 				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
+			} else if(req.body.tag && !req.body.tag.match(History.tagRegExp)){
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_TAG_NAME, responseCodes.INVALID_TAG_NAME);
+				
 			} else {
 
 				let projectSetting;

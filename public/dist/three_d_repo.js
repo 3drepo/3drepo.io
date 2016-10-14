@@ -107,12 +107,11 @@ var ViewerUtilMyListeners = {};
 	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
-		up = ViewerUtil.normalize(up);
 		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
 		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
-		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup);
+		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup).inverse();
 
 		var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
 		q.setValue(viewMat);
@@ -332,12 +331,17 @@ var ClipPlane = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-	 * @param {parentNode} node to append the clipping plane onto
 	 */
-	ClipPlane = function(id, viewer, axis, normal, colour, distance, percentage, clipDirection, parentNode) {
+	ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection) {
 		var self = this;
 
 		// Public properties
+
+		/**
+		 * Axis on which the clipping plane is based
+		 * @type {string}
+		 */
+		this.axis = "X";
 
 		/**
 		 * Value representing the direction of clipping
@@ -346,31 +350,24 @@ var ClipPlane = {};
 		this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
 
 		/**
+		 * Value representing the percentage distance from the origin of
+		 * the clip plane
+		 * @type {number}
+		 */
+		this.percentage = (percentage === undefined) ? 1.0 : percentage;
+
+		/**
 		 * Value representing the distance from the origin of
 		 * the clip plane
 		 * @type {number}
 		 */
 		this.distance = distance;
-		
-		/**
-		 * Normal vector to the clipping plane
-		 * @private
-		 * @type {SFVec3f}
-		 */
-		this.normal = (normal == undefined)? [0,0,0] : normal ;
 
 		/**
 		 * Volume containing the clipping plane
 		 * @type {BoxVolume}
 		 */
 		var volume = null;
-
-
-		/**
-		 * Bounding box of the scene
-		 * * @type {BoxVolume}
-		 */
-		var sceneBbox = null;
 
 		/**
 		 * DOM Element representing the clipping plane
@@ -379,6 +376,12 @@ var ClipPlane = {};
 		 */
 		var clipPlaneElem = document.createElement("ClipPlane");
 
+		/**
+		 * Normal vector to the clipping plane
+		 * @private
+		 * @type {SFVec3f}
+		 */
+		var normal = new x3dom.fields.SFVec3f(0, 0, 0);
 
 		/**
 		 * Coordinate frame for clipping plane
@@ -439,11 +442,11 @@ var ClipPlane = {};
 		/**
 		 * Set the coordinates of the clipping plane outline
 		 */
-		var setOutlineCoordinates = function(axis) {
+		var setOutlineCoordinates = function() {
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			var axisIDX = "XYZ".indexOf(axis);
+			var axisIDX = "XYZ".indexOf(self.axis);
 			var outline = [
 				[0, 0, 0],
 				[0, 0, 0],
@@ -477,221 +480,50 @@ var ClipPlane = {};
 			);
 		};
 
-
-		/**
-		 * Given a list of vertices, return its outline
-		 */
-		this.determineOutline = function(vertices)
-		{
-			var min = vertices[0].slice();
-			var max = vertices[0].slice();
-
-			for(var i = 1; i < vertices.length; ++i)
-			{
-				for(var j = 0; j < 3; ++j)
-				{
-					if(min[j] > vertices[i][j])
-					{
-						min[j] = vertices[i][j]
-					}
-
-
-					if(max[j] < vertices[i][j])
-					{
-						max[j] = vertices[i][j]
-					}
-				}
-			}
-
-			var centrePnt = new x3dom.fields.SFVec3f((max[0]+min[0])/2.0, (max[1]+min[1])/2.0,(max[2]+min[2])/2.0);
-
-			var outline = [vertices[0], null, null, null];
-
-			var basePnt = new x3dom.fields.SFVec3f(vertices[0][0], vertices[0][1], vertices[0][2]);
-			var baseToCen = basePnt.subtract(centrePnt);
-
-
-
-			//There are only 4 vertices, taking first as base point, 2 would be perpendicular and 1 would not.
-			for(var i = 1; i < vertices.length; ++i)
-			{	
-				var currentPnt = new x3dom.fields.SFVec3f(vertices[i][0], vertices[i][1], vertices[i][2]);
-				var curToCen = currentPnt.subtract(centrePnt);
-				var dotProd = Math.abs(baseToCen.normalize().dot(curToCen.normalize()));
-				if(Math.abs(dotProd - 1.0) < 0.01)
-				{
-
-					//not perpendicular, must be the opposite point
-					outline[2] = vertices[i];
-
-				}
-				else
-				{
-					//the vectors are perpendicular
-					//this must be 2 or 4
-					if(outline[1])
-					{
-						outline[3] = vertices[i];
-					}
-					else
-					{
-						outline[1] = vertices[i];
-					}
-				}
-			}
-
-			outline.push(vertices[0]);
-
-			return outline;
-		}
-
-
 		/**
 		 * Move the clipping plane
 		 * @param {number} percentage - Percentage of entire clip volume to move across
 		 */
-		this.movePlane = function(axis, percentage) {
-			console.log("moving plane: " + axis + " percentage " + percentage);
-
-			axis = axis.toUpperCase();
-			// When the axis is change the normal to the plane is changed
-			this.normal = [ (axis === "X") ? this.clipDirection : 0,
-					(axis === "Y") ? this.clipDirection : 0,
-					(axis === "Z") ? this.clipDirection : 0];
-
+		this.movePlane = function(percentage) {
 			// Update the transform containing the clipping plane
-			var axisIDX = "XYZ".indexOf(axis);
+			var axisIDX = "XYZ".indexOf(this.axis);
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
+			self.percentage = percentage;
+			var distance = 0.0;
 
-			self.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+			if (self.distance) {
+				distance = self.distance;
+			} else {
+				distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+			}
 
 			// Update the clipping element plane equation
-			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + self.distance);
+			clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
 
 			var translation = [0, 0, 0];
-			translation[axisIDX] = -self.distance * this.clipDirection;
+			translation[axisIDX] = -distance * this.clipDirection;
 			coordinateFrame.setAttribute("translation", translation.join(","));
-
-			setOutlineCoordinates(axis);
 		};
 
 		/**
-		 * Transform the clipping plane by the given matrix
-		 * @param {sfmatrix4f} matrix - transformation matrix to apply to clipping plane
+		 * Change the clipping axis
+		 * @param {string} axis - Axis on which the clipping plane acts
 		 */
-		this.transformClipPlane = function(matrix, writeProperties)
-		{
+		this.changeAxis = function(axis) {
+			this.axis = axis.toUpperCase();
 
-			var min = volume.min.toGL();
-			var max = volume.max.toGL();
-			var point = min;
+			// When the axis is change the normal to the plane is changed
+			normal.x = (axis === "X") ? this.clipDirection : 0;
+			normal.y = (axis === "Y") ? this.clipDirection : 0;
+			normal.z = (axis === "Z") ? this.clipDirection : 0;
 
-			var normal_x3d = new x3dom.fields.SFVec3f(this.normal[0], this.normal[1], this.normal[2]);
-			point = normal_x3d.multiply(-this.distance).toGL();
+			// Reset plane to the start
+			this.movePlane(1.0);
 
-			normal_x3d = matrix.multMatrixVec(normal_x3d);
-			normal_x3d.normalize();
-
-			var planePnt = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
-			planePnt = matrix.multMatrixPnt(planePnt);
-			var distance = -normal_x3d.dot(planePnt) * BBOX_SCALE;
-			
-
-			var plane = new x3dom.fields.SFVec4f(normal_x3d.x, normal_x3d.y, normal_x3d.z, distance);
-
-
-			if(writeProperties)
-			{				
-
-				// Update the clipping element plane equation
-				clipPlaneElem.setAttribute("plane", plane.toGL().join(" "));
-				//The clip outline doesn't need translation, it should be in the right place
-				//set it to move by a bit so it's not cut off by the clipping plane.
-			
-
-				var translation = [-(max[0]-min[0])*0.001, -(max[1]-min[1])*0.001, -(max[2]-min[0])*0.001];
-				coordinateFrame.setAttribute("translation", translation.join(" "));
-	
-				this.normal = normal_x3d.toGL();
-				this.distance = distance;
-
-			
-
-				//determine the outline of the clipping plane by intersection with the global bounding box	
-
-				var min = sceneBbox.min.multiply(BBOX_SCALE);
-				var max = sceneBbox.max.multiply(BBOX_SCALE);
-	
-				//[pointA, pointB]
-				var bboxOutline = [
-					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, min.z)],
-					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, min.z)],
-					[new x3dom.fields.SFVec3f(min.x, min.y, min.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(min.x, max.y, max.z)],
-					[new x3dom.fields.SFVec3f(max.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-					[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-					[new x3dom.fields.SFVec3f(max.x, min.y, min.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-					[new x3dom.fields.SFVec3f(max.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-					];
-
-				var outline = [];
-			
-				for(var i = 0; i < bboxOutline.length; ++i)
-				{
-
-					var lineDir = bboxOutline[i][1].subtract(bboxOutline[i][0]);
-					lineDir = lineDir.normalize();
-					var dotProd =lineDir.dot(normal_x3d); 
-					if(Math.abs(dotProd) > 0.000001)
-					{
-						//dot product isn't zero -> has single point intersection
-						var d = (planePnt.subtract(bboxOutline[i][0])).dot(normal_x3d) / dotProd;
-						var intersectPnt = lineDir.multiply(d).add(bboxOutline[i][0]);
-						
-						//the intersection point must lie within the global bbox
-						if(intersectPnt.x >= min.x && intersectPnt.x <= max.x 
-								&& intersectPnt.y >= min.y && intersectPnt.y <= max.y 
-								&& intersectPnt.z >= min.z && intersectPnt.z <= max.z)
-						{
-							outline.push(intersectPnt.toGL());	
-						}	
-
-					}
-	
-				}
-
-				outline = this.determineOutline(outline);
-
-				outlineCoords.setAttribute("point",
-				outline.map(function(item) {
-					return item.join(" ");
-				}).join(","));
-			}
-
-
-			return {normal: normal_x3d.toGL(), distance: distance};
-		}
-
-		this.getProperties = function(matrix)
-		{
-
-			var res = JSON.parse(JSON.stringify(this));
-			if(matrix)
-			{
-				var newValues = this.transformClipPlane(matrix, false);	
-				res.normal  = newValues.normal;
-				res.distance = newValues.distance;
-			}
-
-
-			return res;
-		}
+			setOutlineCoordinates();
+		};
 
 		/**
 		 * Destroy me and everything connected with me
@@ -706,8 +538,6 @@ var ClipPlane = {};
 			}
 		};
 
-		sceneBbox = viewer.runtime.getBBox(viewer.getScene());
-
 		// Construct and connect everything together
 		outlineMat.setAttribute("emissiveColor", colour.join(" "));
 		outlineLines.setAttribute("vertexCount", 5);
@@ -721,35 +551,17 @@ var ClipPlane = {};
 
 		// Attach to the root node of the viewer
 		viewer.getScene().appendChild(coordinateFrame);
-		if(parentNode)
-		{
-			volume = viewer.runtime.getBBox(parentNode);
-		}
-		else
-		{
-			volume = sceneBbox;
-			
-		}
+		volume = viewer.runtime.getBBox(viewer.getScene());
 
 		// Move the plane to finish construction
-		if(axis != "")
-		{		
-			console.log("axis is: " + axis);	
-			this.movePlane(axis, percentage);
-		}
-
+		this.changeAxis(axis);
 		viewer.getScene().appendChild(clipPlaneElem);
-
-
-		if(parentNode)
-			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
-
+		this.movePlane(percentage);
 
 	};
 
 
 }());
-
 /* global x3dom */
 /**
  **  Copyright (C) 2014 3D Repo Ltd
@@ -2511,10 +2323,8 @@ var Pin = {};
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-	 * @param {string} account - database it came from
-	 * @param {string} project - name of the project
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, project) {
+	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
 		var self = this;
 
 		self.id = id;
@@ -2525,8 +2335,6 @@ var Pin = {};
 		self.trans = trans;
 		self.scale = scale;
 		self.viewpoint = viewpoint;
-		self.account = account;
-		self.project = project;
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;
@@ -3075,6 +2883,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.runtime = null;
 		this.fullscreen = false;
 		this.multiSelectMode = false;
+		this.pinDropMode = false;
 
 		this.clickingEnabled = false;
 
@@ -3106,7 +2915,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.rootName = "model";
 		this.inlineRoots = {};
-		this.groupNodes = null;
 		this.multipartNodes = [];
 		this.multipartNodesByProject = {};
 
@@ -3335,21 +3143,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (targetParent === self.viewer) {
 					self.setDiffColors(null);
 				}
+
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
-					var nameSpace = objEvent.target.nameSpaceName;
-
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
-
-					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
-					{
-						self.groupNodes={};
-						//loaded x3dom file for current project, figure out the groups
-						var groups = document.getElementsByTagName("Group");
-						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
-						{
-							self.groupNodes[groups[gIdx].id] = groups[gIdx];
-						}
-					}
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 					if (self.multipartNodes.indexOf(objEvent.target) === -1)
 					{
@@ -3542,21 +3338,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getViewMatrix();
 		};
 
-		this.getParentTransformation = function(account, project)
-		{
-			var trans = null;
-			var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-			var parentGroup = self.groupNodes[fullParentGroupName];
-			if(parentGroup)
-			{
-				trans = parentGroup._x3domNode.getCurrentTransform();
-			}
-			else
-			{
-				console.error("Cannot find parent group: " + fullParentGroupName);
-			}
-			return trans;
-		}
 		this.getProjectionMatrix = function() {
 			return self.getViewArea().getProjectionMatrix();
 		};
@@ -3627,21 +3408,23 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
+					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+					var projectInline = self.inlineRoots[inlineTransName];
+					var trans = projectInline._x3domNode.getCurrentTransform();
+
                     console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(account, project),
+						trans: trans,
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
-
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project)
+						normal: pickingInfo.pickNorm
 					});
 				}
 			}
@@ -3779,7 +3562,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
-			if (!this.multiSelectMode) {
+			if (!this.multiSelectMode && !this.pinDropMode) {
 				var nameSpaceName = null;
 
 				/*
@@ -4041,33 +3824,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.loadViewpoint = null;
 
-		this.createViewpoint = function(name, from, at, up ) {
+		this.createViewpoint = function(name, from, at, up) {
 			var groupName = self.getViewpointGroupAndName(name);
+
 			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
-				
 				self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
-					var q = ViewerUtil.getAxisAngle(from, at, up);
+					var q = self.getAxisAngle(from, at, up);
 					newViewPoint.setAttribute("orientation", q.join(","));
 				}
-
-				if(from)
-				{
-					newViewPoint.setAttribute("position", from.join(","));
-
-				}
-
-				if(from && at)
-				{
-					var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
-					newViewPoint.setAttribute("centerofrotation", centre.join(","));
-
-				}
-
 
 				if (!self.viewpoints[groupName.group]) {
 					self.viewpoints[groupName.group] = {};
@@ -4076,12 +3845,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewpoints[groupName.group][groupName.name] = name;
 				self.viewpointsNames[name] = newViewPoint;
 
-			} else
-			{
-					
+			} else {
 				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
-			
 		};
 
 		this.setCurrentViewpointIdx = function(idx) {
@@ -4123,10 +3889,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 
 				return;
-			}
-			else
-			{
-				console.error("Could not find viewpoint." + id);
 			}
 
 			self.loadViewpoint = id;
@@ -4402,18 +4164,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project);
+		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode) {
+			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
-			var origViewTrans = null;
-			if(account && project)
-			{
-					origViewTrans = self.getParentTransformation(account, project);
-
-			}
-
+		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode) {
 			if (!viewDir)
 			{
 				viewDir = self.getCurrentViewpointInfo().view_dir;
@@ -4428,16 +4183,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
 			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				x3domUp = origViewTrans.multMatrixVec(x3domUp);
-				x3domView = origViewTrans.multMatrixVec(x3domView);
-				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
-
-			}
-			
 			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
@@ -4467,12 +4212,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var canvasHeight = self.getViewArea()._doc.canvas.height;
 
 				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
+
 				if (self.pickObject.pickPos)
 				{
 					x3domCenter = self.pickObject.pickPos;
+
 				} else {
 					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
 					var bbox = self.getScene()._x3domNode.getVolume();
+
 					if(ry.intersect(bbox.min, bbox.max))
 					{
 						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
@@ -4483,16 +4231,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
-	
+
 			if (animate) {
 				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
 				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			}
-		
+
 			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
 
 			self.setNavMode(self.currentNavMode);
 			self.getViewArea()._doc.needRender = true;
+
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
 			}
@@ -4603,22 +4352,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function(account, project) {
+		this.getCurrentViewpointInfo = function() {
 			var viewPoint = {};
 
-			var origViewTrans = null;
-			
-			if(account && project)
-			{
-				origViewTrans = self.getParentTransformation(account, project);
-
-			}
-
+			var origViewTrans = self.getViewArea()._scene.getViewpoint().getCurrentTransform();
 			var viewMat = self.getViewMatrix().inverse();
 
 			var viewRight = viewMat.e0();
 			var viewUp = viewMat.e1();
-			var viewDir = viewMat.e2(); // Because OpenGL points out of screen
+			var viewDir = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
 			var viewPos = viewMat.e3();
 
 			var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
@@ -4628,24 +4370,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (center) {
 				lookAt = center.subtract(viewPos);
 			} else {
-				lookAt = viewPos.add(viewDir.multiply(-1));
+				lookAt = viewPos.add(viewDir);
 			}
 
 			var projMat = self.getProjectionMatrix();
-			
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				var transInv = origViewTrans.inverse();
-				viewRight = transInv.multMatrixVec(viewRight);
-				viewUp = transInv.multMatrixVec(viewUp);
-				viewDir = transInv.multMatrixVec(viewDir);
-				viewPos = transInv.multMatrixPnt(viewPos);
-				lookAt = transInv.multMatrixVec(lookAt);
-
-			}
-				
-			viewDir= viewDir.multiply(-1);
 
 			// More viewing direction than lookAt to sync with Assimp
 			viewPoint.up = [viewUp.x, viewUp.y, viewUp.z];
@@ -4657,27 +4385,13 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.fov = Math.atan((1 / projMat._00)) * 2.0;
 			viewPoint.aspect_ratio = viewPoint.fov / projMat._11;
 
-
 			var f = projMat._23 / (projMat._22 + 1);
 			var n = (f * projMat._23) / (projMat._23 - 2 * f);
 
 			viewPoint.far = f;
 			viewPoint.near = n;
 
-			viewPoint.clippingPlanes = [];
-			   
-			if(origViewTrans)
-			{
-				for(var i = 0; i < self.clippingPlanes.length; ++i)
-				{
-					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
-				}
-			}
-			else
-			{
-				viewPoint.clippingPlanes = self.clippingPlanes;
-			}
-
+			viewPoint.clippingPlanes = self.clippingPlanes;
 
 			return viewPoint;
 		};
@@ -4850,7 +4564,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
 			if (on) {
-				element.style.cursor = "crosshair";
+				element.style.cursor = "default";
 				// Clear any single selection
 				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
 					self.oldPart[0].resetColor();
@@ -4858,6 +4572,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				element.style.cursor = "-webkit-grab";
 			}
+		};
+
+		/**
+		 * Pin drop mode
+		 * @param on
+		 */
+		this.setPinDropMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			this.pinDropMode = on;
+			element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};
 
 		/****************************************************************************
@@ -4873,7 +4597,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
 				var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx].axis,
-					clippingPlanes[clipidx].normal,
 					clippingPlanes[clipidx].distance,
 					clippingPlanes[clipidx].percentage,
 					clippingPlanes[clipidx].clipDirection
@@ -4883,36 +4606,23 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		/**
 		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane 
+		 * @param {string} axis - Axis through which the plane clips
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-		 * @param {string} account - name of database (optional)
-		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
+		this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
 			clippingPlaneID += 1;
-			var parentGroup = null;
-			if(account && project){				
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				parentGroup = self.groupNodes[fullParentGroupName];
-			}
 
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
+			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
 			self.clippingPlanes.push(newClipPlane);
 
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(axis, percentage) {
+		this.moveClippingPlane = function(percentage) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(axis, percentage);
-		};
-
-		this.changeAxisClippingPlane = function(axis) {
-			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].changeAxis(axis);
+			self.clippingPlanes[0].movePlane(percentage);
 		};
 
 		/**
@@ -4949,9 +4659,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = self.getParentTransformation(account, project);
+				var trans = null;
+				var projectNameSpace = account + "__" + project;
 
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
+				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
+				{
+					var projectInline = self.inlineRoots[account + "__" + project];
+					trans = projectInline._x3domNode.getCurrentTransform();
+				}
+
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
 			}
 		};
 
@@ -4969,16 +4686,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
-					up: pin.viewpoint.up,
-					account: pin.account,
-					project: pin.project
+					up: pin.viewpoint.up
 				});
 
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
-					clippingPlanes: pin.viewpoint.clippingPlanes,
-					account: pin.account,
-					project: pin.project
-
+					clippingPlanes: pin.viewpoint.clippingPlanes
 				});
 			}
 		};
@@ -5077,7 +4789,6 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
 	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
 	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
-	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
 
@@ -6697,6 +6408,19 @@ var ViewerManager = {};
 
 			vm.file.addEventListener("change", function () {
 				vm.selectedFile = vm.file.files[0];
+
+				var names = vm.selectedFile.name.split('.');
+				vm.uploadButtonDisabled = false;
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				}
+
 				$scope.$apply();
 			});
 		}
@@ -6728,8 +6452,6 @@ var ViewerManager = {};
 					}
 				});
 			}
-
-
 		};
 
 		/**
@@ -6938,9 +6660,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -6952,7 +6674,7 @@ var ViewerManager = {};
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-		vm.units = server_config.units;
+		vm.units = serverConfig.units;
 
 		// Setup file uploaders
 		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -6970,6 +6692,7 @@ var ViewerManager = {};
 			function () {
 				vm.newProjectFileToUpload = this.files[0];
 				vm.newProjectFileSelected = true;
+
 				$scope.$apply();
 			},
 			false
@@ -7010,7 +6733,14 @@ var ViewerManager = {};
 		/*
 		 * Watch new project data
 		 */
-		$scope.$watch("vm.newProjectData", function (newValue) {
+
+
+		$scope.$watch('{a : vm.newProjectData, b: vm.newProjectFileToUpload.name}', function (data){
+
+			var newValue = vm.newProjectData;
+
+			vm.showNewProjectErrorMessage = false;
+			vm.newProjectErrorMessage = '';
 
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
@@ -7021,8 +6751,28 @@ var ViewerManager = {};
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
 
-				vm.newProjectButtonDisabled = !newValue.unit;
+				if(!newValue.unit){
+					vm.newProjectButtonDisabled = true;
+				}
+				
+			
 			}
+
+
+			if(vm.newProjectFileToUpload){
+				var names = vm.newProjectFileToUpload.name.split('.');
+
+				if(names.length === 1){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Filename must have extension';
+					vm.newProjectButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'File format not supported';
+					vm.newProjectButtonDisabled = true;
+				}
+			}
+
 		}, true);
 
 		/*
@@ -9744,10 +9494,7 @@ var ViewerManager = {};
 			},
 			controller: ClipCtrl,
 			controllerAs: 'vm',
-			bindToController: true,
-			account: null,
-			project: null,
-			disableRedefinition: false
+			bindToController: true
 		};
 	}
 
@@ -9764,57 +9511,28 @@ var ViewerManager = {};
 		vm.sliderStep = 0.1;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
-		vm.selectedAxis = "";
+		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
-		vm.account = null;
-		vm.project = null;
-		vm.normal = null;
 		vm.onContentHeightRequest({height: 130});
 
-		function initClippingPlane (account, project, normal, distance) {
+		function initClippingPlane () {
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
 				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-				if(account && project)
-				{
-					vm.account = account;
-					vm.project = project;
-				}	
-
-				if(normal)
-					vm.normal = normal;
-				if(distance)
-					vm.distance = distance;
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
-					normal: vm.normal,
-					percentage: initPosition,
-					distance: vm.distance,
-					account: vm.account,
-					project: vm.project
+					percentage: initPosition
 				});
 			});
 		}
 
 		function moveClippingPlane(sliderPosition) {
-			if(vm.account && vm.project)
+			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
 			{
-				vm.account = null;
-				vm.project = null;
-				vm.normal = null;
-				initClippingPlane();	
-			}
-			else
-			{
-				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
-				{
-					axis: translateAxis(vm.selectedAxis),
-					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
-				});
-
-			}
+				percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
+			});
 		}
 
 		/*
@@ -9839,12 +9557,8 @@ var ViewerManager = {};
 				return "Z";
 			} else if (axis === "Z") {
 				return "Y";
-			} else if(axis === "X") {
+			} else {
 				return "X";
-			}
-			else
-			{
-				return "";
 			}
 		}
 
@@ -9856,7 +9570,7 @@ var ViewerManager = {};
 			{
 				vm.visible = newValue;
 
-				if (newValue )
+				if (newValue)
 				{
 					initClippingPlane();
 				} else {
@@ -9869,23 +9583,9 @@ var ViewerManager = {};
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				if(vm.account && vm.project)
-				{
-					vm.account = null;
-					vm.project = null;
-					vm.normal = null;
-					initClippingPlane();	
-				}
-				else
-				{
-					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
-					{
-						axis: translateAxis(newValue),
-						percentage: (vm.sliderMax - vm.sliderPosition) / vm.sliderMax
-					});
-
-				}
+			if (angular.isDefined(newValue) && vm.show) {
+				initClippingPlane();
+				vm.sliderPosition = vm.sliderMin;
 			}
 		});
 
@@ -9893,8 +9593,7 @@ var ViewerManager = {};
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				vm.distance = 0; //reset the distance
+			if (angular.isDefined(newValue) && vm.show) {
 				moveClippingPlane(newValue);
 			}
 		});
@@ -9902,29 +9601,10 @@ var ViewerManager = {};
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(!event.value.clippingPlanes[0].normal)
-					{
-						//This is most likely old issue format. 
-						console.error("Trying to set clipping plane with no normal value.");
-
-					}
-					else 
-					{
-
-						//vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
-						vm.project = event.value.project;
-						vm.account = event.value.account;
-						vm.normal = event.value.clippingPlanes[0].normal;
-						vm.distance = event.value.clippingPlanes[0].distance;
-						if(vm.visible)
-						{
-
-							initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
-						}
-						else
-							vm.visible=true; 
-					}
+					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
+					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
+					initClippingPlane();
+					vm.visible = true;
 				} else {
 					vm.visible = false;
 					vm.sliderPosition = 0.0;
@@ -12371,7 +12051,7 @@ angular.module('3drepo')
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null,
+			currentAction = null,
 			editingCommentIndex = null,
 			commentViewpoint,
 			issueSelectedObjects = null,
@@ -12402,11 +12082,11 @@ angular.module('3drepo')
 			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
 		];
-		this.actions = [
-			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
-			{icon: "place", action: "pin", label: "Pin", color: "", hidden: this.data},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: "", hidden: this.data}
-		];
+		this.actions = {
+			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
+			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
+			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
+		};
 
 		/**
 		 * Monitor changes to parameters
@@ -12417,6 +12097,7 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
+					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -12451,18 +12132,28 @@ angular.module('3drepo')
 			}
 
 			// Selected objects
-			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
+				(currentAction !== null) && (currentAction === "multi")) {
 				issueSelectedObjects = this.selectedObjects;
 			}
 
 			// Event
-			if ((changes.hasOwnProperty("event") && this.event)) {
-				// After a pin has been placed highlight any saved selected objects
-				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(this.actions[currentActionIndex].action === "pin") &&
+			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
+				/*
+				if ((this.actions[currentAction].action === "pin") &&
+					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
 					(issueSelectedObjects !== null)) {
 					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+				else if ((this.actions[currentAction].action === "multi") &&
+						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
+				}
+				*/
+				if ((currentAction === "multi") &&
+					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
 				}
 			}
 		};
@@ -12479,6 +12170,10 @@ angular.module('3drepo')
 			}
 			if (editingCommentIndex !== null) {
 				this.issueData.comments[editingCommentIndex].editing = false;
+			}
+			// Get out of pin drop mode
+			if ((currentAction !== null) && (currentAction === "pin")) {
+				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
 		};
 
@@ -12543,18 +12238,9 @@ angular.module('3drepo')
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
-					up: viewpoint.up,
-					account: self.issueData.account,
-					project: self.issueData.project
+					up: viewpoint.up
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
-
-				data = {
-					clippingPlanes: viewpoint.clippingPlanes,
-					account: self.issueData.account,
-					project: self.issueData.project,
-				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -12575,31 +12261,47 @@ angular.module('3drepo')
 
 		/**
 		 * Do an action
-		 * @param index
+		 * @param action
 		 */
-		this.doAction = function (index) {
-			if (currentActionIndex === null) {
-				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
-			}
-			else if (currentActionIndex === index) {
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
-			}
-			else {
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
-			}
+		this.doAction = function (action) {
+			var data;
 
-			if (currentActionIndex === null) {
+			// Handle previous action
+			if (currentAction === null) {
+				currentAction = action;
+			}
+			else if (currentAction === action) {
+				switch (action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
+				this.actions[currentAction].color = "";
+				currentAction = null;
 				self.action = null;
-				issueSelectedObjects = null;
 			}
 			else {
-				self.action = this.actions[currentActionIndex].action;
+				switch (action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
+				this.actions[currentAction].color = "";
+				currentAction = action;
+			}
 
-				switch (this.actions[currentActionIndex].action) {
+			// New action
+			if (currentAction !== null) {
+				this.actions[currentAction].color = highlightBackground;
+				self.action = action;
+
+				switch (currentAction) {
 					case "screen_shot":
 						delete this.screenShot; // Remove any clicked on screen shot
 						$mdDialog.show({
@@ -12608,7 +12310,6 @@ angular.module('3drepo')
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
-
 					case "multi":
 						if (issueSelectedObjects !== null) {
 							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
@@ -12616,6 +12317,10 @@ angular.module('3drepo')
 						else {
 							issueSelectedObjects = this.selectedObjects;
 						}
+						break;
+					case "pin":
+						data =
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
 			}
@@ -12650,6 +12355,7 @@ angular.module('3drepo')
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
+						console.log(data);
 					});
 			}
 			else {
@@ -12666,7 +12372,7 @@ angular.module('3drepo')
 				data;
 
 			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
@@ -12740,6 +12446,7 @@ angular.module('3drepo')
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
+					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
@@ -12751,6 +12458,10 @@ angular.module('3drepo')
 
 					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
+
+					// Hide some actions
+					self.actions.pin.hidden = true;
+					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
 					setContentHeight();
@@ -12768,6 +12479,7 @@ angular.module('3drepo')
 			};
 			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
+					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
 				});
 		}
@@ -12782,14 +12494,16 @@ angular.module('3drepo')
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
+						console.log(response);
 						afterNewComment(response.data.issue);
 					});
 			}
 			else {
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
+							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -12813,6 +12527,7 @@ angular.module('3drepo')
 			if (self.issueData.comments.length > 1) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
+						console.log(response);
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 					});
 			}
@@ -12876,7 +12591,7 @@ angular.module('3drepo')
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
@@ -12900,14 +12615,14 @@ angular.module('3drepo')
 			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
-				self.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
+				self.actions[currentAction].color = "";
+				currentAction = null;
 			};
 		}
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 375,
+				newIssueHeight = 425,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
@@ -12948,7 +12663,6 @@ angular.module('3drepo')
 		}
 	}
 }());
-
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -13376,37 +13090,31 @@ angular.module('3drepo')
 				pickedPos = null,
 				pickedNorm = null;
 
-			if (changes.hasOwnProperty("event")) {
+			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
 					(changes.event.currentValue.value.hasOwnProperty("id"))) {
 					removePin();
 
-
-					var trans = changes.event.currentValue.value.trans;
-					position = changes.event.currentValue.value.position;
-					normal = changes.event.currentValue.value.normal;
-
-					if(trans)
-					{
-						console.log("position before:" + position.toGL());
-						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
-					}
-
+					// Add pin
+					// Convert data to arrays
+					angular.forEach(changes.event.currentValue.value.position, function (value) {
+						pickedPos = changes.event.currentValue.value.position;
+						position.push(value);
+					});
+					angular.forEach(changes.event.currentValue.value.normal, function (value) {
+						pickedNorm = changes.event.currentValue.value.normal;
+						normal.push(value);
+					});
 
 					data = {
 						id: newPinId,
 						account: self.account,
 						project: self.project,
-						position: position.toGL(),
-						norm: normal.toGL(),
+						position: position,
+						norm: normal,
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: position,
-						pickedNorm: normal,
+						pickedPos: pickedPos,
+						pickedNorm: pickedNorm,
 						colours: [[200, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
@@ -13418,6 +13126,13 @@ angular.module('3drepo')
 			}
 		};
 
+		/**
+		 * Remove pin when component is destroyed
+		 */
+		this.$onDestroy = function () {
+			removePin();
+		};
+
 		function removePin () {
 			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
@@ -13425,7 +13140,6 @@ angular.module('3drepo')
 		}
 	}
 }());
-
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -13974,6 +13688,35 @@ angular.module('3drepo')
 		};
 
 		/**
+		* import bcf
+		* @param file
+		*/
+		vm.importBcf = function(file){
+
+			$scope.$apply();
+
+			vm.importingBCF = true;
+
+			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+
+				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
+
+			}).then(function(data){
+
+				vm.importingBCF = false;
+				vm.issues = (data === "") ? [] : data;
+
+			}).catch(function(err){
+
+				vm.importingBCF = false;
+				console.log('Error while importing bcf', err);
+				
+			});
+
+
+		}
+
+		/**
 		 * Set up editing issue
 		 * @param issue
 		 */
@@ -14031,15 +13774,11 @@ angular.module('3drepo')
 			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				project: issue.project
+				up: issue.viewpoint.up
 			});
 
 			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				account: issue.account,
-				project: issue.project
+				clippingPlanes: issue.viewpoint.clippingPlanes
 			});
 
 			// Remove highlight from any multi objects
@@ -14072,7 +13811,6 @@ angular.module('3drepo')
 		}
 	}
 }());
-
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -14110,7 +13848,8 @@ angular.module('3drepo')
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<"
+					menuOption: "<",
+					importBcf: "&"
 				}
 			}
 		);
@@ -14252,6 +13991,20 @@ angular.module('3drepo')
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
 				}
+				else if (this.menuOption.value === "exportBCF") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
+				}
+				else if (this.menuOption.value === "importBCF") {
+
+					var file = document.createElement('input');
+					file.setAttribute('type', 'file');
+					file.setAttribute('accept', '.zip,.bcfzip');
+					file.click();
+
+					file.addEventListener("change", function () {
+						self.importBcf({file: file.files[0]});
+					});
+				}
 				setupIssuesToShow();
 				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
@@ -14364,17 +14117,12 @@ angular.module('3drepo')
 			data = {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				project: issue.project
-
+				up: issue.viewpoint.up
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 
 			data = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				account: issue.account,
-				project: issue.project,
+				clippingPlanes: issue.viewpoint.clippingPlanes
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 
@@ -14566,7 +14314,6 @@ angular.module('3drepo')
 		}
 	}
 }());
-
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -14590,9 +14337,9 @@ angular.module('3drepo')
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
 		var self = this,
 			url = "",
 			data = {},
@@ -14707,17 +14454,6 @@ angular.module('3drepo')
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					/*
-					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = issue.account;
-					response.data.issue.project = issue.project;
-					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-					response.data.issue.creator_role = issue.creator_role;
-					response.data.issue.scribble = issue.scribble;
-
-					response.data.issue.title = generateTitle(response.data.issue);
-					self.removePin();
-					*/
 					deferred.resolve(response);
 				});
 
@@ -14953,6 +14689,29 @@ angular.module('3drepo')
 			}
 
 			return statusIcon;
+		};
+
+		/**
+		* Import bcf
+		*/
+		obj.importBcf = function(account, project, file){
+
+			var deferred = $q.defer();
+			var formData = new FormData();
+			formData.append("file", file);
+
+			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+				
+				console.log(res);
+				if(res.status === 200){
+					deferred.resolve();
+				} else {
+					deferred.reject(res.data);
+				}
+
+			});
+
+			return deferred.promise;
 		};
 
 		Object.defineProperty(
@@ -17185,6 +16944,7 @@ var Oculus = {};
 			MEASURE_MODE: "EVENT_MEASURE_MODE",
 			MULTI_SELECT_MODE: "EVENT_MULTI_SELECT_MODE",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
+			PIN_DROP_MODE: "EVENT_PIN_DROP_MODE",
 			PIN_SELECTED: "EVENT_PIN_SELECTED",
 			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
 			PANEL_CARD_ADD_MODE: "EVENT_PANEL_CARD_ADD_MODE",
@@ -17518,7 +17278,21 @@ var Oculus = {};
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print",
+					icon: "fa-print"
+				},
+				{
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-upload"
+				},
+				{
+					value: "exportBCF",
+					label: "Export BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-download",
 					divider: true
 				},
 				{
@@ -18169,18 +17943,11 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
 							v.viewer.addClippingPlane(
 								event.value.axis,
-								event.value.normal,
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1,
-								event.value.account, event.value.project);
+								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							console.log("percentage is: " + event.value.percentage);
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
-						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							console.log(event.value);
-							console.log("percentage is: " + event.value.percentage);
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -18222,13 +17989,11 @@ var Oculus = {};
 								event.value.up,
 								event.value.look_at,
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
-								event.value.rollerCoasterMode,
-								event.value.account,
-								event.value.project
+								event.value.rollerCoasterMode
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
+								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo());
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
@@ -18247,6 +18012,8 @@ var Oculus = {};
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							v.viewer.setMultiSelectMode(event.value);
+						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+							v.viewer.setPinDropMode(event.value);
 						}
 					});
 				}
@@ -20374,7 +20141,7 @@ var Oculus = {};
             data.preserveScope = (data.scope !== null);
             data.targetEvent = (angular.isDefined(event)) ? event : null;
             data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
-            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : true;
+            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
             $mdDialog.show(data);
         };
 

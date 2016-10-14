@@ -47,11 +47,12 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null,
+			currentAction = null,
 			editingCommentIndex = null,
 			commentViewpoint,
 			issueSelectedObjects = null,
-			aboutToBeDestroyed = false;
+			aboutToBeDestroyed = false,
+			textInputHasFocus = false;
 
 		/*
 		 * Init
@@ -78,18 +79,20 @@
 			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
 		];
-		this.actions = [
-			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
-			{icon: "place", action: "pin", label: "Pin", color: "", hidden: this.data},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: "", hidden: this.data}
-		];
+		this.actions = {
+			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
+			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
+			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
+		};
 
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var i, length;
+			var i, length,
+				leftArrow = 37;
+
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -127,18 +130,34 @@
 			}
 
 			// Selected objects
-			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
+				(currentAction !== null) && (currentAction === "multi")) {
 				issueSelectedObjects = this.selectedObjects;
 			}
 
 			// Event
-			if ((changes.hasOwnProperty("event") && this.event)) {
-				// After a pin has been placed highlight any saved selected objects
-				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(this.actions[currentActionIndex].action === "pin") &&
+			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
+				/*
+				if ((this.actions[currentAction].action === "pin") &&
+					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
 					(issueSelectedObjects !== null)) {
 					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+				else if ((this.actions[currentAction].action === "multi") &&
+						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
+				}
+				*/
+				if ((currentAction === "multi") &&
+					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+					issueSelectedObjects = null;
+				}
+			}
+
+			if (changes.hasOwnProperty("keysDown")) {
+				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
+					this.exit();
 				}
 			}
 		};
@@ -155,6 +174,10 @@
 			}
 			if (editingCommentIndex !== null) {
 				this.issueData.comments[editingCommentIndex].editing = false;
+			}
+			// Get out of pin drop mode
+			if ((currentAction !== null) && (currentAction === "pin")) {
+				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 			}
 		};
 
@@ -251,31 +274,47 @@
 
 		/**
 		 * Do an action
-		 * @param index
+		 * @param action
 		 */
-		this.doAction = function (index) {
-			if (currentActionIndex === null) {
-				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
-			}
-			else if (currentActionIndex === index) {
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
-			}
-			else {
-				this.actions[currentActionIndex].color = "";
-				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
-			}
+		this.doAction = function (action) {
+			var data;
 
-			if (currentActionIndex === null) {
+			// Handle previous action
+			if (currentAction === null) {
+				currentAction = action;
+			}
+			else if (currentAction === action) {
+				switch (action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
+				this.actions[currentAction].color = "";
+				currentAction = null;
 				self.action = null;
-				issueSelectedObjects = null;
 			}
 			else {
-				self.action = this.actions[currentActionIndex].action;
+				switch (action) {
+					case "multi":
+						issueSelectedObjects = this.selectedObjects;
+						break;
+					case "pin":
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						break;
+				}
+				this.actions[currentAction].color = "";
+				currentAction = action;
+			}
 
-				switch (this.actions[currentActionIndex].action) {
+			// New action
+			if (currentAction !== null) {
+				this.actions[currentAction].color = highlightBackground;
+				self.action = action;
+
+				switch (currentAction) {
 					case "screen_shot":
 						delete this.screenShot; // Remove any clicked on screen shot
 						$mdDialog.show({
@@ -284,7 +323,6 @@
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
-
 					case "multi":
 						if (issueSelectedObjects !== null) {
 							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
@@ -292,6 +330,10 @@
 						else {
 							issueSelectedObjects = this.selectedObjects;
 						}
+						break;
+					case "pin":
+						data =
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
 			}
@@ -331,6 +373,14 @@
 			else {
 				this.editingDescription = true;
 			}
+		};
+
+		/**
+		 * Register if text input has focus or not
+		 * @param focus
+		 */
+		this.textInputHasFocus = function (focus) {
+			textInputHasFocus = focus;
 		};
 
 		/**
@@ -427,6 +477,10 @@
 
 					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
+
+					// Hide some actions
+					self.actions.pin.hidden = true;
+					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
 					setContentHeight();
@@ -576,14 +630,14 @@
 			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
-				self.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
+				self.actions[currentAction].color = "";
+				currentAction = null;
 			};
 		}
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 375,
+				newIssueHeight = 425,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,

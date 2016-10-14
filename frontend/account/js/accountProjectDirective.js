@@ -28,6 +28,7 @@
 			scope: {
 				account: "=",
 				project: "=",
+				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
 				onShowPage: "&",
@@ -53,26 +54,29 @@
 	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
 
 		var vm = this,
-			infoTimeout = 4000;
+			infoTimeout = 4000,
+			isUserAccount = (vm.account === vm.userAccount),
+			dialogCloseToId;
 
 		// Init
 		vm.project.name = vm.project.project;
+		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
+		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.project.timestamp !== null) {
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
-
+		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload"},
-			projectsetting: {label: "Settings", icon: "settings"},
-			revision: {label: "Revisions", icon: "settings_backup_restore"},
-			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			team: {label: "Team", icon: "group", hidden: !isUserAccount},
+			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
+			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
 		};
-
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 
 		checkFileUploading();
 
@@ -140,7 +144,7 @@
 
 				case "revision":
 					getRevision();
-					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					break;
 			}
 		};
@@ -170,6 +174,19 @@
 
 			vm.file.addEventListener("change", function () {
 				vm.selectedFile = vm.file.files[0];
+
+				var names = vm.selectedFile.name.split('.');
+				vm.uploadButtonDisabled = false;
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				}
+
 				$scope.$apply();
 			});
 		}
@@ -201,17 +218,14 @@
 					}
 				});
 			}
-
-
 		};
 
 		/**
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			console.log(revId);
 			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
-		}
+		};
 
 		/**
 		 * Upload file/model to project
@@ -353,8 +367,7 @@
 		 */
 		function setupEditTeam (event) {
 			vm.item = vm.project;
-			UtilsService.showDialog("teamDialog.html", $scope, event);
-
+			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
 		function getRevision(){

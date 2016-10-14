@@ -5,15 +5,15 @@
 
 	md-list#accountList(flex, ng-if="vm.projectsExist")
 		// Accounts
-		div(ng-repeat="account in vm.accounts", flex, ng-if="account.showAccount")
-			div(layout="row", layout-align="start center")
-				md-list-item(flex="100", layout-fill)
-					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
+		div(ng-repeat="account in vm.accounts", ng-if="account.showAccount")
+			div(layout="row", layout-align="space-between")
+				md-list-item(flex)
+					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
 						md-button.md-icon-button(aria-label="Folder")
 							md-icon.angular-material-icons {{account.showProjectsIcon}}
 						p {{account.account}}
-				span(flex)
-				.accountRight
+						md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
+				.accountRight(ng-if="account.canAddProject")
 					md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
 						md-icon.angular-material-icons.md-accent playlist_add
 
@@ -23,6 +23,7 @@
 				ng-repeat="project in account.projects"
 				account="account.name"
 				project="project"
+				user-account="vm.account"
 				on-upload-file="vm.uploadFile(project)"
 				uploaded-file="vm.uploadedFile"
 				on-show-page="vm.showPage(page, callingPage)"

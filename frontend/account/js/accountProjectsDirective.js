@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -52,7 +52,7 @@
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-		vm.units = server_config.units;
+		vm.units = serverConfig.units;
 
 		// Setup file uploaders
 		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -70,6 +70,7 @@
 			function () {
 				vm.newProjectFileToUpload = this.files[0];
 				vm.newProjectFileSelected = true;
+
 				$scope.$apply();
 			},
 			false
@@ -94,6 +95,8 @@
 					// Always show user account
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
+					// Only show add project menu for user account
+					vm.accounts[i].canAddProject = (i === 0);
 				}
 			}
 		});
@@ -110,7 +113,14 @@
 		/*
 		 * Watch new project data
 		 */
-		$scope.$watch("vm.newProjectData", function (newValue) {
+
+
+		$scope.$watch('{a : vm.newProjectData, b: vm.newProjectFileToUpload.name}', function (data){
+
+			var newValue = vm.newProjectData;
+
+			vm.showNewProjectErrorMessage = false;
+			vm.newProjectErrorMessage = '';
 
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
@@ -121,8 +131,28 @@
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
 
-				vm.newProjectButtonDisabled = !newValue.unit;
+				if(!newValue.unit){
+					vm.newProjectButtonDisabled = true;
+				}
+				
+			
 			}
+
+
+			if(vm.newProjectFileToUpload){
+				var names = vm.newProjectFileToUpload.name.split('.');
+
+				if(names.length === 1){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Filename must have extension';
+					vm.newProjectButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'File format not supported';
+					vm.newProjectButtonDisabled = true;
+				}
+			}
+
 		}, true);
 
 		/*

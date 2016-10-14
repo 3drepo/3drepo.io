@@ -53,7 +53,7 @@
 				pickedPos = null,
 				pickedNorm = null;
 
-			if (changes.hasOwnProperty("event")) {
+			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
 					(changes.event.currentValue.value.hasOwnProperty("id"))) {
 					removePin();
@@ -93,6 +93,13 @@
 					removePin();
 				}
 			}
+		};
+
+		/**
+		 * Remove pin when component is destroyed
+		 */
+		this.$onDestroy = function () {
+			removePin();
 		};
 
 		function removePin () {

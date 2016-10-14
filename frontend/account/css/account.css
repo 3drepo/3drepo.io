@@ -38,8 +38,6 @@ account-dir .userContent .cardInfo {
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
-  max-height: calc(100vh - 180px);
-  overflow: auto;
 }
 
 account-projects md-list {
@@ -139,6 +137,11 @@ account-projects .projectRight .projectUploaded {
 
 account-projects .userContent {
   padding: 0 !important;
+}
+
+account-projects .accountProjectsSharedIcon {
+  margin: 0 0 0 20px;
+  color: rgba(0, 0, 0, 0.3);
 }
 
 /** Account Profile ***************************************************************************************************/

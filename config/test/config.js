@@ -74,6 +74,7 @@ module.exports = {
 	// 	upload_dir: "uploads",
 	// 	shared_storage: "D:/sharedSpace/"
 	// },
+	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
@@ -107,5 +108,6 @@ module.exports = {
 		debug: {
 			skipNonGBChecking: true
 		}
-	}
+	},
+	bcf_dir: '/tmp'
 }
