@@ -250,6 +250,16 @@ function det(mat) {
 }*/
 
 
+function matVecMult(mat, vec)
+{
+	var newRes = [0.0,0.0,0.0];
+	newRes[0] = mat[0][0] * vec[0] + mat[0][1] * vec[1] + mat[0][2] * vec[2] + mat[0][3];
+	newRes[1] = mat[1][0] * vec[1] + mat[1][1] * vec[1] + mat[1][2] * vec[2] + mat[1][3];
+	newRes[2] = mat[2][0] * vec[2] + mat[2][1] * vec[1] + mat[2][2] * vec[2] + mat[2][3];
+
+	return vec;
+}
+
 /*******************************************************************************
  * Add children of node to xmlNode in X3D document
  *
@@ -424,7 +434,15 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			var transMatrix  = mathjs.matrix(child['matrix']);
 			newMatrix = mathjs.multiply(transMatrix, newMatrix);
 
+			var hadOffset = !globalCoordOffset;
 			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, newMatrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+
+			if(!hadOffset && globalCoordOffset)
+			{
+				//child/grandchildren provided a new global offset. transoform it	
+				globalCoordOffset = matVecMult(child.matrix, globalCoordOffset);
+			}
+
 		} else if(child.type === "material") {
 			 var appearance = xmlDoc.createElement("Appearance");
 
