@@ -235,7 +235,7 @@
 		};
 
 		obj.addPin = function (pin, colours, viewpoint) {
-			EventService.send(EventService.EVENT.VIEWERADD_PIN, {
+			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
 				account: pin.account,
 				project: pin.project,
