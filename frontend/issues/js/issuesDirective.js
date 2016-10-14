@@ -307,7 +307,11 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-			vm.issueToEdit = issue;
+
+			IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+				vm.issueToEdit = issue;
+			});
+			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.toShow = "showIssue";
 			vm.setContentHeight();

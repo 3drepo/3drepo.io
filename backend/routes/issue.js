@@ -163,7 +163,7 @@ function listIssues(req, res, next) {
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let projection = {
 		extras: 0,
-		'comments.extras': 0,
+		'comments': 0,
 		'viewpoints.extras': 0,
 		'viewpoints.scribble': 0,
 		'viewpoints.screenshot.content': 0,

@@ -761,6 +761,7 @@
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;
 					self.issueData.status = issue.status;
+					self.statusChange();
 
 					$scope.$apply();
 

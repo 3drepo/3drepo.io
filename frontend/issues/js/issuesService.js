@@ -80,6 +80,35 @@
 			}
 		};
 
+		obj.getIssue = function(account, project, issueId){
+
+			var self = this;
+			var deferred = $q.defer();
+			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues/" + issueId + ".json");
+
+			$http.get(url).then(function(res){
+
+				res.data.timeStamp = self.getPrettyTime(res.data.created);
+				res.data.title = self.generateTitle(res.data);
+
+				if (res.data.hasOwnProperty("comments")) {
+					for (var j = 0, numComments = res.data.comments.length; j < numComments; j += 1) {
+						if (res.data.comments[j].hasOwnProperty("created")) {
+							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
+						}
+					}
+				}
+
+				deferred.resolve(res.data);
+
+			}).catch(function(err){
+				deferred.reject(err);
+			});
+
+			return deferred.promise;
+
+		};
+
 		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();

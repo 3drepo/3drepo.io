@@ -12895,6 +12895,7 @@ angular.module('3drepo')
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;
 					self.issueData.status = issue.status;
+					self.statusChange();
 
 					$scope.$apply();
 
@@ -13987,7 +13988,11 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-			vm.issueToEdit = issue;
+
+			IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+				vm.issueToEdit = issue;
+			});
+			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.toShow = "showIssue";
 			vm.setContentHeight();
@@ -14660,6 +14665,35 @@ angular.module('3drepo')
 			} else {
 				return issue.number + " " + issue.name;
 			}
+		};
+
+		obj.getIssue = function(account, project, issueId){
+
+			var self = this;
+			var deferred = $q.defer();
+			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues/" + issueId + ".json");
+
+			$http.get(url).then(function(res){
+
+				res.data.timeStamp = self.getPrettyTime(res.data.created);
+				res.data.title = self.generateTitle(res.data);
+
+				if (res.data.hasOwnProperty("comments")) {
+					for (var j = 0, numComments = res.data.comments.length; j < numComments; j += 1) {
+						if (res.data.comments[j].hasOwnProperty("created")) {
+							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
+						}
+					}
+				}
+
+				deferred.resolve(res.data);
+
+			}).catch(function(err){
+				deferred.reject(err);
+			});
+
+			return deferred.promise;
+
 		};
 
 		obj.getIssues = function(account, project, revision) {

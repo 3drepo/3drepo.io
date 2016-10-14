@@ -265,8 +265,8 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 
 
 schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean){
-
 	'use strict';
+
 	let issues;
 	let self = this;
 	let filter = {};
@@ -1003,7 +1003,7 @@ schema.methods.clean = function(typePrefix){
 		cleaned.thumbnail = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/thumbnail.png';
 	}
 
-	cleaned.comments.forEach( (comment, i) => {
+	cleaned.comments && cleaned.comments.forEach( (comment, i) => {
 
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
@@ -1023,7 +1023,7 @@ schema.methods.clean = function(typePrefix){
 		
 	});
 
-	if( cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+	if(cleaned.comments && cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
