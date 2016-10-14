@@ -19801,9 +19801,8 @@ var Oculus = {};
 					date.getFullYear();
 
 				if (angular.isDefined(showSeconds) && showSeconds) {
-					projectDate += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
-						(date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+					projectDate += ", " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 				}
 
 				return projectDate;
