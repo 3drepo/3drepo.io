@@ -13303,7 +13303,6 @@ angular.module('3drepo')
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
-						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}
@@ -13458,13 +13457,7 @@ angular.module('3drepo')
 
 					if(trans)
 					{
-						console.log("position before:" + position.toGL());
 						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
 					}
 
 
@@ -14801,7 +14794,6 @@ angular.module('3drepo')
 			$http.get(url)
 				.then(
 					function(data) {
-						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -15093,7 +15085,6 @@ angular.module('3drepo')
 
 			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {
