@@ -12071,6 +12071,18 @@ angular.module('3drepo')
 		};
 
 		/**
+		 * Init stuff
+		 */
+		this.$onInit = function () {
+			// If there are selected objects register them and set the current action to multi
+			if (!this.data && this.selectedObjects) {
+				issueSelectedObjects = this.selectedObjects;
+				currentAction = "multi";
+				this.actions[currentAction].color = highlightBackground;
+			}
+		};
+
+		/**
 		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
@@ -12175,7 +12187,6 @@ angular.module('3drepo')
 				}
 				this.actions[currentAction].color = "";
 				currentAction = null;
-				self.action = null;
 			}
 			else {
 				switch (action) {
@@ -12193,7 +12204,6 @@ angular.module('3drepo')
 			// New action
 			if (currentAction !== null) {
 				this.actions[currentAction].color = highlightBackground;
-				self.action = action;
 
 				switch (currentAction) {
 					case "screen_shot":
@@ -13615,7 +13625,7 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-			if ((vm.selectedIssue !== null) && (vm.selectedIssue._id !== issue._id)) {
+			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
