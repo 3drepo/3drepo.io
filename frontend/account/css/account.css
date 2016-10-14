@@ -38,7 +38,6 @@ account-dir .userContent .cardInfo {
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
-  max-height: calc(100vh - 180px);
   overflow: auto;
 }
 

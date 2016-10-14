@@ -6215,6 +6215,7 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
+		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6239,11 +6240,10 @@ var ViewerManager = {};
 		/*
 		 * Watch changes in upload file
 		 */
-
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
+				vm.selectedFile = vm.uploadedFile.file;
 			}
 		});
 
@@ -6254,6 +6254,9 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 				}
 				else {
@@ -6279,6 +6282,9 @@ var ViewerManager = {};
 
 				case "upload":
 					vm.uploadErrorMessage = null;
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 					//vm.uploadFile();
 					break;
@@ -6324,22 +6330,13 @@ var ViewerManager = {};
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-			vm.file = document.createElement('input');
-			vm.file.setAttribute('type', 'file');
-			vm.file.click();
-
-			vm.file.addEventListener("change", function () {
-				vm.selectedFile = vm.file.files[0];
-				$scope.$apply();
-			});
-		}
+			vm.onUploadFile({project: vm.project});
+		};
 
 		/**
 		 * When users click upload after selecting
 		 */
 		vm.uploadFile = function () {
-			//vm.onUploadFile({project: vm.project});
-			
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
@@ -6356,7 +6353,7 @@ var ViewerManager = {};
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
 						vm.closeDialog();
 					}
 				});
@@ -6372,8 +6369,9 @@ var ViewerManager = {};
 
 		/**
 		 * Upload file/model to project
-		 *
 		 * @param file
+		 * @param tag
+		 * @param desc
 		 */
 		function uploadFileToProject(file, tag, desc) {
 			var promise,
@@ -6571,8 +6569,8 @@ var ViewerManager = {};
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
-			// existingProjectToUpload,
-			// existingProjectFileUploader,
+			existingProjectToUpload,
+			existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -6584,15 +6582,15 @@ var ViewerManager = {};
 		vm.units = server_config.units;
 
 		// Setup file uploaders
-		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		// existingProjectFileUploader.addEventListener(
-		// 	"change",
-		// 	function () {
-		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
-		// 		$scope.$apply();
-		// 	},
-		// 	false
-		// );
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
+			},
+			false
+		);
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -6611,7 +6609,6 @@ var ViewerManager = {};
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
-				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -6752,12 +6749,12 @@ var ViewerManager = {};
 		 *
 		 * @param {Object} project
 		 */
-		// vm.uploadFile = function (project) {
-		// 	console.log(project);
-		// 	existingProjectFileUploader.value = "";
-		// 	existingProjectToUpload = project;
-		// 	existingProjectFileUploader.click();
-		// };
+		vm.uploadFile = function (project) {
+			console.log(project);
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
+		};
 
 		/**
 		 * Upload a file
