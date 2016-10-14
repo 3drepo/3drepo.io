@@ -3631,7 +3631,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(account, project),
+						trans: self.getParentTransformation(self.account, self.project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
@@ -14690,8 +14690,8 @@ angular.module('3drepo')
 							id: self.allIssues[i]._id,
 							position: self.allIssues[i].position,
 							norm: self.allIssues[i].norm,
-							account: self.account,
-							project: self.project
+							account: self.allIssues[i].account,
+							project: self.allIssues[i].project
 						};
 						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
 					}
