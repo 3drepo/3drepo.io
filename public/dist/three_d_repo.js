@@ -14097,7 +14097,7 @@ angular.module('3drepo')
 		vm.editIssue = function (issue) {
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue !== null) {
+			if (vm.selectedIssue) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -14109,7 +14109,7 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-			if ((vm.selectedIssue !== null) && (vm.selectedIssue._id !== issue._id)) {
+			if ((vm.selectedIssue) && (vm.selectedIssue._id !== issue._id)) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
