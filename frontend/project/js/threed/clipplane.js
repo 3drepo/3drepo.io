@@ -431,7 +431,7 @@ var ClipPlane = {};
 		}
 
 		// Move the plane to finish construction
-		if(axis != "")
+		if(!normal)
 		{		
 			this.movePlane(axis, percentage);
 		}
