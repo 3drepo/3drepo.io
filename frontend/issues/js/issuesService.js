@@ -94,7 +94,6 @@
 			$http.get(url)
 				.then(
 					function(data) {
-						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -236,7 +235,7 @@
 		};
 
 		obj.addPin = function (pin, colours, viewpoint) {
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
+			EventService.send(EventService.EVENT.VIEWERADD_PIN, {
 				id: pin.id,
 				account: pin.account,
 				project: pin.project,
@@ -386,7 +385,6 @@
 
 			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {

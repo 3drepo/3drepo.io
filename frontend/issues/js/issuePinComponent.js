@@ -65,13 +65,7 @@
 
 					if(trans)
 					{
-						console.log("position before:" + position.toGL());
 						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
 					}
 
 
