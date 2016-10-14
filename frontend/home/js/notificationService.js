@@ -129,13 +129,21 @@ angular.module('3drepo')
 		
 	}
 
+	function subscribeProjectStatusChanged(account, project, callback){
+		subscribe(account, project, [], 'projectStatusChanged', callback);
+	}
+
+	function unsubscribeProjectStatusChanged(account, project){
+		unsubscribe(account, project, [], 'projectStatusChanged');
+	}
 	return {
 		subscribe: {
 			newIssue: subscribeNewIssue,
 			newComment: subscribeNewComment,
 			commentChanged: subscribeCommentChanged,
 			commentDeleted: subscribeCommentDeleted,
-			issueChanged: subscribeIssueChanged
+			issueChanged: subscribeIssueChanged,
+			projectStatusChanged: subscribeProjectStatusChanged,
 
 		},
 		unsubscribe:{
@@ -143,7 +151,8 @@ angular.module('3drepo')
 			newComment: unsubscribeNewComment,
 			commentChanged: unsubscribeCommentChanged,
 			commentDeleted: unsubscribeCommentDeleted,
-			issueChanged: unsubscribeIssueChanged
+			issueChanged: unsubscribeIssueChanged,
+			projectStatusChanged: unsubscribeProjectStatusChanged,
 		}
 	};
 });

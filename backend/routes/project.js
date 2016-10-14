@@ -337,19 +337,12 @@ function uploadProject(req, res, next){
 				//let username = req.session.user.username;
 
 				let sendChatEvent = projectSetting => {
-					ChatEvent.projectUploaded(
+					ChatEvent.projectStatusChanged(
 						null, 
 						req.params.account, 
 						req.params.project, 
 						projectSetting
-					).catch(err => {
-						systemLogger.logError('Error while inserting chat event', {
-							account: req.params.account,
-							project: req.params.project,
-							event: 'projectUploaded',
-							error: err
-						});
-					});
+					);
 				};
 				//check dup tag first
 

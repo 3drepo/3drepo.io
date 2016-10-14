@@ -54,9 +54,9 @@ function commentDeleted(emitter, account, project, issueId, data){
 }
 
 
-function projectUploaded(emitter, account, project, data){
+function projectStatusChanged(emitter, account, project, data){
 	'use strict';
-	return insertEventQueue('projectUploaded', emitter, account, project, null, data);
+	return insertEventQueue('projectStatusChanged', emitter, account, project, null, data);
 }
 
 function issueChanged(emitter, account, project, issueId, data){
@@ -74,6 +74,6 @@ module.exports = {
 	newComment,
 	commentChanged,
 	commentDeleted,
-	projectUploaded,
+	projectStatusChanged,
 	issueChanged
 };

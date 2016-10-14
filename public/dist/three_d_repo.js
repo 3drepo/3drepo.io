@@ -6586,9 +6586,9 @@ var ViewerManager = {};
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -6835,7 +6835,7 @@ var ViewerManager = {};
 							}
 							else {
 								console.log("Polling upload!");
-								pollUpload();
+								watchProjectStatus();
 							}
 						});
 					}
@@ -6853,49 +6853,44 @@ var ViewerManager = {};
 					vm.project.uploading = true;
 					vm.showUploading = true;
 					vm.showFileUploadInfo = false;
-					pollUpload();
+					watchProjectStatus();
 				}
 			});
 		}
 
 		/**
-		 * Poll uploading of file
+		 * Watch file upload status
 		 */
-		function pollUpload () {
-			var interval,
-				promise;
-
-			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					console.log("uploadStatus", response);
-					if ((response.data.status === "ok") || (response.data.status === "failed")) {
-						if (response.data.status === "ok") {
-							vm.project.timestamp = new Date();
-							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-							vm.fileUploadInfo = "Uploaded";
-							// clear revisions cache
-							vm.revisions = null;
+		function watchProjectStatus(){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+				console.log('upload status changed',  data);
+				if ((data.status === "ok") || (data.status === "failed")) {
+					if (data.status === "ok") {
+						vm.project.timestamp = new Date();
+						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
+						vm.fileUploadInfo = "Uploaded";
+						// clear revisions cache
+						vm.revisions = null;
+					} else {
+						if (data.hasOwnProperty("errorReason")) {
+							vm.fileUploadInfo = data.errorReason.message;
 						}
 						else {
-							if (response.data.hasOwnProperty("errorReason")) {
-								vm.fileUploadInfo = response.data.errorReason.message;
-							}
-							else {
-								vm.fileUploadInfo = "Failed to upload file";
-							}
+							vm.fileUploadInfo = "Failed to upload file";
 						}
-						vm.showUploading = false;
-						$interval.cancel(interval);
-						vm.showFileUploadInfo = true;
-						$timeout(function () {
-							vm.project.uploading = false;
-						}, infoTimeout);
 					}
-				});
-			}, 1000);
-		}
+					vm.showUploading = false;
+					vm.showFileUploadInfo = true;
+					$scope.$apply();
+					$timeout(function () {
+						vm.project.uploading = false;
+					}, infoTimeout);
+					
 
+					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				}
+			});
+		}
 
 		/**
 		 * Set up team of project
@@ -12160,13 +12155,21 @@ angular.module('3drepo')
 		
 	}
 
+	function subscribeProjectStatusChanged(account, project, callback){
+		subscribe(account, project, [], 'projectStatusChanged', callback);
+	}
+
+	function unsubscribeProjectStatusChanged(account, project){
+		unsubscribe(account, project, [], 'projectStatusChanged');
+	}
 	return {
 		subscribe: {
 			newIssue: subscribeNewIssue,
 			newComment: subscribeNewComment,
 			commentChanged: subscribeCommentChanged,
 			commentDeleted: subscribeCommentDeleted,
-			issueChanged: subscribeIssueChanged
+			issueChanged: subscribeIssueChanged,
+			projectStatusChanged: subscribeProjectStatusChanged,
 
 		},
 		unsubscribe:{
@@ -12174,7 +12177,8 @@ angular.module('3drepo')
 			newComment: unsubscribeNewComment,
 			commentChanged: unsubscribeCommentChanged,
 			commentDeleted: unsubscribeCommentDeleted,
-			issueChanged: unsubscribeIssueChanged
+			issueChanged: unsubscribeIssueChanged,
+			projectStatusChanged: unsubscribeProjectStatusChanged,
 		}
 	};
 });
