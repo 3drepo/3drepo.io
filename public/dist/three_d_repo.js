@@ -6257,7 +6257,7 @@ var ViewerManager = {};
 					vm.tag = null;
 					vm.desc = null;
 					vm.selectedFile = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6268,7 +6268,6 @@ var ViewerManager = {};
 
 		/**
 		 * Handle project option selection
-		 *
 		 * @param event
 		 * @param option
 		 */
@@ -6285,7 +6284,7 @@ var ViewerManager = {};
 					vm.tag = null;
 					vm.desc = null;
 					vm.selectedFile = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
@@ -12138,16 +12137,18 @@ angular.module('3drepo')
 
 		/**
 		 * Show screen shot
+		 * @param event
 		 * @param viewpoint
 		 */
-		this.showScreenShot = function (viewpoint) {
+		this.showScreenShot = function (event, viewpoint) {
 			self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
 			$mdDialog.show({
 				controller: function () {
 					this.dialogCaller = self;
 				},
 				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
+				templateUrl: "issueScreenShotDialog.html",
+				targetEvent: event
 			});
 		};
 
@@ -12497,13 +12498,13 @@ angular.module('3drepo')
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 				});
-
-				setContentHeight();
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
 			}
+
+			setContentHeight();
 		};
 
 		/**
@@ -12528,8 +12529,8 @@ angular.module('3drepo')
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
-				thumbnailHeight = 170,
-				issueMinHeight = 520,
+				thumbnailHeight = 180,
+				issueMinHeight = 370,
 				height = issueMinHeight;
 
 			if (self.data) {
@@ -12541,6 +12542,8 @@ angular.module('3drepo')
 				if (self.canEditDescription || self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
+				// Description thumbnail
+				height += thumbnailHeight;
 				// New comment thumbnail
 				if (self.commentThumbnail) {
 					height += thumbnailHeight;
@@ -12557,6 +12560,10 @@ angular.module('3drepo')
 				height = newIssueHeight;
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
+				}
+				// Description thumbnail
+				if (self.descriptionThumbnail) {
+					height += thumbnailHeight;
 				}
 			}
 

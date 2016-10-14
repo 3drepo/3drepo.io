@@ -101,7 +101,7 @@
 					vm.tag = null;
 					vm.desc = null;
 					vm.selectedFile = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -112,7 +112,6 @@
 
 		/**
 		 * Handle project option selection
-		 *
 		 * @param event
 		 * @param option
 		 */
@@ -129,7 +128,7 @@
 					vm.tag = null;
 					vm.desc = null;
 					vm.selectedFile = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
