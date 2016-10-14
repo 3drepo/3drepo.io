@@ -93,9 +93,11 @@
 		this.$onChanges = function (changes) {
 			var i, length;
 			// Data
+
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					
 					this.issueData.comments.forEach(function(comment){
@@ -216,8 +218,11 @@
 		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
+
+
+
 			if (self.data) {
-				if (self.data.owner === self.account) {
+				if (self.data.owner === Auth.getUsername()) {
 					if ((this.data.priority !== this.issueData.priority) ||
 						(this.data.status !== this.issueData.status)) {
 						updateIssue();
@@ -751,12 +756,11 @@
 				});
 
 				/*
-				* Watch for comment deleted
+				* Watch for comment change
 				*/
 				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
 
-					console.log('new issue data', issue);
-
+					console.log(issue);
 					self.issueData.topic_type = issue.topic_type;
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;

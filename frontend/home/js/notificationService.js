@@ -15,11 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var gsocket;
+
 angular.module('3drepo')
 .service('NotificationService', function() {
 	"use strict";
 
 	var socket = io('http://example.org:3000', {path: '/yay'});
+	gsocket = socket;
 	var joined = [];
 
 	socket.on('reconnect', function(){
@@ -64,7 +67,16 @@ angular.module('3drepo')
 	function subscribe(account, project, keys, event, callback){
 
 		joinRoom(account, project);
-		socket.on(getEventName(account, project, keys, event), callback);
+		console.log('sub', getEventName(account, project, keys, event));
+		socket.on(getEventName(account, project, keys, event), function(data){
+			console.log('msg rec', getEventName(account, project, keys, event));
+			callback(data);
+		});
+	}
+
+	function unsubscribe(account, project, keys, event){
+		console.log('unsub', getEventName(account, project, keys, event));
+		socket.off(getEventName(account, project, keys, event));
 	}
 
 	function subscribeNewIssue(account, project, callback){
@@ -72,7 +84,7 @@ angular.module('3drepo')
 	}
 
 	function unsubscribeNewIssue(account, project){
-		socket.off(getEventName(account, project, [], 'newIssue'));
+		unsubscribe(account, project, [], 'newIssue');
 	}
 
 	function subscribeNewComment(account, project, issueId, callback){
@@ -80,7 +92,7 @@ angular.module('3drepo')
 	}
 
 	function unsubscribeNewComment(account, project, issueId){
-		socket.off(getEventName(account, project, [issueId], 'newComment'));
+		unsubscribe(account, project, [issueId], 'newComment');
 	}
 
 	function subscribeCommentChanged(account, project, issueId, callback){
@@ -88,7 +100,7 @@ angular.module('3drepo')
 	}
 
 	function unsubscribeCommentChanged(account, project, issueId){
-		socket.off(getEventName(account, project, [issueId], 'commentChanged'));
+		unsubscribe(account, project, [issueId], 'commentChanged');
 	}
 
 	function subscribeCommentDeleted(account, project, issueId, callback){
@@ -96,15 +108,25 @@ angular.module('3drepo')
 	}
 
 	function unsubscribeCommentDeleted(account, project, issueId){
-		socket.off(getEventName(account, project, [issueId], 'commentDeleted'));
+		unsubscribe(account, project, [issueId], 'commentDeleted');
 	}
 
 	function subscribeIssueChanged(account, project, issueId, callback){
-		subscribe(account, project, [issueId], 'issueChanged', callback);
+		if(arguments.length === 3){
+			callback = issueId;
+			subscribe(account, project, [], 'issueChanged', callback);
+		} else {
+			subscribe(account, project, [issueId], 'issueChanged', callback);
+		}
 	}
 
 	function unsubscribeIssueChanged(account, project, issueId){
-		socket.off(getEventName(account, project, [issueId], 'issueChanged'));
+		if(arguments.length === 2){
+			unsubscribe(account, project, [], 'issueChanged');
+		} else {
+			unsubscribe(account, project, [issueId], 'issueChanged');
+		}
+		
 	}
 
 	return {

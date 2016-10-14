@@ -258,10 +258,30 @@
 		});
 
 		/*
+		 * Watch for status changes from all issues
+		 */
+		NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+
+			issue.title = IssuesService.generateTitle(issue);
+			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+			vm.issues.find(function(oldIssue, i){
+				if(oldIssue._id === issue._id){
+					vm.issues[i] = issue;
+				}
+			});
+
+			vm.issues = vm.issues.slice(0);
+
+			$scope.$apply();
+		});
+
+		/*
 		* Unsubscribe notifcation on destroy
 		*/
 		$scope.$on('$destroy', function(){
 			NotificationService.unsubscribe.newIssue(vm.account, vm.project);
+			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
 		});
 
 		/**
@@ -308,9 +328,14 @@
 		 */
 		vm.editIssue = function (issue) {
 
-			IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
-				vm.issueToEdit = issue;
-			});
+			vm.issueToEdit = issue;
+			
+			if(issue){
+				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+					vm.issueToEdit = issue;
+				});
+			}
+
 			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.toShow = "showIssue";

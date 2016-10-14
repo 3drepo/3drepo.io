@@ -61,7 +61,12 @@ function projectUploaded(emitter, account, project, data){
 
 function issueChanged(emitter, account, project, issueId, data){
 	'use strict';
-	return insertEventQueue('issueChanged', emitter, account, project, [issueId], data);
+
+	//send event to single issue changed listener and any issues changed listener
+	return Promise.all([
+		insertEventQueue('issueChanged', emitter, account, project, [issueId], data),
+		insertEventQueue('issueChanged', emitter, account, project, null, data)
+	]);
 }
 
 module.exports = {
