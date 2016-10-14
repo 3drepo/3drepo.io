@@ -618,8 +618,6 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 	var meshId = mesh['id'];
 	var mat = getChild(mesh, 'material')
 
-	logger.logDebug('Loading mesh ' + meshId);
-
 	var bbox = repoNodeMesh.extractBoundingBox(mesh);
 
 	switch (mode) {
