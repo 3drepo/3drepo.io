@@ -52,7 +52,9 @@
 			commentViewpoint,
 			issueSelectedObjects = null,
 			aboutToBeDestroyed = false,
-			textInputHasFocus = false;
+			textInputHasFocus = false,
+			savedDescription,
+			savedComment;
 
 		/*
 		 * Init
@@ -359,17 +361,20 @@
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
-				var data = {
-					desc: self.issueData.desc
-				};
-				IssuesService.updateIssue(self.issueData, data)
-					.then(function (data) {
-						console.log(data);
-						IssuesService.updatedIssue = self.issueData;
-					});
+				if (self.issueData.desc !== savedDescription) {
+					var data = {
+						desc: self.issueData.desc
+					};
+					IssuesService.updateIssue(self.issueData, data)
+						.then(function (data) {
+							IssuesService.updatedIssue = self.issueData;
+							savedDescription = self.issueData.desc;
+						});
+				}
 			}
 			else {
 				this.editingDescription = true;
+				savedDescription = self.issueData.desc;
 			}
 		};
 
@@ -584,15 +589,19 @@
 			if (this.issueData.comments[index].editing) {
 				editingCommentIndex = null;
 				this.issueData.comments[index].editing = false;
-				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
-					.then(function(response) {
-						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
-						IssuesService.updatedIssue = self.issueData;
-					});
+				if (this.issueData.comments[index].comment !== savedComment) {
+					IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
+						.then(function(response) {
+							self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+							IssuesService.updatedIssue = self.issueData;
+							savedComment = self.issueData.comments[index].comment;
+						});
+				}
 			}
 			else {
 				editingCommentIndex = index;
 				this.issueData.comments[index].editing = true;
+				savedComment = this.issueData.comments[index].comment;
 			}
 		};
 
