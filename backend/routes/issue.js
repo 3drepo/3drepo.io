@@ -31,13 +31,13 @@ router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, get
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasReadAccessToProject, importBCF);
+router.post('/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
 
 router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-
+router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -337,7 +337,8 @@ function importBCF(req, res, next){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
-			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => {
+
+			Issue.importBCF(req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

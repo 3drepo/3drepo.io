@@ -314,7 +314,7 @@
 
 			vm.importingBCF = true;
 
-			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+			IssuesService.importBcf(vm.account, vm.project, vm.revision, file).then(function(){
 
 				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
 

@@ -14391,7 +14391,7 @@ angular.module('3drepo')
 
 			vm.importingBCF = true;
 
-			IssuesService.importBcf(vm.account, vm.project, file).then(function(){
+			IssuesService.importBcf(vm.account, vm.project, vm.revision, file).then(function(){
 
 				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
 
@@ -15444,13 +15444,19 @@ angular.module('3drepo')
 		/**
 		* Import bcf
 		*/
-		obj.importBcf = function(account, project, file){
+		obj.importBcf = function(account, project, revision, file){
 
 			var deferred = $q.defer();
+
+			var url = account + "/" + project + "/issues.bcfzip";
+			if(revision){
+				url = account + "/" + project + "/revision/" + revision + "/issues.bcfzip";
+			}
+
 			var formData = new FormData();
 			formData.append("file", file);
 
-			UtilsService.doPost(formData, account + "/" + project + "/issues.bcfzip", {'Content-Type': undefined}).then(function(res){
+			UtilsService.doPost(formData, url, {'Content-Type': undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
