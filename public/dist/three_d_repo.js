@@ -4847,15 +4847,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			if (on) {
-				element.style.cursor = "default";
-				// Clear any single selection
-				if (self.oldPart && (self.oldPart.length > 0) && (self.oldPart[0].ids.length === 1)) {
-					self.oldPart[0].resetColor();
-				}
-			} else {
-				element.style.cursor = "-webkit-grab";
-			}
+			element.style.cursor =  on ? "default" : "-webkit-grab";
 		};
 
 		/**
@@ -6596,6 +6588,7 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
+		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6620,11 +6613,10 @@ var ViewerManager = {};
 		/*
 		 * Watch changes in upload file
 		 */
-
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
+				vm.selectedFile = vm.uploadedFile.file;
 			}
 		});
 
@@ -6635,7 +6627,10 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6646,7 +6641,6 @@ var ViewerManager = {};
 
 		/**
 		 * Handle project option selection
-		 *
 		 * @param event
 		 * @param option
 		 */
@@ -6660,7 +6654,10 @@ var ViewerManager = {};
 
 				case "upload":
 					vm.uploadErrorMessage = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
@@ -6705,6 +6702,7 @@ var ViewerManager = {};
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
+<<<<<<< HEAD
 			vm.file = document.createElement('input');
 			vm.file.setAttribute('type', 'file');
 			vm.file.click();
@@ -6727,13 +6725,15 @@ var ViewerManager = {};
 				$scope.$apply();
 			});
 		}
+=======
+			vm.onUploadFile({project: vm.project});
+		};
+>>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 
 		/**
 		 * When users click upload after selecting
 		 */
 		vm.uploadFile = function () {
-			//vm.onUploadFile({project: vm.project});
-			
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
@@ -6750,7 +6750,7 @@ var ViewerManager = {};
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
 						vm.closeDialog();
 					}
 				});
@@ -6766,8 +6766,9 @@ var ViewerManager = {};
 
 		/**
 		 * Upload file/model to project
-		 *
 		 * @param file
+		 * @param tag
+		 * @param desc
 		 */
 		function uploadFileToProject(file, tag, desc) {
 			var promise,
@@ -6960,8 +6961,8 @@ var ViewerManager = {};
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig) {
 		var vm = this,
-			// existingProjectToUpload,
-			// existingProjectFileUploader,
+			existingProjectToUpload,
+			existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -6973,15 +6974,15 @@ var ViewerManager = {};
 		vm.units = serverConfig.units;
 
 		// Setup file uploaders
-		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		// existingProjectFileUploader.addEventListener(
-		// 	"change",
-		// 	function () {
-		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
-		// 		$scope.$apply();
-		// 	},
-		// 	false
-		// );
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
+			},
+			false
+		);
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -7001,7 +7002,6 @@ var ViewerManager = {};
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
-				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -7169,12 +7169,12 @@ var ViewerManager = {};
 		 *
 		 * @param {Object} project
 		 */
-		// vm.uploadFile = function (project) {
-		// 	console.log(project);
-		// 	existingProjectFileUploader.value = "";
-		// 	existingProjectToUpload = project;
-		// 	existingProjectFileUploader.click();
-		// };
+		vm.uploadFile = function (project) {
+			console.log(project);
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
+		};
 
 		/**
 		 * Upload a file
@@ -12592,7 +12592,9 @@ angular.module('3drepo')
 			commentViewpoint,
 			issueSelectedObjects = null,
 			aboutToBeDestroyed = false,
-			textInputHasFocus = false;
+			textInputHasFocus = false,
+			savedDescription,
+			savedComment;
 
 		/*
 		 * Init
@@ -12603,6 +12605,8 @@ angular.module('3drepo')
 		this.pinData = null;
 		this.showAdditional = true;
 		this.editingDescription = false;
+		this.clearPin = false;
+
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -12729,6 +12733,19 @@ angular.module('3drepo')
 			// Get out of pin drop mode
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+				this.clearPin = true;
+			}
+		};
+
+		/**
+		 * Init stuff
+		 */
+		this.$onInit = function () {
+			// If there are selected objects register them and set the current action to multi
+			if (!this.data && this.selectedObjects) {
+				issueSelectedObjects = this.selectedObjects;
+				currentAction = "multi";
+				this.actions[currentAction].color = highlightBackground;
 			}
 
 			//unsubscribe on destroy
@@ -12830,26 +12847,27 @@ angular.module('3drepo')
 
 		/**
 		 * Show screen shot
+		 * @param event
 		 * @param viewpoint
 		 */
-		this.showScreenShot = function (viewpoint) {
+		this.showScreenShot = function (event, viewpoint) {
 			self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
 			$mdDialog.show({
 				controller: function () {
 					this.dialogCaller = self;
 				},
 				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
+				templateUrl: "issueScreenShotDialog.html",
+				targetEvent: event
 			});
 		};
 
 		/**
 		 * Do an action
+		 * @param event
 		 * @param action
 		 */
-		this.doAction = function (action) {
-			var data;
-
+		this.doAction = function (event, action) {
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -12865,7 +12883,6 @@ angular.module('3drepo')
 				}
 				this.actions[currentAction].color = "";
 				currentAction = null;
-				self.action = null;
 			}
 			else {
 				switch (action) {
@@ -12883,7 +12900,6 @@ angular.module('3drepo')
 			// New action
 			if (currentAction !== null) {
 				this.actions[currentAction].color = highlightBackground;
-				self.action = action;
 
 				switch (currentAction) {
 					case "screen_shot":
@@ -12891,7 +12907,8 @@ angular.module('3drepo')
 						$mdDialog.show({
 							controller: ScreenShotDialogController,
 							controllerAs: "vm",
-							templateUrl: "issueScreenShotDialog.html"
+							templateUrl: "issueScreenShotDialog.html",
+							targetEvent: event
 						});
 						break;
 					case "multi":
@@ -12903,7 +12920,6 @@ angular.module('3drepo')
 						}
 						break;
 					case "pin":
-						data =
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
@@ -12934,15 +12950,29 @@ angular.module('3drepo')
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
+<<<<<<< HEAD
 				var data = {
 					desc: self.issueData.desc
 				};
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (data) {
 					});
+=======
+				if (self.issueData.desc !== savedDescription) {
+					var data = {
+						desc: self.issueData.desc
+					};
+					IssuesService.updateIssue(self.issueData, data)
+						.then(function (data) {
+							IssuesService.updatedIssue = self.issueData;
+							savedDescription = self.issueData.desc;
+						});
+				}
+>>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 			}
 			else {
 				this.editingDescription = true;
+				savedDescription = self.issueData.desc;
 			}
 		};
 
@@ -13174,14 +13204,19 @@ angular.module('3drepo')
 			if (this.issueData.comments[index].editing) {
 				editingCommentIndex = null;
 				this.issueData.comments[index].editing = false;
-				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
-					.then(function(response) {
-						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
-					});
+				if (this.issueData.comments[index].comment !== savedComment) {
+					IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
+						.then(function(response) {
+							self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+							IssuesService.updatedIssue = self.issueData;
+							savedComment = self.issueData.comments[index].comment;
+						});
+				}
 			}
 			else {
 				editingCommentIndex = index;
 				this.issueData.comments[index].editing = true;
+				savedComment = this.issueData.comments[index].comment;
 			}
 		};
 
@@ -13204,13 +13239,13 @@ angular.module('3drepo')
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 				});
-
-				setContentHeight();
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
 			}
+
+			setContentHeight();
 		};
 
 		/**
@@ -13231,12 +13266,12 @@ angular.module('3drepo')
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
-				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
-				thumbnailHeight = 170,
+				thumbnailHeight = 180,
+				issueMinHeight = 370,
 				height = issueMinHeight;
 
 			if (self.data) {
@@ -13245,9 +13280,11 @@ angular.module('3drepo')
 					height += additionalInfoHeight;
 				}
 				// Description text
-				if (self.issueData.hasOwnProperty("desc")) {
+				if (self.canEditDescription || self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
+				// Description thumbnail
+				height += thumbnailHeight;
 				// New comment thumbnail
 				if (self.commentThumbnail) {
 					height += thumbnailHeight;
@@ -13264,6 +13301,10 @@ angular.module('3drepo')
 				height = newIssueHeight;
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
+				}
+				// Description thumbnail
+				if (self.descriptionThumbnail) {
+					height += thumbnailHeight;
 				}
 			}
 
@@ -13701,7 +13742,8 @@ angular.module('3drepo')
 					project: "<",
 					sendEvent: "&",
 					event: "<",
-					setPin: "&"
+					setPin: "&",
+					clearPin: "<"
 				}
 			}
 		);
@@ -13710,7 +13752,8 @@ angular.module('3drepo')
 
 	function IssuesPinCtrl (EventService) {
 		var self = this,
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			pinDropMode = false;
 
 		// Init
 		this.setPin({data: null});
@@ -13728,7 +13771,8 @@ angular.module('3drepo')
 
 			if (changes.hasOwnProperty("event") && (changes.event.currentValue !== null)) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
-					(changes.event.currentValue.value.hasOwnProperty("id"))) {
+					(changes.event.currentValue.value.hasOwnProperty("id")) &&
+					pinDropMode) {
 					removePin();
 
 
@@ -13755,9 +13799,15 @@ angular.module('3drepo')
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
+<<<<<<< HEAD
 						pickedPos: position,
 						pickedNorm: normal,
 						colours: [[200, 0, 0]]
+=======
+						pickedPos: pickedPos,
+						pickedNorm: pickedNorm,
+						colours: [[0.5, 0, 0]]
+>>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
@@ -13765,6 +13815,13 @@ angular.module('3drepo')
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					removePin();
 				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.value;
+				}
+			}
+
+			if (changes.hasOwnProperty("clearPin") && changes.clearPin.currentValue) {
+				removePin();
 			}
 		};
 
@@ -14134,11 +14191,7 @@ angular.module('3drepo')
 			rolesPromise,
 			projectUserRolesPromise,
 			issue,
-			selectedObjectId = null,
-			pickedPos = null,
-			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0],
-			selectedIssue = null;
+			pinHighlightColour = [1.0000, 0.7, 0.0];
 
 		/*
 		 * Init
@@ -14445,7 +14498,7 @@ angular.module('3drepo')
 			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue !== null) {
+			if (vm.selectedIssue) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -14457,7 +14510,7 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-			if ((vm.selectedIssue !== null) && (vm.selectedIssue._id !== issue._id)) {
+			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -14477,6 +14530,7 @@ angular.module('3drepo')
 		 */
 		vm.issueCreated = function (issue) {
 			vm.issues.unshift(issue);
+			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -14588,7 +14642,7 @@ angular.module('3drepo')
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 150,
+			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = true,
@@ -17892,7 +17946,8 @@ var Oculus = {};
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
-			multiMode = false;
+			multiMode = false,
+			pinDropMode = false;
 
 		// Init
 		this.setSelectedObjects({selectedObjects: null});
@@ -17905,42 +17960,53 @@ var Oculus = {};
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					if (selectedObjects.length === 1) {
+						self.setSelectedObjects({selectedObjects: selectedObjects});
+					}
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (multiMode &&
-						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
 			}
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					deselectedObjects = [];
-					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
-					if (objectIndex === -1) {
-						selectedObjects.push(changes.event.currentValue.value.id);
-					}
-					else {
-						deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
-					}
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+					if (multiMode) {
+						// Collect objects in multi mode
+						deselectedObjects = [];
+						objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
+						if (objectIndex === -1) {
+							selectedObjects.push(changes.event.currentValue.value.id);
+						}
+						else {
+							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+						}
+						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
-					if (selectedObjects.length > 0) {
-						self.setSelectedObjects({selectedObjects: selectedObjects});
+						if (selectedObjects.length > 0) {
+							self.setSelectedObjects({selectedObjects: selectedObjects});
+						}
+						else {
+							self.setSelectedObjects({selectedObjects: null});
+						}
 					}
 					else {
-						self.setSelectedObjects({selectedObjects: null});
+						// Can only select one object at a time when not in multi mode
+						selectedObjects = [changes.event.currentValue.value.id];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					if (selectedObjects.length > 0) {
-						this.displaySelectedObjects([], selectedObjects);
 						selectedObjects = [];
 						self.setSelectedObjects({selectedObjects: null});
 					}
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.type;
 				}
 			}
 
@@ -19110,6 +19176,7 @@ var Oculus = {};
 
 		});
 
+<<<<<<< HEAD
 		// RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 		// 	vm.revisions = revisions;
 		// });
@@ -19140,6 +19207,9 @@ var Oculus = {};
 		// });
 
 		vm.openDialog = function(){
+=======
+		vm.openDialog = function(event){
+>>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 
 			if(!vm.revisions){
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
@@ -19148,7 +19218,7 @@ var Oculus = {};
 			}
 
 			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
-		}
+		};
 
 		/**
 		* Go to the specified revision
@@ -20756,9 +20826,8 @@ var Oculus = {};
 					date.getFullYear();
 
 				if (angular.isDefined(showSeconds) && showSeconds) {
-					projectDate += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
-						(date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+					projectDate += ", " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 				}
 
 				return projectDate;

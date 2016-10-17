@@ -59,6 +59,7 @@
 			dialogCloseToId;
 
 		// Init
+		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -83,11 +84,10 @@
 		/*
 		 * Watch changes in upload file
 		 */
-
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
+				vm.selectedFile = vm.uploadedFile.file;
 			}
 		});
 
@@ -98,7 +98,10 @@
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -109,7 +112,6 @@
 
 		/**
 		 * Handle project option selection
-		 *
 		 * @param event
 		 * @param option
 		 */
@@ -123,7 +125,10 @@
 
 				case "upload":
 					vm.uploadErrorMessage = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					vm.tag = null;
+					vm.desc = null;
+					vm.selectedFile = null;
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
@@ -168,35 +173,14 @@
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-			vm.file = document.createElement('input');
-			vm.file.setAttribute('type', 'file');
-			vm.file.click();
+			vm.onUploadFile({project: vm.project});
+		};
 
-			vm.file.addEventListener("change", function () {
-				vm.selectedFile = vm.file.files[0];
-
-				var names = vm.selectedFile.name.split('.');
-				vm.uploadButtonDisabled = false;
-				vm.uploadErrorMessage = null;
-				
-				if(names.length === 1){
-					vm.uploadErrorMessage = 'Filename must have extension';
-					vm.uploadButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
-					vm.uploadErrorMessage = 'File format not supported';
-					vm.uploadButtonDisabled = true;
-				}
-
-				$scope.$apply();
-			});
-		}
 
 		/**
 		 * When users click upload after selecting
 		 */
 		vm.uploadFile = function () {
-			//vm.onUploadFile({project: vm.project});
-			
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
@@ -213,7 +197,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
 						vm.closeDialog();
 					}
 				});
@@ -229,8 +213,9 @@
 
 		/**
 		 * Upload file/model to project
-		 *
 		 * @param file
+		 * @param tag
+		 * @param desc
 		 */
 		function uploadFileToProject(file, tag, desc) {
 			var promise,
