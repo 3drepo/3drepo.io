@@ -13337,18 +13337,23 @@ angular.module('3drepo')
 						}
 					});
 
-					self.issueData.comments.splice(deleteIndex, 1);
+					self.issueData.comments[deleteIndex].comment = 'This comment has been deleted.'
+
 					
 					$scope.$apply();
 					commentAreaScrollToBottom();
+
+					$timeout(function(){
+						self.issueData.comments.splice(deleteIndex, 1);
+					}, 4000);
 				});
 
 				/*
-				* Watch for comment change
+				* Watch for issue change
 				*/
 				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
 
-					console.log(issue);
+
 					self.issueData.topic_type = issue.topic_type;
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;
@@ -14395,14 +14400,29 @@ angular.module('3drepo')
 				issue.title = IssuesService.generateTitle(issue);
 				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
 
+
 				vm.issues.find(function(oldIssue, i){
 					if(oldIssue._id === issue._id){
-						vm.issues[i] = issue;
+
+
+						if(issue.status === 'closed'){
+							
+							vm.issues[i].justClosed = true;
+							
+							$timeout(function(){
+
+								vm.issues[i] = issue;
+								vm.issues = vm.issues.slice(0);
+
+							}, 4000);
+
+						} else {
+							vm.issues[i] = issue;
+						}
 					}
 				});
 
 				vm.issues = vm.issues.slice(0);
-
 				$scope.$apply();
 			});
 		}
