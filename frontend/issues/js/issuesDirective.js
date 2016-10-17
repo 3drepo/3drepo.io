@@ -263,9 +263,15 @@
 					return rev._id === issue.rev_id;
 				});
 
-				var currentRevision = vm.revisions.find(function(rev){
-					return rev._id === vm.revision || rev.tag === vm.revision;
-				});
+				var currentRevision;
+
+				if(!vm.revision){
+					currentRevision = vm.revisions[0];
+				} else {
+					currentRevision = vm.revisions.find(function(rev){
+						return rev._id === vm.revision || rev.tag === vm.revision;
+					});
+				}
 
 				if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
 					issue.title = IssuesService.generateTitle(issue);

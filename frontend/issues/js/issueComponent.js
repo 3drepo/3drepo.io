@@ -198,11 +198,14 @@
 			}
 
 			//unsubscribe on destroy
-			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
-			
+			if(self.data){
+				NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+			}
+
+
 		};
 
 		/**
