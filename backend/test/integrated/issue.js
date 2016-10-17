@@ -836,6 +836,16 @@ describe('Issues', function () {
 							let issue2 = res.body.find( issue => issue._id === bcf.issue2);
 
 							expect(issue1).to.exist;
+							expect(issue2).to.exist;
+							done(err);
+						});
+					},
+
+					function(done){
+						agent.get(`/${bcfusername}/${bcfproject}/issues/${bcf.issue1}.json`)
+						.expect(200, function(err, res){
+
+							let issue1 = res.body;
 
 							expect(issue1._id).to.equal(bcf.issue1);
 							expect(issue1.desc).to.equal('cc');
@@ -853,10 +863,10 @@ describe('Issues', function () {
 							expect(issue1.comments[0].viewpoint).to.exist;
 							expect(issue1.comments[0].viewpoint.screenshot).to.exist;
 
-							expect(issue2).to.exist;
 							done(err);
+
 						});
-					},
+					}
 				], done);
 
 			});

@@ -95,8 +95,7 @@ module.exports = {
 		callback_queue: 'callbackq',
 		upload_dir: 'uploads',
 		shared_storage: 'uploads',
-		event_queue: 'eventq',
-		event_queue_message_ttl: 1000
+		event_exchange: 'eventExchange'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false,
