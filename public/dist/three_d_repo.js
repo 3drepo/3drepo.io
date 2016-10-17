@@ -12566,6 +12566,7 @@ angular.module('3drepo')
 				bindings: {
 					account: "<",
 					project: "<",
+					revision: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -13023,7 +13024,8 @@ angular.module('3drepo')
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
-				desc: self.issueData.desc
+				desc: self.issueData.desc,
+				rev_id: self.revision
 			};
 			// Pin data
 			if (self.pinData !== null) {
@@ -14124,9 +14126,9 @@ angular.module('3drepo')
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -14231,6 +14233,9 @@ angular.module('3drepo')
 						break;
 					}
 				}
+			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				watchNotification();
 			}
 		});
 
@@ -14331,38 +14336,51 @@ angular.module('3drepo')
 		});
 
 
-		/*
-		 * Watch for new issues
-		 */
-		NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
+		function watchNotification(){
+			/*
+			 * Watch for new issues
+			 */
+			NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
 
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+				var issueRevision = vm.revisions.find(function(rev){
+					return rev._id === issue.rev_id;
+				});
 
-			vm.issues.unshift(issue);
-			vm.issues = vm.issues.slice(0);
+				var currentRevision = vm.revisions.find(function(rev){
+					return rev._id === vm.revision || rev.tag === vm.revision;
+				});
 
-			$scope.$apply();
-		});
+				if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+					issue.title = IssuesService.generateTitle(issue);
+					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
 
-		/*
-		 * Watch for status changes from all issues
-		 */
-		NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+					vm.issues.unshift(issue);
+					vm.issues = vm.issues.slice(0);
 
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-
-			vm.issues.find(function(oldIssue, i){
-				if(oldIssue._id === issue._id){
-					vm.issues[i] = issue;
+					$scope.$apply();
 				}
 			});
 
-			vm.issues = vm.issues.slice(0);
+			/*
+			 * Watch for status changes from all issues
+			 */
+			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
 
-			$scope.$apply();
-		});
+				issue.title = IssuesService.generateTitle(issue);
+				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+				vm.issues.find(function(oldIssue, i){
+					if(oldIssue._id === issue._id){
+						vm.issues[i] = issue;
+					}
+				});
+
+				vm.issues = vm.issues.slice(0);
+
+				$scope.$apply();
+			});
+		}
+
 
 		/*
 		* Unsubscribe notifcation on destroy
@@ -17727,6 +17745,7 @@ var Oculus = {};
 
 			// Ready signals
 			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
+			REVISIONS_LIST_READY: "EVENT_REVISIONS_LIST_READY",
 
 			// User logs in and out
 			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN",
@@ -17996,9 +18015,9 @@ var Oculus = {};
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -18183,6 +18202,10 @@ var Oculus = {};
 						project: data.project,
 						settings: data.settings
 					});
+				});
+
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
 			}
 		});
@@ -19054,39 +19077,67 @@ var Oculus = {};
 		};
 	}
 
-	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter", "EventService"];
 
-	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter, EventService) {
 		var vm = this;
 
-		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
-			vm.revisions = revisions;
-		});
+		$scope.$watch(EventService.currentEvent, function (event) {
 
-		$scope.$watch("vm.revisions", function () {
+			if(event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				if(!vm.revisions || !vm.revisions[0]){
+					return;
+				}
 
-			if(!vm.revisions || !vm.revisions[0]){
-				return;
+				if(!vm.revision){
+					vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+					vm.revisions[0].current = true;
+
+				} else {
+					vm.revisions && vm.revisions.forEach(function(rev, i){
+						if(rev.tag === vm.revision){
+							vm.revName = vm.revision;
+							vm.revisions[i].current = true;
+						} else if(rev._id === vm.revision){
+							vm.revName = $filter('revisionDate')(rev.timestamp);
+							vm.revisions[i].current = true;
+
+						}
+					});
+				}
 			}
 
-			if(!vm.revision){
-				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
-				vm.revisions[0].current = true;
-
-			} else {
-				vm.revisions && vm.revisions.forEach(function(rev, i){
-					if(rev.tag === vm.revision){
-						vm.revName = vm.revision;
-						vm.revisions[i].current = true;
-					} else if(rev._id === vm.revision){
-						vm.revName = $filter('revisionDate')(rev.timestamp);
-						vm.revisions[i].current = true;
-
-					}
-				});
-			}
-
 		});
+
+		// RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+		// 	vm.revisions = revisions;
+		// });
+
+		// $scope.$watch("vm.revisions", function () {
+
+		// 	if(!vm.revisions || !vm.revisions[0]){
+		// 		return;
+		// 	}
+
+		// 	if(!vm.revision){
+		// 		vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+		// 		vm.revisions[0].current = true;
+
+		// 	} else {
+		// 		vm.revisions && vm.revisions.forEach(function(rev, i){
+		// 			if(rev.tag === vm.revision){
+		// 				vm.revName = vm.revision;
+		// 				vm.revisions[i].current = true;
+		// 			} else if(rev._id === vm.revision){
+		// 				vm.revName = $filter('revisionDate')(rev.timestamp);
+		// 				vm.revisions[i].current = true;
+
+		// 			}
+		// 		});
+		// 	}
+
+		// });
 
 		vm.openDialog = function(){
 

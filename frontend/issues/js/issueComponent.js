@@ -27,6 +27,7 @@
 				bindings: {
 					account: "<",
 					project: "<",
+					revision: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -484,7 +485,8 @@
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
-				desc: self.issueData.desc
+				desc: self.issueData.desc,
+				rev_id: self.revision
 			};
 			// Pin data
 			if (self.pinData !== null) {

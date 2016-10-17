@@ -38,9 +38,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -225,6 +225,10 @@
 						project: data.project,
 						settings: data.settings
 					});
+				});
+
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
 			}
 		});

@@ -47,9 +47,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -154,6 +154,9 @@
 						break;
 					}
 				}
+			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				watchNotification();
 			}
 		});
 
@@ -254,38 +257,51 @@
 		});
 
 
-		/*
-		 * Watch for new issues
-		 */
-		NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
+		function watchNotification(){
+			/*
+			 * Watch for new issues
+			 */
+			NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
 
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+				var issueRevision = vm.revisions.find(function(rev){
+					return rev._id === issue.rev_id;
+				});
 
-			vm.issues.unshift(issue);
-			vm.issues = vm.issues.slice(0);
+				var currentRevision = vm.revisions.find(function(rev){
+					return rev._id === vm.revision || rev.tag === vm.revision;
+				});
 
-			$scope.$apply();
-		});
+				if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+					issue.title = IssuesService.generateTitle(issue);
+					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
 
-		/*
-		 * Watch for status changes from all issues
-		 */
-		NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+					vm.issues.unshift(issue);
+					vm.issues = vm.issues.slice(0);
 
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-
-			vm.issues.find(function(oldIssue, i){
-				if(oldIssue._id === issue._id){
-					vm.issues[i] = issue;
+					$scope.$apply();
 				}
 			});
 
-			vm.issues = vm.issues.slice(0);
+			/*
+			 * Watch for status changes from all issues
+			 */
+			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
 
-			$scope.$apply();
-		});
+				issue.title = IssuesService.generateTitle(issue);
+				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+				vm.issues.find(function(oldIssue, i){
+					if(oldIssue._id === issue._id){
+						vm.issues[i] = issue;
+					}
+				});
+
+				vm.issues = vm.issues.slice(0);
+
+				$scope.$apply();
+			});
+		}
+
 
 		/*
 		* Unsubscribe notifcation on destroy
