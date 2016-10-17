@@ -971,7 +971,7 @@ schema.methods.clean = function(typePrefix){
 		
 	});
 
-	if( cleaned.comments.length > 0 && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+	if( cleaned.comments.length > 0 &&  cleaned.viewpoints[0] && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
@@ -1249,13 +1249,32 @@ schema.statics.getProjectBCF = function(projectId){
 };
 
 
-schema.statics.importBCF = function(account, project, zipPath){
+schema.statics.importBCF = function(account, project, revId, zipPath){
 	'use strict';
 
 	let self = this;
 	let settings;
+	let getHistory;
 
-	return ProjectSetting.findById({account, project}, project).then(_settings => {
+	if(revId){
+		getHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
+		getHistory = getHistory({account, project}, revId, {_id: 1});
+	} else {
+		getHistory = History.findByBranch({account, project}, 'master', {_id: 1});
+	}
+
+	//assign revId for issue
+	return getHistory.then(history => {
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		} else if (history){
+			revId = history._id;
+		}
+	}).then(() => {
+
+		return ProjectSetting.findById({account, project}, project);
+
+	}).then(_settings => {
 		settings = _settings;
 
 	}).then(() => {
@@ -1384,6 +1403,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 					issue = Issue.createInstance({account, project});
 					issue._id = stringToUUID(guid);
 					issue.extras = {};
+					issue.rev_id = revId;
 
 					if(xml.Markup){
 						
