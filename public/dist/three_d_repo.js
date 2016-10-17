@@ -6702,33 +6702,9 @@ var ViewerManager = {};
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-<<<<<<< HEAD
-			vm.file = document.createElement('input');
-			vm.file.setAttribute('type', 'file');
-			vm.file.click();
-
-			vm.file.addEventListener("change", function () {
-				vm.selectedFile = vm.file.files[0];
-
-				var names = vm.selectedFile.name.split('.');
-				vm.uploadButtonDisabled = false;
-				vm.uploadErrorMessage = null;
-				
-				if(names.length === 1){
-					vm.uploadErrorMessage = 'Filename must have extension';
-					vm.uploadButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
-					vm.uploadErrorMessage = 'File format not supported';
-					vm.uploadButtonDisabled = true;
-				}
-
-				$scope.$apply();
-			});
-		}
-=======
 			vm.onUploadFile({project: vm.project});
 		};
->>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
+
 
 		/**
 		 * When users click upload after selecting
@@ -12735,6 +12711,13 @@ angular.module('3drepo')
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 				this.clearPin = true;
 			}
+
+			//unsubscribe on destroy
+			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+			
 		};
 
 		/**
@@ -12747,12 +12730,6 @@ angular.module('3drepo')
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
-
-			//unsubscribe on destroy
-			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
@@ -12950,14 +12927,7 @@ angular.module('3drepo')
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
-<<<<<<< HEAD
-				var data = {
-					desc: self.issueData.desc
-				};
-				IssuesService.updateIssue(self.issueData, data)
-					.then(function (data) {
-					});
-=======
+
 				if (self.issueData.desc !== savedDescription) {
 					var data = {
 						desc: self.issueData.desc
@@ -12968,7 +12938,7 @@ angular.module('3drepo')
 							savedDescription = self.issueData.desc;
 						});
 				}
->>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
+
 			}
 			else {
 				this.editingDescription = true;
@@ -13799,15 +13769,9 @@ angular.module('3drepo')
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-<<<<<<< HEAD
-						pickedPos: position,
-						pickedNorm: normal,
-						colours: [[200, 0, 0]]
-=======
 						pickedPos: pickedPos,
 						pickedNorm: pickedNorm,
 						colours: [[0.5, 0, 0]]
->>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
@@ -19176,7 +19140,6 @@ var Oculus = {};
 
 		});
 
-<<<<<<< HEAD
 		// RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 		// 	vm.revisions = revisions;
 		// });
@@ -19206,10 +19169,7 @@ var Oculus = {};
 
 		// });
 
-		vm.openDialog = function(){
-=======
 		vm.openDialog = function(event){
->>>>>>> f2b97aa90be5e2851b5fb1362c22f1c1c40aedc9
 
 			if(!vm.revisions){
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){

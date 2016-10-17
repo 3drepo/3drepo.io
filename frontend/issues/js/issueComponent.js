@@ -196,6 +196,13 @@
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 				this.clearPin = true;
 			}
+
+			//unsubscribe on destroy
+			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+			
 		};
 
 		/**
@@ -208,12 +215,6 @@
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
-
-			//unsubscribe on destroy
-			NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
-			NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 		};
 
 		/**
