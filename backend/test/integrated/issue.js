@@ -793,61 +793,85 @@ describe('Issues', function () {
 
 	});
 
-	describe('Importing a bcf file', function(){
-		it('should succee', function(done){
+	describe('BCF', function(){
 
+		var bcfusername = 'testing';
+		var bcfpassword = 'testing';
+		var bcfproject = 'testproject';
+
+		before(function(done){
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.bcfzip`)
-					.attach('file', __dirname + bcf.path)
-					.expect(200, function(err, res){
-						done(err);
-					});
+					agent.post('/logout')
+					.send({})
+					.expect(200, done);
 				},
-
 				function(done){
-					agent.get(`/${username}/${project}/issues.json`)
-					.expect(200, function(err, res){
-
-						//issues in bcf file should be imported
-						let issue1 = res.body.find( issue => issue._id === bcf.issue1);
-						let issue2 = res.body.find( issue => issue._id === bcf.issue2);
-
-						expect(issue1).to.exist;
-
-						expect(issue1._id).to.equal(bcf.issue1);
-						expect(issue1.desc).to.equal('cc');
-						expect(issue1.created).to.equal(1476107839000);
-						expect(issue1.priority).to.equal('medium');
-						expect(issue1.name).to.equal('monkey');
-						expect(issue1.status).to.equal('in progress');
-						expect(issue1.topic_type).to.equal('for_approval');
-						expect(issue1.thumbnail).to.exist;
-						expect(issue1.viewpoint).to.exist;
-						expect(issue1.viewpoint.screenshot).to.exist;
-
-						expect(issue1.comments.length).to.equal(1);
-						expect(issue1.comments[0].comment).to.equal('cccc');
-						expect(issue1.comments[0].viewpoint).to.exist;
-						expect(issue1.comments[0].viewpoint.screenshot).to.exist;
-
-						expect(issue2).to.exist;
-						done(err);
-					});
-				},
+					agent.post('/login')
+					.send({ username: bcfusername, password: bcfpassword})
+					.expect(200, done);
+				}
 			], done);
-
 		});
-	});
 
+		describe('Importing a bcf file', function(){
 
-	describe('Exporting a bcf file', function(){
-		it('should succee', function(done){
-			agent.get(`/${username}/${project}/issues.bcfzip`)
-			.expect(200, function(err, res){
-				done(err);
+			it('should succee', function(done){
+
+				async.series([
+					function(done){
+						agent.post(`/${bcfusername}/${bcfproject}/issues.bcfzip`)
+						.attach('file', __dirname + bcf.path)
+						.expect(200, function(err, res){
+							done(err);
+						});
+					},
+
+					function(done){
+						agent.get(`/${bcfusername}/${bcfproject}/issues.json`)
+						.expect(200, function(err, res){
+
+							//issues in bcf file should be imported
+							let issue1 = res.body.find( issue => issue._id === bcf.issue1);
+							let issue2 = res.body.find( issue => issue._id === bcf.issue2);
+
+							expect(issue1).to.exist;
+
+							expect(issue1._id).to.equal(bcf.issue1);
+							expect(issue1.desc).to.equal('cc');
+							expect(issue1.created).to.equal(1476107839000);
+							expect(issue1.priority).to.equal('medium');
+							expect(issue1.name).to.equal('monkey');
+							expect(issue1.status).to.equal('in progress');
+							expect(issue1.topic_type).to.equal('for_approval');
+							expect(issue1.thumbnail).to.exist;
+							expect(issue1.viewpoint).to.exist;
+							expect(issue1.viewpoint.screenshot).to.exist;
+
+							expect(issue1.comments.length).to.equal(1);
+							expect(issue1.comments[0].comment).to.equal('cccc');
+							expect(issue1.comments[0].viewpoint).to.exist;
+							expect(issue1.comments[0].viewpoint.screenshot).to.exist;
+
+							expect(issue2).to.exist;
+							done(err);
+						});
+					},
+				], done);
+
 			});
 		});
-	});
+
+
+		describe('Exporting a bcf file', function(){
+			it('should succee', function(done){
+				agent.get(`/${bcfusername}/${bcfproject}/issues.bcfzip`)
+				.expect(200, function(err, res){
+					done(err);
+				});
+			});
+		});
+	})
+
 });
 
