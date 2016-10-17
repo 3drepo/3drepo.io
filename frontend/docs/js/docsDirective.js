@@ -71,6 +71,7 @@
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
 
+									/*
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
@@ -86,6 +87,7 @@
 											}
 										}
 									}
+									 */
 								}
 							}
 							setContentHeight();

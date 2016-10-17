@@ -24,8 +24,14 @@
 	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
 		var vm = this;
 
+		/*
 		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 			vm.revisions = revisions;
+		});
+		*/
+
+		UtilsService.doGet(vm.account + "/" + vm.project + "/revisions.json").then(function(response){
+			vm.revisions = response.data;
 		});
 
 		$scope.$watch("vm.revisions", function () {

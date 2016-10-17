@@ -26,11 +26,11 @@
 	function RevisionsService(UtilsService) {
 
 		function listAll(account, project){
-			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+			UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
 				if(response.status === 200){
-					return Promise.resolve(response.data);
+					return (response.data);
 				} else {
-					return Promise.reject(response.data);
+					return (response.data);
 				}
 			});
 		}

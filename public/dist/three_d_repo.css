@@ -247,7 +247,7 @@ account-menu md-icon {
 }
 
 .newProjectDialog #projectDialogFilenameContainer {
-  margin: 0 0 0 16px;
+  margin: 0 0 20px 16px;
 }
 .newProjectDialog #projectDialogFilenameIntro {
   color: rgba(0, 0, 0, 0.4);

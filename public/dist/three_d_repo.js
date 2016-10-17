@@ -6304,7 +6304,11 @@ var ViewerManager = {};
 					break;
 
 				case "revision":
-					getRevision();
+					if(!vm.revisions){
+						UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+							vm.revisions = response.data;
+						});
+					}
 					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					break;
 			}
@@ -6336,13 +6340,14 @@ var ViewerManager = {};
 		 * When users click upload after selecting
 		 */
 		vm.uploadFile = function () {
+			var revisions;
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
-				getRevision().then(function(revisions){
-
+				UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
 							if(rev.tag === vm.tag){
@@ -6509,18 +6514,6 @@ var ViewerManager = {};
 			vm.item = vm.project;
 			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
-
-		function getRevision(){
-			if(!vm.revisions){
-				return RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
-					vm.revisions = revisions;
-					return Promise.resolve(revisions);
-				});
-			} else {
-				return Promise.resolve(vm.revisions);
-			}
-		}
-
 	}
 }());
 
@@ -9688,6 +9681,7 @@ var ViewerManager = {};
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
 
+									/*
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
@@ -9703,6 +9697,7 @@ var ViewerManager = {};
 											}
 										}
 									}
+									 */
 								}
 							}
 							setContentHeight();
@@ -18182,8 +18177,14 @@ var Oculus = {};
 	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
 		var vm = this;
 
+		/*
 		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 			vm.revisions = revisions;
+		});
+		*/
+
+		UtilsService.doGet(vm.account + "/" + vm.project + "/revisions.json").then(function(response){
+			vm.revisions = response.data;
 		});
 
 		$scope.$watch("vm.revisions", function () {
@@ -18269,11 +18270,11 @@ var Oculus = {};
 	function RevisionsService(UtilsService) {
 
 		function listAll(account, project){
-			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+			UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
 				if(response.status === 200){
-					return Promise.resolve(response.data);
+					return (response.data);
 				} else {
-					return Promise.reject(response.data);
+					return (response.data);
 				}
 			});
 		}
