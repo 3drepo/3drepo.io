@@ -257,35 +257,41 @@
 			/*
 			 * Watch for new issues
 			 */
-			NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
+			NotificationService.subscribe.newIssues(vm.account, vm.project, function(issues){
 
-				var issueRevision = vm.revisions.find(function(rev){
-					return rev._id === issue.rev_id;
+				issues.forEach(function(issue){
+
+					var issueRevision = vm.revisions.find(function(rev){
+						return rev._id === issue.rev_id;
+					});
+
+					var currentRevision;
+
+					if(!vm.revision){
+						currentRevision = vm.revisions[0];
+					} else {
+						currentRevision = vm.revisions.find(function(rev){
+							return rev._id === vm.revision || rev.tag === vm.revision;
+						});
+					}
+
+					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+						issue.title = IssuesService.generateTitle(issue);
+						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+						vm.issues.unshift(issue);
+						
+					}
+
 				});
 
-				var currentRevision;
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
 
-				if(!vm.revision){
-					currentRevision = vm.revisions[0];
-				} else {
-					currentRevision = vm.revisions.find(function(rev){
-						return rev._id === vm.revision || rev.tag === vm.revision;
-					});
-				}
-
-				if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-
-					vm.issues.unshift(issue);
-					vm.issues = vm.issues.slice(0);
-
-					$scope.$apply();
-				}
 			});
 
 			/*
-			 * Watch for status changes from all issues
+			 * Watch for status changes for all issues
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
 
@@ -324,7 +330,7 @@
 		* Unsubscribe notifcation on destroy
 		*/
 		$scope.$on('$destroy', function(){
-			NotificationService.unsubscribe.newIssue(vm.account, vm.project);
+			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
 		});
 

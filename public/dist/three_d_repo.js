@@ -12081,12 +12081,12 @@ angular.module('3drepo')
 		socket.off(getEventName(account, project, keys, event));
 	}
 
-	function subscribeNewIssue(account, project, callback){
-		subscribe(account, project, [], 'newIssue', callback);
+	function subscribeNewIssues(account, project, callback){
+		subscribe(account, project, [], 'newIssues', callback);
 	}
 
-	function unsubscribeNewIssue(account, project){
-		unsubscribe(account, project, [], 'newIssue');
+	function unsubscribeNewIssues(account, project){
+		unsubscribe(account, project, [], 'newIssues');
 	}
 
 	function subscribeNewComment(account, project, issueId, callback){
@@ -12140,7 +12140,7 @@ angular.module('3drepo')
 	}
 	return {
 		subscribe: {
-			newIssue: subscribeNewIssue,
+			newIssues: subscribeNewIssues,
 			newComment: subscribeNewComment,
 			commentChanged: subscribeCommentChanged,
 			commentDeleted: subscribeCommentDeleted,
@@ -12149,7 +12149,7 @@ angular.module('3drepo')
 
 		},
 		unsubscribe:{
-			newIssue: unsubscribeNewIssue,
+			newIssues: unsubscribeNewIssues,
 			newComment: unsubscribeNewComment,
 			commentChanged: unsubscribeCommentChanged,
 			commentDeleted: unsubscribeCommentDeleted,
@@ -14365,31 +14365,37 @@ angular.module('3drepo')
 			/*
 			 * Watch for new issues
 			 */
-			NotificationService.subscribe.newIssue(vm.account, vm.project, function(issue){
+			NotificationService.subscribe.newIssues(vm.account, vm.project, function(issues){
 
-				var issueRevision = vm.revisions.find(function(rev){
-					return rev._id === issue.rev_id;
+				issues.forEach(function(issue){
+
+					var issueRevision = vm.revisions.find(function(rev){
+						return rev._id === issue.rev_id;
+					});
+
+					var currentRevision;
+
+					if(!vm.revision){
+						currentRevision = vm.revisions[0];
+					} else {
+						currentRevision = vm.revisions.find(function(rev){
+							return rev._id === vm.revision || rev.tag === vm.revision;
+						});
+					}
+
+					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+						issue.title = IssuesService.generateTitle(issue);
+						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+
+						vm.issues.unshift(issue);
+						
+					}
+
 				});
 
-				var currentRevision;
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
 
-				if(!vm.revision){
-					currentRevision = vm.revisions[0];
-				} else {
-					currentRevision = vm.revisions.find(function(rev){
-						return rev._id === vm.revision || rev.tag === vm.revision;
-					});
-				}
-
-				if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-
-					vm.issues.unshift(issue);
-					vm.issues = vm.issues.slice(0);
-
-					$scope.$apply();
-				}
 			});
 
 			/*
@@ -14432,7 +14438,7 @@ angular.module('3drepo')
 		* Unsubscribe notifcation on destroy
 		*/
 		$scope.$on('$destroy', function(){
-			NotificationService.unsubscribe.newIssue(vm.account, vm.project);
+			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
 		});
 

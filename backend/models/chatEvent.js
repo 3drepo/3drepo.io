@@ -33,9 +33,9 @@ function insertEventQueue(event, emitter, account, project, extraKeys, data){
 	return Queue.insertEventMessage(msg);
 }
 
-function newIssue(emitter, account, project, data){
+function newIssues(emitter, account, project, data){
 	'use strict';
-	return insertEventQueue('newIssue', emitter, account, project, null, data);
+	return insertEventQueue('newIssues', emitter, account, project, null, data);
 }
 
 function newComment(emitter, account, project, issueId, data){
@@ -70,7 +70,7 @@ function issueChanged(emitter, account, project, issueId, data){
 }
 
 module.exports = {
-	newIssue,
+	newIssues,
 	newComment,
 	commentChanged,
 	commentDeleted,

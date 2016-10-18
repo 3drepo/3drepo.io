@@ -617,7 +617,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			let cleaned = issue.clean(settings.type);
 			
-			ChatEvent.newIssue(data.owner, dbColOptions.account, dbColOptions.project, cleaned);
+			ChatEvent.newIssues(data.owner, dbColOptions.account, dbColOptions.project, [cleaned]);
 
 			return Promise.resolve(cleaned);
 		});
@@ -759,9 +759,14 @@ schema.methods.updateAttrs = function(data){
 	data.hasOwnProperty('priority') && this.changePriority(data.priority);
 	data.hasOwnProperty('status') && this.changeStatus(data.status);
 
+
 	return this.save().then(() => {
 
-		let issue = this.clean();
+		return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project);
+	
+	}).then(settings => {
+
+		let issue = this.clean(settings.type);
 		ChatEvent.issueChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
 
 		return this;
@@ -1302,7 +1307,7 @@ schema.statics.getProjectBCF = function(projectId){
 };
 
 
-schema.statics.importBCF = function(account, project, revId, zipPath){
+schema.statics.importBCF = function(requester, account, project, revId, zipPath){
 	'use strict';
 
 	let self = this;
@@ -1400,8 +1405,22 @@ schema.statics.importBCF = function(account, project, revId, zipPath){
 						return Promise.all(saveIssueProms);
 				
 
-					}).then(() => {
+					}).then(savedIssues => {
+
+						let notifications = [];
+
+						savedIssues.forEach(issue => {
+							if(issue){
+								notifications.push(issue.clean(settings.type));
+							}
+						});
+
+						if(notifications.length){
+							ChatEvent.newIssues(requester, account, project, notifications);
+						}
+						
 						resolve();
+
 					}).catch(err => {
 						reject(err);
 					});

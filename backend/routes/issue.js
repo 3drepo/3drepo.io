@@ -338,7 +338,7 @@ function importBCF(req, res, next){
 		} else {
 
 
-			Issue.importBCF(req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF(req.session.user.username, req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

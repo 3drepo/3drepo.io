@@ -79,12 +79,12 @@ angular.module('3drepo')
 		socket.off(getEventName(account, project, keys, event));
 	}
 
-	function subscribeNewIssue(account, project, callback){
-		subscribe(account, project, [], 'newIssue', callback);
+	function subscribeNewIssues(account, project, callback){
+		subscribe(account, project, [], 'newIssues', callback);
 	}
 
-	function unsubscribeNewIssue(account, project){
-		unsubscribe(account, project, [], 'newIssue');
+	function unsubscribeNewIssues(account, project){
+		unsubscribe(account, project, [], 'newIssues');
 	}
 
 	function subscribeNewComment(account, project, issueId, callback){
@@ -138,7 +138,7 @@ angular.module('3drepo')
 	}
 	return {
 		subscribe: {
-			newIssue: subscribeNewIssue,
+			newIssues: subscribeNewIssues,
 			newComment: subscribeNewComment,
 			commentChanged: subscribeCommentChanged,
 			commentDeleted: subscribeCommentDeleted,
@@ -147,7 +147,7 @@ angular.module('3drepo')
 
 		},
 		unsubscribe:{
-			newIssue: unsubscribeNewIssue,
+			newIssues: unsubscribeNewIssues,
 			newComment: unsubscribeNewComment,
 			commentChanged: unsubscribeCommentChanged,
 			commentDeleted: unsubscribeCommentDeleted,
