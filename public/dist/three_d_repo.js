@@ -6677,7 +6677,11 @@ var ViewerManager = {};
 					break;
 
 				case "revision":
-					getRevision();
+					if(!vm.revisions){
+						UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+							vm.revisions = response.data;
+						});
+					}
 					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					break;
 			}
@@ -6710,13 +6714,14 @@ var ViewerManager = {};
 		 * When users click upload after selecting
 		 */
 		vm.uploadFile = function () {
+			var revisions;
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
-				getRevision().then(function(revisions){
-
+				UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
 							if(rev.tag === vm.tag){
@@ -6878,18 +6883,6 @@ var ViewerManager = {};
 			vm.item = vm.project;
 			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
-
-		function getRevision(){
-			if(!vm.revisions){
-				return RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
-					vm.revisions = revisions;
-					return Promise.resolve(revisions);
-				});
-			} else {
-				return Promise.resolve(vm.revisions);
-			}
-		}
-
 	}
 }());
 
@@ -10156,6 +10149,7 @@ var ViewerManager = {};
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
 
+									/*
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
@@ -10171,6 +10165,7 @@ var ViewerManager = {};
 											}
 										}
 									}
+									 */
 								}
 							}
 							setContentHeight();
@@ -14399,7 +14394,7 @@ angular.module('3drepo')
 			});
 
 			/*
-			 * Watch for status changes from all issues
+			 * Watch for status changes for all issues
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
 
@@ -19147,6 +19142,7 @@ var Oculus = {};
 	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter, EventService) {
 		var vm = this;
 
+
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if(event.type === EventService.EVENT.REVISIONS_LIST_READY){
@@ -19172,37 +19168,8 @@ var Oculus = {};
 					});
 				}
 			}
-
 		});
 
-		// RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
-		// 	vm.revisions = revisions;
-		// });
-
-		// $scope.$watch("vm.revisions", function () {
-
-		// 	if(!vm.revisions || !vm.revisions[0]){
-		// 		return;
-		// 	}
-
-		// 	if(!vm.revision){
-		// 		vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
-		// 		vm.revisions[0].current = true;
-
-		// 	} else {
-		// 		vm.revisions && vm.revisions.forEach(function(rev, i){
-		// 			if(rev.tag === vm.revision){
-		// 				vm.revName = vm.revision;
-		// 				vm.revisions[i].current = true;
-		// 			} else if(rev._id === vm.revision){
-		// 				vm.revName = $filter('revisionDate')(rev.timestamp);
-		// 				vm.revisions[i].current = true;
-
-		// 			}
-		// 		});
-		// 	}
-
-		// });
 
 		vm.openDialog = function(event){
 
@@ -19264,9 +19231,9 @@ var Oculus = {};
 		function listAll(account, project){
 			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
 				if(response.status === 200){
-					return Promise.resolve(response.data);
+					return (response.data);
 				} else {
-					return Promise.reject(response.data);
+					return (response.data);
 				}
 			});
 		}
