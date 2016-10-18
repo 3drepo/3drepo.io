@@ -436,8 +436,16 @@ function uploadProject(req, res, next){
 
 						//catch here to provide custom error message
 						if(err.errCode && projectSetting){
+
 							projectSetting.errorReason = convertToErrorCode(err.errCode);
 							projectSetting.markModified('errorReason');
+
+							if(projectSetting.errorReason.value === responseCodes.FILE_IMPORT_MISSING_TEXTURES.value){
+								projectSetting.status = 'ok';
+							} else {
+								projectSetting.status = 'failed';
+							}
+
 							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
@@ -467,7 +475,7 @@ function uploadProject(req, res, next){
 					//mark project failed
 
 					if(projectSetting){
-						projectSetting.status = 'failed';
+
 						projectSetting.save();
 
 						sendChatEvent(projectSetting);

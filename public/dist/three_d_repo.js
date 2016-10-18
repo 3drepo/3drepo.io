@@ -6875,14 +6875,15 @@ var ViewerManager = {};
 						vm.fileUploadInfo = "Uploaded";
 						// clear revisions cache
 						vm.revisions = null;
-					} else {
-						if (data.hasOwnProperty("errorReason")) {
-							vm.fileUploadInfo = data.errorReason.message;
-						}
-						else {
-							vm.fileUploadInfo = "Failed to upload file";
-						}
 					}
+
+					//status=ok can have an error message too
+					if (data.hasOwnProperty("errorReason")) {
+						vm.fileUploadInfo = data.errorReason.message;
+					} else if (data.status === "failed") {
+						vm.fileUploadInfo = "Failed to upload file";
+					}
+
 					vm.showUploading = false;
 					vm.showFileUploadInfo = true;
 					$scope.$apply();
