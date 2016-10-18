@@ -371,22 +371,22 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-
-			vm.issueToEdit = issue;
 			
-			if(issue){
-				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
-					vm.issueToEdit = issue;
-				});
-			}
-
 			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 			if (vm.selectedIssue) {
 				deselectPin(vm.selectedIssue._id);
 			}
-			vm.selectedIssue = issue;
+
+			if(issue){
+				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+					vm.selectedIssue = issue;
+				});
+			} else {
+				vm.selectedIssue = issue;
+			}
+
 			vm.toShow = "showIssue";
 		};
 
