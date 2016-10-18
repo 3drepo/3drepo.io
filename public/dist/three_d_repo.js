@@ -6560,6 +6560,7 @@ var ViewerManager = {};
 				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
+				projectToUpload: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
@@ -6572,6 +6573,8 @@ var ViewerManager = {};
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
 					scope.vm.uploadedFileWatch(); // Disable events watch
+					scope.vm.projectToUploadFileWatch();
+
 				});
 			}
 		};
@@ -6588,7 +6591,6 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
-		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6607,16 +6609,38 @@ var ViewerManager = {};
 			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
-
+		vm.uploadButtonDisabled = true;
 		checkFileUploading();
 
 		/*
 		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
+
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
+
 				console.log("Uploaded file", vm.uploadedFile);
-				vm.selectedFile = vm.uploadedFile.file;
+				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
+
+			}
+		});
+
+		vm.projectToUploadFileWatch = $scope.$watch("vm.projectToUpload", function () {
+			if(vm.projectToUpload){
+
+				var names = vm.projectToUpload.name.split('.');
+				
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				} else {
+					vm.uploadButtonDisabled = false;
+				}
 			}
 		});
 
@@ -6629,7 +6653,6 @@ var ViewerManager = {};
 					// No timestamp indicates no model previously uploaded
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
@@ -6656,7 +6679,6 @@ var ViewerManager = {};
 					vm.uploadErrorMessage = null;
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
@@ -6731,7 +6753,7 @@ var ViewerManager = {};
 					}
 
 					if(!vm.uploadErrorMessage){
-						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
+						vm.uploadedFile = {project: vm.project, file: vm.projectToUpload};
 						vm.closeDialog();
 					}
 				});
@@ -6947,7 +6969,8 @@ var ViewerManager = {};
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				vm.projectToUpload = this.files[0];
+				//vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
 				$scope.$apply();
 			},
 			false
