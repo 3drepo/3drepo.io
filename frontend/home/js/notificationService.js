@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var gsocket;
-
 angular.module('3drepo')
-.service('NotificationService', function() {
+.factory('NotificationService', NotificationService);
+
+NotificationService.$inject = ["serverConfig"];
+
+function NotificationService(serverConfig){
 	"use strict";
 
-	var socket = io('http://example.org:3000', {path: '/yay'});
-	gsocket = socket;
+	if(!serverConfig.chatHost || !serverConfig.chatPath){
+		console.log('Chat server settings missing');
+	}
+
+	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath});
 	var joined = [];
 
 	socket.on('reconnect', function(){
@@ -155,6 +160,6 @@ angular.module('3drepo')
 			projectStatusChanged: unsubscribeProjectStatusChanged,
 		}
 	};
-});
+};
 
 
