@@ -1054,17 +1054,17 @@ schema.methods.getBCFMarkup = function(unit){
 
 	this.topic_type && (markup.Markup.Topic['@'].TopicType = this.topic_type);
 
-	markup.Markup.Header = _.get(this, 'extras.Header');
-	markup.Markup.Topic.ReferenceLink = _.get(this, 'extras.ReferenceLink');
-	markup.Markup.Topic.Index = _.get(this, 'extras.Index');
-	markup.Markup.Topic.Labels = _.get(this, 'extras.Labels');
-	markup.Markup.Topic.ModifiedDate = _.get(this, 'extras.ModifiedDate');
-	markup.Markup.Topic.ModifiedAuthor = _.get(this, 'extras.ModifiedAuthor');
-	markup.Markup.Topic.DueDate = _.get(this, 'extras.DueDate');
-	markup.Markup.Topic.AssignedTo = _.get(this, 'extras.AssignedTo');
-	markup.Markup.Topic.BimSnippet = _.get(this, 'extras.BimSnippet');
-	markup.Markup.Topic.DocumentReference = _.get(this, 'extras.DocumentReference');
-	markup.Markup.Topic.RelatedTopic = _.get(this, 'extras.RelatedTopic');
+	_.get(this, 'extras.Header') && (markup.Markup.Header = _.get(this, 'extras.Header'));
+	_.get(this, 'extras.ReferenceLink') && (markup.Markup.Topic.ReferenceLink = _.get(this, 'extras.ReferenceLink'));
+	_.get(this, 'extras.Index') && (markup.Markup.Topic.Index = _.get(this, 'extras.Index'));
+	_.get(this, 'extras.Labels') && (markup.Markup.Topic.Labels = _.get(this, 'extras.Labels'));
+	_.get(this, 'extras.ModifiedDate') && (markup.Markup.Topic.ModifiedDate = _.get(this, 'extras.ModifiedDate'));
+	_.get(this, 'extras.ModifiedAuthor') && (markup.Markup.Topic.ModifiedAuthor = _.get(this, 'extras.ModifiedAuthor'));
+	_.get(this, 'extras.DueDate') && (markup.Markup.Topic.DueDate = _.get(this, 'extras.DueDate'));
+	_.get(this, 'extras.AssignedTo') && (markup.Markup.Topic.AssignedTo = _.get(this, 'extras.AssignedTo'));
+	_.get(this, 'extras.BimSnippet') && (markup.Markup.Topic.BimSnippet = _.get(this, 'extras.BimSnippet'));
+	_.get(this, 'extras.DocumentReference') && (markup.Markup.Topic.DocumentReference = _.get(this, 'extras.DocumentReference'));
+	_.get(this, 'extras.RelatedTopic') && (markup.Markup.Topic.RelatedTopic = _.get(this, 'extras.RelatedTopic'));
 	
 	//add comments
 	this.comments.forEach(comment => {
@@ -1081,8 +1081,8 @@ schema.methods.getBCFMarkup = function(unit){
 			'Date': moment(comment.created).utc().format()
 		};
 
-		commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate');
-		commentXmlObj.ModifiedAuthor = _.get(comment, 'extras.ModifiedAuthor');
+		_.get(comment, 'extras.ModifiedDate') && (commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate'));
+		_.get(comment, 'extras.ModifiedAuthor') && (commentXmlObj.ModifiedAuthor = _.get(comment, 'extras.ModifiedAuthor'));
 
 		markup.Markup.Comment.push(commentXmlObj);
 
@@ -1105,6 +1105,9 @@ schema.methods.getBCFMarkup = function(unit){
 					'Guid': utils.uuidToString(vp.guid)
 				},
 				'Viewpoint': viewpointFileName,
+				'Snapshot':  null
+
+
 				
 			};
 
@@ -1151,14 +1154,15 @@ schema.methods.getBCFMarkup = function(unit){
 				}
 			};
 
-			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components');
-			viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces');
-			viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries');
-			viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings');
-			viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera');
-			viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines');
-			viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes');
-			viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap');
+
+			_.get(vp, 'extras.Components') && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components'));
+			_.get(vp, 'extras.Spaces') && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces'));
+			_.get(vp, 'extras.SpaceBoundaries') && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries'));
+			_.get(vp, 'extras.Openings') && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings'));
+			_.get(vp, 'extras.OrthogonalCamera') && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera'));
+			_.get(vp, 'extras.Lines') && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines'));
+			_.get(vp, 'extras.ClippingPlanes') && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes'));
+			_.get(vp, 'extras.Bitmap') && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap'));
 
 			viewpointEntries.push({
 				filename: viewpointFileName,
