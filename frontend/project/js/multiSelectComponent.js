@@ -77,9 +77,17 @@
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
-						objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
+						selectedObjects.find(function(obj, i){
+							if(obj.id === changes.event.currentValue.value.id){
+								objectIndex = i;
+							}
+						});
 						if (objectIndex === -1) {
-							selectedObjects.push(changes.event.currentValue.value.id);
+							selectedObjects.push({
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+							});
 						}
 						else {
 							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
@@ -95,7 +103,11 @@
 					}
 					else {
 						// Can only select one object at a time when not in multi mode
-						selectedObjects = [changes.event.currentValue.value.id];
+						selectedObjects = [{
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+						}];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
