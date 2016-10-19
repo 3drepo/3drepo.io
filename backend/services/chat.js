@@ -28,7 +28,17 @@ module.exports.createApp = function (http, serverConfig){
 	let io = require("socket.io")(http, { path: serverConfig.chat_path });
 	let sharedSession = require("express-socket.io-session");
 
+	io.use((socket, next) => {
+		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
+			socket.handshake.headers.cookie = 'connect.sid=' + socket.handshake.query['connect.sid'] + '; '; 
+		}
+		console.log(socket.handshake.headers.cookie);
+
+		next();
+	});
+
 	io.use(sharedSession(session, { autoSave: true }));
+
 	io.use((socket, next) => {
 		// init the singleton db connection
 		let DB = require("../db/db")(systemLogger);
@@ -82,6 +92,10 @@ module.exports.createApp = function (http, serverConfig){
 		io.on('connection', socket => {
 
 			if(!socket.handshake.session.user){
+
+				systemLogger.logError(`socket connection without credential`);
+				//console.log(socket.handshake);
+
 				return;
 			}
 
