@@ -379,6 +379,14 @@
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
+<<<<<<< HEAD
+				var data = {
+					desc: self.issueData.desc
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (data) {
+					});
+=======
 				if (self.issueData.desc !== savedDescription) {
 					var data = {
 						desc: self.issueData.desc
@@ -389,6 +397,7 @@
 							savedDescription = self.issueData.desc;
 						});
 				}
+>>>>>>> origin/ISSUE_250
 			}
 			else {
 				this.editingDescription = true;

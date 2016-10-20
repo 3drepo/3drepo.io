@@ -38,7 +38,10 @@ account-dir .userContent .cardInfo {
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
+<<<<<<< HEAD
+=======
   overflow: auto;
+>>>>>>> origin/ISSUE_250
 }
 
 account-projects md-list {

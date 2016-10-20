@@ -14,7 +14,7 @@ md-list.typesList(ng-if="!vm.showInfo")
 						ng-class-even="'docsListBackground2'"
 						)
 						p.metadataKey(flex="50") {{mKey}}
-						p.metadataValue(flex="45", ng-bind-html="mValue | linky:'_blank'") {{mValue}}
+						p.metadataValue(flex="45", ng-bind-html="mValue.toString() | linky:'_blank'") {{mValue}}
 
 			// PDF
 			div(ng-if="key==='PDF'")

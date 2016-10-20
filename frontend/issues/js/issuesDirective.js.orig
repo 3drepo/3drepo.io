@@ -306,7 +306,11 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
+<<<<<<< HEAD
+			if ((vm.selectedIssue) && (vm.selectedIssue._id !== issue._id)) {
+=======
 			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
+>>>>>>> origin/ISSUE_250
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;

@@ -177,8 +177,33 @@
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
+<<<<<<< HEAD
+			vm.file = document.createElement('input');
+			vm.file.setAttribute('type', 'file');
+			vm.file.click();
+
+			vm.file.addEventListener("change", function () {
+				vm.selectedFile = vm.file.files[0];
+
+				var names = vm.selectedFile.name.split('.');
+				vm.uploadButtonDisabled = false;
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				}
+
+				$scope.$apply();
+			});
+		}
+=======
 			vm.onUploadFile({project: vm.project});
 		};
+>>>>>>> origin/ISSUE_250
 
 		/**
 		 * When users click upload after selecting
