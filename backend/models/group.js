@@ -81,7 +81,10 @@ groupSchema.methods.updateAttrs = function(data){
 				obj.project,
 				id,
 				utils.uuidToString(this._id)
-			)
+			).then( mesh => {
+
+				obj.shared_id = mesh.shared_id;
+			})
 		);
 	});
 
@@ -149,11 +152,10 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && uuidToString(cleaned.issue_id);
-	console.log(cleaned.objects);
 	cleaned.objects.forEach(object => {
 		object.id = uuidToString(object.id);
+		object.shared_id && (object.shared_id = uuidToString(object.shared_id));
 	});
-
 	return cleaned;
 
 };
