@@ -74,6 +74,13 @@
 					vm.normal = normal;
 				if(distance)
 					vm.distance = distance;
+
+				if(!vm.normal && vm.selectedAxis == "")
+				{
+					//unintiialised clipping plane. reset it
+					vm.selectedAxis = "X";					
+				}
+
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
@@ -158,11 +165,11 @@
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
+				vm.normal = null;
 				if(vm.account && vm.project)
 				{
 					vm.account = null;
 					vm.project = null;
-					vm.normal = null;
 					initClippingPlane();	
 				}
 				else
