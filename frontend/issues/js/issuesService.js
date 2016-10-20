@@ -94,7 +94,6 @@
 			$http.get(url)
 				.then(
 					function(data) {
-						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -392,7 +391,6 @@
 
 			UtilsService.doPost(formData, url, {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {

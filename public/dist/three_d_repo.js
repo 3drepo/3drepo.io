@@ -706,41 +706,45 @@ var ClipPlane = {};
 
 		sceneBbox = viewer.runtime.getBBox(viewer.getScene());
 
-		// Construct and connect everything together
-		outlineMat.setAttribute("emissiveColor", colour.join(" "));
-		outlineLines.setAttribute("vertexCount", 5);
-		outlineLines.appendChild(outlineCoords);
-
-		outlineApp.appendChild(outlineMat);
-		outline.appendChild(outlineApp);
-		outline.appendChild(outlineLines);
-
-		coordinateFrame.appendChild(outline);
-
-		// Attach to the root node of the viewer
-		viewer.getScene().appendChild(coordinateFrame);
-		if(parentNode)
+		if(normal || axis != "")
 		{
-			volume = viewer.runtime.getBBox(parentNode);
-		}
-		else
-		{
-			volume = sceneBbox;
+
+			outlineMat.setAttribute("emissiveColor", colour.join(" "));
+			outlineLines.setAttribute("vertexCount", 5);
+			outlineLines.appendChild(outlineCoords);
+
+			outlineApp.appendChild(outlineMat);
+			outline.appendChild(outlineApp);
+			outline.appendChild(outlineLines);
+
+			coordinateFrame.appendChild(outline);
+
+			// Attach to the root node of the viewer
+			viewer.getScene().appendChild(coordinateFrame);
+			if(parentNode)
+			{
+				volume = viewer.runtime.getBBox(parentNode);
+			}
+			else
+			{
+				volume = sceneBbox;
 			
+			}
+
+			// Move the plane to finish construction
+			if(!normal)
+			{		
+				this.movePlane(axis, percentage);
+			}
+
+			viewer.getScene().appendChild(clipPlaneElem);
+
+
+			if(parentNode)
+				this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
+
+
 		}
-
-		// Move the plane to finish construction
-		if(axis != "")
-		{		
-			this.movePlane(axis, percentage);
-		}
-
-		viewer.getScene().appendChild(clipPlaneElem);
-
-
-		if(parentNode)
-			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
-
 
 	};
 
@@ -3631,7 +3635,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(account, project),
+						trans: self.getParentTransformation(self.account, self.project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
@@ -6708,7 +6712,6 @@ var ViewerManager = {};
 		vm.selectFile = function(){
 			vm.onUploadFile({project: vm.project});
 		};
-
 
 		/**
 		 * When users click upload after selecting
@@ -9814,6 +9817,13 @@ var ViewerManager = {};
 					vm.normal = normal;
 				if(distance)
 					vm.distance = distance;
+
+				if(!vm.normal && vm.selectedAxis == "")
+				{
+					//unintiialised clipping plane. reset it
+					vm.selectedAxis = "X";					
+				}
+
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
@@ -9898,11 +9908,11 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
+				vm.normal = null;
 				if(vm.account && vm.project)
 				{
 					vm.account = null;
 					vm.project = null;
-					vm.normal = null;
 					initClippingPlane();	
 				}
 				else
@@ -13295,7 +13305,6 @@ angular.module('3drepo')
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
-						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}
@@ -13453,13 +13462,7 @@ angular.module('3drepo')
 
 					if(trans)
 					{
-						console.log("position before:" + position.toGL());
 						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
 					}
 
 
@@ -14706,8 +14709,8 @@ angular.module('3drepo')
 							id: self.allIssues[i]._id,
 							position: self.allIssues[i].position,
 							norm: self.allIssues[i].norm,
-							account: self.account,
-							project: self.project
+							account: self.allIssues[i].account,
+							project: self.allIssues[i].project
 						};
 						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
 					}
@@ -14813,7 +14816,6 @@ angular.module('3drepo')
 			$http.get(url)
 				.then(
 					function(data) {
-						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -15111,7 +15113,6 @@ angular.module('3drepo')
 
 			UtilsService.doPost(formData, url, {'Content-Type': undefined}).then(function(res){
 				
-				console.log(res);
 				if(res.status === 200){
 					deferred.resolve();
 				} else {

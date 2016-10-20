@@ -180,7 +180,6 @@
 			vm.onUploadFile({project: vm.project});
 		};
 
-
 		/**
 		 * When users click upload after selecting
 		 */

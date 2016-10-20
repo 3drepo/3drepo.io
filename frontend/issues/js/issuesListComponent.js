@@ -510,8 +510,8 @@
 							id: self.allIssues[i]._id,
 							position: self.allIssues[i].position,
 							norm: self.allIssues[i].norm,
-							account: self.account,
-							project: self.project
+							account: self.allIssues[i].account,
+							project: self.allIssues[i].project
 						};
 						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
 					}
