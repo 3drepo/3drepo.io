@@ -819,17 +819,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
-			var highlightIds = [];
-			var unHighlightIds = [];
-
-			highlight_ids.forEach(function(obj){
-				highlightIds.push(obj.id);
-			});
-
-			unhighlight_ids.forEach(function(obj){
-				unHighlightIds.push(obj.id);
-			});
 			
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -848,12 +837,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlightIds);
+						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
 						if (highlightParts && highlightParts.ids.length > 0) {
 							fullHighlightPartsList.push(highlightParts);
 						}
 
-						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unHighlightIds);
+						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
 						if (unhighlightParts && unhighlightParts.ids.length > 0) {
 							fullUnhighlightPartsList.push(unhighlightParts);
 						}

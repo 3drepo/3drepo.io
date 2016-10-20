@@ -410,7 +410,7 @@
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -425,7 +425,7 @@
 					screenShotPromise.promise.then(function (screenShot) {
 						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});

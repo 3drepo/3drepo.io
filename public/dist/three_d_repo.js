@@ -3634,17 +3634,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
-			var highlightIds = [];
-			var unHighlightIds = [];
-
-			highlight_ids.forEach(function(obj){
-				highlightIds.push(obj.id);
-			});
-
-			unhighlight_ids.forEach(function(obj){
-				unHighlightIds.push(obj.id);
-			});
 			
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -3663,12 +3652,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlightIds);
+						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
 						if (highlightParts && highlightParts.ids.length > 0) {
 							fullHighlightPartsList.push(highlightParts);
 						}
 
-						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unHighlightIds);
+						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
 						if (unhighlightParts && unhighlightParts.ids.length > 0) {
 							fullUnhighlightPartsList.push(unhighlightParts);
 						}
@@ -10192,11 +10181,11 @@ var ViewerManager = {};
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					index = vm.selectedGroup.parents.indexOf(event.value.id);
+					index = vm.selectedGroup.objects.indexOf(event.value.id);
 					if (index !== -1) {
-						vm.selectedGroup.parents.splice(index, 1);
+						vm.selectedGroup.objects.splice(index, 1);
 					} else {
-						vm.selectedGroup.parents.push(event.value.id);
+						vm.selectedGroup.objects.push(event.value.id);
 					}
 
 					promise = GroupsService.updateGroup(vm.selectedGroup);
@@ -10214,14 +10203,14 @@ var ViewerManager = {};
 		 */
 		function setSelectedGroupHighlightStatus (highlight) {
 			var data;
-			if ((vm.selectedGroup !== null) && (vm.selectedGroup.parents.length > 0)) {
+			if ((vm.selectedGroup !== null) && (vm.selectedGroup.objects.length > 0)) {
 				data = {
 					source: "tree",
 					account: vm.account,
 					project: vm.project
 				};
 				if (highlight) {
-					data.ids = vm.selectedGroup.parents;
+					data.ids = vm.selectedGroup.objects;
 					data.colour = vm.selectedGroup.color.map(function(item) {return (item / 255.0);}).join(" ");
 				}
 				else {
@@ -10244,8 +10233,8 @@ var ViewerManager = {};
 
 			// Get all the object IDs
 			for (i = 0, length = groups.length; i < length; i += 1) {
-				if (groups[i].parents.length > 0) {
-					ids = ids.concat(groups[i].parents);
+				if (groups[i].objects.length > 0) {
+					ids = ids.concat(groups[i].objects);
 				}
 			}
 
@@ -10425,7 +10414,7 @@ var ViewerManager = {};
 		 * @returns {Object}
 		 */
 		obj.createGroup = function (name, color) {
-			return doPost({name: name, color: color, parents: []}, "groups");
+			return doPost({name: name, color: color, objects: []}, "groups");
 		};
 
 		/**
@@ -12299,7 +12288,7 @@ angular.module('3drepo')
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -12314,7 +12303,7 @@ angular.module('3drepo')
 					screenShotPromise.promise.then(function (screenShot) {
 						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -13683,11 +13672,17 @@ angular.module('3drepo')
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(vm.account + "/" + vm.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+
 					data = {
 						source: "tree",
 						account: vm.account,
 						project: vm.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
@@ -14051,12 +14046,19 @@ angular.module('3drepo')
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(self.account + "/" + self.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+					
 					data = {
 						source: "tree",
 						account: self.account,
 						project: self.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
@@ -17105,12 +17107,24 @@ var Oculus = {};
 		 * @param deselectedObjects
 		 */
 		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
+
+			var highlightIds = [];
+			var unHighlightIds = [];
+
+			selectedObjects.forEach(function(obj){
+				highlightIds.push(obj.id);
+			});
+
+			deselectedObjects.forEach(function(obj){
+				unHighlightIds.push(obj.id);
+			});
+			
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				highlight_ids: selectedObjects,
-				unhighlight_ids: deselectedObjects
+				highlight_ids: highlightIds,
+				unhighlight_ids: unHighlightIds
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
