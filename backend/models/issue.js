@@ -1090,126 +1090,90 @@ schema.methods.getBCFMarkup = function(unit){
 
 
 	// generate viewpoints
-	if(this.comments.length > 0 && this.viewpoints.length > 0){
+	let snapshotNo = 0;
 
-		let snapshotNo = 0;
+	this.viewpoints.forEach((vp, index) => {
 
-		this.viewpoints.forEach((vp, index) => {
+		let number = index === 0 ? '' : index;
+		let viewpointFileName = `viewpoint${number}.bcfv`;
+		let snapshotFileName = `snapshot${(snapshotNo === 0 ? '' : snapshotNo)}.png`;
 
-			let number = index === 0 ? '' : index;
-			let viewpointFileName = `viewpoint${number}.bcfv`;
-			let snapshotFileName = `snapshot${(snapshotNo === 0 ? '' : snapshotNo)}.png`;
-
-			let vpObj = {
-				'@': {
-					'Guid': utils.uuidToString(vp.guid)
-				},
-				'Viewpoint': viewpointFileName,
-				'Snapshot':  null
+		let vpObj = {
+			'@': {
+				'Guid': utils.uuidToString(vp.guid)
+			},
+			'Viewpoint': viewpointFileName,
+			'Snapshot':  null
 
 
-				
-			};
-
-			if(vp.screenshot.flag){
-
-				vpObj.Snapshot = snapshotFileName;
-				snapshotEntries.push({
-					filename: snapshotFileName,
-					snapshot: vp.screenshot.content
-				});
-				snapshotNo++;
-
-			}
-
-			_.get(vp, 'extras.Index') && (vpObj.Index = vp.extras.Index);
-
-			markup.Markup.Viewpoints.push(vpObj);
 			
-			let viewpointXmlObj = {
-				VisualizationInfo:{
-					'@':{
-						'Guid': utils.uuidToString(vp.guid),
-						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-					},
-					'PerspectiveCamera':{
-						CameraViewPoint:{
-							X: vp.position[0] * scale,
-							Y: vp.position[1] * scale,
-							Z: vp.position[2] * scale
-						},
-						CameraDirection:{
-							X: vp.view_dir[0],
-							Y: vp.view_dir[1],
-							Z: vp.view_dir[2]
-						},
-						CameraUpVector:{
-							X: vp.up[0],
-							Y: vp.up[1],
-							Z: vp.up[2]
-						},
-						FieldOfView: vp.fov * 180 / Math.PI
-					}
-				}
-			};
+		};
 
+		if(vp.screenshot.flag){
 
-			_.get(vp, 'extras.Components') && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components'));
-			_.get(vp, 'extras.Spaces') && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces'));
-			_.get(vp, 'extras.SpaceBoundaries') && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries'));
-			_.get(vp, 'extras.Openings') && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings'));
-			_.get(vp, 'extras.OrthogonalCamera') && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera'));
-			_.get(vp, 'extras.Lines') && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines'));
-			_.get(vp, 'extras.ClippingPlanes') && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes'));
-			_.get(vp, 'extras.Bitmap') && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap'));
-
-			viewpointEntries.push({
-				filename: viewpointFileName,
-				xml:  xmlBuilder.buildObject(viewpointXmlObj)
+			vpObj.Snapshot = snapshotFileName;
+			snapshotEntries.push({
+				filename: snapshotFileName,
+				snapshot: vp.screenshot.content
 			});
+			snapshotNo++;
 
-		});
+		}
 
-	} else if (this.comments.length > 0){
-		//only add viewpoint node if there is at least one comment
+		_.get(vp, 'extras.Index') && (vpObj.Index = vp.extras.Index);
 
-		markup.Markup.Viewpoints.push({
-			'@': { 'Guid': utils.uuidToString(this.viewpoint.guid) },
-			'Viewpoint': 'viewpoint.bcfv'
-		});
+		markup.Markup.Viewpoints.push(vpObj);
+		
+		let viewpointXmlObj = {
+			VisualizationInfo:{
+				'@':{
+					'Guid': utils.uuidToString(vp.guid),
+					'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+					'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+				}
+			}
+		};
+
+
+		if(!_.get(vp, 'extras._noPerspective') && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >=3){
+
+			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+				CameraViewPoint:{
+					X: vp.position[0] * scale,
+					Y: vp.position[1] * scale,
+					Z: vp.position[2] * scale
+				},
+				CameraDirection:{
+					X: vp.view_dir[0],
+					Y: vp.view_dir[1],
+					Z: vp.view_dir[2]
+				},
+				CameraUpVector:{
+					X: vp.up[0],
+					Y: vp.up[1],
+					Z: vp.up[2]
+				},
+				FieldOfView: vp.fov * 180 / Math.PI
+			};
+		}
+
+		_.get(vp, 'extras.Components') && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components'));
+		_.get(vp, 'extras.Spaces') && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces'));
+		_.get(vp, 'extras.SpaceBoundaries') && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries'));
+		_.get(vp, 'extras.Openings') && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings'));
+		_.get(vp, 'extras.OrthogonalCamera') && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera'));
+		_.get(vp, 'extras.Lines') && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines'));
+		_.get(vp, 'extras.ClippingPlanes') && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes'));
+		_.get(vp, 'extras.Bitmap') && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap'));
 
 		viewpointEntries.push({
-			filename: 'viewpoint.bcfv',
-			xml:  xmlBuilder.buildObject({
-				VisualizationInfo:{
-					'@':{
-						'Guid': utils.uuidToString(this.viewpoint.guid),
-						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-					},
-					'PerspectiveCamera':{
-						CameraViewPoint:{
-							X: this.viewpoint.position[0] * scale,
-							Y: this.viewpoint.position[1] * scale,
-							Z: this.viewpoint.position[2] * scale
-						},
-						CameraDirection:{
-							X: this.viewpoint.view_dir[0],
-							Y: this.viewpoint.view_dir[1],
-							Z: this.viewpoint.view_dir[2]
-						},
-						CameraUpVector:{
-							X: this.viewpoint.up[0],
-							Y: this.viewpoint.up[1],
-							Z: this.viewpoint.up[2]
-						},
-						FieldOfView: this.viewpoint.fov * 180 / Math.PI
-					}
-				}
-			})
+			filename: viewpointFileName,
+			xml:  xmlBuilder.buildObject(viewpointXmlObj)
 		});
-	}
+
+	});
+
+
 
 	return {
 		markup: xmlBuilder.buildObject(markup),
@@ -1475,6 +1439,7 @@ schema.statics.importBCF = function(account, project, revId, zipPath){
 						extras.Bitmap = _.get(vpXML, 'VisualizationInfo.Bitmap');
 						extras.Index = viewpoints[guid].Viewpoint;
 						extras.Snapshot = viewpoints[guid].Snapshot;
+						!_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]') && (extras._noPerspective = true);
 
 						let screenshotObj = viewpoints[guid].snapshot ? {
 							flag: 1,
@@ -1517,6 +1482,28 @@ schema.statics.importBCF = function(account, project, revId, zipPath){
 							];
 
 							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
+							
+						} else if (_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0]')){
+
+							vp.up = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._'))
+							];
+
+							vp.view_dir = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._'))
+							];
+
+							vp.position = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._')) * scale,
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._')) * scale
+							];
+
+							vp.fov = 1.8;
 						}
 
 						issue.viewpoints.push(vp);
