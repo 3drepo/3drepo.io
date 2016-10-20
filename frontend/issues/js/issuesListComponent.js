@@ -49,7 +49,7 @@
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 150,
+			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = true,
@@ -347,12 +347,19 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(self.account + "/" + self.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+					
 					data = {
 						source: "tree",
 						account: self.account,
 						project: self.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);

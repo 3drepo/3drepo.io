@@ -324,11 +324,11 @@
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					index = vm.selectedGroup.parents.indexOf(event.value.id);
+					index = vm.selectedGroup.objects.indexOf(event.value.id);
 					if (index !== -1) {
-						vm.selectedGroup.parents.splice(index, 1);
+						vm.selectedGroup.objects.splice(index, 1);
 					} else {
-						vm.selectedGroup.parents.push(event.value.id);
+						vm.selectedGroup.objects.push(event.value.id);
 					}
 
 					promise = GroupsService.updateGroup(vm.selectedGroup);
@@ -346,14 +346,14 @@
 		 */
 		function setSelectedGroupHighlightStatus (highlight) {
 			var data;
-			if ((vm.selectedGroup !== null) && (vm.selectedGroup.parents.length > 0)) {
+			if ((vm.selectedGroup !== null) && (vm.selectedGroup.objects.length > 0)) {
 				data = {
 					source: "tree",
 					account: vm.account,
 					project: vm.project
 				};
 				if (highlight) {
-					data.ids = vm.selectedGroup.parents;
+					data.ids = vm.selectedGroup.objects;
 					data.colour = vm.selectedGroup.color.map(function(item) {return (item / 255.0);}).join(" ");
 				}
 				else {
@@ -376,8 +376,8 @@
 
 			// Get all the object IDs
 			for (i = 0, length = groups.length; i < length; i += 1) {
-				if (groups[i].parents.length > 0) {
-					ids = ids.concat(groups[i].parents);
+				if (groups[i].objects.length > 0) {
+					ids = ids.concat(groups[i].objects);
 				}
 			}
 

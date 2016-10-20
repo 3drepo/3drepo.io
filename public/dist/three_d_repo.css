@@ -38,6 +38,7 @@ account-dir .userContent .cardInfo {
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
+  overflow: auto;
 }
 
 account-projects md-list {
@@ -254,7 +255,7 @@ account-menu md-icon {
 }
 
 .newProjectDialog #projectDialogFilenameContainer {
-  margin: 0 0 0 16px;
+  margin: 0 0 20px 16px;
 }
 .newProjectDialog #projectDialogFilenameIntro {
   color: rgba(0, 0, 0, 0.4);
@@ -1663,7 +1664,7 @@ issues-list #issuesListItemTitle {
 }
 
 issues-list #issuesListItemInfo {
-  margin-top: 5px;
+  margin: 5px 0;
 }
 
 issues-list #issuesListItemInfo label,
@@ -1679,6 +1680,7 @@ issues-list #issuesListItemDescription label {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  word-break: break-all;
 }
 
 issues-list #issuesListItemEnter {
@@ -1737,7 +1739,7 @@ issue-comp .issueCompThumbnail {
 }
 issue-comp .issueCompThumbnailImage:hover {
   cursor: pointer;
-  outline: solid 1px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
 }
 issue-comp .issueCompThumbnailImage {
   width: 100%;
@@ -1757,11 +1759,12 @@ issue-comp .issueCompCommentOwner label {
 }
 
 issue-comp .issueCompComment {
-  margin: 10px 0;
+  margin: 0 0 5px;
 }
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
+  word-break: break-all;
 }
 
 issue-comp .issueCompTextActions {
@@ -1772,12 +1775,14 @@ issue-comp #issueCompDescription {
   outline: none;
   margin-bottom: 20px;
 }
+issue-comp #issueCompDescription label {
+  word-break: break-all;
+}
 
 issue-comp .issueCompComment:hover,
 issue-comp #issueCompDescription:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
-  outline: solid 1px rgba(0, 0, 0, 0.2);
 }
 issue-comp .issueCompComment *:hover,
 issue-comp #issueCompDescription *:hover {
@@ -1793,7 +1798,6 @@ issue-comp #issueCompAdditional {
 }
 
 issue-comp #issueCompNewComment {
-  margin-bottom: -40px;
 }
 
 issue-comp #descriptionAndComments {
@@ -2248,7 +2252,7 @@ right-panel #rightPanelButtons label {
 }
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 5px 0;
+    margin: 5px 20px 5px 0;
 }
 
 sign-up-form #tc {

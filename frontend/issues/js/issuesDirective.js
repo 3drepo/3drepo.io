@@ -55,11 +55,7 @@
 			rolesPromise,
 			projectUserRolesPromise,
 			issue,
-			selectedObjectId = null,
-			pickedPos = null,
-			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0],
-			selectedIssue = null;
+			pinHighlightColour = [1.0000, 0.7, 0.0];
 
 		/*
 		 * Init
@@ -298,7 +294,7 @@
 		vm.editIssue = function (issue) {
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue !== null) {
+			if (vm.selectedIssue) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -310,7 +306,7 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-			if ((vm.selectedIssue !== null) && (vm.selectedIssue._id !== issue._id)) {
+			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -330,6 +326,7 @@
 		 */
 		vm.issueCreated = function (issue) {
 			vm.issues.unshift(issue);
+			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -364,12 +361,18 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(vm.account + "/" + vm.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+
 					data = {
 						source: "tree",
 						account: vm.account,
 						project: vm.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);

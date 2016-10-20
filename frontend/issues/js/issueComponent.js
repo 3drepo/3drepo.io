@@ -52,7 +52,9 @@
 			commentViewpoint,
 			issueSelectedObjects = null,
 			aboutToBeDestroyed = false,
-			textInputHasFocus = false;
+			textInputHasFocus = false,
+			savedDescription,
+			savedComment;
 
 		/*
 		 * Init
@@ -63,6 +65,8 @@
 		this.pinData = null;
 		this.showAdditional = true;
 		this.editingDescription = false;
+		this.clearPin = false;
+
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -178,6 +182,19 @@
 			// Get out of pin drop mode
 			if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+				this.clearPin = true;
+			}
+		};
+
+		/**
+		 * Init stuff
+		 */
+		this.$onInit = function () {
+			// If there are selected objects register them and set the current action to multi
+			if (!this.data && this.selectedObjects) {
+				issueSelectedObjects = this.selectedObjects;
+				currentAction = "multi";
+				this.actions[currentAction].color = highlightBackground;
 			}
 		};
 
@@ -259,26 +276,27 @@
 
 		/**
 		 * Show screen shot
+		 * @param event
 		 * @param viewpoint
 		 */
-		this.showScreenShot = function (viewpoint) {
+		this.showScreenShot = function (event, viewpoint) {
 			self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
 			$mdDialog.show({
 				controller: function () {
 					this.dialogCaller = self;
 				},
 				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
+				templateUrl: "issueScreenShotDialog.html",
+				targetEvent: event
 			});
 		};
 
 		/**
 		 * Do an action
+		 * @param event
 		 * @param action
 		 */
-		this.doAction = function (action) {
-			var data;
-
+		this.doAction = function (event, action) {
 			// Handle previous action
 			if (currentAction === null) {
 				currentAction = action;
@@ -294,7 +312,6 @@
 				}
 				this.actions[currentAction].color = "";
 				currentAction = null;
-				self.action = null;
 			}
 			else {
 				switch (action) {
@@ -312,7 +329,6 @@
 			// New action
 			if (currentAction !== null) {
 				this.actions[currentAction].color = highlightBackground;
-				self.action = action;
 
 				switch (currentAction) {
 					case "screen_shot":
@@ -320,7 +336,8 @@
 						$mdDialog.show({
 							controller: ScreenShotDialogController,
 							controllerAs: "vm",
-							templateUrl: "issueScreenShotDialog.html"
+							templateUrl: "issueScreenShotDialog.html",
+							targetEvent: event
 						});
 						break;
 					case "multi":
@@ -332,7 +349,6 @@
 						}
 						break;
 					case "pin":
-						data =
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
 						break;
 				}
@@ -363,15 +379,20 @@
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
-				var data = {
-					desc: self.issueData.desc
-				};
-				IssuesService.updateIssue(self.issueData, data)
-					.then(function (data) {
-					});
+				if (self.issueData.desc !== savedDescription) {
+					var data = {
+						desc: self.issueData.desc
+					};
+					IssuesService.updateIssue(self.issueData, data)
+						.then(function (data) {
+							IssuesService.updatedIssue = self.issueData;
+							savedDescription = self.issueData.desc;
+						});
+				}
 			}
 			else {
 				this.editingDescription = true;
+				savedDescription = self.issueData.desc;
 			}
 		};
 
@@ -397,7 +418,7 @@
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -412,7 +433,7 @@
 					screenShotPromise.promise.then(function (screenShot) {
 						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -581,14 +602,19 @@
 			if (this.issueData.comments[index].editing) {
 				editingCommentIndex = null;
 				this.issueData.comments[index].editing = false;
-				IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
-					.then(function(response) {
-						self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
-					});
+				if (this.issueData.comments[index].comment !== savedComment) {
+					IssuesService.editComment(self.issueData, this.issueData.comments[index].comment, index)
+						.then(function(response) {
+							self.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+							IssuesService.updatedIssue = self.issueData;
+							savedComment = self.issueData.comments[index].comment;
+						});
+				}
 			}
 			else {
 				editingCommentIndex = index;
 				this.issueData.comments[index].editing = true;
+				savedComment = this.issueData.comments[index].comment;
 			}
 		};
 
@@ -611,13 +637,13 @@
 					commentViewpoint = viewpoint;
 					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 				});
-
-				setContentHeight();
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
 			}
+
+			setContentHeight();
 		};
 
 		/**
@@ -638,12 +664,12 @@
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
-				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
-				thumbnailHeight = 170,
+				thumbnailHeight = 180,
+				issueMinHeight = 370,
 				height = issueMinHeight;
 
 			if (self.data) {
@@ -652,9 +678,11 @@
 					height += additionalInfoHeight;
 				}
 				// Description text
-				if (self.issueData.hasOwnProperty("desc")) {
+				if (self.canEditDescription || self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
+				// Description thumbnail
+				height += thumbnailHeight;
 				// New comment thumbnail
 				if (self.commentThumbnail) {
 					height += thumbnailHeight;
@@ -671,6 +699,10 @@
 				height = newIssueHeight;
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
+				}
+				// Description thumbnail
+				if (self.descriptionThumbnail) {
+					height += thumbnailHeight;
 				}
 			}
 

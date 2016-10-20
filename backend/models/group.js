@@ -29,7 +29,7 @@ var responseCodes = require('../response_codes.js');
 var groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
-	parents: [],
+	objects: [],
 	issue_id: Object,
 	color: [Number]
 });
@@ -50,59 +50,76 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
-	let parents = data.parents;
+	let objects = [];
 
-	if(!parents){
+	data.objects.forEach(obj =>{
+		objects.push(obj.id);
+	});
+
+	if(!objects){
 		return Promise.resolve();
 	}
 
-	let currentParents = [];
+	let currentObjects = [];
 
-	this.parents.forEach(parent => {
-		currentParents.push(utils.uuidToString(parent));
+	this.objects.forEach(obj => {
+		currentObjects.push(utils.uuidToString(obj.id));
 	});
 
 
-	let newParents = _.difference(parents, currentParents);
+	let newObjects = _.difference(objects, currentObjects);
 
 	let addPromises = [];
 
-	newParents.forEach(id => addPromises.push(
-		Mesh.addGroup(
-			this._dbcolOptions.account,
-			this._dbcolOptions.project,
-			id,
-			utils.uuidToString(this._id)
-		)
-	));
+
+	newObjects.forEach(id => {
+
+		let obj = data.objects.find(obj => obj.id === id);
+		addPromises.push(
+			Mesh.addGroup(
+				obj.account,
+				obj.project,
+				id,
+				utils.uuidToString(this._id)
+			).then( mesh => {
+
+				obj.shared_id = mesh.shared_id;
+			})
+		);
+	});
 
 	return Promise.all(addPromises).then(() =>{
 
-		let removeParents = _.difference(currentParents, parents);
+		let removeObjects = _.difference(currentObjects, objects);
 		let removePromises = [];
 
-		removeParents.forEach(id => removePromises.push(
-			Mesh.removeGroup(
-				this._dbcolOptions.account,
-				this._dbcolOptions.project,
-				id,
-				utils.uuidToString(this._id)
-			)
-		));
+		removeObjects.forEach(id => {
+
+			let obj = this.objects.find(obj => utils.uuidToString(obj.id) === id);
+
+			removePromises.push(
+				Mesh.removeGroup(
+					obj.account,
+					obj.project,
+					id,
+					utils.uuidToString(this._id)
+				)
+			);
+		});
 
 		return Promise.all(removePromises);
 
 	}).then(() => {
 
-		parents.forEach((p, index) => {
-			parents[index] = stringToUUID(p);
+		data.objects.forEach(obj => {
+			obj.id = stringToUUID(obj.id);
 		});
 
 		this.name = data.name || this.name;
-		this.parents = parents || this.parents;
+		this.objects = data.objects || this.objects;
 		this.color = data.color || this.color;
 
-		this.markModified('parents');
+		this.markModified('objects');
 		return this.save();
 
 	});
@@ -135,10 +152,10 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && uuidToString(cleaned.issue_id);
-	cleaned.parents.forEach((parent, i) => {
-		cleaned.parents[i] = uuidToString(parent);
+	cleaned.objects.forEach(object => {
+		object.id = uuidToString(object.id);
+		object.shared_id && (object.shared_id = uuidToString(object.shared_id));
 	});
-
 	return cleaned;
 
 };
@@ -155,11 +172,11 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 
 		let removePromises = [];
 
-		group.parents.forEach(meshId => removePromises.push(
+		group.objects.forEach(obj => removePromises.push(
 			Mesh.removeGroup(
-				dbCol.account,
-				dbCol.project,
-				utils.uuidToString(meshId),
+				obj.account,
+				obj.project,
+				utils.uuidToString(obj.id),
 				id
 			)
 		));
