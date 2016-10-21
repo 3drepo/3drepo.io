@@ -79,8 +79,8 @@
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
+						pickedPos: position,
+						pickedNorm: normal,
 						colours: [[0.5, 0, 0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
