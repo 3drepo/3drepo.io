@@ -135,7 +135,7 @@
 		 * @returns {Object}
 		 */
 		obj.createGroup = function (name, color) {
-			return doPost({name: name, color: color, parents: []}, "groups");
+			return doPost({name: name, color: color, objects: []}, "groups");
 		};
 
 		/**

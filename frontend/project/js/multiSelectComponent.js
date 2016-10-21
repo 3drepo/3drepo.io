@@ -45,7 +45,8 @@
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
-			multiMode = false;
+			multiMode = false,
+			pinDropMode = false;
 
 		// Init
 		this.setSelectedObjects({selectedObjects: null});
@@ -58,42 +59,65 @@
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					if (selectedObjects.length === 1) {
+						self.setSelectedObjects({selectedObjects: selectedObjects});
+					}
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (multiMode &&
-						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
+					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
 			}
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					deselectedObjects = [];
-					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
-					if (objectIndex === -1) {
-						selectedObjects.push(changes.event.currentValue.value.id);
-					}
-					else {
-						deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
-					}
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+					if (multiMode) {
+						// Collect objects in multi mode
+						deselectedObjects = [];
+						selectedObjects.find(function(obj, i){
+							if(obj.id === changes.event.currentValue.value.id){
+								objectIndex = i;
+							}
+						});
+						if (objectIndex === -1) {
+							selectedObjects.push({
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+							});
+						}
+						else {
+							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+						}
+						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
-					if (selectedObjects.length > 0) {
-						self.setSelectedObjects({selectedObjects: selectedObjects});
+						if (selectedObjects.length > 0) {
+							self.setSelectedObjects({selectedObjects: selectedObjects});
+						}
+						else {
+							self.setSelectedObjects({selectedObjects: null});
+						}
 					}
 					else {
-						self.setSelectedObjects({selectedObjects: null});
+						// Can only select one object at a time when not in multi mode
+						selectedObjects = [{
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+						}];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					if (selectedObjects.length > 0) {
-						this.displaySelectedObjects([], selectedObjects);
 						selectedObjects = [];
 						self.setSelectedObjects({selectedObjects: null});
 					}
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = changes.event.currentValue.type;
 				}
 			}
 
@@ -117,12 +141,24 @@
 		 * @param deselectedObjects
 		 */
 		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
+
+			var highlightIds = [];
+			var unHighlightIds = [];
+
+			selectedObjects.forEach(function(obj){
+				highlightIds.push(obj.id);
+			});
+
+			deselectedObjects.forEach(function(obj){
+				unHighlightIds.push(obj.id);
+			});
+			
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				highlight_ids: selectedObjects,
-				unhighlight_ids: deselectedObjects
+				highlight_ids: highlightIds,
+				unhighlight_ids: unHighlightIds
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};

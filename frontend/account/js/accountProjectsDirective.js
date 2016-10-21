@@ -42,8 +42,8 @@
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig) {
 		var vm = this,
-			// existingProjectToUpload,
-			// existingProjectFileUploader,
+			existingProjectToUpload,
+			existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -55,15 +55,15 @@
 		vm.units = serverConfig.units;
 
 		// Setup file uploaders
-		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		// existingProjectFileUploader.addEventListener(
-		// 	"change",
-		// 	function () {
-		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
-		// 		$scope.$apply();
-		// 	},
-		// 	false
-		// );
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
+			},
+			false
+		);
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -83,7 +83,6 @@
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
-				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -251,12 +250,12 @@
 		 *
 		 * @param {Object} project
 		 */
-		// vm.uploadFile = function (project) {
-		// 	console.log(project);
-		// 	existingProjectFileUploader.value = "";
-		// 	existingProjectToUpload = project;
-		// 	existingProjectFileUploader.click();
-		// };
+		vm.uploadFile = function (project) {
+			console.log(project);
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
+		};
 
 		/**
 		 * Upload a file
