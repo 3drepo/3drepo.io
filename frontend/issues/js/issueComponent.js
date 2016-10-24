@@ -219,7 +219,7 @@
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			// Update
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
 			}
 		};
 
@@ -521,6 +521,8 @@
 				.then(function (data) {
 					IssuesService.updatedIssue = self.issueData;
 				});
+			
+			self.submitDisabled = true;
 		}
 
 		/**
