@@ -86,7 +86,8 @@
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
 				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
+						pinDropMode) {
 					removePin();
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
