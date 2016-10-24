@@ -81,7 +81,7 @@
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
-						colours: [[0.5, 0, 0]]
+						colours: [[1.0, 0.7,  0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
