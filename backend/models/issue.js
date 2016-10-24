@@ -544,7 +544,10 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.owner = data.owner;
 		issue.status = data.status;
 		issue.topic_type = data.topic_type;
-		issue.desc = data.desc;
+		if(data.desc && data.desc != "")
+			issue.desc = data.desc;
+		else
+			issue.desc = "(No Description)";
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
