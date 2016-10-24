@@ -98,6 +98,11 @@ var schema = Schema({
 		guid: Object,
 		extras: {},
 		scribble: {flag: Number, content: Object},
+		type: {
+			type: String, 
+			default: 'perspective', 
+			enum: ['perspective', 'orthogonal']
+		}
 	}],
 
 	group_id: Object,
@@ -1140,18 +1145,18 @@ schema.methods.getBCFMarkup = function(unit){
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 				CameraViewPoint:{
 					X: vp.position[0] * scale,
-					Y: vp.position[1] * scale,
-					Z: vp.position[2] * scale
+					Y: -vp.position[2] * scale,
+					Z: vp.position[1] * scale
 				},
 				CameraDirection:{
 					X: vp.view_dir[0],
-					Y: vp.view_dir[1],
-					Z: vp.view_dir[2]
+					Y: -vp.view_dir[2],
+					Z: vp.view_dir[1]
 				},
 				CameraUpVector:{
 					X: vp.up[0],
-					Y: vp.up[1],
-					Z: vp.up[2]
+					Y: -vp.up[2],
+					Z: vp.up[1]
 				},
 				FieldOfView: vp.fov * 180 / Math.PI
 			};
@@ -1467,43 +1472,47 @@ schema.statics.importBCF = function(account, project, revId, zipPath){
 						if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
 							vp.up = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._'))
 							];
 							vp.view_dir = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._'))
 							];
 							vp.position = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale,
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale
 							];
 
 							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
+
+							vp.type = 'perspective';
 							
 						} else if (_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0]')){
 
 							vp.up = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._'))
 							];
 
 							vp.view_dir = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._'))
 							];
 
 							vp.position = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._')) * scale
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._')) * scale,
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._')) * scale
 							];
 
 							vp.fov = 1.8;
+
+							vp.type = 'orthogonal';
 						}
 
 						issue.viewpoints.push(vp);
