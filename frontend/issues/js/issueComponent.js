@@ -501,6 +501,7 @@
 
 					// Hide some actions
 					self.actions.pin.hidden = true;
+					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
