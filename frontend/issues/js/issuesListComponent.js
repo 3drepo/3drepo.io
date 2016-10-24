@@ -206,14 +206,14 @@
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
 				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					this.issuesToShow[i].selected = false;
 					this.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
 						selectedIssue = this.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;
@@ -513,7 +513,10 @@
 							account: self.allIssues[i].account,
 							project: self.allIssues[i].project
 						};
-						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
+						var pinColor = [0.5, 0, 0];
+						if(self.selectedIssue && self.allIssues[i]._id == self.selectedIssue._id)
+							pinColor = [1.0, 0.7, 0];
+						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
 			}
