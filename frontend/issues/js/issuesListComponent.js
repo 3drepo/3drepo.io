@@ -513,7 +513,10 @@
 							account: self.allIssues[i].account,
 							project: self.allIssues[i].project
 						};
-						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
+						var pinColor = [0.5, 0, 0];
+						if(self.selectedIssue && self.allIssues[i]._id == self.selectedIssue._id)
+							pinColor = [1.0, 0.7, 0];
+						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
 			}
