@@ -230,7 +230,8 @@
 			if (self.data) {
 				if (self.data.owner === self.account) {
 					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
+						(this.data.status !== this.issueData.status) ||
+						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
 						if (typeof this.comment !== "undefined") {
 							saveComment();
