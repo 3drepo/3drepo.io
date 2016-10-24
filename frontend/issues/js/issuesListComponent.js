@@ -206,14 +206,14 @@
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
 				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					this.issuesToShow[i].selected = false;
 					this.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
 						selectedIssue = this.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;

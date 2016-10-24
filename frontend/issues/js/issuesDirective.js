@@ -294,7 +294,7 @@
 		vm.editIssue = function (issue) {
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue) {
+			if ((!issue && vm.selectedIssue) || (vm.selectedIssue && issue && vm.selectedIssue._id != issue._id)) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
