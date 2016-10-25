@@ -36,7 +36,7 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Unit
-					md-select(ng-model="vm.unit", ng-disabled="vm.unit")
+					md-select(ng-model="vm.unit", ng-disabled="vm.oldUnit")
 						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 				md-input-container(flex)
 

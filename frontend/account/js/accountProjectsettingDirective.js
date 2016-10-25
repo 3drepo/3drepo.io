@@ -72,7 +72,7 @@
 				}
 
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
-				
+				vm.oldUnit = vm.unit;
 
 			} else {
 				vm.message = response.data.message;
@@ -92,6 +92,7 @@
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
+					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
 				}
