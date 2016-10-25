@@ -61,6 +61,7 @@
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 		vm.showAdd = false;
+		vm.hideMenuButton = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -149,6 +150,7 @@
 		 */
 		vm.showItem = function () {
 			vm.statusIcon = "arrow_back";
+			vm.hideMenuButton = true;
 			vm.hideSelectedItem = false; // So that a change to this value is propagated
 		};
 
@@ -157,6 +159,7 @@
 		 */
 		vm.hideItem = function () {
 			vm.statusIcon = vm.contentData.icon;
+			vm.hideMenuButton = false;
 			vm.hideSelectedItem = true;
 		};
 
@@ -223,7 +226,13 @@
 					option = null;
 					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
 					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
-					optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+
+					if(vm.contentData.options[i].type === 'menu'){
+						optionElement += " ng-if='!vm.hideMenuButton'";
+					} else {
+						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+					}
+					
 					vm.contentData.options[i].color = "";
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 

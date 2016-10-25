@@ -12583,7 +12583,7 @@ angular.module('3drepo')
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			// Update
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
 			}
 		};
 
@@ -12594,7 +12594,8 @@ angular.module('3drepo')
 			if (self.data) {
 				if (self.data.owner === self.account) {
 					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
+						(this.data.status !== this.issueData.status) ||
+						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
 						if (typeof this.comment !== "undefined") {
 							saveComment();
@@ -12865,6 +12866,7 @@ angular.module('3drepo')
 
 					// Hide some actions
 					self.actions.pin.hidden = true;
+					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
@@ -12885,6 +12887,8 @@ angular.module('3drepo')
 				.then(function (data) {
 					IssuesService.updatedIssue = self.issueData;
 				});
+			
+			self.submitDisabled = true;
 		}
 
 		/**
@@ -13473,14 +13477,15 @@ angular.module('3drepo')
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
-						colours: [[0.5, 0, 0]]
+						pickedPos: position,
+						pickedNorm: normal,
+						colours: [[1.0, 0.7,  0]]
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
 				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
+						pinDropMode) {
 					removePin();
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
@@ -14098,7 +14103,7 @@ angular.module('3drepo')
 		vm.editIssue = function (issue) {
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue) {
+			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
 			}
 			vm.selectedIssue = issue;
@@ -14405,14 +14410,14 @@ angular.module('3drepo')
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
 				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					this.issuesToShow[i].selected = false;
 					this.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
 						selectedIssue = this.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;
@@ -14712,7 +14717,10 @@ angular.module('3drepo')
 							account: self.allIssues[i].account,
 							project: self.allIssues[i].project
 						};
-						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
+						var pinColor = [0.5, 0, 0];
+						if(self.selectedIssue && self.allIssues[i]._id == self.selectedIssue._id)
+							pinColor = [1.0, 0.7, 0];
+						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
 			}
@@ -15850,6 +15858,7 @@ var Oculus = {};
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 		vm.showAdd = false;
+		vm.hideMenuButton = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -15938,6 +15947,7 @@ var Oculus = {};
 		 */
 		vm.showItem = function () {
 			vm.statusIcon = "arrow_back";
+			vm.hideMenuButton = true;
 			vm.hideSelectedItem = false; // So that a change to this value is propagated
 		};
 
@@ -15946,6 +15956,7 @@ var Oculus = {};
 		 */
 		vm.hideItem = function () {
 			vm.statusIcon = vm.contentData.icon;
+			vm.hideMenuButton = false;
 			vm.hideSelectedItem = true;
 		};
 
@@ -16012,7 +16023,13 @@ var Oculus = {};
 					option = null;
 					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
 					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
-					optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+
+					if(vm.contentData.options[i].type === 'menu'){
+						optionElement += " ng-if='!vm.hideMenuButton'";
+					} else {
+						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+					}
+					
 					vm.contentData.options[i].color = "";
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
