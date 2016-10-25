@@ -6619,13 +6619,11 @@ var ViewerManager = {};
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log("Uploaded file", vm.uploadedFile);
 				vm.selectedFile = vm.uploadedFile.file;
 				vm.tag = vm.uploadedFile.tag;
 				vm.desc = vm.uploadedFile.desc;
 				if(vm.uploadedFile.newProject)
 				{
-					console.log("uploading File");
 					vm.uploadFile();
 				}
 			
@@ -6741,9 +6739,7 @@ var ViewerManager = {};
 						});
 					}
 
-					console.log("in uploadFile, errmsg = " + !vm.uploadErrorMessage);
 					if(!vm.uploadErrorMessage){
-						console.trace();
 						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
 						if(!vm.uploadedFile.newProject)
 							vm.closeDialog();
@@ -7147,7 +7143,6 @@ var ViewerManager = {};
 						};
 						updateAccountProjects (response.data.account, project);
 						vm.closeDialog();
-
 					}
 				});
 			}
@@ -7290,7 +7285,6 @@ var ViewerManager = {};
 			}
 
 			// Save model to project
-			console.log("aaaa - " + vm.newProjectFileToUpload);
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
 					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
