@@ -86,8 +86,14 @@
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log("Uploaded file", vm.uploadedFile);
 				vm.selectedFile = vm.uploadedFile.file;
+				vm.tag = vm.uploadedFile.tag;
+				vm.desc = vm.uploadedFile.desc;
+				if(vm.uploadedFile.newProject)
+				{
+					vm.uploadFile();
+				}
+			
 			}
 		});
 
@@ -202,7 +208,8 @@
 
 					if(!vm.uploadErrorMessage){
 						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
-						vm.closeDialog();
+						if(!vm.uploadedFile.newProject)
+							vm.closeDialog();
 					}
 				});
 			}
