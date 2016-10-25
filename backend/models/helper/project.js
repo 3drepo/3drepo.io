@@ -261,9 +261,15 @@ function importToyJSON(db, project){
 		
 		let updateIssuePromises = [];
 
-		Issue.find({account: db, project: project}, {}, { owner: 1 }).then(issues => {
+		Issue.find({account: db, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
 			issues.forEach(issue => {
+				
 				issue.owner = db;
+				
+				issue.comments.forEach(comment => {
+					comment.owner = db;
+				});
+
 				updateIssuePromises.push(issue.save());
 			});
 		});
