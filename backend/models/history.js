@@ -67,7 +67,7 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	var query = {};
 	projection = projection || {};
 
-	if(branch === C.MASTER_BRANCH_NAME){
+	if(!branch || branch === C.MASTER_BRANCH_NAME){
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
 	} else {
 		query.shared_id = stringToUUID(branch);
@@ -79,6 +79,11 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 		projection, 
 		{sort: {timestamp: -1}}
 	);
+};
+
+//get the head of default branch (master)
+historySchema.statics.findLatest = function(dbColOptions, projection){
+	return this.findByBranch(dbColOptions, null, projection);
 };
 
 historySchema.statics.findByUID = function(dbColOptions, revId, projection){

@@ -244,6 +244,31 @@ function importToyJSON(db, project){
 
 		return Promise.resolve();
 
+	}).then(() => {
+		//change history time and author
+		return History.findLatest({account: db, project: project}, { current: 0 });
+
+	}).then(history => {
+		
+		history.author = db;
+		history.timestamp = new Date();
+
+		return history.save();
+
+	}).then(() => {
+
+		let Issue = require('../issue');
+		
+		let updateIssuePromises = [];
+
+		Issue.find({account: db, project: project}, {}, { owner: 1 }).then(issues => {
+			issues.forEach(issue => {
+				issue.owner = db;
+				updateIssuePromises.push(issue.save());
+			});
+		});
+
+		return Promise.all(updateIssuePromises);
 	});
 
 }
@@ -286,6 +311,11 @@ function importToyProject(username){
 
 	}).catch(err => {
 
+		systemLogger.logError(`Import toy project error`, {
+			err: err,
+			account: username,
+			project: project
+		});
 		//mark project failed
 		if(projectSetting){
 			projectSetting.status = 'failed';
