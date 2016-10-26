@@ -1201,6 +1201,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			this.originBNG = OsGridRef.latLonToOsGrid(new LatLon(this.settings.mapTile.lat, this.settings.mapTile.lon));
 			this.meterPerPixel = 1;
 			this.mapSizes = [];
+			this.enabled = this.settings.osEnabled;
 		}
 
 		var options = this.options;
@@ -1215,6 +1216,10 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 	MapTile.prototype.translateTo = function(options){
 
+		if(!this.enabled){
+			return;
+		}
+		
 		if(!this.originBNG){
 			return console.log('Translation aborted due to no origin lat,lon defined');
 		}
@@ -1884,6 +1889,10 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		console.log('appendMapTileByViewPoint', this.originBNG);
 
+		if(!this.enabled){
+			return;
+		}
+
 		if(!this.originBNG){
 			console.log('originBNG not found');
 			return;
@@ -2167,8 +2176,12 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 	MapTile.prototype.appendMapTile = function(osGridRef){
 
+		if(!this.enabled){
+			return;
+		}
+
 		if(!this.originBNG){
-			//return console.log('No origin BNG coors set, no map tiles can be added.');
+			return;
 		}
 
 		this.addedTileRefs =  this.addedTileRefs || [];
@@ -18381,7 +18394,7 @@ var Oculus = {};
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
 								v.viewer.updateSettings(event.value.settings);
-								v.mapTile.updateSettings(event.value.settings);
+								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
 						}
 					});

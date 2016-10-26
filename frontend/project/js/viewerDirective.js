@@ -202,7 +202,7 @@
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
 								v.viewer.updateSettings(event.value.settings);
-								v.mapTile.updateSettings(event.value.settings);
+								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
 						}
 					});
