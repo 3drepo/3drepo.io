@@ -91,29 +91,37 @@
 			}
 			
 
-			$http.get(url)
-				.then(
-					function(data) {
-						deferred.resolve(data.data);
-						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-							data.data[i].title = self.generateTitle(data.data[i]);
+			$http.get(url).then(
+				function(data) {
+					deferred.resolve(data.data);
+					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+						data.data[i].title = self.generateTitle(data.data[i]);
+						if (data.data[i].thumbnail) {
+							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
+						}
 
-							if (data.data[i].hasOwnProperty("comments")) {
-								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-									if (data.data[i].comments[j].hasOwnProperty("created")) {
-										data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
-									}
+						// Comments
+						if (data.data[i].hasOwnProperty("comments")) {
+							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+								// Timestamp
+								if (data.data[i].comments[j].hasOwnProperty("created")) {
+									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+								}
+								// Screen shot path
+								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
+									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
 								}
 							}
-
-							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
-					},
-					function() {
-						deferred.resolve([]);
+
+						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
-				);
+				},
+				function() {
+					deferred.resolve([]);
+				}
+			);
 
 			return deferred.promise;
 		};

@@ -12472,6 +12472,7 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
+					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -14298,14 +14299,6 @@ angular.module('3drepo')
 						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
 							this.issuesToShow[i] = updatedIssue;
 						}
-						/*
-						// Get a possible selected issue
-						if (this.issuesToShow[i].selected) {
-							selectedIssue = this.issuesToShow[i];
-							focusedIssueIndex = i;
-							setSelectedIssueIndex(selectedIssue);
-						}
-						*/
 					}
 					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 					showPins();
@@ -14726,8 +14719,9 @@ angular.module('3drepo')
 							project: self.allIssues[i].project
 						};
 						var pinColor = [0.5, 0, 0];
-						if(self.selectedIssue && self.allIssues[i]._id == self.selectedIssue._id)
+						if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
 							pinColor = [1.0, 0.7, 0];
+						}
 						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
@@ -14829,29 +14823,37 @@ angular.module('3drepo')
 			}
 			
 
-			$http.get(url)
-				.then(
-					function(data) {
-						deferred.resolve(data.data);
-						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-							data.data[i].title = self.generateTitle(data.data[i]);
+			$http.get(url).then(
+				function(data) {
+					deferred.resolve(data.data);
+					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+						data.data[i].title = self.generateTitle(data.data[i]);
+						if (data.data[i].thumbnail) {
+							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
+						}
 
-							if (data.data[i].hasOwnProperty("comments")) {
-								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-									if (data.data[i].comments[j].hasOwnProperty("created")) {
-										data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
-									}
+						// Comments
+						if (data.data[i].hasOwnProperty("comments")) {
+							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+								// Timestamp
+								if (data.data[i].comments[j].hasOwnProperty("created")) {
+									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+								}
+								// Screen shot path
+								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
+									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
 								}
 							}
-
-							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
-					},
-					function() {
-						deferred.resolve([]);
+
+						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
-				);
+				},
+				function() {
+					deferred.resolve([]);
+				}
+			);
 
 			return deferred.promise;
 		};

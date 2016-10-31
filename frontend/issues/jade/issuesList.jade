@@ -10,7 +10,7 @@
 		ng-class="{issueListItemFocus: issue.focus}")
 			#issuesListItemContent(layout='row')
 				.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
-					img(ng-src="{{$ctrl.UtilsService.getServerUrl(issue.thumbnail)}}")
+					img(ng-src="{{issue.thumbnailPath}}")
 				div(flex, layout="column")
 					label#issuesListItemTitle(flex="none") {{issue.title}}
 					#issuesListItemInfo(layout="row", layout-align="start center", flex="none")

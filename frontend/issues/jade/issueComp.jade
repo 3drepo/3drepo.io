@@ -118,7 +118,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 				ng-if="comment.viewpoint.screenshot"
 				ng-click="$ctrl.showScreenShot($event, comment.viewpoint)"
 				flex)
-					img.issueCompThumbnailImage(ng-src="{{$ctrl.UtilsService.getServerUrl(comment.viewpoint.screenshot)}}")
+					img.issueCompThumbnailImage(ng-src="{{comment.viewpoint.screenshotPath}}")
 
 	md-divider
 
