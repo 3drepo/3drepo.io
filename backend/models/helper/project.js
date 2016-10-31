@@ -344,6 +344,8 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		action = 'view';
 	} else if(role === 'collaborator'){
 		action = 'collaborate';
+	} else if(role === 'commentator'){
+		action = 'comment';
 	} else {
 		return Promise.reject(responseCodes.INVALID_ROLE);
 	}
@@ -392,6 +394,19 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 
+		return Role.findByRoleID(`${account}.${project}.${role}`).then(roleFound => {
+			if(roleFound){
+				return;
+			} else if(role === 'viewer') {
+				return Role.createViewerRole(account, project);
+			} else if(role === 'collaborator') {
+				return Role.createCollaboratorRole(account, project);
+			} else if(role === 'commentator') {
+				return Role.createCommentatorRole(account, project);
+			}
+		});
+
+	}).then(() => {
 		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
 
 	}).then(() => {

@@ -15,6 +15,7 @@ schema.statics.findByRoleID = function(id){
 	return this.findOne({ account: 'admin'}, { _id: id});
 };
 
+
 schema.statics.createCollaboratorRole = function(account, project){
 	'use strict';
 
@@ -77,6 +78,41 @@ schema.statics.createViewerRole = function(account, project){
 	return ModelFactory.db.db(account).command(createRoleCmd);
 };
 
+
+schema.statics.createCommentatorRole = function(account, project){
+	'use strict';
+
+	console.log('commentator created');
+	
+	let createRoleCmd = {
+		'createRole' : `${project}.commentator`,
+		'privileges': [
+			{
+				"resource" : {
+					"db" : account,
+					"collection" : `${project}.history`
+				},
+				"actions" : [ 
+					"find",
+				]
+			},
+			{
+				"resource" : {
+					"db" : account,
+					"collection" : `${project}.issues`
+				},
+				"actions" : [ 
+					"find", "insert", "update"
+				]
+			}, 
+		],
+		roles: []
+	};
+
+	return ModelFactory.db.db(account).command(createRoleCmd);
+};
+
+
 schema.statics.createAdminRole = function(account){
 	'use strict';
 
@@ -110,7 +146,15 @@ schema.statics.removeCollaboratorRole = function(account, project){
 	return ModelFactory.db.db(account).command(dropRoleCmd);
 };
 
+schema.statics.removeCommentatorRole = function(account, project){
+	'use strict';
 
+	let dropRoleCmd = {
+		'dropRole' : `${project}.commentator`
+	};
+
+	return ModelFactory.db.db(account).command(dropRoleCmd);
+};
 
 var Role = ModelFactory.createClass(
 	'Role', 

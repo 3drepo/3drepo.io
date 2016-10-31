@@ -68,7 +68,7 @@ router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessT
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
-router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
+router.post('/:project/upload', middlewares.canCreateProject, middlewares.connectQueue, uploadProject);
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
@@ -271,7 +271,6 @@ function deleteProject(req, res, next){
 
 function uploadProject(req, res, next){
 	'use strict';
-
 	let responsePlace = utils.APIInfo(req);
 
 	//check space
