@@ -35,7 +35,7 @@ var getDbColOptions = function(req){
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
-function getAccessToProject(username, account, project){
+function getAccessByCollection(username, account, collection){
 	'use strict';
 
 	return User.findByUserName(username).then(user => {
@@ -44,7 +44,6 @@ function getAccessToProject(username, account, project){
 	}).then(privileges => {
 
 		//Determine the access rights of a project via privileges on the history collection
-		let collection = project + ".history";
 		let writePermission = false;
 		let readPermission = false;
 
@@ -72,19 +71,19 @@ function hasReadAccessToProjectHelper(username, account, project){
 }
 
 function hasAccessToProjectHelper(username, account, project, permissionBit){
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return getAccessByCollection(username, account, project + ".history").then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	});
 }
 
-function hasAccessToProject(req, res, next, permissionBit){
+function hasAccessToCollection(req, res, next, collection, permissionBit){
 	'use strict';
 
 	let username = req.session.user.username;
 	let account = req.params.account;
-	let project = req.params.project;
+	//let project = req.params.project;
 
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return getAccessByCollection(username, account, collection).then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	}).then(granted => {
 		if(granted){
@@ -92,18 +91,30 @@ function hasAccessToProject(req, res, next, permissionBit){
 		} else {
 			return Promise.reject(responseCodes.NOT_AUTHORIZED);
 		}
-	}).catch( err => {
-		responseCodes.respond("Middleware: check has access to project", req, res, next, err , null, err);
+	}).catch(err => {
+		responseCodes.respond("Middleware: check has access to " + collection, req, res, next, err , null, err);
 	});
 }
 
-function hasWriteAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, WRITE_BIT);
+function hasWriteAccessToIssue(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.issues';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
 }
 
+function hasWriteAccessToProject(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
+}
 
 function hasReadAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, READ_BIT);
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, READ_BIT);
 }
 
 function hasAccessToAccount(req, res, next){
@@ -319,6 +330,7 @@ var middlewares = {
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
+	hasWriteAccessToIssue: [loggedIn, hasWriteAccessToIssue],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
