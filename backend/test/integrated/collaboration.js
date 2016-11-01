@@ -194,6 +194,10 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
+		it('and the viewer should be abloe to download the project', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		});
+
 		it('and the viewer should NOT be able to upload model', function(done){
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
@@ -205,6 +209,29 @@ describe('Sharing/Unsharing a project', function () {
 			.send({})
 			.expect(401 , done);
 		});
+
+		it('and the viewer should NOT be able to delete the project', function(done){
+			agent.delete(`/${username}/${project}`)
+			.send({})
+			.expect(401 , done);
+		});
+
+		it('and the viewer should NOT be able to update project settings', function(done){
+			let body = {
+
+					mapTile: {
+						lat: 123,
+						lon: 234,
+						y: 5
+					},
+					unit: 'cm'
+
+			};
+			
+			agent.put(`/${username}/${project}/settings`)
+			.send(body).expect(401 , done);
+		});
+
 
 		describe('and then remove the role', function(){
 			before(function(done){
@@ -383,6 +410,10 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
+		it('and the commenter should be abloe to download the project', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		});
+
 		it('and the commenter should be able to see raise issue', function(done){
 
 			let issue = { 
@@ -416,6 +447,28 @@ describe('Sharing/Unsharing a project', function () {
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(401, done);
+		});
+
+		it('and the commenter should NOT be able to delete the project', function(done){
+			agent.delete(`/${username}/${project}`)
+			.send({})
+			.expect(401 , done);
+		});
+
+		it('and the commenter should NOT be able to update project settings', function(done){
+			let body = {
+
+					mapTile: {
+						lat: 123,
+						lon: 234,
+						y: 5
+					},
+					unit: 'cm'
+
+			};
+			
+			agent.put(`/${username}/${project}/settings`)
+			.send(body).expect(401 , done);
 		});
 
 		describe('and then remove the role', function(done){
@@ -627,6 +680,33 @@ describe('Sharing/Unsharing a project', function () {
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, done);
+		});
+
+
+		it('and the editor should be abloe to download the project', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		});
+
+		it('and the editor should NOT be able to delete the project', function(done){
+			agent.delete(`/${username}/${project}`)
+			.send({})
+			.expect(401 , done);
+		});
+
+		it('and the editor should NOT be able to update project settings', function(done){
+			let body = {
+
+					mapTile: {
+						lat: 123,
+						lon: 234,
+						y: 5
+					},
+					unit: 'cm'
+
+			};
+			
+			agent.put(`/${username}/${project}/settings`)
+			.send(body).expect(401 , done);
 		});
 
 		describe('and then remove the role', function(done){
