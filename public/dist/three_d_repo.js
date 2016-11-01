@@ -12472,7 +12472,6 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
@@ -19539,15 +19538,18 @@ var Oculus = {};
 
 		/**
 		 * Expand a node to show its children.
+		 * @param event
 		 * @param _id
 		 */
-		vm.expand = function (_id) {
+		vm.expand = function (event, _id) {
 			var i, length,
 				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
 				numChildrenToForceRedraw = 3;
+
+			event.stopPropagation();
 
 			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
@@ -19627,6 +19629,9 @@ var Oculus = {};
 						if (!vm.showNodes) {
 							$timeout(function () {
 								vm.showNodes = true;
+								// Resize virtual repeater
+								// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+								$scope.$broadcast('$md-resize');
 							});
 						}
 					}
@@ -19713,6 +19718,9 @@ var Oculus = {};
 				// Redraw the tree
 				$timeout(function () {
 					vm.showNodes = true;
+					// Resize virtual repeater
+					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+					$scope.$broadcast('$md-resize');
 				});
 			}
 		}
