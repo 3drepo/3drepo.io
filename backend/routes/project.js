@@ -47,9 +47,9 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
+router.put('/:project/settings', middlewares.isAccountAdmin, updateSettings);
 
-router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
 
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
@@ -66,9 +66,9 @@ router.get('/:project/revision/master/head/searchtree.json', middlewares.hasRead
 
 router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
-router.delete('/:project', middlewares.canCreateProject, deleteProject);
+router.delete('/:project', middlewares.isAccountAdmin, deleteProject);
 
-router.post('/:project/upload', middlewares.canCreateProject, middlewares.connectQueue, uploadProject);
+router.post('/:project/upload', middlewares.hasWriteAccessToProject, middlewares.connectQueue, uploadProject);
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
