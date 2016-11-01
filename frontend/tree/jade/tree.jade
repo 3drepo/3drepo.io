@@ -15,7 +15,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			ng-class="{treeNodeSelected: item.selected}"
 			ng-click="vm.selectNode(item)")
 				// Expand/collapse
-				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand(item._id)", ng-if="!item.status")
+				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand($event, item._id)", ng-if="!item.status")
 					md-icon.angular-material-icons(ng-if="!item.expanded && item.hasChildren") add_box
 					md-icon.angular-material-icons(ng-if="!item.expanded && !item.hasChildren") remove
 					md-icon.angular-material-icons(ng-if="item.expanded") indeterminate_check_box
