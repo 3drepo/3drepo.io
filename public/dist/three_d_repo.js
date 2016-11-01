@@ -12472,7 +12472,6 @@ angular.module('3drepo')
 			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
-					console.log(this.data);
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
