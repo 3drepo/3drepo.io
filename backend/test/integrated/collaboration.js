@@ -93,9 +93,16 @@ describe('Sharing/Unsharing a project', function () {
 	});
 
 	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
-			done();
+
+		let q = require('../../services/queue');
+
+		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
+			return q.channel.purgeQueue(q.workerQName);
+		}).then(() => {
+			server.close(function(){
+				console.log('API test server is closed');
+				done();
+			});
 		});
 	});
 
