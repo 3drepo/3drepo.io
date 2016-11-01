@@ -344,7 +344,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		action = 'view';
 	} else if(role === 'collaborator'){
 		action = 'collaborate';
-	} else if(role === 'commentator'){
+	} else if(role === 'commenter'){
 		action = 'comment';
 	} else {
 		return Promise.reject(responseCodes.INVALID_ROLE);
@@ -401,8 +401,8 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 				return Role.createViewerRole(account, project);
 			} else if(role === 'collaborator') {
 				return Role.createCollaboratorRole(account, project);
-			} else if(role === 'commentator') {
-				return Role.createCommentatorRole(account, project);
+			} else if(role === 'commenter') {
+				return Role.createCommenterRole(account, project);
 			}
 		});
 

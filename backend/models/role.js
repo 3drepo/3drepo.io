@@ -79,13 +79,11 @@ schema.statics.createViewerRole = function(account, project){
 };
 
 
-schema.statics.createCommentatorRole = function(account, project){
+schema.statics.createCommenterRole = function(account, project){
 	'use strict';
-
-	console.log('commentator created');
 	
 	let createRoleCmd = {
-		'createRole' : `${project}.commentator`,
+		'createRole' : `${project}.commenter`,
 		'privileges': [
 			{
 				"resource" : {
@@ -146,11 +144,11 @@ schema.statics.removeCollaboratorRole = function(account, project){
 	return ModelFactory.db.db(account).command(dropRoleCmd);
 };
 
-schema.statics.removeCommentatorRole = function(account, project){
+schema.statics.removeCommenterRole = function(account, project){
 	'use strict';
 
 	let dropRoleCmd = {
-		'dropRole' : `${project}.commentator`
+		'dropRole' : `${project}.commenter`
 	};
 
 	return ModelFactory.db.db(account).command(dropRoleCmd);

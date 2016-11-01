@@ -44,8 +44,8 @@ describe('Sharing/Unsharing a project', function () {
 	let username_editor = 'collaborator_editor';
 	let password_editor = 'collaborator_editor';
 
-	let username_commentator = 'collaborator_comm';
-	let password_commentator = 'collaborator_comm';
+	let username_commenter = 'collaborator_comm';
+	let password_commenter = 'collaborator_comm';
 
 	before(function(done){
 
@@ -67,10 +67,10 @@ describe('Sharing/Unsharing a project', function () {
 						done
 					});
 				},
-				function createCommentator(done){
+				function createCommenter(done){
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
-						username: username_commentator, password: password_commentator, email: email('commentator'),
+						username: username_commenter, password: password_commenter, email: email('commenter'),
 						done
 					});
 				}
@@ -317,10 +317,10 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('should succee and the commentator is able to see the project', function(done){
+		it('should succee and the commenter is able to see the project', function(done){
 			let role = {
-				user: username_commentator,
-				role: 'commentator'
+				user: username_commenter,
+				role: 'commenter'
 			};
 
 			async.series([
@@ -342,18 +342,18 @@ describe('Sharing/Unsharing a project', function () {
 						done(err);
 					});
 				},
-				function loginAsCommentator(done){
+				function loginAsCommenter(done){
 
 					agent.post('/login')
-					.send({ username: username_commentator, password: password_commentator })
+					.send({ username: username_commenter, password: password_commenter })
 					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username_commentator);
+						expect(res.body.username).to.equal(username_commenter);
 						done(err);
 					});
 				},
 				function checkSharedProjectInList(done){
 
-					agent.get(`/${username_commentator}.json`)
+					agent.get(`/${username_commenter}.json`)
 					.expect(200, function(err, res){
 
 						expect(res.body).to.have.property('accounts').that.is.an('array');
@@ -378,12 +378,12 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 
-		it('and the commentator should be able to see list of issues', function(done){
+		it('and the commenter should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
 			.expect(200, done);
 		});
 
-		it('and the commentator should be able to see raise issue', function(done){
+		it('and the commenter should be able to see raise issue', function(done){
 
 			let issue = { 
 				"name": "issue",
@@ -412,7 +412,7 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200 , done);
 		});
 
-		it('and the commentator should NOT be able to upload model', function(done){
+		it('and the commenter should NOT be able to upload model', function(done){
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(401, done);
@@ -426,7 +426,7 @@ describe('Sharing/Unsharing a project', function () {
 						agent.post('/logout')
 						.send({})
 						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_commentator);
+							expect(res.body.username).to.equal(username_commenter);
 							done(err);
 						});
 					},
@@ -442,11 +442,11 @@ describe('Sharing/Unsharing a project', function () {
 				], done);
 			});
 
-			it('should succee and the commentator is NOT able to see the project', function(done){
+			it('should succee and the commenter is NOT able to see the project', function(done){
 
 				let role = {
-					user: username_commentator,
-					role: 'commentator'
+					user: username_commenter,
+					role: 'commenter'
 				};
 					
 				async.waterfall([
@@ -468,18 +468,18 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function loginAsCommentator(done){
+					function loginAsCommenter(done){
 
 						agent.post('/login')
-						.send({ username: username_commentator, password: password_commentator })
+						.send({ username: username_commenter, password: password_commenter })
 						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_commentator);
+							expect(res.body.username).to.equal(username_commenter);
 							done(err);
 						});
 					},
 					function checkSharedProjectInList(done){
 
-						agent.get(`/${username_commentator}.json`)
+						agent.get(`/${username_commenter}.json`)
 						.expect(200, function(err, res){
 
 							expect(res.body).to.have.property('accounts').that.is.an('array');
@@ -500,7 +500,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			});
 
-			it('and the commentator should NOT be able to see raise issue', function(done){
+			it('and the commenter should NOT be able to see raise issue', function(done){
 				agent.post(`/${username}/${project}/issues.json`)
 				.send({ })
 				.expect(401 , done);
