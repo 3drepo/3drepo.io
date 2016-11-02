@@ -40,7 +40,7 @@ let repoBaseMock = proxyquire('../../../models/base/repo', {
 	'../factory/modelFactory': modelFactoryMock
 });
 
-let Revision = require('../../../models/revision');
+let History = require('../../../models/history');
 
 
 let DB = require('../mock/db');
@@ -48,7 +48,7 @@ let DB = require('../mock/db');
 let Mesh = proxyquire('../../../models/mesh', { 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,
-	'../revision': Revision,
+	'../history': History,
 	'./base/repo': repoBaseMock
 
 });
@@ -131,7 +131,7 @@ describe('Mesh and Object extended from repo base', function(){
 			let revisionObj = {current: [1,2,3,4,5]};
 			revisionObj.toObject = () => revisionObj;
 
-			let RevStub = sinon.stub(Revision, 'findById').returns(Promise.resolve(revisionObj));
+			let HistoryStub = sinon.stub(History, 'findByUID').returns(Promise.resolve(revisionObj));
 			// mock no stash found
 			//let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
 			let meshStub = sinon.stub(Mesh, 'findOne').returns(Promise.resolve(dbData));
@@ -144,9 +144,9 @@ describe('Mesh and Object extended from repo base', function(){
 
 				expect(data).to.deep.equal(dbData);
 				// Revision.findById should be called
-				sinon.assert.calledWith(RevStub, dbCol, rid);
+				sinon.assert.calledWith(HistoryStub, dbCol, rid);
 				
-				RevStub.restore();
+				HistoryStub.restore();
 				meshStub.restore();
 				//stashStub.restore();
 

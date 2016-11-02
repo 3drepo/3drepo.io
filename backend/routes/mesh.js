@@ -111,7 +111,7 @@ function findByRevision(req, res, next){
 				req.params.format = 'src';
 				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
 
-				stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
+				return stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
 					return Promise.resolve(renderedObj);
 				});
 			});
