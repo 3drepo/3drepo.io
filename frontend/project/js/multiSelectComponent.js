@@ -77,6 +77,7 @@
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
+						objectIndex = -1;
 						selectedObjects.find(function(obj, i){
 							if(obj.id === changes.event.currentValue.value.id){
 								objectIndex = i;
