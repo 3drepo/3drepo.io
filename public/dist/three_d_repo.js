@@ -17586,6 +17586,7 @@ var Oculus = {};
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
+						objectIndex = -1;
 						selectedObjects.find(function(obj, i){
 							if(obj.id === changes.event.currentValue.value.id){
 								objectIndex = i;
@@ -17599,7 +17600,8 @@ var Oculus = {};
 							});
 						}
 						else {
-							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+							deselectedObjects.push(selectedObjects[objectIndex]);
+							selectedObjects.splice(objectIndex, 1)
 						}
 						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
@@ -17653,6 +17655,8 @@ var Oculus = {};
 
 			var highlightIds = [];
 			var unHighlightIds = [];
+
+			console.log(selectedObjects, deselectedObjects);
 
 			selectedObjects.forEach(function(obj){
 				highlightIds.push(obj.id);
