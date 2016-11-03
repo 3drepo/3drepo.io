@@ -18,7 +18,7 @@ Your pull requests should:
 
 1. Follow the style of the existing code
 2. One commit should just do one thing, and one thing only
-3. Work in a branch assigned to a specific issue number, e.g. branch called "ISSUE_138"
+3. Work in a branch assigned to a specific issue number, e.g. branch called "ISSUE_138 - "
 4. Each commit message should be prefixed with the issue number, e.g. "ISSUE #138 Fixing bug xyz..."
 5. Rebase your branch against [upstream's master](https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/) so that we don't pull redundant commits
 6. Sign our [3D Repo Individual CLA](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or if you are representing a legal entity, sign the [3D Repo Entity CLA](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2)
