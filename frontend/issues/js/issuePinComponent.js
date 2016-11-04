@@ -109,7 +109,6 @@
 
 		function removePin () {
 			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
-			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 			self.setPin({data: null});
 		}
 	}
