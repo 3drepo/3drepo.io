@@ -35,7 +35,8 @@
 			userRoles = [],
 			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null;
+			updatedIssue = null,
+			issueDisplay = {};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -436,6 +437,20 @@
 				},
 				set: function(issue) {
 					updatedIssue = issue;
+				}
+			}
+		);
+
+		// Getter setter for issueDisplay
+		Object.defineProperty(
+			obj,
+			"issueDisplay",
+			{
+				get: function () {
+					return issueDisplay;
+				},
+				set: function (newIssueDisplay) {
+					issueDisplay = newIssueDisplay;
 				}
 			}
 		);

@@ -53,7 +53,7 @@
 			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
-			sortOldestFirst = true,
+			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false;
@@ -69,6 +69,7 @@
 		 */
 		this.$onChanges = function (changes) {
 			var i, length,
+				index,
 				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
@@ -80,15 +81,24 @@
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
-					setupIssuesToShow();
-					// Process issues
-					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-						// Check for updated issue
-						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
-							this.issuesToShow[i] = updatedIssue;
-						}
+
+					// Check for updated issue
+					if (updatedIssue) {
+						index = this.allIssues.findIndex(function (issue) {
+							return (issue._id === updatedIssue._id);
+						});
+						this.allIssues[index] = updatedIssue;
 					}
-					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+
+					// Check for issue display
+					if (IssuesService.issueDisplay.showClosed) {
+						showClosed = IssuesService.issueDisplay.showClosed;
+					}
+					if (IssuesService.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					}
+
+					setupIssuesToShow();
 					showPins();
 				}
 				else {
@@ -162,9 +172,11 @@
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
+					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
+					IssuesService.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -390,8 +402,8 @@
 				self.issuesToShow = [self.allIssues[0]];
 				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
 							self.issuesToShow.splice(j, 0, self.allIssues[i]);
 							break;
 						}
