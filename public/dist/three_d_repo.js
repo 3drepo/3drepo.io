@@ -12875,6 +12875,7 @@ angular.module('3drepo')
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
+					self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
 
@@ -13527,7 +13528,6 @@ angular.module('3drepo')
 
 		function removePin () {
 			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
-			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 			self.setPin({data: null});
 		}
 	}
@@ -14065,7 +14065,6 @@ angular.module('3drepo')
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				vm.setContentHeight();
 			}
 		});
 
@@ -14276,7 +14275,7 @@ angular.module('3drepo')
 			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
-			sortOldestFirst = true,
+			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false;
@@ -14292,6 +14291,7 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			var i, length,
+				index,
 				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
@@ -14303,15 +14303,24 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
-					setupIssuesToShow();
-					// Process issues
-					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-						// Check for updated issue
-						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
-							this.issuesToShow[i] = updatedIssue;
-						}
+
+					// Check for updated issue
+					if (updatedIssue) {
+						index = this.allIssues.findIndex(function (issue) {
+							return (issue._id === updatedIssue._id);
+						});
+						this.allIssues[index] = updatedIssue;
 					}
-					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+
+					// Check for issue display
+					if (IssuesService.issueDisplay.showClosed) {
+						showClosed = IssuesService.issueDisplay.showClosed;
+					}
+					if (IssuesService.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					}
+
+					setupIssuesToShow();
 					showPins();
 				}
 				else {
@@ -14385,9 +14394,11 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
+					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
+					IssuesService.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -14614,8 +14625,8 @@ angular.module('3drepo')
 				self.issuesToShow = [self.allIssues[0]];
 				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
 							self.issuesToShow.splice(j, 0, self.allIssues[i]);
 							break;
 						}
@@ -14778,7 +14789,8 @@ angular.module('3drepo')
 			userRoles = [],
 			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null;
+			updatedIssue = null,
+			issueDisplay = {};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -15179,6 +15191,20 @@ angular.module('3drepo')
 				},
 				set: function(issue) {
 					updatedIssue = issue;
+				}
+			}
+		);
+
+		// Getter setter for issueDisplay
+		Object.defineProperty(
+			obj,
+			"issueDisplay",
+			{
+				get: function () {
+					return issueDisplay;
+				},
+				set: function (newIssueDisplay) {
+					issueDisplay = newIssueDisplay;
 				}
 			}
 		);
@@ -16500,19 +16526,10 @@ var Oculus = {};
 				}
 				else {
 					if (index !== currentSortIndex) {
-						if (angular.isDefined(currentSortIndex)) {
-							vm.menu[currentSortIndex].selected = false;
-							vm.menu[currentSortIndex].firstSelected = false;
-							vm.menu[currentSortIndex].secondSelected = false;
-						}
 						currentSortIndex = index;
-						vm.menu[currentSortIndex].selected = true;
-						vm.menu[currentSortIndex].firstSelected = true;
 					}
-					else {
-						vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
-						vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
-					}
+					vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
+					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
 					vm.selectedMenuOption = vm.menu[currentSortIndex];
 				}
 			}
