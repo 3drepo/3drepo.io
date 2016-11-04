@@ -38,6 +38,7 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
+				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			},
@@ -47,9 +48,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "TreeService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, TreeService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -365,7 +366,8 @@
 
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(obj.id);
+
+						ids.push(TreeService.sharedIdToUId(vm.treeMap.nodes, obj.shared_id));
 					});
 
 					data = {

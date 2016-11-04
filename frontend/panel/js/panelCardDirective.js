@@ -31,6 +31,7 @@
 				branch: "=",
 				revision: "=",
                 position: "=",
+                treeMap: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -184,6 +185,7 @@
 				"branch='vm.branch' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
+				"tree-map='vm.treeMap' " +
 				"selected-objects='vm.selectedObjects' " +
 				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
 

@@ -38,9 +38,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "TreeService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, TreeService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -225,6 +225,11 @@
 						project: data.project,
 						settings: data.settings
 					});
+				});
+
+
+				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
+					vm.treeMap = data;
 				});
 			}
 		});

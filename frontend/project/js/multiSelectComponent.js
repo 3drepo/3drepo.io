@@ -26,6 +26,7 @@
 				bindings: {
 					account: "<",
 					project: "<",
+					treeMap: "<",
 					keysDown: "<",
 					sendEvent: "&",
 					event: "<",
@@ -35,9 +36,9 @@
 			}
 		);
 
-	MultiSelectCtrl.$inject = ["EventService"];
+	MultiSelectCtrl.$inject = ["EventService", "TreeService"];
 
-	function MultiSelectCtrl (EventService) {
+	function MultiSelectCtrl (EventService, TreeService) {
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
@@ -56,6 +57,8 @@
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
+			console.log('tree', self.treeMap);
+
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
@@ -74,18 +77,26 @@
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+
+					var sharedId = TreeService.uIdToSharedId(self.treeMap.nodes, changes.event.currentValue.value.id);
+
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
 						objectIndex = -1;
 						selectedObjects.find(function(obj, i){
-							if(obj.id === changes.event.currentValue.value.id){
+							if(obj.shared_id === sharedId){
 								objectIndex = i;
 							}
 						});
 						if (objectIndex === -1) {
+
+							
+							//console.log('sharedId', sharedId);
+
 							selectedObjects.push({
 								id: changes.event.currentValue.value.id,
+								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
 								project: changes.event.currentValue.value.project
 							});
@@ -107,6 +118,7 @@
 						// Can only select one object at a time when not in multi mode
 						selectedObjects = [{
 								id: changes.event.currentValue.value.id,
+								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
 								project: changes.event.currentValue.value.project
 						}];

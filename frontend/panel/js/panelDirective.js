@@ -30,8 +30,9 @@
 				project:  "=",
 				branch:   "=",
 				revision: "=",				
-                position: "@",
+				position: "@",
 				keysDown: "=",
+				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },

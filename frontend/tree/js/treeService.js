@@ -62,9 +62,55 @@
 			return deferred.promise;
 		};
 
+		var uIdToSharedId = function(treeItem, uid){
+			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
+			var sharedId;
+
+			if(treeItem && treeItem.children){
+				
+				for(var i=0; i<treeItem.children.length; i++){
+					sharedId = uIdToSharedId(treeItem.children[i], uid);
+					if(sharedId){
+						break;
+					}
+				}
+
+			}
+
+			if (!sharedId && treeItem && treeItem._id === uid) {
+				sharedId = treeItem.shared_id;
+			}
+
+			return sharedId;
+		};
+
+		var sharedIdToUId = function(treeItem, sharedId){
+			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
+			var uId;
+
+			if(treeItem && treeItem.children){
+				
+				for(var i=0; i<treeItem.children.length; i++){
+					uId = sharedIdToUId(treeItem.children[i], sharedId);
+					if(uId){
+						break;
+					}
+				}
+
+			}
+
+			if (!uId && treeItem && treeItem.shared_id === sharedId) {
+				uId = treeItem._id;
+			}
+
+			return uId;
+		};
+
 		return {
 			init: init,
-			search: search
+			search: search,
+			uIdToSharedId: uIdToSharedId,
+			sharedIdToUId: sharedIdToUId
 		};
 	}
 }());
