@@ -14424,8 +14424,10 @@ angular.module('3drepo')
 					}
 
 					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+						
 						issue.title = IssuesService.generateTitle(issue);
 						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+						issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
 
 						vm.issues.unshift(issue);
 						
@@ -14445,7 +14447,7 @@ angular.module('3drepo')
 
 				issue.title = IssuesService.generateTitle(issue);
 				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-
+				issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
 
 				vm.issues.find(function(oldIssue, i){
 					if(oldIssue._id === issue._id){
