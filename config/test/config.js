@@ -116,6 +116,7 @@ module.exports = {
 		}
 	},
 	vat: {
+		checkUrl: 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl',
 		debug: {
 			skipNonGBChecking: true
 		}

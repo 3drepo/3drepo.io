@@ -145,5 +145,19 @@ module.exports = {
 	},
 
 	uploadSizeLimit: 209715200,
-	gaTrackId: ''
+	gaTrackId: '',
+	invoice_dir: '/tmp',
+	bcf_dir: '/tmp',
+	pdf: {
+		debug: {
+			allowRegenerate: false
+		}
+	},
+
+	vat: {
+		checkUrl: 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl',
+		debug: {
+			skipNonGBChecking: false
+		}
+	},
 }

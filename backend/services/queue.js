@@ -25,7 +25,7 @@ var amqp = require('amqplib');
 var fs = require('fs.extra');
 var uuid = require('node-uuid');
 var shortid = require('shortid');
-
+var systemLogger = require("../logger.js").systemLogger;
 
 function ImportQueue() {}
 
@@ -64,6 +64,10 @@ ImportQueue.prototype.connect = function(url, options) {
 
         conn.on('close', () => {
             this.conn = null;
+        });
+
+        conn.on("error", function(err) {
+            systemLogger.logError("[AMQP] connection error " + err.message);
         });
 
         return conn.createChannel();
