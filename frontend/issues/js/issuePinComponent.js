@@ -68,13 +68,7 @@
 
 					if(trans)
 					{
-						console.log("position before:" + position.toGL());
 						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
 					}
 
 
@@ -85,14 +79,16 @@
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
-						colours: [[0.5, 0, 0]]
+						pickedPos: position,
+						pickedNorm: normal,
+						colours: [[1.0, 0.7,  0]]
+
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
 				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
+						pinDropMode) {
 					removePin();
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {

@@ -627,7 +627,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(account, project),
+						trans: self.getParentTransformation(self.account, self.project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
@@ -845,7 +845,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
+			
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
 				var fullHighlightPartsList = [];

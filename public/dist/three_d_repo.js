@@ -706,41 +706,45 @@ var ClipPlane = {};
 
 		sceneBbox = viewer.runtime.getBBox(viewer.getScene());
 
-		// Construct and connect everything together
-		outlineMat.setAttribute("emissiveColor", colour.join(" "));
-		outlineLines.setAttribute("vertexCount", 5);
-		outlineLines.appendChild(outlineCoords);
-
-		outlineApp.appendChild(outlineMat);
-		outline.appendChild(outlineApp);
-		outline.appendChild(outlineLines);
-
-		coordinateFrame.appendChild(outline);
-
-		// Attach to the root node of the viewer
-		viewer.getScene().appendChild(coordinateFrame);
-		if(parentNode)
+		if(normal || axis != "")
 		{
-			volume = viewer.runtime.getBBox(parentNode);
-		}
-		else
-		{
-			volume = sceneBbox;
+
+			outlineMat.setAttribute("emissiveColor", colour.join(" "));
+			outlineLines.setAttribute("vertexCount", 5);
+			outlineLines.appendChild(outlineCoords);
+
+			outlineApp.appendChild(outlineMat);
+			outline.appendChild(outlineApp);
+			outline.appendChild(outlineLines);
+
+			coordinateFrame.appendChild(outline);
+
+			// Attach to the root node of the viewer
+			viewer.getScene().appendChild(coordinateFrame);
+			if(parentNode)
+			{
+				volume = viewer.runtime.getBBox(parentNode);
+			}
+			else
+			{
+				volume = sceneBbox;
 			
+			}
+
+			// Move the plane to finish construction
+			if(!normal)
+			{		
+				this.movePlane(axis, percentage);
+			}
+
+			viewer.getScene().appendChild(clipPlaneElem);
+
+
+			if(parentNode)
+				this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
+
+
 		}
-
-		// Move the plane to finish construction
-		if(axis != "")
-		{		
-			this.movePlane(axis, percentage);
-		}
-
-		viewer.getScene().appendChild(clipPlaneElem);
-
-
-		if(parentNode)
-			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
-
 
 	};
 
@@ -3631,7 +3635,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(account, project),
+						trans: self.getParentTransformation(self.account, self.project),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
@@ -3849,7 +3853,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-
+			
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
 				var fullHighlightPartsList = [];
@@ -6641,6 +6645,7 @@ var ViewerManager = {};
 				} else {
 					vm.uploadButtonDisabled = false;
 				}
+
 			}
 		});
 
@@ -7296,7 +7301,7 @@ var ViewerManager = {};
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
 				});
 			}
 		}
@@ -7377,7 +7382,7 @@ var ViewerManager = {};
 				}
 
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
-				
+				vm.oldUnit = vm.unit;
 
 			} else {
 				vm.message = response.data.message;
@@ -7397,6 +7402,7 @@ var ViewerManager = {};
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
+					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
 				}
@@ -9833,6 +9839,13 @@ var ViewerManager = {};
 					vm.normal = normal;
 				if(distance)
 					vm.distance = distance;
+
+				if(!vm.normal && vm.selectedAxis == "")
+				{
+					//unintiialised clipping plane. reset it
+					vm.selectedAxis = "X";					
+				}
+
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
 				{
 					axis: translateAxis(vm.selectedAxis),
@@ -9917,11 +9930,11 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
+				vm.normal = null;
 				if(vm.account && vm.project)
 				{
 					vm.account = null;
 					vm.project = null;
-					vm.normal = null;
 					initClippingPlane();	
 				}
 				else
@@ -10676,11 +10689,11 @@ var ViewerManager = {};
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					index = vm.selectedGroup.parents.indexOf(event.value.id);
+					index = vm.selectedGroup.objects.indexOf(event.value.id);
 					if (index !== -1) {
-						vm.selectedGroup.parents.splice(index, 1);
+						vm.selectedGroup.objects.splice(index, 1);
 					} else {
-						vm.selectedGroup.parents.push(event.value.id);
+						vm.selectedGroup.objects.push(event.value.id);
 					}
 
 					promise = GroupsService.updateGroup(vm.selectedGroup);
@@ -10698,14 +10711,14 @@ var ViewerManager = {};
 		 */
 		function setSelectedGroupHighlightStatus (highlight) {
 			var data;
-			if ((vm.selectedGroup !== null) && (vm.selectedGroup.parents.length > 0)) {
+			if ((vm.selectedGroup !== null) && (vm.selectedGroup.objects.length > 0)) {
 				data = {
 					source: "tree",
 					account: vm.account,
 					project: vm.project
 				};
 				if (highlight) {
-					data.ids = vm.selectedGroup.parents;
+					data.ids = vm.selectedGroup.objects;
 					data.colour = vm.selectedGroup.color.map(function(item) {return (item / 255.0);}).join(" ");
 				}
 				else {
@@ -10728,8 +10741,8 @@ var ViewerManager = {};
 
 			// Get all the object IDs
 			for (i = 0, length = groups.length; i < length; i += 1) {
-				if (groups[i].parents.length > 0) {
-					ids = ids.concat(groups[i].parents);
+				if (groups[i].objects.length > 0) {
+					ids = ids.concat(groups[i].objects);
 				}
 			}
 
@@ -10909,7 +10922,7 @@ var ViewerManager = {};
 		 * @returns {Object}
 		 */
 		obj.createGroup = function (name, color) {
-			return doPost({name: name, color: color, parents: []}, "groups");
+			return doPost({name: name, color: color, objects: []}, "groups");
 		};
 
 		/**
@@ -12780,7 +12793,7 @@ angular.module('3drepo')
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			// Update
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
 			}
 		};
 
@@ -12805,7 +12818,8 @@ angular.module('3drepo')
 
 				if (canUpdate) {
 					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
+						(this.data.status !== this.issueData.status) ||
+						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
 						if (typeof this.comment !== "undefined") {
 							saveComment();
@@ -12995,7 +13009,7 @@ angular.module('3drepo')
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -13010,7 +13024,7 @@ angular.module('3drepo')
 					screenShotPromise.promise.then(function (screenShot) {
 						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -13079,6 +13093,7 @@ angular.module('3drepo')
 
 					// Hide some actions
 					self.actions.pin.hidden = true;
+					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
@@ -13101,6 +13116,8 @@ angular.module('3drepo')
 				.then(function (data) {
 					IssuesService.updatedIssue = self.issueData;
 				});
+			
+			self.submitDisabled = true;
 		}
 
 		/**
@@ -13626,7 +13643,6 @@ angular.module('3drepo')
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
-						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}
@@ -13784,13 +13800,7 @@ angular.module('3drepo')
 
 					if(trans)
 					{
-						console.log("position before:" + position.toGL());
 						position = trans.inverse().multMatrixPnt(position);
-						console.log("position after:" + position.toGL());
-					}
-					else
-					{
-						console.log("no trans");
 					}
 
 
@@ -13801,14 +13811,16 @@ angular.module('3drepo')
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
-						pickedPos: pickedPos,
-						pickedNorm: pickedNorm,
-						colours: [[0.5, 0, 0]]
+						pickedPos: position,
+						pickedNorm: normal,
+						colours: [[1.0, 0.7,  0]]
+
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
 				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
+						pinDropMode) {
 					removePin();
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
@@ -14513,7 +14525,7 @@ angular.module('3drepo')
 			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
-			if (vm.selectedIssue) {
+			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
 			}
 
@@ -14588,12 +14600,18 @@ angular.module('3drepo')
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(vm.account + "/" + vm.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+
 					data = {
 						source: "tree",
 						account: vm.account,
 						project: vm.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
@@ -14668,7 +14686,7 @@ angular.module('3drepo')
 			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
-			sortOldestFirst = true,
+			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false;
@@ -14684,6 +14702,7 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			var i, length,
+				index,
 				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
@@ -14695,23 +14714,24 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
-					setupIssuesToShow();
-					// Process issues
-					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-						// Check for updated issue
-						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
-							this.issuesToShow[i] = updatedIssue;
-						}
-						/*
-						// Get a possible selected issue
-						if (this.issuesToShow[i].selected) {
-							selectedIssue = this.issuesToShow[i];
-							focusedIssueIndex = i;
-							setSelectedIssueIndex(selectedIssue);
-						}
-						*/
+
+					// Check for updated issue
+					if (updatedIssue) {
+						index = this.allIssues.findIndex(function (issue) {
+							return (issue._id === updatedIssue._id);
+						});
+						this.allIssues[index] = updatedIssue;
 					}
-					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+
+					// Check for issue display
+					if (IssuesService.issueDisplay.showClosed) {
+						showClosed = IssuesService.issueDisplay.showClosed;
+					}
+					if (IssuesService.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					}
+
+					setupIssuesToShow();
 					showPins();
 				}
 				else {
@@ -14785,9 +14805,11 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
+					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
+					IssuesService.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -14822,14 +14844,14 @@ angular.module('3drepo')
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
 				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					this.issuesToShow[i].selected = false;
 					this.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
 						selectedIssue = this.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;
@@ -14963,12 +14985,19 @@ angular.module('3drepo')
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(self.account + "/" + self.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+					
 					data = {
 						source: "tree",
 						account: self.account,
 						project: self.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
@@ -15007,8 +15036,8 @@ angular.module('3drepo')
 				self.issuesToShow = [self.allIssues[0]];
 				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
 							self.issuesToShow.splice(j, 0, self.allIssues[i]);
 							break;
 						}
@@ -15119,10 +15148,14 @@ angular.module('3drepo')
 							id: self.allIssues[i]._id,
 							position: self.allIssues[i].position,
 							norm: self.allIssues[i].norm,
-							account: self.account,
-							project: self.project
+							account: self.allIssues[i].account,
+							project: self.allIssues[i].project
 						};
-						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
+						var pinColor = [0.5, 0, 0];
+						if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
+							pinColor = [1.0, 0.7, 0];
+						}
+						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
 			}
@@ -15167,7 +15200,8 @@ angular.module('3drepo')
 			userRoles = [],
 			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null;
+			updatedIssue = null,
+			issueDisplay = {};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -15252,30 +15286,37 @@ angular.module('3drepo')
 			}
 			
 
-			$http.get(url)
-				.then(
-					function(data) {
-						console.log(data);
-						deferred.resolve(data.data);
-						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-							data.data[i].title = self.generateTitle(data.data[i]);
+			$http.get(url).then(
+				function(data) {
+					deferred.resolve(data.data);
+					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+						data.data[i].title = self.generateTitle(data.data[i]);
+						if (data.data[i].thumbnail) {
+							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
+						}
 
-							if (data.data[i].hasOwnProperty("comments")) {
-								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-									if (data.data[i].comments[j].hasOwnProperty("created")) {
-										data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
-									}
+						// Comments
+						if (data.data[i].hasOwnProperty("comments")) {
+							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+								// Timestamp
+								if (data.data[i].comments[j].hasOwnProperty("created")) {
+									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+								}
+								// Screen shot path
+								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
+									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
 								}
 							}
-
-							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
-					},
-					function() {
-						deferred.resolve([]);
+
+						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
-				);
+				},
+				function() {
+					deferred.resolve([]);
+				}
+			);
 
 			return deferred.promise;
 		};
@@ -15590,6 +15631,20 @@ angular.module('3drepo')
 				},
 				set: function(issue) {
 					updatedIssue = issue;
+				}
+			}
+		);
+
+		// Getter setter for issueDisplay
+		Object.defineProperty(
+			obj,
+			"issueDisplay",
+			{
+				get: function () {
+					return issueDisplay;
+				},
+				set: function (newIssueDisplay) {
+					issueDisplay = newIssueDisplay;
 				}
 			}
 		);
@@ -16290,6 +16345,7 @@ var Oculus = {};
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 		vm.showAdd = false;
+		vm.hideMenuButton = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -16378,6 +16434,7 @@ var Oculus = {};
 		 */
 		vm.showItem = function () {
 			vm.statusIcon = "arrow_back";
+			vm.hideMenuButton = true;
 			vm.hideSelectedItem = false; // So that a change to this value is propagated
 		};
 
@@ -16386,6 +16443,7 @@ var Oculus = {};
 		 */
 		vm.hideItem = function () {
 			vm.statusIcon = vm.contentData.icon;
+			vm.hideMenuButton = false;
 			vm.hideSelectedItem = true;
 		};
 
@@ -16452,7 +16510,13 @@ var Oculus = {};
 					option = null;
 					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
 					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
-					optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+
+					if(vm.contentData.options[i].type === 'menu'){
+						optionElement += " ng-if='!vm.hideMenuButton'";
+					} else {
+						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+					}
+					
 					vm.contentData.options[i].color = "";
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
@@ -16902,19 +16966,10 @@ var Oculus = {};
 				}
 				else {
 					if (index !== currentSortIndex) {
-						if (angular.isDefined(currentSortIndex)) {
-							vm.menu[currentSortIndex].selected = false;
-							vm.menu[currentSortIndex].firstSelected = false;
-							vm.menu[currentSortIndex].secondSelected = false;
-						}
 						currentSortIndex = index;
-						vm.menu[currentSortIndex].selected = true;
-						vm.menu[currentSortIndex].firstSelected = true;
 					}
-					else {
-						vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
-						vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
-					}
+					vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
+					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
 					vm.selectedMenuOption = vm.menu[currentSortIndex];
 				}
 			}
@@ -18001,9 +18056,18 @@ var Oculus = {};
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
-						objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
+						objectIndex = -1;
+						selectedObjects.find(function(obj, i){
+							if(obj.id === changes.event.currentValue.value.id){
+								objectIndex = i;
+							}
+						});
 						if (objectIndex === -1) {
-							selectedObjects.push(changes.event.currentValue.value.id);
+							selectedObjects.push({
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+							});
 						}
 						else {
 							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
@@ -18019,7 +18083,11 @@ var Oculus = {};
 					}
 					else {
 						// Can only select one object at a time when not in multi mode
-						selectedObjects = [changes.event.currentValue.value.id];
+						selectedObjects = [{
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+						}];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
@@ -18053,12 +18121,24 @@ var Oculus = {};
 		 * @param deselectedObjects
 		 */
 		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
+
+			var highlightIds = [];
+			var unHighlightIds = [];
+
+			selectedObjects.forEach(function(obj){
+				highlightIds.push(obj.id);
+			});
+
+			deselectedObjects.forEach(function(obj){
+				unHighlightIds.push(obj.id);
+			});
+			
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				highlight_ids: selectedObjects,
-				unhighlight_ids: deselectedObjects
+				highlight_ids: highlightIds,
+				unhighlight_ids: unHighlightIds
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
@@ -19927,15 +20007,18 @@ var Oculus = {};
 
 		/**
 		 * Expand a node to show its children.
+		 * @param event
 		 * @param _id
 		 */
-		vm.expand = function (_id) {
+		vm.expand = function (event, _id) {
 			var i, length,
 				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
 				numChildrenToForceRedraw = 3;
+
+			event.stopPropagation();
 
 			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
@@ -20015,6 +20098,9 @@ var Oculus = {};
 						if (!vm.showNodes) {
 							$timeout(function () {
 								vm.showNodes = true;
+								// Resize virtual repeater
+								// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+								$scope.$broadcast('$md-resize');
 							});
 						}
 					}
@@ -20101,6 +20187,9 @@ var Oculus = {};
 				// Redraw the tree
 				$timeout(function () {
 					vm.showNodes = true;
+					// Resize virtual repeater
+					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+					$scope.$broadcast('$md-resize');
 				});
 			}
 		}

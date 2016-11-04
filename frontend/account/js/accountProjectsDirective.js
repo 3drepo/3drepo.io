@@ -385,7 +385,7 @@
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
 				});
 			}
 		}

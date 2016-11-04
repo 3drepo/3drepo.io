@@ -102,6 +102,11 @@ var schema = Schema({
 		guid: Object,
 		extras: {},
 		scribble: {flag: Number, content: Object},
+		type: {
+			type: String, 
+			default: 'perspective', 
+			enum: ['perspective', 'orthogonal']
+		}
 	}],
 
 	group_id: Object,
@@ -543,7 +548,14 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.owner = data.owner;
 		issue.status = data.status;
 		issue.topic_type = data.topic_type;
-		issue.desc = data.desc;
+		if(data.desc && data.desc !== "")
+		{
+			issue.desc = data.desc;
+		}
+		else
+		{
+			issue.desc = "(No Description)";
+		}
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
@@ -1112,17 +1124,17 @@ schema.methods.getBCFMarkup = function(unit){
 
 	this.topic_type && (markup.Markup.Topic['@'].TopicType = this.topic_type);
 
-	markup.Markup.Header = _.get(this, 'extras.Header');
-	markup.Markup.Topic.ReferenceLink = _.get(this, 'extras.ReferenceLink');
-	markup.Markup.Topic.Index = _.get(this, 'extras.Index');
-	markup.Markup.Topic.Labels = _.get(this, 'extras.Labels');
-	markup.Markup.Topic.ModifiedDate = _.get(this, 'extras.ModifiedDate');
-	markup.Markup.Topic.ModifiedAuthor = _.get(this, 'extras.ModifiedAuthor');
-	markup.Markup.Topic.DueDate = _.get(this, 'extras.DueDate');
-	markup.Markup.Topic.AssignedTo = _.get(this, 'extras.AssignedTo');
-	markup.Markup.Topic.BimSnippet = _.get(this, 'extras.BimSnippet');
-	markup.Markup.Topic.DocumentReference = _.get(this, 'extras.DocumentReference');
-	markup.Markup.Topic.RelatedTopic = _.get(this, 'extras.RelatedTopic');
+	_.get(this, 'extras.Header') && (markup.Markup.Header = _.get(this, 'extras.Header'));
+	_.get(this, 'extras.ReferenceLink') && (markup.Markup.Topic.ReferenceLink = _.get(this, 'extras.ReferenceLink'));
+	_.get(this, 'extras.Index') && (markup.Markup.Topic.Index = _.get(this, 'extras.Index'));
+	_.get(this, 'extras.Labels') && (markup.Markup.Topic.Labels = _.get(this, 'extras.Labels'));
+	_.get(this, 'extras.ModifiedDate') && (markup.Markup.Topic.ModifiedDate = _.get(this, 'extras.ModifiedDate'));
+	_.get(this, 'extras.ModifiedAuthor') && (markup.Markup.Topic.ModifiedAuthor = _.get(this, 'extras.ModifiedAuthor'));
+	_.get(this, 'extras.DueDate') && (markup.Markup.Topic.DueDate = _.get(this, 'extras.DueDate'));
+	_.get(this, 'extras.AssignedTo') && (markup.Markup.Topic.AssignedTo = _.get(this, 'extras.AssignedTo'));
+	_.get(this, 'extras.BimSnippet') && (markup.Markup.Topic.BimSnippet = _.get(this, 'extras.BimSnippet'));
+	_.get(this, 'extras.DocumentReference') && (markup.Markup.Topic.DocumentReference = _.get(this, 'extras.DocumentReference'));
+	_.get(this, 'extras.RelatedTopic') && (markup.Markup.Topic.RelatedTopic = _.get(this, 'extras.RelatedTopic'));
 	
 	//add comments
 	this.comments.forEach(comment => {
@@ -1139,8 +1151,8 @@ schema.methods.getBCFMarkup = function(unit){
 			'Date': moment(comment.created).utc().format()
 		};
 
-		commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate');
-		commentXmlObj.ModifiedAuthor = _.get(comment, 'extras.ModifiedAuthor');
+		_.get(comment, 'extras.ModifiedDate') && (commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate'));
+		_.get(comment, 'extras.ModifiedAuthor') && (commentXmlObj.ModifiedAuthor = _.get(comment, 'extras.ModifiedAuthor'));
 
 		markup.Markup.Comment.push(commentXmlObj);
 
@@ -1148,122 +1160,90 @@ schema.methods.getBCFMarkup = function(unit){
 
 
 	// generate viewpoints
-	if(this.comments.length > 0 && this.viewpoints.length > 0){
+	let snapshotNo = 0;
 
-		let snapshotNo = 0;
+	this.viewpoints.forEach((vp, index) => {
 
-		this.viewpoints.forEach((vp, index) => {
+		let number = index === 0 ? '' : index;
+		let viewpointFileName = `viewpoint${number}.bcfv`;
+		let snapshotFileName = `snapshot${(snapshotNo === 0 ? '' : snapshotNo)}.png`;
 
-			let number = index === 0 ? '' : index;
-			let viewpointFileName = `viewpoint${number}.bcfv`;
-			let snapshotFileName = `snapshot${(snapshotNo === 0 ? '' : snapshotNo)}.png`;
+		let vpObj = {
+			'@': {
+				'Guid': utils.uuidToString(vp.guid)
+			},
+			'Viewpoint': viewpointFileName,
+			'Snapshot':  null
 
-			let vpObj = {
-				'@': {
-					'Guid': utils.uuidToString(vp.guid)
-				},
-				'Viewpoint': viewpointFileName,
-				
-			};
 
-			if(vp.screenshot.flag){
-
-				vpObj.Snapshot = snapshotFileName;
-				snapshotEntries.push({
-					filename: snapshotFileName,
-					snapshot: vp.screenshot.content
-				});
-				snapshotNo++;
-
-			}
-
-			_.get(vp, 'extras.Index') && (vpObj.Index = vp.extras.Index);
-
-			markup.Markup.Viewpoints.push(vpObj);
 			
-			let viewpointXmlObj = {
-				VisualizationInfo:{
-					'@':{
-						'Guid': utils.uuidToString(vp.guid),
-						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-					},
-					'PerspectiveCamera':{
-						CameraViewPoint:{
-							X: vp.position[0] * scale,
-							Y: vp.position[1] * scale,
-							Z: vp.position[2] * scale
-						},
-						CameraDirection:{
-							X: vp.view_dir[0],
-							Y: vp.view_dir[1],
-							Z: vp.view_dir[2]
-						},
-						CameraUpVector:{
-							X: vp.up[0],
-							Y: vp.up[1],
-							Z: vp.up[2]
-						},
-						FieldOfView: vp.fov * 180 / Math.PI
-					}
-				}
-			};
+		};
 
-			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components');
-			viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces');
-			viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries');
-			viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings');
-			viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera');
-			viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines');
-			viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes');
-			viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap');
+		if(vp.screenshot.flag){
 
-			viewpointEntries.push({
-				filename: viewpointFileName,
-				xml:  xmlBuilder.buildObject(viewpointXmlObj)
+			vpObj.Snapshot = snapshotFileName;
+			snapshotEntries.push({
+				filename: snapshotFileName,
+				snapshot: vp.screenshot.content
 			});
+			snapshotNo++;
 
-		});
+		}
 
-	} else if (this.comments.length > 0){
-		//only add viewpoint node if there is at least one comment
+		_.get(vp, 'extras.Index') && (vpObj.Index = vp.extras.Index);
 
-		markup.Markup.Viewpoints.push({
-			'@': { 'Guid': utils.uuidToString(this.viewpoint.guid) },
-			'Viewpoint': 'viewpoint.bcfv'
-		});
+		markup.Markup.Viewpoints.push(vpObj);
+		
+		let viewpointXmlObj = {
+			VisualizationInfo:{
+				'@':{
+					'Guid': utils.uuidToString(vp.guid),
+					'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+					'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+				}
+			}
+		};
+
+
+		if(!_.get(vp, 'extras._noPerspective') && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >=3){
+
+			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+				CameraViewPoint:{
+					X: vp.position[0] * scale,
+					Y: -vp.position[2] * scale,
+					Z: vp.position[1] * scale
+				},
+				CameraDirection:{
+					X: vp.view_dir[0],
+					Y: -vp.view_dir[2],
+					Z: vp.view_dir[1]
+				},
+				CameraUpVector:{
+					X: vp.up[0],
+					Y: -vp.up[2],
+					Z: vp.up[1]
+				},
+				FieldOfView: vp.fov * 180 / Math.PI
+			};
+		}
+
+		_.get(vp, 'extras.Components') && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components'));
+		_.get(vp, 'extras.Spaces') && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces'));
+		_.get(vp, 'extras.SpaceBoundaries') && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries'));
+		_.get(vp, 'extras.Openings') && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings'));
+		_.get(vp, 'extras.OrthogonalCamera') && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera'));
+		_.get(vp, 'extras.Lines') && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines'));
+		_.get(vp, 'extras.ClippingPlanes') && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes'));
+		_.get(vp, 'extras.Bitmap') && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap'));
 
 		viewpointEntries.push({
-			filename: 'viewpoint.bcfv',
-			xml:  xmlBuilder.buildObject({
-				VisualizationInfo:{
-					'@':{
-						'Guid': utils.uuidToString(this.viewpoint.guid),
-						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-					},
-					'PerspectiveCamera':{
-						CameraViewPoint:{
-							X: this.viewpoint.position[0] * scale,
-							Y: this.viewpoint.position[1] * scale,
-							Z: this.viewpoint.position[2] * scale
-						},
-						CameraDirection:{
-							X: this.viewpoint.view_dir[0],
-							Y: this.viewpoint.view_dir[1],
-							Z: this.viewpoint.view_dir[2]
-						},
-						CameraUpVector:{
-							X: this.viewpoint.up[0],
-							Y: this.viewpoint.up[1],
-							Z: this.viewpoint.up[2]
-						},
-						FieldOfView: this.viewpoint.fov * 180 / Math.PI
-					}
-				}
-			})
+			filename: viewpointFileName,
+			xml:  xmlBuilder.buildObject(viewpointXmlObj)
 		});
-	}
+
+	});
+
+
 
 	return {
 		markup: xmlBuilder.buildObject(markup),
@@ -1543,6 +1523,7 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 						extras.Bitmap = _.get(vpXML, 'VisualizationInfo.Bitmap');
 						extras.Index = viewpoints[guid].Viewpoint;
 						extras.Snapshot = viewpoints[guid].Snapshot;
+						!_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]') && (extras._noPerspective = true);
 
 						let screenshotObj = viewpoints[guid].snapshot ? {
 							flag: 1,
@@ -1570,21 +1551,47 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 						if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
 							vp.up = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._'))
 							];
 							vp.view_dir = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._'))
 							];
 							vp.position = [
 								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale,
-								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale
+								parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._')) * scale,
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')) * scale
 							];
 
 							vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._')) * Math.PI / 180;
+
+							vp.type = 'perspective';
+							
+						} else if (_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0]')){
+
+							vp.up = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._'))
+							];
+
+							vp.view_dir = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._')),
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._')),
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._'))
+							];
+
+							vp.position = [
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._')) * scale,
+								parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._')) * scale,
+								-parseFloat(_.get(vpXML, 'VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._')) * scale
+							];
+
+							vp.fov = 1.8;
+
+							vp.type = 'orthogonal';
 						}
 
 						issue.viewpoints.push(vp);

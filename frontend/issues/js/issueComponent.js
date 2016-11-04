@@ -241,7 +241,7 @@
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			// Update
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
 			}
 		};
 
@@ -266,7 +266,8 @@
 
 				if (canUpdate) {
 					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
+						(this.data.status !== this.issueData.status) ||
+						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
 						if (typeof this.comment !== "undefined") {
 							saveComment();
@@ -456,7 +457,7 @@
 				if (savedScreenShot !== null) {
 					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -471,7 +472,7 @@
 					screenShotPromise.promise.then(function (screenShot) {
 						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -540,6 +541,7 @@
 
 					// Hide some actions
 					self.actions.pin.hidden = true;
+					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
@@ -562,6 +564,8 @@
 				.then(function (data) {
 					IssuesService.updatedIssue = self.issueData;
 				});
+			
+			self.submitDisabled = true;
 		}
 
 		/**

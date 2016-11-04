@@ -244,6 +244,37 @@ function importToyJSON(db, project){
 
 		return Promise.resolve();
 
+	}).then(() => {
+		//change history time and author
+		return History.findLatest({account: db, project: project}, { current: 0 });
+
+	}).then(history => {
+		
+		history.author = db;
+		history.timestamp = new Date();
+
+		return history.save();
+
+	}).then(() => {
+
+		let Issue = require('../issue');
+		
+		let updateIssuePromises = [];
+
+		Issue.find({account: db, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
+			issues.forEach(issue => {
+				
+				issue.owner = db;
+				
+				issue.comments.forEach(comment => {
+					comment.owner = db;
+				});
+
+				updateIssuePromises.push(issue.save());
+			});
+		});
+
+		return Promise.all(updateIssuePromises);
 	});
 
 }
@@ -286,6 +317,11 @@ function importToyProject(username){
 
 	}).catch(err => {
 
+		systemLogger.logError(`Import toy project error`, {
+			err: err,
+			account: username,
+			project: project
+		});
 		//mark project failed
 		if(projectSetting){
 			projectSetting.status = 'failed';
@@ -699,9 +735,14 @@ function getFullTree(account, project, branch, rev, username){
 
 		let resetPath = function(node, parentPath){
 			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path;
-				child.children && resetPath(child.children, child.path);
+				child.path = parentPath + '__' + child.path; 
+				resetPath(child, child.path);
 			});
+		};
+
+		let setIdToPath = function(obj, idToPath){
+			idToPath[obj._id] = obj.path;
+			obj.children && obj.children.forEach(child => setIdToPath(child, idToPath));
 		};
 
 		subTrees.forEach(subTree => {
@@ -715,6 +756,11 @@ function getFullTree(account, project, branch, rev, username){
 						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
 						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
 						targetChild.children = [subTree.tree.nodes];
+
+						let idToPath = {};
+
+						setIdToPath(subTree.tree.nodes, idToPath);
+						Object.assign(tree.idToPath, idToPath);
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);

@@ -77,9 +77,18 @@
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
-						objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
+						objectIndex = -1;
+						selectedObjects.find(function(obj, i){
+							if(obj.id === changes.event.currentValue.value.id){
+								objectIndex = i;
+							}
+						});
 						if (objectIndex === -1) {
-							selectedObjects.push(changes.event.currentValue.value.id);
+							selectedObjects.push({
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+							});
 						}
 						else {
 							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
@@ -95,7 +104,11 @@
 					}
 					else {
 						// Can only select one object at a time when not in multi mode
-						selectedObjects = [changes.event.currentValue.value.id];
+						selectedObjects = [{
+								id: changes.event.currentValue.value.id,
+								account: changes.event.currentValue.value.account,
+								project: changes.event.currentValue.value.project
+						}];
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
@@ -129,12 +142,24 @@
 		 * @param deselectedObjects
 		 */
 		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
+
+			var highlightIds = [];
+			var unHighlightIds = [];
+
+			selectedObjects.forEach(function(obj){
+				highlightIds.push(obj.id);
+			});
+
+			deselectedObjects.forEach(function(obj){
+				unHighlightIds.push(obj.id);
+			});
+			
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				highlight_ids: selectedObjects,
-				unhighlight_ids: deselectedObjects
+				highlight_ids: highlightIds,
+				unhighlight_ids: unHighlightIds
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};

@@ -55,7 +55,7 @@ _.extend(meshSchema.statics, repoBase.statics);
 meshSchema.statics.addGroup = function(account, project, id, gid){
 	'use strict';
 
-	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1}).then(mesh => {
+	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1, shared_id: 1}).then(mesh => {
 		if(!mesh){
 			return Promise.reject(responseCode.MESH_NOT_FOUND);
 		} else {

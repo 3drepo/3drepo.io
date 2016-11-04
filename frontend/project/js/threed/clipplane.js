@@ -407,41 +407,45 @@ var ClipPlane = {};
 
 		sceneBbox = viewer.runtime.getBBox(viewer.getScene());
 
-		// Construct and connect everything together
-		outlineMat.setAttribute("emissiveColor", colour.join(" "));
-		outlineLines.setAttribute("vertexCount", 5);
-		outlineLines.appendChild(outlineCoords);
-
-		outlineApp.appendChild(outlineMat);
-		outline.appendChild(outlineApp);
-		outline.appendChild(outlineLines);
-
-		coordinateFrame.appendChild(outline);
-
-		// Attach to the root node of the viewer
-		viewer.getScene().appendChild(coordinateFrame);
-		if(parentNode)
+		if(normal || axis != "")
 		{
-			volume = viewer.runtime.getBBox(parentNode);
-		}
-		else
-		{
-			volume = sceneBbox;
+
+			outlineMat.setAttribute("emissiveColor", colour.join(" "));
+			outlineLines.setAttribute("vertexCount", 5);
+			outlineLines.appendChild(outlineCoords);
+
+			outlineApp.appendChild(outlineMat);
+			outline.appendChild(outlineApp);
+			outline.appendChild(outlineLines);
+
+			coordinateFrame.appendChild(outline);
+
+			// Attach to the root node of the viewer
+			viewer.getScene().appendChild(coordinateFrame);
+			if(parentNode)
+			{
+				volume = viewer.runtime.getBBox(parentNode);
+			}
+			else
+			{
+				volume = sceneBbox;
 			
+			}
+
+			// Move the plane to finish construction
+			if(!normal)
+			{		
+				this.movePlane(axis, percentage);
+			}
+
+			viewer.getScene().appendChild(clipPlaneElem);
+
+
+			if(parentNode)
+				this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
+
+
 		}
-
-		// Move the plane to finish construction
-		if(axis != "")
-		{		
-			this.movePlane(axis, percentage);
-		}
-
-		viewer.getScene().appendChild(clipPlaneElem);
-
-
-		if(parentNode)
-			this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
-
 
 	};
 

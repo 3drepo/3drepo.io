@@ -239,7 +239,6 @@ issues-list #issuesListItemDescription label {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-  word-break: break-all;
 }
 
 issues-list #issuesListItemEnter {

@@ -112,6 +112,7 @@
 				} else {
 					vm.uploadButtonDisabled = false;
 				}
+
 			}
 		});
 

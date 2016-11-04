@@ -52,7 +52,7 @@
 			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
-			sortOldestFirst = true,
+			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false;
@@ -68,6 +68,7 @@
 		 */
 		this.$onChanges = function (changes) {
 			var i, length,
+				index,
 				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
@@ -79,23 +80,24 @@
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
-					setupIssuesToShow();
-					// Process issues
-					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-						// Check for updated issue
-						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
-							this.issuesToShow[i] = updatedIssue;
-						}
-						/*
-						// Get a possible selected issue
-						if (this.issuesToShow[i].selected) {
-							selectedIssue = this.issuesToShow[i];
-							focusedIssueIndex = i;
-							setSelectedIssueIndex(selectedIssue);
-						}
-						*/
+
+					// Check for updated issue
+					if (updatedIssue) {
+						index = this.allIssues.findIndex(function (issue) {
+							return (issue._id === updatedIssue._id);
+						});
+						this.allIssues[index] = updatedIssue;
 					}
-					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+
+					// Check for issue display
+					if (IssuesService.issueDisplay.showClosed) {
+						showClosed = IssuesService.issueDisplay.showClosed;
+					}
+					if (IssuesService.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					}
+
+					setupIssuesToShow();
 					showPins();
 				}
 				else {
@@ -169,9 +171,11 @@
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
+					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
+					IssuesService.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -206,14 +210,14 @@
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.selectedIssue) {
+			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
 				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					this.issuesToShow[i].selected = false;
 					this.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.issuesToShow[i]._id === this.selectedIssue._id) {
+					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
 						selectedIssue = this.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;
@@ -347,12 +351,19 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(self.account + "/" + self.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+
+					var ids = [];
+
+					response.data.objects.forEach(function(obj){
+						ids.push(obj.id);
+					});
+					
 					data = {
 						source: "tree",
 						account: self.account,
 						project: self.project,
-						ids: response.data.parents,
+						ids: ids,
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
@@ -391,8 +402,8 @@
 				self.issuesToShow = [self.allIssues[0]];
 				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
 							self.issuesToShow.splice(j, 0, self.allIssues[i]);
 							break;
 						}
@@ -503,10 +514,14 @@
 							id: self.allIssues[i]._id,
 							position: self.allIssues[i].position,
 							norm: self.allIssues[i].norm,
-							account: self.account,
-							project: self.project
+							account: self.allIssues[i].account,
+							project: self.allIssues[i].project
 						};
-						IssuesService.addPin(pinData, [[0.5, 0, 0]], self.allIssues[i].viewpoint);
+						var pinColor = [0.5, 0, 0];
+						if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
+							pinColor = [1.0, 0.7, 0];
+						}
+						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
 			}
