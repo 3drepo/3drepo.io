@@ -12866,6 +12866,10 @@ angular.module('3drepo')
 					self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
+					
+					if (self.issueData.thumbnail) {
+						self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
+					}
 
 					// Hide the description input if no description
 					self.hideDescription = !self.issueData.hasOwnProperty("desc");
