@@ -54,19 +54,10 @@
 				}
 				else {
 					if (index !== currentSortIndex) {
-						if (angular.isDefined(currentSortIndex)) {
-							vm.menu[currentSortIndex].selected = false;
-							vm.menu[currentSortIndex].firstSelected = false;
-							vm.menu[currentSortIndex].secondSelected = false;
-						}
 						currentSortIndex = index;
-						vm.menu[currentSortIndex].selected = true;
-						vm.menu[currentSortIndex].firstSelected = true;
 					}
-					else {
-						vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
-						vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
-					}
+					vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
+					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
 					vm.selectedMenuOption = vm.menu[currentSortIndex];
 				}
 			}
