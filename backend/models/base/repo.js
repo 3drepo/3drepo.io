@@ -19,7 +19,7 @@
 var repoGraphScene = require("../../repo/repoGraphScene.js");
 var GridFSBucket = require('mongodb').GridFSBucket;
 var ModelFactory = require('../factory/modelFactory');
-var Revision = require('../revision');
+var History = require('../history');
 var utils = require("../../utils");
 var responseCodes = require('../../response_codes.js');
 var mongoose = require('mongoose');
@@ -182,7 +182,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 
 	let projection = options && options.projection || {};
 
-	let _find = () => Revision.findById(dbCol, stringToUUID(rid)).then( rev => {
+	let _find = () => History.findByUID(dbCol, rid).then( rev => {
 		rev = rev.toObject();
 
 		return this.findOne(dbCol, { _id: { '$in': rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {

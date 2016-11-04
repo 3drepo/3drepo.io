@@ -209,6 +209,10 @@
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
+	//default vat validation url
+	config.vat = coalesce(config.vat, {});
+	config.vat.checkUrl = coalesce(config.vat.checkUrl, 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl');
+
 	//get frontend base url
 	config.getBaseURL = function(useNonPublicPort){
 

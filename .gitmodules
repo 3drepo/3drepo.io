@@ -5,3 +5,6 @@
 	path = submodules/x3dom
 	url = https://github.com/3drepo/x3dom.git
 	ignore=dirty
+[submodule "submodules/tests"]
+	path = submodules/tests
+	url = https://github.com/3drepo/tests.git

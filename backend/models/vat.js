@@ -1,5 +1,6 @@
 var soap = require('soap');
-var vatValidationUrl = 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl';
+var config = require('../config');
+var vatValidationUrl = config.vat.checkUrl;
 
 var vat = [
 	{ countryCode: 'AT', standardRate: 20 },
@@ -62,6 +63,11 @@ function getByCountryCode(code, isBusiness){
 function checkVAT(code, vat){
 
 	return new Promise((resolve, reject) => {
+
+		if(!vatValidationUrl){
+			return reject({message: 'vat.checkUrl is not defined in config file'});
+		}
+
 		soap.createClient(vatValidationUrl, function(err, client) {
 			client.checkVat({
 				countryCode: code,
