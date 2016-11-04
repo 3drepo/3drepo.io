@@ -44,9 +44,9 @@
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "TreeService"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, TreeService) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
@@ -343,9 +343,8 @@
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
-					console.log('map', self.treeMap);
 					response.data.objects.forEach(function(obj){
-						ids.push(TreeService.sharedIdToUId(self.treeMap.nodes, obj.shared_id));
+						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 					
 					data = {

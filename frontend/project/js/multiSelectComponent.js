@@ -36,9 +36,9 @@
 			}
 		);
 
-	MultiSelectCtrl.$inject = ["EventService", "TreeService"];
+	MultiSelectCtrl.$inject = ["EventService"];
 
-	function MultiSelectCtrl (EventService, TreeService) {
+	function MultiSelectCtrl (EventService) {
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
@@ -57,7 +57,6 @@
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
-			console.log('tree', self.treeMap);
 
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
@@ -76,9 +75,11 @@
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode 
+					&& changes.event.currentValue.value.account && changes.event.currentValue.value.project 
+					&& changes.event.currentValue.value.id) {
 
-					var sharedId = TreeService.uIdToSharedId(self.treeMap.nodes, changes.event.currentValue.value.id);
+					var sharedId = self.treeMap.uidToSharedId[changes.event.currentValue.value.id];
 
 					if (multiMode) {
 						// Collect objects in multi mode

@@ -13865,9 +13865,9 @@ angular.module('3drepo')
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "TreeService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, TreeService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -14184,7 +14184,7 @@ angular.module('3drepo')
 					var ids = [];
 					response.data.objects.forEach(function(obj){
 
-						ids.push(TreeService.sharedIdToUId(vm.treeMap.nodes, obj.shared_id));
+						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
 					data = {
@@ -14258,9 +14258,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "TreeService"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, TreeService) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
@@ -14557,9 +14557,8 @@ angular.module('3drepo')
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
-					console.log('map', self.treeMap);
 					response.data.objects.forEach(function(obj){
-						ids.push(TreeService.sharedIdToUId(self.treeMap.nodes, obj.shared_id));
+						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 					
 					data = {
@@ -17551,9 +17550,9 @@ var Oculus = {};
 			}
 		);
 
-	MultiSelectCtrl.$inject = ["EventService", "TreeService"];
+	MultiSelectCtrl.$inject = ["EventService"];
 
-	function MultiSelectCtrl (EventService, TreeService) {
+	function MultiSelectCtrl (EventService) {
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
@@ -17572,7 +17571,6 @@ var Oculus = {};
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
-			console.log('tree', self.treeMap);
 
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
@@ -17591,9 +17589,11 @@ var Oculus = {};
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode 
+					&& changes.event.currentValue.value.account && changes.event.currentValue.value.project 
+					&& changes.event.currentValue.value.id) {
 
-					var sharedId = TreeService.uIdToSharedId(self.treeMap.nodes, changes.event.currentValue.value.id);
+					var sharedId = self.treeMap.uidToSharedId[changes.event.currentValue.value.id];
 
 					if (multiMode) {
 						// Collect objects in multi mode
@@ -17924,7 +17924,7 @@ var Oculus = {};
 
 
 				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
-					vm.treeMap = data;
+					vm.treeMap = TreeService.getMap(data.nodes);
 				});
 			}
 		});
@@ -20213,55 +20213,38 @@ var Oculus = {};
 			return deferred.promise;
 		};
 
-		var uIdToSharedId = function(treeItem, uid){
+
+		var getMap = function(treeItem){
+
 			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
-			var sharedId;
 
-			if(treeItem && treeItem.children){
-				
-				for(var i=0; i<treeItem.children.length; i++){
-					sharedId = uIdToSharedId(treeItem.children[i], uid);
-					if(sharedId){
-						break;
+			var uidToSharedId = {};
+			var sharedIdToUid = {};
+
+			function genMap(treeItem){
+				if(treeItem){
+					
+					if(treeItem.children){
+						treeItem.children.forEach(genMap);
 					}
+
+					uidToSharedId[treeItem._id] = treeItem.shared_id;
+					sharedIdToUid[treeItem.shared_id] = treeItem._id;
 				}
-
 			}
 
-			if (!sharedId && treeItem && treeItem._id === uid) {
-				sharedId = treeItem.shared_id;
-			}
+			genMap(treeItem);
 
-			return sharedId;
-		};
-
-		var sharedIdToUId = function(treeItem, sharedId){
-			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
-			var uId;
-
-			if(treeItem && treeItem.children){
-				
-				for(var i=0; i<treeItem.children.length; i++){
-					uId = sharedIdToUId(treeItem.children[i], sharedId);
-					if(uId){
-						break;
-					}
-				}
-
-			}
-
-			if (!uId && treeItem && treeItem.shared_id === sharedId) {
-				uId = treeItem._id;
-			}
-
-			return uId;
-		};
+			return {
+				uidToSharedId: uidToSharedId,
+				sharedIdToUid: sharedIdToUid
+			};
+		}
 
 		return {
 			init: init,
 			search: search,
-			uIdToSharedId: uIdToSharedId,
-			sharedIdToUId: sharedIdToUId
+			getMap: getMap
 		};
 	}
 }());
