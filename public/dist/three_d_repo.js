@@ -13082,12 +13082,9 @@ angular.module('3drepo')
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
+					self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
-					
-					if (self.issueData.thumbnail) {
-						self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
-					}
 
 					// Hide the description input if no description
 					self.hideDescription = !self.issueData.hasOwnProperty("desc");
@@ -13846,7 +13843,6 @@ angular.module('3drepo')
 
 		function removePin () {
 			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
-			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 			self.setPin({data: null});
 		}
 	}
