@@ -36,14 +36,15 @@
 					contentHeight: "&",
 					selectedObjects: "<",
 					setInitialSelectedObjects: "&",
-					userRoles: "<"
+					userRoles: "<",
+					availableRoles: "<"
 				}
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -75,12 +76,12 @@
 		];
 		this.statuses = [
 			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
+			{value: "in_progress", label: "In progress"},
+			{value: "for_approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
 		];
 		this.actions = {
@@ -124,6 +125,7 @@
 					this.issueData = {
 						priority: "none",
 						status: "open",
+						assigned: this.userRoles[0],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -159,10 +161,23 @@
 				}
 			}
 
+			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
+			}
+
+			// Role
+			if (changes.hasOwnProperty("availableRoles")) {
+				console.log(this.availableRoles);
+				this.projectRoles = this.availableRoles.map(function (availableRole) {
+					/*
+					// Get the actual role and return the last part of it
+					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
+					*/
+					return availableRole.role;
+				});
 			}
 		};
 
@@ -219,7 +234,14 @@
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			// Update
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
+				this.submitDisabled = (this.data.priority === this.issueData.priority) &&
+					(this.data.status === this.issueData.status) &&
+					(this.data.assigned === this.issueData.assigned) &&
+					(this.data.topic_type === this.issueData.topic_type);
+
+				if (this.issueData.status === "for_approval") {
+					assignToRole(this.issueData.creator_role);
+				}
 			}
 		};
 
@@ -666,13 +688,24 @@
 			};
 		}
 
+		/**
+		 * Assign issue to role
+		 * @param {String} role
+		 */
+		function assignToRole (role) {
+			console.log(role);
+		}
+
+		/**
+		 * Set the content height
+		 */
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 70,
+				additionalInfoHeight = 140,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;

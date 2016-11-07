@@ -49,7 +49,7 @@
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 147,
+			issuesListItemHeight = 160,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,

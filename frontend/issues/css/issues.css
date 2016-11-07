@@ -77,6 +77,13 @@ issues #issuesContent {
 issues .importBCFLoading {
   margin: 10px auto;
 }
+
+issues #issueRoleIndicator {
+  height: 2px;
+  background: #000000;
+  margin-bottom: 10px;
+}
+
 /** Issue *************************************************************************************************************/
 issue {
   display: block;
@@ -131,65 +138,6 @@ md-list-item .issueAssignColourMarker {
 
 issue .issueOpenContainer {
   margin-top: 10px;
-}
-
-/** Issue Area ********************************************************************************************************/
-issue-area {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-issue-area #issueAreaCanvas {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-issue-area #issueAreaCentre {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin: -20px 0 0 -20px;
-  pointer-events: none;
-}
-
-issue-area #issueAreaButtons {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-issue-area #issueAreaButtons md-icon {
-  font-size: 30px;
-  margin-top: -7px;
-  margin-left: -4px;
-}
-
-issue-area #issueAreaPenIndicator {
-  position: absolute;
-  display: block;
-  color: #FFFFFF;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-issue-area #scribbleDisplay {
-  position:absolute;
-  width:100%;
-  height:100%;
-  overflow:hidden
-}
-/* Influenced by Itay answer - http://stackoverflow.com/a/18674144/782358 */
-issue-area #scribbleDisplay img {
-  position: absolute;
-  margin: auto;
-  height: 100%;
-  width: auto;
-  left: -200%;
-  right: -200%;
 }
 
 /** Issues List *******************************************************************************************************/
