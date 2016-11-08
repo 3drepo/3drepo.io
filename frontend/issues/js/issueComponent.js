@@ -27,6 +27,7 @@
 				bindings: {
 					account: "<",
 					project: "<",
+					revision: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -41,9 +42,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -89,6 +90,8 @@
 			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
 		};
 
+		this.notificationStarted = false;
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -98,16 +101,25 @@
 				leftArrow = 37;
 
 			// Data
+
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					
+					this.issueData.comments.forEach(function(comment){
+						if(comment.owner !== Auth.getUsername()){
+							comment.sealed = true;
+						}
+					});
+
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					this.canUpdate = (this.account === this.issueData.owner);
+					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
 							if (this.userRoles[i] === this.issueData.creator_role) {
@@ -184,6 +196,16 @@
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 				this.clearPin = true;
 			}
+
+			//unsubscribe on destroy
+			if(self.data){
+				NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+			}
+
+
 		};
 
 		/**
@@ -227,8 +249,22 @@
 		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
+
+
+
 			if (self.data) {
-				if (self.data.owner === self.account) {
+
+				var canUpdate = (Auth.getUsername() === self.data.owner);
+				if (!canUpdate) {
+					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
+						if (self.userRoles[i] === self.data.creator_role) {
+							canUpdate = true;
+							break;
+						}
+					}
+				}
+
+				if (canUpdate) {
 					if ((this.data.priority !== this.issueData.priority) ||
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
@@ -380,6 +416,7 @@
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
+
 				if (self.issueData.desc !== savedDescription) {
 					var data = {
 						desc: self.issueData.desc
@@ -390,6 +427,7 @@
 							savedDescription = self.issueData.desc;
 						});
 				}
+
 			}
 			else {
 				this.editingDescription = true;
@@ -475,7 +513,8 @@
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
-				desc: self.issueData.desc
+				desc: self.issueData.desc,
+				rev_id: self.revision
 			};
 			// Pin data
 			if (self.pinData !== null) {
@@ -508,6 +547,8 @@
 
 					self.submitDisabled = true;
 					setContentHeight();
+
+					startNotification();
 			});
 		}
 
@@ -556,9 +597,20 @@
 		 * Process after new comment saved
 		 * @param comment
 		 */
-		function afterNewComment (comment) {
+		function afterNewComment(comment, noDeleteInput) {
+			// mark all other comments sealed
+			self.issueData.comments.forEach(function(comment){
+				comment.sealed = true;
+			});
+
+			if(comment.owner !== Auth.getUsername()){
+				comment.sealed = true;
+			}
+
 			// Add new comment to issue
 			self.issueData.comments.push({
+				sealed: comment.sealed,
+				guid: comment.guid,
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
@@ -566,17 +618,25 @@
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
-			if (self.issueData.comments.length > 1) {
-				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
-					.then(function(response) {
-						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
-					});
+			// This logic now moved to backend
+			// if (self.issueData.comments.length > 1) {
+			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+			// 		.then(function(response) {
+			// 			console.log(response);
+			// 			self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+			// 		});
+			// }
+
+			if(!noDeleteInput){
+				delete self.comment;
+				delete self.commentThumbnail;
+				IssuesService.updatedIssue = self.issueData;
+				self.submitDisabled = true;
+
 			}
 
-			delete self.comment;
-			delete self.commentThumbnail;
-			IssuesService.updatedIssue = self.issueData;
-			self.submitDisabled = true;
+
+			commentAreaScrollToBottom();
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
 				setContentHeight();
@@ -713,5 +773,91 @@
 
 			self.contentHeight({height: height});
 		}
+
+		function commentAreaScrollToBottom(){
+
+			$timeout(function(){
+				var commentArea = document.getElementById('descriptionAndComments');
+				commentArea.scrollTop = commentArea.scrollHeight;
+			});
+		}
+
+
+		function startNotification(){
+			if(self.data && !self.notificationStarted){
+
+				self.notificationStarted = true;
+
+				/*
+				* Watch for new comments
+				*/
+				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+					afterNewComment(comment, true);
+
+					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment changed
+				*/
+				NotificationService.subscribe.commentChanged(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var comment = self.issueData.comments.find(function(comment){
+						return comment.guid === newComment.guid;
+					});
+
+					comment.comment = newComment.comment;
+
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.commentDeleted(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var deleteIndex;
+					self.issueData.comments.forEach(function(comment, i){
+						if (comment.guid === newComment.guid){
+							deleteIndex = i;
+						}
+					});
+
+					self.issueData.comments[deleteIndex].comment = 'This comment has been deleted.'
+
+					
+					$scope.$apply();
+					commentAreaScrollToBottom();
+
+					$timeout(function(){
+						self.issueData.comments.splice(deleteIndex, 1);
+					}, 4000);
+				});
+
+				/*
+				* Watch for issue change
+				*/
+				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
+
+
+					self.issueData.topic_type = issue.topic_type;
+					self.issueData.desc = issue.desc;
+					self.issueData.priority = issue.priority;
+					self.issueData.status = issue.status;
+					self.statusChange();
+
+					$scope.$apply();
+
+				});
+			}
+		}
+
+		startNotification();
+
+
 	}
 }());

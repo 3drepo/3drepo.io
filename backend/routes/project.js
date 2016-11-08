@@ -32,7 +32,7 @@ var convertToErrorCode = ProjectHelpers.convertToErrorCode;
 var fs = require('fs');
 var systemLogger = require("../logger.js").systemLogger;
 var History = require('../models/history');
-
+var ChatEvent = require('../models/chatEvent');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -336,6 +336,14 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				//let username = req.session.user.username;
 
+				let sendChatEvent = projectSetting => {
+					ChatEvent.projectStatusChanged(
+						null, 
+						req.params.account, 
+						req.params.project, 
+						projectSetting
+					);
+				};
 				//check dup tag first
 
 				(req.body.tag ? History.findByTag({account, project}, req.body.tag, {_id: 1}) : Promise.resolve()).then(tag => {
@@ -428,8 +436,16 @@ function uploadProject(req, res, next){
 
 						//catch here to provide custom error message
 						if(err.errCode && projectSetting){
+
 							projectSetting.errorReason = convertToErrorCode(err.errCode);
 							projectSetting.markModified('errorReason');
+
+							if(projectSetting.errorReason.value === responseCodes.FILE_IMPORT_MISSING_TEXTURES.value){
+								projectSetting.status = 'ok';
+							} else {
+								projectSetting.status = 'failed';
+							}
+
 							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
@@ -449,6 +465,9 @@ function uploadProject(req, res, next){
 					projectSetting.errorReason = undefined;
 					projectSetting.markModified('errorReason');
 
+					
+					sendChatEvent(projectSetting);
+
 					return projectSetting.save();
 
 				}).catch(err => {
@@ -456,17 +475,14 @@ function uploadProject(req, res, next){
 					//mark project failed
 
 					if(projectSetting){
-						projectSetting.status = 'failed';
+
 						projectSetting.save();
+
+						sendChatEvent(projectSetting);
 					}
 
 					err.stack ? req[C.REQ_REPO].logger.logError(err.stack) : req[C.REQ_REPO].logger.logError(err);
-
-
-
 				});
-
-
 			}
 		});
 

@@ -6569,6 +6569,7 @@ var ViewerManager = {};
 				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
+				projectToUpload: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
@@ -6581,15 +6582,17 @@ var ViewerManager = {};
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
 					scope.vm.uploadedFileWatch(); // Disable events watch
+					scope.vm.projectToUploadFileWatch();
+
 				});
 			}
 		};
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -6597,7 +6600,6 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
-		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6616,22 +6618,39 @@ var ViewerManager = {};
 			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
-
+		vm.uploadButtonDisabled = true;
 		checkFileUploading();
 
 		/*
 		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
+
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				vm.selectedFile = vm.uploadedFile.file;
-				vm.tag = vm.uploadedFile.tag;
-				vm.desc = vm.uploadedFile.desc;
-				if(vm.uploadedFile.newProject)
-				{
-					vm.uploadFile();
+
+				console.log("Uploaded file", vm.uploadedFile);
+				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
+
+			}
+		});
+
+		vm.projectToUploadFileWatch = $scope.$watch("vm.projectToUpload", function () {
+			if(vm.projectToUpload){
+
+				var names = vm.projectToUpload.name.split('.');
+				
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				} else {
+					vm.uploadButtonDisabled = false;
 				}
-			
+
 			}
 		});
 
@@ -6644,7 +6663,6 @@ var ViewerManager = {};
 					// No timestamp indicates no model previously uploaded
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
@@ -6671,7 +6689,6 @@ var ViewerManager = {};
 					vm.uploadErrorMessage = null;
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
@@ -6724,6 +6741,7 @@ var ViewerManager = {};
 			vm.onUploadFile({project: vm.project});
 		};
 
+
 		/**
 		 * When users click upload after selecting
 		 */
@@ -6745,9 +6763,8 @@ var ViewerManager = {};
 					}
 
 					if(!vm.uploadErrorMessage){
-						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
-						if(!vm.uploadedFile.newProject)
-							vm.closeDialog();
+						vm.uploadedFile = {project: vm.project, file: vm.projectToUpload};
+						vm.closeDialog();
 					}
 				});
 			}
@@ -6832,7 +6849,7 @@ var ViewerManager = {};
 							}
 							else {
 								console.log("Polling upload!");
-								pollUpload();
+								watchProjectStatus();
 							}
 						});
 					}
@@ -6850,49 +6867,45 @@ var ViewerManager = {};
 					vm.project.uploading = true;
 					vm.showUploading = true;
 					vm.showFileUploadInfo = false;
-					pollUpload();
+					watchProjectStatus();
 				}
 			});
 		}
 
 		/**
-		 * Poll uploading of file
+		 * Watch file upload status
 		 */
-		function pollUpload () {
-			var interval,
-				promise;
-
-			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					console.log("uploadStatus", response);
-					if ((response.data.status === "ok") || (response.data.status === "failed")) {
-						if (response.data.status === "ok") {
-							vm.project.timestamp = new Date();
-							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-							vm.fileUploadInfo = "Uploaded";
-							// clear revisions cache
-							vm.revisions = null;
-						}
-						else {
-							if (response.data.hasOwnProperty("errorReason")) {
-								vm.fileUploadInfo = response.data.errorReason.message;
-							}
-							else {
-								vm.fileUploadInfo = "Failed to upload file";
-							}
-						}
-						vm.showUploading = false;
-						$interval.cancel(interval);
-						vm.showFileUploadInfo = true;
-						$timeout(function () {
-							vm.project.uploading = false;
-						}, infoTimeout);
+		function watchProjectStatus(){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+				console.log('upload status changed',  data);
+				if ((data.status === "ok") || (data.status === "failed")) {
+					if (data.status === "ok") {
+						vm.project.timestamp = new Date();
+						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
+						vm.fileUploadInfo = "Uploaded";
+						// clear revisions cache
+						vm.revisions = null;
 					}
-				});
-			}, 1000);
-		}
 
+					//status=ok can have an error message too
+					if (data.hasOwnProperty("errorReason")) {
+						vm.fileUploadInfo = data.errorReason.message;
+					} else if (data.status === "failed") {
+						vm.fileUploadInfo = "Failed to upload file";
+					}
+
+					vm.showUploading = false;
+					vm.showFileUploadInfo = true;
+					$scope.$apply();
+					$timeout(function () {
+						vm.project.uploading = false;
+					}, infoTimeout);
+					
+
+					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				}
+			});
+		}
 
 		/**
 		 * Set up team of project
@@ -6967,7 +6980,8 @@ var ViewerManager = {};
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				vm.projectToUpload = this.files[0];
+				//vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
 				$scope.$apply();
 			},
 			false
@@ -12031,6 +12045,172 @@ var ViewerManager = {};
 
 
 /**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+angular.module('3drepo')
+.factory('NotificationService', NotificationService);
+
+NotificationService.$inject = ["serverConfig"];
+
+function NotificationService(serverConfig){
+	"use strict";
+
+	if(!serverConfig.chatHost || !serverConfig.chatPath){
+		console.log('Chat server settings missing');
+	}
+
+	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath});
+	var joined = [];
+
+	socket.on('reconnect', function(){
+		console.log('Rejoining all rooms on reconnect');
+
+		var lastJoined = joined.slice(0);
+		joined = [];
+
+		lastJoined.forEach(function(room){
+
+			room = room.split('::');
+
+			var account = room[0];
+			var project = room[1];
+
+			joinRoom(account, project);
+		});
+	});
+
+	function joinRoom(account, project){
+		
+		var room =  account + '::' + project;
+		if(joined.indexOf(room) === -1){
+
+			socket.emit('join', {account: account, project: project});
+			joined.push(room);
+		}
+	}
+
+	function getEventName(account, project, keys, event){
+
+		keys = keys || [];
+		var keyString = '';
+		
+		if(keys.length){
+			keyString =  '::' + keys.join('::');
+		}
+
+		return account + '::' + project +  keyString + '::' + event;
+	}
+
+	function subscribe(account, project, keys, event, callback){
+
+		joinRoom(account, project);
+		console.log('sub', getEventName(account, project, keys, event));
+		socket.on(getEventName(account, project, keys, event), function(data){
+			console.log('msg rec', getEventName(account, project, keys, event));
+			callback(data);
+		});
+	}
+
+	function unsubscribe(account, project, keys, event){
+		console.log('unsub', getEventName(account, project, keys, event));
+		socket.off(getEventName(account, project, keys, event));
+	}
+
+	function subscribeNewIssues(account, project, callback){
+		subscribe(account, project, [], 'newIssues', callback);
+	}
+
+	function unsubscribeNewIssues(account, project){
+		unsubscribe(account, project, [], 'newIssues');
+	}
+
+	function subscribeNewComment(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'newComment', callback);
+	}
+
+	function unsubscribeNewComment(account, project, issueId){
+		unsubscribe(account, project, [issueId], 'newComment');
+	}
+
+	function subscribeCommentChanged(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentChanged', callback);
+	}
+
+	function unsubscribeCommentChanged(account, project, issueId){
+		unsubscribe(account, project, [issueId], 'commentChanged');
+	}
+
+	function subscribeCommentDeleted(account, project, issueId, callback){
+		subscribe(account, project, [issueId], 'commentDeleted', callback);
+	}
+
+	function unsubscribeCommentDeleted(account, project, issueId){
+		unsubscribe(account, project, [issueId], 'commentDeleted');
+	}
+
+	function subscribeIssueChanged(account, project, issueId, callback){
+		if(arguments.length === 3){
+			callback = issueId;
+			subscribe(account, project, [], 'issueChanged', callback);
+		} else {
+			subscribe(account, project, [issueId], 'issueChanged', callback);
+		}
+	}
+
+	function unsubscribeIssueChanged(account, project, issueId){
+		if(arguments.length === 2){
+			unsubscribe(account, project, [], 'issueChanged');
+		} else {
+			unsubscribe(account, project, [issueId], 'issueChanged');
+		}
+		
+	}
+
+	function subscribeProjectStatusChanged(account, project, callback){
+		subscribe(account, project, [], 'projectStatusChanged', callback);
+	}
+
+	function unsubscribeProjectStatusChanged(account, project){
+		unsubscribe(account, project, [], 'projectStatusChanged');
+	}
+	return {
+		subscribe: {
+			newIssues: subscribeNewIssues,
+			newComment: subscribeNewComment,
+			commentChanged: subscribeCommentChanged,
+			commentDeleted: subscribeCommentDeleted,
+			issueChanged: subscribeIssueChanged,
+			projectStatusChanged: subscribeProjectStatusChanged,
+
+		},
+		unsubscribe:{
+			newIssues: unsubscribeNewIssues,
+			newComment: unsubscribeNewComment,
+			commentChanged: unsubscribeCommentChanged,
+			commentDeleted: unsubscribeCommentDeleted,
+			issueChanged: unsubscribeIssueChanged,
+			projectStatusChanged: unsubscribeProjectStatusChanged,
+		}
+	};
+};
+
+
+
+/**
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -12411,6 +12591,7 @@ angular.module('3drepo')
 				bindings: {
 					account: "<",
 					project: "<",
+					revision: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -12425,9 +12606,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12473,6 +12654,8 @@ angular.module('3drepo')
 			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
 		};
 
+		this.notificationStarted = false;
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -12482,16 +12665,25 @@ angular.module('3drepo')
 				leftArrow = 37;
 
 			// Data
+
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					
+					this.issueData.comments.forEach(function(comment){
+						if(comment.owner !== Auth.getUsername()){
+							comment.sealed = true;
+						}
+					});
+
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					this.canUpdate = (this.account === this.issueData.owner);
+					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
 							if (this.userRoles[i] === this.issueData.creator_role) {
@@ -12568,6 +12760,16 @@ angular.module('3drepo')
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 				this.clearPin = true;
 			}
+
+			//unsubscribe on destroy
+			if(self.data){
+				NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+			}
+
+
 		};
 
 		/**
@@ -12611,8 +12813,22 @@ angular.module('3drepo')
 		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
+
+
+
 			if (self.data) {
-				if (self.data.owner === self.account) {
+
+				var canUpdate = (Auth.getUsername() === self.data.owner);
+				if (!canUpdate) {
+					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
+						if (self.userRoles[i] === self.data.creator_role) {
+							canUpdate = true;
+							break;
+						}
+					}
+				}
+
+				if (canUpdate) {
 					if ((this.data.priority !== this.issueData.priority) ||
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
@@ -12764,6 +12980,7 @@ angular.module('3drepo')
 			event.stopPropagation();
 			if (this.editingDescription) {
 				this.editingDescription = false;
+
 				if (self.issueData.desc !== savedDescription) {
 					var data = {
 						desc: self.issueData.desc
@@ -12774,6 +12991,7 @@ angular.module('3drepo')
 							savedDescription = self.issueData.desc;
 						});
 				}
+
 			}
 			else {
 				this.editingDescription = true;
@@ -12859,7 +13077,8 @@ angular.module('3drepo')
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
-				desc: self.issueData.desc
+				desc: self.issueData.desc,
+				rev_id: self.revision
 			};
 			// Pin data
 			if (self.pinData !== null) {
@@ -12892,6 +13111,8 @@ angular.module('3drepo')
 
 					self.submitDisabled = true;
 					setContentHeight();
+
+					startNotification();
 			});
 		}
 
@@ -12940,9 +13161,20 @@ angular.module('3drepo')
 		 * Process after new comment saved
 		 * @param comment
 		 */
-		function afterNewComment (comment) {
+		function afterNewComment(comment, noDeleteInput) {
+			// mark all other comments sealed
+			self.issueData.comments.forEach(function(comment){
+				comment.sealed = true;
+			});
+
+			if(comment.owner !== Auth.getUsername()){
+				comment.sealed = true;
+			}
+
 			// Add new comment to issue
 			self.issueData.comments.push({
+				sealed: comment.sealed,
+				guid: comment.guid,
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
@@ -12950,17 +13182,25 @@ angular.module('3drepo')
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
-			if (self.issueData.comments.length > 1) {
-				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
-					.then(function(response) {
-						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
-					});
+			// This logic now moved to backend
+			// if (self.issueData.comments.length > 1) {
+			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+			// 		.then(function(response) {
+			// 			console.log(response);
+			// 			self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+			// 		});
+			// }
+
+			if(!noDeleteInput){
+				delete self.comment;
+				delete self.commentThumbnail;
+				IssuesService.updatedIssue = self.issueData;
+				self.submitDisabled = true;
+
 			}
 
-			delete self.comment;
-			delete self.commentThumbnail;
-			IssuesService.updatedIssue = self.issueData;
-			self.submitDisabled = true;
+
+			commentAreaScrollToBottom();
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
 				setContentHeight();
@@ -13097,6 +13337,92 @@ angular.module('3drepo')
 
 			self.contentHeight({height: height});
 		}
+
+		function commentAreaScrollToBottom(){
+
+			$timeout(function(){
+				var commentArea = document.getElementById('descriptionAndComments');
+				commentArea.scrollTop = commentArea.scrollHeight;
+			});
+		}
+
+
+		function startNotification(){
+			if(self.data && !self.notificationStarted){
+
+				self.notificationStarted = true;
+
+				/*
+				* Watch for new comments
+				*/
+				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+
+					afterNewComment(comment, true);
+
+					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment changed
+				*/
+				NotificationService.subscribe.commentChanged(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var comment = self.issueData.comments.find(function(comment){
+						return comment.guid === newComment.guid;
+					});
+
+					comment.comment = newComment.comment;
+
+					$scope.$apply();
+					commentAreaScrollToBottom();
+				});
+
+				/*
+				* Watch for comment deleted
+				*/
+				NotificationService.subscribe.commentDeleted(self.data.account, self.data.project, self.data._id, function(newComment){
+
+					var deleteIndex;
+					self.issueData.comments.forEach(function(comment, i){
+						if (comment.guid === newComment.guid){
+							deleteIndex = i;
+						}
+					});
+
+					self.issueData.comments[deleteIndex].comment = 'This comment has been deleted.'
+
+					
+					$scope.$apply();
+					commentAreaScrollToBottom();
+
+					$timeout(function(){
+						self.issueData.comments.splice(deleteIndex, 1);
+					}, 4000);
+				});
+
+				/*
+				* Watch for issue change
+				*/
+				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
+
+
+					self.issueData.topic_type = issue.topic_type;
+					self.issueData.desc = issue.desc;
+					self.issueData.priority = issue.priority;
+					self.issueData.status = issue.status;
+					self.statusChange();
+
+					$scope.$apply();
+
+				});
+			}
+		}
+
+		startNotification();
+
+
 	}
 }());
 
@@ -13501,6 +13827,7 @@ angular.module('3drepo')
 						pickedPos: position,
 						pickedNorm: normal,
 						colours: [[1.0, 0.7,  0]]
+
 					};
 					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
 					this.setPin({data: data});
@@ -13876,9 +14203,9 @@ angular.module('3drepo')
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -13979,6 +14306,9 @@ angular.module('3drepo')
 						break;
 					}
 				}
+			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				watchNotification();
 			}
 		});
 
@@ -14077,6 +14407,90 @@ angular.module('3drepo')
 			}
 		});
 
+
+		function watchNotification(){
+			/*
+			 * Watch for new issues
+			 */
+			NotificationService.subscribe.newIssues(vm.account, vm.project, function(issues){
+
+				issues.forEach(function(issue){
+
+					var issueRevision = vm.revisions.find(function(rev){
+						return rev._id === issue.rev_id;
+					});
+
+					var currentRevision;
+
+					if(!vm.revision){
+						currentRevision = vm.revisions[0];
+					} else {
+						currentRevision = vm.revisions.find(function(rev){
+							return rev._id === vm.revision || rev.tag === vm.revision;
+						});
+					}
+
+					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+						
+						issue.title = IssuesService.generateTitle(issue);
+						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+						issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+						vm.issues.unshift(issue);
+						
+					}
+
+				});
+
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
+
+			});
+
+			/*
+			 * Watch for status changes for all issues
+			 */
+			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+
+				issue.title = IssuesService.generateTitle(issue);
+				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+				issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+				vm.issues.find(function(oldIssue, i){
+					if(oldIssue._id === issue._id){
+
+
+						if(issue.status === 'closed'){
+							
+							vm.issues[i].justClosed = true;
+							
+							$timeout(function(){
+
+								vm.issues[i] = issue;
+								vm.issues = vm.issues.slice(0);
+
+							}, 4000);
+
+						} else {
+							vm.issues[i] = issue;
+						}
+					}
+				});
+
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
+			});
+		}
+
+
+		/*
+		* Unsubscribe notifcation on destroy
+		*/
+		$scope.$on('$destroy', function(){
+			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
+			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
+		});
+
 		/**
 		 * Send event
 		 * @param type
@@ -14120,12 +14534,22 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
+			
+			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
 			}
-			vm.selectedIssue = issue;
+
+			if(issue){
+				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+					vm.selectedIssue = issue;
+				});
+			} else {
+				vm.selectedIssue = issue;
+			}
+
 			vm.toShow = "showIssue";
 		};
 
@@ -14833,6 +15257,35 @@ angular.module('3drepo')
 			} else {
 				return issue.number + " " + issue.name;
 			}
+		};
+
+		obj.getIssue = function(account, project, issueId){
+
+			var self = this;
+			var deferred = $q.defer();
+			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues/" + issueId + ".json");
+
+			$http.get(url).then(function(res){
+
+				res.data.timeStamp = self.getPrettyTime(res.data.created);
+				res.data.title = self.generateTitle(res.data);
+
+				if (res.data.hasOwnProperty("comments")) {
+					for (var j = 0, numComments = res.data.comments.length; j < numComments; j += 1) {
+						if (res.data.comments[j].hasOwnProperty("created")) {
+							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
+						}
+					}
+				}
+
+				deferred.resolve(res.data);
+
+			}).catch(function(err){
+				deferred.reject(err);
+			});
+
+			return deferred.promise;
+
 		};
 
 		obj.getIssues = function(account, project, revision) {
@@ -17437,6 +17890,7 @@ var Oculus = {};
 
 			// Ready signals
 			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
+			REVISIONS_LIST_READY: "EVENT_REVISIONS_LIST_READY",
 
 			// User logs in and out
 			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN",
@@ -17744,9 +18198,9 @@ var Oculus = {};
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -17931,6 +18385,10 @@ var Oculus = {};
 						project: data.project,
 						settings: data.settings
 					});
+				});
+
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
 			}
 		});
@@ -18802,45 +19260,39 @@ var Oculus = {};
 		};
 	}
 
-	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter", "EventService"];
 
-	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter, EventService) {
 		var vm = this;
 
-		/*
-		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
-			vm.revisions = revisions;
-		});
-		*/
 
-		UtilsService.doGet(vm.account + "/" + vm.project + "/revisions.json").then(function(response){
-			vm.revisions = response.data;
-		});
+		$scope.$watch(EventService.currentEvent, function (event) {
 
-		$scope.$watch("vm.revisions", function () {
+			if(event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				if(!vm.revisions || !vm.revisions[0]){
+					return;
+				}
 
-			if(!vm.revisions || !vm.revisions[0]){
-				return;
+				if(!vm.revision){
+					vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+					vm.revisions[0].current = true;
+
+				} else {
+					vm.revisions && vm.revisions.forEach(function(rev, i){
+						if(rev.tag === vm.revision){
+							vm.revName = vm.revision;
+							vm.revisions[i].current = true;
+						} else if(rev._id === vm.revision){
+							vm.revName = $filter('revisionDate')(rev.timestamp);
+							vm.revisions[i].current = true;
+
+						}
+					});
+				}
 			}
-
-			if(!vm.revision){
-				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
-				vm.revisions[0].current = true;
-
-			} else {
-				vm.revisions && vm.revisions.forEach(function(rev, i){
-					if(rev.tag === vm.revision){
-						vm.revName = vm.revision;
-						vm.revisions[i].current = true;
-					} else if(rev._id === vm.revision){
-						vm.revName = $filter('revisionDate')(rev.timestamp);
-						vm.revisions[i].current = true;
-
-					}
-				});
-			}
-
 		});
+
 
 		vm.openDialog = function(event){
 
@@ -18900,7 +19352,7 @@ var Oculus = {};
 	function RevisionsService(UtilsService) {
 
 		function listAll(account, project){
-			UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
 				if(response.status === 200){
 					return (response.data);
 				} else {

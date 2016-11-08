@@ -75,13 +75,14 @@
     "grunt-mocha-test": "^0.12.7",
     "grunt-webfont": "^1.1.0",
     "jshint": "^2.8.0",
-    "response-time": "^2.3.1",
     "minify": "1.4.23",
     "mockgoose": "6.0.3",
     "mongo-mock": "^2.0.0",
     "mongoose-mock": "^0.4.0",
     "proxyquire": "^1.7.4",
+    "response-time": "^2.3.1",
     "sinon": "^1.17.3",
-    "supertest": "^1.2.0"
+    "supertest": "^1.2.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }

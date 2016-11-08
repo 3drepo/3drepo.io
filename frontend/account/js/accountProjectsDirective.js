@@ -59,7 +59,8 @@
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				vm.projectToUpload = this.files[0];
+				//vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
 				$scope.$apply();
 			},
 			false

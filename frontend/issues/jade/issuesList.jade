@@ -8,6 +8,8 @@
 		ng-mouseenter="$ctrl.setFocus(issue, $index)"
 		ng-mouseleave="$ctrl.removeFocus($event, issue)"
 		ng-class="{issueListItemFocus: issue.focus}")
+			.issueJustClosed(ng-if="issue.justClosed" flex="none")
+				.closedText This issue is now closed
 			#issuesListItemContent(layout='row')
 				.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
 					img(ng-src="{{issue.thumbnailPath}}")

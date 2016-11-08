@@ -268,12 +268,11 @@ function matVecMult(mat, vec)
  * @param {JSON} node - The node loaded from repoGraphScene
  * @param {Matrix} matrix - Current transformation matrix
  * @param {Array} globalCoordOffset - New origin for federated models
- * @param {dbInterface} dbInterface - Database interface object
  * @param {string} account - Name of the account containing the project
  * @param {string} project - Name of the project
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger)
+function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger)
 {
 	if (!node.hasOwnProperty("children")) {
 		return globalCoordOffset;
@@ -336,7 +335,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 
 				var childGlobalCoordPromise = deferred();
 
-				X3D_AddChildren(xmlDoc, inlineNode, child, matrix, null, childGlobalCoordPromise, dbInterface, account, project, mode, logger);
+				X3D_AddChildren(xmlDoc, inlineNode, child, matrix, null, childGlobalCoordPromise, account, project, mode, logger);
 			});
 		}
 		else if (child.type == "camera")
@@ -403,7 +402,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			newNode.setAttribute("orientation", orientation.join(' '));
 
 			xmlNode.appendChild(newNode);
-			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger);
 		}
 		else if (child.type == "transformation")
 		{
@@ -435,14 +434,16 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			var transMatrix  = mathjs.matrix(child['matrix']);
 			newMatrix = mathjs.multiply(transMatrix, newMatrix);
 
+
 			var hadOffset = !globalCoordOffset;
-			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, newMatrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, newMatrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger);
 
 			if(!hadOffset && globalCoordOffset)
 			{
 				//child/grandchildren provided a new global offset. transoform it
 				globalCoordOffset = matVecMult(child.matrix, globalCoordOffset);
 			}
+
 
 		} else if(child.type === "material") {
 			 var appearance = xmlDoc.createElement("Appearance");
@@ -506,7 +507,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 				appearance.appendChild(newNode);
 				xmlNode.appendChild(appearance);
-				globalCoordOffset = X3D_AddChildren(xmlDoc, appearance, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+				globalCoordOffset = X3D_AddChildren(xmlDoc, appearance, child, matrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
 			newNode.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
@@ -520,7 +521,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			texProperties.setAttribute('generateMipMaps', 'true');
 			newNode.appendChild(texProperties);
 
-			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger);
 		} else if (child['type'] == 'map') {
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
@@ -590,9 +591,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 						shape.setAttribute('bboxSize', bbox.size);
 					}
 
-					globalCoordOffset = X3D_AddChildren(xmlDoc, shape, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+					globalCoordOffset = X3D_AddChildren(xmlDoc, shape, child, matrix, globalCoordOffset, globalCoordPromise, account, project, mode, logger);
 
-					X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, subMeshKeys[i],mode, logger);
+					X3D_AddToShape(xmlDoc, shape, account, project, child, subMeshKeys[i],mode, logger);
 
 					xmlNode.appendChild(shape);
 				}
@@ -616,7 +617,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
  * @param {integer} subMeshID - sub mesh ID to render
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subMeshID, mode, logger) {
+function X3D_AddToShape(xmlDoc, shape, account, project, mesh, subMeshID, mode, logger) {
 	var meshId = mesh['id'];
 	var mat = getChild(mesh, 'material')
 
@@ -717,7 +718,6 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 		case "pbf":
 			var popGeometry = xmlDoc.createElement('PopGeometry');
-
 			popCache.getPopCache(dbInterface, project, false, null, mesh['id'], function(err, cacheObj) {
 				if (mesh['id'] in GLOBAL.pbfCache) {
 					var cacheMesh = GLOBAL.pbfCache[mesh['id']];
@@ -952,7 +952,7 @@ exports.render = function (account, project, doc, logger){
       	var offsetTransform2 = xmlDoc.createElement("Transform");
         offsetTransform2.setAttribute("translation", projOffset.join(" "));
 
-   	   	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+   	   	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, account, project, 'mp', logger);
    		groupNode.appendChild(offsetTransform2);
 		offsetTransform.appendChild(groupNode);
 		sceneRoot.root.appendChild(offsetTransform);
@@ -960,7 +960,7 @@ exports.render = function (account, project, doc, logger){
 	}
 	else
 	{
-    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', dbInterface.logger);
+    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, account, project, 'mp', logger);
 
 		//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
 		if (globalCoordOffset) {
@@ -986,125 +986,6 @@ exports.render = function (account, project, doc, logger){
 	return new xmlSerial().serializeToString(xmlDoc);
 
 }
-
-/*******************************************************************************
- * Add ground plane to scene
- *
- * @param {xmlDom} xmlDoc - The XML document to add the scene to
- * @param {JSON} bbox - Bounding used to compute the position and size of
- *						ground plane
- *******************************************************************************/
-function render(dbInterface, account, project, subFormat, branch, revision, callback) {
-	console.log('subformat', subFormat);
-	var full = (subFormat == "x3d");
-
-	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
-
-		console.log(doc);
-
-		if(err.value) return callback(err);
-
-		var xmlDoc = X3D_Header();
-
-		if (!doc.mRootNode)
-		{
-			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
-		}
-
-		var sceneRoot	= X3D_CreateScene(xmlDoc, doc.mRootNode);
-
-		// Hack for the demo, generate objects server side
-		json_objs = [];
-
-		var sceneBBoxMin = [];
-		var sceneBBoxMax = [];
-
-		var dummyRoot = { children: [doc.mRootNode] };
-
-		var mat = mathjs.eye(4);
-		var globalCoordOffset = null;
-		var globalCoordPromise = deferred();
-
-		var groupNode = xmlDoc.createElement("Group");
-		groupNode.setAttribute("id", account + "__" + project);
-		groupNode.setAttribute('onload', 'onLoaded(event);');
-		var projOffset = null;
-		dbInterface.getCoordOffset(account, project, branch, full, function(err, offs) {
-			if(err.value == 0)
-				projOffset = offs;
-
-
-			if(projOffset && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
-			{
-
-    	       	var offsetTransform = xmlDoc.createElement("Transform");
-				var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
-	            offsetTransform.setAttribute("translation", offsetTrans.join(" "));
-
-
-    	       	var offsetTransform2 = xmlDoc.createElement("Transform");
-	            offsetTransform2.setAttribute("translation", projOffset.join(" "));
-
-    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
-    	        groupNode.appendChild(offsetTransform2);
-				offsetTransform.appendChild(groupNode);
-				sceneRoot.root.appendChild(offsetTransform);
-
-			}
-			else
-			{
-
-    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, groupNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
-
-				//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
-				if (globalCoordOffset) {
-	            	var offsetTransform = xmlDoc.createElement("Transform");
-					var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
-    		        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
-
-					offsetTransform.appendChild(groupNode);
-	    	    	sceneRoot.root.appendChild(offsetTransform);
-	        	}
-			}
-
-
-			/*
-			// Compute the scene bounding box.
-			// Should be a better way of doing this.
-			for (var meshId in doc['meshes']) {
-				var mesh = doc['meshes'][meshId];
-				var bbox = repoNodeMesh.extractBoundingBox(mesh);
-
-				if (sceneBBoxMin.length)
-				{
-					for(var idx = 0; idx < 3; idx++)
-					{
-		i				sceneBBoxMin[idx] = Math.min(sceneBBoxMin[idx], bbox.min[idx]);
-						sceneBBoxMax[idx] = Math.max(sceneBBoxMax[idx], bbox.max[idx]);
-					}
-				} else {
-					sceneBBoxMin = bbox.min.slice(0);
-					sceneBBoxMax = bbox.max.slice(0);
-				}
-			}
-
-			var bbox	= {};
-			bbox.min	= sceneBBoxMin;
-			bbox.max	= sceneBBoxMax;
-			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
-			bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
-			*/
-
-			var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
-
-			//X3D_AddGroundPlane(xmlDoc, bbox);
-			X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
-			//X3D_AddLights(xmlDoc, bbox);
-
-			return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
-		});
-	});
-};
 
 exports.route = function(router)
 {

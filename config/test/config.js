@@ -18,6 +18,10 @@
 var hostname   = "127.0.0.1";
 var http_port  = 80;
 var https_port = 443;
+var chat = {
+	port: 3000,
+	path : '/chat'
+};
 
 module.exports = {
 	host: hostname,
@@ -25,6 +29,7 @@ module.exports = {
 		secret: "a",
 		parser_secret : "b"
 	},
+	chat: chat,
 	servers: [
 		{
 			service: "api",
@@ -35,6 +40,11 @@ module.exports = {
 		{
 			service: "frontend",
 			template:   "frontend.jade"
+		},
+		{
+			service: "chat",
+			chat_port: chat.port,
+			chat_path: chat.path
 		}
 	],
 	js_debug_level: 'debug',
@@ -88,7 +98,8 @@ module.exports = {
 		worker_queue: 'jobq',
 		callback_queue: 'callbackq',
 		upload_dir: 'uploads',
-		shared_storage: 'uploads'
+		shared_storage: 'uploads',
+		event_exchange: 'eventExchange'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false,

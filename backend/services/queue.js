@@ -41,16 +41,20 @@ ImportQueue.prototype.connect = function(url, options) {
         return Promise.resolve();
     }
 
+
+
     this.uid = shortid.generate();
 
-    if(!options.sharedSpacePath){
-        return Promise.reject({ message: 'Please define sharedSpacePath in options'});
+    if(!options.shared_storage){
+        return Promise.reject({ message: 'Please define shared_storage in queue config'});
     } else if(!options.logger){
         return Promise.reject({ message: 'Please define logger in options'});
-    } else if(!options.callbackQName){
-        return Promise.reject({ message: 'Please define callbackQName in options'});
-    } else if(!options.workerQName){
-        return Promise.reject({ message: 'Please define workerQName in options'});
+    } else if(!options.callback_queue){
+        return Promise.reject({ message: 'Please define callback_queue in queue config'});
+    } else if(!options.worker_queue){
+        return Promise.reject({ message: 'Please define worker_queue in queue config'});
+    } else if (!options.event_exchange){
+        return Promise.reject({ message: 'Please define event_exchange in queue config'});
     }
 
 
@@ -71,11 +75,12 @@ ImportQueue.prototype.connect = function(url, options) {
     }).then(channel => {
 
         this.channel = channel;
-        this.sharedSpacePath = options.sharedSpacePath;
+        this.sharedSpacePath = options.shared_storage;
         this.logger = options.logger;
-        this.callbackQName = options.callbackQName;
-        this.workerQName = options.workerQName;
+        this.callbackQName = options.callback_queue;
+        this.workerQName = options.worker_queue;
         this.deferedObjs = {};
+        this.eventExchange = options.event_exchange;
 
         return this._consumeCallbackQueue();
 
@@ -357,6 +362,52 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
 
             defer && delete self.deferedObjs[rep.properties.correlationId];
 
+        }, { noAck: true });
+    });
+};
+
+
+ImportQueue.prototype.insertEventMessage = function(msg){
+    'use strict';
+
+
+    msg = JSON.stringify(msg);
+
+    return this.channel.assertExchange(this.eventExchange, 'fanout', {
+        durable: true 
+    }).then(() => {
+        return this.channel.publish(
+            this.eventExchange,
+            '',
+            new Buffer(msg), 
+            {
+                persistent: true 
+            }
+        );
+    });
+};
+
+ImportQueue.prototype.consumeEventMessage = function(callback){
+    'use strict';
+    let queue;
+
+    return this.channel.assertExchange(this.eventExchange, 'fanout', {
+        durable: true 
+    }).then(() => {
+        
+        return this.channel.assertQueue('', { exclusive: true });
+
+    }).then(q => {
+
+        queue = q.queue;
+        return this.channel.bindQueue(queue, this.eventExchange, '');
+
+    }).then(() => {
+
+        return this.channel.consume(queue, function(rep) {
+
+            callback(JSON.parse(rep.content));
+            
         }, { noAck: true });
     });
 };

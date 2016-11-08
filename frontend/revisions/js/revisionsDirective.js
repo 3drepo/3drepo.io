@@ -19,45 +19,39 @@
 		};
 	}
 
-	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter", "EventService"];
 
-	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter, EventService) {
 		var vm = this;
 
-		/*
-		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
-			vm.revisions = revisions;
-		});
-		*/
 
-		UtilsService.doGet(vm.account + "/" + vm.project + "/revisions.json").then(function(response){
-			vm.revisions = response.data;
-		});
+		$scope.$watch(EventService.currentEvent, function (event) {
 
-		$scope.$watch("vm.revisions", function () {
+			if(event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				if(!vm.revisions || !vm.revisions[0]){
+					return;
+				}
 
-			if(!vm.revisions || !vm.revisions[0]){
-				return;
+				if(!vm.revision){
+					vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+					vm.revisions[0].current = true;
+
+				} else {
+					vm.revisions && vm.revisions.forEach(function(rev, i){
+						if(rev.tag === vm.revision){
+							vm.revName = vm.revision;
+							vm.revisions[i].current = true;
+						} else if(rev._id === vm.revision){
+							vm.revName = $filter('revisionDate')(rev.timestamp);
+							vm.revisions[i].current = true;
+
+						}
+					});
+				}
 			}
-
-			if(!vm.revision){
-				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
-				vm.revisions[0].current = true;
-
-			} else {
-				vm.revisions && vm.revisions.forEach(function(rev, i){
-					if(rev.tag === vm.revision){
-						vm.revName = vm.revision;
-						vm.revisions[i].current = true;
-					} else if(rev._id === vm.revision){
-						vm.revName = $filter('revisionDate')(rev.timestamp);
-						vm.revisions[i].current = true;
-
-					}
-				});
-			}
-
 		});
+
 
 		vm.openDialog = function(event){
 

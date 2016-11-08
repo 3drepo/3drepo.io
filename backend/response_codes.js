@@ -131,7 +131,7 @@ var responseCodes = {
 	BLACKLISTED_PROJECT_NAME: {value: 73, message: "Project name reserved", status: 400},
 
 	STASH_GEN_FAILED: { value: 74, message: "Failed to regenerate stash: Unknown error", status: 500 },
-	FILE_IMPORT_MISSING_TEXTURES: { value: 75, message: "Failed to import file: Missing textures", status: 500 },
+	FILE_IMPORT_MISSING_TEXTURES: { value: 75, message: "Imported but missing textures", status: 500 },
 
 	ISSUE_NO_NAME: { value: 76, message: "Create issue without name", status: 400},
 	ISSUE_COMMENT_INVALID_INDEX: {value: 77, message: "Invalid comment index", status: 400},

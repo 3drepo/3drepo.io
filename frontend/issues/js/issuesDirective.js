@@ -47,9 +47,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -150,6 +150,9 @@
 						break;
 					}
 				}
+			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
+				vm.revisions = event.value;
+				watchNotification();
 			}
 		});
 
@@ -248,6 +251,90 @@
 			}
 		});
 
+
+		function watchNotification(){
+			/*
+			 * Watch for new issues
+			 */
+			NotificationService.subscribe.newIssues(vm.account, vm.project, function(issues){
+
+				issues.forEach(function(issue){
+
+					var issueRevision = vm.revisions.find(function(rev){
+						return rev._id === issue.rev_id;
+					});
+
+					var currentRevision;
+
+					if(!vm.revision){
+						currentRevision = vm.revisions[0];
+					} else {
+						currentRevision = vm.revisions.find(function(rev){
+							return rev._id === vm.revision || rev.tag === vm.revision;
+						});
+					}
+
+					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+						
+						issue.title = IssuesService.generateTitle(issue);
+						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+						issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+						vm.issues.unshift(issue);
+						
+					}
+
+				});
+
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
+
+			});
+
+			/*
+			 * Watch for status changes for all issues
+			 */
+			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+
+				issue.title = IssuesService.generateTitle(issue);
+				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+				issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+				vm.issues.find(function(oldIssue, i){
+					if(oldIssue._id === issue._id){
+
+
+						if(issue.status === 'closed'){
+							
+							vm.issues[i].justClosed = true;
+							
+							$timeout(function(){
+
+								vm.issues[i] = issue;
+								vm.issues = vm.issues.slice(0);
+
+							}, 4000);
+
+						} else {
+							vm.issues[i] = issue;
+						}
+					}
+				});
+
+				vm.issues = vm.issues.slice(0);
+				$scope.$apply();
+			});
+		}
+
+
+		/*
+		* Unsubscribe notifcation on destroy
+		*/
+		$scope.$on('$destroy', function(){
+			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
+			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
+		});
+
 		/**
 		 * Send event
 		 * @param type
@@ -291,12 +378,22 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
+			
+			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
 			}
-			vm.selectedIssue = issue;
+
+			if(issue){
+				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+					vm.selectedIssue = issue;
+				});
+			} else {
+				vm.selectedIssue = issue;
+			}
+
 			vm.toShow = "showIssue";
 		};
 

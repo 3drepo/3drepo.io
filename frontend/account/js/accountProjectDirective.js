@@ -31,6 +31,7 @@
 				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
+				projectToUpload: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
@@ -43,15 +44,17 @@
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
 					scope.vm.uploadedFileWatch(); // Disable events watch
+					scope.vm.projectToUploadFileWatch();
+
 				});
 			}
 		};
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -59,7 +62,6 @@
 			dialogCloseToId;
 
 		// Init
-		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -78,22 +80,39 @@
 			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
 		}
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
-
+		vm.uploadButtonDisabled = true;
 		checkFileUploading();
 
 		/*
 		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
+
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				vm.selectedFile = vm.uploadedFile.file;
-				vm.tag = vm.uploadedFile.tag;
-				vm.desc = vm.uploadedFile.desc;
-				if(vm.uploadedFile.newProject)
-				{
-					vm.uploadFile();
+
+				console.log("Uploaded file", vm.uploadedFile);
+				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
+
+			}
+		});
+
+		vm.projectToUploadFileWatch = $scope.$watch("vm.projectToUpload", function () {
+			if(vm.projectToUpload){
+
+				var names = vm.projectToUpload.name.split('.');
+				
+				vm.uploadErrorMessage = null;
+				
+				if(names.length === 1){
+					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadButtonDisabled = true;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadButtonDisabled = true;
+				} else {
+					vm.uploadButtonDisabled = false;
 				}
-			
+
 			}
 		});
 
@@ -106,7 +125,6 @@
 					// No timestamp indicates no model previously uploaded
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 				}
 				else {
@@ -133,7 +151,6 @@
 					vm.uploadErrorMessage = null;
 					vm.tag = null;
 					vm.desc = null;
-					vm.selectedFile = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
@@ -186,6 +203,7 @@
 			vm.onUploadFile({project: vm.project});
 		};
 
+
 		/**
 		 * When users click upload after selecting
 		 */
@@ -207,9 +225,8 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						uploadFileToProject(vm.selectedFile, vm.tag, vm.desc);
-						if(!vm.uploadedFile.newProject)
-							vm.closeDialog();
+						vm.uploadedFile = {project: vm.project, file: vm.projectToUpload};
+						vm.closeDialog();
 					}
 				});
 			}
@@ -294,7 +311,7 @@
 							}
 							else {
 								console.log("Polling upload!");
-								pollUpload();
+								watchProjectStatus();
 							}
 						});
 					}
@@ -312,49 +329,45 @@
 					vm.project.uploading = true;
 					vm.showUploading = true;
 					vm.showFileUploadInfo = false;
-					pollUpload();
+					watchProjectStatus();
 				}
 			});
 		}
 
 		/**
-		 * Poll uploading of file
+		 * Watch file upload status
 		 */
-		function pollUpload () {
-			var interval,
-				promise;
-
-			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					console.log("uploadStatus", response);
-					if ((response.data.status === "ok") || (response.data.status === "failed")) {
-						if (response.data.status === "ok") {
-							vm.project.timestamp = new Date();
-							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-							vm.fileUploadInfo = "Uploaded";
-							// clear revisions cache
-							vm.revisions = null;
-						}
-						else {
-							if (response.data.hasOwnProperty("errorReason")) {
-								vm.fileUploadInfo = response.data.errorReason.message;
-							}
-							else {
-								vm.fileUploadInfo = "Failed to upload file";
-							}
-						}
-						vm.showUploading = false;
-						$interval.cancel(interval);
-						vm.showFileUploadInfo = true;
-						$timeout(function () {
-							vm.project.uploading = false;
-						}, infoTimeout);
+		function watchProjectStatus(){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+				console.log('upload status changed',  data);
+				if ((data.status === "ok") || (data.status === "failed")) {
+					if (data.status === "ok") {
+						vm.project.timestamp = new Date();
+						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
+						vm.fileUploadInfo = "Uploaded";
+						// clear revisions cache
+						vm.revisions = null;
 					}
-				});
-			}, 1000);
-		}
 
+					//status=ok can have an error message too
+					if (data.hasOwnProperty("errorReason")) {
+						vm.fileUploadInfo = data.errorReason.message;
+					} else if (data.status === "failed") {
+						vm.fileUploadInfo = "Failed to upload file";
+					}
+
+					vm.showUploading = false;
+					vm.showFileUploadInfo = true;
+					$scope.$apply();
+					$timeout(function () {
+						vm.project.uploading = false;
+					}, infoTimeout);
+					
+
+					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				}
+			});
+		}
 
 		/**
 		 * Set up team of project

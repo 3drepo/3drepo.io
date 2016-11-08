@@ -29,6 +29,9 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
+
+var ChatEvent = require('./chatEvent');
+
 // var xmlBuilder = require('xmlbuilder');
 var moment = require('moment');
 var archiver = require('archiver');
@@ -49,6 +52,7 @@ var xmlBuilder = new xml2js.Builder({
 	explicitCharkey: true,
 	attrkey: '@'
 });
+
 
 var schema = Schema({
 	_id: Object,
@@ -266,8 +270,8 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 
 
 schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean){
-
 	'use strict';
+
 	let issues;
 	let self = this;
 	let filter = {};
@@ -622,7 +626,12 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}).then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
-			return Promise.resolve(issue.clean(settings.type));
+
+			let cleaned = issue.clean(settings.type);
+			
+			ChatEvent.newIssues(data.owner, dbColOptions.account, dbColOptions.project, [cleaned]);
+
+			return Promise.resolve(cleaned);
 		});
 
 	});
@@ -754,8 +763,27 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 };
 
-schema.methods.updateAttr = function(attr, value){
-	this[attr] = value;
+schema.methods.updateAttrs = function(data){
+	'use strict';
+
+	data.hasOwnProperty('topic_type') && (this.topic_type = data.topic_type);
+	data.hasOwnProperty('desc') && (this.desc = data.desc);
+	data.hasOwnProperty('priority') && this.changePriority(data.priority);
+	data.hasOwnProperty('status') && this.changeStatus(data.status);
+
+
+	return this.save().then(() => {
+
+		return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project);
+	
+	}).then(settings => {
+
+		let issue = this.clean(settings.type);
+		ChatEvent.issueChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
+
+		return this;
+	});
+
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -800,6 +828,12 @@ schema.methods.updateComment = function(commentIndex, data){
 
 				this.viewpoints.push(data.viewpoint);
 
+				this.comments.forEach(comment => {
+					if(!comment.sealed){
+						comment.sealed = true;
+					}
+				});
+
 				this.comments.push({ 
 					owner: data.owner,
 					comment: data.comment, 
@@ -811,9 +845,15 @@ schema.methods.updateComment = function(commentIndex, data){
 			}
 		}).then(() => {
 			return this.save();
+
 		}).then(issue => {
+
 			issue = issue.clean();
-			return issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
+			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
+			let eventData = comment;
+
+			ChatEvent.newComment(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			return comment;
 		});
 
 
@@ -838,7 +878,12 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		return this.save().then(issue => {
 			issue = issue.clean();
-			return issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+
+			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+			let eventData = comment;
+
+			ChatEvent.commentChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			return comment;
 		});
 	}
 
@@ -862,8 +907,20 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
+	let comment = this.clean().comments[commentIndex];
 	this.comments[commentIndex].remove();
-	return this.save();
+
+	return this.save().then(() => {
+
+		let issue = this.clean();
+		ChatEvent.commentDeleted(
+			data.requester, 
+			this._dbcolOptions.account, 
+			this._dbcolOptions.project, 
+			issue._id, comment);
+
+		return issue;
+	});
 };
 
 schema.methods.isClosed = function(){
@@ -963,7 +1020,7 @@ schema.methods.clean = function(typePrefix){
 		cleaned.thumbnail = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/thumbnail.png';
 	}
 
-	cleaned.comments.forEach( (comment, i) => {
+	cleaned.comments && cleaned.comments.forEach( (comment, i) => {
 
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
@@ -983,7 +1040,8 @@ schema.methods.clean = function(typePrefix){
 		
 	});
 
-	if( cleaned.comments.length > 0 &&  cleaned.viewpoints[0] && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+
+	if(cleaned.comments && cleaned.comments.length > 0 && cleaned.viewpoints[0] && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
@@ -1229,7 +1287,7 @@ schema.statics.getProjectBCF = function(projectId){
 };
 
 
-schema.statics.importBCF = function(account, project, revId, zipPath){
+schema.statics.importBCF = function(requester, account, project, revId, zipPath){
 	'use strict';
 
 	let self = this;
@@ -1327,8 +1385,22 @@ schema.statics.importBCF = function(account, project, revId, zipPath){
 						return Promise.all(saveIssueProms);
 				
 
-					}).then(() => {
+					}).then(savedIssues => {
+
+						let notifications = [];
+
+						savedIssues.forEach(issue => {
+							if(issue){
+								notifications.push(issue.clean(settings.type));
+							}
+						});
+
+						if(notifications.length){
+							ChatEvent.newIssues(requester, account, project, notifications);
+						}
+						
 						resolve();
+
 					}).catch(err => {
 						reject(err);
 					});

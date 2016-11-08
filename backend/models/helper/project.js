@@ -920,6 +920,7 @@ function downloadLatest(account, project){
 	});
 }
 
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
 var acceptedFormat = [
@@ -931,6 +932,7 @@ var acceptedFormat = [
 	'ms3d','cob','scn','blend','pk3','ndo',
 	'ifc','xgl','zgl','fbx','assbin'
 ];
+
 
 module.exports = {
 	createAndAssignRole,

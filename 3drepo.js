@@ -105,6 +105,8 @@
 			cluster.fork();
 		}
 	} else {
+		console.log('subdomains', config.subdomains);
+
 		for(let subdomain in config.subdomains)
 		{
 			if (config.subdomains.hasOwnProperty(subdomain))
@@ -123,13 +125,25 @@
 
 					systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.host_dir);
 
+
 					if (!serverConfig.external)
 					{
-						let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+						if(serverConfig.service == 'chat'){
+							//chat server has its own port and can't attach to express
 
-						subDomainApp.use(serverConfig.host_dir, app);
+							let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer();
+							server.listen(serverConfig.chat_port, serverConfig.hostname, function(){
+								console.log(`chat server listening on ${serverConfig.hostname}:${serverConfig.chat_port}`);
+							});
+
+							require("./backend/services/" + serverConfig.service + ".js").createApp(server, serverConfig);
+
+						} else {
+							let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+							subDomainApp.use(serverConfig.host_dir, app);
+						}
+
 					}
-
 					// If the configuration specifies a redirect then apply
 					// it at this point
 					if (serverConfig.redirect)

@@ -43,8 +43,8 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject,
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
 
 router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
 router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
@@ -85,13 +85,14 @@ function updateIssue(req, res, next){
 	//let data = JSON.parse(req.body.data);
 	let data = req.body;
 	data.owner = req.session.user.username;
+	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
 
 
-	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
+	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 }).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -121,12 +122,14 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
-			data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
-			data.hasOwnProperty('priority') && issue.changePriority(data.priority);
-			data.hasOwnProperty('status') && issue.changeStatus(data.status);
+			//data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
+			//data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
+			//data.hasOwnProperty('priority') && issue.changePriority(data.priority);
+			//data.hasOwnProperty('status') && issue.changeStatus(data.status);
+
+			action = issue.updateAttrs(data);
 			
-			action = issue.save();
+			//action = issue.save();
 		}
 
 		return action;
@@ -141,7 +144,7 @@ function updateIssue(req, res, next){
 			issue_id : issueId,
 			number: issue.number,
 			owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
-			created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
+			created: issue.created
 		};
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
@@ -160,7 +163,7 @@ function listIssues(req, res, next) {
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let projection = {
 		extras: 0,
-		'comments.extras': 0,
+		'comments': 0,
 		'viewpoints.extras': 0,
 		'viewpoints.scribble': 0,
 		'viewpoints.screenshot.content': 0,
@@ -334,8 +337,8 @@ function importBCF(req, res, next){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
-			console.log('file', req.file.path);
-			Issue.importBCF(req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
+
+			Issue.importBCF(req.session.user.username, req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);
