@@ -410,6 +410,46 @@ describe('Issues', function () {
 		});
 
 
+		it('change topic_type, desc, priority, status and assigned_roles in one go should succee', function(done){
+
+			let issue = Object.assign({"name":"Issue test"}, baseIssue);
+			let issueId;
+
+			let updateData = { 
+				'topic_type': 'for abcdef',
+				"status": "for approval",
+				"priority": "high",
+				"assigned_roles":["testproject.viewer"],
+			};
+
+			async.series([
+				function(done){
+					agent.post(`/${username}/${project}/issues.json`)
+					.send(issue)
+					.expect(200 , function(err, res){
+						issueId = res.body._id;
+						return done(err);
+						
+					});
+				},
+				function(done){
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(updateData)
+					.expect(200, done);
+				},
+				function(done){
+					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					.expect(200, function(err, res){
+						expect(res.body.topic_type).to.equal(updateData.topic_type);
+						expect(res.body.status).to.equal(updateData.status);
+						expect(res.body.priority).to.equal(updateData.priority);
+						expect(res.body.assigned_roles).to.deep.equal(updateData.assigned_roles);
+						done(err);
+					});
+				},
+			], done);
+		});
+
 		it('change desc should succee', function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);

@@ -115,18 +115,15 @@ function updateIssue(req, res, next){
 		} else if (data.hasOwnProperty('closed') && !data.closed){
 			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
-		} else if (data.hasOwnProperty("assigned_roles")){
-			issue.assigned_roles = data.assigned_roles;
-			action = issue.save();
-
 		} else {
 			
 			data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
 			data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
 			data.hasOwnProperty('priority') && issue.changePriority(data.priority);
 			data.hasOwnProperty('status') && issue.changeStatus(data.status);
-			
+			data.hasOwnProperty("assigned_roles") && issue.updateAttr('assigned_roles', data.assigned_roles);
 			action = issue.save();
+			
 		}
 
 		return action;
