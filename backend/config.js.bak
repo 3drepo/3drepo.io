@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.6.2";
+	const VERSION="1.7.0";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -61,6 +61,7 @@
 		serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
+		serverObject.base_url_no_port     = serverObject.public_protocol + "://" + serverObject.hostname;
 		//serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
 		serverObject.url          = serverObject.base_url + serverObject.host_dir;
 
@@ -134,9 +135,9 @@
 				}
 
 				server.external     = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
-				server.chat_subpath = coalesce(server.chat_subpath, "chat");
-				server.chat_path    = server.host_dir + "/" + server.chat_subpath;
-				server.chat_host    = server.base_url;
+				//server.chat_subpath = coalesce(server.chat_subpath, "chat");
+				server.chat_path    = config.chat.path;
+				server.chat_host    = server.base_url_no_port + ':' + config.chat.port;
 			}
 
 			server.session = sessionFactory.session(config);
