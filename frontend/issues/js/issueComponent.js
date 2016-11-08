@@ -56,8 +56,7 @@
 			textInputHasFocus = false,
 			savedDescription,
 			savedComment,
-			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator')),
-			assignedRoleColour;
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 
 		/*
 		 * Init
@@ -135,7 +134,7 @@
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						assigned: this.userRoles[0],
+						assigned_roles: [this.userRoles[0]],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -241,24 +240,23 @@
 		 * Handle status change
 		 */
 		this.statusChange = function () {
+			var data;
+
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) &&
-					(this.data.status === this.issueData.status) &&
-					(this.data.assigned === this.issueData.assigned) &&
-					(this.data.topic_type === this.issueData.topic_type);
-
-				if (this.issueData.status === "for_approval") {
-					assignToRole(this.issueData.creator_role);
-				}
+				data = {
+					priority: self.issueData.priority,
+					status: self.issueData.status,
+					topic_type: self.issueData.topic_type,
+					assigned_roles: self.issueData.assigned_roles
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (data) {
+						IssuesService.updatedIssue = self.issueData;
+					});
 			}
-		};
-
-		/**
-		 * Handle assign change
-		 */
-		this.assignChange = function () {
-			assignToRole(this.issueData.assigned);
 		};
 
 		/**
@@ -702,26 +700,6 @@
 				self.actions[currentAction].color = "";
 				currentAction = null;
 			};
-		}
-
-		/**
-		 * Assign issue to role
-		 * @param {String} role
-		 */
-		function assignToRole (role) {
-			var promise;
-
-			console.log(role);
-			if (self.data) {
-				self.issueData.assigned_roles[0] = role;
-				promise = IssuesService.assignIssue(self.issueData);
-				promise.then(function (response) {
-					console.log(response);
-				});
-			}
-			else {
-				// What to do about new issue?
-			}
 		}
 
 		/**
