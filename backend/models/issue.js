@@ -161,7 +161,7 @@ function parseXmlString(xml, options){
 // Model statics method
 //internal helper _find
 
-var statusEnum = ['open', 'in progress', 'closed'];
+var statusEnum = ['open', 'in progress', 'for approval', 'closed'];
 var priorityEnum = ['none', 'low', 'medium', 'high'];
 
 schema.statics.statusEnum = statusEnum;
