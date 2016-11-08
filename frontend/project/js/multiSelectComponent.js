@@ -91,7 +91,8 @@
 							});
 						}
 						else {
-							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+							deselectedObjects.push(selectedObjects[objectIndex]);
+							selectedObjects.splice(objectIndex, 1)
 						}
 						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 

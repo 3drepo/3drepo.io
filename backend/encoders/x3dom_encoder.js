@@ -312,6 +312,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				}
 
 				inlineNode.setAttribute("onload", "onLoaded(event);");
+				inlineNode.setAttribute("onerror", "onError(event);");
 				inlineNode.setAttribute("url", url_str);
 				inlineNode.setAttribute("id", child.id);
 				inlineNode.setAttribute("DEF", utils.uuidToString(child.shared_id));
@@ -439,7 +440,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 
 			if(!hadOffset && globalCoordOffset)
 			{
-				//child/grandchildren provided a new global offset. transoform it	
+				//child/grandchildren provided a new global offset. transoform it
 				globalCoordOffset = matVecMult(child.matrix, globalCoordOffset);
 			}
 
@@ -554,6 +555,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			{
 				var mp = xmlDoc.createElement('MultiPart');
 				mp.setAttribute('onload', 'onLoaded(event);');
+				mp.setAttribute('onerror', 'onError(event);');
 				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
@@ -933,13 +935,13 @@ exports.render = function (account, project, doc, logger){
 	var globalCoordOffset = null;
 	var globalCoordPromise = deferred();
 	var dbInterface = {};
-	
+
 	var groupNode = xmlDoc.createElement("Group");
 	groupNode.setAttribute("id", account + "__" + project);
 	groupNode.setAttribute('onload', 'onLoaded(event);');
 	var projOffset = null;
 	projOffset = doc.mRootNode.coordOffset;
-	
+
 	if(projOffset.length > 0 && !(projOffset[0] == 0 && projOffset[1] == 0 && projOffset[2] == 0))
 	{
        	var offsetTransform = xmlDoc.createElement("Transform");
@@ -954,7 +956,7 @@ exports.render = function (account, project, doc, logger){
    		groupNode.appendChild(offsetTransform2);
 		offsetTransform.appendChild(groupNode);
 		sceneRoot.root.appendChild(offsetTransform);
-				
+
 	}
 	else
 	{
@@ -984,8 +986,6 @@ exports.render = function (account, project, doc, logger){
 	return new xmlSerial().serializeToString(xmlDoc);
 
 }
-
-
 
 exports.route = function(router)
 {

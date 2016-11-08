@@ -3028,7 +3028,7 @@ var PinShader = null;
 // Global functions to be passed to X3DOM elements
 var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
-	onLoaded, runtimeReady;
+	onLoaded, onError, runtimeReady;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -3048,6 +3048,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
 	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
 	onLoaded          = ViewerUtil.eventFactory("onLoaded");
+	onError           = ViewerUtil.eventFactory("onError");
 	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
@@ -3295,6 +3296,76 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.viewer = undefined;
 		};
 
+		ViewerUtil.onEvent("onError", function(objEvent) {
+			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
+		});
+
+		ViewerUtil.onEvent("onLoaded", function(objEvent) {
+			if (self.loadViewpoint) {
+				self.setCurrentViewpoint(self.loadViewpoint);
+			}
+
+			var targetParent = objEvent.target._x3domNode._nameSpace.doc._x3dElem;
+
+			self.loadViewpoints();
+
+			if (targetParent === self.viewer) {
+				self.setDiffColors(null);
+			}
+			if (objEvent.target.tagName.toUpperCase() === "INLINE") {
+				var nameSpace = objEvent.target.nameSpaceName;
+
+				self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
+
+				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
+				{
+					self.groupNodes={};
+					//loaded x3dom file for current project, figure out the groups
+					var groups = document.getElementsByTagName("Group");
+					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+					{
+						self.groupNodes[groups[gIdx].id] = groups[gIdx];
+					}
+				}
+			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
+				if (self.multipartNodes.indexOf(objEvent.target) === -1)
+				{
+					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+						self.multipartNodesByProject[nameSpaceName] = {};
+					}
+
+					var multipartName = objEvent.target.getAttribute("id");
+					var multipartNameParts = multipartName.split("__");
+					var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+					self.multipartNodes.push(objEvent.target);
+				}
+			}
+
+			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
+
+			if (!self.pinSizeFromSettings) {
+				var sceneBBox = self.getScene()._x3domNode.getVolume();
+				var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
+				self.pinSize = sceneSize / 20;
+			}
+
+			//console.log('my op', options);
+
+			var options = self.options;
+			// don't show all if lat,lon,height is set in URL
+			if(options.showAll){
+				self.showAll();
+			}
+
+			if (!self.downloadsLeft) {
+				callback(self.EVENT.LOADED);
+			}
+		});
+
 		// This is called when the X3DOM runtime is initialized
 		// member of x3dom.runtime instance
 		this.initRuntime = function() {
@@ -3324,73 +3395,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// TODO: This is a hack to get around a bug in X3DOM
 				self.getViewArea()._flyMat = null;
 			};
-
-			ViewerUtil.onEvent("onLoaded", function(objEvent) {
-				if (self.loadViewpoint) {
-					self.setCurrentViewpoint(self.loadViewpoint);
-				}
-
-				var targetParent = objEvent.target._x3domNode._nameSpace.doc._x3dElem;
-
-				self.loadViewpoints();
-
-				if (targetParent === self.viewer) {
-					self.setDiffColors(null);
-				}
-				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
-					var nameSpace = objEvent.target.nameSpaceName;
-
-					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
-
-					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
-					{
-						self.groupNodes={};
-						//loaded x3dom file for current project, figure out the groups
-						var groups = document.getElementsByTagName("Group");
-						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
-						{
-							self.groupNodes[groups[gIdx].id] = groups[gIdx];
-						}
-					}
-				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					if (self.multipartNodes.indexOf(objEvent.target) === -1)
-					{
-						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-							self.multipartNodesByProject[nameSpaceName] = {};
-						}
-
-						var multipartName = objEvent.target.getAttribute("id");
-						var multipartNameParts = multipartName.split("__");
-						var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-						self.multipartNodes.push(objEvent.target);
-					}
-				}
-
-				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
-
-				if (!self.pinSizeFromSettings) {
-					var sceneBBox = self.getScene()._x3domNode.getVolume();
-					var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
-					self.pinSize = sceneSize / 20;
-				}
-
-				//console.log('my op', options);
-
-				var options = self.options;
-				// don't show all if lat,lon,height is set in URL
-				if(options.showAll){
-					self.showAll();
-				}
-
-				if (!self.downloadsLeft) {
-					callback(self.EVENT.LOADED);
-				}
-
-			});
 		};
 
 		this.setAmbientLight = function(lightDescription) {
@@ -3853,7 +3857,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-			
+
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
 				var fullHighlightPartsList = [];
@@ -4049,7 +4053,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
-				
+
 				self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
@@ -4080,10 +4084,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			} else
 			{
-					
+
 				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
-			
+
 		};
 
 		this.setCurrentViewpointIdx = function(idx) {
@@ -4439,7 +4443,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
 
 			}
-			
+
 			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
@@ -4485,12 +4489,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
-	
+
 			if (animate) {
 				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
 				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			}
-		
+
 			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
 
 			self.setNavMode(self.currentNavMode);
@@ -4583,6 +4587,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.inline.setAttribute("namespacename", self.rootName);
 			self.inline.setAttribute("onload", "onLoaded(event);");
+			//self.inline.setAttribute("onerror", "onError(event);");
 			self.inline.setAttribute("url", url);
 			self.reload();
 
@@ -4609,7 +4614,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var viewPoint = {};
 
 			var origViewTrans = null;
-			
+
 			if(account && project)
 			{
 				origViewTrans = self.getParentTransformation(account, project);
@@ -4634,7 +4639,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			var projMat = self.getProjectionMatrix();
-			
+
 			//transform the vectors to the right space if TransformMatrix is present.
 			if(origViewTrans)
 			{
@@ -4646,7 +4651,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				lookAt = transInv.multMatrixVec(lookAt);
 
 			}
-				
+
 			viewDir= viewDir.multiply(-1);
 
 			// More viewing direction than lookAt to sync with Assimp
@@ -4667,12 +4672,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.near = n;
 
 			viewPoint.clippingPlanes = [];
-			   
+
 			if(origViewTrans)
 			{
 				for(var i = 0; i < self.clippingPlanes.length; ++i)
 				{
-					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
+					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));
 				}
 			}
 			else
@@ -4888,7 +4893,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		/**
 		 * Adds a clipping plane to the viewer
 		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane 
+		 * @param {number} normal - the normal of the plane
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
@@ -4898,7 +4903,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
-			if(account && project){				
+			if(account && project){
 				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
 				parentGroup = self.groupNodes[fullParentGroupName];
 			}
@@ -9671,11 +9676,18 @@ var ViewerManager = {};
 		};
 	}
 
-	CompassCtrl.$inject = ["EventService"];
+	CompassCtrl.$inject = ["$rootScope", "EventService"];
 
-	function CompassCtrl (EventService)
+	function CompassCtrl ($rootScope, EventService)
 	{
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+		$rootScope.$watch(EventService.currentEvent, function(event)
+		{
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
+					EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+				}
+			}
+		});
 	}
 }());
 
@@ -14383,7 +14395,6 @@ angular.module('3drepo')
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				vm.setContentHeight();
 			}
 		});
 
@@ -18072,7 +18083,8 @@ var Oculus = {};
 							});
 						}
 						else {
-							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+							deselectedObjects.push(selectedObjects[objectIndex]);
+							selectedObjects.splice(objectIndex, 1)
 						}
 						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 

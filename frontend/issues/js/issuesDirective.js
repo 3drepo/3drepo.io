@@ -239,7 +239,6 @@
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				vm.setContentHeight();
 			}
 		});
 
