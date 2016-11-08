@@ -12103,9 +12103,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12116,7 +12116,9 @@ angular.module('3drepo')
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator')),
+			assignedRoleColour;
 
 		/*
 		 * Init
@@ -12181,6 +12183,14 @@ angular.module('3drepo')
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
 				}
 				else {
 					this.issueData = {
@@ -12293,16 +12303,23 @@ angular.module('3drepo')
 		 */
 		this.statusChange = function () {
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
 			if (this.data) {
 				this.submitDisabled = (this.data.priority === this.issueData.priority) &&
 					(this.data.status === this.issueData.status) &&
+					(this.data.assigned === this.issueData.assigned) &&
 					(this.data.topic_type === this.issueData.topic_type);
 
 				if (this.issueData.status === "for_approval") {
 					assignToRole(this.issueData.creator_role);
 				}
 			}
+		};
+
+		/**
+		 * Handle assign change
+		 */
+		this.assignChange = function () {
+			assignToRole(this.issueData.assigned);
 		};
 
 		/**
@@ -12753,7 +12770,27 @@ angular.module('3drepo')
 		 * @param {String} role
 		 */
 		function assignToRole (role) {
+			var promise;
+
 			console.log(role);
+			if (self.data) {
+				self.issueData.assigned_roles[0] = role;
+				promise = IssuesService.assignIssue(self.issueData);
+				promise.then(function (response) {
+					console.log(response);
+				});
+			}
+			else {
+				// What to do about new issue?
+			}
+		}
+
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
 		}
 
 		/**
@@ -13975,13 +14012,13 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "$element", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, $element, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 160,
+			issuesListItemHeight = 161,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,
@@ -14462,6 +14499,66 @@ angular.module('3drepo')
 }());
 
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesListItem of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesListItem",
+			{
+				controller: IssuesListItemCtrl,
+				templateUrl: "issuesListItem.html",
+				bindings: {
+					data: "<"
+				}
+			}
+		);
+
+	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
+
+	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
+		var self = this;
+
+		/**
+		 * Init stuff
+		 */
+		this.$onInit = function () {
+			var assignedRoleColour,
+				issueRoleIndicator;
+
+			this.IssuesService = IssuesService;
+
+			$timeout(function () {
+				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
+				if (self.data.assigned_roles.length > 0) {
+					assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				}
+				else {
+					assignedRoleColour = IssuesService.getRoleColor(self.data.creator_role);
+				}
+				issueRoleIndicator.css("background", assignedRoleColour);
+			});
+		};
+	}
+}());
+
+/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -14666,7 +14763,7 @@ angular.module('3drepo')
 				issue,
 				{
 					assigned_roles: issue.assigned_roles,
-					number: issue.number
+					number: 0 //issue.number
 				}
 			);
 		};
@@ -14800,16 +14897,13 @@ angular.module('3drepo')
 		};
 
 		obj.getRoleColor = function(role) {
-			var i = 0,
-				length = 0,
-				roleColor;
+			var i, length,
+				roleColor = null;
 
-			if (availableRoles.length > 0) {
-				for (i = 0, length = availableRoles.length; i < length; i += 1) {
-					if (availableRoles[i].role === role) {
-						roleColor = availableRoles[i].color;
-						break;
-					}
+			for (i = 0, length = availableRoles.length; i < length; i += 1) {
+				if (availableRoles[i].role === role && availableRoles[i].color) {
+					roleColor = availableRoles[i].color;
+					break;
 				}
 			}
 			return roleColor;

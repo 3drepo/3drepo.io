@@ -55,7 +55,9 @@
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator')),
+			assignedRoleColour;
 
 		/*
 		 * Init
@@ -76,8 +78,8 @@
 		];
 		this.statuses = [
 			{value: "open", label: "Open"},
-			{value: "in_progress", label: "In progress"},
-			{value: "for_approval", label: "For approval"},
+			{value: "in progress", label: "In progress"},
+			{value: "for approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
 		this.topic_types = [
@@ -120,6 +122,14 @@
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
 				}
 				else {
 					this.issueData = {
@@ -232,7 +242,6 @@
 		 */
 		this.statusChange = function () {
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
 			if (this.data) {
 				this.submitDisabled = (this.data.priority === this.issueData.priority) &&
 					(this.data.status === this.issueData.status) &&
@@ -243,6 +252,13 @@
 					assignToRole(this.issueData.creator_role);
 				}
 			}
+		};
+
+		/**
+		 * Handle assign change
+		 */
+		this.assignChange = function () {
+			assignToRole(this.issueData.assigned);
 		};
 
 		/**
@@ -693,7 +709,27 @@
 		 * @param {String} role
 		 */
 		function assignToRole (role) {
+			var promise;
+
 			console.log(role);
+			if (self.data) {
+				self.issueData.assigned_roles[0] = role;
+				promise = IssuesService.assignIssue(self.issueData);
+				promise.then(function (response) {
+					console.log(response);
+				});
+			}
+			else {
+				// What to do about new issue?
+			}
+		}
+
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
 		}
 
 		/**

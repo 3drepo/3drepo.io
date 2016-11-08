@@ -8,7 +8,7 @@
 		ng-mouseenter="$ctrl.setFocus(issue, $index)"
 		ng-mouseleave="$ctrl.removeFocus($event, issue)"
 		ng-class="{issueListItemFocus: issue.focus}")
-			#issuesListItemContent(layout='column')
+			//#issuesListItemContent(layout='column')
 				#issueRoleIndicator(flex)
 				div(layout='row')
 					.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
@@ -24,6 +24,7 @@
 								label {{issue.timeStamp}}
 						#issuesListItemDescription
 							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
+			issues-list-item(data="issue")
 			md-divider
 
 			#issuesListItemEnter(ng-if="issue.selected", ng-click="$ctrl.editIssue(issue)", layout="column", layout-align="center center")
