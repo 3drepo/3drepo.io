@@ -54,6 +54,12 @@ router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject,
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
 
+//get project roles
+router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesForProject);
+
+//user roles for this project
+router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToProject, getUserRolesForProject);
+
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
@@ -620,6 +626,20 @@ function downloadLatest(req, res, next){
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getUserRolesForProject(req, res, next){
+	'use strict';
+	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.params.username).then(role => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
+	});
+}
+
+function getRolesForProject(req, res, next){
+	'use strict';
+	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(role => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
 	});
 }
 

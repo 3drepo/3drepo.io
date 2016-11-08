@@ -124,8 +124,6 @@ var schema = Schema({
 		owner: String,
 		comment: {type: String, required: true},
 		created: Number,
-		//TO-DO Error: `set` may not be used as a schema pathname
-		//set: Boolean
 		sealed: Boolean,
 		rev_id: Object,
 		guid: Object,
@@ -133,7 +131,7 @@ var schema = Schema({
 		//bcf extra fields we don't care
 		extras: {}
 	}],
-	assigned_roles: [Schema.Types.Mixed],
+	assigned_roles: [String],
 	closed_time: Number,
 	status_last_changed: Number,
 	priority_last_changed: Number,
