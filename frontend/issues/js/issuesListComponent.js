@@ -55,7 +55,8 @@
 			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
-			rightArrowDown = false;
+			rightArrowDown = false,
+			showSubProjectIssues = false;
 
 		// Init
 		this.UtilsService = UtilsService;
@@ -176,6 +177,9 @@
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
 					IssuesService.issueDisplay.showClosed = showClosed;
+				}
+				else if (this.menuOption.value === "showSubProjects") {
+					showSubProjectIssues = !showSubProjectIssues;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -466,6 +470,11 @@
 						self.issuesToShow.splice(i, 1);
 					}
 				}
+
+				// Sub projects
+				self.issuesToShow = self.issuesToShow.filter(function (issue) {
+					return showSubProjectIssues ? true : (issue.project === self.project);
+				});
 			}
 
 			// Create list of issues to show with pins
