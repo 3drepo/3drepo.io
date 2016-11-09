@@ -498,7 +498,7 @@ describe('Issues', function () {
 				"assigned_roles":["testproject.viewer"]
 			});
 			
-			console.log(issue)
+			//console.log(issue)
 
 			let issueId;
 			let updateData = { 
@@ -511,7 +511,7 @@ describe('Issues', function () {
 					agent.post(`/${username}/${project}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
-						console.log(res.body);
+						//console.log(res.body);
 						issueId = res.body._id;
 						return done(err);
 						

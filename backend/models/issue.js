@@ -120,8 +120,13 @@ var schema = Schema({
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
+		action:{
+			property: String,
+			from: String,
+			to: String
+		},
 		owner: String,
-		comment: {type: String, required: true},
+		comment: {type: String},
 		created: Number,
 		sealed: Boolean,
 		rev_id: Object,
@@ -871,6 +876,17 @@ schema.methods.isClosed = function(){
 };
 
 
+schema.methods.addSystemComment = function(property, from , to){
+	'use strict';
+
+	let timeStamp = (new Date()).getTime();
+	this.comments.push({
+		created: timeStamp,
+		action:{
+			property, from, to
+		}
+	});
+};
 
 schema.methods.updateAttrs = function(data){
 	'use strict';
@@ -879,6 +895,7 @@ schema.methods.updateAttrs = function(data){
 
 	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
 		//force status change to in progress if assigned roles during status=for approval
+		this.addSystemComment('assigned_roles', this.assigned_roles, data.assigned_roles);
 		this.assigned_roles = data.assigned_roles;
 		if(this.status === statusEnum.FOR_APPROVAL){
 			forceStatusChanged = true;
@@ -899,8 +916,11 @@ schema.methods.updateAttrs = function(data){
 				this.assigned_roles = [this.creator_role];
 			}
 
-			this.status_last_changed = (new Date()).getTime();
-			this.status = data.status;
+			if(data.status !== this.status){
+				this.addSystemComment('status', this.status, data.status);
+				this.status_last_changed = (new Date()).getTime();
+				this.status = data.status;			
+			}
 		}
 	}
 
@@ -911,13 +931,23 @@ schema.methods.updateAttrs = function(data){
 
 		} else if(data.priority !== this.priority) {
 
+			this.addSystemComment('priority', this.priority, data.priority);
+
 			this.priority_last_changed = (new Date()).getTime();
 			this.priority = data.priority;
 		}
 	}
 
-	data.hasOwnProperty('topic_type') && (this.topic_type = data.topic_type);
-	data.hasOwnProperty('desc') && (this.desc = data.desc);
+	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
+		this.addSystemComment('topic_type', this.topic_type, data.topic_type);
+		this.topic_type = data.topic_type
+	};
+
+	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
+		this.addSystemComment('desc', this.desc, data.desc);
+		this.desc = data.desc;
+	}
+
 };
 
 schema.methods.clean = function(typePrefix){
