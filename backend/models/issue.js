@@ -57,8 +57,7 @@ var schema = Schema({
 	name: { type: String, required: true },
 	topic_type: String,
 	status: {
-        type: String,
-        //enum: ['open', 'in progress', 'closed']
+        type: String
 	},
 
 
@@ -121,8 +120,13 @@ var schema = Schema({
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
+		action:{
+			property: String,
+			from: String,
+			to: String
+		},
 		owner: String,
-		comment: {type: String, required: true},
+		comment: {type: String},
 		created: Number,
 		sealed: Boolean,
 		rev_id: Object,
@@ -161,11 +165,18 @@ function parseXmlString(xml, options){
 // Model statics method
 //internal helper _find
 
-var statusEnum = ['open', 'in progress', 'for approval', 'closed'];
-var priorityEnum = ['none', 'low', 'medium', 'high'];
-
-schema.statics.statusEnum = statusEnum;
-schema.statics.priorityEnum = priorityEnum;
+var statusEnum = {
+	'OPEN': 'open', 
+	'IN_PROGRESS': 'in progress', 
+	'FOR_APPROVAL': 'for approval', 
+	'CLOSED': 'closed'
+};
+var priorityEnum = {
+	'NONE': 'none', 
+	'LOW': 'low', 
+	'MEDIUM': 'medium', 
+	'HIGH': 'high'
+};
 
 schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	'use strict';
@@ -527,11 +538,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		if(statusEnum.indexOf(data.status) === -1){
+		if(_.map(statusEnum).indexOf(data.status) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
 		}
 
-		if(priorityEnum.indexOf(data.priority) === -1){
+		if(_.map(priorityEnum).indexOf(data.priority) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
 		}
 
@@ -752,16 +763,12 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 };
 
-schema.methods.updateAttr = function(attr, value){
-	this[attr] = value;
-};
-
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
 
 	let timeStamp = (new Date()).getTime();
 
-	if(this.isClosed() || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -856,7 +863,7 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 	}
 
-	if(this.isClosed() || this.comments[commentIndex].sealed){
+	if(this.comments[commentIndex].sealed){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -868,57 +875,80 @@ schema.methods.isClosed = function(){
 	return this.status === 'closed' || this.closed;
 };
 
-schema.methods.changeStatus = function(status){
+
+schema.methods.addSystemComment = function(property, from , to){
 	'use strict';
 
-	if (statusEnum.indexOf(status) === -1){
-
-		throw responseCodes.ISSUE_INVALID_STATUS;
-
-	} else if (status !== this.status) {
-		
-		this.status_last_changed = (new Date()).getTime();
-		this.status = status;
-	}
+	let timeStamp = (new Date()).getTime();
+	this.comments.push({
+		created: timeStamp,
+		action:{
+			property, from, to
+		}
+	});
 };
 
-schema.methods.changePriority = function(priority){
+schema.methods.updateAttrs = function(data){
 	'use strict';
 
-	if (priorityEnum.indexOf(priority) === -1){
+	let forceStatusChanged;
 
-		throw responseCodes.ISSUE_INVALID_PRIORITY;
-
-	} else if(priority !== this.priority) {
-
-		this.priority_last_changed = (new Date()).getTime();
-		this.priority = priority;
+	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
+		//force status change to in progress if assigned roles during status=for approval
+		this.addSystemComment('assigned_roles', this.assigned_roles, data.assigned_roles);
+		this.assigned_roles = data.assigned_roles;
+		if(this.status === statusEnum.FOR_APPROVAL){
+			forceStatusChanged = true;
+			this.status = statusEnum.IN_PROGRESS;
+		}
 	}
+
+
+	if(!forceStatusChanged && data.hasOwnProperty("status")){
+		if (_.map(statusEnum).indexOf(data.status) === -1){
+
+			throw responseCodes.ISSUE_INVALID_STATUS;
+
+		} else {
+			
+			//change status to for_approval if assigned roles is changed.
+			if(data.status === statusEnum.FOR_APPROVAL){
+				this.assigned_roles = [this.creator_role];
+			}
+
+			if(data.status !== this.status){
+				this.addSystemComment('status', this.status, data.status);
+				this.status_last_changed = (new Date()).getTime();
+				this.status = data.status;			
+			}
+		}
+	}
+
+	if(data.hasOwnProperty("priority")){
+		if (_.map(priorityEnum).indexOf(data.priority) === -1){
+
+			throw responseCodes.ISSUE_INVALID_PRIORITY;
+
+		} else if(data.priority !== this.priority) {
+
+			this.addSystemComment('priority', this.priority, data.priority);
+
+			this.priority_last_changed = (new Date()).getTime();
+			this.priority = data.priority;
+		}
+	}
+
+	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
+		this.addSystemComment('topic_type', this.topic_type, data.topic_type);
+		this.topic_type = data.topic_type;
+	}
+
+	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
+		this.addSystemComment('desc', this.desc, data.desc);
+		this.desc = data.desc;
+	}
+
 };
-
-// schema.methods.closeIssue = function(){
-// 	'use strict';
-
-// 	if(this.closed){
-// 		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
-// 	}
-
-// 	this.closed = true;
-// 	this.closed_time = (new Date()).getTime();
-// 	return this.save();
-// };
-
-// schema.methods.reopenIssue = function(){
-// 	'use strict';
-
-// 	this.closed = false;
-// 	this.closed_time = null;
-// 	return this.save();
-// };
-
-
-//Model method
-
 
 schema.methods.clean = function(typePrefix){
 	'use strict';
