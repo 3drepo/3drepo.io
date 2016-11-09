@@ -105,7 +105,6 @@
 			cluster.fork();
 		}
 	} else {
-		console.log('subdomains', config.subdomains);
 
 		for(let subdomain in config.subdomains)
 		{
@@ -132,11 +131,13 @@
 							//chat server has its own port and can't attach to express
 
 							let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer();
-							server.listen(serverConfig.chat_port, serverConfig.hostname, function(){
-								console.log(`chat server listening on ${serverConfig.hostname}:${serverConfig.chat_port}`);
-							});
+							server.listen(serverConfig.port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.port));
 
 							require("./backend/services/" + serverConfig.service + ".js").createApp(server, serverConfig);
+
+							// let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+							// let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer(app);
+							// server.listen(serverConfig.chat_port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.chat_port));
 
 						} else {
 							let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);

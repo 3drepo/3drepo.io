@@ -165,7 +165,5 @@ module.exports.createApp = function (serverConfig) {
 
 	app.use("/", routes.router);
 
-	console.log('config url', config.apiUrls);
-	console.log('config url', config.url);
 	return app;
 };

@@ -18,17 +18,13 @@
 var hostname   = "example.org";
 var http_port  = 80;
 var https_port = 443;
+var chat_port = 3000;
 
 module.exports = {
+	port: http_port,
 	host: hostname,
-	api_server: {
-		name: "api",
-		subdomain_or_subdir : 1,
-		http_port: http_port,
-		https_port: https_port,
-		public_port: http_port,
-		public_protocol: "http"
-	},
+	http_port: http_port,
+	https_port: https_port,
 	cookie: {
 	    secret: "a",
 	    parser_secret: "b"
@@ -40,10 +36,20 @@ module.exports = {
 			subdirectory: "api",
 			public_port: http_port,
 			public_protocol: "http",
+			http_port: http_port,
+			https_port: https_port,
+
 		},
 		{
 			service: "frontend",
-			template:   "frontend.jade"
+			template:   "frontend.jade",
+			public_port: http_port,
+		},
+		{
+			service: "chat",
+			http_port: chat_port,
+			https_port: chat_port,
+			subdirectory: 'chat'
 		}
 	],
 	js_debug_level: 'debug',

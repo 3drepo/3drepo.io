@@ -102,8 +102,8 @@ module.exports.createApp = function(serverConfig)
 			params.config_js += "\nserver_config.demoproject = '" + config.wayfinder.demoproject + "';";
 		}
 
-		params.config_js += "\nserver_config.chatHost	= '" + config.api_server.chat_host + "';";
-		params.config_js += "\nserver_config.chatPath	= '" + config.api_server.chat_path + "';";
+		params.config_js += "\nserver_config.chatHost	= '" + config.chat_server.chat_host + "';";
+		params.config_js += "\nserver_config.chatPath	= '" + '/' + config.chat_server.subdirectory + "';";
 		params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
 
 		if (serverConfig.backgroundImage)
