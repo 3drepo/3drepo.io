@@ -89,22 +89,32 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 		// Comments
 		.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.issueData.comments.length>0")
 			div(ng-repeat="comment in $ctrl.issueData.comments", layout="column", layout-align="start", flex)
-				.issueCompComment(ng-click="$ctrl.showViewpoint($event, comment.viewpoint)", layout="column", layout-align="start", flex)
+				div(ng-click="$ctrl.showViewpoint($event, comment.viewpoint)"
+					layout="column"
+					layout-align="start"
+					flex
+					ng-class="{issueCompComment: !comment.action}")
 					// Text and actions
 					div(layout='row', layout-align="space-between", flex)
+						// Saved normal comment
 						label.issueCompCommentTitle(
 						flex
-						ng-if="!comment.editing"
-						ng-bind-html="comment.comment | linky:'_blank'") {{comment.comment}}
+						ng-if="!comment.editing && !comment.action"
+						ng-bind-html="comment.comment | linky:'_blank'")
+						// Saved auto comment
+						label.issueCompCommentTitle(
+						flex
+						ng-if="comment.action"
+						ng-bind-html="comment.comment")
+						// Editing normal comment
 						md-input-container(flex, ng-if="comment.editing")
-							textarea(
-							ng-model="comment.comment"
-							flex
-							aria-label="Description"
-							tdr-focus="true"
-							ng-focus="$ctrl.textInputHasFocus(true)"
-							ng-blur="$ctrl.textInputHasFocus(false)")
-						.issueCompTextActions(layout="row", ng-if="!comment.sealed", flex="none")
+							textarea(ng-model="comment.comment"
+								flex
+								aria-label="Description"
+								tdr-focus="true"
+								ng-focus="$ctrl.textInputHasFocus(true)"
+								ng-blur="$ctrl.textInputHasFocus(false)")
+						.issueCompTextActions(layout="row", ng-if="!comment.sealed && !comment.action", flex="none")
 							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditComment($event, $index)")
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit

@@ -98,6 +98,7 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+			console.log(this.data);
 
 			// Data
 			if (changes.hasOwnProperty("data")) {
@@ -291,10 +292,10 @@
 		/**
 		 * Show viewpoint
 		 * @param event
-		 * @param viewpoint
+		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
-			if (event.type === "click") {
+			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,

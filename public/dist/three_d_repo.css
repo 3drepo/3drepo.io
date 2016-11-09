@@ -1721,7 +1721,6 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
-  word-break: break-all;
 }
 
 issue-comp .issueCompTextActions {
@@ -1761,6 +1760,10 @@ issue-comp #descriptionAndComments {
   overflow-y:auto;
   overflow-x:hidden;
   background: #f0f0f0;
+}
+
+issue-comp .commentTextLight {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

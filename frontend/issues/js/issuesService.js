@@ -113,6 +113,10 @@
 								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
 									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
 								}
+								// Action comment text
+								if (data.data[i].comments[j].action) {
+									data.data[i].comments[j].comment = convertActionCommentToText(data.data[i].comments[j]);
+								}
 							}
 						}
 
@@ -407,6 +411,91 @@
 
 			return deferred.promise;
 		};
+
+		/**
+		 * Convert an action comment to readable text
+		 * @param comment
+		 * @returns {string}
+		 */
+		function convertActionCommentToText (comment) {
+			var text = "";
+
+			switch (comment.action.property) {
+				case "priority":
+					text = "Priority " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "status":
+					text = "Status " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "assigned_roles":
+					text = "Assigned " +
+						" <span class='commentTextLight'>to</span> " +
+						comment.action.to +
+						" <span class='commentTextLight'>from</span> " +
+						comment.action.from;
+					break;
+				case "topic_type":
+					text = "Type changed " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+			}
+
+			return text;
+		}
+
+		/**
+		 * Convert an action value to readable text
+		 * @param value
+		 */
+		function convertActionValueToText (value) {
+			var text = "";
+
+			switch (value) {
+				case "none":
+					text = "None";
+					break;
+				case "low":
+					text = "Low";
+					break;
+				case "medium":
+					text = "Medium";
+					break;
+				case "high":
+					text = "High";
+					break;
+				case "open":
+					text = "Open";
+					break;
+				case "in progress":
+					text = "In progress";
+					break;
+				case "for approval":
+					text = "For approval";
+					break;
+				case "closed":
+					text = "Closed";
+					break;
+				case "for_information":
+					text = "For information";
+					break;
+				case "vr":
+					text = "VR";
+					break;
+			}
+
+			return text;
+		}
 
 		Object.defineProperty(
 			obj,
