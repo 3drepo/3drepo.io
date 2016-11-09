@@ -892,7 +892,7 @@ schema.methods.updateAttrs = function(data){
 
 			throw responseCodes.ISSUE_INVALID_STATUS;
 
-		} else if (data.status !== this.status) {
+		} else {
 			
 			//change status to for_approval if assigned roles is changed.
 			if(data.status === statusEnum.FOR_APPROVAL){
