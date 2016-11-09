@@ -1,10 +1,10 @@
 #issuesListItemContent(layout='column')
-	#issueRoleIndicator(flex)
+	#issueRoleIndicator
 	div(layout='row')
-		.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="$ctrl.data.thumbnail")
+		.issueListItemThumbnail(ng-if="$ctrl.data.thumbnail")
 			img(ng-src="{{$ctrl.data.thumbnailPath}}")
 		div(flex, layout="column")
-			label#issuesListItemTitle(flex="none") {{$ctrl.data.title}}
+			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: $ctrl.assignedToUserRole}") {{$ctrl.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
 				div(flex="15")
 					md-icon.angular-material-icons#issueCompStatus(

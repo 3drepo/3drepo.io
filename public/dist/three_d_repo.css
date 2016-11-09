@@ -1521,6 +1521,7 @@ issues .importBCFLoading {
 
 issues #issueRoleIndicator {
   height: 4px;
+  width: 120px;
   background: #999999;
   margin-bottom: 10px;
   border-radius: 2px;
@@ -1622,7 +1623,7 @@ issues-list #issuesListItemDescription label {
 }
 
 issues-list #issuesListItemDescription {
-  height: 70px;
+  height: 60px;
 }
 issues-list #issuesListItemDescription label {
   overflow: hidden;
@@ -1646,10 +1647,18 @@ issues-list #issuesListItemEnter md-icon {
 
 issues-list .issueListItemThumbnail {
   margin-right: 10px;
+  height: 120px;
 }
 
 issues-list #issuesListContainer {
   outline: none;
+}
+
+/** Issues List Item **************************************************************************************************/
+.userRoleIssueListItemTitle {
+  border: 1px solid rgba(0, 69, 148, 0.3);
+  margin-left: -4px;
+  padding-left: 4px;
 }
 
 /** Issue Comp ********************************************************************************************************/

@@ -38,18 +38,19 @@
 					contentHeight: "&",
 					menuOption: "<",
 					importBcf: "&",
-					selectedIssue: "<"
+					selectedIssue: "<",
+					userRoles: "<"
 				}
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "$element", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, $window, $element, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 161,
+			issuesListItemHeight = 155,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,

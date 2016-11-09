@@ -253,7 +253,9 @@
 					assigned_roles: self.issueData.assigned_roles
 				};
 				IssuesService.updateIssue(self.issueData, data)
-					.then(function (data) {
+					.then(function (response) {
+						console.log(response);
+						self.issueData.status = response.data.issue.status;
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}

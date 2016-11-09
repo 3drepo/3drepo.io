@@ -25,7 +25,8 @@
 				controller: IssuesListItemCtrl,
 				templateUrl: "issuesListItem.html",
 				bindings: {
-					data: "<"
+					data: "<",
+					userRoles: "<"
 				}
 			}
 		);
@@ -35,15 +36,19 @@
 	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
 		var self = this;
 
+		/*
+		 * Init
+		 */
+		this.IssuesService = IssuesService;
+
 		/**
-		 * Init stuff
+		 * Init callback
 		 */
 		this.$onInit = function () {
 			var assignedRoleColour,
 				issueRoleIndicator;
 
-			this.IssuesService = IssuesService;
-
+			// Role indicator
 			$timeout(function () {
 				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 				if (self.data.assigned_roles.length > 0) {
@@ -54,6 +59,9 @@
 				}
 				issueRoleIndicator.css("background", assignedRoleColour);
 			});
+
+			// Title
+			this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
 		};
 	}
 }());

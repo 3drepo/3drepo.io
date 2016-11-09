@@ -12314,7 +12314,9 @@ angular.module('3drepo')
 					assigned_roles: self.issueData.assigned_roles
 				};
 				IssuesService.updateIssue(self.issueData, data)
-					.then(function (data) {
+					.then(function (response) {
+						console.log(response);
+						self.issueData.status = response.data.issue.status;
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}
@@ -13985,18 +13987,19 @@ angular.module('3drepo')
 					contentHeight: "&",
 					menuOption: "<",
 					importBcf: "&",
-					selectedIssue: "<"
+					selectedIssue: "<",
+					userRoles: "<"
 				}
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "$element", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, $window, $element, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 161,
+			issuesListItemHeight = 155,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,
@@ -14503,7 +14506,8 @@ angular.module('3drepo')
 				controller: IssuesListItemCtrl,
 				templateUrl: "issuesListItem.html",
 				bindings: {
-					data: "<"
+					data: "<",
+					userRoles: "<"
 				}
 			}
 		);
@@ -14513,15 +14517,19 @@ angular.module('3drepo')
 	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
 		var self = this;
 
+		/*
+		 * Init
+		 */
+		this.IssuesService = IssuesService;
+
 		/**
-		 * Init stuff
+		 * Init callback
 		 */
 		this.$onInit = function () {
 			var assignedRoleColour,
 				issueRoleIndicator;
 
-			this.IssuesService = IssuesService;
-
+			// Role indicator
 			$timeout(function () {
 				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 				if (self.data.assigned_roles.length > 0) {
@@ -14532,6 +14540,9 @@ angular.module('3drepo')
 				}
 				issueRoleIndicator.css("background", assignedRoleColour);
 			});
+
+			// Title
+			this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
 		};
 	}
 }());
