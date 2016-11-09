@@ -57,8 +57,7 @@ var schema = Schema({
 	name: { type: String, required: true },
 	topic_type: String,
 	status: {
-        type: String,
-        //enum: ['open', 'in progress', 'closed']
+        type: String
 	},
 
 
@@ -161,11 +160,18 @@ function parseXmlString(xml, options){
 // Model statics method
 //internal helper _find
 
-var statusEnum = ['open', 'in progress', 'for approval', 'closed'];
-var priorityEnum = ['none', 'low', 'medium', 'high'];
-
-schema.statics.statusEnum = statusEnum;
-schema.statics.priorityEnum = priorityEnum;
+var statusEnum = {
+	'OPEN': 'open', 
+	'IN_PROGRESS': 'in progress', 
+	'FOR_APPROVAL': 'for approval', 
+	'CLOSED': 'closed'
+};
+var priorityEnum = {
+	'NONE': 'none', 
+	'LOW': 'low', 
+	'MEDIUM': 'medium', 
+	'HIGH': 'high'
+};
 
 schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	'use strict';
@@ -527,11 +533,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		if(statusEnum.indexOf(data.status) === -1){
+		if(_.map(statusEnum).indexOf(data.status) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
 		}
 
-		if(priorityEnum.indexOf(data.priority) === -1){
+		if(_.map(priorityEnum).indexOf(data.priority) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
 		}
 
@@ -752,10 +758,6 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 };
 
-schema.methods.updateAttr = function(attr, value){
-	this[attr] = value;
-};
-
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
 
@@ -868,57 +870,55 @@ schema.methods.isClosed = function(){
 	return this.status === 'closed' || this.closed;
 };
 
-schema.methods.changeStatus = function(status){
+
+
+schema.methods.updateAttrs = function(data){
 	'use strict';
 
-	if (statusEnum.indexOf(status) === -1){
+	let forceStatusChanged;
 
-		throw responseCodes.ISSUE_INVALID_STATUS;
-
-	} else if (status !== this.status) {
-		
-		this.status_last_changed = (new Date()).getTime();
-		this.status = status;
+	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
+		//force status change to in progress if assigned roles during status=for approval
+		this.assigned_roles = data.assigned_roles;
+		if(this.status === statusEnum.FOR_APPROVAL){
+			forceStatusChanged = true;
+			this.status = statusEnum.IN_PROGRESS;
+		}
 	}
-};
 
-schema.methods.changePriority = function(priority){
-	'use strict';
 
-	if (priorityEnum.indexOf(priority) === -1){
+	if(!forceStatusChanged && data.hasOwnProperty("status")){
+		if (_.map(statusEnum).indexOf(data.status) === -1){
 
-		throw responseCodes.ISSUE_INVALID_PRIORITY;
+			throw responseCodes.ISSUE_INVALID_STATUS;
 
-	} else if(priority !== this.priority) {
+		} else if (data.status !== this.status) {
+			
+			//change status to for_approval if assigned roles is changed.
+			if(data.status === statusEnum.FOR_APPROVAL){
+				this.assigned_roles = [this.creator_role];
+			}
 
-		this.priority_last_changed = (new Date()).getTime();
-		this.priority = priority;
+			this.status_last_changed = (new Date()).getTime();
+			this.status = data.status;
+		}
 	}
+
+	if(data.hasOwnProperty("priority")){
+		if (_.map(priorityEnum).indexOf(data.priority) === -1){
+
+			throw responseCodes.ISSUE_INVALID_PRIORITY;
+
+		} else if(data.priority !== this.priority) {
+
+			this.priority_last_changed = (new Date()).getTime();
+			this.priority = data.priority;
+		}
+	}
+
+	data.hasOwnProperty('topic_type') && (this.topic_type = data.topic_type);
+	data.hasOwnProperty('desc') && (this.desc = data.desc);
 };
-
-// schema.methods.closeIssue = function(){
-// 	'use strict';
-
-// 	if(this.closed){
-// 		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
-// 	}
-
-// 	this.closed = true;
-// 	this.closed_time = (new Date()).getTime();
-// 	return this.save();
-// };
-
-// schema.methods.reopenIssue = function(){
-// 	'use strict';
-
-// 	this.closed = false;
-// 	this.closed_time = null;
-// 	return this.save();
-// };
-
-
-//Model method
-
 
 schema.methods.clean = function(typePrefix){
 	'use strict';
