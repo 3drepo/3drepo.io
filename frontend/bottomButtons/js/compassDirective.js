@@ -51,11 +51,18 @@
 		};
 	}
 
-	CompassCtrl.$inject = ["EventService"];
+	CompassCtrl.$inject = ["$rootScope", "EventService"];
 
-	function CompassCtrl (EventService)
+	function CompassCtrl ($rootScope, EventService)
 	{
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+		$rootScope.$watch(EventService.currentEvent, function(event)
+		{
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
+					EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+				}
+			}
+		});
 	}
 }());
 

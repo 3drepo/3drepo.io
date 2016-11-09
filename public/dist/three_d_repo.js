@@ -3028,7 +3028,7 @@ var PinShader = null;
 // Global functions to be passed to X3DOM elements
 var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
-	onLoaded, runtimeReady;
+	onLoaded, onError, runtimeReady;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -3048,6 +3048,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
 	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
 	onLoaded          = ViewerUtil.eventFactory("onLoaded");
+	onError           = ViewerUtil.eventFactory("onError");
 	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
@@ -3295,6 +3296,76 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.viewer = undefined;
 		};
 
+		ViewerUtil.onEvent("onError", function(objEvent) {
+			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
+		});
+
+		ViewerUtil.onEvent("onLoaded", function(objEvent) {
+			if (self.loadViewpoint) {
+				self.setCurrentViewpoint(self.loadViewpoint);
+			}
+
+			var targetParent = objEvent.target._x3domNode._nameSpace.doc._x3dElem;
+
+			self.loadViewpoints();
+
+			if (targetParent === self.viewer) {
+				self.setDiffColors(null);
+			}
+			if (objEvent.target.tagName.toUpperCase() === "INLINE") {
+				var nameSpace = objEvent.target.nameSpaceName;
+
+				self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
+
+				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
+				{
+					self.groupNodes={};
+					//loaded x3dom file for current project, figure out the groups
+					var groups = document.getElementsByTagName("Group");
+					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+					{
+						self.groupNodes[groups[gIdx].id] = groups[gIdx];
+					}
+				}
+			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
+				if (self.multipartNodes.indexOf(objEvent.target) === -1)
+				{
+					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+						self.multipartNodesByProject[nameSpaceName] = {};
+					}
+
+					var multipartName = objEvent.target.getAttribute("id");
+					var multipartNameParts = multipartName.split("__");
+					var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+					self.multipartNodes.push(objEvent.target);
+				}
+			}
+
+			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
+
+			if (!self.pinSizeFromSettings) {
+				var sceneBBox = self.getScene()._x3domNode.getVolume();
+				var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
+				self.pinSize = sceneSize / 20;
+			}
+
+			//console.log('my op', options);
+
+			var options = self.options;
+			// don't show all if lat,lon,height is set in URL
+			if(options.showAll){
+				self.showAll();
+			}
+
+			if (!self.downloadsLeft) {
+				callback(self.EVENT.LOADED);
+			}
+		});
+
 		// This is called when the X3DOM runtime is initialized
 		// member of x3dom.runtime instance
 		this.initRuntime = function() {
@@ -3324,73 +3395,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// TODO: This is a hack to get around a bug in X3DOM
 				self.getViewArea()._flyMat = null;
 			};
-
-			ViewerUtil.onEvent("onLoaded", function(objEvent) {
-				if (self.loadViewpoint) {
-					self.setCurrentViewpoint(self.loadViewpoint);
-				}
-
-				var targetParent = objEvent.target._x3domNode._nameSpace.doc._x3dElem;
-
-				self.loadViewpoints();
-
-				if (targetParent === self.viewer) {
-					self.setDiffColors(null);
-				}
-				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
-					var nameSpace = objEvent.target.nameSpaceName;
-
-					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
-
-					if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
-					{
-						self.groupNodes={};
-						//loaded x3dom file for current project, figure out the groups
-						var groups = document.getElementsByTagName("Group");
-						for(var gIdx = 0; gIdx < groups.length; ++gIdx)
-						{
-							self.groupNodes[groups[gIdx].id] = groups[gIdx];
-						}
-					}
-				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					if (self.multipartNodes.indexOf(objEvent.target) === -1)
-					{
-						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-							self.multipartNodesByProject[nameSpaceName] = {};
-						}
-
-						var multipartName = objEvent.target.getAttribute("id");
-						var multipartNameParts = multipartName.split("__");
-						var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-						self.multipartNodes.push(objEvent.target);
-					}
-				}
-
-				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
-
-				if (!self.pinSizeFromSettings) {
-					var sceneBBox = self.getScene()._x3domNode.getVolume();
-					var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
-					self.pinSize = sceneSize / 20;
-				}
-
-				//console.log('my op', options);
-
-				var options = self.options;
-				// don't show all if lat,lon,height is set in URL
-				if(options.showAll){
-					self.showAll();
-				}
-
-				if (!self.downloadsLeft) {
-					callback(self.EVENT.LOADED);
-				}
-
-			});
 		};
 
 		this.setAmbientLight = function(lightDescription) {
@@ -3853,7 +3857,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
-			
+
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
 				var fullHighlightPartsList = [];
@@ -4049,7 +4053,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
-				
+
 				self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
@@ -4080,10 +4084,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			} else
 			{
-					
+
 				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
-			
+
 		};
 
 		this.setCurrentViewpointIdx = function(idx) {
@@ -4439,7 +4443,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
 
 			}
-			
+
 			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
@@ -4485,12 +4489,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
-	
+
 			if (animate) {
 				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
 				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			}
-		
+
 			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
 
 			self.setNavMode(self.currentNavMode);
@@ -4583,6 +4587,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.inline.setAttribute("namespacename", self.rootName);
 			self.inline.setAttribute("onload", "onLoaded(event);");
+			//self.inline.setAttribute("onerror", "onError(event);");
 			self.inline.setAttribute("url", url);
 			self.reload();
 
@@ -4609,7 +4614,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			var viewPoint = {};
 
 			var origViewTrans = null;
-			
+
 			if(account && project)
 			{
 				origViewTrans = self.getParentTransformation(account, project);
@@ -4634,7 +4639,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			var projMat = self.getProjectionMatrix();
-			
+
 			//transform the vectors to the right space if TransformMatrix is present.
 			if(origViewTrans)
 			{
@@ -4646,7 +4651,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				lookAt = transInv.multMatrixVec(lookAt);
 
 			}
-				
+
 			viewDir= viewDir.multiply(-1);
 
 			// More viewing direction than lookAt to sync with Assimp
@@ -4667,12 +4672,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			viewPoint.near = n;
 
 			viewPoint.clippingPlanes = [];
-			   
+
 			if(origViewTrans)
 			{
 				for(var i = 0; i < self.clippingPlanes.length; ++i)
 				{
-					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));	
+					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));
 				}
 			}
 			else
@@ -4888,7 +4893,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		/**
 		 * Adds a clipping plane to the viewer
 		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane 
+		 * @param {number} normal - the normal of the plane
 		 * @param {number} distance - Distance along the bounding box to clip
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
@@ -4898,7 +4903,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
-			if(account && project){				
+			if(account && project){
 				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
 				parentGroup = self.groupNodes[fullParentGroupName];
 			}
@@ -9657,11 +9662,18 @@ var ViewerManager = {};
 		};
 	}
 
-	CompassCtrl.$inject = ["EventService"];
+	CompassCtrl.$inject = ["$rootScope", "EventService"];
 
-	function CompassCtrl (EventService)
+	function CompassCtrl ($rootScope, EventService)
 	{
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+		$rootScope.$watch(EventService.currentEvent, function(event)
+		{
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
+					EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+				}
+			}
+		});
 	}
 }());
 
@@ -12863,6 +12875,7 @@ angular.module('3drepo')
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
 					self.issueData.title = IssuesService.generateTitle(self.issueData);
+					self.issueData.thumbnailPath = UtilsService.getServerUrl(self.issueData.thumbnail);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
 
@@ -13515,7 +13528,6 @@ angular.module('3drepo')
 
 		function removePin () {
 			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
-			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 			self.setPin({data: null});
 		}
 	}
@@ -14053,7 +14065,6 @@ angular.module('3drepo')
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				vm.setContentHeight();
 			}
 		});
 
@@ -14264,7 +14275,7 @@ angular.module('3drepo')
 			issuesListItemHeight = 147,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
-			sortOldestFirst = true,
+			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false;
@@ -14280,6 +14291,7 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			var i, length,
+				index,
 				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
@@ -14291,23 +14303,24 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
-					setupIssuesToShow();
-					// Process issues
-					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-						// Check for updated issue
-						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
-							this.issuesToShow[i] = updatedIssue;
-						}
-						/*
-						// Get a possible selected issue
-						if (this.issuesToShow[i].selected) {
-							selectedIssue = this.issuesToShow[i];
-							focusedIssueIndex = i;
-							setSelectedIssueIndex(selectedIssue);
-						}
-						*/
+
+					// Check for updated issue
+					if (updatedIssue) {
+						index = this.allIssues.findIndex(function (issue) {
+							return (issue._id === updatedIssue._id);
+						});
+						this.allIssues[index] = updatedIssue;
 					}
-					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+
+					// Check for issue display
+					if (IssuesService.issueDisplay.showClosed) {
+						showClosed = IssuesService.issueDisplay.showClosed;
+					}
+					if (IssuesService.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					}
+
+					setupIssuesToShow();
 					showPins();
 				}
 				else {
@@ -14381,9 +14394,11 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
+					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
+					IssuesService.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
@@ -14610,8 +14625,8 @@ angular.module('3drepo')
 				self.issuesToShow = [self.allIssues[0]];
 				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
 							self.issuesToShow.splice(j, 0, self.allIssues[i]);
 							break;
 						}
@@ -14726,8 +14741,9 @@ angular.module('3drepo')
 							project: self.allIssues[i].project
 						};
 						var pinColor = [0.5, 0, 0];
-						if(self.selectedIssue && self.allIssues[i]._id == self.selectedIssue._id)
+						if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
 							pinColor = [1.0, 0.7, 0];
+						}
 						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
 					}
 				}
@@ -14773,7 +14789,8 @@ angular.module('3drepo')
 			userRoles = [],
 			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null;
+			updatedIssue = null,
+			issueDisplay = {};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -14829,29 +14846,37 @@ angular.module('3drepo')
 			}
 			
 
-			$http.get(url)
-				.then(
-					function(data) {
-						deferred.resolve(data.data);
-						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-							data.data[i].title = self.generateTitle(data.data[i]);
+			$http.get(url).then(
+				function(data) {
+					deferred.resolve(data.data);
+					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+						data.data[i].title = self.generateTitle(data.data[i]);
+						if (data.data[i].thumbnail) {
+							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
+						}
 
-							if (data.data[i].hasOwnProperty("comments")) {
-								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-									if (data.data[i].comments[j].hasOwnProperty("created")) {
-										data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
-									}
+						// Comments
+						if (data.data[i].hasOwnProperty("comments")) {
+							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+								// Timestamp
+								if (data.data[i].comments[j].hasOwnProperty("created")) {
+									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+								}
+								// Screen shot path
+								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
+									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
 								}
 							}
-
-							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
-					},
-					function() {
-						deferred.resolve([]);
+
+						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
-				);
+				},
+				function() {
+					deferred.resolve([]);
+				}
+			);
 
 			return deferred.promise;
 		};
@@ -15166,6 +15191,20 @@ angular.module('3drepo')
 				},
 				set: function(issue) {
 					updatedIssue = issue;
+				}
+			}
+		);
+
+		// Getter setter for issueDisplay
+		Object.defineProperty(
+			obj,
+			"issueDisplay",
+			{
+				get: function () {
+					return issueDisplay;
+				},
+				set: function (newIssueDisplay) {
+					issueDisplay = newIssueDisplay;
 				}
 			}
 		);
@@ -16487,19 +16526,10 @@ var Oculus = {};
 				}
 				else {
 					if (index !== currentSortIndex) {
-						if (angular.isDefined(currentSortIndex)) {
-							vm.menu[currentSortIndex].selected = false;
-							vm.menu[currentSortIndex].firstSelected = false;
-							vm.menu[currentSortIndex].secondSelected = false;
-						}
 						currentSortIndex = index;
-						vm.menu[currentSortIndex].selected = true;
-						vm.menu[currentSortIndex].firstSelected = true;
 					}
-					else {
-						vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
-						vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
-					}
+					vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
+					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
 					vm.selectedMenuOption = vm.menu[currentSortIndex];
 				}
 			}
@@ -17585,6 +17615,7 @@ var Oculus = {};
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
+						objectIndex = -1;
 						selectedObjects.find(function(obj, i){
 							if(obj.id === changes.event.currentValue.value.id){
 								objectIndex = i;
@@ -17598,7 +17629,8 @@ var Oculus = {};
 							});
 						}
 						else {
-							deselectedObjects.push(selectedObjects.splice(objectIndex, 1));
+							deselectedObjects.push(selectedObjects[objectIndex]);
+							selectedObjects.splice(objectIndex, 1)
 						}
 						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
@@ -19537,15 +19569,18 @@ var Oculus = {};
 
 		/**
 		 * Expand a node to show its children.
+		 * @param event
 		 * @param _id
 		 */
-		vm.expand = function (_id) {
+		vm.expand = function (event, _id) {
 			var i, length,
 				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
 				numChildrenToForceRedraw = 3;
+
+			event.stopPropagation();
 
 			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
@@ -19625,6 +19660,9 @@ var Oculus = {};
 						if (!vm.showNodes) {
 							$timeout(function () {
 								vm.showNodes = true;
+								// Resize virtual repeater
+								// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+								$scope.$broadcast('$md-resize');
 							});
 						}
 					}
@@ -19711,6 +19749,9 @@ var Oculus = {};
 				// Redraw the tree
 				$timeout(function () {
 					vm.showNodes = true;
+					// Resize virtual repeater
+					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
+					$scope.$broadcast('$md-resize');
 				});
 			}
 		}

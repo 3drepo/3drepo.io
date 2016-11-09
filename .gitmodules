@@ -7,4 +7,4 @@
 	ignore=dirty
 [submodule "submodules/tests"]
 	path = submodules/tests
-	url = git@github.com:3drepo/tests.git
+	url = https://github.com/3drepo/tests.git

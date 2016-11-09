@@ -249,7 +249,7 @@ function importToyJSON(db, project){
 		return History.findLatest({account: db, project: project}, { current: 0 });
 
 	}).then(history => {
-		
+
 		history.author = db;
 		history.timestamp = new Date();
 
@@ -258,14 +258,14 @@ function importToyJSON(db, project){
 	}).then(() => {
 
 		let Issue = require('../issue');
-		
+
 		let updateIssuePromises = [];
 
 		Issue.find({account: db, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
 			issues.forEach(issue => {
-				
+
 				issue.owner = db;
-				
+
 				issue.comments.forEach(comment => {
 					comment.owner = db;
 				});
@@ -622,12 +622,10 @@ function getModelProperties(account, project, branch, rev, username){
 		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
 
 	}).then(buf => {
-		let properties;
+		let properties = { hiddenNodes : null };
 
 		if(buf){
 			properties = JSON.parse(buf);
-		} else if (!status && !buf){
-			properties = {};
 		}
 
 		if (!properties.hiddenNodes)
