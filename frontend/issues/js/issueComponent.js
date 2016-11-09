@@ -558,6 +558,7 @@
 		 */
 		function afterNewComment (comment) {
 			// Add new comment to issue
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
