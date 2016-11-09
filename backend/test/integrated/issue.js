@@ -849,44 +849,44 @@ describe('Issues', function () {
 				});
 			});
 
-			it('should fail if adding a comment', function(done){
-				let comment = { comment: 'hello world' };
+			// it('should fail if adding a comment', function(done){
+			// 	let comment = { comment: 'hello world' };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send(comment)
-				.expect(400 , function(err, res){
+			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	.send(comment)
+			// 	.expect(400 , function(err, res){
 
-					expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-					return done(err);
+			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+			// 		return done(err);
 
-				});
-			});
+			// 	});
+			// });
 
-			it('should fail if removing a comment', function(done){
-				let comment = { commentIndex: 0, delete: true };
+			// it('should fail if removing a comment', function(done){
+			// 	let comment = { commentIndex: 0, delete: true };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send(comment)
-				.expect(400 , function(err, res){
+			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	.send(comment)
+			// 	.expect(400 , function(err, res){
 
-					expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-					return done(err);
+			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+			// 		return done(err);
 
-				});
-			});
+			// 	});
+			// });
 
-			it('should fail if editing a comment', function(done){
-				let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
+			// it('should fail if editing a comment', function(done){
+			// 	let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send(comment)
-				.expect(400 , function(err, res){
+			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	.send(comment)
+			// 	.expect(400 , function(err, res){
 
-					expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-					return done(err);
+			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+			// 		return done(err);
 
-				});
-			});
+			// 	});
+			// });
 
 
 			it('should succee if reopening', function(done){

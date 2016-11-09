@@ -768,7 +768,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	let timeStamp = (new Date()).getTime();
 
-	if(this.isClosed() || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -863,7 +863,7 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 	}
 
-	if(this.isClosed() || this.comments[commentIndex].sealed){
+	if(this.comments[commentIndex].sealed){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -940,8 +940,8 @@ schema.methods.updateAttrs = function(data){
 
 	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
 		this.addSystemComment('topic_type', this.topic_type, data.topic_type);
-		this.topic_type = data.topic_type
-	};
+		this.topic_type = data.topic_type;
+	}
 
 	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
 		this.addSystemComment('desc', this.desc, data.desc);
