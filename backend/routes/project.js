@@ -49,7 +49,7 @@ router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetti
 
 router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
 
-router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
 
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
@@ -72,7 +72,7 @@ router.get('/:project/revision/master/head/searchtree.json', middlewares.hasRead
 
 router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
-router.delete('/:project', middlewares.canCreateProject, deleteProject);
+router.delete('/:project', middlewares.isAccountAdmin, deleteProject);
 
 router.post('/:project/upload', middlewares.connectQueue, middlewares.hasWriteAccessToProject, uploadProject);
 
@@ -83,8 +83,6 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
 router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
-
-router.get('/:project/testadmin', middlewares.isAccountAdmin);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -635,6 +633,8 @@ function getUserRolesForProject(req, res, next){
 	'use strict';
 	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.params.username).then(role => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
@@ -642,6 +642,8 @@ function getRolesForProject(req, res, next){
 	'use strict';
 	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(role => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 

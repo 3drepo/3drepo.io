@@ -127,15 +127,6 @@ function hasWriteAccessToAccount(req, res, next){
 	hasAccessToAccount(req, res, next);
 }
 
-function canCreateProject(req, res, next){
-	"use strict";
-
-	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
-		next();
-	} else {
-		responseCodes.respond("Middleware: check has access to account", req, res, next, responseCodes.NOT_AUTHORIZED , null, {});
-	}
-}
 
 function loggedIn(req, res, next){
 	'use strict';
@@ -320,7 +311,7 @@ function isAccountAdmin(req, res, next){
 		return Promise.all(findPromises);
 
 	}).then(() => {
-		
+
 		if(foundAdminRole){
 			next();
 		} else {
@@ -336,7 +327,6 @@ function isAccountAdmin(req, res, next){
 var middlewares = {
 
 	// Real middlewares taking req, res, next
-	canCreateProject: [loggedIn, canCreateProject],
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],

@@ -32,7 +32,7 @@ var stash = require('./stash');
 var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
 var C = require("../../constants");
-
+var _ = require('lodash');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -921,6 +921,8 @@ function downloadLatest(account, project){
 }
 
 function getRolesForProject(account, project){
+	'use strict';
+
 	return Role.find({ account: 'admin'}, {
 		'privileges' : {
 			'$elemMatch': {
@@ -929,9 +931,19 @@ function getRolesForProject(account, project){
 				'actions': 'find'
 			}
 		}
-	}, {
-		role: 1, 
-		db: 1
+	}).then(roles => {
+
+		for(let i = roles.length - 1; i >= 0; i--){
+
+			console.log(Role.determineRole(account, project, roles[i]));
+
+			if (Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
+				roles.splice(i, 1);
+			}
+		}
+
+		roles.forEach((role, i) => roles[i] = _.pick(role.toObject(), ['role', 'db']));
+		return roles;
 	});
 }
 

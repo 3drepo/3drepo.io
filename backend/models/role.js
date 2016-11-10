@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
+var _ = require('lodash');
+
 //var User = require('./user');
 //var _ = require('lodash');
 
@@ -9,6 +11,15 @@ var schema = mongoose.Schema({
 	privileges: {},
 	roles: []
 });
+
+var roleEnum = {
+	'VIEWER': 'viewer',
+	'COLLABORATOR': 'collaborator',
+	'COMMENTER': 'commenter'
+};
+
+schema.statics.roleEnum = roleEnum;
+
 
 schema.statics.findByRoleID = function(id){
 	'use strict';
@@ -110,7 +121,37 @@ schema.statics.removeCollaboratorRole = function(account, project){
 	return ModelFactory.db.db(account).command(dropRoleCmd);
 };
 
+schema.statics.determineRole = function(db, project, role){
+	'use strict';
 
+	let findPriv = function(actions){
+
+		let findHistoryPriv = role.privileges.find(priv => {
+			return priv.resource.db === db &&
+				priv.resource.collection === `${project}.history` &&
+				_.xor(priv.actions, actions.history).length === 0;
+		});
+
+		let findIssuePriv = role.privileges.find(priv => {
+			return priv.resource.db === db &&
+				priv.resource.collection === `${project}.issues` &&
+				_.xor(priv.actions, actions.issue).length === 0;
+		});
+
+		return findHistoryPriv && findIssuePriv;
+	};
+
+	if(role.privileges){
+
+		if(findPriv({history: [ "find", "insert"], issue: [ "find", "insert", "update"]})){
+			return roleEnum.COLLABORATOR;
+		} else if (findPriv({history: [ "find"], issue: ["find", "insert", "update" ]})){
+			return roleEnum.COMMENTER;
+		} else if (findPriv({history: [ "find"], issue: [ "find"]})){
+			return roleEnum.VIEWER;
+		}
+	}
+};
 
 var Role = ModelFactory.createClass(
 	'Role', 
