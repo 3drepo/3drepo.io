@@ -935,6 +935,47 @@ function downloadLatest(account, project){
 	});
 }
 
+function getRolesForProject(account, project){
+	return Role.find({ account: 'admin'}, {
+		'privileges' : {
+			'$elemMatch': {
+				'resource.db': account, 
+				'resource.collection': `${project}.history`,
+				'actions': 'find'
+			}
+		}
+	}, {
+		role: 1, 
+		db: 1
+	});
+}
+
+function getUserRolesForProject(account, project, username){
+	'use strict';
+
+	let projectRoles;
+
+	return getRolesForProject(account, project).then(roles => {
+		
+		projectRoles = roles;
+		return User.findByUserName(username);
+
+	}).then(user => {
+
+		let userRolesForProject = user.roles.filter(userRole => {
+
+			return projectRoles.find(projectRole => { 
+
+				projectRole = projectRole.toObject();
+				return projectRole.db === userRole.db && projectRole.role === userRole.role;
+			});
+
+		});
+
+		return userRolesForProject.map(item => item.role);
+	});
+}
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
 var acceptedFormat = [
@@ -961,5 +1002,7 @@ module.exports = {
 	downloadLatest,
 	fileNameRegExp,
 	projectNameRegExp,
-	acceptedFormat
+	acceptedFormat,
+	getUserRolesForProject,
+	getRolesForProject
 };

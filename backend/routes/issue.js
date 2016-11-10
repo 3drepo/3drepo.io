@@ -25,6 +25,7 @@ var Issue = require('../models/issue');
 var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
+var ProjectHelpers = require('../models/helper/project');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
@@ -90,8 +91,12 @@ function updateIssue(req, res, next){
 	let issueId = req.params.issueId;
 	let action;
 
+	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username).then(roles => {
+		
+		data.owner_roles = roles;
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
 
-	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
+	}).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -115,17 +120,10 @@ function updateIssue(req, res, next){
 		} else if (data.hasOwnProperty('closed') && !data.closed){
 			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
-		} else if (data.hasOwnProperty("assigned_roles")){
-			issue.assigned_roles = data.assigned_roles;
-			action = issue.save();
-
 		} else {
 			
-			data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
-			data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
-			data.hasOwnProperty('priority') && issue.changePriority(data.priority);
-			data.hasOwnProperty('status') && issue.changeStatus(data.status);
-			
+			console.log(data);
+			issue.updateAttrs(data);
 			action = issue.save();
 		}
 
