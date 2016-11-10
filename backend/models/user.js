@@ -498,15 +498,16 @@ schema.methods.listAccounts = function(){
 	let accounts = [];
 
 	this.roles.forEach(role => {
+		console.log(role);
 		if(role.role === 'admin'){
 			accounts.push({ account: role.db, projects: [], fedProjects: [] });
 		}
 	});
 
 	//backward compatibility, user has access to database with the name same as their username
-	if(!_.find(accounts, account => account.account === this.user)){
-		accounts.push({ account: this.user, projects: [], fedProjects: [] });
-	}
+	// if(!_.find(accounts, account => account.account === this.user)){
+	// 	accounts.push({ account: this.user, projects: [], fedProjects: [] });
+	// }
 	
 	// group projects by accounts
 	return this.listProjects().then(projects => {

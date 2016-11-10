@@ -934,6 +934,10 @@ schema.methods.updateAttrs = function(data){
 
 			throw responseCodes.ISSUE_INVALID_STATUS;
 
+		} else if (data.status === statusEnum.CLOSED && data.owner_roles.indexOf(this.creator_role) === -1){
+
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+
 		} else {
 			
 			//change status to for_approval if assigned roles is changed.
