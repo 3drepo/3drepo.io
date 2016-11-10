@@ -25,6 +25,7 @@ var Issue = require('../models/issue');
 var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
+var ProjectHelpers = require('../models/helper/project');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
@@ -90,8 +91,12 @@ function updateIssue(req, res, next){
 	let issueId = req.params.issueId;
 	let action;
 
+	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username).then(roles => {
+		
+		data.owner_roles = roles;
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
 
-	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
+	}).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -117,6 +122,7 @@ function updateIssue(req, res, next){
 
 		} else {
 			
+			console.log(data);
 			issue.updateAttrs(data);
 			action = issue.save();
 		}
