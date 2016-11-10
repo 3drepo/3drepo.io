@@ -241,7 +241,8 @@
 		 * Handle status change
 		 */
 		this.statusChange = function () {
-			var data;
+			var data,
+				lastComment;
 
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
@@ -256,7 +257,14 @@
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
+
+						lastComment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						lastComment.comment = IssuesService.convertActionCommentToText(lastComment);
+						lastComment.timeStamp = IssuesService.getPrettyTime(lastComment.created);
+						self.issueData.comments.push(lastComment);
+
 						self.issueData.status = response.data.issue.status;
+
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}

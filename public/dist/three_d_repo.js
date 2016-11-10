@@ -12302,7 +12302,8 @@ angular.module('3drepo')
 		 * Handle status change
 		 */
 		this.statusChange = function () {
-			var data;
+			var data,
+				lastComment;
 
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
@@ -12317,7 +12318,14 @@ angular.module('3drepo')
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
+
+						lastComment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						lastComment.comment = IssuesService.convertActionCommentToText(lastComment);
+						lastComment.timeStamp = IssuesService.getPrettyTime(lastComment.created);
+						self.issueData.comments.push(lastComment);
+
 						self.issueData.status = response.data.issue.status;
+
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}
@@ -14574,8 +14582,7 @@ angular.module('3drepo')
 	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
 	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
-		var self = this,
-			url = "",
+		var url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -14632,8 +14639,7 @@ angular.module('3drepo')
 		};
 
 		obj.getIssues = function(account, project, revision) {
-			var self = this,
-				deferred = $q.defer();
+			var deferred = $q.defer();
 
 			if(revision){
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
@@ -14646,8 +14652,8 @@ angular.module('3drepo')
 				function(data) {
 					deferred.resolve(data.data);
 					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-						data.data[i].title = self.generateTitle(data.data[i]);
+						data.data[i].timeStamp = obj.getPrettyTime(data.data[i].created);
+						data.data[i].title = obj.generateTitle(data.data[i]);
 						if (data.data[i].thumbnail) {
 							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
 						}
@@ -14657,7 +14663,7 @@ angular.module('3drepo')
 							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
 								// Timestamp
 								if (data.data[i].comments[j].hasOwnProperty("created")) {
-									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+									data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
 								}
 								// Screen shot path
 								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
@@ -14665,7 +14671,7 @@ angular.module('3drepo')
 								}
 								// Action comment text
 								if (data.data[i].comments[j].action) {
-									data.data[i].comments[j].comment = convertActionCommentToText(data.data[i].comments[j]);
+									data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
 								}
 							}
 						}
@@ -14816,8 +14822,7 @@ angular.module('3drepo')
 		};
 
 		obj.fixPin = function (pin, colours) {
-			var self = this;
-			self.removePin();
+			obj.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
@@ -14967,7 +14972,7 @@ angular.module('3drepo')
 		 * @param comment
 		 * @returns {string}
 		 */
-		function convertActionCommentToText (comment) {
+		obj.convertActionCommentToText = function (comment) {
 			var text = "";
 
 			switch (comment.action.property) {
@@ -15002,7 +15007,7 @@ angular.module('3drepo')
 			}
 
 			return text;
-		}
+		};
 
 		/**
 		 * Convert an action value to readable text
