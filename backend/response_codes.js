@@ -196,7 +196,7 @@ var responseCodes = {
 
 
 	PROJECT_NAME_TOO_LONG: {value: 123, message: "Project name cannot be longer than 60 characters", status: 400},
-
+	ISSUE_SYSTEM_COMMENT: { value: 124, message: "Can't edit or remove system comment", status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {

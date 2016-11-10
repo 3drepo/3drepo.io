@@ -834,6 +834,11 @@ schema.methods.updateComment = function(commentIndex, data){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 		}
 
+		if(isSystemComment(commentObj)){
+			return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
+
+		}
+
 		if(data.comment){
 			commentObj.comment = data.comment;
 			commentObj.created = timeStamp;
@@ -849,6 +854,11 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	
 };
+
+function isSystemComment(comment){
+	'use strict';
+	return !_.isEmpty(comment.toObject().action);
+}
 
 schema.methods.removeComment = function(commentIndex, data){
 	'use strict';
@@ -867,6 +877,10 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
+	if(isSystemComment(this.comments[commentIndex])){
+		return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
+	}
+
 	this.comments[commentIndex].remove();
 	return this.save();
 };
@@ -876,7 +890,7 @@ schema.methods.isClosed = function(){
 };
 
 
-schema.methods.addSystemComment = function(property, from , to){
+schema.methods.addSystemComment = function(owner, property, from , to){
 	'use strict';
 
 	let timeStamp = (new Date()).getTime();
@@ -884,8 +898,20 @@ schema.methods.addSystemComment = function(property, from , to){
 		created: timeStamp,
 		action:{
 			property, from, to
-		}
+		},
+		owner: owner
 	});
+
+	//seal the last comment if it is a human commnet after adding system comments
+	let commentLen = this.comments.length;
+	console.log('commentLen', commentLen);
+	console.log('action', this.comments[commentLen - 2].action);
+	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
+		console.log('seal');
+		this.comments[commentLen - 2].sealed = true;
+	}
+
+		console.log(this.comments[commentLen - 2]);
 };
 
 schema.methods.updateAttrs = function(data){
@@ -895,7 +921,7 @@ schema.methods.updateAttrs = function(data){
 
 	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
 		//force status change to in progress if assigned roles during status=for approval
-		this.addSystemComment('assigned_roles', this.assigned_roles, data.assigned_roles);
+		this.addSystemComment(data.owner, 'assigned_roles', this.assigned_roles, data.assigned_roles);
 		this.assigned_roles = data.assigned_roles;
 		if(this.status === statusEnum.FOR_APPROVAL){
 			forceStatusChanged = true;
@@ -917,7 +943,7 @@ schema.methods.updateAttrs = function(data){
 			}
 
 			if(data.status !== this.status){
-				this.addSystemComment('status', this.status, data.status);
+				this.addSystemComment(data.owner, 'status', this.status, data.status);
 				this.status_last_changed = (new Date()).getTime();
 				this.status = data.status;			
 			}
@@ -931,7 +957,7 @@ schema.methods.updateAttrs = function(data){
 
 		} else if(data.priority !== this.priority) {
 
-			this.addSystemComment('priority', this.priority, data.priority);
+			this.addSystemComment(data.owner, 'priority', this.priority, data.priority);
 
 			this.priority_last_changed = (new Date()).getTime();
 			this.priority = data.priority;
@@ -939,12 +965,12 @@ schema.methods.updateAttrs = function(data){
 	}
 
 	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
-		this.addSystemComment('topic_type', this.topic_type, data.topic_type);
+		this.addSystemComment(data.owner, 'topic_type', this.topic_type, data.topic_type);
 		this.topic_type = data.topic_type;
 	}
 
 	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
-		this.addSystemComment('desc', this.desc, data.desc);
+		this.addSystemComment(data.owner, 'desc', this.desc, data.desc);
 		this.desc = data.desc;
 	}
 
@@ -996,22 +1022,28 @@ schema.methods.clean = function(typePrefix){
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
+
 		if(cleaned.comments[i].viewpoint){
+
 			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
 
-			if(i > 0 && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
+			if(i > 0 && cleaned.comments[i-1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
 				//hide repeated screenshot if consecutive comments relate to the same viewpoint
 				cleaned.comments[i].viewpoint.screenshot = null;
 				cleaned.comments[i].viewpoint.screenshotSmall = null;
 			}
 
-		} else {
+		} else if (!isSystemComment(this.comments[i])){
+			// for all other non system comments
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 		
 	});
 
-	if( cleaned.comments.length > 0 &&  cleaned.viewpoints[0] && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+	if( cleaned.comments.length > 0 && 
+		cleaned.viewpoints[0] && 
+		cleaned.comments[0].viewpoint && 
+		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
