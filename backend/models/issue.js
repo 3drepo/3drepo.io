@@ -904,14 +904,13 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 
 	//seal the last comment if it is a human commnet after adding system comments
 	let commentLen = this.comments.length;
-	console.log('commentLen', commentLen);
-	console.log('action', this.comments[commentLen - 2].action);
+
 	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
-		console.log('seal');
+
 		this.comments[commentLen - 2].sealed = true;
 	}
 
-		console.log(this.comments[commentLen - 2]);
+
 };
 
 schema.methods.updateAttrs = function(data){
