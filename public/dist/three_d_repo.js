@@ -17786,6 +17786,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -17793,6 +17794,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",
