@@ -75,12 +75,6 @@
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
-		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "for approval", label: "For approval"},
-			{value: "closed", label: "Closed"}
-		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
 			{value: "vr", label: "VR"},
@@ -134,7 +128,7 @@
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						assigned_roles: [this.userRoles[0]],
+						assigned_roles: [],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -214,12 +208,23 @@
 		 * Init stuff
 		 */
 		this.$onInit = function () {
+			var disableStatus;
+
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
 				issueSelectedObjects = this.selectedObjects;
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
+
+			// Set up statuses
+			disableStatus = this.data ? (this.userRoles[0] !== this.data.creator_role) : false;
+			this.statuses = [
+				{value: "open", label: "Open", disabled: disableStatus},
+				{value: "in progress", label: "In progress", disabled: false},
+				{value: "for approval", label: "For approval", disabled: false},
+				{value: "closed", label: "Closed", disabled: disableStatus}
+			];
 		};
 
 		/**
@@ -256,6 +261,7 @@
 					.then(function (response) {
 						console.log(response);
 						self.issueData.status = response.data.issue.status;
+						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}
@@ -266,22 +272,7 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status) ||
-						(this.data.topic_type !== this.issueData.topic_type)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
-							saveComment();
-						}
-					}
-					else {
-						saveComment();
-					}
-				}
-				else {
-					saveComment();
-				}
+				saveComment();
 			}
 			else {
 				saveIssue();
@@ -547,23 +538,6 @@
 					self.submitDisabled = true;
 					setContentHeight();
 			});
-		}
-
-		/**
-		 * Update an existing issue and notify parent
-		 */
-		function updateIssue () {
-			var data = {
-				priority: self.issueData.priority,
-				status: self.issueData.status,
-				topic_type: self.issueData.topic_type
-			};
-			IssuesService.updateIssue(self.issueData, data)
-				.then(function (data) {
-					IssuesService.updatedIssue = self.issueData;
-				});
-			
-			self.submitDisabled = true;
 		}
 
 		/**
