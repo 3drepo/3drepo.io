@@ -435,9 +435,11 @@
 				case "assigned_roles":
 					text = "Assigned " +
 						" <span class='commentTextLight'>to</span> " +
-						comment.action.to +
-						" <span class='commentTextLight'>from</span> " +
-						comment.action.from;
+						comment.action.to;
+					if (comment.action.from) {
+						text += " <span class='commentTextLight'>from</span> " +
+							comment.action.from;
+					}
 					break;
 				case "topic_type":
 					text = "Type changed " +

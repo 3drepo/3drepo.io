@@ -12303,7 +12303,7 @@ angular.module('3drepo')
 		 */
 		this.statusChange = function () {
 			var data,
-				lastComment;
+				comment;
 
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
@@ -12319,10 +12319,17 @@ angular.module('3drepo')
 					.then(function (response) {
 						console.log(response);
 
-						lastComment = response.data.issue.comments[response.data.issue.comments.length - 1];
-						lastComment.comment = IssuesService.convertActionCommentToText(lastComment);
-						lastComment.timeStamp = IssuesService.getPrettyTime(lastComment.created);
-						self.issueData.comments.push(lastComment);
+						// Add info for new comment
+						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						comment.comment = IssuesService.convertActionCommentToText(comment);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						self.issueData.comments.push(comment);
+
+						// Update last but one comment in case it was "sealed"
+						if (self.issueData.comments.length > 1) {
+							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+						}
 
 						self.issueData.status = response.data.issue.status;
 
@@ -12814,7 +12821,7 @@ angular.module('3drepo')
 				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
 					}
 				}
@@ -14993,9 +15000,11 @@ angular.module('3drepo')
 				case "assigned_roles":
 					text = "Assigned " +
 						" <span class='commentTextLight'>to</span> " +
-						comment.action.to +
-						" <span class='commentTextLight'>from</span> " +
-						comment.action.from;
+						comment.action.to;
+					if (comment.action.from) {
+						text += " <span class='commentTextLight'>from</span> " +
+							comment.action.from;
+					}
 					break;
 				case "topic_type":
 					text = "Type changed " +
