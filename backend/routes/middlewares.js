@@ -22,6 +22,8 @@ var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
+var Role = require('../models/role');
+
 var config = require('../config');
 
 var READ_BIT	= 4;
@@ -131,7 +133,7 @@ function canCreateProject(req, res, next){
 	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
-		hasWriteAccessToProject(req, res, next);
+		responseCodes.respond("Middleware: check has access to account", req, res, next, responseCodes.NOT_AUTHORIZED , null, {});
 	}
 }
 
@@ -294,15 +296,35 @@ function isAccountAdmin(req, res, next){
 
 	let username = req.session.user.username;
 	let account = req.params.account;
+	let foundAdminRole;
 
 	User.findByUserName(username).then(user => {
 
+
+		let findPromises = [];
+
 		if(!user){
 			return Promise.reject();
-		} else if(!user.hasRole(account, 'admin')){
-			return Promise.reject();
-		} else {
+		}
+
+		user.roles.forEach(role => {
+			if (role.db === account){
+				findPromises.push(
+					Role.findByRoleID(`${account}.${role.role}`).then(detailRole => {
+						foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite');
+					})
+				);
+			}
+		});
+
+		return Promise.all(findPromises);
+
+	}).then(() => {
+		
+		if(foundAdminRole){
 			next();
+		} else {
+			return Promise.reject();
 		}
 
 	}).catch(() => {

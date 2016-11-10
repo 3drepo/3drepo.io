@@ -122,7 +122,6 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			console.log(data);
 			issue.updateAttrs(data);
 			action = issue.save();
 		}

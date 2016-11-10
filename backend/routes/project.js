@@ -74,7 +74,7 @@ router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessT
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
-router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
+router.post('/:project/upload', middlewares.connectQueue, middlewares.hasWriteAccessToProject, uploadProject);
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
@@ -83,6 +83,8 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
 router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
+
+router.get('/:project/testadmin', middlewares.isAccountAdmin);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){

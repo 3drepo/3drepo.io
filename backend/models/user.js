@@ -1461,22 +1461,6 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 	});
 };
 
-schema.methods.hasRole = function(db, roleName){
-	'use strict';
-
-	let roleLen = this.roles.length;
-
-	for(let i=0; i < roleLen; i++){
-
-		let role = this.roles[i];
-
-		if(role.role === roleName && role.db === db){
-			return role;
-		}
-	}
-
-	return null;
-};
 
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
