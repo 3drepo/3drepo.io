@@ -47,7 +47,7 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
+router.put('/:project/settings', middlewares.isAccountAdmin, updateSettings);
 
 router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
 
@@ -74,7 +74,7 @@ router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessT
 
 router.delete('/:project', middlewares.isAccountAdmin, deleteProject);
 
-router.post('/:project/upload', middlewares.connectQueue, middlewares.hasWriteAccessToProject, uploadProject);
+router.post('/:project/upload', middlewares.hasWriteAccessToProject, middlewares.connectQueue, uploadProject);
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
@@ -287,7 +287,6 @@ function deleteProject(req, res, next){
 
 function uploadProject(req, res, next){
 	'use strict';
-
 	let responsePlace = utils.APIInfo(req);
 
 	//check space

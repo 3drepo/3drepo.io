@@ -32,23 +32,23 @@ router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, get
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
