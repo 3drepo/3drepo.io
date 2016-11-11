@@ -12073,7 +12073,7 @@ function NotificationService(serverConfig){
 		console.log('Chat server settings missing');
 	}
 
-	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath});
+	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath, transports: ['websocket']});
 	var joined = [];
 
 	socket.on('reconnect', function(){

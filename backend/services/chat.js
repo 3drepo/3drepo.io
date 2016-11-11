@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports.createApp = function (http, serverConfig){
+module.exports.createApp = function (server, serverConfig){
 	"use strict";
+
+	//let app = require('express');
+	//var server = require('http').Server(app);
 
 	let config = require('../config');
 	let session = require('./session').session(config);
@@ -25,14 +28,15 @@ module.exports.createApp = function (http, serverConfig){
 	let middlewares = require('../routes/middlewares');
 	let systemLogger = log_iface.systemLogger;
 
-	let io = require("socket.io")(http, { path: serverConfig.chat_path });
+	//console.log(serverConfig);
+	let io = require("socket.io")(server, { path: '/' + serverConfig.subdirectory });
 	let sharedSession = require("express-socket.io-session");
 
 	io.use((socket, next) => {
 		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
 			socket.handshake.headers.cookie = 'connect.sid=' + socket.handshake.query['connect.sid'] + '; '; 
 		}
-		console.log(socket.handshake.headers.cookie);
+		//console.log(socket.handshake.headers.cookie);
 
 		next();
 	});
@@ -139,4 +143,6 @@ module.exports.createApp = function (http, serverConfig){
 		});
 
 	}
+
+	//return app;
 };
