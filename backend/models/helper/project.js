@@ -920,24 +920,34 @@ function downloadLatest(account, project){
 	});
 }
 
-function getRolesForProject(account, project){
+function getRolesForProject(account, project, removeViewer){
 	'use strict';
 
 	return Role.find({ account: 'admin'}, {
-		'privileges' : {
-			'$elemMatch': {
-				'resource.db': account, 
-				'resource.collection': `${project}.history`,
-				'actions': 'find'
+		'$or': [{
+			'privileges' : {
+				'$elemMatch': {
+					'resource.db': account, 
+					'resource.collection': `${project}.history`,
+					'actions': 'find'
+				}
 			}
-		}
+		},{ 
+			'roles': {
+				'$elemMatch': {
+					"role" : "readWrite",
+					"db" : account
+				}
+			}
+		}]
+
 	}).then(roles => {
 
 		for(let i = roles.length - 1; i >= 0; i--){
 
-			console.log(Role.determineRole(account, project, roles[i]));
+			//console.log(Role.determineRole(account, project, roles[i]));
 
-			if (Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
+			if (removeViewer && Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
 				roles.splice(i, 1);
 			}
 		}
@@ -962,8 +972,6 @@ function getUserRolesForProject(account, project, username){
 		let userRolesForProject = user.roles.filter(userRole => {
 
 			return projectRoles.find(projectRole => { 
-
-				projectRole = projectRole.toObject();
 				return projectRole.db === userRole.db && projectRole.role === userRole.role;
 			});
 

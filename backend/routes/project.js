@@ -640,7 +640,9 @@ function getUserRolesForProject(req, res, next){
 
 function getRolesForProject(req, res, next){
 	'use strict';
-	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(role => {
+	let removeViewer = true;
+	
+	ProjectHelpers.getRolesForProject(req.params.account, req.params.project, removeViewer).then(role => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

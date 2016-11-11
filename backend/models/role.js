@@ -13,6 +13,7 @@ var schema = mongoose.Schema({
 });
 
 var roleEnum = {
+	'ADMIN': 'admin',
 	'VIEWER': 'viewer',
 	'COLLABORATOR': 'collaborator',
 	'COMMENTER': 'commenter'
@@ -143,7 +144,9 @@ schema.statics.determineRole = function(db, project, role){
 
 	if(role.privileges){
 
-		if(findPriv({history: [ "find", "insert"], issue: [ "find", "insert", "update"]})){
+		if(role.roles && role.roles.find(r => r.role === 'readWrite' && r.db === db)){
+			return roleEnum.ADMIN;
+		} else if(findPriv({history: [ "find", "insert"], issue: [ "find", "insert", "update"]})){
 			return roleEnum.COLLABORATOR;
 		} else if (findPriv({history: [ "find"], issue: ["find", "insert", "update" ]})){
 			return roleEnum.COMMENTER;

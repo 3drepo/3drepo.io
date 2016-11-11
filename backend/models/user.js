@@ -24,7 +24,6 @@ var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
 var Billing = require('./billing');
-var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
@@ -35,6 +34,7 @@ var config = require('../config');
 var vat = require('./vat');
 var Counter = require('./counter');
 var addressMeta = require('./addressMeta');
+var ProjectSetting = require('./projectSetting');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -497,12 +497,11 @@ schema.methods.listAccounts = function(){
 
 	let accounts = [];
 
-	this.roles.forEach(role => {
-		console.log(role);
-		if(role.role === 'admin'){
-			accounts.push({ account: role.db, projects: [], fedProjects: [] });
-		}
-	});
+	// this.roles.forEach(role => {
+	// 	if(role.role === 'admin'){
+	// 		accounts.push({ account: role.db, projects: [], fedProjects: [] });
+	// 	}
+	// });
 
 	//backward compatibility, user has access to database with the name same as their username
 	// if(!_.find(accounts, account => account.account === this.user)){
@@ -619,23 +618,51 @@ schema.methods.listProjects = function(options){
 		// when seeing if a project is viewable
 		let filterCollectionType = "history";
 		let projects = [];
+		let promises = [];
 
 		for(var i = 0; i < privs.length; i++){
+
+
 			if (privs[i].resource.db && privs[i].resource.collection && privs[i].resource.db !== "system"){
 				if (privs[i].resource.collection.substr(-filterCollectionType.length) === filterCollectionType){
 					if (privs[i].actions.indexOf("find") !== -1){
 						var baseCollectionName = privs[i].resource.collection.substr(0, privs[i].resource.collection.length - filterCollectionType.length - 1);
 
-						projects.push({
-							"account" : privs[i].resource.db,
-							"project" : baseCollectionName
-						});
+						//if project not found in the list
+						if(!projects.find(proj => proj.account === privs[i].resource.db && 
+							proj.project === baseCollectionName)){
+							projects.push({
+								"account" : privs[i].resource.db,
+								"project" : baseCollectionName
+							});
+						}
 					}
 				}
+			} else if (privs[i].resource.db && privs[i].resource.collection === "" && privs[i].actions.indexOf("find") !== -1) {
+				// this guy have an at least find permission in every collection in this db, let's list all the projects
+				((i) => {
+					promises.push(
+						ProjectSetting.find({account: privs[i].resource.db}).then(settings => {
+							settings.forEach(setting => {
+								
+								//if project not found in the list
+								if(!projects.find(proj => proj.account === privs[i].resource.db && 
+									proj.project === setting._id)){
+
+									projects.push({
+										"account" : privs[i].resource.db,
+										"project" : setting._id
+									});
+								}
+
+							});
+						})
+					);
+				})(i);
 			}
 		}
 
-		return Promise.resolve(projects);
+		return Promise.all(promises).then(() => projects);
 
 	}).then(projects => {
 
@@ -674,7 +701,7 @@ schema.methods.listProjects = function(options){
 
 		projects.forEach((project, index) => {
 			promises.push(
-				projectSetting.findById(project, project.project).then(setting => {
+				ProjectSetting.findById(project, project.project).then(setting => {
 
 					if(setting){
 						projects[index].status = setting.status;
@@ -1482,7 +1509,7 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	}
 
 	//check if they are a collaborator
-	return projectSetting.find({ account: this.user }, {}).then(projects => {
+	return ProjectSetting.find({ account: this.user }, {}).then(projects => {
 
 		let foundProjects = [];
 		projects.forEach(project => {

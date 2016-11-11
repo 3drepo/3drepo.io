@@ -62,8 +62,8 @@ describe('Issues', function () {
 			"clippingPlanes":[]
 		},
 		"scale":1,
-		"creator_role":"testproject.collaborator",
-		"assigned_roles":["testproject.collaborator"],
+		"creator_role":"project1.collaborator",
+		"assigned_roles":["project1.collaborator"],
 	};
 
 	let bcf = {
@@ -564,6 +564,33 @@ describe('Issues', function () {
 			], done);
 		});
 
+
+		it('user with different role try to close an issue should fail', function(done){
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'abcdef.123456'});
+			let issueId;
+			let close = { status: 'closed'};
+			async.series([
+				function(done){
+					agent.post(`/${username}/${project}/issues.json`)
+					.send(issue)
+					.expect(200 , function(err, res){
+						issueId = res.body._id;
+						return done(err);
+						
+					});
+				},
+				function(done){
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(close)
+					.expect(400, function(err, res){
+						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+						done(err);
+					});
+				},
+
+			], done);
+		});
 
 		// it('change or commenting should fail if status is closed', function(done){
 
