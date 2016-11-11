@@ -629,7 +629,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			let cleaned = issue.clean(settings.type);
 			
-			ChatEvent.newIssues(data.owner, dbColOptions.account, dbColOptions.project, [cleaned]);
+			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
 
 			return Promise.resolve(cleaned);
 		});
@@ -779,7 +779,7 @@ schema.methods.updateAttrs = function(data){
 	}).then(settings => {
 
 		let issue = this.clean(settings.type);
-		ChatEvent.issueChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
+		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
 
 		return this;
 	});
@@ -852,7 +852,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 			let eventData = comment;
 
-			ChatEvent.newComment(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
 			return comment;
 		});
 
@@ -882,7 +882,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
 			let eventData = comment;
 
-			ChatEvent.commentChanged(data.requester, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			ChatEvent.commentChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
 			return comment;
 		});
 	}
@@ -914,7 +914,7 @@ schema.methods.removeComment = function(commentIndex, data){
 
 		let issue = this.clean();
 		ChatEvent.commentDeleted(
-			data.requester, 
+			data.sessionId, 
 			this._dbcolOptions.account, 
 			this._dbcolOptions.project, 
 			issue._id, comment);

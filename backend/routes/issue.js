@@ -56,6 +56,8 @@ function storeIssue(req, res, next){
 	//let data = JSON.parse(req.body.data);
 	let data = req.body;
 	data.owner = req.session.user.username;
+	data.sessionId = req.session.id;
+	
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
@@ -87,6 +89,8 @@ function updateIssue(req, res, next){
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
+	data.sessionId = req.session.id;
+
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
@@ -338,7 +342,7 @@ function importBCF(req, res, next){
 		} else {
 
 
-			Issue.importBCF(req.session.user.username, req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF(req.session.id, req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

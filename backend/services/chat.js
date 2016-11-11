@@ -104,10 +104,10 @@ module.exports.createApp = function (server, serverConfig){
 			}
 
 			let username = socket.handshake.session.user.username;
+			let sessionId =  socket.handshake.session.id;
+			userToSocket[sessionId] = socket;
 
-			userToSocket[username] = socket;
-
-			systemLogger.logInfo(`${username} is in chat`, { username });
+			systemLogger.logInfo(`${username} - ${sessionId} is in chat`, { username });
 
 			socket.on('join', data => {
 				//check permission if the user have permission to join room
@@ -115,13 +115,13 @@ module.exports.createApp = function (server, serverConfig){
 
 					if(hasAccess){
 						socket.join(`${data.account}::${data.project}`);
-						systemLogger.logInfo(`${username} has joined room ${data.account}::${data.project}`, { 
+						systemLogger.logInfo(`${username} - ${sessionId} has joined room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
 						});
 					} else {
-						systemLogger.logError(`${username} has no access to join room ${data.account}::${data.project}`, { 
+						systemLogger.logError(`${username} - ${sessionId} has no access to join room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
@@ -133,7 +133,7 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('leave', data => {
 				socket.leave(`${data.account}::${data.project}`);
-				systemLogger.logInfo(`${username} has left room ${data.account}::${data.project}`, { 
+				systemLogger.logInfo(`${username} - ${sessionId} has left room ${data.account}::${data.project}`, { 
 					username, 
 					account: data.account, 
 					project: data.project 
