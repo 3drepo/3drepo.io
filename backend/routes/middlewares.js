@@ -302,7 +302,7 @@ function isAccountAdmin(req, res, next){
 			if (role.db === account){
 				findPromises.push(
 					Role.findByRoleID(`${account}.${role.role}`).then(detailRole => {
-						foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite');
+						!foundAdminRole && (foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite'));
 					})
 				);
 			}
@@ -312,6 +312,7 @@ function isAccountAdmin(req, res, next){
 
 	}).then(() => {
 
+		console.log('foundAdminRole', foundAdminRole);
 		if(foundAdminRole){
 			next();
 		} else {
