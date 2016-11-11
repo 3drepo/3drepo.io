@@ -26,12 +26,12 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 					label {{$ctrl.data.timeStamp}}
 
 		// Status
-		.issueCompItemContainer#issueCompAdditional(layout="column")
-			div(layout="row", layout-align="start center")
+		.issueCompItemContainer#issueCompAdditional(layout="row", layout-align="start")
+			div
 				md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle", ng-click="$ctrl.toggleShowAdditional()")
-					md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") keyboard_arrow_right
-					md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") keyboard_arrow_down
-			div(layout="column", ng-if="$ctrl.showAdditional")
+					md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") add_circle_outline
+					md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") remove_circle_outline
+			div(layout="column", ng-if="$ctrl.showAdditional", layout-fill)
 				div(layout="row")
 					md-input-container.issueCompItemStatus(flex)
 						label Priority
@@ -146,7 +146,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 	md-divider
 
 	// Footer
-	.issueCompItemContainer(layout="row", layout-align="space-between center")
+	.issueCompItemContainer#issueCompFooterButtons(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
 			ng-repeat="(action, actionData) in $ctrl.actions"

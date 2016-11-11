@@ -1648,6 +1648,8 @@ issues-list #issuesListItemEnter md-icon {
 issues-list .issueListItemThumbnail {
   margin-right: 10px;
   height: 120px;
+  width: 120px;
+  background: rgba(0, 69, 148, 0.2);
 }
 
 issues-list #issuesListContainer {
@@ -1659,6 +1661,13 @@ issues-list #issuesListContainer {
   border: 1px solid rgba(0, 69, 148, 0.3);
   margin-left: -4px;
   padding-left: 4px;
+}
+
+issues-list-item .issueListItemMissingThumbnail {
+  font-size: 50px;
+  width: 50px;
+  height: 50px;
+  opacity: 0.3;
 }
 
 /** Issue Comp ********************************************************************************************************/
@@ -1680,10 +1689,6 @@ issue-comp #issueCompTitle {
 
 issue-comp #issueCompStatus {
   margin: 0 0 10px;
-}
-
-issue-comp textarea {
-  min-height: 70px !important;
 }
 
 issue-comp .issueCompItemStatus {
@@ -1747,20 +1752,26 @@ issue-comp #issueCompDescription *:hover {
 }
 
 issue-comp #additionalInfoButton {
-  margin: 0 0 0 -8px;
+  margin: 0 5px 0 -8px;
 }
 
 issue-comp #issueCompAdditional {
   margin-top: -20px;
 }
 
-issue-comp #issueCompNewComment {
+issue-comp #issueCompNewComment md-input-container {
+  margin-bottom: -10px;
 }
 
 issue-comp #descriptionAndComments {
   overflow-y:auto;
   overflow-x:hidden;
   background: #f0f0f0;
+}
+
+issue-comp #issueCompFooterButtons .md-button {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/
