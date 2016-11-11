@@ -70,7 +70,7 @@ function getAccessToProject(username, account, project){
 }
 
 function hasReadAccessToProjectHelper(username, account, project){
-	return hasAccessToProjectHelper(username, account, project, WRITE_BIT);
+	return hasAccessToProjectHelper(username, account, project, READ_BIT);
 }
 
 function hasAccessToProjectHelper(username, account, project, permissionBit){
