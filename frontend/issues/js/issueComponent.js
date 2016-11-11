@@ -36,14 +36,15 @@
 					contentHeight: "&",
 					selectedObjects: "<",
 					setInitialSelectedObjects: "&",
-					userRoles: "<"
+					userRoles: "<",
+					availableRoles: "<"
 				}
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
 
-	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -54,7 +55,8 @@
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 
 		/*
 		 * Init
@@ -76,11 +78,11 @@
 		this.statuses = [
 			{value: "open", label: "Open"},
 			{value: "in progress", label: "In progress"},
+			{value: "for approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
 		];
 		this.actions = {
@@ -119,11 +121,20 @@
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
+						assigned_roles: [this.userRoles[0]],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -159,10 +170,23 @@
 				}
 			}
 
+			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
+			}
+
+			// Role
+			if (changes.hasOwnProperty("availableRoles")) {
+				console.log(this.availableRoles);
+				this.projectRoles = this.availableRoles.map(function (availableRole) {
+					/*
+					// Get the actual role and return the last part of it
+					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
+					*/
+					return availableRole.role;
+				});
 			}
 		};
 
@@ -216,10 +240,24 @@
 		 * Handle status change
 		 */
 		this.statusChange = function () {
+			var data;
+
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
+			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
+				data = {
+					priority: self.issueData.priority,
+					status: self.issueData.status,
+					topic_type: self.issueData.topic_type,
+					assigned_roles: self.issueData.assigned_roles
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (response) {
+						console.log(response);
+						self.issueData.status = response.data.issue.status;
+						IssuesService.updatedIssue = self.issueData;
+					});
 			}
 		};
 
@@ -666,13 +704,24 @@
 			};
 		}
 
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+		}
+
+		/**
+		 * Set the content height
+		 */
 		function setContentHeight() {
 			var i, length,
 				newIssueHeight = 425,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 70,
+				additionalInfoHeight = 140,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;
