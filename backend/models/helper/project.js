@@ -76,9 +76,8 @@ function convertToErrorCode(errCode){
 }
 
 
-function createAndAssignRole(project, account, username, desc, type, unit, subProjects, federate) {
+function createAndAssignRole(project, account, username, data) {
 	'use strict';
-
 
 	if(project.length > 60){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
@@ -89,7 +88,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	}
 
 
-	if(!unit){
+	if(!data.unit){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
 	}
 
@@ -104,7 +103,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
 		}
 
-		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
+		return (data.federate ? createFederatedProject(account, project, data.subProjects) : Promise.resolve());
 
 	}).then(() => {
 
@@ -147,11 +146,14 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 
 		setting._id = project;
 		setting.owner = username;
-		setting.desc = desc;
-		setting.type = type;
-		setting.federate = federate;
+		setting.desc = data.desc;
+		setting.type = data.type;
+		setting.federate = data.federate;
+
 		setting.updateProperties({
-			unit
+			unit: data.unit,
+			code: data.code,
+			topicTypes: data.topicTypes
 		});
 
 		return setting.save();
@@ -291,7 +293,11 @@ function importToyProject(username){
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
+	let data = {
+		desc, type, unit: 'm'
+	};
+	
+	return createAndAssignRole(project, account, username, data).then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
 

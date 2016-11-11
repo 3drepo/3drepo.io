@@ -219,7 +219,17 @@ function createProject(req, res, next){
 		federate = true;
 	}
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.unit, req.body.subProjects, federate).then(() => {
+	let data = {
+		desc: req.body.desc, 
+		type: req.body.type, 
+		unit: req.body.unit, 
+		subProjects: req.body.subProjects, 
+		federate: federate,
+		code: req.body.code,
+		topicTypes: req.body.topicTypes
+	};
+
+	createAndAssignRole(project, account, username, data).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -641,7 +651,7 @@ function getUserRolesForProject(req, res, next){
 function getRolesForProject(req, res, next){
 	'use strict';
 	let removeViewer = true;
-	
+
 	ProjectHelpers.getRolesForProject(req.params.account, req.params.project, removeViewer).then(role => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
 	}).catch(err => {
