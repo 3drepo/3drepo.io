@@ -1593,6 +1593,26 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 
 };
 
+schema.methods.getPrivileges = function(){
+	'use strict';
+
+	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
+	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
+
+
+		let privs = [];
+		if (docs && docs.roles.length) {
+			let rolesArr = docs.roles;
+			for (let i = 0; i < rolesArr.length; i++) {
+				privs = privs.concat(rolesArr[i].inheritedPrivileges);
+			}
+		}
+
+		return Promise.resolve(privs);
+	});
+
+};
+
 var User = ModelFactory.createClass(
 	'User',
 	schema,
