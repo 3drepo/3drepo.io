@@ -68,7 +68,14 @@ var schema = mongoose.Schema({
 
 });
 
-schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
+
+schema.statics.defaultTopicTypes = ['For information', 'VR'];
+
+schema.path('properties.topicTypes').get(function(v) {
+	return v.length === 0 ? schema.statics.defaultTopicTypes : v;
+});
+
+schema.set('toObject', { getters: true });
 
 schema.methods.updateProperties = function(updateObj){
 	'use strict';

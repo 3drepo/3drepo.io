@@ -156,7 +156,7 @@ function createAndAssignRole(project, account, username, data) {
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
-			topicTypes: data.topicTypes
+			topicTypes: ProjectSetting.defaultTopicTypes
 		});
 
 		return setting.save();

@@ -12574,7 +12574,7 @@ angular.module('3drepo')
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
-				assigned_roles: [],
+				assigned_roles: self.issueData.assigned_roles,
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,

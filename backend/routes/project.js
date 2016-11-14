@@ -196,6 +196,8 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
+		setting = setting.toObject();
+		
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
 
