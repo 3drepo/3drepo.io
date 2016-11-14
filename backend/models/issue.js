@@ -1069,10 +1069,10 @@ schema.methods.generateCommentsGUID = function(){
 	'use strict';
 
 	this.comments.forEach(comment => {
-		if(!comment.guid){
+		if(!comment.guid && !isSystemComment(comment)){
 			comment.guid = utils.generateUUID();
 		}
-		if(!comment.viewpoint){
+		if(!comment.viewpoint && !isSystemComment(comment)){
 			comment.viewpoint = this.viewpoint.guid;
 		}
 	});
@@ -1143,6 +1143,10 @@ schema.methods.getBCFMarkup = function(unit){
 	
 	//add comments
 	this.comments.forEach(comment => {
+
+		if(isSystemComment(comment)){
+			return;
+		}
 
 		let commentXmlObj = {
 			'@':{
