@@ -45,7 +45,10 @@ var schema = mongoose.Schema({
 			y: Number
 		},
 		code: String,
-		topicTypes: [String]
+		topicTypes: [{
+			value: String,
+			label: String
+		}]
 
 	},
 	//bid_4_free only fields
@@ -69,7 +72,10 @@ var schema = mongoose.Schema({
 });
 
 
-schema.statics.defaultTopicTypes = ['For information', 'VR'];
+schema.statics.defaultTopicTypes = [
+	{value: "for_information", label: "For information"},
+	{value: "vr", label: "VR"}
+];
 
 schema.path('properties.topicTypes').get(function(v) {
 	return v.length === 0 ? schema.statics.defaultTopicTypes : v;
