@@ -25,29 +25,30 @@ var Issue = require('../models/issue');
 var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
+var ProjectHelpers = require('../models/helper/project');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -90,8 +91,12 @@ function updateIssue(req, res, next){
 	let issueId = req.params.issueId;
 	let action;
 
+	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username).then(roles => {
+		
+		data.owner_roles = roles;
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
 
-	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
+	}).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
