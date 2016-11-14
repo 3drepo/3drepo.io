@@ -744,7 +744,7 @@
 				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
 					}
 				}
