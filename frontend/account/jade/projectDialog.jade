@@ -10,6 +10,10 @@ md-dialog.newProjectDialog(aria-label="New project")
 			md-input-container
 				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)")
 				.inputHint Letters, numbers and underscore only
+			
+			md-input-container
+				input(placeholder="Project Code (Optional)", ng-model="vm.newProjectData.code")
+
 			md-input-container
 				label Project type
 				md-select(ng-model="vm.newProjectData.type")
