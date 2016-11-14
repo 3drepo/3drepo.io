@@ -123,7 +123,7 @@
 				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
 				unit: projectData.unit
 			};
-			return doPost(data, projectData.account + "/" + projectData.name);
+			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
 		};
 
 		/**
