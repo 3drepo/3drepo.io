@@ -471,46 +471,18 @@ schema.statics.revokeRolesFromUser = function(username, db, role){
 	return ModelFactory.db.admin().command(cmd);
 };
 
-// list project readable by this user
-schema.methods.getPrivileges = function(){
-	'use strict';
-
-	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
-	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
-
-
-		let privs = [];
-		if (docs && docs.roles.length) {
-			let rolesArr = docs.roles;
-			for (let i = 0; i < rolesArr.length; i++) {
-				privs = privs.concat(rolesArr[i].inheritedPrivileges);
-			}
-		}
-
-		return Promise.resolve(privs);
-	});
-
-};
 
 schema.methods.listAccounts = function(){
 	'use strict';
 
 	let accounts = [];
 
-	// this.roles.forEach(role => {
-	// 	if(role.role === 'admin'){
-	// 		accounts.push({ account: role.db, projects: [], fedProjects: [] });
-	// 	}
-	// });
-
-	//backward compatibility, user has access to database with the name same as their username
-	// if(!_.find(accounts, account => account.account === this.user)){
-	// 	accounts.push({ account: this.user, projects: [], fedProjects: [] });
-	// }
-	
 	// group projects by accounts
-	return this.listProjects().then(projects => {
+	return this.listProjectsAndAccountAdmins().then(data => {
 		
+		let projects = data.projects;
+		let adminAccounts = data.adminAccounts;
+
 		projects.forEach(project => {
 
 			let account = _.find(accounts, account => account.account === project.account);
@@ -539,6 +511,7 @@ schema.methods.listAccounts = function(){
 					project: project.project,
 					timestamp: project.timestamp,
 					status: project.status,
+					roleFunctions: project.roleFunctions,
 					subProjects: project.subProjects
 				});
 			}
@@ -546,7 +519,22 @@ schema.methods.listAccounts = function(){
 
 		});
 
+		adminAccounts.forEach(account => {
+			let accObj = accounts.find(_account => _account.account === account);
+			if(accObj){
+				accObj.isAdmin = true;
+			} else {
+				accounts.push({
+					account: account,
+					projects: [],
+					fedProjects: [],
+					isAdmin: true
+				});
+			}
+		});
+
 		let getQuotaPromises = [];
+
 		accounts.forEach(account => {
 			account.projects.sort((a, b) => {
 				if(a.timestamp < b.timestamp){
@@ -582,7 +570,6 @@ schema.methods.listAccounts = function(){
 
 		});
 
-
 		accounts.sort((a, b) => {
 			if (a.account.toLowerCase() < b.account.toLowerCase()){
 				return -1;
@@ -607,62 +594,83 @@ schema.methods.listAccounts = function(){
 	});
 };
 
-schema.methods.listProjects = function(options){
+schema.methods.listProjectsAndAccountAdmins = function(options){
 	'use strict';
 
 	var ProjectHelper = require('./helper/project');
+	let adminAccounts = [];
+	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
+	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
 
-	return this.getPrivileges().then(privs => {
-
-		// This is the collection that we check for
-		// when seeing if a project is viewable
-		let filterCollectionType = "history";
-		let projects = [];
+		let projects = {};
 		let promises = [];
 
-		for(var i = 0; i < privs.length; i++){
+		function getProjectName(privileges){
+			
+			let collectionSuffix = '.history';
 
-
-			if (privs[i].resource.db && privs[i].resource.collection && privs[i].resource.db !== "system"){
-				if (privs[i].resource.collection.substr(-filterCollectionType.length) === filterCollectionType){
-					if (privs[i].actions.indexOf("find") !== -1){
-						var baseCollectionName = privs[i].resource.collection.substr(0, privs[i].resource.collection.length - filterCollectionType.length - 1);
-
-						//if project not found in the list
-						if(!projects.find(proj => proj.account === privs[i].resource.db && 
-							proj.project === baseCollectionName)){
-							projects.push({
-								"account" : privs[i].resource.db,
-								"project" : baseCollectionName
-							});
-						}
-					}
+			for(let i=0 ; i < privileges.length ; i++){
+				let collectionName = privileges[i].resource.collection;
+				if(collectionName.endsWith(collectionSuffix)){
+					return collectionName.substr(0, collectionName.length - collectionSuffix.length);
 				}
-			} else if (privs[i].resource.db && privs[i].resource.collection === "" && privs[i].actions.indexOf("find") !== -1) {
-				// this guy have an at least find permission in every collection in this db, let's list all the projects
-				((i) => {
-					promises.push(
-						ProjectSetting.find({account: privs[i].resource.db}).then(settings => {
-							settings.forEach(setting => {
-								
-								//if project not found in the list
-								if(!projects.find(proj => proj.account === privs[i].resource.db && 
-									proj.project === setting._id)){
-
-									projects.push({
-										"account" : privs[i].resource.db,
-										"project" : setting._id
-									});
-								}
-
-							});
-						})
-					);
-				})(i);
 			}
 		}
 
-		return Promise.all(promises).then(() => projects);
+		function addToProjectList(account, project, role){
+			//if project not found in the list
+			if(!projects[`${account}.${project}`]){
+				projects[`${account}.${project}`] = {
+					project,
+					account,
+					roleFunctions: [role]
+				};
+			} else {
+				projects[`${account}.${project}`].roleFunctions.push(role);
+			}
+		}
+
+		let privs = [];
+		if (docs && docs.roles.length) {
+			let rolesArr = docs.roles;
+			for (let i = 0; i < rolesArr.length; i++) {
+				privs = privs.concat(rolesArr[i].inheritedPrivileges);
+			}
+		}
+
+		docs.roles.forEach(role => {
+			
+			if(role.inheritedRoles.find(_role => _role.role === 'readWrite')){
+				// admin role list all projects on that db
+				adminAccounts.push(role.db);
+				promises.push(
+					ProjectSetting.find({account: role.db}).then(settings => {
+						settings.forEach(setting => {
+						
+							let projectName = setting._id;
+							addToProjectList(role.db, projectName, Role.roleEnum.ADMIN);
+
+						});
+					})
+				);
+
+			} else {
+
+				let projectName = getProjectName(role.privileges);
+				let roleFunction;
+
+				if(projectName){
+					roleFunction = Role.determineRole(role.db, projectName, role);
+				}
+
+				if(roleFunction){
+					addToProjectList(role.db, projectName, roleFunction);
+				}
+
+			}
+		});
+
+		return Promise.all(promises).then(() => _.values(projects));
 
 	}).then(projects => {
 
@@ -729,7 +737,7 @@ schema.methods.listProjects = function(options){
 			);
 		});
 
-		return Promise.all(promises).then(() => Promise.resolve(projects));
+		return Promise.all(promises).then(() => Promise.resolve({projects, adminAccounts}));
 	});
 };
 
