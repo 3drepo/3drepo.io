@@ -71,6 +71,8 @@
 					vm.projectType = response.data.type;
 				}
 
+				response.data.properties.code && (vm.code = response.data.properties.code);
+
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
 				vm.oldUnit = vm.unit;
 
@@ -85,7 +87,8 @@
 
 			var data = {
 				mapTile: vm.mapTile,
-				unit: vm.unit
+				unit: vm.unit,
+				code: vm.code
 			};
 
 			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")

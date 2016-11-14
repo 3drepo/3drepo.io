@@ -101,8 +101,14 @@ function updateSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+
+		if(req.body.code && !ProjectHelpers.projectCodeRegExp.test(req.body.code)) {
+			return Promise.reject(responseCodes.INVALID_PROJECT_CODE);
+		}
+
 		projectSetting.updateProperties(req.body);
 		return projectSetting.save();
+
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {

@@ -21,6 +21,12 @@
 
 			div(layout="row")
 				md-input-container(flex)
+					label Project code
+					input(type="text", ng-model="vm.code", maxlength=5)
+				md-input-container(flex)
+
+			div(layout="row")
+				md-input-container(flex)
 					label Latitude
 					input(type="text", ng-model="vm.mapTile.lat")
 				md-input-container(flex)

@@ -87,6 +87,9 @@ function createAndAssignRole(project, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+	if(data.code && !projectCodeRegExp.test(data.code)){
+		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_CODE });
+	}
 
 	if(!data.unit){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
@@ -1004,6 +1007,7 @@ function getUserRolesForProject(account, project, username){
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var projectCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 var acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -1028,6 +1032,7 @@ module.exports = {
 	downloadLatest,
 	fileNameRegExp,
 	projectNameRegExp,
+	projectCodeRegExp,
 	acceptedFormat,
 	getUserRolesForProject,
 	getRolesForProject

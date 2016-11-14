@@ -7146,7 +7146,7 @@ var ViewerManager = {};
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects (response.data.account, project);
+						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
 					}
 				});
@@ -7372,6 +7372,8 @@ var ViewerManager = {};
 					vm.projectType = response.data.type;
 				}
 
+				response.data.properties.code && (vm.code = response.data.properties.code);
+
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
 				vm.oldUnit = vm.unit;
 
@@ -7386,7 +7388,8 @@ var ViewerManager = {};
 
 			var data = {
 				mapTile: vm.mapTile,
-				unit: vm.unit
+				unit: vm.unit,
+				code: vm.code
 			};
 
 			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
@@ -7579,9 +7582,10 @@ var ViewerManager = {};
 			var data = {
 				desc: "",
 				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
-				unit: projectData.unit
+				unit: projectData.unit,
+				code: projectData.code
 			};
-			return doPost(data, projectData.account + "/" + projectData.name);
+			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
 		};
 
 		/**
@@ -14623,7 +14627,9 @@ angular.module('3drepo')
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;

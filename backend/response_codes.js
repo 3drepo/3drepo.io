@@ -199,6 +199,8 @@ var responseCodes = {
 	ISSUE_SYSTEM_COMMENT: { value: 124, message: "Can't edit or remove system comment", status: 400},
 	ISSUE_UPDATE_PERMISSION_DECLINED: {value: 125, message: "No permission to update issue", status: 400},
 
+	INVALID_PROJECT_CODE: { value: 126, message: 'Project code must contain only alphabets and numerical digits', status: 400},
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 900,

@@ -12,7 +12,7 @@ md-dialog.newProjectDialog(aria-label="New project")
 				.inputHint Letters, numbers and underscore only
 			
 			md-input-container
-				input(placeholder="Project Code (Optional)", ng-model="vm.newProjectData.code")
+				input(placeholder="Project Code (Optional)", ng-model="vm.newProjectData.code", maxlength=5)
 
 			md-input-container
 				label Project type
