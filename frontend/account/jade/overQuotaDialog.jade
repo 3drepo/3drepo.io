@@ -6,7 +6,7 @@ md-dialog#overQuotaDialog(aria-label="Over quota")
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-content(layout-margin)
-		.cardInfo
+		.cardInfo(ng-if="vm.userAccount==vm.account")
 			p You currently do not have enough quota to upload this file.
 			br
 			p
@@ -15,10 +15,15 @@ md-dialog#overQuotaDialog(aria-label="Over quota")
 				a(href="", ng-click="vm.setupAddLicenses()") Billing Page
 				=" "
 				| to add more licenses.
+
+		.cardInfo(ng-if="vm.userAccount!=vm.account")
+			p There is currently not enough quota to upload this file.
+			br
+			p Please contact the admin of {{vm.account}} account.
 		#overQuotaInfo(layout="row", flex="90", layout-align="center center")
 			md-input-container(flex)
 				label Quota available
-				input(type="text", value="{{vm.quota.spaceLimit | formatBytes}}", ng-disabled="true")
+				input(type="text", value="{{vm.accountQuota.spaceLimit | formatBytes}}", ng-disabled="true")
 			md-input-container(flex)
 				label Quota used
-				input(type="text", value="{{vm.quota.spaceUsed | formatBytes}}", ng-disabled="true")
+				input(type="text", value="{{vm.accountQuota.spaceUsed | formatBytes}}", ng-disabled="true")
