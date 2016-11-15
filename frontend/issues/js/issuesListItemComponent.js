@@ -34,7 +34,8 @@
 	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
 
 	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
-		var self = this;
+		var self = this,
+			issueRoleIndicator = null;
 
 		/*
 		 * Init
@@ -45,12 +46,44 @@
 		 * Init callback
 		 */
 		this.$onInit = function () {
-			var assignedRoleColour,
-				issueRoleIndicator;
-
 			// Role indicator
 			$timeout(function () {
 				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
+				setRoleIndicatorColour();
+			});
+		};
+
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
+		this.$onChanges = function (changes) {
+			// Data
+			if (changes.hasOwnProperty("data") && this.data) {
+				setRoleIndicatorColour();
+
+				// Title
+				if (this.userRoles) {
+					this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
+				}
+			}
+
+			// User roles
+			if (changes.hasOwnProperty("userRoles") && this.userRoles) {
+				// Title
+				if (this.data) {
+					this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
+				}
+			}
+		};
+
+		/**
+		 * Set role indicator colour
+		 */
+		function setRoleIndicatorColour () {
+			var assignedRoleColour;
+
+			if (self.data && issueRoleIndicator) {
 				if (self.data.assigned_roles.length > 0) {
 					assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
 				}
@@ -58,10 +91,7 @@
 					assignedRoleColour = IssuesService.getRoleColor(self.data.creator_role);
 				}
 				issueRoleIndicator.css("background", assignedRoleColour);
-			});
-
-			// Title
-			this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
-		};
+			}
+		}
 	}
 }());
