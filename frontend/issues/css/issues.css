@@ -325,6 +325,10 @@ issue-comp #descriptionAndComments {
   background: #f0f0f0;
 }
 
+issue-comp #issueRoleIndicator {
+  margin-left: 7px;
+}
+
 /** Issue Screen Shot  ************************************************************************************************/
 #issueScreenShotDialog {
   width:80%;
