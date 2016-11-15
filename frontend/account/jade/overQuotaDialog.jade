@@ -23,7 +23,7 @@ md-dialog#overQuotaDialog(aria-label="Over quota")
 		#overQuotaInfo(layout="row", flex="90", layout-align="center center")
 			md-input-container(flex)
 				label Quota available
-				input(type="text", value="{{vm.accountQuota.spaceLimit | formatBytes}}", ng-disabled="true")
+				input(type="text", value="{{vm.targetAccountQuota.spaceLimit | formatBytes}}", ng-disabled="true")
 			md-input-container(flex)
 				label Quota used
-				input(type="text", value="{{vm.accountQuota.spaceUsed | formatBytes}}", ng-disabled="true")
+				input(type="text", value="{{vm.targetAccountQuota.spaceUsed | formatBytes}}", ng-disabled="true")

@@ -6572,7 +6572,6 @@ var ViewerManager = {};
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
-				accountQuota: "=",
 				subscriptions: "="
 			},
 			controller: AccountProjectCtrl,
@@ -6771,12 +6770,18 @@ var ViewerManager = {};
 			var promise,
 				formData;
 
-			console.log('accountQuota', vm.accountQuota);
 			// Check the quota
-			//promise = UtilsService.doGet(vm.account + ".json");
-			promise = Promise.resolve(vm.accountQuota);
+			promise = UtilsService.doGet(vm.userAccount + ".json");
 
-			promise.then(function (quota) {
+			promise.then(function (response) {
+
+				var targetAccount = response.data.accounts.find(function(account){
+					return account.account === vm.account;
+				});
+
+				var quota = targetAccount.quota;
+				vm.targetAccountQuota = quota;
+
 				if (file.size > (quota.spaceLimit - quota.spaceUsed)) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
