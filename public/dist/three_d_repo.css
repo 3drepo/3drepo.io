@@ -1521,7 +1521,7 @@ issues .importBCFLoading {
 
 issues #issueRoleIndicator {
   width: 8px;
-  border: 1px solid #999;
+  border: 1px solid #DDDDDD;
   margin-right: 10px;
 }
 
