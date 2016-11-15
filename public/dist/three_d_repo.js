@@ -6572,6 +6572,7 @@ var ViewerManager = {};
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
+				isAccountAdmin: "=",
 				subscriptions: "="
 			},
 			controller: AccountProjectCtrl,
@@ -6597,6 +6598,22 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
+
+		function checkProjectPermission(action){
+			if(action === 'upload'){
+				
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
+
+			} else if (action === 'download') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1
+				|| vm.project.roleFunctions.indexOf('commenter');
+			} else if (action === 'delete' || action === 'projectsetting') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1;
+			}
+		}
+
 		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
@@ -6607,15 +6624,15 @@ var ViewerManager = {};
 		vm.project.canUpload = true;
 		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !checkProjectPermission('upload')},
 			team: {label: "Team", icon: "group", hidden: !isUserAccount},
 			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
-			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
+			projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission('projectsetting')}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
 		}
-		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
 
 		checkFileUploading();
 
@@ -6662,8 +6679,8 @@ var ViewerManager = {};
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "projectsetting":
-					console.log('Settings clicked');
 					$location.search("proj", vm.project.name);
+					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
 					break;
 
@@ -6688,7 +6705,7 @@ var ViewerManager = {};
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project});
+					vm.onSetupDeleteProject({event: event, project: vm.project, account: vm.account});
 					break;
 
 				case "revision":
@@ -7221,12 +7238,13 @@ var ViewerManager = {};
 		 * @param {Object} event
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (event, project) {
+		vm.setupDeleteProject = function (event, project, account) {
 			vm.projectToDelete = project;
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Project";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.projectToDelete.name;
+			vm.targetAccountToDeleteProject = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
@@ -7236,7 +7254,7 @@ var ViewerManager = {};
 		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteProject + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list
@@ -7360,6 +7378,8 @@ var ViewerManager = {};
 
 		vm.goBack = function () {
 			$location.search("project", null);
+			$location.search("targetAcct", null);
+
 			vm.showPage({page: "repos"});
 		};
 
@@ -7367,9 +7387,9 @@ var ViewerManager = {};
 
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
+		vm.targetAcct = $location.search().targetAcct;
 
-
-		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		UtilsService.doGet(vm.targetAcct + "/" + vm.projectName + ".json")
 		.then(function (response) {
 
 			if (response.status === 200 && response.data.properties) {
@@ -7399,7 +7419,7 @@ var ViewerManager = {};
 				unit: vm.unit
 			};
 
-			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.projectName +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';

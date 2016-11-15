@@ -34,6 +34,7 @@
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
+				isAccountAdmin: "=",
 				subscriptions: "="
 			},
 			controller: AccountProjectCtrl,
@@ -59,6 +60,22 @@
 			dialogCloseToId;
 
 		// Init
+
+		function checkProjectPermission(action){
+			if(action === 'upload'){
+				
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
+
+			} else if (action === 'download') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1
+				|| vm.project.roleFunctions.indexOf('commenter');
+			} else if (action === 'delete' || action === 'projectsetting') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1;
+			}
+		}
+
 		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
@@ -69,15 +86,15 @@
 		vm.project.canUpload = true;
 		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !checkProjectPermission('upload')},
 			team: {label: "Team", icon: "group", hidden: !isUserAccount},
 			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
-			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
+			projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission('projectsetting')}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
 		}
-		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
 
 		checkFileUploading();
 
@@ -124,8 +141,8 @@
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "projectsetting":
-					console.log('Settings clicked');
 					$location.search("proj", vm.project.name);
+					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
 					break;
 
@@ -150,7 +167,7 @@
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project});
+					vm.onSetupDeleteProject({event: event, project: vm.project, account: vm.account});
 					break;
 
 				case "revision":
