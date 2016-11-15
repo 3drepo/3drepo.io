@@ -79,11 +79,9 @@ issues .importBCFLoading {
 }
 
 issues #issueRoleIndicator {
-  height: 4px;
-  width: 120px;
-  background: #999999;
-  margin-bottom: 10px;
-  border-radius: 2px;
+  width: 8px;
+  border: 1px solid #999;
+  margin-right: 10px;
 }
 
 /** Issue *************************************************************************************************************/
@@ -233,12 +231,17 @@ issue-comp .issueCompItemContainer div {
   outline: none;
 }
 
+issue-comp #issueCompTitleInput {
+  margin-bottom: -8px;
+  height: 40px;
+}
+
 issue-comp #issueCompTitle {
-  margin-bottom: 20px;
+  margin: 10px 0;
 }
 
 issue-comp #issueCompStatus {
-  margin: 0 0 10px;
+  margin: 10px 0 0;
 }
 
 issue-comp textarea {

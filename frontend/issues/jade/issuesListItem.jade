@@ -1,6 +1,6 @@
 #issuesListItemContent(layout='column')
-	#issueRoleIndicator
 	div(layout='row')
+		#issueRoleIndicator
 		.issueListItemThumbnail(ng-if="$ctrl.data.thumbnail")
 			img(ng-src="{{$ctrl.data.thumbnailPath}}")
 		div(flex, layout="column")
