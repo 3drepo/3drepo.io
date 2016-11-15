@@ -6991,6 +6991,7 @@ var ViewerManager = {};
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
+				console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -7003,7 +7004,7 @@ var ViewerManager = {};
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
-					vm.accounts[i].canAddProject = (i === 0);
+					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
 				}
 			}
 		});
@@ -7085,13 +7086,13 @@ var ViewerManager = {};
 		/**
 		 * Bring up dialog to add a new project
 		 */
-		vm.newProject = function (event) {
+		vm.newProject = function (event, accountForProject) {
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
-				account: vm.account,
+				account: accountForProject,
 				type: vm.projectTypes[0]
 			};
 			vm.newProjectFileToUpload = null;
