@@ -83,7 +83,7 @@
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
-				console.log('vm.accounts', vm.accounts);
+				//console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
