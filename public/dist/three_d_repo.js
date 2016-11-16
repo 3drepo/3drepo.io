@@ -12138,7 +12138,7 @@ angular.module('3drepo')
 		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "vr", label: "VR"},
+			{value: "vr", label: "VR"}
 		];
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
@@ -12164,15 +12164,7 @@ angular.module('3drepo')
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					this.canUpdate = (this.account === this.issueData.owner);
-					if (!this.canUpdate) {
-						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
-							if (this.userRoles[i] === this.issueData.creator_role) {
-								this.canUpdate = true;
-								break;
-							}
-						}
-					}
+					this.canUpdate = ((this.account === this.issueData.owner) || userHasCreatorRole());
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
@@ -12242,6 +12234,7 @@ angular.module('3drepo')
 					*/
 					return availableRole.role;
 				});
+				console.log(this.projectRoles);
 			}
 		};
 
@@ -12279,7 +12272,7 @@ angular.module('3drepo')
 			}
 
 			// Set up statuses
-			disableStatus = this.data ? (this.userRoles[0] !== this.data.creator_role) : false;
+			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
 			this.statuses = [
 				{value: "open", label: "Open", disabled: disableStatus},
 				{value: "in progress", label: "In progress", disabled: false},
@@ -12748,6 +12741,38 @@ angular.module('3drepo')
 		}
 
 		/**
+		 * Check if user has a role same as the creator role
+		 * @returns {boolean}
+		 */
+		function userHasCreatorRole () {
+			var i, iLength,
+				hasCreatorRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
+				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			}
+
+			return hasCreatorRole;
+		}
+
+		/**
+		 * Check if user has admin role
+		 * @returns {boolean}
+		 */
+		function userHasAdminRole () {
+			var i, iLength, j, jLength,
+				hasAdminRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+				}
+			}
+
+			return hasAdminRole;
+		}
+
+		/**
 		 * Set the content height
 		 */
 		function setContentHeight() {
@@ -12779,7 +12804,7 @@ angular.module('3drepo')
 				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
 					}
 				}
