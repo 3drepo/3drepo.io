@@ -12176,6 +12176,12 @@ angular.module('3drepo')
 					else {
 						setRoleIndicatorColour(this.issueData.creator_role);
 					}
+
+					// Old issues
+					this.issueData.priority = (!this.issueData.priority) ? "none" : this.issueData.priority;
+					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
+					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
+					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 				}
 				else {
 					this.issueData = {

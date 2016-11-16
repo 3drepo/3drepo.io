@@ -1,8 +1,9 @@
 #issuesListItemContent(layout='column')
 	div(layout='row')
 		#issueRoleIndicator
-		.issueListItemThumbnail(ng-if="$ctrl.data.thumbnail")
-			img(ng-src="{{$ctrl.data.thumbnailPath}}")
+		.issueListItemThumbnail(layout="column", layout-align="center center")
+			img(ng-if="$ctrl.data.thumbnail", ng-src="{{$ctrl.data.thumbnailPath}}")
+			md-icon.angular-material-icons.issueListItemMissingThumbnail(ng-if="!$ctrl.data.thumbnail") insert_photo
 		div(flex, layout="column")
 			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: $ctrl.assignedToUserRole}") {{$ctrl.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
