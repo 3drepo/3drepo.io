@@ -12113,6 +12113,7 @@ angular.module('3drepo')
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
+					projectSettings: '<',
 					setInitialSelectedObjects: "&",
 					userRoles: "<",
 					availableRoles: "<"
@@ -12159,10 +12160,7 @@ angular.module('3drepo')
 			{value: "for approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
-		this.topic_types = [
-			{value: "for_information", label: "For information"},
-			{value: "vr", label: "VR"},
-		];
+
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
 			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
@@ -12176,6 +12174,10 @@ angular.module('3drepo')
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+
+			if(changes.hasOwnProperty('projectSettings')){
+				this.topic_types = this.projectSettings.topicTypes;
+			}
 
 			// Data
 			if (changes.hasOwnProperty("data")) {
@@ -13603,6 +13605,7 @@ angular.module('3drepo')
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
+				projectSettings: "=",
 				show: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
@@ -13628,6 +13631,7 @@ angular.module('3drepo')
 			projectUserRolesPromise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
+
 
 		/*
 		 * Init
@@ -15686,6 +15690,7 @@ var Oculus = {};
 				branch: "=",
 				revision: "=",
                 position: "=",
+                projectSettings: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -15837,6 +15842,7 @@ var Oculus = {};
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
+				"project-settings='vm.projectSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
 				"selected-objects='vm.selectedObjects' " +
@@ -16578,6 +16584,7 @@ var Oculus = {};
 				revision: "=",				
                 position: "@",
 				keysDown: "=",
+				projectSettings: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },

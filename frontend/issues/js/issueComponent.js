@@ -35,6 +35,7 @@
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
+					projectSettings: '<',
 					setInitialSelectedObjects: "&",
 					userRoles: "<",
 					availableRoles: "<"
@@ -81,10 +82,7 @@
 			{value: "for approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
-		this.topic_types = [
-			{value: "for_information", label: "For information"},
-			{value: "vr", label: "VR"},
-		];
+
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
 			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
@@ -98,6 +96,10 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+
+			if(changes.hasOwnProperty('projectSettings')){
+				this.topic_types = this.projectSettings.topicTypes;
+			}
 
 			// Data
 			if (changes.hasOwnProperty("data")) {
