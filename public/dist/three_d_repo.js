@@ -7369,8 +7369,22 @@ var ViewerManager = {};
 					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
 					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
 					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
-					vm.projectType = response.data.type;
 				}
+
+				vm.projectType = response.data.type;
+
+				if(response.data.properties.topicTypes){
+					
+					vm.topicTypes = [];
+					
+					response.data.properties.topicTypes.forEach(function(type){
+						vm.topicTypes.push(type.label);
+					});
+
+					vm.topicTypes = vm.topicTypes.join('\n');
+				}
+
+				console.log('topicTypes', vm.topicTypes);
 
 				response.data.properties.code && (vm.code = response.data.properties.code);
 
@@ -7389,7 +7403,8 @@ var ViewerManager = {};
 			var data = {
 				mapTile: vm.mapTile,
 				unit: vm.unit,
-				code: vm.code
+				code: vm.code,
+				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
 			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")

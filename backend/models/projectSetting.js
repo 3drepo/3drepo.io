@@ -95,14 +95,14 @@ schema.methods.updateProperties = function(updateObj){
 			let topicTypes = {};
 			updateObj[key].forEach(type => {
 				//generate value from label
-				let value = type.toLowerCase().replace(/ /g, '_');
+				let value = type.trim().toLowerCase().replace(/ /g, '_');
 				
 				if(topicTypes[value]){
 					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
 				} else {
 					topicTypes[value] = {
 						value,
-						label: type
+						label: type.trim()
 					};
 				}
 			});
