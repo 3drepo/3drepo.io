@@ -199,7 +199,6 @@
 					});
 				}
 				setupIssuesToShow();
-				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
 			}
 
