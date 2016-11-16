@@ -83,14 +83,12 @@
 		function setRoleIndicatorColour () {
 			var assignedRoleColour;
 
-			if (self.data && issueRoleIndicator) {
-				if (self.data.assigned_roles.length > 0) {
-					assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
+				assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				if (assignedRoleColour !== null) {
+					issueRoleIndicator.css("border", "none");
+					issueRoleIndicator.css("background", assignedRoleColour);
 				}
-				else {
-					assignedRoleColour = IssuesService.getRoleColor(self.data.creator_role);
-				}
-				issueRoleIndicator.css("background", assignedRoleColour);
 			}
 		}
 	}

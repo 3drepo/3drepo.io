@@ -12770,7 +12770,11 @@ angular.module('3drepo')
 		 * @param {String} role
 		 */
 		function setRoleIndicatorColour (role) {
-			issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+			var roleColor = IssuesService.getRoleColor(role);
+			if (roleColor !== null) {
+				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("border", "none");
+			}
 		}
 
 		/**
@@ -14564,14 +14568,12 @@ angular.module('3drepo')
 		function setRoleIndicatorColour () {
 			var assignedRoleColour;
 
-			if (self.data && issueRoleIndicator) {
-				if (self.data.assigned_roles.length > 0) {
-					assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
+				assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				if (assignedRoleColour !== null) {
+					issueRoleIndicator.css("border", "none");
+					issueRoleIndicator.css("background", assignedRoleColour);
 				}
-				else {
-					assignedRoleColour = IssuesService.getRoleColor(self.data.creator_role);
-				}
-				issueRoleIndicator.css("background", assignedRoleColour);
 			}
 		}
 	}
@@ -14964,30 +14966,6 @@ angular.module('3drepo')
 					statusIcon.colour = "#004594";
 					break;
 			}
-
-			/*
-			if (issue.status === "closed") {
-				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
-			}
-			else {
-				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (issue.priority) {
-					case "none":
-						statusIcon.colour = "#7777777";
-						break;
-					case "low":
-						statusIcon.colour = "#4CAF50";
-						break;
-					case "medium":
-						statusIcon.colour = "#FF9800";
-						break;
-					case "high":
-						statusIcon.colour = "#F44336";
-						break;
-				}
-			}
-			*/
 
 			return statusIcon;
 		};

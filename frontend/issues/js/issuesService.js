@@ -386,30 +386,6 @@
 					break;
 			}
 
-			/*
-			if (issue.status === "closed") {
-				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
-			}
-			else {
-				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (issue.priority) {
-					case "none":
-						statusIcon.colour = "#7777777";
-						break;
-					case "low":
-						statusIcon.colour = "#4CAF50";
-						break;
-					case "medium":
-						statusIcon.colour = "#FF9800";
-						break;
-					case "high":
-						statusIcon.colour = "#F44336";
-						break;
-				}
-			}
-			*/
-
 			return statusIcon;
 		};
 

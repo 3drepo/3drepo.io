@@ -709,7 +709,11 @@
 		 * @param {String} role
 		 */
 		function setRoleIndicatorColour (role) {
-			issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+			var roleColor = IssuesService.getRoleColor(role);
+			if (roleColor !== null) {
+				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("border", "none");
+			}
 		}
 
 		/**
