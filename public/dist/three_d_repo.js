@@ -12136,15 +12136,9 @@ angular.module('3drepo')
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
-		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "for approval", label: "For approval"},
-			{value: "closed", label: "Closed"}
-		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "vr", label: "VR"},
+			{value: "vr", label: "VR"}
 		];
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
@@ -12170,15 +12164,7 @@ angular.module('3drepo')
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					this.canUpdate = (this.account === this.issueData.owner);
-					if (!this.canUpdate) {
-						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
-							if (this.userRoles[i] === this.issueData.creator_role) {
-								this.canUpdate = true;
-								break;
-							}
-						}
-					}
+					this.canUpdate = ((this.account === this.issueData.owner) || userHasCreatorRole());
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
@@ -12195,7 +12181,7 @@ angular.module('3drepo')
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						assigned_roles: [this.userRoles[0]],
+						assigned_roles: [],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -12248,6 +12234,7 @@ angular.module('3drepo')
 					*/
 					return availableRole.role;
 				});
+				console.log(this.projectRoles);
 			}
 		};
 
@@ -12275,12 +12262,23 @@ angular.module('3drepo')
 		 * Init stuff
 		 */
 		this.$onInit = function () {
+			var disableStatus;
+
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
 				issueSelectedObjects = this.selectedObjects;
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
+
+			// Set up statuses
+			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
+			this.statuses = [
+				{value: "open", label: "Open", disabled: disableStatus},
+				{value: "in progress", label: "In progress", disabled: false},
+				{value: "for approval", label: "For approval", disabled: false},
+				{value: "closed", label: "Closed", disabled: disableStatus}
+			];
 		};
 
 		/**
@@ -12317,6 +12315,7 @@ angular.module('3drepo')
 					.then(function (response) {
 						console.log(response);
 						self.issueData.status = response.data.issue.status;
+						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}
@@ -12327,22 +12326,7 @@ angular.module('3drepo')
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status) ||
-						(this.data.topic_type !== this.issueData.topic_type)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
-							saveComment();
-						}
-					}
-					else {
-						saveComment();
-					}
-				}
-				else {
-					saveComment();
-				}
+				saveComment();
 			}
 			else {
 				saveIssue();
@@ -12611,23 +12595,6 @@ angular.module('3drepo')
 		}
 
 		/**
-		 * Update an existing issue and notify parent
-		 */
-		function updateIssue () {
-			var data = {
-				priority: self.issueData.priority,
-				status: self.issueData.status,
-				topic_type: self.issueData.topic_type
-			};
-			IssuesService.updateIssue(self.issueData, data)
-				.then(function (data) {
-					IssuesService.updatedIssue = self.issueData;
-				});
-			
-			self.submitDisabled = true;
-		}
-
-		/**
 		 * Add comment to issue
 		 * Save screen shot viewpoint or current viewpoint
 		 */
@@ -12775,6 +12742,38 @@ angular.module('3drepo')
 				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
 				issueRoleIndicator.css("border", "none");
 			}
+		}
+
+		/**
+		 * Check if user has a role same as the creator role
+		 * @returns {boolean}
+		 */
+		function userHasCreatorRole () {
+			var i, iLength,
+				hasCreatorRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
+				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			}
+
+			return hasCreatorRole;
+		}
+
+		/**
+		 * Check if user has admin role
+		 * @returns {boolean}
+		 */
+		function userHasAdminRole () {
+			var i, iLength, j, jLength,
+				hasAdminRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+				}
+			}
+
+			return hasAdminRole;
 		}
 
 		/**

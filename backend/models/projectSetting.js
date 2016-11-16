@@ -39,12 +39,13 @@ var schema = mongoose.Schema({
 		"zNear" : Number,
 		"zFar" : Number,
 		"unit": String, //cm, m, ft, mm
-
 		"mapTile": {
 			lat: Number,
 			lon: Number,
 			y: Number
-		}
+		},
+		code: String,
+		topicTypes: [String]
 
 	},
 	//bid_4_free only fields
@@ -63,7 +64,8 @@ var schema = mongoose.Schema({
 	collaborators: [{
 		user: String,
 		role: {type: String}
-	}]
+	}],
+
 });
 
 schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
@@ -76,8 +78,6 @@ schema.methods.updateProperties = function(updateObj){
 	});
 
 };
-
-
 
 schema.methods.findCollaborator = function(user, role){
 	'use strict';
