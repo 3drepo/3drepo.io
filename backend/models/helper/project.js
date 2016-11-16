@@ -975,6 +975,7 @@ function getRolesForProject(account, project, removeViewer){
 	}).then(roles => {
 
 
+
 		for(let i = roles.length - 1; i >= 0; i--){
 
 			//console.log(Role.determineRole(account, project, roles[i]));
