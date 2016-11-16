@@ -22,6 +22,8 @@ var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
+var Role = require('../models/role');
+
 var config = require('../config');
 
 var READ_BIT	= 4;
@@ -35,7 +37,7 @@ var getDbColOptions = function(req){
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
-function getAccessToProject(username, account, project){
+function getAccessByCollection(username, account, collection){
 	'use strict';
 
 	return User.findByUserName(username).then(user => {
@@ -44,7 +46,6 @@ function getAccessToProject(username, account, project){
 	}).then(privileges => {
 
 		//Determine the access rights of a project via privileges on the history collection
-		let collection = project + ".history";
 		let writePermission = false;
 		let readPermission = false;
 
@@ -68,23 +69,23 @@ function getAccessToProject(username, account, project){
 }
 
 function hasReadAccessToProjectHelper(username, account, project){
-	return hasAccessToProjectHelper(username, account, project, WRITE_BIT);
+	return hasAccessToProjectHelper(username, account, project, READ_BIT);
 }
 
 function hasAccessToProjectHelper(username, account, project, permissionBit){
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return getAccessByCollection(username, account, project + ".history").then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	});
 }
 
-function hasAccessToProject(req, res, next, permissionBit){
+function hasAccessToCollection(req, res, next, collection, permissionBit){
 	'use strict';
 
 	let username = req.session.user.username;
 	let account = req.params.account;
-	let project = req.params.project;
+	//let project = req.params.project;
 
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return getAccessByCollection(username, account, collection).then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	}).then(granted => {
 		if(granted){
@@ -92,18 +93,30 @@ function hasAccessToProject(req, res, next, permissionBit){
 		} else {
 			return Promise.reject(responseCodes.NOT_AUTHORIZED);
 		}
-	}).catch( err => {
-		responseCodes.respond("Middleware: check has access to project", req, res, next, err , null, err);
+	}).catch(err => {
+		responseCodes.respond("Middleware: check has access to " + collection, req, res, next, err , null, err);
 	});
 }
 
-function hasWriteAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, WRITE_BIT);
+function hasWriteAccessToIssue(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.issues';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
 }
 
+function hasWriteAccessToProject(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
+}
 
 function hasReadAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, READ_BIT);
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, READ_BIT);
 }
 
 function hasAccessToAccount(req, res, next){
@@ -125,15 +138,6 @@ function hasWriteAccessToAccount(req, res, next){
 	hasAccessToAccount(req, res, next);
 }
 
-function canCreateProject(req, res, next){
-	"use strict";
-
-	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
-		next();
-	} else {
-		hasWriteAccessToProject(req, res, next);
-	}
-}
 
 function loggedIn(req, res, next){
 	'use strict';
@@ -294,15 +298,36 @@ function isAccountAdmin(req, res, next){
 
 	let username = req.session.user.username;
 	let account = req.params.account;
+	let foundAdminRole;
 
 	User.findByUserName(username).then(user => {
 
+
+		let findPromises = [];
+
 		if(!user){
 			return Promise.reject();
-		} else if(!user.hasRole(account, 'admin')){
-			return Promise.reject();
-		} else {
+		}
+
+		user.roles.forEach(role => {
+			if (role.db === account){
+				findPromises.push(
+					Role.findByRoleID(`${account}.${role.role}`).then(detailRole => {
+						!foundAdminRole && (foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite'));
+					})
+				);
+			}
+		});
+
+		return Promise.all(findPromises);
+
+	}).then(() => {
+
+		console.log('foundAdminRole', foundAdminRole);
+		if(foundAdminRole){
 			next();
+		} else {
+			return Promise.reject();
 		}
 
 	}).catch(() => {
@@ -314,11 +339,11 @@ function isAccountAdmin(req, res, next){
 var middlewares = {
 
 	// Real middlewares taking req, res, next
-	canCreateProject: [loggedIn, canCreateProject],
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
+	hasWriteAccessToIssue: [loggedIn, hasWriteAccessToIssue],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
