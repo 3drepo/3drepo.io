@@ -98,6 +98,7 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+			console.log(this.data);
 
 			// Data
 			if (changes.hasOwnProperty("data")) {
@@ -240,7 +241,8 @@
 		 * Handle status change
 		 */
 		this.statusChange = function () {
-			var data;
+			var data,
+				comment;
 
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
@@ -255,7 +257,26 @@
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
+
+						// Add info for new comment
+						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						comment.comment = IssuesService.convertActionCommentToText(comment);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						self.issueData.comments.push(comment);
+
+						// Update last but one comment in case it was "sealed"
+						if (self.issueData.comments.length > 1) {
+							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							if (comment.action) {
+								comment.comment = IssuesService.convertActionCommentToText(comment);
+							}
+							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+						}
+
+						// The status could have changed due to assigning role
 						self.issueData.status = response.data.issue.status;
+
 						IssuesService.updatedIssue = self.issueData;
 					});
 			}
@@ -291,10 +312,10 @@
 		/**
 		 * Show viewpoint
 		 * @param event
-		 * @param viewpoint
+		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
-			if (event.type === "click") {
+			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,

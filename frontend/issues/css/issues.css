@@ -283,7 +283,6 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
-  word-break: break-all;
 }
 
 issue-comp .issueCompTextActions {
@@ -325,8 +324,8 @@ issue-comp #descriptionAndComments {
   background: #f0f0f0;
 }
 
-issue-comp #issueRoleIndicator {
-  margin-left: 7px;
+issue-comp .commentTextLight {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /** Issue Screen Shot  ************************************************************************************************/
