@@ -88,6 +88,9 @@ function createAndAssignRole(project, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+	if(data.code && !ProjectSetting.projectCodeRegExp.test(data.code)){
+		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_CODE });
+	}
 
 	if(!data.unit){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
@@ -154,9 +157,10 @@ function createAndAssignRole(project, account, username, data) {
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
-			topicTypes: data.topicTypes
 		});
 
+		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
+		
 		return setting.save();
 
 	});

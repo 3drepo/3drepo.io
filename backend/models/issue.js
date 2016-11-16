@@ -191,7 +191,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(settings.type);
+			issues[index] = noClean ? issue: issue.clean(settings.type, settings.properties.code);
 		});
 
 		return Promise.resolve(issues);
@@ -631,7 +631,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}).then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
-			return Promise.resolve(issue.clean(settings.type));
+			return Promise.resolve(issue.clean(settings.type, settings.properties.code));
 		});
 
 	});
@@ -979,12 +979,13 @@ schema.methods.updateAttrs = function(data){
 
 };
 
-schema.methods.clean = function(typePrefix){
+schema.methods.clean = function(typePrefix, projectCode){
 	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.typePrefix = typePrefix;
+	cleaned.projectCode = projectCode;
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;

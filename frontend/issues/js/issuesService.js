@@ -74,7 +74,9 @@
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;
@@ -203,7 +205,7 @@
 				issue,
 				{
 					assigned_roles: issue.assigned_roles,
-					number: issue.number
+					number: 0 //issue.number
 				}
 			);
 		};
@@ -337,16 +339,13 @@
 		};
 
 		obj.getRoleColor = function(role) {
-			var i = 0,
-				length = 0,
-				roleColor;
+			var i, length,
+				roleColor = null;
 
-			if (availableRoles.length > 0) {
-				for (i = 0, length = availableRoles.length; i < length; i += 1) {
-					if (availableRoles[i].role === role) {
-						roleColor = availableRoles[i].color;
-						break;
-					}
+			for (i = 0, length = availableRoles.length; i < length; i += 1) {
+				if (availableRoles[i].role === role && availableRoles[i].color) {
+					roleColor = availableRoles[i].color;
+					break;
 				}
 			}
 			return roleColor;

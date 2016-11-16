@@ -32,6 +32,7 @@
 				revision: "=",				
                 position: "@",
 				keysDown: "=",
+				projectSettings: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },

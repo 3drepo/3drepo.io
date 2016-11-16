@@ -238,7 +238,7 @@
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects (response.data.account, project);
+						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
 					}
 				});

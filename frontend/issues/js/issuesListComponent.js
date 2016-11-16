@@ -38,7 +38,8 @@
 					contentHeight: "&",
 					menuOption: "<",
 					importBcf: "&",
-					selectedIssue: "<"
+					selectedIssue: "<",
+					userRoles: "<"
 				}
 			}
 		);
@@ -49,7 +50,7 @@
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 147,
+			issuesListItemHeight = 155,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,
