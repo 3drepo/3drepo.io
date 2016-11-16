@@ -16,6 +16,7 @@
  */
 
 var Role = require('../role');
+var RoleSetting = require('../roleSetting');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
@@ -944,23 +945,32 @@ function downloadLatest(account, project){
 function getRolesForProject(account, project, removeViewer){
 	'use strict';
 
-	return Role.find({ account: 'admin'}, {
-		'$or': [{
-			'privileges' : {
-				'$elemMatch': {
-					'resource.db': account, 
-					'resource.collection': `${project}.history`,
-					'actions': 'find'
+	let roleSettings;
+
+
+	return RoleSetting.find({ account }).then(_roleSetting => {
+
+		roleSettings = _.indexBy(_roleSetting, '_id');
+
+		return Role.find({ account: 'admin'}, {
+			'$or': [{
+				'privileges' : {
+					'$elemMatch': {
+						'resource.db': account, 
+						'resource.collection': `${project}.history`,
+						'actions': 'find'
+					}
 				}
-			}
-		},{ 
-			'roles': {
-				'$elemMatch': {
-					"role" : "readWrite",
-					"db" : account
+			},{ 
+				'roles': {
+					'$elemMatch': {
+						"role" : "readWrite",
+						"db" : account
+					}
 				}
-			}
-		}]
+			}]
+
+		});
 
 	}).then(roles => {
 
@@ -973,7 +983,16 @@ function getRolesForProject(account, project, removeViewer){
 			}
 		}
 
-		roles.forEach((role, i) => roles[i] = _.pick(role.toObject(), ['role', 'db']));
+		roles.forEach((role, i) => {
+
+			roles[i] = _.pick(role.toObject(), ['role', 'db']);
+			
+			if(roleSettings[roles[i].role]){
+				roles[i].color = roleSettings[roles[i].role].color;
+				roles[i].desc = roleSettings[roles[i].role].desc;
+			}
+		});
+
 		return roles;
 	});
 }
