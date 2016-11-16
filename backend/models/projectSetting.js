@@ -85,10 +85,15 @@ schema.path('properties.topicTypes').get(function(v) {
 
 schema.set('toObject', { getters: true });
 
+schema.statics.projectCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
-	console.log(updateObj);
+
 	Object.keys(updateObj).forEach(key => {
+
+		if(key === 'code' && !schema.statics.projectCodeRegExp.test(updateObj[key])){
+			throw responseCodes.INVALID_PROJECT_CODE;
+		}
 
 		if(key === 'topicTypes'){
 			
@@ -112,10 +117,11 @@ schema.methods.updateProperties = function(updateObj){
 				}
 			});
 
-			updateObj[key] = _.values(topicTypes);
+			this.properties[key] = _.values(topicTypes);
+		} else {
+			this.properties[key] = updateObj[key];
 		}
-
-		this.properties[key] = updateObj[key];
+		
 	});
 
 };

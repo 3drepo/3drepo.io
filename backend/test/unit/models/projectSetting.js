@@ -78,16 +78,32 @@ describe('Project Settings', function(){
 					y: 5
 				},
 				unit: "metre",
-				topicTypes: ['a', 'b'],
+				topicTypes: ['For info', 'VR'],
 				code: '09ABC'
 
+			};
+
+			let expectedReturn = {
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				unit: "metre",
+				topicTypes: [{
+					label: 'For info',
+					value: 'for_info'
+				}, {
+					label: 'VR',
+					value: 'vr'
+				}],
+				code: '09ABC'
 			};
 
 			let projectSetting = new ProjectSetting();
 			
 			projectSetting.updateProperties(props);
-	
-			expect(projectSetting.toObject().properties).to.deep.equal(props);
+			expect(projectSetting.toObject().properties).to.deep.equal(expectedReturn);
 		
 
 		});

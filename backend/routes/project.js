@@ -102,10 +102,6 @@ function updateSettings(req, res, next){
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
 
-		if(req.body.code && !ProjectHelpers.projectCodeRegExp.test(req.body.code)) {
-			return Promise.reject(responseCodes.INVALID_PROJECT_CODE);
-		}
-
 		projectSetting.updateProperties(req.body);
 		return projectSetting.save();
 
