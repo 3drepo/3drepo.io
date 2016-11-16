@@ -12328,9 +12328,14 @@ angular.module('3drepo')
 						// Update last but one comment in case it was "sealed"
 						if (self.issueData.comments.length > 1) {
 							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							if (comment.action) {
+								comment.comment = IssuesService.convertActionCommentToText(comment);
+							}
 							self.issueData.comments[self.issueData.comments.length - 2] = comment;
 						}
 
+						// The status could have changed due to assigning role
 						self.issueData.status = response.data.issue.status;
 
 						IssuesService.updatedIssue = self.issueData;
