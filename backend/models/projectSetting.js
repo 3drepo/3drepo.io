@@ -94,6 +94,11 @@ schema.methods.updateProperties = function(updateObj){
 			
 			let topicTypes = {};
 			updateObj[key].forEach(type => {
+
+				if(!type || !type.trim()){
+					return;
+				}
+				
 				//generate value from label
 				let value = type.trim().toLowerCase().replace(/ /g, '_');
 				

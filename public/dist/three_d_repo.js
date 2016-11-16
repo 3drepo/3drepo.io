@@ -7358,6 +7358,16 @@ var ViewerManager = {};
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
 
+		function convertTopicTypesToString(topicTypes){
+
+			var result = [];
+
+			topicTypes.forEach(function(type){
+				result.push(type.label);
+			});
+
+			return result.join('\n');
+		}
 
 		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
 		.then(function (response) {
@@ -7373,21 +7383,8 @@ var ViewerManager = {};
 
 				vm.projectType = response.data.type;
 
-				if(response.data.properties.topicTypes){
-					
-					vm.topicTypes = [];
-					
-					response.data.properties.topicTypes.forEach(function(type){
-						vm.topicTypes.push(type.label);
-					});
-
-					vm.topicTypes = vm.topicTypes.join('\n');
-				}
-
-				console.log('topicTypes', vm.topicTypes);
-
+				response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
 				response.data.properties.code && (vm.code = response.data.properties.code);
-
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
 				vm.oldUnit = vm.unit;
 
@@ -7411,6 +7408,7 @@ var ViewerManager = {};
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
+					response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
 					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
