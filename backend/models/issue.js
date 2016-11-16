@@ -631,7 +631,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}).then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
-			return Promise.resolve(issue.clean(settings.type));
+			return Promise.resolve(issue.clean(settings.type, settings.properties.code));
 		});
 
 	});

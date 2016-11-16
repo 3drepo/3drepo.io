@@ -91,7 +91,7 @@ schema.methods.updateProperties = function(updateObj){
 
 	Object.keys(updateObj).forEach(key => {
 
-		if(key === 'code' && !schema.statics.projectCodeRegExp.test(updateObj[key])){
+		if(key === 'code' && updateObj[key] && !schema.statics.projectCodeRegExp.test(updateObj[key])){
 			throw responseCodes.INVALID_PROJECT_CODE;
 		}
 
