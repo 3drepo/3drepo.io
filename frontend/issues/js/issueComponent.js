@@ -714,6 +714,10 @@
 				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
 				issueRoleIndicator.css("border", "none");
 			}
+			else {
+				issueRoleIndicator.css("background", "none");
+				issueRoleIndicator.css("border", "1px solid #DDDDDD");
+			}
 		}
 
 		/**
