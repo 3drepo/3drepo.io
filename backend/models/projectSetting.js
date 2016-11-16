@@ -20,6 +20,7 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Role = require('./role');
 var responseCodes = require('../response_codes.js');
+var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -46,6 +47,7 @@ var schema = mongoose.Schema({
 		},
 		code: String,
 		topicTypes: [{
+			_id: false,
 			value: String,
 			label: String
 		}]
@@ -85,8 +87,29 @@ schema.set('toObject', { getters: true });
 
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
-
+	console.log(updateObj);
 	Object.keys(updateObj).forEach(key => {
+
+		if(key === 'topicTypes'){
+			
+			let topicTypes = {};
+			updateObj[key].forEach(type => {
+				//generate value from label
+				let value = type.toLowerCase().replace(/ /g, '_');
+				
+				if(topicTypes[value]){
+					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+				} else {
+					topicTypes[value] = {
+						value,
+						label: type
+					};
+				}
+			});
+
+			updateObj[key] = _.values(topicTypes);
+		}
+
 		this.properties[key] = updateObj[key];
 	});
 
