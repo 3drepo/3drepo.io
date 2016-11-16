@@ -14934,6 +14934,38 @@ angular.module('3drepo')
 		obj.getStatusIcon = function (issue) {
 			var statusIcon = {};
 
+			switch (issue.priority) {
+				case "none":
+					statusIcon.colour = "#7777777";
+					break;
+				case "low":
+					statusIcon.colour = "#4CAF50";
+					break;
+				case "medium":
+					statusIcon.colour = "#FF9800";
+					break;
+				case "high":
+					statusIcon.colour = "#F44336";
+					break;
+			}
+
+			switch (issue.status) {
+				case "open":
+					statusIcon.icon = "panorama_fish_eye";
+					break;
+				case "in progress":
+					statusIcon.icon = "lens";
+					break;
+				case "for approval":
+					statusIcon.icon = "adjust";
+					break;
+				case "closed":
+					statusIcon.icon = "check_circle";
+					statusIcon.colour = "#004594";
+					break;
+			}
+
+			/*
 			if (issue.status === "closed") {
 				statusIcon.icon = "check_circle";
 				statusIcon.colour = "#004594";
@@ -14955,6 +14987,7 @@ angular.module('3drepo')
 						break;
 				}
 			}
+			*/
 
 			return statusIcon;
 		};
