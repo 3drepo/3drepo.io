@@ -49,6 +49,8 @@
 
 		vm.goBack = function () {
 			$location.search("project", null);
+			$location.search("targetAcct", null);
+
 			vm.showPage({page: "repos"});
 		};
 
@@ -56,6 +58,8 @@
 
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
+		vm.targetAcct = $location.search().targetAcct;
+
 
 		function convertTopicTypesToString(topicTypes){
 
@@ -68,7 +72,8 @@
 			return result.join('\n');
 		}
 
-		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+
+		UtilsService.doGet(vm.targetAcct + "/" + vm.projectName + ".json")
 		.then(function (response) {
 
 			if (response.status === 200 && response.data.properties) {
@@ -103,7 +108,7 @@
 				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
-			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.projectName +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';

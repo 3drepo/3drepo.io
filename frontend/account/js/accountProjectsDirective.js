@@ -83,6 +83,7 @@
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
+				//console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -95,7 +96,7 @@
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
-					vm.accounts[i].canAddProject = (i === 0);
+					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
 				}
 			}
 		});
@@ -177,13 +178,13 @@
 		/**
 		 * Bring up dialog to add a new project
 		 */
-		vm.newProject = function (event) {
+		vm.newProject = function (event, accountForProject) {
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
-				account: vm.account,
+				account: accountForProject,
 				type: vm.projectTypes[0]
 			};
 			vm.newProjectFileToUpload = null;
@@ -303,12 +304,13 @@
 		 * @param {Object} event
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (event, project) {
+		vm.setupDeleteProject = function (event, project, account) {
 			vm.projectToDelete = project;
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Project";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.projectToDelete.name;
+			vm.targetAccountToDeleteProject = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
@@ -318,7 +320,7 @@
 		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteProject + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list
