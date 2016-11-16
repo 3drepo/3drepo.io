@@ -974,6 +974,8 @@ function getRolesForProject(account, project, removeViewer){
 
 	}).then(roles => {
 
+
+
 		for(let i = roles.length - 1; i >= 0; i--){
 
 			//console.log(Role.determineRole(account, project, roles[i]));
@@ -986,7 +988,8 @@ function getRolesForProject(account, project, removeViewer){
 		roles.forEach((role, i) => {
 
 			roles[i] = _.pick(role.toObject(), ['role', 'db']);
-			
+			roles[i].roleFunction = Role.determineRole(account, project, role);
+
 			if(roleSettings[roles[i].role]){
 				roles[i].color = roleSettings[roles[i].role].color;
 				roles[i].desc = roleSettings[roles[i].role].desc;
