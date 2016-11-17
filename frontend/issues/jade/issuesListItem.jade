@@ -4,7 +4,7 @@
 		.issueListItemThumbnail(ng-if="$ctrl.data.thumbnail")
 			img(ng-src="{{$ctrl.data.thumbnailPath}}")
 		div(flex, layout="column")
-			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: $ctrl.assignedToUserRole}") {{$ctrl.data.title}}
+			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: $ctrl.assignedToAUserRole}") {{$ctrl.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
 				div(flex="15")
 					md-icon.angular-material-icons#issueCompStatus(
