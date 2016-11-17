@@ -14558,7 +14558,7 @@ angular.module('3drepo')
 
 				// Title
 				if (this.userRoles) {
-					this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
 
@@ -14566,7 +14566,7 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("userRoles") && this.userRoles) {
 				// Title
 				if (this.data) {
-					this.assignedToUserRole = (this.data.assigned_roles[0] === this.userRoles[0]);
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
 		};
@@ -14584,6 +14584,22 @@ angular.module('3drepo')
 					issueRoleIndicator.css("background", assignedRoleColour);
 				}
 			}
+		}
+
+		/**
+		 * Check if the issue is assigned to one of the user's roles
+		 */
+		function issueIsAssignedToAUserRole () {
+			var i, iLength, j, jLength,
+				isAssignedToAUserRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !isAssignedToAUserRole; i += 1) {
+				for (j = 0, jLength = self.data.assigned_roles.length; (j < jLength) && !isAssignedToAUserRole; j += 1) {
+					isAssignedToAUserRole = (self.userRoles[i] === self.data.assigned_roles[j]);
+				}
+			}
+
+			return isAssignedToAUserRole;
 		}
 	}
 }());
