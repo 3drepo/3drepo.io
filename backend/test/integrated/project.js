@@ -133,6 +133,17 @@ describe('Project', function () {
 
 	});
 
+	it('update issues type with duplicate values', function(done){
+			agent.put(`/${username}/${project}/settings`)
+			.send({
+				topicTypes: ['For Info', 'for info']
+			}).expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
+				done(err);
+			});
+	});
+	
+
 	it('update settings should be successful', function(done){
 
 		let body = {
