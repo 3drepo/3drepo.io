@@ -236,6 +236,7 @@
 						// Add project to list
 						project = {
 							project: response.data.project,
+							roleFunctions: response.data.roleFunctions,
 							canUpload: true,
 							timestamp: null
 						};
@@ -383,6 +384,7 @@
 				vm.accounts.push(accountToUpdate);
 			}
 
+			console.log('vmaccounts', vm.accounts);
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {

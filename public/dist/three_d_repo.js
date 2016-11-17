@@ -6600,15 +6600,11 @@ var ViewerManager = {};
 		// Init
 
 		function checkProjectPermission(action){
-			if(action === 'upload'){
+			if(action === 'upload' || action === 'download'){
 				
 				return vm.project.roleFunctions.indexOf('admin') !== -1 
 				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
 
-			} else if (action === 'download') {
-				return vm.project.roleFunctions.indexOf('admin') !== -1 
-				|| vm.project.roleFunctions.indexOf('collaborator') !== -1
-				|| vm.project.roleFunctions.indexOf('commenter') !== -1;
 			} else if (action === 'delete' || action === 'projectsetting') {
 				return vm.project.roleFunctions.indexOf('admin') !== -1;
 			}
@@ -7170,6 +7166,7 @@ var ViewerManager = {};
 						// Add project to list
 						project = {
 							project: response.data.project,
+							roleFunctions: response.data.roleFunctions,
 							canUpload: true,
 							timestamp: null
 						};
@@ -7317,6 +7314,7 @@ var ViewerManager = {};
 				vm.accounts.push(accountToUpdate);
 			}
 
+			console.log('vmaccounts', vm.accounts);
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {

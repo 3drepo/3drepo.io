@@ -163,6 +163,14 @@ function createAndAssignRole(project, account, username, data) {
 		
 		return setting.save();
 
+	}).then(() => {
+
+		// this is true if only admin can create project
+		return {
+			account,
+			project,
+			roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+		};
 	});
 }
 

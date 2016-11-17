@@ -82,7 +82,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasWriteAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -233,8 +233,8 @@ function createProject(req, res, next){
 		topicTypes: req.body.topicTypes
 	};
 
-	createAndAssignRole(project, account, username, data).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	createAndAssignRole(project, account, username, data).then(project => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, project);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
