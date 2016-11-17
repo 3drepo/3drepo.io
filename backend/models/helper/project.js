@@ -158,13 +158,18 @@ function createAndAssignRole(project, account, username, data) {
 
 		return setting.save();
 
-	}).then(() => {
+	}).then(setting => {
 
 		// this is true if only admin can create project
 		return {
-			account,
-			project,
-			roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+
+			setting,
+			project: {
+				account,
+				project,
+				roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+			}
+
 		};
 	});
 }
@@ -305,9 +310,9 @@ function importToyProject(username){
 		desc, type, unit: 'm'
 	};
 	
-	return createAndAssignRole(project, account, username, data).then(setting => {
+	return createAndAssignRole(project, account, username, data).then(data => {
 		//console.log('setting', setting);
-		return Promise.resolve(setting);
+		return Promise.resolve(data.setting);
 
 	}).then(setting => {
 

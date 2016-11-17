@@ -229,8 +229,8 @@ function createProject(req, res, next){
 		topicTypes: req.body.topicTypes
 	};
 
-	createAndAssignRole(project, account, username, data).then(project => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, project);
+	createAndAssignRole(project, account, username, data).then(data => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.project);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
