@@ -608,6 +608,7 @@
 			}
 
 			// Add new comment to issue
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			self.issueData.comments.push({
 				sealed: comment.sealed,
 				guid: comment.guid,
