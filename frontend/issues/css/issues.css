@@ -229,6 +229,10 @@ issues-list-item .issueListItemMissingThumbnail {
   opacity: 0.3;
 }
 
+issues-list-item #issueListItemStatus {
+  margin-right: 5px;
+}
+
 /** Issue Comp ********************************************************************************************************/
 issue-comp #issueCompAll {
   outline: none;
