@@ -77,6 +77,7 @@
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -84,6 +85,7 @@
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",
