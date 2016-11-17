@@ -723,7 +723,7 @@
 		 */
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 425,
+				newIssueHeight = 285,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
