@@ -12942,6 +12942,7 @@ angular.module('3drepo')
 		 */
 		function afterNewComment (comment) {
 			// Add new comment to issue
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
@@ -17595,7 +17596,8 @@ var Oculus = {};
 		this.$onChanges = function (changes) {
 			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
-				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) ||
+					(!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
 					if (selectedObjects.length === 1) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -17603,7 +17605,9 @@ var Oculus = {};
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode &&
+						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) ||
+						  (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
@@ -17783,6 +17787,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -17790,6 +17795,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",

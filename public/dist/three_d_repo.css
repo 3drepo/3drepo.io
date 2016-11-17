@@ -1101,16 +1101,6 @@ cookies .md-toolbar-tools img {
     width: 150px;
 }
 
-cookies-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -1438,6 +1428,8 @@ md-dialog md-toolbar {
 
 #legal #legalText {
     padding: 10px 50px;
+    overflow: auto;
+    height: calc(100vh - 80px);
 }
 /** Issues ************************************************************************************************************/
 
@@ -2160,18 +2152,6 @@ privacy .md-toolbar-tools img {
     width: 150px;
 }
 
-privacy-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    overflow-x: hidden;
-
-}
-
 register-verify .databaseError {
     color: #F44336;
     margin: 5px 0 5px;
@@ -2313,16 +2293,6 @@ terms .md-toolbar-tools img {
     width: 150px;
 }
 
-terms-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
 tree .virtualRepeatInfiniteScroll {
   overflow-y: auto;
   overflow-x: hidden;
