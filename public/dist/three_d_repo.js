@@ -7170,10 +7170,11 @@ var ViewerManager = {};
 						// Add project to list
 						project = {
 							project: response.data.project,
+							roleFunctions: response.data.roleFunctions,
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects (response.data.account, project);
+						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
 					}
 				});
@@ -7317,6 +7318,7 @@ var ViewerManager = {};
 				vm.accounts.push(accountToUpdate);
 			}
 
+			console.log('vmaccounts', vm.accounts);
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
