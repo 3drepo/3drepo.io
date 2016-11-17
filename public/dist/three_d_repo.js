@@ -6600,15 +6600,11 @@ var ViewerManager = {};
 		// Init
 
 		function checkProjectPermission(action){
-			if(action === 'upload'){
+			if(action === 'upload' || action === 'download'){
 				
 				return vm.project.roleFunctions.indexOf('admin') !== -1 
 				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
 
-			} else if (action === 'download') {
-				return vm.project.roleFunctions.indexOf('admin') !== -1 
-				|| vm.project.roleFunctions.indexOf('collaborator') !== -1
-				|| vm.project.roleFunctions.indexOf('commenter') !== -1;
 			} else if (action === 'delete' || action === 'projectsetting') {
 				return vm.project.roleFunctions.indexOf('admin') !== -1;
 			}

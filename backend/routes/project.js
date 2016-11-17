@@ -82,7 +82,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasWriteAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){

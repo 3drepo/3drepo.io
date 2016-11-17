@@ -194,8 +194,8 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('and the viewer should be abloe to download the project', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		it('and the viewer should not be able to download the project', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(401, done);
 		});
 
 		it('and the viewer should NOT be able to upload model', function(done){
@@ -410,8 +410,8 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('and the commenter should be abloe to download the project', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		it('and the commenter should not be able to download the project', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(401, done);
 		});
 
 		it('and the commenter should be able to see raise issue', function(done){
@@ -561,7 +561,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 	});
 
-	describe('for both view and edit', function(){
+	describe('for collaborator', function(){
 		before(function(done){
 
 			agent = request.agent(server);
@@ -676,24 +676,24 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200 , done);
 		});
 
-		it('and the editor should be able to upload model', function(done){
+		it('and the collaborator should be able to upload model', function(done){
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, done);
 		});
 
 
-		it('and the editor should be abloe to download the project', function(done){
+		it('and the collaborator should be abloe to download the project', function(done){
 			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
 		});
 
-		it('and the editor should NOT be able to delete the project', function(done){
+		it('and the collaborator should NOT be able to delete the project', function(done){
 			agent.delete(`/${username}/${project}`)
 			.send({})
 			.expect(401 , done);
 		});
 
-		it('and the editor should NOT be able to update project settings', function(done){
+		it('and the collaborator should NOT be able to update project settings', function(done){
 			let body = {
 
 					mapTile: {
