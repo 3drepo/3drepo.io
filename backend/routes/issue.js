@@ -26,6 +26,7 @@ var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
 var ProjectHelpers = require('../models/helper/project');
+var _ = require('lodash');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
@@ -86,14 +87,28 @@ function updateIssue(req, res, next){
 	//let data = JSON.parse(req.body.data);
 	let data = req.body;
 	data.owner = req.session.user.username;
+	data.isAdmin = false;
 	data.revId = req.params.rid;
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
+	let projectRoles;
 
-	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username).then(roles => {
+	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(_projectRoles => {
+
+		projectRoles = _.indexBy(_projectRoles, 'role');
+		return ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username);
+
+	}).then(roles => {
 		
 		data.owner_roles = roles;
+		
+		roles.forEach(role => {
+			if(projectRoles[role] && projectRoles[role].roleFunction === 'admin'){
+				data.isAdmin = true;
+			}
+		});
+
 		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
 
 	}).then(issue => {
