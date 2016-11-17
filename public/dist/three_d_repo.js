@@ -6652,7 +6652,7 @@ var ViewerManager = {};
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
-			if (!vm.project.uploading) {
+			if (!vm.project.uploading && checkProjectPermission('upload')) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
 					vm.tag = null;
