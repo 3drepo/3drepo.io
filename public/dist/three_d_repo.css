@@ -1518,6 +1518,13 @@ issues #issuesContent {
 issues .importBCFLoading {
   margin: 10px auto;
 }
+
+issues #issueRoleIndicator {
+  width: 8px;
+  border: 1px solid #DDDDDD;
+  margin-right: 10px;
+}
+
 /** Issue *************************************************************************************************************/
 issue {
   display: block;
@@ -1574,65 +1581,6 @@ issue .issueOpenContainer {
   margin-top: 10px;
 }
 
-/** Issue Area ********************************************************************************************************/
-issue-area {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-issue-area #issueAreaCanvas {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-issue-area #issueAreaCentre {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin: -20px 0 0 -20px;
-  pointer-events: none;
-}
-
-issue-area #issueAreaButtons {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-issue-area #issueAreaButtons md-icon {
-  font-size: 30px;
-  margin-top: -7px;
-  margin-left: -4px;
-}
-
-issue-area #issueAreaPenIndicator {
-  position: absolute;
-  display: block;
-  color: #FFFFFF;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-issue-area #scribbleDisplay {
-  position:absolute;
-  width:100%;
-  height:100%;
-  overflow:hidden
-}
-/* Influenced by Itay answer - http://stackoverflow.com/a/18674144/782358 */
-issue-area #scribbleDisplay img {
-  position: absolute;
-  margin: auto;
-  height: 100%;
-  width: auto;
-  left: -200%;
-  right: -200%;
-}
-
 /** Issues List *******************************************************************************************************/
 issues-list .issueListItem {
   position: relative;
@@ -1673,7 +1621,7 @@ issues-list #issuesListItemDescription label {
 }
 
 issues-list #issuesListItemDescription {
-  height: 70px;
+  height: 60px;
 }
 issues-list #issuesListItemDescription label {
   overflow: hidden;
@@ -1697,6 +1645,7 @@ issues-list #issuesListItemEnter md-icon {
 
 issues-list .issueListItemThumbnail {
   margin-right: 10px;
+  height: 120px;
 }
 
 issues-list #issuesListContainer {
@@ -1717,6 +1666,11 @@ issues-list .closedText{
   padding: 15px 25px;
   background-color: rgba(255,255,255,0.9);
   border: 1px solid #DDDDDD;
+/** Issues List Item **************************************************************************************************/
+.userRoleIssueListItemTitle {
+  border: 1px solid rgba(0, 69, 148, 0.3);
+  margin-left: -4px;
+  padding-left: 4px;
 }
 
 /** Issue Comp ********************************************************************************************************/
@@ -1732,12 +1686,17 @@ issue-comp .issueCompItemContainer div {
   outline: none;
 }
 
+issue-comp #issueCompTitleInput {
+  margin-bottom: -8px;
+  height: 40px;
+}
+
 issue-comp #issueCompTitle {
-  margin-bottom: 20px;
+  margin: 10px 0;
 }
 
 issue-comp #issueCompStatus {
-  margin: 0 0 10px;
+  margin: 10px 0 0;
 }
 
 issue-comp textarea {
@@ -1819,6 +1778,10 @@ issue-comp #descriptionAndComments {
   overflow-y:auto;
   overflow-x:hidden;
   background: #f0f0f0;
+}
+
+issue-comp #issueRoleIndicator {
+  margin-left: 7px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

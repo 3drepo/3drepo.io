@@ -43,6 +43,8 @@ describe('Project', function () {
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'm';
+	let code = '00011';
+	let topicTypes = ['a', 'b'];
 
 	before(function(done){
 
@@ -75,7 +77,7 @@ describe('Project', function () {
 	it('should be created successfully', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type, unit })
+		.send({ desc, type, unit, topicTypes, code })
 		.expect(200, function(err ,res) {
 
 			expect(res.body.project).to.equal(project);
@@ -89,6 +91,8 @@ describe('Project', function () {
 				expect(res.body.desc).to.equal(desc);
 				expect(res.body.type).to.equal(type);
 				expect(res.body.properties.unit).to.equal(unit);
+				expect(res.body.properties.code).to.equal(code);
+				expect(res.body.properties.topicTypes).to.deep.equal(topicTypes);
 				done(err);
 			})
 			
@@ -117,7 +121,9 @@ describe('Project', function () {
 					lon: 234,
 					y: 5
 				},
-				unit: 'cm'
+				unit: 'cm',
+				code: '000222',
+				topicTypes: ['c', 'd']
 
 		};
 		

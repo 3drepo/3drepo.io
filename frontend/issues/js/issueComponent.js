@@ -37,14 +37,15 @@
 					contentHeight: "&",
 					selectedObjects: "<",
 					setInitialSelectedObjects: "&",
-					userRoles: "<"
+					userRoles: "<",
+					availableRoles: "<"
 				}
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
-	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -55,7 +56,8 @@
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 
 		/*
 		 * Init
@@ -74,15 +76,9 @@
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
-		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "closed", label: "Closed"}
-		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "for_approval", label: "For approval"},
-			{value: "vr", label: "VR"},
+			{value: "vr", label: "VR"}
 		];
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
@@ -99,6 +95,7 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+			console.log(this.data);
 
 			// Data
 
@@ -131,11 +128,26 @@
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
+
+					// Old issues
+					this.issueData.priority = (!this.issueData.priority) ? "none" : this.issueData.priority;
+					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
+					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
+					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
+						assigned_roles: [],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -171,10 +183,24 @@
 				}
 			}
 
+			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
+			}
+
+			// Role
+			if (changes.hasOwnProperty("availableRoles")) {
+				console.log(this.availableRoles);
+				this.projectRoles = this.availableRoles.map(function (availableRole) {
+					/*
+					// Get the actual role and return the last part of it
+					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
+					*/
+					return availableRole.role;
+				});
+				console.log(this.projectRoles);
 			}
 		};
 
@@ -212,12 +238,23 @@
 		 * Init stuff
 		 */
 		this.$onInit = function () {
+			var disableStatus;
+
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
 				issueSelectedObjects = this.selectedObjects;
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
+
+			// Set up statuses
+			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
+			this.statuses = [
+				{value: "open", label: "Open", disabled: disableStatus},
+				{value: "in progress", label: "In progress", disabled: false},
+				{value: "for approval", label: "For approval", disabled: false},
+				{value: "closed", label: "Closed", disabled: disableStatus}
+			];
 		};
 
 		/**
@@ -238,10 +275,44 @@
 		 * Handle status change
 		 */
 		this.statusChange = function () {
+			var data,
+				comment;
+
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
+			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
+				data = {
+					priority: self.issueData.priority,
+					status: self.issueData.status,
+					topic_type: self.issueData.topic_type,
+					assigned_roles: self.issueData.assigned_roles
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (response) {
+						console.log(response);
+
+						// Add info for new comment
+						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						comment.comment = IssuesService.convertActionCommentToText(comment);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						self.issueData.comments.push(comment);
+
+						// Update last but one comment in case it was "sealed"
+						if (self.issueData.comments.length > 1) {
+							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							if (comment.action) {
+								comment.comment = IssuesService.convertActionCommentToText(comment);
+							}
+							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+						}
+
+						// The status could have changed due to assigning role
+						self.issueData.status = response.data.issue.status;
+						self.issueData.assigned_roles = response.data.issue.assigned_roles;
+						IssuesService.updatedIssue = self.issueData;
+					});
 			}
 		};
 
@@ -289,10 +360,10 @@
 		/**
 		 * Show viewpoint
 		 * @param event
-		 * @param viewpoint
+		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
-			if (event.type === "click") {
+			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
@@ -509,7 +580,7 @@
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
-				assigned_roles: [],
+				assigned_roles: self.issueData.assigned_roles,
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
@@ -550,23 +621,6 @@
 
 					startNotification();
 			});
-		}
-
-		/**
-		 * Update an existing issue and notify parent
-		 */
-		function updateIssue () {
-			var data = {
-				priority: self.issueData.priority,
-				status: self.issueData.status,
-				topic_type: self.issueData.topic_type
-			};
-			IssuesService.updateIssue(self.issueData, data)
-				.then(function (data) {
-					IssuesService.updatedIssue = self.issueData;
-				});
-			
-			self.submitDisabled = true;
 		}
 
 		/**
@@ -726,13 +780,64 @@
 			};
 		}
 
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			var roleColor = IssuesService.getRoleColor(role);
+			if (roleColor !== null) {
+				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("border", "none");
+			}
+			else {
+				issueRoleIndicator.css("background", "none");
+				issueRoleIndicator.css("border", "1px solid #DDDDDD");
+			}
+		}
+
+		/**
+		 * Check if user has a role same as the creator role
+		 * @returns {boolean}
+		 */
+		function userHasCreatorRole () {
+			var i, iLength,
+				hasCreatorRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
+				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			}
+
+			return hasCreatorRole;
+		}
+
+		/**
+		 * Check if user has admin role
+		 * @returns {boolean}
+		 */
+		function userHasAdminRole () {
+			var i, iLength, j, jLength,
+				hasAdminRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+				}
+			}
+
+			return hasAdminRole;
+		}
+
+		/**
+		 * Set the content height
+		 */
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 425,
+				newIssueHeight = 285,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 70,
+				additionalInfoHeight = 140,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;
@@ -755,7 +860,7 @@
 				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
 					}
 				}

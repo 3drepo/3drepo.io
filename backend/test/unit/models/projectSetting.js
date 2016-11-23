@@ -77,7 +77,9 @@ describe('Project Settings', function(){
 					lon: 234,
 					y: 5
 				},
-				unit: "metre"
+				unit: "metre",
+				topicTypes: ['a', 'b'],
+				code: '09ABC'
 
 			};
 

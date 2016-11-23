@@ -10,20 +10,23 @@
 		ng-class="{issueListItemFocus: issue.focus}")
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
-			#issuesListItemContent(layout='row')
-				.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
-					img(ng-src="{{issue.thumbnailPath}}")
-				div(flex, layout="column")
-					label#issuesListItemTitle(flex="none") {{issue.title}}
-					#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
-						div(flex="15")
-							md-icon.angular-material-icons#issueCompStatus(
-							style="color:{{$ctrl.IssuesService.getStatusIcon(issue).colour}}") {{$ctrl.IssuesService.getStatusIcon(issue).icon}}
-						label(flex) {{issue.owner}}
-						div(layout="row", layout-align="end", flex="30")
-							label {{issue.timeStamp}}
-					#issuesListItemDescription
-						label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
+			//#issuesListItemContent(layout='column')
+				#issueRoleIndicator(flex)
+				div(layout='row')
+					.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
+						img(ng-src="{{issue.thumbnailPath}}")
+					div(flex, layout="column")
+						label#issuesListItemTitle(flex="none") {{issue.title}}
+						#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
+							div(flex="15")
+								md-icon.angular-material-icons#issueCompStatus(
+								style="color:{{$ctrl.IssuesService.getStatusIcon(issue).colour}}") {{$ctrl.IssuesService.getStatusIcon(issue).icon}}
+							label(flex) {{issue.owner}}
+							div(layout="row", layout-align="end", flex="30")
+								label {{issue.timeStamp}}
+						#issuesListItemDescription
+							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
+			issues-list-item(data="issue", user-roles="$ctrl.userRoles")
 			md-divider
 
 			#issuesListItemEnter(ng-if="issue.selected", ng-click="$ctrl.editIssue(issue)", layout="column", layout-align="center center")

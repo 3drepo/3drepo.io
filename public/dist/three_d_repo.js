@@ -12243,329 +12243,6 @@ angular.module('3drepo')
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function() {
-    "use strict";
-
-    angular.module("3drepo")
-        .directive("issueArea", issueArea);
-
-    function issueArea() {
-        return {
-            restrict: "EA",
-            templateUrl: "issueArea.html",
-            scope: {
-                data: "=",
-                type: "="
-            },
-            link: function (scope, element) {
-                // Cleanup when destroyed
-                element.on('$destroy', function(){
-                    scope.vm.eventsWatch(); // Disable events watch
-                });
-            },
-            controller: IssueAreaCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
-
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
-
-    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
-        var vm = this,
-            canvas,
-            canvasColour = "rgba(0 ,0 ,0, 0)",
-            myCanvas,
-            penIndicator,
-            mouse_drag_x = 0, mouse_drag_y = 0,
-            last_mouse_drag_x = -1, last_mouse_drag_y = -1,
-            mouse_button = 0,
-            mouse_dragging = false,
-            pen_col = "#FF0000",
-            initialPenIndicatorSize = 10,
-            penIndicatorSize = initialPenIndicatorSize,
-            penToIndicatorRatio = 0.8,
-            pen_size = penIndicatorSize * penToIndicatorRatio,
-            mouseWheelDirectionUp = null,
-            hasDrawnOnCanvas = false;
-
-        /*
-         * Init
-         */
-        $timeout(function () {
-            if (angular.isDefined(vm.data)) {
-                if (vm.data.hasOwnProperty("scribble")) {
-                    vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
-                }
-            }
-            else {
-                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
-                myCanvas = document.getElementById("issueAreaCanvas");
-                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
-                penIndicator.css("font-size", penIndicatorSize + "px");
-                vm.pointerEvents = "auto";
-                vm.showPenIndicator = false;
-                resizeCanvas();
-                initCanvas(myCanvas);
-                if (angular.isDefined(vm.type)) {
-                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
-                }
-            }
-        });
-
-        /*
-         * Setup event watch
-         */
-        vm.eventsWatch = $scope.$watch(EventService.currentEvent, function(event) {
-            if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
-                if (event.value === "scribble") {
-                    setupScribble();
-                }
-                else if (event.value === "erase") {
-                    setupErase();
-                }
-                else if (event.value === "pin") {
-                    setupPin();
-                }
-            }
-            else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
-                var png = null;
-                if (hasDrawnOnCanvas) {
-                    png = myCanvas.toDataURL('image/png');
-                    // Remove base64 header text
-                    png = png.substring(png.indexOf(",") + 1);
-                }
-                event.value.promise.resolve(png);
-            }
-        });
-
-        /**
-         * Make the canvas the same size as the area
-         */
-        function resizeCanvas () {
-            canvas.attr("width", $element[0].offsetWidth);
-            canvas.attr("height", $element[0].offsetHeight);
-        }
-
-        /**
-         * Setup canvas and event listeners
-         *
-         * @param canvas
-         */
-        function initCanvas(canvas)
-        {
-            clearCanvas();
-
-            canvas.addEventListener('mousedown', function (evt) {
-                mouse_drag_x = evt.layerX;
-                mouse_drag_y = evt.layerY;
-                mouse_dragging = true;
-
-                updateImage(canvas);
-
-                window.status='DOWN: '+evt.layerX+", "+evt.layerY;
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-                vm.pointerEvents = "none";
-            }, false);
-
-            canvas.addEventListener('mouseup', function (evt) {
-                mouse_button = 0;
-                mouse_dragging = false;
-                last_mouse_drag_x = -1;
-                last_mouse_drag_y = -1;
-
-                updateImage(canvas);
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
-            }, false);
-
-            canvas.addEventListener('mouseout', function (evt) {
-                mouse_button = 0;
-                mouse_dragging = false;
-                last_mouse_drag_x = -1;
-                last_mouse_drag_y = -1;
-
-                updateImage(canvas);
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
-            }, false);
-
-            canvas.addEventListener('mousemove', function (evt) {
-                window.status='MOVE: ' + evt.layerX + ", " + evt.layerY;
-                mouse_drag_x = evt.layerX;
-                mouse_drag_y = evt.layerY;
-
-                if (!mouse_dragging && !vm.showPenIndicator) {
-                    $timeout(function () {
-                        vm.showPenIndicator = true;
-                    });
-                }
-                else {
-                    if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
-                        hasDrawnOnCanvas = true;
-                    }
-                    updateImage(canvas);
-                }
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-                setPenIndicatorPosition(evt.layerX, evt.layerY);
-            }, false);
-
-            // Disable changing on pen size with mouse wheel
-            /*
-            canvas.addEventListener('wheel', function (evt) {
-                var penToIndicatorRation = 0.8;
-
-                if (evt.deltaY === 0) {
-                    mouseWheelDirectionUp = null;
-                    initialPenIndicatorSize = penIndicatorSize;
-                }
-                else if ((evt.deltaY === 1) && (mouseWheelDirectionUp === null)) {
-                    mouseWheelDirectionUp = false;
-                    penIndicatorSize = initialPenIndicatorSize;
-                }
-                else if ((evt.deltaY === -1) && (mouseWheelDirectionUp === null)) {
-                    mouseWheelDirectionUp = true;
-                    penIndicatorSize = initialPenIndicatorSize;
-                }
-                else {
-                    penIndicatorSize += mouseWheelDirectionUp ? 1 : -1;
-                    penIndicatorSize = (penIndicatorSize < 0) ? 0 : penIndicatorSize;
-                    penIndicator.css("font-size", penIndicatorSize + "px");
-                    setPenIndicatorPosition(evt.layerX, evt.layerY);
-
-                    pen_size += mouseWheelDirectionUp ? penToIndicatorRation : -penToIndicatorRation;
-                    pen_size = (pen_size < 0) ? 0 : pen_size;
-                }
-            }, false);
-            */
-        }
-
-        /**
-         * Update the canvas
-         *
-         * @param canvas
-         */
-        function updateImage(canvas)
-        {
-            var context = canvas.getContext("2d");
-
-            if (!mouse_dragging) {
-                return;
-            }
-
-            if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0)
-            {
-                last_mouse_drag_x = mouse_drag_x;
-                last_mouse_drag_y = mouse_drag_y;
-                return;
-            }
-
-            // redraw the canvas...
-            context.lineWidth = pen_size;
-
-            // Draw line
-            context.beginPath();
-            context.strokeStyle = pen_col;
-            context.moveTo(last_mouse_drag_x, last_mouse_drag_y);
-            context.lineTo(mouse_drag_x, mouse_drag_y);
-            context.stroke();
-
-            last_mouse_drag_x = mouse_drag_x;
-            last_mouse_drag_y = mouse_drag_y;
-        }
-
-        /**
-         * Clear the canvas
-         */
-        function clearCanvas () {
-            var context = myCanvas.getContext("2d");
-            context.clearRect(0, 0, myCanvas.width, myCanvas.height);
-            context.fillStyle = canvasColour;
-            context.fillRect(0, 0, myCanvas.width, myCanvas.height);
-            context.lineCap = "round";
-        }
-
-        /**
-         * Set up placing of the pin
-         */
-        function setupPin () {
-            vm.canvasPointerEvents = "none";
-        }
-
-        /**
-         * Erase the canvas
-         */
-        function setupErase () {
-            var context = myCanvas.getContext("2d");
-            context.globalCompositeOperation = "destination-out";
-            pen_col = "rgba(0, 0, 0, 1)";
-            vm.canvasPointerEvents = "auto";
-        }
-
-        /**
-         * Set up drawing
-         */
-        function setupScribble () {
-            var context = myCanvas.getContext("2d");
-            context.globalCompositeOperation = "source-over";
-            pen_col = "#FF0000";
-            pen_size = penIndicatorSize;
-            vm.canvasPointerEvents = "auto";
-        }
-
-        /*
-         * Watch for screen resize
-         */
-        angular.element($window).bind("resize", function() {
-            //resizeCanvas();
-        });
-
-        /**
-         * Move the pen indicator
-         * @param x
-         * @param y
-         */
-        function setPenIndicatorPosition (x, y) {
-            var positionFactor = 2.2;
-            penIndicator.css("left", (x - (penIndicatorSize / positionFactor)) + "px");
-            penIndicator.css("top", (y - (penIndicatorSize / positionFactor)) + "px");
-        }
-    }
-}());
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
  *	it under the issueComp of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
  *	License, or (at your option) any later version.
@@ -12601,14 +12278,21 @@ angular.module('3drepo')
 					contentHeight: "&",
 					selectedObjects: "<",
 					setInitialSelectedObjects: "&",
-					userRoles: "<"
+					userRoles: "<",
+					availableRoles: "<"
 				}
 			}
 		);
 
+<<<<<<< HEAD
 	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
 	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
+=======
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
+
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
+>>>>>>> origin/PINAKIN_TEST
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12619,7 +12303,8 @@ angular.module('3drepo')
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 
 		/*
 		 * Init
@@ -12638,15 +12323,9 @@ angular.module('3drepo')
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
-		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "closed", label: "Closed"}
-		];
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
-			{value: "for_approval", label: "For approval"},
-			{value: "vr", label: "VR"},
+			{value: "vr", label: "VR"}
 		];
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
@@ -12683,6 +12362,7 @@ angular.module('3drepo')
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
+<<<<<<< HEAD
 					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
@@ -12692,14 +12372,32 @@ angular.module('3drepo')
 							}
 						}
 					}
+=======
+					this.canUpdate = ((this.account === this.issueData.owner) || userHasCreatorRole());
+>>>>>>> origin/PINAKIN_TEST
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
+
+					// Old issues
+					this.issueData.priority = (!this.issueData.priority) ? "none" : this.issueData.priority;
+					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
+					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
+					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
+						assigned_roles: [],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -12735,10 +12433,24 @@ angular.module('3drepo')
 				}
 			}
 
+			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
+			}
+
+			// Role
+			if (changes.hasOwnProperty("availableRoles")) {
+				console.log(this.availableRoles);
+				this.projectRoles = this.availableRoles.map(function (availableRole) {
+					/*
+					// Get the actual role and return the last part of it
+					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
+					*/
+					return availableRole.role;
+				});
+				console.log(this.projectRoles);
 			}
 		};
 
@@ -12776,12 +12488,23 @@ angular.module('3drepo')
 		 * Init stuff
 		 */
 		this.$onInit = function () {
+			var disableStatus;
+
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
 				issueSelectedObjects = this.selectedObjects;
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
+
+			// Set up statuses
+			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
+			this.statuses = [
+				{value: "open", label: "Open", disabled: disableStatus},
+				{value: "in progress", label: "In progress", disabled: false},
+				{value: "for approval", label: "For approval", disabled: false},
+				{value: "closed", label: "Closed", disabled: disableStatus}
+			];
 		};
 
 		/**
@@ -12802,10 +12525,25 @@ angular.module('3drepo')
 		 * Handle status change
 		 */
 		this.statusChange = function () {
+			var data;
+
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
+			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
+				data = {
+					priority: self.issueData.priority,
+					status: self.issueData.status,
+					topic_type: self.issueData.topic_type,
+					assigned_roles: self.issueData.assigned_roles
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (response) {
+						console.log(response);
+						self.issueData.status = response.data.issue.status;
+						self.issueData.assigned_roles = response.data.issue.assigned_roles;
+						IssuesService.updatedIssue = self.issueData;
+					});
 			}
 		};
 
@@ -12817,6 +12555,7 @@ angular.module('3drepo')
 
 
 			if (self.data) {
+<<<<<<< HEAD
 
 				var canUpdate = (Auth.getUsername() === self.data.owner);
 				if (!canUpdate) {
@@ -12844,6 +12583,9 @@ angular.module('3drepo')
 				else {
 					saveComment();
 				}
+=======
+				saveComment();
+>>>>>>> origin/PINAKIN_TEST
 			}
 			else {
 				saveIssue();
@@ -13073,7 +12815,7 @@ angular.module('3drepo')
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
-				assigned_roles: [],
+				assigned_roles: self.issueData.assigned_roles,
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
@@ -13114,23 +12856,6 @@ angular.module('3drepo')
 
 					startNotification();
 			});
-		}
-
-		/**
-		 * Update an existing issue and notify parent
-		 */
-		function updateIssue () {
-			var data = {
-				priority: self.issueData.priority,
-				status: self.issueData.status,
-				topic_type: self.issueData.topic_type
-			};
-			IssuesService.updateIssue(self.issueData, data)
-				.then(function (data) {
-					IssuesService.updatedIssue = self.issueData;
-				});
-			
-			self.submitDisabled = true;
 		}
 
 		/**
@@ -13290,13 +13015,64 @@ angular.module('3drepo')
 			};
 		}
 
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			var roleColor = IssuesService.getRoleColor(role);
+			if (roleColor !== null) {
+				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("border", "none");
+			}
+			else {
+				issueRoleIndicator.css("background", "none");
+				issueRoleIndicator.css("border", "1px solid #DDDDDD");
+			}
+		}
+
+		/**
+		 * Check if user has a role same as the creator role
+		 * @returns {boolean}
+		 */
+		function userHasCreatorRole () {
+			var i, iLength,
+				hasCreatorRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
+				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			}
+
+			return hasCreatorRole;
+		}
+
+		/**
+		 * Check if user has admin role
+		 * @returns {boolean}
+		 */
+		function userHasAdminRole () {
+			var i, iLength, j, jLength,
+				hasAdminRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+				}
+			}
+
+			return hasAdminRole;
+		}
+
+		/**
+		 * Set the content height
+		 */
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 425,
+				newIssueHeight = 285,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 70,
+				additionalInfoHeight = 140,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;
@@ -13319,7 +13095,7 @@ angular.module('3drepo')
 				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
 					}
 				}
@@ -14685,7 +14461,8 @@ angular.module('3drepo')
 					contentHeight: "&",
 					menuOption: "<",
 					importBcf: "&",
-					selectedIssue: "<"
+					selectedIssue: "<",
+					userRoles: "<"
 				}
 			}
 		);
@@ -14696,7 +14473,7 @@ angular.module('3drepo')
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 147,
+			issuesListItemHeight = 141,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,
@@ -15177,6 +14954,118 @@ angular.module('3drepo')
 }());
 
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesListItem of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesListItem",
+			{
+				controller: IssuesListItemCtrl,
+				templateUrl: "issuesListItem.html",
+				bindings: {
+					data: "<",
+					userRoles: "<"
+				}
+			}
+		);
+
+	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
+
+	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
+		var self = this,
+			issueRoleIndicator = null;
+
+		/*
+		 * Init
+		 */
+		this.IssuesService = IssuesService;
+
+		/**
+		 * Init callback
+		 */
+		this.$onInit = function () {
+			// Role indicator
+			$timeout(function () {
+				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
+				setRoleIndicatorColour();
+			});
+		};
+
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
+		this.$onChanges = function (changes) {
+			// Data
+			if (changes.hasOwnProperty("data") && this.data) {
+				setRoleIndicatorColour();
+
+				// Title
+				if (this.userRoles) {
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				}
+			}
+
+			// User roles
+			if (changes.hasOwnProperty("userRoles") && this.userRoles) {
+				// Title
+				if (this.data) {
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				}
+			}
+		};
+
+		/**
+		 * Set role indicator colour
+		 */
+		function setRoleIndicatorColour () {
+			var assignedRoleColour;
+
+			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
+				assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				if (assignedRoleColour !== null) {
+					issueRoleIndicator.css("border", "none");
+					issueRoleIndicator.css("background", assignedRoleColour);
+				}
+			}
+		}
+
+		/**
+		 * Check if the issue is assigned to one of the user's roles
+		 */
+		function issueIsAssignedToAUserRole () {
+			var i, iLength, j, jLength,
+				isAssignedToAUserRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !isAssignedToAUserRole; i += 1) {
+				for (j = 0, jLength = self.data.assigned_roles.length; (j < jLength) && !isAssignedToAUserRole; j += 1) {
+					isAssignedToAUserRole = (self.userRoles[i] === self.data.assigned_roles[j]);
+				}
+			}
+
+			return isAssignedToAUserRole;
+		}
+	}
+}());
+
+/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -15410,7 +15299,7 @@ angular.module('3drepo')
 				issue,
 				{
 					assigned_roles: issue.assigned_roles,
-					number: issue.number
+					number: 0 //issue.number
 				}
 			);
 		};
@@ -15544,16 +15433,13 @@ angular.module('3drepo')
 		};
 
 		obj.getRoleColor = function(role) {
-			var i = 0,
-				length = 0,
-				roleColor;
+			var i, length,
+				roleColor = null;
 
-			if (availableRoles.length > 0) {
-				for (i = 0, length = availableRoles.length; i < length; i += 1) {
-					if (availableRoles[i].role === role) {
-						roleColor = availableRoles[i].color;
-						break;
-					}
+			for (i = 0, length = availableRoles.length; i < length; i += 1) {
+				if (availableRoles[i].role === role && availableRoles[i].color) {
+					roleColor = availableRoles[i].color;
+					break;
 				}
 			}
 			return roleColor;
@@ -15565,26 +15451,35 @@ angular.module('3drepo')
 		obj.getStatusIcon = function (issue) {
 			var statusIcon = {};
 
-			if (issue.status === "closed") {
-				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
+			switch (issue.priority) {
+				case "none":
+					statusIcon.colour = "#7777777";
+					break;
+				case "low":
+					statusIcon.colour = "#4CAF50";
+					break;
+				case "medium":
+					statusIcon.colour = "#FF9800";
+					break;
+				case "high":
+					statusIcon.colour = "#F44336";
+					break;
 			}
-			else {
-				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (issue.priority) {
-					case "none":
-						statusIcon.colour = "#7777777";
-						break;
-					case "low":
-						statusIcon.colour = "#4CAF50";
-						break;
-					case "medium":
-						statusIcon.colour = "#FF9800";
-						break;
-					case "high":
-						statusIcon.colour = "#F44336";
-						break;
-				}
+
+			switch (issue.status) {
+				case "open":
+					statusIcon.icon = "panorama_fish_eye";
+					break;
+				case "in progress":
+					statusIcon.icon = "lens";
+					break;
+				case "for approval":
+					statusIcon.icon = "adjust";
+					break;
+				case "closed":
+					statusIcon.icon = "check_circle";
+					statusIcon.colour = "#004594";
+					break;
 			}
 
 			return statusIcon;
