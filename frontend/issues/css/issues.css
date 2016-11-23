@@ -227,6 +227,8 @@ issues-list .closedText{
   padding: 15px 25px;
   background-color: rgba(255,255,255,0.9);
   border: 1px solid #DDDDDD;
+}
+
 /** Issues List Item **************************************************************************************************/
 .userRoleIssueListItemTitle {
   border: 1px solid rgba(0, 69, 148, 0.3);
