@@ -1106,7 +1106,8 @@ schema.methods.clean = function(typePrefix, projectCode){
 		
 	});
 
-	if( cleaned.comments.length > 0 && 
+	if( cleaned.comments &&
+		cleaned.comments.length > 0 && 
 		cleaned.viewpoints[0] && 
 		cleaned.comments[0].viewpoint && 
 		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){

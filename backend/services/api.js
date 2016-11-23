@@ -37,11 +37,7 @@ module.exports.createApp = function (serverConfig) {
 	// Attach the encoders to the router
 	require("../encoders/x3dom_encoder.js").route(routes);
 	require("../encoders/json_encoder.js").route(routes);
-	//require("../encoders/html_encoder.js").route(routes);
-	//require("../encoders/src_encoder.js").route(routes);
-	require("../encoders/img_encoder.js").route(routes);
-    require("../encoders/bin_encoder.js").route(routes);
-    require("../encoders/gltf_encoder.js").route(routes);
+
 
 	let bodyParser = require("body-parser");
 	let app = express();
@@ -137,12 +133,6 @@ module.exports.createApp = function (serverConfig) {
 	// payment api header
 	app.use('/payment', require('../routes/payment'));
 
-	if(config.test_helper_api){
-		// test helpers
-		app.use("/tests", require("../js/core/handlers/testHelper"));
-		// api doc console
-		app.use(express.static("doc"));
-	}
 
 	//project handlers
 	app.use("/:account", require("../routes/project"));
