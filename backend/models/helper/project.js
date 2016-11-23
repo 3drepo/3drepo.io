@@ -88,6 +88,9 @@ function createAndAssignRole(project, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+	if(data.code && !ProjectSetting.projectCodeRegExp.test(data.code)){
+		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_CODE });
+	}
 
 	if(!data.unit){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
@@ -154,11 +157,25 @@ function createAndAssignRole(project, account, username, data) {
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
-			topicTypes: data.topicTypes
 		});
 
+		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
+		
 		return setting.save();
 
+	}).then(setting => {
+
+		// this is true if only admin can create project
+		return {
+
+			setting,
+			project: {
+				account,
+				project,
+				roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+			}
+
+		};
 	});
 }
 
@@ -298,9 +315,9 @@ function importToyProject(username){
 		desc, type, unit: 'm'
 	};
 	
-	return createAndAssignRole(project, account, username, data).then(setting => {
+	return createAndAssignRole(project, account, username, data).then(data => {
 		//console.log('setting', setting);
-		return Promise.resolve(setting);
+		return Promise.resolve(data.setting);
 
 	}).then(setting => {
 

@@ -73,7 +73,9 @@
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;

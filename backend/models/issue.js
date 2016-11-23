@@ -195,7 +195,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(settings.type);
+			issues[index] = noClean ? issue: issue.clean(settings.type, settings.properties.code);
 		});
 
 		return Promise.resolve(issues);
@@ -636,11 +636,12 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
 
-			let cleaned = issue.clean(settings.type);
+			let cleaned = issue.clean(settings.type, settings.properties.code);
 			
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
 
 			return Promise.resolve(cleaned);
+
 		});
 
 	});
@@ -995,7 +996,7 @@ schema.methods.updateAttrs = function(data){
 
 			throw responseCodes.ISSUE_INVALID_STATUS;
 
-		} else if (data.status === statusEnum.CLOSED && data.owner_roles.indexOf(this.creator_role) === -1){
+		} else if (data.status === statusEnum.CLOSED && !data.isAdmin && data.owner_roles.indexOf(this.creator_role) === -1){
 
 			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 
@@ -1040,12 +1041,13 @@ schema.methods.updateAttrs = function(data){
 
 };
 
-schema.methods.clean = function(typePrefix){
+schema.methods.clean = function(typePrefix, projectCode){
 	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.typePrefix = typePrefix;
+	cleaned.projectCode = projectCode;
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;

@@ -82,7 +82,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasWriteAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -101,8 +101,10 @@ function updateSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+
 		projectSetting.updateProperties(req.body);
 		return projectSetting.save();
+
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {
@@ -190,6 +192,8 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
+		setting = setting.toObject();
+		
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
 
@@ -229,8 +233,8 @@ function createProject(req, res, next){
 		topicTypes: req.body.topicTypes
 	};
 
-	createAndAssignRole(project, account, username, data).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	createAndAssignRole(project, account, username, data).then(data => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.project);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

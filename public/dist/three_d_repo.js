@@ -6573,6 +6573,7 @@ var ViewerManager = {};
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
+				isAccountAdmin: "=",
 				subscriptions: "="
 			},
 			controller: AccountProjectCtrl,
@@ -6600,6 +6601,22 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
+<<<<<<< HEAD
+=======
+
+		function checkProjectPermission(action){
+			if(action === 'upload' || action === 'download'){
+				
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
+
+			} else if (action === 'delete' || action === 'projectsetting') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1;
+			}
+		}
+
+		vm.selectedFile = null;
+>>>>>>> origin/HENRY_TEST
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6609,16 +6626,21 @@ var ViewerManager = {};
 		vm.project.canUpload = true;
 		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !checkProjectPermission('upload')},
 			team: {label: "Team", icon: "group", hidden: !isUserAccount},
 			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
-			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
+			projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission('projectsetting')}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
 		}
+<<<<<<< HEAD
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 		vm.uploadButtonDisabled = true;
+=======
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
+
+>>>>>>> origin/HENRY_TEST
 		checkFileUploading();
 
 		/*
@@ -6661,9 +6683,18 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
+<<<<<<< HEAD
 					vm.tag = null;
 					vm.desc = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+=======
+					if(checkProjectPermission('upload')){
+						vm.tag = null;
+						vm.desc = null;
+						vm.selectedFile = null;
+						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+					}
+>>>>>>> origin/HENRY_TEST
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6680,8 +6711,8 @@ var ViewerManager = {};
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "projectsetting":
-					console.log('Settings clicked');
 					$location.search("proj", vm.project.name);
+					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
 					break;
 
@@ -6705,7 +6736,7 @@ var ViewerManager = {};
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project});
+					vm.onSetupDeleteProject({event: event, project: vm.project, account: vm.account});
 					break;
 
 				case "revision":
@@ -6788,9 +6819,18 @@ var ViewerManager = {};
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account + ".json");
+			promise = UtilsService.doGet(vm.userAccount + ".json");
+
 			promise.then(function (response) {
-				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+
+				var targetAccount = response.data.accounts.find(function(account){
+					return account.account === vm.account;
+				});
+
+				var quota = targetAccount.quota;
+				vm.targetAccountQuota = quota;
+
+				if (file.size > (quota.spaceLimit - quota.spaceUsed)) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
@@ -7005,6 +7045,7 @@ var ViewerManager = {};
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
+				//console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -7017,7 +7058,7 @@ var ViewerManager = {};
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
-					vm.accounts[i].canAddProject = (i === 0);
+					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
 				}
 			}
 		});
@@ -7099,13 +7140,13 @@ var ViewerManager = {};
 		/**
 		 * Bring up dialog to add a new project
 		 */
-		vm.newProject = function (event) {
+		vm.newProject = function (event, accountForProject) {
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
-				account: vm.account,
+				account: accountForProject,
 				type: vm.projectTypes[0]
 			};
 			vm.newProjectFileToUpload = null;
@@ -7157,10 +7198,11 @@ var ViewerManager = {};
 						// Add project to list
 						project = {
 							project: response.data.project,
+							roleFunctions: response.data.roleFunctions,
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects (response.data.account, project);
+						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
 					}
 				});
@@ -7225,12 +7267,13 @@ var ViewerManager = {};
 		 * @param {Object} event
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (event, project) {
+		vm.setupDeleteProject = function (event, project, account) {
 			vm.projectToDelete = project;
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Project";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.projectToDelete.name;
+			vm.targetAccountToDeleteProject = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
@@ -7240,7 +7283,7 @@ var ViewerManager = {};
 		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteProject + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list
@@ -7303,6 +7346,7 @@ var ViewerManager = {};
 				vm.accounts.push(accountToUpdate);
 			}
 
+			console.log('vmaccounts', vm.accounts);
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
@@ -7364,6 +7408,8 @@ var ViewerManager = {};
 
 		vm.goBack = function () {
 			$location.search("project", null);
+			$location.search("targetAcct", null);
+
 			vm.showPage({page: "repos"});
 		};
 
@@ -7371,9 +7417,22 @@ var ViewerManager = {};
 
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
+		vm.targetAcct = $location.search().targetAcct;
 
 
-		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		function convertTopicTypesToString(topicTypes){
+
+			var result = [];
+
+			topicTypes.forEach(function(type){
+				result.push(type.label);
+			});
+
+			return result.join('\n');
+		}
+
+
+		UtilsService.doGet(vm.targetAcct + "/" + vm.projectName + ".json")
 		.then(function (response) {
 
 			if (response.status === 200 && response.data.properties) {
@@ -7383,9 +7442,12 @@ var ViewerManager = {};
 					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
 					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
 					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
-					vm.projectType = response.data.type;
 				}
 
+				vm.projectType = response.data.type;
+
+				response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
+				response.data.properties.code && (vm.code = response.data.properties.code);
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
 				vm.oldUnit = vm.unit;
 
@@ -7400,13 +7462,16 @@ var ViewerManager = {};
 
 			var data = {
 				mapTile: vm.mapTile,
-				unit: vm.unit
+				unit: vm.unit,
+				code: vm.code,
+				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
-			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.projectName +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
+					response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
 					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
@@ -7593,9 +7658,10 @@ var ViewerManager = {};
 			var data = {
 				desc: "",
 				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
-				unit: projectData.unit
+				unit: projectData.unit,
+				code: projectData.code
 			};
-			return doPost(data, projectData.account + "/" + projectData.name);
+			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
 		};
 
 		/**
@@ -12277,6 +12343,7 @@ angular.module('3drepo')
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
+					projectSettings: '<',
 					setInitialSelectedObjects: "&",
 					userRoles: "<",
 					availableRoles: "<"
@@ -12323,10 +12390,20 @@ angular.module('3drepo')
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
+<<<<<<< HEAD
 		this.topic_types = [
 			{value: "for_information", label: "For information"},
 			{value: "vr", label: "VR"}
 		];
+=======
+		this.statuses = [
+			{value: "open", label: "Open"},
+			{value: "in progress", label: "In progress"},
+			{value: "for approval", label: "For approval"},
+			{value: "closed", label: "Closed"}
+		];
+
+>>>>>>> origin/HENRY_TEST
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
 			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
@@ -12342,6 +12419,10 @@ angular.module('3drepo')
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+
+			if(changes.hasOwnProperty('projectSettings')){
+				this.topic_types = this.projectSettings.topicTypes;
+			}
 
 			// Data
 
@@ -13963,6 +14044,7 @@ angular.module('3drepo')
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
+				projectSettings: "=",
 				show: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
@@ -13988,6 +14070,7 @@ angular.module('3drepo')
 			projectUserRolesPromise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
+
 
 		/*
 		 * Init
@@ -15141,7 +15224,9 @@ angular.module('3drepo')
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;
@@ -16223,6 +16308,7 @@ var Oculus = {};
 				branch: "=",
 				revision: "=",
                 position: "=",
+                projectSettings: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -16374,6 +16460,7 @@ var Oculus = {};
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
+				"project-settings='vm.projectSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
 				"selected-objects='vm.selectedObjects' " +
@@ -17115,6 +17202,7 @@ var Oculus = {};
 				revision: "=",				
                 position: "@",
 				keysDown: "=",
+				projectSettings: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },

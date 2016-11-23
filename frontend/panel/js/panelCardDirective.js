@@ -31,6 +31,7 @@
 				branch: "=",
 				revision: "=",
                 position: "=",
+                projectSettings: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -182,6 +183,7 @@
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
+				"project-settings='vm.projectSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
 				"selected-objects='vm.selectedObjects' " +

@@ -31,6 +31,7 @@
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
+				projectSettings: "=",
 				show: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
@@ -56,6 +57,7 @@
 			projectUserRolesPromise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
+
 
 		/*
 		 * Init
