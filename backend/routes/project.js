@@ -39,10 +39,6 @@ var getDbColOptions = function(req){
 };
 
 
-// bid4free exclusive api get project info
-router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
-//  bid4free exclusive api update project info
-router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProjectSetting);
 
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
@@ -122,53 +118,6 @@ function _getProject(req){
 		} else {
 			return Promise.resolve(setting);
 		}
-	});
-}
-
-function B4F_getProjectSetting(req, res, next){
-	'use strict';
-
-	let place = '/:account/:project/info.json GET';
-	_getProject(req).then(setting => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, setting.info);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function B4F_updateProjectSetting(req, res, next){
-	'use strict';
-
-	let place = '/:account/:project/info.json POST';
-
-	ProjectSetting.findById(getDbColOptions(req), req.params.project).then(setting => {
-
-		if(!setting){
-			setting = ProjectSetting.createInstance(getDbColOptions(req));
-			setting._id = req.params.project;
-		}
-		return Promise.resolve(setting);
-
-	}).then(setting => {
-
-		let whitelist = [
-			'name',
-			'site',
-			'code',
-			'client',
-			'budget',
-			'completedBy',
-			'contact'
-		];
-
-		setting.info = setting.info || {};
-		setting.info = utils.writeCleanedBodyToModel(whitelist, req.body, setting.info);
-		return setting.save();
-
-	}).then(setting => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, setting.info);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 

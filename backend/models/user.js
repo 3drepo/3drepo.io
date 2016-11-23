@@ -46,13 +46,6 @@ var schema = mongoose.Schema({
 	//db: String,
 	customData: {
 
-		bids: [{
-			package: String,
-			project: String,
-			account: String,
-			role: String
-		}],
-
 		projects: [{
 			account: String,
 			project: String

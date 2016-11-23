@@ -53,18 +53,6 @@ var schema = mongoose.Schema({
 		}]
 
 	},
-	//bid_4_free only fields
-	info: mongoose.Schema({
-
-		name: String,
-		site: String,
-		code: String,
-		client: String,
-		budget: Number,
-		completedBy: Date,
-		contact: String
-	}),
-
 	//redundant field to speed up listing collaborators
 	collaborators: [{
 		user: String,

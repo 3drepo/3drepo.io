@@ -1646,6 +1646,8 @@ issues-list #issuesListItemEnter md-icon {
 issues-list .issueListItemThumbnail {
   margin-right: 10px;
   height: 120px;
+  width: 120px;
+  background: rgba(0, 69, 148, 0.2);
 }
 
 issues-list #issuesListContainer {
@@ -1673,6 +1675,17 @@ issues-list .closedText{
   padding-left: 4px;
 }
 
+issues-list-item .issueListItemMissingThumbnail {
+  font-size: 50px;
+  width: 50px;
+  height: 50px;
+  opacity: 0.3;
+}
+
+issues-list-item #issueListItemStatus {
+  margin-right: 5px;
+}
+
 /** Issue Comp ********************************************************************************************************/
 issue-comp #issueCompAll {
   outline: none;
@@ -1697,10 +1710,6 @@ issue-comp #issueCompTitle {
 
 issue-comp #issueCompStatus {
   margin: 10px 0 0;
-}
-
-issue-comp textarea {
-  min-height: 70px !important;
 }
 
 issue-comp .issueCompItemStatus {
@@ -1738,7 +1747,6 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
-  word-break: break-all;
 }
 
 issue-comp .issueCompTextActions {
@@ -1764,14 +1772,15 @@ issue-comp #issueCompDescription *:hover {
 }
 
 issue-comp #additionalInfoButton {
-  margin: 0 0 0 -8px;
+  margin: 0 5px 0 -8px;
 }
 
 issue-comp #issueCompAdditional {
   margin-top: -20px;
 }
 
-issue-comp #issueCompNewComment {
+issue-comp #issueCompNewComment md-input-container {
+  margin-bottom: -10px;
 }
 
 issue-comp #descriptionAndComments {
@@ -1780,8 +1789,13 @@ issue-comp #descriptionAndComments {
   background: #f0f0f0;
 }
 
-issue-comp #issueRoleIndicator {
-  margin-left: 7px;
+issue-comp .commentTextLight {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp #issueCompFooterButtons .md-button {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

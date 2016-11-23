@@ -331,25 +331,6 @@
 		});
 	}
 
-	function listUserBid(req, res, next){
-
-		let responsePlace = utils.APIInfo(req);
-		//let user;
-
-		User.findByUserName(req.params.account).then(user => {
-
-			if(!user){
-				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
-			}
-
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user.customData.bids);
-
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-
-	}
-
 	function listUserInfo(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
@@ -407,8 +388,6 @@
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {type});
 			});
 
-		} else if(req.query.hasOwnProperty('bids')){
-			listUserBid(req, res, next);
 		} else {
 			listUserInfo(req, res, next);
 		}

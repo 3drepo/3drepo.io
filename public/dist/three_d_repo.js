@@ -6601,8 +6601,6 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
-<<<<<<< HEAD
-=======
 
 		function checkProjectPermission(action){
 			if(action === 'upload' || action === 'download'){
@@ -6616,7 +6614,6 @@ var ViewerManager = {};
 		}
 
 		vm.selectedFile = null;
->>>>>>> origin/HENRY_TEST
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6634,13 +6631,9 @@ var ViewerManager = {};
 		if(vm.project.timestamp && !vm.project.federate){
 			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
 		}
-<<<<<<< HEAD
-		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 		vm.uploadButtonDisabled = true;
-=======
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
 
->>>>>>> origin/HENRY_TEST
 		checkFileUploading();
 
 		/*
@@ -6683,18 +6676,12 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-<<<<<<< HEAD
-					vm.tag = null;
-					vm.desc = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
-=======
 					if(checkProjectPermission('upload')){
 						vm.tag = null;
 						vm.desc = null;
 						vm.selectedFile = null;
 						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					}
->>>>>>> origin/HENRY_TEST
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -12351,15 +12338,9 @@ angular.module('3drepo')
 			}
 		);
 
-<<<<<<< HEAD
-	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
-	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
-=======
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
-
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
->>>>>>> origin/PINAKIN_TEST
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12390,12 +12371,6 @@ angular.module('3drepo')
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
-<<<<<<< HEAD
-		this.topic_types = [
-			{value: "for_information", label: "For information"},
-			{value: "vr", label: "VR"}
-		];
-=======
 		this.statuses = [
 			{value: "open", label: "Open"},
 			{value: "in progress", label: "In progress"},
@@ -12403,7 +12378,6 @@ angular.module('3drepo')
 			{value: "closed", label: "Closed"}
 		];
 
->>>>>>> origin/HENRY_TEST
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
 			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
@@ -12419,6 +12393,7 @@ angular.module('3drepo')
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
+			console.log(this.data);
 
 			if(changes.hasOwnProperty('projectSettings')){
 				this.topic_types = this.projectSettings.topicTypes;
@@ -12443,7 +12418,6 @@ angular.module('3drepo')
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-<<<<<<< HEAD
 					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
@@ -12453,9 +12427,6 @@ angular.module('3drepo')
 							}
 						}
 					}
-=======
-					this.canUpdate = ((this.account === this.issueData.owner) || userHasCreatorRole());
->>>>>>> origin/PINAKIN_TEST
 
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
@@ -12606,7 +12577,8 @@ angular.module('3drepo')
 		 * Handle status change
 		 */
 		this.statusChange = function () {
-			var data;
+			var data,
+				comment;
 
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
@@ -12621,6 +12593,24 @@ angular.module('3drepo')
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
+
+						// Add info for new comment
+						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						comment.comment = IssuesService.convertActionCommentToText(comment);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						self.issueData.comments.push(comment);
+
+						// Update last but one comment in case it was "sealed"
+						if (self.issueData.comments.length > 1) {
+							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							if (comment.action) {
+								comment.comment = IssuesService.convertActionCommentToText(comment);
+							}
+							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+						}
+
+						// The status could have changed due to assigning role
 						self.issueData.status = response.data.issue.status;
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
@@ -12636,7 +12626,6 @@ angular.module('3drepo')
 
 
 			if (self.data) {
-<<<<<<< HEAD
 
 				var canUpdate = (Auth.getUsername() === self.data.owner);
 				if (!canUpdate) {
@@ -12664,9 +12653,6 @@ angular.module('3drepo')
 				else {
 					saveComment();
 				}
-=======
-				saveComment();
->>>>>>> origin/PINAKIN_TEST
 			}
 			else {
 				saveIssue();
@@ -12676,10 +12662,10 @@ angular.module('3drepo')
 		/**
 		 * Show viewpoint
 		 * @param event
-		 * @param viewpoint
+		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
-			if (event.type === "click") {
+			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
@@ -14562,7 +14548,8 @@ angular.module('3drepo')
 			sortOldestFirst = false,
 			showClosed = false,
 			focusedIssueIndex = null,
-			rightArrowDown = false;
+			rightArrowDown = false,
+			showSubProjectIssues = false;
 
 		// Init
 		this.UtilsService = UtilsService;
@@ -14684,6 +14671,9 @@ angular.module('3drepo')
 					showClosed = !showClosed;
 					IssuesService.issueDisplay.showClosed = showClosed;
 				}
+				else if (this.menuOption.value === "showSubProjects") {
+					showSubProjectIssues = !showSubProjectIssues;
+				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
 				}
@@ -14702,7 +14692,6 @@ angular.module('3drepo')
 					});
 				}
 				setupIssuesToShow();
-				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
 			}
 
@@ -14973,6 +14962,11 @@ angular.module('3drepo')
 						self.issuesToShow.splice(i, 1);
 					}
 				}
+
+				// Sub projects
+				self.issuesToShow = self.issuesToShow.filter(function (issue) {
+					return showSubProjectIssues ? true : (issue.project === self.project);
+				});
 			}
 
 			// Create list of issues to show with pins
@@ -15174,8 +15168,7 @@ angular.module('3drepo')
 	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
 	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
-		var self = this,
-			url = "",
+		var url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -15263,8 +15256,7 @@ angular.module('3drepo')
 		};
 
 		obj.getIssues = function(account, project, revision) {
-			var self = this,
-				deferred = $q.defer();
+			var deferred = $q.defer();
 
 			if(revision){
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
@@ -15277,8 +15269,8 @@ angular.module('3drepo')
 				function(data) {
 					deferred.resolve(data.data);
 					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-						data.data[i].title = self.generateTitle(data.data[i]);
+						data.data[i].timeStamp = obj.getPrettyTime(data.data[i].created);
+						data.data[i].title = obj.generateTitle(data.data[i]);
 						if (data.data[i].thumbnail) {
 							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
 						}
@@ -15288,11 +15280,15 @@ angular.module('3drepo')
 							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
 								// Timestamp
 								if (data.data[i].comments[j].hasOwnProperty("created")) {
-									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+									data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
 								}
 								// Screen shot path
 								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
 									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
+								}
+								// Action comment text
+								if (data.data[i].comments[j].action) {
+									data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
 								}
 							}
 						}
@@ -15443,8 +15439,7 @@ angular.module('3drepo')
 		};
 
 		obj.fixPin = function (pin, colours) {
-			var self = this;
-			self.removePin();
+			obj.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
@@ -15597,6 +15592,93 @@ angular.module('3drepo')
 
 			return deferred.promise;
 		};
+
+		/**
+		 * Convert an action comment to readable text
+		 * @param comment
+		 * @returns {string}
+		 */
+		obj.convertActionCommentToText = function (comment) {
+			var text = "";
+
+			switch (comment.action.property) {
+				case "priority":
+					text = "Priority " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "status":
+					text = "Status " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "assigned_roles":
+					text = "Assigned " +
+						" <span class='commentTextLight'>to</span> " +
+						comment.action.to;
+					if (comment.action.from) {
+						text += " <span class='commentTextLight'>from</span> " +
+							comment.action.from;
+					}
+					break;
+				case "topic_type":
+					text = "Type changed " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+			}
+
+			return text;
+		};
+
+		/**
+		 * Convert an action value to readable text
+		 * @param value
+		 */
+		function convertActionValueToText (value) {
+			var text = "";
+
+			switch (value) {
+				case "none":
+					text = "None";
+					break;
+				case "low":
+					text = "Low";
+					break;
+				case "medium":
+					text = "Medium";
+					break;
+				case "high":
+					text = "High";
+					break;
+				case "open":
+					text = "Open";
+					break;
+				case "in progress":
+					text = "In progress";
+					break;
+				case "for approval":
+					text = "For approval";
+					break;
+				case "closed":
+					text = "Closed";
+					break;
+				case "for_information":
+					text = "For information";
+					break;
+				case "vr":
+					text = "VR";
+					break;
+			}
+
+			return text;
+		}
 
 		Object.defineProperty(
 			obj,
@@ -18248,6 +18330,14 @@ var Oculus = {};
 				{
 					value: "showClosed",
 					label: "Show resolved issues",
+					toggle: true,
+					selected: false,
+					firstSelected: false,
+					secondSelected: false
+				},
+				{
+					value: "showSubProjects",
+					label: "Show sub project issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,

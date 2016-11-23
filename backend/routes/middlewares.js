@@ -18,7 +18,6 @@
 var _ = require('lodash');
 var responseCodes = require('../response_codes');
 var C				= require("../constants");
-var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
@@ -170,40 +169,6 @@ function checkRole(acceptedRoles, req){
 
 }
 
-function isMainContractor(req, res, next){
-	checkRole([C.REPO_ROLE_MAINCONTRACTOR], req).then(() => {
-		next();
-	}).catch(resCode => {
-		responseCodes.respond("Middleware: check is main contractor", req, res, next, resCode, null, req.params);
-	});
-}
-
-function isSubContractorInvitedHelper(req){
-	'use strict';
-
-	let filter = {
-		user: req.session[C.REPO_SESSION_USER].username
-	};
-
-	if (req.params.packageName){
-		filter.packageName = req.params.packageName;
-	}
-	return Bid.count(getDbColOptions(req), filter).then(count => {
-		if (count > 0) {
-			return Promise.resolve();
-		} else {
-			return Promise.reject(responseCodes.AUTH_ERROR);
-		}
-	});
-}
-
-function isSubContractorInvited(req, res, next){
-	isSubContractorInvitedHelper(req).then(()=>{
-		next();
-	}).catch(resCode => {
-		responseCodes.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
-	});
-}
 
 function canCreateDatabase(req, res, next){
 	'use strict';
@@ -273,7 +238,6 @@ function createQueueInstance(){
 	'use strict';
 
 	// init ampq and import queue object
-	let importQueue = require('../services/queue');
 	let log_iface = require("../logger.js");
 	let systemLogger = log_iface.systemLogger;
 
@@ -359,8 +323,6 @@ var middlewares = {
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	hasWriteAccessToIssue: [loggedIn, hasWriteAccessToIssue],
-	isMainContractor: [loggedIn, isMainContractor],
-	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
 	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 
@@ -369,7 +331,6 @@ var middlewares = {
 
 	// Helpers
 	freeSpace,
-	isSubContractorInvitedHelper,
 	loggedIn,
 	checkRole,
 	hasReadAccessToProjectHelper,

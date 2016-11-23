@@ -90,21 +90,6 @@ var responseCodes = {
 	ROLE_SETTINGS_NOT_FOUND : { value: 41, message: "Role settings not found", status: 500 },
 
 
-	PACKAGE_NOT_FOUND: {value: 43, message: 'Package not found', status: 404},
-	BID_NOT_FOUND: {value: 44, message: 'Bid not found', status: 404},
-	BID_ALREADY_ACCEPTED_OR_DECLINED: {value : 45, message: 'Bid already accepted or declined', status: 400},
-	USER_ALREADY_IN_BID: {value: 46, message: 'User already has a bid created in this package', status: 400},
-	BID_NOT_ACCEPTED_OR_DECLINED: {value: 47, message: 'Bid invitation is not yet accepted or is declined', status: 400},
-
-	PACKAGE_AWARDED :{ value: 48, message: 'This package has a winner already', status: 400},
-	ATTACHMENT_NOT_FOUND: {value:49, message: 'Attachment not found', status: 404},
-	ATTACHMENT_FIELD_NOT_FOUND: {value:50, message: 'Attachment field not found in request body', status: 400},
-
-	BID_SUBMIITED: { value: 51, message: 'Bid already submitted', status: 400},
-	BID_NOT_UPDATEABLE: {value: 52, message: 'Bid is not updateable since it is either submitted or declined', status: 400},
-	BID_NOT_SUBMIITED: { value: 53, message: 'Bid not yet submitted', status: 400},
-
-
 	GROUP_NOT_FOUND: {value: 54, message: 'Group not found', status: 404},
 
 	USER_EXISTS: { value: 55, message: 'User already exists', status: 400},
