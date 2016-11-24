@@ -12338,9 +12338,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12621,38 +12621,12 @@ angular.module('3drepo')
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
+		/**
+		 * Submit - new issue or comment or update issue
+		 */
 		this.submit = function () {
-
-
-
 			if (self.data) {
-
-				var canUpdate = (Auth.getUsername() === self.data.owner);
-				if (!canUpdate) {
-					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
-						if (self.userRoles[i] === self.data.creator_role) {
-							canUpdate = true;
-							break;
-						}
-					}
-				}
-
-				if (canUpdate) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status) ||
-						(this.data.topic_type !== this.issueData.topic_type)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
-							saveComment();
-						}
-					}
-					else {
-						saveComment();
-					}
-				}
-				else {
-					saveComment();
-				}
+				saveComment();
 			}
 			else {
 				saveIssue();
@@ -12970,7 +12944,8 @@ angular.module('3drepo')
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
-				viewpoint: comment.viewpoint
+				viewpoint: comment.viewpoint,
+				action: comment.action
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
@@ -13200,6 +13175,10 @@ angular.module('3drepo')
 				*/
 				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
+					if(comment.action){
+						comment.comment = IssuesService.convertActionCommentToText(comment);
+					}
+					
 					afterNewComment(comment, true);
 
 					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
@@ -13250,12 +13229,14 @@ angular.module('3drepo')
 				*/
 				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
 
-
 					self.issueData.topic_type = issue.topic_type;
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;
 					self.issueData.status = issue.status;
-					self.statusChange();
+					self.issueData.assigned_roles = issue.assigned_roles;
+
+					self.statusIcon = IssuesService.getStatusIcon(self.issueData);
+					setRoleIndicatorColour(self.issueData.assigned_roles[0]);
 
 					$scope.$apply();
 
@@ -15241,6 +15222,10 @@ angular.module('3drepo')
 					for (var j = 0, numComments = res.data.comments.length; j < numComments; j += 1) {
 						if (res.data.comments[j].hasOwnProperty("created")) {
 							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
+						}
+						// Action comment text
+						if (res.data.comments[j].action) {
+							res.data.comments[j].comment = obj.convertActionCommentToText(res.data.comments[j]);
 						}
 					}
 				}

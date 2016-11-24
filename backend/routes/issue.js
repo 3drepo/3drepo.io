@@ -142,8 +142,7 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			issue.updateAttrs(data);
-			action = issue.save();
+			action = issue.updateAttrs(data);
 		}
 
 		return action;

@@ -98,6 +98,10 @@
 						if (res.data.comments[j].hasOwnProperty("created")) {
 							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
 						}
+						// Action comment text
+						if (res.data.comments[j].action) {
+							res.data.comments[j].comment = obj.convertActionCommentToText(res.data.comments[j]);
+						}
 					}
 				}
 
