@@ -114,7 +114,7 @@ function updateIssue(req, res, next){
 			}
 		});
 
-		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 });
 
 	}).then(issue => {
 

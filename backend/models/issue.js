@@ -1027,11 +1027,22 @@ schema.methods.updateAttrs = function(data){
 		this.desc = data.desc;
 	}
 
-	return this.save().then(() => {
-		let issue = this.clean();
+	let settings;
+
+	return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project).then(_settings => {
+
+		settings = _settings;
+		return this.save();
+
+	}).then(() => {
+
+		let issue = this.clean(settings.type, settings.properties.code);
+
 		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
 		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, systemComment);
+		
 		return issue;
+
 	});
 	
 };

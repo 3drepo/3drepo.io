@@ -112,7 +112,7 @@
 					this.issueData = angular.copy(this.data);
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
-					
+					this.issueData.thumbnailPath = UtilsService.getServerUrl(this.issueData.thumbnail);
 					this.issueData.comments.forEach(function(comment){
 						if(comment.owner !== Auth.getUsername()){
 							comment.sealed = true;
@@ -643,6 +643,8 @@
 				comment.sealed = true;
 			}
 
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			
 			// Add new comment to issue
 			self.issueData.comments.push({
 				sealed: comment.sealed,
