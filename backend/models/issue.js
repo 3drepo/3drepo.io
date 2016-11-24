@@ -472,7 +472,7 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
 
 		settings = _settings;
-		return this.findById(dbColOptions, stringToUUID(uid))
+		return this.findById(dbColOptions, stringToUUID(uid));
 	
 	}).then(issue => {
 		return Promise.resolve(noClean ? issue : issue.clean(settings.type, settings.properties.code));

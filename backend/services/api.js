@@ -25,7 +25,7 @@ module.exports.createApp = function (serverConfig) {
 
 	let express = require("express");
 	let routes = require("../routes/routes.js")();
-	let config = require("../config.js");
+	// let config = require("../config.js");
 	let compress = require("compression");
 	let responseCodes = require("../response_codes");
 
