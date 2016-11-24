@@ -116,7 +116,6 @@ var repoRouter = function() {
 
 	//self.router.use(log_iface.startRequest); // moved to api.js
 	self.getHandler  = require("./routes_get")(self.router, self.checkAccess(hasReadAccessToProject));
-	self.router.use(log_iface.endRequest);
 
 	self.get  = function(format, regex, callback) {
 		self.getHandler.get(format, regex, callback);

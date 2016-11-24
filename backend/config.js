@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function() {
+(() => {
 	"use strict";
 
 	const VERSION="1.7.2";
@@ -188,7 +188,14 @@
 
 	// Log file options
 	config.logfile               = coalesce(config.logfile, {});
-	config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
+
+	if (!config.logfile.filename)
+	{
+		config.logfile.logDirectory  = coalesce(config.logfile.logDirectory, "/var/log");
+	} else {
+		config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
+	}
+
 	config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 	config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
