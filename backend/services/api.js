@@ -16,7 +16,7 @@
  */
 
 /**
- * Create API EExpress app
+ * Create API Express app
  * 
  * @param {Object} serverConfig - Configuration for server
  * @returns
