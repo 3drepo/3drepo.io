@@ -223,7 +223,7 @@
 				});
 			} catch (e) {
 				// Jade files don't exist
-				systemLogger.logFatal("Jade file does not exist");
+				systemLogger.logFatal(e.message);
 			}
 		}
 

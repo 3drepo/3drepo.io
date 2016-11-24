@@ -265,13 +265,11 @@
 
 	Object.keys(responseCodes)
 		.forEach(key => {
-			if (typeof responseCodes[key].value !== "undefined") {
-				if (typeof responseCodes[key] != "function") {
-					responseCodes[key].value = valueCounter;
-				}
-
-				valid_values.push(responseCodes[key].value);
+			if (typeof responseCodes[key] !== "function") {
+				responseCodes[key].value = valueCounter;
 			}
+
+			valid_values.push(responseCodes[key].value);
 		});
 
 	const mimeTypes = {
