@@ -6932,6 +6932,10 @@ var ViewerManager = {};
 					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
 				}
 			});
+
+			$scope.$on('$destroy', function(){
+				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+			});
 		}
 
 		/**
