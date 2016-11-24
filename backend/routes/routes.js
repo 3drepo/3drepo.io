@@ -23,18 +23,6 @@ var dbInterface = require("../db/db_interface.js");
 
 var C = require("../constants");
 
-function hasWriteAccessToProject(req, account, project, callback)
-{
-	"use strict";
-
-	var username = null;
-
-if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-		username = req.session[C.REPO_SESSION_USER].username;
-	}
-
-	dbInterface(req[C.REQ_REPO].logger).hasWriteAccessToProject(username, account, project, callback);
-}
 
 function hasReadAccessToProject(req, account, project, callback)
 {

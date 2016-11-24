@@ -35,18 +35,6 @@ exports.route = function(router)
 {
 
 
-	router.get("json", "/:account/:project/revision/:branch/head", function(req, res, params, err_callback) {
-		var dbInter = dbInterface(req[C.REQ_REPO].logger);
-
-		dbInter.getHeadOf(params.account, params.project, params.branch, dbInter.getRevisionInfo, function(err, revisionObj) {
-			if(err.value)
-				err_callback(err);
-			else
-				err_callback(responseCodes.OK, revisionObj);
-		});
-	});
-
-
 	router.get("json", "/:account/:project/revision/:rid/meta/:sid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;

@@ -45,11 +45,11 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, i
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -114,7 +114,7 @@ function updateIssue(req, res, next){
 			}
 		});
 
-		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 });
 
 	}).then(issue => {
 
@@ -142,8 +142,7 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			issue.updateAttrs(data);
-			action = issue.save();
+			action = issue.updateAttrs(data);
 		}
 
 		return action;

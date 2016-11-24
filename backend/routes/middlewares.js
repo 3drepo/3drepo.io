@@ -29,10 +29,6 @@ var READ_BIT	= 4;
 var WRITE_BIT	= 2;
 // var EXECUTE_BIT	= 1;
 
-var getDbColOptions = function(req){
-	return {account: req.params.account, project: req.params.project};
-};
-
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
