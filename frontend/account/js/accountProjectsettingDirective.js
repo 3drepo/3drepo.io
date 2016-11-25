@@ -28,7 +28,8 @@
 			scope: {
 				account: "=",
 				showPage: "&",
-				subscriptions: "="
+				subscriptions: "=",
+				data: "="
 			},
 			controller: AccountProjectsettingCtrl,
 			controllerAs: 'vm',
@@ -45,13 +46,13 @@
 		/**
 		 * Go back to the repos page
 		 */
-
+		 console.log('data', vm.data);
 
 		vm.goBack = function () {
 			$location.search("project", null);
 			$location.search("targetAcct", null);
 
-			vm.showPage({page: "repos"});
+			vm.showPage({page: "repos", data: vm.data});
 		};
 
 		vm.units = server_config.units

@@ -162,7 +162,7 @@
 				case "projectsetting":
 					$location.search("proj", vm.project.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
+					vm.onShowPage({page: "projectsetting", callingPage: "repos", data: {tabIndex: 0}});
 					break;
 
 				case "upload":

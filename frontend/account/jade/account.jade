@@ -14,8 +14,9 @@ div(ng-if="!vm.state.project")
 			ng-switch-when="repos"
 			account="vm.account"
 			accounts="vm.accounts"
-			on-show-page="vm.showItem(page, callingPage)"
+			on-show-page="vm.showPage(page, callingPage, data)"
 			quota="vm.quota"
+			selected-index="vm.data.tabIndex"
 			subscriptions="vm.subscriptions")
 
 			account-profile(
@@ -52,7 +53,8 @@ div(ng-if="!vm.state.project")
 			ng-switch-when="projectsetting"
 			account="vm.account"
 			project="vm.project"
-			show-page="vm.showPage(page, callingPage)"
+			data="vm.data"
+			show-page="vm.showPage(page, callingPage, data)"
 			subscriptions="vm.subscriptions")
 
 div(ng-if="vm.state.project")

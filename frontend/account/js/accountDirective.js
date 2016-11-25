@@ -127,10 +127,10 @@
 		 * @param page
 		 * @param callingPage
 		 */
-		vm.showPage = function (page, callingPage) {
+		vm.showPage = function (page, callingPage, data) {
 			vm.itemToShow = page;
-			$location.search("page", page);
 			vm.callingPage = callingPage;
+			vm.data = data;
 		};
 
 		/**
