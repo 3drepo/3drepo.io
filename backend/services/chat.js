@@ -31,6 +31,7 @@ module.exports.createApp = function (server, serverConfig){
 	//console.log(serverConfig);
 	let io = require("socket.io")(server, { path: '/' + serverConfig.subdirectory });
 	let sharedSession = require("express-socket.io-session");
+	let _ = require('lodash');
 
 	io.use((socket, next) => {
 		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
@@ -95,7 +96,12 @@ module.exports.createApp = function (server, serverConfig){
 		//on client connect	
 		io.on('connection', socket => {
 
-			if(!socket.handshake.session.user){
+			//socket error handler, frontend will attempt to reconnect
+			socket.on('error', err => {
+				systemLogger.logError('Chat server - socket error - ' + err.message);
+			});
+
+			if(!_.get(socket, 'handshake.session.user')){
 
 				systemLogger.logError(`socket connection without credential`);
 				//console.log(socket.handshake);
@@ -141,6 +147,8 @@ module.exports.createApp = function (server, serverConfig){
 			});
 
 		});
+
+
 
 	}
 
