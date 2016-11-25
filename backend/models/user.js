@@ -497,7 +497,8 @@ schema.methods.listAccounts = function(){
 					timestamp: project.timestamp,
 					status: project.status,
 					federate: project.federate,
-					subProjects: project.subProjects
+					subProjects: project.subProjects,
+					roleFunctions: project.roleFunctions,
 				});
 			} else {
 				account.projects.push({
