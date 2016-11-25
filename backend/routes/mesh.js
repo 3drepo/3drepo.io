@@ -31,14 +31,14 @@ var stash = require('../models/helper/stash');
 var repoGraphScene = require("../repo/repoGraphScene.js");
 var x3dEncoder = require("../encoders/x3dom_encoder");
 
-router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUID);
-router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
+router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, generateSRC);
+router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, generateSRC);
 
-router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3DofHead);
+router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
 router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
 
 
-function findByUID(req, res, next){
+function generateSRC(req, res, next){
 	'use strict';
 
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
@@ -58,7 +58,16 @@ function findByUID(req, res, next){
 	start.then(buffer => {
 
 		if(!buffer) {
-			return Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
+
+			let findMesh;
+
+			if(req.params.uid){
+				findMesh = Mesh.findByUID(dbCol, req.params.uid, options);
+			} else if (req.params.rid && req.params.sid) {
+				findMesh = Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options);
+			}
+
+			return findMesh.then(mesh => {
 				req.params.format = 'src';
 				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
 
@@ -83,67 +92,6 @@ function findByUID(req, res, next){
 		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
-
-}
-
-function findByRevision(req, res, next){
-	'use strict';
-
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
-	let place = utils.APIInfo(req);
-	let options = {};
-	// options.stash = _getStashOptions(dbCol, 'src', req.url);
-	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
-	let start = Promise.resolve(false);
-
-	if(!config.disableCache){
-		start = stash.findStashByFilename(dbCol, 'src', filename);
-	}
-
-
-	start.then(buffer => {
-
-		if(!buffer) {
-
-			return Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options).then(mesh => {
-
-				req.params.format = 'src';
-				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
-
-				return stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
-					return Promise.resolve(renderedObj);
-				});
-			});
-
-		} else {
-			return Promise.resolve(buffer);
-		}
-
-	}).then(data => {
-		req.params.format = 'src';
-		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
-	}).catch(err => {
-		console.log(err.stack);
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
-
-
-	// Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options).then(mesh => {
-
-	// 	req.params.format = 'src';
-	// 	let renderedObj = mesh;
-	// 	if(!options.stash){
-	// 		// generate src format if obj not from stash
-	// 		renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
-	// 	}
-
-	// 	responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
-	// }).catch(err => {
-	// 	console.log(err.stack);
-	// 	responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	// });
 }
 
 function getSceneObject(account, project, history){
@@ -206,13 +154,15 @@ function generateX3D(req, res, next){
 
 	let findHistory;
 
-	if(utils.isUUID(id)){
-		findHistory = History.findByUID;
+	if(!id){
+		findHistory = History.findLatest({account, project});
+	} else if(utils.isUUID(id)){
+		findHistory = History.findByUID({account, project}, id);
 	} else {
-		findHistory = History.findByTag;
+		findHistory = History.findByTag({account, project}, id);
 	}
 
-	findHistory({account, project}, id).then(history => {
+	findHistory.then(history => {
 
 		if(!history){
 			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
@@ -231,34 +181,5 @@ function generateX3D(req, res, next){
 	});
 }
 
-
-
-function generateX3DofHead(req, res ,next){
-	'use strict';
-
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let project = req.params.project;
-
-	History.findByBranch({account, project}, 'master').then(history => {
-
-		if(!history){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-		}
-
-		return getSceneObject(account, project, history);
-
-	}).then(objs => {
-
-		//console.log(objs);
-
-		let xml = x3dEncoder.render(account, project, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
-		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
-
-	}).catch(err => {
-		console.log(err.stack);
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
 
 module.exports = router;
