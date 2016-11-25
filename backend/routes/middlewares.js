@@ -285,10 +285,13 @@ function isAccountAdmin(req, res, next){
 		}
 
 		user.roles.forEach(role => {
+
 			if (role.db === account){
 				findPromises.push(
 					Role.findByRoleID(`${account}.${role.role}`).then(detailRole => {
-						!foundAdminRole && (foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite'));
+						if(detailRole){
+							!foundAdminRole && (foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite'));
+						}
 					})
 				);
 			}
@@ -298,15 +301,14 @@ function isAccountAdmin(req, res, next){
 
 	}).then(() => {
 
-		console.log('foundAdminRole', foundAdminRole);
 		if(foundAdminRole){
 			next();
 		} else {
 			return Promise.reject();
 		}
 
-	}).catch(() => {
-		responseCodes.respond("Middleware: isAccountAdmin", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+	}).catch(err => {
+		responseCodes.respond("Middleware: isAccountAdmin", req, res, next, responseCodes.AUTH_ERROR, err);
 	});
 
 }
