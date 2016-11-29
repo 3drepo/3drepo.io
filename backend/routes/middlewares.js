@@ -324,7 +324,7 @@ var middlewares = {
 	isAccountAdmin: [loggedIn, isAccountAdmin],
 	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 
-	canCreateDatabase,
+	canCreateDatabase: [loggedIn, canCreateDatabase],
 	connectQueue,
 
 	// Helpers
