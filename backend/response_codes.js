@@ -266,10 +266,10 @@
 	Object.keys(responseCodes)
 		.forEach(key => {
 			if (typeof responseCodes[key] !== "function") {
-				responseCodes[key].value = valueCounter;
+				responseCodes[key].value = valueCounter++;
+				valid_values.push(responseCodes[key].value);
 			}
 
-			valid_values.push(responseCodes[key].value);
 		});
 
 	const mimeTypes = {
@@ -294,6 +294,7 @@
 	 * @param {any} format
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
+		
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -304,6 +305,7 @@
 			}
 
 			resCode = responseCodes.PROCESS_ERROR(resCode);
+
 		}
 
 		let length;

@@ -65,6 +65,7 @@ module.exports = function(grunt) {
                 strict: false,
                 esnext: true,
                 expr: true,
+                newcap: false,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,
@@ -143,7 +144,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-env');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont', 'concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
-	grunt.registerTask('test', ['mochaTest:unit']);
+	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
 	grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 	grunt.registerTask('frontend', ['concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
 };

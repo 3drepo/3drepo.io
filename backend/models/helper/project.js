@@ -34,6 +34,9 @@ var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
 var C = require("../../constants");
 var _ = require('lodash');
+var multer = require("multer");
+var fs = require('fs');
+var ChatEvent = require('../chatEvent');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -79,10 +82,6 @@ function convertToErrorCode(errCode){
 
 function createAndAssignRole(project, account, username, data) {
 	'use strict';
-
-	if(project.length > 60){
-		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
-	}
 
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
@@ -179,130 +178,9 @@ function createAndAssignRole(project, account, username, data) {
 	});
 }
 
-function importToyJSON(db, project){
-	'use strict';
-
-	let path = '../../statics/toy';
-
-	let importCollectionFiles = {};
-
-	importCollectionFiles[`${project}.history.chunks`] = 'history.chunks.json';
-	importCollectionFiles[`${project}.history.files`] = 'history.files.json';
-	importCollectionFiles[`${project}.history`] = 'history.json';
-	importCollectionFiles[`${project}.issues`] = 'issues.json';
-	importCollectionFiles[`${project}.scene`] = 'scene.json';
-	importCollectionFiles[`${project}.stash.3drepo.chunks`] = 'stash.3drepo.chunks.json';
-	importCollectionFiles[`${project}.stash.3drepo.files`] = 'stash.3drepo.files.json';
-	importCollectionFiles[`${project}.stash.3drepo`] = 'stash.3drepo.json';
-	importCollectionFiles[`${project}.stash.json_mpc.chunks`] = 'stash.json_mpc.chunks.json';
-	importCollectionFiles[`${project}.stash.json_mpc.files`] = 'stash.json_mpc.files.json';
-	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
-	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
-
-	let host = config.db.host[0];
-	let port = config.db.port[0];
-
-	let username = config.db.username;
-	let password = config.db.password;
-
-	let promises = [];
-
-	Object.keys(importCollectionFiles).forEach(collection => {
-
-		let filename = importCollectionFiles[collection];
-
-		promises.push(new Promise((resolve, reject) => {
-
-			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --port ${port} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
-			{
-				cwd: __dirname
-			}, function (err) {
-				if(err){
-					reject({message: err.message.replace(new RegExp(password, 'g'), '[password masked]').replace(new RegExp(username, 'g'), '[username masked]')});
-				} else {
-					resolve();
-				}
-			});
-
-		}));
-	});
-
-	return Promise.all(promises).then(() => {
-		//rename json_mpc stash
-		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
-
-		jsonBucket.find().forEach(file => {
-
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = db;
-			newFileName = newFileName.join('/');
-			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
-				);
-			});
-		});
-
-		//rename src stash
-		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
-
-		srcBucket.find().forEach(file => {
-
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = db;
-			newFileName = newFileName.join('/');
-			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
-				);
-			});
-
-		});
-
-		return Promise.resolve();
-
-	}).then(() => {
-		//change history time and author
-		return History.findLatest({account: db, project: project}, { current: 0 });
-
-	}).then(history => {
-
-		history.author = db;
-		history.timestamp = new Date();
-
-		return history.save();
-
-	}).then(() => {
-
-		let Issue = require('../issue');
-
-		let updateIssuePromises = [];
-
-		Issue.find({account: db, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
-			issues.forEach(issue => {
-
-				issue.owner = db;
-
-				issue.comments.forEach(comment => {
-					comment.owner = db;
-				});
-
-				updateIssuePromises.push(issue.save());
-			});
-		});
-
-		return Promise.all(updateIssuePromises);
-	});
-
-}
-
 function importToyProject(username){
 	'use strict';
 
-	let projectSetting;
 	let project = 'sample_project';
 	let account = username;
 	let desc = '';
@@ -316,44 +194,9 @@ function importToyProject(username){
 	};
 	
 	return createAndAssignRole(project, account, username, data).then(data => {
-		//console.log('setting', setting);
 		return Promise.resolve(data.setting);
-
 	}).then(setting => {
-
-		projectSetting = setting;
-		projectSetting.status = 'processing';
-
-		return projectSetting.save();
-
-	}).then(() => {
-
-		return importToyJSON(account, project);
-
-	}).then(() => {
-		//mark project ready
-
-		projectSetting.status = 'ok';
-		projectSetting.errorReason = undefined;
-		projectSetting.markModified('errorReason');
-
-		return projectSetting.save();
-
-	}).catch(err => {
-
-		systemLogger.logError(`Import toy project error`, {
-			err: err,
-			account: username,
-			project: project
-		});
-		//mark project failed
-		if(projectSetting){
-			projectSetting.status = 'failed';
-			projectSetting.save();
-		}
-
-		return Promise.reject(err);
-
+		importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
 	});
 }
 
@@ -1041,8 +884,319 @@ function getUserRolesForProject(account, project, username){
 	});
 }
 
+
+
+function uploadFile(req){
+	'use strict';
+
+	if (!config.cn_queue) {
+		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
+	}
+
+
+	//upload project with tag
+	let checkTag = tag => {
+		if(!tag){
+			return Promise.resolve();
+		} else {
+			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
+				return History.findByTag({account, project}, req.body.tag, {_id: 1});
+			}).then(tag => {
+				if (!tag){
+					return Promise.resolve();
+				} else {
+					return Promise.reject(responseCodes.DUPLICATE_TAG);
+				}
+			});
+
+		}
+	};
+
+	
+	return checkTag(req.body.tag).then(() => {
+		return new Promise((resolve, reject) => {
+
+
+			let upload = multer({
+				dest: config.cn_queue.upload_dir,
+				fileFilter: function(req, file, cb){
+
+					let format = file.originalname.split('.');
+					
+					if(format.length <= 1){
+						return cb({resCode: responseCodes.FILE_NO_EXT});
+					}
+
+					format = format[format.length - 1];
+
+					let size = parseInt(req.headers['content-length']);
+
+					if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+						return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+					}
+
+					if(size > config.uploadSizeLimit){
+						return cb({ resCode: responseCodes.SIZE_LIMIT });
+					}
+
+					middlewares.freeSpace(req.params.account).then(space => {
+
+						if(size > space){
+							cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+						} else {
+							cb(null, true);
+						}
+					});
+				}
+			});
+
+			upload.single("file")(req, null, function (err) {
+				if (err) {
+					return reject(err);
+
+				} else if(!req.file.size){
+					return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+				} else {
+					return resolve(req.file);
+				}
+			});
+
+		});
+	});
+}
+
+function _handleUpload(account, project, username, file, data){
+	'use strict';
+
+	let deleteFiles = function(filePath, fileDir, jsonFile){
+
+		[
+			{desc: 'tmp model file', type: 'file', path: filePath}, 
+			{desc: 'json file', type: 'file', path: jsonFile}, 
+			{desc: 'tmp dir', type: 'dir', path: fileDir}
+		].forEach(file => {
+
+			let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+
+			deleteFile(file.path, function(err){
+				if(err){
+					systemLogger.logError(`error while deleting ${file.desc}`,{
+						message: err.message,
+						err: err,
+						file: file.path
+					});
+				} else {
+					systemLogger.logInfo(`${file.desc} deleted`,{
+						file: file.path
+					});
+				}
+			});
+		});
+
+
+	};
+
+	return importQueue.importFile(
+		file.path,
+		file.originalname,
+		account,
+		project,
+		username,
+		null,
+		data.tag,
+		data.desc
+	).then(obj => {
+
+		let corID = obj.corID;
+
+		systemLogger.logInfo(`Job ${corID} imported without error`,{
+			account,
+			project,
+			username
+		});
+
+		deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
+		return Promise.resolve(obj);
+
+	}).catch(err => {
+
+		deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
+		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
+	});
+
+}
+
+function _importBSON(account, project, username, dir){
+	'use strict';
+
+	let importCollectionFiles = {};
+	
+	fs.readdirSync(`${__dirname}/${dir}`).forEach(file => {
+		// remove '.json' in string
+		let collectionName = file.split('.');
+		collectionName.pop();
+		collectionName = collectionName.join('.');
+
+		importCollectionFiles[`${project}.${collectionName}`] = file;
+	});
+
+
+	let host = config.db.host[0];
+	let port = config.db.port[0];
+
+	let dbUsername = config.db.username;
+	let dbPassword = config.db.password;
+
+	let promises = [];
+
+	Object.keys(importCollectionFiles).forEach(collection => {
+
+		let filename = importCollectionFiles[collection];
+
+		promises.push(new Promise((resolve, reject) => {
+
+			require('child_process').exec(
+			`mongoimport -j 8 --host ${host} --port ${port} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
+			{
+				cwd: __dirname
+			}, function (err) {
+				if(err){
+					reject({message: err.message.replace(new RegExp(dbPassword, 'g'), '[password masked]').replace(new RegExp(dbUsername, 'g'), '[username masked]')});
+				} else {
+					resolve();
+				}
+			});
+
+		}));
+	});
+
+	return Promise.all(promises).then(() => {
+		//rename json_mpc stash
+		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
+
+		jsonBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = account;
+			newFileName = newFileName.join('/');
+			jsonBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash',
+					{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
+				);
+			});
+		});
+
+		//rename src stash
+		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
+
+		srcBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = account;
+			newFileName = newFileName.join('/');
+			srcBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash',
+					{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
+				);
+			});
+
+		});
+
+		return Promise.resolve();
+
+	}).then(() => {
+		//change history time and author
+		return History.findLatest({account: account, project: project}, { current: 0 });
+
+	}).then(history => {
+
+		history.author = username;
+		history.timestamp = new Date();
+
+		return history.save();
+
+	}).then(() => {
+
+		let Issue = require('../issue');
+
+		let updateIssuePromises = [];
+
+		Issue.find({account: account, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
+			issues.forEach(issue => {
+
+				issue.owner = account;
+
+				issue.comments.forEach(comment => {
+					comment.owner = username;
+				});
+
+				updateIssuePromises.push(issue.save());
+			});
+		});
+
+		return Promise.all(updateIssuePromises);
+	});
+
+}
+
+function importProject(account, project, username, projectSetting, source, data){
+	'use strict';
+
+	if(!projectSetting){
+		return Promise.reject({ message: `projectSetting is ${projectSetting}`});
+	}
+
+	projectSetting.status = 'processing';
+
+	return projectSetting.save().then(() => {
+
+		if(source.type === 'bson'){
+			return _importBSON(account, project, username, source.dir);
+		} else if (source.type === 'upload'){
+			return _handleUpload(account, project, username, source.file, data);
+		}
+
+	}).then(() => {
+
+		projectSetting.status = 'ok';
+		projectSetting.errorReason = undefined;
+		projectSetting.markModified('errorReason');
+
+		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+
+		return projectSetting.save();
+
+	}).catch(err => {
+
+		// import failed for some reason(s)...
+		//mark project failed
+
+		systemLogger.logError(`Error while importing project from source ${source.type}`, {
+			stack : err.stack,
+			err: err,
+			account,
+			project,
+			username
+		});
+
+		projectSetting.status = 'failed';
+		projectSetting.errorReason = err;
+		projectSetting.markModified('errorReason');
+		projectSetting.save();
+
+		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+
+
+		return Promise.reject(err);
+
+	});
+}
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -1070,5 +1224,7 @@ module.exports = {
 	projectNameRegExp,
 	acceptedFormat,
 	getUserRolesForProject,
-	getRolesForProject
+	getRolesForProject,
+	uploadFile,
+	importProject
 };

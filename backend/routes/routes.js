@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var log_iface  = require("../logger.js");
+//var log_iface  = require("../logger.js");
 var express = require("express");
 var responseCodes = require("../response_codes.js");
 var dbInterface = require("../db/db_interface.js");
