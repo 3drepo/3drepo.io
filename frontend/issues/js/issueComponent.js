@@ -92,6 +92,14 @@
 
 		this.notificationStarted = false;
 
+		function convertCommentTopicType(){
+			self.issueData && self.issueData.comments.forEach(function(comment){
+				if(comment.action && comment.action.property === 'topic_type'){
+					IssuesService.convertActionCommentToText(comment, self.topic_types);
+				}
+			});
+		}
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -103,6 +111,8 @@
 
 			if(changes.hasOwnProperty('projectSettings')){
 				this.topic_types = this.projectSettings.topicTypes;
+				//convert comment topic_types
+				convertCommentTopicType();
 			}
 
 			// Data
@@ -150,6 +160,8 @@
 					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+
+					convertCommentTopicType();
 				}
 				else {
 					this.issueData = {
@@ -302,7 +314,7 @@
 
 						// Add info for new comment
 						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
-						comment.comment = IssuesService.convertActionCommentToText(comment);
+						IssuesService.convertActionCommentToText(comment, self.topic_types);
 						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 						self.issueData.comments.push(comment);
 
@@ -311,7 +323,7 @@
 							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 							if (comment.action) {
-								comment.comment = IssuesService.convertActionCommentToText(comment);
+								IssuesService.convertActionCommentToText(comment, self.topic_types);
 							}
 							self.issueData.comments[self.issueData.comments.length - 2] = comment;
 						}
@@ -478,6 +490,12 @@
 						.then(function (data) {
 							IssuesService.updatedIssue = self.issueData;
 							savedDescription = self.issueData.desc;
+
+							// Add info for new comment
+							var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
+							IssuesService.convertActionCommentToText(comment, self.topic_types);
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							self.issueData.comments.push(comment);
 						});
 				}
 
@@ -643,7 +661,10 @@
 				comment.sealed = true;
 			}
 
-			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if(comment.viewpoint && comment.viewpoint.screenshot){
+				comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			}
+			
 			
 			// Add new comment to issue
 			self.issueData.comments.push({
@@ -884,7 +905,7 @@
 				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
 					if(comment.action){
-						comment.comment = IssuesService.convertActionCommentToText(comment);
+						IssuesService.convertActionCommentToText(comment, self.topic_types);
 					}
 					
 					afterNewComment(comment, true);

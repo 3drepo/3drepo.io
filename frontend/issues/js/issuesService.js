@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService", "$sanitize"];
 
-	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService, $sanitize) {
 		var url = "",
 			data = {},
 			config = {},
@@ -446,39 +446,61 @@
 		 * @param comment
 		 * @returns {string}
 		 */
-		obj.convertActionCommentToText = function (comment) {
+		obj.convertActionCommentToText = function (comment, topic_types) {
 			var text = "";
 
 			switch (comment.action.property) {
 				case "priority":
-					text = "Priority " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Priority';
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
 					break;
+
 				case "status":
-					text = "Status " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Status';
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to= convertActionValueToText(comment.action.to);
+
 					break;
+
 				case "assigned_roles":
-					text = "Assigned " +
-						" <span class='commentTextLight'>to</span> " +
-						comment.action.to;
-					if (comment.action.from) {
-						text += " <span class='commentTextLight'>from</span> " +
-							comment.action.from;
-					}
+
+					comment.action.propertyText = 'Assigned';
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
 					break;
+
 				case "topic_type":
-					text = "Type changed " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Type';
+					if(topic_types){
+
+						var from = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.from;
+						});
+
+						var to = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.to;
+						});
+
+						if(from && from.label){
+							comment.action.from = from.label
+						}
+
+						if(to && to.label){
+							comment.action.to = to.label
+						}
+
+					}
+
+					break;
+
+				case "desc":
+
+					comment.action.propertyText = 'Description';
+
 					break;
 			}
 
@@ -547,12 +569,6 @@
 					break;
 				case "closed":
 					text = "Closed";
-					break;
-				case "for_information":
-					text = "For information";
-					break;
-				case "vr":
-					text = "VR";
 					break;
 			}
 

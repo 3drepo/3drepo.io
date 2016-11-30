@@ -102,8 +102,12 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 						// Saved auto comment
 						label.issueCompCommentTitle(
 						flex
-						ng-if="comment.action"
-						ng-bind-html="comment.comment")
+						ng-if="comment.action")
+							| {{comment.action.propertyText}} 
+							span.commentTextLight changed from 
+							| {{comment.action.from}} 
+							span.commentTextLight to 
+							| {{comment.action.to}}
 						// Editing normal comment
 						md-input-container(flex, ng-if="comment.editing")
 							textarea(ng-model="comment.comment"
