@@ -608,6 +608,84 @@ describe('Enrolling to a subscription', function () {
 
 	});
 
+	describe('and then simulate recurring payment message from the 2nd month', function(){
+
+		before(function(done){
+
+			let paymentDate = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+			let paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
+			console.log('paymentDate', paymentDate);
+			console.log('paymentDateAfterNext', paymentDateAfterNext);
+			let nextPayDateString = moment(paymentDateAfterNext).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
+			let transactionId = '99999999AA000000A';
+
+			let fakePaymentMsg = 
+				'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
+				+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
+				+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
+				+ '&product_name=abc&charset=UTF-8'
+				+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=0.00&address_country_code=GB'
+				+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=360.00&payer_status=verified&currency_code=GBP'
+				+ '&business=test3drepo@example.org&address_country=UK&address_city=London'
+				+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
+				+ '&initial_payment_amount=0.00&profile_status=Active&amount=360.00&txn_id=' + transactionId + '&payment_type=instant'
+				+ '&last_name=3d&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
+				+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
+				+ '&transaction_subject=abc'
+				+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
+
+
+			async.series([
+
+				function(done){
+					agent.post(`/payment/paypal/food`)
+					.send(fakePaymentMsg)
+					.expect(200, function(err, res){
+						setTimeout(function(){
+							if(err){
+								done(err);
+							} else {
+								done();
+							}
+						}, 500);
+					});
+				}, 
+
+				function(done){
+
+					agent.post('/login')
+					.send({ username, password})
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(username);
+						done(err);
+					});
+			
+				}
+			], done);
+
+		});
+
+		after(function(done){
+			agent.post('/logout')
+			.send({})
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
+		it('should have invoice created with number SO-2', function(done){
+			agent.get(`/${username}/billings`)
+			.expect(200, function(err, res){
+			
+				expect(res.body).to.be.an('array');
+				let cn = res.body.find( bill => bill.invoiceNo === 'SO-2');
+				expect(cn).to.exist;
+
+				done(err);
+			});
+		});
+
+	});
 
 	describe('second user pays', function(){
 		before(function(done){
@@ -638,7 +716,7 @@ describe('Enrolling to a subscription', function () {
 			});
 		});
 
-		it('should have an invoice with invoice number SO-2', function(){
+		it('should have an invoice with invoice number SO-3', function(){
 			return User.findByUserName(username3).then(user => {
 
 				return user.executeBillingAgreement('EC-000000001', billingId, {
@@ -708,13 +786,13 @@ describe('Enrolling to a subscription', function () {
 			}).then(() => {
 
 
-				// it should have a pending billing with SO-2 as invoice number.
+				// it should have a pending billing with SO-3 as invoice number.
 				return new Promise((resolve, reject) => {
 					agent.get(`/${username3}/billings`)
 					.expect(200, function(err, res){
 						//console.log('billings', res.body);
 						expect(res.body).to.be.an('array').and.to.have.length(1);
-						expect(res.body[0].invoiceNo).to.equal('SO-2');
+						expect(res.body[0].invoiceNo).to.equal('SO-3');
 						expect(res.body[0].pending).to.equal(true);
 
 						if(err){
