@@ -43,9 +43,6 @@ let ProjectSetting = proxyquire('../../../models/projectSetting', {
 
 let DB = require('../mock/db');
 
-
-
-
 describe('Project Settings', function(){
 
 	before(function(done) {
