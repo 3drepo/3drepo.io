@@ -893,14 +893,15 @@ function uploadFile(req){
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-
+	let account = req.params.account;
+	let project = req.params.project;
 	//upload project with tag
 	let checkTag = tag => {
 		if(!tag){
 			return Promise.resolve();
 		} else {
 			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, project}, req.body.tag, {_id: 1});
+				return History.findByTag({account, project}, tag, {_id: 1});
 			}).then(tag => {
 				if (!tag){
 					return Promise.resolve();
@@ -912,58 +913,57 @@ function uploadFile(req){
 		}
 	};
 
-	
-	return checkTag(req.body.tag).then(() => {
-		return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 
+		let upload = multer({
+			dest: config.cn_queue.upload_dir,
+			fileFilter: function(req, file, cb){
 
-			let upload = multer({
-				dest: config.cn_queue.upload_dir,
-				fileFilter: function(req, file, cb){
-
-					let format = file.originalname.split('.');
-					
-					if(format.length <= 1){
-						return cb({resCode: responseCodes.FILE_NO_EXT});
-					}
-
-					format = format[format.length - 1];
-
-					let size = parseInt(req.headers['content-length']);
-
-					if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
-						return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-					}
-
-					if(size > config.uploadSizeLimit){
-						return cb({ resCode: responseCodes.SIZE_LIMIT });
-					}
-
-					middlewares.freeSpace(req.params.account).then(space => {
-
-						if(size > space){
-							cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-						} else {
-							cb(null, true);
-						}
-					});
+				let format = file.originalname.split('.');
+				
+				if(format.length <= 1){
+					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
-			});
 
-			upload.single("file")(req, null, function (err) {
-				if (err) {
-					return reject(err);
+				format = format[format.length - 1];
 
-				} else if(!req.file.size){
-					return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				let size = parseInt(req.headers['content-length']);
 
-				} else {
-					return resolve(req.file);
+				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
-			});
 
+				if(size > config.uploadSizeLimit){
+					return cb({ resCode: responseCodes.SIZE_LIMIT });
+				}
+
+				middlewares.freeSpace(account).then(space => {
+
+					if(size > space){
+						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+					} else {
+						cb(null, true);
+					}
+				});
+			}
 		});
+
+		upload.single("file")(req, null, function (err) {
+			if (err) {
+				return reject(err);
+
+			} else if(!req.file.size){
+				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+			} else {
+				return resolve(req.file);
+			}
+		});
+
+	}).then(file => {
+		return checkTag(req.body.tag).then(() => file);
 	});
+
 }
 
 function _handleUpload(account, project, username, file, data){
