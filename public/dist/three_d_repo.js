@@ -13903,16 +13903,18 @@ angular.module('3drepo')
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.toShow = "showIssues";
 
 		/*
 		 * Get all the Issues
 		 */
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
+			/*
 			vm.showProgress = false;
+			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
 			vm.showAddButton = true;
+			*/
 		});
 
 		/*
