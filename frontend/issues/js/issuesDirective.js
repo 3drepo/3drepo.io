@@ -80,6 +80,7 @@
 		promise.then(function (data) {
 			vm.showProgress = false;
 			vm.issues = (data === "") ? [] : data;
+			vm.showAddButton = true;
 		});
 
 		/*
@@ -236,15 +237,7 @@
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-			}
-		});
-
-		/*
-		 * Show the add button if displaying info or list
-		 */
-		$scope.$watch("vm.toShow", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+				vm.showAddButton = true;
 			}
 		});
 
@@ -298,6 +291,7 @@
 			}
 			vm.selectedIssue = issue;
 			vm.toShow = "showIssue";
+			vm.showAddButton = false;
 		};
 
 		/**

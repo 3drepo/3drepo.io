@@ -101,7 +101,7 @@
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
-					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
@@ -118,7 +118,7 @@
 					}
 
 					// Can edit description if no comments
-					this.canEditDescription = (this.issueData.comments.length === 0);
+					this.canEditDescription = (this.issueData.comments && (this.issueData.comments.length === 0));
 				}
 				else {
 					this.issueData = {
@@ -567,7 +567,7 @@
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
-			if (self.issueData.comments.length > 1) {
+			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
@@ -694,10 +694,12 @@
 					height += thumbnailHeight;
 				}
 				// Comments
-				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
-					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
-						height += commentImageHeight;
+				if (self.issueData.comments) {
+					for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+						height += commentTextHeight;
+						if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+							height += commentImageHeight;
+						}
 					}
 				}
 			}

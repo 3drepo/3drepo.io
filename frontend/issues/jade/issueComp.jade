@@ -14,7 +14,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 					tdr-focus="true"
 					required)
 			#issueCompTitle(ng-if="$ctrl.data")
-				label {{$ctrl.issueData.name}}
+				label {{$ctrl.issueData.nameToUse}}
 			div(layout="row", layout-align="start center", flex="none")
 				div(flex="10")
 					md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
