@@ -13909,12 +13909,10 @@ angular.module('3drepo')
 		 */
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
-			/*
 			vm.showProgress = false;
 			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
 			vm.showAddButton = true;
-			*/
 		});
 
 		/*
