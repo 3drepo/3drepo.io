@@ -187,15 +187,8 @@
 						promise.then(function (response) {
 							if (response.status === 200) {
 								vm.showPage("registerRequest");
-							}
-							else if (response.data.value === 62) {
-								vm.registerErrorMessage = "Prove you're not a robot";
-							}
-							else if (response.data.value === 55) {
-								vm.registerErrorMessage = "Username already in use";
-							}
-							else {
-								vm.registerErrorMessage = response.data.message;
+							} else {
+								vm.registerErrorMessage = UtilsService.getErrorMessage(response.data);
 							}
 							vm.registering = false;
 							if (vm.useReCapthca) {

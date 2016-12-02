@@ -81,7 +81,7 @@
 		 */
 		vm.assignLicense = function (event) {
 			var doSave = false,
-				enterKey = 13;
+				enterKey = 13;s
 
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
@@ -132,8 +132,8 @@
 					vm.addDisabled = false;
 					vm.allLicensesAssigned = false;
 				}
-				else if (response.data.status === 400) {
-					if (response.data.value === 94) {
+				else if (response.status === 400) {
+					if (response.data.code === 'USER_IN_COLLABORATOR_LIST') {
 						vm.licenseAssigneeIndex = index;
 						vm.userProjects = response.data.projects;
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);

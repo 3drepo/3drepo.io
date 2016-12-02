@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig", "UtilsService"];
 
-	function LoginCtrl($scope, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, Auth, EventService, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13;
 
@@ -65,18 +65,12 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				console.log(666, event);
-				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
+				if (event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
 					}
 					else {
-						if (event.value.error.value === 61) {
-							vm.errorMessage = "Please click on the link in the verify email sent to your account";
-						}
-						else {
-							vm.errorMessage = event.value.error.message;
-						}
+						vm.errorMessage = UtilsService.getErrorMessage(event.value.error);
 					}
 				}
 			}

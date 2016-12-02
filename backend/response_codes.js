@@ -25,9 +25,8 @@
 	 * List of response and error codes
 	 * @type {Object}
 	 */
-	let responseCodes = {
-		// User error codes
 
+	let codesMap = {
 		OK: { message: "OK", status: 200 },
 		USER_NOT_FOUND: { message: "User not found", status: 404 },
 		INCORRECT_USERNAME_OR_PASSWORD: { message: "Incorrect username or password", status: 400 },
@@ -188,6 +187,23 @@
 
 		INVALID_PROJECT_CODE: { message: "Project code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
+	};
+
+
+	let valueCounter = 0;
+	let valid_values = [900, 1000, 2000, 3000, 4000];
+
+	Object.keys(codesMap)
+		.forEach(key => {
+			codesMap[key].code = key;
+			codesMap[key].value = valueCounter++;
+			valid_values.push(codesMap[key].value);
+			
+		});
+
+	let responseCodes = Object.assign({
+
+		codesMap: codesMap,
 
 		/**
 		 * Wrapper for mongoose errors
@@ -258,19 +274,7 @@
 				status: 500
 			};
 		}
-	};
-
-	let valid_values = [900, 1000, 2000, 3000, 4000];
-	let valueCounter = 0;
-
-	Object.keys(responseCodes)
-		.forEach(key => {
-			if (typeof responseCodes[key] !== "function") {
-				responseCodes[key].value = valueCounter++;
-				valid_values.push(responseCodes[key].value);
-			}
-
-		});
+	}, codesMap);
 
 	const mimeTypes = {
 		"src": "text/plain",

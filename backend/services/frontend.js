@@ -38,6 +38,8 @@
 		const ProjectHelper = require("../models/helper/project");
 		const User = require("../models/user");
 		const systemLogger = require("../logger.js").systemLogger;
+		const responseCodes = require("../response_codes.js");
+		const _ = require('lodash');
 
 		let app = express();
 
@@ -128,6 +130,8 @@
 			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
 
+			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
+			
 			res.header("Content-Type", "text/javascript");
 			res.render("config.jade", params);
 		});
