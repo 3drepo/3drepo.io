@@ -34,7 +34,6 @@ module.exports.createApp = function (server, serverConfig){
 	let _ = require('lodash');
 
 	io.use((socket, next) => {
-		console.log('header info', socket.handshake);
 		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
 			socket.handshake.headers.cookie = 'connect.sid=' + socket.handshake.query['connect.sid'] + '; '; 
 		}
@@ -132,8 +131,9 @@ module.exports.createApp = function (server, serverConfig){
 							account: data.account, 
 							project: data.project 
 						});
+						
 					} else {
-						socket.emit(credentialError, { message: `You have no access to join room ${data.account}::${data.project}`});
+						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}::${data.project}`});
 						systemLogger.logError(`${username} - ${sessionId} has no access to join room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
