@@ -83,6 +83,7 @@
     "proxyquire": "^1.7.4",
     "response-time": "^2.3.1",
     "sinon": "^1.17.3",
+    "socket.io-client-cookie": "^0.1.0",
     "supertest": "^1.2.0",
     "xmlhttprequest": "^1.8.0"
   }

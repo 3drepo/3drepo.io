@@ -34,6 +34,7 @@ module.exports.createApp = function (server, serverConfig){
 	let _ = require('lodash');
 
 	io.use((socket, next) => {
+		console.log('header info', socket.handshake);
 		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
 			socket.handshake.headers.cookie = 'connect.sid=' + socket.handshake.query['connect.sid'] + '; '; 
 		}
@@ -70,6 +71,8 @@ module.exports.createApp = function (server, serverConfig){
 
 
 	let userToSocket = {};
+	let credentialErrorEventName = 'credentialError';
+	let joinedEventName = 'joined';
 
 	function socket(queue){
 
@@ -95,7 +98,6 @@ module.exports.createApp = function (server, serverConfig){
 
 		//on client connect	
 		io.on('connection', socket => {
-
 			//socket error handler, frontend will attempt to reconnect
 			socket.on('error', err => {
 				systemLogger.logError('Chat server - socket error - ' + err.message);
@@ -104,6 +106,7 @@ module.exports.createApp = function (server, serverConfig){
 			if(!_.get(socket, 'handshake.session.user')){
 
 				systemLogger.logError(`socket connection without credential`);
+				socket.emit(credentialErrorEventName, { message: 'Connection without credential'});
 				//console.log(socket.handshake);
 
 				return;
@@ -120,13 +123,17 @@ module.exports.createApp = function (server, serverConfig){
 				middlewares.hasReadAccessToProjectHelper(username, data.account, data.project).then(hasAccess => {
 
 					if(hasAccess){
+
 						socket.join(`${data.account}::${data.project}`);
+						socket.emit(joinedEventName, { account: data.account, project: data.project});
+
 						systemLogger.logInfo(`${username} - ${sessionId} has joined room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
 						});
 					} else {
+						socket.emit(credentialError, { message: `You have no access to join room ${data.account}::${data.project}`});
 						systemLogger.logError(`${username} - ${sessionId} has no access to join room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
