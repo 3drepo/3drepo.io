@@ -2498,7 +2498,7 @@ var Pin = {};
 
 	var PIN_RADIUS = 0.25;
 	var PIN_HEIGHT = 1.0;
-	var GHOST_OPACITY = 0.1;
+	var GHOST_OPACITY = 0.4;
 	var OPAQUE_OPACITY = 1.0 - GHOST_OPACITY;
 
 	/*
@@ -11783,7 +11783,7 @@ var ViewerManager = {};
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
@@ -11884,7 +11884,7 @@ var ViewerManager = {};
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "auto";
+					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});
@@ -12136,7 +12136,7 @@ angular.module('3drepo')
                 myCanvas = document.getElementById("issueAreaCanvas");
                 penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
                 penIndicator.css("font-size", penIndicatorSize + "px");
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
                 vm.showPenIndicator = false;
                 resizeCanvas();
                 initCanvas(myCanvas);
@@ -12218,7 +12218,7 @@ angular.module('3drepo')
                 evt.returnValue = false;
 
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
             }, false);
 
             canvas.addEventListener('mouseout', function (evt) {
@@ -12234,7 +12234,7 @@ angular.module('3drepo')
                 evt.returnValue = false;
 
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
             }, false);
 
             canvas.addEventListener('mousemove', function (evt) {
@@ -17762,7 +17762,7 @@ var Oculus = {};
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
 		/*
@@ -17985,7 +17985,7 @@ var Oculus = {};
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				vm.pointerEvents = event.value.on ? "none" : "auto";
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display

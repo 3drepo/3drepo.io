@@ -1912,6 +1912,7 @@ tdr-measure .md-whiteframe-1dp md-content p {
 panel  {
   display: block;
   position: absolute;
+  pointer-events: inherit;
   top: 20px;
   width: 470px;
   z-index: 2;
