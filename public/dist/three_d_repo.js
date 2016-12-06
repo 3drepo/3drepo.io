@@ -12485,6 +12485,7 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+					console.log(this.issueData);
 					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
@@ -12943,6 +12944,9 @@ angular.module('3drepo')
 		function afterNewComment (comment) {
 			// Add new comment to issue
 			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if (!self.issueData.comments) {
+				self.issueData.comments = [];
+			}
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
