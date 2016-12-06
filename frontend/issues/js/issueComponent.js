@@ -233,7 +233,7 @@
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}

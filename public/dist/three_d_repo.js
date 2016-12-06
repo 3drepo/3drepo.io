@@ -12485,7 +12485,6 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
-					console.log(this.issueData);
 					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
@@ -12618,7 +12617,7 @@ angular.module('3drepo')
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}
