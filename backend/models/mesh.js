@@ -15,91 +15,91 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+(() => {
+	"use strict";
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var utils = require('../utils');
-var responseCode = require('../response_codes');
+	const _ = require("lodash");
+	const repoBase = require("./base/repo");
+	const mongoose = require("mongoose");
+	const ModelFactory = require("./factory/modelFactory");
+	const utils = require("../utils");
+	const responseCode = require("../response_codes");
 
-var Schema = mongoose.Schema;
+	const Schema = mongoose.Schema;
 
-var meshSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		vertices:  Object,
-		vertices_count: Number,
-		vertices_byte_count: Number,
+	let meshSchema = Schema(
+		_.extend({}, repoBase.attrs, {
+			vertices: Object,
+			vertices_count: Number,
+			vertices_byte_count: Number,
 
-		normals: Object,
+			normals: Object,
 
-		faces: Object,
-		faces_count: Number,
-		faces_byte_count: Number,
+			faces: Object,
+			faces_count: Number,
+			faces_byte_count: Number,
 
-		outline: [],
-		bounding_box: [],
+			outline: [],
+			bounding_box: [],
 
-		uv_channels: Object,
-		uv_channels_count: Number,
-		uv_channels_byte_count: Number,
+			uv_channels: Object,
+			uv_channels_count: Number,
+			uv_channels_byte_count: Number,
 
-		groups: [],
+			groups: [],
 
-	})
-);
+		})
+	);
 
-// extend statics method
-_.extend(meshSchema.statics, repoBase.statics);
+	// extend statics method
+	_.extend(meshSchema.statics, repoBase.statics);
 
-meshSchema.statics.addGroup = function(account, project, id, gid){
-	'use strict';
-
-	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1, shared_id: 1}).then(mesh => {
-		if(!mesh){
-			return Promise.reject(responseCode.MESH_NOT_FOUND);
-		} else {
-			mesh.groups.addToSet(utils.stringToUUID(gid));
-			return mesh.save();
-		}
-	});
-};
-
-meshSchema.statics.removeGroup = function(account, project, id, gid){
-	'use strict';
-
-	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1}).then(mesh => {
-		
-
-		if(!mesh){
-			return Promise.reject(responseCode.MESH_NOT_FOUND);
-		} else {
-
-			let index = -1;
-
-			mesh.groups.forEach((val, i) => {
-				if (utils.uuidToString(val) === gid){
-					index = i;
+	meshSchema.statics.addGroup = function (account, project, id, gid) {
+		return this.findById({ account, project }, utils.stringToUUID(id), { groups: 1, shared_id: 1 })
+			.then(mesh => {
+				if (!mesh) {
+					return Promise.reject(responseCode.MESH_NOT_FOUND);
+				} else {
+					mesh.groups.addToSet(utils.stringToUUID(gid));
+					return mesh.save();
 				}
 			});
+	};
 
-			if(index === -1){
-				return Promise.reject(responseCode.GROUP_ID_NOT_FOUND_IN_MESH);
-			}
+	meshSchema.statics.removeGroup = function (account, project, id, gid) {
+		return this.findById({ account, project }, utils.stringToUUID(id), { groups: 1 })
+			.then(mesh => {
 
-			mesh.groups.splice(index ,1);
-			return mesh.save();			
+				if (!mesh) {
+					return Promise.reject(responseCode.MESH_NOT_FOUND);
+				} else {
+
+					let index = -1;
+
+					mesh.groups.forEach((val, i) => {
+						if (utils.uuidToString(val) === gid) {
+							index = i;
+						}
+					});
+
+					if (index === -1) {
+						return Promise.reject(responseCode.GROUP_ID_NOT_FOUND_IN_MESH);
+					}
+
+					mesh.groups.splice(index, 1);
+					return mesh.save();
+				}
+			});
+	};
+
+	let Mesh = ModelFactory.createClass(
+		"Mesh",
+		meshSchema,
+		arg => {
+			return `${arg.project}.scene`;
 		}
-	});
-};
+	);
 
-var Mesh = ModelFactory.createClass(
-	'Mesh', 
-	meshSchema, 
-	arg => { 
-		return `${arg.project}.scene`;
-	}
-);
+	module.exports = Mesh;
 
-
-module.exports = Mesh;
+})();
