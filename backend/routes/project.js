@@ -391,8 +391,6 @@ function uploadProject(req, res, next){
 		// api respond ok once the file is uploaded
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
-		console.log('uploadProject', req.body);
-
 		let data = {
 			tag: req.body.tag,
 			desc: req.body.desc

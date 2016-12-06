@@ -96,7 +96,7 @@
 		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-			req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
+			req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);

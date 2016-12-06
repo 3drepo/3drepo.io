@@ -1073,6 +1073,12 @@ function _importBSON(account, project, username, dir){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
+		systemLogger.logInfo(`toy project BSON imported without error`,{
+			account,
+			project,
+			username
+		});
+
 		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
 
 		jsonBucket.find().forEach(file => {
