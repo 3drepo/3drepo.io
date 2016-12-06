@@ -12617,7 +12617,7 @@ angular.module('3drepo')
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}
@@ -12943,6 +12943,9 @@ angular.module('3drepo')
 		function afterNewComment (comment) {
 			// Add new comment to issue
 			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if (!self.issueData.comments) {
+				self.issueData.comments = [];
+			}
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
@@ -13903,7 +13906,6 @@ angular.module('3drepo')
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.toShow = "showIssues";
 
 		/*
 		 * Get all the Issues
@@ -13911,6 +13913,7 @@ angular.module('3drepo')
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			vm.showProgress = false;
+			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
 			vm.showAddButton = true;
 		});

@@ -233,7 +233,7 @@
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}
@@ -559,6 +559,9 @@
 		function afterNewComment (comment) {
 			// Add new comment to issue
 			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if (!self.issueData.comments) {
+				self.issueData.comments = [];
+			}
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
