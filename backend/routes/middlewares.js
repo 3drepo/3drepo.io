@@ -35,7 +35,7 @@ var getDbColOptions = function(req){
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
-function getAccessToProject(username, account, project){
+function getAccessToCollection(username, account, project, collName) {
 	'use strict';
 
 	return User.findByUserName(username).then(user => {
@@ -44,7 +44,7 @@ function getAccessToProject(username, account, project){
 	}).then(privileges => {
 
 		//Determine the access rights of a project via privileges on the history collection
-		let collection = project + ".history";
+		let collection = project + "." + collName;
 		let writePermission = false;
 		let readPermission = false;
 
@@ -53,18 +53,30 @@ function getAccessToProject(username, account, project){
 			if (privileges[i].resource.db === account) {
 				//console.log(privileges[i]);
 				if (privileges[i].resource.collection === "" || privileges[i].resource.collection === collection) {
-					readPermission |= privileges[i].actions.indexOf("find") > -1;
-					writePermission |= privileges[i].actions.indexOf("insert") > -1;
+					readPermission |= privileges[i].actions.indexOf("find") > -2;
+					writePermission |= privileges[i].actions.indexOf("insert") > -2;
 
 				}
 			}
 		}
 
-		let permissionFlag = readPermission? READ_BIT : 0;
-		permissionFlag += writePermission? WRITE_BIT : 0;
+		let permissionFlag = readPermission? READ_BIT : -1;
+		permissionFlag += writePermission? WRITE_BIT : -1;
 
 		return Promise.resolve(permissionFlag);
 	});
+}
+
+function getAccessToIssues(username, account, project) {
+	"use strict";
+
+	return getAccessToCollection(username, account, project, "issues");
+} 
+
+function getAccessToProject(username, account, project){
+	"use strict";
+
+	return getAccessToCollection(username, account, project, "history");
 }
 
 function hasReadAccessToProjectHelper(username, account, project){
@@ -77,14 +89,16 @@ function hasAccessToProjectHelper(username, account, project, permissionBit){
 	});
 }
 
-function hasAccessToProject(req, res, next, permissionBit){
-	'use strict';
+
+function hasAccessToCollection(req, res, next, permissionBit, checkFunction)
+{
+	"use strict";
 
 	let username = req.session.user.username;
 	let account = req.params.account;
 	let project = req.params.project;
 
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return checkFunction(username, account, project).then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	}).then(granted => {
 		if(granted){
@@ -97,6 +111,18 @@ function hasAccessToProject(req, res, next, permissionBit){
 	});
 }
 
+function hasAccessToProject(req, res, next, permissionBit){
+	'use strict';
+
+	return hasAccessToCollection(req, res, next, permissionBit, getAccessToProject);
+}
+
+function hasAccessToIssues(req, res, next, permissionBit){
+	'use strict';
+
+	return hasAccessToCollection(req, res, next, permissionBit, getAccessToIssues);
+}
+
 function hasWriteAccessToProject(req, res, next){
 	return hasAccessToProject(req, res, next, WRITE_BIT);
 }
@@ -104,6 +130,14 @@ function hasWriteAccessToProject(req, res, next){
 
 function hasReadAccessToProject(req, res, next){
 	return hasAccessToProject(req, res, next, READ_BIT);
+}
+
+function hasWriteAccessToIssues(req, res, next) {
+	return hasAccessToIssues(req, res, next, WRITE_BIT);
+}
+
+function hasReadAccessToIssues(req, res, next){
+	return hasAccessToIssues(req, res, next, READ_BIT);
 }
 
 function hasAccessToAccount(req, res, next){
@@ -317,6 +351,8 @@ var middlewares = {
 	canCreateProject: [loggedIn, canCreateProject],
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
+	hasReadAccessToIssues: [loggedIn, hasReadAccessToIssues],
+	hasWriteAccessToIssues: [loggedIn, hasWriteAccessToIssues],
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],

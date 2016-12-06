@@ -43,11 +43,11 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject,
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.hasWriteAccessToIssues, storeIssue);
+router.put('/issues/:issueId.json', middlewares.hasWriteAccessToIssues, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssues, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssues, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';

@@ -75,7 +75,7 @@
                 myCanvas = document.getElementById("issueAreaCanvas");
                 penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
                 penIndicator.css("font-size", penIndicatorSize + "px");
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
                 vm.showPenIndicator = false;
                 resizeCanvas();
                 initCanvas(myCanvas);
@@ -157,7 +157,7 @@
                 evt.returnValue = false;
 
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
             }, false);
 
             canvas.addEventListener('mouseout', function (evt) {
@@ -173,7 +173,7 @@
                 evt.returnValue = false;
 
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
+                vm.pointerEvents = "inherit";
             }, false);
 
             canvas.addEventListener('mousemove', function (evt) {

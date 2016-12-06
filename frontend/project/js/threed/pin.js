@@ -26,7 +26,7 @@ var Pin = {};
 
 	var PIN_RADIUS = 0.25;
 	var PIN_HEIGHT = 1.0;
-	var GHOST_OPACITY = 0.1;
+	var GHOST_OPACITY = 0.4;
 	var OPAQUE_OPACITY = 1.0 - GHOST_OPACITY;
 
 	/*
