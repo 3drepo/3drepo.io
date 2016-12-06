@@ -19,7 +19,7 @@
 	"use strict";
 
 	const winston = require("winston");
-	require('winston-daily-rotate-file');
+	require("winston-daily-rotate-file");
 	const config = require("./config.js");
 	const shortid = require("shortid");
 	const C = require("./constants");
@@ -85,8 +85,8 @@
 	 * @param {string} id - Unique logger ID
 	 * @returns
 	 */
-	var repoLogger = function (req, res, id) {
-		var self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
+	let repoLogger = function (req, res, id) {
+		let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
 
 		self.uid = id;
 
@@ -113,9 +113,9 @@
 	 * @param {Object} meta - Extra data to put into the log file
 	 */
 	repoLogger.prototype.logMessage = function (type, msg, meta) {
-		var currentTime = (new Date())
+		let currentTime = (new Date())
 			.getTime();
-		var timeDiff = currentTime - this.startTime;
+		let timeDiff = currentTime - this.startTime;
 
 		let metadata = Object.assign({}, meta, {
 			uid: this.uid,

@@ -1,16 +1,62 @@
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var _ = require('lodash');
+/**
+ *	Copyright (C) 2014 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const mongoose = require('mongoose');
+const ModelFactory = require('./factory/modelFactory');
+const _ = require('lodash');
 
 //var User = require('./user');
 //var _ = require('lodash');
 
-var schema = mongoose.Schema({
+const schema = mongoose.Schema({
 	_id : String,
 	role: String,
 	privileges: {},
 	roles: []
 });
+
+schema.statics.createStandardRoles = function (account, project) {
+	let rolePromises = [];
+
+	for(let role in roleTemplates)
+	{
+		rolePromises.push(this.creatRole(account, project, role));
+	}
+
+	return Promise.all(rolePromises);
+};
+
+schema.statics.createRole = function (account, project, role) {
+	Role.findByRoleID(account, project, role).then(roleFound => {
+		if(roleFound){
+			return;
+		} else {
+			return roleTemplates.createRoleFromTemplate(account, project, role, roleName);
+		}
+	});
+};
+
+schema.static.dropRole = function (account, project, role) {
+	
+};
+
+schema.statics.grantRoleToUser = function (username) {
+
+};
 
 var roleEnum = {
 	'ADMIN': 'admin',

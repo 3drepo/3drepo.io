@@ -110,28 +110,8 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(() => {
 
-		return Role.findByRoleID(`${account}.${project}.viewer`);
-
-	}).then(role =>{
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createViewerRole(account, project);
-		}
-
-	}).then(() => {
-
-		return Role.findByRoleID(`${account}.${project}.collaborator`);
-
-	}).then(role => {
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createCollaboratorRole(account, project);
-		}
-
+		return Role.createStandardRoles(account, project);
+	
 	}).then(() => {
 
 		return User.grantRoleToUser(username, account, `${project}.collaborator`);
@@ -207,17 +187,6 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 	let user;
 	let action;
 
-	if(role === 'viewer'){
-		action = 'view';
-	} else if(role === 'collaborator'){
-		action = 'collaborate';
-	} else if(role === 'commenter'){
-		action = 'comment';
-	} else {
-		return Promise.reject(responseCodes.INVALID_ROLE);
-	}
-
-
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
 		setting = _setting;
@@ -261,17 +230,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 
-		return Role.findByRoleID(`${account}.${project}.${role}`).then(roleFound => {
-			if(roleFound){
-				return;
-			} else if(role === 'viewer') {
-				return Role.createViewerRole(account, project);
-			} else if(role === 'collaborator') {
-				return Role.createCollaboratorRole(account, project);
-			} else if(role === 'commenter') {
-				return Role.createCommenterRole(account, project);
-			}
-		});
+		return Role.createRole(role);
 
 	}).then(() => {
 		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
@@ -833,9 +792,6 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 	}).then(roles => {
-
-
-
 		for(let i = roles.length - 1; i >= 0; i--){
 
 			//console.log(Role.determineRole(account, project, roles[i]));

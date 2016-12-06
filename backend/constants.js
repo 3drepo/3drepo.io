@@ -35,6 +35,7 @@
 
 	// Overall constants
 	define("MASTER_BRANCH_NAME", "master");
+	define("ADMIN_DB", "admin");
 	define("HEAD_REVISION_NAME", "revision");
 	define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
 	define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
@@ -230,15 +231,35 @@
 	//-----------------------------------------------------------------------------
 
 	define("MONGO_AUTH_FAILED", 18);
+	define("MONGO_DUPLICATE_KEY", "11000");
 
 	//-----------------------------------------------------------------------------
 	//
-	// Roles
+	// Permissions
 	//
 	//-----------------------------------------------------------------------------
 
-	define("REPO_ROLE_SUBCONTRACTOR", "SubContractor");
-	define("REPO_ROLE_MAINCONTRACTOR", "MainContractor");
+	define("PERM_DELETE_PROJECT", "delete_project");
+	define("PERM_CHANGE_PROJECT_SETTINGS", "change_project_settings");
+	define("PERM_ASSIGN_LICENCE", "assign_licence");
+	define("PERM_UPLOAD_FILES", "upload_files");
+	define("PERM_CREATE_ISSUE", "create_issue");
+	define("PERM_COMMENT_ISSUE", "comment_issue");
+	define("PERM_DOWNLOAD_PROJECT", "download_project");
+	define("PERM_VIEW_PROJECT", "view_project");
+	define("PERM_CREATE_PROJECT", "create_project");
+	define("PERM_PROJECT_ADMIN", "admin");
+
+	//-----------------------------------------------------------------------------
+	//
+	// User templates
+	//
+	//-----------------------------------------------------------------------------
+
+	define("ADMIN_TEMPLATE", "admin");
+	define("COLLABORATOR_TEMPLATE", "collaborator");
+	define("COMMENTER_TEMPLATE", "commenter");
+	define("VIEWER_TEMPLATE", "viewer");
 
 	//-----------------------------------------------------------------------------
 	//
@@ -273,4 +294,22 @@
 		"billings"
 	]);
 
+
+	//-----------------------------------------------------------------------------
+	//
+	// Regular expressions
+	//
+	//-----------------------------------------------------------------------------
+
+	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
+	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/);
+
+	//-----------------------------------------------------------------------------
+	//
+	// Repo subscription plans
+	//
+	//-----------------------------------------------------------------------------
+	define("BASIC_PLAN", "BASIC");
+	define("PAID_PLAN", "THE-100-QUID-PLAN");
+	
 })();

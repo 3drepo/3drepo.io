@@ -114,11 +114,13 @@
 
 		SIZE_LIMIT: { message: "Single file size exceeded system limit", status: 400 },
 		INVALID_PROJECT_NAME: { message: "Invalid project name", status: 400 },
-		SIGN_UP_INVALID_EMAIL: { message: "Invalid email adress", status: 400 },
+		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 		BLACKLISTED_PROJECT_NAME: { message: "Project name reserved", status: 400 },
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
+		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
+		
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
@@ -204,6 +206,8 @@
 	let responseCodes = Object.assign({
 
 		codesMap: codesMap,
+
+		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
 
 		/**
 		 * Wrapper for mongoose errors
