@@ -1219,7 +1219,8 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 						account: account,
 						amount: currency + amount,
 						email: user.customData.email,
-						invoiceNo: billing.invoiceNo
+						invoiceNo: billing.invoiceNo,
+						type: billing.type
 					}, attachments),
 
 					Mailer.sendPaymentReceivedEmail(user.customData.email, {
