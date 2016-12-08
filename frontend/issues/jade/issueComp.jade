@@ -1,11 +1,10 @@
 div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 	div
 		// Title
-		.issueCompItemContainer(layout="column", layout-align="start", flex)
+		.issueCompItemContainer#issueCompTitleArea(layout="column", layout-align="start", flex)
 			div(layout="row", flex)
 				#issueRoleIndicator
-				md-input-container#issueCompTitleInput(ng-if="!$ctrl.data", flex)
-					label Title
+				md-input-container#issueCompTitleInput(ng-if="!$ctrl.data", flex, md-no-float)
 					input(
 					type="text"
 					ng-model="$ctrl.issueData.name"
@@ -13,10 +12,11 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 					ng-disabled="$ctrl.data"
 					aria-label="Title"
 					tdr-focus="true"
-					required)
+					required
+					placeholder="Title")
 				label#issueCompTitle(ng-if="$ctrl.data") {{$ctrl.issueData.name}}
 
-			div(layout="row", layout-align="start end", flex="none")
+			#issueCompInfoArea(layout="row", layout-align="start end", flex="none")
 				div(flex="10")
 					md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
 				.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
@@ -131,20 +131,18 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 
 	// New comment
 	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="$ctrl.data")
-		md-input-container.issueComp(flex)
-			label Comment
+		md-input-container(flex, md-no-float)
 			textarea(
 			ng-model="$ctrl.comment"
 			ng-change="$ctrl.commentChange()"
 			ng-focus="$ctrl.textInputHasFocus(true)"
-			ng-blur="$ctrl.textInputHasFocus(false)")
+			ng-blur="$ctrl.textInputHasFocus(false)"
+			placeholder="Comment")
 		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
 			img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
 
-	md-divider
-
 	// Footer
-	.issueCompItemContainer(layout="row", layout-align="space-between center")
+	div(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
 			ng-repeat="(action, actionData) in $ctrl.actions"
