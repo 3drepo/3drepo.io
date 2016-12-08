@@ -35,6 +35,8 @@ var vat = require('./vat');
 var Counter = require('./counter');
 var addressMeta = require('./addressMeta');
 var ProjectSetting = require('./projectSetting');
+var C = require('../constants');
+var RoleTemplates = require('./role_templates');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -341,7 +343,7 @@ schema.statics.verify = function(username, token, options){
 			var ProjectHelper = require('./helper/project');
 
 			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError('Failed to import toy project', err && err.stack ? err.stack : err);
+				systemLogger.logError('Failed to import toy project', { err : err && err.stack ? err.stack : err});
 			});
 		}
 
@@ -354,19 +356,11 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(() => {
 
-		//create admin role for own database
-		return Role.createAdminRole(username).catch(err => {
+		return Role.createRole(username, null, C.ADMIN_TEMPLATE);
 
-			//role exists
-			if(err.code === '11000'){
-				return Promise.resolve();
-			}
+	}).then(role => {
 
-		});
-
-	}).then(() => {
-		let adminRoleName = 'admin';
-		return User.grantRoleToUser(username, username, adminRoleName);
+		return Role.grantRolesToUser(username, [role]);
 	});
 };
 
@@ -499,6 +493,7 @@ schema.methods.listAccounts = function(){
 					federate: project.federate,
 					subProjects: project.subProjects,
 					roleFunctions: project.roleFunctions,
+					permissions: project.permissions
 				});
 			} else {
 				account.projects.push({
@@ -506,7 +501,8 @@ schema.methods.listAccounts = function(){
 					timestamp: project.timestamp,
 					status: project.status,
 					roleFunctions: project.roleFunctions,
-					subProjects: project.subProjects
+					subProjects: project.subProjects,
+					permissions: project.permissions
 				});
 			}
 
@@ -611,16 +607,19 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 			}
 		}
 
-		function addToProjectList(account, project, role){
+		function addToProjectList(account, project, role, permissions){
 			//if project not found in the list
 			if(!projects[`${account}.${project}`]){
 				projects[`${account}.${project}`] = {
 					project,
 					account,
-					roleFunctions: [role]
+					roleFunctions: role ? [role]: [],
+					permissions: permissions ? permissions : []
 				};
 			} else {
-				projects[`${account}.${project}`].roleFunctions.push(role);
+				role && projects[`${account}.${project}`].roleFunctions.push(role);
+				permissions && (projects[`${account}.${project}`].permissions = projects[`${account}.${project}`].permissions.concat(permissions));
+				projects[`${account}.${project}`].permissions  = _.unique(projects[`${account}.${project}`].permissions);
 			}
 		}
 
@@ -642,7 +641,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 						settings.forEach(setting => {
 						
 							let projectName = setting._id;
-							addToProjectList(role.db, projectName, Role.roleEnum.ADMIN);
+							addToProjectList(role.db, projectName, Role.roleEnum.ADMIN, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
 
 						});
 					})
@@ -652,13 +651,15 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 
 				let projectName = getProjectName(role.privileges);
 				let roleFunction;
+				let permissions;
 
 				if(projectName){
 					roleFunction = Role.determineRole(role.db, projectName, role);
+					permissions = RoleTemplates.determinePermission(role.db, projectName, role);
 				}
 
 				if(roleFunction){
-					addToProjectList(role.db, projectName, roleFunction);
+					addToProjectList(role.db, projectName, roleFunction, permissions);
 				}
 
 			}
@@ -1090,20 +1091,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
 		}
 
-		return Role.findByRoleID(`${account}.admin`);
+		return Role.createRole(account, null, C.ADMIN_TEMPLATE);
 
 	}).then(role => {
 
-		if(!role){
-			return Role.createAdminRole(account);
-		} else {
-			return Promise.resolve();
-		}
-
-	}).then(() => {
-
-		let adminRoleName = 'admin';
-		return User.grantRoleToUser(dbUser.customData.billingUser, account, adminRoleName);
+		return Role.grantRolesToUser(dbUser.customData.billingUser, [role]);
 
 	}).then(() => {
 

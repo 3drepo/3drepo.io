@@ -198,7 +198,7 @@ function deleteProject(req, res, next){
 	let account = req.params.account;
 
 	//delete
-	ProjectSetting.removeProject(account, project).then(() => {
+	ProjectHelpers.removeProject(account, project).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);

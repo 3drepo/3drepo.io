@@ -21,12 +21,10 @@ var middlewares = require('./middlewares');
 var config = require('../config');
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
-var Mesh = require('../models/mesh');
 var Scene = require('../models/scene');
 var Stash3DRepo = require('../models/stash3DRepo');
 var History = require('../models/history');
 var utils = require('../utils');
-var srcEncoder = require('../encoders/src_encoder');
 var stash = require('../models/helper/stash');
 var repoGraphScene = require("../repo/repoGraphScene.js");
 var x3dEncoder = require("../encoders/x3dom_encoder");
@@ -43,9 +41,6 @@ function generateSRC(req, res, next){
 
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
-	let options = {};
-	//options.stash = _getStashOptions(dbCol, 'src', req.url);
-	//options.filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
 
 	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
 
@@ -59,27 +54,7 @@ function generateSRC(req, res, next){
 
 		if(!buffer) {
 
-			let findMesh;
-
-			if(req.params.uid){
-				findMesh = Mesh.findByUID(dbCol, req.params.uid, options);
-			} else if (req.params.rid && req.params.sid) {
-				findMesh = Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options);
-			}
-
-			return findMesh.then(mesh => {
-				req.params.format = 'src';
-				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
-
-				if (!config.disableStash)
-				{
-					return stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
-						return Promise.resolve(renderedObj);
-					});
-				} else {
-					return Promise.resolve(renderedObj);
-				}
-			});
+			return Promise.reject(responseCodes.MESH_STASH_NOT_FOUND);
 
 		} else {
 			return Promise.resolve(buffer);

@@ -245,6 +245,7 @@
 	define("PERM_UPLOAD_FILES", "upload_files");
 	define("PERM_CREATE_ISSUE", "create_issue");
 	define("PERM_COMMENT_ISSUE", "comment_issue");
+	define("PERM_VIEW_ISSUE", "view_issue");
 	define("PERM_DOWNLOAD_PROJECT", "download_project");
 	define("PERM_VIEW_PROJECT", "view_project");
 	define("PERM_CREATE_PROJECT", "create_project");

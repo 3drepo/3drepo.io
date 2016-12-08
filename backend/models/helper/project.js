@@ -114,7 +114,7 @@ function createAndAssignRole(project, account, username, data) {
 	
 	}).then(() => {
 
-		return User.grantRoleToUser(username, account, `${project}.collaborator`);
+		return Role.grantProjectRoleToUser(username, account, project, C.COLLABORATOR_TEMPLATE);
 
 	}).then(() => {
 
@@ -185,7 +185,6 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 	let setting;
 	let user;
-	let action;
 
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
@@ -230,10 +229,9 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 
-		return Role.createRole(role);
-
 	}).then(() => {
-		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
+
+		return Role.grantProjectRoleToUser(user.user, account, project, role);
 
 	}).then(() => {
 
@@ -248,7 +246,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 			if(!disableEmail){
 				Mailer.sendProjectInvitation(user.customData.email, {
-					action, account, project
+					account, project
 				}).catch(err => {
 					systemLogger.logError(`Email error - ${err.message}`);
 				});
@@ -302,7 +300,10 @@ function removeCollaborator(username, email, account, project, role){
 			return Promise.reject(responseCodes.NOT_IN_ROLE);
 		}
 
-		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
+		return Role.revokeRolesFromUser(user.user, [{
+			db: account, 
+			role: `${project}.${role}`
+		}]);
 
 	}).then(() => {
 
@@ -1157,6 +1158,51 @@ function importProject(account, project, username, projectSetting, source, data)
 	});
 }
 
+function removeProject(account, project){
+	'use strict';
+
+	let setting;
+	return ProjectSetting.findById({account, project}, project).then(_setting => {
+
+		setting = _setting;
+
+		if(!setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_NOT_FOUND});
+		}
+
+	}).then(() => {
+		return ModelFactory.db.db(account).listCollections().toArray();
+
+	}).then(collections => {
+		//remove project collections
+
+		let promises = [];
+		
+		collections.forEach(collection => {
+			if(collection.name.startsWith(project)){
+				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
+			}
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => {
+		//remove project settings
+		return setting.remove();
+
+	}).then(() => {
+		//remove roles related to this project from system.roles collection
+		let promises = [];
+		
+		projectRoleTemplateLists.forEach(role => {
+			promises.push(Role.dropRole(account, `${project}.${role}`));
+		});
+
+		return Promise.all(promises);
+	});
+
+}
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
@@ -1188,5 +1234,6 @@ module.exports = {
 	getUserRolesForProject,
 	getRolesForProject,
 	uploadFile,
-	importProject
+	importProject,
+	removeProject
 };

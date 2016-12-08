@@ -189,6 +189,9 @@
 
 		INVALID_PROJECT_CODE: { message: "Project code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
+
+		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
+		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
 	};
 
 
@@ -206,8 +209,6 @@
 	let responseCodes = Object.assign({
 
 		codesMap: codesMap,
-
-		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
 
 		/**
 		 * Wrapper for mongoose errors

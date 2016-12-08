@@ -18,7 +18,6 @@
 
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
-var Role = require('./role');
 var responseCodes = require('../response_codes.js');
 var _ = require('lodash');
 
@@ -142,74 +141,6 @@ schema.methods.removeCollaborator = function(user, role){
 	return collaborator;
 };
 
-schema.statics.removeProject = function(account, project){
-	'use strict';
-
-	let User = require('./user');
-	let setting;
-	return this.findById({account, project}, project).then(_setting => {
-
-		setting = _setting;
-
-		if(!setting){
-			return Promise.reject({resCode: responseCodes.PROJECT_NOT_FOUND});
-		}
-
-		let owner = setting.owner;
-		let collaborators = setting.collaborators;
-
-		//remove all roles related to this project for these users
-		let promises = [];
-		
-		//owner has a collaborator role
-		promises.push(User.revokeRolesFromUser(owner, account, `${project}.collaborator`).catch(err =>{
-			console.log(err);
-			return Promise.resolve();
-		}));
-		
-		collaborators.forEach(user => {
-			promises.push(User.revokeRolesFromUser(user.user, account, `${project}.${user.role}`).catch(err => {
-				console.log(err);
-				return Promise.resolve();
-			}));
-		});
-
-		return Promise.all(promises);
-
-	}).then(() => {
-		return ModelFactory.db.db(account).listCollections().toArray();
-
-	}).then(collections => {
-		//remove project collections
-		console.log(collections);
-		
-		let promises = [];
-		
-		collections.forEach(collection => {
-			if(collection.name.startsWith(project)){
-				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
-			}
-		});
-
-		return Promise.all(promises);
-
-	}).then(() => {
-		//remove project settings
-		return setting.remove();
-
-	}).then(() => {
-		//remove roles related to this project from system.roles collection
-
-		//remove collaborator role first because it inherit viewer role
-		return Role.removeCollaboratorRole(account, project).then(() => {
-			return Role.removeViewerRole(account, project);
-		}).catch(err => {
-			console.log(err);
-			return Promise.resolve();
-		});
-	});
-
-};
 
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',

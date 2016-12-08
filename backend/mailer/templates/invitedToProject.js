@@ -18,7 +18,7 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	You've been invited to ${data.action} the project - ${data.project}
+	You've been invited to collaborate on the project - ${data.project}
 	<br><br>
 	<a href="${data.url}">Go to project ${data.project}</a>
 	<br><br>
@@ -26,7 +26,7 @@ var html = data => `
 	3D Repo
 `;
 
-var subject = data => `${data.project} - Invitation to ${data.action}`;
+var subject = data => `${data.project} - Invitation to collaborate`;
 
 module.exports =  {
 	html: html,
