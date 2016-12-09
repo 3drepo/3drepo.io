@@ -4,8 +4,8 @@
 		.cardInfo
 			p You do not currently have any federations set up
 
-	md-list(ng-if="!vm.showInfo")
-		div(ng-repeat="(accountIndex, account) in vm.accountsToUse", ng-if="account.fedProjects.length!==0")
+	md-list
+		div(ng-repeat="(accountIndex, account) in vm.accountsToUse")
 			// Account
 			div(layout="row", layout-align="start center")
 
@@ -30,7 +30,7 @@
 							md-icon.angular-material-icons edit
 						#federationInfoRight(layout="row")
 							p.federationTimestamp {{federation.timestamp | prettyDate:true}}
-							md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(federation)", id="{{vm.dialogCloseTo}}")
+							md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(federation, account.account)", id="{{vm.dialogCloseTo}}")
 								md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
 									md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 								md-menu-content(width="3")

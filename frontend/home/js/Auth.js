@@ -146,5 +146,10 @@
 
 			return self.authPromise.promise;
 		};
+
+		this.hasPermission = function(requiredPerm, permissions){
+			return permissions.indexOf(requiredPerm) !== -1;
+		};
+
 	}]);
 })();

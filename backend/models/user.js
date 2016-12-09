@@ -492,7 +492,6 @@ schema.methods.listAccounts = function(){
 					status: project.status,
 					federate: project.federate,
 					subProjects: project.subProjects,
-					roleFunctions: project.roleFunctions,
 					permissions: project.permissions
 				});
 			} else {
@@ -500,7 +499,6 @@ schema.methods.listAccounts = function(){
 					project: project.project,
 					timestamp: project.timestamp,
 					status: project.status,
-					roleFunctions: project.roleFunctions,
 					subProjects: project.subProjects,
 					permissions: project.permissions
 				});
@@ -607,17 +605,15 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 			}
 		}
 
-		function addToProjectList(account, project, role, permissions){
+		function addToProjectList(account, project, permissions){
 			//if project not found in the list
 			if(!projects[`${account}.${project}`]){
 				projects[`${account}.${project}`] = {
 					project,
 					account,
-					roleFunctions: role ? [role]: [],
 					permissions: permissions ? permissions : []
 				};
 			} else {
-				role && projects[`${account}.${project}`].roleFunctions.push(role);
 				permissions && (projects[`${account}.${project}`].permissions = projects[`${account}.${project}`].permissions.concat(permissions));
 				projects[`${account}.${project}`].permissions  = _.unique(projects[`${account}.${project}`].permissions);
 			}
@@ -641,7 +637,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 						settings.forEach(setting => {
 						
 							let projectName = setting._id;
-							addToProjectList(role.db, projectName, Role.roleEnum.ADMIN, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
+							addToProjectList(role.db, projectName, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
 
 						});
 					})
@@ -650,16 +646,14 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 			} else {
 
 				let projectName = getProjectName(role.privileges);
-				let roleFunction;
 				let permissions;
 
 				if(projectName){
-					roleFunction = Role.determineRole(role.db, projectName, role);
 					permissions = RoleTemplates.determinePermission(role.db, projectName, role);
 				}
 
-				if(roleFunction){
-					addToProjectList(role.db, projectName, roleFunction, permissions);
+				if(permissions){
+					addToProjectList(role.db, projectName, permissions);
 				}
 
 			}

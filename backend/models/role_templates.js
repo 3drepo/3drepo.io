@@ -50,6 +50,7 @@
 	systemToDatabasePermissions[C.PERM_CHANGE_PROJECT_SETTINGS] = { "settings": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_ASSIGN_LICENCE] = { "system.users": DB_READ_WRITE };
 	systemToDatabasePermissions[C.PERM_UPLOAD_FILES] = { "files": DB_READ_WRITE };
+	systemToDatabasePermissions[C.PERM_EDIT_PROJECT] = { "files": DB_READ_WRITE };
 	systemToDatabasePermissions[C.PERM_CREATE_ISSUE] = { "issues": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_COMMENT_ISSUE] = { "issues": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_VIEW_ISSUE] = { "issues": DB_READ };
@@ -59,7 +60,7 @@
 
 	let roleTemplates = {};
 
-	roleTemplates[C.ADMIN_TEMPLATE] = [C.PERM_DELETE_PROJECT, C.PERM_CHANGE_PROJECT_SETTINGS, C.PERM_ASSIGN_LICENCE, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_PROJECT, C.PERM_CREATE_PROJECT, C.PERM_VIEW_ISSUE];
+	roleTemplates[C.ADMIN_TEMPLATE] = [C.PERM_EDIT_PROJECT, C.PERM_DELETE_PROJECT, C.PERM_CHANGE_PROJECT_SETTINGS, C.PERM_ASSIGN_LICENCE, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_PROJECT, C.PERM_CREATE_PROJECT, C.PERM_VIEW_ISSUE];
 	roleTemplates[C.COLLABORATOR_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_ISSUE];
 	roleTemplates[C.COMMENTER_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_COMMENT_ISSUE, C.PERM_VIEW_ISSUE];
 	roleTemplates[C.VIEWER_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_VIEW_ISSUE];
@@ -153,7 +154,10 @@
 
 	let determinePermission = function(db, project, role){
 		//speical mongo role readWrite on the whole database
-		if(role.inheritedRoles && role.inheritedRoles.find(_role => _role.role === 'readWrite' && _role.db === db)){
+
+		let inheritedRoles = role.roles || role.inheritedRoles;
+		
+		if(inheritedRoles && inheritedRoles.find(_role => _role.role === 'readWrite' && _role.db === db)){
 			return roleTemplates[C.ADMIN_TEMPLATE];
 		}
 

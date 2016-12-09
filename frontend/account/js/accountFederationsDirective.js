@@ -38,34 +38,24 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth) {
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
 			accountsToUse, // For listing federations
 			dialogCloseToId;
 
-		function checkProjectPermission(project, action){
-			if(action === 'edit' || action === 'team'){
-				
-				return project.roleFunctions.indexOf('admin') !== -1 
-				|| project.roleFunctions.indexOf('collaborator') !== -1;
-
-			} else if (action === 'delete' || action === 'projectsetting') {
-				return project.roleFunctions.indexOf('admin') !== -1;
-			}
-		}
-
 		// Init
-		function getFederationOptions(project){
+		function getFederationOptions(project, account){
 
+			var isUserAccount = account === vm.account;
 			return {
-				edit: {label: "Edit", icon: "edit", hidden: !checkProjectPermission(project, 'edit')},
-				team: {label: "Team", icon: "group", hidden: !checkProjectPermission(project, 'team')},
-				projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission(project, 'projectsetting')},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !checkProjectPermission(project, 'delete')}
+				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_PROJECT, project.permissions)},
+				team: {label: "Team", icon: "group", hidden: !isUserAccount},
+				projectsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, project.permissions)},
+				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, project.permissions)}
 			};
 			
 		};
@@ -74,14 +64,13 @@
 		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
 
-		vm.showMenu = function(project){
-
-			if(project.roleFunctions.indexOf('admin') !== -1 
-				|| project.roleFunctions.indexOf('collaborator') !== -1){
-				return true;
-			}
+		vm.showMenu = function(project, account){
 		
-			return false;
+			var isUserAccount = account === vm.account;
+			return Auth.hasPermission(serverConfig.permissions.PERM_EDIT_PROJECT, project.permissions) ||
+				Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, project.permissions) ||
+				Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, project.permissions) ||
+				isUserAccount;
 		}
 
 		/*
@@ -112,7 +101,7 @@
 
 						if(vm.accounts[i].fedProjects){
 							vm.accounts[i].fedProjects.forEach(function(fedProject){
-								fedProject.federationOptions = getFederationOptions(fedProject);
+								fedProject.federationOptions = getFederationOptions(fedProject, vm.accounts[i].account);
 							});
 						}
 
@@ -227,7 +216,8 @@
 					console.log(response);
 					vm.showInfo = false;
 					vm.newFederationData.timestamp = (new Date()).toString();
-					vm.newFederationData.roleFunctions = response.data.roleFunctions;
+					vm.newFederationData.permissions = response.data.permissions;
+					vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
 					vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
 				});

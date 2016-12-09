@@ -250,6 +250,8 @@
 	define("PERM_VIEW_PROJECT", "view_project");
 	define("PERM_CREATE_PROJECT", "create_project");
 	define("PERM_PROJECT_ADMIN", "admin");
+	// edit fed project
+	define("PERM_EDIT_PROJECT", "edit_project");
 
 	//-----------------------------------------------------------------------------
 	//

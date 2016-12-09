@@ -26,6 +26,8 @@ var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
 var ProjectHelpers = require('../models/helper/project');
+var RoleTemplates = require('../models/role_templates');
+
 var _ = require('lodash');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
@@ -109,7 +111,12 @@ function updateIssue(req, res, next){
 		data.owner_roles = roles;
 		
 		roles.forEach(role => {
-			if(projectRoles[role] && projectRoles[role].roleFunction === 'admin'){
+			if(projectRoles[role] 
+				&& _.intersection(
+						projectRoles[role].permissions, 
+						RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+					).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
+				
 				data.isAdmin = true;
 			}
 		});

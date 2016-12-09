@@ -40,6 +40,7 @@
 		const systemLogger = require("../logger.js").systemLogger;
 		const responseCodes = require("../response_codes.js");
 		const _ = require('lodash');
+		const C = require('../constants');
 
 		let app = express();
 
@@ -131,7 +132,20 @@
 			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
 
 			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
-			
+			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({
+				'PERM_DELETE_PROJECT': C.PERM_DELETE_PROJECT,
+				'PERM_CHANGE_PROJECT_SETTINGS': C.PERM_CHANGE_PROJECT_SETTINGS,
+				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
+				'PERM_UPLOAD_FILES': C.PERM_UPLOAD_FILES,
+				'PERM_CREATE_ISSUE': C.PERM_CREATE_ISSUE,
+				'PERM_COMMENT_ISSUE': C.PERM_COMMENT_ISSUE,
+				'PERM_VIEW_ISSUE': C.PERM_VIEW_ISSUE,
+				'PERM_DOWNLOAD_PROJECT': C.PERM_DOWNLOAD_PROJECT,
+				'PERM_VIEW_PROJECT': C.PERM_VIEW_PROJECT,
+				'PERM_CREATE_PROJECT': C.PERM_CREATE_PROJECT,
+				'PERM_EDIT_PROJECT': C.PERM_EDIT_PROJECT
+			}) + ";";
+
 			res.header("Content-Type", "text/javascript");
 			res.render("config.jade", params);
 		});

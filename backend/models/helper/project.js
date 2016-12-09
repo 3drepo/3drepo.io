@@ -16,6 +16,7 @@
  */
 
 var Role = require('../role');
+var RoleTemplates = require('../role_templates');
 var RoleSetting = require('../roleSetting');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
@@ -151,7 +152,7 @@ function createAndAssignRole(project, account, username, data) {
 			project: {
 				account,
 				project,
-				roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+				permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
 			}
 
 		};
@@ -793,25 +794,26 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 	}).then(roles => {
-		for(let i = roles.length - 1; i >= 0; i--){
 
-			//console.log(Role.determineRole(account, project, roles[i]));
-
-			if (removeViewer && Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
-				roles.splice(i, 1);
-			}
-		}
 
 		roles.forEach((role, i) => {
 
 			roles[i] = _.pick(role.toObject(), ['role', 'db']);
-			roles[i].roleFunction = Role.determineRole(account, project, role);
+			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
 
 			if(roleSettings[roles[i].role]){
 				roles[i].color = roleSettings[roles[i].role].color;
 				roles[i].desc = roleSettings[roles[i].role].desc;
 			}
 		});
+
+		for(let i = roles.length - 1; i >= 0; i--){
+			if (removeViewer && 
+				_.union(roles[i].permissions, RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE]).length ===  RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE].length)
+			{
+				roles.splice(i, 1);
+			}
+		}
 
 		return roles;
 	});

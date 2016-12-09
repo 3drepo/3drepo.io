@@ -650,7 +650,7 @@ describe('Role templates model', function(){
 
 			let permissions = RoleTemplates.determinePermission(db, project, role);
 
-			let expectedPerm = [C.PERM_VIEW_PROJECT, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_ISSUE];
+			let expectedPerm = [C.PERM_EDIT_PROJECT, C.PERM_VIEW_PROJECT, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_ISSUE];
 
 			expect(permissions).to.include.members(expectedPerm);
 			expect(permissions.length).to.equal(expectedPerm.length);
