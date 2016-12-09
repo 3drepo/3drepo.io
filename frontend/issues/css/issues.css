@@ -233,6 +233,14 @@ issue-comp .issueCompItemContainer div {
 
 issue-comp #issueCompTitleArea {
   padding-top: 0;
+  outline: none;
+}
+issue-comp .issueCompTitleArea:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+issue-comp .issueCompTitleArea #issueCompTitle {
+  cursor: inherit;
 }
 
 issue-comp #issueCompInfoArea {
