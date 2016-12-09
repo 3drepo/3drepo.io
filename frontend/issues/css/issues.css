@@ -236,7 +236,7 @@ issue-comp #issueCompTitleArea {
 }
 
 issue-comp #issueCompInfoArea {
-  margin-top: -10px;
+  margin: -20px 0 10px;
 }
 
 issue-comp #issueCompTitleInput {
@@ -317,7 +317,7 @@ issue-comp #additionalInfoButton {
 }
 
 issue-comp #issueCompAdditional {
-  margin-top: -20px;
+  margin: -20px 0;
 }
 
 issue-comp #issueCompNewComment md-input-container {
@@ -332,8 +332,8 @@ issue-comp #descriptionAndComments {
 
 issue-comp #issueRoleIndicator {
   margin-left: 7px;
-  margin-top: 10px;
-  height: 20px;
+  margin-top: 5px;
+  height: 28px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/
