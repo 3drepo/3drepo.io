@@ -81,7 +81,7 @@
 		 */
 		vm.assignLicense = function (event) {
 			var doSave = false,
-				enterKey = 13;s
+				enterKey = 13;
 
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
