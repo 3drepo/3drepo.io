@@ -159,7 +159,7 @@
 				priv.resource.collection === collection &&
 				_.intersection(priv.actions, actions).length === actions.length;
 		});
-	}
+	};
 
 	let determinePermission = function(db, project, role){
 
