@@ -45,9 +45,17 @@
 	};
 
 	schema.statics.createRole = function (account, project, role) {
-		return Role.findByRoleID(`${account}.${project}.${role}`).then(roleFound => {
+		
+		let roleId = `${account}.${project}.${role}`;
+		
+		if(!project){
+			roleId = `${account}.${role}`;
+		}
+		
+		return Role.findByRoleID(roleId).then(roleFound => {
 			if(roleFound){
-				return;
+				roleFound = roleFound.toObject();
+				return { role: roleFound.role, db: roleFound.db};
 			} else {
 				return RoleTemplates.createRoleFromTemplate(account, project, role);
 			}
