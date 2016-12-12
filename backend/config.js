@@ -39,6 +39,52 @@
 	};
 
 	/*******************************************************************************
+	 * Round robin API configuration
+	 * @param {Object} variable - variable to coalesce
+	 * @param {Object} value - value to return if object is null or undefined
+	 *******************************************************************************/
+	let createRoundRobinAlgorithm = function()
+	{
+			let roundRobin = {
+				apiUrls : config.apiUrls,
+				apiUrlCounter: {}
+			};
+
+			/*
+			params.config_js += "server_config.apiUrls = {";
+
+			for (let k in config.apiUrls) {
+				if (config.apiUrls.hasOwnProperty(k)) {
+					params.config_js += "\"" + k + "\" : [";
+					params.config_js += config.apiUrls[k].join(",");
+					params.config_js += "],";
+				}
+			}
+
+			params.config_js += "};\n";
+			
+			params.config_js += "server_config.apiUrlCounter = {";
+			*/
+
+			for (let k in config.apiUrls) {
+				roundRobin.apiUrlCounter[k] = 0;
+			}
+
+			//params.config_js += "};\n";
+
+			roundRobin.apiUrl = function(type, path) {
+				let typeFunctions = this.apiUrls[type];
+				let functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
+
+				this.apiUrlCounter[type] += 1;
+
+				return this.apiUrls[type][functionIndex](path);
+			};
+
+			return roundRobin;
+	}
+
+	/*******************************************************************************
 	 * Fill in the details of a server
 	 * @param {Object} serverObject - The object to populate
 	 * @param {string} name - The name of the server (also populates sub-domain/sub-directory)
@@ -145,6 +191,8 @@
 			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
 		}
 	}
+
+	config.apiAlgorithm = createRoundRobinAlgorithm();
 
 	config.disableCache = coalesce(config.disableCache, false);
 

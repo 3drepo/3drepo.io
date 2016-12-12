@@ -93,6 +93,8 @@
 		app.use("/", require("../routes/plan"));
 		//auth handler
 		app.use("/", require("../routes/auth"));
+		// subscriptions handler
+		app.use("/", require("../routes/subscriptions"));
 		// os api handler
 		app.use("/os", require("../routes/osBuilding"));
 		// payment api header

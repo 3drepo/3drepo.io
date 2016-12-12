@@ -42,6 +42,8 @@
 
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
+
+	router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 	router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 	router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 	router.get("/:account/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
@@ -53,6 +55,7 @@
 	router.post('/:account/subscriptions', middlewares.isAccountAdmin, createSubscription);
 	router.post("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
 	router.delete("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
+
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.isAccountAdmin, updateUser);
@@ -393,53 +396,6 @@
 		}
 	}
 
-	// function createDatabase(req, res, next){
-
-
-	// 	let responsePlace = utils.APIInfo(req);
-	// 	let password = crypto.randomBytes(64).toString('hex');
-
-	// 	//first create the ghost user
-	// 	let checkPlan = User.getSubscription(req.body.plan) ?
-	// 		Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
-
-
-	// 	return checkPlan.then(() => {
-	// 		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
-
-	// 	}).then(() => {
-
-	// 		return User.findByUserName(req.body.database);
-
-
-	// 	}).catch(err => {
-	// 		//change user exists error message to database exists
-	// 		if(err.resCode && err.resCode.value === 55){
-	// 			return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
-	// 		} else {
-	// 			return Promise.reject(err);
-	// 		}
-
-	// 	}).then(dbUser => {
-
-	// 		//create a subscription token in this ghost user
-	// 		let billingUser = req.params.account;
-	// 		return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-
-
-	// 	}).then(token => {
-
-
-	// 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-	// 			database: req.body.database,
-	// 			token: token.token
-	// 		});
-
-	// 	}).catch(err => {
-	// 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	// 	});
-	// }
-
 	function createSubscription(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
@@ -505,10 +461,10 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			let template = 'invoice.jade';
+			let template = "invoice.jade";
 
-			if(billing.type === 'refund'){
-				template = 'refund.jade';
+			if(billing.type === "refund"){
+				template = "refund.jade";
 			}
 
 			res.render(template, {billing : billing.clean(), baseURL: config.getBaseURL()});

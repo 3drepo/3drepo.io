@@ -20,7 +20,6 @@ router.post("/paypal/food", handleIPN);
 //capture a pre-approve payment
 router.post("/paypal/execute", executeAgreement);
 
-
 function executeAgreement(req, res, next){
 	'use strict';
 	let responsePlace = utils.APIInfo(req);

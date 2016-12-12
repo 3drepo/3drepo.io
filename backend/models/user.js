@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
 var _ = require('lodash');
@@ -33,26 +33,21 @@ var Subscription = require('./subscription');
 var config = require('../config');
 var vat = require('./vat');
 var Counter = require('./counter');
-var addressMeta = require('./addressMeta');
 var ProjectSetting = require('./projectSetting');
 var C = require('../constants');
 var RoleTemplates = require('./role_templates');
-
+var userBilling = require("./userBilling");
 var getSubscription = Subscription.getSubscription;
-
-
 
 var schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
 	customData: {
-
 		projects: [{
 			account: String,
 			project: String
 		}],
-
 		firstName: String,
 		lastName: String,
 		email: String,
@@ -65,42 +60,7 @@ var schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		subscriptions: [{
-			active: Boolean,
-			updatedAt: Date,
-			createdAt: Date,
-			billingUser: String,
-			assignedUser: String,
-			expiredAt: Date,
-			limits: {},
-			token: String, 
-			plan: String,
-			inCurrentAgreement: Boolean,
-			pendingDelete: Boolean,
-			//newPurchased: Boolean,
-			database: String
-		}],
-		billingInfo:{
-
-			"vat": String,
-			"line1": String,
-			"line2": String,
-			"line3": String,
-			"firstName": String,
-			"lastName": String,
-			"company": String,
-			"city": String,
-			"postalCode": String,
-			"countryCode": String,
-			"state": String,
-		},
-		//global billing info
-		billingAgreementId: String,
-		paypalPaymentToken: String,
-		billingUser: String,
-		lastAnniversaryDate: Date,
-		nextPaymentDate: Date,
-		firstNextPaymentDate:  Date,
+		billing: userBilling,
 		avatar: Object
 	},
 	roles: [{}]
@@ -113,7 +73,7 @@ schema.statics.historyChunksStats = function(dbName){
 
 		let historyChunks = _.filter(collections, collection => collection.name.endsWith('.history.chunks'));
 		let promises = [];
-		
+
 		historyChunks.forEach(collection => {
 			promises.push(ModelFactory.db.db(dbName).collection(collection.name).stats());
 		});
@@ -138,7 +98,7 @@ schema.statics.authenticate = function(logger, username, password){
 	}).then(user => {
 		if(user.customData && user.customData.inactive) {
 			return Promise.reject({resCode: responseCodes.USER_NOT_VERIFIED});
-		} 
+		}
 		return Promise.resolve(user);
 	}).catch( err => {
 		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
@@ -218,7 +178,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 	return checkUser.then(() => {
 
-		let updateUserCmd = { 
+		let updateUserCmd = {
 			'updateUser' : username,
 			'pwd': newPassword
 		 };
@@ -230,7 +190,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 		if(user){
 			user.customData.resetPasswordToken = undefined;
 			return user.save().then(() => Promise.resolve());
-		} 
+		}
 
 		return Promise.resolve();
 
@@ -245,7 +205,7 @@ schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
-	
+
 	let cleanedCustomData = {};
 	let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
@@ -310,7 +270,7 @@ schema.statics.verify = function(username, token, options){
 	let user;
 
 	return this.findByUserName(username).then(_user => {
-		
+
 		user = _user;
 
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
@@ -330,7 +290,7 @@ schema.statics.verify = function(username, token, options){
 			user.customData.emailVerifyToken = undefined;
 			return user.save();
 
-		
+
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
@@ -374,7 +334,7 @@ schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
 	let updateableFields = [ 'firstName', 'lastName', 'email', 'billingInfo' ];
-	
+
 	this.customData = this.customData || {};
 
 	updateableFields.forEach(field => {
@@ -411,7 +371,7 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 		user.customData.resetPasswordToken = resetPasswordToken;
 
 		return user.save();
-	
+
 	}).then(() => {
 		return Promise.resolve(resetPasswordToken);
 	});
@@ -423,7 +383,7 @@ schema.statics.grantRoleToUser = function(username, db, role){
 	'use strict';
 
 	return this.findByUserName(username).then(user => {
-		
+
 		let dup = false;
 		user.roles.forEach(_role => {
 			if(_role.role === role && _role.db === db){
@@ -434,7 +394,7 @@ schema.statics.grantRoleToUser = function(username, db, role){
 		if(!dup){
 			user.roles.push({ role, db});
 
-			let grantRoleCmd = { 
+			let grantRoleCmd = {
 				grantRolesToUser: username,
 				roles: user.roles
 			};
@@ -466,7 +426,7 @@ schema.methods.listAccounts = function(){
 
 	// group projects by accounts
 	return this.listProjectsAndAccountAdmins().then(data => {
-		
+
 		let projects = data.projects;
 		let adminAccounts = data.adminAccounts;
 
@@ -542,13 +502,13 @@ schema.methods.listAccounts = function(){
 					}
 
 				}).then(stats => {
-				
+
 					if(stats && account.quota.spaceLimit > 0){
 						let totalSize = 0;
 						stats.forEach(stat => {
-							totalSize += stat.size; 
+							totalSize += stat.size;
 						});
-						
+
 						account.quota.spaceUsed = totalSize;
 					} else if(account.quota) {
 						account.quota.spaceUsed = 0;
@@ -574,7 +534,7 @@ schema.methods.listAccounts = function(){
 			let myAccount = accounts[myAccountIndex];
 			accounts.splice(myAccountIndex, 1);
 			accounts.unshift(myAccount);
-		} 
+		}
 
 		return Promise.all(getQuotaPromises).then(() => {
 			return Promise.resolve(accounts);
@@ -593,7 +553,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 		let promises = [];
 
 		function getProjectName(privileges){
-			
+
 			let collectionSuffix = '.history';
 
 			for(let i=0 ; i < privileges.length ; i++){
@@ -619,7 +579,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 		}
 
 		roles.forEach(role => {
-			
+
 			let permissions = RoleTemplates.determinePermission(role.db, '', role);
 
 			if(_.intersection(permissions, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
@@ -628,7 +588,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 				promises.push(
 					ProjectSetting.find({account: role.db}).then(settings => {
 						settings.forEach(setting => {
-						
+
 							let projectName = setting._id;
 							addToProjectList(role.db, projectName, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
 
@@ -673,13 +633,13 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 					}
 
 					return Promise.resolve();
-					
+
 				}).catch(() => Promise.resolve())
 			);
 		});
 
 		return Promise.all(promises).then(() => Promise.resolve(projects));
-	
+
 	}).then(projects => {
 
 		//get status for project
@@ -699,10 +659,10 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 					}
 
 					return Promise.resolve();
-					
+
 				}).then(() => {
 
-					
+
 					if(projects[index].federate){
 						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, 'master');
 					}
@@ -723,334 +683,24 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 	});
 };
 
-//to-do: refactor
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
-	'use strict';
+	"use strict";
 
-	plans = plans || [];
-	this.customData.subscriptions = this.customData.subscriptions || [];
-	this.customData.billingUser = billingUser;
-
-	let subscriptions = this.customData.subscriptions;
-
-	let currentCount = {};
-
-	//clear subscriptions
-	let ids = this.customData.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < new Date())).map(sub => sub._id);
-
-	ids.forEach(id => {
-		this.customData.subscriptions.remove(id);
-	});
-	
-
-	//count user current plans
-	this.customData.subscriptions.forEach(subscription => {
-
-		//ignore basic plan or plans not inCurrentAgreement
-		if (subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement) {
-			return;
-		}
-
-		//clean old flag
-		subscription.pendingDelete = undefined;
-
-		if(!currentCount[subscription.plan]){
-			currentCount[subscription.plan] = 1;
-		} else {
-			currentCount[subscription.plan]++;
-		}
-	});
-
-	// calulate change of plans
-	plans.forEach(plan => {
-		if(currentCount[plan.plan]){
-			plan.quantity = plan.quantity - currentCount[plan.plan];
-		}
-	});
-
-	// get plans with changes
-	plans = plans.filter(plan => plan.quantity !== 0);
-
-
-	let next;
 	let billingAgreement;
 
-	let cleanedVATNumber = billingAddress.vat;
-	if (billingAddress.vat && billingAddress.vat.toUpperCase().startsWith(billingAddress.countryCode)) {
-		cleanedVATNumber = billingAddress.vat.substr(2); 
-	}
+	plans = plans || [];
 
-	let checkVAT = billingAddress.vat && addressMeta.euCountriesCode.indexOf(billingAddress.countryCode) !== -1 ? 
-	vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
-
-	let skipCheckingForTravis = config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && billingAddress.countryCode !== 'GB';
-
-	if(skipCheckingForTravis){
-		checkVAT = Promise.resolve(({ valid: true }));
-	}
-
-
-	return checkVAT.then(result => {
-		if(!result.valid){
-			return Promise.reject(responseCodes.INVALID_VAT);
-		} else {
-
-			if(plans.length <= 0){
-
-				// no changes in no. of licences
-				if(!this.customData.billingAgreementId){
-					next = Promise.resolve({});
-				} else {
-					next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
-						"line1": billingAddress.line1,
-						"line2": billingAddress.line2,
-						"city": billingAddress.city,
-						"postal_code": billingAddress.postalCode,
-						"country_code": billingAddress.countryCode,
-						"state": billingAddress.state
-					});
-				}
-
-
-			} else {
-
-				let currency = 'GBP';
-				let existingPlans = [];
-				let now = new Date();
-				let check = Promise.resolve();
-
-
-				Object.keys(currentCount).forEach(plan => {
-					existingPlans.push({ plan: plan, quantity: currentCount[plan]});
-				});
-
-				plans.forEach(plan => {
-
-					if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
-						
-						// buying new licences
-						//amount += getSubscription(plan.plan).amount * plan.quantity;
-
-						for(let i=0; i<plan.quantity; i++){
-
-							subscriptions.push({
-								plan: plan.plan,
-								createdAt: now,
-								updatedAt: now,
-								inCurrentAgreement: true,
-								active: false
-							});
-						}
-
-					} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
-						
-						// canceling licences
-
-						// cancel plans with no assigned user first
-
-						let removeNumber = -plan.quantity;
-						let removeCount = 0;
-
-
-						let subs = this.getActiveSubscriptions({excludeNotInAgreement: true}).filter(sub => sub.plan === plan.plan && !sub.assignedUser);
-						for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-							subs[i].pendingDelete = true;
-							removeCount++;
-						}
-						//allow to remove billingUser's licence if remove count = user's current no. of licences
-						if(removeCount < removeNumber && 
-							this.getActiveSubscriptions({ excludeNotInAgreement: true }).filter(sub => sub.plan === plan.plan).length === removeNumber){
-
-							let subs = this.getActiveSubscriptions( {excludeNotInAgreement:  true}).filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
-							for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-								subs[i].pendingDelete = true;
-								removeCount++;
-							}
-						}
-
-						//check if they can remove licences
-						let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
-						let totalSize = 0;
-
-						check = new Promise((resolve, reject) => {
-					
-							if(removeCount < removeNumber){
-								reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
-							} else {
-								resolve(User.historyChunksStats(this.user));
-							}
-							
-						}).then(stats => {
-						
-							if(stats){
-								stats.forEach(stat => {
-									totalSize += stat.size; 
-								});
-							}
-						}).then(() => {
-
-							console.log(quotaAfterDelete.spaceLimit - totalSize);
-							if(quotaAfterDelete.spaceLimit - totalSize < 0){
-								return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
-							} else{
-								return Promise.resolve();
-							}
-
-						});
-
-						let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
-						existingPlan.quantity += plan.quantity;
-
-					}
-				});
-
-
-				next = check.then(() => {
-					//console.log('new plan amount', amount);
-
-					let startDate = moment().utc().add(10, 'second');
-					let nextPaymentDate;
-
-					if(this.getActiveSubscriptions({ skipBasic: 'true', excludeNotInAgreement: true}).length === 0){
-						// first time to buy licence and pick today as the anniversary date
-						console.log('First time buying');
-						this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
-						this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
-
-					}
-
-					nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-					let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.vat);
-
-					if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
-
-						return Promise.resolve();
-
-					} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
-						//cancel the old agreement, if any
-
-						var cancel_note = {
-							"note": "You have updated the licence subscriptions."
-						};
-
-						let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-
-						ids.forEach(id => {
-							this.customData.subscriptions.remove(id);
-						});
-
-						return new Promise((resolve, reject) => {
-							Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
-								if (err) {
-									systemLogger.logError(JSON.stringify(err),{ 
-										billingAgreementId: this.customData.billingAgreementId
-									});
-
-									reject(err);
-								} else {
-									systemLogger.logInfo("Billing agreement canceled successfully", { 
-										billingAgreementId: this.customData.billingAgreementId
-									});
-
-									this.customData.billingAgreementId = undefined;
-									resolve();
-								}
-							});
-						});
-
-
-					} else {
-
-						let paypalBillingAddress = {
-							"line1": billingAddress.line1,
-							"line2": billingAddress.line2,
-							"city": billingAddress.city,
-							"postal_code": billingAddress.postalCode,
-							"country_code": billingAddress.countryCode,
-							"state": billingAddress.state
-						};
-
-						return Payment.getBillingAgreement(
-							billingUser,
-							paypalBillingAddress, 
-							currency, 
-							paymentDateAndAmount.firstCycleAmount, 
-							paymentDateAndAmount.firstCycleBeforeTaxAmount, 
-							paymentDateAndAmount.firstCycleTaxAmount, 
-							paymentDateAndAmount.firstCycleLength,
-							paymentDateAndAmount.regularAmount, 
-							paymentDateAndAmount.regularBeforeTaxAmount, 
-							paymentDateAndAmount.regularTaxAmount, 
-							paymentDateAndAmount.regularCycleLength, 
-							paymentDateAndAmount.startDate
-						).then(_billingAgreement => {
-
-							billingAgreement = _billingAgreement;
-							this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
-
-						});
-
-					}
-				});
-
-			}
-
-		}
-
-		return next;
-
-	}).then(() => {
-		//store billing info locally
-		console.log(billingAddress);
-		this.customData.billingInfo = billingAddress;
+	return this.customData.billing.buySubscriptions(plans, billingUser, billingAddress).then(function(_billingAgreement) {
+		billingAgreement = _billingAgreement;
 		return this.save();
-
-	}).then(() => {
+	}).then(function() {
 		return Promise.resolve(billingAgreement || {});
 	});
 };
 
-
-schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
-	'use strict';
-
-	if(getSubscription(plan)){
-
-
-		this.customData.subscriptions = this.customData.subscriptions || [];
-		let subscriptions = this.customData.subscriptions;
-
-		var now = new Date();
-
-		let subscription = {
-
-			plan: plan,
-			billingUser: billingUser,
-			createdAt: now,
-			updatedAt: now,
-			active: active,
-			expiredAt: expiredAt
-		};
-
-		if(active){
-			subscription.limits = getSubscription(subscription.plan).limits;
-		}
-
-		subscriptions.push(subscription);
-
-		return this.save().then(() => {
-			return Promise.resolve(subscription);
-		});
-
-	} else {
-
-		return Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
-	}
-};
-
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw, disableEmail){
 	'use strict';
-	
+
 	let query = {'customData.billingAgreementId': billingAgreementId};
 	let account;
 	let dbUser;
@@ -1088,16 +738,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		let items = [];
 
-		dbUser.customData.nextPaymentDate && console.log('nextPaymentDate', moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString());
-		console.log('pp next', moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString());
-
 		if(dbUser.customData.nextPaymentDate && moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString()){
-			console.log('last ann date changed');
 			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
 		}
 
 		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
-
 
 		// set to to next 3rd of next month, give 3 days cushion
 		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
@@ -1125,7 +770,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 						taxAmount: Math.round(paymentInfo.taxAmount / newPurchaseCount * 100) / 100
 					});
 				}
-			
+
 			}
 
 		});
@@ -1191,7 +836,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 				}
 
 			}).then(billing => {
-				
+
 				let attachments;
 
 				if(billing && billing.pdf){
@@ -1209,7 +854,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 				}
 
 				return User.findByUserName(dbUser.customData.billingUser).then(user => {
-					
+
 					//make a copy to sales
 
 					Mailer.sendPaymentReceivedEmailToSales({
@@ -1237,9 +882,9 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		return dbUser.save().then(() => {
 			return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account, payment: paymentInfo});
 		});
-		
 
-		
+
+
 	});
 
 };
@@ -1297,7 +942,7 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 	if(!assignedBillingUser){
 
 		let subscriptions = this.customData.subscriptions;
-		
+
 		for(let i=0; i < subscriptions.length; i++){
 
 			if(subscriptions[i].plan !== Subscription.getBasicPlan().plan && !subscriptions[i].assignedUser){
@@ -1314,7 +959,7 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 
 		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 		let nextAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
-		
+
 		let paymentInfo = {
 			currency: billAmount.amount.currency,
 			taxAmount: parseFloat(billAmount.charge_models.find(model => model.type === 'TAX').amount.value)
@@ -1387,34 +1032,7 @@ schema.methods.haveActiveSubscriptions = function(){
 	return this.getActiveSubscriptions().length > 0;
 };
 
-schema.methods.getActiveSubscriptions = function(options){
-	'use strict';
-	let now = new Date();
-	options = options || {};
 
-
-	return this.customData.subscriptions.filter(sub => { 
-
-		let basicCond = true;
-		if (options.skipBasic){
-			basicCond = sub.plan !== Subscription.getBasicPlan().plan;
-		}
-
-		let pendingDeleteCond = true;
-		if(options.excludePendingDelete){
-			pendingDeleteCond = !sub.pendingDelete;
-		}
-
-		let inCurrentAgreementCond = true;
-		if(options.excludeNotInAgreement){
-			inCurrentAgreementCond = sub.inCurrentAgreement;
-		} 
-
-		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt) && inCurrentAgreementCond;
-	});
-	
-
-};
 
 schema.methods.getSubscriptionLimits = function(options){
 	'use strict';
@@ -1422,7 +1040,7 @@ schema.methods.getSubscriptionLimits = function(options){
 	let subscriptions = this.getActiveSubscriptions(options);
 
 	let sumLimits = {
-		spaceLimit: 0, 
+		spaceLimit: 0,
 		collaboratorLimit: 0
 	};
 
@@ -1441,7 +1059,7 @@ schema.methods.getSubscriptionLimits = function(options){
 schema.statics.findSubscriptionByToken = function(billingUser, token){
 	'use strict';
 
-	let query = { 
+	let query = {
 		'customData.subscriptions.token': token
 	};
 
@@ -1458,7 +1076,7 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 
 		subscription = dbUser.customData.subscriptions[0].toObject();
 		subscription.account = dbUser.user;
-		
+
 		return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
 
 	}).then(payments => {
@@ -1476,7 +1094,7 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	let ProjectHelper = require('./helper/project');
 
 	let subscription = this.customData.subscriptions.id(id);
-	
+
 	if(!subscription){
 		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
 	}
@@ -1509,7 +1127,7 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 			foundProjects.forEach(foundProject => {
 				promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, this.user, foundProject.project, foundProject.role));
 			});
-			
+
 			return Promise.all(promises);
 
 		}
@@ -1525,14 +1143,14 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
 	let subscription = this.customData.subscriptions.id(id);
-	
+
 	if(!subscription){
 		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
 	}
 
 	let next;
 
-	
+
 	if(userData.email){
 		next = User.findByEmail(userData.email);
 	} else {
@@ -1561,7 +1179,7 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 			subscription.assignedUser = user.user;
 			return this.save().then(() => subscription);
 		}
-		
+
 	});
 
 };

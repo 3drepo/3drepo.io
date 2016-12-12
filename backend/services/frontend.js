@@ -60,41 +60,21 @@
 		app.get("/public/plugins/base/config.js", function (req, res) {
 			let params = {};
 
-			params.config_js = "var server_config = {};";
-			params.config_js += "server_config.apiUrls = {";
+			params.config_js = "var server_config = {};\n";
 
-			for (let k in config.apiUrls) {
-				if (config.apiUrls.hasOwnProperty(k)) {
-					params.config_js += "\"" + k + "\" : [";
-					params.config_js += config.apiUrls[k].join(",");
-					params.config_js += "],";
-				}
+			params.config_js = "server_config.api_algorithm = {\n";
+
+			for(let prop in config.apiAlgorithm) { 
+				params.config_js += "\t\"" + prop + "\":" + params.config_js[prop] + "\n"; 
 			}
 
 			params.config_js += "};\n";
 
-			params.config_js += "server_config.apiUrlCounter = {";
+			params.config_js = "server_config.apiUrl = server_config.api_algorithm.apiUrl";
 
-			for (let k in config.apiUrls) {
-				if (config.apiUrls.hasOwnProperty(k)) {
-					params.config_js += "\"" + k + "\" : 0,";
-				}
-			}
-
-			params.config_js += "};\n";
-
-			params.config_js += `server_config.apiUrl = function(type, path) {
-			var typeFunctions = server_config.apiUrls[type];
-			var functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
-
-			this.apiUrlCounter[type] += 1;
-
-			return this.apiUrls[type][functionIndex](path);
-		};\n`;
-
-			params.config_js += "server_config.GET_API =  \"all\"\n";
-			params.config_js += "server_config.POST_API = (\"post\" in server_config.apiUrls) ? \"post\" : server_config.GET_API;\n";
-			params.config_js += "server_config.MAP_API = (\"map\" in server_config.apiUrls) ? \"map\" : server_config.GET_API;\n";
+			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\"\n";
+			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
+			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
 
 			if ("wayfinder" in config) {
 				// TODO: Make a public section in config for vars to be revealed
