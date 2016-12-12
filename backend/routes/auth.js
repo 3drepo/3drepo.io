@@ -42,20 +42,20 @@
 
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
-	router.get("/:account/avatar", middlewares.hasReadAccessToAccount, getAvatar);
-	router.post("/:account/avatar", middlewares.hasReadAccessToAccount, uploadAvatar);
-	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
-	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
-	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
-	router.get("/:account/billings/:invoiceNo.pdf", middlewares.hasReadAccessToAccount, renderBillingPDF);
+	router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
+	router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
+	router.get("/:account/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+	router.get("/:account/billings", middlewares.isAccountAdmin, listBillings);
+	router.get("/:account/billings/:invoiceNo.html", middlewares.isAccountAdmin, renderBilling);
+	router.get("/:account/billings/:invoiceNo.pdf", middlewares.isAccountAdmin, renderBillingPDF);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
-	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
-	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
+	router.post('/:account/subscriptions', middlewares.isAccountAdmin, createSubscription);
+	router.post("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
-	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
+	router.put("/:account", middlewares.isAccountAdmin, updateUser);
 	router.put("/:account/password", resetPassword);
 
 	// function expireSession(req) {

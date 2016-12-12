@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+var ModelFactory = require('../factory/modelFactory');
 var Role = require('../role');
 var RoleTemplates = require('../role_templates');
 var RoleSetting = require('../roleSetting');
@@ -785,26 +785,34 @@ function getRolesForProject(account, project, removeViewer){
 			},{ 
 				'roles': {
 					'$elemMatch': {
-						"role" : "readWrite",
 						"db" : account
 					}
 				}
 			}]
 
+		},{
+			role: 1, db: 1, _id: 0
 		});
 
 	}).then(roles => {
 
+		roles.forEach((role, i)  => roles[i] = role.toObject());
+		return Role.viewRolesWithInheritedPrivs(roles);
+
+	}).then(roles => {
+
+		//console.log(JSON.stringify(roles, null , 2));
 
 		roles.forEach((role, i) => {
-
-			roles[i] = _.pick(role.toObject(), ['role', 'db']);
+			
 			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
 
 			if(roleSettings[roles[i].role]){
 				roles[i].color = roleSettings[roles[i].role].color;
 				roles[i].desc = roleSettings[roles[i].role].desc;
 			}
+
+			roles[i] = _.pick(roles[i], ['role', 'db', 'color', 'desc', 'permissions']);
 		});
 
 		for(let i = roles.length - 1; i >= 0; i--){
@@ -1196,7 +1204,7 @@ function removeProject(account, project){
 		//remove roles related to this project from system.roles collection
 		let promises = [];
 		
-		projectRoleTemplateLists.forEach(role => {
+		RoleTemplates.projectRoleTemplateLists.forEach(role => {
 			promises.push(Role.dropRole(account, `${project}.${role}`));
 		});
 

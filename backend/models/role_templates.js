@@ -43,6 +43,7 @@
 	const DB_READ_WRITE_UPDATE = ["find", "insert", "update"];
 	const DB_READ_WRITE = ["find", "insert"];
 	const DB_READ = ["find"];
+	const DB_ALL = ["find", "insert", "update", "remove"];
 
 	let systemToDatabasePermissions = {};
 
@@ -152,17 +153,26 @@
 			});
 	};
 
-	let determinePermission = function(db, project, role){
-		//speical mongo role readWrite on the whole database
+	let _matchPrivileges = function(privs, db, collection, actions){
+		return privs.find(priv => {
+			return priv.resource.db === db &&
+				priv.resource.collection === collection &&
+				_.intersection(priv.actions, actions).length === actions.length;
+		});
+	}
 
-		let inheritedRoles = role.roles || role.inheritedRoles;
-		
-		if(inheritedRoles && inheritedRoles.find(_role => _role.role === 'readWrite' && _role.db === db)){
-			return roleTemplates[C.ADMIN_TEMPLATE];
+	let determinePermission = function(db, project, role){
+
+		if(!role || !role.inheritedPrivileges){
+			return [];
 		}
 
-		if(!role.privileges){
-			return [];
+		//console.log(db, project, role);
+		
+		let adminPrivMatched = _matchPrivileges(role.inheritedPrivileges, db, '', DB_ALL);
+
+		if(adminPrivMatched){
+			return roleTemplates[C.ADMIN_TEMPLATE];
 		}
 
 		let permissions = [];
@@ -178,12 +188,7 @@
 
 				dbCollections[collSet].forEach(collection => {
 
-					let privMatched = role.privileges.find(priv => {
-						return priv.resource.db === db &&
-							priv.resource.collection === `${project}.${collection}` &&
-							_.intersection(priv.actions, actions).length === actions.length;
-
-					});
+					let privMatched = _matchPrivileges(role.inheritedPrivileges, db, `${project}.${collection}`, actions);
 
 					if(!privMatched){
 						failedMatching = true;
@@ -199,6 +204,7 @@
 
 		return permissions;
 	};
+
 
 	module.exports = {
 		roleTemplates: roleTemplates,

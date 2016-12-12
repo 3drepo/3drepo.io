@@ -587,8 +587,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 
 	var ProjectHelper = require('./helper/project');
 	let adminAccounts = [];
-	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
-	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
+	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
 
 		let projects = {};
 		let promises = [];
@@ -619,17 +618,11 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 			}
 		}
 
-		let privs = [];
-		if (docs && docs.roles.length) {
-			let rolesArr = docs.roles;
-			for (let i = 0; i < rolesArr.length; i++) {
-				privs = privs.concat(rolesArr[i].inheritedPrivileges);
-			}
-		}
-
-		docs.roles.forEach(role => {
+		roles.forEach(role => {
 			
-			if(role.inheritedRoles.find(_role => _role.role === 'readWrite')){
+			let permissions = RoleTemplates.determinePermission(role.db, '', role);
+
+			if(_.intersection(permissions, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
 				// admin role list all projects on that db
 				adminAccounts.push(role.db);
 				promises.push(
@@ -1573,22 +1566,20 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 
 };
 
+
 schema.methods.getPrivileges = function(){
 	'use strict';
 
-	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
-	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
-
+	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
 
 		let privs = [];
-		if (docs && docs.roles.length) {
-			let rolesArr = docs.roles;
-			for (let i = 0; i < rolesArr.length; i++) {
-				privs = privs.concat(rolesArr[i].inheritedPrivileges);
+		if (roles && roles.length) {
+			for (let i = 0; i < roles.length; i++) {
+				privs = privs.concat(roles[i].inheritedPrivileges);
 			}
 		}
 
-		return Promise.resolve(privs);
+		return Promise.resolve({inheritedPrivileges: privs});
 	});
 
 };

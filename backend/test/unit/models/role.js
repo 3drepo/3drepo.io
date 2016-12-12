@@ -401,15 +401,20 @@ describe('Role templates model', function(){
 
 	describe('#determinePermission', function(){
 
-		it(`should able to determine permission for a readWrite role`, function(){
+		it(`should able to determine permission for a admin role`, function(){
 			
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-				inheritedRoles:[{
-					role: 'readWrite',
-					db: db
-				}]
+	            "inheritedPrivileges" : [ 
+	                {
+	                    "resource" : {
+	                        "db" : db,
+	                        "collection" : ""
+	                    },
+	                    "actions" : ["find", "insert", "update", "remove"]
+	                }
+	            ]
 			};
 
 			let permissions = RoleTemplates.determinePermission(db, project, role);
@@ -423,7 +428,7 @@ describe('Role templates model', function(){
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-				privileges:[]
+				inheritedPrivileges:[]
 			};
 
 			[
@@ -438,7 +443,7 @@ describe('Role templates model', function(){
 				"stash.src.files"
 
 			].forEach(collection => {
-				role.privileges.push({
+				role.inheritedPrivileges.push({
 					resource:{
 						db: db,
 						collection: `${project}.${collection}`
@@ -460,7 +465,7 @@ describe('Role templates model', function(){
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-				privileges:[]
+				inheritedPrivileges:[]
 			};
 
 			[
@@ -470,7 +475,7 @@ describe('Role templates model', function(){
 				"stash.3drepo.files", 
 				"stash.3drepo"
 			].forEach(collection => {
-				role.privileges.push({
+				role.inheritedPrivileges.push({
 					resource:{
 						db: db,
 						collection: `${project}.${collection}`
@@ -492,7 +497,7 @@ describe('Role templates model', function(){
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-				privileges:[]
+				inheritedPrivileges:[]
 			};
 
 			[
@@ -508,7 +513,7 @@ describe('Role templates model', function(){
 				"some_other_collections"
 
 			].forEach(collection => {
-				role.privileges.push({
+				role.inheritedPrivileges.push({
 					resource:{
 						db: db,
 						collection: `${project}.${collection}`
@@ -530,7 +535,7 @@ describe('Role templates model', function(){
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-			    "privileges" : [ 
+			    "inheritedPrivileges" : [ 
 			        {
 			            "resource" : {
 			                "db" : db,
@@ -661,7 +666,7 @@ describe('Role templates model', function(){
 			let db = 'testacct';
 			let project = 'testproject';
 			let role = {
-			    "privileges" : [ 
+			    "inheritedPrivileges" : [ 
 			        {
 			            "resource" : {
 			                "db" : db,

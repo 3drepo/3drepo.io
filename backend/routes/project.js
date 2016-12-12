@@ -35,7 +35,7 @@ var getDbColOptions = function(req){
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings', middlewares.isAccountAdmin, updateSettings);
+router.put('/:project/settings', middlewares.hasWriteAccessToProjectSettings, updateSettings);
 
 router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
 
@@ -60,7 +60,7 @@ router.get('/:project/revision/master/head/searchtree.json', middlewares.hasRead
 
 router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
-router.delete('/:project', middlewares.isAccountAdmin, deleteProject);
+router.delete('/:project', middlewares.hasDeleteAccessToProject, deleteProject);
 
 router.post('/:project/upload', middlewares.hasWriteAccessToProject, middlewares.connectQueue, uploadProject);
 
@@ -70,7 +70,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasWriteAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasDownloadAccessToProject, downloadLatest);
 
 function updateSettings(req, res, next){
 	'use strict';

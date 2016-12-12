@@ -20,7 +20,6 @@
 
 	const mongoose = require('mongoose');
 	const ModelFactory = require('./factory/modelFactory');
-	const _ = require('lodash');
 	const RoleTemplates = require('./role_templates');
 	const responseCodes = require("../response_codes");
 	//var User = require('./user');
@@ -55,12 +54,19 @@
 		});
 	};
 
-	schema.static.dropRole = function (account, role) {
+	schema.statics.dropRole = function (account, role) {
 		let dropRoleCmd = {
 			'dropRole' : role
 		};
 
-		return ModelFactory.db.db(account).command(dropRoleCmd);
+		return this.findByRoleID(`${account}.${role}`).then(role => {
+			if(!role){
+				return Promise.resolve();
+			} else {
+				return ModelFactory.db.db(account).command(dropRoleCmd);
+			}
+		});
+		
 	};
 
 	schema.statics.grantRolesToUser = function (username, roles) {
@@ -96,51 +102,8 @@
 
 	};
 
-	var roleEnum = {
-		'ADMIN': 'admin',
-		'VIEWER': 'viewer',
-		'COLLABORATOR': 'collaborator',
-		'COMMENTER': 'commenter'
-	};
-
-	schema.statics.roleEnum = roleEnum;
-
-
 	schema.statics.findByRoleID = function(id){
 		return this.findOne({ account: 'admin'}, { _id: id});
-	};
-
-	schema.statics.determineRole = function(db, project, role){
-
-		let findPriv = function(actions){
-
-			let findHistoryPriv = role.privileges.find(priv => {
-				return priv.resource.db === db &&
-					priv.resource.collection === `${project}.history` &&
-					_.xor(priv.actions, actions.history).length === 0;
-			});
-
-			let findIssuePriv = role.privileges.find(priv => {
-				return priv.resource.db === db &&
-					priv.resource.collection === `${project}.issues` &&
-					_.xor(priv.actions, actions.issue).length === 0;
-			});
-
-			return findHistoryPriv && findIssuePriv;
-		};
-
-		if(role.privileges){
-
-			if(role.roles && role.roles.find(r => r.role === 'readWrite' && r.db === db)){
-				return roleEnum.ADMIN;
-			} else if(findPriv({history: [ "find", "insert"], issue: [ "find", "insert", "update"]})){
-				return roleEnum.COLLABORATOR;
-			} else if (findPriv({history: [ "find"], issue: ["find", "insert", "update" ]})){
-				return roleEnum.COMMENTER;
-			} else if (findPriv({history: [ "find"], issue: [ "find"]})){
-				return roleEnum.VIEWER;
-			}
-		}
 	};
 
 	schema.statics.revokeRolesFromUser = function(username, roles){
@@ -151,6 +114,13 @@
 		};
 
 		return ModelFactory.db.admin().command(cmd);
+	};
+
+	schema.statics.viewRolesWithInheritedPrivs = function(roles){
+
+		let viewRolesCmd = { rolesInfo : roles, showPrivileges: true };
+		return ModelFactory.db.admin().command(viewRolesCmd).then(doc => doc.roles);
+
 	};
 
 	var Role = ModelFactory.createClass(
