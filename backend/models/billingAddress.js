@@ -22,64 +22,68 @@
 	const vat = require("./vat");
 	const addressMeta = require("./addressMeta");
 	const responseCodes = require("../response_codes");
+	const config = require("../config");
 
-	module.exports = function () {
-		let _hasChanged = false;
+	let billingAddressSchema = new mongoose.Schema({
+		//vat setter was async. setter cannot be async at the momnent. 
+		// could happen in the future versions of mongoose
+		// https://github.com/Automattic/mongoose/issues/4227 
+		vat: { type: String },
+		line1: { type: String },
+		line2: { type: String },
+		line3: { type: String },
+		firstName: { type: String },
+		lastName: { type: String },
+		company: { type: String },
+		city: { type: String },
+		postalCode: { type: String },
+		countryCode: { type: String },
+		state: { type: String },
+	});
 
-		let hasChanged = function () {
-			let tempHasChanged = _hasChanged;
-			_hasChanged = false;
-			return tempHasChanged;
-		}
-
-		let monitorChange = function(fieldName) {
-			return function (newValue) {
-				if (this[fieldName] !== newValue) {
-					_hasChanged = true;
-				}
-
-				return newValue;
-			};
-		};
-
-		let changeVATNumber = function(vatCode) {
-			if (this.vat !== vat)
-			{
-				_hasChanged = true;
+	billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
+		
+		Object.keys(billingAddress).forEach(key => {
+			if(key !== 'vat'){
+				this[key] = billingAddress[key];
 			}
-
-			let cleanedVATNumber = this.vat;
-			if (this.vat && this.vat.toUpperCase().startsWith(this.countryCode)) {
-				cleanedVATNumber = this.vat.substr(2); 
-			}
-
-			let checkVAT = this.vat && addressMeta.euCountriesCode.indexOf(this.countryCode) !== -1 ? 
-			vat.checkVAT(this.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
-
-			checkVAT.then(result => {
-				if (!result.valid)
-				{
-					throw new Error(responseCodes.INVALID_VAT);
-				} else {
-					return vatCode;
-				}
-			});
-		};
-
-		let billingAddressSchema = new mongoose.Schema({
-			vat: { type: String, set: changeVATNumber },
-			line1: { type: String, set: monitorChange("line1") },
-			line2: { type: String, set: monitorChange("line2") },
-			line3: { type: String, set: monitorChange("line3") },
-			firstName: { type: String, set: monitorChange("firstName") },
-			lastName: { type: String, set: monitorChange("lastName") },
-			company: { type: String, set: monitorChange("company") },
-			city: { type: String, set: monitorChange("city") },
-			postalCode: { type: String, set: monitorChange("postalCode") },
-			countryCode: { type: String, set: monitorChange("countryCode") },
-			state: { type: String, set: monitorChange("state") },
 		});
 
-		return billingAddressSchema;
+		if(billingAddress.vat){
+			return this.changeVATNumber(billingAddress.vat);
+		} else {
+			return Promise.resolve();
+		}
 	};
+
+	billingAddressSchema.methods.changeVATNumber = function(vatCode){
+
+		this.vat = vatCode;
+
+		let cleanedVATNumber = this.vat.replace(/ /g,'');
+		if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
+			cleanedVATNumber = cleanedVATNumber.substr(2); 
+		}
+
+		let checkVAT = this.vat && addressMeta.euCountriesCode.indexOf(this.countryCode) !== -1 ? 
+		vat.checkVAT(this.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
+
+		let skipCheckingForTravis = config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && this.countryCode !== 'GB';
+
+		if(skipCheckingForTravis){
+			checkVAT = Promise.resolve(({ valid: true }));
+		}
+
+		return checkVAT.then(result => {
+			if (!result.valid)
+			{
+				return Promise.reject(responseCodes.INVALID_VAT);
+			} else {
+				return Promise.resolve();
+			}
+		});
+	};
+
+	module.exports = billingAddressSchema;
+
 })();

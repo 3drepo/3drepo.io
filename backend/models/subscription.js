@@ -61,4 +61,5 @@
 		getSubscription,
 		getBasicPlan
 	};
-});
+	
+})();

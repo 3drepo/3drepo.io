@@ -20,7 +20,7 @@
 
 	const mongoose = require("mongoose");
 	const Subscriptions = require("./subscriptions");
-	const billingAddressInfo = require("./billingAddress")();
+	const billingAddressInfo = require("./billingAddress");
 	const moment = require("moment");
 	const Subscription = require("./subscription");
 	const vat = require("./vat");
@@ -48,8 +48,13 @@
 	});
 
 	let billingSchema = new mongoose.Schema({
-		subscriptions: { type: [subscriptionSchema], get: function (subs) { return Subscriptions(this, this.billingInfo, subs); } },
-		billingInfo: billingAddressInfo,
+		subscriptions: { 
+			type: [subscriptionSchema], 
+			get: function (subs) { 
+				return new Subscriptions(this, this.billingInfo, subs); 
+			} 
+		},
+		billingInfo: { type: billingAddressInfo, default: {} },
 		//global billing info
 		billingAgreementId: String,
 		paypalPaymentToken: String,
@@ -61,29 +66,29 @@
 
 	let bills = [];
 
-	billingSchema.virtual("bills").get(function () {
-		if (!bills.length) {
-			let billPromises = Billing.findByAgreementId(this.billingUser, this.billingAgreementId).then(bill => {
-				return new Promise(function (resolve) {
-					bills.push(bill);
-					resolve();
-				});
-			});
+	// billingSchema.virtual("bills").get(function () {
+	// 	if (!bills.length) {
+	// 		let billPromises = Billing.findByAgreementId(this.billingUser, this.billingAgreementId).then(bill => {
+	// 			return new Promise(function (resolve) {
+	// 				bills.push(bill);
+	// 				resolve();
+	// 			});
+	// 		});
 
-			Promise.all(billPromises).then(function() {
-				return bills;
-			});
-		} else {
-			return bills;
-		}
-	});
+	// 		Promise.all(billPromises).then(function() {
+	// 			return bills;
+	// 		});
+	// 	} else {
+	// 		return bills;
+	// 	}
+	// });
 
 	// Wrapper for VAT calculation and payment information
 	let Payment = function (type, grossAmount, countryCode, isBusiness, length) {
 		this.type = type;
 		this.gross = grossAmount;
 		this.tax = this.gross * vat.getByCountryCode(countryCode, isBusiness);
-		this.net = this.gross + this.net;
+		this.net = this.gross + this.vat;
 		this.length = length;
 		this.currency = "GBP";
 
@@ -92,7 +97,7 @@
 		this.tax = utils.roundToNDP(this.tax, 2.0);
 	};
 
-	billingSchema.statics.calculateAmounts = function (hasBoughtBefore) {
+	billingSchema.methods.calculateAmounts = function(paymentDate, changes) {
 
 		let country = this.billingInfo.countryCode;
 		let isBusiness = this.billingInfo.vat;
@@ -100,35 +105,50 @@
 		let proRataLength = { value: -1, unit: "DAY" };
 		let regularCycleLength = { value: 1, unit: "MONTH" };
 
-		let startDate;
-
 		let payments = [];
 
 		// For all licences that we need to purchase add up amount * quantity
-		let regularAmount = this.subscriptions.plans.reduce((sum, licence) => {
+		let regularAmount = changes.regularPeriodPlans.reduce((sum, licence) => {
 			return sum + getSubscription(licence.plan).amount * licence.quantity;
-		});
+		}, 0);
 
-		// do pro-rata if not first time to buy
-		if (hasBoughtBefore) {
-			this.paymentDate = moment(this.paymentDate).utc();
-			startDate = this.paymentDate.toDate();
+		let proRataAmount = changes.proRataPeriodPlans.reduce((sum, licence) => {
+			return sum + getSubscription(licence.plan).amount * licence.quantity;
+		}, 0);
 
-			this.lastAnniversaryDate = moment(this.lastAnniversaryDate).utc();
-			this.nextPaymentDate = moment(this.nextPaymentDate).utc();
 
+		console.log(changes);
+
+		if (proRataAmount) {
+			console.log('pro-rata');
 			// The length of the pro-rata period is difference between now and next payment date
-			proRataLength.value = Math.round(moment.duration(this.nextPaymentDate.diff(moment(this.paymentDate).utc().startOf("date"))).asDays());
+			proRataLength.value = Math.round(moment.duration(this.nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
 			// Calculate percentage of payment period * cost of the period.
-			let proRataBeforeTaxAmount = proRataLength.value / Math.round(moment.duration(this.nextPaymentDate.diff(this.lastAnniversaryDate)).asDays()) * regularAmount;
+			let proRataBeforeTaxAmount = proRataLength.value / Math.round(moment.duration(this.nextPaymentDate.diff(this.lastAnniversaryDate)).asDays()) * proRataAmount;
 
 			payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataBeforeTaxAmount, country, isBusiness, proRataLength));
+		
+		} else if (!proRataAmount && this.subscriptions.hasBoughtLicence()) {
+			// it means a decrease in no. of licences
+			// new agreement will start on next payment date
+			console.log('decrease');
+
+			paymentDate = moment(this.nextPaymentDate).utc().toDate();
+
+		} else {
+
+			console.log('1st buy');
+			console.log('this.constructor', this.constructor);
+			//first time to buy
+			this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(paymentDate);
+			this.lastAnniversaryDate = paymentDate.clone().startOf("day").toDate();
+
 		}
 
 		payments.push(new Payment(C.REGULAR_PAYMENT, regularAmount, country, isBusiness, regularCycleLength));
 
-		return Promise.resolve(payments);
+		return { payments, paymentDate};
 	};
 
 	// used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
@@ -143,42 +163,51 @@
 		return next.toDate();
 	};
 
-	billingSchema.statics.changeBillingAddress = function (billingAddress) {
-		this.billingInfo.line1 = billingAddress.line1;
-		this.billingInfo.line2 = billingAddress.line2;
-		this.billingInfo.city = billingAddress.city;
-		this.billingInfo.postalCode = billingAddress.postalCode;
-		this.billingInfo.countryCode = billingAddress.countryCode;
-		this.billingInfo.state = billingAddress.state;
+	billingSchema.methods.cancelAgreement = function(){
+
+		return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {
+			this.subscriptions.removePendingDeleteSubscription();
+			this.billingAgreementId = undefined;
+		});
+
 	};
 
-	billingSchema.buySubscriptions = function (plans, billingUser, billingAddress) {
+	billingSchema.methods.buySubscriptions = function (plans, billingUser, billingAddress) {
 		// User want to buy new subscriptions.
-		this.changeBillingAddress(billingAddress);
+		
 
 		// Update subscriptions with new plans
-		this.subscriptions.changeSubscriptions(plans).then(function (hasChanges) {
-			let startDate = moment().utc().add(10, "second");
+		//this.billingInfo = this.billingInfo || {};
 
-			this.nextPaymentDate = this.getNextPaymentDate(startDate);
-			this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
+		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 
-			if (!hasChanges) {
-				// If there are no changes
-				if (this.billingInfo.hasChanged())
+			return this.subscriptions.changeSubscriptions(plans);
+
+		}).then(changes => {
+
+			if (!changes) {
+				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
+				if (this.billingAgreementId && this.billingInfo.isModified())
 				{	
-					Paypal.updateBillingAddress(this.billingAgreementId, this.billingAddress)
-					{
-						return Promise.resolve();
-					}
+					return Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
 				}
-			} else {
-				this.calculateAmounts().then(function(payments) {
+
+			} else if (changes.canceledAllPlans){
+				// User cancelled everything, no need to calualte/create new bills,
+				// just cancel the previous agreement
+				return this.cancelAgreement();
+
+			} else if (changes) {
+
+				let startDate = moment().utc().add(10, "second");
+
+				let data = this.calculateAmounts(startDate, changes);
 					// Once we have calculated a set of payments send them
-					return Paypal.processPayments(this, payments);
-				});
+				return Paypal.processPayments(this, data.payments, data.paymentDate);
 			}
 		});
 	};
+
+	module.exports = billingSchema;
 
 })();

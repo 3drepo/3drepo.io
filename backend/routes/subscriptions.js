@@ -26,10 +26,10 @@
 	const config = require("../config");
 	const utils = require("../utils");
 
-	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
-	router.post("/:account/subscriptions", middlewares.canCreateDatabase, createSubscription);
-	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
-	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
+	router.get("/:account/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+	router.post("/:account/subscriptions", middlewares.isAccountAdmin, createSubscription);
+	router.post("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
 
 	function createSubscription(req, res, next) {
 
@@ -40,7 +40,7 @@
 			.then(_dbUser => {
 
 				dbUser = _dbUser;
-				let billingUser = req.params.account;
+				let billingUser = req.session.user.username;
 				//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
 				return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 			})

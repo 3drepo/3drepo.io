@@ -22,90 +22,99 @@
 	const Billing = require("./new_billing.js");
 	const responseCodes = require("../response_codes.js");
 
-	let Subscriptions = function (user, billingAddress, subscriptions) {
-		this.user = user;
+	let Subscriptions = function (userBilling, billingAddress, subscriptions) {
+		this.userBilling = userBilling;
 		this.subscriptions = subscriptions;
 		this.billingAddress = billingAddress;
 		this.now = new Date();
 		this.currentPlanCount = {};
 
-		let addSubscription = function (plan) {
-			// Add subscription
-			for (let i = 0; i < plan.quantity; i++) {
-				this.subscriptions.push({
-					plan: plan.plan,
-					createdAt: this.now,
-					updatedAt: this.now,
-					inCurrentAgreement: true,
-					active: false
-				});
-			}
-		};
+		console.log('Subscriptions init --')
+	};
 
-		let removeSubscription = function (plan) {
-			// Find subscription and remove it
-			let removeNumber = -plan.quantity;
-			let removeCount = 0;
+	Subscriptions.prototype.addSubscription = function (plan) {
+		// Add subscription
+		for (let i = 0; i < plan.quantity; i++) {
+			this.subscriptions.push({
+				plan: plan.plan,
+				createdAt: this.now,
+				updatedAt: this.now,
+				inCurrentAgreement: true,
+				active: false
+			});
+		}
+	};
+
+	Subscriptions.prototype.removeSubscription = function(plan){
+
+		// plan.quantity negative means no. to remove, make it postive for removeNumber
+		let removeNumber = -plan.quantity;
+		let removeCount = 0;
+
+		// Remove subscription with no assignedUser first
+		let subs = this.getActiveSubscriptions({ excludeNotInAgreement: true })
+			.filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+
+		for (let i = 0; i < subs.length && removeCount < removeNumber; i++) {
+			subs[i].pendingDelete = true;
+			removeCount++;
+		}
+
+		// continue the remove process if removeCount still smaller than the desired removeNumber
+		// all unassigned licences have been removed previously, now looking for assigned licences to remove
+		// but assigned licences can only be removed if assignedUser === this.customData.billingUser
+
+		if (removeCount < removeNumber &&
+			this.getActiveSubscriptions({ excludeNotInAgreement: true })
+			.filter(sub => sub.plan === plan.plan)
+			.length === removeNumber) {
 
 			let subs = this.getActiveSubscriptions({ excludeNotInAgreement: true })
-				.filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+				.filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+
 			for (let i = 0; i < subs.length && removeCount < removeNumber; i++) {
 				subs[i].pendingDelete = true;
 				removeCount++;
 			}
+		}
 
-			//allow to remove billingUser's licence if remove count = user's current no. of licences
-			if (removeCount < removeNumber &&
-				this.getActiveSubscriptionewLicencesns({ excludeNotInAgreement: true })
-				.filter(sub => sub.plan === plan.plan)
-				.length === removeNumber) {
 
-				let subs = this.getActiveSubscriptions({ excludeNotInAgreement: true })
-					.filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
-				for (let i = 0; i < subs.length && removeCount < removeNumber; i++) {
-					subs[i].pendingDelete = true;
-					removeCount++;
-				}
-			}
+		if (removeCount < removeNumber) {
+			// User try to remove licence with assigned user, reject it.
+			return Promise.Reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
 
-			// Check if they can remove licences
+		} else {
+
+			// Get all the space limit remaining after removing the licences
 			let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete: true });
 			let totalSize = 0;
 
-			let check = new Promise((resolve, reject) => {
-					if (removeCount < removeNumber) {
-						reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
-					} else {
-						resolve(User.historyChunksStats(this.user));
-					}
-				})
-				.then(stats => {
-					if (stats) { stats.forEach(stat => { totalSize += stat.size; }); }
-				})
-				.then(() => {
-					if (quotaAfterDelete.spaceLimit - totalSize < 0) {
-						return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
-					} else {
-						return Promise.resolve();
-					}
+			return User.historyChunksStats(this.userBilling).then(stats => {
+				
+				if (stats) { 
+					stats.forEach(stat => { totalSize += stat.size; });
+				}
+				// see if user have enough space to store their data after removing their licences
+				// reject if they in fact dont have enough space after removing
 
-				});
-		};
+				if (quotaAfterDelete.spaceLimit - totalSize < 0) {
+					return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
+				} else {
+					return Promise.resolve();
+				}
+			});
+		}
 
-		// Build up a list of expired subscriptions and remove them
-		let ids = this.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < this.now))
-			.map(sub => sub._id);
 
-		ids.forEach(id => { this.subscriptions.remove(id); });
-
-		// Compute the current set of plans for the subscriptions
-		this.getActiveSubscriptions({ skipBasic: true })
-			.forEach(subscription => {
-				// Clean old flag
-				subscription.pendingDelete = undefined;
-				this.currentPlanCount[subscription.plan]  = (this.currentPlanCount[subscription.plan] + 1) || 1;
-		});	
 	};
+
+	Subscriptions.prototype.removePendingDeleteSubscription = function(){
+
+		let ids = this.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+		ids.forEach(id => {
+			this.subscriptions.remove(id);
+		});
+	}
 
 	Subscriptions.prototype.getActiveSubscriptions = function (options) {
 		options = options || {};
@@ -121,49 +130,98 @@
 	};
 
 	Subscriptions.prototype.hasBoughtLicence = function () {
-		return (this.getActiveSubscriptions({ skipBasic: "true", excludeNotInAgreement: true })
-			.length === 0);
+		return (this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
+			.length !== 0);
 	};
 
 	Subscriptions.prototype.changeSubscriptions = function (plans) {
-		let changeInPlans = {};
+
+
+		// Build up a list of expired subscriptions and remove them
+		let ids = this.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < this.now))
+			.map(sub => sub._id);
+
+		ids.forEach(id => { this.subscriptions.remove(id); });
+
+		// Compute the current set of plans for the subscriptions
+		this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
+			.forEach(subscription => {
+				// Clean old flag
+				subscription.pendingDelete = undefined;
+				this.currentPlanCount[subscription.plan]  = (this.currentPlanCount[subscription.plan] + 1) || 1;
+		});
+
+		let changeInPlans = [];
 		let hasChanges = false;
+
+		// plans: [ { 'plan': 'ABC', 'quantity': 3 }]
+		// currentPlanCount: { ABC: 1 }
 
 		// Initialize to number of desired licences
 		plans.forEach(plan => {
 			changeInPlans.push({ plan: plan.plan, quantity: plan.quantity });
 		});
+		// changeInPlans: [ { 'plan': 'ABC', 'quantity': 3 }]
 
 		// Calculate change in plans
 		changeInPlans.forEach(plan => {
 			if (this.currentPlanCount[plan.plan]) {
-				changeInPlans[plan.plan] -= this.currentPlanCount[plan.plan];
+				plan.quantity -= this.currentPlanCount[plan.plan];
 			}
 		});
+		// changeInPlans: [ { 'plan': 'ABC', 'quantity': 2 }]
 
 		// Loop through the changes in the plans. If there is a change
 		// update the subscription amounts.
+
+		let addRemoveSubPromises = [];
+
 		changeInPlans.forEach(plan => {
 			// If a valid plan and has changed
 			if (Subscription.getSubscription(plan.plan) && plan.quantity !== 0) {
 				hasChanges = true;
-				(changeInPlans.quantity > 0) ? this.addSubscription(plan): this.removeSubscription(plan);
+				addRemoveSubPromises.push(
+					(plan.quantity > 0) ? this.addSubscription(plan): this.removeSubscription(plan)
+				);
 			}
 		});
 
-		return Promise.resolve(hasChanges);
+		let proRataPeriodPlans = Object.keys(this.currentPlanCount).length > 0 ? changeInPlans.filter(plan => plan.quantity > 0) : [];
+		let canceledAllPlans = plans.reduce((sum, plan) => sum + plan.quantity , 0) && Object.keys(this.currentPlanCount).length === plans.length
+
+		return Promise.all(addRemoveSubPromises).then(() => {
+			return hasChanges ? { 
+				proRataPeriodPlans: proRataPeriodPlans, 
+				regularPeriodPlans: plans,
+				canceledAllPlans: canceledAllPlans } : false
+		});
 	};
 
-	Subscriptions.prototype.renewSubscription = function () {
-		// Renew subscription changing expiry date
+	Subscriptions.prototype.getSubscriptionLimits = function(options) {
 
-	};
+		let subscriptions = this.getActiveSubscriptions(options);
+
+		let sumLimits = {
+			spaceLimit: 0, 
+			collaboratorLimit: 0
+		};
+
+		//console.log(subscriptions);
+
+		subscriptions.forEach(sub => {
+			sumLimits.spaceLimit += sub.limits.spaceLimit;
+			sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
+		});
+
+		return sumLimits;
+
+	}
 
 	Subscriptions.prototype.activateSubscription = function () {
 		// Activate a created subscription
 
 	};
 
-	module.exports
+	module.exports = Subscriptions;
 
 })();

@@ -31,7 +31,7 @@
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");
 	const vat = require("./vat");
-	const billingAddressInfo = require("./billingAddress")();
+	const billingAddressInfo = require("./billingAddress");
 	const utils = require("../utils");
 	const C = require("../constants");
 
@@ -68,6 +68,7 @@
 		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
 		pending: Boolean,
+		state: {type: String, default: 'init', enum: ['init', 'pending', 'complete']},
 		pdf: Object
 	});
 

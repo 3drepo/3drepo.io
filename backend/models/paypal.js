@@ -50,43 +50,36 @@
 		});
 	};
 
-	let cancelOldAgreement = function(billing) { 
+	let cancelOldAgreement = function(billingAgreementId) { 
+
 		let cancel_note = {
 			"note": "You have updated the licence subscriptions."
 		};
 
-		let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-
-		ids.forEach(id => {
-			this.customData.subscriptions.remove(id);
-		});
-
 		return new Promise((resolve, reject) => {
-			paypal.billingAgreement.cancel(billing.billingAgreementId, cancel_note, (err) => {
+			paypal.billingAgreement.cancel(billingAgreementId, cancel_note, (err) => {
 				if (err) {
 					systemLogger.logError(JSON.stringify(err),{ 
-						billingAgreementId: billing.billingAgreementId
+						billingAgreementId: billingAgreementId
 					});
 
 					reject(err);
 				} else {
 					systemLogger.logInfo("Billing agreement cancelled successfully", { 
-						billingAgreementId: billing.billingAgreementId
+						billingAgreementId: billingAgreementId
 					});
-
-					this.customData.billingAgreementId = undefined;
 					resolve();
 				}
 			});
 		});
 	};
 
-	let createBillingAgreement = function(billing, payments) { 
+	let createBillingAgreement = function(billing, payments, paymentDate) { 
 		let paymentDefs = [];
 		let hasProRata = false;
 		let proRataAmount = 0.0;
 		let regularAmount = 0.0;
-		let startDate = billing.nextPaymentDate;
+		let startDate = paymentDate;
 
 		// Translate payments to paypal specific
 		payments.forEach(function(payment) {
@@ -100,12 +93,7 @@
 			paymentDefs.push(paypalTrans.getPaypalPayment(payment));
 		});
 
-		// If we have a pro-rata payment we must bill from today
-		if (hasProRata) {
-			startDate = moment().utc().add(10, "second");
-		}
-
-		let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billingUser, paymentDefs);
+		let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
 
 		return new Promise((resolve, reject) => {
 
@@ -158,7 +146,11 @@
 					}
 					desc += `Regular monthly recurring payment £${regularAmount}, starts on ${moment(billing.nextPaymentDate).utc().format('Do MMM YYYY')}`;
 
-					let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(billingPlan.id, startDate, billing.billingInfo);
+					let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
+						billingPlan.id, 
+						startDate, 
+						paypalTrans.getPaypalAddress(billing.billingInfo)
+					);
 
 					paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 						if (err) {
@@ -185,16 +177,21 @@
 
 	};
 
-	let processPayments = function(billing, payments) {
+	let processPayments = function(billing, payments, paymentDate) {
 		// Cancel old agreements and then create new ones 
-		cancelOldAgreement(this).then(function() {
-			return createBillingAgreement(billing, payments);
-		});
+
+		// don't cancel agreement here. only cancel after executing billing agreement
+		// otherwise if user decide not to complete the payment in paypal page it will
+		// leave users with no agreements at all in their account
+		//cancelOldAgreement(this).then(function() {
+			return createBillingAgreement(billing, payments, paymentDate);
+		//});
 	};	
 
 	module.exports = {
 		updateBillingAddress: updateBillingAddress,
-		processPayment: processPayments
+		processPayments: processPayments,
+		cancelOldAgreement: cancelOldAgreement
 	};
 
 })();
