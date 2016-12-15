@@ -61,8 +61,7 @@ var schema = Schema({
 	name: { type: String, required: true },
 	topic_type: String,
 	status: {
-        type: String,
-        //enum: ['open', 'in progress', 'closed']
+        type: String
 	},
 
 
@@ -125,11 +124,14 @@ var schema = Schema({
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
+		action:{
+			property: String,
+			from: String,
+			to: String
+		},
 		owner: String,
-		comment: {type: String, required: true},
+		comment: {type: String},
 		created: Number,
-		//TO-DO Error: `set` may not be used as a schema pathname
-		//set: Boolean
 		sealed: Boolean,
 		rev_id: Object,
 		guid: Object,
@@ -137,7 +139,7 @@ var schema = Schema({
 		//bcf extra fields we don't care
 		extras: {}
 	}],
-	assigned_roles: [Schema.Types.Mixed],
+	assigned_roles: [String],
 	closed_time: Number,
 	status_last_changed: Number,
 	priority_last_changed: Number,
@@ -167,11 +169,18 @@ function parseXmlString(xml, options){
 // Model statics method
 //internal helper _find
 
-var statusEnum = ['open', 'in progress', 'closed'];
-var priorityEnum = ['none', 'low', 'medium', 'high'];
-
-schema.statics.statusEnum = statusEnum;
-schema.statics.priorityEnum = priorityEnum;
+var statusEnum = {
+	'OPEN': 'open', 
+	'IN_PROGRESS': 'in progress', 
+	'FOR_APPROVAL': 'for approval', 
+	'CLOSED': 'closed'
+};
+var priorityEnum = {
+	'NONE': 'none', 
+	'LOW': 'low', 
+	'MEDIUM': 'medium', 
+	'HIGH': 'high'
+};
 
 schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	'use strict';
@@ -186,7 +195,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(settings.type);
+			issues[index] = noClean ? issue: issue.clean(settings.type, settings.properties.code);
 		});
 
 		return Promise.resolve(issues);
@@ -533,11 +542,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		if(statusEnum.indexOf(data.status) === -1){
+		if(_.map(statusEnum).indexOf(data.status) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
 		}
 
-		if(priorityEnum.indexOf(data.priority) === -1){
+		if(_.map(priorityEnum).indexOf(data.priority) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
 		}
 
@@ -627,11 +636,12 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
 
-			let cleaned = issue.clean(settings.type);
+			let cleaned = issue.clean(settings.type, settings.properties.code);
 			
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
 
 			return Promise.resolve(cleaned);
+
 		});
 
 	});
@@ -791,7 +801,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	let timeStamp = (new Date()).getTime();
 
-	if(this.isClosed() || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -869,6 +879,11 @@ schema.methods.updateComment = function(commentIndex, data){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 		}
 
+		if(isSystemComment(commentObj)){
+			return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
+
+		}
+
 		if(data.comment){
 			commentObj.comment = data.comment;
 			commentObj.created = timeStamp;
@@ -890,6 +905,11 @@ schema.methods.updateComment = function(commentIndex, data){
 	
 };
 
+function isSystemComment(comment){
+	'use strict';
+	return !_.isEmpty(comment.toObject().action);
+}
+
 schema.methods.removeComment = function(commentIndex, data){
 	'use strict';
 
@@ -903,10 +923,14 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 	}
 
-	if(this.isClosed() || this.comments[commentIndex].sealed){
+	if(this.comments[commentIndex].sealed){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
+	if(isSystemComment(this.comments[commentIndex])){
+		return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
+	}
+	
 	let comment = this.clean().comments[commentIndex];
 	this.comments[commentIndex].remove();
 
@@ -927,64 +951,103 @@ schema.methods.isClosed = function(){
 	return this.status === 'closed' || this.closed;
 };
 
-schema.methods.changeStatus = function(status){
+
+schema.methods.addSystemComment = function(owner, property, from , to){
 	'use strict';
 
-	if (statusEnum.indexOf(status) === -1){
+	let timeStamp = (new Date()).getTime();
+	this.comments.push({
+		created: timeStamp,
+		action:{
+			property, from, to
+		},
+		owner: owner
+	});
 
-		throw responseCodes.ISSUE_INVALID_STATUS;
+	//seal the last comment if it is a human commnet after adding system comments
+	let commentLen = this.comments.length;
 
-	} else if (status !== this.status) {
-		
-		this.status_last_changed = (new Date()).getTime();
-		this.status = status;
+	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
+
+		this.comments[commentLen - 2].sealed = true;
 	}
+
+
 };
 
-schema.methods.changePriority = function(priority){
+schema.methods.updateAttrs = function(data){
 	'use strict';
 
-	if (priorityEnum.indexOf(priority) === -1){
+	let forceStatusChanged;
 
-		throw responseCodes.ISSUE_INVALID_PRIORITY;
-
-	} else if(priority !== this.priority) {
-
-		this.priority_last_changed = (new Date()).getTime();
-		this.priority = priority;
+	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
+		//force status change to in progress if assigned roles during status=for approval
+		this.addSystemComment(data.owner, 'assigned_roles', this.assigned_roles, data.assigned_roles);
+		this.assigned_roles = data.assigned_roles;
+		if(this.status === statusEnum.FOR_APPROVAL){
+			forceStatusChanged = true;
+			this.status = statusEnum.IN_PROGRESS;
+		}
 	}
+
+
+	if(!forceStatusChanged && data.hasOwnProperty("status")){
+		if (_.map(statusEnum).indexOf(data.status) === -1){
+
+			throw responseCodes.ISSUE_INVALID_STATUS;
+
+		} else if (data.status === statusEnum.CLOSED && !data.isAdmin && data.owner_roles.indexOf(this.creator_role) === -1){
+
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+
+		} else {
+			
+			//change status to for_approval if assigned roles is changed.
+			if(data.status === statusEnum.FOR_APPROVAL){
+				this.assigned_roles = [this.creator_role];
+			}
+
+			if(data.status !== this.status){
+				this.addSystemComment(data.owner, 'status', this.status, data.status);
+				this.status_last_changed = (new Date()).getTime();
+				this.status = data.status;			
+			}
+		}
+	}
+
+	if(data.hasOwnProperty("priority")){
+		if (_.map(priorityEnum).indexOf(data.priority) === -1){
+
+			throw responseCodes.ISSUE_INVALID_PRIORITY;
+
+		} else if(data.priority !== this.priority) {
+
+			this.addSystemComment(data.owner, 'priority', this.priority, data.priority);
+
+			this.priority_last_changed = (new Date()).getTime();
+			this.priority = data.priority;
+		}
+	}
+
+	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
+		this.addSystemComment(data.owner, 'topic_type', this.topic_type, data.topic_type);
+		this.topic_type = data.topic_type;
+	}
+
+	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
+		this.addSystemComment(data.owner, 'desc', this.desc, data.desc);
+		this.desc = data.desc;
+	}
+
 };
 
-// schema.methods.closeIssue = function(){
-// 	'use strict';
-
-// 	if(this.closed){
-// 		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
-// 	}
-
-// 	this.closed = true;
-// 	this.closed_time = (new Date()).getTime();
-// 	return this.save();
-// };
-
-// schema.methods.reopenIssue = function(){
-// 	'use strict';
-
-// 	this.closed = false;
-// 	this.closed_time = null;
-// 	return this.save();
-// };
-
-
-//Model method
-
-
-schema.methods.clean = function(typePrefix){
+schema.methods.clean = function(typePrefix, projectCode){
 	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.typePrefix = typePrefix;
+	cleaned.projectCode = projectCode;
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;
@@ -1025,23 +1088,28 @@ schema.methods.clean = function(typePrefix){
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
+
 		if(cleaned.comments[i].viewpoint){
+
 			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
 
-			if(i > 0 && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
+			if(i > 0 && cleaned.comments[i-1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
 				//hide repeated screenshot if consecutive comments relate to the same viewpoint
 				cleaned.comments[i].viewpoint.screenshot = null;
 				cleaned.comments[i].viewpoint.screenshotSmall = null;
 			}
 
-		} else {
+		} else if (!isSystemComment(this.comments[i])){
+			// for all other non system comments
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 		
 	});
 
-
-	if(cleaned.comments && cleaned.comments.length > 0 && cleaned.viewpoints[0] && cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
+	if( cleaned.comments.length > 0 && 
+		cleaned.viewpoints[0] && 
+		cleaned.comments[0].viewpoint && 
+		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
@@ -1064,10 +1132,10 @@ schema.methods.generateCommentsGUID = function(){
 	'use strict';
 
 	this.comments.forEach(comment => {
-		if(!comment.guid){
+		if(!comment.guid && !isSystemComment(comment)){
 			comment.guid = utils.generateUUID();
 		}
-		if(!comment.viewpoint){
+		if(!comment.viewpoint && !isSystemComment(comment)){
 			comment.viewpoint = this.viewpoint.guid;
 		}
 	});
@@ -1138,6 +1206,10 @@ schema.methods.getBCFMarkup = function(unit){
 	
 	//add comments
 	this.comments.forEach(comment => {
+
+		if(isSystemComment(comment)){
+			return;
+		}
 
 		let commentXmlObj = {
 			'@':{

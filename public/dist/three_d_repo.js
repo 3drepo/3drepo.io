@@ -2498,7 +2498,7 @@ var Pin = {};
 
 	var PIN_RADIUS = 0.25;
 	var PIN_HEIGHT = 1.0;
-	var GHOST_OPACITY = 0.1;
+	var GHOST_OPACITY = 0.4;
 	var OPAQUE_OPACITY = 1.0 - GHOST_OPACITY;
 
 	/*
@@ -6573,6 +6573,7 @@ var ViewerManager = {};
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "=",
+				isAccountAdmin: "=",
 				subscriptions: "="
 			},
 			controller: AccountProjectCtrl,
@@ -6600,6 +6601,22 @@ var ViewerManager = {};
 			dialogCloseToId;
 
 		// Init
+<<<<<<< HEAD
+=======
+
+		function checkProjectPermission(action){
+			if(action === 'upload' || action === 'download'){
+				
+				return vm.project.roleFunctions.indexOf('admin') !== -1 
+				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
+
+			} else if (action === 'delete' || action === 'projectsetting') {
+				return vm.project.roleFunctions.indexOf('admin') !== -1;
+			}
+		}
+
+		vm.selectedFile = null;
+>>>>>>> origin/HENRY_TEST
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6609,16 +6626,21 @@ var ViewerManager = {};
 		vm.project.canUpload = true;
 		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload", hidden: !isUserAccount},
+			upload: {label: "Upload file", icon: "cloud_upload", hidden: !checkProjectPermission('upload')},
 			team: {label: "Team", icon: "group", hidden: !isUserAccount},
 			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
-			projectsetting: {label: "Settings", icon: "settings", hidden: !isUserAccount}
+			projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission('projectsetting')}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !isUserAccount};
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
 		}
+<<<<<<< HEAD
 		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !isUserAccount, color: "#F44336"};
 		vm.uploadButtonDisabled = true;
+=======
+		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
+
+>>>>>>> origin/HENRY_TEST
 		checkFileUploading();
 
 		/*
@@ -6661,9 +6683,18 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
+<<<<<<< HEAD
 					vm.tag = null;
 					vm.desc = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+=======
+					if(checkProjectPermission('upload')){
+						vm.tag = null;
+						vm.desc = null;
+						vm.selectedFile = null;
+						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+					}
+>>>>>>> origin/HENRY_TEST
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6680,8 +6711,8 @@ var ViewerManager = {};
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "projectsetting":
-					console.log('Settings clicked');
 					$location.search("proj", vm.project.name);
+					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
 					break;
 
@@ -6705,7 +6736,7 @@ var ViewerManager = {};
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project});
+					vm.onSetupDeleteProject({event: event, project: vm.project, account: vm.account});
 					break;
 
 				case "revision":
@@ -6788,9 +6819,18 @@ var ViewerManager = {};
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account + ".json");
+			promise = UtilsService.doGet(vm.userAccount + ".json");
+
 			promise.then(function (response) {
-				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+
+				var targetAccount = response.data.accounts.find(function(account){
+					return account.account === vm.account;
+				});
+
+				var quota = targetAccount.quota;
+				vm.targetAccountQuota = quota;
+
+				if (file.size > (quota.spaceLimit - quota.spaceUsed)) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
@@ -7005,6 +7045,7 @@ var ViewerManager = {};
 			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
+				//console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -7017,7 +7058,7 @@ var ViewerManager = {};
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
-					vm.accounts[i].canAddProject = (i === 0);
+					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
 				}
 			}
 		});
@@ -7099,13 +7140,13 @@ var ViewerManager = {};
 		/**
 		 * Bring up dialog to add a new project
 		 */
-		vm.newProject = function (event) {
+		vm.newProject = function (event, accountForProject) {
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
-				account: vm.account,
+				account: accountForProject,
 				type: vm.projectTypes[0]
 			};
 			vm.newProjectFileToUpload = null;
@@ -7157,10 +7198,11 @@ var ViewerManager = {};
 						// Add project to list
 						project = {
 							project: response.data.project,
+							roleFunctions: response.data.roleFunctions,
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects (response.data.account, project);
+						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
 					}
 				});
@@ -7225,12 +7267,13 @@ var ViewerManager = {};
 		 * @param {Object} event
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (event, project) {
+		vm.setupDeleteProject = function (event, project, account) {
 			vm.projectToDelete = project;
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Project";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.projectToDelete.name;
+			vm.targetAccountToDeleteProject = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
@@ -7240,7 +7283,7 @@ var ViewerManager = {};
 		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteProject + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list
@@ -7303,6 +7346,7 @@ var ViewerManager = {};
 				vm.accounts.push(accountToUpdate);
 			}
 
+			console.log('vmaccounts', vm.accounts);
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
@@ -7364,6 +7408,8 @@ var ViewerManager = {};
 
 		vm.goBack = function () {
 			$location.search("project", null);
+			$location.search("targetAcct", null);
+
 			vm.showPage({page: "repos"});
 		};
 
@@ -7371,9 +7417,22 @@ var ViewerManager = {};
 
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
+		vm.targetAcct = $location.search().targetAcct;
 
 
-		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		function convertTopicTypesToString(topicTypes){
+
+			var result = [];
+
+			topicTypes.forEach(function(type){
+				result.push(type.label);
+			});
+
+			return result.join('\n');
+		}
+
+
+		UtilsService.doGet(vm.targetAcct + "/" + vm.projectName + ".json")
 		.then(function (response) {
 
 			if (response.status === 200 && response.data.properties) {
@@ -7383,9 +7442,12 @@ var ViewerManager = {};
 					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
 					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
 					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
-					vm.projectType = response.data.type;
 				}
 
+				vm.projectType = response.data.type;
+
+				response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
+				response.data.properties.code && (vm.code = response.data.properties.code);
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
 				vm.oldUnit = vm.unit;
 
@@ -7400,13 +7462,16 @@ var ViewerManager = {};
 
 			var data = {
 				mapTile: vm.mapTile,
-				unit: vm.unit
+				unit: vm.unit,
+				code: vm.code,
+				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
-			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.projectName +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
+					response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
 					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
@@ -7593,9 +7658,10 @@ var ViewerManager = {};
 			var data = {
 				desc: "",
 				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
-				unit: projectData.unit
+				unit: projectData.unit,
+				code: projectData.code
 			};
-			return doPost(data, projectData.account + "/" + projectData.name);
+			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
 		};
 
 		/**
@@ -11797,7 +11863,7 @@ var ViewerManager = {};
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
@@ -11898,7 +11964,7 @@ var ViewerManager = {};
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "auto";
+					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});
@@ -12084,7 +12150,33 @@ function NotificationService(serverConfig){
 
 		lastJoined.forEach(function(room){
 
+<<<<<<< HEAD
 			room = room.split('::');
+=======
+        /*
+         * Init
+         */
+        $timeout(function () {
+            if (angular.isDefined(vm.data)) {
+                if (vm.data.hasOwnProperty("scribble")) {
+                    vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
+                }
+            }
+            else {
+                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
+                myCanvas = document.getElementById("issueAreaCanvas");
+                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                penIndicator.css("font-size", penIndicatorSize + "px");
+                vm.pointerEvents = "inherit";
+                vm.showPenIndicator = false;
+                resizeCanvas();
+                initCanvas(myCanvas);
+                if (angular.isDefined(vm.type)) {
+                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+                }
+            }
+        });
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 			var account = room[0];
 			var project = room[1];
@@ -12115,7 +12207,13 @@ function NotificationService(serverConfig){
 		return account + '::' + project +  keyString + '::' + event;
 	}
 
+<<<<<<< HEAD
 	function subscribe(account, project, keys, event, callback){
+=======
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+                vm.pointerEvents = "inherit";
+            }, false);
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 		joinRoom(account, project);
 		console.log('sub', getEventName(account, project, keys, event));
@@ -12134,9 +12232,15 @@ function NotificationService(serverConfig){
 		subscribe(account, project, [], 'newIssues', callback);
 	}
 
+<<<<<<< HEAD
 	function unsubscribeNewIssues(account, project){
 		unsubscribe(account, project, [], 'newIssues');
 	}
+=======
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+                vm.pointerEvents = "inherit";
+            }, false);
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 	function subscribeNewComment(account, project, issueId, callback){
 		subscribe(account, project, [issueId], 'newComment', callback);
@@ -12243,329 +12347,6 @@ angular.module('3drepo')
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function() {
-    "use strict";
-
-    angular.module("3drepo")
-        .directive("issueArea", issueArea);
-
-    function issueArea() {
-        return {
-            restrict: "EA",
-            templateUrl: "issueArea.html",
-            scope: {
-                data: "=",
-                type: "="
-            },
-            link: function (scope, element) {
-                // Cleanup when destroyed
-                element.on('$destroy', function(){
-                    scope.vm.eventsWatch(); // Disable events watch
-                });
-            },
-            controller: IssueAreaCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
-
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
-
-    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
-        var vm = this,
-            canvas,
-            canvasColour = "rgba(0 ,0 ,0, 0)",
-            myCanvas,
-            penIndicator,
-            mouse_drag_x = 0, mouse_drag_y = 0,
-            last_mouse_drag_x = -1, last_mouse_drag_y = -1,
-            mouse_button = 0,
-            mouse_dragging = false,
-            pen_col = "#FF0000",
-            initialPenIndicatorSize = 10,
-            penIndicatorSize = initialPenIndicatorSize,
-            penToIndicatorRatio = 0.8,
-            pen_size = penIndicatorSize * penToIndicatorRatio,
-            mouseWheelDirectionUp = null,
-            hasDrawnOnCanvas = false;
-
-        /*
-         * Init
-         */
-        $timeout(function () {
-            if (angular.isDefined(vm.data)) {
-                if (vm.data.hasOwnProperty("scribble")) {
-                    vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
-                }
-            }
-            else {
-                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
-                myCanvas = document.getElementById("issueAreaCanvas");
-                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
-                penIndicator.css("font-size", penIndicatorSize + "px");
-                vm.pointerEvents = "auto";
-                vm.showPenIndicator = false;
-                resizeCanvas();
-                initCanvas(myCanvas);
-                if (angular.isDefined(vm.type)) {
-                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
-                }
-            }
-        });
-
-        /*
-         * Setup event watch
-         */
-        vm.eventsWatch = $scope.$watch(EventService.currentEvent, function(event) {
-            if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
-                if (event.value === "scribble") {
-                    setupScribble();
-                }
-                else if (event.value === "erase") {
-                    setupErase();
-                }
-                else if (event.value === "pin") {
-                    setupPin();
-                }
-            }
-            else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
-                var png = null;
-                if (hasDrawnOnCanvas) {
-                    png = myCanvas.toDataURL('image/png');
-                    // Remove base64 header text
-                    png = png.substring(png.indexOf(",") + 1);
-                }
-                event.value.promise.resolve(png);
-            }
-        });
-
-        /**
-         * Make the canvas the same size as the area
-         */
-        function resizeCanvas () {
-            canvas.attr("width", $element[0].offsetWidth);
-            canvas.attr("height", $element[0].offsetHeight);
-        }
-
-        /**
-         * Setup canvas and event listeners
-         *
-         * @param canvas
-         */
-        function initCanvas(canvas)
-        {
-            clearCanvas();
-
-            canvas.addEventListener('mousedown', function (evt) {
-                mouse_drag_x = evt.layerX;
-                mouse_drag_y = evt.layerY;
-                mouse_dragging = true;
-
-                updateImage(canvas);
-
-                window.status='DOWN: '+evt.layerX+", "+evt.layerY;
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-                vm.pointerEvents = "none";
-            }, false);
-
-            canvas.addEventListener('mouseup', function (evt) {
-                mouse_button = 0;
-                mouse_dragging = false;
-                last_mouse_drag_x = -1;
-                last_mouse_drag_y = -1;
-
-                updateImage(canvas);
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
-            }, false);
-
-            canvas.addEventListener('mouseout', function (evt) {
-                mouse_button = 0;
-                mouse_dragging = false;
-                last_mouse_drag_x = -1;
-                last_mouse_drag_y = -1;
-
-                updateImage(canvas);
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-
-                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-                vm.pointerEvents = "auto";
-            }, false);
-
-            canvas.addEventListener('mousemove', function (evt) {
-                window.status='MOVE: ' + evt.layerX + ", " + evt.layerY;
-                mouse_drag_x = evt.layerX;
-                mouse_drag_y = evt.layerY;
-
-                if (!mouse_dragging && !vm.showPenIndicator) {
-                    $timeout(function () {
-                        vm.showPenIndicator = true;
-                    });
-                }
-                else {
-                    if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
-                        hasDrawnOnCanvas = true;
-                    }
-                    updateImage(canvas);
-                }
-
-                evt.preventDefault();
-                evt.stopPropagation();
-                evt.returnValue = false;
-                setPenIndicatorPosition(evt.layerX, evt.layerY);
-            }, false);
-
-            // Disable changing on pen size with mouse wheel
-            /*
-            canvas.addEventListener('wheel', function (evt) {
-                var penToIndicatorRation = 0.8;
-
-                if (evt.deltaY === 0) {
-                    mouseWheelDirectionUp = null;
-                    initialPenIndicatorSize = penIndicatorSize;
-                }
-                else if ((evt.deltaY === 1) && (mouseWheelDirectionUp === null)) {
-                    mouseWheelDirectionUp = false;
-                    penIndicatorSize = initialPenIndicatorSize;
-                }
-                else if ((evt.deltaY === -1) && (mouseWheelDirectionUp === null)) {
-                    mouseWheelDirectionUp = true;
-                    penIndicatorSize = initialPenIndicatorSize;
-                }
-                else {
-                    penIndicatorSize += mouseWheelDirectionUp ? 1 : -1;
-                    penIndicatorSize = (penIndicatorSize < 0) ? 0 : penIndicatorSize;
-                    penIndicator.css("font-size", penIndicatorSize + "px");
-                    setPenIndicatorPosition(evt.layerX, evt.layerY);
-
-                    pen_size += mouseWheelDirectionUp ? penToIndicatorRation : -penToIndicatorRation;
-                    pen_size = (pen_size < 0) ? 0 : pen_size;
-                }
-            }, false);
-            */
-        }
-
-        /**
-         * Update the canvas
-         *
-         * @param canvas
-         */
-        function updateImage(canvas)
-        {
-            var context = canvas.getContext("2d");
-
-            if (!mouse_dragging) {
-                return;
-            }
-
-            if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0)
-            {
-                last_mouse_drag_x = mouse_drag_x;
-                last_mouse_drag_y = mouse_drag_y;
-                return;
-            }
-
-            // redraw the canvas...
-            context.lineWidth = pen_size;
-
-            // Draw line
-            context.beginPath();
-            context.strokeStyle = pen_col;
-            context.moveTo(last_mouse_drag_x, last_mouse_drag_y);
-            context.lineTo(mouse_drag_x, mouse_drag_y);
-            context.stroke();
-
-            last_mouse_drag_x = mouse_drag_x;
-            last_mouse_drag_y = mouse_drag_y;
-        }
-
-        /**
-         * Clear the canvas
-         */
-        function clearCanvas () {
-            var context = myCanvas.getContext("2d");
-            context.clearRect(0, 0, myCanvas.width, myCanvas.height);
-            context.fillStyle = canvasColour;
-            context.fillRect(0, 0, myCanvas.width, myCanvas.height);
-            context.lineCap = "round";
-        }
-
-        /**
-         * Set up placing of the pin
-         */
-        function setupPin () {
-            vm.canvasPointerEvents = "none";
-        }
-
-        /**
-         * Erase the canvas
-         */
-        function setupErase () {
-            var context = myCanvas.getContext("2d");
-            context.globalCompositeOperation = "destination-out";
-            pen_col = "rgba(0, 0, 0, 1)";
-            vm.canvasPointerEvents = "auto";
-        }
-
-        /**
-         * Set up drawing
-         */
-        function setupScribble () {
-            var context = myCanvas.getContext("2d");
-            context.globalCompositeOperation = "source-over";
-            pen_col = "#FF0000";
-            pen_size = penIndicatorSize;
-            vm.canvasPointerEvents = "auto";
-        }
-
-        /*
-         * Watch for screen resize
-         */
-        angular.element($window).bind("resize", function() {
-            //resizeCanvas();
-        });
-
-        /**
-         * Move the pen indicator
-         * @param x
-         * @param y
-         */
-        function setPenIndicatorPosition (x, y) {
-            var positionFactor = 2.2;
-            penIndicator.css("left", (x - (penIndicatorSize / positionFactor)) + "px");
-            penIndicator.css("top", (y - (penIndicatorSize / positionFactor)) + "px");
-        }
-    }
-}());
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
  *	it under the issueComp of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
  *	License, or (at your option) any later version.
@@ -12600,15 +12381,23 @@ angular.module('3drepo')
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
+					projectSettings: '<',
 					setInitialSelectedObjects: "&",
-					userRoles: "<"
+					userRoles: "<",
+					availableRoles: "<"
 				}
 			}
 		);
 
+<<<<<<< HEAD
 	IssueCompCtrl.$inject = ["$q", "$scope", "$mdDialog", "$timeout", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
 
 	function IssueCompCtrl ($q, $scope, $mdDialog, $timeout, EventService, IssuesService, UtilsService, NotificationService, Auth) {
+=======
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService"];
+
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService) {
+>>>>>>> origin/PINAKIN_TEST
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12619,7 +12408,8 @@ angular.module('3drepo')
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
-			savedComment;
+			savedComment,
+			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
 
 		/*
 		 * Init
@@ -12638,16 +12428,20 @@ angular.module('3drepo')
 			{value: "medium", label: "Medium"},
 			{value: "high", label: "High"}
 		];
+<<<<<<< HEAD
+		this.topic_types = [
+			{value: "for_information", label: "For information"},
+			{value: "vr", label: "VR"}
+		];
+=======
 		this.statuses = [
 			{value: "open", label: "Open"},
 			{value: "in progress", label: "In progress"},
+			{value: "for approval", label: "For approval"},
 			{value: "closed", label: "Closed"}
 		];
-		this.topic_types = [
-			{value: "for_information", label: "For information"},
-			{value: "for_approval", label: "For approval"},
-			{value: "vr", label: "VR"},
-		];
+
+>>>>>>> origin/HENRY_TEST
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
 			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
@@ -12664,11 +12458,16 @@ angular.module('3drepo')
 			var i, length,
 				leftArrow = 37;
 
+			if(changes.hasOwnProperty('projectSettings')){
+				this.topic_types = this.projectSettings.topicTypes;
+			}
+
 			// Data
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+<<<<<<< HEAD
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					
@@ -12678,11 +12477,15 @@ angular.module('3drepo')
 						}
 					});
 
+=======
+					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+>>>>>>> refs/remotes/origin/ISSUE_295
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
+<<<<<<< HEAD
 					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
 						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
@@ -12692,14 +12495,36 @@ angular.module('3drepo')
 							}
 						}
 					}
+=======
+					this.canUpdate = ((this.account === this.issueData.owner) || userHasCreatorRole());
+>>>>>>> origin/PINAKIN_TEST
 
 					// Can edit description if no comments
+<<<<<<< HEAD
 					this.canEditDescription = (this.issueData.comments.length === 0);
+
+					// Role colour
+					if (this.issueData.assigned_roles.length > 0) {
+						setRoleIndicatorColour(this.issueData.assigned_roles[0]);
+					}
+					else {
+						setRoleIndicatorColour(this.issueData.creator_role);
+					}
+
+					// Old issues
+					this.issueData.priority = (!this.issueData.priority) ? "none" : this.issueData.priority;
+					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
+					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
+					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+=======
+					this.canEditDescription = (this.issueData.comments && (this.issueData.comments.length === 0));
+>>>>>>> refs/remotes/origin/ISSUE_295
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
+						assigned_roles: [],
 						topic_type: "for_information",
 						viewpoint: {}
 					};
@@ -12735,10 +12560,24 @@ angular.module('3drepo')
 				}
 			}
 
+			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
+			}
+
+			// Role
+			if (changes.hasOwnProperty("availableRoles")) {
+				console.log(this.availableRoles);
+				this.projectRoles = this.availableRoles.map(function (availableRole) {
+					/*
+					// Get the actual role and return the last part of it
+					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
+					*/
+					return availableRole.role;
+				});
+				console.log(this.projectRoles);
 			}
 		};
 
@@ -12776,12 +12615,23 @@ angular.module('3drepo')
 		 * Init stuff
 		 */
 		this.$onInit = function () {
+			var disableStatus;
+
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
 				issueSelectedObjects = this.selectedObjects;
 				currentAction = "multi";
 				this.actions[currentAction].color = highlightBackground;
 			}
+
+			// Set up statuses
+			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
+			this.statuses = [
+				{value: "open", label: "Open", disabled: disableStatus},
+				{value: "in progress", label: "In progress", disabled: false},
+				{value: "for approval", label: "For approval", disabled: false},
+				{value: "closed", label: "Closed", disabled: disableStatus}
+			];
 		};
 
 		/**
@@ -12802,10 +12652,25 @@ angular.module('3drepo')
 		 * Handle status change
 		 */
 		this.statusChange = function () {
+			var data;
+
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
-			// Update
+			setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+
 			if (this.data) {
-				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status) && (this.data.topic_type === this.issueData.topic_type);
+				data = {
+					priority: self.issueData.priority,
+					status: self.issueData.status,
+					topic_type: self.issueData.topic_type,
+					assigned_roles: self.issueData.assigned_roles
+				};
+				IssuesService.updateIssue(self.issueData, data)
+					.then(function (response) {
+						console.log(response);
+						self.issueData.status = response.data.issue.status;
+						self.issueData.assigned_roles = response.data.issue.assigned_roles;
+						IssuesService.updatedIssue = self.issueData;
+					});
 			}
 		};
 
@@ -12817,6 +12682,7 @@ angular.module('3drepo')
 
 
 			if (self.data) {
+<<<<<<< HEAD
 
 				var canUpdate = (Auth.getUsername() === self.data.owner);
 				if (!canUpdate) {
@@ -12833,7 +12699,7 @@ angular.module('3drepo')
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}
@@ -12844,6 +12710,9 @@ angular.module('3drepo')
 				else {
 					saveComment();
 				}
+=======
+				saveComment();
+>>>>>>> origin/PINAKIN_TEST
 			}
 			else {
 				saveIssue();
@@ -13073,7 +12942,7 @@ angular.module('3drepo')
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
-				assigned_roles: [],
+				assigned_roles: self.issueData.assigned_roles,
 				priority: self.issueData.priority,
 				status: self.issueData.status,
 				topic_type: self.issueData.topic_type,
@@ -13117,23 +12986,6 @@ angular.module('3drepo')
 		}
 
 		/**
-		 * Update an existing issue and notify parent
-		 */
-		function updateIssue () {
-			var data = {
-				priority: self.issueData.priority,
-				status: self.issueData.status,
-				topic_type: self.issueData.topic_type
-			};
-			IssuesService.updateIssue(self.issueData, data)
-				.then(function (data) {
-					IssuesService.updatedIssue = self.issueData;
-				});
-			
-			self.submitDisabled = true;
-		}
-
-		/**
 		 * Add comment to issue
 		 * Save screen shot viewpoint or current viewpoint
 		 */
@@ -13172,6 +13024,10 @@ angular.module('3drepo')
 			}
 
 			// Add new comment to issue
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if (!self.issueData.comments) {
+				self.issueData.comments = [];
+			}
 			self.issueData.comments.push({
 				sealed: comment.sealed,
 				guid: comment.guid,
@@ -13182,6 +13038,7 @@ angular.module('3drepo')
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
+<<<<<<< HEAD
 			// This logic now moved to backend
 			// if (self.issueData.comments.length > 1) {
 			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
@@ -13197,6 +13054,13 @@ angular.module('3drepo')
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
 
+=======
+			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
+				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+					.then(function(response) {
+						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+					});
+>>>>>>> refs/remotes/origin/ISSUE_295
 			}
 
 
@@ -13290,13 +13154,64 @@ angular.module('3drepo')
 			};
 		}
 
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role) {
+			var roleColor = IssuesService.getRoleColor(role);
+			if (roleColor !== null) {
+				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("border", "none");
+			}
+			else {
+				issueRoleIndicator.css("background", "none");
+				issueRoleIndicator.css("border", "1px solid #DDDDDD");
+			}
+		}
+
+		/**
+		 * Check if user has a role same as the creator role
+		 * @returns {boolean}
+		 */
+		function userHasCreatorRole () {
+			var i, iLength,
+				hasCreatorRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
+				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			}
+
+			return hasCreatorRole;
+		}
+
+		/**
+		 * Check if user has admin role
+		 * @returns {boolean}
+		 */
+		function userHasAdminRole () {
+			var i, iLength, j, jLength,
+				hasAdminRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+				}
+			}
+
+			return hasAdminRole;
+		}
+
+		/**
+		 * Set the content height
+		 */
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 425,
+				newIssueHeight = 285,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 70,
+				additionalInfoHeight = 140,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;
@@ -13317,10 +13232,19 @@ angular.module('3drepo')
 					height += thumbnailHeight;
 				}
 				// Comments
+<<<<<<< HEAD
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
-					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
+=======
+				if (self.issueData.comments) {
+					for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+						height += commentTextHeight;
+						if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+							height += commentImageHeight;
+						}
+>>>>>>> refs/remotes/origin/ISSUE_295
 					}
 				}
 			}
@@ -14187,6 +14111,7 @@ angular.module('3drepo')
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
+				projectSettings: "=",
 				show: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
@@ -14213,6 +14138,7 @@ angular.module('3drepo')
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
 
+
 		/*
 		 * Init
 		 */
@@ -14227,7 +14153,6 @@ angular.module('3drepo')
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.toShow = "showIssues";
 
 		/*
 		 * Get all the Issues
@@ -14235,7 +14160,9 @@ angular.module('3drepo')
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			vm.showProgress = false;
+			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
+			vm.showAddButton = true;
 		});
 
 		/*
@@ -14395,15 +14322,7 @@ angular.module('3drepo')
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-			}
-		});
-
-		/*
-		 * Show the add button if displaying info or list
-		 */
-		$scope.$watch("vm.toShow", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+				vm.showAddButton = true;
 			}
 		});
 
@@ -14551,6 +14470,7 @@ angular.module('3drepo')
 			}
 
 			vm.toShow = "showIssue";
+			vm.showAddButton = false;
 		};
 
 		/**
@@ -14685,7 +14605,8 @@ angular.module('3drepo')
 					contentHeight: "&",
 					menuOption: "<",
 					importBcf: "&",
-					selectedIssue: "<"
+					selectedIssue: "<",
+					userRoles: "<"
 				}
 			}
 		);
@@ -14696,7 +14617,7 @@ angular.module('3drepo')
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
-			issuesListItemHeight = 147,
+			issuesListItemHeight = 141,
 			infoHeight = 81,
 			issuesToShowWithPinsIDs,
 			sortOldestFirst = false,
@@ -15177,6 +15098,118 @@ angular.module('3drepo')
 }());
 
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesListItem of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesListItem",
+			{
+				controller: IssuesListItemCtrl,
+				templateUrl: "issuesListItem.html",
+				bindings: {
+					data: "<",
+					userRoles: "<"
+				}
+			}
+		);
+
+	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
+
+	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
+		var self = this,
+			issueRoleIndicator = null;
+
+		/*
+		 * Init
+		 */
+		this.IssuesService = IssuesService;
+
+		/**
+		 * Init callback
+		 */
+		this.$onInit = function () {
+			// Role indicator
+			$timeout(function () {
+				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
+				setRoleIndicatorColour();
+			});
+		};
+
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
+		this.$onChanges = function (changes) {
+			// Data
+			if (changes.hasOwnProperty("data") && this.data) {
+				setRoleIndicatorColour();
+
+				// Title
+				if (this.userRoles) {
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				}
+			}
+
+			// User roles
+			if (changes.hasOwnProperty("userRoles") && this.userRoles) {
+				// Title
+				if (this.data) {
+					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				}
+			}
+		};
+
+		/**
+		 * Set role indicator colour
+		 */
+		function setRoleIndicatorColour () {
+			var assignedRoleColour;
+
+			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
+				assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				if (assignedRoleColour !== null) {
+					issueRoleIndicator.css("border", "none");
+					issueRoleIndicator.css("background", assignedRoleColour);
+				}
+			}
+		}
+
+		/**
+		 * Check if the issue is assigned to one of the user's roles
+		 */
+		function issueIsAssignedToAUserRole () {
+			var i, iLength, j, jLength,
+				isAssignedToAUserRole = false;
+
+			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !isAssignedToAUserRole; i += 1) {
+				for (j = 0, jLength = self.data.assigned_roles.length; (j < jLength) && !isAssignedToAUserRole; j += 1) {
+					isAssignedToAUserRole = (self.userRoles[i] === self.data.assigned_roles[j]);
+				}
+			}
+
+			return isAssignedToAUserRole;
+		}
+	}
+}());
+
+/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -15252,7 +15285,9 @@ angular.module('3drepo')
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;
@@ -15410,7 +15445,7 @@ angular.module('3drepo')
 				issue,
 				{
 					assigned_roles: issue.assigned_roles,
-					number: issue.number
+					number: 0 //issue.number
 				}
 			);
 		};
@@ -15544,16 +15579,13 @@ angular.module('3drepo')
 		};
 
 		obj.getRoleColor = function(role) {
-			var i = 0,
-				length = 0,
-				roleColor;
+			var i, length,
+				roleColor = null;
 
-			if (availableRoles.length > 0) {
-				for (i = 0, length = availableRoles.length; i < length; i += 1) {
-					if (availableRoles[i].role === role) {
-						roleColor = availableRoles[i].color;
-						break;
-					}
+			for (i = 0, length = availableRoles.length; i < length; i += 1) {
+				if (availableRoles[i].role === role && availableRoles[i].color) {
+					roleColor = availableRoles[i].color;
+					break;
 				}
 			}
 			return roleColor;
@@ -15565,26 +15597,35 @@ angular.module('3drepo')
 		obj.getStatusIcon = function (issue) {
 			var statusIcon = {};
 
-			if (issue.status === "closed") {
-				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
+			switch (issue.priority) {
+				case "none":
+					statusIcon.colour = "#7777777";
+					break;
+				case "low":
+					statusIcon.colour = "#4CAF50";
+					break;
+				case "medium":
+					statusIcon.colour = "#FF9800";
+					break;
+				case "high":
+					statusIcon.colour = "#F44336";
+					break;
 			}
-			else {
-				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (issue.priority) {
-					case "none":
-						statusIcon.colour = "#7777777";
-						break;
-					case "low":
-						statusIcon.colour = "#4CAF50";
-						break;
-					case "medium":
-						statusIcon.colour = "#FF9800";
-						break;
-					case "high":
-						statusIcon.colour = "#F44336";
-						break;
-				}
+
+			switch (issue.status) {
+				case "open":
+					statusIcon.icon = "panorama_fish_eye";
+					break;
+				case "in progress":
+					statusIcon.icon = "lens";
+					break;
+				case "for approval":
+					statusIcon.icon = "adjust";
+					break;
+				case "closed":
+					statusIcon.icon = "check_circle";
+					statusIcon.colour = "#004594";
+					break;
 			}
 
 			return statusIcon;
@@ -16328,6 +16369,7 @@ var Oculus = {};
 				branch: "=",
 				revision: "=",
                 position: "=",
+                projectSettings: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -16479,6 +16521,7 @@ var Oculus = {};
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
+				"project-settings='vm.projectSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
 				"selected-objects='vm.selectedObjects' " +
@@ -17220,6 +17263,7 @@ var Oculus = {};
 				revision: "=",				
                 position: "@",
 				keysDown: "=",
+				projectSettings: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },
@@ -18049,7 +18093,8 @@ var Oculus = {};
 		this.$onChanges = function (changes) {
 			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
-				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) ||
+					(!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
 					if (selectedObjects.length === 1) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -18057,7 +18102,9 @@ var Oculus = {};
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode &&
+						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) ||
+						  (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
@@ -18213,7 +18260,7 @@ var Oculus = {};
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
 		/*
@@ -18237,6 +18284,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -18244,6 +18292,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",
@@ -18438,7 +18487,7 @@ var Oculus = {};
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				vm.pointerEvents = event.value.on ? "none" : "auto";
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display

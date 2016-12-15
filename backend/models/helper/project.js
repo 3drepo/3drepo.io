@@ -16,6 +16,7 @@
  */
 
 var Role = require('../role');
+var RoleSetting = require('../roleSetting');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
@@ -32,7 +33,7 @@ var stash = require('./stash');
 var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
 var C = require("../../constants");
-
+var _ = require('lodash');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -76,9 +77,8 @@ function convertToErrorCode(errCode){
 }
 
 
-function createAndAssignRole(project, account, username, desc, type, unit, subProjects, federate) {
+function createAndAssignRole(project, account, username, data) {
 	'use strict';
-
 
 	if(project.length > 60){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
@@ -88,8 +88,11 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+	if(data.code && !ProjectSetting.projectCodeRegExp.test(data.code)){
+		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_CODE });
+	}
 
-	if(!unit){
+	if(!data.unit){
 		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
 	}
 
@@ -104,7 +107,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
 		}
 
-		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
+		return (data.federate ? createFederatedProject(account, project, data.subProjects) : Promise.resolve());
 
 	}).then(() => {
 
@@ -147,15 +150,32 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 
 		setting._id = project;
 		setting.owner = username;
-		setting.desc = desc;
-		setting.type = type;
-		setting.federate = federate;
+		setting.desc = data.desc;
+		setting.type = data.type;
+		setting.federate = data.federate;
+
 		setting.updateProperties({
-			unit
+			unit: data.unit,
+			code: data.code,
 		});
 
+		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
+		
 		return setting.save();
 
+	}).then(setting => {
+
+		// this is true if only admin can create project
+		return {
+
+			setting,
+			project: {
+				account,
+				project,
+				roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+			}
+
+		};
 	});
 }
 
@@ -291,9 +311,13 @@ function importToyProject(username){
 	//dun move the toy model instead make a copy of it
 	// let copy = true;
 
-	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
+	let data = {
+		desc, type, unit: 'm'
+	};
+	
+	return createAndAssignRole(project, account, username, data).then(data => {
 		//console.log('setting', setting);
-		return Promise.resolve(setting);
+		return Promise.resolve(data.setting);
 
 	}).then(setting => {
 
@@ -344,6 +368,8 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 		action = 'view';
 	} else if(role === 'collaborator'){
 		action = 'collaborate';
+	} else if(role === 'commenter'){
+		action = 'comment';
 	} else {
 		return Promise.reject(responseCodes.INVALID_ROLE);
 	}
@@ -392,6 +418,19 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 
+		return Role.findByRoleID(`${account}.${project}.${role}`).then(roleFound => {
+			if(roleFound){
+				return;
+			} else if(role === 'viewer') {
+				return Role.createViewerRole(account, project);
+			} else if(role === 'collaborator') {
+				return Role.createCollaboratorRole(account, project);
+			} else if(role === 'commenter') {
+				return Role.createCommenterRole(account, project);
+			}
+		});
+
+	}).then(() => {
 		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
 
 	}).then(() => {
@@ -920,6 +959,87 @@ function downloadLatest(account, project){
 	});
 }
 
+function getRolesForProject(account, project, removeViewer){
+	'use strict';
+
+	let roleSettings;
+
+
+	return RoleSetting.find({ account }).then(_roleSetting => {
+
+		roleSettings = _.indexBy(_roleSetting, '_id');
+
+		return Role.find({ account: 'admin'}, {
+			'$or': [{
+				'privileges' : {
+					'$elemMatch': {
+						'resource.db': account, 
+						'resource.collection': `${project}.history`,
+						'actions': 'find'
+					}
+				}
+			},{ 
+				'roles': {
+					'$elemMatch': {
+						"role" : "readWrite",
+						"db" : account
+					}
+				}
+			}]
+
+		});
+
+	}).then(roles => {
+
+
+
+		for(let i = roles.length - 1; i >= 0; i--){
+
+			//console.log(Role.determineRole(account, project, roles[i]));
+
+			if (removeViewer && Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
+				roles.splice(i, 1);
+			}
+		}
+
+		roles.forEach((role, i) => {
+
+			roles[i] = _.pick(role.toObject(), ['role', 'db']);
+			roles[i].roleFunction = Role.determineRole(account, project, role);
+
+			if(roleSettings[roles[i].role]){
+				roles[i].color = roleSettings[roles[i].role].color;
+				roles[i].desc = roleSettings[roles[i].role].desc;
+			}
+		});
+
+		return roles;
+	});
+}
+
+function getUserRolesForProject(account, project, username){
+	'use strict';
+
+	let projectRoles;
+
+	return getRolesForProject(account, project).then(roles => {
+		
+		projectRoles = roles;
+		return User.findByUserName(username);
+
+	}).then(user => {
+
+		let userRolesForProject = user.roles.filter(userRole => {
+
+			return projectRoles.find(projectRole => { 
+				return projectRole.db === userRole.db && projectRole.role === userRole.role;
+			});
+
+		});
+
+		return userRolesForProject.map(item => item.role);
+	});
+}
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
@@ -948,5 +1068,7 @@ module.exports = {
 	downloadLatest,
 	fileNameRegExp,
 	projectNameRegExp,
-	acceptedFormat
+	acceptedFormat,
+	getUserRolesForProject,
+	getRolesForProject
 };

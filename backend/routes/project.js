@@ -47,12 +47,18 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
+router.put('/:project/settings', middlewares.isAccountAdmin, updateSettings);
 
-router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
 
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
+
+//get project roles
+router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesForProject);
+
+//user roles for this project
+router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToProject, getUserRolesForProject);
 
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
@@ -66,9 +72,9 @@ router.get('/:project/revision/master/head/searchtree.json', middlewares.hasRead
 
 router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
-router.delete('/:project', middlewares.canCreateProject, deleteProject);
+router.delete('/:project', middlewares.isAccountAdmin, deleteProject);
 
-router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
+router.post('/:project/upload', middlewares.hasWriteAccessToProject, middlewares.connectQueue, uploadProject);
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
@@ -76,7 +82,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasWriteAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -95,8 +101,10 @@ function updateSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+
 		projectSetting.updateProperties(req.body);
 		return projectSetting.save();
+
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {
@@ -184,6 +192,8 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
+		setting = setting.toObject();
+		
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
 
@@ -213,8 +223,18 @@ function createProject(req, res, next){
 		federate = true;
 	}
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.unit, req.body.subProjects, federate).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	let data = {
+		desc: req.body.desc, 
+		type: req.body.type, 
+		unit: req.body.unit, 
+		subProjects: req.body.subProjects, 
+		federate: federate,
+		code: req.body.code,
+		topicTypes: req.body.topicTypes
+	};
+
+	createAndAssignRole(project, account, username, data).then(data => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.project);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -271,7 +291,6 @@ function deleteProject(req, res, next){
 
 function uploadProject(req, res, next){
 	'use strict';
-
 	let responsePlace = utils.APIInfo(req);
 
 	//check space
@@ -634,6 +653,26 @@ function downloadLatest(req, res, next){
 		res.writeHead(200, headers);
 		file.readStream.pipe(res);
 
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getUserRolesForProject(req, res, next){
+	'use strict';
+	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.params.username).then(role => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getRolesForProject(req, res, next){
+	'use strict';
+	let removeViewer = true;
+
+	ProjectHelpers.getRolesForProject(req.params.account, req.params.project, removeViewer).then(role => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

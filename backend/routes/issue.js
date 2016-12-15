@@ -25,19 +25,21 @@ var Issue = require('../models/issue');
 var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
+var ProjectHelpers = require('../models/helper/project');
+var _ = require('lodash');
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToProject, importBCF);
+router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -46,8 +48,8 @@ router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, ren
 router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
 router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -88,15 +90,33 @@ function updateIssue(req, res, next){
 	let data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
+	data.isAdmin = false;
 	data.revId = req.params.rid;
 	data.sessionId = req.session.id;
 
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
+	let projectRoles;
 
+	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(_projectRoles => {
 
-	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 }).then(issue => {
+		projectRoles = _.indexBy(_projectRoles, 'role');
+		return ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username);
+
+	}).then(roles => {
+		
+		data.owner_roles = roles;
+		
+		roles.forEach(role => {
+			if(projectRoles[role] && projectRoles[role].roleFunction === 'admin'){
+				data.isAdmin = true;
+			}
+		});
+
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
+
+	}).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -120,20 +140,10 @@ function updateIssue(req, res, next){
 		} else if (data.hasOwnProperty('closed') && !data.closed){
 			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
-		} else if (data.hasOwnProperty("assigned_roles")){
-			issue.assigned_roles = data.assigned_roles;
-			action = issue.save();
-
 		} else {
 			
-			//data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
-			//data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
-			//data.hasOwnProperty('priority') && issue.changePriority(data.priority);
-			//data.hasOwnProperty('status') && issue.changeStatus(data.status);
-
-			action = issue.updateAttrs(data);
-			
-			//action = issue.save();
+			issue.updateAttrs(data);
+			action = issue.save();
 		}
 
 		return action;

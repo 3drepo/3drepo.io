@@ -111,6 +111,14 @@
 					selected: false,
 					firstSelected: false,
 					secondSelected: false
+				},
+				{
+					value: "showSubProjects",
+					label: "Show sub project issues",
+					toggle: true,
+					selected: false,
+					firstSelected: false,
+					secondSelected: false
 				}
 			],
 			minHeight: 260,

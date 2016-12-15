@@ -20,6 +20,7 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Role = require('./role');
 var responseCodes = require('../response_codes.js');
+var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -39,12 +40,17 @@ var schema = mongoose.Schema({
 		"zNear" : Number,
 		"zFar" : Number,
 		"unit": String, //cm, m, ft, mm
-
 		"mapTile": {
 			lat: Number,
 			lon: Number,
 			y: Number
-		}
+		},
+		code: String,
+		topicTypes: [{
+			_id: false,
+			value: String,
+			label: String
+		}]
 
 	},
 	//bid_4_free only fields
@@ -63,21 +69,62 @@ var schema = mongoose.Schema({
 	collaborators: [{
 		user: String,
 		role: {type: String}
-	}]
+	}],
+
 });
 
-schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
 
+schema.statics.defaultTopicTypes = [
+	{value: "for_information", label: "For information"},
+	{value: "vr", label: "VR"}
+];
+
+schema.path('properties.topicTypes').get(function(v) {
+	return v.length === 0 ? schema.statics.defaultTopicTypes : v;
+});
+
+schema.set('toObject', { getters: true });
+
+schema.statics.projectCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
 
 	Object.keys(updateObj).forEach(key => {
-		this.properties[key] = updateObj[key];
+
+		if(key === 'code' && updateObj[key] && !schema.statics.projectCodeRegExp.test(updateObj[key])){
+			throw responseCodes.INVALID_PROJECT_CODE;
+		}
+
+		if(key === 'topicTypes'){
+			
+			let topicTypes = {};
+			updateObj[key].forEach(type => {
+
+				if(!type || !type.trim()){
+					return;
+				}
+				
+				//generate value from label
+				let value = type.trim().toLowerCase().replace(/ /g, '_');
+				
+				if(topicTypes[value]){
+					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+				} else {
+					topicTypes[value] = {
+						value,
+						label: type.trim()
+					};
+				}
+			});
+
+			this.properties[key] = _.values(topicTypes);
+		} else {
+			this.properties[key] = updateObj[key];
+		}
+		
 	});
 
 };
-
-
 
 schema.methods.findCollaborator = function(user, role){
 	'use strict';

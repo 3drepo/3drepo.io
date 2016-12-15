@@ -196,7 +196,11 @@ var responseCodes = {
 
 
 	PROJECT_NAME_TOO_LONG: {value: 123, message: "Project name cannot be longer than 60 characters", status: 400},
+	ISSUE_SYSTEM_COMMENT: { value: 124, message: "Can't edit or remove system comment", status: 400},
+	ISSUE_UPDATE_PERMISSION_DECLINED: {value: 125, message: "No permission to update issue", status: 400},
 
+	INVALID_PROJECT_CODE: { value: 126, message: 'Project code must contain only alphabets and numerical digits', status: 400},
+	ISSUE_DUPLICATE_TOPIC_TYPE: { value: 127, message: 'Two or more topic types given are the same', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {

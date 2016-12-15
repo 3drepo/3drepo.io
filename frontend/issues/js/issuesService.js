@@ -24,8 +24,7 @@
 	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
 	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
-		var self = this,
-			url = "",
+		var url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -74,7 +73,9 @@
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.typePrefix) {
+			if (issue.projectCode){
+				return issue.projectCode + "." + issue.number + " " + issue.name;
+			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
 				return issue.number + " " + issue.name;
@@ -111,8 +112,7 @@
 		};
 
 		obj.getIssues = function(account, project, revision) {
-			var self = this,
-				deferred = $q.defer();
+			var deferred = $q.defer();
 
 			if(revision){
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
@@ -125,8 +125,8 @@
 				function(data) {
 					deferred.resolve(data.data);
 					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-						data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
-						data.data[i].title = self.generateTitle(data.data[i]);
+						data.data[i].timeStamp = obj.getPrettyTime(data.data[i].created);
+						data.data[i].title = obj.generateTitle(data.data[i]);
 						if (data.data[i].thumbnail) {
 							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
 						}
@@ -136,11 +136,15 @@
 							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
 								// Timestamp
 								if (data.data[i].comments[j].hasOwnProperty("created")) {
-									data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
+									data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
 								}
 								// Screen shot path
 								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
 									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
+								}
+								// Action comment text
+								if (data.data[i].comments[j].action) {
+									data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
 								}
 							}
 						}
@@ -232,7 +236,7 @@
 				issue,
 				{
 					assigned_roles: issue.assigned_roles,
-					number: issue.number
+					number: 0 //issue.number
 				}
 			);
 		};
@@ -291,8 +295,7 @@
 		};
 
 		obj.fixPin = function (pin, colours) {
-			var self = this;
-			self.removePin();
+			obj.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
@@ -366,16 +369,13 @@
 		};
 
 		obj.getRoleColor = function(role) {
-			var i = 0,
-				length = 0,
-				roleColor;
+			var i, length,
+				roleColor = null;
 
-			if (availableRoles.length > 0) {
-				for (i = 0, length = availableRoles.length; i < length; i += 1) {
-					if (availableRoles[i].role === role) {
-						roleColor = availableRoles[i].color;
-						break;
-					}
+			for (i = 0, length = availableRoles.length; i < length; i += 1) {
+				if (availableRoles[i].role === role && availableRoles[i].color) {
+					roleColor = availableRoles[i].color;
+					break;
 				}
 			}
 			return roleColor;
@@ -387,26 +387,35 @@
 		obj.getStatusIcon = function (issue) {
 			var statusIcon = {};
 
-			if (issue.status === "closed") {
-				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
+			switch (issue.priority) {
+				case "none":
+					statusIcon.colour = "#7777777";
+					break;
+				case "low":
+					statusIcon.colour = "#4CAF50";
+					break;
+				case "medium":
+					statusIcon.colour = "#FF9800";
+					break;
+				case "high":
+					statusIcon.colour = "#F44336";
+					break;
 			}
-			else {
-				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (issue.priority) {
-					case "none":
-						statusIcon.colour = "#7777777";
-						break;
-					case "low":
-						statusIcon.colour = "#4CAF50";
-						break;
-					case "medium":
-						statusIcon.colour = "#FF9800";
-						break;
-					case "high":
-						statusIcon.colour = "#F44336";
-						break;
-				}
+
+			switch (issue.status) {
+				case "open":
+					statusIcon.icon = "panorama_fish_eye";
+					break;
+				case "in progress":
+					statusIcon.icon = "lens";
+					break;
+				case "for approval":
+					statusIcon.icon = "adjust";
+					break;
+				case "closed":
+					statusIcon.icon = "check_circle";
+					statusIcon.colour = "#004594";
+					break;
 			}
 
 			return statusIcon;
@@ -439,6 +448,93 @@
 
 			return deferred.promise;
 		};
+
+		/**
+		 * Convert an action comment to readable text
+		 * @param comment
+		 * @returns {string}
+		 */
+		obj.convertActionCommentToText = function (comment) {
+			var text = "";
+
+			switch (comment.action.property) {
+				case "priority":
+					text = "Priority " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "status":
+					text = "Status " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+				case "assigned_roles":
+					text = "Assigned " +
+						" <span class='commentTextLight'>to</span> " +
+						comment.action.to;
+					if (comment.action.from) {
+						text += " <span class='commentTextLight'>from</span> " +
+							comment.action.from;
+					}
+					break;
+				case "topic_type":
+					text = "Type changed " +
+						"<span class='commentTextLight'>changed from</span> " +
+						convertActionValueToText(comment.action.from) +
+						" <span class='commentTextLight'>to</span> " +
+						convertActionValueToText(comment.action.to);
+					break;
+			}
+
+			return text;
+		};
+
+		/**
+		 * Convert an action value to readable text
+		 * @param value
+		 */
+		function convertActionValueToText (value) {
+			var text = "";
+
+			switch (value) {
+				case "none":
+					text = "None";
+					break;
+				case "low":
+					text = "Low";
+					break;
+				case "medium":
+					text = "Medium";
+					break;
+				case "high":
+					text = "High";
+					break;
+				case "open":
+					text = "Open";
+					break;
+				case "in progress":
+					text = "In progress";
+					break;
+				case "for approval":
+					text = "For approval";
+					break;
+				case "closed":
+					text = "Closed";
+					break;
+				case "for_information":
+					text = "For information";
+					break;
+				case "vr":
+					text = "VR";
+					break;
+			}
+
+			return text;
+		}
 
 		Object.defineProperty(
 			obj,

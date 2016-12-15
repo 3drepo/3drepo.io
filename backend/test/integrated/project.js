@@ -43,6 +43,8 @@ describe('Project', function () {
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'm';
+	let code = '00011';
+
 
 	before(function(done){
 
@@ -75,7 +77,7 @@ describe('Project', function () {
 	it('should be created successfully', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type, unit })
+		.send({ desc, type, unit, code })
 		.expect(200, function(err ,res) {
 
 			expect(res.body.project).to.equal(project);
@@ -89,6 +91,7 @@ describe('Project', function () {
 				expect(res.body.desc).to.equal(desc);
 				expect(res.body.type).to.equal(type);
 				expect(res.body.properties.unit).to.equal(unit);
+				expect(res.body.properties.code).to.equal(code);
 				done(err);
 			})
 			
@@ -108,6 +111,39 @@ describe('Project', function () {
 		});
 	});
 
+	it('update project code with invalid format', function(done){
+
+
+		function updateProjectCode(code, done){
+			agent.put(`/${username}/${project}/settings`)
+			.send({code}).expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_CODE.value);
+				done(err);
+			});
+		}
+
+		async.series([
+			function(done){
+				updateProjectCode('$', done)
+			}, 
+			function(done){
+				updateProjectCode('123456', done)
+			}
+		], done)
+
+	});
+
+	it('update issues type with duplicate values', function(done){
+			agent.put(`/${username}/${project}/settings`)
+			.send({
+				topicTypes: ['For Info', 'for info']
+			}).expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
+				done(err);
+			});
+	});
+	
+
 	it('update settings should be successful', function(done){
 
 		let body = {
@@ -117,14 +153,38 @@ describe('Project', function () {
 					lon: 234,
 					y: 5
 				},
-				unit: 'cm'
+				unit: 'cm',
+				code: '00222',
+				topicTypes: ['For Info', '3D Repo', 'Vr']
 
 		};
 		
+		let expectedReturn = {
+
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				unit: 'cm',
+				code: '00222',
+				topicTypes: [{
+					label: 'For Info', 
+					value: 'for_info'
+				}, {
+					label: '3D Repo',
+					value: '3d_repo'
+				}, {
+					label: 'Vr',
+					value: 'vr'
+				}]
+
+		};
+
 		agent.put(`/${username}/${project}/settings`)
 		.send(body).expect(200, function(err ,res) {
 
-			expect(res.body.properties).to.deep.equal(body);
+			expect(res.body.properties).to.deep.equal(expectedReturn);
 
 			if(err){
 				return done(err);
@@ -132,7 +192,7 @@ describe('Project', function () {
 
 			agent.get(`/${username}/${project}.json`)
 			.expect(200, function(err, res){
-				expect(res.body.properties).to.deep.equal(body);
+				expect(res.body.properties).to.deep.equal(expectedReturn);
 				done(err);
 			})
 			
