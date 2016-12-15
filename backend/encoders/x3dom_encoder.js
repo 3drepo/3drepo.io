@@ -682,13 +682,13 @@ function X3D_AddToShape(xmlDoc, shape, account, project, mesh, subMeshID, mode, 
 
 			var suffix = "";
 
-			if (subMeshID) {
-				suffix += "#" + subMeshID
-			}
-
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
-				suffix += "?tex_uuid=" + tex_id;
+
+				if(tex_id)
+				{
+					suffix += "?tex_uuid=" + tex_id;
+				}
 			}
 
 			externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src' + suffix);
@@ -1158,7 +1158,14 @@ exports.route = function(router)
 					shape.appendChild(app);
 
 					var eg  = xmlDoc.createElement('ExternalGeometry');
-					eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
+				
+					if (maxSubMeshIDX > 1)
+					{
+						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
+					} else {
+						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
+					}
+
 					eg.textContent = ' ';
 					eg.setAttribute("solid", "true");
 					shape.appendChild(eg);

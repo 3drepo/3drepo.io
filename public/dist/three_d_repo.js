@@ -2498,7 +2498,7 @@ var Pin = {};
 
 	var PIN_RADIUS = 0.25;
 	var PIN_HEIGHT = 1.0;
-	var GHOST_OPACITY = 0.1;
+	var GHOST_OPACITY = 0.4;
 	var OPAQUE_OPACITY = 1.0 - GHOST_OPACITY;
 
 	/*
@@ -11863,7 +11863,7 @@ var ViewerManager = {};
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
@@ -11964,7 +11964,7 @@ var ViewerManager = {};
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "auto";
+					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});
@@ -12150,7 +12150,33 @@ function NotificationService(serverConfig){
 
 		lastJoined.forEach(function(room){
 
+<<<<<<< HEAD
 			room = room.split('::');
+=======
+        /*
+         * Init
+         */
+        $timeout(function () {
+            if (angular.isDefined(vm.data)) {
+                if (vm.data.hasOwnProperty("scribble")) {
+                    vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
+                }
+            }
+            else {
+                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
+                myCanvas = document.getElementById("issueAreaCanvas");
+                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                penIndicator.css("font-size", penIndicatorSize + "px");
+                vm.pointerEvents = "inherit";
+                vm.showPenIndicator = false;
+                resizeCanvas();
+                initCanvas(myCanvas);
+                if (angular.isDefined(vm.type)) {
+                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+                }
+            }
+        });
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 			var account = room[0];
 			var project = room[1];
@@ -12181,7 +12207,13 @@ function NotificationService(serverConfig){
 		return account + '::' + project +  keyString + '::' + event;
 	}
 
+<<<<<<< HEAD
 	function subscribe(account, project, keys, event, callback){
+=======
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+                vm.pointerEvents = "inherit";
+            }, false);
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 		joinRoom(account, project);
 		console.log('sub', getEventName(account, project, keys, event));
@@ -12200,9 +12232,15 @@ function NotificationService(serverConfig){
 		subscribe(account, project, [], 'newIssues', callback);
 	}
 
+<<<<<<< HEAD
 	function unsubscribeNewIssues(account, project){
 		unsubscribe(account, project, [], 'newIssues');
 	}
+=======
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+                vm.pointerEvents = "inherit";
+            }, false);
+>>>>>>> refs/remotes/origin/ISSUE_295
 
 	function subscribeNewComment(account, project, issueId, callback){
 		subscribe(account, project, [issueId], 'newComment', callback);
@@ -12429,6 +12467,7 @@ angular.module('3drepo')
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+<<<<<<< HEAD
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					
@@ -12438,6 +12477,9 @@ angular.module('3drepo')
 						}
 					});
 
+=======
+					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+>>>>>>> refs/remotes/origin/ISSUE_295
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
@@ -12458,6 +12500,7 @@ angular.module('3drepo')
 >>>>>>> origin/PINAKIN_TEST
 
 					// Can edit description if no comments
+<<<<<<< HEAD
 					this.canEditDescription = (this.issueData.comments.length === 0);
 
 					// Role colour
@@ -12473,6 +12516,9 @@ angular.module('3drepo')
 					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+=======
+					this.canEditDescription = (this.issueData.comments && (this.issueData.comments.length === 0));
+>>>>>>> refs/remotes/origin/ISSUE_295
 				}
 				else {
 					this.issueData = {
@@ -12653,7 +12699,7 @@ angular.module('3drepo')
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
 						updateIssue();
-						if (typeof this.comment !== "undefined") {
+						if (this.comment && this.comment !== "") {
 							saveComment();
 						}
 					}
@@ -12978,6 +13024,10 @@ angular.module('3drepo')
 			}
 
 			// Add new comment to issue
+			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			if (!self.issueData.comments) {
+				self.issueData.comments = [];
+			}
 			self.issueData.comments.push({
 				sealed: comment.sealed,
 				guid: comment.guid,
@@ -12988,6 +13038,7 @@ angular.module('3drepo')
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
+<<<<<<< HEAD
 			// This logic now moved to backend
 			// if (self.issueData.comments.length > 1) {
 			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
@@ -13003,6 +13054,13 @@ angular.module('3drepo')
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
 
+=======
+			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
+				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+					.then(function(response) {
+						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+					});
+>>>>>>> refs/remotes/origin/ISSUE_295
 			}
 
 
@@ -13174,10 +13232,19 @@ angular.module('3drepo')
 					height += thumbnailHeight;
 				}
 				// Comments
+<<<<<<< HEAD
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
 					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
+=======
+				if (self.issueData.comments) {
+					for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+						height += commentTextHeight;
+						if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+							height += commentImageHeight;
+						}
+>>>>>>> refs/remotes/origin/ISSUE_295
 					}
 				}
 			}
@@ -14086,7 +14153,6 @@ angular.module('3drepo')
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.toShow = "showIssues";
 
 		/*
 		 * Get all the Issues
@@ -14094,7 +14160,9 @@ angular.module('3drepo')
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			vm.showProgress = false;
+			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
+			vm.showAddButton = true;
 		});
 
 		/*
@@ -14254,15 +14322,7 @@ angular.module('3drepo')
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-			}
-		});
-
-		/*
-		 * Show the add button if displaying info or list
-		 */
-		$scope.$watch("vm.toShow", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+				vm.showAddButton = true;
 			}
 		});
 
@@ -14410,6 +14470,7 @@ angular.module('3drepo')
 			}
 
 			vm.toShow = "showIssue";
+			vm.showAddButton = false;
 		};
 
 		/**
@@ -18032,7 +18093,8 @@ var Oculus = {};
 		this.$onChanges = function (changes) {
 			// Keys down
 			if (changes.hasOwnProperty("keysDown")) {
-				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) ||
+					(!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
 					if (selectedObjects.length === 1) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -18040,7 +18102,9 @@ var Oculus = {};
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode &&
+						 ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) ||
+						  (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
@@ -18196,7 +18260,7 @@ var Oculus = {};
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
 		/*
@@ -18220,6 +18284,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -18227,6 +18292,7 @@ var Oculus = {};
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",
@@ -18421,7 +18487,7 @@ var Oculus = {};
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				vm.pointerEvents = event.value.on ? "none" : "auto";
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
