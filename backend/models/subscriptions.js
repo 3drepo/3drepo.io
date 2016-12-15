@@ -22,14 +22,14 @@
 	const Billing = require("./new_billing.js");
 	const responseCodes = require("../response_codes.js");
 
-	let Subscriptions = function (userBilling, billingAddress, subscriptions) {
-		this.userBilling = userBilling;
+	let Subscriptions = function (billingUser, billingAddress, subscriptions) {
+		this.billingUser = billingUser;
 		this.subscriptions = subscriptions;
 		this.billingAddress = billingAddress;
 		this.now = new Date();
 		this.currentPlanCount = {};
 
-		console.log('Subscriptions init --')
+		//console.log('Subscriptions init --')
 	};
 
 	Subscriptions.prototype.addSubscription = function (plan) {
@@ -46,6 +46,8 @@
 	};
 
 	Subscriptions.prototype.removeSubscription = function(plan){
+		
+		const User = require('./user');
 
 		// plan.quantity negative means no. to remove, make it postive for removeNumber
 		let removeNumber = -plan.quantity;
@@ -89,7 +91,8 @@
 			let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete: true });
 			let totalSize = 0;
 
-			return User.historyChunksStats(this.userBilling).then(stats => {
+			console.log(quotaAfterDelete);
+			return User.historyChunksStats(this.billingUser).then(stats => {
 				
 				if (stats) { 
 					stats.forEach(stat => { totalSize += stat.size; });
@@ -110,10 +113,18 @@
 
 	Subscriptions.prototype.removePendingDeleteSubscription = function(){
 
-		let ids = this.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-		ids.forEach(id => {
-			this.subscriptions.remove(id);
-		});
+		// cannot use mongoosearray remove function anymore in subdoc schema, its not working
+		// let ids = this.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+		// ids.forEach(id => {
+		// 	this.subscriptions.remove(id);
+		// });
+
+		for(let i=this.subscriptions.length - 1; i>=0; i++){
+			let sub = this.subscriptions[i];
+			if(sub.pendingDelete){
+				this.subscriptions.splice(i, 1);
+			}
+		}
 	}
 
 	Subscriptions.prototype.getActiveSubscriptions = function (options) {
@@ -138,10 +149,24 @@
 
 
 		// Build up a list of expired subscriptions and remove them
-		let ids = this.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < this.now))
-			.map(sub => sub._id);
 
-		ids.forEach(id => { this.subscriptions.remove(id); });
+		//cannot use mongoarray.remove because it is not working the subdocument's schema's method
+		// let ids = this.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < this.now))
+		// 	.map(sub => sub._id);
+
+		//console.log(ids);
+		//ids.forEach(id => { this.subscriptions.remove(id); });
+
+		for(let i = this.subscriptions.length - 1; i >= 0; i --){
+			let sub = this.subscriptions[i];
+			let expired = !sub.active || (sub.expiredAt && sub.expiredAt < this.now);
+
+			if(expired){
+				this.subscriptions.splice(i, 1);
+			}
+		}
+
+		console.log('after remove', this.subscriptions.length);
 
 		// Compute the current set of plans for the subscriptions
 		this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
@@ -153,6 +178,8 @@
 
 		let changeInPlans = [];
 		let hasChanges = false;
+
+		console.log(this.currentPlanCount);
 
 		// plans: [ { 'plan': 'ABC', 'quantity': 3 }]
 		// currentPlanCount: { ABC: 1 }
@@ -187,7 +214,7 @@
 		});
 
 		let proRataPeriodPlans = Object.keys(this.currentPlanCount).length > 0 ? changeInPlans.filter(plan => plan.quantity > 0) : [];
-		let canceledAllPlans = plans.reduce((sum, plan) => sum + plan.quantity , 0) && Object.keys(this.currentPlanCount).length === plans.length
+		let canceledAllPlans = plans.reduce((sum, plan) => sum + plan.quantity , 0)  === 0 && Object.keys(this.currentPlanCount).length === plans.length
 
 		return Promise.all(addRemoveSubPromises).then(() => {
 			return hasChanges ? { 

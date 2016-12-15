@@ -27,7 +27,7 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 	const Paypal = require("./paypal.js");
-	const Billing = require("./new_billing.js");
+	const Invoice = require("./invoice.js");
 
 	let getSubscription = Subscription.getSubscription;
 
@@ -38,7 +38,12 @@
 		billingUser: String,
 		assignedUser: String,
 		expiredAt: Date,
-		limits: {},
+		
+		limits: {
+			collaboratorLimit : {type: Number, default: 0},
+			spaceLimit : {type: Number, default: 0}
+		},
+
 		token: String,
 		plan: String,
 		inCurrentAgreement: Boolean,
@@ -51,7 +56,7 @@
 		subscriptions: { 
 			type: [subscriptionSchema], 
 			get: function (subs) { 
-				return new Subscriptions(this, this.billingInfo, subs); 
+				return new Subscriptions(this.billingUser, this.billingInfo, subs); 
 			} 
 		},
 		billingInfo: { type: billingAddressInfo, default: {} },
@@ -84,11 +89,15 @@
 	// });
 
 	// Wrapper for VAT calculation and payment information
+	let calTax = function(gross, countryCode, isBusiness){
+		return gross * vat.getByCountryCode(countryCode, isBusiness);
+	};
+
 	let Payment = function (type, grossAmount, countryCode, isBusiness, length) {
 		this.type = type;
 		this.gross = grossAmount;
-		this.tax = this.gross * vat.getByCountryCode(countryCode, isBusiness);
-		this.net = this.gross + this.vat;
+		this.tax = calTax(this.gross, countryCode, isBusiness);
+		this.net = this.gross + this.tax;
 		this.length = length;
 		this.currency = "GBP";
 
@@ -118,37 +127,43 @@
 
 
 		console.log(changes);
+		let nextPaymentDate = moment(this.nextPaymentDate);
 
 		if (proRataAmount) {
 			console.log('pro-rata');
 			// The length of the pro-rata period is difference between now and next payment date
-			proRataLength.value = Math.round(moment.duration(this.nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
+			proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
 			// Calculate percentage of payment period * cost of the period.
-			let proRataBeforeTaxAmount = proRataLength.value / Math.round(moment.duration(this.nextPaymentDate.diff(this.lastAnniversaryDate)).asDays()) * proRataAmount;
+			let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays())l
+			proRataAmount = proRataFactor * proRataAmount;
 
-			payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataBeforeTaxAmount, country, isBusiness, proRataLength));
+			// add the pro-rata info in the changes obj, useful for generating invoice without recaluating £ of each item in invoice class
+			changes.proRataPeriodPlans.forEach(plan => {
+				plan.amount = proRataFactor * getSubscription(plan.plan).amount;
+				plan.taxAmount = calTax(plan.taxAmount, country, isBusiness);
+			});
+
+			payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
 		
 		} else if (!proRataAmount && this.subscriptions.hasBoughtLicence()) {
 			// it means a decrease in no. of licences
 			// new agreement will start on next payment date
 			console.log('decrease');
 
-			paymentDate = moment(this.nextPaymentDate).utc().toDate();
-
-		} else {
-
-			console.log('1st buy');
-			//console.log('this.constructor', this.constructor);
-			//first time to buy
-			this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(paymentDate);
-			this.lastAnniversaryDate = paymentDate.clone().startOf("day").toDate();
+			paymentDate = moment(nextPaymentDate).utc().toDate();
 
 		}
 
+		//useful for generating invoice
+		changes.regularPeriodPlans.forEach(plan => {
+			plan.amount = getSubscription(plan.plan).amount
+			plan.taxAmount = calTax(plan.taxAmount, country, isBusiness);
+		});
+
 		payments.push(new Payment(C.REGULAR_PAYMENT, regularAmount, country, isBusiness, regularCycleLength));
 
-		return { payments, paymentDate};
+		return { payments, paymentDate, changesWithPriceAdded};
 	};
 
 	// used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
@@ -179,12 +194,14 @@
 		// Update subscriptions with new plans
 		//this.billingInfo = this.billingInfo || {};
 		this.billingUser = billingUser;
-		
+
 		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 
 			return this.subscriptions.changeSubscriptions(plans);
 
 		}).then(changes => {
+
+			console.log(changes);
 
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
@@ -200,10 +217,30 @@
 
 			} else if (changes) {
 
+				//changes in plans
+				
 				let startDate = moment().utc().add(10, "second");
 
 				let data = this.calculateAmounts(startDate, changes);
-					// Once we have calculated a set of payments send them
+	
+				changes = data.changesWithPriceAdded;
+
+				//init date for 1st/'new' payments
+				if (changes.proRataPeriodPlans.length === 0){
+					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
+					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
+				}
+
+				// create invoice with init state
+				let invoice = Invoice.createInstance({ account: billingUser });
+				invoice.initInvoice({ 
+					changes, 
+					payments,
+					nextPaymentDate: this.nextPaymentDate,
+					billingInfo: this.billingInfo,
+					startDate
+				});
+				// Once we have calculated a set of payments send them
 				return Paypal.processPayments(this, data.payments, data.paymentDate);
 			}
 		});

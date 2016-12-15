@@ -83,18 +83,20 @@
 
 		// Translate payments to paypal specific
 		payments.forEach(function(payment) {
+			console.log(payment);
+
 			if (payment.type === C.PRO_RATA_PAYMENT) { 
 				hasProRata = true;
-				proRataAmount += payment.gross;
-			 } else if (payment.type === C.REGULAR_AMOUNT) {
-				regularAmount += payment.gross;
+				proRataAmount += payment.net;
+			 } else if (payment.type === C.REGULAR_PAYMENT) {
+				regularAmount += payment.net;
 			 }
 
 			paymentDefs.push(paypalTrans.getPaypalPayment(payment));
 		});
 
 		let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
-		console.log(billingPlanAttributes);
+		console.log(JSON.stringify(billingPlanAttributes, null , 2));
 
 		return new Promise((resolve, reject) => {
 
@@ -145,7 +147,7 @@
 					if (hasProRata) {
 						desc += `This month's pro-rata: £${proRataAmount}. `;
 					}
-					desc += `Regular monthly recurring payment £${regularAmount}, starts on ${moment(billing.nextPaymentDate).utc().format('Do MMM YYYY')}`;
+					desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 
 					let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
 						billingPlan.id, 
@@ -153,7 +155,7 @@
 						paypalTrans.getPaypalAddress(billing.billingInfo),
 						desc
 					);
-					console.log(billingAgreementAttributes);
+					console.log(JSON.stringify(billingAgreementAttributes, null , 2));
 
 					paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 						if (err) {

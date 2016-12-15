@@ -26,7 +26,7 @@
 	const jade = require("jade");
 	const phantom = require("phantom");
 	const config = require("../config");
-	const Subscriptions = require("./subscription");
+	const Subscription = require("./subscription");
 	const systemLogger = require("../logger.js").systemLogger;
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");
@@ -49,26 +49,25 @@
 		billingAgreementId: String,
 		gateway: String,
 		raw: {},
-		createdAt: { type: Date, get: dateTimeToString, set: stringToDateTime } ,
+		createdAt: { type: Date } ,
 		currency: String,
-		amount: Number,
+		amount: Number, //gross+tax
 		type: { type: String, default: "invoice", enum: ["invoice", "refund"] },
 		items: [{
 			name: String,
 			description: String,
 			currency: String,
-			amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
+			amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
 			taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP }
 		}],
-		periodStart: { type: Date, get: dateToString, set: stringToDate },
-		periodEnd: { type: Date, get: dateToString, set: stringToDate },
-		nextPaymentDate:  { type: Date, get: dateToString, set: stringToDate },
-		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
+		periodStart: { type: Date, get: dateToString },
+		periodEnd: { type: Date, get: dateToString },
+		nextPaymentDate:  { type: Date, get: dateToString },
+		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
 		transactionId: String,
 		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
-		pending: Boolean,
-		state: {type: String, default: 'init', enum: ['init', 'pending', 'complete']},
+		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
 		pdf: Object
 	});
 
@@ -76,11 +75,55 @@
 		return this.taxAmount / this.netAmount;
 	});
 
-	/*
+	schema.methods.initInvoice = function(data){
+
+		this.createdAt = new Date();
+		this.nextPaymentDate = data.nextPaymentDate;
+		this.info = data.billingInfo;
+
+		let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
+
+		if(proRataPayments.length > 0){
+			this.currency = proRataPayments[0].currency;
+			this.amount = proRataPayments.reduce((sum, payment => sum + payment.net, 0);
+			this.taxAmount = proRataPayments.reduce((sum, payment => sum + payment.tax, 0);
+		}
+
+		let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
+		this.nextPaymentAmount = regularPayments.reduce((sum, payment => sum + payment.net, 0);
+	
+		this.periodStart = data.startDate
+		this.periodEnd = moment(this.nextPaymentDate)
+			.utc()
+			.subtract(1, 'day')
+			.endOf('date')
+			.toDate();
+
+		if(data.changes.proRataPeriodPlans){
+			
+			data.changes.proRataPeriodPlans.forEach(plan => {
+				for(let i=0 ; i< plan.quantity; i++){
+					this.items.push({
+						name: Subscription.getSubscription(plan.plan).plan,
+						description: Subscription.getSubscription(plan.plan).desc,
+						currency: Subscription.getSubscription(plan.plan).currency,
+						amount: plan.amount,  //gross+tax
+						taxAmount: plan.taxAmount
+					});
+				}
+			});
+
+
+		} else if (data.changes.regularPeriodPlans){
+
+		}
+		
+	}
+	
 	schema.statics.findByAccount = function (account) {
 		return this.find({ account }, {}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
-	*/
+	
 
 	schema.statics.findByAgreementId = function(account, billingAgreementId) {
 		return this.find({ account }, { billingAgreementId }, { raw: 0, pdf: 0});
@@ -325,14 +368,14 @@
 		}
 	};
 
-	var Billing = ModelFactory.createClass(
-		"Billing",
+	var Invoice = ModelFactory.createClass(
+		"Invoice",
 		schema,
 		() => {
-			return "billings";
+			return "invoices";
 		}
 	);
 
-	module.exports = Billing;
+	module.exports = Invoice;
 
 })();
