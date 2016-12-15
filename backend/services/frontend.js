@@ -62,19 +62,36 @@
 
 			params.config_js = "var server_config = {};\n";
 
-			params.config_js = "server_config.api_algorithm = {\n";
+			params.config_js += "server_config.api_algorithm = {\n";
 
+			
 			for(let prop in config.apiAlgorithm) { 
-				params.config_js += "\t\"" + prop + "\":" + params.config_js[prop] + "\n"; 
+
+				// not working for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
+				if(prop === 'apiUrls'){
+					continue;
+				}
+
+				params.config_js += "\t\"" + prop + "\":" + (typeof config.apiAlgorithm[prop] === 'function' ? config.apiAlgorithm[prop] : JSON.stringify(config.apiAlgorithm[prop])) + ",\n"; 
 			}
+
+			// fix for for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
+			params.config_js += '\tapiUrls: {';
+			for(let prop in config.apiAlgorithm.apiUrls) { 
+				params.config_js += '\n\t\t' + prop + ': [' + config.apiAlgorithm.apiUrls[prop].toString() + ']';
+			}
+			params.config_js += '\n\t}\n';
+
+
+
 
 			params.config_js += "};\n";
 
-			params.config_js = "server_config.apiUrl = server_config.api_algorithm.apiUrl";
+			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm)" + ";\n" ;
 
 			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\"\n";
-			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
-			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
+			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.api_algorithm.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
+			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.api_algorithm.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
 
 			if ("wayfinder" in config) {
 				// TODO: Make a public section in config for vars to be revealed

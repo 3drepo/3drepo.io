@@ -73,8 +73,8 @@
 			//params.config_js += "};\n";
 
 			roundRobin.apiUrl = function(type, path) {
-				let typeFunctions = this.apiUrls[type];
-				let functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
+				var typeFunctions = this.apiUrls[type];
+				var functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
 
 				this.apiUrlCounter[type] += 1;
 

@@ -139,7 +139,7 @@
 		} else {
 
 			console.log('1st buy');
-			console.log('this.constructor', this.constructor);
+			//console.log('this.constructor', this.constructor);
 			//first time to buy
 			this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(paymentDate);
 			this.lastAnniversaryDate = paymentDate.clone().startOf("day").toDate();
@@ -178,7 +178,8 @@
 
 		// Update subscriptions with new plans
 		//this.billingInfo = this.billingInfo || {};
-
+		this.billingUser = billingUser;
+		
 		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 
 			return this.subscriptions.changeSubscriptions(plans);

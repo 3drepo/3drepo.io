@@ -94,6 +94,7 @@
 		});
 
 		let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
+		console.log(billingPlanAttributes);
 
 		return new Promise((resolve, reject) => {
 
@@ -149,8 +150,10 @@
 					let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
 						billingPlan.id, 
 						startDate, 
-						paypalTrans.getPaypalAddress(billing.billingInfo)
+						paypalTrans.getPaypalAddress(billing.billingInfo),
+						desc
 					);
+					console.log(billingAgreementAttributes);
 
 					paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 						if (err) {

@@ -690,10 +690,13 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	plans = plans || [];
 	console.log(this.customData);
-	return this.customData.billing.buySubscriptions(plans, billingUser, billingAddress).then(function(_billingAgreement) {
+	
+	return this.customData.billing.buySubscriptions(plans, billingUser, billingAddress).then(_billingAgreement => {
+		
 		billingAgreement = _billingAgreement;
 		return this.save();
-	}).then(function() {
+
+	}).then(() => {
 		return Promise.resolve(billingAgreement || {});
 	});
 };

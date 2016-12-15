@@ -20,8 +20,9 @@
 
 	const C = require("../constants");
 	const config = require("../config");
-
+	const moment = require('moment');
 	const paypalPaymentTypes = {};
+	
 	paypalPaymentTypes[C.PRO_RATA_PAYMENT] = { "name" : "First month pro-rata price",
 		"type" : "TRIAL",
 		"cycles" : 1 };
@@ -66,8 +67,12 @@
 	};
 
 	let getBillingPlanAttributes = function (billingUser, paymentDefs) {
-		let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
-		let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
+		//this is for generating and api url, but we only need a frontend url.
+		//let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
+		//let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
+
+		let cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
+		let returnUrl =config.getBaseURL() + `/${billingUser}?page=billing`;
 
 		return {
 			"description": "3D Repo Licence",
@@ -84,10 +89,10 @@
 		};
 	};
 
-	let getBillingAgreementAttributes = function(id, startDate, billingAddress)
+	let getBillingAgreementAttributes = function(id, startDate, billingAddress, desc)
 	{
 		return {
-			"name": "3D Repo Licenses",
+			"name": "3D Repo Licences",
 			"description": desc,
 			"start_date": moment(startDate)
 				.utc()
@@ -105,6 +110,7 @@
 	module.exports = {
 		getPaypalAddress: getPaypalAddress,
 		getPaypalPayment: getPaypalPayment,
-		getBillingPlanAttributes: getBillingPlanAttributes
+		getBillingPlanAttributes: getBillingPlanAttributes,
+		getBillingAgreementAttributes: getBillingAgreementAttributes
 	};
 })();
