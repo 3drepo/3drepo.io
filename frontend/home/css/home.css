@@ -158,6 +158,4 @@ md-dialog md-toolbar {
 
 #legal #legalText {
     padding: 10px 50px;
-    overflow: auto;
-    height: calc(100vh - 80px);
 }

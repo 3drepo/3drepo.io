@@ -110,7 +110,6 @@
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
-<<<<<<< HEAD
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					
@@ -120,9 +119,6 @@
 						}
 					});
 
-=======
-					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
->>>>>>> ISSUE_292
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
@@ -139,7 +135,6 @@
 					}
 
 					// Can edit description if no comments
-<<<<<<< HEAD
 					this.canEditDescription = (this.issueData.comments.length === 0);
 
 					// Role colour
@@ -155,9 +150,6 @@
 					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
-=======
-					this.canEditDescription = (this.issueData.comments && (this.issueData.comments.length === 0));
->>>>>>> ISSUE_292
 				}
 				else {
 					this.issueData = {
@@ -678,10 +670,13 @@
 			}
 
 			// Add new comment to issue
+<<<<<<< HEAD
 			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			if (!self.issueData.comments) {
 				self.issueData.comments = [];
 			}
+=======
+>>>>>>> 1f4eaf8ab3cfd6fb83d0a57e7f3a4c15e8b96e61
 			self.issueData.comments.push({
 				sealed: comment.sealed,
 				guid: comment.guid,

@@ -684,7 +684,6 @@
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
-<<<<<<< HEAD
 			// This logic now moved to backend
 			// if (self.issueData.comments.length > 1) {
 			// 	IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
@@ -700,13 +699,11 @@
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
 
-=======
 			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
 				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
 					.then(function(response) {
 						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 					});
->>>>>>> ISSUE_292
 			}
 
 
@@ -878,19 +875,16 @@
 					height += thumbnailHeight;
 				}
 				// Comments
-<<<<<<< HEAD
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
 					if (self.issueData.comments[i].viewpoint && self.issueData.comments[i].viewpoint.screenshot) {
 						height += commentImageHeight;
-=======
 				if (self.issueData.comments) {
 					for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 						height += commentTextHeight;
 						if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
 							height += commentImageHeight;
 						}
->>>>>>> ISSUE_292
 					}
 				}
 			}
