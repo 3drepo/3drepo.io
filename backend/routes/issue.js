@@ -33,13 +33,13 @@ router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, get
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
+router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssues, importBCF);
 
 router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
-router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
+router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssues, importBCF);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);

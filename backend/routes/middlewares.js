@@ -72,7 +72,7 @@ function getAccessToIssues(username, account, project) {
 	"use strict";
 
 	return getAccessToCollection(username, account, project, "issues");
-} 
+}
 
 function getAccessToProject(username, account, project){
 	"use strict";
@@ -317,7 +317,7 @@ function createQueueInstance(){
 		event_exchange: config.cn_queue.event_exchange
 
 	}).then(() => importQueue);
-	
+
 
 }
 
@@ -392,7 +392,6 @@ var middlewares = {
 	hasWriteAccessToIssues: [loggedIn, hasWriteAccessToIssues],
 	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
-	hasWriteAccessToIssue: [loggedIn, hasWriteAccessToIssue],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
