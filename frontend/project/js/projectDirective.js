@@ -53,7 +53,7 @@
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
 		/*
@@ -77,6 +77,7 @@
 					noToggle: true,
 					icon: "fa-print"
 				},
+				/*
 				{
 					value: "importBCF",
 					label: "Import BCF",
@@ -84,6 +85,7 @@
 					noToggle: true,
 					icon: "fa-cloud-upload"
 				},
+				*/
 				{
 					value: "exportBCF",
 					label: "Export BCF",
@@ -286,7 +288,7 @@
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				vm.pointerEvents = event.value.on ? "none" : "auto";
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display

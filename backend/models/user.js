@@ -1177,87 +1177,98 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 			}).then(invoiceNo => {
 
+				if(pendingBill){
+
+					billing.createdAt = pendingBill.createdAt;
+					billing.periodStart = pendingBill.periodStart;
+					billing.periodEnd = pendingBill.periodEnd;
+					billing.info = pendingBill.info;
+
+				} else {
+
+					billing.periodStart = dbUser.customData.lastAnniversaryDate;
+					billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
+						.utc()
+						.subtract(1, 'day')
+						.endOf('date')
+						.toDate();
+					billing.createdAt = new Date();
+					billing.info = dbUser.customData.billingInfo;
+				}
+
 				billing.raw = raw;
 				billing.gateway = paymentInfo.gateway;
-				billing.createdAt = pendingBill.createdAt;
 				billing.currency = paymentInfo.currency;
 				billing.amount = paymentInfo.amount;
 				billing.billingAgreementId = billingAgreementId;
-				billing.items = pendingBill.items;
+				billing.items = items;
 				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
 				billing.taxAmount = paymentInfo.taxAmount;
 				billing.nextPaymentAmount = paymentInfo.nextAmount;
 				billing.invoiceNo = invoiceNo;
 				billing.transactionId = paymentInfo.transactionId;
 
-				//copy current billing info from user to billing
-				billing.info = pendingBill.info;
-
-				billing.periodStart = pendingBill.periodStart;
-				billing.periodEnd = pendingBill.periodEnd;
-
 				return billing.save();
+
+			}).then(_billing => {
+
+				billing = _billing;
+				return billing.generatePDF();
+
+			}).then(pdf => {
+
+				billing.pdf = pdf;
+				return billing.save();
+
 			});
 
 		}
 
 
-		if(!disableEmail){
+		return createBill;
 
+	}).then(billing => {
 
-			createBill.then(billing => {
+		if(!disableEmail && billing){
 
-				if(billing){
-					return billing.generatePDF().then(pdf => {
+			let attachments;
 
-						billing.pdf = pdf;
-						// also save the pdf to database for ref.
-						return billing.save();
+			if(billing && billing.pdf){
+				attachments = [{
+					filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
+					content: billing.pdf
+				}];
+			}
 
-					});
-				}
+			//send invoice
+			let amount = paymentInfo.amount;
+			let currency = paymentInfo.currency;
+			if(currency === 'GBP'){
+				currency = '£';
+			}
 
-			}).then(billing => {
+			User.findByUserName(dbUser.customData.billingUser).then(user => {
 				
-				let attachments;
-
-				if(billing && billing.pdf){
-					attachments = [{
-						filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
-						content: billing.pdf
-					}];
-				}
-
-				//send invoice
-				let amount = paymentInfo.amount;
-				let currency = paymentInfo.currency;
-				if(currency === 'GBP'){
-					currency = '£';
-				}
-
-				return User.findByUserName(dbUser.customData.billingUser).then(user => {
-					
+				return Promise.all([
 					//make a copy to sales
-
 					Mailer.sendPaymentReceivedEmailToSales({
 						account: account,
 						amount: currency + amount,
 						email: user.customData.email,
-						invoiceNo: billing.invoiceNo
-					}, attachments);
+						invoiceNo: billing.invoiceNo,
+						type: billing.type
+					}, attachments),
 
-					return Mailer.sendPaymentReceivedEmail(user.customData.email, {
+					Mailer.sendPaymentReceivedEmail(user.customData.email, {
 						account: account,
 						amount: currency + amount
-					}, attachments);
-				});
-
+					}, attachments)				
+				]);
 
 			}).catch(err => {
 				console.log(err.stack);
 				systemLogger.logError(`Email error - ${err.message}`);
 			});
-
 
 		}
 

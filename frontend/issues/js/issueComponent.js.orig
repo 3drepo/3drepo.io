@@ -110,6 +110,7 @@
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
+<<<<<<< HEAD
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					
@@ -119,6 +120,9 @@
 						}
 					});
 
+=======
+					this.issueData.nameToUse = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+>>>>>>> ISSUE_292
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
 						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
@@ -135,6 +139,7 @@
 					}
 
 					// Can edit description if no comments
+<<<<<<< HEAD
 					this.canEditDescription = (this.issueData.comments.length === 0);
 
 					// Role colour
@@ -150,6 +155,9 @@
 					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+=======
+					this.canEditDescription = (this.issueData.comments && (this.issueData.comments.length === 0));
+>>>>>>> ISSUE_292
 				}
 				else {
 					this.issueData = {

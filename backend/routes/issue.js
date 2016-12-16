@@ -45,11 +45,11 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, i
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssues, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssues, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssues, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssues, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -59,18 +59,18 @@ function storeIssue(req, res, next){
 	let data = req.body;
 	data.owner = req.session.user.username;
 	data.sessionId = req.session.id;
-	
+
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
 
 		// let resData = {
 		// 	_id: issue._id,
-		// 	account: req.params.account, 
-		// 	project: req.params.project, 
-		// 	issue_id : issue._id, 
-		// 	number : issue.number, 
-		// 	created : issue.created, 
+		// 	account: req.params.account,
+		// 	project: req.params.project,
+		// 	issue_id : issue._id,
+		// 	number : issue.number,
+		// 	created : issue.created,
 		// 	scribble: data.scribble,
 		// 	issue: issue
 		// };
@@ -105,9 +105,9 @@ function updateIssue(req, res, next){
 		return ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username);
 
 	}).then(roles => {
-		
+
 		data.owner_roles = roles;
-		
+
 		roles.forEach(role => {
 			if(projectRoles[role] && projectRoles[role].roleFunction === 'admin'){
 				data.isAdmin = true;
@@ -133,7 +133,7 @@ function updateIssue(req, res, next){
 
 		} else if (data.hasOwnProperty('comment')){
 			action = issue.updateComment(null, data);
-		
+
 		} else if (data.hasOwnProperty('closed') && data.closed){
 			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
@@ -141,7 +141,7 @@ function updateIssue(req, res, next){
 			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
 		} else {
-			
+
 			issue.updateAttrs(data);
 			action = issue.save();
 		}
@@ -204,11 +204,11 @@ function listIssues(req, res, next) {
 
 function getIssuesBCF(req, res, next) {
 	'use strict';
-	
+
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let project = req.params.project;
-	
+
 	let getBCFZipRS;
 
 	if (req.params.rid) {
@@ -338,7 +338,7 @@ function importBCF(req, res, next){
 		return responseCodes.respond(place, req, res, next, { message: 'config.bcf_dir is not defined'});
 	}
 
-	var upload = multer({ 
+	var upload = multer({
 		dest: config.bcf_dir,
 		fileFilter: fileFilter,
 	});
@@ -346,7 +346,7 @@ function importBCF(req, res, next){
 	upload.single("file")(req, res, function (err) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
-		
+
 		} else if(!req.file.size){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {

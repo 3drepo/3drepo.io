@@ -22,6 +22,7 @@ var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
+var Role = require('../models/role');
 
 var config = require('../config');
 
@@ -36,7 +37,11 @@ var getDbColOptions = function(req){
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
+<<<<<<< HEAD
+function getAccessByCollection(username, account, collection){
+=======
 function getAccessToCollection(username, account, project, collName) {
+>>>>>>> ISSUE_292
 	'use strict';
 
 	return User.findByUserName(username).then(user => {
@@ -45,7 +50,10 @@ function getAccessToCollection(username, account, project, collName) {
 	}).then(privileges => {
 
 		//Determine the access rights of a project via privileges on the history collection
+<<<<<<< HEAD
+=======
 		let collection = project + "." + collName;
+>>>>>>> ISSUE_292
 		let writePermission = false;
 		let readPermission = false;
 
@@ -85,21 +93,30 @@ function hasReadAccessToProjectHelper(username, account, project){
 }
 
 function hasAccessToProjectHelper(username, account, project, permissionBit){
-	return getAccessToProject(username, account, project).then(permissionFlag => {
+	return getAccessByCollection(username, account, project + ".history").then(permissionFlag => {
 		return Promise.resolve(permissionFlag & permissionBit);
 	});
 }
 
+<<<<<<< HEAD
+function hasAccessToCollection(req, res, next, collection, permissionBit){
+	'use strict';
+=======
 
 function hasAccessToCollection(req, res, next, permissionBit, checkFunction)
 {
 	"use strict";
+>>>>>>> ISSUE_292
 
 	let username = req.session.user.username;
 	let account = req.params.account;
-	let project = req.params.project;
+	//let project = req.params.project;
 
+<<<<<<< HEAD
+	return getAccessByCollection(username, account, collection).then(permissionFlag => {
+=======
 	return checkFunction(username, account, project).then(permissionFlag => {
+>>>>>>> ISSUE_292
 		return Promise.resolve(permissionFlag & permissionBit);
 	}).then(granted => {
 		if(granted){
@@ -107,11 +124,18 @@ function hasAccessToCollection(req, res, next, permissionBit, checkFunction)
 		} else {
 			return Promise.reject(responseCodes.NOT_AUTHORIZED);
 		}
-	}).catch( err => {
-		responseCodes.respond("Middleware: check has access to project", req, res, next, err , null, err);
+	}).catch(err => {
+		responseCodes.respond("Middleware: check has access to " + collection, req, res, next, err , null, err);
 	});
 }
 
+<<<<<<< HEAD
+function hasWriteAccessToIssue(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.issues';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
+=======
 function hasAccessToProject(req, res, next, permissionBit){
 	'use strict';
 
@@ -126,11 +150,21 @@ function hasAccessToIssues(req, res, next, permissionBit){
 
 function hasWriteAccessToProject(req, res, next){
 	return hasAccessToProject(req, res, next, WRITE_BIT);
+>>>>>>> ISSUE_292
 }
 
+function hasWriteAccessToProject(req, res, next){
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
+}
 
 function hasReadAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, READ_BIT);
+	'use strict';
+
+	let collection = req.params.project + '.history';
+	return hasAccessToCollection(req, res, next, collection, READ_BIT);
 }
 
 function hasWriteAccessToIssues(req, res, next) {
@@ -160,15 +194,6 @@ function hasWriteAccessToAccount(req, res, next){
 	hasAccessToAccount(req, res, next);
 }
 
-function canCreateProject(req, res, next){
-	"use strict";
-
-	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
-		next();
-	} else {
-		hasWriteAccessToProject(req, res, next);
-	}
-}
 
 function loggedIn(req, res, next){
 	'use strict';
@@ -385,7 +410,6 @@ function isAccountAdmin(req, res, next){
 var middlewares = {
 
 	// Real middlewares taking req, res, next
-	canCreateProject: [loggedIn, canCreateProject],
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
 	hasReadAccessToIssues: [loggedIn, hasReadAccessToIssues],

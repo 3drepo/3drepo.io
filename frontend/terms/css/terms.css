@@ -1,14 +1,3 @@
 terms .md-toolbar-tools img {
     width: 150px;
 }
-
-terms-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
