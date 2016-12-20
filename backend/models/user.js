@@ -689,7 +689,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let billingAgreement;
 
 	plans = plans || [];
-	console.log(this.customData);
+	//console.log(this.customData);
 	
 	return this.customData.billing.buySubscriptions(plans, billingUser, billingAddress).then(_billingAgreement => {
 		

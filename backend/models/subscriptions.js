@@ -19,7 +19,6 @@
 	"use strict";
 
 	const Subscription = require("./subscription.js");
-	const Billing = require("./new_billing.js");
 	const responseCodes = require("../response_codes.js");
 
 	let Subscriptions = function (billingUser, billingAddress, subscriptions) {

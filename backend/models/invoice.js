@@ -39,10 +39,8 @@
 
 	// Various getter/setter helper functions
 	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); }
-	let stringToDate = function(str) { return moment(str).utc().format(C.DATE_FORMAT); }
-	let dateToString = function(date) { return date.format(C.DATE_FORMAT); }
-	let stringToDateTime = function(str) { return moment(str).utc().format(C.DATE_TIME_FORMAT); }
-	let dateTimeToString = function(date) { return date.format(C.DATE_TIME_FORMAT); }
+	let dateToString = function(date) { return date; }
+	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
 	let schema = mongoose.Schema({
 		invoiceNo: String,
@@ -85,12 +83,12 @@
 
 		if(proRataPayments.length > 0){
 			this.currency = proRataPayments[0].currency;
-			this.amount = proRataPayments.reduce((sum, payment => sum + payment.net, 0);
-			this.taxAmount = proRataPayments.reduce((sum, payment => sum + payment.tax, 0);
+			this.amount = proRataPayments.reduce((sum, payment) => sum + payment.net, 0);
+			this.taxAmount = proRataPayments.reduce((sum, payment) => sum + payment.tax, 0);
 		}
 
 		let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
-		this.nextPaymentAmount = regularPayments.reduce((sum, payment => sum + payment.net, 0);
+		this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
 	
 		this.periodStart = data.startDate
 		this.periodEnd = moment(this.nextPaymentDate)
@@ -99,24 +97,27 @@
 			.endOf('date')
 			.toDate();
 
+		let plans = [];
+
+		// if there is any pro rata priced plans then there will be no regular priced plans in this invoice and vice versa.
 		if(data.changes.proRataPeriodPlans){
-			
-			data.changes.proRataPeriodPlans.forEach(plan => {
-				for(let i=0 ; i< plan.quantity; i++){
-					this.items.push({
-						name: Subscription.getSubscription(plan.plan).plan,
-						description: Subscription.getSubscription(plan.plan).desc,
-						currency: Subscription.getSubscription(plan.plan).currency,
-						amount: plan.amount,  //gross+tax
-						taxAmount: plan.taxAmount
-					});
-				}
-			});
-
-
+			plans = data.changes.proRataPeriodPlans;	
 		} else if (data.changes.regularPeriodPlans){
-
+			plans = data.changes.regularPeriodPlans;
 		}
+
+		// add items bought in the invoice
+		plans.forEach(plan => {
+			for(let i=0 ; i< plan.quantity; i++){
+				this.items.push({
+					name: Subscription.getSubscription(plan.plan).plan,
+					description: Subscription.getSubscription(plan.plan).desc,
+					currency: Subscription.getSubscription(plan.plan).currency,
+					amount: plan.amount,  //gross+tax
+					taxAmount: plan.taxAmount
+				});
+			}
+		});
 		
 	}
 	

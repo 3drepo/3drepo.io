@@ -83,7 +83,7 @@
 
 		// Translate payments to paypal specific
 		payments.forEach(function(payment) {
-			console.log(payment);
+			//console.log(payment);
 
 			if (payment.type === C.PRO_RATA_PAYMENT) { 
 				hasProRata = true;
@@ -96,89 +96,98 @@
 		});
 
 		let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
-		console.log(JSON.stringify(billingPlanAttributes, null , 2));
+		//console.log(JSON.stringify(billingPlanAttributes, null , 2));
 
 		return new Promise((resolve, reject) => {
 
-				// create plan
-				paypal.billingPlan.create(billingPlanAttributes, function (err, billingPlan) {
+			// create plan
+			console.log('create plan');
+			paypal.billingPlan.create(billingPlanAttributes, function (err, billingPlan) {
 
+				if (err) {
+					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+					paypalError.message = err.response && err.response.message || err.message;
+					reject(paypalError);
+				} else {
+					resolve(billingPlan);
+				}
+			});
+
+		})
+		.then(billingPlan => {
+
+			//activate plan
+			console.log('activate plan');
+			return new Promise((resolve, reject) => {
+				let billingPlanUpdateAttributes = [{
+					"op": "replace",
+					"path": "/",
+					"value": {
+						"state": "ACTIVE"
+					}
+				}];
+
+				paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 					if (err) {
 						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-						paypalError.message = err.response && err.response.message || err.message;
+
+						paypalError.message = err.response.message;
 						reject(paypalError);
 					} else {
 						resolve(billingPlan);
 					}
 				});
 
-			})
-			.then(billingPlan => {
+			});
+		})
+		.then(billingPlan => {
 
-				//activate plan
-				return new Promise((resolve, reject) => {
-					let billingPlanUpdateAttributes = [{
-						"op": "replace",
-						"path": "/",
-						"value": {
-							"state": "ACTIVE"
-						}
-					}];
+			//create agreement
+			console.log('create agreement');
+			return new Promise((resolve, reject) => {
 
-					paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
-						if (err) {
-							let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+				let desc = "";
+				if (hasProRata) {
+					desc += `This month's pro-rata: £${proRataAmount}. `;
+				}
+				desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 
-							paypalError.message = err.response.message;
-							reject(paypalError);
-						} else {
-							resolve(billingPlan);
-						}
-					});
+				let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
+					billingPlan.id, 
+					startDate, 
+					paypalTrans.getPaypalAddress(billing.billingInfo),
+					desc
+				);
+				//console.log(JSON.stringify(billingAgreementAttributes, null , 2));
 
-				});
-			})
-			.then(billingPlan => {
+				paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
+					if (err) {
+						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+						paypalError.message = err.response.message;
+						reject(paypalError);
+					} else {
 
-				//create agreement
-				return new Promise((resolve, reject) => {
+						let link = billingAgreement.links.find(link => link.rel === "approval_url");
+						let token = url.parse(link.href, true)
+							.query.token;
 
-					let desc = "";
-					if (hasProRata) {
-						desc += `This month's pro-rata: £${proRataAmount}. `;
+						console.log('resolve data', {
+							url: link.href,
+							paypalPaymentToken: token,
+							agreement: billingAgreement
+						});
+
+						resolve({
+							url: link.href,
+							paypalPaymentToken: token,
+							agreement: billingAgreement
+						});
 					}
-					desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
-
-					let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
-						billingPlan.id, 
-						startDate, 
-						paypalTrans.getPaypalAddress(billing.billingInfo),
-						desc
-					);
-					console.log(JSON.stringify(billingAgreementAttributes, null , 2));
-
-					paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
-						if (err) {
-							let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-							paypalError.message = err.response.message;
-							reject(paypalError);
-						} else {
-
-							let link = billingAgreement.links.find(link => link.rel === "approval_url");
-							let token = url.parse(link.href, true)
-								.query.token;
-
-							resolve({
-								url: link.href,
-								paypalPaymentToken: token,
-								agreement: billingAgreement
-							});
-						}
-					});
-
 				});
 
 			});
+
+		});
 
 	};
 

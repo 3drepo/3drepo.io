@@ -135,13 +135,13 @@
 			proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
 			// Calculate percentage of payment period * cost of the period.
-			let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays())l
+			let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays());
 			proRataAmount = proRataFactor * proRataAmount;
 
-			// add the pro-rata info in the changes obj, useful for generating invoice without recaluating £ of each item in invoice class
+			// add the pro-rata price info in the changes obj, useful for generating invoice without recaluating £ of each item in the invoice class
 			changes.proRataPeriodPlans.forEach(plan => {
 				plan.amount = proRataFactor * getSubscription(plan.plan).amount;
-				plan.taxAmount = calTax(plan.taxAmount, country, isBusiness);
+				plan.taxAmount = calTax(plan.amount, country, isBusiness);
 			});
 
 			payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
@@ -158,12 +158,12 @@
 		//useful for generating invoice
 		changes.regularPeriodPlans.forEach(plan => {
 			plan.amount = getSubscription(plan.plan).amount
-			plan.taxAmount = calTax(plan.taxAmount, country, isBusiness);
+			plan.taxAmount = calTax(plan.amount, country, isBusiness);
 		});
 
 		payments.push(new Payment(C.REGULAR_PAYMENT, regularAmount, country, isBusiness, regularCycleLength));
 
-		return { payments, paymentDate, changesWithPriceAdded};
+		return { payments, paymentDate, changesWithPriceAdded: changes};
 	};
 
 	// used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
@@ -201,7 +201,7 @@
 
 		}).then(changes => {
 
-			console.log(changes);
+			console.log('**changes', changes);
 
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
@@ -235,13 +235,19 @@
 				let invoice = Invoice.createInstance({ account: billingUser });
 				invoice.initInvoice({ 
 					changes, 
-					payments,
+					payments: data.payments,
 					nextPaymentDate: this.nextPaymentDate,
 					billingInfo: this.billingInfo,
 					startDate
 				});
-				// Once we have calculated a set of payments send them
-				return Paypal.processPayments(this, data.payments, data.paymentDate);
+
+				//save this invoice first
+				return invoice.save().then(() => {
+					// Once we have calculated a set of payments send them
+					return Paypal.processPayments(this, data.payments, data.paymentDate);
+
+				});
+
 			}
 		});
 	};
