@@ -189,6 +189,14 @@
 
 	};
 
+	billingSchema.methods.isNewPayment = function(changes){
+		return changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence();
+	}
+
+	let getImmediatePaymentStartDate = function(){
+		return moment().utc().add(10, "second");
+	}
+
 	billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
 		// User want to buy new subscriptions.
 		
@@ -221,14 +229,14 @@
 
 				//changes in plans
 				
-				let startDate = moment().utc().add(10, "second");
+				let startDate = getImmediatePaymentStartDate();
 
 				let data = this.calculateAmounts(startDate, changes);
 	
 				changes = data.changesWithPriceAdded;
 
 				//init date for 1st/'new' payments
-				if (changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence()){
+				if (this.isNewPayment(changes)){
 					console.log('new payments');
 					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
@@ -239,19 +247,23 @@
 					//save the payment token to user billing info
 					this.paypalPaymentToken = paypalData.paypalPaymentToken;
 
-					// create invoice with init state
-					let invoice = Invoice.createInstance({ account: user });
+					// create invoice with init state for payment happens right after executing agreement
+					if(data.paymentDate <= startDate.toDate()){
+						let invoice = Invoice.createInstance({ account: user });
 
-					invoice.initInvoice({ 
-						changes, 
-						payments: data.payments,
-						nextPaymentDate: this.nextPaymentDate,
-						billingInfo: this.billingInfo,
-						paypalPaymentToken: paypalData.paypalPaymentToken,
-						startDate
-					});
+						invoice.initInvoice({ 
+							changes, 
+							payments: data.payments,
+							nextPaymentDate: this.nextPaymentDate,
+							billingInfo: this.billingInfo,
+							paypalPaymentToken: paypalData.paypalPaymentToken,
+							startDate
+						});
 
-					return invoice.save().then(() => paypalData);
+						return invoice.save().then(() => paypalData);
+					} else {
+						return paypalData;
+					}
 				});
 			}
 		});
@@ -264,11 +276,8 @@
 		
 		return Invoice.findByPaypalPaymentToken(user, this.paypalPaymentToken).then(invoice => {
 
-			if(!invoice){
 
-				return Promise.reject(responseCodes.MISSING_INIT_INVOICE);
-
-			} else if(invoice.state === C.INV_PENDING && invoice.billingAgreementId){
+			if(invoice && invoice.state === C.INV_PENDING && invoice.billingAgreementId){
 
 				//stop exeing the agreement if already done before
 				console.log('execed before');
@@ -283,9 +292,9 @@
 					//cancel old subscription, if any
 					if(this.billingAgreementId && this.billingAgreementId !== billingAgreement.id){
 						return Paypal.cancelOldAgreement(this.billingAgreementId);
-					} else {
-						return Promise.resolve();
 					}
+
+					return Promise.resolve();
 
 				}).then(() => {
 
@@ -297,6 +306,15 @@
 					// assign first licence to billing user if there is none
 					this.subscriptions.assignFirstLicenceToBillingUser();
 
+					if(new Date(billingAgreement.start_date) > getImmediatePaymentStartDate().toDate()){
+						// we are done here if the billing agreement start later
+						return Promise.resolve();
+					}
+
+					if(!invoice){
+						return Promise.reject(responseCodes.MISSING_INIT_INVOICE);
+					}
+
 					// pre activate
 					// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 					// IPN message should come quickly after executing an agreement, usually less then a minute
@@ -304,17 +322,17 @@
 					this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
 
 					//generate an unique invoice id
-					return Counter.findAndIncInvoiceNumber();
+					return Counter.findAndIncInvoiceNumber().then(invoiceNo => {
+						// change invoice state
+						invoice.changeState(C.INV_PENDING, {
+							billingAgreementId: this.billingAgreementId,
+							invoiceNo,
+							gateway: 'PAYPAL'
+						})
+
+						return invoice.save();
+					});
 					
-				}).then(invoiceNo => {
-
-					invoice.changeState(C.INV_PENDING, {
-						billingAgreementId: this.billingAgreementId,
-						invoiceNo,
-						gateway: 'PAYPAL'
-					})
-
-					return invoice.save();
 				});
 			}
 		});

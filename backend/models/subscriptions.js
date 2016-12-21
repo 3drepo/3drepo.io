@@ -63,7 +63,7 @@
 
 		// continue the remove process if removeCount still smaller than the desired removeNumber
 		// all unassigned licences have been removed previously, now looking for assigned licences to remove
-		// but assigned licences can only be removed if assignedUser === this.customData.billingUser
+		// but assigned licences can only be removed if assignedUser === this.billingUser
 
 		if (removeCount < removeNumber &&
 			this.getActiveSubscriptions({ excludeNotInAgreement: true })
@@ -71,7 +71,7 @@
 			.length === removeNumber) {
 
 			let subs = this.getActiveSubscriptions({ excludeNotInAgreement: true })
-				.filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+				.filter(sub => sub.plan === plan.plan && sub.assignedUser === this.billingUser);
 
 			for (let i = 0; i < subs.length && removeCount < removeNumber; i++) {
 				subs[i].pendingDelete = true;
@@ -121,7 +121,8 @@
 		for(let i=this.subscriptions.length - 1; i>=0; i--){
 			let sub = this.subscriptions[i];
 			if(sub.pendingDelete){
-				this.subscriptions.splice(i, 1);
+				sub.pendingDelete = undefined;
+				sub.inCurrentAgreement = false;
 			}
 		}
 	}
