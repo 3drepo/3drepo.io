@@ -66,7 +66,8 @@
 		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
 		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
-		pdf: Object
+		pdf: Object,
+		paypalPaymentToken: String
 	});
 
 	schema.virtual("taxPercentage").get(function() {
@@ -78,6 +79,7 @@
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
 		this.info = data.billingInfo;
+		this.paypalPaymentToken = data.paypalPaymentToken;
 
 		let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
 
@@ -120,11 +122,25 @@
 		});
 		
 	}
+
+	schema.methods.changeState = function(state, data){
+
+		this.state = state;
+		data.invoiceNo && (this.invoiceNo = data.invoiceNo);
+		data.billingAgreementId && (this.billingAgreementId = data.billingAgreementId);
+		data.gateway && (this.gateway = data.gateway);
+		data.raw && (this.raw = data.raw);
+		data.transactionId && (this.transactionId = data.transactionId);
+
+	}
 	
 	schema.statics.findByAccount = function (account) {
 		return this.find({ account }, {}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
 	
+	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
+		return this.findOne({ account }, { paypalPaymentToken }, { raw: 0, pdf: 0});
+	}
 
 	schema.statics.findByAgreementId = function(account, billingAgreementId) {
 		return this.find({ account }, { billingAgreementId }, { raw: 0, pdf: 0});

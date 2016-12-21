@@ -28,6 +28,8 @@
 	const C = require("../constants");
 	const Paypal = require("./paypal.js");
 	const Invoice = require("./invoice.js");
+	const responseCodes = require("../response_codes.js");
+	const Counter = require("./counter");
 
 	let getSubscription = Subscription.getSubscription;
 
@@ -187,7 +189,7 @@
 
 	};
 
-	billingSchema.methods.buySubscriptions = function (plans, billingUser, billingAddress) {
+	billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
 		// User want to buy new subscriptions.
 		
 
@@ -226,30 +228,98 @@
 				changes = data.changesWithPriceAdded;
 
 				//init date for 1st/'new' payments
-				if (changes.proRataPeriodPlans.length === 0){
+				if (changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence()){
+					console.log('new payments');
 					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 				}
 
-				// create invoice with init state
-				let invoice = Invoice.createInstance({ account: billingUser });
-				invoice.initInvoice({ 
-					changes, 
-					payments: data.payments,
-					nextPaymentDate: this.nextPaymentDate,
-					billingInfo: this.billingInfo,
-					startDate
+				// Once we have calculated a set of payments send them
+				return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
+					//save the payment token to user billing info
+					this.paypalPaymentToken = paypalData.paypalPaymentToken;
+
+					// create invoice with init state
+					let invoice = Invoice.createInstance({ account: user });
+
+					invoice.initInvoice({ 
+						changes, 
+						payments: data.payments,
+						nextPaymentDate: this.nextPaymentDate,
+						billingInfo: this.billingInfo,
+						paypalPaymentToken: paypalData.paypalPaymentToken,
+						startDate
+					});
+
+					return invoice.save().then(() => paypalData);
 				});
-
-				//save this invoice first
-				return invoice.save().then(() => {
-					// Once we have calculated a set of payments send them
-					return Paypal.processPayments(this, data.payments, data.paymentDate);
-
-				});
-
 			}
 		});
+	};
+
+	billingSchema.methods.executeBillingAgreement = function(user){
+
+		let billingAgreement;
+
+		
+		return Invoice.findByPaypalPaymentToken(user, this.paypalPaymentToken).then(invoice => {
+
+			if(!invoice){
+
+				return Promise.reject(responseCodes.MISSING_INIT_INVOICE);
+
+			} else if(invoice.state === C.INV_PENDING && invoice.billingAgreementId){
+
+				//stop exeing the agreement if already done before
+				console.log('execed before');
+				return Promise.resolve();
+
+			} else {
+
+				//exec the agreement
+				return Paypal.executeAgreement(this.paypalPaymentToken).then(_billingAgreement => {
+
+					billingAgreement = _billingAgreement;
+					//cancel old subscription, if any
+					if(this.billingAgreementId && this.billingAgreementId !== billingAgreement.id){
+						return Paypal.cancelOldAgreement(this.billingAgreementId);
+					} else {
+						return Promise.resolve();
+					}
+
+				}).then(() => {
+
+					this.billingAgreementId = billingAgreement.id;
+					
+					// remove pending delete subscriptions
+					this.subscriptions.removePendingDeleteSubscription();
+
+					// assign first licence to billing user if there is none
+					this.subscriptions.assignFirstLicenceToBillingUser();
+
+					// pre activate
+					// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
+					// IPN message should come quickly after executing an agreement, usually less then a minute
+					let twoDayLater = moment().utc().add(48, 'hour').toDate();
+					this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
+
+					//generate an unique invoice id
+					return Counter.findAndIncInvoiceNumber();
+					
+				}).then(invoiceNo => {
+
+					invoice.changeState(C.INV_PENDING, {
+						billingAgreementId: this.billingAgreementId,
+						invoiceNo,
+						gateway: 'PAYPAL'
+					})
+
+					return invoice.save();
+				});
+			}
+		});
+
+
 	};
 
 	module.exports = billingSchema;

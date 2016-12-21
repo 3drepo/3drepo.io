@@ -118,7 +118,7 @@
 		// 	this.subscriptions.remove(id);
 		// });
 
-		for(let i=this.subscriptions.length - 1; i>=0; i++){
+		for(let i=this.subscriptions.length - 1; i>=0; i--){
 			let sub = this.subscriptions[i];
 			if(sub.pendingDelete){
 				this.subscriptions.splice(i, 1);
@@ -139,6 +139,16 @@
 		});
 	};
 
+	Subscriptions.prototype.getAllInAgreementSubscriptions = function () {
+
+		return this.subscriptions.filter(sub => {
+			let basicCond = sub.plan !== Subscription.getBasicPlan();
+			let inCurrentAgreementCond =sub.inCurrentAgreement;
+
+			return basicCond && inCurrentAgreementCond;
+		});
+	};
+
 	Subscriptions.prototype.hasBoughtLicence = function () {
 		return (this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
 			.length !== 0);
@@ -156,7 +166,7 @@
 		//console.log(ids);
 		//ids.forEach(id => { this.subscriptions.remove(id); });
 
-		for(let i = this.subscriptions.length - 1; i >= 0; i --){
+		for(let i = this.subscriptions.length - 1; i >= 0; i--){
 			let sub = this.subscriptions[i];
 			let expired = !sub.active || (sub.expiredAt && sub.expiredAt < this.now);
 
@@ -243,10 +253,43 @@
 
 	}
 
-	Subscriptions.prototype.activateSubscription = function () {
+	Subscriptions.prototype.activateSubscriptions = function() {
 		// Activate a created subscription
 
 	};
+
+
+	Subscriptions.prototype.renewSubscriptions = function(newDate, options) {
+		// Activate or renew a created subscription
+		options = options || {};
+
+		let subscriptions = this.getAllInAgreementSubscriptions();
+		console.log('renewSubscriptions', subscriptions);
+		subscriptions.forEach(subscription => {
+			if(!subscription.expiredAt || subscription.expiredAt < newDate){
+				console.log('subscription', subscription);
+				subscription.active = true;
+				subscription.expiredAt = newDate;
+				// assignLimits = true when executing agreement for 1st time, and thereafter they stick with the limits they have
+				options.assignLimits && (subscription.limits = Subscription.getSubscription(subscription.plan).limits);
+			}
+		});
+	};
+
+	Subscriptions.prototype.assignFirstLicenceToBillingUser = function(){
+
+		let subscriptions = this.getActiveSubscriptions({ skipBasic: true });
+
+		if(!subscriptions.find(sub => sub.assignedUser === this.billingUser)){
+			
+			for(let i=0; i < subscriptions.length; i++){
+				if(!subscriptions[i].assignedUser){
+					subscriptions[i].assignedUser = this.billingUser;
+					break;
+				}
+			}
+		}
+	}
 
 	module.exports = Subscriptions;
 

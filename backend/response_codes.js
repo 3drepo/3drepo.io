@@ -192,6 +192,7 @@
 
 		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
 		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
+		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500},
 	};
 
 

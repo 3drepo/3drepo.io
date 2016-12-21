@@ -119,7 +119,7 @@ schema.statics.findByEmail = function(email){
 };
 
 schema.statics.findByPaypalPaymentToken = function(token){
-	return this.findOne({account: 'admin'}, { 'customData.paypalPaymentToken': token });
+	return this.findOne({account: 'admin'}, { 'customData.billing.paypalPaymentToken': token });
 };
 
 schema.statics.isEmailTaken = function(email, exceptUser){
@@ -691,7 +691,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	plans = plans || [];
 	//console.log(this.customData);
 	
-	return this.customData.billing.buySubscriptions(plans, billingUser, billingAddress).then(_billingAgreement => {
+	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress).then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;
 		return this.save();
@@ -892,143 +892,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 };
 
-schema.methods.executeBillingAgreement = function(token, billingAgreementId, billingAgreement){
+schema.methods.executeBillingAgreement = function(){
 	'use strict';
-
-	this.customData.paypalPaymentToken = token;
-	this.customData.billingAgreementId = billingAgreementId;
-
-	let assignedBillingUser = false;
-	let items = [];
-
-	this.customData.subscriptions.forEach(subscription => {
-
-		if(subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement){
-			return;
-		}
-
-		if(subscription.assignedUser === this.customData.billingUser){
-			assignedBillingUser = true;
-		}
-
-		//subscription.inCurrentAgreement = true;
-
-		if(!subscription.active){
-
-			items.push({
-				name: subscription.plan,
-				description: getSubscription(subscription.plan).description,
-				currency: getSubscription(subscription.plan).currency,
-			});
-		}
-		// pre activate
-		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
-		// IPN message should come quickly after executing an agreement, usually less then a minute
-		let twoDayLater = moment().utc().add(48, 'hour').toDate();
-		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
-			subscription.active = true;
-			//subscription.newPurchased = true;
-			subscription.expiredAt = twoDayLater;
-			subscription.limits = getSubscription(subscription.plan).limits;
-		}
-
+	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
+		return this.save();
 	});
-
-
-	//clear pending delete subscriptions
-	let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-
-	ids.forEach(id => {
-		this.customData.subscriptions.remove(id);
-	});
-
-	if(!assignedBillingUser){
-
-		let subscriptions = this.customData.subscriptions;
-
-		for(let i=0; i < subscriptions.length; i++){
-
-			if(subscriptions[i].plan !== Subscription.getBasicPlan().plan && !subscriptions[i].assignedUser){
-				subscriptions[i].assignedUser = this.customData.billingUser;
-				break;
-			}
-		}
-	}
-
-	// create pending bill
-
-	if(items.length > 0){
-
-
-		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
-		let nextAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
-
-		let paymentInfo = {
-			currency: billAmount.amount.currency,
-			taxAmount: parseFloat(billAmount.charge_models.find(model => model.type === 'TAX').amount.value)
-		};
-
-		paymentInfo.amount = parseFloat(billAmount.amount.value) + paymentInfo.taxAmount;
-		paymentInfo.nextAmount = parseFloat(nextAmount.amount.value) + parseFloat(nextAmount.charge_models.find(model => model.type === 'TAX').amount.value);
-		paymentInfo.nextAmount = Math.round(paymentInfo.nextAmount * 100) / 100;
-
-		items.forEach(item => {
-			item.amount = Math.round(paymentInfo.amount / items.length * 100) / 100;
-			item.taxAmount = Math.round(paymentInfo.taxAmount / items.length * 100) / 100;
-		});
-
-		let billing = Billing.createInstance({ account: this.user });
-
-		return Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
-
-			if(hasBill){
-				return Promise.resolve();
-			} else {
-				return Counter.findAndIncInvoiceNumber().then(counter => {
-					return Promise.resolve('SO-' + counter.count);
-				});
-			}
-
-		}).then(invoiceNo => {
-
-			if(invoiceNo){
-
-				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-
-				billing.gateway = 'PAYPAL';
-				billing.createdAt = new Date();
-				billing.currency = paymentInfo.currency;
-				billing.amount = paymentInfo.amount;
-				billing.billingAgreementId = billingAgreementId;
-				billing.items = items;
-				billing.nextPaymentDate = nextPaymentDate;
-				billing.taxAmount = paymentInfo.taxAmount;
-				billing.nextPaymentAmount = paymentInfo.nextAmount;
-				billing.invoiceNo = invoiceNo;
-				billing.pending = true;
-
-				//copy current billing info from user to billing
-				billing.info = this.customData.billingInfo;
-
-				billing.periodStart = moment().utc().toDate();
-				billing.periodEnd = nextPaymentDate
-					.utc()
-					.subtract(1, 'day')
-					.endOf('date')
-					.toDate();
-
-				return billing.save();
-			}
-
-		});
-
-	} else {
-		return Promise.resolve();
-	}
-
-
-
-
 };
 
 schema.methods.haveActiveSubscriptions = function(){

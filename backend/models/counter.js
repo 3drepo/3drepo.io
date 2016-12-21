@@ -37,7 +37,7 @@ schema.statics.findAndIncInvoiceNumber = function(){
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
 			).then(doc => {
-				resolve(doc.value);
+				resolve('SO-' + doc.value.count);
 			}).catch(err => {
 				reject(err);
 			});
@@ -65,7 +65,7 @@ schema.statics.findAndIncRefundNumber = function(){
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
 			).then(doc => {
-				resolve(doc.value);
+				resolve('CN-' + doc.value.count);
 			}).catch(err => {
 				reject(err);
 			});

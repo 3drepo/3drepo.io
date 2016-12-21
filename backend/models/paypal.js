@@ -25,6 +25,7 @@
 	const url = require("url");
 	const C = require("../constants");
 	const systemLogger = require("../logger.js").systemLogger;
+	const config = require('../config');
 
 	let updateBillingAddress = function (billingAgreementId, billingAddress) {
 		const paypalAddress = paypalTrans.getPaypalAddress(billingAddress);
@@ -171,12 +172,6 @@
 						let token = url.parse(link.href, true)
 							.query.token;
 
-						console.log('resolve data', {
-							url: link.href,
-							paypalPaymentToken: token,
-							agreement: billingAgreement
-						});
-
 						resolve({
 							url: link.href,
 							paypalPaymentToken: token,
@@ -200,12 +195,35 @@
 		//cancelOldAgreement(this).then(function() {
 			return createBillingAgreement(billing, payments, paymentDate);
 		//});
-	};	
+	};
+
+	let executeAgreement = function(token){
+
+		return new Promise((resolve, reject) => {
+			paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
+
+				//console.log(billingAgreement);
+				if (err) {
+					reject(err);
+				} else if(
+					(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) || 
+					['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
+				){
+					reject(responseCodes.EXECUTE_AGREEMENT_ERROR);
+
+				} else {
+					console.log('billingAgreement', billingAgreement);
+					resolve(billingAgreement);
+				}
+			});
+		});
+	}
 
 	module.exports = {
 		updateBillingAddress: updateBillingAddress,
 		processPayments: processPayments,
-		cancelOldAgreement: cancelOldAgreement
+		cancelOldAgreement: cancelOldAgreement,
+		executeAgreement: executeAgreement
 	};
 
 })();

@@ -26,61 +26,17 @@ function executeAgreement(req, res, next){
 
 	// execute payment, update billingAgreementId
 	let token = req.body.token;
-	let dbUser;
 
-
-	User.findByPaypalPaymentToken(token).then(_dbUser => {
-
-		dbUser = _dbUser;
-
+	User.findByPaypalPaymentToken(token).then(dbUser => {
 		// important to check there is a user/ghost with this token before executing the agreement
 		if(!dbUser){
-			return Promise.reject({resCode: responseCodes.PAYMENT_TOKEN_ERROR});
+			return Promise.reject(responseCodes.PAYMENT_TOKEN_ERROR);
 		} else {
-			return new Promise((resolve, reject) => {
-				paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
-
-					//console.log(billingAgreement);
-
-					if (err) {
-						reject(err);
-					} else if(
-						(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) || 
-						['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
-					){
-						reject({ resCode: responseCodes.EXECUTE_AGREEMENT_ERROR });
-
-					} else {
-
-						if(dbUser.customData.billingAgreementId && dbUser.customData.billingAgreementId !== billingAgreement.id){
-							//cancel the old agreement, if any
-							var cancel_note = {
-								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
-							};
-
-							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err) {
-								if (err) {
-									req[C.REQ_REPO].logger.logError(JSON.stringify(err));
-								} else {
-									req[C.REQ_REPO].logger.logInfo("Old billing agreement canceled successfully", { billingAgreementId: dbUser.customData.billingAgreementId});
-								}
-							});
-						}
-
-						dbUser.executeBillingAgreement(token, billingAgreement.id, billingAgreement).then(() => {
-							resolve();
-						}).catch( err => {
-							reject(err);
-						});
-						
-					}
-				});
-			});
+			return dbUser.executeBillingAgreement();
 		}
+		
 	}).then(() => {
-		return dbUser.save();
-	}).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { });
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
