@@ -228,7 +228,9 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
+				//console.log('owner', self.data.owner);
+				//console.log('account', self.account);
+				if (/*self.data.owner === self.account*/ true) {
 					if ((this.data.priority !== this.issueData.priority) ||
 						(this.data.status !== this.issueData.status) ||
 						(this.data.topic_type !== this.issueData.topic_type)) {
