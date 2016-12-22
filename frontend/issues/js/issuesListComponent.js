@@ -195,7 +195,7 @@
 					});
 				}
 				setupIssuesToShow();
-				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+				//self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
 			}
 
