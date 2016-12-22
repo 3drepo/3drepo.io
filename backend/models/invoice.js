@@ -165,6 +165,10 @@
 			});
 	};
 
+	schema.statics.findPendingInvoice = function(account, billingAgreementId){
+		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
+	};
+
 	schema.statics.findAndRemovePendingBill = function (account, billingAgreementId) {
 		return this.findOne({ account }, { billingAgreementId: billingAgreementId, pending: true })
 			.then(billing => {

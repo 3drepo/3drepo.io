@@ -67,8 +67,7 @@
 		paypalPaymentToken: String,
 		billingUser: String,
 		lastAnniversaryDate: Date,
-		nextPaymentDate: Date,
-		firstNextPaymentDate: Date
+		nextPaymentDate: Date
 	});
 
 	let bills = [];
@@ -339,6 +338,78 @@
 
 
 	};
+
+	billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
+
+		let pendingInvoice;
+
+		if(this.nextPaymentDate > paymentInfo.nextPaymentDate){
+			return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
+		}
+
+		return Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
+			if(invoice){
+				return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
+			}
+
+			return Role.createRole(user, null, C.ADMIN_TEMPLATE);
+
+		}).then(role => {
+
+			return Role.grantRolesToUser(this.billingUser, [role]);
+
+		}).then(() => {
+			this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
+
+			// set to to next 3rd of next month, give 3 days cushion
+			let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+				.add(3, 'day')
+				.hours(0).minutes(0).seconds(0).milliseconds(0)
+				.toDate();
+
+			this.subscriptions.renewSubscriptions(expiredAt);
+
+			Invoice.findPendingInvoice(user, this.billingAgreementId);
+		
+		}).then(invoice => {
+			
+			pendingInvoice = invoice;
+			
+			if(!pendingInvoice){
+				return Counter.findAndIncInvoiceNumber()
+			}
+
+		}).then(invoiceNo => {
+
+			if(pendingInvoice){
+
+			} else {
+
+				billing.periodStart = this.lastAnniversaryDate;
+				billing.periodEnd = moment(this.nextPaymentDate)
+					.utc()
+					.subtract(1, 'day')
+					.endOf('date')
+					.toDate();
+				billing.createdAt = new Date();
+				billing.info = this.billingInfo;
+			}
+
+			billing.raw = raw;
+			billing.gateway = paymentInfo.gateway;
+			billing.currency = paymentInfo.currency;
+			billing.amount = paymentInfo.amount;
+			billing.billingAgreementId = billingAgreementId;
+			billing.items = items;
+			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+			billing.taxAmount = paymentInfo.taxAmount;
+			billing.nextPaymentAmount = paymentInfo.nextAmount;
+			billing.invoiceNo = invoiceNo;
+			billing.transactionId = paymentInfo.transactionId;
+
+			return billing.save();
+
+		});
 
 	module.exports = billingSchema;
 
