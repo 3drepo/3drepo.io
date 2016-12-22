@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.6.7";
+	const VERSION="1.6.8";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
