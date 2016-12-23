@@ -23,7 +23,6 @@ var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
-var Billing = require('./billing');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
@@ -60,7 +59,7 @@ var schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: userBilling,
+		billing: { type: userBilling, default: {} },
 		avatar: Object
 	},
 	roles: [{}]
@@ -134,18 +133,9 @@ schema.statics.isEmailTaken = function(email, exceptUser){
 	return this.count({account: 'admin'}, query);
 };
 
-// schema.statics.findBillingUserByToken = function(token){
-// 	return this.findSubscriptionByToken(null, token).then(subscription => {
-// 		if(subscription){
-// 			return this.findByUserName(subscription.billingUser);
-// 		}
-
-// 		return Promise.resolve();
-// 	});
-// };
 
 schema.statics.findBillingUserByBillingId = function(billingAgreementId){
-	return this.findOne({account: 'admin'}, { 'customData.billingAgreementId': billingAgreementId });
+	return this.findOne({account: 'admin'}, { 'customData.billing.billingAgreementId': billingAgreementId });
 };
 
 
@@ -497,7 +487,8 @@ schema.methods.listAccounts = function(){
 			getQuotaPromises.push(
 				User.findByUserName(account.account).then(user => {
 					if(user){
-						account.quota = user.getSubscriptionLimits();
+						account.quota = user.customData.billing.subscriptions.getSubscriptionLimits();
+						console.log(account.quota );
 						return User.historyChunksStats(account.account);
 					}
 
@@ -704,11 +695,10 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw, disableEmail){
 	'use strict';
 
-	let query = {'customData.billingAgreementId': billingAgreementId};
-	let account;
+
 	let dbUser;
 
-	return this.findOne({account: 'admin'}, query).then(user => {
+	return this.findBillingUserByBillingId(billingAgreementId).then(user => {
 
 		dbUser = user;
 
@@ -716,178 +706,12 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
-		if(dbUser.customData.nextPaymentDate > paymentInfo.nextPaymentDate){
-			return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
-		}
-
-
-		account = dbUser.user;
-
-		return Billing.findByTransactionId(account, paymentInfo.transactionId);
-
-	}).then(billing => {
-
-		if(billing){
-			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
-		}
-
-		return Role.createRole(account, null, C.ADMIN_TEMPLATE);
-
-	}).then(role => {
-
-		return Role.grantRolesToUser(dbUser.customData.billingUser, [role]);
+		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
 
 	}).then(() => {
-
-		let items = [];
-
-		if(dbUser.customData.nextPaymentDate && moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString()){
-			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
-		}
-
-		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
-
-		// set to to next 3rd of next month, give 3 days cushion
-		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
-			.add(3, 'day')
-			.hours(0).minutes(0).seconds(0).milliseconds(0)
-			.toDate();
-
-		let newPurchaseCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement && (!sub.expiredAt || sub.expiredAt < expiredAt)).length;
-
-		dbUser.customData.subscriptions.forEach(subscription => {
-
-			if(subscription.inCurrentAgreement){
-
-				subscription.limits = getSubscription(subscription.plan).limits;
-
-				if(!subscription.expiredAt || subscription.expiredAt < expiredAt){
-					subscription.expiredAt = expiredAt;
-					//subscription.active = true;
-
-					items.push({
-						name: subscription.plan,
-						description: getSubscription(subscription.plan).description,
-						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(paymentInfo.amount / newPurchaseCount * 100) / 100,
-						taxAmount: Math.round(paymentInfo.taxAmount / newPurchaseCount * 100) / 100
-					});
-				}
-
-			}
-
-		});
-
-		let createBill = Promise.resolve();
-
-		if(paymentInfo.createBilling){
-
-			let billing = Billing.createInstance({ account });
-			let pendingBill;
-
-			createBill = Billing.findAndRemovePendingBill(account, billingAgreementId).then(_pendingBill => {
-
-				pendingBill = _pendingBill;
-				if(pendingBill){
-					return Promise.resolve(pendingBill.invoiceNo);
-				} else {
-					return Counter.findAndIncInvoiceNumber().then(counter => {
-						return Promise.resolve('SO-' + counter.count);
-					});
-				}
-
-			}).then(invoiceNo => {
-
-				billing.raw = raw;
-				billing.gateway = paymentInfo.gateway;
-				billing.createdAt = pendingBill.createdAt;
-				billing.currency = paymentInfo.currency;
-				billing.amount = paymentInfo.amount;
-				billing.billingAgreementId = billingAgreementId;
-				billing.items = pendingBill.items;
-				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
-				billing.taxAmount = paymentInfo.taxAmount;
-				billing.nextPaymentAmount = paymentInfo.nextAmount;
-				billing.invoiceNo = invoiceNo;
-				billing.transactionId = paymentInfo.transactionId;
-
-				//copy current billing info from user to billing
-				billing.info = pendingBill.info;
-
-				billing.periodStart = pendingBill.periodStart;
-				billing.periodEnd = pendingBill.periodEnd;
-
-				return billing.save();
-			});
-
-		}
-
-
-		if(!disableEmail){
-
-
-			createBill.then(billing => {
-
-				if(billing){
-					return billing.generatePDF().then(pdf => {
-
-						billing.pdf = pdf;
-						// also save the pdf to database for ref.
-						return billing.save();
-
-					});
-				}
-
-			}).then(billing => {
-
-				let attachments;
-
-				if(billing && billing.pdf){
-					attachments = [{
-						filename: `${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_invoice-${billing.invoiceNo}.pdf`,
-						content: billing.pdf
-					}];
-				}
-
-				//send invoice
-				let amount = paymentInfo.amount;
-				let currency = paymentInfo.currency;
-				if(currency === 'GBP'){
-					currency = '£';
-				}
-
-				return User.findByUserName(dbUser.customData.billingUser).then(user => {
-
-					//make a copy to sales
-
-					Mailer.sendPaymentReceivedEmailToSales({
-						account: account,
-						amount: currency + amount,
-						email: user.customData.email,
-						invoiceNo: billing.invoiceNo
-					}, attachments);
-
-					return Mailer.sendPaymentReceivedEmail(user.customData.email, {
-						account: account,
-						amount: currency + amount
-					}, attachments);
-				});
-
-
-			}).catch(err => {
-				console.log(err.stack);
-				systemLogger.logError(`Email error - ${err.message}`);
-			});
-
-
-		}
-
-		return dbUser.save().then(() => {
-			return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account, payment: paymentInfo});
-		});
-
-
-
+		return dbUser.save();
+	}).then(() => {
+		return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account: dbUser, payment: paymentInfo});
 	});
 
 };
@@ -898,66 +722,6 @@ schema.methods.executeBillingAgreement = function(){
 		return this.save();
 	});
 };
-
-schema.methods.haveActiveSubscriptions = function(){
-	return this.getActiveSubscriptions().length > 0;
-};
-
-
-
-schema.methods.getSubscriptionLimits = function(options){
-	'use strict';
-
-	let subscriptions = this.getActiveSubscriptions(options);
-
-	let sumLimits = {
-		spaceLimit: 0,
-		collaboratorLimit: 0
-	};
-
-	//console.log(subscriptions);
-
-	subscriptions.forEach(sub => {
-		sumLimits.spaceLimit += sub.limits.spaceLimit;
-		sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
-	});
-
-	return sumLimits;
-};
-
-
-
-schema.statics.findSubscriptionByToken = function(billingUser, token){
-	'use strict';
-
-	let query = {
-		'customData.subscriptions.token': token
-	};
-
-	let subscription;
-
-	if(billingUser){
-		query['customData.subscriptions.billingUser'] = billingUser;
-	}
-
-	return this.findOne({account: 'admin'}, query, {
-		'customData.subscriptions.$': 1,
-		'user': 1
-	}).then( dbUser => {
-
-		subscription = dbUser.customData.subscriptions[0].toObject();
-		subscription.account = dbUser.user;
-
-		return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
-
-	}).then(payments => {
-
-		subscription.payments = payments;
-		return subscription;
-
-	});
-};
-
 
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';

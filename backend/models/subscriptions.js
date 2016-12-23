@@ -151,8 +151,11 @@
 	};
 
 	Subscriptions.prototype.hasBoughtLicence = function () {
-		return (this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-			.length !== 0);
+		return this.getBoughtLicenes().length !== 0;
+	};
+
+	Subscriptions.prototype.getBoughtLicenes = function(){
+		return this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true });
 	};
 
 	Subscriptions.prototype.changeSubscriptions = function (plans) {
@@ -179,8 +182,7 @@
 		console.log('after remove', this.subscriptions.length);
 
 		// Compute the current set of plans for the subscriptions
-		this.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-			.forEach(subscription => {
+		this.getBoughtLicenes().forEach(subscription => {
 				// Clean old flag
 				subscription.pendingDelete = undefined;
 				this.currentPlanCount[subscription.plan]  = (this.currentPlanCount[subscription.plan] + 1) || 1;
@@ -243,9 +245,8 @@
 			collaboratorLimit: 0
 		};
 
-		//console.log(subscriptions);
-
 		subscriptions.forEach(sub => {
+			console.log('sub', sub)
 			sumLimits.spaceLimit += sub.limits.spaceLimit;
 			sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
 		});

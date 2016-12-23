@@ -43,11 +43,18 @@
 
 	billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
 		
+		this.changed = false;
+
 		Object.keys(billingAddress).forEach(key => {
 			if(key !== 'vat'){
-				this[key] = billingAddress[key];
+				if (this[key] !== billingAddress[key]) {
+					this.changed = true;
+				}
+
+				this.set(key, billingAddress[key]);
 			}
 		});
+
 
 		if(billingAddress.vat){
 			return this.changeVATNumber(billingAddress.vat);
@@ -57,6 +64,10 @@
 	};
 
 	billingAddressSchema.methods.changeVATNumber = function(vatCode){
+
+		if(this.vat !== vatCode){
+			this.changed = true;
+		}
 
 		this.vat = vatCode;
 
@@ -83,6 +94,10 @@
 			}
 		});
 	};
+
+	billingAddressSchema.methods.isChanged = function(){
+		return this.changed;
+	}
 
 	module.exports = billingAddressSchema;
 

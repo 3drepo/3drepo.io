@@ -38,26 +38,36 @@
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
-	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); }
-	let dateToString = function(date) { return date; }
+	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); };
+	let roundTo3DP = function(x) { return utils.roundToNDP(x, 3.0); };
+	let dateToString = function(date) { return moment(date).utc().format('YYYY-MM-DD'); };
+	let dateToDateTimeString = function(date) { return moment(date).utc().format('DD-MM-YYYY HH:mm'); };
+
 	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
+	let itemSchema = mongoose.Schema({
+		name: String,
+		currency: String,
+		amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
+		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP }
+	});
+
+	itemSchema.virtual('description').get(function(){
+		return Subscription.getSubscription(this.name).description;
+	});
+
+	itemSchema.set('toJSON', { virtuals: true, getters:true });
+	
 	let schema = mongoose.Schema({
 		invoiceNo: String,
 		billingAgreementId: String,
 		gateway: String,
 		raw: {},
-		createdAt: { type: Date } ,
+		createdAt: { type: Date, get: dateToDateTimeString } ,
 		currency: String,
-		amount: Number, //gross+tax
+		amount: SchemaTypes.Double, //gross+tax
 		type: { type: String, default: "invoice", enum: ["invoice", "refund"] },
-		items: [{
-			name: String,
-			description: String,
-			currency: String,
-			amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
-			taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP }
-		}],
+		items: [itemSchema],
 		periodStart: { type: Date, get: dateToString },
 		periodEnd: { type: Date, get: dateToString },
 		nextPaymentDate:  { type: Date, get: dateToString },
@@ -70,28 +80,95 @@
 		paypalPaymentToken: String
 	});
 
+	schema.virtual("netAmount").get(function() {
+		return this.amount - this.taxAmount;
+	});
+
 	schema.virtual("taxPercentage").get(function() {
-		return this.taxAmount / this.netAmount;
+		return roundTo2DP(this.taxAmount / this.netAmount);
+	});
+
+	schema.virtual('info.countryName').get(function(){
+		let country = addressMeta.countries.find(c => c.code === this.info.countryCode);
+		return country && country.name;
+	});
+
+	schema.virtual('B2B_EU').get(function(){
+		return (addressMeta.euCountriesCode.indexOf(this.info.countryCode) !== -1) && this.info.vat ? true : false;
+	});
+
+	//TO-DO: the current design of the invoice (invoice.jade) assume user only buy one type of products which is always true for now but not for the future
+	// remove unit price and change the layout of invoice and use price in the items array
+	schema.virtual('unitPrice').get(function(){
+
+		let unitPrice = roundTo3DP(this.netAmount / this.items.length).toFixed(3);
+		
+		if(unitPrice.substr(-1) === '0'){
+			unitPrice = unitPrice.slice(0, -1);
+		}
+
+		return unitPrice;
+	});
+
+	schema.virtual('pending').get(function(){
+		return this.state === C.INV_PENDING;
+	});
+
+	schema.virtual('proRata').get(function(){
+		if(this.items[0].amount.toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
+			return true;
+		}
+
+		return false;
+	});
+
+	//schema.set('toObject', { virtuals: true, getter:true });
+	schema.set('toJSON', { virtuals: true, getters:true });
+
+	schema.pre('save', function(next){
+		
+		if(!this.invoiceNo && this.state !== C.INV_INIT){
+			//generate invoice number if doesn't have one and passed the init state
+			Counter.findAndIncInvoiceNumber().then(invoiceNo => {
+				this.invoiceNo = invoiceNo;
+				next();
+			}).catch(err => {
+				next(err);
+			});
+
+		} else {
+			next();
+		}
+		
 	});
 
 	schema.methods.initInvoice = function(data){
 
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
+		console.log('init inv', data.billingInfo);
 		this.info = data.billingInfo;
 		this.paypalPaymentToken = data.paypalPaymentToken;
 
-		let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
+		if(data.payments){
 
-		if(proRataPayments.length > 0){
-			this.currency = proRataPayments[0].currency;
-			this.amount = proRataPayments.reduce((sum, payment) => sum + payment.net, 0);
-			this.taxAmount = proRataPayments.reduce((sum, payment) => sum + payment.tax, 0);
+			let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
+			let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
+
+			if(proRataPayments.length > 0){
+				this.currency = proRataPayments[0].currency;
+				this.amount = proRataPayments.reduce((sum, payment) => sum + payment.net, 0);
+				this.taxAmount = proRataPayments.reduce((sum, payment) => sum + payment.tax, 0);
+			} else {
+				this.currency = regularPayments[0].currency;
+				this.amount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
+				this.taxAmount = regularPayments.reduce((sum, payment) => sum + payment.tax, 0);
+			}
+
+
+			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
 		}
 
-		let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
-		this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
-	
 		this.periodStart = data.startDate
 		this.periodEnd = moment(this.nextPaymentDate)
 			.utc()
@@ -101,25 +178,44 @@
 
 		let plans = [];
 
-		// if there is any pro rata priced plans then there will be no regular priced plans in this invoice and vice versa.
-		if(data.changes.proRataPeriodPlans){
-			plans = data.changes.proRataPeriodPlans;	
-		} else if (data.changes.regularPeriodPlans){
-			plans = data.changes.regularPeriodPlans;
+		if(data.changes){
+			//init invoice items using data.changes
+			// if there is any pro rata priced plans then there will be no regular priced plans in this invoice and vice versa.
+
+			if(data.changes.proRataPeriodPlans.length > 0){
+				plans = data.changes.proRataPeriodPlans;	
+			} else if (data.changes.regularPeriodPlans){
+				plans = data.changes.regularPeriodPlans;
+			}
+
+			// add items bought in the invoice
+			plans.forEach(plan => {
+				for(let i=0 ; i< plan.quantity; i++){
+					this.items.push({
+						name: Subscription.getSubscription(plan.plan).plan,
+						description: Subscription.getSubscription(plan.plan).desc,
+						currency: Subscription.getSubscription(plan.plan).currency,
+						amount: plan.amount,  //gross+tax
+						taxAmount: plan.taxAmount
+					});
+				}
+			});
+
+			return this;
+
+		} else if (data.billingAgreementId) {
+			//init items using last invoice with same billing id
+
+			this.billingAgreementId = data.billingAgreementId;
+			//copy items from last completed invoice with same agreement id
+			return Invoice.findLatestCompleteByAgreementId(data.account, data.billingAgreementId).then(lastGoodInvoice => {
+				if(!lastGoodInvoice){
+					return Promise.reject({ message: 'Missing last invoice'});
+				}
+				this.items = lastGoodInvoice.items
+			}).then(() => this);
 		}
 
-		// add items bought in the invoice
-		plans.forEach(plan => {
-			for(let i=0 ; i< plan.quantity; i++){
-				this.items.push({
-					name: Subscription.getSubscription(plan.plan).plan,
-					description: Subscription.getSubscription(plan.plan).desc,
-					currency: Subscription.getSubscription(plan.plan).currency,
-					amount: plan.amount,  //gross+tax
-					taxAmount: plan.taxAmount
-				});
-			}
-		});
 		
 	}
 
@@ -131,6 +227,11 @@
 		data.gateway && (this.gateway = data.gateway);
 		data.raw && (this.raw = data.raw);
 		data.transactionId && (this.transactionId = data.transactionId);
+		data.currency && (this.currency = data.currency);
+		data.amount && (this.amount = data.amount);
+		data.taxAmount && (this.taxAmount = data.taxAmount);
+		data.nextPaymentAmount && (this.nextPaymentAmount = data.nextPaymentAmount);
+		data.nextPaymentDate && (this.nextPaymentDate = data.nextPaymentDate);
 
 	}
 	
@@ -146,8 +247,8 @@
 		return this.find({ account }, { billingAgreementId }, { raw: 0, pdf: 0});
 	}
 
-	schema.statics.findLatestByAgreementId = function (account, billingAgreementId) {
-		return this.findOne({ account }, { billingAgreementId }, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
+	schema.statics.findLatestCompleteByAgreementId = function (account, billingAgreementId) {
+		return this.findOne({ account }, { billingAgreementId, state: C.INV_COMPLETE}, { raw: 0, pdf: 0 });
 	};
 
 	schema.statics.findByInvoiceNo = function (account, invoiceNo) {
@@ -166,6 +267,7 @@
 	};
 
 	schema.statics.findPendingInvoice = function(account, billingAgreementId){
+		console.log(account, { billingAgreementId, state: C.INV_PENDING });
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
 	};
 
@@ -185,7 +287,7 @@
 		let lastBill;
 		let billing;
 
-		return this.findLatestByAgreementId(user.user, data.billingAgreementId)
+		return this.findLatestCompleteByAgreementId(user.user, data.billingAgreementId)
 			.then(bill => {
 
 				lastBill = bill;
@@ -261,7 +363,7 @@
 	};
 
 	schema.methods.generatePDF = function () {
-		let cleaned = this.clean();
+		//let cleaned = this.clean();
 
 		let ph;
 		let page;
@@ -281,7 +383,7 @@
 					template = "./jade/refund.jade";
 				}
 
-				jade.renderFile(template, { billing: cleaned, baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
+				jade.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
 					if (err) {
 						reject(err);
 					} else {

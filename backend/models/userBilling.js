@@ -30,6 +30,8 @@
 	const Invoice = require("./invoice.js");
 	const responseCodes = require("../response_codes.js");
 	const Counter = require("./counter");
+	const Role = require('./role');
+	const Mailer = require('../mailer/mailer');
 
 	let getSubscription = Subscription.getSubscription;
 
@@ -59,9 +61,9 @@
 			type: [subscriptionSchema], 
 			get: function (subs) { 
 				return new Subscriptions(this.billingUser, this.billingInfo, subs); 
-			} 
+			}
 		},
-		billingInfo: { type: billingAddressInfo, default: {} },
+		billingInfo: { type: billingAddressInfo, default: billingAddressInfo  },
 		//global billing info
 		billingAgreementId: String,
 		paypalPaymentToken: String,
@@ -69,25 +71,6 @@
 		lastAnniversaryDate: Date,
 		nextPaymentDate: Date
 	});
-
-	let bills = [];
-
-	// billingSchema.virtual("bills").get(function () {
-	// 	if (!bills.length) {
-	// 		let billPromises = Billing.findByAgreementId(this.billingUser, this.billingAgreementId).then(bill => {
-	// 			return new Promise(function (resolve) {
-	// 				bills.push(bill);
-	// 				resolve();
-	// 			});
-	// 		});
-
-	// 		Promise.all(billPromises).then(function() {
-	// 			return bills;
-	// 		});
-	// 	} else {
-	// 		return bills;
-	// 	}
-	// });
 
 	// Wrapper for VAT calculation and payment information
 	let calTax = function(gross, countryCode, isBusiness){
@@ -143,6 +126,7 @@
 			changes.proRataPeriodPlans.forEach(plan => {
 				plan.amount = proRataFactor * getSubscription(plan.plan).amount;
 				plan.taxAmount = calTax(plan.amount, country, isBusiness);
+				plan.amount += plan.taxAmount;
 			});
 
 			payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
@@ -160,6 +144,7 @@
 		changes.regularPeriodPlans.forEach(plan => {
 			plan.amount = getSubscription(plan.plan).amount
 			plan.taxAmount = calTax(plan.amount, country, isBusiness);
+			plan.amount += plan.taxAmount;
 		});
 
 		payments.push(new Payment(C.REGULAR_PAYMENT, regularAmount, country, isBusiness, regularCycleLength));
@@ -205,11 +190,13 @@
 		this.billingUser = billingUser;
 
 		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
-
+			this.markModified('billingInfo');
+			console.log('ismod', this.billingInfo.isChanged());
 			return this.subscriptions.changeSubscriptions(plans);
 
 		}).then(changes => {
 
+			console.log('billinginfo', this.billingInfo);
 			console.log('**changes', changes);
 
 			if (!changes) {
@@ -240,6 +227,8 @@
 					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 				}
+
+				console.log('payments', data.payments);
 
 				// Once we have calculated a set of payments send them
 				return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
@@ -320,18 +309,15 @@
 					let twoDayLater = moment().utc().add(48, 'hour').toDate();
 					this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
 
-					//generate an unique invoice id
-					return Counter.findAndIncInvoiceNumber().then(invoiceNo => {
-						// change invoice state
-						invoice.changeState(C.INV_PENDING, {
-							billingAgreementId: this.billingAgreementId,
-							invoiceNo,
-							gateway: 'PAYPAL'
-						})
 
-						return invoice.save();
-					});
-					
+					// change invoice state
+					invoice.changeState(C.INV_PENDING, {
+						billingAgreementId: this.billingAgreementId,
+						gateway: 'PAYPAL'
+					})
+
+					return invoice.save();
+
 				});
 			}
 		});
@@ -340,8 +326,9 @@
 	};
 
 	billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
+		const User = require('./user');
 
-		let pendingInvoice;
+		let invoice;
 
 		if(this.nextPaymentDate > paymentInfo.nextPaymentDate){
 			return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
@@ -359,6 +346,13 @@
 			return Role.grantRolesToUser(this.billingUser, [role]);
 
 		}).then(() => {
+
+
+			if(this.nextPaymentDate && 
+				moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(this.nextPaymentDate).utc().startOf('date').toISOString()){
+				this.lastAnniversaryDate = new Date(this.nextPaymentDate);
+			}
+
 			this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
 
 			// set to to next 3rd of next month, give 3 days cushion
@@ -369,47 +363,96 @@
 
 			this.subscriptions.renewSubscriptions(expiredAt);
 
-			Invoice.findPendingInvoice(user, this.billingAgreementId);
+			return Invoice.findPendingInvoice(user, this.billingAgreementId);
 		
+		}).then(pendingInvoice => {
+			
+			console.log('pinv', pendingInvoice);
+
+			invoice = pendingInvoice;
+
+			if(!invoice){
+
+				invoice = Invoice.createInstance({ account: user });
+				console.log('this', this);
+				console.log('billingInfo', this.billingInfo);
+				console.log('billinfo22', this.toObject().billingInfo);
+				return invoice.initInvoice({ 
+					nextPaymentDate: this.nextPaymentDate,
+					billingAgreementId: this.billingAgreementId,
+					billingInfo: this.billingInfo,
+					startDate: this.lastAnniversaryDate,
+					account: user
+				});
+			}
+
+		}).then(() => {
+
+			invoice.changeState(C.INV_COMPLETE, {
+				raw: raw,
+				gateway: paymentInfo.gateway,
+				currency: paymentInfo.currency,
+				amount: paymentInfo.amount,
+				billingAgreementId: this.billingAgreementId,
+				nextPaymentDate: this.nextPaymentDate,
+				taxAmount: paymentInfo.taxAmount,
+				nextPaymentAmount: paymentInfo.nextAmount,
+				transactionId: paymentInfo.transactionId
+			});
+
+			return invoice.save();
+
 		}).then(invoice => {
+
+			return invoice.generatePDF().then(pdf => {
+
+				invoice.pdf = pdf;
+				// also save the pdf to database for ref.
+				return invoice.save();
+			});
+				
+
+		}).then(invoice => {
+
+			//email
+
+			let attachments;
+
+			attachments = [{
+				filename: `${moment(invoice.createdAt).utc().format('YYYY-MM-DD')}_invoice-${invoice.invoiceNo}.pdf`,
+				content: invoice.pdf
+			}];
 			
-			pendingInvoice = invoice;
-			
-			if(!pendingInvoice){
-				return Counter.findAndIncInvoiceNumber()
-			}
 
-		}).then(invoiceNo => {
+			//send invoice
+			let amount = invoice.amount;
+			let currency = invoice.currency;
 
-			if(pendingInvoice){
+			User.findByUserName(this.billingUser).then(billingUser => {
+				
+				return Promise.all([
+					//make a copy to sales
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: user,
+						amount: `${currency}${amount}`,
+						email: billingUser.customData.email,
+						invoiceNo: invoice.invoiceNo
+					}, attachments),
 
-			} else {
+					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
+						account: user,
+						amount: `${currency}${amount}`,
+					}, attachments)				
+				]);
 
-				billing.periodStart = this.lastAnniversaryDate;
-				billing.periodEnd = moment(this.nextPaymentDate)
-					.utc()
-					.subtract(1, 'day')
-					.endOf('date')
-					.toDate();
-				billing.createdAt = new Date();
-				billing.info = this.billingInfo;
-			}
+			}).catch(err => {
+				console.log(err.stack);
+				systemLogger.logError(`Email error - ${err.message}`);
+			});
 
-			billing.raw = raw;
-			billing.gateway = paymentInfo.gateway;
-			billing.currency = paymentInfo.currency;
-			billing.amount = paymentInfo.amount;
-			billing.billingAgreementId = billingAgreementId;
-			billing.items = items;
-			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
-			billing.taxAmount = paymentInfo.taxAmount;
-			billing.nextPaymentAmount = paymentInfo.nextAmount;
-			billing.invoiceNo = invoiceNo;
-			billing.transactionId = paymentInfo.transactionId;
-
-			return billing.save();
-
+			return;
 		});
+	}
 
 	module.exports = billingSchema;
 

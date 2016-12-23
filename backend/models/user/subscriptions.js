@@ -111,38 +111,7 @@
 
 			return sumLimits;
 		};
-
-		Subscriptions.prototype.findSubscriptionByToken = function (billingUser, token) {
-			let query = {
-				"customData.subscriptions.token": token
-			};
-
-			let subscription;
-
-			if (billingUser) {
-				query["customData.subscriptions.billingUser"] = billingUser;
-			}
-
-			return this.findOne({ account: "admin" }, query, {
-					"customData.subscriptions.$": 1,
-					"user": 1
-				})
-				.then(dbUser => {
-
-					subscription = dbUser.customData.subscriptions[0].toObject();
-					subscription.account = dbUser.user;
-
-					return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
-
-				})
-				.then(payments => {
-
-					subscription.payments = payments;
-					return subscription;
-
-				});
-		};
-
+		
 		Subscriptions.prototype.removeAssignedSubscriptionFromUser = function (id, cascadeRemove) {
 			let ProjectHelper = require("./helper/project");
 

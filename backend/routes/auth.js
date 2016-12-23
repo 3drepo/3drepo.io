@@ -30,7 +30,6 @@
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
 	//var crypto = require('crypto');
-	var Billing = require('../models/billing');
 	var Subscription = require('../models/subscription');
 	var multer = require("multer");
 	var moment = require('moment');
@@ -47,9 +46,6 @@
 	router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 	router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 	
-	router.get("/:account/billings", middlewares.isAccountAdmin, listBillings);
-	router.get("/:account/billings/:invoiceNo.html", middlewares.isAccountAdmin, renderBilling);
-	router.get("/:account/billings/:invoiceNo.pdf", middlewares.isAccountAdmin, renderBillingPDF);
 	router.post('/:account', signUp);
 
 	router.post('/:account/verify', verify);
@@ -351,7 +347,7 @@
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
 				email: user.customData.email,
-				billingInfo: user.customData.billingInfo,
+				billingInfo: user.customData.billing.billingInfo,
 				hasAvatar: user.customData.avatar ? true : false
 			});
 
@@ -433,77 +429,6 @@
 		});
 	}
 
-	function listBillings(req, res, next){
-
-		let responsePlace = utils.APIInfo(req);
-		Billing.findByAccount(req.params.account).then(billings => {
-
-			billings.forEach((billing, i) => {
-				billings[i] = billing.clean({skipDate: true});
-			});
-
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
-
-	function renderBilling(req, res, next){
-
-		let responsePlace = utils.APIInfo(req);
-		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(billing => {
-
-			if(!billing){
-				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-			}
-
-			let template = "invoice.jade";
-
-			if(billing.type === "refund"){
-				template = "refund.jade";
-			}
-
-			res.render(template, {billing : billing.clean(), baseURL: config.getBaseURL()});
-
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-}
-
-	function renderBillingPDF(req, res, next){
-
-		let responsePlace = utils.APIInfo(req);
-		let billing;
-		let regenerate;
-
-		if(config.pdf && config.pdf.debug && config.pdf.debug.allowRegenerate){
-			regenerate = req.query.regenerate;
-		}
-
-		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_billing => {
-
-			billing = _billing;
-			if(!billing){
-				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-			}
-
-			return billing.getPDF({regenerate: regenerate});
-
-		}).then(pdf => {
-
-
-			res.writeHead(200, {
-				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="${moment(billing.createdAt).utc().format('YYYY-MM-DD')}_${billing.type}-${billing.invoiceNo}.pdf"`,
-				'Content-Length': pdf.length
-			});
-
-			res.end(pdf);
-
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
 
 	function assignSubscription(req, res, next){
 

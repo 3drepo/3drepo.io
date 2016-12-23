@@ -26,10 +26,10 @@
 	const config = require("../config");
 	const utils = require("../utils");
 
-	router.get("/:account/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
-	router.post("/:account/subscriptions", middlewares.isAccountAdmin, createSubscription);
-	router.post("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
-	router.delete("/:account/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
+	router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+	router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
+	router.post("/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
+	router.delete("/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
 
 	function createSubscription(req, res, next) {
 
@@ -68,9 +68,7 @@
 		User.findByUserName(req.params.account)
 			.then(user => {
 
-				let subscriptions = user.getActiveSubscriptions()
-					.filter(sub => sub.plan !== Subscription.getBasicPlan()
-						.plan);
+				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 			})

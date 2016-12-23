@@ -346,4 +346,18 @@
 	define("INV_PENDING", "pending");
 	define("INV_COMPLETE", "complete");
 
+	//-----------------------------------------------------------------------------
+	//
+	// ipn type
+	//
+	//-----------------------------------------------------------------------------
+	define("IPN_PAYMENT_INIT", "init");
+	define("IPN_PAYMENT_SUCCESS", "success");
+	define("IPN_PAYMENT_CANCEL", "cancel");
+	define("IPN_PAYMENT_SUSPENDED", "suspended");
+	define("IPN_PAYMENT_FAILED", "failed");
+	define("IPN_PAYMENT_REFUNDED", "refunded");
+	define("IPN_UNKONWN", "unkonwn");
+
+
 })();

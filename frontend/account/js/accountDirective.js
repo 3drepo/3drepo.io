@@ -156,7 +156,7 @@
 
 			getUserInfo();
 
-			billingsPromise = UtilsService.doGet(vm.account + "/billings");
+			billingsPromise = UtilsService.doGet(vm.account + "/invoices");
 			billingsPromise.then(function (response) {
 				vm.billings = response.data;
 			});
