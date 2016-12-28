@@ -52,9 +52,9 @@
 		}];
 
 		return new Promise((resolve, reject) => {
-			paypal.billingAgreement.update(billingAgreementId, updateOps, function (err, billingAgreement) {
+			paypal.billingAgreement.update(billingAgreementId, updateOps, function (err/*, billingAgreement*/) {
 				if (err) {
-					console.log(JSON.stringify(err, null , 2));
+					//console.log(JSON.stringify(err, null , 2));
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 					paypalError.message = err.response.message;
 					reject(paypalError);
@@ -116,11 +116,11 @@
 		return new Promise((resolve, reject) => {
 
 			// create plan
-			console.log('create plan');
+			//console.log('create plan');
 			paypal.billingPlan.create(billingPlanAttributes, function (err, billingPlan) {
 
 				if (err) {
-					console.log(JSON.stringify(err, null , 2));
+					//console.log(JSON.stringify(err, null , 2));
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 					paypalError.message = err.response && err.response.message || err.message;
 					reject(paypalError);
@@ -133,7 +133,7 @@
 		.then(billingPlan => {
 
 			//activate plan
-			console.log('activate plan');
+			//console.log('activate plan');
 			return new Promise((resolve, reject) => {
 				let billingPlanUpdateAttributes = [{
 					"op": "replace",
@@ -145,7 +145,7 @@
 
 				paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 					if (err) {
-						console.log(JSON.stringify(err, null , 2));
+						//console.log(JSON.stringify(err, null , 2));
 						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 
 						paypalError.message = err.response.message;
@@ -160,7 +160,7 @@
 		.then(billingPlan => {
 
 			//create agreement
-			console.log('create agreement');
+			//console.log('create agreement');
 			return new Promise((resolve, reject) => {
 
 				let desc = "";
@@ -176,11 +176,11 @@
 					desc
 				);
 				
-				console.log(JSON.stringify(billingAgreementAttributes, null , 2));
+				//console.log(JSON.stringify(billingAgreementAttributes, null , 2));
 
 				paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 					if (err) {
-						console.log(JSON.stringify(err, null , 2));
+						//console.log(JSON.stringify(err, null , 2));
 						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 						paypalError.message = err.response.message;
 						reject(paypalError);
@@ -230,12 +230,12 @@
 					reject(responseCodes.EXECUTE_AGREEMENT_ERROR);
 
 				} else {
-					console.log('billingAgreement', billingAgreement);
+					//console.log('billingAgreement', billingAgreement);
 					resolve(billingAgreement);
 				}
 			});
 		});
-	}
+	};
 
 	let validateIPN = function(data){
 
@@ -280,14 +280,14 @@
 		}
 
 		return C.IPN_UNKONWN;
-	}
+	};
 
 	let handleIPN = function(paymentInfo){
 		const User = require('./user');
 
 		let billingAgreementId = paymentInfo.recurring_payment_id;
 		let ipnType = determineIPNType(paymentInfo);
-		console.log('ipnType', ipnType);
+		//console.log('ipnType', ipnType);
 		//save IPN
 		IPN.save(paymentInfo).catch(err => {
 			systemLogger.logError('Failed to save IPN', {err: err, billingAgreementId: billingAgreementId} );
@@ -313,7 +313,7 @@
 					nextAmount: paymentInfo.amount_per_cycle,
 					transactionId: paymentInfo.txn_id
 
-				}, paymentInfo).then(resData => {
+				}, paymentInfo).then(() => {
 					systemLogger.logInfo('payment confirmed and licenses activated', { billingAgreementId });
 				});
 
@@ -376,7 +376,7 @@
 					}).then(() => {
 						systemLogger.logInfo('Created and sent refund invoice to user', { billingAgreementId, user: user.user });
 					}).catch(err => {
-						console.log(err.stack);
+						//console.log(err.stack);
 						systemLogger.logError('Error while creating refund notice', {err: err, user: user.user, ipn: paymentInfo} );
 					});
 
@@ -413,7 +413,7 @@
 			}
 
 		});
-	}
+	};
 
 	module.exports = {
 		updateBillingAddress: updateBillingAddress,

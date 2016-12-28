@@ -3,12 +3,7 @@ var router = express.Router({mergeParams: true});
 var responseCodes = require("../response_codes.js");
 var utils = require("../utils");
 var User = require('../models/user');
-var httpsPost = require('../libs/httpsReq').post;
-var querystring = require('../libs/httpsReq').querystring;
-var config = require('../config');
-var systemLogger = require("../logger.js").systemLogger;
 var Paypal = require("../models/paypal.js");
-var C = require("../constants");
 
 // var moment = require('moment');
 // var getSubscription = require('../models/subscription').getSubscription;

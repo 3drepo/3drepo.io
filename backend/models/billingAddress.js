@@ -20,9 +20,8 @@
 
 	const mongoose = require("mongoose");
 	const vat = require("./vat");
-	const addressMeta = require("./addressMeta");
 	const responseCodes = require("../response_codes");
-	const config = require("../config");
+
 
 	let billingAddressSchema = new mongoose.Schema({
 		//vat setter was async. setter cannot be async at the momnent. 
@@ -71,7 +70,7 @@
 			cleanedVATNumber = cleanedVATNumber.substr(2); 
 		}
 
-		console.log(this.countryCode, cleanedVATNumber);
+//		console.log(this.countryCode, cleanedVATNumber);
 		return vat.checkVAT(this.countryCode, cleanedVATNumber).then(result => {
 			if (!result.valid)
 			{
@@ -84,7 +83,7 @@
 
 	billingAddressSchema.methods.isChanged = function(){
 		return this.changed;
-	}
+	};
 
 	module.exports = billingAddressSchema;
 

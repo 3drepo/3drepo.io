@@ -66,7 +66,6 @@
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(user => {
-				console.log(user);
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
@@ -93,7 +92,6 @@
 				return dbUser.assignSubscriptionToUser(req.params.sid, userData);
 			})
 			.then(subscription => {
-				console.log(subscription);
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
 			})
 			.catch(err => {

@@ -42,7 +42,7 @@
 		ipn.markModified('message');
 
 		return ipn.save();
-	}
+	};
 
 
 	let IPN = ModelFactory.createClass(

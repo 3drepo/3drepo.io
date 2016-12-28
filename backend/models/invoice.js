@@ -34,6 +34,7 @@
 	const billingAddressInfo = require("./billingAddress");
 	const utils = require("../utils");
 	const C = require("../constants");
+	const responseCodes = require("../response_codes.js");
 
 
 	const SchemaTypes = mongoose.Schema.Types;
@@ -41,7 +42,7 @@
 	// Various getter/setter helper functions
 	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); };
 	let roundTo3DP = function(x) { return utils.roundToNDP(x, 3.0); };
-	let signAndRoundTo2DP = function(x) { return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x) };
+	let signAndRoundTo2DP = function(x) { return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); };
 	let dateToString = function(date) { return moment(date).utc().format(C.DATE_FORMAT); };
 	let dateToDateTimeString = function(date) { return moment(date).utc().format(C.DATE_TIME_FORMAT); };
 
@@ -55,6 +56,7 @@
 	});
 
 	itemSchema.virtual('description').get(function(){
+//		console.log('this desc', this);
 		return Subscription.getSubscription(this.name).description;
 	});
 
@@ -160,7 +162,7 @@
 
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
-		console.log('init inv', data.billingInfo);
+//		console.log('init inv', data.billingInfo);
 		this.info = data.billingInfo;
 		this.paypalPaymentToken = data.paypalPaymentToken;
 
@@ -183,7 +185,7 @@
 			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.gross, 0);
 		}
 
-		this.periodStart = data.startDate
+		this.periodStart = data.startDate;
 		this.periodEnd = moment(this.nextPaymentDate)
 			.utc()
 			.subtract(1, 'day')
@@ -205,9 +207,9 @@
 			// add items bought in the invoice
 			plans.forEach(plan => {
 				for(let i=0 ; i< plan.quantity; i++){
+					//console.log('init invoice add items', plan, Subscription.getSubscription(plan.plan).plan);
 					this.items.push({
 						name: Subscription.getSubscription(plan.plan).plan,
-						description: Subscription.getSubscription(plan.plan).desc,
 						currency: Subscription.getSubscription(plan.plan).currency,
 						amount: plan.amount,  //gross+tax
 						taxAmount: plan.taxAmount
@@ -215,6 +217,7 @@
 				}
 			});
 
+			//console.log(this.items);
 			return this;
 
 		} else if (data.billingAgreementId) {
@@ -224,14 +227,14 @@
 			//copy items from last completed invoice with same agreement id
 			return Invoice.findLatestCompleteByAgreementId(data.account, data.billingAgreementId).then(lastGoodInvoice => {
 				if(!lastGoodInvoice){
-					return Promise.reject({ message: 'Missing last invoice'});
+					return Promise.reject(responseCodes.MISSING_LAST_INVOICE);
 				}
-				this.items = lastGoodInvoice.items
+				this.items = lastGoodInvoice.items;
 			}).then(() => this);
 		}
 
 		
-	}
+	};
 
 	schema.methods.changeState = function(state, data){
 
@@ -247,7 +250,7 @@
 		data.nextPaymentAmount && (this.nextPaymentAmount = data.nextPaymentAmount);
 		data.nextPaymentDate && (this.nextPaymentDate = data.nextPaymentDate);
 
-	}
+	};
 	
 	schema.statics.findByAccount = function (account) {
 		return this.find({ account }, {state: {'$in': [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
@@ -255,11 +258,11 @@
 	
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
 		return this.findOne({ account }, { paypalPaymentToken }, { raw: 0, pdf: 0});
-	}
+	};
 
 	schema.statics.findByAgreementId = function(account, billingAgreementId) {
 		return this.find({ account }, { billingAgreementId }, { raw: 0, pdf: 0});
-	}
+	};
 
 	schema.statics.findLatestCompleteByAgreementId = function (account, billingAgreementId) {
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_COMPLETE}, { raw: 0, pdf: 0 });
@@ -281,7 +284,7 @@
 	};
 
 	schema.statics.findPendingInvoice = function(account, billingAgreementId){
-		console.log(account, { billingAgreementId, state: C.INV_PENDING });
+		//console.log(account, { billingAgreementId, state: C.INV_PENDING });
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
 	};
 
@@ -311,7 +314,8 @@
 		invoice.createdAt = new Date();
 		invoice.currency = data.currency;
 		invoice.amount = data.amount;
-		// refund (full/parital) IPNs don't have tax infomation
+		// full/parital refund IPNs don't have any tax infomation, need to recalulate the tax for refund case
+		// or we hide tax info for refund invoice in that case we don't need to bother this
 		data.amount = parseFloat(data.amount);
 		invoice.taxAmount =roundTo2DP(
 				data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))

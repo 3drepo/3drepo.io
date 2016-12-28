@@ -24,18 +24,18 @@ var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
 var Role = require('./role');
-var Mailer = require('../mailer/mailer');
+
 var systemLogger = require("../logger.js").systemLogger;
-var moment = require('moment');
+
 var Subscription = require('./subscription');
 var config = require('../config');
-var vat = require('./vat');
-var Counter = require('./counter');
+
+
 var ProjectSetting = require('./projectSetting');
 var C = require('../constants');
 var RoleTemplates = require('./role_templates');
 var userBilling = require("./userBilling");
-var getSubscription = Subscription.getSubscription;
+
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -217,7 +217,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	});
 
-	cleanedCustomData.billing = {};
+	//cleanedCustomData.billing = {};
 
 	var expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
@@ -261,8 +261,7 @@ schema.statics.verify = function(username, token, options){
 	let user;
 
 	return this.findByUserName(username).then(_user => {
-
-		console.log('verify user', _user.user, _user.customData.billing);
+		
 		user = _user;
 
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
@@ -490,7 +489,7 @@ schema.methods.listAccounts = function(){
 				User.findByUserName(account.account).then(user => {
 					if(user){
 						account.quota = user.customData.billing.subscriptions.getSubscriptionLimits();
-						console.log(account.quota );
+						//console.log(account.quota );
 						return User.historyChunksStats(account.account);
 					}
 
@@ -694,7 +693,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	});
 };
 
-schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw, disableEmail){
+schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	'use strict';
 
 
@@ -763,7 +762,7 @@ schema.methods.getPrivileges = function(){
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
-	console.log('create sub', plan, this.user, billingUser);
+	//console.log('create sub', plan, this.user, billingUser);
 	this.customData.billing.billingUser = billingUser;
 	//console.log(' this.customData.billing.subscriptions',  this.customData.billing.subscriptions);
 	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);

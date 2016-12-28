@@ -29,7 +29,6 @@
 	const Paypal = require("./paypal.js");
 	const Invoice = require("./invoice.js");
 	const responseCodes = require("../response_codes.js");
-	const Counter = require("./counter");
 	const Role = require('./role');
 	const Mailer = require('../mailer/mailer');
 
@@ -111,11 +110,11 @@
 		}, 0);
 
 
-		console.log(changes);
+		//console.log(changes);
 		let nextPaymentDate = moment(this.nextPaymentDate);
 
 		if (proRataAmount) {
-			console.log('pro-rata');
+			//console.log('pro-rata');
 			// The length of the pro-rata period is difference between now and next payment date
 			proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
@@ -135,7 +134,7 @@
 		} else if (!proRataAmount && this.subscriptions.hasBoughtLicence()) {
 			// it means a decrease in no. of licences
 			// new agreement will start on next payment date
-			console.log('decrease');
+			//console.log('decrease');
 
 			paymentDate = moment(nextPaymentDate).utc().toDate();
 
@@ -143,7 +142,7 @@
 
 		//useful for generating invoice
 		changes.regularPeriodPlans.forEach(plan => {
-			plan.amount = getSubscription(plan.plan).amount
+			plan.amount = getSubscription(plan.plan).amount;
 			plan.taxAmount = calTax(plan.amount, country, isBusiness);
 			plan.amount += plan.taxAmount;
 		});
@@ -176,11 +175,11 @@
 
 	billingSchema.methods.isNewPayment = function(changes){
 		return changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence();
-	}
+	};
 
 	let getImmediatePaymentStartDate = function(){
 		return moment().utc().add(20, "second");
-	}
+	};
 
 	billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
 		// User want to buy new subscriptions.
@@ -192,13 +191,13 @@
 
 		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 			this.markModified('billingInfo');
-			console.log('ismod', this.billingInfo.isChanged());
+			//console.log('ismod', this.billingInfo.isChanged());
 			return this.subscriptions.changeSubscriptions(plans);
 
 		}).then(changes => {
 
-			console.log('billinginfo', this.billingInfo);
-			console.log('**changes', changes);
+			//console.log('billinginfo', this.billingInfo);
+			//console.log('**changes', changes);
 
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
@@ -229,7 +228,7 @@
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 				}
 
-				console.log('payments', data.payments);
+				//console.log('payments', data.payments);
 
 				// Once we have calculated a set of payments send them
 				return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
@@ -269,7 +268,7 @@
 			if(invoice && invoice.state === C.INV_PENDING && invoice.billingAgreementId){
 
 				//stop exeing the agreement if already done before
-				console.log('execed before');
+				//console.log('execed before');
 				return Promise.resolve();
 
 			} else {
@@ -314,7 +313,7 @@
 					invoice.changeState(C.INV_PENDING, {
 						billingAgreementId: this.billingAgreementId,
 						gateway: 'PAYPAL'
-					})
+					});
 
 					return invoice.save();
 
@@ -367,16 +366,13 @@
 		
 		}).then(pendingInvoice => {
 			
-			console.log('pinv', pendingInvoice);
+			//console.log('pinv', pendingInvoice);
 
 			invoice = pendingInvoice;
 
 			if(!invoice){
 
 				invoice = Invoice.createInstance({ account: user });
-				console.log('this', this);
-				console.log('billingInfo', this.billingInfo);
-				console.log('billinfo22', this.toObject().billingInfo);
 				return invoice.initInvoice({ 
 					nextPaymentDate: this.nextPaymentDate,
 					billingAgreementId: this.billingAgreementId,
@@ -453,7 +449,7 @@
 
 			return;
 		});
-	}
+	};
 
 	module.exports = billingSchema;
 

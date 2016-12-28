@@ -67,7 +67,9 @@
 			*/
 
 			for (let k in config.apiUrls) {
-				roundRobin.apiUrlCounter[k] = 0;
+				if(config.apiUrls.hasOwnProperty(k)){
+					roundRobin.apiUrlCounter[k] = 0;
+				}
 			}
 
 			//params.config_js += "};\n";
@@ -82,7 +84,7 @@
 			};
 
 			return roundRobin;
-	}
+	};
 
 	/*******************************************************************************
 	 * Fill in the details of a server

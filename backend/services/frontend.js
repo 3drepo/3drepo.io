@@ -66,20 +66,25 @@
 
 			
 			for(let prop in config.apiAlgorithm) { 
+				if(config.apiAlgorithm.hasOwnProperty(prop)){
+					// not working for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
+					if(prop === 'apiUrls'){
+						continue;
+					}
 
-				// not working for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
-				if(prop === 'apiUrls'){
-					continue;
+					params.config_js += "\t\"" + prop + "\":" + (typeof config.apiAlgorithm[prop] === 'function' ? config.apiAlgorithm[prop] : JSON.stringify(config.apiAlgorithm[prop])) + ",\n"; 
 				}
-
-				params.config_js += "\t\"" + prop + "\":" + (typeof config.apiAlgorithm[prop] === 'function' ? config.apiAlgorithm[prop] : JSON.stringify(config.apiAlgorithm[prop])) + ",\n"; 
 			}
 
 			// fix for for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
 			params.config_js += '\tapiUrls: {';
+			
 			for(let prop in config.apiAlgorithm.apiUrls) { 
-				params.config_js += '\n\t\t' + prop + ': [' + config.apiAlgorithm.apiUrls[prop].toString() + ']';
+				if(config.apiAlgorithm.apiUrls.hasOwnProperty(prop)){
+					params.config_js += '\n\t\t' + prop + ': [' + config.apiAlgorithm.apiUrls[prop].toString() + ']';
+				}
 			}
+
 			params.config_js += '\n\t}\n';
 
 

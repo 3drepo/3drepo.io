@@ -150,7 +150,7 @@ describe('User', function(){
 			};
 
 			let expectedCallWithOptions = {
-				customData: { firstName : options.firstName, inactive: true, email: options.email, billing: {}},
+				customData: { firstName : options.firstName, inactive: true, email: options.email},
 				roles: []
 			}
 

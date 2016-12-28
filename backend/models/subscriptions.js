@@ -118,7 +118,7 @@
 			let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete: true });
 			let totalSize = 0;
 
-			console.log(quotaAfterDelete);
+			//console.log(quotaAfterDelete);
 			return User.historyChunksStats(this.billingUser).then(stats => {
 				
 				if (stats) { 
@@ -153,12 +153,12 @@
 				sub.inCurrentAgreement = false;
 			}
 		}
-	}
+	};
 
 	Subscriptions.prototype.getActiveSubscriptions = function (options) {
 		options = options || {};
 
-		console.log('act sub', this.subscriptions);
+		//console.log('act sub', this.subscriptions);
 		return this.subscriptions.filter(sub => {
 			let basicCond = options.skipBasic ? sub.plan !== Subscription.getBasicPlan()
 				.plan : true;
@@ -208,7 +208,7 @@
 			}
 		}
 
-		console.log('after remove', this.subscriptions.length);
+		//console.log('after remove', this.subscriptions.length);
 
 		// Compute the current set of plans for the subscriptions
 		this.getBoughtLicenes().forEach(subscription => {
@@ -220,7 +220,7 @@
 		let changeInPlans = [];
 		let hasChanges = false;
 
-		console.log(this.currentPlanCount);
+		//console.log(this.currentPlanCount);
 
 		// plans: [ { 'plan': 'ABC', 'quantity': 3 }]
 		// currentPlanCount: { ABC: 1 }
@@ -255,13 +255,13 @@
 		});
 
 		let proRataPeriodPlans = Object.keys(this.currentPlanCount).length > 0 ? changeInPlans.filter(plan => plan.quantity > 0) : [];
-		let canceledAllPlans = plans.reduce((sum, plan) => sum + plan.quantity , 0)  === 0 && Object.keys(this.currentPlanCount).length === plans.length
+		let canceledAllPlans = plans.reduce((sum, plan) => sum + plan.quantity , 0)  === 0 && Object.keys(this.currentPlanCount).length === plans.length;
 
 		return Promise.all(addRemoveSubPromises).then(() => {
 			return hasChanges ? { 
 				proRataPeriodPlans: proRataPeriodPlans, 
 				regularPeriodPlans: plans,
-				canceledAllPlans: canceledAllPlans } : false
+				canceledAllPlans: canceledAllPlans } : false;
 		});
 	};
 
@@ -275,14 +275,13 @@
 		};
 
 		subscriptions.forEach(sub => {
-			console.log('sub', sub)
 			sumLimits.spaceLimit += sub.limits.spaceLimit;
 			sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
 		});
 
 		return sumLimits;
 
-	}
+	};
 
 	Subscriptions.prototype.activateSubscriptions = function() {
 		// Activate a created subscription
@@ -295,10 +294,10 @@
 		options = options || {};
 
 		let subscriptions = this.getAllInAgreementSubscriptions();
-		console.log('renewSubscriptions', subscriptions);
+		//console.log('renewSubscriptions', subscriptions);
 		subscriptions.forEach(subscription => {
 			if(!subscription.expiredAt || subscription.expiredAt < newDate){
-				console.log('subscription', subscription);
+				//console.log('subscription', subscription);
 				subscription.active = true;
 				subscription.expiredAt = newDate;
 				// assignLimits = true when executing agreement for 1st time, and thereafter they stick with the limits they have
@@ -311,7 +310,7 @@
 
 		let subscriptions = this.getActiveSubscriptions({ skipBasic: true });
 
-		console.log('assignFirstLicenceToBillingUser');
+		//console.log('assignFirstLicenceToBillingUser');
 		if(!subscriptions.find(sub => sub.assignedUser === this.billingUser)){
 			
 			for(let i=0; i < subscriptions.length; i++){
@@ -321,8 +320,7 @@
 				}
 			}
 		}
-		console.log(subscriptions);
-	}
+	};
 
 	Subscriptions.prototype.assignSubscriptionToUser = function(id, userData){
 		
@@ -360,7 +358,7 @@
 			}
 
 		});
-	}
+	};
 
 	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, user, cascadeRemove){
 

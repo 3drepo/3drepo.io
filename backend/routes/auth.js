@@ -30,9 +30,9 @@
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
 	//var crypto = require('crypto');
-	var Subscription = require('../models/subscription');
+
 	var multer = require("multer");
-	var moment = require('moment');
+
 
 	router.post("/login", login);
 	router.post("/logout", logout);
@@ -40,6 +40,7 @@
 	router.get("/login", checkLogin);
 
 	router.post('/contact', contact);
+
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 
 	router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
@@ -52,6 +53,8 @@
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.isAccountAdmin, updateUser);
 	router.put("/:account/password", resetPassword);
+
+
 
 	// function expireSession(req) {
 	// 	if (req.session)
