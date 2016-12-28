@@ -26,7 +26,6 @@ var History = require('./history');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
-var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
 var config = require('../config');
@@ -59,7 +58,7 @@ var schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: { type: userBilling, default: {} },
+		billing: { type: userBilling, default: userBilling },
 		avatar: Object
 	},
 	roles: [{}]
@@ -134,7 +133,7 @@ schema.statics.isEmailTaken = function(email, exceptUser){
 };
 
 
-schema.statics.findBillingUserByBillingId = function(billingAgreementId){
+schema.statics.findUserByBillingId = function(billingAgreementId){
 	return this.findOne({account: 'admin'}, { 'customData.billing.billingAgreementId': billingAgreementId });
 };
 
@@ -218,6 +217,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	});
 
+	cleanedCustomData.billing = {};
+
 	var expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
@@ -261,6 +262,7 @@ schema.statics.verify = function(username, token, options){
 
 	return this.findByUserName(username).then(_user => {
 
+		console.log('verify user', _user.user, _user.customData.billing);
 		user = _user;
 
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
@@ -285,7 +287,7 @@ schema.statics.verify = function(username, token, options){
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
 
-	}).then(() => {
+	}).then(user => {
 
 		if(!skipImportToyProject){
 
@@ -323,7 +325,7 @@ schema.methods.getAvatar = function(){
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
-	let updateableFields = [ 'firstName', 'lastName', 'email', 'billingInfo' ];
+	let updateableFields = [ 'firstName', 'lastName', 'email' ];
 
 	this.customData = this.customData || {};
 
@@ -698,7 +700,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 	let dbUser;
 
-	return this.findBillingUserByBillingId(billingAgreementId).then(user => {
+	return this.findUserByBillingId(billingAgreementId).then(user => {
 
 		dbUser = user;
 
@@ -711,7 +713,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 	}).then(() => {
 		return dbUser.save();
 	}).then(() => {
-		return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account: dbUser, payment: paymentInfo});
+		return Promise.resolve({subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo});
 	});
 
 };
@@ -726,49 +728,7 @@ schema.methods.executeBillingAgreement = function(){
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
 
-	let ProjectHelper = require('./helper/project');
-
-	let subscription = this.customData.subscriptions.id(id);
-
-	if(!subscription){
-		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
-	}
-
-	if(!subscription.assignedUser){
-		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_ASSIGNED});
-	}
-
-	if(subscription.assignedUser === this.user){
-		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF});
-	}
-
-	//check if they are a collaborator
-	return ProjectSetting.find({ account: this.user }, {}).then(projects => {
-
-		let foundProjects = [];
-		projects.forEach(project => {
-			project.collaborators.forEach(collaborator => {
-				if(collaborator.user === subscription.assignedUser){
-					foundProjects.push({ project: project._id, role: collaborator.role});
-				}
-			});
-		});
-
-		if(!cascadeRemove && foundProjects.length > 0){
-			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
-		} else {
-
-			let promises = [];
-			foundProjects.forEach(foundProject => {
-				promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, this.user, foundProject.project, foundProject.role));
-			});
-
-			return Promise.all(promises);
-
-		}
-
-	}).then(() => {
-		subscription.assignedUser = undefined;
+	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
 		return this.save().then(() => subscription);
 	});
 
@@ -777,46 +737,9 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
-	let subscription = this.customData.subscriptions.id(id);
-
-	if(!subscription){
-		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
-	}
-
-	let next;
-
-
-	if(userData.email){
-		next = User.findByEmail(userData.email);
-	} else {
-		next = User.findByUserName(userData.user);
-	}
-
-	return next.then(user => {
-
-		if(!user){
-			return Promise.reject({ resCode: responseCodes.USER_NOT_FOUND });
-		}
-
-		let assigned;
-
-		this.customData.subscriptions.forEach(subscription => {
-			if(subscription.assignedUser === user.user){
-				assigned = true;
-			}
-		});
-
-		if(assigned){
-			return Promise.reject({ resCode: responseCodes.USER_ALREADY_ASSIGNED });
-		} else if(subscription.assignedUser){
-			return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED });
-		} else {
-			subscription.assignedUser = user.user;
-			return this.save().then(() => subscription);
-		}
-
+	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
+		return this.save().then(() => subscription);
 	});
-
 };
 
 
@@ -833,6 +756,21 @@ schema.methods.getPrivileges = function(){
 		}
 
 		return Promise.resolve({inheritedPrivileges: privs});
+	});
+
+};
+
+schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
+	'use strict';
+
+	console.log('create sub', plan, this.user, billingUser);
+	this.customData.billing.billingUser = billingUser;
+	//console.log(' this.customData.billing.subscriptions',  this.customData.billing.subscriptions);
+	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
+	//this.markModified('customData.billing');
+	//console.log(this.user, this.customData.billing.billingUser, subscription)
+	return this.save().then(() => {
+		return Promise.resolve(subscription);
 	});
 
 };

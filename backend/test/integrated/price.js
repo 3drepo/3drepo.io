@@ -25,11 +25,11 @@ let app = require("../../services/api.js").createApp(
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
-let getNextPaymentDate = require("../../models/payment").getNextPaymentDate;
+let UserBilling = require('../../models/userBilling');
+let getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 let helpers = require("./helpers");
 let async = require('async');
 let moment = require('moment-timezone');
-let Payment = require('../../models/payment');
 let User = require('../../models/user');
 let url = require('url');
 describe('Billing agreement price from PayPal', function () {
@@ -81,10 +81,10 @@ describe('Billing agreement price from PayPal', function () {
 				"line3": "line3",
 				"firstName": "Nigel",
 				"lastName": "Farage",
-				"vat": options.vat,
 				"city": "city",
 				"postalCode": "A00 2ss020",
-				"countryCode": options.country
+				"countryCode": options.country,
+				"vat": options.vat
 			}
 		};
 
@@ -122,7 +122,7 @@ describe('Billing agreement price from PayPal', function () {
 	}
 
 	it('GB Business', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 		makeTest({ 
 			noOfLicence: 3, 
 			vat: '206909015', 
@@ -133,7 +133,7 @@ describe('Billing agreement price from PayPal', function () {
 	});
 
 	it('GB Personal', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'GB', 
@@ -144,7 +144,7 @@ describe('Billing agreement price from PayPal', function () {
 	});
 
 	it('DE Business', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 		makeTest({ 
 			noOfLicence: 3, 
 			vat: '9009009', 
@@ -155,12 +155,13 @@ describe('Billing agreement price from PayPal', function () {
 	});
 
 	it('DE Personal', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'DE', 
 			amount: '200', 
-			taxAmount: '38', 
+			taxAmount: '38',
+			vat: "",
 		}, done);
 
 	});
@@ -174,7 +175,7 @@ describe('Billing agreement price from PayPal', function () {
 			let nextPaymentDate = getNextPaymentDate(twoDaysAgo);
 
 			return User.findByUserName(username).then(user => {
-				user.customData.subscriptions.push({
+				user.customData.billing.subscriptions = [{
 					"plan" : "THE-100-QUID-PLAN",
 					"createdAt" : twoDaysAgo.toDate(),
 					"updatedAt" : twoDaysAgo.toDate(),
@@ -186,20 +187,20 @@ describe('Billing agreement price from PayPal', function () {
 						"collaboratorLimit" : 1,
 						"spaceLimit" : 10737418240
 					}
-				});
+				}];
 
-				user.customData.billingUser = username,
-				user.customData.lastAnniversaryDate = twoDaysAgo,
-				user.customData.paypalPaymentToken = "EC-00000000000000000";
+				user.customData.billing.billingUser = username,
+				user.customData.billing.lastAnniversaryDate = twoDaysAgo,
+				user.customData.billing.paypalPaymentToken = "EC-00000000000000000";
 				user.customData.billingAgreementId = "I-000000000000";
-				user.customData.nextPaymentDate = nextPaymentDate;
+				user.customData.billing.nextPaymentDate = nextPaymentDate;
 				return user.save();
 			});
 		});
 
 
 		it('GB Business', function(done){
-			this.timeout(10000);
+			this.timeout(20000);
 			makeTest({ 
 				noOfLicence: 2, 
 				vat: '206909015', 

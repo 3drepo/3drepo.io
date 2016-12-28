@@ -20,6 +20,7 @@
 
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
+	const ProjectSetting = require("./projectSetting");
 
 	let Subscriptions = function (billingUser, billingAddress, subscriptions) {
 		this.billingUser = billingUser;
@@ -31,7 +32,7 @@
 		//console.log('Subscriptions init --')
 	};
 
-	Subscriptions.prototype.addSubscription = function (plan) {
+	Subscriptions.prototype.addSubscriptionByPlan = function (plan) {
 		// Add subscription
 		for (let i = 0; i < plan.quantity; i++) {
 			this.subscriptions.push({
@@ -44,7 +45,34 @@
 		}
 	};
 
-	Subscriptions.prototype.removeSubscription = function(plan){
+	Subscriptions.prototype.addSubscription = function(plan, active, expiredAt){
+
+		if(Subscription.getSubscription(plan)){
+
+			let subscription = {
+
+				plan: plan,
+				createdAt: this.now,
+				updatedAt: this.now,
+				active: active,
+				expiredAt: expiredAt
+			};
+
+			if(active){
+				subscription.limits = Subscription.getSubscription(subscription.plan).limits;
+			}
+
+			this.subscriptions.push(subscription);
+
+			return subscription;
+
+		} else {
+
+			throw responseCodes.INVALID_SUBSCRIPTION_PLAN;
+		}
+	};
+
+	Subscriptions.prototype.removeSubscriptionByPlan = function(plan){
 		
 		const User = require('./user');
 
@@ -130,6 +158,7 @@
 	Subscriptions.prototype.getActiveSubscriptions = function (options) {
 		options = options || {};
 
+		console.log('act sub', this.subscriptions);
 		return this.subscriptions.filter(sub => {
 			let basicCond = options.skipBasic ? sub.plan !== Subscription.getBasicPlan()
 				.plan : true;
@@ -220,7 +249,7 @@
 			if (Subscription.getSubscription(plan.plan) && plan.quantity !== 0) {
 				hasChanges = true;
 				addRemoveSubPromises.push(
-					(plan.quantity > 0) ? this.addSubscription(plan): this.removeSubscription(plan)
+					(plan.quantity > 0) ? this.addSubscriptionByPlan(plan): this.removeSubscriptionByPlan(plan)
 				);
 			}
 		});
@@ -282,6 +311,7 @@
 
 		let subscriptions = this.getActiveSubscriptions({ skipBasic: true });
 
+		console.log('assignFirstLicenceToBillingUser');
 		if(!subscriptions.find(sub => sub.assignedUser === this.billingUser)){
 			
 			for(let i=0; i < subscriptions.length; i++){
@@ -291,7 +321,96 @@
 				}
 			}
 		}
+		console.log(subscriptions);
 	}
+
+	Subscriptions.prototype.assignSubscriptionToUser = function(id, userData){
+		
+		const User = require("./user.js");
+
+		let subscription = this.subscriptions.id(id);
+
+		if(!subscription){
+			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
+		}
+
+		let findUser;
+
+		if(userData.email){
+			findUser = User.findByEmail(userData.email);
+		} else {
+			findUser = User.findByUserName(userData.user);
+		}
+
+		return findUser.then(user => {
+
+			if(!user){
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+
+			let assigned = this.subscriptions.find(sub => sub.assignedUser === user.user);
+
+			if(assigned){
+				return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
+			} else if(subscription.assignedUser){
+				return Promise.reject(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED);
+			} else {
+				subscription.assignedUser = user.user;
+				return subscription;
+			}
+
+		});
+	}
+
+	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, user, cascadeRemove){
+
+		const ProjectHelper = require('./helper/project');
+
+		let subscription = this.subscriptions.id(id);
+
+		if(!subscription){
+			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
+		}
+
+		if(!subscription.assignedUser){
+			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_ASSIGNED);
+		}
+
+		if(subscription.assignedUser === user){
+			return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
+		}
+
+		//check if they are a collaborator
+		return ProjectSetting.find({ account: user }, {}).then(projects => {
+
+			let foundProjects = [];
+			projects.forEach(project => {
+				project.collaborators.forEach(collaborator => {
+					if(collaborator.user === subscription.assignedUser){
+						foundProjects.push({ project: project._id, role: collaborator.role});
+					}
+				});
+			});
+
+			if(!cascadeRemove && foundProjects.length > 0){
+				return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+			} else {
+
+				let promises = [];
+				foundProjects.forEach(foundProject => {
+					promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, user, foundProject.project, foundProject.role));
+				});
+
+				return Promise.all(promises);
+
+			}
+
+		}).then(() => {
+			subscription.assignedUser = undefined;
+			return subscription;
+		});
+
+	};
 
 	module.exports = Subscriptions;
 

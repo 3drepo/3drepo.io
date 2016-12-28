@@ -49,7 +49,7 @@
 		return {
 			"amount": {
 				"currency": payment.currency,
-				"value": payment.gross
+				"value": payment.net
 			},
 			"cycles": paymentType.cycles,
 			"frequency": payment.length.unit,

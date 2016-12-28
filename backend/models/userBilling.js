@@ -56,14 +56,15 @@
 		database: String
 	});
 
-	let billingSchema = new mongoose.Schema({
+	let billingSchema = mongoose.Schema({
 		subscriptions: { 
 			type: [subscriptionSchema], 
 			get: function (subs) { 
+				//console.log('subs', subs)
 				return new Subscriptions(this.billingUser, this.billingInfo, subs); 
 			}
 		},
-		billingInfo: { type: billingAddressInfo, default: billingAddressInfo  },
+		billingInfo: { type: billingAddressInfo, default: {}  },
 		//global billing info
 		billingAgreementId: String,
 		paypalPaymentToken: String,
@@ -77,11 +78,11 @@
 		return gross * vat.getByCountryCode(countryCode, isBusiness);
 	};
 
-	let Payment = function (type, grossAmount, countryCode, isBusiness, length) {
+	let Payment = function (type, netAmount, countryCode, isBusiness, length) {
 		this.type = type;
-		this.gross = grossAmount;
-		this.tax = calTax(this.gross, countryCode, isBusiness);
-		this.net = this.gross + this.tax;
+		this.net = netAmount;
+		this.tax = calTax(this.net, countryCode, isBusiness);
+		this.gross =  this.net + this.tax;
 		this.length = length;
 		this.currency = "GBP";
 
@@ -178,7 +179,7 @@
 	}
 
 	let getImmediatePaymentStartDate = function(){
-		return moment().utc().add(10, "second");
+		return moment().utc().add(20, "second");
 	}
 
 	billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
@@ -201,13 +202,13 @@
 
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
-				if (this.billingAgreementId && this.billingInfo.isModified())
+				if (this.billingAgreementId && this.billingInfo.isChanged())
 				{	
 					return Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
 				}
 
 			} else if (changes.canceledAllPlans){
-				// User cancelled everything, no need to calualte/create new bills,
+				// User cancelled everything, no need to calculate/create new bills,
 				// just cancel the previous agreement
 				return this.cancelAgreement();
 
@@ -291,9 +292,6 @@
 					// remove pending delete subscriptions
 					this.subscriptions.removePendingDeleteSubscription();
 
-					// assign first licence to billing user if there is none
-					this.subscriptions.assignFirstLicenceToBillingUser();
-
 					if(new Date(billingAgreement.start_date) > getImmediatePaymentStartDate().toDate()){
 						// we are done here if the billing agreement start later
 						return Promise.resolve();
@@ -308,7 +306,9 @@
 					// IPN message should come quickly after executing an agreement, usually less then a minute
 					let twoDayLater = moment().utc().add(48, 'hour').toDate();
 					this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
-
+					
+					// assign first licence to billing user if there is none
+					this.subscriptions.assignFirstLicenceToBillingUser();
 
 					// change invoice state
 					invoice.changeState(C.INV_PENDING, {
@@ -419,7 +419,7 @@
 			let attachments;
 
 			attachments = [{
-				filename: `${moment(invoice.createdAt).utc().format('YYYY-MM-DD')}_invoice-${invoice.invoiceNo}.pdf`,
+				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
 				content: invoice.pdf
 			}];
 			
@@ -436,7 +436,8 @@
 						account: user,
 						amount: `${currency}${amount}`,
 						email: billingUser.customData.email,
-						invoiceNo: invoice.invoiceNo
+						invoiceNo: invoice.invoiceNo,
+						type: invoice.type
 					}, attachments),
 
 					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {

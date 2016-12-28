@@ -92,7 +92,7 @@
 
 			res.writeHead(200, {
 				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="${moment(invoice.createdAt).utc().format('YYYY-MM-DD')}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
+				'Content-disposition': `inline; filename="${moment(invoice.createdAtDate).utc().format('YYYY-MM-DD')}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
 				'Content-Length': pdf.length
 			});
 

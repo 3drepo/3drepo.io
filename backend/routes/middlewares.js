@@ -118,7 +118,7 @@ function freeSpace(account){
 	//console.log('checking free space');
 	return User.findByUserName(account).then( dbUser => {
 
-		limits = dbUser.getSubscriptionLimits();
+		limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
 		return User.historyChunksStats(account);
 
 	}).then(stats => {
@@ -147,7 +147,7 @@ function hasCollaboratorQuota(req, res, next){
 
 	return User.findByUserName(account).then( dbUser => {
 
-		limits = dbUser.getSubscriptionLimits();
+		limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
 
 		return ProjectSetting.findById({account}, project);
 
@@ -159,6 +159,9 @@ function hasCollaboratorQuota(req, res, next){
 			responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
 		}
 
+	}).catch(err => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
 }
 

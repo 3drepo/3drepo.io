@@ -233,6 +233,7 @@ function addCollaborator(req, res ,next){
 	let role = req.body.role;
 	let email = req.body.email;
 
+	console.log('addCollaborator');
 	ProjectHelpers.addCollaborator(username, email, account, project, role).then(resRole => {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
 	}).catch(err => {

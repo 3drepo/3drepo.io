@@ -218,7 +218,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 	}).then(dbUser => {
 
 		let found = false;
-		let subscriptions = dbUser.getActiveSubscriptions();
+		let subscriptions = dbUser.customData.billing.subscriptions.getActiveSubscriptions();
 
 		subscriptions.forEach(subscription => {
 			if(subscription.assignedUser === user.user){

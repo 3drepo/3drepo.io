@@ -35,13 +35,15 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 
+
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
 	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); };
 	let roundTo3DP = function(x) { return utils.roundToNDP(x, 3.0); };
-	let dateToString = function(date) { return moment(date).utc().format('YYYY-MM-DD'); };
-	let dateToDateTimeString = function(date) { return moment(date).utc().format('DD-MM-YYYY HH:mm'); };
+	let signAndRoundTo2DP = function(x) { return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x) };
+	let dateToString = function(date) { return moment(date).utc().format(C.DATE_FORMAT); };
+	let dateToDateTimeString = function(date) { return moment(date).utc().format(C.DATE_TIME_FORMAT); };
 
 	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
@@ -65,15 +67,15 @@
 		raw: {},
 		createdAt: { type: Date, get: dateToDateTimeString } ,
 		currency: String,
-		amount: SchemaTypes.Double, //gross+tax
-		type: { type: String, default: "invoice", enum: ["invoice", "refund"] },
+		amount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },//gross+tax
+		type: { type: String, default: C.INV_TYPE_INVOICE, enum: [C.INV_TYPE_INVOICE, C.INV_TYPE_REFUND] },
 		items: [itemSchema],
 		periodStart: { type: Date, get: dateToString },
 		periodEnd: { type: Date, get: dateToString },
 		nextPaymentDate:  { type: Date, get: dateToString },
 		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
 		transactionId: String,
-		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },
+		taxAmount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
 		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
 		pdf: Object,
@@ -82,6 +84,10 @@
 
 	schema.virtual("netAmount").get(function() {
 		return this.amount - this.taxAmount;
+	});
+
+	schema.virtual("createdAtDate").get(function() {
+		return moment(this.toObject().createdAt).utc().format(C.DATE_FORMAT);
 	});
 
 	schema.virtual("taxPercentage").get(function() {
@@ -115,7 +121,7 @@
 	});
 
 	schema.virtual('proRata').get(function(){
-		if(this.items[0].amount.toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
+		if(this.items.length > 0 && this.items[0].amount.toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
 			return true;
 		}
 
@@ -129,7 +135,15 @@
 		
 		if(!this.invoiceNo && this.state !== C.INV_INIT){
 			//generate invoice number if doesn't have one and passed the init state
-			Counter.findAndIncInvoiceNumber().then(invoiceNo => {
+			let genNo;
+
+			if(this.type === C.INV_TYPE_INVOICE) {
+				genNo = Counter.findAndIncInvoiceNumber;
+			} else if (this.type === C.INV_TYPE_REFUND) {
+				genNo = Counter.findAndIncRefundNumber;
+			}
+
+			genNo().then(invoiceNo => {
 				this.invoiceNo = invoiceNo;
 				next();
 			}).catch(err => {
@@ -157,16 +171,16 @@
 
 			if(proRataPayments.length > 0){
 				this.currency = proRataPayments[0].currency;
-				this.amount = proRataPayments.reduce((sum, payment) => sum + payment.net, 0);
+				this.amount = proRataPayments.reduce((sum, payment) => sum + payment.gross, 0);
 				this.taxAmount = proRataPayments.reduce((sum, payment) => sum + payment.tax, 0);
 			} else {
 				this.currency = regularPayments[0].currency;
-				this.amount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
+				this.amount = regularPayments.reduce((sum, payment) => sum + payment.gross, 0);
 				this.taxAmount = regularPayments.reduce((sum, payment) => sum + payment.tax, 0);
 			}
 
 
-			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.net, 0);
+			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.gross, 0);
 		}
 
 		this.periodStart = data.startDate
@@ -236,7 +250,7 @@
 	}
 	
 	schema.statics.findByAccount = function (account) {
-		return this.find({ account }, {}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
+		return this.find({ account }, {state: {'$in': [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
 	
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
@@ -284,82 +298,63 @@
 	};
 
 	schema.statics.createRefund = function (user, data) {
-		let lastBill;
-		let billing;
 
-		return this.findLatestCompleteByAgreementId(user.user, data.billingAgreementId)
-			.then(bill => {
+		const User = require('./user');
 
-				lastBill = bill;
-				return Counter.findAndIncRefundNumber();
+		let invoice;
 
-			})
-			.then(counter => {
+		invoice = Invoice.createInstance({ account: user.user });
 
-				return Promise.resolve("CN-" + counter.count);
+		invoice.info = user.customData.billing.billingInfo;
+		invoice.raw = data.raw;
+		invoice.gateway = data.gateway;
+		invoice.createdAt = new Date();
+		invoice.currency = data.currency;
+		invoice.amount = data.amount;
+		// refund (full/parital) IPNs don't have tax infomation
+		data.amount = parseFloat(data.amount);
+		invoice.taxAmount =roundTo2DP(
+				data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))
+		);
 
-			})
-			.then(invoiceNo => {
-				billing = Billing.createInstance({ account: user.user });
+		invoice.billingAgreementId = data.billingAgreementId;
+		invoice.type = C.INV_TYPE_REFUND;
+		invoice.transactionId = data.transactionId;
+		invoice.state = C.INV_COMPLETE;
 
-				billing.info = (lastBill && lastBill.info) || user.customData.billingInfo;
-				billing.raw = data.raw;
-				billing.gateway = data.gateway;
-				billing.createdAt = new Date();
-				billing.currency = data.currency;
-				billing.amount = data.amount;
-				billing.taxAmount =
-					(
-						parseFloat(data.amount) -
-						Math.round(
-							(parseFloat(data.amount) / (1 + vat.getByCountryCode(billing.info.countryCode, billing.info.vat))) * 100
-						) / 100
-					)
-					.toFixed(2);
+		//save first to generate invoice no before generating pdf
+		return invoice.save().then(invoice => {
 
-				billing.billingAgreementId = data.billingAgreementId;
-				billing.invoiceNo = invoiceNo;
-				billing.type = "refund";
-				billing.transactionId = data.transactionId;
-
-				let amount = data.amount.substr(1);
-				if (data.currency === "GBP") {
-					amount = "£" + amount;
-				} else {
-					amount = data.currency + " " + amount;
-				}
-
-				return billing.generatePDF()
-					.then(pdf => {
-
-						billing.pdf = pdf;
-						// also save the pdf to database for ref.
-						return billing.save();
-
-					})
-					.then(() => {
-
-						let attachments = [{
-							filename: `${moment(billing.createdAt).utc().format(C.DATE_FORMAT)}_invoice-${billing.invoiceNo}.pdf`,
-							content: billing.pdf
-						}];
-
-						Mailer.sendPaymentRefundedEmail(user.customData.email, {
-							amount: amount
-						}, attachments);
-
-						//make a copy to sales
-						Mailer.sendPaymentReceivedEmailToSales({
-							account: user.account,
-							amount: data.currency + amount,
-							email: user.customData.email,
-							invoiceNo: billing.invoiceNo,
-							type: billing.type
-						}, attachments);
-
-						return billing;
-					});
+			// also save the pdf to database for ref.
+			return invoice.generatePDF().then(pdf => {
+				invoice.pdf = pdf;
+				return invoice;
 			});
+
+		}).then(invoice => {
+
+			let attachments = [{
+				filename: `${moment(invoice.createdAtDate).utc().format(C.DATE_FORMAT)}_invoice-${invoice.invoiceNo}.pdf`,
+				content: invoice.pdf
+			}];
+
+			User.findByUserName(user.customData.billing.billingUser).then(billingUser => {
+				Mailer.sendPaymentRefundedEmail(billingUser.customData.email, {
+					amount: `${data.currency}${data.amount}`
+				}, attachments);
+
+				//make a copy to sales
+				Mailer.sendPaymentReceivedEmailToSales({
+					account: user.user,
+					amount: `${data.currency}${data.amount}`,
+					email: billingUser.customData.email,
+					invoiceNo: invoice.invoiceNo,
+					type: invoice.type
+				}, attachments);
+			});
+
+			return invoice;
+		});
 	};
 
 	schema.methods.generatePDF = function () {

@@ -41,7 +41,6 @@
 
 				dbUser = _dbUser;
 				let billingUser = req.session.user.username;
-				//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
 				return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 			})
 			.then(agreement => {
@@ -67,7 +66,7 @@
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(user => {
-
+				console.log(user);
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);

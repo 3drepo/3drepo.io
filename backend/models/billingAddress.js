@@ -46,15 +46,14 @@
 		this.changed = false;
 
 		Object.keys(billingAddress).forEach(key => {
-			if(key !== 'vat'){
-				if (this[key] !== billingAddress[key]) {
-					this.changed = true;
-				}
 
-				this.set(key, billingAddress[key]);
+			if (this[key] !== billingAddress[key]) {
+				this.changed = true;
 			}
-		});
 
+			this.set(key, billingAddress[key]);
+			
+		});
 
 		if(billingAddress.vat){
 			return this.changeVATNumber(billingAddress.vat);
@@ -65,10 +64,6 @@
 
 	billingAddressSchema.methods.changeVATNumber = function(vatCode){
 
-		if(this.vat !== vatCode){
-			this.changed = true;
-		}
-
 		this.vat = vatCode;
 
 		let cleanedVATNumber = this.vat.replace(/ /g,'');
@@ -76,16 +71,8 @@
 			cleanedVATNumber = cleanedVATNumber.substr(2); 
 		}
 
-		let checkVAT = this.vat && addressMeta.euCountriesCode.indexOf(this.countryCode) !== -1 ? 
-		vat.checkVAT(this.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
-
-		let skipCheckingForTravis = config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && this.countryCode !== 'GB';
-
-		if(skipCheckingForTravis){
-			checkVAT = Promise.resolve(({ valid: true }));
-		}
-
-		return checkVAT.then(result => {
+		console.log(this.countryCode, cleanedVATNumber);
+		return vat.checkVAT(this.countryCode, cleanedVATNumber).then(result => {
 			if (!result.valid)
 			{
 				return Promise.reject(responseCodes.INVALID_VAT);
