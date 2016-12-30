@@ -223,7 +223,7 @@
 
 				//init date for 1st/'new' payments
 				if (this.isNewPayment(changes)){
-					console.log('new payments');
+					//console.log('new payments');
 					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 				}

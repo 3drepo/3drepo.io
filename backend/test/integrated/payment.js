@@ -233,7 +233,7 @@ describe('Enrolling to a subscription', function () {
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
-			console.log(res.body);
+			//console.log(res.body);
 			expect(res.body).to.have.property('url');
 			let parsed = url.parse(res.body.url, true);
 			expect(parsed.query).to.have.property('token');
@@ -501,7 +501,7 @@ describe('Enrolling to a subscription', function () {
 
 				subscriptions = res.body;
 
-				console.log(subscriptions);
+				//console.log(subscriptions);
 
 				subscriptions.forEach(sub => {
 					expect(sub).to.have.deep.property('limits.spaceLimit');

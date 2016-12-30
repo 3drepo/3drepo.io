@@ -124,10 +124,10 @@
 
 	schema.virtual('proRata').get(function(){
 		if(this.items.length > 0 && this.items[0].amount.toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
-			return true;
+			return false;
 		}
 
-		return false;
+		return true;
 	});
 
 	//schema.set('toObject', { virtuals: true, getter:true });

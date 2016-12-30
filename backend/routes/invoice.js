@@ -59,7 +59,7 @@
 				template = "refund.jade";
 			}
 
-			console.log( invoice.toJSON());
+			//console.log( invoice.toJSON());
 			
 			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
 
