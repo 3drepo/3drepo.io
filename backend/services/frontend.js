@@ -62,17 +62,20 @@
 
 			for(let prop in obj)
 			{
-				let aProperty       = obj[prop];
-				
-				objString += "\"" + prop + "\":"; 
-				if (typeof aProperty === "object")
-				{
-					objString += objectToString(aProperty);
-				} else {
-					objString += "" + aProperty; 
-				} 
+				// to avoid jshint to complain
+				if(obj.hasOwnProperty(prop)){
+					let aProperty       = obj[prop];
+					
+					objString += "\"" + prop + "\":"; 
+					if (typeof aProperty === "object")
+					{
+						objString += objectToString(aProperty);
+					} else {
+						objString += "" + aProperty; 
+					} 
 
-				objString += ",";
+					objString += ",";
+				}
 			}
 
 			objString += "}";
@@ -85,7 +88,7 @@
 
 			params.config_js = "var server_config = {};\n";
 
-			params.config_js += "server_config.api_algorithm = (function () { let self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
+			params.config_js += "server_config.api_algorithm = (function () {'use strict'; let self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
 
 			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
 			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl;\n";
