@@ -52,7 +52,7 @@
 		vm.B2B_EU = false;
 
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
-			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
+			billingsPromise = UtilsService.doGet(vm.query.user + "/invoices");
 			billingsPromise.then(function (response) {
 				console.log("**billings**", response);
 				if ((response.data.length > 0) &&

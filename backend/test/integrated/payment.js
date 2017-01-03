@@ -25,11 +25,15 @@ let app = require("../../services/api.js").createApp(
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
-let getNextPaymentDate = require("../../models/payment").getNextPaymentDate;
 let helpers = require("./helpers");
 let async = require('async');
 let moment = require('moment-timezone');
-let Payment = require('../../models/payment');
+
+let User = require('../../models/user');
+let Paypal = require('../../models/paypal');
+let UserBilling = require('../../models/userBilling');
+let getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+let sinon = require('sinon');
 
 let url = require('url');
 describe('Enrolling to a subscription', function () {
@@ -38,7 +42,7 @@ describe('Enrolling to a subscription', function () {
 	let agent;
 	let username = 'payment_testing';
 	let password = 'payment_testing';
-	
+
 	let username2 = 'payment_user2';
 	let password2 = 'payment_user2';
 	let email2 = 'test3drepo_payment2@mailinator.com';
@@ -113,7 +117,7 @@ describe('Enrolling to a subscription', function () {
 
 	let plans = {
 		"plans": [
-			{    
+			{
 			"plan": "THE-100-QUID-PLAN",
 			"quantity": 3
 			}
@@ -133,20 +137,20 @@ describe('Enrolling to a subscription', function () {
 	};
 
 
-	it('should fail if VAT is invalid', function(done){
-		this.timeout(10000);
+	// it('should fail if VAT is invalid', function(done){
+	// 	this.timeout(20000);
 
-		agent.post(`/${username}/subscriptions`)
-		.send(plans)
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.INVALID_VAT.value);
-			done(err);
-		});
-	});
+	// 	agent.post(`/${username}/subscriptions`)
+	// 	.send(plans)
+	// 	.expect(400, function(err, res){
+	// 		expect(res.body.value).to.equal(responseCodes.INVALID_VAT.value);
+	// 		done(err);
+	// 	});
+	// });
 
 
 	it('should success no VAT is supplied', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 
 		delete plans.billingAddress.vat;
 
@@ -159,11 +163,11 @@ describe('Enrolling to a subscription', function () {
 
 
 	it('should success VAT is supplied and country is non EU', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 
 		let plans = {
 			"plans": [
-				{    
+				{
 				"plan": "THE-100-QUID-PLAN",
 				"quantity": 3
 				}
@@ -191,11 +195,11 @@ describe('Enrolling to a subscription', function () {
 
 
 	it('should success VAT is not supplied and country is non EU', function(done){
-		this.timeout(10000);
+		this.timeout(20000);
 
 		let plans = {
 			"plans": [
-				{    
+				{
 				"plan": "THE-100-QUID-PLAN",
 				"quantity": 3
 				}
@@ -220,19 +224,20 @@ describe('Enrolling to a subscription', function () {
 		});
 	});
 
-	it('should succee (GB business)', function(done){
+	it('should succeed (GB business)', function(done){
 
 		plans.billingAddress.vat = '206909015';
 
-		this.timeout(10000);
+		this.timeout(20000);
 
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
+			//console.log(res.body);
 			expect(res.body).to.have.property('url');
 			let parsed = url.parse(res.body.url, true);
 			expect(parsed.query).to.have.property('token');
-			
+
 			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 			expect(paymentDef).to.be.not.null;
 			done(err);
@@ -244,14 +249,17 @@ describe('Enrolling to a subscription', function () {
 
 	describe('and then pay', function(){
 
+		let stub;
+
 		before(function(done){
 			//fake payment
-			this.timeout(7000);
-
+			this.timeout(20000);
+			let start_date = (new Date()).toISOString();
 			// set fake billing id
 			User.findByUserName(username).then(user => {
 
-				return user.executeBillingAgreement('EC-000000000', billingId, {
+				//stub paypal execute agreement
+				stub = sinon.stub(Paypal, 'executeAgreement').returns(Promise.resolve( {
 				  "id": billingId,
 				  "name": "3D Repo Licenses",
 				  "description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
@@ -309,18 +317,18 @@ describe('Enrolling to a subscription', function () {
 				      "method": "POST"
 				    }
 				  ],
-				  "start_date": "2016-08-01T15:04:22Z",
+				  "start_date": start_date,
 				  "httpStatusCode": 201
-				}).then(() => {
-					return user.save();
-				});
+				}));
+
+				return user.executeBillingAgreement();
 
 			}).then(() => {
 
 
 				// it should have a pending billing with SO-1 as invoice number.
 				return new Promise((resolve, reject) => {
-					agent.get(`/${username}/billings`)
+					agent.get(`/${username}/invoices`)
 					.expect(200, function(err, res){
 						//console.log('billings', res.body);
 						expect(res.body).to.be.an('array').and.to.have.length(1);
@@ -335,65 +343,10 @@ describe('Enrolling to a subscription', function () {
 					});
 				});
 
-
-			}).then(() => {
-
-				let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
-				let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
-
-				let fakePaymentMsg = 
-					'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
-					+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
-					+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
-					+ '&product_name=abc&charset=UTF-8'
-					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=0.00&address_country_code=GB'
-					+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=360.00&payer_status=verified&currency_code=GBP'
-					+ '&business=test3drepo@example.org&address_country=UK&address_city=London'
-					+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
-					+ '&initial_payment_amount=0.00&profile_status=Active&amount=360.00&txn_id=7VE78102JM363223J&payment_type=instant'
-					+ '&last_name=3d&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
-					+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
-					+ '&transaction_subject=abc'
-					+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
-
-				return new Promise((resolve, reject) => {
-					agent.post(`/payment/paypal/food`)
-					.send(fakePaymentMsg)
-					.expect(200, function(err, res){
-						setTimeout(function(){
-							if(err){
-								reject(err);
-							} else {
-								resolve();
-							}
-						}, 2000);
-					});
-				});
-
-
-			}).then(() => {
-
-				// it should have a pending billing with SO-1 as invoice number.
-				return new Promise((resolve, reject) => {
-					agent.get(`/${username}/billings`)
-					.expect(200, function(err, res){
-						//console.log('billings', res.body);
-						expect(res.body).to.be.an('array').and.to.have.length(1);
-						expect(res.body[0].invoiceNo).to.equal('SO-1');
-						expect(res.body[0].pending).to.be.undefined;
-
-						if(err){
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
-
 			}).then(() => {
 
 				done();
-				
+
 			}).catch(err => {
 				done(err);
 			});
@@ -402,9 +355,138 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		after(function(done){
+			stub.restore();
+
 			agent.post('/logout')
 			.send({})
 			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
+		it('before 1st IPN the subscriptions should be activated temporary for 48 hours', function(done){
+
+			let twoDayLater = moment().utc().add(48, 'hour').toDate();
+
+			return User.findByUserName(username).then(user => {
+				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true });
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
+				subscriptions.forEach(sub => {
+					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
+					expect(Math.abs(sub.expiredAt - twoDayLater) / 1000).to.below(60);
+				});
+
+				done();
+			}).catch(err => {
+				done(err);
+			});
+		});
+
+		it('before 1st IPN the last anniversary date and next payment date are set already', function(done){
+			return User.findByUserName(username).then(user => {
+
+				let startDate = moment().utc();
+				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(startDate.clone().startOf('day').toDate().valueOf());
+				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(getNextPaymentDate(startDate).valueOf());
+
+				done();
+			}).catch(err => {
+				done(err);
+			});
+		});
+
+		let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+
+		it('and then 1st IPN arrive', function(done){
+
+			this.timeout(20000);
+
+			let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+			let fakePaymentMsg =
+				'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
+				+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
+				+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
+				+ '&product_name=abc&charset=UTF-8'
+				+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=0.00&address_country_code=GB'
+				+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=360.00&payer_status=verified&currency_code=GBP'
+				+ '&business=test3drepo@example.org&address_country=UK&address_city=London'
+				+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
+				+ '&initial_payment_amount=0.00&profile_status=Active&amount=360.00&txn_id=7VE78102JM363223J&payment_type=instant'
+				+ '&last_name=3d&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
+				+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
+				+ '&transaction_subject=abc'
+				+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
+
+			return new Promise((resolve, reject) => {
+				agent.post(`/payment/paypal/food`)
+				.send(fakePaymentMsg)
+				.expect(200, function(err, res){
+					setTimeout(function(){
+						if(err){
+							reject(err);
+						} else {
+							resolve();
+						}
+					}, 3000);
+				});
+			}).then(() => {
+
+				done();
+
+			}).catch(err => {
+				done(err);
+			});
+
+		});
+
+		it('after 1st IPN it should have a confirmed invoice SO-1 generated', function(done){
+			// it should have a confirmed billing with SO-1 as invoice number.
+
+			agent.get(`/${username}/invoices`)
+			.expect(200, function(err, res){
+				//console.log('billings', res.body);
+				expect(res.body).to.be.an('array').and.to.have.length(1);
+				expect(res.body[0].invoiceNo).to.equal('SO-1');
+				expect(res.body[0].pending).to.be.false;
+				done(err);
+			});
+
+		});
+
+		it('after 1st IPN the subscriptions should be activated until 3 days after next payment date', function(done){
+
+			let twoDayLater = moment().utc().add(48, 'hour').toDate();
+
+			return User.findByUserName(username).then(user => {
+				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
+				subscriptions.forEach(sub => {
+					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
+
+					let expiredAt = moment(new Date(nextPayDateString)).utc()
+						.add(3, 'day')
+						.hours(0).minutes(0).seconds(0).milliseconds(0)
+						.toDate();
+
+					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
+				});
+
+				done();
+			}).catch(err => {
+				done(err);
+			});
+		});
+
+		it('after 1st IPN the next payment date are set', function(done){
+			return User.findByUserName(username).then(user => {
+
+				let startDate = moment().utc();
+
+				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf('date').toDate().valueOf());
+
+				done();
+
+			}).catch(err => {
 				done(err);
 			});
 		});
@@ -441,7 +523,7 @@ describe('Enrolling to a subscription', function () {
 
 		describe('and then assigning it', function(){
 
-			
+
 
 			it('should fail if subscription id does not exist', function(done){
 				agent.post(`/${username}/subscriptions/000000000000000000000000/assign`)
@@ -539,6 +621,7 @@ describe('Enrolling to a subscription', function () {
 
 
 	describe('and then refund', function(){
+		this.timeout(6000);
 
 		before(function(done){
 			let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
@@ -568,9 +651,9 @@ describe('Enrolling to a subscription', function () {
 							} else {
 								done();
 							}
-						}, 500);
+						}, 3000);
 					});
-				}, 
+				},
 
 				function(done){
 
@@ -580,7 +663,7 @@ describe('Enrolling to a subscription', function () {
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
-			
+
 				}
 			], done);
 
@@ -595,9 +678,9 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('should have credit note created with number CN-1', function(done){
-			agent.get(`/${username}/billings`)
+			agent.get(`/${username}/invoices`)
 			.expect(200, function(err, res){
-			
+
 				expect(res.body).to.be.an('array');
 				let cn = res.body.find( bill => bill.invoiceNo === 'CN-1');
 				expect(cn).to.exist;
@@ -610,16 +693,18 @@ describe('Enrolling to a subscription', function () {
 
 	describe('and then simulate recurring payment message from the 2nd month', function(){
 
+		this.timeout(6000);
+
+		let paymentDate = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+		let paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
+		let nextPayDateString = moment(paymentDateAfterNext).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
+		let lastPaymentDate;
+
 		before(function(done){
 
-			let paymentDate = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
-			let paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
-			console.log('paymentDate', paymentDate);
-			console.log('paymentDateAfterNext', paymentDateAfterNext);
-			let nextPayDateString = moment(paymentDateAfterNext).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
 			let transactionId = '99999999AA000000A';
 
-			let fakePaymentMsg = 
+			let fakePaymentMsg =
 				'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
 				+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
 				+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
@@ -638,6 +723,12 @@ describe('Enrolling to a subscription', function () {
 			async.series([
 
 				function(done){
+					return User.findByUserName(username).then(user => {
+						lastPaymentDate = user.customData.billing.nextPaymentDate;
+						done();
+					});
+				},
+				function(done){
 					agent.post(`/payment/paypal/food`)
 					.send(fakePaymentMsg)
 					.expect(200, function(err, res){
@@ -647,9 +738,9 @@ describe('Enrolling to a subscription', function () {
 							} else {
 								done();
 							}
-						}, 500);
+						}, 3000);
 					});
-				}, 
+				},
 
 				function(done){
 
@@ -659,7 +750,7 @@ describe('Enrolling to a subscription', function () {
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
-			
+
 				}
 			], done);
 
@@ -674,9 +765,9 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('should have invoice created with number SO-2', function(done){
-			agent.get(`/${username}/billings`)
+			agent.get(`/${username}/invoices`)
 			.expect(200, function(err, res){
-			
+
 				expect(res.body).to.be.an('array');
 				let cn = res.body.find( bill => bill.invoiceNo === 'SO-2');
 				expect(cn).to.exist;
@@ -685,9 +776,49 @@ describe('Enrolling to a subscription', function () {
 			});
 		});
 
+		it('after 2nd IPN the subscriptions should be activated until 3 days after next payment date', function(done){
+
+			let twoDayLater = moment().utc().add(48, 'hour').toDate();
+
+			return User.findByUserName(username).then(user => {
+				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
+				subscriptions.forEach(sub => {
+					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
+
+					let expiredAt = moment(new Date(nextPayDateString)).utc()
+						.add(3, 'day')
+						.hours(0).minutes(0).seconds(0).milliseconds(0)
+						.toDate();
+
+					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
+				});
+
+				done();
+			}).catch(err => {
+				done(err);
+			});
+		});
+
+		it('after 2nd IPN the last anniversary date and next payment date are set', function(done){
+			return User.findByUserName(username).then(user => {
+
+				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(lastPaymentDate.valueOf());
+				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf('date').toDate().valueOf());
+
+				done();
+
+			}).catch(err => {
+				done(err);
+			});
+		});
+
 	});
 
 	describe('second user pays', function(){
+
+		let stub;
+
 		before(function(done){
 			agent.post('/login')
 			.send({ username: username3, password: password3 })
@@ -697,11 +828,25 @@ describe('Enrolling to a subscription', function () {
 			});
 		});
 
+		after(function(done){
+			stub.restore();
+
+			agent.post('/logout')
+			.send({})
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
 		it('should succee (GB business)', function(done){
 
 			plans.billingAddress.vat = '206909015';
+			plans.billingAddress.line1 = '2nduser line1';
+			plans.billingAddress.line2 = '2nduser line2';
+			plans.billingAddress.line3 = '2nduser line3';
 
-			this.timeout(10000);
+
+			this.timeout(20000);
 
 			agent.post(`/${username3}/subscriptions`)
 			.send(plans)
@@ -709,7 +854,7 @@ describe('Enrolling to a subscription', function () {
 				expect(res.body).to.have.property('url');
 				let parsed = url.parse(res.body.url, true);
 				expect(parsed.query).to.have.property('token');
-				
+
 				let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 				expect(paymentDef).to.be.not.null;
 				done(err);
@@ -719,7 +864,9 @@ describe('Enrolling to a subscription', function () {
 		it('should have an invoice with invoice number SO-3', function(){
 			return User.findByUserName(username3).then(user => {
 
-				return user.executeBillingAgreement('EC-000000001', billingId, {
+				let start_date = (new Date()).toISOString();
+
+				stub = sinon.stub(Paypal, 'executeAgreement').returns(Promise.resolve({
 				  "id": billingId,
 				  "name": "3D Repo Licenses",
 				  "description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
@@ -777,18 +924,19 @@ describe('Enrolling to a subscription', function () {
 				      "method": "POST"
 				    }
 				  ],
-				  "start_date": "2016-08-01T15:04:22Z",
+				  "start_date": start_date,
 				  "httpStatusCode": 201
-				}).then(() => {
-					return user.save();
-				});
+				}));
+
+				return user.executeBillingAgreement();
+
 
 			}).then(() => {
 
 
 				// it should have a pending billing with SO-3 as invoice number.
 				return new Promise((resolve, reject) => {
-					agent.get(`/${username3}/billings`)
+					agent.get(`/${username3}/invoices`)
 					.expect(200, function(err, res){
 						//console.log('billings', res.body);
 						expect(res.body).to.be.an('array').and.to.have.length(1);
@@ -807,8 +955,5 @@ describe('Enrolling to a subscription', function () {
 			});
 		});
 	});
-
-
-
 
 });

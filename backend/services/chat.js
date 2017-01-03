@@ -31,6 +31,7 @@ module.exports.createApp = function (server, serverConfig){
 	//console.log(serverConfig);
 	let io = require("socket.io")(server, { path: '/' + serverConfig.subdirectory });
 	let sharedSession = require("express-socket.io-session");
+	let _ = require('lodash');
 
 	io.use((socket, next) => {
 		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
@@ -69,6 +70,8 @@ module.exports.createApp = function (server, serverConfig){
 
 
 	let userToSocket = {};
+	let credentialErrorEventName = 'credentialError';
+	let joinedEventName = 'joined';
 
 	function socket(queue){
 
@@ -94,10 +97,15 @@ module.exports.createApp = function (server, serverConfig){
 
 		//on client connect	
 		io.on('connection', socket => {
+			//socket error handler, frontend will attempt to reconnect
+			socket.on('error', err => {
+				systemLogger.logError('Chat server - socket error - ' + err.message);
+			});
 
-			if(!socket.handshake.session.user){
+			if(!_.get(socket, 'handshake.session.user')){
 
 				systemLogger.logError(`socket connection without credential`);
+				socket.emit(credentialErrorEventName, { message: 'Connection without credential'});
 				//console.log(socket.handshake);
 
 				return;
@@ -114,13 +122,18 @@ module.exports.createApp = function (server, serverConfig){
 				middlewares.hasReadAccessToProjectHelper(username, data.account, data.project).then(hasAccess => {
 
 					if(hasAccess){
+
 						socket.join(`${data.account}::${data.project}`);
+						socket.emit(joinedEventName, { account: data.account, project: data.project});
+
 						systemLogger.logInfo(`${username} - ${sessionId} has joined room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
 						});
+						
 					} else {
+						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}::${data.project}`});
 						systemLogger.logError(`${username} - ${sessionId} has no access to join room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
@@ -141,6 +154,8 @@ module.exports.createApp = function (server, serverConfig){
 			});
 
 		});
+
+
 
 	}
 

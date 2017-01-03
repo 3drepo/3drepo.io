@@ -127,10 +127,10 @@
 		 * @param page
 		 * @param callingPage
 		 */
-		vm.showPage = function (page, callingPage) {
+		vm.showPage = function (page, callingPage, data) {
 			vm.itemToShow = page;
-			$location.search("page", page);
 			vm.callingPage = callingPage;
+			vm.data = data;
 		};
 
 		/**
@@ -156,7 +156,7 @@
 
 			getUserInfo();
 
-			billingsPromise = UtilsService.doGet(vm.account + "/billings");
+			billingsPromise = UtilsService.doGet(vm.account + "/invoices");
 			billingsPromise.then(function (response) {
 				vm.billings = response.data;
 			});

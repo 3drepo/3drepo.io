@@ -1,6 +1,7 @@
 var soap = require('soap');
 var config = require('../config');
 var vatValidationUrl = config.vat.checkUrl;
+var addressMeta = require("./addressMeta");
 
 var vat = [
 	{ countryCode: 'AT', standardRate: 20 },
@@ -61,8 +62,17 @@ function getByCountryCode(code, isBusiness){
 
 
 function checkVAT(code, vat){
+	'use strict';
 
 	return new Promise((resolve, reject) => {
+
+		if(addressMeta.euCountriesCode.indexOf(code) === -1){
+			return resolve({ valid: true });
+		} 
+
+		if(config.vat && config.vat.debug && config.vat.debug.skipChecking){
+			return resolve({ valid: true });
+		}
 
 		if(!vatValidationUrl){
 			return reject({message: 'vat.checkUrl is not defined in config file'});

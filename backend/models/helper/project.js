@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+var ModelFactory = require('../factory/modelFactory');
 var Role = require('../role');
+var RoleTemplates = require('../role_templates');
 var RoleSetting = require('../roleSetting');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
@@ -34,6 +35,9 @@ var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
 var C = require("../../constants");
 var _ = require('lodash');
+var multer = require("multer");
+var fs = require('fs');
+var ChatEvent = require('../chatEvent');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -80,10 +84,6 @@ function convertToErrorCode(errCode){
 function createAndAssignRole(project, account, username, data) {
 	'use strict';
 
-	if(project.length > 60){
-		return Promise.reject({ resCode: responseCodes.PROJECT_NAME_TOO_LONG });
-	}
-
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
@@ -111,31 +111,11 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(() => {
 
-		return Role.findByRoleID(`${account}.${project}.viewer`);
-
-	}).then(role =>{
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createViewerRole(account, project);
-		}
-
+		return Role.createStandardRoles(account, project);
+	
 	}).then(() => {
 
-		return Role.findByRoleID(`${account}.${project}.collaborator`);
-
-	}).then(role => {
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createCollaboratorRole(account, project);
-		}
-
-	}).then(() => {
-
-		return User.grantRoleToUser(username, account, `${project}.collaborator`);
+		return Role.grantProjectRoleToUser(username, account, project, C.COLLABORATOR_TEMPLATE);
 
 	}).then(() => {
 
@@ -172,137 +152,16 @@ function createAndAssignRole(project, account, username, data) {
 			project: {
 				account,
 				project,
-				roleFunctions: [Role.roleEnum.COLLABORATOR, Role.roleEnum.ADMIN]
+				permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
 			}
 
 		};
 	});
 }
 
-function importToyJSON(db, project){
-	'use strict';
-
-	let path = '../../statics/toy';
-
-	let importCollectionFiles = {};
-
-	importCollectionFiles[`${project}.history.chunks`] = 'history.chunks.json';
-	importCollectionFiles[`${project}.history.files`] = 'history.files.json';
-	importCollectionFiles[`${project}.history`] = 'history.json';
-	importCollectionFiles[`${project}.issues`] = 'issues.json';
-	importCollectionFiles[`${project}.scene`] = 'scene.json';
-	importCollectionFiles[`${project}.stash.3drepo.chunks`] = 'stash.3drepo.chunks.json';
-	importCollectionFiles[`${project}.stash.3drepo.files`] = 'stash.3drepo.files.json';
-	importCollectionFiles[`${project}.stash.3drepo`] = 'stash.3drepo.json';
-	importCollectionFiles[`${project}.stash.json_mpc.chunks`] = 'stash.json_mpc.chunks.json';
-	importCollectionFiles[`${project}.stash.json_mpc.files`] = 'stash.json_mpc.files.json';
-	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
-	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
-
-	let host = config.db.host[0];
-	let port = config.db.port[0];
-
-	let username = config.db.username;
-	let password = config.db.password;
-
-	let promises = [];
-
-	Object.keys(importCollectionFiles).forEach(collection => {
-
-		let filename = importCollectionFiles[collection];
-
-		promises.push(new Promise((resolve, reject) => {
-
-			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --port ${port} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
-			{
-				cwd: __dirname
-			}, function (err) {
-				if(err){
-					reject({message: err.message.replace(new RegExp(password, 'g'), '[password masked]').replace(new RegExp(username, 'g'), '[username masked]')});
-				} else {
-					resolve();
-				}
-			});
-
-		}));
-	});
-
-	return Promise.all(promises).then(() => {
-		//rename json_mpc stash
-		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
-
-		jsonBucket.find().forEach(file => {
-
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = db;
-			newFileName = newFileName.join('/');
-			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
-				);
-			});
-		});
-
-		//rename src stash
-		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
-
-		srcBucket.find().forEach(file => {
-
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = db;
-			newFileName = newFileName.join('/');
-			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
-				);
-			});
-
-		});
-
-		return Promise.resolve();
-
-	}).then(() => {
-		//change history time and author
-		return History.findLatest({account: db, project: project}, { current: 0 });
-
-	}).then(history => {
-
-		history.author = db;
-		history.timestamp = new Date();
-
-		return history.save();
-
-	}).then(() => {
-
-		let Issue = require('../issue');
-
-		let updateIssuePromises = [];
-
-		Issue.find({account: db, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
-			issues.forEach(issue => {
-
-				issue.owner = db;
-
-				issue.comments.forEach(comment => {
-					comment.owner = db;
-				});
-
-				updateIssuePromises.push(issue.save());
-			});
-		});
-
-		return Promise.all(updateIssuePromises);
-	});
-
-}
-
 function importToyProject(username){
 	'use strict';
 
-	let projectSetting;
 	let project = 'sample_project';
 	let account = username;
 	let desc = '';
@@ -316,44 +175,9 @@ function importToyProject(username){
 	};
 	
 	return createAndAssignRole(project, account, username, data).then(data => {
-		//console.log('setting', setting);
 		return Promise.resolve(data.setting);
-
 	}).then(setting => {
-
-		projectSetting = setting;
-		projectSetting.status = 'processing';
-
-		return projectSetting.save();
-
-	}).then(() => {
-
-		return importToyJSON(account, project);
-
-	}).then(() => {
-		//mark project ready
-
-		projectSetting.status = 'ok';
-		projectSetting.errorReason = undefined;
-		projectSetting.markModified('errorReason');
-
-		return projectSetting.save();
-
-	}).catch(err => {
-
-		systemLogger.logError(`Import toy project error`, {
-			err: err,
-			account: username,
-			project: project
-		});
-		//mark project failed
-		if(projectSetting){
-			projectSetting.status = 'failed';
-			projectSetting.save();
-		}
-
-		return Promise.reject(err);
-
+		importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
 	});
 }
 
@@ -362,18 +186,6 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 	let setting;
 	let user;
-	let action;
-
-	if(role === 'viewer'){
-		action = 'view';
-	} else if(role === 'collaborator'){
-		action = 'collaborate';
-	} else if(role === 'commenter'){
-		action = 'comment';
-	} else {
-		return Promise.reject(responseCodes.INVALID_ROLE);
-	}
-
 
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
@@ -406,7 +218,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 	}).then(dbUser => {
 
 		let found = false;
-		let subscriptions = dbUser.getActiveSubscriptions();
+		let subscriptions = dbUser.customData.billing.subscriptions.getActiveSubscriptions();
 
 		subscriptions.forEach(subscription => {
 			if(subscription.assignedUser === user.user){
@@ -418,20 +230,9 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 
-		return Role.findByRoleID(`${account}.${project}.${role}`).then(roleFound => {
-			if(roleFound){
-				return;
-			} else if(role === 'viewer') {
-				return Role.createViewerRole(account, project);
-			} else if(role === 'collaborator') {
-				return Role.createCollaboratorRole(account, project);
-			} else if(role === 'commenter') {
-				return Role.createCommenterRole(account, project);
-			}
-		});
-
 	}).then(() => {
-		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
+
+		return Role.grantProjectRoleToUser(user.user, account, project, role);
 
 	}).then(() => {
 
@@ -446,7 +247,7 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 			if(!disableEmail){
 				Mailer.sendProjectInvitation(user.customData.email, {
-					action, account, project
+					account, project
 				}).catch(err => {
 					systemLogger.logError(`Email error - ${err.message}`);
 				});
@@ -500,7 +301,10 @@ function removeCollaborator(username, email, account, project, role){
 			return Promise.reject(responseCodes.NOT_IN_ROLE);
 		}
 
-		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
+		return Role.revokeRolesFromUser(user.user, [{
+			db: account, 
+			role: `${project}.${role}`
+		}]);
 
 	}).then(() => {
 
@@ -981,37 +785,43 @@ function getRolesForProject(account, project, removeViewer){
 			},{ 
 				'roles': {
 					'$elemMatch': {
-						"role" : "readWrite",
 						"db" : account
 					}
 				}
 			}]
 
+		},{
+			role: 1, db: 1, _id: 0
 		});
 
 	}).then(roles => {
 
+		roles.forEach((role, i)  => roles[i] = role.toObject());
+		return Role.viewRolesWithInheritedPrivs(roles);
 
+	}).then(roles => {
 
-		for(let i = roles.length - 1; i >= 0; i--){
-
-			//console.log(Role.determineRole(account, project, roles[i]));
-
-			if (removeViewer && Role.determineRole(account, project, roles[i]) === Role.roleEnum.VIEWER){
-				roles.splice(i, 1);
-			}
-		}
+		//console.log(JSON.stringify(roles, null , 2));
 
 		roles.forEach((role, i) => {
-
-			roles[i] = _.pick(role.toObject(), ['role', 'db']);
-			roles[i].roleFunction = Role.determineRole(account, project, role);
+			
+			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
 
 			if(roleSettings[roles[i].role]){
 				roles[i].color = roleSettings[roles[i].role].color;
 				roles[i].desc = roleSettings[roles[i].role].desc;
 			}
+
+			roles[i] = _.pick(roles[i], ['role', 'db', 'color', 'desc', 'permissions']);
 		});
+
+		for(let i = roles.length - 1; i >= 0; i--){
+			if (removeViewer && 
+				_.union(roles[i].permissions, RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE]).length ===  RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE].length)
+			{
+				roles.splice(i, 1);
+			}
+		}
 
 		return roles;
 	});
@@ -1041,8 +851,370 @@ function getUserRolesForProject(account, project, username){
 	});
 }
 
+
+
+function uploadFile(req){
+	'use strict';
+
+	if (!config.cn_queue) {
+		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
+	}
+
+	let account = req.params.account;
+	let project = req.params.project;
+	//upload project with tag
+	let checkTag = tag => {
+		if(!tag){
+			return Promise.resolve();
+		} else {
+			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
+				return History.findByTag({account, project}, tag, {_id: 1});
+			}).then(tag => {
+				if (!tag){
+					return Promise.resolve();
+				} else {
+					return Promise.reject(responseCodes.DUPLICATE_TAG);
+				}
+			});
+
+		}
+	};
+
+	return new Promise((resolve, reject) => {
+
+		let upload = multer({
+			dest: config.cn_queue.upload_dir,
+			fileFilter: function(req, file, cb){
+
+				let format = file.originalname.split('.');
+				
+				if(format.length <= 1){
+					return cb({resCode: responseCodes.FILE_NO_EXT});
+				}
+
+				format = format[format.length - 1];
+
+				let size = parseInt(req.headers['content-length']);
+
+				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+				}
+
+				if(size > config.uploadSizeLimit){
+					return cb({ resCode: responseCodes.SIZE_LIMIT });
+				}
+
+				middlewares.freeSpace(account).then(space => {
+
+					if(size > space){
+						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+					} else {
+						cb(null, true);
+					}
+				});
+			}
+		});
+
+		upload.single("file")(req, null, function (err) {
+			if (err) {
+				return reject(err);
+
+			} else if(!req.file.size){
+				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+			} else {
+				return resolve(req.file);
+			}
+		});
+
+	}).then(file => {
+		return checkTag(req.body.tag).then(() => file);
+	});
+
+}
+
+function _handleUpload(account, project, username, file, data){
+	'use strict';
+
+	let deleteFiles = function(filePath, fileDir, jsonFile){
+
+		[
+			{desc: 'tmp model file', type: 'file', path: filePath}, 
+			{desc: 'json file', type: 'file', path: jsonFile}, 
+			{desc: 'tmp dir', type: 'dir', path: fileDir}
+		].forEach(file => {
+
+			let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+
+			deleteFile(file.path, function(err){
+				if(err){
+					systemLogger.logError(`error while deleting ${file.desc}`,{
+						message: err.message,
+						err: err,
+						file: file.path
+					});
+				} else {
+					systemLogger.logInfo(`${file.desc} deleted`,{
+						file: file.path
+					});
+				}
+			});
+		});
+
+
+	};
+
+	return importQueue.importFile(
+		file.path,
+		file.originalname,
+		account,
+		project,
+		username,
+		null,
+		data.tag,
+		data.desc
+	).then(obj => {
+
+		let corID = obj.corID;
+
+		systemLogger.logInfo(`Job ${corID} imported without error`,{
+			account,
+			project,
+			username
+		});
+
+		deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
+		return Promise.resolve(obj);
+
+	}).catch(err => {
+
+		deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
+		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
+	});
+
+}
+
+function _importBSON(account, project, username, dir){
+	'use strict';
+
+	let importCollectionFiles = {};
+	
+	fs.readdirSync(`${__dirname}/${dir}`).forEach(file => {
+		// remove '.json' in string
+		let collectionName = file.split('.');
+		collectionName.pop();
+		collectionName = collectionName.join('.');
+
+		importCollectionFiles[`${project}.${collectionName}`] = file;
+	});
+
+
+	let host = config.db.host[0];
+	let port = config.db.port[0];
+
+	let dbUsername = config.db.username;
+	let dbPassword = config.db.password;
+
+	let promises = [];
+
+	Object.keys(importCollectionFiles).forEach(collection => {
+
+		let filename = importCollectionFiles[collection];
+
+		promises.push(new Promise((resolve, reject) => {
+
+			require('child_process').exec(
+			`mongoimport -j 8 --host ${host} --port ${port} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
+			{
+				cwd: __dirname
+			}, function (err) {
+				if(err){
+					reject({message: err.message.replace(new RegExp(dbPassword, 'g'), '[password masked]').replace(new RegExp(dbUsername, 'g'), '[username masked]')});
+				} else {
+					resolve();
+				}
+			});
+
+		}));
+	});
+
+	return Promise.all(promises).then(() => {
+		//rename json_mpc stash
+		systemLogger.logInfo(`toy project BSON imported without error`,{
+			account,
+			project,
+			username
+		});
+
+		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
+
+		jsonBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = account;
+			newFileName = newFileName.join('/');
+			jsonBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash',
+					{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
+				);
+			});
+		});
+
+		//rename src stash
+		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
+
+		srcBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = account;
+			newFileName = newFileName.join('/');
+			srcBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash',
+					{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
+				);
+			});
+
+		});
+
+		return Promise.resolve();
+
+	}).then(() => {
+		//change history time and author
+		return History.findLatest({account: account, project: project}, { current: 0 });
+
+	}).then(history => {
+
+		history.author = username;
+		history.timestamp = new Date();
+
+		return history.save();
+
+	}).then(() => {
+
+		let Issue = require('../issue');
+
+		let updateIssuePromises = [];
+
+		Issue.find({account: account, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
+			issues.forEach(issue => {
+
+				issue.owner = account;
+
+				issue.comments.forEach(comment => {
+					comment.owner = username;
+				});
+
+				updateIssuePromises.push(issue.save());
+			});
+		});
+
+		return Promise.all(updateIssuePromises);
+	});
+
+}
+
+function importProject(account, project, username, projectSetting, source, data){
+	'use strict';
+
+	if(!projectSetting){
+		return Promise.reject({ message: `projectSetting is ${projectSetting}`});
+	}
+
+	projectSetting.status = 'processing';
+
+	return projectSetting.save().then(() => {
+
+		if(source.type === 'bson'){
+			return _importBSON(account, project, username, source.dir);
+		} else if (source.type === 'upload'){
+			return _handleUpload(account, project, username, source.file, data);
+		}
+
+	}).then(() => {
+
+		projectSetting.status = 'ok';
+		projectSetting.errorReason = undefined;
+		projectSetting.markModified('errorReason');
+
+		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+
+		return projectSetting.save();
+
+	}).catch(err => {
+
+		// import failed for some reason(s)...
+		//mark project failed
+
+		systemLogger.logError(`Error while importing project from source ${source.type}`, {
+			stack : err.stack,
+			err: err,
+			account,
+			project,
+			username
+		});
+
+		projectSetting.status = 'failed';
+		projectSetting.errorReason = err;
+		projectSetting.markModified('errorReason');
+		projectSetting.save();
+
+		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+
+
+		return Promise.reject(err);
+
+	});
+}
+
+function removeProject(account, project){
+	'use strict';
+
+	let setting;
+	return ProjectSetting.findById({account, project}, project).then(_setting => {
+
+		setting = _setting;
+
+		if(!setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_NOT_FOUND});
+		}
+
+	}).then(() => {
+		return ModelFactory.db.db(account).listCollections().toArray();
+
+	}).then(collections => {
+		//remove project collections
+
+		let promises = [];
+		
+		collections.forEach(collection => {
+			if(collection.name.startsWith(project)){
+				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
+			}
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => {
+		//remove project settings
+		return setting.remove();
+
+	}).then(() => {
+		//remove roles related to this project from system.roles collection
+		let promises = [];
+		
+		RoleTemplates.projectRoleTemplateLists.forEach(role => {
+			promises.push(Role.dropRole(account, `${project}.${role}`));
+		});
+
+		return Promise.all(promises);
+	});
+
+}
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var projectNameRegExp = /^[a-zA-Z0-9_]{1,60}$/;
+var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -1070,5 +1242,8 @@ module.exports = {
 	projectNameRegExp,
 	acceptedFormat,
 	getUserRolesForProject,
-	getRolesForProject
+	getRolesForProject,
+	uploadFile,
+	importProject,
+	removeProject
 };

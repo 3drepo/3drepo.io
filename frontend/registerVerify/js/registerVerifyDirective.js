@@ -54,7 +54,7 @@
                 vm.verified = true;
                 vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
             }
-            else if (response.data.value === 60) {
+            else if (response.data.code === 'ALREADY_VERIFIED') {
                 vm.verified = true;
                 vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
             }

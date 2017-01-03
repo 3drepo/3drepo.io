@@ -44,9 +44,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -92,6 +92,14 @@
 
 		this.notificationStarted = false;
 
+		function convertCommentTopicType(){
+			self.issueData && self.issueData.comments.forEach(function(comment){
+				if(comment.action && comment.action.property === 'topic_type'){
+					IssuesService.convertActionCommentToText(comment, self.topic_types);
+				}
+			});
+		}
+
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -103,6 +111,8 @@
 
 			if(changes.hasOwnProperty('projectSettings')){
 				this.topic_types = this.projectSettings.topicTypes;
+				//convert comment topic_types
+				convertCommentTopicType();
 			}
 
 			// Data
@@ -112,7 +122,7 @@
 					this.issueData = angular.copy(this.data);
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
-					
+					this.issueData.thumbnailPath = UtilsService.getServerUrl(this.issueData.thumbnail);
 					this.issueData.comments.forEach(function(comment){
 						if(comment.owner !== Auth.getUsername()){
 							comment.sealed = true;
@@ -150,6 +160,8 @@
 					this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+
+					convertCommentTopicType();
 				}
 				else {
 					this.issueData = {
@@ -302,7 +314,7 @@
 
 						// Add info for new comment
 						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
-						comment.comment = IssuesService.convertActionCommentToText(comment);
+						IssuesService.convertActionCommentToText(comment, self.topic_types);
 						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 						self.issueData.comments.push(comment);
 
@@ -311,7 +323,7 @@
 							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 							if (comment.action) {
-								comment.comment = IssuesService.convertActionCommentToText(comment);
+								IssuesService.convertActionCommentToText(comment, self.topic_types);
 							}
 							self.issueData.comments[self.issueData.comments.length - 2] = comment;
 						}
@@ -327,12 +339,11 @@
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
+		/**
+		 * Submit - new issue or comment or update issue
+		 */
 		this.submit = function () {
-
-
-
 			if (self.data) {
-
 				var canUpdate = (Auth.getUsername() === self.data.owner);
 				if (!canUpdate) {
 					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
@@ -504,6 +515,12 @@
 						.then(function (data) {
 							IssuesService.updatedIssue = self.issueData;
 							savedDescription = self.issueData.desc;
+
+							// Add info for new comment
+							var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
+							IssuesService.convertActionCommentToText(comment, self.topic_types);
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							self.issueData.comments.push(comment);
 						});
 				}
 
@@ -677,6 +694,11 @@
 				comment.sealed = true;
 			}
 
+			if(comment.viewpoint && comment.viewpoint.screenshot){
+				comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+			}
+
+
 			// Add new comment to issue
 			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			if (!self.issueData.comments) {
@@ -688,7 +710,8 @@
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
-				viewpoint: comment.viewpoint
+				viewpoint: comment.viewpoint,
+				action: comment.action
 			});
 
 			// Mark any previous comment as 'sealed' - no longer deletable or editable
@@ -845,9 +868,10 @@
 			var i, iLength, j, jLength,
 				hasAdminRole = false;
 
+
 			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
 				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
-					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (self.availableRoles[j].roleFunction === "admin");
+					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, self.availableRoles[j].permissions));
 				}
 			}
 
@@ -926,6 +950,10 @@
 				*/
 				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
 
+					if(comment.action){
+						IssuesService.convertActionCommentToText(comment, self.topic_types);
+					}
+
 					afterNewComment(comment, true);
 
 					//necessary to apply scope.apply and reapply scroll down again here because this function is not triggered from UI
@@ -962,7 +990,7 @@
 
 					self.issueData.comments[deleteIndex].comment = 'This comment has been deleted.'
 
-					
+
 					$scope.$apply();
 					commentAreaScrollToBottom();
 
@@ -976,12 +1004,14 @@
 				*/
 				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
 
-
 					self.issueData.topic_type = issue.topic_type;
 					self.issueData.desc = issue.desc;
 					self.issueData.priority = issue.priority;
 					self.issueData.status = issue.status;
-					self.statusChange();
+					self.issueData.assigned_roles = issue.assigned_roles;
+
+					self.statusIcon = IssuesService.getStatusIcon(self.issueData);
+					setRoleIndicatorColour(self.issueData.assigned_roles[0]);
 
 					$scope.$apply();
 

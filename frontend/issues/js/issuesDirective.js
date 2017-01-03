@@ -292,6 +292,7 @@
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
 
+
 				issue.title = IssuesService.generateTitle(issue);
 				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
 				issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);

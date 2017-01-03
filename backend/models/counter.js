@@ -25,10 +25,7 @@ var schema = mongoose.Schema({
 
 //inc counter and return the number atomically
 schema.statics.findAndIncInvoiceNumber = function(){
-
-
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
-
 	return new Promise((resolve, reject) => {
 
 		DB({}).dbCallback("admin", function(err, db) {
@@ -40,7 +37,7 @@ schema.statics.findAndIncInvoiceNumber = function(){
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
 			).then(doc => {
-				resolve(doc.value);
+				resolve('SO-' + doc.value.count);
 			}).catch(err => {
 				reject(err);
 			});
@@ -68,7 +65,7 @@ schema.statics.findAndIncRefundNumber = function(){
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
 			).then(doc => {
-				resolve(doc.value);
+				resolve('CN-' + doc.value.count);
 			}).catch(err => {
 				reject(err);
 			});

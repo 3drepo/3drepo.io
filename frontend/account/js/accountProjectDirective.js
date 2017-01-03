@@ -53,9 +53,9 @@
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -63,18 +63,6 @@
 			dialogCloseToId;
 
 		// Init
-
-		function checkProjectPermission(action){
-			if(action === 'upload' || action === 'download'){
-				
-				return vm.project.roleFunctions.indexOf('admin') !== -1 
-				|| vm.project.roleFunctions.indexOf('collaborator') !== -1;
-
-			} else if (action === 'delete' || action === 'projectsetting') {
-				return vm.project.roleFunctions.indexOf('admin') !== -1;
-			}
-		}
-
 		vm.selectedFile = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
@@ -85,16 +73,42 @@
 		vm.project.canUpload = true;
 		// Options
 		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload", hidden: !checkProjectPermission('upload')},
-			team: {label: "Team", icon: "group", hidden: !isUserAccount},
-			revision: {label: "Revisions", icon: "settings_backup_restore", hidden: false},
-			projectsetting: {label: "Settings", icon: "settings", hidden: !checkProjectPermission('projectsetting')}
+			upload: {
+				label: "Upload file", 
+				icon: "cloud_upload", 
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)
+			},
+			team: {
+				label: "Team", 
+				icon: "group", 
+				// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
+				hidden: !isUserAccount
+			},
+			revision: {
+				label: "Revisions", 
+				icon: "settings_backup_restore", 
+				hidden: false
+			},
+			projectsetting: {
+				label: "Settings",
+				 icon: "settings", 
+				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, vm.project.permissions)
+			}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {label: "Download", icon: "cloud_download", hidden: !checkProjectPermission('download')};
+			vm.projectOptions.download = {
+				label: "Download", 
+				icon: "cloud_download", 
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_PROJECT, vm.project.permissions)
+			};
 		}
 		vm.uploadButtonDisabled = true;
-		vm.projectOptions.delete = {label: "Delete", icon: "delete", hidden: !checkProjectPermission('delete'), color: "#F44336"};
+		vm.projectOptions.delete = {
+			label: "Delete", 
+			icon: "delete", 
+			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, vm.project.permissions), 
+			color: "#F44336"
+		};
 
 		checkFileUploading();
 
@@ -138,7 +152,7 @@
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					if(checkProjectPermission('upload')){
+					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)){
 						vm.tag = null;
 						vm.desc = null;
 						vm.selectedFile = null;
@@ -162,7 +176,7 @@
 				case "projectsetting":
 					$location.search("proj", vm.project.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
+					vm.onShowPage({page: "projectsetting", callingPage: "repos", data: {tabIndex: 0}});
 					break;
 
 				case "upload":
@@ -320,16 +334,7 @@
 							console.log("uploadModel", response);
 							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
-								if (response.data.value === 68) {
-									vm.fileUploadInfo = "Unsupported file format";
-								}
-								else if (response.data.value === 66) {
-									vm.fileUploadInfo = "Insufficient quota for model";
-								}
-								else {
-									vm.fileUploadInfo = response.data.message;
-								}
-								
+								vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
 								vm.showUploading = false;
 								vm.showFileUploadInfo = true;
 								$timeout(function () {
@@ -393,6 +398,10 @@
 
 					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
 				}
+			});
+
+			$scope.$on('$destroy', function(){
+				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
 			});
 		}
 

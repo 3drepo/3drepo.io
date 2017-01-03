@@ -683,7 +683,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 
-		it('and the collaborator should be abloe to download the project', function(done){
+		it('and the collaborator should be able to download the project', function(done){
 			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
 		});
 

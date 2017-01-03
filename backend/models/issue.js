@@ -467,8 +467,15 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 		};
 	}
 
-	return this.findById(dbColOptions, stringToUUID(uid)).then(issue => {
-		return Promise.resolve(noClean ? issue : issue.clean());
+	let settings;
+
+	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
+
+		settings = _settings;
+		return this.findById(dbColOptions, stringToUUID(uid));
+	
+	}).then(issue => {
+		return Promise.resolve(noClean ? issue : issue.clean(settings.type, settings.properties.code));
 	});
 };
 
@@ -773,28 +780,6 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 };
 
-schema.methods.updateAttrs = function(data){
-	'use strict';
-
-	data.hasOwnProperty('topic_type') && (this.topic_type = data.topic_type);
-	data.hasOwnProperty('desc') && (this.desc = data.desc);
-	data.hasOwnProperty('priority') && this.changePriority(data.priority);
-	data.hasOwnProperty('status') && this.changeStatus(data.status);
-
-
-	return this.save().then(() => {
-
-		return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project);
-	
-	}).then(settings => {
-
-		let issue = this.clean(settings.type);
-		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
-
-		return this;
-	});
-
-};
 
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
@@ -956,13 +941,15 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	'use strict';
 
 	let timeStamp = (new Date()).getTime();
-	this.comments.push({
+	let comment = {
 		created: timeStamp,
 		action:{
 			property, from, to
 		},
 		owner: owner
-	});
+	};
+
+	this.comments.push(comment);
 
 	//seal the last comment if it is a human commnet after adding system comments
 	let commentLen = this.comments.length;
@@ -972,17 +959,18 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 		this.comments[commentLen - 2].sealed = true;
 	}
 
-
+	return comment;
 };
 
 schema.methods.updateAttrs = function(data){
 	'use strict';
 
 	let forceStatusChanged;
+	let systemComment; 
 
 	if (data.hasOwnProperty("assigned_roles") && !_.isEqual(this.assigned_roles, data.assigned_roles)){
 		//force status change to in progress if assigned roles during status=for approval
-		this.addSystemComment(data.owner, 'assigned_roles', this.assigned_roles, data.assigned_roles);
+		systemComment = this.addSystemComment(data.owner, 'assigned_roles', this.assigned_roles, data.assigned_roles);
 		this.assigned_roles = data.assigned_roles;
 		if(this.status === statusEnum.FOR_APPROVAL){
 			forceStatusChanged = true;
@@ -1008,7 +996,7 @@ schema.methods.updateAttrs = function(data){
 			}
 
 			if(data.status !== this.status){
-				this.addSystemComment(data.owner, 'status', this.status, data.status);
+				systemComment = this.addSystemComment(data.owner, 'status', this.status, data.status);
 				this.status_last_changed = (new Date()).getTime();
 				this.status = data.status;			
 			}
@@ -1022,7 +1010,7 @@ schema.methods.updateAttrs = function(data){
 
 		} else if(data.priority !== this.priority) {
 
-			this.addSystemComment(data.owner, 'priority', this.priority, data.priority);
+			systemComment = this.addSystemComment(data.owner, 'priority', this.priority, data.priority);
 
 			this.priority_last_changed = (new Date()).getTime();
 			this.priority = data.priority;
@@ -1030,15 +1018,33 @@ schema.methods.updateAttrs = function(data){
 	}
 
 	if(data.hasOwnProperty('topic_type') && this.topic_type !== data.topic_type){
-		this.addSystemComment(data.owner, 'topic_type', this.topic_type, data.topic_type);
+		systemComment = this.addSystemComment(data.owner, 'topic_type', this.topic_type, data.topic_type);
 		this.topic_type = data.topic_type;
 	}
 
 	if(data.hasOwnProperty('desc') && this.desc !== data.desc){
-		this.addSystemComment(data.owner, 'desc', this.desc, data.desc);
+		systemComment = this.addSystemComment(data.owner, 'desc', this.desc, data.desc);
 		this.desc = data.desc;
 	}
 
+	let settings;
+
+	return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project).then(_settings => {
+
+		settings = _settings;
+		return this.save();
+
+	}).then(() => {
+
+		let issue = this.clean(settings.type, settings.properties.code);
+
+		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
+		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, systemComment);
+		
+		return issue;
+
+	});
+	
 };
 
 schema.methods.clean = function(typePrefix, projectCode){
@@ -1106,7 +1112,8 @@ schema.methods.clean = function(typePrefix, projectCode){
 		
 	});
 
-	if( cleaned.comments.length > 0 && 
+	if( cleaned.comments &&
+		cleaned.comments.length > 0 && 
 		cleaned.viewpoints[0] && 
 		cleaned.comments[0].viewpoint && 
 		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){

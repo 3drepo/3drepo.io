@@ -49,13 +49,11 @@ function listGroups(req, res, next){
 		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
-		next();
 
 	}).catch(err => {
 
 		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		next();
 
 	});
 }
@@ -89,11 +87,9 @@ function createGroup(req, res, next){
 	create.then(group => {
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
-		next();
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		next();
 	});
 }
 

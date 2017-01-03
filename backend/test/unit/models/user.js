@@ -13,7 +13,7 @@ let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', {
 });
 
 let sinon = require('sinon');
-let DB = require('../mock/db')
+let DB = require('../mock/db');
 
 
 let User = proxyquire('../../../models/user', {
@@ -28,7 +28,7 @@ let User = proxyquire('../../../models/user', {
 	'./factory/modelFactory':  modelFactoryMock,
 	'../mailer/mailer': {},
 	'../logger.js': {},
-	'./payment': {},
+	'./userBilling': {}
 });
 
 

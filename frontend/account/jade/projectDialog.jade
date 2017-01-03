@@ -9,7 +9,7 @@ md-dialog.newProjectDialog(aria-label="New project")
 		div(layout="column")
 			md-input-container
 				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)")
-				.inputHint Letters, numbers and underscore only
+				.inputHint Letters, numbers, hyphen and underscore only
 			
 			md-input-container
 				input(placeholder="Project Code (Optional)", ng-model="vm.newProjectData.code", maxlength=5)
