@@ -436,7 +436,7 @@
 					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
 						account: user,
 						amount: `${currency}${amount}`,
-					}, attachments)				
+					}, attachments)
 				]);
 
 			}).catch(err => {
