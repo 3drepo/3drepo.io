@@ -501,7 +501,7 @@ describe('Enrolling to a subscription', function () {
 
 				subscriptions = res.body;
 
-				//console.log(subscriptions);
+				console.log(subscriptions);
 
 				subscriptions.forEach(sub => {
 					expect(sub).to.have.deep.property('limits.spaceLimit');

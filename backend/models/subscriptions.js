@@ -326,6 +326,9 @@
 		
 		const User = require("./user.js");
 
+		console.log('assignSubscriptionToUser - this.subscriptions', this.subscriptions);
+		console.log('assignSubscriptionToUser - this.subscriptions.id', id, this.subscriptions.id(id));
+
 		let subscription = this.subscriptions.id(id);
 
 		if(!subscription){
