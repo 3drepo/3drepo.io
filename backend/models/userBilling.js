@@ -34,7 +34,7 @@
 
 	let getSubscription = Subscription.getSubscription;
 
-	let subscriptionSchema = new mongoose.Schema({
+	let subscriptionSchema = mongoose.Schema({
 		active: Boolean,
 		updatedAt: Date,
 		createdAt: Date,
