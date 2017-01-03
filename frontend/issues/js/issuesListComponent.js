@@ -28,6 +28,7 @@
 					account: "<",
 					project: "<",
 					allIssues: "<",
+					treeMap: "<",
 					filterText: "<",
 					sendEvent: "&",
 					event: "<",
@@ -358,9 +359,8 @@
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
-
 					response.data.objects.forEach(function(obj){
-						ids.push(obj.id);
+						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 					
 					data = {

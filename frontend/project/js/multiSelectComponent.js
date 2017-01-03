@@ -26,6 +26,7 @@
 				bindings: {
 					account: "<",
 					project: "<",
+					treeMap: "<",
 					keysDown: "<",
 					sendEvent: "&",
 					event: "<",
@@ -56,6 +57,7 @@
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
+
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
@@ -73,19 +75,29 @@
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode) {
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode 
+					&& changes.event.currentValue.value.account && changes.event.currentValue.value.project 
+					&& changes.event.currentValue.value.id) {
+
+					var sharedId = self.treeMap.uidToSharedId[changes.event.currentValue.value.id];
+
 					if (multiMode) {
 						// Collect objects in multi mode
 						deselectedObjects = [];
 						objectIndex = -1;
 						selectedObjects.find(function(obj, i){
-							if(obj.id === changes.event.currentValue.value.id){
+							if(obj.shared_id === sharedId){
 								objectIndex = i;
 							}
 						});
 						if (objectIndex === -1) {
+
+							
+							//console.log('sharedId', sharedId);
+
 							selectedObjects.push({
 								id: changes.event.currentValue.value.id,
+								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
 								project: changes.event.currentValue.value.project
 							});
@@ -107,6 +119,7 @@
 						// Can only select one object at a time when not in multi mode
 						selectedObjects = [{
 								id: changes.event.currentValue.value.id,
+								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
 								project: changes.event.currentValue.value.project
 						}];

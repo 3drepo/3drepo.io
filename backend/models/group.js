@@ -29,7 +29,12 @@ var responseCodes = require('../response_codes.js');
 var groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
-	objects: [],
+	objects: [{
+		_id : false,
+		shared_id: Object,
+		account: String,
+		project: String
+	}],
 	issue_id: Object,
 	color: [Number]
 });
@@ -153,7 +158,7 @@ groupSchema.methods.clean = function(){
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && uuidToString(cleaned.issue_id);
 	cleaned.objects.forEach(object => {
-		object.id = uuidToString(object.id);
+		//object.id = uuidToString(object.id);
 		object.shared_id && (object.shared_id = uuidToString(object.shared_id));
 	});
 	return cleaned;

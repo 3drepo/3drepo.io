@@ -29,10 +29,11 @@
 				account:  "=",
 				project:  "=",
 				branch:   "=",
-				revision: "=",				
-                position: "@",
+				revision: "=",
+				position: "@",
 				keysDown: "=",
 				projectSettings: "=",
+				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
             },

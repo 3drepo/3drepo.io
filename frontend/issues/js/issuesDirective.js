@@ -39,6 +39,7 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
+				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			},
@@ -457,7 +458,8 @@
 
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(obj.id);
+
+						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
 					data = {

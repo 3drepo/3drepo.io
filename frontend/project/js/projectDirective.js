@@ -38,9 +38,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "RevisionsService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "TreeService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, RevisionsService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, TreeService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -237,6 +237,10 @@
 
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
+				});
+
+				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
+					vm.treeMap = TreeService.getMap(data.nodes);
 				});
 			}
 		});
