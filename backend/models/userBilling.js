@@ -47,12 +47,9 @@
 			spaceLimit : {type: Number, default: 0}
 		},
 
-		token: String,
 		plan: String,
 		inCurrentAgreement: Boolean,
 		pendingDelete: Boolean,
-		//newPurchased: Boolean,
-		database: String
 	});
 
 	let billingSchema = mongoose.Schema({
