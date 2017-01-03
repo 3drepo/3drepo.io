@@ -54,8 +54,6 @@
 	router.put("/:account", middlewares.isAccountAdmin, updateUser);
 	router.put("/:account/password", resetPassword);
 
-
-
 	// function expireSession(req) {
 	// 	if (req.session)
 	// 	{

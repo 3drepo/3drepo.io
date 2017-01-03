@@ -160,7 +160,6 @@ function hasCollaboratorQuota(req, res, next){
 		}
 
 	}).catch(err => {
-
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
 }

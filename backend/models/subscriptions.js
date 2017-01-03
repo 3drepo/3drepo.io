@@ -220,8 +220,6 @@
 		let changeInPlans = [];
 		let hasChanges = false;
 
-		//console.log(this.currentPlanCount);
-
 		// plans: [ { 'plan': 'ABC', 'quantity': 3 }]
 		// currentPlanCount: { ABC: 1 }
 

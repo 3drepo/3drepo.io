@@ -107,7 +107,6 @@
 		}, 0);
 
 
-		//console.log(changes);
 		let nextPaymentDate = moment(this.nextPaymentDate);
 
 		if (proRataAmount) {
@@ -191,10 +190,6 @@
 			return this.subscriptions.changeSubscriptions(plans);
 
 		}).then(changes => {
-
-			//console.log('billinginfo', this.billingInfo);
-			//console.log('**changes', changes);
-
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
 				if (this.billingAgreementId && this.billingInfo.isModified())
@@ -219,12 +214,9 @@
 
 				//init date for 1st/'new' payments
 				if (this.isNewPayment(changes)){
-					//console.log('new payments');
 					this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 					this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 				}
-
-				//console.log('payments', data.payments);
 
 				// Once we have calculated a set of payments send them
 				return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
@@ -259,12 +251,9 @@
 
 		
 		return Invoice.findByPaypalPaymentToken(user, this.paypalPaymentToken).then(invoice => {
-
-
 			if(invoice && invoice.state === C.INV_PENDING && invoice.billingAgreementId){
 
 				//stop exeing the agreement if already done before
-				//console.log('execed before');
 				return Promise.resolve();
 
 			} else {
@@ -361,8 +350,6 @@
 			return Invoice.findPendingInvoice(user, this.billingAgreementId);
 		
 		}).then(pendingInvoice => {
-			
-			//console.log('pinv', pendingInvoice);
 
 			invoice = pendingInvoice;
 
@@ -439,7 +426,6 @@
 				]);
 
 			}).catch(err => {
-				console.log(err.stack);
 				systemLogger.logError(`Email error - ${err.message}`);
 			});
 
