@@ -162,10 +162,10 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
 			img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
 
+	md-divider
+
 	// Footer
 	.issueCompItemContainer#issueCompFooterButtons(layout="row", layout-align="space-between center")
-		
-	div(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
 			ng-repeat="(action, actionData) in $ctrl.actions"
