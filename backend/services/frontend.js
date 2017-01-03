@@ -57,46 +57,42 @@
 
 		app.use(favicon("public/images/favicon.ico"));
 
+		let objectToString = function(obj) {
+			let objString = "{";
+
+			for(let prop in obj)
+			{
+				let aProperty       = obj[prop];
+				
+				objString += "\"" + prop + "\":"; 
+				if (typeof aProperty === "object")
+				{
+					objString += objectToString(aProperty);
+				} else {
+					objString += "" + aProperty; 
+				} 
+
+				objString += ",";
+			}
+
+			objString += "}";
+
+			return objString;
+		};
+
 		app.get("/public/plugins/base/config.js", function (req, res) {
 			let params = {};
 
 			params.config_js = "var server_config = {};\n";
 
-			params.config_js += "server_config.api_algorithm = {\n";
+			params.config_js += "server_config.api_algorithm = (function () { let self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
 
-			
-			for(let prop in config.apiAlgorithm) { 
-				if(config.apiAlgorithm.hasOwnProperty(prop)){
-					// not working for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
-					if(prop === 'apiUrls'){
-						continue;
-					}
+			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
+			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl;\n";
 
-					params.config_js += "\t\"" + prop + "\":" + (typeof config.apiAlgorithm[prop] === 'function' ? config.apiAlgorithm[prop] : JSON.stringify(config.apiAlgorithm[prop])) + ",\n"; 
-				}
-			}
-
-			// fix for for apiUrls = { all: [func1, ... ], ...} as func1,.. become string in the output
-			params.config_js += '\tapiUrls: {';
-			
-			for(let prop in config.apiAlgorithm.apiUrls) { 
-				if(config.apiAlgorithm.apiUrls.hasOwnProperty(prop)){
-					params.config_js += '\n\t\t' + prop + ': [' + config.apiAlgorithm.apiUrls[prop].toString() + ']';
-				}
-			}
-
-			params.config_js += '\n\t}\n';
-
-
-
-
-			params.config_js += "};\n";
-
-			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm)" + ";\n" ;
-
-			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\"\n";
-			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.api_algorithm.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
-			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.api_algorithm.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
+			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\";\n";
+			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
+			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
 
 			if ("wayfinder" in config) {
 				// TODO: Make a public section in config for vars to be revealed
@@ -189,8 +185,6 @@
 						"qrCodeReader",
 						"docs",
 						"utils",
-						"walkthroughVr",
-						"oculus",
 						"groups",
 						"measure",
 						"rightPanel",

@@ -42,7 +42,7 @@ describe('Enrolling to a subscription', function () {
 	let agent;
 	let username = 'payment_testing';
 	let password = 'payment_testing';
-	
+
 	let username2 = 'payment_user2';
 	let password2 = 'payment_user2';
 	let email2 = 'test3drepo_payment2@mailinator.com';
@@ -117,7 +117,7 @@ describe('Enrolling to a subscription', function () {
 
 	let plans = {
 		"plans": [
-			{    
+			{
 			"plan": "THE-100-QUID-PLAN",
 			"quantity": 3
 			}
@@ -167,7 +167,7 @@ describe('Enrolling to a subscription', function () {
 
 		let plans = {
 			"plans": [
-				{    
+				{
 				"plan": "THE-100-QUID-PLAN",
 				"quantity": 3
 				}
@@ -199,7 +199,7 @@ describe('Enrolling to a subscription', function () {
 
 		let plans = {
 			"plans": [
-				{    
+				{
 				"plan": "THE-100-QUID-PLAN",
 				"quantity": 3
 				}
@@ -224,7 +224,7 @@ describe('Enrolling to a subscription', function () {
 		});
 	});
 
-	it('should succee (GB business)', function(done){
+	it('should succeed (GB business)', function(done){
 
 		plans.billingAddress.vat = '206909015';
 
@@ -237,7 +237,7 @@ describe('Enrolling to a subscription', function () {
 			expect(res.body).to.have.property('url');
 			let parsed = url.parse(res.body.url, true);
 			expect(parsed.query).to.have.property('token');
-			
+
 			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 			expect(paymentDef).to.be.not.null;
 			done(err);
@@ -346,7 +346,7 @@ describe('Enrolling to a subscription', function () {
 			}).then(() => {
 
 				done();
-				
+
 			}).catch(err => {
 				done(err);
 			});
@@ -365,17 +365,17 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('before 1st IPN the subscriptions should be activated temporary for 48 hours', function(done){
-			
+
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
 			return User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true });
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity); 
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
 					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
 					expect(Math.abs(sub.expiredAt - twoDayLater) / 1000).to.below(60);
 				});
-				
+
 				done();
 			}).catch(err => {
 				done(err);
@@ -388,7 +388,7 @@ describe('Enrolling to a subscription', function () {
 				let startDate = moment().utc();
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(startDate.clone().startOf('day').toDate().valueOf());
 				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(getNextPaymentDate(startDate).valueOf());
-				
+
 				done();
 			}).catch(err => {
 				done(err);
@@ -402,7 +402,7 @@ describe('Enrolling to a subscription', function () {
 			this.timeout(20000);
 
 			let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
-			let fakePaymentMsg = 
+			let fakePaymentMsg =
 				'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
 				+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
 				+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
@@ -432,7 +432,7 @@ describe('Enrolling to a subscription', function () {
 			}).then(() => {
 
 				done();
-				
+
 			}).catch(err => {
 				done(err);
 			});
@@ -450,16 +450,16 @@ describe('Enrolling to a subscription', function () {
 				expect(res.body[0].pending).to.be.false;
 				done(err);
 			});
-	
+
 		});
 
 		it('after 1st IPN the subscriptions should be activated until 3 days after next payment date', function(done){
-			
+
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
 			return User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity); 
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
 					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
 
@@ -470,7 +470,7 @@ describe('Enrolling to a subscription', function () {
 
 					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
 				});
-				
+
 				done();
 			}).catch(err => {
 				done(err);
@@ -483,14 +483,14 @@ describe('Enrolling to a subscription', function () {
 				let startDate = moment().utc();
 
 				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf('date').toDate().valueOf());
-				
+
 				done();
 
 			}).catch(err => {
 				done(err);
 			});
 		});
-		
+
 		let subscriptions;
 		it('and the subscription should be active and filled with quota', function(done){
 
@@ -523,7 +523,7 @@ describe('Enrolling to a subscription', function () {
 
 		describe('and then assigning it', function(){
 
-			
+
 
 			it('should fail if subscription id does not exist', function(done){
 				agent.post(`/${username}/subscriptions/000000000000000000000000/assign`)
@@ -622,7 +622,7 @@ describe('Enrolling to a subscription', function () {
 
 	describe('and then refund', function(){
 		this.timeout(6000);
-		
+
 		before(function(done){
 			let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
 			let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
@@ -653,7 +653,7 @@ describe('Enrolling to a subscription', function () {
 							}
 						}, 3000);
 					});
-				}, 
+				},
 
 				function(done){
 
@@ -663,7 +663,7 @@ describe('Enrolling to a subscription', function () {
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
-			
+
 				}
 			], done);
 
@@ -680,7 +680,7 @@ describe('Enrolling to a subscription', function () {
 		it('should have credit note created with number CN-1', function(done){
 			agent.get(`/${username}/invoices`)
 			.expect(200, function(err, res){
-			
+
 				expect(res.body).to.be.an('array');
 				let cn = res.body.find( bill => bill.invoiceNo === 'CN-1');
 				expect(cn).to.exist;
@@ -701,10 +701,10 @@ describe('Enrolling to a subscription', function () {
 		let lastPaymentDate;
 
 		before(function(done){
-	
+
 			let transactionId = '99999999AA000000A';
 
-			let fakePaymentMsg = 
+			let fakePaymentMsg =
 				'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
 				+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
 				+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
@@ -740,7 +740,7 @@ describe('Enrolling to a subscription', function () {
 							}
 						}, 3000);
 					});
-				}, 
+				},
 
 				function(done){
 
@@ -750,7 +750,7 @@ describe('Enrolling to a subscription', function () {
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
-			
+
 				}
 			], done);
 
@@ -767,7 +767,7 @@ describe('Enrolling to a subscription', function () {
 		it('should have invoice created with number SO-2', function(done){
 			agent.get(`/${username}/invoices`)
 			.expect(200, function(err, res){
-			
+
 				expect(res.body).to.be.an('array');
 				let cn = res.body.find( bill => bill.invoiceNo === 'SO-2');
 				expect(cn).to.exist;
@@ -777,12 +777,12 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('after 2nd IPN the subscriptions should be activated until 3 days after next payment date', function(done){
-			
+
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
 			return User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity); 
+				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
 					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
 
@@ -793,7 +793,7 @@ describe('Enrolling to a subscription', function () {
 
 					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
 				});
-				
+
 				done();
 			}).catch(err => {
 				done(err);
@@ -805,7 +805,7 @@ describe('Enrolling to a subscription', function () {
 
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(lastPaymentDate.valueOf());
 				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf('date').toDate().valueOf());
-				
+
 				done();
 
 			}).catch(err => {
@@ -854,7 +854,7 @@ describe('Enrolling to a subscription', function () {
 				expect(res.body).to.have.property('url');
 				let parsed = url.parse(res.body.url, true);
 				expect(parsed.query).to.have.property('token');
-				
+
 				let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 				expect(paymentDef).to.be.not.null;
 				done(err);
