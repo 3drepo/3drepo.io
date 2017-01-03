@@ -54,11 +54,18 @@
 		return new Promise((resolve, reject) => {
 			paypal.billingAgreement.update(billingAgreementId, updateOps, function (err/*, billingAgreement*/) {
 				if (err) {
-					//console.log(JSON.stringify(err, null , 2));
+
+					systemLogger.logError(JSON.stringify(err),{ 
+						billingAgreementId: billingAgreementId
+					});
+
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 					paypalError.message = err.response.message;
 					reject(paypalError);
 				} else {
+					systemLogger.logInfo('Billing address updated successfully on PayPal side',{ 
+						billingAgreementId: billingAgreementId
+					});
 					resolve(paypalAddress);
 				}
 			});
@@ -120,7 +127,9 @@
 			paypal.billingPlan.create(billingPlanAttributes, function (err, billingPlan) {
 
 				if (err) {
-					//console.log(JSON.stringify(err, null , 2));
+
+					systemLogger.logError(JSON.stringify(err));
+
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 					paypalError.message = err.response && err.response.message || err.message;
 					reject(paypalError);
@@ -145,7 +154,9 @@
 
 				paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 					if (err) {
-						//console.log(JSON.stringify(err, null , 2));
+
+						systemLogger.logError(JSON.stringify(err));
+
 						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 
 						paypalError.message = err.response.message;
@@ -180,7 +191,7 @@
 
 				paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 					if (err) {
-						//console.log(JSON.stringify(err, null , 2));
+						systemLogger.logError(JSON.stringify(err));
 						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 						paypalError.message = err.response.message;
 						reject(paypalError);

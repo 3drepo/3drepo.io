@@ -22,7 +22,6 @@
 	const vat = require("./vat");
 	const responseCodes = require("../response_codes");
 
-
 	let billingAddressSchema = new mongoose.Schema({
 		//vat setter was async. setter cannot be async at the momnent. 
 		// could happen in the future versions of mongoose
@@ -40,15 +39,14 @@
 		state: { type: String },
 	});
 
+
 	billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
 		
-		this.changed = false;
-
 		Object.keys(billingAddress).forEach(key => {
 
-			if (this[key] !== billingAddress[key]) {
-				this.changed = true;
-			}
+			if(key === '_id') {
+				return;
+			} 
 
 			this.set(key, billingAddress[key]);
 			
@@ -79,10 +77,6 @@
 				return Promise.resolve();
 			}
 		});
-	};
-
-	billingAddressSchema.methods.isChanged = function(){
-		return this.changed;
 	};
 
 	module.exports = billingAddressSchema;

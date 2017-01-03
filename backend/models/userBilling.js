@@ -188,7 +188,6 @@
 
 		return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 			this.markModified('billingInfo');
-			//console.log('ismod', this.billingInfo.isChanged());
 			return this.subscriptions.changeSubscriptions(plans);
 
 		}).then(changes => {
@@ -198,7 +197,7 @@
 
 			if (!changes) {
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
-				if (this.billingAgreementId && this.billingInfo.isChanged())
+				if (this.billingAgreementId && this.billingInfo.isModified())
 				{	
 					return Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
 				}
