@@ -523,6 +523,14 @@
 		};
 
 		/**
+		 * This prevents show/hide of additional info when clicking in the input
+		 * @param event
+		 */
+		this.titleInputClick = function (event) {
+			event.stopPropagation();
+		};
+
+		/**
 		 * Save issue
 		 */
 		function saveIssue () {
