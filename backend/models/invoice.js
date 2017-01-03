@@ -123,7 +123,7 @@
 	});
 
 	schema.virtual('proRata').get(function(){
-		if(this.items.length > 0 && this.items[0].amount.toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
+		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
 			return false;
 		}
 
