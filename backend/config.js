@@ -213,6 +213,12 @@
 		process.exit(1);
 	}
 
+	if (config.db.host.length > 1 && !config.db.replicaSet)
+	{
+		console.log("You must specify the replica set name");
+		process.exit(1);
+	}
+
 	config.db.username = coalesce(config.db.username, "username");
 	config.db.password = coalesce(config.db.password, "password");
 
