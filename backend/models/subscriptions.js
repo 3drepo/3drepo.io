@@ -21,7 +21,7 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ProjectSetting = require("./projectSetting");
-
+	
 	let Subscriptions = function (billingUser, billingAddress, subscriptions) {
 		this.billingUser = billingUser;
 		this.subscriptions = subscriptions;
@@ -324,10 +324,9 @@
 		
 		const User = require("./user.js");
 
-		console.log('assignSubscriptionToUser - this.subscriptions', this.subscriptions);
-		console.log('assignSubscriptionToUser - this.subscriptions.id', id, this.subscriptions.id(id));
-
-		let subscription = this.subscriptions.id(id);
+		// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
+		// let subscription = this.subscriptions.id(id);
+		 let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
 
 		if(!subscription){
 			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
@@ -365,7 +364,9 @@
 
 		const ProjectHelper = require('./helper/project');
 
-		let subscription = this.subscriptions.id(id);
+		// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
+		// let subscription = this.subscriptions.id(id);
+		 let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
 
 		if(!subscription){
 			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
