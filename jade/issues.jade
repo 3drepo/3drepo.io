@@ -1,5 +1,6 @@
 doctype html
 html(lang="en" ng-app="3drepo").ng-scope
+	script(type="text/javascript", src="/public/plugins/base/config.js")
 	head
 		each issueTypeIssues, issueType in issues
 			if issueType === "open"
@@ -11,6 +12,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 					tr
 						td(colspan=2)
 							h3 #!{issue.number} !{issue.name}
+					if issue.viewpoint.screenshotSmall
+						tr
+							td(colspan=2) 
+								a(href=url(issue.viewpoint.screenshot) target='_blank')
+									img(src=url(issue.viewpoint.screenshotSmall))
 					if issue.assigned_roles
 						tr
 							td(colspan=2)
@@ -23,6 +29,19 @@ html(lang="en" ng-app="3drepo").ng-scope
 						each comment in issue.comments
 							tr
 								td !{comment.owner} [!{comment.created}]
-								td !{comment.comment}
+								td 
+									if comment.comment
+										| !{comment.comment}
+									if comment.action
+										| !{comment.action.propertyText} changed from 
+										i !{comment.action.from} 
+										| to 
+										i !{comment.action.to}
+							if comment.viewpoint && comment.viewpoint.screenshotSmall
+								tr
+									td(colspan=2)
+										a(href=url(comment.viewpoint.screenshot) target='_blank')
+											img(src=url(comment.viewpoint.screenshotSmall))
+								
 				br
 

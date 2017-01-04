@@ -275,10 +275,19 @@ function renderIssuesHTML(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let findIssue;
 
+	let projection = {
+		extras: 0,
+		'viewpoints.extras': 0,
+		'viewpoints.scribble': 0,
+		'viewpoints.screenshot.content': 0,
+		'viewpoints.screenshot.resizedContent': 0,
+		'thumbnail.content': 0
+	};
+
 	if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master");
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection);
 	}
 
 	findIssue.then(issues => {
@@ -305,7 +314,12 @@ function renderIssuesHTML(req, res, next){
 			}
 		}
 
-		res.render("issues.jade", {issues : splitIssues});
+		res.render("issues.jade", {
+			issues : splitIssues, 
+			url: function (path){
+				return config.apiAlgorithm.apiUrl(C.GET_API, path);
+			}
+		});
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

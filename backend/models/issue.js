@@ -54,6 +54,33 @@ var xmlBuilder = new xml2js.Builder({
 });
 
 
+var actionSchema = Schema({
+	property: String,
+	from: String,
+	to: String
+}, { _id : false });
+
+function propertyTextMapping(property){
+	'use strict';
+
+	let mapping = {
+		'priority': 'Priority',
+		'status': 'Status',
+		'assigned_roles': 'Assigned',
+		'topic_type': 'Type',
+		'desc': 'Description'
+	};
+
+	return mapping[property] || property;
+}
+
+actionSchema.virtual('propertyText').get(function(){
+	return propertyTextMapping(this.property);
+});
+
+actionSchema.set('toObject', { virtuals: true, getters:true });
+
+
 var schema = Schema({
 	_id: Object,
 	object_id: Object,
@@ -124,11 +151,7 @@ var schema = Schema({
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
-		action:{
-			property: String,
-			from: String,
-			to: String
-		},
+		action: actionSchema,
 		owner: String,
 		comment: {type: String},
 		created: Number,
