@@ -20,6 +20,7 @@
 	const C = require("./constants");
 	const _ = require("lodash");
 	const config = require("./config");
+	const systemLogger = require("./logger.js").systemLogger;
 
 	/**
 	 * List of response and error codes
@@ -239,6 +240,7 @@
 				return this.INCORRECT_USERNAME_OR_PASSWORD;
 			}
 			//other error
+			systemLogger.logError(mongoErr);
 			return {
 				value: 1000,
 				message: "System error. Please try again later.",
