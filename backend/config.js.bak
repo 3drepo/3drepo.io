@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.7.";
+	const VERSION="1.7.4";
 
 	let config = require("app-config")
 		.config;
@@ -210,6 +210,12 @@
 
 	if (config.db.port.length !== config.db.host.length) {
 		console.log("Incorrect number of hosts and ports");
+		process.exit(1);
+	}
+
+	if (config.db.host.length > 1 && !config.db.replicaSet)
+	{
+		console.log("You must specify the replica set name");
 		process.exit(1);
 	}
 
