@@ -43,7 +43,7 @@
 
 		self.host = config.db.host;
 		self.port = config.db.port;
-		self.rsName = config.db.rsName;
+		self.rsName = config.db.replicaSet;
 
 		self.username = config.db.username;
 		self.password = config.db.password;
