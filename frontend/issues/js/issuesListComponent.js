@@ -362,7 +362,7 @@
 					response.data.objects.forEach(function(obj){
 						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
-					
+
 					data = {
 						source: "tree",
 						account: self.account,
@@ -518,19 +518,21 @@
 						}
 					}
 					else {
-						// Create new pin
-						pinData = {
-							id: self.allIssues[i]._id,
-							position: self.allIssues[i].position,
-							norm: self.allIssues[i].norm,
-							account: self.allIssues[i].account,
-							project: self.allIssues[i].project
-						};
-						var pinColor = [0.5, 0, 0];
-						if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
-							pinColor = [1.0, 0.7, 0];
-						}
-						IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
+                        if (issuesToShowWithPinsIDs[self.allIssues[i]._id]) {
+                            // Create new pin
+                            pinData = {
+                                id: self.allIssues[i]._id,
+                                position: self.allIssues[i].position,
+                                norm: self.allIssues[i].norm,
+                                account: self.allIssues[i].account,
+                                project: self.allIssues[i].project
+                            };
+                            var pinColor = [0.5, 0, 0];
+                            if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
+                                pinColor = [1.0, 0.7, 0];
+                            }
+                            IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
+                        }
 					}
 				}
 			}
