@@ -847,7 +847,15 @@ function getUserRolesForProject(account, project, username){
 
 		});
 
-		return userRolesForProject.map(item => item.role);
+		let roles = userRolesForProject.map(item => item.role);
+		// rank C.ADMIN_TEMPLATE role first
+		let adminRoleIndex = roles.indexOf(C.ADMIN_TEMPLATE);
+		if(adminRoleIndex !== -1){
+			roles.splice(adminRoleIndex, 1);
+			roles.unshift(C.ADMIN_TEMPLATE);
+		}
+
+		return roles;
 	});
 }
 
