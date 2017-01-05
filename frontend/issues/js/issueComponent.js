@@ -100,6 +100,12 @@
 			});
 		}
 
+		function setCanUpdateStatus(issueData){
+			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
+				self.userRoles.find(function(role){
+					return role === issueData.assigned_roles[0];
+				});
+		}
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -144,6 +150,8 @@
 						}
 					}
 
+					setCanUpdateStatus(this.issueData);
+
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
 
@@ -172,6 +180,7 @@
 						viewpoint: {}
 					};
 					this.canUpdate = true;
+					this.canUpdateStatus = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 				setContentHeight();
@@ -332,6 +341,8 @@
 						self.issueData.status = response.data.issue.status;
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
+						setCanUpdateStatus(self.issueData);
+
 					});
 			}
 		};
@@ -979,6 +990,7 @@
 
 					self.statusIcon = IssuesService.getStatusIcon(self.issueData);
 					setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+					setCanUpdateStatus(self.issueData);
 
 					$scope.$apply();
 
