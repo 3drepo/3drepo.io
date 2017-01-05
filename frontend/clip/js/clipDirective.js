@@ -57,6 +57,8 @@
 		vm.account = null;
 		vm.project = null;
 		vm.normal = null;
+		vm.projectTrans = null;
+		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 
 		function initClippingPlane (account, project, normal, distance) {
@@ -75,10 +77,17 @@
 				if(distance)
 					vm.distance = distance;
 
-				if(!vm.normal && vm.selectedAxis == "")
+				if(!vm.normal)
 				{
-					//unintiialised clipping plane. reset it
-					vm.selectedAxis = "X";					
+					if(vm.selectedAxis == "")
+					{
+						//unintiialised clipping plane. reset it
+						vm.selectedAxis = "X";					
+					}
+				}
+				else
+				{
+					//figure out the axis base on the normal
 				}
 
 				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
@@ -224,6 +233,11 @@
 					vm.visible = false;
 					vm.sliderPosition = 0.0;
 				}
+			}
+			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
+			{
+				vm.projectTrans = event.value.projectTrans;
+				vm.bbox = event.value.bbox;
 			}
 		});
 	}
