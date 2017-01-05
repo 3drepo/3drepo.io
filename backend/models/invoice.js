@@ -93,7 +93,7 @@
 	});
 
 	schema.virtual("taxPercentage").get(function() {
-		return roundTo2DP(this.taxAmount / this.netAmount);
+		return roundTo2DP(this.taxAmount / this.netAmount) * 100;
 	});
 
 	schema.virtual('info.countryName').get(function(){
