@@ -675,7 +675,6 @@
 
 
 			// Add new comment to issue
-			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			if (!self.issueData.comments) {
 				self.issueData.comments = [];
 			}
@@ -704,13 +703,6 @@
 				delete self.commentThumbnail;
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
-			}
-
-			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
-				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
-					.then(function(response) {
-						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
-					});
 			}
 
 
