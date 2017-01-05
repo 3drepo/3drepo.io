@@ -110,7 +110,17 @@
 			color: "#F44336"
 		};
 
-		checkFileUploading();
+		/**
+		 * Display file uploading and info and setup watch if status is processing
+		 */
+
+		if (vm.project.status === "processing") {
+			vm.project.uploading = true;
+			vm.showUploading = true;
+			vm.showFileUploadInfo = false;
+			watchProjectStatus();
+		}
+		
 
 		/*
 		 * Watch changes in upload file
@@ -347,21 +357,6 @@
 							}
 						});
 					}
-				}
-			});
-		}
-
-		/**
-		 * Display file uploading and info
-		 */
-		function checkFileUploading () {
-			var promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
-			promise.then(function (response) {
-				if (response.data.status === "processing") {
-					vm.project.uploading = true;
-					vm.showUploading = true;
-					vm.showFileUploadInfo = false;
-					watchProjectStatus();
 				}
 			});
 		}
