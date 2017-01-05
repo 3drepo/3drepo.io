@@ -55,10 +55,12 @@ var xmlBuilder = new xml2js.Builder({
 
 
 var actionSchema = Schema({
+	_id : false,
+	id: false,
 	property: String,
 	from: String,
 	to: String
-}, { _id : false });
+});
 
 function propertyTextMapping(property){
 	'use strict';
@@ -369,7 +371,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 	return addRevFilter.then(() => {
 		
 		if(ids){
-			
+
 			ids.forEach((id, i) => {
 				ids[i] = stringToUUID(id);
 			});
