@@ -301,7 +301,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 };
 
 
-schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean){
+schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean, ids){
 	'use strict';
 
 	let issues;
@@ -361,15 +361,26 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 						rev_id: { '$in' : revIds }
 					}]
 				};
-				//console.log(filter);
-
 			}
 		});
 	}
 
 
 	return addRevFilter.then(() => {
+		
+		if(ids){
+			
+			ids.forEach((id, i) => {
+				ids[i] = stringToUUID(id);
+			});
+
+			filter._id = {
+				'$in': ids
+			};
+		}
+
 		return this._find(dbColOptions, filter, projection, noClean);
+
 	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(

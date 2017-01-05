@@ -45,6 +45,7 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, i
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToIssue, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 
 router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
@@ -274,6 +275,7 @@ function renderIssuesHTML(req, res, next){
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let findIssue;
+	let noClean = false;
 
 	let projection = {
 		extras: 0,
@@ -284,10 +286,15 @@ function renderIssuesHTML(req, res, next){
 		'thumbnail.content': 0
 	};
 
+	let ids;
+	if(req.query.ids){
+		ids = req.query.ids.split(',');
+	}
+
 	if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
