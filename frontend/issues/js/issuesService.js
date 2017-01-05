@@ -605,19 +605,6 @@
 			}
 		);
 
-		// Getter setter for issueDisplay
-		Object.defineProperty(
-			obj,
-			"issueDisplay",
-			{
-				get: function () {
-					return issueDisplay;
-				},
-				set: function (newIssueDisplay) {
-					issueDisplay = newIssueDisplay;
-				}
-			}
-		);
 
 		return obj;
 	}
