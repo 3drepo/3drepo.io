@@ -121,6 +121,22 @@
 			}
 		}
 
+		function loadClippingPlane(account, project, normal, distance)
+		{
+
+
+			vm.project = project;
+			vm.account = account;
+			vm.normal = normal;
+			vm.distance = distance;
+			if(vm.visible)
+			{
+				vm.initClippingPlane(account, project, normal, distance); 
+			}
+			else
+				vm.visible=true; 
+		}
+
 		/*
 		 * Watch for show/hide of card
 		 */
@@ -215,19 +231,10 @@
 					}
 					else 
 					{
+						loadClippingPlane(event.value.account, event.value.project, 
+							event.value.clippingPlanes[0].normal,
+						    event.value.clippingPlanes[0].distance);
 
-						//vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
-						vm.project = event.value.project;
-						vm.account = event.value.account;
-						vm.normal = event.value.clippingPlanes[0].normal;
-						vm.distance = event.value.clippingPlanes[0].distance;
-						if(vm.visible)
-						{
-
-							initClippingPlane(event.value.account, event.value.project, event.value.normal, event.value.distance); 
-						}
-						else
-							vm.visible=true; 
 					}
 				} else {
 					vm.visible = false;
