@@ -58,7 +58,6 @@
 		vm.project = null;
 		vm.normal = null;
 		vm.projectTrans = null;
-		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 
 		function initClippingPlane (account, project, normal, distance) {
@@ -121,6 +120,29 @@
 			}
 		}
 
+		function determineAxis()
+		{
+			//translate the normal and compare it to the axis
+			if(vm.project && vm.account)
+			{
+				var fullProjectName = vm.account + "__" + vm.project;
+				if(vm.projectTrans[fullProjectName])
+				{
+					var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
+					var transformedNormal = vm.projectTrans[fullProjectName].trans.multMatrixVec(normal_x3d);
+					transformedNormal.normalize();
+					//Since it's normalized if we only need to check 1 axis
+					if(transformNormal.x === 1)
+						vm.selectedAxis = "X";
+					else if(transformedNormal.y === 1)
+						vm.selectedAxis = "Y";
+					else if (transformedNormal.z ===1)
+						vm.selectedAxis = "Z";
+
+				}
+			}	
+		}
+
 		function loadClippingPlane(account, project, normal, distance)
 		{
 
@@ -129,12 +151,18 @@
 			vm.account = account;
 			vm.normal = normal;
 			vm.distance = distance;
-			if(vm.visible)
-			{
-				vm.initClippingPlane(account, project, normal, distance); 
+
+			vm.determineAxis(
+					function(){
+						if(vm.visible)
+						{
+							vm.initClippingPlane(); 
+						}
+						else
+						{
+							vm.visible=true; 
+						}
 			}
-			else
-				vm.visible=true; 
 		}
 
 		/*
@@ -244,7 +272,6 @@
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{
 				vm.projectTrans = event.value.projectTrans;
-				vm.bbox = event.value.bbox;
 			}
 		});
 	}

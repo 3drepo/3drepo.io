@@ -313,7 +313,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				{
 					self.groupNodes={};
 					var projectTrans = {};					
-					var vol = null;
 					//loaded x3dom file for current project, figure out the groups
 					var groups = document.getElementsByTagName("Group");
 					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
@@ -325,18 +324,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						{
 							//valid name
 							var accProj = res[2] + "__" + res[3];
-							projectTrans[accProj] = groups[gIdx]._x3domNode.getCurrentTransform(); 
-							if(res[0] == res[2] && res[1] == res[3])
-							{
-								vol = groups[gIdx]._x3domNode.getVolume();
-							}
+							projectTrans[accProj].trans = groups[gIdx]._x3domNode.getCurrentTransform(); 
+							projectTrans[accProj].vol = {
+								min: groups[gIdx]._x3domNode.getVolume().min,
+								max: groups[gIdx]._x3domNode.getVolume().max
+							};
 						}
 
 					}
 					callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
 								{
 									projectTrans: projectTrans,
-									bbox: {min: vol.min, max: vol.max}
 								}
 							
 							);
