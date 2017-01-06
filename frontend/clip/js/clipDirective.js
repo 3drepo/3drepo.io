@@ -300,13 +300,13 @@
 				
 					var distanceInverted = max - newValue + min;
 					var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
-					if(percentage < 0)
+					if(percentage < vm.sliderMin)
 					{
-						percentage = 0;
+						percentage = vm.sliderMin;
 					}
-					else if(percentage > 1)
+					else if(percentage > vm.sliderMax)
 					{
-						percentage = 1;
+						percentage = vm.sliderMax;
 					}
 					vm.sliderPosition = percentage;
 				}
@@ -359,6 +359,10 @@
 				vm.projectTrans = event.value.projectTrans;
 				vm.bbox = event.value.bbox;
 				updateSliderSettings();
+			}
+			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
+			{
+				vm.units = event.value.settings.unit;
 			}
 		});
 	}
