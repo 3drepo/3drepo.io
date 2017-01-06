@@ -313,6 +313,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				{
 					self.groupNodes={};
 					var projectTrans = {};					
+					var vol = null;
 					//loaded x3dom file for current project, figure out the groups
 					var groups = document.getElementsByTagName("Group");
 					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
@@ -326,16 +327,18 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 							var accProj = res[2] + "__" + res[3];
 							projectTrans[accProj] = {trans: groups[gIdx]._x3domNode.getCurrentTransform() }
 
-							projectTrans[accProj].vol = {
-								min: groups[gIdx]._x3domNode.getVolume().min,
-								max: groups[gIdx]._x3domNode.getVolume().max
-							};
 						}
 
 					}
+
 					callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
 								{
 									projectTrans: projectTrans,
+									bbox : {
+
+										min: self.getScene()._x3domNode.getVolume().min,
+										max: self.getScene()._x3domNode.getVolume().max
+									}
 								}
 							
 							);
@@ -1927,9 +1930,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(axis, percentage) {
+		this.moveClippingPlane = function(axis, distance) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(axis, percentage);
+			self.clippingPlanes[0].movePlane(axis, distance);
 		};
 
 		this.changeAxisClippingPlane = function(axis) {

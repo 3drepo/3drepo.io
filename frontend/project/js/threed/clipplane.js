@@ -249,9 +249,9 @@ var ClipPlane = {};
 
 		/**
 		 * Move the clipping plane
-		 * @param {number} percentage - Percentage of entire clip volume to move across
+		 * @param {number} distance - distance from the minimum bounding box
 		 */
-		this.movePlane = function(axis, percentage) {
+		this.movePlane = function(axis, distance) {
 			axis = axis.toUpperCase();
 			// When the axis is change the normal to the plane is changed
 			this.normal = [ (axis === "X") ? this.clipDirection : 0,
@@ -263,8 +263,7 @@ var ClipPlane = {};
 			var min = volume.min.multiply(BBOX_SCALE).toGL();
 			var max = volume.max.multiply(BBOX_SCALE).toGL();
 
-			if (!this.distance)
-				self.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+			self.distance = distance;
 
 			// Update the clipping element plane equation
 			clipPlaneElem.setAttribute("plane", this.normal.join(" ") + " " + self.distance);
@@ -442,16 +441,14 @@ var ClipPlane = {};
 			// Move the plane to finish construction
 			if(!normal)
 			{		
-				this.movePlane(axis, percentage);
+				this.movePlane(axis, distance);
 			}
 
 			viewer.getScene().appendChild(clipPlaneElem);
 
 
-			if(parentNode)
+			if(normal)
 				this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
-			else if(normal)
-				this.transformClipPlane(null, true);
 			
 
 

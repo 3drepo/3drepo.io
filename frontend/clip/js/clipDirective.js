@@ -63,6 +63,7 @@
 		vm.project = null;
 		vm.normal = null;
 		vm.projectTrans = null;
+		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 
 		function initClippingPlane (account, project, normal, distance) {
@@ -106,7 +107,7 @@
 			});
 		}
 
-		function moveClippingPlane(sliderPosition) {
+		vm.moveClippingPlane = function () {
 			if(vm.account && vm.project)
 			{
 				vm.account = null;
@@ -119,7 +120,7 @@
 				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
 				{
 					axis: translateAxis(vm.selectedAxis),
-					percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
+					distance: vm.distance
 				});
 
 			}
@@ -170,22 +171,25 @@
 		function loadClippingPlane(account, project, normal, distance)
 		{
 
+			vm.disableWatch = true;
 
 			vm.project = project;
 			vm.account = account;
 			vm.normal = normal;
 			vm.distance = distance;
+
 			determineAxis(
 					function(){
 
 						if(vm.visible)
 						{
-							vm.initClippingPlane(); 
+							initClippingPlane(); 
 						}
 						else
 						{
 							vm.visible=true; 
 						}
+							vm.disableWatch = false;
 					}
 			)
 		}
@@ -238,27 +242,77 @@
 			}
 		});
 
+		function updateSliderSettings(callback)
+		{
+			if(vm.selectedAxis && vm.selectedAxis != ""){
+
+				var min = 0;
+				var max = 0;
+				if(vm.selectedAxis === "X")
+				{
+					min = vm.bbox.min.x;
+					max = vm.bbox.max.x;
+				}
+				else if(vm.selectedAxis === "Y")
+				{
+					min = vm.bbox.min.z;
+					max = vm.bbox.max.z;
+				}
+				else if(vm.selectedAxis === "Z")
+				{
+					min = vm.bbox.min.y;
+					max = vm.bbox.max.y;
+				}
+				
+
+				
+				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
+				vm.distance = max - distanceDisplay + min;
+			}
+			callback();
+
+		}
+
+		/*
+		 * Change the clipping plane axis
+		 */
+		$scope.$watch("vm.distance", function (newValue) {
+			if (newValue != "" && angular.isDefined(newValue)) {
+				if(vm.selectedAxis && vm.selectedAxis != ""){
+	
+					var min = 0;
+					var max = 0;
+					if(vm.selectedAxis === "X")
+					{
+						min = vm.bbox.min.x;
+						max = vm.bbox.max.x;
+					}
+					else if(vm.selectedAxis === "Y")
+					{
+						min = vm.bbox.min.z;
+						max = vm.bbox.max.z;
+					}
+					else if(vm.selectedAxis === "Z")
+					{
+						min = vm.bbox.min.y;
+						max = vm.bbox.max.y;
+					}
+				
+
+				
+					var distanceInverted = max - newValue + min;
+					vm.sliderPosition =  (distanceInverted - min) / (Math.abs(max - min)/100) ;
+				}
+
+			}
+		});
+
 		/*
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if (newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				vm.normal = null;
-				if(vm.account && vm.project)
-				{
-					vm.account = null;
-					vm.project = null;
-					initClippingPlane();	
-				}
-				else
-				{
-					EventService.send(EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE,
-					{
-						axis: translateAxis(newValue),
-						percentage: (vm.sliderMax - vm.sliderPosition) / vm.sliderMax
-					});
-
-				}
+			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue) && vm.show ) {
+				updateSliderSettings(vm.moveClippingPlane);	
 			}
 		});
 
@@ -266,9 +320,9 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				vm.distance = 0; //reset the distance
-				moveClippingPlane(newValue);
+			console.log( vm.disableWatch);
+			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
+				updateSliderSettings(vm.moveClippingPlane);	
 			}
 		});
 
@@ -297,6 +351,8 @@
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{
 				vm.projectTrans = event.value.projectTrans;
+				vm.bbox = event.value.bbox;
+				updateSliderSettings();
 			}
 		});
 	}

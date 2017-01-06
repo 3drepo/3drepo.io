@@ -19,10 +19,7 @@ div(layout="column", layout-align="start center", flex, layout-fill)
 				div(flex, layout="row")
 					input(
 						flextype="number"
-						ng-model="vm.sliderPosition"
-						step="{{vm.sliderStep}}"
-						min="{{vm.sliderMin}}"
-						max="{{vm.sliderMax}}"
+						ng-model="vm.distance"
 						ng-disabled="!vm.visible"
 					)
 					| &nbsp;%
