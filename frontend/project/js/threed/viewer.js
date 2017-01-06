@@ -324,7 +324,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						{
 							//valid name
 							var accProj = res[2] + "__" + res[3];
-							projectTrans[accProj].trans = groups[gIdx]._x3domNode.getCurrentTransform(); 
+							projectTrans[accProj] = {trans: groups[gIdx]._x3domNode.getCurrentTransform() }
+
 							projectTrans[accProj].vol = {
 								min: groups[gIdx]._x3domNode.getVolume().min,
 								max: groups[gIdx]._x3domNode.getVolume().max

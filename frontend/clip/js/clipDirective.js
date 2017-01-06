@@ -43,7 +43,12 @@
 
 	function ClipCtrl($scope, $timeout, EventService) {
 		var vm = this;
-
+		/**
+		 * Bounding box scale avoids flickering at edges
+		 * @private
+		 * @type {number}
+		 */
+		var BBOX_SCALE = 1.0001;
 		/*
 		 * Init
 		 */
@@ -120,27 +125,46 @@
 			}
 		}
 
-		function determineAxis()
+		function determineAxis(callback)
 		{
+			console.log(vm);
 			//translate the normal and compare it to the axis
+			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
+			var transformedNormal = normal_x3d;
+
 			if(vm.project && vm.account)
 			{
 				var fullProjectName = vm.account + "__" + vm.project;
 				if(vm.projectTrans[fullProjectName])
 				{
-					var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
-					var transformedNormal = vm.projectTrans[fullProjectName].trans.multMatrixVec(normal_x3d);
+					transformedNormal = vm.projectTrans[fullProjectName].trans.multMatrixVec(normal_x3d);
 					transformedNormal.normalize();
+					vm.normal = transformedNormal.toGL();
 					//Since it's normalized if we only need to check 1 axis
-					if(transformNormal.x === 1)
+					if(Math.abs(transformedNormal.x) === 1)
+					{
 						vm.selectedAxis = "X";
-					else if(transformedNormal.y === 1)
-						vm.selectedAxis = "Y";
-					else if (transformedNormal.z ===1)
+						vm.normal = null;
+					}
+					else if(Math.abs(transformedNormal.y) === 1)
+					{
 						vm.selectedAxis = "Z";
+						vm.normal = null;
+					}
+					else if (Math.abs(transformedNormal.z) ===1)
+					{
+						vm.selectedAxis = "Y";
+						vm.normal = null;
+					}
 
+					var point = normal_x3d.multiply(-vm.distance);
+					point = vm.projectTrans[fullProjectName].trans.multMatrixPnt(point);
+					vm.distance = -transformedNormal.dot(point) * BBOX_SCALE;
+					vm.account = null;
+					vm.project = null;
 				}
 			}	
+			callback();
 		}
 
 		function loadClippingPlane(account, project, normal, distance)
@@ -151,9 +175,9 @@
 			vm.account = account;
 			vm.normal = normal;
 			vm.distance = distance;
-
-			vm.determineAxis(
+			determineAxis(
 					function(){
+
 						if(vm.visible)
 						{
 							vm.initClippingPlane(); 
@@ -162,7 +186,8 @@
 						{
 							vm.visible=true; 
 						}
-			}
+					}
+			)
 		}
 
 		/*
