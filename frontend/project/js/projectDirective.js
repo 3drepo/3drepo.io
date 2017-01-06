@@ -56,6 +56,20 @@
 		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
+		// Warn when user click refresh
+		var refreshHandler = function (e){
+			var confirmationMessage = "This will reload the whole model, are you sre?";
+
+			e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+			return confirmationMessage;              // Gecko, WebKit, Chrome <34
+		}
+
+		window.addEventListener("beforeunload", refreshHandler);
+
+		$scope.$on('$destroy', function(){
+			window.removeEventListener("beforeunload", refreshHandler);
+		});
+
 		/*
 		 * Get the project element
 		 */

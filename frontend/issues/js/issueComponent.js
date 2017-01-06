@@ -92,6 +92,28 @@
 
 		this.notificationStarted = false;
 
+		// create a fake state to prevent the back button
+		history.pushState({'issueCard': true}, null, document.URL);
+
+		// popup when user click back button
+		this.popStateHandler = function () {
+			// the fake state has already been popped by user at this moment
+
+			if(confirm('It will go back to project listing page. If you wish to go back to issue list, please use the back button on the issue card.\n\nAre you sure to go back to project listing page?')){
+				// pop one more state if user actually wants to go back
+				history.go(-1);
+			} else {
+				// recreate a fake state
+				history.pushState({'issueCard': true}, null, document.URL);
+			}
+			// self.exit();
+			// //necessary because action is not triggered by click UI within the app
+			// $scope.$apply();
+		};
+
+		//listen for user clicking the back button
+		window.addEventListener('popstate', this.popStateHandler);
+
 		function convertCommentTopicType(){
 			self.issueData && self.issueData.comments.forEach(function(comment){
 				if(comment.action && comment.action.property === 'topic_type'){
@@ -260,7 +282,12 @@
 				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 			}
 
-
+			window.removeEventListener('popstate', this.popStateHandler);
+			if(history.state && history.state.issueCard){
+				// remove the fake state created, if any
+				history.go(-1);
+			}
+			
 		};
 
 		/**
