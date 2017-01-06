@@ -65,6 +65,7 @@
 		vm.projectTrans = null;
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
+		vm.units = "m";
 
 		function initClippingPlane (account, project, normal, distance) {
 			$timeout(function () {
@@ -128,7 +129,6 @@
 
 		function determineAxis(callback)
 		{
-			console.log(vm);
 			//translate the normal and compare it to the axis
 			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
 			var transformedNormal = normal_x3d;
@@ -264,8 +264,6 @@
 					max = vm.bbox.max.y;
 				}
 				
-
-				
 				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
 				vm.distance = max - distanceDisplay + min;
 			}
@@ -301,7 +299,16 @@
 
 				
 					var distanceInverted = max - newValue + min;
-					vm.sliderPosition =  (distanceInverted - min) / (Math.abs(max - min)/100) ;
+					var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
+					if(percentage < 0)
+					{
+						percentage = 0;
+					}
+					else if(percentage > 1)
+					{
+						percentage = 1;
+					}
+					vm.sliderPosition = percentage;
 				}
 
 			}
@@ -320,7 +327,6 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			console.log( vm.disableWatch);
 			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
 				updateSliderSettings(vm.moveClippingPlane);	
 			}
