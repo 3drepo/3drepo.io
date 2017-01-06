@@ -11,7 +11,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				table(border=0)
 					tr
 						td(colspan=2)
-							h3 #!{issue.number} !{issue.name}
+							h3 ##{issue.number} #{issue.name}
 					if issue.viewpoint.screenshotSmall
 						tr
 							td(colspan=2) 
@@ -21,36 +21,36 @@ html(lang="en" ng-app="3drepo").ng-scope
 					tr
 						td(colspan=2)
 							b Assigned:
-							span [!{issue.assigned_roles.join(",")}] 
+							span [#{issue.assigned_roles.join(",")}] 
 
 							b Priority: 
-							span !{issue.priority} 
+							span #{issue.priority} 
 
 							b Status: 
-							span !{issue.status} 
+							span #{issue.status} 
 
 							b Type: 
-							span !{issue.topic_type}
+							span #{issue.topic_type}
 
 					tr
 						td(colspan=2)
 							b Description: 
-							span !{issue.desc}
+							span #{issue.desc}
 					tr
-						td !{issue.owner} [!{issue.created}]
+						td #{issue.owner} [#{issue.created}]
 						td Issue Opened....
 					if issue.comments
 						each comment in issue.comments
 							tr
-								td !{comment.owner} [!{comment.created}]
+								td #{comment.owner} [#{comment.created}]
 								td 
 									if comment.comment
-										| !{comment.comment}
+										| #{comment.comment}
 									if comment.action
-										| !{comment.action.propertyText} changed from 
-										i !{comment.action.from} 
+										| #{comment.action.propertyText} changed from 
+										i #{comment.action.from} 
 										| to 
-										i !{comment.action.to}
+										i #{comment.action.to}
 							if comment.viewpoint && comment.viewpoint.screenshotSmall
 								tr
 									td(colspan=2)
