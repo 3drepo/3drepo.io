@@ -22,8 +22,8 @@
 	const ModelFactory = require('./factory/modelFactory');
 	const RoleTemplates = require('./role_templates');
 	const responseCodes = require("../response_codes");
-	//var User = require('./user');
-	//var _ = require('lodash');
+	const ProjectSetting = require("./projectSetting");
+	const _ = require('lodash');
 
 	const schema = mongoose.Schema({
 		_id : String,
@@ -128,6 +128,86 @@
 
 		let viewRolesCmd = { rolesInfo : roles, showPrivileges: true };
 		return ModelFactory.db.admin().command(viewRolesCmd).then(doc => doc.roles);
+
+	};
+
+	schema.statics.listProjectsAndAccountAdmin = function(roles){
+
+		let projects = {};
+		let promises = [];
+		let adminAccounts = [];
+
+		function getProjectNames(privileges){
+
+			let collectionSuffix = '.history';
+			let projectNames = [];
+
+			for(let i=0 ; i < privileges.length ; i++){
+				let collectionName = privileges[i].resource.collection;
+				if(collectionName.endsWith(collectionSuffix)){
+					projectNames.push(collectionName.substr(0, collectionName.length - collectionSuffix.length));
+				}
+			}
+
+			return _.unique(projectNames);
+		}
+
+		function addToProjectList(account, project, permissions){
+			//if project not found in the list
+			if(!projects[`${account}.${project}`]){
+				projects[`${account}.${project}`] = {
+					project,
+					account,
+					permissions: permissions ? permissions : []
+				};
+			} else {
+				permissions && (projects[`${account}.${project}`].permissions = projects[`${account}.${project}`].permissions.concat(permissions));
+				projects[`${account}.${project}`].permissions  = _.unique(projects[`${account}.${project}`].permissions);
+			}
+		}
+
+		roles.forEach(role => {
+
+			let permissions = RoleTemplates.determinePermission(role.db, '', role);
+
+			if(_.intersection(permissions, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
+				// admin role list all projects on that db
+				adminAccounts.push(role.db);
+				promises.push(
+					ProjectSetting.find({account: role.db}).then(settings => {
+						settings.forEach(setting => {
+
+							let projectName = setting._id;
+							addToProjectList(role.db, projectName, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
+
+						});
+					})
+				);
+
+			} else {
+
+				let projectNames = getProjectNames(role.privileges);
+				let permissions;
+
+				projectNames.forEach(projectName => {
+					if(projectName){
+						permissions = RoleTemplates.determinePermission(role.db, projectName, role);
+					}
+
+					if(permissions){
+						addToProjectList(role.db, projectName, permissions);
+					}
+				});
+
+			}
+		});
+
+		return Promise.all(promises).then(() => {
+			return {
+				projects:  _.values(projects),
+				adminAccounts: adminAccounts
+			};
+		});
 
 	};
 
