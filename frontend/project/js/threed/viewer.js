@@ -308,6 +308,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var nameSpace = objEvent.target.nameSpaceName;
 
 				self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
+				console.log("onload -> " + nameSpace);
+				console.log( self.getScene()._x3domNode.getVolume().min);
 
 				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
 				{
@@ -331,18 +333,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 					}
 
-					callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
-								{
-									projectTrans: projectTrans,
-									bbox : {
-
-										min: self.getScene()._x3domNode.getVolume().min,
-										max: self.getScene()._x3domNode.getVolume().max
-									}
-								}
-							
-							);
 				}
+				var accProj = nameSpace.split("__");
+				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
+							{
+								projectNameSpace: nameSpace,
+								projectTrans: self.getParentTransformation(accProj[0], accProj[1])
+					
+							}
+						
+						);
 			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 				if (self.multipartNodes.indexOf(objEvent.target) === -1)
 				{
@@ -378,7 +378,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED);
+				callback(self.EVENT.LOADED, {								
+					bbox : {
+						min: self.getScene()._x3domNode.getVolume().min,
+						max: self.getScene()._x3domNode.getVolume().max
+					}
+				});
 			}
 		});
 

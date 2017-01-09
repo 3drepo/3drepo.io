@@ -62,7 +62,7 @@
 		vm.account = null;
 		vm.project = null;
 		vm.normal = null;
-		vm.projectTrans = null;
+		vm.projectTrans = {};
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 		vm.units = "m";
@@ -263,11 +263,12 @@
 					min = vm.bbox.min.y;
 					max = vm.bbox.max.y;
 				}
-				
+				console.log("max : " + max + ", min: " + min + " slider position: " + vm.sliderPosition);	
 				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
 				vm.distance = max - distanceDisplay + min;
 			}
-			callback();
+			if(callback)
+				callback();
 
 		}
 
@@ -356,7 +357,10 @@
 			}
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{
-				vm.projectTrans = event.value.projectTrans;
+				vm.projectTrans[event.value.projectNameSpace] = event.value.projectTrans;
+			}
+			else if(event.type === EventService.EVENT.VIEWER.LOADED)
+			{
 				vm.bbox = event.value.bbox;
 				updateSliderSettings();
 			}
