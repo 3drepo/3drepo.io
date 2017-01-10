@@ -187,7 +187,7 @@
 
 			} else {
 
-				let projectNames = getProjectNames(role.privileges);
+				let projectNames = getProjectNames(role.inheritedPrivileges);
 				let permissions;
 
 				projectNames.forEach(projectName => {
@@ -206,7 +206,7 @@
 		return Promise.all(promises).then(() => {
 			return {
 				projects:  _.values(projects),
-				adminAccounts: adminAccounts
+				adminAccounts: _.unique(adminAccounts)
 			};
 		});
 
