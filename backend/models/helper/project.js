@@ -558,9 +558,8 @@ function newGetFullTree(account, project, branch, rev, username){
 					}
 
 					let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-					console.log('treeFileName', treeFileName);
 					return stash.findStashByFilename({ account: ref.owner, project: ref.project }, 'json_mpc', treeFileName);
-				})
+				});
 
 			}).then(buf => { 
 				return {
@@ -697,16 +696,15 @@ function getFullTree(account, project, branch, rev, username){
 
 				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
 				if (targetChild){
-					console.log('targetChild', targetChild);
 					if(subTree && subTree.tree && subTree.tree.nodes){
 						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
-						//resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
+						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
 						targetChild.children = [subTree.tree.nodes];
 
 						let idToPath = {};
 
-						//setIdToPath(subTree.tree.nodes, idToPath);
-						//Object.assign(tree.idToPath, idToPath);
+						setIdToPath(subTree.tree.nodes, idToPath);
+						Object.assign(tree.idToPath, idToPath);
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);

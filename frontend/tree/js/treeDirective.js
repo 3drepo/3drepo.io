@@ -166,6 +166,20 @@
 			node.toggleState = visibility;
 		};
 
+		/*
+		* See if id in each ids is a sub string of path
+		*/
+		function matchPath(ids, path){
+
+			for(var i=0; i<ids.length; i++){
+				if(path.indexOf(ids[i]) !== -1){
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		/**
 		 * Expand a node to show its children.
 		 * @param event
@@ -189,14 +203,31 @@
 				}
 			}
 
+			var _ids = [_id];
 			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
 					if (vm.nodesToShow[index].expanded) {
 						// Collapse
+
+						//if the target itself contains subProjectTree
+						if(vm.nodesToShow[index].hasSubProjTree){
+							//node containing sub project tree must have only one child
+							var subProjectNode = vm.subTreesById[vm.nodesToShow[index].children[0]._id];
+							_ids.push(subProjectNode._id);
+						}
+
 						while (!endOfSplice) {
-							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
+							
+							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
+
+								if(vm.nodesToShow[index + 1].hasSubProjTree){
+									var subProjectNode = vm.subTreesById[vm.nodesToShow[index + 1].children[0]._id];
+									_ids.push(subProjectNode._id);
+								}
+
 								vm.nodesToShow.splice(index + 1, 1);
+
 							} else {
 								endOfSplice = true;
 							}
@@ -364,7 +395,14 @@
 
 					if (objectID)
 					{
-						var path = vm.idToPath[objectID].split("__");
+						var path;
+						if(vm.idToPath[objectID]){
+							path = vm.idToPath[objectID].split("__");
+						} else {
+							path = vm.subProjIdToPath[objectID].split("__");
+							var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
+							path = parentPath.concat(path);
+						}
 
 						initNodesToShow();
 						expandToSelection(path, 0);
@@ -400,8 +438,11 @@
 				vm.nodes = vm.allNodes;
 				vm.showTree = true;
 				vm.showProgress = false;
-
+				vm.subTreesById = event.value.subTreesById;
 				vm.idToPath = event.value.idToPath;
+				vm.subProjIdToPath = event.value.subProjIdToPath;
+				console.log('subProjIdToPath', vm.subProjIdToPath);
+
 				initNodesToShow();
 				expandFirstNode();
 				setupInfiniteScroll();
@@ -628,13 +669,15 @@
 			}
 			else {
 				var map = [];
-				var pathArr = [];
-				for (var obj in vm.idToPath) {
-					if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
-						pathArr = vm.idToPath[obj].split("__");
-						map.push(pathArr[pathArr.length - 1]);
-					}
+
+				function traverseNodeAndPushId(node){
+					map.push(node._id);
+					node.children && node.children.forEach(function(child){
+						traverseNodeAndPushId(child);
+					});
 				}
+
+				traverseNodeAndPushId(node);
 
 				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
