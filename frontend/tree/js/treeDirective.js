@@ -74,25 +74,7 @@
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.visible   = [];
-		vm.invisible = [];
-
-		/*
-		 * Get all the tree nodes
-		 */
-		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
-		promise.then(function (data) {
-			vm.allNodes = [];
-			vm.allNodes.push(data.nodes);
-			vm.nodes = vm.allNodes;
-			vm.showTree = true;
-			vm.showProgress = false;
-
-			vm.idToPath = data.idToPath;
-			initNodesToShow();
-			expandFirstNode();
-			setupInfiniteScroll();
-			setContentHeight(vm.nodesToShow);
-		});
+		vm.invisible = [];		
 
 		/**
 		 * Set the content height.
@@ -408,6 +390,23 @@
 			else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 				multiSelectMode = event.value;
 			}
+			else if (event.type === EventService.EVENT.TREE_READY){
+				/*
+				 * Get all the tree nodes
+				 */
+
+				vm.allNodes = [];
+				vm.allNodes.push(event.value.nodes);
+				vm.nodes = vm.allNodes;
+				vm.showTree = true;
+				vm.showProgress = false;
+
+				vm.idToPath = event.value.idToPath;
+				initNodesToShow();
+				expandFirstNode();
+				setupInfiniteScroll();
+				setContentHeight(vm.nodesToShow);
+			}
 		});
 
 		vm.toggleTreeNode = function (node) {
@@ -461,6 +460,7 @@
 							if (numInvisible === vm.nodesToShow[j].children.length) {
 								vm.setToggleState(vm.nodesToShow[j], "invisible");
 							} else if ((numParentInvisible + numInvisible) > 0) {
+								console.log('set to parentOfInvisible');
 								vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
