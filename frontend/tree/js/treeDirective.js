@@ -287,6 +287,7 @@
 				}
 			}
 
+			console.log('vm.nodesToShow', vm.nodesToShow);
 			setContentHeight(vm.nodesToShow);
 		};
 

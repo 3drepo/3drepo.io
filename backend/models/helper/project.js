@@ -477,6 +477,111 @@ function getModelProperties(account, project, branch, rev, username){
 	});
 }
 
+// more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
+function newGetFullTree(account, project, branch, rev, username){
+	'use strict';
+
+	let getHistory;
+	let history;
+
+	let trees = {};
+
+	if(rev && utils.isUUID(rev)){
+
+		getHistory = History.findByUID({ account, project }, rev);
+
+	} else if (rev && !utils.isUUID(rev)) {
+
+		getHistory = History.findByTag({ account, project }, rev);
+
+	} else if (branch) {
+
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
+
+	return getHistory.then(_history => {
+
+		history = _history;
+
+		if(!history){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		let revId = utils.uuidToString(history._id);
+		let treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
+
+	}).then(buf => {
+
+		trees.mainTree = buf.toString();
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTrees = [];
+
+		refs.forEach(ref => {
+
+			let getRefId;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				
+				getRefId = History.findByBranch({ account: ref.owner, project: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
+					return _history ? utils.uuidToString(_history._id) : null;
+				});
+
+			} else {
+				getRefId = Promise.resolve(utils.uuidToString(ref._rid));
+			}
+
+			let status;
+			let getTree = middlewares.hasReadAccessToProjectHelper(username, ref.owner, ref.project).then(granted => {
+				
+				if(!granted){
+					status = 'NO_ACCESS';
+					return;
+				}
+				
+				return getRefId.then(revId => {
+
+					if(!revId){
+						status = 'NOT_FOUND';
+						return;
+					}
+
+					let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
+					console.log('treeFileName', treeFileName);
+					return stash.findStashByFilename({ account: ref.owner, project: ref.project }, 'json_mpc', treeFileName);
+				})
+
+			}).then(buf => { 
+				return {
+					status, 
+					buf: buf.toString(), 
+					_id: utils.uuidToString(ref._id)
+				};
+			});
+
+			getTrees.push(getTree);
+
+		});
+
+		return Promise.all(getTrees);
+
+	}).then(subTrees => {
+		trees.subTrees = subTrees;
+		return trees;
+	});
+}
+
 function getFullTree(account, project, branch, rev, username){
 	'use strict';
 
@@ -592,16 +697,16 @@ function getFullTree(account, project, branch, rev, username){
 
 				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
 				if (targetChild){
-
+					console.log('targetChild', targetChild);
 					if(subTree && subTree.tree && subTree.tree.nodes){
 						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
-						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
+						//resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
 						targetChild.children = [subTree.tree.nodes];
 
 						let idToPath = {};
 
-						setIdToPath(subTree.tree.nodes, idToPath);
-						Object.assign(tree.idToPath, idToPath);
+						//setIdToPath(subTree.tree.nodes, idToPath);
+						//Object.assign(tree.idToPath, idToPath);
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
@@ -1253,5 +1358,6 @@ module.exports = {
 	getRolesForProject,
 	uploadFile,
 	importProject,
-	removeProject
+	removeProject,
+	newGetFullTree
 };
