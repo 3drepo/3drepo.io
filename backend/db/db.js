@@ -43,6 +43,7 @@
 
 		self.host = config.db.host;
 		self.port = config.db.port;
+		self.rsName = config.db.replicaSet;
 
 		self.username = config.db.username;
 		self.password = config.db.password;
@@ -74,7 +75,7 @@
 		authDBConn.open(function(err, dbConn) {
 			if(err) {
 				var dbError = responseCodes.DB_ERROR(err);
-				systemLogger.logError(dbError);
+				systemLogger.logError("ETC: " + JSON.stringify(err.err));
 				throw Error(JSON.stringify(dbError));
 			}
 
@@ -100,6 +101,7 @@
 
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
+		connectString += this.rsName ? "&replicaSet=" + this.rsName : "";
 
 		return connectString;
 	};

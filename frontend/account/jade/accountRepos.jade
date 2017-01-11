@@ -4,7 +4,7 @@
 			.md-toolbar-tools
 				h2 Repos
 
-		md-tabs(md-dynamic-height, md-border-bottom)
+		md-tabs(md-dynamic-height, md-border-bottom, md-selected="vm.selectedIndex")
 			md-tab(label="Projects")
 				account-projects(
 				account="vm.account"
@@ -17,6 +17,6 @@
 				account-federations(
 				account="vm.account"
 				accounts="vm.accounts"
-				on-show-page="vm.showItem(page, callingPage)"
+				on-show-page="vm.showPage(page, callingPage, data)"
 				quota="vm.quota"
 				subscriptions="vm.subscriptions")

@@ -195,6 +195,38 @@
             return serverConfig.apiUrl(serverConfig.GET_API, url);
         };
 
+        /**
+        * Convert error code to custom error message
+        */
+        obj.getErrorMessage = function(resData){
+            
+            var messages = {
+                'FILE_FORMAT_NOT_SUPPORTED': 'Unsupported file format',
+                'SIZE_LIMIT_PAY': 'Insufficient quota for model',
+                'USER_NOT_VERIFIED': 'Please click on the link in the verify email sent to your account',
+                'ALREADY_VERIFIED': 'You have already verified your account successfully. You may now login to your account.',
+                'INVALID_CAPTCHA_RES': 'Prove you\'re not a robot',
+                'USER_EXISTS': 'User already exists'
+            };
+
+            var message;
+
+            Object.keys(serverConfig.responseCodes).forEach(function(key){
+                if(serverConfig.responseCodes[key].value === resData.value){
+                    if(messages[key]){
+                        message = messages[key]; 
+                    } else {
+                        message = serverConfig.responseCodes[key].message;
+                    }
+                }
+            });
+
+            return message;
+
+        };
+
+
+
         return obj;
     }
 }());

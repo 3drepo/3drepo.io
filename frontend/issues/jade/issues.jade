@@ -30,8 +30,11 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 	keys-down="vm.keysDown"
 	content-height="vm.setContentHeight(height)"
 	menu-option="vm.selectedMenuOption"
-	selected-issue="vm.selectedIssue",
-	user-roles="vm.projectUserRoles")
+	user-roles="vm.projectUserRoles"
+	tree-map="vm.treeMap"
+	selected-issue="vm.selectedIssue"
+	issue-display="vm.issueDisplay"
+	)
 
 	// Issue
 	issue-comp(
@@ -49,7 +52,7 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 	selected-objects="vm.selectedObjects"
 	revision="vm.revision"
 	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
-	user-roles="vm.projectUserRoles",
+	user-roles="vm.projectUserRoles"
 	available-roles="vm.availableRoles")
 
 

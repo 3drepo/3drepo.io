@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var log_iface  = require("../logger.js");
+//var log_iface  = require("../logger.js");
 var express = require("express");
 var responseCodes = require("../response_codes.js");
 var dbInterface = require("../db/db_interface.js");
@@ -23,18 +23,6 @@ var dbInterface = require("../db/db_interface.js");
 
 var C = require("../constants");
 
-function hasWriteAccessToProject(req, account, project, callback)
-{
-	"use strict";
-
-	var username = null;
-
-if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-		username = req.session[C.REPO_SESSION_USER].username;
-	}
-
-	dbInterface(req[C.REQ_REPO].logger).hasWriteAccessToProject(username, account, project, callback);
-}
 
 function hasReadAccessToProject(req, account, project, callback)
 {
@@ -116,14 +104,8 @@ var repoRouter = function() {
 
 	//self.router.use(log_iface.startRequest); // moved to api.js
 	self.getHandler  = require("./routes_get")(self.router, self.checkAccess(hasReadAccessToProject));
-	self.postHandler = require("./routes_post")(self.router, self.checkAccess(hasWriteAccessToProject));
-	self.router.use(log_iface.endRequest);
 
 	self.get  = function(format, regex, callback) {
-		self.getHandler.get(format, regex, callback);
-	};
-
-	self.post = function(format, regex, callback) {
 		self.getHandler.get(format, regex, callback);
 	};
 

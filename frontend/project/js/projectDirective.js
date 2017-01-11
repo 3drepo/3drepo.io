@@ -38,9 +38,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "RevisionsService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "TreeService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, RevisionsService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, TreeService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
@@ -53,7 +53,7 @@
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
 		/*
@@ -238,6 +238,10 @@
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
 					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
+
+				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
+					vm.treeMap = TreeService.getMap(data.nodes);
+				});
 			}
 		});
 
@@ -286,7 +290,7 @@
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				vm.pointerEvents = event.value.on ? "none" : "auto";
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display

@@ -32,6 +32,7 @@
 				revision: "=",
                 position: "=",
                 projectSettings: "=",
+                treeMap: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -186,6 +187,7 @@
 				"project-settings='vm.projectSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
+				"tree-map='vm.treeMap' " +
 				"selected-objects='vm.selectedObjects' " +
 				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
 
@@ -234,7 +236,7 @@
 					} else {
 						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
 					}
-					
+
 					vm.contentData.options[i].color = "";
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
@@ -318,7 +320,7 @@
 
 		/**
 		 * Handle adding content
-		 * 
+		 *
 		 * @param {Boolean} on
          */
 		function toggleAdd (on) {

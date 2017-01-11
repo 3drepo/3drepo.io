@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService", "$sanitize"];
 
-	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService, $sanitize) {
 		var url = "",
 			data = {},
 			config = {},
@@ -90,16 +90,7 @@
 
 			$http.get(url).then(function(res){
 
-				res.data.timeStamp = self.getPrettyTime(res.data.created);
-				res.data.title = self.generateTitle(res.data);
-
-				if (res.data.hasOwnProperty("comments")) {
-					for (var j = 0, numComments = res.data.comments.length; j < numComments; j += 1) {
-						if (res.data.comments[j].hasOwnProperty("created")) {
-							res.data.comments[j].timeStamp = self.getPrettyTime(res.data.comments[j].created);
-						}
-					}
-				}
+				res.data = obj.cleanIssue(res.data);
 
 				deferred.resolve(res.data);
 
@@ -132,22 +123,23 @@
 						}
 
 						// Comments
-						if (data.data[i].hasOwnProperty("comments")) {
-							for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-								// Timestamp
-								if (data.data[i].comments[j].hasOwnProperty("created")) {
-									data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
-								}
-								// Screen shot path
-								if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
-									data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
-								}
-								// Action comment text
-								if (data.data[i].comments[j].action) {
-									data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
-								}
-							}
-						}
+						// issues api don't return comments anymore
+						// if (data.data[i].hasOwnProperty("comments")) {
+						// 	for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+						// 		// Timestamp
+						// 		if (data.data[i].comments[j].hasOwnProperty("created")) {
+						// 			data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
+						// 		}
+						// 		// Screen shot path
+						// 		if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
+						// 			data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
+						// 		}
+						// 		// Action comment text
+						// 		if (data.data[i].comments[j].action) {
+						// 			data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
+						// 		}
+						// 	}
+						// }
 
 						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
@@ -454,44 +446,96 @@
 		 * @param comment
 		 * @returns {string}
 		 */
-		obj.convertActionCommentToText = function (comment) {
+		obj.convertActionCommentToText = function (comment, topic_types) {
 			var text = "";
 
 			switch (comment.action.property) {
 				case "priority":
-					text = "Priority " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Priority';
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
 					break;
+
 				case "status":
-					text = "Status " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Status';
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to= convertActionValueToText(comment.action.to);
+
 					break;
+
 				case "assigned_roles":
-					text = "Assigned " +
-						" <span class='commentTextLight'>to</span> " +
-						comment.action.to;
-					if (comment.action.from) {
-						text += " <span class='commentTextLight'>from</span> " +
-							comment.action.from;
-					}
+
+					comment.action.propertyText = 'Assigned';
+					
 					break;
+
 				case "topic_type":
-					text = "Type changed " +
-						"<span class='commentTextLight'>changed from</span> " +
-						convertActionValueToText(comment.action.from) +
-						" <span class='commentTextLight'>to</span> " +
-						convertActionValueToText(comment.action.to);
+
+					comment.action.propertyText = 'Type';
+					if(topic_types){
+
+						var from = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.from;
+						});
+
+						var to = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.to;
+						});
+
+						if(from && from.label){
+							comment.action.from = from.label
+						}
+
+						if(to && to.label){
+							comment.action.to = to.label
+						}
+
+					}
+
+					break;
+
+				case "desc":
+
+					comment.action.propertyText = 'Description';
+
 					break;
 			}
 
 			return text;
 		};
+
+		/**
+		 * generate title, screenshot path and comment for an issue
+		 * @param issue
+		 * @returns issue
+		 */
+		obj.cleanIssue = function(issue){
+
+			var self = this;
+
+			issue.timeStamp = self.getPrettyTime(issue.created);
+			issue.title = self.generateTitle(issue);
+
+			if (issue.hasOwnProperty("comments")) {
+				for (var j = 0, numComments = issue.comments.length; j < numComments; j += 1) {
+					if (issue.comments[j].hasOwnProperty("created")) {
+						issue.comments[j].timeStamp = self.getPrettyTime(issue.comments[j].created);
+					}
+					// Action comment text
+					if (issue.comments[j].action) {
+						issue.comments[j].comment = obj.convertActionCommentToText(issue.comments[j]);
+					}
+					//screen shot path
+					if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
+						issue.comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(issue.comments[j].viewpoint.screenshot);
+					}
+				}
+			}
+
+			return issue;
+		}
 
 		/**
 		 * Convert an action value to readable text
@@ -524,12 +568,6 @@
 					break;
 				case "closed":
 					text = "Closed";
-					break;
-				case "for_information":
-					text = "For information";
-					break;
-				case "vr":
-					text = "VR";
 					break;
 			}
 
@@ -566,19 +604,6 @@
 			}
 		);
 
-		// Getter setter for issueDisplay
-		Object.defineProperty(
-			obj,
-			"issueDisplay",
-			{
-				get: function () {
-					return issueDisplay;
-				},
-				set: function (newIssueDisplay) {
-					issueDisplay = newIssueDisplay;
-				}
-			}
-		);
 
 		return obj;
 	}

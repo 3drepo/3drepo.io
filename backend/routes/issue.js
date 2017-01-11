@@ -26,30 +26,32 @@ var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
 var ProjectHelpers = require('../models/helper/project');
+var RoleTemplates = require('../models/role_templates');
+
 var _ = require('lodash');
 
-router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
-router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
+router.get('/issues/:uid.json', middlewares.hasReadAccessToIssue, findIssueById);
+router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToIssue, getThumbnail);
 
-router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
-router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
+router.get('/issues.json', middlewares.hasReadAccessToIssue, listIssues);
+router.get('/issues.bcfzip', middlewares.hasReadAccessToIssue, getIssuesBCF);
 router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
-router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
-router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
-router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
-router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
+router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToIssue, getScreenshot);
+router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToIssue, getScreenshotSmall);
+router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToIssue, listIssues);
+router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToIssue, getIssuesBCF);
 router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
 
-//router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
-router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
-router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
+//router.get('/issues/:sid.json', middlewares.hasReadAccessToIssue, listIssuesBySID);
+router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, storeIssue);
-router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToIssue, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -109,12 +111,17 @@ function updateIssue(req, res, next){
 		data.owner_roles = roles;
 		
 		roles.forEach(role => {
-			if(projectRoles[role] && projectRoles[role].roleFunction === 'admin'){
+			if(projectRoles[role] && 
+				_.intersection(
+					projectRoles[role].permissions, 
+					RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+				).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
+				
 				data.isAdmin = true;
 			}
 		});
 
-		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 });
+		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 });
 
 	}).then(issue => {
 
@@ -142,8 +149,7 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			issue.updateAttrs(data);
-			action = issue.save();
+			action = issue.updateAttrs(data);
 		}
 
 		return action;

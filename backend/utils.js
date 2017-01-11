@@ -281,6 +281,18 @@ function Utils() {
         return `${req.method} ${req._parsedUrl.pathname}`;
     };
 
+    /**
+     * Con 
+     *
+     * @param {Double} value - Value to round to n d.p.
+     * @param {Double} n - Number of d.p. to round to
+     * @return {Double} value rounded to n d.p.
+     */
+    this.roundToNDP = function(value, n){
+        let factor = Math.pow(10.0, n);
+	    return Math.round(value * factor) / factor;
+    };
+
 }
 
 module.exports = new Utils();

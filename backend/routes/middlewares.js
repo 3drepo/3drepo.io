@@ -18,124 +18,64 @@
 var _ = require('lodash');
 var responseCodes = require('../response_codes');
 var C				= require("../constants");
-var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
-var Role = require('../models/role');
-
+var RoleTemplates = require('../models/role_templates');
+var utils = require("../utils");
 var config = require('../config');
 
-var READ_BIT	= 4;
-var WRITE_BIT	= 2;
-// var EXECUTE_BIT	= 1;
-
-var getDbColOptions = function(req){
-	return {account: req.params.account, project: req.params.project};
-};
 
 // init ampq and import queue object
 var importQueue = require('../services/queue');
 
-function getAccessByCollection(username, account, collection){
-	'use strict';
-
-	return User.findByUserName(username).then(user => {
-		return user.getPrivileges();
-
-	}).then(privileges => {
-
-		//Determine the access rights of a project via privileges on the history collection
-		let writePermission = false;
-		let readPermission = false;
-
-		//console.log(privileges);
-		for (let i = 0; i < privileges.length; i++) {
-			if (privileges[i].resource.db === account) {
-				//console.log(privileges[i]);
-				if (privileges[i].resource.collection === "" || privileges[i].resource.collection === collection) {
-					readPermission |= privileges[i].actions.indexOf("find") > -1;
-					writePermission |= privileges[i].actions.indexOf("insert") > -1;
-
-				}
-			}
-		}
-
-		let permissionFlag = readPermission? READ_BIT : 0;
-		permissionFlag += writePermission? WRITE_BIT : 0;
-
-		return Promise.resolve(permissionFlag);
-	});
-}
-
 function hasReadAccessToProjectHelper(username, account, project){
-	return hasAccessToProjectHelper(username, account, project, READ_BIT);
+	return checkSystemPermissions(
+		username, 
+		account, 
+		project, 
+		[C.PERM_VIEW_PROJECT]
+	);
 }
 
-function hasAccessToProjectHelper(username, account, project, permissionBit){
-	return getAccessByCollection(username, account, project + ".history").then(permissionFlag => {
-		return Promise.resolve(permissionFlag & permissionBit);
-	});
+function hasReadAccessToIssue(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_VIEW_ISSUE]);
 }
 
-function hasAccessToCollection(req, res, next, collection, permissionBit){
+function hasWriteAccessToIssue(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_CREATE_ISSUE]);
+}
+
+function hasWriteAccessToProject(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_UPLOAD_FILES]);
+}
+
+function hasReadAccessToProject(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_VIEW_PROJECT]);
+}
+
+function hasAccessTo(req, res, next, requestedPerms){
 	'use strict';
 
-	let username = req.session.user.username;
-	let account = req.params.account;
-	//let project = req.params.project;
-
-	return getAccessByCollection(username, account, collection).then(permissionFlag => {
-		return Promise.resolve(permissionFlag & permissionBit);
-	}).then(granted => {
+	checkSystemPermissions(
+		req.session.user.username, 
+		req.params.account, 
+		req.params.project, 
+		requestedPerms
+	).then(granted => {
 		if(granted){
 			next();
 		} else {
 			return Promise.reject(responseCodes.NOT_AUTHORIZED);
 		}
 	}).catch(err => {
-		responseCodes.respond("Middleware: check has access to " + collection, req, res, next, err , null, err);
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
-}
-
-function hasWriteAccessToIssue(req, res, next){
-	'use strict';
-
-	let collection = req.params.project + '.issues';
-	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
-}
-
-function hasWriteAccessToProject(req, res, next){
-	'use strict';
-
-	let collection = req.params.project + '.history';
-	return hasAccessToCollection(req, res, next, collection, WRITE_BIT);
-}
-
-function hasReadAccessToProject(req, res, next){
-	'use strict';
-
-	let collection = req.params.project + '.history';
-	return hasAccessToCollection(req, res, next, collection, READ_BIT);
-}
-
-function hasAccessToAccount(req, res, next){
-	'use strict';
-
-	let username = req.session.user.username;
-	if(username === req.params.account){
-		next();
-	} else {
-		responseCodes.respond("Middleware: check has access to account", req, res, next, responseCodes.NOT_AUTHORIZED , null, {});
-	}
-}
-
-function hasReadAccessToAccount(req, res, next){
-	hasAccessToAccount(req, res, next);
-}
-
-function hasWriteAccessToAccount(req, res, next){
-	hasAccessToAccount(req, res, next);
 }
 
 
@@ -170,53 +110,6 @@ function checkRole(acceptedRoles, req){
 
 }
 
-function isMainContractor(req, res, next){
-	checkRole([C.REPO_ROLE_MAINCONTRACTOR], req).then(() => {
-		next();
-	}).catch(resCode => {
-		responseCodes.respond("Middleware: check is main contractor", req, res, next, resCode, null, req.params);
-	});
-}
-
-function isSubContractorInvitedHelper(req){
-	'use strict';
-
-	let filter = {
-		user: req.session[C.REPO_SESSION_USER].username
-	};
-
-	if (req.params.packageName){
-		filter.packageName = req.params.packageName;
-	}
-	return Bid.count(getDbColOptions(req), filter).then(count => {
-		if (count > 0) {
-			return Promise.resolve();
-		} else {
-			return Promise.reject(responseCodes.AUTH_ERROR);
-		}
-	});
-}
-
-function isSubContractorInvited(req, res, next){
-	isSubContractorInvitedHelper(req).then(()=>{
-		next();
-	}).catch(resCode => {
-		responseCodes.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
-	});
-}
-
-function canCreateDatabase(req, res, next){
-	'use strict';
-
-	if (req.session[C.REPO_SESSION_USER] && req.params.account === req.session[C.REPO_SESSION_USER].username){
-		next();
-	} else {
-		responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
-	}
-}
-
-
-
 function freeSpace(account){
 	'use strict';
 
@@ -225,7 +118,7 @@ function freeSpace(account){
 	//console.log('checking free space');
 	return User.findByUserName(account).then( dbUser => {
 
-		limits = dbUser.getSubscriptionLimits();
+		limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
 		return User.historyChunksStats(account);
 
 	}).then(stats => {
@@ -254,7 +147,7 @@ function hasCollaboratorQuota(req, res, next){
 
 	return User.findByUserName(account).then( dbUser => {
 
-		limits = dbUser.getSubscriptionLimits();
+		limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
 
 		return ProjectSetting.findById({account}, project);
 
@@ -266,6 +159,8 @@ function hasCollaboratorQuota(req, res, next){
 			responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
 		}
 
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
 }
 
@@ -273,7 +168,6 @@ function createQueueInstance(){
 	'use strict';
 
 	// init ampq and import queue object
-	let importQueue = require('../services/queue');
 	let log_iface = require("../logger.js");
 	let systemLogger = log_iface.systemLogger;
 
@@ -313,63 +207,81 @@ function isAccountAdmin(req, res, next){
 
 	let username = req.session.user.username;
 	let account = req.params.account;
-	let foundAdminRole;
 
-	User.findByUserName(username).then(user => {
-
-
-		let findPromises = [];
-
-		if(!user){
-			return Promise.reject();
-		}
-
-		user.roles.forEach(role => {
-			if (role.db === account){
-				findPromises.push(
-					Role.findByRoleID(`${account}.${role.role}`).then(detailRole => {
-						!foundAdminRole && (foundAdminRole = detailRole.roles.find(role => role.db === account && role.role === 'readWrite'));
-					})
-				);
-			}
-		});
-
-		return Promise.all(findPromises);
-
-	}).then(() => {
-
-		console.log('foundAdminRole', foundAdminRole);
-		if(foundAdminRole){
+	checkSystemPermissions(
+		username, 
+		account, 
+		'', 
+		RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+	).then(granted => {
+		if(granted){
 			next();
 		} else {
-			return Promise.reject();
+			return Promise.reject(responseCodes.NOT_AUTHORIZED);
 		}
+	}).catch(err => {
 
-	}).catch(() => {
-		responseCodes.respond("Middleware: isAccountAdmin", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
 
 }
+
+function checkSystemPermissions(username, db, project, requestPerms){
+	'use strict';
+	
+	return User.findByUserName(username).then(user => {
+		return user.getPrivileges();
+	}).then(role => {
+		//console.log(JSON.stringify(roles, null, 2))
+		return RoleTemplates.determinePermission(db, project, role);
+	}).then(perms => {
+		//console.log(perms);
+		if(_.intersection(requestPerms, perms).length === requestPerms.length){
+			return true;
+		} else {
+			return false;
+		}
+	});
+}
+
+
+function hasWriteAccessToProjectSettings(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_CHANGE_PROJECT_SETTINGS]);
+}
+
+function hasDeleteAccessToProject(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_DELETE_PROJECT]);
+}
+
+function hasDownloadAccessToProject(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_DOWNLOAD_PROJECT]);
+}
+
+function hasReadAccessToIssue(req, res, next){
+	'use strict';
+	hasAccessTo(req, res, next, [C.PERM_VIEW_ISSUE]);
+}
+
 
 var middlewares = {
 
 	// Real middlewares taking req, res, next
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
-	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
-	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	hasWriteAccessToIssue: [loggedIn, hasWriteAccessToIssue],
-	isMainContractor: [loggedIn, isMainContractor],
-	isSubContractorInvited: [loggedIn, isSubContractorInvited],
+	hasWriteAccessToProjectSettings: [loggedIn, hasWriteAccessToProjectSettings],
+	hasDeleteAccessToProject: [loggedIn, hasDeleteAccessToProject],
+	hasDownloadAccessToProject: [loggedIn, hasDownloadAccessToProject],
+	hasReadAccessToIssue: [loggedIn, hasReadAccessToIssue],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
 	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
-
-	canCreateDatabase,
 	connectQueue,
 
 	// Helpers
 	freeSpace,
-	isSubContractorInvitedHelper,
 	loggedIn,
 	checkRole,
 	hasReadAccessToProjectHelper,

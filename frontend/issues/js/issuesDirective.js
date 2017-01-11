@@ -39,6 +39,7 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
+				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			},
@@ -73,15 +74,17 @@
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.toShow = "showIssues";
-
+		vm.issueDisplay = {};
+		
 		/*
 		 * Get all the Issues
 		 */
 		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			vm.showProgress = false;
+			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
+			vm.showAddButton = true;
 		});
 
 		/*
@@ -241,15 +244,7 @@
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-			}
-		});
-
-		/*
-		 * Show the add button if displaying info or list
-		 */
-		$scope.$watch("vm.toShow", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+				vm.showAddButton = true;
 			}
 		});
 
@@ -297,6 +292,7 @@
 			 * Watch for status changes for all issues
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+
 
 				issue.title = IssuesService.generateTitle(issue);
 				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
@@ -397,6 +393,7 @@
 			}
 
 			vm.toShow = "showIssue";
+			vm.showAddButton = false;
 		};
 
 		/**
@@ -463,7 +460,8 @@
 
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(obj.id);
+
+						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
 					data = {

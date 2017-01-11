@@ -227,6 +227,8 @@ issues-list .closedText{
   padding: 15px 25px;
   background-color: rgba(255,255,255,0.9);
   border: 1px solid #DDDDDD;
+ }
+
 /** Issues List Item **************************************************************************************************/
 .userRoleIssueListItemTitle {
   border: 1px solid rgba(0, 69, 148, 0.3);
@@ -258,8 +260,24 @@ issue-comp .issueCompItemContainer div {
   outline: none;
 }
 
+issue-comp #issueCompTitleArea {
+  padding-top: 0;
+  outline: none;
+}
+issue-comp .issueCompTitleArea:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+issue-comp .issueCompTitleArea #issueCompTitle {
+  cursor: inherit;
+}
+
+issue-comp #issueCompInfoArea {
+  margin: -20px 0 10px;
+}
+
 issue-comp #issueCompTitleInput {
-  margin-bottom: -8px;
+  margin: 2px 0 0;
   height: 40px;
 }
 
@@ -335,11 +353,11 @@ issue-comp #additionalInfoButton {
 }
 
 issue-comp #issueCompAdditional {
-  margin-top: -20px;
+  margin: -20px 0;
 }
 
 issue-comp #issueCompNewComment md-input-container {
-  margin-bottom: -10px;
+  margin: 0 0 -35px;
 }
 
 issue-comp #descriptionAndComments {
@@ -348,13 +366,10 @@ issue-comp #descriptionAndComments {
   background: #f0f0f0;
 }
 
-issue-comp .commentTextLight {
-  color: rgba(0, 0, 0, 0.5);
-}
-
-issue-comp #issueCompFooterButtons .md-button {
-  margin-top: 0;
-  margin-bottom: 0;
+issue-comp #issueRoleIndicator {
+  margin-left: 7px;
+  margin-top: 5px;
+  height: 28px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

@@ -62,9 +62,38 @@
 			return deferred.promise;
 		};
 
+
+		var getMap = function(treeItem){
+
+			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
+
+			var uidToSharedId = {};
+			var sharedIdToUid = {};
+
+			function genMap(treeItem){
+				if(treeItem){
+					
+					if(treeItem.children){
+						treeItem.children.forEach(genMap);
+					}
+
+					uidToSharedId[treeItem._id] = treeItem.shared_id;
+					sharedIdToUid[treeItem.shared_id] = treeItem._id;
+				}
+			}
+
+			genMap(treeItem);
+
+			return {
+				uidToSharedId: uidToSharedId,
+				sharedIdToUid: sharedIdToUid
+			};
+		}
+
 		return {
 			init: init,
-			search: search
+			search: search,
+			getMap: getMap
 		};
 	}
 }());

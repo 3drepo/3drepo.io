@@ -91,7 +91,7 @@
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
-		vm.pointerEvents = "auto";
+		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
@@ -192,7 +192,7 @@
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "auto";
+					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});

@@ -30,7 +30,8 @@
 				accounts: "=",
 				onShowPage: "&",
 				quota: "=",
-				subscriptions: "="
+				subscriptions: "=",
+				selectedIndex: "="
 			},
 			controller: AccountReposCtrl,
 			controllerAs: 'vm',
@@ -43,8 +44,8 @@
 	function AccountReposCtrl() {
 		var vm = this;
 
-		vm.showPage = function (page, callingPage) {
-			vm.onShowPage({page: page, callingPage: callingPage});
+		vm.showPage = function (page, callingPage, data) {
+			vm.onShowPage({page: page, callingPage: callingPage, data: data});
 		};
 
 	}

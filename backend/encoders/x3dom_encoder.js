@@ -989,25 +989,7 @@ exports.render = function (account, project, doc, logger){
 
 exports.route = function(router)
 {
-	// router.get('x3d', '/:account/:project/revision/:rid', function(req, res, params, callback)
-	// {
-	// 	render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, callback);
-	// });
 
-	// router.get('x3d', '/:account/:project/revision/:branch/head', function(req, res, params, callback)
-	// {
-	// 	render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, callback);
-	// });
-
-	// router.get('x3d', '/:account/:project/revision/:rid/:sid', function(req, res, params, err_callback)
-	// {
-	// 	render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, callback);
-	// });
-
-	// router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(req, res, params, err_callback)
-	// {
-	// 	render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
-	// });
 
 	function addMeshToBoundingBox(bbox, currentMeshBBox)
 	{

@@ -146,7 +146,7 @@
 		 */
 		vm.downloadBilling = function (index) {
 			//$window.open("/billing?user=" + vm.account + "&item=" + index);
-			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/billings/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/invoices/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
 		};
 
 		vm.changeSubscription = function () {

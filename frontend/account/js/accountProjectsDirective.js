@@ -237,7 +237,7 @@
 						// Add project to list
 						project = {
 							project: response.data.project,
-							roleFunctions: response.data.roleFunctions,
+							permissions: response.data.permissions,
 							canUpload: true,
 							timestamp: null
 						};
