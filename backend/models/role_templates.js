@@ -167,8 +167,7 @@
 			return [];
 		}
 
-		//console.log(db, project, role);
-		
+		// have DB_ALL permissions to '' collection (all collections) = admin
 		let adminPrivMatched = _matchPrivileges(role.inheritedPrivileges, db, '', DB_ALL);
 
 		if(adminPrivMatched){

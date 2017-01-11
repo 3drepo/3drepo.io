@@ -33,7 +33,6 @@ var config = require('../config');
 
 var ProjectSetting = require('./projectSetting');
 var C = require('../constants');
-var RoleTemplates = require('./role_templates');
 var userBilling = require("./userBilling");
 
 
@@ -537,76 +536,16 @@ schema.methods.listAccounts = function(){
 schema.methods.listProjectsAndAccountAdmins = function(options){
 	'use strict';
 
-	var ProjectHelper = require('./helper/project');
+	let ProjectHelper = require('./helper/project');
 	let adminAccounts = [];
 	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
 
-		let projects = {};
-		let promises = [];
+		return Role.listProjectsAndAccountAdmin(roles);
 
-		function getProjectName(privileges){
+	}).then(data => {
 
-			let collectionSuffix = '.history';
-
-			for(let i=0 ; i < privileges.length ; i++){
-				let collectionName = privileges[i].resource.collection;
-				if(collectionName.endsWith(collectionSuffix)){
-					return collectionName.substr(0, collectionName.length - collectionSuffix.length);
-				}
-			}
-		}
-
-		function addToProjectList(account, project, permissions){
-			//if project not found in the list
-			if(!projects[`${account}.${project}`]){
-				projects[`${account}.${project}`] = {
-					project,
-					account,
-					permissions: permissions ? permissions : []
-				};
-			} else {
-				permissions && (projects[`${account}.${project}`].permissions = projects[`${account}.${project}`].permissions.concat(permissions));
-				projects[`${account}.${project}`].permissions  = _.unique(projects[`${account}.${project}`].permissions);
-			}
-		}
-
-		roles.forEach(role => {
-
-			let permissions = RoleTemplates.determinePermission(role.db, '', role);
-
-			if(_.intersection(permissions, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
-				// admin role list all projects on that db
-				adminAccounts.push(role.db);
-				promises.push(
-					ProjectSetting.find({account: role.db}).then(settings => {
-						settings.forEach(setting => {
-
-							let projectName = setting._id;
-							addToProjectList(role.db, projectName, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
-
-						});
-					})
-				);
-
-			} else {
-
-				let projectName = getProjectName(role.privileges);
-				let permissions;
-
-				if(projectName){
-					permissions = RoleTemplates.determinePermission(role.db, projectName, role);
-				}
-
-				if(permissions){
-					addToProjectList(role.db, projectName, permissions);
-				}
-
-			}
-		});
-
-		return Promise.all(promises).then(() => _.values(projects));
-
-	}).then(projects => {
+		let projects = data.projects;
+		adminAccounts = data.adminAccounts;
 
 		//get timestamp for project
 		if(options && options.skipTimestamp){
@@ -616,7 +555,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 		let promises = [];
 		projects.forEach((project, index) => {
 			promises.push(
-				History.findByBranch(project, 'master').then(history => {
+				History.findByBranch(project, C.MASTER_BRANCH_NAME).then(history => {
 
 					if(history){
 						projects[index].timestamp = history.timestamp;
@@ -656,7 +595,7 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 
 
 					if(projects[index].federate){
-						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, 'master');
+						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, C.MASTER_BRANCH_NAME);
 					}
 
 					return Promise.resolve();
