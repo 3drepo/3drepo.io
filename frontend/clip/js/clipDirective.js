@@ -48,7 +48,6 @@
 		 * @private
 		 * @type {number}
 		 */
-		var BBOX_SCALE = 1.0001;
 		/*
 		 * Init
 		 */
@@ -160,7 +159,7 @@
 
 					var point = normal_x3d.multiply(-vm.distance);
 					point = vm.projectTrans[fullProjectName].multMatrixPnt(point);
-					vm.distance = -transformedNormal.dot(point) * BBOX_SCALE;
+					vm.distance = -transformedNormal.dot(point) ;
 					vm.account = null;
 					vm.project = null;
 				}
