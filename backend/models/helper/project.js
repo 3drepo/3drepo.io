@@ -564,7 +564,7 @@ function newGetFullTree(account, project, branch, rev, username){
 			}).then(buf => { 
 				return {
 					status, 
-					buf: buf.toString(), 
+					buf: buf && buf.toString(), 
 					_id: utils.uuidToString(ref._id)
 				};
 			});

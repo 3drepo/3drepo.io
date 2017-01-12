@@ -76,20 +76,22 @@
 							//attach the sub tree back on main tree
 							if(idToObjRef[tree._id]){
 
-								var obj = JSON.parse(tree.buf);
+								if(tree.buf){
+									var obj = JSON.parse(tree.buf);
 
-								var subTree = obj.nodes;
-								subTree.parent = idToObjRef[tree._id];
-								
-								angular.extend(mainTree.subProjIdToPath, obj.idToPath);
+									var subTree = obj.nodes;
+									subTree.parent = idToObjRef[tree._id];
+									
+									angular.extend(mainTree.subProjIdToPath, obj.idToPath);
 
-								idToObjRef[tree._id].children = [subTree];
-								idToObjRef[tree._id].hasSubProjTree = true;
-								idToObjRef[tree._id].status = tree.status;
+									idToObjRef[tree._id].children = [subTree];
+									idToObjRef[tree._id].hasSubProjTree = true;
+									subTreesById[subTree._id] = subTree;
+								}
 
-								subTreesById[subTree._id] = subTree;
-
-
+								if(tree.status){
+									idToObjRef[tree._id].status = tree.status;
+								}
 							}
 						});
 

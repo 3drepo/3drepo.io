@@ -125,6 +125,25 @@
 			vm.nodesToShow[0].children[0].selected = false;
 		}
 
+
+		function traverseNode(node, callback){
+			callback(node);
+			node.children && node.children.forEach(function(child){
+				traverseNode(child, callback);
+			});
+		}
+		/**
+		 * Add all child id of a node recursively, the parent node's id will also be added.
+		 * @param {Object} node
+		 * @param {Array} ids Array to push the ids to
+		 */
+		function traverseNodeAndPushId(node, ids){
+			ids.push(node._id);
+			node.children && node.children.forEach(function(child){
+				traverseNodeAndPushId(child, ids);
+			});
+		}
+
 		/**
 		 * Set the toggle state of a node
 		 * @param {Object} node Node to change the visibility for
@@ -139,6 +158,7 @@
 			{
 				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
 				{
+
 					vm.invisible.splice(idx,1);
 				} else {
 					vm.invisible.push(node._id);
@@ -151,6 +171,7 @@
 			} else {
 				if ((idx = vm.visible.indexOf(node._id)) !== -1)
 				{
+
 					vm.visible.splice(idx,1);
 				} else {
 					vm.visible.push(node._id);
@@ -247,28 +268,19 @@
 							if ((vm.nodesToShow[index].level === 0) &&
 								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
 								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
+
 								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
+
 							}
 							else {
 								// Normal tree node
 								vm.nodesToShow[index].children[i].expanded = false;
 
-								/*
-								 // If the child node was not clicked hidden set its toggle state to visible
-								 if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
-								 vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-								 }
-								 */
 								// If the child node does not have a toggleState set it to visible
 								if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
 									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
 								}
-								// A node should relect the state of any path relative
-								else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
-									(vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
-									pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
-									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-								}
+
 							}
 
 							// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
@@ -454,36 +466,57 @@
 			var i, j,
 				nodesLength,
 				path,
-				parent = null,
+				hasParent,
+				lastParent = node,
 				nodeToggleState = "visible",
 				numInvisible = 0,
 				numParentInvisible = 0;
 
 			vm.toggledNode = node;
 
+
+
+			
+			console.log(node.children)
+
+			traverseNode(node, function(myNode){
+				if(myNode === node){
+					//toggle yourself
+					vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
+					nodeToggleState = node.toggleState;
+					updateClickedHidden(node);
+					updateClickedShown(node);
+				} else {
+					//toggle children
+					vm.setToggleState(myNode, nodeToggleState);
+				}
+				
+			});
+			
+			
+			//a__b .. c__d
+			//toggle parent
 			path = node.path.split("__");
 			path.splice(path.length - 1, 1);
 
 			for (i = 0, nodesLength = vm.nodesToShow.length; i < nodesLength; i += 1) {
-				// Set node toggle state
-				if (vm.nodesToShow[i]._id === node._id) {
-					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
-					nodeToggleState = vm.nodesToShow[i].toggleState;
-					updateClickedHidden(vm.nodesToShow[i]);
-					updateClickedShown(vm.nodesToShow[i]);
-				}
-				// Set children to node toggle state
-				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
-					vm.setToggleState(vm.nodesToShow[i], nodeToggleState);
-				}
-				// Get node parent
+			// 	// Get node parent
 				if (vm.nodesToShow[i]._id === path[path.length - 1]) {
-					parent = vm.nodesToShow[i];
+
+					lastParent = vm.nodesToShow[i];
+					hasParent = true;
+
+				} else if(lastParent.parent){
+
+					//Get node parent and reconstruct the path in case it is a fed project
+					lastParent = lastParent.parent;
+					path = lastParent.path.split("__").concat(path);
+					hasParent = true;
 				}
 			}
 
 			// Set the toggle state of the nodes above
-			if (parent !== null) {
+			if (hasParent) {
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
@@ -501,7 +534,6 @@
 							if (numInvisible === vm.nodesToShow[j].children.length) {
 								vm.setToggleState(vm.nodesToShow[j], "invisible");
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								console.log('set to parentOfInvisible');
 								vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
@@ -518,13 +550,8 @@
 			var pathArr = [];
 			var idx = 0, i = 0;
 
-			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node.path) !== -1)) {
-					pathArr = vm.idToPath[obj].split("__");
-					childNodes.push(pathArr[pathArr.length - 1]);
-				}
-			}
-
+			traverseNodeAndPushId(node, childNodes);
+			console.log('childNodes', childNodes);
 			if (node.toggleState === "invisible")
 			{
 				for(i = 0; i < childNodes.length; i++)
@@ -670,14 +697,7 @@
 			else {
 				var map = [];
 
-				function traverseNodeAndPushId(node){
-					map.push(node._id);
-					node.children && node.children.forEach(function(child){
-						traverseNodeAndPushId(child);
-					});
-				}
-
-				traverseNodeAndPushId(node);
+				traverseNodeAndPushId(node, map);
 
 				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
