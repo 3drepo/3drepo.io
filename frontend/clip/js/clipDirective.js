@@ -241,10 +241,10 @@
 			}
 		});
 
-		function updateSliderSettings(callback)
+		vm.updateSliderSettings = function(callback)
 		{
-			if(!vm.changedDistance && vm.selectedAxis && vm.selectedAxis != ""){
-
+			var updateDistance = !vm.changedDistance && vm.selectedAxis && vm.selectedAxis != ""
+			if( updateDistance){
 				var min = 0;
 				var max = 0;
 				if(vm.selectedAxis === "X")
@@ -263,6 +263,7 @@
 					max = vm.bbox.max.y;
 				}
 				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
+				vm.changedSlider = true;
 				vm.distance = max - distanceDisplay + min;
 			}
 			if(callback)
@@ -307,12 +308,15 @@
 					{
 						percentage = vm.sliderMax;
 					}
-					vm.changedDistance = true;
-					console.log("Changing distance...");
-					vm.sliderPosition = percentage;
+					if(!vm.changedSlider)
+					{
+						vm.changedDistance = true;
+						vm.sliderPosition = percentage;
+					}
 				}
 
 			}
+			vm.changedSlider = false;
 		});
 
 		/*
@@ -321,7 +325,7 @@
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			vm.changedDistance = false;
 			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				updateSliderSettings(vm.moveClippingPlane);	
+				vm.updateSliderSettings(vm.moveClippingPlane);	
 			}
 		});
 
@@ -329,8 +333,9 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
+
 			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				updateSliderSettings(vm.moveClippingPlane);	
+				vm.updateSliderSettings(vm.moveClippingPlane);	
 			}
 
 			vm.changedDistance = false;
@@ -365,7 +370,7 @@
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
-				updateSliderSettings();
+				vm.updateSliderSettings();
 			}
 			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
 			{
