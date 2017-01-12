@@ -244,7 +244,7 @@
 
 		function updateSliderSettings(callback)
 		{
-			if(vm.selectedAxis && vm.selectedAxis != ""){
+			if(!vm.changedDistance && vm.selectedAxis && vm.selectedAxis != ""){
 
 				var min = 0;
 				var max = 0;
@@ -308,6 +308,8 @@
 					{
 						percentage = vm.sliderMax;
 					}
+					vm.changedDistance = true;
+					console.log("Changing distance...");
 					vm.sliderPosition = percentage;
 				}
 
@@ -318,6 +320,7 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
+			vm.changedDistance = false;
 			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue) && vm.show ) {
 				updateSliderSettings(vm.moveClippingPlane);	
 			}
@@ -330,6 +333,8 @@
 			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
 				updateSliderSettings(vm.moveClippingPlane);	
 			}
+
+			vm.changedDistance = false;
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
