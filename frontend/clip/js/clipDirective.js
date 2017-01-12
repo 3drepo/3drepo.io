@@ -138,7 +138,7 @@
 				var fullProjectName = vm.account + "__" + vm.project;
 				if(vm.projectTrans[fullProjectName])
 				{
-					transformedNormal = vm.projectTrans[fullProjectName].trans.multMatrixVec(normal_x3d);
+					transformedNormal = vm.projectTrans[fullProjectName].multMatrixVec(normal_x3d);
 					transformedNormal.normalize();
 					vm.normal = transformedNormal.toGL();
 					//Since it's normalized if we only need to check 1 axis
@@ -159,7 +159,7 @@
 					}
 
 					var point = normal_x3d.multiply(-vm.distance);
-					point = vm.projectTrans[fullProjectName].trans.multMatrixPnt(point);
+					point = vm.projectTrans[fullProjectName].multMatrixPnt(point);
 					vm.distance = -transformedNormal.dot(point) * BBOX_SCALE;
 					vm.account = null;
 					vm.project = null;
@@ -263,7 +263,6 @@
 					min = vm.bbox.min.y;
 					max = vm.bbox.max.y;
 				}
-				console.log("max : " + max + ", min: " + min + " slider position: " + vm.sliderPosition);	
 				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
 				vm.distance = max - distanceDisplay + min;
 			}

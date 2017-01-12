@@ -308,8 +308,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var nameSpace = objEvent.target.nameSpaceName;
 
 				self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
-				console.log("onload -> " + nameSpace);
-				console.log( self.getScene()._x3domNode.getVolume().min);
 
 				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
 				{
