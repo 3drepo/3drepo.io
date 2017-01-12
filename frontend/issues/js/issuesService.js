@@ -468,8 +468,7 @@
 				case "assigned_roles":
 
 					comment.action.propertyText = 'Assigned';
-					comment.action.from = convertActionValueToText(comment.action.from);
-					comment.action.to = convertActionValueToText(comment.action.to);
+					
 					break;
 
 				case "topic_type":
@@ -605,19 +604,6 @@
 			}
 		);
 
-		// Getter setter for issueDisplay
-		Object.defineProperty(
-			obj,
-			"issueDisplay",
-			{
-				get: function () {
-					return issueDisplay;
-				},
-				set: function (newIssueDisplay) {
-					issueDisplay = newIssueDisplay;
-				}
-			}
-		);
 
 		return obj;
 	}

@@ -40,7 +40,8 @@
 					menuOption: "<",
 					importBcf: "&",
 					selectedIssue: "<",
-					userRoles: "<"
+					userRoles: "<",
+					issueDisplay: "<"
 				}
 			}
 		);
@@ -93,11 +94,11 @@
 					}
 
 					// Check for issue display
-					if (IssuesService.issueDisplay.showClosed) {
-						showClosed = IssuesService.issueDisplay.showClosed;
+					if (self.issueDisplay.showClosed) {
+						showClosed = self.issueDisplay.showClosed;
 					}
-					if (IssuesService.issueDisplay.sortOldestFirst) {
-						sortOldestFirst = IssuesService.issueDisplay.sortOldestFirst;
+					if (self.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = self.issueDisplay.sortOldestFirst;
 					}
 
 					setupIssuesToShow();
@@ -174,11 +175,11 @@
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
-					IssuesService.issueDisplay.sortOldestFirst = sortOldestFirst;
+					self.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
 				else if (this.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
-					IssuesService.issueDisplay.showClosed = showClosed;
+					self.issueDisplay.showClosed = showClosed;
 				}
 				else if (this.menuOption.value === "showSubProjects") {
 					showSubProjectIssues = !showSubProjectIssues;

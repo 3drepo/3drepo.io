@@ -74,7 +74,8 @@
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-
+		vm.issueDisplay = {};
+		
 		/*
 		 * Get all the Issues
 		 */

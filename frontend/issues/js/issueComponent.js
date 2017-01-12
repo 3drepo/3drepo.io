@@ -100,6 +100,12 @@
 			});
 		}
 
+		function setCanUpdateStatus(issueData){
+			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
+				self.userRoles.find(function(role){
+					return role === issueData.assigned_roles[0];
+				});
+		}
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
@@ -144,6 +150,8 @@
 						}
 					}
 
+					setCanUpdateStatus(this.issueData);
+
 					// Can edit description if no comments
 					this.canEditDescription = (this.issueData.comments.length === 0);
 
@@ -172,6 +180,7 @@
 						viewpoint: {}
 					};
 					this.canUpdate = true;
+					this.canUpdateStatus = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 				setContentHeight();
@@ -332,6 +341,8 @@
 						self.issueData.status = response.data.issue.status;
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
+						setCanUpdateStatus(self.issueData);
+
 					});
 			}
 		};
@@ -344,32 +355,7 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				var canUpdate = (Auth.getUsername() === self.data.owner);
-				if (!canUpdate) {
-					for (i = 0, length = self.userRoles.length; i < length; i += 1) {
-						if (self.userRoles[i] === self.data.creator_role) {
-							canUpdate = true;
-							break;
-						}
-					}
-				}
-
-				if (canUpdate) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status) ||
-						(this.data.topic_type !== this.issueData.topic_type)) {
-						updateIssue();
-						if (this.comment && this.comment !== "") {
-							saveComment();
-						}
-					}
-					else {
-						saveComment();
-					}
-				}
-				else {
-					saveComment();
-				}
+				saveComment();
 			}
 			else {
 				saveIssue();
@@ -700,7 +686,6 @@
 
 
 			// Add new comment to issue
-			comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			if (!self.issueData.comments) {
 				self.issueData.comments = [];
 			}
@@ -729,13 +714,6 @@
 				delete self.commentThumbnail;
 				IssuesService.updatedIssue = self.issueData;
 				self.submitDisabled = true;
-			}
-
-			if (self.issueData.comments && (self.issueData.comments.length > 1)) {
-				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
-					.then(function(response) {
-						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
-					});
 			}
 
 
@@ -1012,6 +990,7 @@
 
 					self.statusIcon = IssuesService.getStatusIcon(self.issueData);
 					setRoleIndicatorColour(self.issueData.assigned_roles[0]);
+					setCanUpdateStatus(self.issueData);
 
 					$scope.$apply();
 
