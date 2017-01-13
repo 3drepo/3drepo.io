@@ -241,7 +241,7 @@
 			}
 		});
 
-		vm.updateSliderSettings = function(callback)
+		function updateSliderSettings(callback)
 		{
 			var updateDistance = !vm.changedDistance && vm.selectedAxis && vm.selectedAxis != ""
 			if( updateDistance){
@@ -325,7 +325,7 @@
 		$scope.$watch("vm.selectedAxis", function (newValue) {
 			vm.changedDistance = false;
 			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				vm.updateSliderSettings(vm.moveClippingPlane);	
+				updateSliderSettings(vm.moveClippingPlane);	
 			}
 		});
 
@@ -335,7 +335,7 @@
 		$scope.$watch("vm.sliderPosition", function (newValue) {
 
 			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				vm.updateSliderSettings(vm.moveClippingPlane);	
+				updateSliderSettings(vm.moveClippingPlane);	
 			}
 
 			vm.changedDistance = false;
@@ -370,7 +370,7 @@
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
-				vm.updateSliderSettings();
+				updateSliderSettings();
 			}
 			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
 			{
