@@ -73,8 +73,8 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
-		vm.visible   = [];
-		vm.invisible = [];		
+		vm.visible   = {};
+		vm.invisible = {};		
 
 		/**
 		 * Set the content height.
@@ -144,6 +144,22 @@
 			});
 		}
 
+		function getVisibleArray(account, project){
+			if(!vm.visible[account + '@' + project]){
+				vm.visible[account + '@' + project] = [];
+			}
+
+			return vm.visible[account + '@' + project];
+		}
+
+		function getInvisibleArray(account, project){
+			if(!vm.invisible[account + '@' + project]){
+				vm.invisible[account + '@' + project] = [];
+			}
+
+			return vm.invisible[account + '@' + project];
+		}
+
 		/**
 		 * Set the toggle state of a node
 		 * @param {Object} node Node to change the visibility for
@@ -153,33 +169,36 @@
 		{
 			var idx = -1;
 
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
+
 			// TODO: This function is probably in-efficient
 			if (visibility === "invisible")
 			{
-				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				if ((idx = invisible.indexOf(node._id)) !== -1)
 				{
 
-					vm.invisible.splice(idx,1);
+					invisible.splice(idx,1);
 				} else {
-					vm.invisible.push(node._id);
+					invisible.push(node._id);
 				}
 
-				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				if ((idx = visible.indexOf(node._id)) !== -1)
 				{
-					vm.visible.splice(idx, 1);
+					visible.splice(idx, 1);
 				}
 			} else {
-				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				if ((idx = visible.indexOf(node._id)) !== -1)
 				{
 
-					vm.visible.splice(idx,1);
+					visible.splice(idx,1);
 				} else {
-					vm.visible.push(node._id);
+					visible.push(node._id);
 				}
 
-				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				if ((idx = invisible.indexOf(node._id)) !== -1)
 				{
-					vm.invisible.splice(idx, 1);
+					invisible.splice(idx, 1);
 				}
 
 			}
@@ -474,9 +493,6 @@
 
 			vm.toggledNode = node;
 
-
-
-			
 			console.log(node.children)
 
 			traverseNode(node, function(myNode){
@@ -532,16 +548,20 @@
 								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								vm.setToggleState(vm.nodesToShow[j], "invisible");
+								//vm.setToggleState(vm.nodesToShow[j], "invisible");
+								vm.nodesToShow[j].toggleState = 'invisible';
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
+								//vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
+								vm.nodesToShow[j].toggleState = 'parentOfInvisible';
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
+								//vm.nodesToShow[j].toggleState = 'visible';
 							}
 						}
 					}
 				}
 			}
+
 			toggleNode(node);
 		};
 
@@ -550,47 +570,58 @@
 			var pathArr = [];
 			var idx = 0, i = 0;
 
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
+
 			traverseNodeAndPushId(node, childNodes);
-			console.log('childNodes', childNodes);
+
 			if (node.toggleState === "invisible")
 			{
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (vm.invisible.indexOf(childNodes[i]) === -1)
+					if (invisible.indexOf(childNodes[i]) === -1)
 					{
-						vm.invisible.push(childNodes[i]);
+						invisible.push(childNodes[i]);
 					}
 
-					idx = vm.visible.indexOf(childNodes[i]);
+					idx = visible.indexOf(childNodes[i]);
 					if (idx !== -1)
 					{
-						vm.visible.splice(idx,1);
+						visible.splice(idx,1);
 					}
 				}
 			} else {
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (vm.visible.indexOf(childNodes[i]) === -1)
+					if (visible.indexOf(childNodes[i]) === -1)
 					{
-						vm.visible.push(childNodes[i]);
+						visible.push(childNodes[i]);
 					}
 
-					idx = vm.invisible.indexOf(childNodes[i]);
+					idx = invisible.indexOf(childNodes[i]);
 					if (idx !== -1)
 					{
-						vm.invisible.splice(idx,1);
+						invisible.splice(idx,1);
 					}
 				}
 			}
 
-			EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
-				source: "tree",
-				account: node.account,
-				project: node.project,
-				name: node.name,
-				visible_ids: vm.visible,
-				invisible_ids: vm.invisible
-			});
+			for (var key in vm.visible){
+
+				var vals = key.split('@');
+				var account = vals[0];
+				var project = vals[1];
+
+				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
+					source: "tree",
+					account: account,
+					project: project,
+					name: node.name,
+					visible_ids: getVisibleArray(account, project),
+					invisible_ids: getInvisibleArray(account, project)
+				});
+			}
+
 		};
 
 		function setupInfiniteScroll() {
