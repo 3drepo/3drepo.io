@@ -125,22 +125,26 @@
 			vm.nodesToShow[0].children[0].selected = false;
 		}
 
-
+		/**
+		 * traverse children of a node recursively
+		 * @param {Object} node
+		 * @param {Function} callback 
+		 */
 		function traverseNode(node, callback){
 			callback(node);
 			node.children && node.children.forEach(function(child){
 				traverseNode(child, callback);
 			});
 		}
+
 		/**
 		 * Add all child id of a node recursively, the parent node's id will also be added.
 		 * @param {Object} node
 		 * @param {Array} ids Array to push the ids to
 		 */
 		function traverseNodeAndPushId(node, ids){
-			ids.push(node._id);
-			node.children && node.children.forEach(function(child){
-				traverseNodeAndPushId(child, ids);
+			traverseNode(node, function(node){
+				ids.push(node._id);
 			});
 		}
 
@@ -331,7 +335,6 @@
 				}
 			}
 
-			console.log('vm.nodesToShow', vm.nodesToShow);
 			setContentHeight(vm.nodesToShow);
 		};
 
@@ -472,7 +475,6 @@
 				vm.subTreesById = event.value.subTreesById;
 				vm.idToPath = event.value.idToPath;
 				vm.subProjIdToPath = event.value.subProjIdToPath;
-				console.log('subProjIdToPath', vm.subProjIdToPath);
 
 				initNodesToShow();
 				expandFirstNode();
@@ -492,8 +494,6 @@
 				numParentInvisible = 0;
 
 			vm.toggledNode = node;
-
-			console.log(node.children)
 
 			traverseNode(node, function(myNode){
 				if(myNode === node){
