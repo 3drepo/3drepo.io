@@ -336,7 +336,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
 							{
 								projectNameSpace: nameSpace,
-								projectTrans: self.getParentTransformation(accProj[0], accProj[1])
+								projectTrans: self.getParentTransformation(accProj[0], accProj[1]),
+								isMainProject: accProj[0] === self.account && accProj[1] === self.project
 					
 							}
 						

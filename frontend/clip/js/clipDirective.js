@@ -54,6 +54,8 @@
 		vm.sliderMin = 0;
 		vm.sliderMax = 100;
 		vm.sliderStep = 0.1;
+		vm.distance = 0;
+		vm.displayDistance = 0;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = "";
@@ -62,9 +64,17 @@
 		vm.project = null;
 		vm.normal = null;
 		vm.projectTrans = {};
+		vm.offsetTrans = null;
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 		vm.units = "m";
+		vm.updateFrom = -1;
+		vm.states = {
+			fromIssue : 0,
+			fromAxis  : 1,
+			fromScroll: 2,
+			fromDistance: 3
+		}
 
 		function initClippingPlane (account, project, normal, distance) {
 			$timeout(function () {
@@ -170,7 +180,8 @@
 		function loadClippingPlane(account, project, normal, distance)
 		{
 
-			vm.disableWatch = true;
+			console.log("update is from issue");
+			vm.updateFrom = vm.states.fromIssue;
 
 			vm.project = project;
 			vm.account = account;
@@ -186,9 +197,9 @@
 						}
 						else
 						{
-							vm.visible=true; 
+							vm.visible=true;
 						}
-							vm.disableWatch = false;
+						   	vm.updateFrom = -1;	
 					}
 			)
 		}
@@ -243,7 +254,7 @@
 
 		function updateSliderSettings(callback)
 		{
-			var updateDistance = !vm.changedDistance && vm.selectedAxis && vm.selectedAxis != ""
+			var updateDistance = vm.updateFrom == vm.states.fromAxis || vm.updateFrom == vm.states.fromSlider;
 			if( updateDistance){
 				var min = 0;
 				var max = 0;
@@ -263,7 +274,6 @@
 					max = vm.bbox.max.y;
 				}
 				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
-				vm.changedSlider = true;
 				vm.distance = max - distanceDisplay + min;
 			}
 			if(callback)
@@ -274,10 +284,25 @@
 		/*
 		 * Change the clipping plane axis
 		 */
+		$scope.$watch("vm.displayDistance", function (newValue) {
+			if (vm.updateFrom == -1 && newValue != "" && angular.isDefined(newValue)) {
+				console.log("update is from distance");
+				vm.updateFrom = vm.states.fromDistance;
+				vm.distance = vm.displayDistance;
+				vm.updateFrom = -1;
+			}
+		});
+
 		$scope.$watch("vm.distance", function (newValue) {
 			if (newValue != "" && angular.isDefined(newValue)) {
-				if(vm.selectedAxis && vm.selectedAxis != ""){
-	
+				console.log("@vm.distance change: " + vm.updateFrom);
+				if(vm.updateFrom != vm.states.fromDistance)
+				{
+					//update display distance if the update didn't come from changing the distance
+					vm.displayDistance = vm.distance;
+				}
+				if(vm.updateFrom != vm.states.fromSlider && vm.selectedAxis && vm.selectedAxis != ""){
+					//update slider position if the update did not come from moving the slider
 					var min = 0;
 					var max = 0;
 					if(vm.selectedAxis === "X")
@@ -296,8 +321,6 @@
 						max = vm.bbox.max.y;
 					}
 				
-
-				
 					var distanceInverted = max - newValue + min;
 					var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
 					if(percentage < vm.sliderMin)
@@ -308,24 +331,21 @@
 					{
 						percentage = vm.sliderMax;
 					}
-					if(!vm.changedSlider)
-					{
-						vm.changedDistance = true;
-						vm.sliderPosition = percentage;
-					}
+					vm.sliderPosition = percentage;
 				}
 
 			}
-			vm.changedSlider = false;
 		});
 
 		/*
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			vm.changedDistance = false;
-			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue) && vm.show ) {
+			if (vm.updateFrom == -1  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
+				vm.updateFrom = vm.states.fromAxis;
+				console.log("change from axis change");
 				updateSliderSettings(vm.moveClippingPlane);	
+				vm.updateFrom = -1;
 			}
 		});
 
@@ -334,11 +354,13 @@
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
 
-			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
+			if (vm.updateFrom == -1 && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
+				vm.updateFrom = vm.states.fromSlider;
 				updateSliderSettings(vm.moveClippingPlane);	
+				console.log("change from slider change");
+				vm.updateFrom = -1;
 			}
 
-			vm.changedDistance = false;
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
@@ -366,6 +388,8 @@
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{
 				vm.projectTrans[event.value.projectNameSpace] = event.value.projectTrans;
+				if(event.value.isMainProject)
+					vm.offsetTrans = event.value.projectTrans;
 			}
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
