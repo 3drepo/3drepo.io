@@ -240,7 +240,7 @@
 			
 			//replica error format
 			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err){
-				errorCode = err.errors[0].err.code;
+				errorCode = mongoErr.errors[0].err.code;
 			}
 
 			if (errorCode === 11000) {
