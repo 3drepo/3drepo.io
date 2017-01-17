@@ -148,6 +148,11 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 	var user;
 
 	if(oldPassword){
+		
+		if(oldPassword === newPassword){
+			return Promise.reject(responseCodes.NEW_OLD_PASSWORD_SAME);
+		}
+
 		checkUser = this.authenticate(logger, username, oldPassword);
 	} else if (token){
 
