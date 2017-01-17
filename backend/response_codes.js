@@ -235,9 +235,17 @@
 		 * @returns
 		 */
 		DB_ERROR: function (mongoErr) {
-			if (mongoErr.code === 11000) {
+
+			let errorCode = mongoErr.code;
+			
+			//replica error format
+			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err){
+				errorCode = err.errors[0].err.code;
+			}
+
+			if (errorCode === 11000) {
 				return this.USER_EXISTS;
-			} else if (mongoErr.code === 18) {
+			} else if (errorCode === 18) {
 				return this.INCORRECT_USERNAME_OR_PASSWORD;
 			}
 			//other error
