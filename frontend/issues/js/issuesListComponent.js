@@ -103,7 +103,9 @@
 					if (self.issueDisplay.sortOldestFirst) {
 						sortOldestFirst = self.issueDisplay.sortOldestFirst;
 					}
-
+					if (self.issueDisplay.showSubProjectIssues){
+						showSubProjectIssues = self.issueDisplay.showSubProjectIssues;
+					}
 					setupIssuesToShow();
 					showPins();
 				}
@@ -186,6 +188,7 @@
 				}
 				else if (this.menuOption.value === "showSubProjects") {
 					showSubProjectIssues = !showSubProjectIssues;
+					self.issueDisplay.showSubProjectIssues = showSubProjectIssues;
 				}
 				else if (this.menuOption.value === "print") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");

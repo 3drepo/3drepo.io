@@ -405,7 +405,7 @@
 			}
 
 			if(issue){
-				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
 			} else {
