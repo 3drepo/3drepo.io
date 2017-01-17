@@ -116,7 +116,10 @@
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+					divider: true
+				},{
+					label: "Created by: "
 				}
 			],
 			minHeight: 260,

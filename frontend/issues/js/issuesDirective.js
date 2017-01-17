@@ -92,8 +92,28 @@
 		 */
 		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
 		rolesPromise.then(function (data) {
+
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
+
+			var menu = [];
+			data.forEach(function(role){
+				menu.push({
+					value: "filterRole",
+					role: role.role,
+					label: role.role,
+					keepCheckSpace: true,
+					toggle: true,
+					selected: true,
+					firstSelected: false,
+					secondSelected: false
+				});
+			});
+
+			EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
+				type: 'issues',
+				menu: menu
+			});
 		});
 
 		/**

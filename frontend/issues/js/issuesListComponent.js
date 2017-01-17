@@ -41,7 +41,8 @@
 					importBcf: "&",
 					selectedIssue: "<",
 					userRoles: "<",
-					issueDisplay: "<"
+					issueDisplay: "<",
+					availableRoles: "<"
 				}
 			}
 		);
@@ -59,12 +60,14 @@
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false,
-			showSubProjectIssues = false;
+			showSubProjectIssues = false,
+			excludeRoles = [];
 
 		// Init
 		this.UtilsService = UtilsService;
 		this.IssuesService = IssuesService;
 		this.setFocus = setFocus;
+
 
 		/**
 		 * Monitor changes to parameters
@@ -200,6 +203,21 @@
 					file.addEventListener("change", function () {
 						self.importBcf({file: file.files[0]});
 					});
+				} else if(this.menuOption.value === "filterRole"){
+					
+					var index = excludeRoles.indexOf(this.menuOption.role);
+
+					if(this.menuOption.selected){
+						if(index !== -1){
+							excludeRoles.splice(index, 1);
+						}
+					} else {
+						if(index === -1){
+							excludeRoles.push(this.menuOption.role);
+						}
+					}
+
+					
 				}
 				setupIssuesToShow();
 				showPins();
@@ -475,6 +493,11 @@
 				// Sub projects
 				self.issuesToShow = self.issuesToShow.filter(function (issue) {
 					return showSubProjectIssues ? true : (issue.project === self.project);
+				});
+
+				//Roles Filter
+				self.issuesToShow = self.issuesToShow.filter(function(issue){
+					return excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			}
 
