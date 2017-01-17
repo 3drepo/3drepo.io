@@ -354,6 +354,10 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 	return this.findByUserName(username).then(user => {
 
+		if(!user){
+			return Promise.reject(responseCodes.USER_EMAIL_NOT_MATCH);
+		}
+
 		if(user.customData.email !== email){
 			return Promise.reject({ resCode: responseCodes.USER_EMAIL_NOT_MATCH});
 		}

@@ -99,7 +99,7 @@
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
-		USER_EMAIL_NOT_MATCH: { message: "Username or email address doesn't match/ exist", status: 400 },
+		USER_EMAIL_NOT_MATCH: { message: "Incorrect username or email", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
