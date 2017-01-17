@@ -335,7 +335,7 @@
 
 		obj.hexToRgb = function(hex) {
 			// If nothing comes end, then send nothing out.
-			if (typeof hex === "undefined") {
+			if (!hex) {
 				return undefined;
 			}
 

@@ -117,8 +117,8 @@
 					selected: false,
 					firstSelected: false,
 					secondSelected: false,
-					divider: true
 				},{
+					upperDivider: true,
 					label: "Created by: "
 				}
 			],
@@ -231,6 +231,22 @@
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
 					vm.settings = data.settings;
+
+					var index = -1;
+
+					if(!data.federate){
+						panelCard.left[issuesCardIndex].menu.find(function(item, i){
+							if(item.value === 'showSubProjects'){
+								index = i;
+							}
+
+						});
+
+						if(index !== -1){
+							panelCard.left[issuesCardIndex].menu.splice(index, 1);
+						}
+					}
+
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,

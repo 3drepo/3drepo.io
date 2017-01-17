@@ -92,7 +92,7 @@
 		 */
 		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
 		rolesPromise.then(function (data) {
-
+			console.log('Finish getting roles');
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
 

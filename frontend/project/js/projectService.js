@@ -38,7 +38,8 @@
 					owner		: data.owner,
 					description	: data.desc,
 					type		: data.type,
-					settings 	: data.properties
+					settings 	: data.properties,
+					federate	: data.federate
 				}, function(){
 					deferred.resolve();
 				});
