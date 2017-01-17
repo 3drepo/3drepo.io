@@ -468,7 +468,9 @@
 				case "assigned_roles":
 
 					comment.action.propertyText = 'Assigned';
-					
+					comment.action.from = comment.action.from.toString();
+					comment.action.to= comment.action.to.toString();	
+							
 					break;
 
 				case "topic_type":
