@@ -291,17 +291,14 @@
 		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
 			if(changeDistance)
 			{
-				console.log("updating distance...");
 				updateDisplayDistance();
 			}
 			if(changeSlider)
 			{
-				console.log("updating slider...");
 				updateDisplaySlider();
 			}
 			if(changeAxis)
 			{
-				console.log("updating axis...");
 				updateAxis();
 			}
 
@@ -341,7 +338,6 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
-			console.log("display distance updated, watch: "  + vm.disableWatchDistance);
 			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
 				vm.distance = newValue;
 				updateClippingPlane(false, false, true, true);
@@ -354,7 +350,6 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayedAxis", function (newValue) {
-			console.log("display axis updated, watch: "  + vm.disableWatchAxis);
 			if (!vm.disableWatchAxis  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
 				vm.selectedAxis = newValue;
 				calculateDistanceFromSlider(
@@ -370,7 +365,6 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			console.log("slider updated, watch: "  + vm.disableWatchSlider);
 			if (!vm.disableWatchSlider && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
 				calculateDistanceFromSlider(
 					function(){
