@@ -244,10 +244,63 @@
 
 		}
 
-		function updateDisplayDistance()
+		function getNormal()
 		{
-			vm.displayDistance = vm.distance;
+
+			var normal = [1, 0, 0]; //X axis by default
+			if(vm.normal)
+				normal = vm.normal;
+			else if(vm.selectedAxis)
+			{
+				if(vm.selectedAxis == "Y")
+				{
+					normal = [0, 0, 1];
+				}
+				else if(vm.selectedAxis == "Z")
+				{
+					normal = [0, 1, 0];
+				}
+			}
+
+
+			return normal;
+
 		}
+
+		function updateDistance(updateDisplayDistance)
+		{
+			var normal = getNormal();
+			var normal_x3d = new x3dom.fields.SFVec3f(normal[0], normal[1], normal[2]);
+
+			var distance = null;
+			var trans = null;
+			   
+			if(updateDisplayDistance)
+			{
+				distance = vm.distance;
+				trans = vm.offsetTrans;
+			}
+			else
+			{
+				distance = vm.displayDistance;
+				trans = vm.offsetTrans.inverse();
+			}
+
+
+			var transformedNormal = trans.multMatrixVec(normal_x3d);
+			transformedNormal.normalize();
+
+			var point = normal_x3d.multiply(-distance);
+			point = trans.multMatrixPnt(point);
+
+			if(updateDisplayDistance)
+				console.log("converting distance " + vm.distance + " to display distance of " + -transformedNormal.dot(point));
+			else
+				console.log("converting display distance " + vm.displayDistance + " to distance of " + -transformedNormal.dot(point));
+			return -transformedNormal.dot(point);
+
+		}
+
 
 		function updateDisplaySlider()
 		{
@@ -291,7 +344,7 @@
 		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
 			if(changeDistance)
 			{
-				updateDisplayDistance();
+				vm.displayDistance = updateDistance(true);
 			}
 			if(changeSlider)
 			{
@@ -339,7 +392,7 @@
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
 			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
-				vm.distance = newValue;
+				vm.distance = updateDistance(false);
 				updateClippingPlane(false, false, true, true);
 			}
 			vm.disableWatchDistance = false;
