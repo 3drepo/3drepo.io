@@ -63,5 +63,9 @@
 		vm.logout = function () {
 			Auth.logout();
 		};
+
+		vm.openUserManual = function(){
+			window.open('http://3drepo.org/projects/3drepo-io-user-manual/', '_blank');
+		};
 	}
 }());
