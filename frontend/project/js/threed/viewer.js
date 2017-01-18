@@ -1936,7 +1936,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.moveClippingPlane = function(axis, distance) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(axis, distance);
+			if(self.clippingPlanes[0])
+			{
+				self.clippingPlanes[0].movePlane(axis, distance);
+			}
 		};
 
 		this.changeAxisClippingPlane = function(axis) {

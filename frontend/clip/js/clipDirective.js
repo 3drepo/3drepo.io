@@ -233,64 +233,76 @@
 		function updateClippingPlane(updateDdist, updateDaxis, updateSlider, movePlane)
 		{
 		
-			vm.disableWatch = true;
-			updateDisplayValues( updateDdist, updateDaxis, updateSlider, function()
-					{
-						vm.disableWatch = false;	
-					})
+			vm.disableWatchDistance = updateDdist;
+			vm.disableWatchSlider = updateSlider;
+			vm.disableWatchAxis = updateDaxis;
+
+			updateDisplayValues( updateDdist, updateDaxis, updateSlider);
 
 			if(movePlane)
 				vm.moveClippingPlane();
 
 		}
 
-		function updateDisplayValues(changeDistance, changeAxis, changeSlider, callback) {
-			console.log("distance: " + vm.distance + "("+changeDistance+") axis: "+vm.selectedAxis+"("+changeAxis+") slider: "+vm.sliderPosition+"("+changeSlider+")"); 
+		function updateDisplayDistance()
+		{
+			vm.displayDistance = vm.distance;
+		}
+
+		function updateDisplaySlider()
+		{
+			var min = 0;
+			var max = 0;
+			if(vm.selectedAxis === "X")
+			{
+				min = vm.bbox.min.x;
+				max = vm.bbox.max.x;
+			}
+			else if(vm.selectedAxis === "Y")
+			{
+				min = vm.bbox.min.z;
+				max = vm.bbox.max.z;
+			}
+			else if(vm.selectedAxis === "Z")
+			{
+				min = vm.bbox.min.y;
+				max = vm.bbox.max.y;
+			}
+			
+			var distanceInverted = max - vm.distance + min;
+			var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
+			if(percentage < vm.sliderMin)
+			{
+				percentage = vm.sliderMin;
+			}
+			else if(percentage > vm.sliderMax)
+			{
+				percentage = vm.sliderMax;
+			}
+			vm.sliderPosition = percentage;
+
+		}
+
+		function updateAxis()
+		{
+			vm.displayedAxis = vm.selectedAxis;
+		}
+
+		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
 			if(changeDistance)
 			{
-				//update display distance if the update didn't come from changing the distance
-				vm.displayDistance = vm.distance;
+				console.log("updating distance...");
+				updateDisplayDistance();
 			}
-			if(changeSlider){
-				//update slider position if the update did not come from moving the slider
-				var min = 0;
-				var max = 0;
-				if(vm.selectedAxis === "X")
-				{
-					min = vm.bbox.min.x;
-					max = vm.bbox.max.x;
-				}
-				else if(vm.selectedAxis === "Y")
-				{
-					min = vm.bbox.min.z;
-					max = vm.bbox.max.z;
-				}
-				else if(vm.selectedAxis === "Z")
-				{
-					min = vm.bbox.min.y;
-					max = vm.bbox.max.y;
-				}
-			
-				var distanceInverted = max - vm.distance + min;
-				var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
-				if(percentage < vm.sliderMin)
-				{
-					percentage = vm.sliderMin;
-				}
-				else if(percentage > vm.sliderMax)
-				{
-					percentage = vm.sliderMax;
-				}
-				vm.sliderPosition = percentage;
+			if(changeSlider)
+			{
+				console.log("updating slider...");
+				updateDisplaySlider();
 			}
 			if(changeAxis)
 			{
-				vm.displayedAxis = vm.selectedAxis;
-			}
-
-			if(callback)
-			{
-				callback();
+				console.log("updating axis...");
+				updateAxis();
 			}
 
 		}
@@ -329,10 +341,12 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
-			if (!vm.disableWatch && newValue != "" && angular.isDefined(newValue)) {
+			console.log("display distance updated, watch: "  + vm.disableWatchDistance);
+			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
 				vm.distance = newValue;
 				updateClippingPlane(false, false, true, true);
 			}
+			vm.disableWatchDistance = false;
 		});
 
 
@@ -340,23 +354,24 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayedAxis", function (newValue) {
-			console.log("displayAxis changed watch? " + vm.disableWatch);
-			if (!vm.disableWatch  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				console.log("displayAxis Changed to " + newValue);
+			console.log("display axis updated, watch: "  + vm.disableWatchAxis);
+			if (!vm.disableWatchAxis  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
 				vm.selectedAxis = newValue;
 				calculateDistanceFromSlider(
 					function(){
-						updateClippingPlane(true, false, true, true);	
+						updateClippingPlane(true, false, false, true);	
 					}
 				);
 			}
+			vm.disableWatchAxis = false;
 		});
 
 		/*
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (!vm.disableWatch && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
+			console.log("slider updated, watch: "  + vm.disableWatchSlider);
+			if (!vm.disableWatchSlider && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
 				calculateDistanceFromSlider(
 					function(){
 						updateClippingPlane(true, true, false, true);	
@@ -364,6 +379,7 @@
 				);
 
 			}
+			vm.disableWatchSlider = false;
 
 		});
 
