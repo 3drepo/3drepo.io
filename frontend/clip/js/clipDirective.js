@@ -293,10 +293,6 @@
 			var point = normal_x3d.multiply(-distance);
 			point = trans.multMatrixPnt(point);
 
-			if(updateDisplayDistance)
-				console.log("converting distance " + vm.distance + " to display distance of " + -transformedNormal.dot(point));
-			else
-				console.log("converting display distance " + vm.displayDistance + " to distance of " + -transformedNormal.dot(point));
 			return -transformedNormal.dot(point);
 
 		}
@@ -421,7 +417,7 @@
 			if (!vm.disableWatchSlider && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
 				calculateDistanceFromSlider(
 					function(){
-						updateClippingPlane(true, true, false, true);	
+						updateClippingPlane(true, false, false, true);	
 					}
 				);
 
