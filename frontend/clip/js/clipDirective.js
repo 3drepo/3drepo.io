@@ -120,6 +120,10 @@
 			}
 		}
 
+		/**
+		 * Determine axis based on vm.normal
+		 * @param {function} callback
+		 */
 		function determineAxis(callback)
 		{
 			//translate the normal and compare it to the axis
@@ -161,6 +165,13 @@
 			callback();
 		}
 
+		/**
+		 * update/create a clipping plane based on the given information
+		 * @param {string} account
+		 * @param {string} project
+		 * @param {array} normal vector
+		 * @param {number} distance from bbox
+		 */
 		function loadClippingPlane(account, project, normal, distance)
 		{
 
@@ -230,6 +241,13 @@
 			}
 		});
 
+		/**
+		 * Update clipping plane and its display values
+		 * @param {bool} update displayed distance
+		 * @param {bool} update displayed axis
+		 * @param {bool} update slider position
+		 * @param {bool} move the clipping plane
+		 */
 		function updateClippingPlane(updateDdist, updateDaxis, updateSlider, movePlane)
 		{
 		
@@ -244,6 +262,10 @@
 
 		}
 
+		/**
+		 * Returns the normal value based on axis
+		 * @return {array} returns normal vector 
+		 */
 		function getNormal()
 		{
 
@@ -267,6 +289,10 @@
 
 		}
 
+		/**
+		 * Update display/internal distance base on the internal/display distance
+		 * @param {bool} update display distance if set to true, internal distance otherwise
+		 */
 		function updateDistance(updateDisplayDistance)
 		{
 			var normal = getNormal();
@@ -298,6 +324,9 @@
 		}
 
 
+		/**
+		 * Update display slider based on current internal distance
+		 */
 		function updateDisplaySlider()
 		{
 			var min = 0;
@@ -332,11 +361,20 @@
 
 		}
 
+		/**
+		 *  Update display axis based on vm.selectedAxis
+		 */
 		function updateAxis()
 		{
 			vm.displayedAxis = vm.selectedAxis;
 		}
 
+		/**
+		 *  Update values displayed on cards
+		 *  @param {bool} update display distance
+		 *  @param {bool} update display axis
+		 *  @param {bool} update slider position
+		 */
 		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
 			if(changeDistance)
 			{
@@ -353,6 +391,10 @@
 
 		}
 
+		/**
+		 * Calculate distance base on slider position
+		 * @param {function} callback
+		 */
 		function calculateDistanceFromSlider(callback)
 		{
 				var min = 0;
@@ -384,7 +426,7 @@
 
 
 		/*
-		 * Change the clipping plane axis
+		 * Change the clipping plane distance
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
 			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
