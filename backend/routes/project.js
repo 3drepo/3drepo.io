@@ -113,7 +113,7 @@ function getProjectSetting(req, res, next){
 
 		setting = setting.toObject();
 		
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate'];
 		let resObj = {};
 
 		whitelist.forEach(key => {

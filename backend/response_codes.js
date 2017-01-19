@@ -99,7 +99,7 @@
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
-		USER_EMAIL_NOT_MATCH: { message: "Username or email address doesn't match/ exist", status: 400 },
+		USER_EMAIL_NOT_MATCH: { message: "Incorrect username or email", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
@@ -195,6 +195,7 @@
 		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
 		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500},
 		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500},
+		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 	};
 
 
@@ -234,9 +235,17 @@
 		 * @returns
 		 */
 		DB_ERROR: function (mongoErr) {
-			if (mongoErr.code === 11000) {
+
+			let errorCode = mongoErr.code;
+			
+			//replica error format
+			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err){
+				errorCode = mongoErr.errors[0].err.code;
+			}
+
+			if (errorCode === 11000) {
 				return this.USER_EXISTS;
-			} else if (mongoErr.code === 18) {
+			} else if (errorCode === 18) {
 				return this.INCORRECT_USERNAME_OR_PASSWORD;
 			}
 			//other error

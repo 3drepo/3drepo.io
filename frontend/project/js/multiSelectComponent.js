@@ -36,9 +36,9 @@
 			}
 		);
 
-	MultiSelectCtrl.$inject = ["EventService"];
+	MultiSelectCtrl.$inject = ["EventService", "$scope"];
 
-	function MultiSelectCtrl (EventService) {
+	function MultiSelectCtrl (EventService, $scope) {
 		var self = this,
 			objectIndex,
 			selectedObjects = [],
@@ -53,10 +53,32 @@
 		this.setSelectedObjects({selectedObjects: null});
 
 		/**
+		 * Set up event watching
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+
+
+			if (event.type === EventService.EVENT.RESET_SELECTED_OBJS) {
+				if (selectedObjects.length > 0) {
+					
+					selectedObjects = [];
+					self.setSelectedObjects({selectedObjects: null});
+				}
+			} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+					pinDropMode = event.value;
+			}
+
+		});
+
+		/**
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
+
+			if (pinDropMode) {
+				return;
+			}
 
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
@@ -65,6 +87,7 @@
 						self.setSelectedObjects({selectedObjects: selectedObjects});
 					}
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
 				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
@@ -75,7 +98,7 @@
 
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) && !pinDropMode 
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) 
 					&& changes.event.currentValue.value.account && changes.event.currentValue.value.project 
 					&& changes.event.currentValue.value.id) {
 
@@ -126,13 +149,14 @@
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+
 					if (selectedObjects.length > 0) {
+						
 						selectedObjects = [];
 						self.setSelectedObjects({selectedObjects: null});
 					}
-				}
-				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
-					pinDropMode = changes.event.currentValue.type;
 				}
 			}
 

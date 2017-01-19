@@ -77,21 +77,21 @@
 					noToggle: true,
 					icon: "fa-print"
 				},
-				{
-					value: "importBCF",
-					label: "Import BCF",
-					selected: false,
-					noToggle: true,
-					icon: "fa-cloud-upload"
-				},
-				{
-					value: "exportBCF",
-					label: "Export BCF",
-					selected: false,
-					noToggle: true,
-					icon: "fa-cloud-download",
-					divider: true
-				},
+				// {
+				// 	value: "importBCF",
+				// 	label: "Import BCF",
+				// 	selected: false,
+				// 	noToggle: true,
+				// 	icon: "fa-cloud-upload"
+				// },
+				// {
+				// 	value: "exportBCF",
+				// 	label: "Export BCF",
+				// 	selected: false,
+				// 	noToggle: true,
+				// 	icon: "fa-cloud-download",
+				// 	divider: true
+				// },
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
@@ -116,7 +116,10 @@
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+				},{
+					upperDivider: true,
+					label: "Created by: "
 				}
 			],
 			minHeight: 260,
@@ -228,6 +231,22 @@
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
 					vm.settings = data.settings;
+
+					var index = -1;
+
+					if(!data.federate){
+						panelCard.left[issuesCardIndex].menu.find(function(item, i){
+							if(item.value === 'showSubProjects'){
+								index = i;
+							}
+
+						});
+
+						if(index !== -1){
+							panelCard.left[issuesCardIndex].menu.splice(index, 1);
+						}
+					}
+
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,

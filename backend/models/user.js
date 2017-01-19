@@ -148,6 +148,11 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 	var user;
 
 	if(oldPassword){
+		
+		if(oldPassword === newPassword){
+			return Promise.reject(responseCodes.NEW_OLD_PASSWORD_SAME);
+		}
+
 		checkUser = this.authenticate(logger, username, oldPassword);
 	} else if (token){
 
@@ -353,6 +358,10 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 	};
 
 	return this.findByUserName(username).then(user => {
+
+		if(!user){
+			return Promise.reject(responseCodes.USER_EMAIL_NOT_MATCH);
+		}
 
 		if(user.customData.email !== email){
 			return Promise.reject({ resCode: responseCodes.USER_EMAIL_NOT_MATCH});

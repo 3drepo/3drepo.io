@@ -88,7 +88,7 @@
 				if (response.statusText === "OK") {
 					vm.passwordSaveInfo = "Saved";
 				} else {
-					vm.passwordSaveInfo = "Error saving password";
+					vm.passwordSaveInfo = response.data.message;
 				}
 			});
 		};

@@ -48,6 +48,7 @@
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
 			filterInput.focus();
+			vm.showFilter = false;
 		};
 
 		/*
