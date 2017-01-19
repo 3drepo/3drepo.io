@@ -429,7 +429,7 @@
 				case "screen_shot":
 
 					// There is no concept of selected in screenshot as there will be a popup once you click the button
-					//this.actions[action].selected = false;
+					this.actions[action].selected = false;
 
 					delete this.screenShot; // Remove any clicked on screen shot
 					$mdDialog.show({
