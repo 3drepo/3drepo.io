@@ -24,6 +24,7 @@ var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
 var C = require("../constants");
 var ProjectHelpers = require('../models/helper/project');
+var History = require('../models/history');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
 
 var getDbColOptions = function(req){
