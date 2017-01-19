@@ -845,8 +845,8 @@
 			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
-				self.actions[currentAction].color = "";
-				currentAction = null;
+				// self.actions[currentAction].color = "";
+				// currentAction = null;
 			};
 		}
 
