@@ -356,6 +356,9 @@
 		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
+			
+			this.saving = true;
+
 			if (self.data) {
 				saveComment();
 			}
@@ -682,6 +685,7 @@
 					setContentHeight();
 
 					startNotification();
+					self.saving = false;
 			});
 		}
 
@@ -695,6 +699,7 @@
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
+						self.saving = false;
 						afterNewComment(response.data.issue);
 					});
 			}
@@ -703,6 +708,7 @@
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
+							self.saving = false;
 							afterNewComment(response.data.issue);
 						});
 				});
