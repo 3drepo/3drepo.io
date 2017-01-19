@@ -173,7 +173,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 			ng-click="$ctrl.doAction($event, action)"
 			ng-if="!actionData.hidden")
 				md-tooltip(md-direction="bottom") {{actionData.label}}
-				md-icon.angular-material-icons(style="color:{{actionData.color}}") {{actionData.icon}}
+				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
 		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()")
 			md-tooltip(md-direction="bottom") Submit
 			md-icon.angular-material-icons save

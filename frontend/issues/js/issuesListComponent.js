@@ -376,6 +376,9 @@
 			// Remove highlight from any multi objects
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 
+			// clear selection
+			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {

@@ -777,7 +777,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
-			if (!this.multiSelectMode && !this.pinDropMode) {
+			if (!this.pinDropMode) {
 				var nameSpaceName = null;
 
 				/*
@@ -1848,7 +1848,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			element.style.cursor =  on ? "default" : "-webkit-grab";
+			element.style.cursor =  on ? "copy" : "-webkit-grab";
 		};
 
 		/**
