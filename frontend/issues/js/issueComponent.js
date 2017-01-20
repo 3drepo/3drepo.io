@@ -587,14 +587,25 @@
 				screenShotPromise = $q.defer(),
 				data;
 
-			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			if(commentViewpoint)
+			{
+				console.log("has commentViewpoint");
+				console.log(commentViewpoint);
+				viewpointPromise.resolve(commentViewpoint);
+			}
+			else
+			{
+				// Get the viewpoint
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			}
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (self.actions.multi.selected && self.selectedObjects) {
 						// Create a group of selected objects
 						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							console.log("saving issue with viewpoint: " );
+							console.log(viewpoint);
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
 					}
@@ -828,15 +839,19 @@
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
-				viewpointPromise.promise.then(function (viewpoint) {
-					commentViewpoint = viewpoint;
-					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
-				});
+
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
+				
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			}
+
+			viewpointPromise.promise.then(function (viewpoint) {
+				commentViewpoint = viewpoint;
+				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+			});
 
 			setContentHeight();
 		};
