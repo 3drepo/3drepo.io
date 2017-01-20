@@ -230,7 +230,7 @@
 				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings;
+					vm.settings = data;
 
 					var index = -1;
 

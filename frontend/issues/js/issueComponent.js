@@ -92,7 +92,7 @@
 
 		this.notificationStarted = false;
 
-		console.log('issue::selectedObjects', this.selectedObjects);
+		//console.log('issue::selectedObjects', this.selectedObjects);
 
 		function convertCommentTopicType(){
 			self.issueData && self.issueData.comments.forEach(function(comment){
@@ -103,6 +103,10 @@
 		}
 
 		function setCanUpdateStatus(issueData){
+			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.projectSettings.permissions)){
+				return self.canUpdateStatus = false;
+			}
+
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
 				self.userRoles.find(function(role){
 					return role === issueData.assigned_roles[0];
@@ -115,10 +119,11 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
-			console.log(this.data);
+			//console.log('issueComp on changes', changes);
 
 			if(changes.hasOwnProperty('projectSettings')){
-				this.topic_types = this.projectSettings.topicTypes;
+				this.topic_types = this.projectSettings.properties.topicTypes;
+				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.projectSettings.permissions);
 				//convert comment topic_types
 				convertCommentTopicType();
 			}
@@ -150,6 +155,10 @@
 								break;
 							}
 						}
+					}
+
+					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.projectSettings.permissions)){
+						this.canUpdate = false;
 					}
 
 					setCanUpdateStatus(this.issueData);

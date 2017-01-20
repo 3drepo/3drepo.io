@@ -1229,7 +1229,7 @@ function getProjectPermission(username, account, project){
 
 	return User.findByUserName(username).then(user => {
 
-		return Role.viewRolesWithInheritedPrivs(user.roles)
+		return Role.viewRolesWithInheritedPrivs(user.roles);
 	}).then(roles => {
 
 		roles.forEach(role => {
