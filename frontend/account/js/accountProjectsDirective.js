@@ -70,7 +70,6 @@
 			"change",
 			function () {
 				vm.newProjectFileToUpload = this.files[0];
-				vm.newProjectFileSelected = true;
 
 				$scope.$apply();
 			},
@@ -183,7 +182,7 @@
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
-			vm.newProjectFileSelected = false;
+			vm.newProjectFileToUpload = null;
 			vm.newProjectData = {
 				account: accountForProject,
 				type: vm.projectTypes[0]

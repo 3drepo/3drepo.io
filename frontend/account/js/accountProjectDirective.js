@@ -63,7 +63,7 @@
 			dialogCloseToId;
 
 		// Init
-		vm.selectedFile = null;
+		vm.projectToUpload = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -144,9 +144,11 @@
 				
 				if(names.length === 1){
 					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
 					vm.uploadErrorMessage = 'File format not supported';
+					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else {
 					vm.uploadButtonDisabled = false;
@@ -165,7 +167,7 @@
 					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)){
 						vm.tag = null;
 						vm.desc = null;
-						vm.selectedFile = null;
+						vm.projectToUpload = null;
 						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					}
 				}
