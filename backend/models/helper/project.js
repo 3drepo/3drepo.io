@@ -821,7 +821,7 @@ function getRolesForProject(account, project, removeViewer){
 
 		for(let i = roles.length - 1; i >= 0; i--){
 			if (removeViewer && 
-				_.union(roles[i].permissions, RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE]).length ===  RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE].length)
+				roles[i].permissions.indexOf(C.PERM_COMMENT_ISSUE) === -1)
 			{
 				roles.splice(i, 1);
 			}
