@@ -9,7 +9,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue")
 		md-icon.angular-material-icons add
 
 md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")

@@ -1222,6 +1222,25 @@ function removeProject(account, project){
 
 }
 
+function getProjectPermission(username, account, project){
+	'use strict';
+
+	let permissions = [];
+
+	return User.findByUserName(username).then(user => {
+
+		return Role.viewRolesWithInheritedPrivs(user.roles)
+	}).then(roles => {
+
+		roles.forEach(role => {
+			permissions = permissions.concat(RoleTemplates.determinePermission(account, project, role));
+		});
+
+		return _.unique(permissions);
+	});
+}
+
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
@@ -1254,5 +1273,6 @@ module.exports = {
 	getRolesForProject,
 	uploadFile,
 	importProject,
-	removeProject
+	removeProject,
+	getProjectPermission
 };

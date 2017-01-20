@@ -32,15 +32,11 @@
 
 			$http.get(url).then(function(res){
 				var data = res.data;
-				deferred.resolve({
-					account     : account,
-					project		: project,
-					owner		: data.owner,
-					description	: data.desc,
-					type		: data.type,
-					settings 	: data.properties,
-					federate	: data.federate
-				}, function(){
+				data.account = account;
+				data.project = project;
+				data.settings = data.properties;
+				
+				deferred.resolve(data, function(){
 					deferred.resolve();
 				});
 			});

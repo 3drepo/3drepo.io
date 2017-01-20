@@ -99,7 +99,11 @@ function _getProject(req){
 		if(!setting){
 			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
 		} else {
-			return Promise.resolve(setting);
+			//compute permissions by user role
+			return ProjectHelpers.getProjectPermission( req.session.user.username, req.params.account, req.params.project).then(permissions => {
+				setting.permissions = permissions;
+				return Promise.resolve(setting);
+			});
 		}
 	});
 }
