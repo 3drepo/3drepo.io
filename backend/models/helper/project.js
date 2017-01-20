@@ -72,7 +72,10 @@ function convertToErrorCode(errCode){
         case 9:
         	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
         	break;
-        default:
+		case 10:
+			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
+			break;
+		default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
 
@@ -818,7 +821,7 @@ function getRolesForProject(account, project, removeViewer){
 
 		for(let i = roles.length - 1; i >= 0; i--){
 			if (removeViewer && 
-				_.union(roles[i].permissions, RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE]).length ===  RoleTemplates.roleTemplates[C.VIEWER_TEMPLATE].length)
+				roles[i].permissions.indexOf(C.PERM_COMMENT_ISSUE) === -1)
 			{
 				roles.splice(i, 1);
 			}
@@ -1222,6 +1225,25 @@ function removeProject(account, project){
 
 }
 
+function getProjectPermission(username, account, project){
+	'use strict';
+
+	let permissions = [];
+
+	return User.findByUserName(username).then(user => {
+
+		return Role.viewRolesWithInheritedPrivs(user.roles);
+	}).then(roles => {
+
+		roles.forEach(role => {
+			permissions = permissions.concat(RoleTemplates.determinePermission(account, project, role));
+		});
+
+		return _.unique(permissions);
+	});
+}
+
+
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
@@ -1254,5 +1276,6 @@ module.exports = {
 	getRolesForProject,
 	uploadFile,
 	importProject,
-	removeProject
+	removeProject,
+	getProjectPermission
 };

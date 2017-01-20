@@ -113,9 +113,10 @@ module.exports.createApp = function (server, serverConfig){
 
 			let username = socket.handshake.session.user.username;
 			let sessionId =  socket.handshake.session.id;
-			userToSocket[sessionId] = socket;
+			//console.log('socket id', socket.client.id);
+			userToSocket[socket.client.id] = socket;
 
-			systemLogger.logInfo(`${username} - ${sessionId} is in chat`, { username });
+			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
 
 			socket.on('join', data => {
 				//check permission if the user have permission to join room
@@ -126,7 +127,7 @@ module.exports.createApp = function (server, serverConfig){
 						socket.join(`${data.account}::${data.project}`);
 						socket.emit(joinedEventName, { account: data.account, project: data.project});
 
-						systemLogger.logInfo(`${username} - ${sessionId} has joined room ${data.account}::${data.project}`, { 
+						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
@@ -134,7 +135,7 @@ module.exports.createApp = function (server, serverConfig){
 						
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}::${data.project}`});
-						systemLogger.logError(`${username} - ${sessionId} has no access to join room ${data.account}::${data.project}`, { 
+						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}::${data.project}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
@@ -146,7 +147,7 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('leave', data => {
 				socket.leave(`${data.account}::${data.project}`);
-				systemLogger.logInfo(`${username} - ${sessionId} has left room ${data.account}::${data.project}`, { 
+				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}::${data.project}`, { 
 					username, 
 					account: data.account, 
 					project: data.project 

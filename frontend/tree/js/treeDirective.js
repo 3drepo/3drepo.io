@@ -139,7 +139,7 @@
 		 * Show the first set of children using the expand function but deselect the child used for this
 		 */
 		function expandFirstNode () {
-			expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0);
+			expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0, true);
 			vm.nodesToShow[0].children[0].selected = false;
 		}
 
@@ -295,7 +295,7 @@
 		 * @param path
 		 * @param level
 		 */
-		function expandToSelection(path, level) {
+		function expandToSelection(path, level, noHighlight) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			// Force a redraw of the tree to get round the display problem
@@ -321,7 +321,7 @@
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								vm.nodesToShow[i].children[j].selected = true;
 							}
-							else {
+							else if(!noHighlight){
 								vm.selectNode(vm.nodesToShow[i]);
 							}
 						}

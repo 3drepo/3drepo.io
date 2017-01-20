@@ -30,7 +30,7 @@ var schema = mongoose.Schema({
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
 	federate: Boolean,
-	permissions: [Number],
+	permissions: [],
 	properties: {
 		"pinSize" : Number,
 		"avatarHeight" : Number,

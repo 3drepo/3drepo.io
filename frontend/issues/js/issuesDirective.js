@@ -49,9 +49,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -178,8 +178,16 @@
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
 				watchNotification();
+			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
+				console.log('permission', event.value.permissions)
+				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+					vm.canAddIssue = true;
+				}
+				vm.subProjects = event.value.subProjects || [];
+				watchNotification();
 			}
 		});
+
 
 		/**
 		 * The roles assigned to the issue have been changed
@@ -270,28 +278,43 @@
 
 
 		function watchNotification(){
-			/*
-			 * Watch for new issues
-			 */
-			NotificationService.subscribe.newIssues(vm.account, vm.project, function(issues){
+
+
+			 if(!vm.revisions || !vm.subProjects){
+			 	return;
+			 }
+
+			function newIssueListener(issues, subproject){
 
 				issues.forEach(function(issue){
 
-					var issueRevision = vm.revisions.find(function(rev){
-						return rev._id === issue.rev_id;
-					});
+					var showIssue;
 
-					var currentRevision;
+					if(subproject){
+						
+						showIssue = true;
 
-					if(!vm.revision){
-						currentRevision = vm.revisions[0];
 					} else {
-						currentRevision = vm.revisions.find(function(rev){
-							return rev._id === vm.revision || rev.tag === vm.revision;
+
+						var issueRevision = vm.revisions.find(function(rev){
+							return rev._id === issue.rev_id;
 						});
+
+						var currentRevision;
+
+						if(!vm.revision){
+							currentRevision = vm.revisions[0];
+						} else {
+							currentRevision = vm.revisions.find(function(rev){
+								return rev._id === vm.revision || rev.tag === vm.revision;
+							});
+						}
+
+						showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
 					}
 
-					if(issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp)){
+
+					if(showIssue){
 						
 						issue.title = IssuesService.generateTitle(issue);
 						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
@@ -306,12 +329,9 @@
 				vm.issues = vm.issues.slice(0);
 				$scope.$apply();
 
-			});
+			}
 
-			/*
-			 * Watch for status changes for all issues
-			 */
-			NotificationService.subscribe.issueChanged(vm.account, vm.project, function(issue){
+			function issueChangedListener(issue){
 
 
 				issue.title = IssuesService.generateTitle(issue);
@@ -341,7 +361,27 @@
 
 				vm.issues = vm.issues.slice(0);
 				$scope.$apply();
-			});
+			}
+
+
+			/*
+			 * Watch for new issues
+			 */
+			NotificationService.subscribe.newIssues(vm.account, vm.project, newIssueListener);
+
+			/*
+			 * Watch for status changes for all issues
+			 */
+			NotificationService.subscribe.issueChanged(vm.account, vm.project, issueChangedListener);
+
+			//do the same for all subprojects
+			if(vm.subProjects){
+				vm.subProjects.forEach(function(subProject){
+					var subproject = true;
+					NotificationService.subscribe.newIssues(subProject.database, subProject.project, function(issues){ newIssueListener(issues, subproject) });
+					NotificationService.subscribe.issueChanged(subProject.database, subProject.project, issueChangedListener);
+				});
+			}
 		}
 
 
@@ -351,6 +391,14 @@
 		$scope.$on('$destroy', function(){
 			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
+
+			if(vm.subProjects){
+				vm.subProjects.forEach(function(subProject){
+					NotificationService.unsubscribe.newIssues(subProject.database, subProject.project);
+					NotificationService.unsubscribe.issueChanged(subProject.database, subProject.project);
+				});
+			}
+
 		});
 
 		/**

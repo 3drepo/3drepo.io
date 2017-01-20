@@ -92,7 +92,7 @@
 
 		this.notificationStarted = false;
 
-		console.log('issue::selectedObjects', this.selectedObjects);
+		//console.log('issue::selectedObjects', this.selectedObjects);
 
 		function convertCommentTopicType(){
 			self.issueData && self.issueData.comments.forEach(function(comment){
@@ -103,6 +103,10 @@
 		}
 
 		function setCanUpdateStatus(issueData){
+			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.projectSettings.permissions)){
+				return self.canUpdateStatus = false;
+			}
+
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
 				self.userRoles.find(function(role){
 					return role === issueData.assigned_roles[0];
@@ -115,10 +119,11 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
-			console.log(this.data);
+			//console.log('issueComp on changes', changes);
 
 			if(changes.hasOwnProperty('projectSettings')){
-				this.topic_types = this.projectSettings.topicTypes;
+				this.topic_types = this.projectSettings.properties.topicTypes;
+				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.projectSettings.permissions);
 				//convert comment topic_types
 				convertCommentTopicType();
 			}
@@ -150,6 +155,10 @@
 								break;
 							}
 						}
+					}
+
+					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.projectSettings.permissions)){
+						this.canUpdate = false;
 					}
 
 					setCanUpdateStatus(this.issueData);
@@ -331,12 +340,13 @@
 
 						// Update last but one comment in case it was "sealed"
 						if (self.issueData.comments.length > 1) {
-							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							if (comment.action) {
-								IssuesService.convertActionCommentToText(comment, self.topic_types);
-							}
-							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							// if (comment.action) {
+							// 	IssuesService.convertActionCommentToText(comment, self.topic_types);
+							// }
+							//self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 						}
 
 						// The status could have changed due to assigning role
@@ -344,14 +354,11 @@
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 						setCanUpdateStatus(self.issueData);
-
+						commentAreaScrollToBottom();
 					});
 			}
 		};
 
-		/**
-		 * Submit - new issue or comment or update issue
-		 */
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
@@ -587,14 +594,25 @@
 				screenShotPromise = $q.defer(),
 				data;
 
-			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			if(commentViewpoint)
+			{
+				console.log("has commentViewpoint");
+				console.log(commentViewpoint);
+				viewpointPromise.resolve(commentViewpoint);
+			}
+			else
+			{
+				// Get the viewpoint
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			}
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (self.actions.multi.selected && self.selectedObjects) {
 						// Create a group of selected objects
 						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							console.log("saving issue with viewpoint: " );
+							console.log(viewpoint);
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
 					}
@@ -828,15 +846,19 @@
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
-				viewpointPromise.promise.then(function (viewpoint) {
-					commentViewpoint = viewpoint;
-					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
-				});
+
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
+				
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			}
+
+			viewpointPromise.promise.then(function (viewpoint) {
+				commentViewpoint = viewpoint;
+				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+			});
 
 			setContentHeight();
 		};

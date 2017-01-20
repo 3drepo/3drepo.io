@@ -230,7 +230,7 @@
 				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings;
+					vm.settings = data;
 
 					var index = -1;
 
@@ -247,11 +247,7 @@
 						}
 					}
 
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: data.account,
-						project: data.project,
-						settings: data.settings
-					});
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, data);
 				});
 
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
