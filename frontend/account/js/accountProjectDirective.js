@@ -146,7 +146,7 @@
 					vm.uploadErrorMessage = 'Filename must have extension';
 					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
 					vm.uploadErrorMessage = 'File format not supported';
 					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;

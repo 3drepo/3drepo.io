@@ -119,8 +119,6 @@
 
 			var newValue = vm.newProjectData;
 
-			vm.showNewProjectErrorMessage = false;
-			vm.newProjectErrorMessage = '';
 
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
@@ -142,14 +140,16 @@
 			if(vm.newProjectFileToUpload){
 				var names = vm.newProjectFileToUpload.name.split('.');
 
+				vm.showNewProjectErrorMessage = false;
+				vm.newProjectErrorMessage = '';
 				if(names.length === 1){
 					vm.showNewProjectErrorMessage = true;
 					vm.newProjectErrorMessage = 'Filename must have extension';
-					vm.newProjectButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.newProjectFileToUpload = null;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
 					vm.showNewProjectErrorMessage = true;
 					vm.newProjectErrorMessage = 'File format not supported';
-					vm.newProjectButtonDisabled = true;
+					vm.newProjectFileToUpload = null
 				}
 			}
 
