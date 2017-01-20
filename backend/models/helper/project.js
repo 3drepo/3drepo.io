@@ -72,7 +72,10 @@ function convertToErrorCode(errCode){
         case 9:
         	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
         	break;
-        default:
+		case 10:
+			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
+			break;
+		default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
 

@@ -123,6 +123,7 @@
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
 		
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
+		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },
