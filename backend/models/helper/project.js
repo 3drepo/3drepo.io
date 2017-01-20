@@ -618,84 +618,85 @@ function getFullTree(account, project, branch, rev, username){
 function searchTree(account, project, branch, rev, searchString, username){
 	'use strict';
 
-	let getHistory;
-
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({account, project}, rev);
-	} else if (rev && !utils.isUUID(rev)){
-		getHistory = History.findByTag({account, project}, rev);
-	} else {
-		getHistory = History.findByBranch({account, project}, branch);
-	}
-
 	let items = [];
-	let history;
 
-	let search = () => getHistory.then(_history => {
-
-		history = _history;
-
-		if(!history){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-		}
+	let search = (history) => {
 
 		let filter = {
 			_id: {'$in': history.current },
 			name: new RegExp(searchString, 'i')
 		};
 
-		return Scene.find({account, project}, filter, { name: 1 });
+		return Scene.find({account, project}, filter, { name: 1 }).then(objs => {
 
-	}).then(objs => {
+			objs.forEach((obj, i) => {
 
-		objs.forEach((obj, i) => {
+				objs[i] = obj.toJSON();
+				objs[i].account = account;
+				objs[i].project = project;
+				items.push(objs[i]);
 
-			objs[i] = obj.toJSON();
-			objs[i].account = account;
-			objs[i].project = project;
-			items.push(objs[i]);
+			});
+
+			let filter = {
+				_id: {'$in': history.current },
+				type: 'ref'
+			};
+
+			return Ref.find({account, project}, filter);
+
+		}).then(refs => {
+
+			let promises = [];
+
+			refs.forEach(ref => {
+
+				let refRev, refBranch;
+
+				if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+					refBranch = C.MASTER_BRANCH_NAME;
+				} else {
+					refRev = utils.uuidToString(ref._rid);
+				}
+
+				promises.push(searchTree(ref.owner, ref.project, refBranch, refRev, searchString, username));
+			});
+
+			return Promise.all(promises);
+
+		}).then(results => {
+
+			results.forEach(objs => {
+				items = items.concat(objs);
+			});
+
+			return Promise.resolve(items);
 
 		});
-
-		let filter = {
-			_id: {'$in': history.current },
-			type: 'ref'
-		};
-
-		return Ref.find({account, project}, filter);
-
-	}).then(refs => {
-
-		let promises = [];
-
-		refs.forEach(ref => {
-
-			let refRev, refBranch;
-
-			if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			promises.push(searchTree(ref.owner, ref.project, refBranch, refRev, searchString, username));
-		});
-
-		return Promise.all(promises);
-
-	}).then(results => {
-
-		results.forEach(objs => {
-			items = items.concat(objs);
-		});
-
-		return Promise.resolve(items);
-
-	});
+	};
 
 	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+
 		if(granted){
-			return search();
+
+			let getHistory;
+
+			if(rev && utils.isUUID(rev)){
+				getHistory = History.findByUID({account, project}, rev);
+			} else if (rev && !utils.isUUID(rev)){
+				getHistory = History.findByTag({account, project}, rev);
+			} else {
+				getHistory = History.findByBranch({account, project}, branch);
+			}
+
+			return getHistory.then(history => {
+				if(history){
+					return search(history);
+				} else {
+					return Promise.resolve([]);
+				}
+			});
+
 		} else {
 			return Promise.resolve([]);
 		}

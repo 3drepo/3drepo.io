@@ -92,8 +92,28 @@
 		 */
 		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
 		rolesPromise.then(function (data) {
+			console.log('Finish getting roles');
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
+
+			var menu = [];
+			data.forEach(function(role){
+				menu.push({
+					value: "filterRole",
+					role: role.role,
+					label: role.role,
+					keepCheckSpace: true,
+					toggle: true,
+					selected: true,
+					firstSelected: false,
+					secondSelected: false
+				});
+			});
+
+			EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
+				type: 'issues',
+				menu: menu
+			});
 		});
 
 		/**
@@ -385,7 +405,7 @@
 			}
 
 			if(issue){
-				IssuesService.getIssue(vm.account, vm.project, issue._id).then(function(issue){
+				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
 			} else {

@@ -44,6 +44,8 @@
 		vm.contact = {information: "", name: "", email: ""};
 		vm.sent = false;
 		vm.sending = false;
+		vm.emailRegex = /^[_a-z0-9-]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+
 
 		/*
 		 * Watch to enable send button

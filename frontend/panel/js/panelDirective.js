@@ -64,7 +64,9 @@
 		/*
 		 * Watch for events
 		 */
+		 console.log('watch event setup!');
         $scope.$watch(EventService.currentEvent, function (event) {
+
 			var i;
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
 				vm.contentItems = (event.value[vm.position]);
@@ -74,6 +76,18 @@
 			}
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 vm.showPanel = !vm.showPanel;
+            } 
+            else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
+
+
+            	var item = vm.contentItems.find(function(item){
+            		return item.type === event.value.type
+            	});
+
+            	if(item){
+            		item.menu = item.menu.concat(event.value.menu);
+            	}
+            
             }
         });
 
