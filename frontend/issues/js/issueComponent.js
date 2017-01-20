@@ -331,12 +331,13 @@
 
 						// Update last but one comment in case it was "sealed"
 						if (self.issueData.comments.length > 1) {
-							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							if (comment.action) {
-								IssuesService.convertActionCommentToText(comment, self.topic_types);
-							}
-							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							// if (comment.action) {
+							// 	IssuesService.convertActionCommentToText(comment, self.topic_types);
+							// }
+							//self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 						}
 
 						// The status could have changed due to assigning role
@@ -344,14 +345,11 @@
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 						setCanUpdateStatus(self.issueData);
-
+						commentAreaScrollToBottom();
 					});
 			}
 		};
 
-		/**
-		 * Submit - new issue or comment or update issue
-		 */
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
