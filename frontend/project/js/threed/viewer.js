@@ -216,7 +216,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				//self.scene.setAttribute("dopickpass", false);
+				self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
@@ -753,6 +753,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.oldPart = highlightPart;
 		};
 
+		this.lastMultipart = null;
+
 		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
@@ -761,19 +763,36 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if ((objEvent.button === 1) && !self.selectionDisabled) {
 				if (objEvent.partID) {
 					id = objEvent.partID;
+	
+					var splitID = objEvent.part.multiPart._nameSpace.name.split("__");
+					account = splitID[0];
+					project = splitID[1];
 
-					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
-					project = objEvent.part.multiPart._nameSpace.name.split("__")[1];
+					var multipartID = objEvent.hitObject.id.split("__");
+					self.lastMultipart = multipartID[2];
 
+				} else if (objEvent.hitObject) {
+					var splitID = objEvent.hitObject.id.split("__");
+					account = splitID[0];
+					project = splitID[1];
+					id = splitID[2];
+
+					
 				}
 			}
 
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: account,
-				project: project,
-				id: id,
-				source: "viewer"
-			});
+			if (id !== self.lastMultipart)
+			{
+				callback(self.EVENT.OBJECT_SELECTED, {
+					account: account,
+					project: project,
+					id: id,
+					source: "viewer"
+				});
+			} else {
+				// Hack to avoid bug in X3DOM
+				self.lastMultipart = null;
+			}
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
@@ -820,6 +839,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 					self.selectParts(fullPartsList, zoom, colour);
 				}
+
+				self.setApp(null);
 
 				for(var i = 0; i < ids.length; i++)
 				{
@@ -880,6 +901,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 
 				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
+
+
+				self.setApp(null);
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						self.setApp(object[0], colour);
+					}
+				
 			}
 		};
 
@@ -1247,7 +1281,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			var oldPickMode = scene._vf.pickMode.toLowerCase();
-			scene._vf.pickMode = "idbuf";
+			//scene._vf.pickMode = "idbufid";
 			scene._vf.pickMode = oldPickMode;
 
 			self.pickObject = viewArea._pickingInfo;
