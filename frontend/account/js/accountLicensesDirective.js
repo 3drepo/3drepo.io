@@ -50,6 +50,7 @@
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
+			vm.numLicensesAssigned = 0;
 			vm.numLicenses = vm.subscriptions.length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
@@ -66,6 +67,7 @@
 				}
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
+			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 		});
 
 		/*
@@ -104,6 +106,7 @@
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
 						vm.unassigned.splice(0, 1);
 						vm.allLicensesAssigned = (vm.unassigned.length === 0);
+						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 						vm.addDisabled = vm.allLicensesAssigned;
 						vm.newLicenseAssignee = "";
 					}
@@ -131,9 +134,11 @@
 					vm.licenses.splice(index, 1);
 					vm.addDisabled = false;
 					vm.allLicensesAssigned = false;
+					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 				}
 				else if (response.status === 400) {
-					if (response.data.code === 'USER_IN_COLLABORATOR_LIST') {
+					var message = UtilsService.getErrorMessage(response.data);
+					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
 						vm.licenseAssigneeIndex = index;
 						vm.userProjects = response.data.projects;
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);
@@ -153,6 +158,8 @@
 					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
 					vm.addDisabled = false;
+					vm.allLicensesAssigned = false;
+					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 					UtilsService.closeDialog();
 				}
 			});

@@ -88,7 +88,7 @@
 
 			params.config_js = "var server_config = {};\n";
 
-			params.config_js += "server_config.api_algorithm = (function () {'use strict'; let self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
+			params.config_js += "server_config.api_algorithm = (function () {'use strict'; var self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
 
 			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
 			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl;\n";
