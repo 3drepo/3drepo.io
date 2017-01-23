@@ -309,6 +309,7 @@ issue-comp .issueCompIssueOwner {
   margin-top: -10px;
 }
 
+issue-comp .issueCompAutoComment,
 issue-comp .issueCompCommentOwner {
   margin-bottom: 10px;
 }
@@ -316,6 +317,11 @@ issue-comp .issueCompCommentOwner {
 issue-comp .issueCompIssueOwner label,
 issue-comp .issueCompCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp .issueCompAutoComment label {
+  color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
 }
 
 issue-comp .issueCompComment {
