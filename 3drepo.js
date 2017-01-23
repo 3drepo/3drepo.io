@@ -176,6 +176,7 @@
 		}
 
 		let server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
+		server.setTimeout(config.timeout * 1000);
 		server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
 	}
 }());
