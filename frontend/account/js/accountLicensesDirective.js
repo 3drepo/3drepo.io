@@ -158,6 +158,8 @@
 					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
 					vm.addDisabled = false;
+					vm.allLicensesAssigned = false;
+					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 					UtilsService.closeDialog();
 				}
 			});
