@@ -1,4 +1,5 @@
 /**
+ *
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -127,7 +128,7 @@
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 
-			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
+			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name) && (vm.uploadedFile.account === vm.account)) {
 
 				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
@@ -193,6 +194,7 @@
 
 				case "upload":
 					vm.uploadErrorMessage = null;
+					vm.projectToUpload = null;
 					vm.tag = null;
 					vm.desc = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
@@ -244,7 +246,7 @@
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-			vm.onUploadFile({project: vm.project});
+			vm.onUploadFile({project: vm.project, account: vm.account});
 		};
 
 
@@ -269,7 +271,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, file: vm.projectToUpload};
+						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload};
 						vm.closeDialog();
 					}
 				});

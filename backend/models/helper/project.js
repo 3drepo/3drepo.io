@@ -715,13 +715,17 @@ function listSubProjects(account, project, branch){
 	return History.findByBranch({ account, project }, branch).then(history => {
 
 
+		if(history){
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
 
-		let filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
+			return Ref.find({ account, project }, filter);
+		} else {
+			return [];
+		}
 
-		return Ref.find({ account, project }, filter);
 
 	}).then(refs => {
 

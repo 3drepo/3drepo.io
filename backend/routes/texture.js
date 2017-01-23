@@ -42,7 +42,7 @@ function findByUID(format, req, res, next){
 
 	Texture.findByUID(dbCol, req.params.uid, options).then(texture => {
 
-		if (texture.textures){
+		if (texture.textures && texture.textures[req.params.uid] && texture.textures[req.params.uid].data && texture.textures[req.params.uid].data.buffer){
 
 			if (req.params.subformat === "heightmap"){
 
@@ -61,7 +61,7 @@ function findByUID(format, req, res, next){
 			}
 
 		} else {
-			return Promise.reject({ resCode: responseCodes.OBJECT_TYPE_NOT_SUPPORTED});
+			return Promise.reject({ resCode: responseCodes.TEXTURE_NOT_FOUND});
 		}
 
 	}).catch(err => {

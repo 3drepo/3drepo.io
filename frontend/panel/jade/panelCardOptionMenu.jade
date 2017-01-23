@@ -1,7 +1,7 @@
 md-menu(md-position-mode="target-right target", md-offset="2 14")
 	md-button.md-icon-button(aria-label="Menu", ng-click="$mdOpenMenu($event)")
 		md-icon.angular-material-icons more_vert
-	md-menu-content(width="4")
+	md-menu-content(width="4" style="max-height:none")
 		md-menu-item(ng-repeat="menuItem in vm.menu")
 			md-button(ng-click="vm.menuItemSelected($index)")
 				div(layout="column" flex)
