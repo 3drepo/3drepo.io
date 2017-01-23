@@ -125,15 +125,35 @@ function getProjectSetting(req, res, next){
 	_getProject(req).then(setting => {
 
 		//setting = setting.toObject();
-		
+
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subProjects'];
+
 		let resObj = {};
 
 		whitelist.forEach(key => {
 			resObj[key] = setting[key];
 		});
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
+		resObj.headRevisions = {};
+		let proj  = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
+	       	let sort  = {sort: {branch: -1, timestamp: -1}};
+		let account = req.params.account;
+		let project = req.params.project;
+
+		// Calculate revision heads
+		History.find({account, project}, {}, proj, sort).then(histories => {
+			histories = History.clean(histories);
+
+			histories.forEach(history => {
+				var branch = history.branch || C.MASTER_BRANCH_NAME;
+				if (!resObj.headRevisions[branch])
+				{
+					resObj.headRevisions[branch] = history._id;
+				}
+			});
+
+			responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
+		});
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -156,10 +176,10 @@ function createProject(req, res, next){
 	}
 
 	let data = {
-		desc: req.body.desc, 
-		type: req.body.type, 
-		unit: req.body.unit, 
-		subProjects: req.body.subProjects, 
+		desc: req.body.desc,
+		type: req.body.type,
+		unit: req.body.unit,
+		subProjects: req.body.subProjects,
 		federate: federate,
 		code: req.body.code,
 		topicTypes: req.body.topicTypes
@@ -391,7 +411,7 @@ function uploadProject(req, res, next){
 
 	//check project exists before upload
 	return ProjectSetting.findById({account, project}, project).then(_projectSetting => {
-		
+
 		projectSetting = _projectSetting;
 
 		if(!projectSetting){
