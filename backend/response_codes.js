@@ -197,6 +197,7 @@
 		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500},
 		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500},
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
+		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404},
 	};
 
 
