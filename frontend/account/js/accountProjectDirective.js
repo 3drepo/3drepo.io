@@ -371,7 +371,7 @@
 		function watchProjectStatus(){
 			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
 				console.log('upload status changed',  data);
-				if ((data.status === "ok") || (data.errorReason.value === "failed")) {
+				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
 						|| (data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_TEXTURES') 
 						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
