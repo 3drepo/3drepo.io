@@ -67,6 +67,8 @@
 				replSet.push(new Server(self.host[host], self.port[host]));
 			}
 
+			opts.rs_name = self.rsName;
+
 			serverConfig = new ReplSet(replSet, opts);
 		}
 
@@ -75,8 +77,8 @@
 		authDBConn.open(function(err, dbConn) {
 			if(err) {
 				var dbError = responseCodes.DB_ERROR(err);
-				systemLogger.logError("ETC: " + JSON.stringify(err.err));
-				throw Error(JSON.stringify(dbError));
+				systemLogger.logError("ETC: " + JSON.stringify(Object.keys(err)));
+				throw Error(JSON.stringify(dbError));D
 			}
 
 			self.authDB = dbConn;
@@ -102,6 +104,8 @@
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
 		connectString += this.rsName ? "&replicaSet=" + this.rsName : "";
+
+		systemLogger.logInfo("CONNECTION: " + connectString);
 
 		return connectString;
 	};

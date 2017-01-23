@@ -126,7 +126,7 @@ function getProjectSetting(req, res, next){
 	_getProject(req).then(setting => {
 
 		//setting = setting.toObject();
-		
+
 		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subProjects'];
 
 		let resObj = {};
@@ -177,10 +177,10 @@ function createProject(req, res, next){
 	}
 
 	let data = {
-		desc: req.body.desc, 
-		type: req.body.type, 
-		unit: req.body.unit, 
-		subProjects: req.body.subProjects, 
+		desc: req.body.desc,
+		type: req.body.type,
+		unit: req.body.unit,
+		subProjects: req.body.subProjects,
 		federate: federate,
 		code: req.body.code,
 		topicTypes: req.body.topicTypes
@@ -412,7 +412,7 @@ function uploadProject(req, res, next){
 
 	//check project exists before upload
 	return ProjectSetting.findById({account, project}, project).then(_projectSetting => {
-		
+
 		projectSetting = _projectSetting;
 
 		if(!projectSetting){

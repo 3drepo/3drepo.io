@@ -225,6 +225,12 @@
 
         };
 
+		obj.getResponseCode = function(errorToFind)
+		{
+
+			return Object.keys(serverConfig.responseCodes).indexOf(errorToFind);
+		};
+
 
 
         return obj;
