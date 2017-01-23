@@ -369,7 +369,6 @@ issue-comp #issueCompNewComment md-input-container {
 issue-comp #descriptionAndComments {
   overflow-y:auto;
   overflow-x:hidden;
-  background: #f0f0f0;
 }
 
 issue-comp #issueRoleIndicator {
