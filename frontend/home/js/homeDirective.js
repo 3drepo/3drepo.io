@@ -100,7 +100,7 @@
 			vm.legalDisplays = serverConfig.legal;
 		}
 		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
-		vm.legalDisplays.push({title: "Contact", page: "contact"});
+		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));

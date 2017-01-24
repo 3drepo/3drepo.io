@@ -1,6 +1,6 @@
 img#homeBackground(src="/public/images/viewer_background.jpg")
 #legalLinks(layout="row")
-	a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{'/' + display.page}}") {{display.title}}
+	a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{display.page}}") {{display.title}}
 
 #homeLogo(style="pointer-events:{{vm.pointerEvents}}")
 	img(src="/public/images/3drepo-logo-white.png", ng-click="vm.home()")
