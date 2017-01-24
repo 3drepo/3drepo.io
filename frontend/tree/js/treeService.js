@@ -69,6 +69,7 @@
 
 			var uidToSharedId = {};
 			var sharedIdToUid = {};
+			var oIdToMetaId = {};
 
 			function genMap(treeItem){
 				if(treeItem){
@@ -79,6 +80,11 @@
 
 					uidToSharedId[treeItem._id] = treeItem.shared_id;
 					sharedIdToUid[treeItem.shared_id] = treeItem._id;
+
+					if(treeItem.meta){
+						oIdToMetaId[treeItem._id] = treeItem.meta;
+					}
+
 				}
 			}
 
@@ -86,9 +92,11 @@
 
 			return {
 				uidToSharedId: uidToSharedId,
-				sharedIdToUid: sharedIdToUid
+				sharedIdToUid: sharedIdToUid,
+				oIdToMetaId: oIdToMetaId
 			};
 		}
+
 
 		return {
 			init: init,
