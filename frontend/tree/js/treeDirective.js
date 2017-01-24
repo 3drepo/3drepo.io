@@ -361,12 +361,13 @@
 			if (level < (path.length - 2)) {
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
-				vm.topIndex = selectedIndex - 2;
 				setContentHeight(vm.nodesToShow);
-				// Redraw the tree
-				$timeout(function () {
-					vm.showNodes = true;
+				vm.showNodes = true;
+				$timeout(function() {
+					// Redraw the tree
+					vm.topIndex = selectedIndex - 2;
 					// Resize virtual repeater
+
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
 				});
