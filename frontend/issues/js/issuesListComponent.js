@@ -122,7 +122,7 @@
 				showPins();
 			}
 
-			// Keys down - check for down followed by up
+/*			// Keys down - check for down followed by up
 			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
 				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
@@ -174,7 +174,7 @@
 					rightArrowDown = false;
 					self.editIssue(selectedIssue);
 				}
-			}
+			}*/
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {

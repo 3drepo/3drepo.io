@@ -16,6 +16,8 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 						ng-model="$ctrl.issueData.name"
 						ng-change="$ctrl.nameChange()"
 						ng-disabled="$ctrl.data"
+						ng-focus="$ctrl.textInputHasFocus(true)"
+						ng-blur="$ctrl.textInputHasFocus(false)"
 						aria-label="Title"
 						tdr-focus="true"
 						required
