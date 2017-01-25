@@ -445,6 +445,7 @@ describe('Issues', function () {
 						expect(res.body.status === status.status);
 						expect(res.body.comments[0].action).to.deep.equal({
 							property: 'status',
+							propertyText: 'Status',
 							from: 'open',
 							to: 'in progress' 
 						});
@@ -481,6 +482,7 @@ describe('Issues', function () {
 						expect(res.body.topic_type === data.topic_type);
 						expect(res.body.comments[0].action).to.deep.equal({
 							property: 'topic_type',
+							propertyText: 'Type',
 							from: 'ru123',
 							to: 'abc123' 
 						});
@@ -519,6 +521,7 @@ describe('Issues', function () {
 						expect(res.body.assigned_roles).to.deep.equal(data.assigned_roles);
 						expect(res.body.comments[0].action).to.deep.equal({
 							property: 'assigned_roles',
+							propertyText: 'Assigned',
 							from: 'project1.collaborator',
 							to: 'project1.viewer' 
 						});

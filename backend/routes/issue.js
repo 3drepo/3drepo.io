@@ -45,6 +45,7 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, i
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToIssue, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 
 router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
@@ -274,11 +275,26 @@ function renderIssuesHTML(req, res, next){
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let findIssue;
+	let noClean = false;
+
+	let projection = {
+		extras: 0,
+		'viewpoints.extras': 0,
+		'viewpoints.scribble': 0,
+		'viewpoints.screenshot.content': 0,
+		'viewpoints.screenshot.resizedContent': 0,
+		'thumbnail.content': 0
+	};
+
+	let ids;
+	if(req.query.ids){
+		ids = req.query.ids.split(',');
+	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master");
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
@@ -305,7 +321,12 @@ function renderIssuesHTML(req, res, next){
 			}
 		}
 
-		res.render("issues.jade", {issues : splitIssues});
+		res.render("issues.jade", {
+			issues : splitIssues, 
+			url: function (path){
+				return config.apiAlgorithm.apiUrl(C.GET_API, path);
+			}
+		});
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

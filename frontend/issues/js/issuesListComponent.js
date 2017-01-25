@@ -191,7 +191,13 @@
 					self.issueDisplay.showSubProjectIssues = showSubProjectIssues;
 				}
 				else if (this.menuOption.value === "print") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+					var ids = [];
+					
+					this.issuesToShow.forEach(function(issue){
+						ids.push(issue._id);
+					});
+
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html?ids=" + ids.join(',')), "_blank");
 				}
 				else if (this.menuOption.value === "exportBCF") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
