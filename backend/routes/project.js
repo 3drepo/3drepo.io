@@ -26,6 +26,7 @@ var C = require("../constants");
 var ProjectHelpers = require('../models/helper/project');
 var History = require('../models/history');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
+var History = require('../models/history');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};

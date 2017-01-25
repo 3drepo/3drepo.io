@@ -78,7 +78,7 @@
 			if(err) {
 				var dbError = responseCodes.DB_ERROR(err);
 				systemLogger.logError("ETC: " + JSON.stringify(Object.keys(err)));
-				throw Error(JSON.stringify(dbError));D
+				throw Error(JSON.stringify(dbError));
 			}
 
 			self.authDB = dbConn;
