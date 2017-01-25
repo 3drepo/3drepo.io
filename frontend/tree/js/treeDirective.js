@@ -73,26 +73,8 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
-		vm.visible   = [];
-		vm.invisible = [];
-
-		/*
-		 * Get all the tree nodes
-		 */
-		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
-		promise.then(function (data) {
-			vm.allNodes = [];
-			vm.allNodes.push(data.nodes);
-			vm.nodes = vm.allNodes;
-			vm.showTree = true;
-			vm.showProgress = false;
-
-			vm.idToPath = data.idToPath;
-			initNodesToShow();
-			expandFirstNode();
-			setupInfiniteScroll();
-			setContentHeight(vm.nodesToShow);
-		});
+		vm.visible   = {};
+		vm.invisible = {};		
 
 		/**
 		 * Set the content height.
@@ -144,6 +126,45 @@
 		}
 
 		/**
+		 * traverse children of a node recursively
+		 * @param {Object} node
+		 * @param {Function} callback 
+		 */
+		function traverseNode(node, callback){
+			callback(node);
+			node.children && node.children.forEach(function(child){
+				traverseNode(child, callback);
+			});
+		}
+
+		/**
+		 * Add all child id of a node recursively, the parent node's id will also be added.
+		 * @param {Object} node
+		 * @param {Array} ids Array to push the ids to
+		 */
+		function traverseNodeAndPushId(node, ids){
+			traverseNode(node, function(node){
+				ids.push(node._id);
+			});
+		}
+
+		function getVisibleArray(account, project){
+			if(!vm.visible[account + '@' + project]){
+				vm.visible[account + '@' + project] = [];
+			}
+
+			return vm.visible[account + '@' + project];
+		}
+
+		function getInvisibleArray(account, project){
+			if(!vm.invisible[account + '@' + project]){
+				vm.invisible[account + '@' + project] = [];
+			}
+
+			return vm.invisible[account + '@' + project];
+		}
+
+		/**
 		 * Set the toggle state of a node
 		 * @param {Object} node Node to change the visibility for
 		 * @param {String} visibility Visibility to change to
@@ -152,37 +173,56 @@
 		{
 			var idx = -1;
 
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
+
 			// TODO: This function is probably in-efficient
 			if (visibility === "invisible")
 			{
-				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				if ((idx = invisible.indexOf(node._id)) !== -1)
 				{
-					vm.invisible.splice(idx,1);
+
+					invisible.splice(idx,1);
 				} else {
-					vm.invisible.push(node._id);
+					invisible.push(node._id);
 				}
 
-				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				if ((idx = visible.indexOf(node._id)) !== -1)
 				{
-					vm.visible.splice(idx, 1);
+					visible.splice(idx, 1);
 				}
 			} else {
-				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				if ((idx = visible.indexOf(node._id)) !== -1)
 				{
-					vm.visible.splice(idx,1);
+
+					visible.splice(idx,1);
 				} else {
-					vm.visible.push(node._id);
+					visible.push(node._id);
 				}
 
-				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				if ((idx = invisible.indexOf(node._id)) !== -1)
 				{
-					vm.invisible.splice(idx, 1);
+					invisible.splice(idx, 1);
 				}
 
 			}
 
 			node.toggleState = visibility;
 		};
+
+		/*
+		* See if id in each ids is a sub string of path
+		*/
+		function matchPath(ids, path){
+
+			for(var i=0; i<ids.length; i++){
+				if(path.indexOf(ids[i]) !== -1){
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		/**
 		 * Expand a node to show its children.
@@ -207,14 +247,31 @@
 				}
 			}
 
+			var _ids = [_id];
 			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
 					if (vm.nodesToShow[index].expanded) {
 						// Collapse
+
+						//if the target itself contains subProjectTree
+						if(vm.nodesToShow[index].hasSubProjTree){
+							//node containing sub project tree must have only one child
+							var subProjectNode = vm.subTreesById[vm.nodesToShow[index].children[0]._id];
+							_ids.push(subProjectNode._id);
+						}
+
 						while (!endOfSplice) {
-							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
+							
+							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
+
+								if(vm.nodesToShow[index + 1].hasSubProjTree){
+									var subProjectNode = vm.subTreesById[vm.nodesToShow[index + 1].children[0]._id];
+									_ids.push(subProjectNode._id);
+								}
+
 								vm.nodesToShow.splice(index + 1, 1);
+
 							} else {
 								endOfSplice = true;
 							}
@@ -234,28 +291,19 @@
 							if ((vm.nodesToShow[index].level === 0) &&
 								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
 								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
+
 								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
+
 							}
 							else {
 								// Normal tree node
 								vm.nodesToShow[index].children[i].expanded = false;
 
-								/*
-								 // If the child node was not clicked hidden set its toggle state to visible
-								 if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
-								 vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-								 }
-								 */
 								// If the child node does not have a toggleState set it to visible
 								if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
 									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
 								}
-								// A node should relect the state of any path relative
-								else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
-									(vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
-									pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
-									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-								}
+
 							}
 
 							// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
@@ -361,12 +409,13 @@
 			if (level < (path.length - 2)) {
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
-				vm.topIndex = selectedIndex - 2;
 				setContentHeight(vm.nodesToShow);
-				// Redraw the tree
-				$timeout(function () {
-					vm.showNodes = true;
+				vm.showNodes = true;
+				$timeout(function() {
+					// Redraw the tree
+					vm.topIndex = selectedIndex - 2;
 					// Resize virtual repeater
+
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
 				});
@@ -381,7 +430,14 @@
 
 					if (objectID)
 					{
-						var path = vm.idToPath[objectID].split("__");
+						var path;
+						if(vm.idToPath[objectID]){
+							path = vm.idToPath[objectID].split("__");
+						} else {
+							path = vm.subProjIdToPath[objectID].split("__");
+							var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
+							path = parentPath.concat(path);
+						}
 
 						initNodesToShow();
 						expandToSelection(path, 0);
@@ -407,42 +463,77 @@
 			else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 				multiSelectMode = event.value;
 			}
+			else if (event.type === EventService.EVENT.TREE_READY){
+				/*
+				 * Get all the tree nodes
+				 */
+
+				vm.allNodes = [];
+				vm.allNodes.push(event.value.nodes);
+				vm.nodes = vm.allNodes;
+				vm.showTree = true;
+				vm.showProgress = false;
+				vm.subTreesById = event.value.subTreesById;
+				vm.idToPath = event.value.idToPath;
+				vm.subProjIdToPath = event.value.subProjIdToPath;
+
+				initNodesToShow();
+				expandFirstNode();
+				setupInfiniteScroll();
+				setContentHeight(vm.nodesToShow);
+			}
 		});
 
 		vm.toggleTreeNode = function (node) {
 			var i, j,
 				nodesLength,
 				path,
-				parent = null,
+				hasParent,
+				lastParent = node,
 				nodeToggleState = "visible",
 				numInvisible = 0,
 				numParentInvisible = 0;
 
 			vm.toggledNode = node;
 
+			traverseNode(node, function(myNode){
+				if(myNode === node){
+					//toggle yourself
+					vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
+					nodeToggleState = node.toggleState;
+					updateClickedHidden(node);
+					updateClickedShown(node);
+				} else {
+					//toggle children
+					vm.setToggleState(myNode, nodeToggleState);
+				}
+				
+			});
+			
+			
+			//a__b .. c__d
+			//toggle parent
 			path = node.path.split("__");
 			path.splice(path.length - 1, 1);
 
 			for (i = 0, nodesLength = vm.nodesToShow.length; i < nodesLength; i += 1) {
-				// Set node toggle state
-				if (vm.nodesToShow[i]._id === node._id) {
-					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
-					nodeToggleState = vm.nodesToShow[i].toggleState;
-					updateClickedHidden(vm.nodesToShow[i]);
-					updateClickedShown(vm.nodesToShow[i]);
-				}
-				// Set children to node toggle state
-				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
-					vm.setToggleState(vm.nodesToShow[i], nodeToggleState);
-				}
-				// Get node parent
+			// 	// Get node parent
 				if (vm.nodesToShow[i]._id === path[path.length - 1]) {
-					parent = vm.nodesToShow[i];
+
+					lastParent = vm.nodesToShow[i];
+					hasParent = true;
+
+				} else if(lastParent.parent){
+
+					//Get node parent and reconstruct the path in case it is a fed project
+					lastParent = lastParent.parent;
+					path = lastParent.path.split("__").concat(path);
+					hasParent = true;
 				}
 			}
 
 			// Set the toggle state of the nodes above
-			if (parent !== null) {
+			if (hasParent) {
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
@@ -458,16 +549,20 @@
 								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								vm.setToggleState(vm.nodesToShow[j], "invisible");
+								//vm.setToggleState(vm.nodesToShow[j], "invisible");
+								vm.nodesToShow[j].toggleState = 'invisible';
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
+								//vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
+								vm.nodesToShow[j].toggleState = 'parentOfInvisible';
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
+								//vm.nodesToShow[j].toggleState = 'visible';
 							}
 						}
 					}
 				}
 			}
+
 			toggleNode(node);
 		};
 
@@ -476,52 +571,58 @@
 			var pathArr = [];
 			var idx = 0, i = 0;
 
-			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node.path) !== -1)) {
-					pathArr = vm.idToPath[obj].split("__");
-					childNodes.push(pathArr[pathArr.length - 1]);
-				}
-			}
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
+
+			traverseNodeAndPushId(node, childNodes);
 
 			if (node.toggleState === "invisible")
 			{
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (vm.invisible.indexOf(childNodes[i]) === -1)
+					if (invisible.indexOf(childNodes[i]) === -1)
 					{
-						vm.invisible.push(childNodes[i]);
+						invisible.push(childNodes[i]);
 					}
 
-					idx = vm.visible.indexOf(childNodes[i]);
+					idx = visible.indexOf(childNodes[i]);
 					if (idx !== -1)
 					{
-						vm.visible.splice(idx,1);
+						visible.splice(idx,1);
 					}
 				}
 			} else {
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (vm.visible.indexOf(childNodes[i]) === -1)
+					if (visible.indexOf(childNodes[i]) === -1)
 					{
-						vm.visible.push(childNodes[i]);
+						visible.push(childNodes[i]);
 					}
 
-					idx = vm.invisible.indexOf(childNodes[i]);
+					idx = invisible.indexOf(childNodes[i]);
 					if (idx !== -1)
 					{
-						vm.invisible.splice(idx,1);
+						invisible.splice(idx,1);
 					}
 				}
 			}
 
-			EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
-				source: "tree",
-				account: node.account,
-				project: node.project,
-				name: node.name,
-				visible_ids: vm.visible,
-				invisible_ids: vm.invisible
-			});
+			for (var key in vm.visible){
+
+				var vals = key.split('@');
+				var account = vals[0];
+				var project = vals[1];
+
+				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
+					source: "tree",
+					account: account,
+					project: project,
+					name: node.name,
+					visible_ids: getVisibleArray(account, project),
+					invisible_ids: getInvisibleArray(account, project)
+				});
+			}
+
 		};
 
 		function setupInfiniteScroll() {
@@ -627,13 +728,8 @@
 			}
 			else {
 				var map = [];
-				var pathArr = [];
-				for (var obj in vm.idToPath) {
-					if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
-						pathArr = vm.idToPath[obj].split("__");
-						map.push(pathArr[pathArr.length - 1]);
-					}
-				}
+
+				traverseNodeAndPushId(node, map);
 
 				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {

@@ -26,7 +26,25 @@
 	function TreeService($http, $q, EventService, serverConfig) {
 		var ts = this;
 
+		var genIdToObjRef = function(tree, map){
+			
+			if(!map){
+				map = {};
+			}
+
+			map[tree._id] = tree;
+			
+			tree.children && tree.children.forEach(function(child){
+				genIdToObjRef(child, map);
+			});
+
+			return map;
+		};
+
 		var init = function(account, project, branch, revision) {
+
+			console.log('tree init');
+
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
@@ -40,14 +58,51 @@
 			}
 
 			var deferred = $q.defer(),
-				url = ts.baseURL + "fulltree.json";
+				url = ts.baseURL + "fulltree_new.json";
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
-					deferred.resolve(json.data);
+					var mainTree = JSON.parse(json.data.mainTree);
+					var subTrees = json.data.subTrees;
+					var subTreesById = {};
+
+					if(subTrees){
+
+						// idToObjRef only needed if project is a fed project. i.e. subTrees.length > 0
+						var idToObjRef = genIdToObjRef(mainTree.nodes);
+						mainTree.subProjIdToPath = {};
+
+						subTrees.forEach(function(tree){
+							//attach the sub tree back on main tree
+							if(idToObjRef[tree._id]){
+
+								if(tree.buf){
+									var obj = JSON.parse(tree.buf);
+
+									var subTree = obj.nodes;
+									subTree.parent = idToObjRef[tree._id];
+									
+									angular.extend(mainTree.subProjIdToPath, obj.idToPath);
+
+									idToObjRef[tree._id].children = [subTree];
+									idToObjRef[tree._id].hasSubProjTree = true;
+									subTreesById[subTree._id] = subTree;
+								}
+
+								if(tree.status){
+									idToObjRef[tree._id].status = tree.status;
+								}
+							}
+						});
+
+						mainTree.subTreesById = subTreesById;
+					}
+
+					deferred.resolve(mainTree);
 				});
 
 			return deferred.promise;
+
 		};
 
 		var search = function(searchString) {

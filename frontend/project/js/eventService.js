@@ -42,6 +42,7 @@
 			PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
 			PANEL_CONTENT_TOGGLED: "EVENT_PANEL_CONTENT_TOGGLED",
 			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
+			SET_SUBPROJECT_TRANS_INFO: "EVENT_SET_SUBPROJECT_TRANS_INFO",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
 			SHOW_PROJECTS: "EVENT_SHOW_PROJECTS",
 			SHOW_QR_CODE_READER: "EVENT_SHOW_QR_CODE_READER",
@@ -65,6 +66,7 @@
 			// Ready signals
 			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
 			REVISIONS_LIST_READY: "EVENT_REVISIONS_LIST_READY",
+			TREE_READY: "EVENT_TREE_READY",
 
 			// User logs in and out
 			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN",
@@ -93,7 +95,8 @@
 				{
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
-					console.log("SEND: " + type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type);
+					console.log(value);
 					currentEvent = {type: type, value: value};
 				}
 			});

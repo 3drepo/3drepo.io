@@ -122,7 +122,7 @@
 				showPins();
 			}
 
-			// Keys down - check for down followed by up
+/*			// Keys down - check for down followed by up
 			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
 				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
@@ -174,7 +174,7 @@
 					rightArrowDown = false;
 					self.editIssue(selectedIssue);
 				}
-			}
+			}*/
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
@@ -191,7 +191,13 @@
 					self.issueDisplay.showSubProjectIssues = showSubProjectIssues;
 				}
 				else if (this.menuOption.value === "print") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+					var ids = [];
+					
+					this.issuesToShow.forEach(function(issue){
+						ids.push(issue._id);
+					});
+
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html?ids=" + ids.join(',')), "_blank");
 				}
 				else if (this.menuOption.value === "exportBCF") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");

@@ -20,10 +20,8 @@ module.exports = function(grunt) {
 				},
 
 				src: [
-					'frontend/utils/js/*.js',
 					'frontend/project/js/threed/viewerutil.js',
 					'frontend/project/js/threed/*.js',
-					'frontend/project/js/eventService.js',
 					'frontend/**/*.js'
 				],
 
