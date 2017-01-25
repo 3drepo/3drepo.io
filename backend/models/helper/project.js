@@ -1384,6 +1384,6 @@ module.exports = {
 	uploadFile,
 	importProject,
 	removeProject,
-	getProjectPermission
+	getProjectPermission,
 	newGetFullTree
 };
