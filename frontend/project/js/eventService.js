@@ -66,6 +66,7 @@
 			// Ready signals
 			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
 			REVISIONS_LIST_READY: "EVENT_REVISIONS_LIST_READY",
+			TREE_READY: "EVENT_TREE_READY",
 
 			// User logs in and out
 			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN",
@@ -94,7 +95,8 @@
 				{
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
-					console.log("SEND: " + type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type);
+					console.log(value);
 					currentEvent = {type: type, value: value};
 				}
 			});
