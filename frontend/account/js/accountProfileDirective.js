@@ -62,7 +62,7 @@
 				lastName: vm.lastNameNew
 			});
 			promise.then(function (response) {
-				console.log(response);
+
 				if (response.statusText === "OK") {
 					vm.infoSaveInfo = "Saved";
 					vm.firstName = vm.firstNameNew;
@@ -70,7 +70,7 @@
 					vm.email = vm.emailNew;
 
 				} else {
-					vm.infoSaveInfo = "Error saving info";
+					vm.infoSaveInfo = response.data.message;
 				}
 			});
 		};
@@ -88,7 +88,7 @@
 				if (response.statusText === "OK") {
 					vm.passwordSaveInfo = "Saved";
 				} else {
-					vm.passwordSaveInfo = "Error saving password";
+					vm.passwordSaveInfo = response.data.message;
 				}
 			});
 		};

@@ -1,4 +1,5 @@
 /**
+ *
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -63,7 +64,7 @@
 			dialogCloseToId;
 
 		// Init
-		vm.selectedFile = null;
+		vm.projectToUpload = null;
 		vm.project.name = vm.project.project;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -127,7 +128,7 @@
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 
-			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
+			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name) && (vm.uploadedFile.account === vm.account)) {
 
 				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
@@ -144,9 +145,11 @@
 				
 				if(names.length === 1){
 					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
 					vm.uploadErrorMessage = 'File format not supported';
+					vm.projectToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else {
 					vm.uploadButtonDisabled = false;
@@ -165,7 +168,7 @@
 					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)){
 						vm.tag = null;
 						vm.desc = null;
-						vm.selectedFile = null;
+						vm.projectToUpload = null;
 						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					}
 				}
@@ -191,6 +194,7 @@
 
 				case "upload":
 					vm.uploadErrorMessage = null;
+					vm.projectToUpload = null;
 					vm.tag = null;
 					vm.desc = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
@@ -242,7 +246,7 @@
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-			vm.onUploadFile({project: vm.project});
+			vm.onUploadFile({project: vm.project, account: vm.account});
 		};
 
 
@@ -267,7 +271,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, file: vm.projectToUpload};
+						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload};
 						vm.closeDialog();
 					}
 				});
@@ -368,7 +372,9 @@
 			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
-					if (data.status === "ok") {
+					if (data.status === "ok"
+						|| (data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_TEXTURES') 
+						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
 						vm.project.timestamp = new Date();
 						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 						vm.fileUploadInfo = "Uploaded";

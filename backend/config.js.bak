@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.7.4";
+	const VERSION="1.7.8";
 
 	let config = require("app-config")
 		.config;
@@ -76,12 +76,12 @@
 
 			// self variable will be filled in by frontend
 			roundRobin.apiUrl = function(type, path) {
-				let typeFunctions = self.apiUrls[type];
-				let functionIndex = self.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+				let typeFunctions = this.apiUrls[type];
+				let functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
-				self.apiUrlCounter[type] += 1;
+				this.apiUrlCounter[type] += 1;
 
-				return self.apiUrls[type][functionIndex](path);
+				return this.apiUrls[type][functionIndex](path);
 			};
 
 			return roundRobin;
@@ -121,7 +121,7 @@
 			serverObject.location_url = new Function("path", "return '" + serverObject.url + "/' + path;");
 		}
 
-		serverObject.location_url = serverObject.location_url.toString();
+		//serverObject.location_url = serverObject.location_url.toString();
 	};
 
 	// Check for hostname and ip here
@@ -135,6 +135,8 @@
 
 	config.using_ssl = config.hasOwnProperty("ssl");
 	config.port = coalesce(config.port, config.using_ssl ? default_https_port : default_http_port);
+	
+	config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
 	config.cookie = coalesce(config.cookie, {});
 	config.cookie.secret = coalesce(config.cookie.secret, config.default_cookie_secret);

@@ -67,7 +67,7 @@
             }
 
             if (requestChange) {
-                if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
+                if (vm.username && vm.email) {
                     vm.messageColor = messageColour;
                     vm.message = "Please wait...";
                     vm.showProgress = true;
@@ -81,13 +81,13 @@
                         }
                         else {
                             vm.messageColor = messageErrorColour;
-                            vm.message = "Error with with one or more fields";
+                            vm.message = response.data.message;
                         }
                     });
                 }
                 else {
                     vm.messageColor = messageErrorColour;
-                    vm.message = "All fields must be filled";
+                    vm.message = "Missing username or email";
                 }
             }
         };

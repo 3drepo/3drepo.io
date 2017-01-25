@@ -335,7 +335,7 @@
 
 		obj.hexToRgb = function(hex) {
 			// If nothing comes end, then send nothing out.
-			if (typeof hex === "undefined") {
+			if (!hex) {
 				return undefined;
 			}
 
@@ -468,7 +468,9 @@
 				case "assigned_roles":
 
 					comment.action.propertyText = 'Assigned';
-					
+					comment.action.from = comment.action.from.toString();
+					comment.action.to= comment.action.to.toString();	
+							
 					break;
 
 				case "topic_type":

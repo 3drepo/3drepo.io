@@ -18,9 +18,9 @@
 angular.module('3drepo')
 .factory('NotificationService', NotificationService);
 
-NotificationService.$inject = ["serverConfig"];
+NotificationService.$inject = ["serverConfig", "$injector"];
 
-function NotificationService(serverConfig){
+function NotificationService(serverConfig, $injector){
 	"use strict";
 
 	if(!serverConfig.chatHost || !serverConfig.chatPath){
@@ -30,8 +30,26 @@ function NotificationService(serverConfig){
 	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath, transports: ['websocket']});
 	var joined = [];
 
+	function addSocketIdToHeader(socketId){
+		
+		var $httpProvider = $injector.get('$http');
+
+		$httpProvider.defaults.headers.post = $httpProvider.defaults.headers.post || {};
+		$httpProvider.defaults.headers.put = $httpProvider.defaults.headers.put || {};
+		$httpProvider.defaults.headers.delete = $httpProvider.defaults.headers.delete || {};
+
+		$httpProvider.defaults.headers.post['x-socket-id'] = socketId;
+		$httpProvider.defaults.headers.put['x-socket-id'] = socketId;
+		$httpProvider.defaults.headers.delete['x-socket-id'] = socketId;
+	}
+
+	socket.on('connect', function(){
+		addSocketIdToHeader(socket.id);
+	});
+
 	socket.on('reconnect', function(){
 		console.log('Rejoining all rooms on reconnect');
+		addSocketIdToHeader(socket.id);
 
 		var lastJoined = joined.slice(0);
 		joined = [];

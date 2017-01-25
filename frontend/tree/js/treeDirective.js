@@ -121,7 +121,7 @@
 		 * Show the first set of children using the expand function but deselect the child used for this
 		 */
 		function expandFirstNode () {
-			expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0);
+			expandToSelection(vm.nodesToShow[0].children[0].path.split("__"), 0, true);
 			vm.nodesToShow[0].children[0].selected = false;
 		}
 
@@ -343,7 +343,7 @@
 		 * @param path
 		 * @param level
 		 */
-		function expandToSelection(path, level) {
+		function expandToSelection(path, level, noHighlight) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			// Force a redraw of the tree to get round the display problem
@@ -369,7 +369,7 @@
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								vm.nodesToShow[i].children[j].selected = true;
 							}
-							else {
+							else if(!noHighlight){
 								vm.selectNode(vm.nodesToShow[i]);
 							}
 						}
@@ -409,12 +409,13 @@
 			if (level < (path.length - 2)) {
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
-				vm.topIndex = selectedIndex - 2;
 				setContentHeight(vm.nodesToShow);
-				// Redraw the tree
-				$timeout(function () {
-					vm.showNodes = true;
+				vm.showNodes = true;
+				$timeout(function() {
+					// Redraw the tree
+					vm.topIndex = selectedIndex - 2;
 					// Resize virtual repeater
+
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
 				});

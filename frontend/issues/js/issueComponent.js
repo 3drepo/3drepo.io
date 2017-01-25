@@ -53,7 +53,6 @@
 			currentAction = null,
 			editingCommentIndex = null,
 			commentViewpoint,
-			issueSelectedObjects = null,
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
@@ -85,12 +84,15 @@
 		];
 
 		this.actions = {
-			screen_shot: {icon: "camera_alt", label: "Screen shot", color: "", hidden: false},
-			pin: {icon: "place", label: "Pin", color: "", hidden: this.data},
-			multi: {icon: "view_comfy", label: "Multi", color: "", hidden: this.data}
+			screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: false, selected: false},
+			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false},
+			multi: {icon: "view_comfy", label: "Save the selected objects with the issue", hidden: this.data, selected: false}
 		};
 
+
 		this.notificationStarted = false;
+
+		//console.log('issue::selectedObjects', this.selectedObjects);
 
 		function convertCommentTopicType(){
 			self.issueData && self.issueData.comments.forEach(function(comment){
@@ -101,6 +103,10 @@
 		}
 
 		function setCanUpdateStatus(issueData){
+			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.projectSettings.permissions)){
+				return self.canUpdateStatus = false;
+			}
+
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
 				self.userRoles.find(function(role){
 					return role === issueData.assigned_roles[0];
@@ -113,10 +119,11 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
-			console.log(this.data);
+			//console.log('issueComp on changes', changes);
 
 			if(changes.hasOwnProperty('projectSettings')){
-				this.topic_types = this.projectSettings.topicTypes;
+				this.topic_types = this.projectSettings.properties.topicTypes;
+				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.projectSettings.permissions);
 				//convert comment topic_types
 				convertCommentTopicType();
 			}
@@ -148,6 +155,10 @@
 								break;
 							}
 						}
+					}
+
+					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.projectSettings.permissions)){
+						this.canUpdate = false;
 					}
 
 					setCanUpdateStatus(this.issueData);
@@ -187,10 +198,10 @@
 			}
 
 			// Selected objects
-			if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
-				(currentAction !== null) && (currentAction === "multi")) {
-				issueSelectedObjects = this.selectedObjects;
-			}
+			// if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
+			// 	(currentAction !== null) && (currentAction === "multi")) {
+			// 	issueSelectedObjects = this.selectedObjects;
+			// }
 
 			// Event
 			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
@@ -206,18 +217,18 @@
 					issueSelectedObjects = null;
 				}
 				*/
-				if ((currentAction === "multi") &&
-					(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
-					issueSelectedObjects = null;
-				}
+				// if ((currentAction === "multi") &&
+				// 	(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
+				// 	issueSelectedObjects = null;
+				// }
 			}
 
 			// Keys down
-			if (changes.hasOwnProperty("keysDown")) {
+/*			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
-			}
+			}*/
 
 			// Role
 			if (changes.hasOwnProperty("availableRoles")) {
@@ -247,10 +258,10 @@
 				this.issueData.comments[editingCommentIndex].editing = false;
 			}
 			// Get out of pin drop mode
-			if ((currentAction !== null) && (currentAction === "pin")) {
+			//if ((currentAction !== null) && (currentAction === "pin")) {
 				this.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
 				this.clearPin = true;
-			}
+			//}
 
 			//unsubscribe on destroy
 			if(self.data){
@@ -259,8 +270,7 @@
 				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
 				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 			}
-
-
+			
 		};
 
 		/**
@@ -271,9 +281,9 @@
 
 			// If there are selected objects register them and set the current action to multi
 			if (!this.data && this.selectedObjects) {
-				issueSelectedObjects = this.selectedObjects;
-				currentAction = "multi";
-				this.actions[currentAction].color = highlightBackground;
+				//issueSelectedObjects = this.selectedObjects;
+				//currentAction = "multi";
+				this.actions.multi.selected = true;
 			}
 
 			// Set up statuses
@@ -329,12 +339,13 @@
 
 						// Update last but one comment in case it was "sealed"
 						if (self.issueData.comments.length > 1) {
-							comment = response.data.issue.comments[response.data.issue.comments.length - 2];
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							if (comment.action) {
-								IssuesService.convertActionCommentToText(comment, self.topic_types);
-							}
-							self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+							// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							// if (comment.action) {
+							// 	IssuesService.convertActionCommentToText(comment, self.topic_types);
+							// }
+							//self.issueData.comments[self.issueData.comments.length - 2] = comment;
+							self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
 						}
 
 						// The status could have changed due to assigning role
@@ -342,7 +353,7 @@
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 						setCanUpdateStatus(self.issueData);
-
+						commentAreaScrollToBottom();
 					});
 			}
 		};
@@ -350,10 +361,10 @@
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
-		/**
-		 * Submit - new issue or comment or update issue
-		 */
 		this.submit = function () {
+			
+			this.saving = true;
+
 			if (self.data) {
 				saveComment();
 			}
@@ -411,61 +422,102 @@
 		 */
 		this.doAction = function (event, action) {
 			// Handle previous action
-			if (currentAction === null) {
-				currentAction = action;
-			}
-			else if (currentAction === action) {
-				switch (action) {
-					case "multi":
-						issueSelectedObjects = this.selectedObjects;
-						break;
-					case "pin":
-						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-						break;
-				}
-				this.actions[currentAction].color = "";
-				currentAction = null;
-			}
-			else {
-				switch (action) {
-					case "multi":
-						issueSelectedObjects = this.selectedObjects;
-						break;
-					case "pin":
-						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-						break;
-				}
-				this.actions[currentAction].color = "";
-				currentAction = action;
-			}
+			this.actions[action].selected = !this.actions[action].selected;
+			var selected = this.actions[action].selected;
 
-			// New action
-			if (currentAction !== null) {
-				this.actions[currentAction].color = highlightBackground;
+			switch(action){
+				case "pin":
 
-				switch (currentAction) {
-					case "screen_shot":
-						delete this.screenShot; // Remove any clicked on screen shot
-						$mdDialog.show({
-							controller: ScreenShotDialogController,
-							controllerAs: "vm",
-							templateUrl: "issueScreenShotDialog.html",
-							targetEvent: event
-						});
-						break;
-					case "multi":
-						if (issueSelectedObjects !== null) {
-							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
-						}
-						else {
-							issueSelectedObjects = this.selectedObjects;
-						}
-						break;
-					case "pin":
+					if(selected){
 						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
-						break;
-				}
+					} else {
+						self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+					}
+					break;
+
+				case "screen_shot":
+
+					// There is no concept of selected in screenshot as there will be a popup once you click the button
+					this.actions[action].selected = false;
+
+					delete this.screenShot; // Remove any clicked on screen shot
+					$mdDialog.show({
+						controller: ScreenShotDialogController,
+						controllerAs: "vm",
+						templateUrl: "issueScreenShotDialog.html",
+						targetEvent: event
+					});
+					break;
+
+
+				case "multi":
+
+					//clear selection if not selected to avoid confusion
+					if(!selected){
+						// Remove highlight from any multi objects
+						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+						// clear selection
+						EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+					}
+
+
 			}
+
+			// if (currentAction === null) {
+			// 	currentAction = action;
+			// }
+			// else if (currentAction === action) {
+			// 	switch (action) {
+			// 		case "multi":
+			// 			issueSelectedObjects = this.selectedObjects;
+			// 			break;
+			// 		case "pin":
+			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+			// 			break;
+			// 	}
+			// 	this.actions[currentAction].color = "";
+			// 	currentAction = null;
+			// }
+			// else {
+			// 	switch (action) {
+			// 		case "multi":
+			// 			issueSelectedObjects = this.selectedObjects;
+			// 			break;
+			// 		case "pin":
+			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+			// 			break;
+			// 	}
+			// 	this.actions[currentAction].color = "";
+			// 	currentAction = action;
+			// }
+
+			// // New action
+			// if (currentAction !== null) {
+			// 	this.actions[currentAction].color = highlightBackground;
+
+			// 	switch (currentAction) {
+			// 		case "screen_shot":
+			// 			delete this.screenShot; // Remove any clicked on screen shot
+			// 			$mdDialog.show({
+			// 				controller: ScreenShotDialogController,
+			// 				controllerAs: "vm",
+			// 				templateUrl: "issueScreenShotDialog.html",
+			// 				targetEvent: event
+			// 			});
+			// 			break;
+			// 		case "multi":
+			// 			if (issueSelectedObjects !== null) {
+			// 				this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+			// 			}
+			// 			else {
+			// 				issueSelectedObjects = this.selectedObjects;
+			// 			}
+			// 			break;
+			// 		case "pin":
+			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
+			// 			break;
+			// 	}
+			// }
 		};
 
 		/**
@@ -480,8 +532,12 @@
 		 * Toggle showing of extra inputs
 		 */
 		this.toggleShowAdditional = function () {
-			this.showAdditional = !this.showAdditional;
-			setContentHeight();
+			if(!textInputHasFocus)
+			{
+				//don't toggle if the user is trying to type
+				this.showAdditional = !this.showAdditional;
+				setContentHeight();
+			}
 		};
 
 		/**
@@ -541,14 +597,25 @@
 				screenShotPromise = $q.defer(),
 				data;
 
-			// Get the viewpoint
-			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			if(commentViewpoint)
+			{
+				console.log("has commentViewpoint");
+				console.log(commentViewpoint);
+				viewpointPromise.resolve(commentViewpoint);
+			}
+			else
+			{
+				// Get the viewpoint
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+			}
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
-					if (issueSelectedObjects !== null) {
+					if (self.actions.multi.selected && self.selectedObjects) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
+						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							console.log("saving issue with viewpoint: " );
+							console.log(viewpoint);
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
 					}
@@ -560,9 +627,9 @@
 					// Get a screen shot if not already created
 					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 					screenShotPromise.promise.then(function (screenShot) {
-						if (issueSelectedObjects !== null) {
+						if (self.actions.multi.selected && self.selectedObjects) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], objects: issueSelectedObjects};
+							data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -639,6 +706,7 @@
 					setContentHeight();
 
 					startNotification();
+					self.saving = false;
 			});
 		}
 
@@ -652,6 +720,7 @@
 			if (angular.isDefined(self.commentThumbnail)) {
 				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
 					.then(function (response) {
+						self.saving = false;
 						afterNewComment(response.data.issue);
 					});
 			}
@@ -660,6 +729,7 @@
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
+							self.saving = false;
 							afterNewComment(response.data.issue);
 						});
 				});
@@ -779,15 +849,19 @@
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
-				viewpointPromise.promise.then(function (viewpoint) {
-					commentViewpoint = viewpoint;
-					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
-				});
+
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
+				
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			}
+
+			viewpointPromise.promise.then(function (viewpoint) {
+				commentViewpoint = viewpoint;
+				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+			});
 
 			setContentHeight();
 		};
@@ -802,8 +876,8 @@
 			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
-				self.actions[currentAction].color = "";
-				currentAction = null;
+				// self.actions[currentAction].color = "";
+				// currentAction = null;
 			};
 		}
 

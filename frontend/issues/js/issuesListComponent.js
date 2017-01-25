@@ -41,7 +41,8 @@
 					importBcf: "&",
 					selectedIssue: "<",
 					userRoles: "<",
-					issueDisplay: "<"
+					issueDisplay: "<",
+					availableRoles: "<"
 				}
 			}
 		);
@@ -59,12 +60,14 @@
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false,
-			showSubProjectIssues = false;
+			showSubProjectIssues = false,
+			excludeRoles = [];
 
 		// Init
 		this.UtilsService = UtilsService;
 		this.IssuesService = IssuesService;
 		this.setFocus = setFocus;
+
 
 		/**
 		 * Monitor changes to parameters
@@ -100,7 +103,9 @@
 					if (self.issueDisplay.sortOldestFirst) {
 						sortOldestFirst = self.issueDisplay.sortOldestFirst;
 					}
-
+					if (self.issueDisplay.showSubProjectIssues){
+						showSubProjectIssues = self.issueDisplay.showSubProjectIssues;
+					}
 					setupIssuesToShow();
 					showPins();
 				}
@@ -117,7 +122,7 @@
 				showPins();
 			}
 
-			// Keys down - check for down followed by up
+/*			// Keys down - check for down followed by up
 			if (changes.hasOwnProperty("keysDown")) {
 				// Up/Down arrow
 				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
@@ -169,7 +174,7 @@
 					rightArrowDown = false;
 					self.editIssue(selectedIssue);
 				}
-			}
+			}*/
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
@@ -183,9 +188,16 @@
 				}
 				else if (this.menuOption.value === "showSubProjects") {
 					showSubProjectIssues = !showSubProjectIssues;
+					self.issueDisplay.showSubProjectIssues = showSubProjectIssues;
 				}
 				else if (this.menuOption.value === "print") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+					var ids = [];
+					
+					this.issuesToShow.forEach(function(issue){
+						ids.push(issue._id);
+					});
+
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html?ids=" + ids.join(',')), "_blank");
 				}
 				else if (this.menuOption.value === "exportBCF") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
@@ -200,6 +212,21 @@
 					file.addEventListener("change", function () {
 						self.importBcf({file: file.files[0]});
 					});
+				} else if(this.menuOption.value === "filterRole"){
+					
+					var index = excludeRoles.indexOf(this.menuOption.role);
+
+					if(this.menuOption.selected){
+						if(index !== -1){
+							excludeRoles.splice(index, 1);
+						}
+					} else {
+						if(index === -1){
+							excludeRoles.push(this.menuOption.role);
+						}
+					}
+
+					
 				}
 				setupIssuesToShow();
 				showPins();
@@ -355,6 +382,9 @@
 			// Remove highlight from any multi objects
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 
+			// clear selection
+			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
@@ -475,6 +505,11 @@
 				// Sub projects
 				self.issuesToShow = self.issuesToShow.filter(function (issue) {
 					return showSubProjectIssues ? true : (issue.project === self.project);
+				});
+
+				//Roles Filter
+				self.issuesToShow = self.issuesToShow.filter(function(issue){
+					return excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			}
 

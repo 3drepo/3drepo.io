@@ -158,14 +158,14 @@
 				});
 			});
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
-				function(json, status) {
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: v.account,
-						project: v.project,
-						settings: json.properties
-				});
-			});
+			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
+			// 	function(json, status) {
+			// 		EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+			// 			account: v.account,
+			// 			project: v.project,
+			// 			settings: json.properties
+			// 	});
+			// });
 
 		};
 
@@ -201,6 +201,7 @@
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
+								console.log('viewer project settings ready');
 								v.viewer.updateSettings(event.value.settings);
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
@@ -241,7 +242,7 @@
 								event.value.clipDirection ? event.value.clipDirection : -1,
 								event.value.account, event.value.project);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
+							v.viewer.moveClippingPlane(event.value.axis, event.value.distance);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {

@@ -56,6 +56,41 @@
 		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
+		// Warn when user click refresh
+		var refreshHandler = function (e){
+			var confirmationMessage = "This will reload the whole model, are you sure?";
+
+			e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+			return confirmationMessage;              // Gecko, WebKit, Chrome <34
+		}
+
+		window.addEventListener("beforeunload", refreshHandler);
+
+
+		// create a fake state to prevent the back button
+		history.pushState(null, null, document.URL);
+
+		// popup when user click back button
+		var popStateHandler = function () {
+			// the fake state has already been popped by user at this moment
+
+			if(confirm('It will go back to project listing page, are you sure?')){
+				// pop one more state if user actually wants to go back
+				history.go(-1);
+			} else {
+				// recreate a fake state
+				history.pushState(null, null, document.URL);
+			}
+		};
+
+		//listen for user clicking the back button
+		window.addEventListener('popstate', popStateHandler);
+
+		$scope.$on('$destroy', function(){
+			window.removeEventListener("beforeunload", refreshHandler);
+			window.removeEventListener('popstate', popStateHandler);
+		});
+
 		/*
 		 * Get the project element
 		 */
@@ -77,21 +112,21 @@
 					noToggle: true,
 					icon: "fa-print"
 				},
-				{
-					value: "importBCF",
-					label: "Import BCF",
-					selected: false,
-					noToggle: true,
-					icon: "fa-cloud-upload"
-				},
-				{
-					value: "exportBCF",
-					label: "Export BCF",
-					selected: false,
-					noToggle: true,
-					icon: "fa-cloud-download",
-					divider: true
-				},
+				// {
+				// 	value: "importBCF",
+				// 	label: "Import BCF",
+				// 	selected: false,
+				// 	noToggle: true,
+				// 	icon: "fa-cloud-upload"
+				// },
+				// {
+				// 	value: "exportBCF",
+				// 	label: "Export BCF",
+				// 	selected: false,
+				// 	noToggle: true,
+				// 	icon: "fa-cloud-download",
+				// 	divider: true
+				// },
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
@@ -116,7 +151,10 @@
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+				},{
+					upperDivider: true,
+					label: "Created by: "
 				}
 			],
 			minHeight: 260,
@@ -227,12 +265,24 @@
 				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings;
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: data.account,
-						project: data.project,
-						settings: data.settings
-					});
+					vm.settings = data;
+
+					var index = -1;
+
+					if(!data.federate){
+						panelCard.left[issuesCardIndex].menu.find(function(item, i){
+							if(item.value === 'showSubProjects'){
+								index = i;
+							}
+
+						});
+
+						if(index !== -1){
+							panelCard.left[issuesCardIndex].menu.splice(index, 1);
+						}
+					}
+
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, data);
 				});
 
 				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){

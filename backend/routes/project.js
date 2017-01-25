@@ -96,11 +96,24 @@ function updateSettings(req, res, next){
 function _getProject(req){
 	'use strict';
 
-	return ProjectSetting.findById(getDbColOptions(req), req.params.project).then(setting => {
-		if(!setting){
+	let setting;
+	return ProjectSetting.findById(getDbColOptions(req), req.params.project).then(_setting => {
+
+		if(!_setting){
 			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
 		} else {
-			return Promise.resolve(setting);
+
+			setting = _setting;
+			setting = setting.toObject();
+			//compute permissions by user role
+			return ProjectHelpers.getProjectPermission( req.session.user.username, req.params.account, req.params.project).then(permissions => {
+				setting.permissions = permissions;
+				return ProjectHelpers.listSubProjects(req.params.account, req.params.project, C.MASTER_BRANCH_NAME);
+			}).then(subProjects => {
+				//console.log('subProjects', subProjects)
+				setting.subProjects = subProjects;
+				return setting;
+			});
 		}
 	});
 }
@@ -112,9 +125,9 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
-		setting = setting.toObject();
+		//setting = setting.toObject();
 		
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subProjects'];
 		let resObj = {};
 
 		whitelist.forEach(key => {

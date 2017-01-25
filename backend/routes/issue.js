@@ -45,6 +45,7 @@ router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, i
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToIssue, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 
 router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
@@ -60,7 +61,7 @@ function storeIssue(req, res, next){
 	//let data = JSON.parse(req.body.data);
 	let data = req.body;
 	data.owner = req.session.user.username;
-	data.sessionId = req.session.id;
+	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 	
 	data.revId = req.params.rid;
 
@@ -94,7 +95,7 @@ function updateIssue(req, res, next){
 	data.requester = req.session.user.username;
 	data.isAdmin = false;
 	data.revId = req.params.rid;
-	data.sessionId = req.session.id;
+	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
@@ -274,11 +275,26 @@ function renderIssuesHTML(req, res, next){
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let findIssue;
+	let noClean = false;
+
+	let projection = {
+		extras: 0,
+		'viewpoints.extras': 0,
+		'viewpoints.scribble': 0,
+		'viewpoints.screenshot.content': 0,
+		'viewpoints.screenshot.resizedContent': 0,
+		'thumbnail.content': 0
+	};
+
+	let ids;
+	if(req.query.ids){
+		ids = req.query.ids.split(',');
+	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master");
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
@@ -305,7 +321,12 @@ function renderIssuesHTML(req, res, next){
 			}
 		}
 
-		res.render("issues.jade", {issues : splitIssues});
+		res.render("issues.jade", {
+			issues : splitIssues, 
+			url: function (path){
+				return config.apiAlgorithm.apiUrl(C.GET_API, path);
+			}
+		});
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -358,7 +379,7 @@ function importBCF(req, res, next){
 		} else {
 
 
-			Issue.importBCF(req.session.id, req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

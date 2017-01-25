@@ -1,13 +1,15 @@
 md-menu(md-position-mode="target-right target", md-offset="2 14")
 	md-button.md-icon-button(aria-label="Menu", ng-click="$mdOpenMenu($event)")
 		md-icon.angular-material-icons more_vert
-	md-menu-content(width="4")
+	md-menu-content(width="4" style="max-height:none")
 		md-menu-item(ng-repeat="menuItem in vm.menu")
 			md-button(ng-click="vm.menuItemSelected($index)")
 				div(layout="column" flex)
+					md-divider(ng-if="menuItem.upperDivider" flex)
 					div(layout="row" flex)
 						md-icon(md-font-icon="{{menuItem.icon}}", class="fa", ng-if="menuItem.noToggle")
-						md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.selected")
+						md-icon(md-font-icon="fa-check", class="fa", ng-if="!menuItem.keepCheckSpace && menuItem.selected")
+						md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.keepCheckSpace" ng-style="{'visibility': menuItem.selected?'visible':'hidden'}")
 						p(flex="") {{menuItem.label}}
 						md-icon(md-font-icon="{{menuItem.firstSelectedIcon}}", class="fa", ng-if="menuItem.firstSelected")
 						md-icon(md-font-icon="{{menuItem.secondSelectedIcon}}", class="fa", ng-if="menuItem.secondSelected")

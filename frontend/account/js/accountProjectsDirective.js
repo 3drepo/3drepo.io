@@ -70,7 +70,6 @@
 			"change",
 			function () {
 				vm.newProjectFileToUpload = this.files[0];
-				vm.newProjectFileSelected = true;
 
 				$scope.$apply();
 			},
@@ -120,8 +119,6 @@
 
 			var newValue = vm.newProjectData;
 
-			vm.showNewProjectErrorMessage = false;
-			vm.newProjectErrorMessage = '';
 
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
@@ -143,14 +140,16 @@
 			if(vm.newProjectFileToUpload){
 				var names = vm.newProjectFileToUpload.name.split('.');
 
+				vm.showNewProjectErrorMessage = false;
+				vm.newProjectErrorMessage = '';
 				if(names.length === 1){
 					vm.showNewProjectErrorMessage = true;
 					vm.newProjectErrorMessage = 'Filename must have extension';
-					vm.newProjectButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1]) === -1) {
+					vm.newProjectFileToUpload = null;
+				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
 					vm.showNewProjectErrorMessage = true;
 					vm.newProjectErrorMessage = 'File format not supported';
-					vm.newProjectButtonDisabled = true;
+					vm.newProjectFileToUpload = null
 				}
 			}
 
@@ -183,7 +182,7 @@
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
-			vm.newProjectFileSelected = false;
+			vm.newProjectFileToUpload = null;
 			vm.newProjectData = {
 				account: accountForProject,
 				type: vm.projectTypes[0]
@@ -389,7 +388,7 @@
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
+					vm.uploadedFile = {account: account, project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
 				});
 			}
 		}
