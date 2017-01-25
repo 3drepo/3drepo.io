@@ -270,8 +270,7 @@
 				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
 				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 			}
-
-
+			
 		};
 
 		/**
