@@ -16,9 +16,9 @@ clip #clipAxislabel {
   margin-top: 20px;
 }
 .clipSlider md-slider {
-  width: 200px;
+  width: 150px;
   padding-right: 20px;
 }
 .clipSlider input {
-  width: 50px;
+  width: 85px;
 }

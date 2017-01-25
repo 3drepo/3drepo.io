@@ -312,13 +312,36 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
 				{
 					self.groupNodes={};
+					var projectTrans = {};					
+					var vol = null;
 					//loaded x3dom file for current project, figure out the groups
 					var groups = document.getElementsByTagName("Group");
 					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
 					{
-						self.groupNodes[groups[gIdx].id] = groups[gIdx];
+						var fullProjectName = groups[gIdx].id;
+						self.groupNodes[fullProjectName] = groups[gIdx];
+						var res = fullProjectName.split("__");
+						if(res.length == 4)
+						{
+							//valid name
+							var accProj = res[2] + "__" + res[3];
+							projectTrans[accProj] = {trans: groups[gIdx]._x3domNode.getCurrentTransform() }
+
+						}
+
 					}
+
 				}
+				var accProj = nameSpace.split("__");
+				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
+							{
+								projectNameSpace: nameSpace,
+								projectTrans: self.getParentTransformation(accProj[0], accProj[1]),
+								isMainProject: accProj[0] === self.account && accProj[1] === self.project
+					
+							}
+						
+						);
 			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 				if (self.multipartNodes.indexOf(objEvent.target) === -1)
 				{
@@ -354,7 +377,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED);
+				callback(self.EVENT.LOADED, {								
+					bbox : {
+						min: self.getScene()._x3domNode.getVolume().min,
+						max: self.getScene()._x3domNode.getVolume().max
+					}
+				});
 			}
 		});
 
@@ -1906,9 +1934,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return clippingPlaneID;
 		};
 
-		this.moveClippingPlane = function(axis, percentage) {
+		this.moveClippingPlane = function(axis, distance) {
 			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].movePlane(axis, percentage);
+			if(self.clippingPlanes[0])
+			{
+				self.clippingPlanes[0].movePlane(axis, distance);
+			}
 		};
 
 		this.changeAxisClippingPlane = function(axis) {
@@ -2081,6 +2112,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
+	SET_SUBPROJECT_TRANS_INFO : "VIEWER_:SET_SUBPROJECT_TRANS_INFO",
 
 	// Pin events
 	CLICK_PIN: "VIEWER_CLICK_PIN",
