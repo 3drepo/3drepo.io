@@ -15208,6 +15208,10 @@ angular.module('3drepo')
 					// Helper function for searching strings
 					var stringSearch = function(superString, subString)
 					{
+						if(!superString){
+							return false;
+						}
+
 						return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 					};
 

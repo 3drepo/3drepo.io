@@ -817,9 +817,9 @@ function getRolesForProject(account, project, removeViewer){
 			return role.inheritedPrivileges.find(priv => {
 				return  priv.resource.db === account &&
 						(priv.resource.collection === `${project}.history` || priv.resource.collection === '' ) &&
-						priv.actions.indexOf('find') !== -1
+						priv.actions.indexOf('find') !== -1;
 			});
-		})
+		});
 
 		roles.forEach((role, i) => {
 			
