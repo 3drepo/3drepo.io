@@ -27,7 +27,8 @@
 			templateUrl: 'docs.html',
 			scope: {
 				show: "=",
-				onContentHeightRequest: "&"
+				onContentHeightRequest: "&",
+				treeMap: "="
 			},
 			controller: DocsCtrl,
 			controllerAs: 'vm',
@@ -60,9 +61,15 @@
 			if (autoMetaData && !pinMode && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 				// Get any documents associated with an object
 				var object = event.value;
-				promise = DocsService.getDocs(object.account, object.project, object.id);
-				promise.then(function (data) {
-					if (Object.keys(data).length > 0) {
+
+				var metadataIds = vm.treeMap.oIdToMetaId[object.id];
+				if(metadataIds && metadataIds.length){
+					DocsService.getDocs(object.account, object.project, metadataIds[0]).then(function(data){
+
+						if(!data){
+							return;
+						}
+						
 						vm.show = true;
 						$timeout(function () {
 							vm.docs = data;
@@ -94,11 +101,12 @@
 							}
 							setContentHeight();
 						});
-					}
-					else {
-						vm.show = false;
-					}
-				});
+					});
+
+				} else {
+					vm.show = false;
+				}
+
 			}
 			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				vm.show = false;

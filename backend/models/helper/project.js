@@ -1350,6 +1350,26 @@ function getProjectPermission(username, account, project){
 	});
 }
 
+function getMetadata(account, project, id){
+	'use strict';
+	
+	let projection = {
+		shared_id: 0,
+		paths: 0,
+		type: 0,
+		api: 0,
+		parents: 0
+	};
+
+	return Scene.findOne({account, project}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
+		if(obj){
+			return obj;
+		} else {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+	});
+
+}
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
@@ -1385,5 +1405,6 @@ module.exports = {
 	importProject,
 	removeProject,
 	getProjectPermission,
-	newGetFullTree
+	newGetFullTree,
+	getMetadata
 };

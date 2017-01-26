@@ -206,10 +206,7 @@
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
 						}
-					});
-
-					v.loaded.promise.then(function() {
-						if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
+						else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
 							v.viewer.addPin(
 								event.value.account,
 								event.value.project,
@@ -314,7 +311,11 @@
 						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
 							v.viewer.setPinDropMode(event.value);
 						}
+
 					});
+
+					/*v.loaded.promise.then(function() {
+					});*/
 				}
 			}
 		});
