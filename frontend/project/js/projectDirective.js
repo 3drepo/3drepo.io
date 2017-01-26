@@ -56,6 +56,41 @@
 		vm.pointerEvents = "inherit";
 		vm.keysDown = [];
 
+		// Warn when user click refresh
+		var refreshHandler = function (e){
+			var confirmationMessage = "This will reload the whole model, are you sure?";
+
+			e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+			return confirmationMessage;              // Gecko, WebKit, Chrome <34
+		}
+
+		window.addEventListener("beforeunload", refreshHandler);
+
+
+		// create a fake state to prevent the back button
+		history.pushState(null, null, document.URL);
+
+		// popup when user click back button
+		var popStateHandler = function () {
+			// the fake state has already been popped by user at this moment
+
+			if(confirm('It will go back to project listing page, are you sure?')){
+				// pop one more state if user actually wants to go back
+				history.go(-1);
+			} else {
+				// recreate a fake state
+				history.pushState(null, null, document.URL);
+			}
+		};
+
+		//listen for user clicking the back button
+		window.addEventListener('popstate', popStateHandler);
+
+		$scope.$on('$destroy', function(){
+			window.removeEventListener("beforeunload", refreshHandler);
+			window.removeEventListener('popstate', popStateHandler);
+		});
+
 		/*
 		 * Get the project element
 		 */
@@ -256,6 +291,7 @@
 
 				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
 					vm.treeMap = TreeService.getMap(data.nodes);
+					EventService.send(EventService.EVENT.TREE_READY, data);
 				});
 			}
 		});

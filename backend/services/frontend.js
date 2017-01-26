@@ -91,7 +91,7 @@
 			params.config_js += "server_config.api_algorithm = (function () {'use strict'; var self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
 
 			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
-			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl;\n";
+			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm);\n";
 
 			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\";\n";
 			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";

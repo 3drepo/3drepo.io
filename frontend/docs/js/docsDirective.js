@@ -44,7 +44,8 @@
 			docTypeHeight = 50,
 			allDocTypesHeight,
 			currentOpenDocTypes = [],
-			autoMetaData;
+			autoMetaData,
+			pinMode;
 
 		/*
 		 * Init
@@ -57,7 +58,7 @@
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			var item, i, length;
-			if (autoMetaData && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
+			if (autoMetaData && !pinMode && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 				// Get any documents associated with an object
 				var object = event.value;
 
@@ -112,6 +113,10 @@
 			}
 			else if (event.type === EventService.EVENT.AUTO_META_DATA) {
 				autoMetaData = event.value;
+			}
+			else if (event.type === EventService.EVENT.PIN_DROP_MODE)
+			{
+				pinMode = event.value;
 			}
 		});
 

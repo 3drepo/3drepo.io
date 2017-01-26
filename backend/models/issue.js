@@ -54,6 +54,35 @@ var xmlBuilder = new xml2js.Builder({
 });
 
 
+var actionSchema = Schema({
+	_id : false,
+	id: false,
+	property: String,
+	from: String,
+	to: String
+});
+
+function propertyTextMapping(property){
+	'use strict';
+
+	let mapping = {
+		'priority': 'Priority',
+		'status': 'Status',
+		'assigned_roles': 'Assigned',
+		'topic_type': 'Type',
+		'desc': 'Description'
+	};
+
+	return mapping[property] || property;
+}
+
+actionSchema.virtual('propertyText').get(function(){
+	return propertyTextMapping(this.property);
+});
+
+actionSchema.set('toObject', { virtuals: true, getters:true });
+
+
 var schema = Schema({
 	_id: Object,
 	object_id: Object,
@@ -124,11 +153,7 @@ var schema = Schema({
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
-		action:{
-			property: String,
-			from: String,
-			to: String
-		},
+		action: actionSchema,
 		owner: String,
 		comment: {type: String},
 		created: Number,
@@ -278,7 +303,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 };
 
 
-schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean){
+schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean, ids){
 	'use strict';
 
 	let issues;
@@ -338,15 +363,26 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 						rev_id: { '$in' : revIds }
 					}]
 				};
-				//console.log(filter);
-
 			}
 		});
 	}
 
 
 	return addRevFilter.then(() => {
+		
+		if(ids){
+
+			ids.forEach((id, i) => {
+				ids[i] = stringToUUID(id);
+			});
+
+			filter._id = {
+				'$in': ids
+			};
+		}
+
 		return this._find(dbColOptions, filter, projection, noClean);
+
 	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(

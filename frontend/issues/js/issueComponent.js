@@ -224,11 +224,11 @@
 			}
 
 			// Keys down
-			if (changes.hasOwnProperty("keysDown")) {
+/*			if (changes.hasOwnProperty("keysDown")) {
 				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
 					this.exit();
 				}
-			}
+			}*/
 
 			// Role
 			if (changes.hasOwnProperty("availableRoles")) {
@@ -270,8 +270,7 @@
 				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
 				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
 			}
-
-
+			
 		};
 
 		/**
@@ -533,8 +532,12 @@
 		 * Toggle showing of extra inputs
 		 */
 		this.toggleShowAdditional = function () {
-			this.showAdditional = !this.showAdditional;
-			setContentHeight();
+			if(!textInputHasFocus)
+			{
+				//don't toggle if the user is trying to type
+				this.showAdditional = !this.showAdditional;
+				setContentHeight();
+			}
 		};
 
 		/**
