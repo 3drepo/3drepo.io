@@ -170,7 +170,7 @@ var repoGetHandler = function(router, checkAccess){
 	self.getInternal("/:account/:project/users.:format.:subformat?");
 
 	// Get object with specific uid in a specific format
-	self.getInternal("/:account/:project/meta/:uid.:format.:subformat?");
+	// self.getInternal("/:account/:project/meta/:uid.:format.:subformat?");
 	// self.getInternal("/:account/:project/issue/:uid.:format");
 	// self.getInternal("/:account/:project/issues/:sid.:format");
 	//self.getInternal("/:account/:project/issues.:format");

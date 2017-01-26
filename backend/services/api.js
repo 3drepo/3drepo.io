@@ -104,6 +104,10 @@
 
 		//project handlers
 		app.use("/:account", require("../routes/project"));
+
+		//metadata handler
+		app.use("/:account/:project", require("../routes/meta"));
+
 		//groups handler
 		app.use("/:account/:project/groups", require("../routes/group"));
 		//issues handler
