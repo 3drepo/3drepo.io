@@ -914,6 +914,16 @@ function getRolesForProject(account, project, removeViewer){
 
 		//console.log(JSON.stringify(roles, null , 2));
 
+		//filter again because old role inherits viewer role and the first db query will get list of all roles inherited from other roles regardless of project name(collection name)
+		roles = roles.filter(role => {
+
+			return role.inheritedPrivileges.find(priv => {
+				return  priv.resource.db === account &&
+						(priv.resource.collection === `${project}.history` || priv.resource.collection === '' ) &&
+						priv.actions.indexOf('find') !== -1;
+			});
+		});
+
 		roles.forEach((role, i) => {
 			
 			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
@@ -952,7 +962,7 @@ function getUserRolesForProject(account, project, username){
 
 		let userRolesForProject = user.roles.filter(userRole => {
 
-			return projectRoles.find(projectRole => { 
+			return projectRoles.find(projectRole => {
 				return projectRole.db === userRole.db && projectRole.role === userRole.role;
 			});
 

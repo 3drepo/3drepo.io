@@ -51,11 +51,11 @@
 		};
 	}
 
-	CompassCtrl.$inject = ["$rootScope", "EventService"];
+	CompassCtrl.$inject = ["$scope", "EventService"];
 
-	function CompassCtrl ($rootScope, EventService)
+	function CompassCtrl ($scope, EventService)
 	{
-		$rootScope.$watch(EventService.currentEvent, function(event)
+		$scope.$watch(EventService.currentEvent, function(event)
 		{
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
