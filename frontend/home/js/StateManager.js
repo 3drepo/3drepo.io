@@ -149,10 +149,6 @@
 				fromParams : fromParams
 			};
 
-			if(typeof ga !== "undefined" && ga !== null){
-				ga("send", "pageview", $location.path());
-			}
-
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
@@ -162,6 +158,10 @@
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
+
+			if(typeof ga !== "undefined" && ga !== null){
+				ga("send", "pageview", $location.path());
+			}
 
 			var queryParams = $location.search();
 
