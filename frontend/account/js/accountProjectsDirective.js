@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService) {
 		var vm = this,
 			existingProjectToUpload,
 			existingProjectFileUploader,
@@ -242,6 +242,11 @@
 						};
 						updateAccountProjects(response.data.account, project);
 						vm.closeDialog();
+
+						AnalyticService.sendEvent({
+							eventCategory: 'Project',
+							eventAction: 'create'
+						});
 					}
 				});
 			}
@@ -336,6 +341,11 @@
 						}
 					}
 					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'delete'
+					});
 				}
 				else {
 					vm.deleteError = "Error deleting project";

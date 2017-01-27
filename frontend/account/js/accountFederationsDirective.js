@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth", "AnalyticService"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth, AnalyticService) {
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
@@ -220,6 +220,13 @@
 					vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
 					vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'create',
+						eventLabel: 'federation'
+					});
+
 				});
 			}
 			else {
@@ -251,6 +258,11 @@
 			}
 			else {
 				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedProjects[projectIndex].project, "_self").search({});
+				AnalyticService.sendEvent({
+					eventCategory: 'Project',
+					eventAction: 'view',
+					eventLabel: 'federation'
+				});
 			}
 
 		};
@@ -291,6 +303,12 @@
 					vm.accountsToUse[vm.currentAccountIndex].fedProjects.splice(federationToDeleteIndex, 1);
 					vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[vm.currentAccountIndex].fedProjects.length === 0));
 					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'delete',
+						eventLabel: 'federation'
+					});
 				}
 				else {
 					vm.deleteError = "Error deleting federation";

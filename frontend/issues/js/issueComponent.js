@@ -44,9 +44,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -355,6 +355,11 @@
 						setCanUpdateStatus(self.issueData);
 						commentAreaScrollToBottom();
 					});
+
+				AnalyticService.sendEvent({
+					eventCategory: 'Issue',
+					eventAction: 'edit'
+				});
 			}
 		};
 
@@ -708,6 +713,11 @@
 					startNotification();
 					self.saving = false;
 			});
+
+			AnalyticService.sendEvent({
+				eventCategory: 'Issue',
+				eventAction: 'create'
+			});
 		}
 
 		/**
@@ -734,6 +744,11 @@
 						});
 				});
 			}
+
+			AnalyticService.sendEvent({
+				eventCategory: 'Issue',
+				eventAction: 'comment'
+			});
 		}
 
 		/**
@@ -805,6 +820,10 @@
 				.then(function(response) {
 					self.issueData.comments.splice(index, 1);
 				});
+			AnalyticService.sendEvent({
+				eventCategory: 'Issue',
+				eventAction: 'deleteComment'
+			});
 			setContentHeight();
 		};
 
@@ -825,6 +844,10 @@
 							IssuesService.updatedIssue = self.issueData;
 							savedComment = self.issueData.comments[index].comment;
 						});
+					AnalyticService.sendEvent({
+						eventCategory: 'Issue',
+						eventAction: 'editComment'
+					});
 				}
 			}
 			else {
