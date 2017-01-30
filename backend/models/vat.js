@@ -27,7 +27,7 @@ var vat = [
 	{ countryCode: 'NL', standardRate: 21 },
 	{ countryCode: 'PL', standardRate: 23 },
 	{ countryCode: 'PT', standardRate: 23 },
-	{ countryCode: 'RO', standardRate: 20 },
+	{ countryCode: 'RO', standardRate: 19 },
 	{ countryCode: 'SE', standardRate: 25 },
 	{ countryCode: 'SI', standardRate: 22 },
 	{ countryCode: 'SK', standardRate: 20 },

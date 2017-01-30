@@ -73,7 +73,7 @@ describe('VAT', function(){
 			expect(vat.getByCountryCode('NL', isBusiness)).to.closeTo(0.21, Number.EPSILON);
 			expect(vat.getByCountryCode('PL', isBusiness)).to.closeTo(0.23, Number.EPSILON);
 			expect(vat.getByCountryCode('PT', isBusiness)).to.closeTo(0.23, Number.EPSILON);
-			expect(vat.getByCountryCode('RO', isBusiness)).to.closeTo(0.2, Number.EPSILON);
+			expect(vat.getByCountryCode('RO', isBusiness)).to.closeTo(0.19, Number.EPSILON);
 			expect(vat.getByCountryCode('SE', isBusiness)).to.closeTo(0.25, Number.EPSILON);
 			expect(vat.getByCountryCode('SI', isBusiness)).to.closeTo(0.22, Number.EPSILON);
 			expect(vat.getByCountryCode('SK', isBusiness)).to.closeTo(0.2, Number.EPSILON);
