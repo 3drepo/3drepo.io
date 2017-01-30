@@ -8,7 +8,7 @@ md-dialog.newProjectDialog(aria-label="New project")
 	md-content(layout-margin)
 		div(layout="column")
 			md-input-container
-				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)")
+				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)", ng-pattern="vm.projectRegExp" maxlength=20)
 				.inputHint Letters, numbers, hyphen and underscore only
 			
 			md-input-container

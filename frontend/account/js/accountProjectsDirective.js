@@ -53,6 +53,7 @@
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.units = serverConfig.units;
+		vm.projectRegExp = serverConfig.projectNameRegExp;
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -221,6 +222,12 @@
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
 					vm.showNewProjectErrorMessage = true;
 					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+				
+				if(!vm.newProjectData.name){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid project name';
 					return;
 				}
 
