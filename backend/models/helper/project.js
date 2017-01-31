@@ -378,7 +378,12 @@ function createFederatedProject(account, project, subProjects){
 
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
-		return importQueue.createFederatedProject(account, federatedJSON);
+		
+		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+			_deleteFiles(files(err));
+			return;
+		});
+
 	}).then(data => {
 
 
@@ -388,8 +393,6 @@ function createFederatedProject(account, project, subProjects){
 
 	}).catch(err => {
 		//catch here to provide custom error message
-		_deleteFiles(files(err));
-
 		if(err.errCode){
 			return Promise.reject(convertToErrorCode(err.errCode));
 		}
@@ -1111,7 +1114,7 @@ function _handleUpload(account, project, username, file, data){
 			{desc: 'json file', type: 'file', path: jsonFile}, 
 			{desc: 'tmp dir', type: 'dir', path: fileDir}
 		];
-	}
+	};
 
 	return importQueue.importFile(
 		file.path,
