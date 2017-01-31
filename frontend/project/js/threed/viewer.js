@@ -928,21 +928,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					}
 				}
 
-				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
-
-
-				self.setApp(null);
-
-				for(var i = 0; i < ids.length; i++)
-				{
-					var id = ids[i];
-					var object = document.querySelectorAll("[id$='" + id + "']");
-
-					if (object[0]) {
-						self.setApp(object[0], colour);
-					}
-				}
-				
+				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);				
 			}
 		};
 
