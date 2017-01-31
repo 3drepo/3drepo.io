@@ -38,7 +38,7 @@ describe('Verify', function () {
 
 	let password = 'password';
 	let email = suf => `test3drepo_verification_${suf}@mailinator.com`;
-
+	let async = require('async');
 
 	before(function(done){
 
@@ -63,6 +63,8 @@ describe('Verify', function () {
 
 	it('user should success if username and token is correct', function(done){
 		// create a user
+		this.timeout(15000);
+
 		User.createUser(systemLogger, username, password, {
 			email: email('success')
 		}, 200000).then(emailVerifyToken => {
@@ -71,13 +73,42 @@ describe('Verify', function () {
 			.post(`/${username}/verify`)
 			.send({ token: emailVerifyToken.token })
 			.expect(200, function(err, res){
-				done(err);
+				
+				// give the system some time to import the toy project after users verified
+				setTimeout(function(){
+					done(err);
+				}, 10000);
 
 			});
 
 		}).catch(err => {
 			done(err);
 		});
+	});
+
+
+	it('verified user should have toy project imported', function(done){
+
+		let agent = request.agent(server);
+		
+		async.series([
+			function(done){
+				agent.post('/login')
+				.send({ username, password })
+				.expect(200, function(err, res){
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+			},
+			function(done){
+				agent.get(`/${username}/sample_project.json`)
+				.expect(200, function(err, res){
+					expect(res.body.status).to.equal('ok');
+					done(err);
+				});
+			}
+		], done);
+
 	});
 
 	it('user should fail if verify more than once', function(done){
