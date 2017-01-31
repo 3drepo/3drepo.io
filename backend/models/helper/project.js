@@ -1115,6 +1115,7 @@ function _handleUpload(account, project, username, file, data){
 
 	return importQueue.importFile(
 		file.path,
+		file.originalname,
 		account,
 		project,
 		username,
