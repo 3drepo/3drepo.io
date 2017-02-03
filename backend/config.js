@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.9.4";
+	const VERSION="1.8.1";
 
 	let config = require("app-config")
 		.config;
@@ -135,7 +135,7 @@
 
 	config.using_ssl = config.hasOwnProperty("ssl");
 	config.port = coalesce(config.port, config.using_ssl ? default_https_port : default_http_port);
-	
+
 	config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
 	config.cookie = coalesce(config.cookie, {});
