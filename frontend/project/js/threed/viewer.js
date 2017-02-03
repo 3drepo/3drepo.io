@@ -216,7 +216,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				self.scene.setAttribute("pickmode", "idbufid");
+				//self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
@@ -312,7 +312,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
 				{
 					self.groupNodes={};
-					var projectTrans = {};					
+					var projectTrans = {};
 					var vol = null;
 					//loaded x3dom file for current project, figure out the groups
 					var groups = document.getElementsByTagName("Group");
@@ -333,14 +333,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				}
 				var accProj = nameSpace.split("__");
-				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO, 
+				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO,
 							{
 								projectNameSpace: nameSpace,
 								projectTrans: self.getParentTransformation(accProj[0], accProj[1]),
 								isMainProject: accProj[0] === self.account && accProj[1] === self.project
-					
+
 							}
-						
+
 						);
 			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 				if (self.multipartNodes.indexOf(objEvent.target) === -1)
@@ -377,7 +377,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED, {								
+				callback(self.EVENT.LOADED, {
 					bbox : {
 						min: self.getScene()._x3domNode.getVolume().min,
 						max: self.getScene()._x3domNode.getVolume().max
@@ -791,36 +791,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if ((objEvent.button === 1) && !self.selectionDisabled) {
 				if (objEvent.partID) {
 					id = objEvent.partID;
-	
-					var splitID = objEvent.part.multiPart._nameSpace.name.split("__");
-					account = splitID[0];
-					project = splitID[1];
 
-					var multipartID = objEvent.hitObject.id.split("__");
-					self.lastMultipart = multipartID[2];
+					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
+					project = objEvent.part.multiPart._nameSpace.name.split("__")[1];
 
-				} else if (objEvent.hitObject) {
-					var splitID = objEvent.hitObject.id.split("__");
-					account = splitID[0];
-					project = splitID[1];
-					id = splitID[2];
-
-					
 				}
 			}
 
-			if (id !== self.lastMultipart)
-			{
-				callback(self.EVENT.OBJECT_SELECTED, {
-					account: account,
-					project: project,
-					id: id,
-					source: "viewer"
-				});
-			} else {
-				// Hack to avoid bug in X3DOM
-				self.lastMultipart = null;
-			}
+			callback(self.EVENT.OBJECT_SELECTED, {
+				account: account,
+				project: project,
+				id: id,
+				source: "viewer"
+			});
 		};
 
 		this.highlightObjects = function(account, project, ids, zoom, colour) {
@@ -867,8 +850,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 					self.selectParts(fullPartsList, zoom, colour);
 				}
-
-				self.setApp(null);
 
 				for(var i = 0; i < ids.length; i++)
 				{
@@ -930,19 +911,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
 
-
-				self.setApp(null);
-
-				for(var i = 0; i < ids.length; i++)
-				{
-					var id = ids[i];
-					var object = document.querySelectorAll("[id$='" + id + "']");
-
-					if (object[0]) {
-						self.setApp(object[0], colour);
-					}
-				}
-				
 			}
 		};
 
@@ -1310,7 +1278,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			var oldPickMode = scene._vf.pickMode.toLowerCase();
-			//scene._vf.pickMode = "idbufid";
+			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
 			self.pickObject = viewArea._pickingInfo;
