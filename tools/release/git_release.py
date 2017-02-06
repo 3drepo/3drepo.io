@@ -26,7 +26,7 @@ if code:
     fatalError("git checkout failed")
 
 if production:
-    code = os.system("grunt webfont")
+    code = os.system("grunt webfont --force")
 
     if code:
         fatalError("Webfont compilation failed")
