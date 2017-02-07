@@ -54,9 +54,9 @@
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -174,6 +174,10 @@
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'view'
+					});
 				}
 			}
 		};
@@ -206,6 +210,12 @@
 						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project.name + "/download/latest"),
 						'_blank' 
 					);
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'download'
+					});
+
 					break;
 
 				case "team":
@@ -283,6 +293,10 @@
 		*/
 		vm.goToRevision = function(revId){
 			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
+			AnalyticService.sendEvent({
+				eventCategory: 'Project',
+				eventAction: 'view'
+			});
 		};
 
 		/**
@@ -358,6 +372,10 @@
 							else {
 								console.log("Polling upload!");
 								watchProjectStatus();
+								AnalyticService.sendEvent({
+									eventCategory: 'Project',
+									eventAction: 'upload'
+								});
 							}
 						});
 					}
