@@ -47,6 +47,8 @@
 			accountsToUse, // For listing federations
 			dialogCloseToId;
 
+		vm.projectRegExp = serverConfig.projectNameRegExp;
+		
 		// Init
 		function getFederationOptions(project, account){
 
