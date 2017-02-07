@@ -1145,6 +1145,7 @@ function _importBSON(account, project, username, dir){
 	let dbPassword = config.db.password;
 
 	let promises = [];
+	let bucketItrPromises = [];
 
 	Object.keys(importCollectionFiles).forEach(collection => {
 
@@ -1169,45 +1170,98 @@ function _importBSON(account, project, username, dir){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
-		systemLogger.logInfo(`toy project BSON imported without error`,{
-			account,
-			project,
-			username
-		});
 
 		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
 
-		jsonBucket.find().forEach(file => {
+		bucketItrPromises.push(
 
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = account;
-			newFileName = newFileName.join('/');
-			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
-				);
-			});
-		});
+			new Promise((resolve, reject) => {
+
+				let renamePromises = [];
+
+				jsonBucket.find().forEach(file => {
+
+					let newFileName = file.filename;
+					newFileName = newFileName.split('/');
+					newFileName[1] = account;
+					newFileName = newFileName.join('/');
+
+					renamePromises.push(
+
+						new Promise((resolve, reject) => {
+
+							jsonBucket.rename(file._id, newFileName, function(err) {
+								if(err){
+									systemLogger.logError('error while renaming sample project stash',
+										{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
+									);
+									reject(err);
+								} else {
+									resolve();
+								}
+
+							});
+						})
+
+					);
+
+				}, err => {
+					if(err){
+						reject(err);
+					} else {
+						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
+					}
+				});
+
+			})
+		);
 
 		//rename src stash
 		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
 
-		srcBucket.find().forEach(file => {
+		bucketItrPromises.push(
+			new Promise((resolve, reject) => {
 
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = account;
-			newFileName = newFileName.join('/');
-			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
-				);
-			});
+				let renamePromises = [];
 
-		});
+				srcBucket.find().forEach(file => {
 
-		return Promise.resolve();
+					let newFileName = file.filename;
+					newFileName = newFileName.split('/');
+					newFileName[1] = account;
+					newFileName = newFileName.join('/');
+
+					renamePromises.push(
+						new Promise((resolve, reject) => {
+							srcBucket.rename(file._id, newFileName, function(err) {
+
+								if(err) {
+									systemLogger.logError('error while renaming sample project stash',
+										{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
+									);
+
+									reject(err);
+
+								} else {
+									resolve();
+								}
+
+							});
+						})
+					);
+
+				}, err => {
+					if(err){
+						reject(err);
+					} else {
+						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
+					}
+				});
+
+			})
+		);
+
+		return Promise.all(bucketItrPromises);
 
 	}).then(() => {
 		//change history time and author
@@ -1240,6 +1294,15 @@ function _importBSON(account, project, username, dir){
 		});
 
 		return Promise.all(updateIssuePromises);
+	}).then(() => {
+
+		systemLogger.logInfo(`toy project BSON imported and renamed without error`,{
+			account,
+			project,
+			username
+		});
+
+		return;
 	});
 
 }
@@ -1270,6 +1333,16 @@ function importProject(account, project, username, projectSetting, source, data)
 		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
 
 		return projectSetting.save();
+
+	}).then(() => {
+
+		systemLogger.logInfo(`Project from source ${source.type} has imported successfully`, {
+			account,
+			project,
+			username
+		});
+
+		return;
 
 	}).catch(err => {
 
