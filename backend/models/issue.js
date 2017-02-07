@@ -312,6 +312,13 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 
 	let addRevFilter = Promise.resolve();
 
+	if(ids){
+
+		ids.forEach((id, i) => {
+			ids[i] = stringToUUID(id);
+		});
+	}
+
 	if (revId){
 
 		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
@@ -371,11 +378,6 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 	return addRevFilter.then(() => {
 		
 		if(ids){
-
-			ids.forEach((id, i) => {
-				ids[i] = stringToUUID(id);
-			});
-
 			filter._id = {
 				'$in': ids
 			};
@@ -406,7 +408,16 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 				promises.push(
 					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
 						if(granted){
-							return self._find({account: childDbName, project: childProject}, null, projection, noClean);
+
+							let filter = {};
+
+							if(ids){
+								filter._id = {
+									'$in': ids
+								};
+							}
+
+							return self._find({account: childDbName, project: childProject}, filter, projection, noClean);
 						} else {
 							return Promise.resolve([]);
 						}
