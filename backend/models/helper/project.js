@@ -341,6 +341,13 @@ function createFederatedProject(account, project, subProjects){
 
 	let addSubProjects = [];
 
+	let files = function(data){
+		return [
+			{desc: 'json file', type: 'file', path: data.jsonFilename}, 
+			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
+		];
+	};
+
 	subProjects.forEach(subProject => {
 
 		if(subProject.database !== account){
@@ -371,7 +378,19 @@ function createFederatedProject(account, project, subProjects){
 
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
-		return importQueue.createFederatedProject(account, federatedJSON);
+		
+		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+			_deleteFiles(files(err));
+			return;
+		});
+
+	}).then(data => {
+
+
+		_deleteFiles(files(data));
+
+		return;
+
 	}).catch(err => {
 		//catch here to provide custom error message
 		if(err.errCode){
@@ -1062,35 +1081,39 @@ function uploadFile(req){
 
 }
 
+function _deleteFiles(files){
+	'use strict';
+
+	files.forEach(file => {
+
+		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+
+		deleteFile(file.path, function(err){
+			if(err){
+				systemLogger.logError(`error while deleting ${file.desc}`,{
+					message: err.message,
+					err: err,
+					file: file.path
+				});
+			} else {
+				systemLogger.logInfo(`${file.desc} deleted`,{
+					file: file.path
+				});
+			}
+		});
+	});
+}
+
 function _handleUpload(account, project, username, file, data){
 	'use strict';
 
-	let deleteFiles = function(filePath, fileDir, jsonFile){
 
-		[
+	let files = function(filePath, fileDir, jsonFile){
+		return [
 			{desc: 'tmp model file', type: 'file', path: filePath}, 
 			{desc: 'json file', type: 'file', path: jsonFile}, 
 			{desc: 'tmp dir', type: 'dir', path: fileDir}
-		].forEach(file => {
-
-			let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
-
-			deleteFile(file.path, function(err){
-				if(err){
-					systemLogger.logError(`error while deleting ${file.desc}`,{
-						message: err.message,
-						err: err,
-						file: file.path
-					});
-				} else {
-					systemLogger.logInfo(`${file.desc} deleted`,{
-						file: file.path
-					});
-				}
-			});
-		});
-
-
+		];
 	};
 
 	return importQueue.importFile(
@@ -1112,12 +1135,12 @@ function _handleUpload(account, project, username, file, data){
 			username
 		});
 
-		deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
+		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
 		return Promise.resolve(obj);
 
 	}).catch(err => {
 
-		deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
+		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
 		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
 	});
 
