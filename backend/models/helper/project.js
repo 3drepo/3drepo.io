@@ -180,7 +180,7 @@ function importToyProject(username){
 	return createAndAssignRole(project, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
+		return importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
 	});
 }
 

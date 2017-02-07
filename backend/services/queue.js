@@ -332,6 +332,11 @@
 	};
 
 	ImportQueue.prototype.insertEventMessage = function (msg) {
+		
+		if(!this.channel){
+			return;
+		}
+
 		msg = JSON.stringify(msg);
 
 		return this.channel.assertExchange(this.eventExchange, "fanout", {
