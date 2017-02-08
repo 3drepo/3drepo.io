@@ -3834,63 +3834,60 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			});
 		};
 
-		this.highlightObjects = function(account, project, ids, zoom, colour) {
+		this.highlightObjects = function(account, project, ids_in, zoom, colour) {
 			if (!this.pinDropMode) {
 				var nameSpaceName = null;
 
-				/*
-				 if (account && project) {
-				 nameSpaceName = account + "__" + project;
-				 }
-				 */
-
-				if (!ids) {
-					ids = [];
-				}
-
 				// If we pass in a single id, then we might be selecting
 				// an old-style Group in X3DOM rather than multipart.
-				ids = Array.isArray(ids) ? ids: [ids];
+				ids_in = ids_in || [];
+				ids_in = Array.isArray(ids_in) ? ids_in: [ids_in];
+				var ids = new Set(ids_in);
 
-				// Is this a multipart project
-				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-					var fullPartsList = [];
-					var nsMultipartNodes;
+				if(ids.size)
+				{
+					// Is this a multipart project
+					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+						var fullPartsList = [];
+						var nsMultipartNodes;
 
-					// If account and project have been specified
-					// this helps narrow the search
-					if (nameSpaceName) {
-						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-					} else {
-						// Otherwise iterate over everything
-						nsMultipartNodes = self.multipartNodes;
-					}
+						// If account and project have been specified
+						// this helps narrow the search
+						if (nameSpaceName) {
+							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+						} else {
+							// Otherwise iterate over everything
+							nsMultipartNodes = self.multipartNodes;
+						}
 
-					for (var multipartNodeName in nsMultipartNodes) {
-						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+						for (var multipartNodeName in nsMultipartNodes) {
+							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+								var mp = nsMultipartNodes[multipartNodeName];
+								var parts = mp.getParts(Array.from(ids));
 
-							if (parts && parts.ids.length > 0) {
-								fullPartsList.push(parts);
+								if (parts && parts.ids.length > 0) {
+									fullPartsList.push(parts);
+
+									for(var i = 0; i < parts.ids.length; i++)
+									{
+										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
+									}
+								}
 							}
 						}
+
+						self.selectParts(fullPartsList, zoom, colour);
 					}
 
-					self.selectParts(fullPartsList, zoom, colour);
-				}
+					ids.forEach(function(id) {
+						var object = document.querySelectorAll("[id$='" + id + "']");
 
-				for(var i = 0; i < ids.length; i++)
-				{
-					var id = ids[i];
-					var object = document.querySelectorAll("[id$='" + id + "']");
-
-					if (object[0]) {
-						self.setApp(object[0], colour);
-					}
-				}
-
-				if (ids.length === 0)
-				{
+						if (object[0]) {
+							self.setApp(object[0], colour);
+						}
+					});
+				} else {
+					self.highlightAndUnhighlightObjects([]);
 					self.setApp(null);
 				}
 			}
@@ -3898,14 +3895,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		/**
 		 * This is copied from highlightObjects()
-		 * @param account
-		 * @param project
 		 * @param highlight_ids
 		 * @param unhighlight_ids
 		 * @param zoom
 		 * @param colour
 		 */
-		this.highlightAndUnhighlightObjects = function(account, project, highlight_ids, unhighlight_ids, zoom, colour) {
+		this.highlightAndUnhighlightObjects = function(highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			// Is this a multipart project
@@ -3945,41 +3940,49 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		//this.switchedOldParts = [];
 		//this.switchedObjects = [];
 
-		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
+		this.__processSwitchVisibility = function(nameSpaceName, ids_in, state)
 		{
-			if (ids && ids.length) {
-				// Is this a multipart project
-				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-					var nsMultipartNodes;
+			if (ids_in) {
+				var ids = new Set(ids_in); // Convert to Set if necessary
 
-					// If account and project have been specified
-					// this helps narrow the search
-					if (nameSpaceName) {
-						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-					} else {
-						// Otherwise iterate over everything
-						nsMultipartNodes = self.multipartNodes;
-					}
+				if (ids.size) {
+					// Is this a multipart project
+					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+						var nsMultipartNodes;
 
-					for (var multipartNodeName in nsMultipartNodes) {
-						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+						// If account and project have been specified
+						// this helps narrow the search
+						if (nameSpaceName) {
+							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+						} else {
+							// Otherwise iterate over everything
+							nsMultipartNodes = self.multipartNodes;
+						}
 
-							if (parts && parts.ids.length > 0) {
-								parts.setVisibility(state);
+						for (var multipartNodeName in nsMultipartNodes) {
+							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+								var mp = nsMultipartNodes[multipartNodeName];
+								var parts = mp.getParts(Array.from(ids));
+
+								if (parts && parts.ids.length > 0) {
+									parts.setVisibility(state);
+
+									for(var i = 0; i < parts.ids.length; i++)
+									{
+										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
+									}
+								}
 							}
 						}
 					}
-				}
 
-				for(var i = 0; i < ids.length; i++)
-				{
-					var id = ids[i];
-					var object = document.querySelectorAll("[id$='" + id + "']");
+					ids.forEach(function(id) {
+						var object = document.querySelectorAll("[id$='" + id + "']");
 
-					if (object[0]) {
-						object[0].setAttribute("render", state.toString());
-					}
+						if (object[0]) {
+							object[0].setAttribute("render", state.toString());
+						}
+					});
 				}
 			}
 		};
@@ -19277,8 +19280,7 @@ var Oculus = {};
 		 * Watch for events
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
-			var parent = angular.element($element[0].querySelector("#project")),
-				element;
+			var element;
 
 			vm.event = event;
 
@@ -19308,7 +19310,7 @@ var Oculus = {};
 				if (event.value) {
 					// Create measure display
 					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
-					parent.append(element);
+					angular.element($element[0].querySelector("#project")).append(element);
 					$compile(element)($scope);
 
 				}
@@ -20816,7 +20818,7 @@ var Oculus = {};
 		/**
 		 * traverse children of a node recursively
 		 * @param {Object} node
-		 * @param {Function} callback 
+		 * @param {Function} callback
 		 */
 		function traverseNode(node, callback){
 			callback(node);
@@ -20832,13 +20834,16 @@ var Oculus = {};
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				ids.push(node._id);
+				if (!node.children)
+				{
+					ids.push(node._id);
+				}
 			});
 		}
 
 		function getVisibleArray(account, project){
 			if(!vm.visible[account + '@' + project]){
-				vm.visible[account + '@' + project] = [];
+				vm.visible[account + '@' + project] = new Set();
 			}
 
 			return vm.visible[account + '@' + project];
@@ -20846,7 +20851,7 @@ var Oculus = {};
 
 		function getInvisibleArray(account, project){
 			if(!vm.invisible[account + '@' + project]){
-				vm.invisible[account + '@' + project] = [];
+				vm.invisible[account + '@' + project] = new Set();
 			}
 
 			return vm.invisible[account + '@' + project];
@@ -20859,42 +20864,32 @@ var Oculus = {};
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
-			var idx = -1;
-
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			// TODO: This function is probably in-efficient
-			if (visibility === "invisible")
-			{
-				if ((idx = invisible.indexOf(node._id)) !== -1)
+			if (!node.children)
+			{		
+				if (visibility === "invisible")
 				{
+					if (invisible.has(node._id))
+					{
+						invisible.delete(node._id);
+					} else {
+						invisible.add(node._id);
+					}
 
-					invisible.splice(idx,1);
+					visible.delete(node._id);
 				} else {
-					invisible.push(node._id);
-				}
+					if (visible.has(node._id))
+					{
+						visible.delete(node._id);
+					} else {
+						visible.add(node._id);
+					}
 
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
-					visible.splice(idx, 1);
+					invisible.delete(node._id);
 				}
-			} else {
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
-
-					visible.splice(idx,1);
-				} else {
-					visible.push(node._id);
-				}
-
-				if ((idx = invisible.indexOf(node._id)) !== -1)
-				{
-					invisible.splice(idx, 1);
-				}
-
 			}
-
 			node.toggleState = visibility;
 		};
 
@@ -20950,7 +20945,7 @@ var Oculus = {};
 						}
 
 						while (!endOfSplice) {
-							
+
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
 
 								if(vm.nodesToShow[index + 1].hasSubProjTree){
@@ -21184,21 +21179,32 @@ var Oculus = {};
 
 			vm.toggledNode = node;
 
-			traverseNode(node, function(myNode){
-				if(myNode === node){
-					//toggle yourself
-					vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
-					nodeToggleState = node.toggleState;
-					updateClickedHidden(node);
-					updateClickedShown(node);
-				} else {
-					//toggle children
-					vm.setToggleState(myNode, nodeToggleState);
+			//toggle yourself
+			vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
+			nodeToggleState = node.toggleState;
+			updateClickedHidden(node);
+			updateClickedShown(node);
+
+			var stack = [node];
+			var head = null;
+
+			while (stack.length > 0)
+			{
+				var head = stack.pop();
+
+				if (node !== head) {
+					vm.setToggleState(head, nodeToggleState);
 				}
-				
-			});
-			
-			
+
+				if (head.children)
+				{
+					for(var i = 0; i < head.children.length; i++)
+					{
+						stack.push(head.children[i]);
+					}
+				}
+			}
+
 			//a__b .. c__d
 			//toggle parent
 			path = node.path.split("__");
@@ -21237,14 +21243,11 @@ var Oculus = {};
 								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								//vm.setToggleState(vm.nodesToShow[j], "invisible");
 								vm.nodesToShow[j].toggleState = 'invisible';
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								//vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
 								vm.nodesToShow[j].toggleState = 'parentOfInvisible';
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
-								//vm.nodesToShow[j].toggleState = 'visible';
 							}
 						}
 					}
@@ -21268,30 +21271,14 @@ var Oculus = {};
 			{
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (invisible.indexOf(childNodes[i]) === -1)
-					{
-						invisible.push(childNodes[i]);
-					}
-
-					idx = visible.indexOf(childNodes[i]);
-					if (idx !== -1)
-					{
-						visible.splice(idx,1);
-					}
+					invisible.add(childNodes[i]);
+					visible.delete(childNodes[i]);
 				}
 			} else {
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (visible.indexOf(childNodes[i]) === -1)
-					{
-						visible.push(childNodes[i]);
-					}
-
-					idx = invisible.indexOf(childNodes[i]);
-					if (idx !== -1)
-					{
-						invisible.splice(idx,1);
-					}
+					visible.add(childNodes[i]);
+					invisible.delete(childNodes[i]);
 				}
 			}
 
@@ -21430,15 +21417,12 @@ var Oculus = {};
 
 				// Separately highlight the children
 				// but only for multipart meshes
-				if (document.getElementsByTagName("multipart").length)
-				{
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-						source: "tree",
-						account: node.account,
-						project: node.project,
-						ids: map
-					});
-				}
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					ids: map
+				});
 			}
 		};
 
