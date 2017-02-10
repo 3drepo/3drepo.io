@@ -38,6 +38,7 @@ var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
+var DB = require('../../db/db');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -1160,15 +1161,12 @@ function _importBSON(account, project, username, dir){
 		importCollectionFiles[`${project}.${collectionName}`] = file;
 	});
 
-
-	let host = config.db.host[0];
-	let port = config.db.port[0];
-
 	let dbUsername = config.db.username;
 	let dbPassword = config.db.password;
 
 	let promises = [];
 	let bucketItrPromises = [];
+	let hostString = DB(systemLogger).getHostString();
 
 	Object.keys(importCollectionFiles).forEach(collection => {
 
@@ -1177,7 +1175,7 @@ function _importBSON(account, project, username, dir){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --port ${port} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
+			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
 			{
 				cwd: __dirname
 			}, function (err) {
