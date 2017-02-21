@@ -123,6 +123,7 @@
 			params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
 			params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
 			params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
+			params.config_js += "\n\nserver_config.euCountriesCode = " + JSON.stringify(addressMeta.euCountriesCode) + ";";
 			params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
 			params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
 			params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";

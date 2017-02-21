@@ -34,9 +34,9 @@
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService", "$timeout"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService, $timeout) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -55,6 +55,29 @@
 		vm.useReCapthca = false;
 		vm.registering = false;
 		vm.showLegalText = false;
+
+		vm.jobTitles = [
+			"Director",
+			"Architect",
+			"Architectural assistant",
+			"BIM Manager",
+			"Structural engineer",
+			"Civil engineer",
+			"MEP engineer",
+			"Mechanical engineer",
+			"Facilities Manager",
+			"Other"
+		];
+
+		vm.firstCountries = [
+			{name: "United Kingdom", code: "GB"},
+			{name: "Europe", code: "EU"},
+			{name: "United States", code: "US"},
+			{name: "Canada", code: "CA"},
+			{name: "Other", code: "other"}
+		];
+
+		vm.countries = vm.firstCountries;
 
 		/*
 		 * Auth stuff
@@ -108,6 +131,54 @@
 				vm.registerErrorMessage = "";
 			}
 		}, true);
+
+		vm.resetCountry = true;
+		vm.otherCountries = serverConfig.countries.concat();
+		vm.euCountries = [];
+
+		for(var i=vm.otherCountries.length - 1; i >=0; i--){
+			var code = vm.otherCountries[i].code;
+			if(serverConfig.euCountriesCode.indexOf(code) !== -1 || code === 'CA' || code === 'US'){
+				vm.otherCountries.splice(i, 1);
+			}
+		}
+
+		serverConfig.countries.forEach(function(country){
+			if(serverConfig.euCountriesCode.indexOf(country.code) !== -1){
+				vm.euCountries.push(country);
+			}
+		});
+
+		function resetCountryList(){
+
+			vm.newUser.country = '';
+
+			$timeout(function(){
+				vm.resetCountry = false;
+				document.getElementById('country-select').click();
+				vm.resetCountry = true;
+			}, 100);
+		}
+
+		vm.closeSelect = function(){
+			if(vm.newUser.country === 'other'){
+				
+				vm.countries = vm.otherCountries;
+				resetCountryList();
+
+			} else if(vm.newUser.country === 'EU') {
+
+				vm.countries = vm.euCountries;
+				resetCountryList();
+			}
+		}
+
+		vm.openSelect = function(){
+			if(vm.resetCountry){
+				vm.countries = vm.firstCountries;
+			}
+			
+		}
 
 		/**
 		 * Attempt to register
