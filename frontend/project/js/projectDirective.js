@@ -315,8 +315,7 @@
 		 * Watch for events
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
-			var parent = angular.element($element[0].querySelector("#project")),
-				element;
+			var element;
 
 			vm.event = event;
 
@@ -346,7 +345,7 @@
 				if (event.value) {
 					// Create measure display
 					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
-					parent.append(element);
+					angular.element($element[0].querySelector("#project")).append(element);
 					$compile(element)($scope);
 
 				}

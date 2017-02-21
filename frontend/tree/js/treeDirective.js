@@ -128,7 +128,7 @@
 		/**
 		 * traverse children of a node recursively
 		 * @param {Object} node
-		 * @param {Function} callback 
+		 * @param {Function} callback
 		 */
 		function traverseNode(node, callback){
 			callback(node);
@@ -144,13 +144,16 @@
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				ids.push(node._id);
+				if (!node.children)
+				{
+					ids.push(node._id);
+				}
 			});
 		}
 
 		function getVisibleArray(account, project){
 			if(!vm.visible[account + '@' + project]){
-				vm.visible[account + '@' + project] = [];
+				vm.visible[account + '@' + project] = new Set();
 			}
 
 			return vm.visible[account + '@' + project];
@@ -158,7 +161,7 @@
 
 		function getInvisibleArray(account, project){
 			if(!vm.invisible[account + '@' + project]){
-				vm.invisible[account + '@' + project] = [];
+				vm.invisible[account + '@' + project] = new Set();
 			}
 
 			return vm.invisible[account + '@' + project];
@@ -171,42 +174,32 @@
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
-			var idx = -1;
-
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			// TODO: This function is probably in-efficient
-			if (visibility === "invisible")
-			{
-				if ((idx = invisible.indexOf(node._id)) !== -1)
+			if (!node.children)
+			{		
+				if (visibility === "invisible")
 				{
+					if (invisible.has(node._id))
+					{
+						invisible.delete(node._id);
+					} else {
+						invisible.add(node._id);
+					}
 
-					invisible.splice(idx,1);
+					visible.delete(node._id);
 				} else {
-					invisible.push(node._id);
-				}
+					if (visible.has(node._id))
+					{
+						visible.delete(node._id);
+					} else {
+						visible.add(node._id);
+					}
 
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
-					visible.splice(idx, 1);
+					invisible.delete(node._id);
 				}
-			} else {
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
-
-					visible.splice(idx,1);
-				} else {
-					visible.push(node._id);
-				}
-
-				if ((idx = invisible.indexOf(node._id)) !== -1)
-				{
-					invisible.splice(idx, 1);
-				}
-
 			}
-
 			node.toggleState = visibility;
 		};
 
@@ -262,7 +255,7 @@
 						}
 
 						while (!endOfSplice) {
-							
+
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
 
 								if(vm.nodesToShow[index + 1].hasSubProjTree){
@@ -496,21 +489,32 @@
 
 			vm.toggledNode = node;
 
-			traverseNode(node, function(myNode){
-				if(myNode === node){
-					//toggle yourself
-					vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
-					nodeToggleState = node.toggleState;
-					updateClickedHidden(node);
-					updateClickedShown(node);
-				} else {
-					//toggle children
-					vm.setToggleState(myNode, nodeToggleState);
+			//toggle yourself
+			vm.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
+			nodeToggleState = node.toggleState;
+			updateClickedHidden(node);
+			updateClickedShown(node);
+
+			var stack = [node];
+			var head = null;
+
+			while (stack.length > 0)
+			{
+				var head = stack.pop();
+
+				if (node !== head) {
+					vm.setToggleState(head, nodeToggleState);
 				}
-				
-			});
-			
-			
+
+				if (head.children)
+				{
+					for(var i = 0; i < head.children.length; i++)
+					{
+						stack.push(head.children[i]);
+					}
+				}
+			}
+
 			//a__b .. c__d
 			//toggle parent
 			path = node.path.split("__");
@@ -549,14 +553,11 @@
 								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								//vm.setToggleState(vm.nodesToShow[j], "invisible");
 								vm.nodesToShow[j].toggleState = 'invisible';
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								//vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
 								vm.nodesToShow[j].toggleState = 'parentOfInvisible';
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
-								//vm.nodesToShow[j].toggleState = 'visible';
 							}
 						}
 					}
@@ -580,30 +581,14 @@
 			{
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (invisible.indexOf(childNodes[i]) === -1)
-					{
-						invisible.push(childNodes[i]);
-					}
-
-					idx = visible.indexOf(childNodes[i]);
-					if (idx !== -1)
-					{
-						visible.splice(idx,1);
-					}
+					invisible.add(childNodes[i]);
+					visible.delete(childNodes[i]);
 				}
 			} else {
 				for(i = 0; i < childNodes.length; i++)
 				{
-					if (visible.indexOf(childNodes[i]) === -1)
-					{
-						visible.push(childNodes[i]);
-					}
-
-					idx = invisible.indexOf(childNodes[i]);
-					if (idx !== -1)
-					{
-						invisible.splice(idx,1);
-					}
+					visible.add(childNodes[i]);
+					invisible.delete(childNodes[i]);
 				}
 			}
 
@@ -742,15 +727,12 @@
 
 				// Separately highlight the children
 				// but only for multipart meshes
-				if (document.getElementsByTagName("multipart").length)
-				{
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-						source: "tree",
-						account: node.account,
-						project: node.project,
-						ids: map
-					});
-				}
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					ids: map
+				});
 			}
 		};
 
