@@ -69,15 +69,16 @@
 			"Other"
 		];
 
-		vm.firstCountries = [
-			{name: "United Kingdom", code: "GB"},
-			{name: "Europe", code: "EU"},
-			{name: "United States", code: "US"},
-			{name: "Canada", code: "CA"},
-			{name: "Other", code: "other"}
-		];
+		vm.countries = serverConfig.countries.concat();
+		var gbIndex;
+		
+		vm.countries.find(function(country, i){
+			if(country.code === 'GB'){
+				gbIndex = i;
+			}
+		});
 
-		vm.countries = vm.firstCountries;
+		vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
 		/*
 		 * Auth stuff
@@ -131,54 +132,6 @@
 				vm.registerErrorMessage = "";
 			}
 		}, true);
-
-		vm.resetCountry = true;
-		vm.otherCountries = serverConfig.countries.concat();
-		vm.euCountries = [];
-
-		for(var i=vm.otherCountries.length - 1; i >=0; i--){
-			var code = vm.otherCountries[i].code;
-			if(serverConfig.euCountriesCode.indexOf(code) !== -1 || code === 'CA' || code === 'US'){
-				vm.otherCountries.splice(i, 1);
-			}
-		}
-
-		serverConfig.countries.forEach(function(country){
-			if(serverConfig.euCountriesCode.indexOf(country.code) !== -1){
-				vm.euCountries.push(country);
-			}
-		});
-
-		function resetCountryList(){
-
-			vm.newUser.country = '';
-
-			$timeout(function(){
-				vm.resetCountry = false;
-				document.getElementById('country-select').click();
-				vm.resetCountry = true;
-			}, 100);
-		}
-
-		vm.closeSelect = function(){
-			if(vm.newUser.country === 'other'){
-				
-				vm.countries = vm.otherCountries;
-				resetCountryList();
-
-			} else if(vm.newUser.country === 'EU') {
-
-				vm.countries = vm.euCountries;
-				resetCountryList();
-			}
-		}
-
-		vm.openSelect = function(){
-			if(vm.resetCountry){
-				vm.countries = vm.firstCountries;
-			}
-			
-		}
 
 		/**
 		 * Attempt to register
@@ -237,19 +190,37 @@
 			doRegister = true,
 			allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
+			console.log(vm.newUser);
+
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
-				(angular.isDefined(vm.newUser.password))) {
+				(angular.isDefined(vm.newUser.password)) &&
+				(angular.isDefined(vm.newUser.firstName)) &&
+				(angular.isDefined(vm.newUser.lastName)) &&
+				(angular.isDefined(vm.newUser.company)) &&
+				(angular.isDefined(vm.newUser.jobTitle)) &&
+				(vm.newUser.jobTitle !== 'Other' || angular.isDefined(vm.newUser.otherJobTitle)) &&
+				(angular.isDefined(vm.newUser.country)) 
+
+				) {
 				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.showLegalText) {
 						doRegister = vm.newUser.tcAgreed;
 					}
 
 					if (doRegister) {
+
 						data = {
 							email: vm.newUser.email,
-							password: vm.newUser.password
+							password: vm.newUser.password,
+							firstName: vm.newUser.firstName,
+							lastName: vm.newUser.lastName,
+							company: vm.newUser.company,
+							jobTitle: vm.newUser.jobTitle === 'Other' ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
+							country: vm.newUser.country,
+							phoneNo: vm.newUser.phoneNo
 						};
+
 						if (vm.useReCapthca) {
 							data.captcha = vm.reCaptchaResponse;
 						}

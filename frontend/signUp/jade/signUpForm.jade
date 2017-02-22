@@ -36,7 +36,7 @@ form
 			input(type="text", ng-model="vm.newUser.phoneNo")
 		md-input-container(flex)
 			label Country
-			md-select#country-select(ng-model="vm.newUser.country", md-on-close="vm.closeSelect()", md-on-open="vm.openSelect()", required)
+			md-select#country-select(ng-model="vm.newUser.country", required)
 				md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
 
 
