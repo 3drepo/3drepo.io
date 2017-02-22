@@ -217,7 +217,7 @@
 							lastName: vm.newUser.lastName,
 							company: vm.newUser.company,
 							jobTitle: vm.newUser.jobTitle === 'Other' ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
-							country: vm.newUser.country,
+							countryCode: vm.newUser.country,
 							phoneNo: vm.newUser.phoneNo
 						};
 

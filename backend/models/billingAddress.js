@@ -37,6 +37,8 @@
 		postalCode: { type: String },
 		countryCode: { type: String },
 		state: { type: String },
+		jobTitle: {type: String },
+		phoneNo: {type: String }
 	});
 
 

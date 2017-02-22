@@ -221,6 +221,14 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	});
 
+	let billingInfo = {};
+
+	['firstName', 'lastName', 'phoneNo', 'countryCode', 'jobTitle', 'company'].forEach(key => {
+		if (customData && customData[key]){
+			billingInfo[key] = customData[key];
+		}
+	});
+
 	//cleanedCustomData.billing = {};
 
 	var expiryAt = new Date();
@@ -250,6 +258,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
 		}
 
+	}).then(() => {
+		return User.findByUserName(username);
+	}).then(user => {
+		user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
+		return user.save();
+	}).then(() => {
+		return Promise.resolve(cleanedCustomData.emailVerifyToken);
 	});
 };
 

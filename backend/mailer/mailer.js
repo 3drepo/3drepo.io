@@ -135,6 +135,20 @@ function sendPaymentReceivedEmailToSales(data, attachments){
 	
 }
 
+function sendNewUser(data){
+	'use strict';
+
+	let template = require('./templates/newUser');
+
+	data.url = getBaseURL();
+	
+	if(config.contact && config.contact.sales){
+		//console.log(config.contact.sales);
+		return sendEmail(template, config.contact.sales, data);
+	} else {
+		return Promise.resolve();
+	}
+}
 
 function sendContactEmail(data){
 	'use strict';
@@ -207,5 +221,6 @@ module.exports = {
 	sendProjectInvitation,
 	sendSubscriptionSuspendedEmail,
 	sendPaymentReceivedEmailToSales,
-	sendPaymentRefundedEmail
+	sendPaymentRefundedEmail,
+	sendNewUser,
 }
