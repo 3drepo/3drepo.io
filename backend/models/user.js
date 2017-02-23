@@ -58,7 +58,8 @@ var schema = mongoose.Schema({
 			token: String
 		},
 		billing: { type: userBilling, default: userBilling },
-		avatar: Object
+		avatar: Object,
+		lastLoginAt: Date
 	},
 	roles: [{}]
 });
@@ -96,7 +97,14 @@ schema.statics.authenticate = function(logger, username, password){
 		if(user.customData && user.customData.inactive) {
 			return Promise.reject({resCode: responseCodes.USER_NOT_VERIFIED});
 		}
-		return Promise.resolve(user);
+
+		if(!user.customData){
+			user.customData = {};
+		}
+		
+		user.customData.lastLoginAt = new Date();
+		return user.save();
+
 	}).catch( err => {
 		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
 	});

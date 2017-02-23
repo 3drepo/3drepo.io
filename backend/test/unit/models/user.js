@@ -56,7 +56,9 @@ describe('User', function(){
 			let username = 'a';
 			let password = 'b';
 
-			let stub = sinon.stub(User, 'findByUserName').returns(Promise.resolve({username}));
+			let stub = sinon.stub(User, 'findByUserName').returns(Promise.resolve({
+				save: () => { return {username} }
+			}));
 			//let spy = sinon.spy(modelFactoryMock.db, 'authenticate');
 
 
