@@ -154,13 +154,27 @@ describe('User', function(){
 				roles: []
 			}
 
-			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
+			let stubs = [];
+			stubs.push(sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0)));
+			stubs.push(
+				sinon.stub(User, 'findByUserName').returns(Promise.resolve({
+					save: () => Promise.resolve(),
+					customData: {
+						billing:{
+							billingInfo:{
+								changeBillingAddress: () => true
+							}
+						}
+					}
+				}))
+			);
+			
 
 			return User.createUser({}, username, password, options, 1).then(res => {
 				expectedCallWithOptions.customData.emailVerifyToken = res;
 				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
 				spy.restore();
-				stub.restore();
+				stubs.forEach(stub => stub.restore());
 			});
 		});
 

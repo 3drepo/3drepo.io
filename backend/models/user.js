@@ -259,7 +259,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 
 	}).then(() => {
-		return User.findByUserName(username);
+		return this.findByUserName(username);
 	}).then(user => {
 		user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
 		return user.save();
