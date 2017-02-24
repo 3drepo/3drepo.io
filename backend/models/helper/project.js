@@ -1168,7 +1168,6 @@ function _importBSON(account, project, username, dir){
 	let dbPassword = config.db.password;
 
 	let promises = [];
-	let bucketItrPromises = [];
 
 	Object.keys(importCollectionFiles).forEach(collection => {
 
@@ -1191,100 +1190,57 @@ function _importBSON(account, project, username, dir){
 		}));
 	});
 
+	function renameStash(bucketName){
+
+		let bucket = stash.getGridFSBucket(account, bucketName);
+
+		return new Promise((resolve, reject) => {
+
+			let renamePromises = [];
+
+			bucket.find().forEach(file => {
+
+				let newFileName = file.filename;
+				newFileName = newFileName.split('/');
+				newFileName[1] = account;
+				newFileName = newFileName.join('/');
+
+				renamePromises.push(
+
+					new Promise((resolve, reject) => {
+
+						bucket.rename(file._id, newFileName, function(err) {
+							if(err){
+								systemLogger.logError('error while renaming sample project stash',
+									{ err: err, bucketName: bucketName, db: account, _id: file._id, filename: file.filename }
+								);
+								reject(err);
+							} else {
+								resolve();
+							}
+
+						});
+					})
+
+				);
+
+			}, err => {
+				if(err){
+					reject(err);
+				} else {
+					return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
+				}
+			});
+
+		});
+	}
+
 	return Promise.all(promises).then(() => {
-		//rename json_mpc stash
 
-		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
-
-		bucketItrPromises.push(
-
-			new Promise((resolve, reject) => {
-
-				let renamePromises = [];
-
-				jsonBucket.find().forEach(file => {
-
-					let newFileName = file.filename;
-					newFileName = newFileName.split('/');
-					newFileName[1] = account;
-					newFileName = newFileName.join('/');
-
-					renamePromises.push(
-
-						new Promise((resolve, reject) => {
-
-							jsonBucket.rename(file._id, newFileName, function(err) {
-								if(err){
-									systemLogger.logError('error while renaming sample project stash',
-										{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
-									);
-									reject(err);
-								} else {
-									resolve();
-								}
-
-							});
-						})
-
-					);
-
-				}, err => {
-					if(err){
-						reject(err);
-					} else {
-						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
-					}
-				});
-
-			})
-		);
-
-		//rename src stash
-		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
-
-		bucketItrPromises.push(
-			new Promise((resolve, reject) => {
-
-				let renamePromises = [];
-
-				srcBucket.find().forEach(file => {
-
-					let newFileName = file.filename;
-					newFileName = newFileName.split('/');
-					newFileName[1] = account;
-					newFileName = newFileName.join('/');
-
-					renamePromises.push(
-						new Promise((resolve, reject) => {
-							srcBucket.rename(file._id, newFileName, function(err) {
-
-								if(err) {
-									systemLogger.logError('error while renaming sample project stash',
-										{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
-									);
-
-									reject(err);
-
-								} else {
-									resolve();
-								}
-
-							});
-						})
-					);
-
-				}, err => {
-					if(err){
-						reject(err);
-					} else {
-						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
-					}
-				});
-
-			})
-		);
-
-		return Promise.all(bucketItrPromises);
+		return Promise.all([
+			renameStash(`${project}.stash.json_mpc`),
+			renameStash(`${project}.stash.src`)
+		]);
 
 	}).then(() => {
 		//change history time and author
@@ -1326,6 +1282,16 @@ function _importBSON(account, project, username, dir){
 		});
 
 		return;
+	}).catch(err => {
+
+		Mailer.sendImportError({
+			account,
+			project,
+			username,
+			err: err.message
+		});
+
+		return Promise.reject(err);
 	});
 
 }

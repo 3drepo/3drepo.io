@@ -196,6 +196,12 @@ function sendProjectInvitation(to, data){
 	return sendEmail(template, to, data);
 }
 
+function sendImportError(data){
+	'use strict';
+
+	let template = require('./templates/importError');
+	return sendEmail(template, config.contact.email, data);
+}
 
 module.exports = {
 	sendVerifyUserEmail,
@@ -207,5 +213,6 @@ module.exports = {
 	sendProjectInvitation,
 	sendSubscriptionSuspendedEmail,
 	sendPaymentReceivedEmailToSales,
-	sendPaymentRefundedEmail
+	sendPaymentRefundedEmail,
+	sendImportError
 }
