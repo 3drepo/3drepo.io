@@ -116,8 +116,8 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService",
-		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService", "BrowserDetect",
+		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService, BrowserDetect) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
@@ -149,6 +149,10 @@
 				fromState  : fromState,
 				fromParams : fromParams
 			};
+
+			if(toState.url !== 'notSupported' && BrowserDetect.browser === 'Explorer'){
+				$location.path('/notSupported');
+			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
