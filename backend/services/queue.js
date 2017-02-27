@@ -207,6 +207,28 @@
 	};
 
 	/*******************************************************************************
+	 * Dispatch work to regenerate a project's tree
+	 * @param {account} account - username
+	 * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+	 *******************************************************************************/
+	ImportQueue.prototype.reGenProjectTree = function (database, project) {
+		let corID = uuid.v1();
+
+
+		let msg = `genStash ${database} ${project} tree`;
+		
+		return this._dispatchWork(corID, msg).then(() => {
+
+			return new Promise((resolve, reject) => {
+				this.deferedObjs[corID] = {
+					resolve: () => resolve({corID, database, project}),
+					reject: errCode => reject({ corID, errCode, database, project })
+				};
+			});
+		});
+	};
+
+	/*******************************************************************************
 	 * Move a specified file to shared storage (area shared by queue workers)
 	 * move the file to shared storage space, put it in a corID/newFileName
 	 * note: using move(in fs.extra) instead of rename(in fs) as rename doesn"t allow cross device

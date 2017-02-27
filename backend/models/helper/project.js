@@ -1315,8 +1315,13 @@ function _importBSON(account, project, username, dir){
 		});
 
 		return Promise.all(updateIssuePromises);
+
 	}).then(() => {
 
+		return importQueue.reGenProjectTree(account, project);
+
+	}).then(() => {
+		
 		systemLogger.logInfo(`toy project BSON imported and renamed without error`,{
 			account,
 			project,
