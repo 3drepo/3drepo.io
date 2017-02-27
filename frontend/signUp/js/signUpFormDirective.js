@@ -34,9 +34,9 @@
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService", "$timeout"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService, $timeout) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -55,6 +55,30 @@
 		vm.useReCapthca = false;
 		vm.registering = false;
 		vm.showLegalText = false;
+
+		vm.jobTitles = [
+			"Director",
+			"Architect",
+			"Architectural assistant",
+			"BIM Manager",
+			"Structural engineer",
+			"Civil engineer",
+			"MEP engineer",
+			"Mechanical engineer",
+			"Facilities Manager",
+			"Other"
+		];
+
+		vm.countries = serverConfig.countries.concat();
+		var gbIndex;
+		
+		vm.countries.find(function(country, i){
+			if(country.code === 'GB'){
+				gbIndex = i;
+			}
+		});
+
+		vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
 		/*
 		 * Auth stuff
@@ -166,19 +190,37 @@
 			doRegister = true,
 			allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
+			console.log(vm.newUser);
+
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
-				(angular.isDefined(vm.newUser.password))) {
+				(angular.isDefined(vm.newUser.password)) &&
+				(angular.isDefined(vm.newUser.firstName)) &&
+				(angular.isDefined(vm.newUser.lastName)) &&
+				(angular.isDefined(vm.newUser.company)) &&
+				(angular.isDefined(vm.newUser.jobTitle)) &&
+				(vm.newUser.jobTitle !== 'Other' || angular.isDefined(vm.newUser.otherJobTitle)) &&
+				(angular.isDefined(vm.newUser.country)) 
+
+				) {
 				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.showLegalText) {
 						doRegister = vm.newUser.tcAgreed;
 					}
 
 					if (doRegister) {
+
 						data = {
 							email: vm.newUser.email,
-							password: vm.newUser.password
+							password: vm.newUser.password,
+							firstName: vm.newUser.firstName,
+							lastName: vm.newUser.lastName,
+							company: vm.newUser.company,
+							jobTitle: vm.newUser.jobTitle === 'Other' ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
+							countryCode: vm.newUser.country,
+							phoneNo: vm.newUser.phoneNo
 						};
+
 						if (vm.useReCapthca) {
 							data.captcha = vm.reCaptchaResponse;
 						}

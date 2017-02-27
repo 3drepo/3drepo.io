@@ -26,6 +26,7 @@
 	//var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
 	var User = require("../models/user");
+	var addressMeta = require("../models/addressMeta");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
@@ -174,9 +175,15 @@
 
 			if(resBody.success){
 				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+
 					email: req.body.email,
 					firstName: req.body.firstName,
-					lastName: req.body.lastName
+					lastName: req.body.lastName,
+					phoneNo: req.body.phoneNo,
+					countryCode: req.body.countryCode,
+					jobTitle: req.body.jobTitle,
+					company: req.body.company,
+
 				}, config.tokenExpiry.emailVerify);
 			} else {
 				//console.log(resBody);
@@ -185,6 +192,23 @@
 
 
 		}).then( data => {
+
+			let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
+			//send to sales
+			Mailer.sendNewUser({
+				email: req.body.email,
+				firstName: req.body.firstName,
+				lastName: req.body.lastName,
+				phoneNo: req.body.phoneNo,
+				country: country && country.name,
+				jobTitle: req.body.jobTitle,
+				company: req.body.company,
+			}).catch( err => {
+				// catch email error instead of returning to client
+				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				return Promise.resolve(err);
+			});
+
 			//send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
@@ -197,6 +221,9 @@
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
+
+
+
 
 		}).then(emailRes => {
 

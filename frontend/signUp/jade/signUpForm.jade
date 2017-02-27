@@ -1,13 +1,48 @@
 form
+
+	div(layout="row")
+		md-input-container(flex)
+			label First name
+			input(type="text", ng-model="vm.newUser.firstName", required)
+		md-input-container(flex)
+			label Last name
+			input(type="text", ng-model="vm.newUser.lastName", required)
+
 	md-input-container.md-block
 		label Username
-		input(type='text', ng-model='vm.newUser.username', ng-required, ng-keypress="vm.register($event)", tdr-focus="true")
+		input(type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true")
 	md-input-container.md-block
 		label Email
-		input(type='email', ng-model='vm.newUser.email', ng-required, ng-keypress="vm.register($event)")
+		input(type='email', ng-model='vm.newUser.email', required, ng-keypress="vm.register($event)")
+
+
+	div(layout="row")
+		md-input-container(flex)
+			label Company
+			input(type="text", ng-model="vm.newUser.company", required)
+		md-input-container(flex)
+			label Job title
+			md-select(ng-model="vm.newUser.jobTitle", required)
+				md-option(ng-repeat="jobTitle in vm.jobTitles", value="{{jobTitle}}") {{jobTitle}}
+
+	div(layout="row" ng-if="vm.newUser.jobTitle=='Other'")
+		md-input-container(flex)
+		md-input-container(flex)
+			input(type='text', ng-model='vm.newUser.otherJobTitle', placeholder='Please specify' ng-required="vm.newUser.jobTitle=='Other'")
+
+	div(layout="row")
+		md-input-container(flex)
+			label Phone number
+			input(type="text", ng-model="vm.newUser.phoneNo")
+		md-input-container(flex)
+			label Country
+			md-select#country-select(ng-model="vm.newUser.country", required)
+				md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
+
+
 	md-input-container.md-block(md-no-float)
 		label Password
-		input(type='password', ng-model='vm.newUser.password', ng-required ng-keypress="vm.register($event)")
+		input(type='password', ng-model='vm.newUser.password', required ng-keypress="vm.register($event)")
 
 	// Hidden inputs to prevent autofill
 	#signUpFormHiddenInputs(ng-show="false", layout="column")
@@ -27,5 +62,5 @@ form
 			md-progress-circular(md-mode="indeterminate", md-diameter="20")
 	h4.registerError {{vm.registerErrorMessage}}
 	div
-		a.registerLinks(target="_blank", href="/pricing") Pricing
+		a.registerLinks(target="_blank", href="http://3drepo.org/pricing/") Pricing
 		a.registerLinks(href="/") Log in

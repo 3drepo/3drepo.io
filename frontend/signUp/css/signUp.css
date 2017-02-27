@@ -3,6 +3,11 @@ sign-up .registerLinks {
     margin: 5px 20px 5px 0;
 }
 
+sign-up-form {
+    width: 600px;
+    padding: 0 40px;
+}
+
 sign-up-form #tc {
     width: 300px;
     margin: -15px 0 0 2px;
