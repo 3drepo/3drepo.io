@@ -9,7 +9,6 @@ sign-up-form {
 }
 
 sign-up-form #tc {
-    width: 300px;
     margin: -15px 0 0 2px;
 }
 sign-up-form #tc md-checkbox {
