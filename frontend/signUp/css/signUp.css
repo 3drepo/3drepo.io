@@ -4,12 +4,13 @@ sign-up .registerLinks {
 }
 
 sign-up-form {
-    width: 600px;
-    padding: 0 40px;
+    width: 750px;
+    padding: 0 30px;
 }
 
 sign-up-form #tc {
-    margin: -15px 0 0 2px;
+    margin-top: 15px;
+    margin-right: 15px;
 }
 sign-up-form #tc md-checkbox {
     margin : 0;
@@ -29,10 +30,10 @@ sign-up-form #tc a {
     outline: none;
 }
 
-sign-up-form #loginCaptcha {
+/*sign-up-form #loginCaptcha {
     margin: 10px 30px 10px 0;
 }
-
+*/
 sign-up-form #registerWait {
     height: 30px;
 }
