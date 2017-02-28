@@ -168,8 +168,7 @@
 				"signUp",
 				"contact",
 				"payment",
-				"billing",
-				"notSupported"
+				"billing"
 			],
 			"children": [{
 				"plugin": "account",

@@ -150,8 +150,8 @@
 				fromParams : fromParams
 			};
 
-			if(toState.url !== 'notSupported' && BrowserDetect.browser === 'Explorer'){
-				$location.path('/notSupported');
+			if(BrowserDetect.browser === 'Explorer'){
+				StateManager.messages.notSupported = true;
 			}
 
 			StateManager.handleStateChange(stateChangeObject);
@@ -190,9 +190,8 @@
 		};
 
 		this.changedState = {};
-
+		this.messages = {notSupported: false};
 		this.structure  = structure;
-
 		this.destroy = function()  {
 			delete this.state;
 			this.state = {};
