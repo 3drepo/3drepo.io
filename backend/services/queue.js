@@ -336,13 +336,16 @@
 
 					let defer = self.deferedObjs[rep.properties.correlationId];
 
-					let resErrorCode = parseInt(JSON.parse(rep.content)
-						.value);
+					let resData = JSON.parse(rep.content);
+
+					let resErrorCode = parseInt(resData.value);
+
+					let resErrorMessage = resData.message;
 
 					if (defer && resErrorCode === 0) {
 						defer.resolve();
 					} else if (defer) {
-						defer.reject(resErrorCode);
+						defer.reject(resErrorCode, resErrorMessage);
 					} else {
 						self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
 					}
