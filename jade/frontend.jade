@@ -65,6 +65,35 @@ html(lang="en" ng-app="3drepo")
 
 	body
 
+		style.
+			#notSupported {
+				position: fixed;
+				background-color: lightgoldenrodyellow;
+				padding: 100px 50px;
+				left: 0;
+				right: 0;
+				margin: auto;
+				width: 50%;
+				text-align: center;
+				z-index: 10;
+				top: 20%;
+				height: 70px;
+			}
+
+		#notSupported(style='visibility:hidden')
+			| Your browser is not supported.
+			| Please upgrade your browser to latest version of 
+			a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
+			| , 
+			a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
+			|  or 
+			a(target='_blank', href='https://www.microsoft.com/en-gb/windows/microsoft-edge') Edge
+			br
+			br
+			br
+			input(type='button', value='OK', style='padding:10px 60px;' onclick='document.getElementById("notSupported").style="visibility:hidden"')
+
+
 		// Plugin JADE Files
 		//each j in pluginJade
 			script(type="text/ng-template", id=j.id)
@@ -81,3 +110,8 @@ html(lang="en" ng-app="3drepo")
 				!= renderMe(j.path, locals)
 
 		home
+
+	script.
+		if(BrowserDetect.browser === 'Explorer'){
+			document.getElementById('notSupported').style="visiblity:show"
+		}

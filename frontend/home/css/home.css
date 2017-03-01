@@ -104,19 +104,6 @@ home md-radio-button ._md-label {
     line-height: 1.7;
 }
 
-home #notSupported {
-    position: fixed;
-    background-color: whitesmoke;
-    padding: 10px;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 70%;
-    text-align: center;
-    z-index: 10;
-    top: 0;
-}
-
 .inputHint {
     position: absolute;
     left: 2px;
