@@ -90,6 +90,7 @@
 		 */
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
+		vm.messages =  StateManager.messages;
 		vm.functions = StateManager.functions;
 		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
@@ -101,6 +102,8 @@
 		}
 		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
+
+
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
@@ -139,6 +142,10 @@
 						$compile(notLoggedInElement)($scope);
 					}
 				}
+			}, true);
+
+			$scope.$watch("vm.messages", function(){
+				console.log('vm.messages', vm.messages);
 			}, true);
 		});
 

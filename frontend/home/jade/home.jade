@@ -1,3 +1,10 @@
+#notSupported(ng-show="vm.messages.notSupported")
+	| Your browser is not supported.
+	| Please upgrade your browser to latest version of 
+	a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
+	|  or 
+	a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
+	
 img#homeBackground(src="/public/images/viewer_background.jpg")
 #legalLinks(layout="row")
 	a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{display.page}}") {{display.title}}
