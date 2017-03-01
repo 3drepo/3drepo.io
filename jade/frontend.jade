@@ -77,12 +77,13 @@ html(lang="en" ng-app="3drepo")
 				text-align: center;
 				z-index: 10;
 				top: 20%;
+				font-size: 20px;
 				height: 70px;
 			}
 
 		#notSupported(style='visibility:hidden')
 			| Your browser is not supported.
-			| Please upgrade your browser to latest version of 
+			| Please upgrade to the latest version of 
 			a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
 			| , 
 			a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
@@ -91,7 +92,7 @@ html(lang="en" ng-app="3drepo")
 			br
 			br
 			br
-			input(type='button', value='OK', style='padding:10px 60px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
+			input(type='button', value='OK', style='padding:10px 60px; font-size:14px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
 
 		// Plugin JADE Files
