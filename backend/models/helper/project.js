@@ -181,7 +181,7 @@ function importToyProject(username){
 	return createAndAssignRole(project, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		return importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
+		return importProject(account, project, username, setting, {type: 'toy' });
 	});
 }
 
@@ -1312,9 +1312,17 @@ function importProject(account, project, username, projectSetting, source, data)
 	return projectSetting.save().then(() => {
 
 		if(source.type === 'bson'){
+			
 			return _importBSON(account, project, username, source.dir);
 		} else if (source.type === 'upload'){
 			return _handleUpload(account, project, username, source.file, data);
+
+		} else if (source.type === 'toy'){
+
+			return importQueue.importToyProject(account, project).then(obj => {
+				let corID = obj.corID;
+				systemLogger.logInfo(`Job ${corID} imported without error`,{account, project, username});
+			});
 		}
 
 	}).then(() => {

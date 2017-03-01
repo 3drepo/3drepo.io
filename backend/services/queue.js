@@ -206,6 +206,27 @@
 
 	};
 
+
+	/*******************************************************************************
+	 * Dispatch work to import toyproject
+	 * @param {database} database - database name
+	 *******************************************************************************/
+	ImportQueue.prototype.importToyProject = function (database, project) {
+		let corID = uuid.v1();
+
+
+		let msg = `importToy ${database} ${project}`;
+		
+		return this._dispatchWork(corID, msg).then(() => {
+
+			return new Promise((resolve, reject) => {
+				this.deferedObjs[corID] = {
+					resolve: () => resolve({corID, database, project}),
+					reject: errCode => reject({ corID, errCode, database, project })
+				};
+			});
+		});
+	};
 	/*******************************************************************************
 	 * Dispatch work to regenerate a project's tree
 	 * @param {account} account - username
