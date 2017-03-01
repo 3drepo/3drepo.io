@@ -90,7 +90,6 @@
 		 */
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
-		vm.messages =  StateManager.messages;
 		vm.functions = StateManager.functions;
 		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
@@ -144,9 +143,6 @@
 				}
 			}, true);
 
-			$scope.$watch("vm.messages", function(){
-				console.log('vm.messages', vm.messages);
-			}, true);
 		});
 
 		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))

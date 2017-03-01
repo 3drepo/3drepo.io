@@ -116,8 +116,8 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService", "BrowserDetect",
-		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService, BrowserDetect) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService",
+		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
@@ -149,10 +149,6 @@
 				fromState  : fromState,
 				fromParams : fromParams
 			};
-
-			if(BrowserDetect.browser === 'Explorer'){
-				StateManager.messages.notSupported = true;
-			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
@@ -190,7 +186,6 @@
 		};
 
 		this.changedState = {};
-		this.messages = {notSupported: false};
 		this.structure  = structure;
 		this.destroy = function()  {
 			delete this.state;
