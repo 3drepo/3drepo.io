@@ -91,7 +91,7 @@ html(lang="en" ng-app="3drepo")
 			br
 			br
 			br
-			input(type='button', value='OK', style='padding:10px 60px;' onclick='document.getElementById("notSupported").style="visibility:hidden"')
+			input(type='button', value='OK', style='padding:10px 60px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
 
 		// Plugin JADE Files
@@ -113,5 +113,6 @@ html(lang="en" ng-app="3drepo")
 
 	script.
 		if(BrowserDetect.browser === 'Explorer'){
-			document.getElementById('notSupported').style="visiblity:show"
+			document.getElementById('notSupported').style.visibility='visible';
 		}
+
