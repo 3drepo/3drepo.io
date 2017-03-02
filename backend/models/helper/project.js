@@ -38,7 +38,6 @@ var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
-var DB = require('../../db/db');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -182,6 +181,18 @@ function importToyProject(username){
 		return Promise.resolve(data.setting);
 	}).then(setting => {
 		return importProject(account, project, username, setting, {type: 'toy' });
+	}).catch(err => {
+
+		Mailer.sendImportError({
+ 			account,
+ 			project,
+ 			username,
+ 			err: err.message,
+ 			corID: err.corID,
+ 			appId: err.appId
+ 		});
+
+		return Promise.reject(err);
 	});
 }
 
@@ -1147,159 +1158,6 @@ function _handleUpload(account, project, username, file, data){
 
 }
 
-function _importBSON(account, project, username, dir){
-	'use strict';
-
-	let importCollectionFiles = {};
-	
-	fs.readdirSync(`${__dirname}/${dir}`).forEach(file => {
-		// remove '.json' in string
-		let collectionName = file.split('.');
-		collectionName.pop();
-		collectionName = collectionName.join('.');
-
-		importCollectionFiles[`${project}.${collectionName}`] = file;
-	});
-
-	let dbUsername = config.db.username;
-	let dbPassword = config.db.password;
-
-	let promises = [];
-	let hostString = DB(systemLogger).getHostString();
-
-
-	Object.keys(importCollectionFiles).forEach(collection => {
-
-		let filename = importCollectionFiles[collection];
-
-		promises.push(new Promise((resolve, reject) => {
-
-			require('child_process').exec(
-			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
-			{
-				cwd: __dirname
-			}, function (err) {
-				if(err){
-					reject({message: err.message.replace(new RegExp(dbPassword, 'g'), '[password masked]').replace(new RegExp(dbUsername, 'g'), '[username masked]')});
-				} else {
-					resolve();
-				}
-			});
-
-		}));
-	});
-
-	function renameStash(bucketName){
-
-		let bucket = stash.getGridFSBucket(account, bucketName);
-
-		return new Promise((resolve, reject) => {
-
-			let renamePromises = [];
-
-			bucket.find().forEach(file => {
-
-				let newFileName = file.filename;
-				newFileName = newFileName.split('/');
-				newFileName[1] = account;
-				newFileName = newFileName.join('/');
-
-				renamePromises.push(
-
-					new Promise((resolve, reject) => {
-
-						bucket.rename(file._id, newFileName, function(err) {
-							if(err){
-								systemLogger.logError('error while renaming sample project stash',
-									{ err: err, bucketName: bucketName, db: account, _id: file._id, filename: file.filename }
-								);
-								reject(err);
-							} else {
-								resolve();
-							}
-
-						});
-					})
-
-				);
-
-			}, err => {
-				if(err){
-					reject(err);
-				} else {
-					return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
-				}
-			});
-
-		});
-	}
-
-	return Promise.all(promises).then(() => {
-
-		return Promise.all([
-			renameStash(`${project}.stash.json_mpc`),
-			renameStash(`${project}.stash.src`)
-		]);
-
-	}).then(() => {
-		//change history time and author
-		return History.findLatest({account: account, project: project}, { current: 0 });
-
-	}).then(history => {
-
-		history.author = username;
-		history.timestamp = new Date();
-
-		return history.save();
-
-	}).then(() => {
-
-		let Issue = require('../issue');
-
-		let updateIssuePromises = [];
-
-		Issue.find({account: account, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
-			issues.forEach(issue => {
-
-				issue.owner = account;
-
-				issue.comments.forEach(comment => {
-					comment.owner = username;
-				});
-
-				updateIssuePromises.push(issue.save());
-			});
-		});
-
-		return Promise.all(updateIssuePromises);
-
-	}).then(() => {
-
-		return importQueue.reGenProjectTree(account, project);
-
-	}).then(() => {
-		
-		systemLogger.logInfo(`toy project BSON imported and renamed without error`,{
-			account,
-			project,
-			username
-		});
-
-		return;
-	}).catch(err => {
-
-		Mailer.sendImportError({
-			account,
-			project,
-			username,
-			err: err.message
-		});
-
-		return Promise.reject(err);
-	});
-
-}
-
 function importProject(account, project, username, projectSetting, source, data){
 	'use strict';
 
@@ -1311,10 +1169,7 @@ function importProject(account, project, username, projectSetting, source, data)
 
 	return projectSetting.save().then(() => {
 
-		if(source.type === 'bson'){
-			
-			return _importBSON(account, project, username, source.dir);
-		} else if (source.type === 'upload'){
+		if (source.type === 'upload'){
 			return _handleUpload(account, project, username, source.file, data);
 
 		} else if (source.type === 'toy'){
