@@ -76,8 +76,8 @@
 
 			// self variable will be filled in by frontend
 			roundRobin.apiUrl = function(type, path) {
-				let typeFunctions = this.apiUrls[type];
-				let functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+				var typeFunctions = this.apiUrls[type];
+				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
 				this.apiUrlCounter[type] += 1;
 
