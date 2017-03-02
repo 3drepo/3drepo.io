@@ -82,7 +82,10 @@
 
 			// If someone tries to access the site through http redirect to the encrypted site.
 			http_app.get("*", function(req, res) {
-				res.redirect("https://" + req.headers.host + req.url);
+				//Do not redirect if user uses IE6 because it doesn't suppotr TLS 1.2
+				if(req.headers['user-agent'].indexOf('MSIE 6') === -1){
+					res.redirect("https://" + req.headers.host + req.url);
+				}
 			});
 
 			http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
