@@ -75,23 +75,6 @@
 		if (config.ssl["default"].ca) {
 			ssl_options.ca = fs.readFileSync(config.ssl["default"].ca, "utf8");
 		}
-
-		if (config.HTTPSredirect)
-		{
-			let http_app = express();
-
-			// If someone tries to access the site through http redirect to the encrypted site.
-			http_app.get("*", function(req, res) {
-				//Do not redirect if user uses IE6 because it doesn't suppotr TLS 1.2
-				if(req.headers['user-agent'].indexOf('MSIE 6') === -1){
-					res.redirect("https://" + req.headers.host + req.url);
-				}
-			});
-
-			http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
-				systemLogger.logInfo("Starting routing HTTP for " + config.servers[0].hostname + " service on port " + config.servers[0].http_port);
-			});
-		}
 	}
 
 	let serverStartFunction = function(serverHost, serverPort) {
@@ -108,6 +91,30 @@
 			cluster.fork();
 		}
 	} else {
+
+
+		if (config.HTTPSredirect)
+		{
+
+			let http_app = express();
+			let redirect = express();
+
+			// If someone tries to access the site through http redirect to the encrypted site.
+			http_app.use(vhost(config.host, redirect));
+			redirect.get("*", function(req, res) {
+				//Do not redirect if user uses IE6 because it doesn't suppotr TLS 1.2
+				if(!req.headers['user-agent'] || req.headers['user-agent'].toLowerCase().indexOf('msie 6') === -1){
+					res.redirect("https://" + req.headers.host + req.url);
+				} else {
+					res.sendFile(__dirname + '/jade/ie6.html');
+				}
+			});
+
+			// listen on hostname not working on ie6, therefore listen on 0.0.0.0, and use vhost lib instead
+			http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
+				systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
+			});
+		}
 
 		for(let subdomain in config.subdomains)
 		{
