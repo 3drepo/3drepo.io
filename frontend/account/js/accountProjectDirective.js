@@ -116,9 +116,12 @@
 		 */
 
 		if (vm.project.status === "processing") {
+
 			vm.project.uploading = true;
 			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
+			vm.fileUploadInfo = 'Processing...';
+			vm.showFileUploadInfo = true;
+
 			watchProjectStatus();
 		}
 		
@@ -344,6 +347,8 @@
 					else {
 
 						vm.uploadFileName = file.name;
+						vm.showFileUploadInfo = true;
+						vm.fileUploadInfo = 'Uploading...';
 
 						formData = new FormData();
 						formData.append("file", file);
@@ -355,6 +360,10 @@
 						if(desc){
 							formData.append('desc', desc);
 						}
+
+						// watch status before upload 
+						// if watching after uploading, for small models the app may miss the message  
+						watchProjectStatus();
 
 						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 
@@ -371,7 +380,10 @@
 							}
 							else {
 								console.log("Polling upload!");
-								watchProjectStatus();
+
+								vm.fileUploadInfo = 'Processing...';
+								vm.showFileUploadInfo = true;
+								
 								AnalyticService.sendEvent({
 									eventCategory: 'Project',
 									eventAction: 'upload'
@@ -387,6 +399,7 @@
 		 * Watch file upload status
 		 */
 		function watchProjectStatus(){
+
 			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
@@ -395,7 +408,7 @@
 						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
 						vm.project.timestamp = new Date();
 						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-						vm.fileUploadInfo = "Uploaded";
+						vm.fileUploadInfo = "Model imported successfully";
 						// clear revisions cache
 						vm.revisions = null;
 					}
@@ -404,7 +417,7 @@
 					if (data.hasOwnProperty("errorReason")) {
 						vm.fileUploadInfo = data.errorReason.message;
 					} else if (data.status === "failed") {
-						vm.fileUploadInfo = "Failed to upload file";
+						vm.fileUploadInfo = "Failed to import model";
 					}
 
 					vm.showUploading = false;
