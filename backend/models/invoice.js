@@ -85,7 +85,7 @@
 	});
 
 	schema.virtual("netAmount").get(function() {
-		return this.amount - this.taxAmount;
+		return roundTo2DP(this.amount - this.taxAmount);
 	});
 
 	schema.virtual("createdAtDate").get(function() {

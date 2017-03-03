@@ -131,7 +131,7 @@
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name) && (vm.uploadedFile.account === vm.account)) {
 
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 
 			}
 		});
@@ -281,7 +281,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload};
+						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload, tag: vm.tag, desc: vm.desc};
 						vm.closeDialog();
 					}
 				});
