@@ -38,6 +38,7 @@ var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
+var DB = require('../../db/db');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -180,7 +181,7 @@ function importToyProject(username){
 	return createAndAssignRole(project, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
+		return importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
 	});
 }
 
@@ -341,6 +342,13 @@ function createFederatedProject(account, project, subProjects){
 
 	let addSubProjects = [];
 
+	let files = function(data){
+		return [
+			{desc: 'json file', type: 'file', path: data.jsonFilename}, 
+			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
+		];
+	};
+
 	subProjects.forEach(subProject => {
 
 		if(subProject.database !== account){
@@ -371,7 +379,19 @@ function createFederatedProject(account, project, subProjects){
 
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
-		return importQueue.createFederatedProject(account, federatedJSON);
+		
+		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+			_deleteFiles(files(err));
+			return;
+		});
+
+	}).then(data => {
+
+
+		_deleteFiles(files(data));
+
+		return;
+
 	}).catch(err => {
 		//catch here to provide custom error message
 		if(err.errCode){
@@ -1062,35 +1082,39 @@ function uploadFile(req){
 
 }
 
+function _deleteFiles(files){
+	'use strict';
+
+	files.forEach(file => {
+
+		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+
+		deleteFile(file.path, function(err){
+			if(err){
+				systemLogger.logError(`error while deleting ${file.desc}`,{
+					message: err.message,
+					err: err,
+					file: file.path
+				});
+			} else {
+				systemLogger.logInfo(`${file.desc} deleted`,{
+					file: file.path
+				});
+			}
+		});
+	});
+}
+
 function _handleUpload(account, project, username, file, data){
 	'use strict';
 
-	let deleteFiles = function(filePath, fileDir, jsonFile){
 
-		[
+	let files = function(filePath, fileDir, jsonFile){
+		return [
 			{desc: 'tmp model file', type: 'file', path: filePath}, 
 			{desc: 'json file', type: 'file', path: jsonFile}, 
 			{desc: 'tmp dir', type: 'dir', path: fileDir}
-		].forEach(file => {
-
-			let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
-
-			deleteFile(file.path, function(err){
-				if(err){
-					systemLogger.logError(`error while deleting ${file.desc}`,{
-						message: err.message,
-						err: err,
-						file: file.path
-					});
-				} else {
-					systemLogger.logInfo(`${file.desc} deleted`,{
-						file: file.path
-					});
-				}
-			});
-		});
-
-
+		];
 	};
 
 	return importQueue.importFile(
@@ -1112,12 +1136,12 @@ function _handleUpload(account, project, username, file, data){
 			username
 		});
 
-		deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
+		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
 		return Promise.resolve(obj);
 
 	}).catch(err => {
 
-		deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
+		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
 		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
 	});
 
@@ -1137,14 +1161,12 @@ function _importBSON(account, project, username, dir){
 		importCollectionFiles[`${project}.${collectionName}`] = file;
 	});
 
-
-	let host = config.db.host[0];
-	let port = config.db.port[0];
-
 	let dbUsername = config.db.username;
 	let dbPassword = config.db.password;
 
 	let promises = [];
+	let bucketItrPromises = [];
+	let hostString = DB(systemLogger).getHostString();
 
 	Object.keys(importCollectionFiles).forEach(collection => {
 
@@ -1153,7 +1175,7 @@ function _importBSON(account, project, username, dir){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${host} --port ${port} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
+			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
 			{
 				cwd: __dirname
 			}, function (err) {
@@ -1169,45 +1191,98 @@ function _importBSON(account, project, username, dir){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
-		systemLogger.logInfo(`toy project BSON imported without error`,{
-			account,
-			project,
-			username
-		});
 
 		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
 
-		jsonBucket.find().forEach(file => {
+		bucketItrPromises.push(
 
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = account;
-			newFileName = newFileName.join('/');
-			jsonBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
-				);
-			});
-		});
+			new Promise((resolve, reject) => {
+
+				let renamePromises = [];
+
+				jsonBucket.find().forEach(file => {
+
+					let newFileName = file.filename;
+					newFileName = newFileName.split('/');
+					newFileName[1] = account;
+					newFileName = newFileName.join('/');
+
+					renamePromises.push(
+
+						new Promise((resolve, reject) => {
+
+							jsonBucket.rename(file._id, newFileName, function(err) {
+								if(err){
+									systemLogger.logError('error while renaming sample project stash',
+										{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
+									);
+									reject(err);
+								} else {
+									resolve();
+								}
+
+							});
+						})
+
+					);
+
+				}, err => {
+					if(err){
+						reject(err);
+					} else {
+						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
+					}
+				});
+
+			})
+		);
 
 		//rename src stash
 		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
 
-		srcBucket.find().forEach(file => {
+		bucketItrPromises.push(
+			new Promise((resolve, reject) => {
 
-			let newFileName = file.filename;
-			newFileName = newFileName.split('/');
-			newFileName[1] = account;
-			newFileName = newFileName.join('/');
-			srcBucket.rename(file._id, newFileName, function(err) {
-				err && systemLogger.logError('error while renaming sample project stash',
-					{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
-				);
-			});
+				let renamePromises = [];
 
-		});
+				srcBucket.find().forEach(file => {
 
-		return Promise.resolve();
+					let newFileName = file.filename;
+					newFileName = newFileName.split('/');
+					newFileName[1] = account;
+					newFileName = newFileName.join('/');
+
+					renamePromises.push(
+						new Promise((resolve, reject) => {
+							srcBucket.rename(file._id, newFileName, function(err) {
+
+								if(err) {
+									systemLogger.logError('error while renaming sample project stash',
+										{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
+									);
+
+									reject(err);
+
+								} else {
+									resolve();
+								}
+
+							});
+						})
+					);
+
+				}, err => {
+					if(err){
+						reject(err);
+					} else {
+						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
+					}
+				});
+
+			})
+		);
+
+		return Promise.all(bucketItrPromises);
 
 	}).then(() => {
 		//change history time and author
@@ -1240,6 +1315,20 @@ function _importBSON(account, project, username, dir){
 		});
 
 		return Promise.all(updateIssuePromises);
+
+	}).then(() => {
+
+		return importQueue.reGenProjectTree(account, project);
+
+	}).then(() => {
+		
+		systemLogger.logInfo(`toy project BSON imported and renamed without error`,{
+			account,
+			project,
+			username
+		});
+
+		return;
 	});
 
 }
@@ -1270,6 +1359,16 @@ function importProject(account, project, username, projectSetting, source, data)
 		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
 
 		return projectSetting.save();
+
+	}).then(() => {
+
+		systemLogger.logInfo(`Project from source ${source.type} has imported successfully`, {
+			account,
+			project,
+			username
+		});
+
+		return;
 
 	}).catch(err => {
 

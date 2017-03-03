@@ -655,6 +655,29 @@
 		return mongo.authDB;
 	};
 
+
+	/*******************************************************************************
+	 * Return host string for mongoimport
+	 *
+	 ******************************************************************************/
+	MongoWrapper.prototype.getHostString = function()
+	{
+
+		let connectString = mongo.rsName ? mongo.rsName + '/' : '' ;
+
+		let hostPorts = [];
+		/* jshint ignore:start */
+		for(let host in mongo.host)
+		/* jshint ignore:end */
+		{
+			hostPorts.push(mongo.host[host] + ":" + mongo.port[host]);
+		}
+
+		connectString += hostPorts.join(",");
+
+		return connectString;
+	};
+
 	module.exports = function(logger) {
 		return new MongoWrapper(logger);
 	};

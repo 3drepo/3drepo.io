@@ -54,9 +54,9 @@
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -131,7 +131,7 @@
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name) && (vm.uploadedFile.account === vm.account)) {
 
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.tag, vm.desc);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 
 			}
 		});
@@ -174,6 +174,10 @@
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'view'
+					});
 				}
 			}
 		};
@@ -206,6 +210,12 @@
 						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project.name + "/download/latest"),
 						'_blank' 
 					);
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Project',
+						eventAction: 'download'
+					});
+
 					break;
 
 				case "team":
@@ -271,7 +281,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload};
+						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload, tag: vm.tag, desc: vm.desc};
 						vm.closeDialog();
 					}
 				});
@@ -283,6 +293,10 @@
 		*/
 		vm.goToRevision = function(revId){
 			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
+			AnalyticService.sendEvent({
+				eventCategory: 'Project',
+				eventAction: 'view'
+			});
 		};
 
 		/**
@@ -358,6 +372,10 @@
 							else {
 								console.log("Polling upload!");
 								watchProjectStatus();
+								AnalyticService.sendEvent({
+									eventCategory: 'Project',
+									eventAction: 'upload'
+								});
 							}
 						});
 					}

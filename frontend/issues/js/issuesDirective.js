@@ -49,9 +49,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -463,6 +463,12 @@
 
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
+
+
+			AnalyticService.sendEvent({
+				eventCategory: 'Issue',
+				eventAction: 'view'
+			});
 		};
 
 		/**

@@ -159,51 +159,73 @@
 		let filename = `${newFileDir}/obj.json`;
 
 		return new Promise((resolve, reject) => {
-				fs.mkdir(this.sharedSpacePath, function (err) {
-					if (!err || err && err.code === "EEXIST") {
-						resolve();
-					} else {
+			fs.mkdir(this.sharedSpacePath, function (err) {
+				if (!err || err && err.code === "EEXIST") {
+					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		})
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				fs.mkdir(newFileDir, function (err) {
+					if (err) {
 						reject(err);
+					} else {
+						resolve();
 					}
-				});
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					fs.mkdir(newFileDir, function (err) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-
-				});
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					fs.writeFile(filename, JSON.stringify(defObj), { flag: "a+" }, err => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
-			})
-			.then(() => {
-				let msg = `genFed ${filename} ${account}`;
-				return this._dispatchWork(corID, msg);
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					this.deferedObjs[corID] = {
-						resolve: () => resolve(corID),
-						reject: errCode => reject({ corID, errCode })
-					};
 				});
 
 			});
+		})
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				fs.writeFile(filename, JSON.stringify(defObj), { flag: "a+" }, err => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			});
+		})
+		.then(() => {
+			let msg = `genFed ${filename} ${account}`;
+			return this._dispatchWork(corID, msg);
+		})
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				this.deferedObjs[corID] = {
+					resolve: () => resolve({corID, newFileDir, jsonFilename: filename}),
+					reject: errCode => reject({ corID, errCode, newFileDir, jsonFilename: filename })
+				};
+			});
 
+		});
+
+	};
+
+	/*******************************************************************************
+	 * Dispatch work to regenerate a project's tree
+	 * @param {account} account - username
+	 * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+	 *******************************************************************************/
+	ImportQueue.prototype.reGenProjectTree = function (database, project) {
+		let corID = uuid.v1();
+
+
+		let msg = `genStash ${database} ${project} tree`;
+		
+		return this._dispatchWork(corID, msg).then(() => {
+
+			return new Promise((resolve, reject) => {
+				this.deferedObjs[corID] = {
+					resolve: () => resolve({corID, database, project}),
+					reject: errCode => reject({ corID, errCode, database, project })
+				};
+			});
+		});
 	};
 
 	/*******************************************************************************
@@ -332,6 +354,11 @@
 	};
 
 	ImportQueue.prototype.insertEventMessage = function (msg) {
+		
+		if(!this.channel){
+			return;
+		}
+
 		msg = JSON.stringify(msg);
 
 		return this.channel.assertExchange(this.eventExchange, "fanout", {

@@ -116,7 +116,8 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService",
+		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
@@ -149,10 +150,6 @@
 				fromParams : fromParams
 			};
 
-			if(typeof ga !== "undefined" && ga !== null){
-				ga("send", "pageview", $location.path());
-			}
-
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
@@ -162,6 +159,8 @@
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
+
+			AnalyticService.sendPageView(location);
 
 			var queryParams = $location.search();
 
