@@ -1235,7 +1235,7 @@ schema.methods.getBCFMarkup = function(unit){
 				},
 				'Priority': this.priority,
 				'Title': this.name ,
-				'CreationDate': moment(this.created).utc().format() ,
+				'CreationDate': moment(this.created).format() ,
 				'CreationAuthor': this.owner,
 				'Description': this.desc
 			},
@@ -1274,7 +1274,10 @@ schema.methods.getBCFMarkup = function(unit){
 			'Viewpoint': {
 				'@': {Guid: utils.uuidToString(comment.viewpoint)}
 			},
-			'Date': moment(comment.created).utc().format()
+			'Date': moment(comment.created).format(),
+			// bcf 1.0 for back comp
+			'Status': this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, ' ')) : '',
+			'VerbalStatus': this.status ? this.status : (this.closed ? 'closed' : 'open')
 		};
 
 		_.get(comment, 'extras.ModifiedDate') && (commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate'));
