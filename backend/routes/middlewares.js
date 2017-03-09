@@ -202,6 +202,15 @@ function connectQueue(req, res, next){
 
 }
 
+function isAccountAdminHelper(username, account){
+	return checkSystemPermissions(
+		username, 
+		account, 
+		'', 
+		RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+	);
+}
+
 function isAccountAdmin(req, res, next){
 	'use strict';
 
@@ -285,6 +294,7 @@ var middlewares = {
 	loggedIn,
 	checkRole,
 	hasReadAccessToProjectHelper,
+	isAccountAdminHelper,
 	createQueueInstance
 };
 

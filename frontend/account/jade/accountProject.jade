@@ -12,10 +12,10 @@ div(layout="row", layout-align="start center", flex)
 			p.projectName(flex) {{vm.project.name}}
 
 	.projectRight(layout="row", layout-align="start center")
-		.projectUploadInfo(ng-if="vm.project.uploading", layout="row", layout-align="start center")
+		.projectUploadInfo(layout="row", layout-align="start center")
 			//p.projectUploadFilename {{vm.uploadFileName}}
-			p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
-			md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
+			p.projectUploadInfo() {{vm.fileUploadInfo}}
+			md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.project.uploading")
 
 		p.projectTimestamp {{vm.project.timestampPretty}}
 

@@ -67,7 +67,13 @@ function NotificationService(serverConfig, $injector){
 
 	function joinRoom(account, project){
 		
-		var room =  account + '::' + project;
+		var projectNameSpace = '';
+		
+		if(project){
+			projectNameSpace = '::' + project;
+		}
+
+		var room =  account + projectNameSpace;
 		if(joined.indexOf(room) === -1){
 
 			socket.emit('join', {account: account, project: project});
@@ -77,6 +83,12 @@ function NotificationService(serverConfig, $injector){
 
 	function getEventName(account, project, keys, event){
 
+		var projectNameSpace = '';
+		
+		if(project){
+			projectNameSpace = '::' + project;
+		}
+		
 		keys = keys || [];
 		var keyString = '';
 		
@@ -84,7 +96,7 @@ function NotificationService(serverConfig, $injector){
 			keyString =  '::' + keys.join('::');
 		}
 
-		return account + '::' + project +  keyString + '::' + event;
+		return account + projectNameSpace +  keyString + '::' + event;
 	}
 
 	function subscribe(account, project, keys, event, callback){
@@ -159,6 +171,15 @@ function NotificationService(serverConfig, $injector){
 	function unsubscribeProjectStatusChanged(account, project){
 		unsubscribe(account, project, [], 'projectStatusChanged');
 	}
+
+	function subscribeNewProject(account, callback){
+		subscribe(account, null, [], 'newProject', callback);
+	}
+
+	function unsubscribeNewProject(account, project){
+		unsubscribe(account, null, [], 'newProject');
+	}
+
 	return {
 		subscribe: {
 			newIssues: subscribeNewIssues,
@@ -167,6 +188,7 @@ function NotificationService(serverConfig, $injector){
 			commentDeleted: subscribeCommentDeleted,
 			issueChanged: subscribeIssueChanged,
 			projectStatusChanged: subscribeProjectStatusChanged,
+			newProject: subscribeNewProject
 
 		},
 		unsubscribe:{
@@ -176,6 +198,7 @@ function NotificationService(serverConfig, $injector){
 			commentDeleted: unsubscribeCommentDeleted,
 			issueChanged: unsubscribeIssueChanged,
 			projectStatusChanged: unsubscribeProjectStatusChanged,
+			newProject: unsubscribeNewProject
 		}
 	};
 };
