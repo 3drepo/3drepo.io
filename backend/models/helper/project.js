@@ -149,15 +149,20 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(setting => {
 
+
+		let projectData = {
+			account,
+			project,
+			permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+		};
+
+		ChatEvent.newProject(data.sessionId, account, projectData);
+
 		// this is true if only admin can create project
 		return {
 
 			setting,
-			project: {
-				account,
-				project,
-				permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
-			}
+			project: projectData
 
 		};
 	});
