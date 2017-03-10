@@ -364,6 +364,7 @@
 							}
 							else if(!noHighlight){
 								vm.selectNode(vm.nodesToShow[i]);
+								selectedId = vm.nodesToShow[i]._id;
 							}
 						}
 						else {
@@ -406,12 +407,19 @@
 				vm.showNodes = true;
 				$timeout(function() {
 					// Redraw the tree
-					vm.topIndex = selectedIndex - 2;
+
 					// Resize virtual repeater
 
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
+					vm.topIndex = selectedIndex - 2;
 				});
+
+				$timeout(function(){
+					var el = document.getElementById(selectedId);
+					el && el.scrollIntoView();
+				});
+
 			}
 		}
 
@@ -433,6 +441,7 @@
 						}
 
 						initNodesToShow();
+						console.log('path', path);
 						expandToSelection(path, 0);
 					}
 				}

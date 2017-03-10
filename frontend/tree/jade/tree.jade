@@ -5,7 +5,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 .virtualRepeatInfiniteScroll(ng-show="vm.showTree")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex", ng-show="vm.showNodes")
 		// .treeNodes(md-virtual-repeat="item in vm.infiniteItemsTree" md-on-demand="" class="repeated-item")
-		.treeNodes.repeated-item(md-virtual-repeat="item in vm.nodesToShow")
+		.treeNodes.repeated-item(id="{{item._id}}" md-virtual-repeat="item in vm.nodesToShow")
 			.treeNode(
 			style="margin-left:{{item.level * 20}}px"
 			ng-if="item.name"
