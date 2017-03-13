@@ -128,7 +128,7 @@
 		/**
 		 * traverse children of a node recursively
 		 * @param {Object} node
-		 * @param {Function} callback 
+		 * @param {Function} callback
 		 */
 		function traverseNode(node, callback){
 			callback(node);
@@ -144,7 +144,7 @@
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				if (!node.children && node.type == "mesh")
+				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
 					ids.push(node._id);
 				}
@@ -179,7 +179,7 @@
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			if (!node.children && node.type == "mesh")
+			if (!node.children && ((node.type || "mesh") === "mesh"))
 			{
 				if (visibility === "invisible")
 				{
@@ -267,7 +267,7 @@
 						}
 
 						while (!endOfSplice) {
-							
+
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
 
 								if(vm.nodesToShow[index + 1].hasSubProjTree){
@@ -512,10 +512,10 @@
 					//toggle children
 					vm.setToggleState(myNode, nodeToggleState);
 				}
-				
+
 			});
-			
-			
+
+
 			//a__b .. c__d
 			//toggle parent
 			path = node.path.split("__");
