@@ -29,6 +29,7 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
+var _ = require('lodash');
 
 var ChatEvent = require('./chatEvent');
 
@@ -220,7 +221,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(settings.type, settings.properties.code);
+			issues[index] = noClean ? issue: issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', ''));
 		});
 
 		return Promise.resolve(issues);
@@ -522,7 +523,7 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 		return this.findById(dbColOptions, stringToUUID(uid));
 	
 	}).then(issue => {
-		return Promise.resolve(noClean ? issue : issue.clean(settings.type, settings.properties.code));
+		return Promise.resolve(noClean ? issue : issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', '')));
 	});
 };
 
@@ -690,7 +691,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
 
-			let cleaned = issue.clean(settings.type, settings.properties.code);
+			let cleaned = issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', ''));
 			
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
 

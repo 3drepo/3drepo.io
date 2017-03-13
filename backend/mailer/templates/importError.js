@@ -23,6 +23,10 @@ var html = data => `
 	project: ${data.project}
 	<br>
 	Error: ${data.err}
+	<br>
+	correlationId: ${data.corID}
+	<br>
+	appId: ${data.appId}
 `;
 
 var subject = '[System] Toy project import error';
