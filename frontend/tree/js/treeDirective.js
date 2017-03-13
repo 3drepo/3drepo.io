@@ -74,7 +74,7 @@
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.visible   = {};
-		vm.invisible = {};		
+		vm.invisible = {};
 
 		/**
 		 * Set the content height.
@@ -144,7 +144,8 @@
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				if (!node.children)
+				if (!node.children && node.type == "mesh")
+>>>>>>> ISSUE_336
 				{
 					ids.push(node._id);
 				}
@@ -177,8 +178,8 @@
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			if (!node.children)
-			{		
+			if (!node.children && node.type == "mesh")
+			{
 				if (visibility === "invisible")
 				{
 					if (invisible.has(node._id))
@@ -200,6 +201,7 @@
 					invisible.delete(node._id);
 				}
 			}
+
 			node.toggleState = visibility;
 		};
 
