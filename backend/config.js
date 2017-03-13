@@ -192,6 +192,11 @@
 			server.chat_host = server.base_url_no_port + ":" + server.port;
 			config.chat_server = server;
 
+		} else if (server.service === "frontend"){
+			
+			server.session = sessionFactory.session(config);
+			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+
 		} else {
 			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
 		}

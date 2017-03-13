@@ -35,6 +35,14 @@ html(lang="en" ng-app="3drepo")
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+				
+
+
+		if gaTrackId && userId
+			script.
+				ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
+		else
+			script.
 				ga('create', '!{gaTrackId}', 'auto');
 
 

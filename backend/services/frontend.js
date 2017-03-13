@@ -25,8 +25,10 @@
 	 * @returns
 	 */
 	module.exports.createApp = function (serverConfig) {
+
 		const express = require("express");
 		const config = require("../config.js");
+		const sharedSession = serverConfig.session;
 		const bodyParser = require("body-parser");
 		const compress = require("compression");
 		const fs = require("fs");
@@ -44,6 +46,7 @@
 
 		let app = express();
 
+		app.use(sharedSession);
 		app.use(compress({ level: 9 }));
 
 		app.use(bodyParser.urlencoded({
@@ -317,7 +320,8 @@
 				"renderMe": jade.renderFile,
 				"structure": JSON.stringify(pluginStructure),
 				"frontendJade": [],
-				"gaTrackId": config.gaTrackId
+				"gaTrackId": config.gaTrackId,
+				"userId": _.get(req, 'session.user.username')
 			};
 
 			params.parentStateJSON = JSON.stringify(params.parentStateJSON);
