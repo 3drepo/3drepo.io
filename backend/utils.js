@@ -293,6 +293,9 @@ function Utils() {
 	    return Math.round(value * factor) / factor;
     };
 
+    this.ucFirst = function(s){
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    };
 }
 
 module.exports = new Utils();
