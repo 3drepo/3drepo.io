@@ -48,6 +48,12 @@ describe('Sign up', function(){
 	let username = 'signup_helloworld';
 	let password = 'password';
 	let email = 'test3drepo_signup@mailinator.com';
+	let firstName = 'Hello';
+	let lastName = 'World';
+	let phoneNo = '123456';
+	let countryCode = 'GB';
+	let jobTitle = 'ABC';
+	let company = 'company';
 
 	let User = require('../../models/user');
 
@@ -58,7 +64,13 @@ describe('Sign up', function(){
 		.send({
 
 			"email": email,
-			"password": password
+			"password": password,
+			"firstName": firstName,
+			"lastName": lastName,
+			"phoneNo": phoneNo,
+			"countryCode": countryCode,
+			"jobTitle": jobTitle,
+			"company": company
 
 		}).expect(200, function(err, res){
 
@@ -74,6 +86,12 @@ describe('Sign up', function(){
 		return User.findByUserName(username).then(user => {
 			expect(user).to.not.be.null;
 			expect(user.user).to.equal(username);
+			expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
+			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
+			expect(user.customData.billing.billingInfo.phoneNo).to.equal(phoneNo);
+			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
+			expect(user.customData.billing.billingInfo.jobTitle).to.equal(jobTitle);
+			expect(user.customData.billing.billingInfo.company).to.equal(company);
 		});
 	});
 
