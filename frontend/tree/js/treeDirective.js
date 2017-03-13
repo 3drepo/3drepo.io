@@ -144,8 +144,7 @@
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				if (!node.children && node.type == "mesh")
->>>>>>> ISSUE_336
+				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
 					ids.push(node._id);
 				}
@@ -178,7 +177,7 @@
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			if (!node.children && node.type == "mesh")
+			if (!node.children && ((node.type || "mesh") === "mesh"))
 			{
 				if (visibility === "invisible")
 				{
