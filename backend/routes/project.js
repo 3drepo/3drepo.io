@@ -186,6 +186,8 @@ function createProject(req, res, next){
 		topicTypes: req.body.topicTypes
 	};
 
+	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+
 	createAndAssignRole(project, account, username, data).then(data => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.project);
 	}).catch( err => {

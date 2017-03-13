@@ -111,15 +111,14 @@
 			color: "#F44336"
 		};
 
-		/**
-		 * Display file uploading and info and setup watch if status is processing
-		 */
+
+		watchProjectStatus();
 
 		if (vm.project.status === "processing") {
+
 			vm.project.uploading = true;
-			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
-			watchProjectStatus();
+			vm.fileUploadInfo = 'Processing...';
+
 		}
 		
 
@@ -326,24 +325,18 @@
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
 				else {
-					vm.project.uploading = true;
-					vm.showUploading = true;
-					vm.showFileUploadInfo = false;
 
 					// Check for file size limit
 					if (file.size > serverConfig.uploadSizeLimit) {
 						$timeout(function () {
-							vm.showUploading = false;
-							vm.showFileUploadInfo = true;
+
 							vm.fileUploadInfo = "File exceeds size limit";
 							$timeout(function () {
-								vm.project.uploading = false;
+								vm.fileUploadInfo = "";
 							}, infoTimeout);
 						});
 					}
 					else {
-
-						vm.uploadFileName = file.name;
 
 						formData = new FormData();
 						formData.append("file", file);
@@ -362,16 +355,15 @@
 							console.log("uploadModel", response);
 							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
+								vm.project.uploading = false;
 								vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
-								vm.showUploading = false;
-								vm.showFileUploadInfo = true;
+
 								$timeout(function () {
-									vm.project.uploading = false;
+									vm.fileUploadInfo = "";
 								}, infoTimeout);
 							}
 							else {
-								console.log("Polling upload!");
-								watchProjectStatus();
+								
 								AnalyticService.sendEvent({
 									eventCategory: 'Project',
 									eventAction: 'upload'
@@ -387,6 +379,7 @@
 		 * Watch file upload status
 		 */
 		function watchProjectStatus(){
+
 			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
@@ -395,27 +388,35 @@
 						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
 						vm.project.timestamp = new Date();
 						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-						vm.fileUploadInfo = "Uploaded";
+						vm.fileUploadInfo = "Model imported successfully";
 						// clear revisions cache
 						vm.revisions = null;
 					}
 
 					//status=ok can have an error message too
-					if (data.hasOwnProperty("errorReason")) {
+					if (data.hasOwnProperty("errorReason") && data.errorReason.message) {
 						vm.fileUploadInfo = data.errorReason.message;
 					} else if (data.status === "failed") {
-						vm.fileUploadInfo = "Failed to upload file";
+						vm.fileUploadInfo = "Failed to import model";
 					}
 
-					vm.showUploading = false;
-					vm.showFileUploadInfo = true;
+					vm.project.uploading = false;
+
 					$scope.$apply();
 					$timeout(function () {
-						vm.project.uploading = false;
+						vm.fileUploadInfo = "";
 					}, infoTimeout);
 					
+				} else if (data.status === 'uploading'){
 
-					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+					vm.project.uploading = true;
+					vm.fileUploadInfo = 'Uploading...';
+					$scope.$apply();
+
+				} else if (data.status === 'processing'){
+					vm.project.uploading = true;
+					vm.fileUploadInfo = 'Processing...';
+					$scope.$apply();
 				}
 			});
 

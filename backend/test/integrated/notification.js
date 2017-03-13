@@ -270,7 +270,7 @@ describe('Notification', function () {
 		});
 	});
 
-	it('subscribe project status change should succee', function(done){
+	it('subscribe issue change should succee', function(done){
 
 		let status = {"priority":"high","status":"open","topic_type":"for info","assigned_roles":["testproject.collaborator"]};
 

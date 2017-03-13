@@ -149,15 +149,20 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(setting => {
 
+
+		let projectData = {
+			account,
+			project,
+			permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+		};
+
+		ChatEvent.newProject(data.sessionId, account, projectData);
+
 		// this is true if only admin can create project
 		return {
 
 			setting,
-			project: {
-				account,
-				project,
-				permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
-			}
+			project: projectData
 
 		};
 	});
@@ -1011,6 +1016,8 @@ function uploadFile(req){
 
 	let account = req.params.account;
 	let project = req.params.project;
+
+	ChatEvent.projectStatusChanged(null, account, project, { status: 'uploading' });
 	//upload project with tag
 	let checkTag = tag => {
 		if(!tag){
@@ -1072,6 +1079,7 @@ function uploadFile(req){
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
 			} else {
+				ChatEvent.projectStatusChanged(null, account, project, { status: 'uploaded' });
 				return resolve(req.file);
 			}
 		});
@@ -1140,7 +1148,6 @@ function _handleUpload(account, project, username, file, data){
 		return Promise.resolve(obj);
 
 	}).catch(err => {
-
 		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
 		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
 	});
@@ -1306,6 +1313,8 @@ function importProject(account, project, username, projectSetting, source, data)
 	if(!projectSetting){
 		return Promise.reject({ message: `projectSetting is ${projectSetting}`});
 	}
+
+	ChatEvent.projectStatusChanged(null, account, project, { status: 'processing' });
 
 	projectSetting.status = 'processing';
 
