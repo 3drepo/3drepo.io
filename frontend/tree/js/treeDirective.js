@@ -74,7 +74,7 @@
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.visible   = {};
-		vm.invisible = {};		
+		vm.invisible = {};
 
 		/**
 		 * Set the content height.
@@ -144,7 +144,10 @@
 		 */
 		function traverseNodeAndPushId(node, ids){
 			traverseNode(node, function(node){
-				ids.push(node._id);
+				if (!node.children && node.type == "mesh")
+				{
+					ids.push(node._id);
+				}
 			});
 		}
 
@@ -176,35 +179,37 @@
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			// TODO: This function is probably in-efficient
-			if (visibility === "invisible")
+			if (!node.children && node.type == "mesh")
 			{
-				if ((idx = invisible.indexOf(node._id)) !== -1)
+				if (visibility === "invisible")
 				{
+					if ((idx = invisible.indexOf(node._id)) !== -1)
+					{
 
-					invisible.splice(idx,1);
+						invisible.splice(idx,1);
+					} else {
+						invisible.push(node._id);
+					}
+
+					if ((idx = visible.indexOf(node._id)) !== -1)
+					{
+						visible.splice(idx, 1);
+					}
 				} else {
-					invisible.push(node._id);
-				}
+					if ((idx = visible.indexOf(node._id)) !== -1)
+					{
 
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
-					visible.splice(idx, 1);
-				}
-			} else {
-				if ((idx = visible.indexOf(node._id)) !== -1)
-				{
+						visible.splice(idx,1);
+					} else {
+						visible.push(node._id);
+					}
 
-					visible.splice(idx,1);
-				} else {
-					visible.push(node._id);
-				}
+					if ((idx = invisible.indexOf(node._id)) !== -1)
+					{
+						invisible.splice(idx, 1);
+					}
 
-				if ((idx = invisible.indexOf(node._id)) !== -1)
-				{
-					invisible.splice(idx, 1);
 				}
-
 			}
 
 			node.toggleState = visibility;
