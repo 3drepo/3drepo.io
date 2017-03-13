@@ -115,7 +115,7 @@ function createAndAssignRole(project, account, username, data) {
 	}).then(() => {
 
 		return Role.createStandardRoles(account, project);
-	
+
 	}).then(() => {
 
 		return Role.grantProjectRoleToUser(username, account, project, C.COLLABORATOR_TEMPLATE);
@@ -143,7 +143,7 @@ function createAndAssignRole(project, account, username, data) {
 		});
 
 		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
-		
+
 		return setting.save();
 
 	}).then(setting => {
@@ -181,7 +181,7 @@ function importToyProject(username){
 	let data = {
 		desc, type, unit: 'm'
 	};
-	
+
 	return createAndAssignRole(project, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
@@ -322,7 +322,7 @@ function removeCollaborator(username, email, account, project, role){
 		}
 
 		return Role.revokeRolesFromUser(user.user, [{
-			db: account, 
+			db: account,
 			role: `${project}.${role}`
 		}]);
 
@@ -360,7 +360,7 @@ function createFederatedProject(account, project, subProjects){
 
 	let files = function(data){
 		return [
-			{desc: 'json file', type: 'file', path: data.jsonFilename}, 
+			{desc: 'json file', type: 'file', path: data.jsonFilename},
 			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
 		];
 	};
@@ -395,7 +395,7 @@ function createFederatedProject(account, project, subProjects){
 
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
-		
+
 		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
 			_deleteFiles(files(err));
 			return;
@@ -572,7 +572,7 @@ function newGetFullTree(account, project, branch, rev, username){
 			let getRefId;
 
 			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-				
+
 				getRefId = History.findByBranch({ account: ref.owner, project: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
 					return _history ? utils.uuidToString(_history._id) : null;
 				});
@@ -583,12 +583,12 @@ function newGetFullTree(account, project, branch, rev, username){
 
 			let status;
 			let getTree = middlewares.hasReadAccessToProjectHelper(username, ref.owner, ref.project).then(granted => {
-				
+
 				if(!granted){
 					status = 'NO_ACCESS';
 					return;
 				}
-				
+
 				return getRefId.then(revId => {
 
 					if(!revId){
@@ -600,10 +600,10 @@ function newGetFullTree(account, project, branch, rev, username){
 					return stash.findStashByFilename({ account: ref.owner, project: ref.project }, 'json_mpc', treeFileName);
 				});
 
-			}).then(buf => { 
+			}).then(buf => {
 				return {
-					status, 
-					buf: buf && buf.toString(), 
+					status,
+					buf: buf && buf.toString(),
 					_id: utils.uuidToString(ref._id)
 				};
 			});
@@ -719,7 +719,7 @@ function getFullTree(account, project, branch, rev, username){
 
 		let resetPath = function(node, parentPath){
 			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path; 
+				child.path = parentPath + '__' + child.path;
 				resetPath(child, child.path);
 			});
 		};
@@ -924,12 +924,12 @@ function getRolesForProject(account, project, removeViewer){
 			'$or': [{
 				'privileges' : {
 					'$elemMatch': {
-						'resource.db': account, 
+						'resource.db': account,
 						'resource.collection': `${project}.history`,
 						'actions': 'find'
 					}
 				}
-			},{ 
+			},{
 				'roles': {
 					'$elemMatch': {
 						"db" : account
@@ -961,7 +961,7 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 		roles.forEach((role, i) => {
-			
+
 			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
 
 			if(roleSettings[roles[i].role]){
@@ -973,7 +973,7 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 		for(let i = roles.length - 1; i >= 0; i--){
-			if (removeViewer && 
+			if (removeViewer &&
 				roles[i].permissions.indexOf(C.PERM_COMMENT_ISSUE) === -1)
 			{
 				roles.splice(i, 1);
@@ -990,7 +990,7 @@ function getUserRolesForProject(account, project, username){
 	let projectRoles;
 
 	return getRolesForProject(account, project).then(roles => {
-		
+
 		projectRoles = roles;
 		return User.findByUserName(username);
 
@@ -1054,7 +1054,7 @@ function uploadFile(req){
 			fileFilter: function(req, file, cb){
 
 				let format = file.originalname.split('.');
-				
+
 				if(format.length <= 1){
 					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
@@ -1130,8 +1130,8 @@ function _handleUpload(account, project, username, file, data){
 
 	let files = function(filePath, fileDir, jsonFile){
 		return [
-			{desc: 'tmp model file', type: 'file', path: filePath}, 
-			{desc: 'json file', type: 'file', path: jsonFile}, 
+			{desc: 'tmp model file', type: 'file', path: filePath},
+			{desc: 'json file', type: 'file', path: jsonFile},
 			{desc: 'tmp dir', type: 'dir', path: fileDir}
 		];
 	};
@@ -1254,7 +1254,7 @@ function removeProject(account, project){
 		//remove project collections
 
 		let promises = [];
-		
+
 		collections.forEach(collection => {
 			if(collection.name.startsWith(project)){
 				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
@@ -1270,7 +1270,7 @@ function removeProject(account, project){
 	}).then(() => {
 		//remove roles related to this project from system.roles collection
 		let promises = [];
-		
+
 		RoleTemplates.projectRoleTemplateLists.forEach(role => {
 			promises.push(Role.dropRole(account, `${project}.${role}`));
 		});
@@ -1300,7 +1300,7 @@ function getProjectPermission(username, account, project){
 
 function getMetadata(account, project, id){
 	'use strict';
-	
+
 	let projection = {
 		shared_id: 0,
 		paths: 0,
@@ -1328,7 +1328,7 @@ var acceptedFormat = [
 	'bvh','irrmesh','irr','q3d','q3s','b3d',
 	'dae','ter','csm','3d','lws','xml','ogex',
 	'ms3d','cob','scn','blend','pk3','ndo',
-	'ifc','xgl','zgl','fbx','assbin'
+	'ifc','xgl','zgl','fbx','assbin', 'bim'
 ];
 
 
