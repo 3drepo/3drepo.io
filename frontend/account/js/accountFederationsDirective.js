@@ -144,6 +144,7 @@
 				type: "",
 				subProjects: []
 			};
+			vm.errorMessage = '';
 			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		};
 
@@ -215,19 +216,26 @@
 			if (vm.federationOriginalData === null) {
 				promise = UtilsService.doPost(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
-					console.log(response);
-					vm.showInfo = false;
-					vm.newFederationData.timestamp = (new Date()).toString();
-					vm.newFederationData.permissions = response.data.permissions;
-					vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
-					vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
-					vm.closeDialog();
+					
+					if(response.status !== 200 && response.status !== 201){
+						vm.errorMessage = response.data.message;
+					} else {
+						vm.errorMessage = '';
+						vm.showInfo = false;
+						vm.newFederationData.timestamp = (new Date()).toString();
+						vm.newFederationData.permissions = response.data.permissions;
+						vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
+						vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
+						vm.closeDialog();
 
-					AnalyticService.sendEvent({
-						eventCategory: 'Project',
-						eventAction: 'create',
-						eventLabel: 'federation'
-					});
+						AnalyticService.sendEvent({
+							eventCategory: 'Project',
+							eventAction: 'create',
+							eventLabel: 'federation'
+						});
+					}
+
+
 
 				});
 			}
