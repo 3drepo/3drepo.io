@@ -1175,7 +1175,7 @@ function _importBSON(account, project, username, dir){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename}`,
+			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename} --writeConcern '{w: 1}'`,
 			{
 				cwd: __dirname
 			}, function (err) {
