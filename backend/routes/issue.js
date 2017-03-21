@@ -27,6 +27,7 @@ var multer = require("multer");
 var config = require("../config.js");
 var ProjectHelpers = require('../models/helper/project');
 var RoleTemplates = require('../models/role_templates');
+var stringToUUID = utils.stringToUUID;
 
 var _ = require('lodash');
 
@@ -198,7 +199,7 @@ function listIssues(req, res, next) {
 	} else if (req.params.rid) {
 		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
@@ -262,7 +263,10 @@ function findIssueById(req, res, next) {
 	let dbCol =  {account: req.params.account, project: req.params.project};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
+
+		Issue.update(dbCol, { _id: stringToUUID(params.uid) }, { $inc: { viewCount: '1' }}).exec();
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
+
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

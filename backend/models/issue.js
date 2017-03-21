@@ -165,6 +165,8 @@ var schema = Schema({
 		//bcf extra fields we don't care
 		extras: {}
 	}],
+	commentCount: Number,
+	viewCount: Number,
 	assigned_roles: [String],
 	closed_time: Number,
 	status_last_changed: Number,
@@ -208,7 +210,7 @@ var priorityEnum = {
 	'HIGH': 'high'
 };
 
-schema.statics._find = function(dbColOptions, filter, projection, noClean){
+schema.statics._find = function(dbColOptions, filter, projection, sort, noClean){
 	'use strict';
 	//get project type
 	let settings;
@@ -216,7 +218,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
 		settings = _settings;
-		return this.find(dbColOptions, filter, projection);
+		return this.find(dbColOptions, filter, projection, sort);
 	}).then(_issues => {
 
 		issues = _issues;
@@ -304,7 +306,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 };
 
 
-schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean, ids){
+schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 	'use strict';
 
 	let issues;
@@ -318,6 +320,16 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 		ids.forEach((id, i) => {
 			ids[i] = stringToUUID(id);
 		});
+	}
+
+	let sort;
+
+	if(sortBy === 'activity'){
+		sort = {sort: {'commentCount': -1}}
+	} else if (sortBy === 'view') {
+		sort = {sort: {'viewCount': -1}}
+	}  else if (sortBy === 'createdDate') {
+		sort = {sort: {'created': -1}}
 	}
 
 	if (revId){
@@ -384,7 +396,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 			};
 		}
 
-		return this._find(dbColOptions, filter, projection, noClean);
+		return this._find(dbColOptions, filter, projection, sort, noClean);
 
 	}).then(_issues => {
 		issues = _issues;
@@ -418,7 +430,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 								};
 							}
 
-							return self._find({account: childDbName, project: childProject}, filter, projection, noClean);
+							return self._find({account: childDbName, project: childProject}, filter, projection, sort, noClean);
 						} else {
 							return Promise.resolve([]);
 						}
@@ -885,6 +897,9 @@ schema.methods.updateComment = function(commentIndex, data){
 					guid: commentGuid,
 					viewpoint: data.viewpoint.guid
 				});
+
+				this.commentCount++;
+
 			}
 		}).then(() => {
 			return this.save();
@@ -998,6 +1013,7 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	};
 
 	this.comments.push(comment);
+	this.commentCount++;
 
 	//seal the last comment if it is a human commnet after adding system comments
 	let commentLen = this.comments.length;
