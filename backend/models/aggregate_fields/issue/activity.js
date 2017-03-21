@@ -18,26 +18,8 @@
 (() => {
 	"use strict";
 
-	// calulate how many weeks an issue has been created.
-	// 0 - <=1 = week 1
-	// >1 - <=2 = week 2 
-	// ...
-
-	const age = {
-		'$ceil': {
-			'$divide': [
-				{'$subtract': [new Date().valueOf(), '$$CURRENT.created']},
-				// one week in milliseconds
-				604800000
-			]
-		}
-	};
-
-	module.exports = (sort) => {
-		return [
-			{ '$group' : { _id: age, 'count': { '$sum': 1 } }},
-			{ '$sort': {'count': sort }}
-		];
+	module.exports = {
+		'$size': '$$CURRENT.comments'
 	};
 
 })();

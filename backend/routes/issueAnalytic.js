@@ -32,7 +32,7 @@
 		const place = utils.APIInfo(req);
 		const sort = parseInt(req.query.sort) || -1;
 		
-		IssueAnalytic.groupBy(req.params.account, req.params.project, req.query.groupBy, sort).then(docs => {
+		IssueAnalytic.groupBy(req.params.account, req.params.project, req.query.groupBy, req.query.secGroupBy, sort).then(docs => {
 
 			responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
 		}).catch(err => {

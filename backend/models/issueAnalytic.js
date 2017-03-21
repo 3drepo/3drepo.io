@@ -20,27 +20,27 @@
 
 	const ModelFactory = require('./factory/modelFactory');
 	const responseCodes = require('../response_codes.js');
-	//const mongodb = require('mongodb');
-	function getPipeline(field, sort){
+
+	function getField(field){
 		try {
-			return require(`./pipelines/issue/${field}`)(sort);
+			return require(`./aggregate_fields/issue/${field}`);
 		} catch (e) {
-			if (e.code !== 'MODULE_NOT_FOUND') {
-				throw e;
-			} else {
-				return;
-			}
+			return `$$CURRENT.${field}`;
 		}
 	}
 
 	module.exports = {
 		
-		groupBy: (account, project, field, sort) => {
+		groupBy: (account, project, firstField, secondField, sort) => {
 
 			const collection = ModelFactory.db.db(account).collection(`${project}.issues`);
-			const pipeline = getPipeline(field, sort);
-			
-			console.log(JSON.stringify(pipeline, null , 2));
+
+			const fields = secondField ? {firstField: getField(firstField), secondField: getField(secondField)} : getField(firstField);
+
+			const pipeline = [
+				{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
+				{ '$sort': {'count': sort }}
+			];
 
 			if(!pipeline){
 				return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);

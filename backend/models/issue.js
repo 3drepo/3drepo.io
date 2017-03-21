@@ -325,11 +325,11 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 	let sort;
 
 	if(sortBy === 'activity'){
-		sort = {sort: {'commentCount': -1}}
+		sort = {sort: {'commentCount': -1}};
 	} else if (sortBy === 'view') {
-		sort = {sort: {'viewCount': -1}}
+		sort = {sort: {'viewCount': -1}};
 	}  else if (sortBy === 'createdDate') {
-		sort = {sort: {'created': -1}}
+		sort = {sort: {'created': -1}};
 	}
 
 	if (revId){
