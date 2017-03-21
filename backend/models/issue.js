@@ -165,8 +165,8 @@ var schema = Schema({
 		//bcf extra fields we don't care
 		extras: {}
 	}],
-	commentCount: Number,
-	viewCount: Number,
+	commentCount: { type: Number, default: 0},
+	viewCount: { type: Number, default: 0},
 	assigned_roles: [String],
 	closed_time: Number,
 	status_last_changed: Number,
