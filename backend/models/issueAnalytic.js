@@ -20,6 +20,7 @@
 
 	const ModelFactory = require('./factory/modelFactory');
 	const responseCodes = require('../response_codes.js');
+	const json2csv = require('json2csv');
 
 	function getField(field){
 		try {
@@ -31,11 +32,15 @@
 
 	module.exports = {
 		
-		groupBy: (account, project, firstField, secondField, sort) => {
+		groupBy: (account, project, firstField, secondField, sort, format) => {
 
 			const collection = ModelFactory.db.db(account).collection(`${project}.issues`);
 
-			const fields = secondField ? {firstField: getField(firstField), secondField: getField(secondField)} : getField(firstField);
+			let fields = {firstField: getField(firstField)};
+
+			if(secondField){
+				fields.secondField = getField(secondField);
+			}
 
 			const pipeline = [
 				{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
@@ -46,7 +51,23 @@
 				return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);
 			}
 
-			return collection.aggregate(pipeline).toArray();
+			const promise = collection.aggregate(pipeline).toArray();
+
+			if(format === 'csv'){
+				let csvFields = ['_id.firstField'];
+				let csvFieldNames = [firstField];
+
+				secondField && csvFields.push('_id.secondField') && csvFieldNames.push(secondField);
+
+				csvFieldNames.push('count');
+				csvFields.push('count');
+
+				return promise.then(data => {
+					return json2csv({ data, fields: csvFields, fieldNames: csvFieldNames });
+				});
+			}
+
+			return promise;
 
 		}
 	};

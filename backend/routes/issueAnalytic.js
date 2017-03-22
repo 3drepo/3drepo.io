@@ -25,16 +25,33 @@
 	const IssueAnalytic = require('../models/issueAnalytic');
 	const utils = require("../utils");
 
-	router.get('/issues/analytics', middlewares.hasReadAccessToIssue, getIssueAnalytics);
+	router.get('/issues/analytics.:format', middlewares.hasReadAccessToIssue, getIssueAnalytics);
 
 	function getIssueAnalytics(req, res, next){
 		
 		const place = utils.APIInfo(req);
 		const sort = parseInt(req.query.sort) || -1;
 		
-		IssueAnalytic.groupBy(req.params.account, req.params.project, req.query.groupBy, req.query.secGroupBy, sort).then(docs => {
+		IssueAnalytic.groupBy(
+			req.params.account, 
+			req.params.project, 
+			req.query.groupBy, 
+			req.query.secGroupBy, 
+			sort, 
+			req.params.format
+		).then(docs => {
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
+			if(req.params.format === 'csv'){
+
+				res.set('Content-Disposition', 'attachment;filename=data.csv');
+				res.send(docs);
+				
+			} else {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
+			}
+			
+
+
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
