@@ -99,7 +99,7 @@
 		if (angular.isDefined(serverConfig.legal)) {
 			vm.legalDisplays = serverConfig.legal;
 		}
-		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 
