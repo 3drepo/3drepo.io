@@ -198,7 +198,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// else we'll do it ourselves
 				x3dom.runtime.ready = self.initRuntime;
 
-				self.addLogo();
+				//self.addLogo();
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -275,7 +275,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
 
-			self.removeLogo();
+			//self.removeLogo();
 
 			//self.viewer.removeEventListener("mousedown", onMouseDown);
 			//self.viewer.removeEventListener("mouseup", onMouseUp);
