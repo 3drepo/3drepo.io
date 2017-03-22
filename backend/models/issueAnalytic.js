@@ -44,7 +44,7 @@
 
 			const pipeline = [
 				{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
-				{ '$sort': {'count': sort }}
+				{ '$sort': {'count': sort, '_id.firstField': sort}}
 			];
 
 			if(!pipeline){
