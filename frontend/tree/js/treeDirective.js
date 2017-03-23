@@ -312,7 +312,10 @@
 								}
 							}
 
-							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+							if(vm.nodesToShow[index].children[i].hasOwnProperty("name")){
+								vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+							}
+							
 						}
 
 						// Redraw the tree if needed
@@ -337,14 +340,24 @@
 		 * @param path
 		 * @param level
 		 */
+
+		var lastParentWithName = null;
+
 		function expandToSelection(path, level, noHighlight) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			// Force a redraw of the tree to get round the display problem
 			vm.showNodes = false;
-
-			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
+			var condLoop = true;
+			for (i = 0, length = vm.nodesToShow.length; i < length && condLoop; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
+
+					//console.log('name', vm.nodesToShow[i].name);
+					//console.log('selectedId', selectedId);
+					//console.log('length', vm.nodesToShow.length)
+					
+					lastParentWithName = vm.nodesToShow[i];
+
 					vm.nodesToShow[i].expanded = true;
 					vm.nodesToShow[i].selected = false;
 					childrenLength = vm.nodesToShow[i].children.length;
@@ -353,20 +366,36 @@
 						selectedIndex = i;
 					}
 
+					var childWithNameCount = 0;
+
 					for (j = 0; j < childrenLength; j += 1) {
 						// Set child to not expanded
 						vm.nodesToShow[i].children[j].expanded = false;
 
 						if (vm.nodesToShow[i].children[j]._id === selectedId) {
-							// If the selected mesh doesn't have a name highlight the parent in the tree
-							// highlight the parent in the viewer
+
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
+								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
+								lastParentWithName = null;
+								selectedIndex = i + j + 1;
+
 							}
 							else if(!noHighlight){
+								// If the selected mesh doesn't have a name highlight the parent in the tree
+								// highlight the parent in the viewer
+
 								vm.selectNode(vm.nodesToShow[i]);
 								selectedId = vm.nodesToShow[i]._id;
+								selectedIndex = i;
+								//console.log('selectedIndex', selectedIndex);
+								//console.log(vm.nodesToShow[i]);
+								lastParentWithName = null;
+								//console.log('vm.nodesToShow[i]', vm.nodesToShow[i]);
+								selectedId = vm.nodesToShow[i]._id;
 							}
+
+							condLoop = false;
 						}
 						else {
 							// This will clear any previously selected node
@@ -379,25 +408,32 @@
 						}
 
 						// Determine if child node has childern
-						if ("children" in vm.nodesToShow[i].children[j]) {
-							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
-						}
-						else {
-							vm.nodesToShow[i].children[j].hasChildren = false;
+						vm.nodesToShow[i].children[j].hasChildren = false;
+						if (("children" in vm.nodesToShow[i].children[j]) && (vm.nodesToShow[i].children[j].children.length > 0)) {
+							for (var k = 0, jLength = vm.nodesToShow[i].children[j].children.length; k < jLength; k++) {
+								if (vm.nodesToShow[i].children[j].children[k].hasOwnProperty("name")) {
+									vm.nodesToShow[i].children[j].hasChildren = true;
+									break;
+								}
+							}
 						}
 
 						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 							currentSelectedNode = vm.nodesToShow[i].children[j];
+
 						}
 
-						// Determine if more expansion is required
-						if ((level === (path.length - 2)) && !selectionFound) {
-							selectedIndex += 1;
-						}
+
 						vm.nodesToShow[i].children[j].level = level + 1;
-						vm.nodesToShow.splice(i + j + 1, 0, vm.nodesToShow[i].children[j]);
+
+						if(vm.nodesToShow[i].hasChildren && vm.nodesToShow[i].children[j].hasOwnProperty('name')){
+
+							vm.nodesToShow.splice(i + childWithNameCount + 1, 0, vm.nodesToShow[i].children[j]);
+							childWithNameCount++;
+						}
+						
 					}
 				}
 			}
@@ -413,11 +449,15 @@
 
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
-					vm.topIndex = selectedIndex - 2;
+					//console.log('this selectedIndex', selectedIndex);
+					vm.topIndex = selectedIndex;
 				});
 
 				$timeout(function(){
 					var el = document.getElementById(selectedId);
+					if(!el){
+						//console.log('el not found')
+					}
 					el && el.scrollIntoView();
 				});
 
@@ -442,8 +482,11 @@
 						}
 
 						initNodesToShow();
-						console.log('path', path);
+						//console.log('path', path);
+						lastParentWithName = null;
 						expandToSelection(path, 0);
+						//console.log('lastParentWithName', lastParentWithName);
+						lastParentWithName && vm.selectNode(lastParentWithName);
 					}
 				}
 			}
@@ -701,6 +744,7 @@
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
+			//console.log('selectNode');
 			// Remove highlight from the current selection and highlight this node if not the same
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
