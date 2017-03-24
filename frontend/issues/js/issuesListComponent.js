@@ -40,6 +40,7 @@
 					menuOption: "<",
 					importBcf: "&",
 					selectedIssue: "<",
+					displayIssue: "<",
 					userRoles: "<",
 					issueDisplay: "<",
 					availableRoles: "<"
@@ -47,9 +48,9 @@
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
@@ -258,6 +259,17 @@
 						selectedIssueIndex = i;
 					}
 				}
+			}
+
+			if(changes.hasOwnProperty('displayIssue') && this.displayIssue){
+				//console.log('changes.displayIssue', this.displayIssue)
+				var that = this;
+				$timeout(function(){
+					that.select({type: 'click'}, that.displayIssue);
+				}, 3000);
+
+				this.editIssue(this.displayIssue);
+
 			}
 		};
 

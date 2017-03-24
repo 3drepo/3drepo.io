@@ -55,6 +55,7 @@ router.get('/:project/revision/master/head/fulltree_new.json', middlewares.hasRe
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/:rev/fulltree_new.json', middlewares.hasReadAccessToProject, getProjectTreeNew);
 router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 //search master tree
