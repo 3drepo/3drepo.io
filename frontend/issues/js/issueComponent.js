@@ -44,9 +44,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -712,6 +712,17 @@
 
 					startNotification();
 					self.saving = false;
+
+					$state.go('home.account.project.issue', 
+						{
+							account: self.account, 
+							project: self.project, 
+							revision: self.revision,
+							issue: self.data._id,
+							noSet: true
+						}, 
+						{notify: false}
+					);
 			});
 
 			AnalyticService.sendEvent({
