@@ -231,7 +231,7 @@
 			}*/
 
 			// Role
-			if (changes.hasOwnProperty("availableRoles")) {
+			if (changes.hasOwnProperty("availableRoles") && this.availableRoles) {
 				console.log(this.availableRoles);
 				this.projectRoles = this.availableRoles.map(function (availableRole) {
 					/*

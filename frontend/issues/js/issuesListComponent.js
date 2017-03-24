@@ -264,11 +264,11 @@
 			if(changes.hasOwnProperty('displayIssue') && this.displayIssue){
 				//console.log('changes.displayIssue', this.displayIssue)
 				var that = this;
-				$timeout(function(){
-					that.select({type: 'click'}, that.displayIssue);
-				}, 3000);
 
 				this.editIssue(this.displayIssue);
+				$timeout(function(){
+					showIssue(that.displayIssue);
+				}, 1500);
 
 			}
 		};
@@ -364,6 +364,7 @@
 		 * @param issue
 		 */
 		function showIssue (issue) {
+
 			var data,
 				pinHighlightColour = [1.0000, 0.7, 0.0];
 
