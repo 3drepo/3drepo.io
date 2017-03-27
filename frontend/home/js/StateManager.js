@@ -517,6 +517,8 @@
 					self.updateState();
 				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
 					self.clearState();
+				} else if (event.type === EventService.EVENT.UPDATE_STATE){
+					self.updateState(true);
 				}
 			}
 		});

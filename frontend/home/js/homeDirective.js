@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig, $location) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -179,7 +179,11 @@
 					{
 						if(!event.value.initialiser) {
 							StateManager.setStateVar("loggedIn", true);
-							EventService.send(EventService.EVENT.GO_HOME);
+							EventService.send(EventService.EVENT.UPDATE_STATE);
+
+							if(!StateManager.state.account){
+								EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
+							}
 						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
