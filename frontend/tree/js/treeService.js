@@ -58,7 +58,7 @@
 			}
 
 			var deferred = $q.defer(),
-				url = ts.baseURL + "fulltree_new.json";
+				url = ts.baseURL + "fulltree.json";
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {

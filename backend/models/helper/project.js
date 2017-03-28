@@ -517,7 +517,7 @@ function getModelProperties(account, project, branch, rev, username){
 }
 
 // more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
-function newGetFullTree(account, project, branch, rev, username){
+function getFullTree(account, project, branch, rev, username){
 	'use strict';
 
 	let getHistory;
@@ -617,143 +617,6 @@ function newGetFullTree(account, project, branch, rev, username){
 	}).then(subTrees => {
 		trees.subTrees = subTrees;
 		return trees;
-	});
-}
-
-function getFullTree(account, project, branch, rev, username){
-	'use strict';
-
-	let revId, treeFileName;
-	let subTrees;
-	let status;
-	let history;
-	let getHistory;
-
-	if(rev && utils.isUUID(rev)){
-
-		getHistory = History.findByUID({ account, project }, rev);
-
-	} else if (rev && !utils.isUUID(rev)) {
-
-		getHistory = History.findByTag({ account, project }, rev);
-
-	} else if (branch) {
-
-		getHistory = History.findByBranch({ account, project }, branch);
-	}
-
-	return getHistory.then(_history => {
-
-		history = _history;
-		return middlewares.hasReadAccessToProjectHelper(username, account, project);
-
-	}).then(granted => {
-
-		if(!history){
-
-			status = 'NOT_FOUND';
-			return Promise.resolve([]);
-
-		} else if (!granted) {
-
-			status = 'NO_ACCESS';
-			return Promise.resolve([]);
-
-		} else {
-
-			revId = utils.uuidToString(history._id);
-			treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
-
-			let filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return Ref.find({ account, project }, filter);
-
-		}
-
-	}).then(refs => {
-
-		//for all refs get their tree
-		let getTrees = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getTrees.push(
-				getFullTree(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						tree: obj.tree,
-						status: obj.status,
-						_rid: utils.uuidToString(ref._rid),
-						_id: utils.uuidToString(ref._id)
-					});
-				})
-			);
-		});
-
-		return Promise.all(getTrees);
-
-	}).then(_subTrees => {
-
-		subTrees = _subTrees;
-		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
-
-	}).then(buf => {
-
-		let tree;
-
-		if(buf){
-			tree = JSON.parse(buf);
-		} else if (!status && !buf){
-			status = 'NOT_FOUND';
-		}
-
-		let resetPath = function(node, parentPath){
-			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path;
-				resetPath(child, child.path);
-			});
-		};
-
-		let setIdToPath = function(obj, idToPath){
-			idToPath[obj._id] = obj.path;
-			obj.children && obj.children.forEach(child => setIdToPath(child, idToPath));
-		};
-
-		subTrees.forEach(subTree => {
-
-			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
-
-				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
-				if (targetChild){
-					if(subTree && subTree.tree && subTree.tree.nodes){
-						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
-						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
-						targetChild.children = [subTree.tree.nodes];
-
-						let idToPath = {};
-
-						setIdToPath(subTree.tree.nodes, idToPath);
-						Object.assign(tree.idToPath, idToPath);
-					}
-
-					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
-				}
-
-			});
-		});
-
-		return Promise.resolve({tree, status});
-
 	});
 }
 
@@ -1353,6 +1216,5 @@ module.exports = {
 	importProject,
 	removeProject,
 	getProjectPermission,
-	newGetFullTree,
 	getMetadata
 };

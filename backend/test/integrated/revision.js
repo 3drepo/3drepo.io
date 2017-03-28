@@ -128,7 +128,7 @@ describe('Revision', function () {
 	it('get tree by revision tag should success', function(done){
 		agent.get(`/${username}/${project}/revision/original/fulltree.json`)
 		.expect(200, function(err, res){
-			expect(res.body.nodes.name).to.equal('suzanne-flat.obj');
+			expect(JSON.parse(res.body.mainTree).nodes.name).to.equal('suzanne-flat.obj');
 			done(err);
 		});
 	});
@@ -137,7 +137,7 @@ describe('Revision', function () {
 	it('get tree by revision id should success', function(done){
 		agent.get(`/${username}/${project}/revision/6c558faa-8236-4255-a48a-a4ce99465182/fulltree.json`)
 		.expect(200, function(err, res){
-			expect(res.body.nodes.name).to.equal('suzanne-flat.obj');
+			expect(JSON.parse(res.body.mainTree).nodes.name).to.equal('suzanne-flat.obj');
 			done(err);
 		});
 	});
@@ -155,7 +155,7 @@ describe('Revision', function () {
 	it('get tree of head of master should success', function(done){
 		agent.get(`/${username}/${project}/revision/master/head/fulltree.json`)
 		.expect(200, function(err, res){
-			expect(res.body.nodes.name).to.equal('3DrepoBIM.obj');
+			expect(JSON.parse(res.body.mainTree).nodes.name).to.equal('3DrepoBIM.obj');
 			done(err);
 		});
 	});
