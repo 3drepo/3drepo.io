@@ -500,6 +500,97 @@ function getModelProperties(account, project, branch, rev, username){
 	});
 }
 
+function getUnityAssets(account, project, branch, rev, username){
+	'use strict';
+
+	let subAssets;
+	let revId, assetsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, project }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, project }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			assetsFileName = `/${account}/${project}/revision/${revId}/unityAssets.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, project }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getUnityProps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getUnityProps.push(
+				getUnityAssets(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						projects: obj.projects,
+						owner: ref.owner,
+						project: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getUnityProps);
+
+	}).then(_subAssets => {
+
+		subAssets = _subAssets;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', assetsFileName);
+
+	}).then(buf => {
+		let projects = [];
+
+		if(buf){
+			let projectAssets = JSON.parse(buf);
+			if(projectAssets != null)
+				projects.push(projectAssets);
+
+		}
+
+		subAssets.forEach(subAsset => {
+			if (subAsset.projects)
+			{
+				projects = projects.concat(subAsset.projects);
+			}
+		});
+
+		return Promise.resolve({projects, status});
+
+	});
+}
+
 // more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
 function newGetFullTree(account, project, branch, rev, username){
 	'use strict';
@@ -1503,6 +1594,7 @@ module.exports = {
 	listSubProjects,
 	getFullTree,
 	getModelProperties,
+	getUnityAssets,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,

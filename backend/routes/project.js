@@ -50,10 +50,12 @@ router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesF
 router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToProject, getUserRolesForProject);
 
 //master tree
+router.get('/:project/revision/master/head/unityAssets.json', middlewares.hasReadAccessToProject, getUnityAssets);
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 router.get('/:project/revision/master/head/fulltree_new.json', middlewares.hasReadAccessToProject, getProjectTreeNew);
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
+router.get('/:project/revision/:rev/unityAssets.json', middlewares.hasReadAccessToProject, getUnityAssets);
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
@@ -352,6 +354,26 @@ function getModelProperties(req, res, next) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
+
+function getUnityAssets(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.getUnityAssets(account, project, branch, req.params.rev, username).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 
 
 
