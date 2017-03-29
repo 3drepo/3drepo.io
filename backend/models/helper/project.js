@@ -591,6 +591,26 @@ function getUnityAssets(account, project, branch, rev, username){
 	});
 }
 
+function getUnityBundle(account, project, uid, username){
+	'use strict';
+
+	let bundleFileName;
+
+	bundleFileName = `/${account}/${project}/${uid}.unity3d`;
+
+	return stash.findStashByFilename({ account, project }, 'unity3d', bundleFileName).then(buf => {
+		if(!buf)
+		{
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
+		}
+		else
+		{
+			return Promise.resolve(buf);
+		}
+	});
+}
+
+
 // more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
 function newGetFullTree(account, project, branch, rev, username){
 	'use strict';
@@ -1595,6 +1615,7 @@ module.exports = {
 	getFullTree,
 	getModelProperties,
 	getUnityAssets,
+	getUnityBundle,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,

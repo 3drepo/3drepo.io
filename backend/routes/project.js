@@ -49,13 +49,16 @@ router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesF
 //user roles for this project
 router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToProject, getUserRolesForProject);
 
-//master tree
+//Unity information
 router.get('/:project/revision/master/head/unityAssets.json', middlewares.hasReadAccessToProject, getUnityAssets);
+router.get('/:project/revision/:rev/unityAssets.json', middlewares.hasReadAccessToProject, getUnityAssets);
+router.get('/:project/:uid.unity3d', middlewares.hasReadAccessToProject, getUnityBundle);
+
+//master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 router.get('/:project/revision/master/head/fulltree_new.json', middlewares.hasReadAccessToProject, getProjectTreeNew);
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
-router.get('/:project/revision/:rev/unityAssets.json', middlewares.hasReadAccessToProject, getUnityAssets);
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
@@ -371,6 +374,23 @@ function getUnityAssets(req, res, next){
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getUnityBundle(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let id = req.params.uid;
+	let username = req.session.user.username;
+
+
+	ProjectHelpers.getUnityBundle(account, project, id, username).then(obj => {
+		req.params.format= 'unity3d';
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
 	});
 }
 
