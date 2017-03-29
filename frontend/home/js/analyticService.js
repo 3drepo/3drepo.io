@@ -18,9 +18,9 @@
 angular.module('3drepo')
 .factory('AnalyticService', AnalyticService);
 
-AnalyticService.$inject = ["Auth"];
+AnalyticService.$inject = [];
 
-function AnalyticService(Auth){
+function AnalyticService(){
 	"use strict";
 
 	
@@ -43,13 +43,21 @@ function AnalyticService(Auth){
 		}
 
 		event.hitType = 'event';
-		event.dimension1 = Auth.username;
 
 		ga("send", event);
 	}
 
+	function setUserId(userId){
+		if(!isGoogleAnalyticEnabled()){
+			return;
+		}
+
+		ga("set", "userId", userId);
+	}
+
 	return {
 		sendPageView: sendPageView,
-		sendEvent: sendEvent
+		sendEvent: sendEvent,
+		setUserId: setUserId
 	}
 }
