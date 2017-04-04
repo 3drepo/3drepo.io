@@ -22,7 +22,7 @@ var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
 	onLoaded, onError, runtimeReady;
 
-x3dom.runtime.ready = runtimeReady;
+//x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 var Viewer = {};
@@ -196,12 +196,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// If we have a viewer manager then it
 				// will take care of initializing the runtime
 				// else we'll do it ourselves
-				x3dom.runtime.ready = self.initRuntime;
+				//x3dom.runtime.ready = self.initRuntime;
 
 				self.addLogo();
 
 				// Set up the DOM elements
-				self.viewer = document.createElement("x3d");
+/*				self.viewer = document.createElement("x3d");
 				self.viewer.setAttribute("id", self.name);
 				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
 				self.viewer.setAttribute("keysEnabled", "true");
@@ -210,6 +210,38 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.addEventListener("mouseup",  onMouseUp);
 				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
+				*/
+				self.viewer = document.createElement("div");
+				var canvas = document.createElement("canvas");
+				canvas.className = "emscripten";
+				canvas.setAttribute("id", "canvas");
+				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+				canvas.setAttribute("height", "600px");
+				canvas.setAttribute("width", "960px");
+				
+				var canvasScript = document.createElement("script");
+				canvasScript.setAttribute("type", "text/javascript");
+
+				var unitySettings = {
+				 	TOTAL_MEMORY: 2130706432,
+				    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
+				    compatibilitycheck: null,
+				    backgroundColor: "#222C36",
+				    splashStyle: "Light",
+				    dataUrl: "public/unity/Release/unity.data",
+				    codeUrl: "public/unity/Release/unity.js",
+				    asmUrl: "public/unity/Release/unity.asm.js",
+				    memUrl: "public/unity/Release/unity.mem"
+				};
+				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
+				canvasScript.appendChild(moduleSettings);
+				var canvasScript2 = document.createElement("script");
+				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
+				
+
+				self.viewer.appendChild(canvas);
+				self.viewer.appendChild(canvasScript);
+				self.viewer.appendChild(canvasScript2);
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
@@ -219,7 +251,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				//self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
-				self.pinShader = new PinShader(self.scene);
+				//self.pinShader = new PinShader(self.scene);
 
 				self.bground = null;
 				self.currentNavMode = null;
@@ -1394,7 +1426,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.reload = function() {
-			x3dom.reload();
+			//x3dom.reload();
 		};
 
 		this.startingPoint = [0.0, 0.0, 0.0];
@@ -1880,9 +1912,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setMultiSelectMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			element.style.cursor =  on ? "copy" : "-webkit-grab";
+			//element.style.cursor =  on ? "copy" : "-webkit-grab";
 		};
 
 		/**
@@ -1890,9 +1922,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setPinDropMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.pinDropMode = on;
-			element.style.cursor = on ? "crosshair" : "-webkit-grab";
+			//element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};
 
 		/****************************************************************************

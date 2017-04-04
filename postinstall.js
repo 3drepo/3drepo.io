@@ -27,9 +27,9 @@ var fs = require('fs');
  */
 var public_files = {
 	js: {
-		x3domjs: '/public/js/external/x3dom.js',
+//		x3domjs: '/public/js/external/x3dom.js',
 		angularjs: '/public/js/external/angular.js',
-		ammojs: '/public/js/external/ammo.js',
+//		ammojs: '/public/js/external/ammo.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
@@ -49,7 +49,7 @@ var public_files = {
 	},
 
 	css : {
-		x3domcss : '/public/css/external/x3dom.css',
+//		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
 		repouicss : '/public/css/ui.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css',
