@@ -294,10 +294,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
 				});
 
-				callback(self.EVENT.READY, {
-					name: self.name,
-					model: self.modelString
-				});
+				UnityUtil.onReady().then(
+						function()
+						{
+							callback(self.EVENT.READY, {
+								name: self.name,
+								model: self.modelString
+							});
+													   
+						}
+					);
 			}
 		};
 
@@ -1610,50 +1616,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.loadModel = function(account, project, branch, revision) {
-			var url = "";
-
-			if (revision === "head") {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
-			} else {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
-			}
-
 			self.account = account;
 			self.project = project;
 			self.branch = branch;
 			self.revision = revision;
-
-			self.modelString = account + "_" + project + "_" + branch + "_" + revision;
-
-			self.loadURL(url);
-		};
-
-		this.loadURL = function(url) {
-			if (self.inline) {
-				self.inline.parentNode.removeChild(self.inline);
-				self.inline = null; // Garbage collect
-			}
-
-			self.inline = document.createElement("inline");
-			self.scene.appendChild(self.inline);
-
-			if (self.account && self.project) {
-				self.rootName = self.account + "__" + self.project;
-			} else {
-				self.rootName = "model";
-			}
-
-			self.inline.setAttribute("namespacename", self.rootName);
-			self.inline.setAttribute("onload", "onLoaded(event);");
-			//self.inline.setAttribute("onerror", "onError(event);");
-			self.inline.setAttribute("url", url);
-			self.reload();
-
-			self.url = url;
-
-			callback(self.EVENT.START_LOADING, {
-				name: self.name
-			});
+			UnityUtil.loadProject(self.account, self.project,
+							self.branch, self.revision);
 		};
 
 		this.getRoot = function() {
