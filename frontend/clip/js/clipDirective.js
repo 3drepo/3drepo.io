@@ -127,6 +127,7 @@
 		function determineAxis(callback)
 		{
 			//translate the normal and compare it to the axis
+			console.log("Requires reimplementing!"); return;
 			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
 			var transformedNormal = normal_x3d;
 
@@ -295,6 +296,8 @@
 		 */
 		function updateDistance(updateDisplayDistance)
 		{
+			console.log("Requires reimplementing!");
+			return distance;			
 			var normal = getNormal();
 			var normal_x3d = new x3dom.fields.SFVec3f(normal[0], normal[1], normal[2]);
 

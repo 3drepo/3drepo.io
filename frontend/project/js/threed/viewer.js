@@ -233,7 +233,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				    asmUrl: "public/unity/Release/unity.asm.js",
 				    memUrl: "public/unity/Release/unity.mem"
 				};
-				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
+				var moduleSettings = document.createTextNode("if(!Module) var Module = " + JSON.stringify(unitySettings));
 				canvasScript.appendChild(moduleSettings);
 				var canvasScript2 = document.createElement("script");
 				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
@@ -315,15 +315,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.removeLogo();
 
-			//self.viewer.removeEventListener("mousedown", onMouseDown);
-			//self.viewer.removeEventListener("mouseup", onMouseUp);
+			self.viewer.removeEventListener("mousedown", onMouseDown);
+			self.viewer.removeEventListener("mouseup", onMouseUp);
 			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
 
-			self.viewer.parentNode.removeChild(self.viewer);
+			//self.viewer.parentNode.removeChild(self.viewer);
 
 			ViewerUtil.offEventAll();
+			UnityUtil.reset();
 
-			self.viewer = undefined;
+			//self.viewer = undefined;
 		};
 
 		ViewerUtil.onEvent("onError", function(objEvent) {
@@ -415,12 +416,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED, {
-					bbox : {
-						min: self.getScene()._x3domNode.getVolume().min,
-						max: self.getScene()._x3domNode.getVolume().max
-					}
-				});
+
 			}
 		});
 
@@ -1621,7 +1617,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.branch = branch;
 			self.revision = revision;
 			UnityUtil.loadProject(self.account, self.project,
-							self.branch, self.revision);
+							self.branch, self.revision).then(
+				function(bbox)
+				{
+					callback(self.EVENT.LOADED, bbox);
+				}
+			);
 		};
 
 		this.getRoot = function() {

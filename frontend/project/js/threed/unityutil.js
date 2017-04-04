@@ -29,7 +29,8 @@ var UnityUtil;
 
 
 	var readyPromise;
-	var awaitingResolve;
+	var readyResolve;
+	var loadedResolve;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	/*
@@ -37,8 +38,16 @@ var UnityUtil;
 	 */
 	UnityUtil.prototype.Ready = function()
 	{
-		awaitingResolve();
-	};
+		readyResolve.resolve();
+	}
+
+	UnityUtil.prototype.Loaded = function(bboxStr)
+	{
+		var res = {};
+		res.bbox = JSON.parse(bboxStr);
+		loadedResolve.resolve(res);
+
+	}
 
 	/*
 	 * =============== TO UNITY ====================
@@ -52,9 +61,14 @@ var UnityUtil;
 			params.revision = revision;	
 			UnityUtil.onReady().then(function()
 			{
-				SendMessage(UNITY_GAME_OBJECT, "LoadProject", JSON.stringify(params))
+				SendMessage(UNITY_GAME_OBJECT, "LoadProject", JSON.stringify(params));
 			}
 		);
+		return new Promise(function(resolve, reject)
+			{
+				loadedResolve = {resolve : resolve, reject : reject};
+			}
+			);
 	}
 
 	UnityUtil.prototype.onReady = function()	
@@ -63,7 +77,7 @@ var UnityUtil;
 		{
 		   readyPromise	= new Promise(function(resolve, reject)
 			{
-				awaitingResolve = resolve;
+				readyResolve = {resolve: resolve, reject: reject};
 			}	
 			);
 		}
@@ -71,6 +85,14 @@ var UnityUtil;
 		
 	}
 
+	UnityUtil.prototype.reset = function()
+	{
+		UnityUtil.onReady().then(function()
+		{
+			SendMessage(UNITY_GAME_OBJECT, "ClearCanvas");
+			
+		});
+	}
 	UnityUtil = new UnityUtil();
 }());
 
