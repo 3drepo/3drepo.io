@@ -51,7 +51,7 @@ router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAc
 
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
-router.get('/:project/revision/master/head/fulltree_new.json', middlewares.hasReadAccessToProject, getProjectTreeNew);
+
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
@@ -292,7 +292,6 @@ function removeCollaborator(req, res ,next){
 	});
 }
 
-
 function getProjectTree(req, res, next){
 	'use strict';
 
@@ -306,30 +305,6 @@ function getProjectTree(req, res, next){
 	}
 
 	ProjectHelpers.getFullTree(account, project, branch, req.params.rev, username).then(obj => {
-
-		if(!obj.tree){
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function getProjectTreeNew(req, res, next){
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-	let username = req.session.user.username;
-	let branch;
-
-	if(!req.params.rev){
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ProjectHelpers.newGetFullTree(account, project, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
