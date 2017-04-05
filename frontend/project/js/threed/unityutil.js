@@ -132,6 +132,11 @@ var UnityUtil;
 		UnityUtil.toUnity("ClearCanvas");
 	}
 
+	UnityUtil.prototype.resetCamera = function()
+	{
+		UnityUtil.toUnity("ResetCamera");
+	}
+
 	UnityUtil.prototype.setNavigation = function(navMode)
 	{
 		UnityUtil.toUnity("SetNavMode", navMode);

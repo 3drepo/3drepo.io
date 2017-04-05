@@ -442,12 +442,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					}
 			};
 
-			self.showAll = function() {
-				self.runtime.fitAll();
 
-				// TODO: This is a hack to get around a bug in X3DOM
-				self.getViewArea()._flyMat = null;
-			};
+		};
+
+		this.showAll = function() {
+			UnityUtil.resetCamera();
 		};
 
 		this.setAmbientLight = function(lightDescription) {
