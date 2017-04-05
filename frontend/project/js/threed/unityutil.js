@@ -33,44 +33,6 @@ var UnityUtil;
 	var loadedResolve;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
-	/*
-	 * =============== FROM UNITY ====================
-	 */
-	UnityUtil.prototype.Ready = function()
-	{
-		readyResolve.resolve();
-	}
-
-	UnityUtil.prototype.Loaded = function(bboxStr)
-	{
-		var res = {};
-		res.bbox = JSON.parse(bboxStr);
-		loadedResolve.resolve(res);
-
-	}
-
-	/*
-	 * =============== TO UNITY ====================
-	 */
-	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
-	{
-		var params = {};
-		params.database = account;
-		params.project = project;
-		if(revision != "head")
-			params.revision = revision;	
-			UnityUtil.onReady().then(function()
-			{
-				SendMessage(UNITY_GAME_OBJECT, "LoadProject", JSON.stringify(params));
-			}
-		);
-		return new Promise(function(resolve, reject)
-			{
-				loadedResolve = {resolve : resolve, reject : reject};
-			}
-			);
-	}
-
 	UnityUtil.prototype.onReady = function()	
 	{
 		if(!readyPromise)
@@ -85,14 +47,97 @@ var UnityUtil;
 		
 	}
 
-	UnityUtil.prototype.reset = function()
+
+	UnityUtil.prototype.toUnity = function(methodName, params)
 	{
 		UnityUtil.onReady().then(function()
 		{
-			SendMessage(UNITY_GAME_OBJECT, "ClearCanvas");
+			SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 		});
+
 	}
+
+	/*
+	 * =============== FROM UNITY ====================
+	 */
+
+	UnityUtil.prototype.currentPointInfo = function(pointInfo)
+	{
+		var point = JSON.parse(pointInfo);
+		if(UnityUtil.pickPointCallback)
+			UnityUtil.pickPointCallback(point);
+	}
+
+	UnityUtil.prototype.ready = function()
+	{
+		readyResolve.resolve();
+	}
+
+	UnityUtil.prototype.loaded = function(bboxStr)
+	{
+		var res = {};
+		res.bbox = JSON.parse(bboxStr);
+		loadedResolve.resolve(res);
+
+	}
+
+	/*
+	 * =============== TO UNITY ====================
+	 */
+
+	UnityUtil.prototype.clearHighlights = function()
+	{
+		UnityUtil.toUnity("ClearHighlighting");
+	}
+
+	UnityUtil.prototype.getPointInfo = function()
+	{
+		UnityUtil.toUnity("GetPointInfo", 0);
+	}
+
+	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color)
+	{
+		var params = {};
+		params.database = account;
+		params.project = project;
+		params.ids = idArr;
+		if(color)
+			params.color = color;
+
+		console.log(params);
+		UnityUtil.toUnity("HighlightObjects", JSON.stringify(params));
+	}
+
+	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
+	{
+		var params = {};
+		params.database = account;
+		params.project = project;
+		if(revision != "head")
+			params.revision = revision;	
+
+		UnityUtil.toUnity("LoadProject", JSON.stringify(params));
+			
+
+		return new Promise(function(resolve, reject)
+			{
+				loadedResolve = {resolve : resolve, reject : reject};
+			}
+			);
+	}
+	
+	UnityUtil.prototype.reset = function()
+	{
+		UnityUtil.toUnity("ClearCanvas");
+	}
+
+	UnityUtil.prototype.setNavigation = function(navMode)
+	{
+		UnityUtil.toUnity("SetNavMode", navMode);
+	}
+
+
 	UnityUtil = new UnityUtil();
 }());
 

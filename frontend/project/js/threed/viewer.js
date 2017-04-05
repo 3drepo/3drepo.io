@@ -206,9 +206,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
 				self.viewer.setAttribute("keysEnabled", "true");
 				self.viewer.setAttribute("disableTouch", "true");
-				self.viewer.addEventListener("mousedown", onMouseDown);
-				self.viewer.addEventListener("mouseup",  onMouseUp);
-				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
 				*/
 				self.viewer = document.createElement("div");
@@ -218,6 +215,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
 				canvas.setAttribute("height", "600px");
 				canvas.setAttribute("width", "960px");
+				canvas.addEventListener("mousedown", onMouseDown);
+				canvas.addEventListener("mouseup",  onMouseUp);
+				canvas.addEventListener("mousemove",  onMouseMove);
+				canvas.style["pointer-events"] = "all";
 				
 				var canvasScript = document.createElement("script");
 				canvasScript.setAttribute("type", "text/javascript");
@@ -237,7 +238,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvasScript.appendChild(moduleSettings);
 				var canvasScript2 = document.createElement("script");
 				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
-				
+								
 
 				self.viewer.appendChild(canvas);
 				self.viewer.appendChild(canvasScript);
@@ -271,10 +272,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.createViewpoint(self.name + "_default");
 
-				self.nav = document.createElement("navigationInfo");
-				self.nav.setAttribute("headlight", "false");
-				self.setNavMode(self.defaultNavMode);
-				self.scene.appendChild(self.nav);
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
@@ -294,6 +291,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
 				});
 
+				UnityUtil.pickPointCallback = self.pickPointCallback;
+				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()
 						{
@@ -658,53 +657,50 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
+		this.pickPointCallback = function(pointInfo)
+		{
+			if(pointInfo.id)
+			{
+				if(pointInfo.pin)
+				{
+					//User clicked a pin
+					callback(self.EVENT.CLICK_PIN,
+							{id: pointInfo.id});
+
+				}
+				else
+				{
+					//User clicked a mesh
+					callback(self.EVENT.PICK_POINT, {
+						id: pointInfo.id,
+						position: pointInfo.position,
+						normal: pointInfo.normal,
+						//trans: self.getParentTransformation(self.account, self.project),
+						screenPos: pointInfo.mousePos
+					});
+
+					if(!self.selectionDisabled)
+					{
+						callback(self.EVENT.OBJECT_SELECTED, {
+							account: pointInfo.database,
+							project: pointInfo.project,
+							id: pointInfo.id,
+							source: "viewer"						
+						});
+					}
+				}
+
+			}
+			else
+			{
+				//User clicked the background
+				callback(self.EVENT.BACKGROUND_SELECTED);
+			}
+		}
+
 		this.mouseDownPickPoint = function(event)
 		{
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
-
-			if (pickingInfo.pickObj)
-			{
-				var account, project;
-				var projectParts = null;
-
-				if (pickingInfo.pickObj._xmlNode)
-				{
-					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
-					{
-						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
-					}
-				} else {
-					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-				}
-
-				if (projectParts)
-				{
-					var objectID = pickingInfo.pickObj.partID ?
-						pickingInfo.pickObj.partID :
-						projectParts[2];
-
-					account = projectParts[0];
-					project = projectParts[1];
-
-                    console.trace(event);
-
-					callback(self.EVENT.PICK_POINT, {
-						id: objectID,
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project),
-						screenPos: [event.layerX, event.layerY]
-					});
-				} else {
-
-					callback(self.EVENT.PICK_POINT, {
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project)
-					});
-				}
-			}
+			UnityUtil.getPointInfo();
 		};
 
 		this.onMouseDown(this.mouseDownPickPoint);
@@ -755,191 +751,18 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (!Array.isArray(part)) {
-				part = [part];
-			}
-
-			if (zoom) {
-				for (i = 0; i < part.length; i++) {
-					part[i].fit();
-				}
-			}
-
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
-				}
-			}
-
-			self.oldPart = part;
-
-			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(colour, "both");
-			}
-		};
-
-		/**
-		 * This is copied from selectParts()
-		 * @param highlightPart
-		 * @param unhighlightPart
-		 * @param zoom
-		 * @param colour
-		 */
-		this.selectAndUnselectParts = function(highlightPart, unhighlightPart, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (zoom) {
-				for (i = 0; i < highlightPart.length; i++) {
-					highlightPart[i].fit();
-				}
-				for (i = 0; i < unhighlightPart.length; i++) {
-					unhighlightPart[i].fit();
-				}
-			}
-
-			for (i = 0; i < highlightPart.length; i++) {
-				highlightPart[i].setEmissiveColor(colour, "both");
-			}
-
-			for (i = 0; i < unhighlightPart.length; i++) {
-				unhighlightPart[i].resetColor();
-			}
-
-			self.oldPart = highlightPart;
-		};
-
 		this.lastMultipart = null;
-
-		this.clickObject = function(objEvent) {
-			var account = null;
-			var project = null;
-			var id = null;
-
-			if ((objEvent.button === 1) && !self.selectionDisabled) {
-				if (objEvent.partID) {
-					id = objEvent.partID;
-
-					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
-					project = objEvent.part.multiPart._nameSpace.name.split("__")[1];
-
-				}
-			}
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: account,
-				project: project,
-				id: id,
-				source: "viewer"
-			});
-		};
 
 		this.highlightObjects = function(account, project, ids_in, zoom, colour) {
 			if (!this.pinDropMode) {
-				var nameSpaceName = null;
-
-				// If we pass in a single id, then we might be selecting
-				// an old-style Group in X3DOM rather than multipart.
-				ids_in = ids_in || [];
-				ids_in = Array.isArray(ids_in) ? ids_in: [ids_in];
 				var ids = new Set(ids_in);
 
 				if(ids.size)
 				{
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						var fullPartsList = [];
-						var nsMultipartNodes;
-
-						// If account and project have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									fullPartsList.push(parts);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-
-						self.selectParts(fullPartsList, zoom, colour);
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							self.setApp(object[0], colour);
-						}
-					});
+					UnityUtil.highlightObjects(account, project, Array.from(ids), colour);
 				} else {
-					self.highlightAndUnhighlightObjects([]);
-					self.setApp(null);
+					UnityUtil.clearHighlights();
 				}
-			}
-		};
-
-		/**
-		 * This is copied from highlightObjects()
-		 * @param highlight_ids
-		 * @param unhighlight_ids
-		 * @param zoom
-		 * @param colour
-		 */
-		this.highlightAndUnhighlightObjects = function(highlight_ids, unhighlight_ids, zoom, colour) {
-			var nameSpaceName = null;
-
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullHighlightPartsList = [];
-				var fullUnhighlightPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
-						if (highlightParts && highlightParts.ids.length > 0) {
-							fullHighlightPartsList.push(highlightParts);
-						}
-
-						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
-						if (unhighlightParts && unhighlightParts.ids.length > 0) {
-							fullUnhighlightPartsList.push(unhighlightParts);
-						}
-					}
-				}
-
-				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
-
 			}
 		};
 
@@ -1345,7 +1168,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.oneGrpNodes = [];
 		this.twoGrpNodes = [];
 
-		this.setApp = function(group, app) {
+/*		this.setApp = function(group, app) {
 			if (!group || !group.multipart) {
 				if (app === undefined) {
 					app = self.SELECT_COLOUR.EMISSIVE;
@@ -1373,42 +1196,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.viewer.render();
 			}
-		};
+		};*/
 
 		this.setNavMode = function(mode, force) {
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
-				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
-					waypoint.init();
-				}
-
-				if (self.currentNavMode === self.NAV_MODES.WAYFINDER) { // Exiting the wayfinding mode
-					waypoint.close();
-				}
-
-				if (mode === self.NAV_MODES.HELICOPTER) {
-					var vpInfo = self.getCurrentViewpointInfo();
-					var eye = vpInfo.position;
-					var viewDir = vpInfo.view_dir;
-
-					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
-					self.nav._x3domNode._vf.typeParams[1] = eye[1];
-
-					var bboxMax = self.getScene()._x3domNode.getVolume().max;
-					var bboxMin = self.getScene()._x3domNode.getVolume().min;
-					var bboxSize = bboxMax.subtract(bboxMin);
-					var calculatedSpeed = Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * 0.03;
-
-					self.nav.setAttribute("speed", calculatedSpeed);
-				}
-
 				self.currentNavMode = mode;
-				self.nav.setAttribute("type", mode);
+				UnityUtil.setNavigation(mode);
 
 				if (mode === self.NAV_MODES.WALK) {
 					self.disableClicking();
-					self.setApp(null);
 				}
 				/*else if (mode == "HELICOPTER") {
 					self.disableSelecting();
@@ -1417,13 +1215,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.enableClicking();
 				}
 
-				if ((mode === self.NAV_MODES.WAYFINDER) && waypoint) {
-					waypoint.resetViewer();
-				}
-
-				if (mode === self.NAV_MODES.TURNTABLE) {
-					self.nav.setAttribute("typeParams", "-0.4 60.0 0 3.14 0.00001");
-				}
 			}
 		};
 
@@ -1623,6 +1414,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					callback(self.EVENT.LOADED, bbox);
 				}
 			);
+			callback(self.EVENT.START_LOADING);
 		};
 
 		this.getRoot = function() {
