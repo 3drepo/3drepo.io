@@ -65,9 +65,17 @@ var UnityUtil;
 	UnityUtil.prototype.currentPointInfo = function(pointInfo)
 	{
 		var point = JSON.parse(pointInfo);
+		if(UnityUtil.objectSelectedCallback)
+			UnityUtil.objectSelectedCallback(point);
+	}
+
+	UnityUtil.prototype.pickPointAlert = function(pointInfo)
+	{
+		var point = JSON.parse(pointInfo);
 		if(UnityUtil.pickPointCallback)
 			UnityUtil.pickPointCallback(point);
 	}
+
 
 	UnityUtil.prototype.ready = function()
 	{

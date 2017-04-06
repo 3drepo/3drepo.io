@@ -291,7 +291,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
 				});
 
-				UnityUtil.pickPointCallback = self.pickPointCallback;
+				UnityUtil.pickPointCallback = self.pickPointEvent;
+				UnityUtil.objectSelectedCallback = self.objectSelected;
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()
@@ -656,29 +657,33 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
-		this.pickPointCallback = function(pointInfo)
+		this.pickPointEvent = function(pointInfo)
 		{
-			if(pointInfo.id)
+
+			//User clicked a mesh
+			callback(self.EVENT.PICK_POINT, {
+				id: pointInfo.id,
+				position: pointInfo.position,
+				normal: pointInfo.normal,
+				//trans: self.getParentTransformation(self.account, self.project),
+				screenPos: pointInfo.mousePos
+			});
+		};
+
+		this.objectSelected = function(pointInfo)
+		{
+			if(!self.selectionDisabled)
 			{
-				if(pointInfo.pin)
+				if(pointInfo.id)
 				{
-					//User clicked a pin
-					callback(self.EVENT.CLICK_PIN,
+					if(pointInfo.pin)
+					{
+						//User clicked a pin
+						callback(self.EVENT.CLICK_PIN,
 							{id: pointInfo.id});
 
-				}
-				else
-				{
-					//User clicked a mesh
-					callback(self.EVENT.PICK_POINT, {
-						id: pointInfo.id,
-						position: pointInfo.position,
-						normal: pointInfo.normal,
-						//trans: self.getParentTransformation(self.account, self.project),
-						screenPos: pointInfo.mousePos
-					});
-
-					if(!self.selectionDisabled)
+					}
+					else
 					{
 						callback(self.EVENT.OBJECT_SELECTED, {
 							account: pointInfo.database,
@@ -687,22 +692,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 							source: "viewer"						
 						});
 					}
+				}				
+				else
+				{
+					//User clicked the background
+					callback(self.EVENT.BACKGROUND_SELECTED);
 				}
-
 			}
-			else
-			{
-				//User clicked the background
-				callback(self.EVENT.BACKGROUND_SELECTED);
-			}
-		}
+		};
 
 		this.mouseDownPickPoint = function(event)
 		{
 			UnityUtil.getPointInfo();
 		};
 
-		this.onMouseDown(this.mouseDownPickPoint);
 
 		/*
 		this.mouseMovePoint = function (event) {
