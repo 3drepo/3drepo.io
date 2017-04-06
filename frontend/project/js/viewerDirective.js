@@ -258,16 +258,7 @@
 								event.value.zoom,
 								event.value.colour
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
-							v.viewer.highlightAndUnhighlightObjects(
-								event.value.account,
-								event.value.project,
-								event.value.highlight_ids,
-								event.value.unhighlight_ids,
-								event.value.zoom,
-								event.value.colour
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+						}  else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
 							v.viewer.switchObjectVisibility(

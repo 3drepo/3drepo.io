@@ -83,12 +83,13 @@
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
+					console.log("Selected objects: ");
+					console.log(selectedObjects);
 					if (selectedObjects.length === 1) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
 					}
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+//					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
 				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
@@ -129,7 +130,7 @@
 							deselectedObjects.push(selectedObjects[objectIndex]);
 							selectedObjects.splice(objectIndex, 1)
 						}
-						this.displaySelectedObjects(selectedObjects, deselectedObjects);
+//						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
 						if (selectedObjects.length > 0) {
 							self.setSelectedObjects({selectedObjects: selectedObjects});

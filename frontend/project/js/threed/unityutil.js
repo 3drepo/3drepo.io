@@ -104,16 +104,16 @@ var UnityUtil;
 		UnityUtil.toUnity("GetPointInfo", 0);
 	}
 
-	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color)
+	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color, toggleMode)
 	{
 		var params = {};
 		params.database = account;
 		params.project = project;
 		params.ids = idArr;
+		params.toggle = toggleMode;
 		if(color)
 			params.color = color;
 
-		console.log(params);
 		UnityUtil.toUnity("HighlightObjects", JSON.stringify(params));
 	}
 
