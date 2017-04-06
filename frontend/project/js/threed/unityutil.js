@@ -94,9 +94,27 @@ var UnityUtil;
 	 * =============== TO UNITY ====================
 	 */
 
+	UnityUtil.prototype.changePinColour = function(id, colour)
+	{
+		var params =  {};	
+		params.color = colour;
+		params.id = id;
+		UnityUtil.toUnity("ChangePinColour", JSON.stringify(params));
+	}
+
 	UnityUtil.prototype.clearHighlights = function()
 	{
 		UnityUtil.toUnity("ClearHighlighting");
+	}
+
+	UnityUtil.prototype.dropPin = function(id, position, normal, colour)
+	{
+		var params = {};
+		params.id = id;
+		params.position = position;
+		params.normal = normal;
+		params.color = colour;
+		UnityUtil.toUnity("DropPin", JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.getPointInfo = function()
@@ -133,6 +151,11 @@ var UnityUtil;
 				loadedResolve = {resolve : resolve, reject : reject};
 			}
 			);
+	}
+
+	UnityUtil.prototype.removePin = function(id)
+	{
+		UnityUtil.toUnity("RemovePin", id);
 	}
 	
 	UnityUtil.prototype.reset = function()

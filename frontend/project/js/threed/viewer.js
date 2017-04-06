@@ -672,7 +672,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.objectSelected = function(pointInfo)
 		{
-			if(!self.selectionDisabled)
+			if(!self.selectionDisabled && !self.pinDropMode)
 			{
 				if(pointInfo.id)
 				{
@@ -761,7 +761,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				if(ids.size)
 				{
-					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, this.multiSelectMode);
+					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, this.tmultiSelectMode);
 				} else {
 					UnityUtil.clearHighlights();
 				}
@@ -1782,9 +1782,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = self.getParentTransformation(account, project);
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
+				self.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, project);
 			}
 		};
 

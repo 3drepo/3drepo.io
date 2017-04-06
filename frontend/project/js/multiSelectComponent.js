@@ -91,7 +91,7 @@
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 //					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode === true && ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
