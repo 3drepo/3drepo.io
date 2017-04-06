@@ -137,34 +137,46 @@
 			});
 		}
 
+		function getAccountProjectKey(account, project)
+		{
+			return account + "@" + project;
+		}
+
 		/**
 		 * Add all child id of a node recursively, the parent node's id will also be added.
 		 * @param {Object} node
-		 * @param {Array} ids Array to push the ids to
+		 * @param {Array} nodes Array to push the nodes to
 		 */
-		function traverseNodeAndPushId(node, ids){
+		function traverseNodeAndPushId(node, nodes){
 			traverseNode(node, function(node){
 				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
-					ids.push(node._id);
+					var key = getAccountProjectKey(node.account, node.project);
+					if(!nodes[key]){
+						nodes[key] = [];
+					}
+
+					nodes[key].push(node._id);
 				}
 			});
 		}
 
 		function getVisibleArray(account, project){
-			if(!vm.visible[account + '@' + project]){
-				vm.visible[account + '@' + project] = new Set();
+			var key = getAccountProjectKey(account, project);
+			if(!vm.visible[key]){
+				vm.visible[key] = new Set();
 			}
 
-			return vm.visible[account + '@' + project];
+			return vm.visible[key];
 		}
 
 		function getInvisibleArray(account, project){
-			if(!vm.invisible[account + '@' + project]){
-				vm.invisible[account + '@' + project] = new Set();
+			var key = getAccountProjectKey(account, project);
+			if(!vm.invisible[key]){
+				vm.invisible[key] = new Set();
 			}
 
-			return vm.invisible[account + '@' + project];
+			return vm.invisible[key];
 		}
 
 		/**
@@ -621,27 +633,30 @@
 		};
 
 		var toggleNode = function (node) {
-			var childNodes = [];
+			var childNodes = {};
 			var pathArr = [];
 			var idx = 0, i = 0;
-
-			var visible = getVisibleArray(node.account, node.project);
-			var invisible = getInvisibleArray(node.account, node.project);
 
 			traverseNodeAndPushId(node, childNodes);
 
 			if (node.toggleState === "invisible")
 			{
-				for(i = 0; i < childNodes.length; i++)
+				for(var key in childNodes)
 				{
-					invisible.add(childNodes[i]);
-					visible.delete(childNodes[i]);
+					for(var i = 0; i < childNodes[key].length; i++)
+					{
+						vm.invisible[key].add(childNodes[key][i]);
+						vm.visible[key].delete(childNodes[key][i]);
+					}
 				}
 			} else {
-				for(i = 0; i < childNodes.length; i++)
+				for(var key in childNodes)
 				{
-					visible.add(childNodes[i]);
-					invisible.delete(childNodes[i]);
+					for(var i = 0; i < childNodes[key].length; i++)
+					{
+						vm.visible[key].add(childNodes[key][i]);
+						vm.invisible[key].delete(childNodes[key][i]);
+					}
 				}
 			}
 
@@ -779,14 +794,21 @@
 					name: node.name
 				});
 
-				// Separately highlight the children
-				// but only for multipart meshes
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-					source: "tree",
-					account: node.account,
-					project: node.project,
-					ids: map
-				});
+				for(var key in map)
+				{
+					var vals = key.split("@");
+					var account = vals[0];
+					var project = vals[1];
+				
+					// Separately highlight the children
+					// but only for multipart meshes
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+						source: "tree",
+						account: account,
+						project: project,
+						ids: map[key]
+					});
+				}
 			}
 		};
 
