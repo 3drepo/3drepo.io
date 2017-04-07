@@ -193,21 +193,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// Set option param from viewerDirective
 				self.options = options;
 
-				// If we have a viewer manager then it
-				// will take care of initializing the runtime
-				// else we'll do it ourselves
-				//x3dom.runtime.ready = self.initRuntime;
-
 				self.addLogo();
 
-				// Set up the DOM elements
-/*				self.viewer = document.createElement("x3d");
-				self.viewer.setAttribute("id", self.name);
-				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
-				self.viewer.setAttribute("keysEnabled", "true");
-				self.viewer.setAttribute("disableTouch", "true");
-				self.viewer.style["pointer-events"] = "all";
-				*/
 				self.viewer = document.createElement("div");
 				var canvas = document.createElement("canvas");
 				canvas.className = "emscripten";
@@ -234,7 +221,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				    asmUrl: "public/unity/Release/unity.asm.js",
 				    memUrl: "public/unity/Release/unity.mem"
 				};
-				var moduleSettings = document.createTextNode("if(!Module) var Module = " + JSON.stringify(unitySettings));
+				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
 				canvasScript.appendChild(moduleSettings);
 				var canvasScript2 = document.createElement("script");
 				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
@@ -420,32 +407,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		});
 
-		// This is called when the X3DOM runtime is initialized
-		// member of x3dom.runtime instance
-		this.initRuntime = function() {
-
-			if (this.doc.id === self.name) {
-				self.runtime = this;
-
-				callback(self.EVENT.RUNTIME_READY, {
-					name: self.name
-				});
-			}
-
-			self.runtime.enterFrame = function () {
-					if (self.gyroOrientation)
-					{
-							self.gyroscope(
-									self.gyroOrientation.alpha,
-									self.gyroOrientation.beta,
-									self.gyroOrientation.gamma
-							);
-					}
-			};
-
-
-		};
-
 		this.showAll = function() {
 			UnityUtil.resetCamera();
 		};
@@ -619,6 +580,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.getProjectionMatrix = function() {
 			return self.getViewArea().getProjectionMatrix();
 		};
+
+		this.getScreenshot = function(promise)
+		{
+			UnityUtil.requestScreenShot(promise);
+
+		}
 
 		this.onMouseUp = function(functionToBind) {
 			ViewerUtil.onEvent("onMouseUp", functionToBind);

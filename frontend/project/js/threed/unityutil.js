@@ -31,6 +31,7 @@ var UnityUtil;
 	var readyPromise;
 	var readyResolve;
 	var loadedResolve;
+	var screenshotPromises = [];
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	UnityUtil.prototype.onReady = function()	
@@ -58,6 +59,7 @@ var UnityUtil;
 
 	}
 
+
 	/*
 	 * =============== FROM UNITY ====================
 	 */
@@ -67,6 +69,14 @@ var UnityUtil;
 		var point = JSON.parse(pointInfo);
 		if(UnityUtil.objectSelectedCallback)
 			UnityUtil.objectSelectedCallback(point);
+	}
+
+	UnityUtil.prototype.loaded = function(bboxStr)
+	{
+		var res = {};
+		res.bbox = JSON.parse(bboxStr);
+		loadedResolve.resolve(res);
+
 	}
 
 	UnityUtil.prototype.pickPointAlert = function(pointInfo)
@@ -81,14 +91,20 @@ var UnityUtil;
 	{
 		readyResolve.resolve();
 	}
-
-	UnityUtil.prototype.loaded = function(bboxStr)
+	
+	UnityUtil.prototype.screenshotReady = function(screenshot)
 	{
-		var res = {};
-		res.bbox = JSON.parse(bboxStr);
-		loadedResolve.resolve(res);
+		var ssJSON = JSON.parse(screenshot);
 
+		screenshotPromises.forEach(function(promise)
+				{
+					promise.resolve(ssJSON.ssBytes);
+				}
+		);
+		screenshotPromises = [];
 	}
+
+
 
 	/*
 	 * =============== TO UNITY ====================
@@ -166,6 +182,12 @@ var UnityUtil;
 	UnityUtil.prototype.resetCamera = function()
 	{
 		UnityUtil.toUnity("ResetCamera");
+	}
+
+	UnityUtil.prototype.requestScreenShot = function(promise)
+	{
+		screenshotPromises.push(promise);
+		UnityUtil.toUnity("RequestScreenShot");
 	}
 
 	UnityUtil.prototype.setNavigation = function(navMode)
