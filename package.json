@@ -75,7 +75,7 @@
     "grunt-env": "0.4.4",
     "grunt-environment": "0.4.2",
     "grunt-mocha-test": "0.12.7",
-    "grunt-webfont": "1.1.0",
+    "grunt-webfont": "*",
     "jshint": "2.8.0",
     "minify": "1.4.23",
     "mockgoose": "6.0.3",
