@@ -32,6 +32,7 @@ var UnityUtil;
 	var readyResolve;
 	var loadedResolve;
 	var screenshotPromises = [];
+	var vpPromise = null;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	UnityUtil.prototype.onReady = function()	
@@ -49,7 +50,7 @@ var UnityUtil;
 	}
 
 
-	UnityUtil.prototype.toUnity = function(methodName, params)
+	function toUnity(methodName, params)
 	{
 		UnityUtil.onReady().then(function()
 		{
@@ -104,6 +105,17 @@ var UnityUtil;
 		screenshotPromises = [];
 	}
 
+	UnityUtil.prototype.viewpointReturned = function(vpInfo)	
+	{
+		if(vpPromise != null)
+		{
+			var viewpoint = JSON.parse(vpInfo);
+			vpPromise.resolve(viewpoint);
+			vpPromise = null;
+		}
+
+	}
+
 
 
 	/*
@@ -115,12 +127,12 @@ var UnityUtil;
 		var params =  {};	
 		params.color = colour;
 		params.id = id;
-		UnityUtil.toUnity("ChangePinColour", JSON.stringify(params));
+		toUnity("ChangePinColour", JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.clearHighlights = function()
 	{
-		UnityUtil.toUnity("ClearHighlighting");
+		toUnity("ClearHighlighting");
 	}
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour)
@@ -130,12 +142,12 @@ var UnityUtil;
 		params.position = position;
 		params.normal = normal;
 		params.color = colour;
-		UnityUtil.toUnity("DropPin", JSON.stringify(params));
+		toUnity("DropPin", JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.getPointInfo = function()
 	{
-		UnityUtil.toUnity("GetPointInfo", 0);
+		toUnity("GetPointInfo", 0);
 	}
 
 	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color, toggleMode)
@@ -148,7 +160,7 @@ var UnityUtil;
 		if(color)
 			params.color = color;
 
-		UnityUtil.toUnity("HighlightObjects", JSON.stringify(params));
+		toUnity("HighlightObjects", JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
@@ -159,7 +171,7 @@ var UnityUtil;
 		if(revision != "head")
 			params.revision = revision;	
 
-		UnityUtil.toUnity("LoadProject", JSON.stringify(params));
+		toUnity("LoadProject", JSON.stringify(params));
 			
 
 		return new Promise(function(resolve, reject)
@@ -171,28 +183,68 @@ var UnityUtil;
 
 	UnityUtil.prototype.removePin = function(id)
 	{
-		UnityUtil.toUnity("RemovePin", id);
+		toUnity("RemovePin", id);
 	}
 	
 	UnityUtil.prototype.reset = function()
 	{
-		UnityUtil.toUnity("ClearCanvas");
+		toUnity("ClearCanvas");
 	}
 
 	UnityUtil.prototype.resetCamera = function()
 	{
-		UnityUtil.toUnity("ResetCamera");
+		toUnity("ResetCamera");
 	}
 
 	UnityUtil.prototype.requestScreenShot = function(promise)
 	{
 		screenshotPromises.push(promise);
-		UnityUtil.toUnity("RequestScreenShot");
+		toUnity("RequestScreenShot");
+	}
+
+	UnityUtil.prototype.requestViewpoint = function(account, project, promise)
+	{
+		if(vpPromise != null)
+		{
+			vpPromise.then(_requestViewpoint(account, project, promise));
+		}
+		else
+		{
+			_requestViewpoint(account, project, promise);
+		}
+
+	}
+
+	function _requestViewpoint(account, project, promise)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.namespace = account + "."  + project;
+		}
+		vpPromise = promise;
+		toUnity("RequestViewpoint", JSON.stringify(param));
 	}
 
 	UnityUtil.prototype.setNavigation = function(navMode)
 	{
-		UnityUtil.toUnity("SetNavMode", navMode);
+		toUnity("SetNavMode", navMode);
+	}
+
+	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, project)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+
+		param.position = pos;
+		param.up = up;
+		param.forward = forward;
+		toUnity("SetViewpoint", JSON.stringify(param));
+
+
 	}
 
 

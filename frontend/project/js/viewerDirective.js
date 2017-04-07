@@ -280,7 +280,7 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
+								v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {

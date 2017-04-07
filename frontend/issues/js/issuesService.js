@@ -165,8 +165,8 @@
 			config = {withCredentials: true};
 
 			if (issue.pickedPos !== null) {
-				issue.position = issue.pickedPos.toGL();
-				issue.norm = issue.pickedNorm.toGL();
+				issue.position = issue.pickedPos;
+				issue.norm = issue.pickedNorm;
 			}
 
 			$http.post(url, issue, config)
