@@ -126,8 +126,8 @@ var UnityUtil;
 	{
 		var params =  {};	
 		params.color = colour;
-		params.id = id;
-		toUnity("ChangePinColour", JSON.stringify(params));
+		params.pinName = id;
+		toUnity("ChangePinColor", JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.clearHighlights = function()

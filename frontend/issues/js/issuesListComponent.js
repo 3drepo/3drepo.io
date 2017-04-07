@@ -358,7 +358,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: pinHighlightColour
+				colours: [pinHighlightColour]
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
 
