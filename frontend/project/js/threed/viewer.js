@@ -728,7 +728,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				if(ids.size)
 				{
-					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, this.tmultiSelectMode);
+					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, this.multiSelectMode);
 				} else {
 					UnityUtil.clearHighlights();
 				}
