@@ -9,7 +9,6 @@ module.exports = {
 		js :{
 			'x3domjs': "/public/js/external/x3dom.js",
 			'angularjs': "/public/js/external/angular.js",
-			'ammojs': "/public/js/external/ammo.js",
 			'angularutilsjs': "/public/js/external/angular-ui-utils.min.js",
 			'angularrouterjs': "/public/js/external/angular-ui-router.js",
 			'momentjs': "/public/js/external/moment.js",
@@ -37,7 +36,6 @@ module.exports = {
 		js :{
 			'x3domjs': "/public/js/external/x3dom.min.js",
 			'angularjs': "/public/js/external/angular.min.js",
-			'ammojs': "/public/js/external/ammo.min.js",
 			'angularutilsjs': "/public/js/external/angular-ui-utils.min.js",
 			'angularrouterjs': "/public/js/external/angular-ui-router.min.js",
 			'momentjs': "/public/js/external/moment.min.js",

@@ -206,23 +206,23 @@
 
 	};
 
+
 	/*******************************************************************************
-	 * Dispatch work to regenerate a project's tree
-	 * @param {account} account - username
-	 * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+	 * Dispatch work to import toyproject
+	 * @param {database} database - database name
 	 *******************************************************************************/
-	ImportQueue.prototype.reGenProjectTree = function (database, project) {
+	ImportQueue.prototype.importToyProject = function (database, project) {
 		let corID = uuid.v1();
 
 
-		let msg = `genStash ${database} ${project} tree`;
+		let msg = `importToy ${database} ${project}`;
 		
 		return this._dispatchWork(corID, msg).then(() => {
 
 			return new Promise((resolve, reject) => {
 				this.deferedObjs[corID] = {
 					resolve: () => resolve({corID, database, project}),
-					reject: errCode => reject({ corID, errCode, database, project })
+					reject: (errCode, message, rep) => reject({ corID, errCode, database, project, message, appId: rep.properties.appId })
 				};
 			});
 		});
@@ -336,13 +336,16 @@
 
 					let defer = self.deferedObjs[rep.properties.correlationId];
 
-					let resErrorCode = parseInt(JSON.parse(rep.content)
-						.value);
+					let resData = JSON.parse(rep.content);
+
+					let resErrorCode = parseInt(resData.value);
+
+					let resErrorMessage = resData.message;
 
 					if (defer && resErrorCode === 0) {
-						defer.resolve();
+						defer.resolve(rep);
 					} else if (defer) {
-						defer.reject(resErrorCode);
+						defer.reject(resErrorCode, resErrorMessage, rep);
 					} else {
 						self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
 					}

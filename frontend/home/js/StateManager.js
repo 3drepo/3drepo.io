@@ -186,9 +186,7 @@
 		};
 
 		this.changedState = {};
-
 		this.structure  = structure;
-
 		this.destroy = function()  {
 			delete this.state;
 			this.state = {};

@@ -69,11 +69,17 @@ function issueChanged(emitter, account, project, issueId, data){
 	]);
 }
 
+function newProject(emitter, account, data){
+	'use strict';
+	return insertEventQueue('newProject', emitter, account, null, null, data);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
 	commentChanged,
 	commentDeleted,
 	projectStatusChanged,
-	issueChanged
+	issueChanged,
+	newProject
 };

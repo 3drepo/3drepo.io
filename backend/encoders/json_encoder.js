@@ -33,59 +33,6 @@ var responseCodes = require("../response_codes.js");
 
 exports.route = function(router)
 {
-
-
-	router.get("json", "/:account/:project/revision/:rid/meta/:sid", function(req, res, params, err_callback) {
-		var account		= params.account;
-		var project		= params.project;
-
-		var rid			= params.rid;
-
-		var sid			= params.sid;
-
-		dbInterface(req[C.REQ_REPO].logger).getMetadata(account, project, null, rid, sid, null, function (err, metadocs) {
-			if (err.value)
-				err_callback(err);
-			else
-				err_callback(responseCodes.OK, {"meta" : metadocs});
-		});
-	});
-
-	router.get("json", "/:account/:project/revision/:branch/head/meta/:sid", function(req, res, params, err_callback) {
-		var account		= params.account;
-		var project		= params.project;
-
-		var	branch		= params.branch;
-
-		var sid			= params.sid;
-
-		dbInterface(req[C.REQ_REPO].logger).getMetadata(account, project, branch, null, sid, null, function (err, metadocs) {
-			if (err.value)
-				err_callback(err);
-			else
-				err_callback(responseCodes.OK, {"meta" : metadocs});
-		});
-	});
-
-
-	router.get("json", "/:account/:project/meta/:uid", function(req, res, params, err_callback) {
-		var account		= params.account;
-		var project		= params.project;
-
-		var	branch		= params.branch;
-
-		var uid			= params.uid;
-
-		dbInterface(req[C.REQ_REPO].logger).getMetadata(account, project, null, null, null, uid, function (err, metadocs) {
-			if (err.value)
-				err_callback(err);
-			else
-				err_callback(responseCodes.OK, {"meta" : metadocs});
-		});
-	});
-
-
-
 	router.get("json", "/:account/:project/revision/:branch/head/:sid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{

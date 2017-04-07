@@ -74,10 +74,11 @@ describe('Verify', function () {
 			.send({ token: emailVerifyToken.token })
 			.expect(200, function(err, res){
 				
-				// give the system some time to import the toy project after users verified
-				setTimeout(function(){
-					done(err);
-				}, 10000);
+				done(err);
+				// // give the system some time to import the toy project after users verified
+				// setTimeout(function(){
+				// 	done(err);
+				// }, 10000);
 
 			});
 
@@ -86,30 +87,30 @@ describe('Verify', function () {
 		});
 	});
 
+	// Can't test any more but logic moved to bouncer
+	// it('verified user should have toy project imported', function(done){
 
-	it('verified user should have toy project imported', function(done){
-
-		let agent = request.agent(server);
+	// 	let agent = request.agent(server);
 		
-		async.series([
-			function(done){
-				agent.post('/login')
-				.send({ username, password })
-				.expect(200, function(err, res){
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
-			},
-			function(done){
-				agent.get(`/${username}/sample_project.json`)
-				.expect(200, function(err, res){
-					expect(res.body.status).to.equal('ok');
-					done(err);
-				});
-			}
-		], done);
+	// 	async.series([
+	// 		function(done){
+	// 			agent.post('/login')
+	// 			.send({ username, password })
+	// 			.expect(200, function(err, res){
+	// 				expect(res.body.username).to.equal(username);
+	// 				done(err);
+	// 			});
+	// 		},
+	// 		function(done){
+	// 			agent.get(`/${username}/sample_project.json`)
+	// 			.expect(200, function(err, res){
+	// 				expect(res.body.status).to.equal('ok');
+	// 				done(err);
+	// 			});
+	// 		}
+	// 	], done);
 
-	});
+	// });
 
 	it('user should fail if verify more than once', function(done){
 		// create a user

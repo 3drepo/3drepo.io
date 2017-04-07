@@ -99,8 +99,10 @@
 		if (angular.isDefined(serverConfig.legal)) {
 			vm.legalDisplays = serverConfig.legal;
 		}
-		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
+
+
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
@@ -140,6 +142,7 @@
 					}
 				}
 			}, true);
+
 		});
 
 		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))

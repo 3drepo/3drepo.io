@@ -180,6 +180,11 @@
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 
+					if(this.issueData.status === 'closed'){
+						this.canUpdate = false;
+						this.canComment = false;
+					}
+				
 					convertCommentTopicType();
 				}
 				else {
@@ -327,6 +332,7 @@
 					topic_type: self.issueData.topic_type,
 					assigned_roles: self.issueData.assigned_roles
 				};
+
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
@@ -353,8 +359,18 @@
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 						setCanUpdateStatus(self.issueData);
+
 						commentAreaScrollToBottom();
 					});
+
+
+				if(self.issueData.status === 'closed'){
+					this.canUpdate = false;
+					this.canComment = false;
+				} else {
+					this.canUpdate = true;
+					this.canComment = true;
+				}
 
 				AnalyticService.sendEvent({
 					eventCategory: 'Issue',
