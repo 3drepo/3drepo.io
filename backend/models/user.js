@@ -34,7 +34,7 @@ var config = require('../config');
 var ProjectSetting = require('./projectSetting');
 var C = require('../constants');
 var userBilling = require("./userBilling");
-
+var job = require('./job');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -59,7 +59,8 @@ var schema = mongoose.Schema({
 		},
 		billing: { type: userBilling, default: userBilling },
 		avatar: Object,
-		lastLoginAt: Date
+		lastLoginAt: Date,
+		jobs: [job]
 	},
 	roles: [{}]
 });

@@ -102,6 +102,8 @@
 		// payment api header
 		app.use("/payment", require("../routes/payment"));
 
+		app.use("/:account", require("../routes/job"));
+		
 		//project handlers
 		app.use("/:account", require("../routes/project"));
 
