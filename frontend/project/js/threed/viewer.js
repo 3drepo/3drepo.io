@@ -280,6 +280,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
+				UnityUtil.clipBroadcast = self.broadcastClippingPlane;
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()
@@ -1439,6 +1440,41 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * Clipping planes
 		 ****************************************************************************/
 
+		/*
+		 * NOTE: Clipping planes are now all managed by unity use broadcast events to retrieve its info
+		 */
+
+		this.broadcastClippingPlane = function(clip)
+		{
+			callback(self.EVENT.CLIPPING_PLANE_BROADCAST, clip);
+		}
+
+		/**
+		 * Update clipping planes on the viewer
+		 * @param {array} clipPlanes - array of clipping planes
+		 * @param {bool} fromPanel - indicate if the request came from clip panel
+		 * @param {account} account - (OPTIONAL) the account the clip plane came from
+		 * @param {project} project - (OPTIONAL) the project the clip plane came from
+		 */
+		this.updateClippingPlanes = function(clipPlanes, fromPanel, account, project)
+		{
+			if(clipPlanes && clipPlanes.length > 0 )
+			{
+				UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, project);
+			}
+
+			if(clipPlanes && clipPlanes.length > 1)
+			{
+				console.log("More than 1 clipping planes requested!");
+			}
+
+		}
+
+		this.clearClippingPlanes = function()
+		{
+			UnityUtil.disableClippingPlanes();
+		}
+/*
 		var clippingPlaneID = -1;
 		this.clippingPlanes = [];
 
@@ -1455,7 +1491,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				);
 			}
 		};
-
+*/
 		/**
 		 * Adds a clipping plane to the viewer
 		 * @param {string} axis - Axis through which the plane clips (overrides normal)
@@ -1466,7 +1502,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param {string} account - name of database (optional)
 		 * @param {string} project - name of project (optional)
 		 */
-		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
+/*		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
 			if(account && project){
@@ -1493,10 +1529,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.clippingPlanes[0].changeAxis(axis);
 		};
 
-		/**
+*/		/**
 		 * Clear out all clipping planes
 		 */
-		this.clearClippingPlanes = function() {
+/*		this.clearClippingPlanes = function() {
 			self.clippingPlanes.forEach(function(clipPlane) {
 				clipPlane.destroy();
 
@@ -1504,19 +1540,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.clippingPlanes = [];
 		};
-
+*/
 		/**
 		 * Clear out all clipping planes
 		 * @param {number} id - Get the clipping plane with matching unique ID
 		 */
-		this.getClippingPlane = function(id) {
+/*		this.getClippingPlane = function(id) {
 			// If the clipping plane no longer exists this
 			// will return undefined
 			return self.clippingPlanes.filter(function(clipPlane) {
 				return (clipPlane.getID() === id);
 			})[0];
 		};
-
+*/
 		/****************************************************************************
 		 * Pins
 		 ****************************************************************************/
@@ -1550,10 +1586,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					project: pin.project
 				});
 
-				callback(self.EVENT.SET_CLIPPING_PLANES, {
+				callback(self.EVENT.UPDATE_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes,
 					account: pin.account,
-					project: pin.project
+					project: pin.project,
+					fromClipPanel: false
 
 				});
 			}
@@ -1651,12 +1688,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
-	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
-	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
-	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
+	UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
-	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
-	SET_SUBPROJECT_TRANS_INFO : "VIEWER_:SET_SUBPROJECT_TRANS_INFO",
+	CLIPPING_PLANE_BROADCAST: "VIEWER_CLIPPING_PLANE_BROADCAST",
 
 	// Pin events
 	CLICK_PIN: "VIEWER_CLICK_PIN",

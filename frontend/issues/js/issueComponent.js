@@ -396,10 +396,12 @@
 
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
+					fromClipPanel: false,
 					account: self.issueData.account,
-					project: self.issueData.project,
+					project: self.issueData.project
+
 				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+				self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 			}
 		};
 

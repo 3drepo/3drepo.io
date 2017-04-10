@@ -65,6 +65,14 @@ var UnityUtil;
 	 * =============== FROM UNITY ====================
 	 */
 
+	UnityUtil.prototype.clipBroadcast = function(clipInfo)
+	{
+		if(UnityUtil.clipBroadcast)
+		{
+			UnityUtil.clipBroadcast(JSON.parse(clipInfo));
+		}
+	}
+
 	UnityUtil.prototype.currentPointInfo = function(pointInfo)
 	{
 		var point = JSON.parse(pointInfo);
@@ -86,7 +94,6 @@ var UnityUtil;
 		if(UnityUtil.pickPointCallback)
 			UnityUtil.pickPointCallback(point);
 	}
-
 
 	UnityUtil.prototype.ready = function()
 	{
@@ -133,6 +140,11 @@ var UnityUtil;
 	UnityUtil.prototype.clearHighlights = function()
 	{
 		toUnity("ClearHighlighting");
+	}
+	
+	UnityUtil.prototype.disableClippingPlanes = function()
+	{
+		toUnity("DisableClip");
 	}
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour)
@@ -259,6 +271,18 @@ var UnityUtil;
 		param.visible = visibility;
 		toUnity("ToggleVisibility", JSON.stringify(param));
 
+	}
+
+	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, project)
+	{
+		var param = {}
+		param.clip = clipPlane;
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+		param.broadcast = requireBroadcast;
+		toUnity("UpdateClip", JSON.stringify(param));
 	}
 
 

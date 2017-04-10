@@ -374,10 +374,11 @@
 
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				project: issue.project,
 			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+			self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 
 			// Remove highlight from any multi objects
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});

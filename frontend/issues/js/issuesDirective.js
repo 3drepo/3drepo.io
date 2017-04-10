@@ -520,8 +520,9 @@
 				project: issue.project
 			});
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				project: issue.project
 			});
