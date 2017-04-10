@@ -247,6 +247,20 @@ var UnityUtil;
 
 	}
 
+	UnityUtil.prototype.toggleVisibility = function(account, project, ids, visibility)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+
+		param.ids = ids;
+		param.visible = visibility;
+		toUnity("ToggleVisibility", JSON.stringify(param));
+
+	}
+
 
 	UnityUtil = new UnityUtil();
 }());

@@ -264,8 +264,8 @@
 							v.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.project,
-								event.value.visible_ids,
-								event.value.invisible_ids
+								event.value.ids,
+								event.value.visible
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 							v.viewer.setCamera(

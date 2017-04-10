@@ -738,69 +738,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		//this.switchedOldParts = [];
 		//this.switchedObjects = [];
 
-		this.__processSwitchVisibility = function(nameSpaceName, ids_in, state)
+		this.switchObjectVisibility = function(account, project, ids, visibility)
 		{
-			if (ids_in) {
-				var ids = new Set(ids_in); // Convert to Set if necessary
-
-				if (ids.size) {
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						var nsMultipartNodes;
-
-						// If account and project have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									parts.setVisibility(state);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							object[0].setAttribute("render", state.toString());
-						}
-					});
-				}
-			}
-		};
-
-		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
-			var nameSpaceName = null;
-
-			if (account && project) {
-				nameSpaceName = account + "__" + project;
-			}
-
-			if (visible_ids)
-			{
-				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
-			}
-
-			if (invisible_ids)
-			{
-				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
-			}
+			UnityUtil.toggleVisibility(account, project, ids, visibility);
 		};
 
 		ViewerUtil.onEvent("pinClick", function(clickInfo) {

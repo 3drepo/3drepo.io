@@ -569,28 +569,8 @@
 
 		var toggleNode = function (node) {
 			var childNodes = [];
-			var pathArr = [];
-			var idx = 0, i = 0;
-
-			var visible = getVisibleArray(node.account, node.project);
-			var invisible = getInvisibleArray(node.account, node.project);
 
 			traverseNodeAndPushId(node, childNodes);
-
-			if (node.toggleState === "invisible")
-			{
-				for(i = 0; i < childNodes.length; i++)
-				{
-					invisible.add(childNodes[i]);
-					visible.delete(childNodes[i]);
-				}
-			} else {
-				for(i = 0; i < childNodes.length; i++)
-				{
-					visible.add(childNodes[i]);
-					invisible.delete(childNodes[i]);
-				}
-			}
 
 			for (var key in vm.visible){
 
@@ -603,8 +583,8 @@
 					account: account,
 					project: project,
 					name: node.name,
-					visible_ids: getVisibleArray(account, project),
-					invisible_ids: getInvisibleArray(account, project)
+					visible : node.toggleState != "invisible",
+					ids: childNodes
 				});
 			}
 
