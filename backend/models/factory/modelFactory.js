@@ -157,7 +157,7 @@ module.exports = {
 			var args = Array.prototype.slice.call(arguments);
 			args.shift();
 
-			update.apply(mongooseModel, args);
+			return update.apply(mongooseModel, args);
 		};
 
 		mongooseModel.prototype.model = modelName => {
