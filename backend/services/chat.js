@@ -78,10 +78,11 @@ module.exports.createApp = function (server, serverConfig){
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
 
-			if(msg.event && msg.account && msg.project){
+			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message
 				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				
+				let projectNameSpace = msg.project ?  `::${msg.project}` : ''; 
 				let extraPrefix = '';
 
 				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0){
@@ -90,8 +91,8 @@ module.exports.createApp = function (server, serverConfig){
 					});
 				}
 
-				let eventName = `${msg.account}::${msg.project}${extraPrefix}::${msg.event}`;
-				emitter.to(`${msg.account}::${msg.project}`).emit(eventName, msg.data);
+				let eventName = `${msg.account}${projectNameSpace}${extraPrefix}::${msg.event}`;
+				emitter.to(`${msg.account}${projectNameSpace}`).emit(eventName, msg.data);
 			}
 		});
 
@@ -120,25 +121,29 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('join', data => {
 				//check permission if the user have permission to join room
-				middlewares.hasReadAccessToProjectHelper(username, data.account, data.project).then(hasAccess => {
+				let auth = data.project ? middlewares.hasReadAccessToProjectHelper : middlewares.isAccountAdminHelper;
+				
+				auth(username, data.account, data.project).then(hasAccess => {
+
+					let projectNameSpace = data.project ?  `::${data.project}` : '';
 
 					if(hasAccess){
 
-						socket.join(`${data.account}::${data.project}`);
+						socket.join(`${data.account}${projectNameSpace}`);
 						socket.emit(joinedEventName, { account: data.account, project: data.project});
 
-						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}::${data.project}`, { 
+						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${projectNameSpace}`, { 
 							username, 
 							account: data.account, 
 							project: data.project 
 						});
 						
 					} else {
-						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}::${data.project}`});
-						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}::${data.project}`, { 
+						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${projectNameSpace}`});
+						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${projectNameSpace}`, { 
 							username, 
 							account: data.account, 
-							project: data.project 
+							project: data.project
 						});
 					}
 				});
@@ -146,8 +151,11 @@ module.exports.createApp = function (server, serverConfig){
 			});
 
 			socket.on('leave', data => {
-				socket.leave(`${data.account}::${data.project}`);
-				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}::${data.project}`, { 
+
+				let projectNameSpace = data.project ?  `::${data.project}` : '';
+
+				socket.leave(`${data.account}${projectNameSpace}`);
+				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}${projectNameSpace}`, { 
 					username, 
 					account: data.account, 
 					project: data.project 

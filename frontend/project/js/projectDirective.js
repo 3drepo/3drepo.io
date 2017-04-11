@@ -119,14 +119,14 @@
 				// 	noToggle: true,
 				// 	icon: "fa-cloud-upload"
 				// },
-				// {
-				// 	value: "exportBCF",
-				// 	label: "Export BCF",
-				// 	selected: false,
-				// 	noToggle: true,
-				// 	icon: "fa-cloud-download",
-				// 	divider: true
-				// },
+				{
+					value: "exportBCF",
+					label: "Export BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-download",
+					divider: true
+				},
 				{
 					value: "sortByDate",
 					label: "Sort by Date",

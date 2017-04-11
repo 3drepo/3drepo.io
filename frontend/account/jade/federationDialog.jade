@@ -68,3 +68,5 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 			#federationSave(layout="row", layout-align="start center")
 				md-button.md-raised.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.saveFederation()") Save
 				md-button.md-accent(ng-click="vm.closeDialog()") Cancel
+
+			p.projectDialogError(ng-if="vm.errorMessage") {{vm.errorMessage}}

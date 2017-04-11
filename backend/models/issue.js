@@ -29,6 +29,7 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
+var _ = require('lodash');
 
 var ChatEvent = require('./chatEvent');
 
@@ -220,7 +221,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(settings.type, settings.properties.code);
+			issues[index] = noClean ? issue: issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', ''));
 		});
 
 		return Promise.resolve(issues);
@@ -522,7 +523,7 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 		return this.findById(dbColOptions, stringToUUID(uid));
 	
 	}).then(issue => {
-		return Promise.resolve(noClean ? issue : issue.clean(settings.type, settings.properties.code));
+		return Promise.resolve(noClean ? issue : issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', '')));
 	});
 };
 
@@ -690,7 +691,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
 
-			let cleaned = issue.clean(settings.type, settings.properties.code);
+			let cleaned = issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', ''));
 			
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
 
@@ -1235,7 +1236,7 @@ schema.methods.getBCFMarkup = function(unit){
 				},
 				'Priority': this.priority,
 				'Title': this.name ,
-				'CreationDate': moment(this.created).utc().format() ,
+				'CreationDate': moment(this.created).format() ,
 				'CreationAuthor': this.owner,
 				'Description': this.desc
 			},
@@ -1274,7 +1275,10 @@ schema.methods.getBCFMarkup = function(unit){
 			'Viewpoint': {
 				'@': {Guid: utils.uuidToString(comment.viewpoint)}
 			},
-			'Date': moment(comment.created).utc().format()
+			'Date': moment(comment.created).format(),
+			// bcf 1.0 for back comp
+			'Status': this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, ' ')) : '',
+			'VerbalStatus': this.status ? this.status : (this.closed ? 'closed' : 'open')
 		};
 
 		_.get(comment, 'extras.ModifiedDate') && (commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate'));

@@ -1,3 +1,0 @@
-{"_id":{"$oid":"580e10a4fcee22c1ccf9a4a9"},"filename":"9958ab47-50dc-4a66-99d4-cae755caac4f_faces","chunkSize":261120,"uploadDate":{"$date":"2016-10-24T13:46:12.478Z"},"md5":"874f5f1478279f31b182e80d4743ecd7","length":7961296}
-{"_id":{"$oid":"580e10a4fcee22c1ccf9a4c9"},"filename":"9958ab47-50dc-4a66-99d4-cae755caac4f_normals","chunkSize":261120,"uploadDate":{"$date":"2016-10-24T13:46:12.673Z"},"md5":"09268809690bf1e6bac705da66c0eb0b","length":8974080}
-{"_id":{"$oid":"580e10a5fcee22c1ccf9a4ed"},"filename":"72ab3127-cd24-45d7-bef5-adcd9643f1ae_uv","chunkSize":261120,"uploadDate":{"$date":"2016-10-24T13:46:13.156Z"},"md5":"fee30387f9c8ba912462f7bee7a66f3d","length":3234032}

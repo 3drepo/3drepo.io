@@ -35,6 +35,14 @@ html(lang="en" ng-app="3drepo")
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+				
+
+
+		if gaTrackId && userId
+			script.
+				ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
+		else
+			script.
 				ga('create', '!{gaTrackId}', 'auto');
 
 
@@ -65,6 +73,36 @@ html(lang="en" ng-app="3drepo")
 
 	body
 
+		style.
+			#notSupported {
+				position: fixed;
+				background-color: lightgoldenrodyellow;
+				padding: 100px 50px;
+				left: 0;
+				right: 0;
+				margin: auto;
+				width: 50%;
+				text-align: center;
+				z-index: 10;
+				top: 20%;
+				font-size: 20px;
+				height: 70px;
+			}
+
+		#notSupported(style='visibility:hidden')
+			| Your browser is not supported.
+			| Please upgrade to the latest version of 
+			a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
+			| , 
+			a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
+			|  or 
+			a(target='_blank', href='https://www.microsoft.com/en-gb/windows/microsoft-edge') Edge
+			br
+			br
+			br
+			input(id='notSupportedButton' type='button', value='OK', style='padding:10px 60px; font-size:14px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
+
+
 		// Plugin JADE Files
 		//each j in pluginJade
 			script(type="text/ng-template", id=j.id)
@@ -81,3 +119,38 @@ html(lang="en" ng-app="3drepo")
 				!= renderMe(j.path, locals)
 
 		home
+
+	|<!-- For IE <= 9-->
+	|<!--[if (IE)]>
+	|	<script type="text/javascript">
+	|		document.getElementById('notSupported').style.visibility='visible';
+	|		document.getElementById('notSupportedButton').style.display = 'none';
+	|	</script>
+	|	
+	|<![endif]-->
+
+	script.
+		if(BrowserDetect && BrowserDetect.browser === 'Explorer'){
+			document.getElementById('notSupported').style.visibility='visible';
+			if (BrowserDetect.version <= 10){
+				document.getElementById('notSupportedButton').style.display = 'none';
+			}
+		}
+
+	if googleConversionId
+
+		// Google Code for Remarketing Tag
+		//
+			------------------------------------------------
+			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
+			-------------------------------------------------
+		script(type='text/javascript').
+			/* <![CDATA[ */
+			var google_conversion_id = !{googleConversionId};
+			var google_custom_params = window.google_tag_params;
+			var google_remarketing_only = true;
+			/* ]]> */
+		script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
+		noscript
+			div(style='display:inline;')
+				img(height='1', width='1', style='border-style:none;', alt='', src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')

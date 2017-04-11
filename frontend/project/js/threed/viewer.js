@@ -193,8 +193,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// Set option param from viewerDirective
 				self.options = options;
 
-				self.addLogo();
-
 				self.viewer = document.createElement("div");
 				var canvas = document.createElement("canvas");
 				canvas.className = "emscripten";
@@ -301,7 +299,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
 
-			self.removeLogo();
 
 			self.viewer.removeEventListener("mousedown", onMouseDown);
 			self.viewer.removeEventListener("mouseup", onMouseUp);

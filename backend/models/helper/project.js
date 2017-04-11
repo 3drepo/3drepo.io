@@ -38,7 +38,6 @@ var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
-var DB = require('../../db/db');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -116,7 +115,7 @@ function createAndAssignRole(project, account, username, data) {
 	}).then(() => {
 
 		return Role.createStandardRoles(account, project);
-	
+
 	}).then(() => {
 
 		return Role.grantProjectRoleToUser(username, account, project, C.COLLABORATOR_TEMPLATE);
@@ -144,20 +143,25 @@ function createAndAssignRole(project, account, username, data) {
 		});
 
 		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
-		
+
 		return setting.save();
 
 	}).then(setting => {
+
+
+		let projectData = {
+			account,
+			project,
+			permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+		};
+
+		ChatEvent.newProject(data.sessionId, account, projectData);
 
 		// this is true if only admin can create project
 		return {
 
 			setting,
-			project: {
-				account,
-				project,
-				permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
-			}
+			project: projectData
 
 		};
 	});
@@ -177,11 +181,23 @@ function importToyProject(username){
 	let data = {
 		desc, type, unit: 'm'
 	};
-	
+
 	return createAndAssignRole(project, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		return importProject(account, project, username, setting, {type: 'bson', dir: '../../statics/toy'});
+		return importProject(account, project, username, setting, {type: 'toy' });
+	}).catch(err => {
+
+		Mailer.sendImportError({
+ 			account,
+ 			project,
+ 			username,
+ 			err: err.message,
+ 			corID: err.corID,
+ 			appId: err.appId
+ 		});
+
+		return Promise.reject(err);
 	});
 }
 
@@ -306,7 +322,7 @@ function removeCollaborator(username, email, account, project, role){
 		}
 
 		return Role.revokeRolesFromUser(user.user, [{
-			db: account, 
+			db: account,
 			role: `${project}.${role}`
 		}]);
 
@@ -344,7 +360,7 @@ function createFederatedProject(account, project, subProjects){
 
 	let files = function(data){
 		return [
-			{desc: 'json file', type: 'file', path: data.jsonFilename}, 
+			{desc: 'json file', type: 'file', path: data.jsonFilename},
 			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
 		];
 	};
@@ -379,7 +395,7 @@ function createFederatedProject(account, project, subProjects){
 
 	//console.log(federatedJSON);
 	return Promise.all(addSubProjects).then(() => {
-		
+
 		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
 			_deleteFiles(files(err));
 			return;
@@ -612,7 +628,7 @@ function getUnityBundle(account, project, uid, username){
 
 
 // more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
-function newGetFullTree(account, project, branch, rev, username){
+function getFullTree(account, project, branch, rev, username){
 	'use strict';
 
 	let getHistory;
@@ -667,7 +683,7 @@ function newGetFullTree(account, project, branch, rev, username){
 			let getRefId;
 
 			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-				
+
 				getRefId = History.findByBranch({ account: ref.owner, project: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
 					return _history ? utils.uuidToString(_history._id) : null;
 				});
@@ -678,12 +694,12 @@ function newGetFullTree(account, project, branch, rev, username){
 
 			let status;
 			let getTree = middlewares.hasReadAccessToProjectHelper(username, ref.owner, ref.project).then(granted => {
-				
+
 				if(!granted){
 					status = 'NO_ACCESS';
 					return;
 				}
-				
+
 				return getRefId.then(revId => {
 
 					if(!revId){
@@ -695,10 +711,10 @@ function newGetFullTree(account, project, branch, rev, username){
 					return stash.findStashByFilename({ account: ref.owner, project: ref.project }, 'json_mpc', treeFileName);
 				});
 
-			}).then(buf => { 
+			}).then(buf => {
 				return {
-					status, 
-					buf: buf && buf.toString(), 
+					status,
+					buf: buf && buf.toString(),
 					_id: utils.uuidToString(ref._id)
 				};
 			});
@@ -712,143 +728,6 @@ function newGetFullTree(account, project, branch, rev, username){
 	}).then(subTrees => {
 		trees.subTrees = subTrees;
 		return trees;
-	});
-}
-
-function getFullTree(account, project, branch, rev, username){
-	'use strict';
-
-	let revId, treeFileName;
-	let subTrees;
-	let status;
-	let history;
-	let getHistory;
-
-	if(rev && utils.isUUID(rev)){
-
-		getHistory = History.findByUID({ account, project }, rev);
-
-	} else if (rev && !utils.isUUID(rev)) {
-
-		getHistory = History.findByTag({ account, project }, rev);
-
-	} else if (branch) {
-
-		getHistory = History.findByBranch({ account, project }, branch);
-	}
-
-	return getHistory.then(_history => {
-
-		history = _history;
-		return middlewares.hasReadAccessToProjectHelper(username, account, project);
-
-	}).then(granted => {
-
-		if(!history){
-
-			status = 'NOT_FOUND';
-			return Promise.resolve([]);
-
-		} else if (!granted) {
-
-			status = 'NO_ACCESS';
-			return Promise.resolve([]);
-
-		} else {
-
-			revId = utils.uuidToString(history._id);
-			treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
-
-			let filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return Ref.find({ account, project }, filter);
-
-		}
-
-	}).then(refs => {
-
-		//for all refs get their tree
-		let getTrees = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getTrees.push(
-				getFullTree(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						tree: obj.tree,
-						status: obj.status,
-						_rid: utils.uuidToString(ref._rid),
-						_id: utils.uuidToString(ref._id)
-					});
-				})
-			);
-		});
-
-		return Promise.all(getTrees);
-
-	}).then(_subTrees => {
-
-		subTrees = _subTrees;
-		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
-
-	}).then(buf => {
-
-		let tree;
-
-		if(buf){
-			tree = JSON.parse(buf);
-		} else if (!status && !buf){
-			status = 'NOT_FOUND';
-		}
-
-		let resetPath = function(node, parentPath){
-			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path; 
-				resetPath(child, child.path);
-			});
-		};
-
-		let setIdToPath = function(obj, idToPath){
-			idToPath[obj._id] = obj.path;
-			obj.children && obj.children.forEach(child => setIdToPath(child, idToPath));
-		};
-
-		subTrees.forEach(subTree => {
-
-			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
-
-				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
-				if (targetChild){
-					if(subTree && subTree.tree && subTree.tree.nodes){
-						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
-						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
-						targetChild.children = [subTree.tree.nodes];
-
-						let idToPath = {};
-
-						setIdToPath(subTree.tree.nodes, idToPath);
-						Object.assign(tree.idToPath, idToPath);
-					}
-
-					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
-				}
-
-			});
-		});
-
-		return Promise.resolve({tree, status});
-
 	});
 }
 
@@ -1019,12 +898,12 @@ function getRolesForProject(account, project, removeViewer){
 			'$or': [{
 				'privileges' : {
 					'$elemMatch': {
-						'resource.db': account, 
+						'resource.db': account,
 						'resource.collection': `${project}.history`,
 						'actions': 'find'
 					}
 				}
-			},{ 
+			},{
 				'roles': {
 					'$elemMatch': {
 						"db" : account
@@ -1056,7 +935,7 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 		roles.forEach((role, i) => {
-			
+
 			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
 
 			if(roleSettings[roles[i].role]){
@@ -1068,7 +947,7 @@ function getRolesForProject(account, project, removeViewer){
 		});
 
 		for(let i = roles.length - 1; i >= 0; i--){
-			if (removeViewer && 
+			if (removeViewer &&
 				roles[i].permissions.indexOf(C.PERM_COMMENT_ISSUE) === -1)
 			{
 				roles.splice(i, 1);
@@ -1085,7 +964,7 @@ function getUserRolesForProject(account, project, username){
 	let projectRoles;
 
 	return getRolesForProject(account, project).then(roles => {
-		
+
 		projectRoles = roles;
 		return User.findByUserName(username);
 
@@ -1122,6 +1001,8 @@ function uploadFile(req){
 
 	let account = req.params.account;
 	let project = req.params.project;
+
+	ChatEvent.projectStatusChanged(null, account, project, { status: 'uploading' });
 	//upload project with tag
 	let checkTag = tag => {
 		if(!tag){
@@ -1147,7 +1028,7 @@ function uploadFile(req){
 			fileFilter: function(req, file, cb){
 
 				let format = file.originalname.split('.');
-				
+
 				if(format.length <= 1){
 					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
@@ -1183,6 +1064,7 @@ function uploadFile(req){
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
 			} else {
+				ChatEvent.projectStatusChanged(null, account, project, { status: 'uploaded' });
 				return resolve(req.file);
 			}
 		});
@@ -1222,8 +1104,8 @@ function _handleUpload(account, project, username, file, data){
 
 	let files = function(filePath, fileDir, jsonFile){
 		return [
-			{desc: 'tmp model file', type: 'file', path: filePath}, 
-			{desc: 'json file', type: 'file', path: jsonFile}, 
+			{desc: 'tmp model file', type: 'file', path: filePath},
+			{desc: 'json file', type: 'file', path: jsonFile},
 			{desc: 'tmp dir', type: 'dir', path: fileDir}
 		];
 	};
@@ -1251,195 +1133,8 @@ function _handleUpload(account, project, username, file, data){
 		return Promise.resolve(obj);
 
 	}).catch(err => {
-
 		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
 		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
-	});
-
-}
-
-function _importBSON(account, project, username, dir){
-	'use strict';
-
-	let importCollectionFiles = {};
-	
-	fs.readdirSync(`${__dirname}/${dir}`).forEach(file => {
-		// remove '.json' in string
-		let collectionName = file.split('.');
-		collectionName.pop();
-		collectionName = collectionName.join('.');
-
-		importCollectionFiles[`${project}.${collectionName}`] = file;
-	});
-
-	let dbUsername = config.db.username;
-	let dbPassword = config.db.password;
-
-	let promises = [];
-	let bucketItrPromises = [];
-	let hostString = DB(systemLogger).getHostString();
-
-	Object.keys(importCollectionFiles).forEach(collection => {
-
-		let filename = importCollectionFiles[collection];
-
-		promises.push(new Promise((resolve, reject) => {
-
-			require('child_process').exec(
-			`mongoimport -j 8 --host ${hostString} --username ${dbUsername} --password ${dbPassword} --authenticationDatabase admin --db ${account} --collection ${collection} --file ${dir}/${filename} --writeConcern '{w: 1}'`,
-			{
-				cwd: __dirname
-			}, function (err) {
-				if(err){
-					reject({message: err.message.replace(new RegExp(dbPassword, 'g'), '[password masked]').replace(new RegExp(dbUsername, 'g'), '[username masked]')});
-				} else {
-					resolve();
-				}
-			});
-
-		}));
-	});
-
-	return Promise.all(promises).then(() => {
-		//rename json_mpc stash
-
-		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
-
-		bucketItrPromises.push(
-
-			new Promise((resolve, reject) => {
-
-				let renamePromises = [];
-
-				jsonBucket.find().forEach(file => {
-
-					let newFileName = file.filename;
-					newFileName = newFileName.split('/');
-					newFileName[1] = account;
-					newFileName = newFileName.join('/');
-
-					renamePromises.push(
-
-						new Promise((resolve, reject) => {
-
-							jsonBucket.rename(file._id, newFileName, function(err) {
-								if(err){
-									systemLogger.logError('error while renaming sample project stash',
-										{ err: err, collections: 'stash.json_mpc.files', db: account, _id: file._id, filename: file.filename }
-									);
-									reject(err);
-								} else {
-									resolve();
-								}
-
-							});
-						})
-
-					);
-
-				}, err => {
-					if(err){
-						reject(err);
-					} else {
-						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
-					}
-				});
-
-			})
-		);
-
-		//rename src stash
-		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
-
-		bucketItrPromises.push(
-			new Promise((resolve, reject) => {
-
-				let renamePromises = [];
-
-				srcBucket.find().forEach(file => {
-
-					let newFileName = file.filename;
-					newFileName = newFileName.split('/');
-					newFileName[1] = account;
-					newFileName = newFileName.join('/');
-
-					renamePromises.push(
-						new Promise((resolve, reject) => {
-							srcBucket.rename(file._id, newFileName, function(err) {
-
-								if(err) {
-									systemLogger.logError('error while renaming sample project stash',
-										{ err: err, collections: 'stash.src.files', db: account, _id: file._id, filename: file.filename }
-									);
-
-									reject(err);
-
-								} else {
-									resolve();
-								}
-
-							});
-						})
-					);
-
-				}, err => {
-					if(err){
-						reject(err);
-					} else {
-						return Promise.all(renamePromises).then(() => resolve()).catch(err => reject(err));
-					}
-				});
-
-			})
-		);
-
-		return Promise.all(bucketItrPromises);
-
-	}).then(() => {
-		//change history time and author
-		return History.findLatest({account: account, project: project}, { current: 0 });
-
-	}).then(history => {
-
-		history.author = username;
-		history.timestamp = new Date();
-
-		return history.save();
-
-	}).then(() => {
-
-		let Issue = require('../issue');
-
-		let updateIssuePromises = [];
-
-		Issue.find({account: account, project: project}, {}, { owner: 1, comments: 1 }).then(issues => {
-			issues.forEach(issue => {
-
-				issue.owner = account;
-
-				issue.comments.forEach(comment => {
-					comment.owner = username;
-				});
-
-				updateIssuePromises.push(issue.save());
-			});
-		});
-
-		return Promise.all(updateIssuePromises);
-
-	}).then(() => {
-
-		return importQueue.reGenProjectTree(account, project);
-
-	}).then(() => {
-		
-		systemLogger.logInfo(`toy project BSON imported and renamed without error`,{
-			account,
-			project,
-			username
-		});
-
-		return;
 	});
 
 }
@@ -1451,14 +1146,21 @@ function importProject(account, project, username, projectSetting, source, data)
 		return Promise.reject({ message: `projectSetting is ${projectSetting}`});
 	}
 
+	ChatEvent.projectStatusChanged(null, account, project, { status: 'processing' });
+
 	projectSetting.status = 'processing';
 
 	return projectSetting.save().then(() => {
 
-		if(source.type === 'bson'){
-			return _importBSON(account, project, username, source.dir);
-		} else if (source.type === 'upload'){
+		if (source.type === 'upload'){
 			return _handleUpload(account, project, username, source.file, data);
+
+		} else if (source.type === 'toy'){
+
+			return importQueue.importToyProject(account, project).then(obj => {
+				let corID = obj.corID;
+				systemLogger.logInfo(`Job ${corID} imported without error`,{account, project, username});
+			});
 		}
 
 	}).then(() => {
@@ -1526,7 +1228,7 @@ function removeProject(account, project){
 		//remove project collections
 
 		let promises = [];
-		
+
 		collections.forEach(collection => {
 			if(collection.name.startsWith(project)){
 				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
@@ -1542,7 +1244,7 @@ function removeProject(account, project){
 	}).then(() => {
 		//remove roles related to this project from system.roles collection
 		let promises = [];
-		
+
 		RoleTemplates.projectRoleTemplateLists.forEach(role => {
 			promises.push(Role.dropRole(account, `${project}.${role}`));
 		});
@@ -1572,7 +1274,7 @@ function getProjectPermission(username, account, project){
 
 function getMetadata(account, project, id){
 	'use strict';
-	
+
 	let projection = {
 		shared_id: 0,
 		paths: 0,
@@ -1600,7 +1302,7 @@ var acceptedFormat = [
 	'bvh','irrmesh','irr','q3d','q3s','b3d',
 	'dae','ter','csm','3d','lws','xml','ogex',
 	'ms3d','cob','scn','blend','pk3','ndo',
-	'ifc','xgl','zgl','fbx','assbin'
+	'ifc','xgl','zgl','fbx','assbin', 'bim'
 ];
 
 
@@ -1627,6 +1329,5 @@ module.exports = {
 	importProject,
 	removeProject,
 	getProjectPermission,
-	newGetFullTree,
 	getMetadata
 };

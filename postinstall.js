@@ -33,9 +33,9 @@ var public_files = {
 		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
 		socketio: '/public/js/external/socket.io.js',
-        angularmaterialjs: '/public/js/external/angular-material.min.js',
-        angularanimatejs: '/public/js/external/angular-animate.min.js',
-        angularariajs: '/public/js/external/angular-aria.min.js',
+		angularmaterialjs: '/public/js/external/angular-material.min.js',
+		angularanimatejs: '/public/js/external/angular-animate.min.js',
+		angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 		angularrecaptcha: '/public/js/external/angular-recaptcha.min.js',
 
@@ -51,7 +51,7 @@ var public_files = {
 	css : {
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
 		repouicss : '/public/css/ui.css',
-        angularmaterialcss: '/public/css/external/angular-material.min.css',
+		angularmaterialcss: '/public/css/external/angular-material.min.css',
 		threedrepocss: "/public/css/external/three-d-repo.css"
 	}
 };
@@ -89,7 +89,7 @@ var internal_files = {
 	],
 
 	x3dom_files: [
-		'submodules/x3dom/dist/ammo.js',
+		//'submodules/x3dom/dist/ammo.js',
 		'submodules/x3dom/dist/x3dom.js',
 		'submodules/x3dom/dist/x3dom.css'
 	]

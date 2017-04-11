@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.10.1";
+	const VERSION="1.10.3";
 
 	let config = require("app-config")
 		.config;
@@ -76,8 +76,8 @@
 
 			// self variable will be filled in by frontend
 			roundRobin.apiUrl = function(type, path) {
-				let typeFunctions = this.apiUrls[type];
-				let functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+				var typeFunctions = this.apiUrls[type];
+				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
 				this.apiUrlCounter[type] += 1;
 
@@ -191,6 +191,11 @@
 			fillInServerDetails(server, "chat", config.using_ssl, config.host, server.http_port, server.https_port);
 			server.chat_host = server.base_url_no_port + ":" + server.port;
 			config.chat_server = server;
+
+		} else if (server.service === "frontend"){
+
+			server.session = sessionFactory.session(config);
+			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
 
 		} else {
 			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);

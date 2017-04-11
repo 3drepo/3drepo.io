@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService) {
 		var vm = this,
 			existingProjectToUpload,
 			existingProjectFileUploader,
@@ -98,6 +98,23 @@
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
 					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
+
+					if(vm.accounts[i].isAdmin){
+						NotificationService.subscribe.newProject(vm.accounts[i].account, function(data){
+							vm.newProjectFileToUpload = null;
+							vm.projectsExist = true;
+							// Add project to list
+							var project = {
+								project: data.project,
+								permissions: data.permissions,
+								canUpload: true,
+								timestamp: null
+							};
+							updateAccountProjects(data.account, project);
+							$scope.$apply();
+
+						});
+					}
 				}
 			}
 		});

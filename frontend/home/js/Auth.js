@@ -19,7 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", function($injector, $q, $http, serverConfig, EventService) {
+	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", "AnalyticService", 
+		function($injector, $q, $http, serverConfig, EventService, AnalyticService) {
 
 		var self = this;
 
@@ -34,6 +35,7 @@
 			self.userRoles = data.roles;
 
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username, initialiser: data.initialiser });
+			AnalyticService.setUserId(self.username);
 
 			self.authPromise.resolve(self.loggedIn);
 		};
