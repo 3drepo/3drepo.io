@@ -280,7 +280,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
-				UnityUtil.clipBroadcast = self.broadcastClippingPlane;
+				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()

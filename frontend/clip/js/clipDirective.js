@@ -89,15 +89,15 @@
 			var res = "";
 			if(normal.length === 3)
 			{
-				if(normal[0] === 1 && normal[1] === 0  && normal[2] === 0)
+				if(normal[1] === 0  && normal[2] === 0)
 				{
 					res = "X";
 				}
-				else if(normal[0] === 0 && normal[1] === 1  && normal[2] === 0)
+				else if(normal[0] === 0 && normal[2] === 0)
 				{
 					res = "Z";
 				}
-				else if(normal[0] === 0 && normal[1] === 0  && normal[2] === 1)
+				else if(normal[0] === 0 && normal[1] === 0)
 				{
 					res = "Y";
 				}
@@ -113,7 +113,7 @@
 		function setDisplayValues(axis, distance, moveClip, slider)
 		{
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-			vm.displayDistance = distance //vm.bbox.max[0];
+			vm.displayDistance = distance;
 			vm.displayedAxis = axis;
 			if(slider != null)
 			{
@@ -315,26 +315,7 @@
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-/*				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(!event.value.clippingPlanes[0].normal)
-					{
-						//This is most likely old issue format. 
-						console.error("Trying to set clipping plane with no normal value.");
-
-					}
-					else 
-					{
-						loadClippingPlane(event.value.account, event.value.project, 
-							event.value.clippingPlanes[0].normal,
-						    event.value.clippingPlanes[0].distance);
-
-					}
-				} else {
-					vm.visible = false;
-					vm.sliderPosition = 0.0;
-				}*/
-				console.log("MISSING IMPLEMENTATION!");
+				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
 			}
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{

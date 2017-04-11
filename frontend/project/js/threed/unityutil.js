@@ -67,9 +67,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.clipBroadcast = function(clipInfo)
 	{
-		if(UnityUtil.clipBroadcast)
+		if(UnityUtil.clipBroadcastCallback)
 		{
-			UnityUtil.clipBroadcast(JSON.parse(clipInfo));
+			UnityUtil.clipBroadcastCallback(JSON.parse(clipInfo));
 		}
 	}
 
@@ -281,7 +281,7 @@ var UnityUtil;
 		{
 			param.nameSpace = account + "." + project;
 		}
-		param.broadcast = requireBroadcast;
+		param.requiresBroadcast = requireBroadcast;
 		toUnity("UpdateClip", JSON.stringify(param));
 	}
 

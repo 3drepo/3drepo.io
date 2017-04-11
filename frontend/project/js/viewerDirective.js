@@ -230,18 +230,10 @@
 							v.viewer.setPinVisibility(event.value.id, event.value.visibility);
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
-						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
-							v.viewer.addClippingPlane(
-								event.value.axis,
-								event.value.normal,
-								event.value.distance ? event.value.distance : 0,
-								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1,
+						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES) {
+							v.viewer.updateClippingPlanes(
+								event.value.clippingPlanes, event.value.fromClipPanel,
 								event.value.account, event.value.project);
-						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.distance);
-						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
