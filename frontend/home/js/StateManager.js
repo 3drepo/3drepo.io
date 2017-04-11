@@ -95,14 +95,17 @@
 					stateStack.push(parentState.children[i]);
 
 					(function(childState){
+						//console.log('childState.url', childState.url);
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
+							params: childState.params,
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
 							reloadOnSearch : false,
 							resolve: {
 								init: function(StateManager, $location, $stateParams)
 								{
 									StateManager.setState($stateParams);
+									//console.log('##state', StateManager.state);
 								}
 							}
 						});
@@ -166,9 +169,9 @@
 
 			if (Object.keys(queryParams).length === 0)
 			{
-				StateManager.clearQuery();
+				//StateManager.clearQuery();
 			} else {
-				StateManager.setQuery(queryParams);
+				//StateManager.setQuery(queryParams);
 			}
 		});
 	}])
@@ -452,13 +455,18 @@
 					self.changedState[varName] = value;
 				}
 			}
-
+			//console.log(varName, value);
 			self.state[varName] = value;
 		};
 
 		this.setState = function(stateParams) {
 			// Copy all state parameters and extra parameters
-			// to the state
+			// to the state#
+			//console.log('stateParams', stateParams);
+			if(stateParams.noSet){
+				return;
+			}
+
 			for (var state in stateParams) {
 				if (stateParams.hasOwnProperty(state)) {
 					self.setStateVar(state, stateParams[state]);
@@ -509,6 +517,8 @@
 					self.updateState();
 				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
 					self.clearState();
+				} else if (event.type === EventService.EVENT.UPDATE_STATE){
+					self.updateState(true);
 				}
 			}
 		});
