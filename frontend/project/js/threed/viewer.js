@@ -800,6 +800,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
+		this.getObjectsStatus = function(account, project, promise){
+			UnityUtil.getObjectsStatus(account, project, promise);
+		}
+
+
 		this.getViewpointGroupAndName = function(id) {
 			var splitID = id.trim().split("__");
 			var name, group;
@@ -1077,36 +1082,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.oneGrpNodes = [];
 		this.twoGrpNodes = [];
-
-/*		this.setApp = function(group, app) {
-			if (!group || !group.multipart) {
-				if (app === undefined) {
-					app = self.SELECT_COLOUR.EMISSIVE;
-				}
-
-				self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
-
-				// TODO: Make this more efficient
-				self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
-				self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
-
-				if (group) {
-					self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-					self.oneGrpNodes = group.getElementsByTagName("Material");
-				} else {
-					self.oneGrpNodes = [];
-					self.twoGrpNodes = [];
-				}
-
-				self.applyApp(self.oneGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, true);
-
-				self.viewer.render();
-			}
-		};*/
 
 		this.setNavMode = function(mode, force) {
 			if (self.currentNavMode !== mode || force) {
@@ -1458,6 +1433,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 */
 		this.updateClippingPlanes = function(clipPlanes, fromPanel, account, project)
 		{
+			if(!clipPlanes || clipPlanes.length === 0)
+			{
+				UnityUtil.disableClippingPlanes();
+			}
+
 			if(clipPlanes && clipPlanes.length > 0 )
 			{
 				UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, project);
@@ -1474,85 +1454,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		{
 			UnityUtil.disableClippingPlanes();
 		}
-/*
-		var clippingPlaneID = -1;
-		this.clippingPlanes = [];
-
-		this.setClippingPlanes = function(clippingPlanes) {
-			self.clearClippingPlanes();
-
-			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
-				var clipPlaneIDX = self.addClippingPlane(
-					clippingPlanes[clipidx].axis,
-					clippingPlanes[clipidx].normal,
-					clippingPlanes[clipidx].distance,
-					clippingPlanes[clipidx].percentage,
-					clippingPlanes[clipidx].clipDirection
-				);
-			}
-		};
-*/
-		/**
-		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane
-		 * @param {number} distance - Distance along the bounding box to clip
-		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
-		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-		 * @param {string} account - name of database (optional)
-		 * @param {string} project - name of project (optional)
-		 */
-/*		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
-			clippingPlaneID += 1;
-			var parentGroup = null;
-			if(account && project){
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				parentGroup = self.groupNodes[fullParentGroupName];
-			}
-
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
-			self.clippingPlanes.push(newClipPlane);
-
-			return clippingPlaneID;
-		};
-
-		this.moveClippingPlane = function(axis, distance) {
-			// Only supports a single clipping plane at the moment.
-			if(self.clippingPlanes[0])
-			{
-				self.clippingPlanes[0].movePlane(axis, distance);
-			}
-		};
-
-		this.changeAxisClippingPlane = function(axis) {
-			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].changeAxis(axis);
-		};
-
-*/		/**
-		 * Clear out all clipping planes
-		 */
-/*		this.clearClippingPlanes = function() {
-			self.clippingPlanes.forEach(function(clipPlane) {
-				clipPlane.destroy();
-
-			});
-
-			self.clippingPlanes = [];
-		};
-*/
-		/**
-		 * Clear out all clipping planes
-		 * @param {number} id - Get the clipping plane with matching unique ID
-		 */
-/*		this.getClippingPlane = function(id) {
-			// If the clipping plane no longer exists this
-			// will return undefined
-			return self.clippingPlanes.filter(function(clipPlane) {
-				return (clipPlane.getID() === id);
-			})[0];
-		};
-*/
 		/****************************************************************************
 		 * Pins
 		 ****************************************************************************/
@@ -1670,9 +1571,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
-	HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
+	GET_CURRENT_OBJECT_STATUS: "VIEWER_GET_CURRENT_OBJECT_STATUS",
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 

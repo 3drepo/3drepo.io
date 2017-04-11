@@ -33,6 +33,7 @@ var UnityUtil;
 	var loadedResolve;
 	var screenshotPromises = [];
 	var vpPromise = null;
+	var objectStatusPromise = null;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	UnityUtil.prototype.onReady = function()	
@@ -87,6 +88,14 @@ var UnityUtil;
 		loadedResolve.resolve(res);
 
 	}
+
+	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
+	{
+		objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		objectStatusPromise = null;
+		
+	}
+
 
 	UnityUtil.prototype.pickPointAlert = function(pointInfo)
 	{
@@ -155,6 +164,31 @@ var UnityUtil;
 		params.normal = normal;
 		params.color = colour;
 		toUnity("DropPin", JSON.stringify(params));
+	}
+
+	UnityUtil.prototype.getObjectsStatus = function(account, project, promise)
+	{
+		var nameSpace = "";
+		if(account && project)
+		{
+			nameSpace = account + "."  + project;
+		}
+		if(objectStatusPromise)
+		{
+			objectStatusPromise.then(function(blah){
+					_getObjectsStatus(nameSpace, promise);
+				}					
+			);
+		}
+		else
+			_getObjectsStatus(nameSpace, promise)
+
+	}
+
+	function _getObjectsStatus(nameSpace, promise)
+	{
+		objectStatusPromise = promise;
+		toUnity("GetObjectsStatus", nameSpace);
 	}
 
 	UnityUtil.prototype.getPointInfo = function()

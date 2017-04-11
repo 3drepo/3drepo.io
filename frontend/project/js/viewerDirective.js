@@ -233,7 +233,13 @@
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES) {
 							v.viewer.updateClippingPlanes(
 								event.value.clippingPlanes, event.value.fromClipPanel,
-								event.value.account, event.value.project);
+								event.value.account, event.value.project);							
+						} else if ((event.type === EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS)) {
+							v.viewer.getObjectsStatus(
+								event.value.account,
+								event.value.project,
+								event.value.promise
+							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
