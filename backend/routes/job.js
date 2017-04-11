@@ -33,7 +33,6 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-	
 			return user.customData.jobs.add({
 				_id: req.body._id,
 				color: req.body.color
@@ -58,6 +57,7 @@
 		}).then(user => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
+
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

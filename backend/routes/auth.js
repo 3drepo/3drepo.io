@@ -370,13 +370,16 @@
 
 		}).then(databases => {
 
+			let customData = user.customData.toObject();
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 				accounts: databases,
-				firstName: user.customData.firstName,
-				lastName: user.customData.lastName,
-				email: user.customData.email,
-				billingInfo: user.customData.billing.billingInfo,
-				hasAvatar: user.customData.avatar ? true : false
+				firstName: customData.firstName,
+				lastName: customData.lastName,
+				email: customData.email,
+				billingInfo: customData.billing.billingInfo,
+				hasAvatar: customData.avatar ? true : false,
+				jobs: customData.jobs
 			});
 
 		}).catch(err => {

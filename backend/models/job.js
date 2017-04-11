@@ -23,33 +23,45 @@
 		_id: String,
 		color: String
 	});
+	const responseCodes = require('../response_codes.js');
 
+	const Job = {
 
-	jobSchema.statics.add = function(user, job){
+		init: function(user, jobs) {
+			console.log('init called');
+			this.user = user;
+			this.jobs = jobs;
+			return this;
+		},
 
-		if(!user){
-			throw new Error('Arg user is missing');
-		}
+		add: function(job) {
+			if (!this.jobs.find(myJob => myJob._id == job._id)){
+				this.jobs.push(job);
+				return this.user.save();
+			} else {
+				return Promise.reject(responseCodes.DUP_JOB);
+			}
 
-		user.customData.jobs.push(job);
+		},
+
+		remove: function(name){
+
+			let job = this.jobs.id(name);
 		
-		return user.save();
-
+			if(job){
+				job.remove();
+				return this.user.save();
+			} else {
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
+			}
+			
+		}
 	}
 
-	jobSchema.statics.remove = function(user, name){
-
-		if(!user){
-			throw new Error('Arg user is missing');
-		}
-
-		let job = user.customData.jobs.id(name);
-		job && job.remove();
-
-		return user.save();
-
+	// Mongoose doesn't support subschema static method
+	module.exports = {
+		schema: jobSchema,
+		Job: Job
 	};
-
-	module.exports = jobSchema;
 
 })();

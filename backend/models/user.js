@@ -60,7 +60,12 @@ var schema = mongoose.Schema({
 		billing: { type: userBilling, default: userBilling },
 		avatar: Object,
 		lastLoginAt: Date,
-		jobs: [job]
+		jobs: {
+			type: [job.schema],
+			get: function(jobs){
+				return job.Job.init(this, jobs);
+			}
+		}
 	},
 	roles: [{}]
 });
