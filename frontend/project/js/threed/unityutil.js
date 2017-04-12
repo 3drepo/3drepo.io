@@ -243,8 +243,8 @@ var UnityUtil;
 		params.database = account;
 		params.project = project;
 		if(revision != "head")
-			params.revision = revision;	
-
+			params.revID = revision;	
+		console.log(JSON.stringify(params));
 		toUnity("LoadProject", false, JSON.stringify(params));
 			
 
