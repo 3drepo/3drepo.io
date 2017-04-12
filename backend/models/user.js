@@ -35,6 +35,7 @@ var ProjectSetting = require('./projectSetting');
 var C = require('../constants');
 var userBilling = require("./userBilling");
 var job = require('./job');
+var permissionTemplate = require('./permissionTemplate');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -73,7 +74,13 @@ var schema = mongoose.Schema({
 		jobs: {
 			type: [job.schema],
 			get: function(jobs){
-				return job.Job.init(this, jobs);
+				return job.methods.init(this, jobs);
+			}
+		},
+		permissionTemplates: {
+			type: [permissionTemplate.schema],
+			get: function(permissionTemplates){
+				return permissionTemplate.methods.init(this, permissionTemplates);
 			}
 		}
 	},

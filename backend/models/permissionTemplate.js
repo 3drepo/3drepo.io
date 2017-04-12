@@ -21,43 +21,47 @@
 	const mongoose = require("mongoose");
 	const schema = mongoose.Schema({
 		_id: String,
-		color: String
+		permissions: [String]
 	});
 	const responseCodes = require('../response_codes.js');
+	const C = require('../constants');
+	const _ = require('lodash');
 
 	const methods = {
-
-		init: function(user, jobs) {
+		init: function(user, permissions) {
 
 			this.user = user;
-			this.jobs = jobs;
+			this.permissions = permissions;
 			return this;
 		},
 
 		findById: function(id){
-			return this.jobs.id(id);
+			return this.permissions.id(id);
 		},
 
-		add: function(job) {
-			if (!this.findById(job._id)){
-				this.jobs.push(job);
-				return this.user.save();
+		add: function(permission){
+
+			let isPermissionInvalid = !Array.isArray(permission.permissions) || 
+				_.intersection(C.PERM_LIST, permission.permissions).length !== permission.permissions.length;
+
+			if (this.findById(permission._id)){
+				return Promise.reject(responseCodes.DUP_PERM_TEMPLATE);
+			} else if (isPermissionInvalid) {
+				return Promise.reject(responseCodes.INVALID_PERM);
 			} else {
-				return Promise.reject(responseCodes.DUP_JOB);
+				this.permissions.push(permission);
+				return this.user.save().then(() => permission);
 			}
-
 		},
 
-		remove: function(name){
+		remove: function(id){
 
-			let job = this.findById(name);
+			let permission = this.findById(id);
 			
-			if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
-				return Promise.reject(responseCodes.JOB_ASSIGNED);
-			} else if (!job) {
-				return Promise.reject(responseCodes.JOB_NOT_FOUND);
+			 if (!permission) {
+				return Promise.reject(responseCodes.PERM_NOT_FOUND);
 			} else {
-				job.remove();
+				permission.remove();
 				return this.user.save();
 			}
 			

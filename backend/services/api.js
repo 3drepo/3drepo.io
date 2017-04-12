@@ -103,7 +103,7 @@
 		app.use("/payment", require("../routes/payment"));
 
 		app.use("/:account", require("../routes/job"));
-		
+		app.use("/:account", require("../routes/permissionTemplate"));
 		//project handlers
 		app.use("/:account", require("../routes/project"));
 
