@@ -37,6 +37,25 @@ var UnityUtil;
 	var objectStatusPromise = null;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
+	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;	
+	UnityUtil.prototype._SendMessage = function(gameObject, func, param)
+	{
+    	if (param === undefined) {
+	      if (!SendMessage_vss)
+    	    SendMessage_vss = Module.cwrap('SendMessage', 'void', ['string', 'string']);
+	      SendMessage_vss(gameObject, func);
+    	} else if (typeof param === "string") {
+	      if (!SendMessage_vsss)
+    	    SendMessage_vsss = Module.cwrap('SendMessageString', 'void', ['string', 'string', 'string']);
+	      SendMessage_vsss(gameObject, func, param);
+	    } else if (typeof param === "number") {
+    	  if (!SendMessage_vssn)
+	        SendMessage_vssn = Module.cwrap('SendMessageFloat', 'void', ['string', 'string', 'number']);
+    	 SendMessage_vssn(gameObject, func, param);
+	    } else
+    	    throw "" + param + " is does not have a type which is supported by SendMessage.";
+	}
+
 	UnityUtil.prototype.onLoaded = function()	
 	{
 		if(!loadedPromise)
@@ -134,6 +153,10 @@ var UnityUtil;
 
 	UnityUtil.prototype.ready = function()
 	{
+		//Overwrite the Send Message function to make it run quicker 
+		//This shouldn't need to be done in the future when the
+		//optimisation in added into unity.
+		SendMessage = UnityUtil._SendMessage;
 		readyResolve.resolve();
 	}
 	
@@ -342,7 +365,6 @@ var UnityUtil;
 		param.requiresBroadcast = requireBroadcast;
 		toUnity("UpdateClip", false, JSON.stringify(param));
 	}
-
 
 	UnityUtil = new UnityUtil();
 }());
