@@ -17,15 +17,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
+const request = require('supertest');
+const expect = require('chai').expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing'}) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
-let responseCodes = require("../../response_codes.js");
-
+const log_iface = require("../../logger.js");
+const systemLogger = log_iface.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const async = require('async');
 
 
 describe('Job', function () {
@@ -35,6 +35,9 @@ describe('Job', function () {
 	let username = 'job';
 	let password = 'job';
 	let job = { _id: 'job1', color: '000000'};
+	let job2 = { _id: 'job2', color: '000000'};
+
+	let subId = '58ecfbf94804d17bee4cdbbc';
 
 
 	before(function(done){
@@ -70,6 +73,16 @@ describe('Job', function () {
 	
 	});
 
+	it('should able to create second job', function(done){
+
+		agent.post(`/${username}/jobs`)
+		.send(job2)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	
+	});
+
 	it('should not able to create duplicated job', function(done){
 
 		agent.post(`/${username}/jobs`)
@@ -84,11 +97,80 @@ describe('Job', function () {
 	it('should able to list the job created', function(done){
 		agent.get(`/${username}.json`)
 		.expect(200, function(err, res){
-			expect(res.body.jobs).to.deep.equal([job]);
+			expect(res.body.jobs).to.deep.equal([job, job2]);
 			done(err);
 		});
 	});
 
+	it('should fail to assign a job that doesnt exist to a licence(user)', function(done){
+		agent.post(`/${username}/subscriptions/${subId}/assign`)
+		.send({ user: 'testing', job: `nonsense`})
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+	it('should able to assign a job to a licence(user)', function(done){
+
+		async.series([
+			callback => {
+				agent.post(`/${username}/subscriptions/${subId}/assign`)
+				.send({ user: 'testing', job: job._id})
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/subscriptions`)
+				.expect(200, function(err, res){
+					expect(res.body.find(sub => sub._id === subId).job).to.equal(job._id);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
+	it('should fail to change assigment to a job that doesnt exist to a licence(user)', function(done){
+		agent.put(`/${username}/subscriptions/${subId}/assign`)
+		.send({ job: `nonsense`})
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+	it('should able to change assigment to another job', function(done){
+		async.series([
+			callback => {
+				agent.put(`/${username}/subscriptions/${subId}/assign`)
+				.send({ job: job2._id})
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/subscriptions`)
+				.expect(200, function(err, res){
+					expect(res.body.find(sub => sub._id === subId).job).to.equal(job2._id);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+	});
+
+	it('should faile to remove a job if it is assigned to someone', function(done){
+		agent.delete(`/${username}/jobs/${job2._id}`)
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.JOB_ASSIGNED.value);
+			done(err);
+		});	
+	});
 
 	it('should able to remove a job', function(done){
 		agent.delete(`/${username}/jobs/${job._id}`)
@@ -108,7 +190,7 @@ describe('Job', function () {
 	it('job should be removed from the list', function(done){
 		agent.get(`/${username}.json`)
 		.expect(200, function(err, res){
-			expect(res.body.jobs).to.deep.equal([]);
+			expect(res.body.jobs).to.deep.equal([job2]);
 			done(err);
 		});
 	});

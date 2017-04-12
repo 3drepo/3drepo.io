@@ -28,14 +28,18 @@
 	const Job = {
 
 		init: function(user, jobs) {
-			console.log('init called');
+
 			this.user = user;
 			this.jobs = jobs;
 			return this;
 		},
 
+		findById: function(id){
+			return this.jobs.id(id);
+		},
+
 		add: function(job) {
-			if (!this.jobs.find(myJob => myJob._id == job._id)){
+			if (!this.findById(job._id)){
 				this.jobs.push(job);
 				return this.user.save();
 			} else {
@@ -46,17 +50,19 @@
 
 		remove: function(name){
 
-			let job = this.jobs.id(name);
-		
-			if(job){
+			let job = this.findById(name);
+			
+			if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
+				return Promise.reject(responseCodes.JOB_ASSIGNED);
+			} else if (!job) {
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
+			} else {
 				job.remove();
 				return this.user.save();
-			} else {
-				return Promise.reject(responseCodes.JOB_NOT_FOUND);
 			}
 			
 		}
-	}
+	};
 
 	// Mongoose doesn't support subschema static method
 	module.exports = {

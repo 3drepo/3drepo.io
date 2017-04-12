@@ -57,7 +57,17 @@ var schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: { type: userBilling, default: userBilling },
+		billing: { 
+			type: userBilling, 
+			default: userBilling,
+			get: function(billing){
+				if(billing){
+					billing._parent = this;
+				}
+				return billing;
+			}
+
+		},
 		avatar: Object,
 		lastLoginAt: Date,
 		jobs: {
@@ -714,6 +724,14 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
 	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
+		return this.save().then(() => subscription);
+	});
+};
+
+schema.methods.updateAssignDetail = function(id, data){
+	'use strict';
+
+	return this.customData.billing.subscriptions.updateAssignDetail(id, data).then(subscription => {
 		return this.save().then(() => subscription);
 	});
 };

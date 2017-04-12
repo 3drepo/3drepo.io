@@ -202,6 +202,7 @@
 
 		JOB_NOT_FOUND:{ message: 'Job not found', status: 404},
 		DUP_JOB: {message: 'Duplicate job id', status: 400},
+		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
 	};
 
 

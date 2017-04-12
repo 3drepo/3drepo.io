@@ -85,7 +85,6 @@ describe('User', function(){
 		it('updateInfo should put the data in customData and save', function(){
 
 			let user = new User();
-
 			user._id = 'whatever';
 
 			let updateObj = {

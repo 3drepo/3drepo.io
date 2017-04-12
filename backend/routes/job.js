@@ -54,7 +54,7 @@
 
 			return user.customData.jobs.remove(req.params.jobId);
 
-		}).then(user => {
+		}).then(() => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 

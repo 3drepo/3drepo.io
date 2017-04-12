@@ -40,6 +40,7 @@
 		createdAt: Date,
 		billingUser: String,
 		assignedUser: String,
+		job: String,
 		expiredAt: Date,
 		
 		limits: {
@@ -57,7 +58,7 @@
 			type: [subscriptionSchema], 
 			get: function (subs) { 
 				//console.log('subs', subs)
-				return new Subscriptions(this.billingUser, this.billingInfo, subs); 
+				return new Subscriptions(this._parent, this.billingUser, this.billingInfo, subs); 
 			}
 		},
 		billingInfo: { type: billingAddressInfo, default: {}  },

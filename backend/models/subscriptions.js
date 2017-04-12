@@ -22,7 +22,8 @@
 	const responseCodes = require("../response_codes.js");
 	const ProjectSetting = require("./projectSetting");
 	
-	let Subscriptions = function (billingUser, billingAddress, subscriptions) {
+	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
+		this.user = user;
 		this.billingUser = billingUser;
 		this.subscriptions = subscriptions;
 		this.billingAddress = billingAddress;
@@ -320,6 +321,24 @@
 		}
 	};
 
+	Subscriptions.prototype.updateAssignDetail = function(id, data){
+
+		let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
+
+		if(!subscription){
+			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
+		}
+
+		if(data.job && !this.user.customData.jobs.findById(data.job)){
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		} else {
+			subscription.job = data.job;
+		}
+
+		return Promise.resolve(subscription);
+
+	};
+
 	Subscriptions.prototype.assignSubscriptionToUser = function(id, userData){
 		
 		const User = require("./user.js");
@@ -352,8 +371,15 @@
 				return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 			} else if(subscription.assignedUser){
 				return Promise.reject(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED);
+			} else if (userData.job && !this.user.customData.jobs.findById(userData.job)) {
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
 			} else {
 				subscription.assignedUser = user.user;
+
+				if(userData.job){
+					subscription.job = userData.job;
+				}
+
 				return subscription;
 			}
 
@@ -410,6 +436,10 @@
 			return subscription;
 		});
 
+	};
+
+	Subscriptions.prototype.findByJob = function(job){
+		return this.subscriptions.filter(sub => sub.job === job);
 	};
 
 	module.exports = Subscriptions;
