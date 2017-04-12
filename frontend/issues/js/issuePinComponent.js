@@ -76,8 +76,6 @@
 						id: newPinId,
 						account: self.account,
 						project: self.project,
-						position: position,
-						norm: normal,
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,

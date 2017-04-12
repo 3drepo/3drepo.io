@@ -211,8 +211,8 @@
 								event.value.account,
 								event.value.project,
 								event.value.id,
-								event.value.position,
-								event.value.norm,
+								event.value.pickedPos,
+								event.value.pickedNorm,
 								event.value.colours,
 								event.value.viewpoint);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {

@@ -273,8 +273,8 @@
 				id: pin.id,
 				account: pin.account,
 				project: pin.project,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours,
 				viewpoint: viewpoint
 			});
@@ -291,8 +291,8 @@
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours
 			});
 		};

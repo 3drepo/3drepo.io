@@ -21,8 +21,7 @@ module.exports = {
 			'dms': "/public/js/external/dms.js",
 			'vector3d': "/public/js/external/vector3d.js",
 			'latlon-ellipsoidal': "/public/js/external/latlon-ellipsoidal.js",
-			'osgridref': "/public/js/external/osgridref.js",
-			'mathjs': "/public/js/external/math.js"
+			'osgridref': "/public/js/external/osgridref.js"
 		},
 		css :{
 			'fontawesomecss': "/public/css/external/font-awesome.min.css",
@@ -47,8 +46,7 @@ module.exports = {
 			'dms': "/public/js/external/dms.min.js",
 			'vector3d': "/public/js/external/vector3d.min.js",
 			'latlon-ellipsoidal': "/public/js/external/latlon-ellipsoidal.min.js",
-			'osgridref': "/public/js/external/osgridref.min.js",
-			'mathjs': "/public/js/external/math.min.js"
+			'osgridref': "/public/js/external/osgridref.min.js"
 		},
 		css :{
 			'fontawesomecss': "/public/css/external/font-awesome.min.css",

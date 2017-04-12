@@ -45,7 +45,6 @@ var public_files = {
 		'latlon-ellipsoidal': '/public/js/external/latlon-ellipsoidal.js',
 		osgridref: '/public/js/external/osgridref.js',
 
-		mathjs: '/public/js/external/math.js'
 	},
 
 	css : {

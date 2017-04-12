@@ -34,7 +34,6 @@
     "angular-sanitize": "~1.4.8",
     "material-design-icons": "^2.2.3",
     "angular-recaptcha": "^3.0.3",
-	"mathjs": "*",
     "geodesy": "https://github.com/chrisveness/geodesy.git#1.0.2"
   },
   "resolutions": {
