@@ -637,7 +637,7 @@
 
 			traverseNodeAndPushId(node, childNodes);
 			
-			for (var key in vm.visible){
+			for (var key in childNodes){
 
 				var vals = key.split('@');
 				var account = vals[0];
@@ -649,7 +649,7 @@
 					project: project,
 					name: node.name,
 					visible : node.toggleState != "invisible",
-					ids: childNodes
+					ids: childNodes[key]
 				});
 			}
 
