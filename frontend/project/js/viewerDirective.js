@@ -254,7 +254,8 @@
 								event.value.project,
 								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
-								event.value.colour
+								event.value.colour,
+								event.value.multi
 							);
 						}  else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();

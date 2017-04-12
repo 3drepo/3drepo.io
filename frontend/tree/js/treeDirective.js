@@ -783,7 +783,9 @@
 						source: "tree",
 						account: account,
 						project: project,
-						ids: map[key]
+						ids: map[key],
+						multi: true
+
 					});
 				}
 			}

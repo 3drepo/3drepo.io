@@ -720,13 +720,13 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.lastMultipart = null;
 
-		this.highlightObjects = function(account, project, ids_in, zoom, colour) {
+		this.highlightObjects = function(account, project, ids_in, zoom, colour, multiOverride) {
 			if (!this.pinDropMode) {
 				var ids = new Set(ids_in);
 
 				if(ids.size)
 				{
-					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, this.multiSelectMode);
+					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, multiOverride || this.multiSelectMode);
 				} else {
 					UnityUtil.clearHighlights();
 				}
