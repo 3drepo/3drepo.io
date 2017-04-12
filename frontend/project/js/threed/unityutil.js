@@ -339,6 +339,12 @@ var UnityUtil;
 
 
 	}
+	
+	UnityUtil.prototype.toggleStats = function()
+	{
+		toUnity("ShowStats", false);
+	}
+
 
 	UnityUtil.prototype.toggleVisibility = function(account, project, ids, visibility)
 	{
