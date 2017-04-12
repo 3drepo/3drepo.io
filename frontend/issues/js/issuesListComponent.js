@@ -390,19 +390,34 @@
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
+					console.log(response.data);
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
+						var key = obj.account + "@" +  obj.project;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
+						ids[key].push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
-					data = {
-						source: "tree",
-						account: self.account,
-						project: self.project,
-						ids: ids,
-						colour: response.data.colour
-					};
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					for(var key in ids)
+					{
+
+						var vals = key.split('@');
+						var account = vals[0];
+						var project = vals[1];
+
+						data = {
+							source: "tree",
+							account: account,
+							project: project,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true
+						
+						};
+						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					}
 				});
 			}
 		}
