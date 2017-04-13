@@ -135,7 +135,7 @@
 
 			v.collision  = new Collision(v.viewer);
 
-			$scope.reload();
+			//$scope.reload();
 
 			v.loaded.promise.then(function() {
 				// TODO: Move this so that the attachment is contained
@@ -186,6 +186,8 @@
 					v.initialised.resolve();
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
+				} else if (event.type === EventService.EVENT.VIEWER.LOAD_PROJECT) {
+					v.viewer.loadModel(event.value.account, event.value.project, event.value.branch, event.value.revision);
 				} else {
 					v.initialised.promise.then(function() {
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
@@ -201,7 +203,6 @@
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
-								console.log('viewer project settings ready');
 								v.viewer.updateSettings(event.value.settings);
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}

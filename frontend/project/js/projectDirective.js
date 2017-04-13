@@ -297,17 +297,7 @@
 		});
 
 		$timeout(function () {
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {
-				name: "default",
-				account:  vm.account,
-				project:  vm.project,
-				branch:   vm.branch,
-				revision: vm.revision,
-				at:       StateManager.query.at,
-				up:       StateManager.query.up,
-				view:     StateManager.query.view
-			});
-
+			EventService.send(EventService.EVENT.VIEWER.LOAD_PROJECT, {account: vm.account, project: vm.project, branch: vm.branch, revision: vm.revision });
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 

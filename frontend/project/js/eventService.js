@@ -93,7 +93,7 @@
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
-					console.trace("UNDEFINED EVENT TYPE");
+					console.trace("UNDEFINED EVENT TYPE" + type);
 				} else {
 					console.log("SEND: " + type);
 					console.log(value);

@@ -35,6 +35,7 @@ var UnityUtil;
 	var screenshotPromises = [];
 	var vpPromise = null;
 	var objectStatusPromise = null;
+	var loaded = false;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;	
@@ -133,7 +134,7 @@ var UnityUtil;
 		var res = {};
 		res.bbox = JSON.parse(bboxStr);
 		loadedResolve.resolve(res);
-
+		loaded = true;
 	}
 
 	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
@@ -262,12 +263,13 @@ var UnityUtil;
 
 	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
 	{
+
+		UnityUtil.reset();	
 		var params = {};
 		params.database = account;
 		params.project = project;
 		if(revision != "head")
 			params.revID = revision;	
-		console.log(JSON.stringify(params));
 		toUnity("LoadProject", false, JSON.stringify(params));
 			
 
@@ -281,6 +283,15 @@ var UnityUtil;
 	
 	UnityUtil.prototype.reset = function()
 	{
+		if(!loaded && loadedResolve)
+		{
+			//If the previous project is being loaded but hasn't finished yet
+			loadedResolve.reject();
+		}
+		
+		loadedPromise = null;
+		loadedResolve = null;
+		loaded = false;
 		toUnity("ClearCanvas", false);
 	}
 

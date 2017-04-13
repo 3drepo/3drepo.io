@@ -294,22 +294,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.destroy = function() {
-			if (self.currentViewpoint) {
-				self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
-			}
-			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
-
-
-			self.viewer.removeEventListener("mousedown", onMouseDown);
-			self.viewer.removeEventListener("mouseup", onMouseUp);
-			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
-
-			//self.viewer.parentNode.removeChild(self.viewer);
-
-			ViewerUtil.offEventAll();
 			UnityUtil.reset();
-
-			//self.viewer = undefined;
 		};
 
 		ViewerUtil.onEvent("onError", function(objEvent) {
@@ -1555,6 +1540,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	// States of the viewer
 	READY: "VIEWER_EVENT_READY",
 	START_LOADING: "VIEWING_START_LOADING",
+	LOAD_PROJECT: "VIEWER_LOAD_PROJECT",
 	LOADED: "VIEWER_EVENT_LOADED",
 	RUNTIME_READY: "VIEWING_RUNTIME_READY",
 
