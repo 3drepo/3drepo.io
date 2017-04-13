@@ -972,16 +972,26 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.applyModelProperties = function(account, project, properties)
 		{
-			if (properties.properties)
+			console.log("!!!!Model properties : " + JSON.stringify(properties));
+			if (properties)
 			{
-				if (properties.properties.hiddenNodes)
+				if (properties.hiddenNodes && properties.hiddenNodes.length > 0)
 				{
 					self.switchObjectVisibility(
-						null,
-						null,
-						null,
-						properties.properties.hiddenNodes
+						account,
+						project,
+						properties.hiddenNodes,
+						false
 					);
+				}
+
+				if(properties.subProjects)
+				{
+					for(var i = 0; i < properties.subProjects.length; i++)
+					{
+						var entry = properties.subProjects[i];
+						this.applyModelProperties(entry.account, entry.project, entry.properties);
+					}
 				}
 			}
 		}

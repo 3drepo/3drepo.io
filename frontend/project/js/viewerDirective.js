@@ -148,14 +148,8 @@
 
 				v.collision  = new Collision(v.viewer);
 
-				v.branch = "master";
-				v.revision = "head";
-
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
-				function (json, status)
-				{
-					v.viewer.applyModelProperties(v.account, v.project, json);
-				});
+	//			v.branch = "master";
+	//			v.revision = "head";
 			});
 
 			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
@@ -168,6 +162,29 @@
 			// });
 
 		};
+
+		function fetchModelProperties(account, project, branch, revision)
+		{
+
+			if(!branch)
+			{
+				if(!revision)
+					branch = "master";
+				else
+					branch = "";
+			}
+					
+
+			if(!revision)
+				revision = "head";
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + branch + "/" + revision + "/modelProperties.json")).success(
+			function (json, status)
+			{
+				if(json.properties)
+					v.viewer.applyModelProperties(account, project, json.properties);
+			});
+
+		}
 
 		$scope.enterVR = function() {
 			v.loaded.promise.then(function() {
@@ -184,6 +201,7 @@
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					v.initialised.resolve();
+					fetchModelProperties(v.account, v.project, v.branch, v.revision);	
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
 				} else if (event.type === EventService.EVENT.VIEWER.LOAD_PROJECT) {

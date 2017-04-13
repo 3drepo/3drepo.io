@@ -500,14 +500,16 @@ function getModelProperties(account, project, branch, rev, username){
 			properties.hiddenNodes = [];
 		}
 
+		if(subProperties.length > 0)
+			properties.subProjects = [];
 		subProperties.forEach(subProperty => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
 
-			if (subProperty.properties.hiddenNodes)
+			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0)
 			{
-				properties.hiddenNodes = properties.hiddenNodes.concat(subProperty.properties.hiddenNodes);
+				properties.subProjects.push({properties: subProperty.properties, account: subProperty.owner, project: subProperty.project});
 			}
 		});
 

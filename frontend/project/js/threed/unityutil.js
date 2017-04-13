@@ -27,11 +27,18 @@ var UnityUtil;
 	
 	UnityUtil = function() {};
 
+	var LoadingState = { 
+		VIEWER_READY : 1,  //Viewer has been loaded
+		MODEL_LOADING : 2, //project information has been fetched, world offset determined, model starts loading
+		MODEL_LOADED : 3 //Models
+	};
 
 	var readyPromise;
 	var readyResolve;
 	var loadedPromise;
 	var loadedResolve;
+	var loadingPromise;
+	var loadingResolve;
 	var screenshotPromises = [];
 	var vpPromise = null;
 	var objectStatusPromise = null;
@@ -71,6 +78,20 @@ var UnityUtil;
 		
 	}
 
+	UnityUtil.prototype.onLoading = function()	
+	{
+		if(!loadingPromise)
+		{
+		   loadingPromise	= new Promise(function(resolve, reject)
+			{
+				loadingResolve = {resolve: resolve, reject: reject};
+			}	
+			);
+		}
+		return loadingPromise;
+		
+	}
+
 
 	UnityUtil.prototype.onReady = function()	
 	{
@@ -87,12 +108,21 @@ var UnityUtil;
 	}
 
 
-	function toUnity(methodName, requireModel, params)
+	function toUnity(methodName, requireStatus, params)
 	{
-		if(requireModel)
+		if(requireStatus == LoadingState.MODEL_LOADED)
 		{
 			//Requires model to be loaded
 			UnityUtil.onLoaded().then(function()
+			{
+				SendMessage(UNITY_GAME_OBJECT, methodName, params);
+			
+			});
+		}
+		else if(requireStatus == LoadingState.MODEL_LOADING)
+		{
+			//Requires model to be loaded
+			UnityUtil.onLoading().then(function()
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
@@ -135,6 +165,12 @@ var UnityUtil;
 		res.bbox = JSON.parse(bboxStr);
 		loadedResolve.resolve(res);
 		loaded = true;
+	}
+
+	UnityUtil.prototype.loading = function(bboxStr)
+	{
+
+		loadingResolve.resolve();
 	}
 
 	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
@@ -195,12 +231,12 @@ var UnityUtil;
 		var params =  {};	
 		params.color = colour;
 		params.pinName = id;
-		toUnity("ChangePinColor", true, JSON.stringify(params));
+		toUnity("ChangePinColor", LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.clearHighlights = function()
 	{
-		toUnity("ClearHighlighting", true);
+		toUnity("ClearHighlighting", LoadingState.MODEL_LOADED);
 	}
 	
 	UnityUtil.prototype.disableClippingPlanes = function()
@@ -215,7 +251,8 @@ var UnityUtil;
 		params.position = position;
 		params.normal = normal;
 		params.color = colour;
-		toUnity("DropPin", true, JSON.stringify(params));
+		toUnity("DropPin", LoadingState.MODEL_LOADING, JSON.stringify(params));
+
 	}
 
 	UnityUtil.prototype.getObjectsStatus = function(account, project, promise)
@@ -240,7 +277,7 @@ var UnityUtil;
 	function _getObjectsStatus(nameSpace, promise)
 	{
 		objectStatusPromise = promise;
-		toUnity("GetObjectsStatus", true, nameSpace);
+		toUnity("GetObjectsStatus", LoadingState.MODEL_LOADED, nameSpace);
 	}
 
 	UnityUtil.prototype.getPointInfo = function()
@@ -258,7 +295,7 @@ var UnityUtil;
 		if(color)
 			params.color = color;
 
-		toUnity("HighlightObjects", true, JSON.stringify(params));
+		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
@@ -270,15 +307,16 @@ var UnityUtil;
 		params.project = project;
 		if(revision != "head")
 			params.revID = revision;	
-		toUnity("LoadProject", false, JSON.stringify(params));
+		
+		UnityUtil.onLoading(); //Initialise the promise
+		toUnity("LoadProject", LoadingState.VIEWER_READY, JSON.stringify(params));
 			
-
 		return UnityUtil.onLoaded();
 	}
 
 	UnityUtil.prototype.removePin = function(id)
 	{
-		toUnity("RemovePin", false, id);
+		toUnity("RemovePin", LoadingState.MODEL_LOADING, id);
 	}
 	
 	UnityUtil.prototype.reset = function()
@@ -287,23 +325,26 @@ var UnityUtil;
 		{
 			//If the previous project is being loaded but hasn't finished yet
 			loadedResolve.reject();
+			loadingResolve.reject();
 		}
 		
 		loadedPromise = null;
 		loadedResolve = null;
-		loaded = false;
-		toUnity("ClearCanvas", false);
+		loadingPromise = null;
+		loadingResolve = null;
+		loaded  = false;
+		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
 	}
 
 	UnityUtil.prototype.resetCamera = function()
 	{
-		toUnity("ResetCamera", false);
+		toUnity("ResetCamera", LoadingState.VIEWER_READY);
 	}
 
 	UnityUtil.prototype.requestScreenShot = function(promise)
 	{
 		screenshotPromises.push(promise);
-		toUnity("RequestScreenShot", false);
+		toUnity("RequestScreenShot", LoadingState.VIEWER_READY);
 	}
 
 	UnityUtil.prototype.requestViewpoint = function(account, project, promise)
@@ -327,12 +368,12 @@ var UnityUtil;
 			param.namespace = account + "."  + project;
 		}
 		vpPromise = promise;
-		toUnity("RequestViewpoint", false, JSON.stringify(param));
+		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
 	UnityUtil.prototype.setNavigation = function(navMode)
 	{
-		toUnity("SetNavMode", false, navMode);
+		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
 	}
 
 	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, project)
@@ -346,14 +387,14 @@ var UnityUtil;
 		param.position = pos;
 		param.up = up;
 		param.forward = forward;
-		toUnity("SetViewpoint", false, JSON.stringify(param));
+		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 
 
 	}
 	
 	UnityUtil.prototype.toggleStats = function()
 	{
-		toUnity("ShowStats", false);
+		toUnity("ShowStats", LoadingState.VIEWER_READY);
 	}
 
 
@@ -367,7 +408,7 @@ var UnityUtil;
 
 		param.ids = ids;
 		param.visible = visibility;
-		toUnity("ToggleVisibility", true, JSON.stringify(param));
+		toUnity("ToggleVisibility",LoadingState.MODEL_LOADED, JSON.stringify(param));
 
 	}
 
@@ -380,7 +421,7 @@ var UnityUtil;
 			param.nameSpace = account + "." + project;
 		}
 		param.requiresBroadcast = requireBroadcast;
-		toUnity("UpdateClip", false, JSON.stringify(param));
+		toUnity("UpdateClip", LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
 	UnityUtil = new UnityUtil();
