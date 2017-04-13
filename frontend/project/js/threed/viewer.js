@@ -972,7 +972,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.applyModelProperties = function(account, project, properties)
 		{
-			console.log("!!!!Model properties : " + JSON.stringify(properties));
 			if (properties)
 			{
 				if (properties.hiddenNodes && properties.hiddenNodes.length > 0)
