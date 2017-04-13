@@ -43,6 +43,12 @@ router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, c
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
 
+//model permission
+router.post('/:project/permissions', middlewares.hasWriteAccessToProject, updatePermissions);
+
+//model permission
+router.get('/:project/permissions', middlewares.hasWriteAccessToProject, getPermissions);
+
 //get project roles
 router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesForProject);
 
@@ -440,6 +446,45 @@ function uploadProject(req, res, next){
 	});
 }
 
+function updatePermissions(req, res, next){
+	'use strict';
+
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let project = req.params.project;
+
+	return ProjectSetting.findById({account, project}, project).then(projectSetting => {
+
+		return projectSetting.changePermissions(req.body);
+
+	}).then(permission => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+	}).catch(err => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getPermissions(req, res, next){
+	'use strict';
+
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let project = req.params.project;
+
+	return ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(!setting){
+			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
+		} else {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.permissions);
+		}
+	}).catch(err => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
 
 module.exports = router;
 

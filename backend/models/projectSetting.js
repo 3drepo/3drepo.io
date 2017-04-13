@@ -30,7 +30,11 @@ var schema = mongoose.Schema({
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
 	federate: Boolean,
-	permissions: [],
+	permissions: [{
+		_id: false,
+		user: String,
+		permission: String
+	}],
 	properties: {
 		"pinSize" : Number,
 		"avatarHeight" : Number,
@@ -141,6 +145,55 @@ schema.methods.removeCollaborator = function(user, role){
 	return collaborator;
 };
 
+schema.methods.changePermissions = function(permissions){
+	'use strict';
+
+	const User = require('./user');
+	const account = this._dbcolOptions.account;
+
+	//get list of valid permission name
+	return User.findByUserName(account).then(dbUser => {
+
+		let promises = [];
+
+		permissions.forEach(permission => {
+
+			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
+				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
+			}
+
+
+			let perm = this.permissions.find(perm => perm.user === permission.user);
+
+			if(perm) {
+
+				perm.permission = permission.permission;
+
+			} else {
+
+				promises.push(
+					User.findByUserName(permission.user).then(user => {
+						if(!user){
+							return Promise.reject(responseCodes.USER_NOT_FOUND);
+						} else {
+							this.permissions.push(permission);
+						}
+					})
+				);
+			}
+
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => this.save())
+	.then(() => this.permissions);
+
+}
+
+schema.methods.isPermissionAssigned = function(permission){
+	return this.permissions.find(perm => perm.permission === permission) ?  true : false;
+}
 
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',

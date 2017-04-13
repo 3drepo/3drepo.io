@@ -36,6 +36,7 @@ describe('Permission templates', function () {
 	let password = 'job';
 	let permission = { _id: 'customA', permissions: ['view_issue', 'view_project']};
 	let permission1 = { _id: 'customB', permissions: ['view_issue', 'view_project', 'create_project', 'create_issue']};
+	let model = 'model1';
 
 	let subId = '58ecfbf94804d17bee4cdbbc';
 
@@ -120,8 +121,55 @@ describe('Permission templates', function () {
 
 		agent.delete(`/${username}/permission-templates/nonsense`)
 		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
 			done(err);
 		});
 	
+	});
+
+	it('should able to assign permission to user on model level', function(done){
+
+		let permissions = [{ user: 'testing', permission: 'customB'}, { user: 'user1', permission: 'customB'}];
+
+		async.series([callback => {
+			
+			agent.post(`/${username}/${model}/permissions`)
+			.send(permissions)
+			.expect(200, function(err, res){
+				callback(err);
+			});
+
+		}, callback => {
+
+			agent.get(`/${username}/${model}/permissions`)
+			.expect(200, function(err, res){
+				expect(res.body).to.deep.equal(permissions);
+				callback(err);
+			})
+
+		}], done);
+
+	});
+
+	it('should fail to assign a non existing permission to user', function(done){
+
+		agent.post(`/${username}/${model}/permissions`)
+		.send([{ user: 'testing', permission: 'nonsense'}])
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
+			done(err);
+		});
+
+	});
+
+	it('should fail to assign a permission to a non existing user', function(done){
+
+		agent.post(`/${username}/${model}/permissions`)
+		.send([{ user: 'nonses', permission: 'customB'}])
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+			done(err);
+		});
+
 	});
 });
