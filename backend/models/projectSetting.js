@@ -189,11 +189,11 @@ schema.methods.changePermissions = function(permissions){
 	}).then(() => this.save())
 	.then(() => this.permissions);
 
-}
+};
 
 schema.methods.isPermissionAssigned = function(permission){
 	return this.permissions.find(perm => perm.permission === permission) ?  true : false;
-}
+};
 
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',

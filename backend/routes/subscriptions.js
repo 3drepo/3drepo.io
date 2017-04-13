@@ -94,6 +94,10 @@
 					userData.job = req.body.job;
 				}
 
+				if (req.body.permissions){
+					userData.permissions = req.body.permissions;
+				}
+
 				return dbUser.assignSubscriptionToUser(req.params.sid, userData);
 			})
 			.then(subscription => {

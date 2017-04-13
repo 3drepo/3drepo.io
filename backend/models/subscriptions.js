@@ -21,7 +21,9 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ProjectSetting = require("./projectSetting");
-	
+	const C = require('../constants');
+	const _ = require('lodash');
+
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
 		this.user = user;
 		this.billingUser = billingUser;
@@ -330,9 +332,21 @@
 		}
 
 		if(data.job && !this.user.customData.jobs.findById(data.job)){
+
 			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		} else if (data.permissions && _.intersection(data.permissions, C.ACCOUNT_PERM_LIST).length !== data.permissions.length) {
+
+			return Promise.reject(responseCodes.INVALID_PERM);
+
 		} else {
-			subscription.job = data.job;
+
+			if(data.job){
+				subscription.job = data.job;
+			}
+			
+			if(data.permissions){
+				subscription.permissions = data.permissions;
+			}
 		}
 
 		return Promise.resolve(subscription);
@@ -373,11 +387,17 @@
 				return Promise.reject(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED);
 			} else if (userData.job && !this.user.customData.jobs.findById(userData.job)) {
 				return Promise.reject(responseCodes.JOB_NOT_FOUND);
+			} else if (userData.permissions && _.intersection(userData.permissions, C.ACCOUNT_PERM_LIST).length !== userData.permissions.length) {
+				return Promise.reject(responseCodes.INVALID_PERM);
 			} else {
 				subscription.assignedUser = user.user;
 
 				if(userData.job){
 					subscription.job = userData.job;
+				}
+
+				if(userData.permissions){
+					subscription.permissions = userData.permissions;
 				}
 
 				return subscription;

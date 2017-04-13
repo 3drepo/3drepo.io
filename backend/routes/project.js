@@ -450,7 +450,6 @@ function updatePermissions(req, res, next){
 	'use strict';
 
 	let account = req.params.account;
-	let username = req.session.user.username;
 	let project = req.params.project;
 
 	return ProjectSetting.findById({account, project}, project).then(projectSetting => {
@@ -470,7 +469,6 @@ function getPermissions(req, res, next){
 	'use strict';
 
 	let account = req.params.account;
-	let username = req.session.user.username;
 	let project = req.params.project;
 
 	return ProjectSetting.findById({account, project}, project).then(setting => {

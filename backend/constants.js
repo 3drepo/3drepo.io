@@ -260,19 +260,29 @@
 	//
 	//-----------------------------------------------------------------------------
 
-	define("PERM_DELETE_PROJECT", "delete_project");
-	define("PERM_CHANGE_PROJECT_SETTINGS", "change_project_settings");
+
+	//team space
+
 	define("PERM_ASSIGN_LICENCE", "assign_licence");
+	define("PERM_CREATE_PROJECT", "create_project");
+
+
+	// models
+	define("PERM_CHANGE_PROJECT_SETTINGS", "change_project_settings");
 	define("PERM_UPLOAD_FILES", "upload_files");
 	define("PERM_CREATE_ISSUE", "create_issue");
 	define("PERM_COMMENT_ISSUE", "comment_issue");
 	define("PERM_VIEW_ISSUE", "view_issue");
 	define("PERM_DOWNLOAD_PROJECT", "download_project");
-	define("PERM_VIEW_PROJECT", "view_project");
-	define("PERM_CREATE_PROJECT", "create_project");
-	define("PERM_PROJECT_ADMIN", "admin");
+	define("PERM_VIEW_MODEL", "view_model");
 	// edit fed project
+
+	//project level permission
+	define("PERM_CREATE_MODEL", "create_model");
+	define("PERM_PROJECT_ADMIN", "admin");
+	define("PERM_VIEW_PROJECT", "view_project");
 	define("PERM_EDIT_PROJECT", "edit_project");
+	define("PERM_DELETE_PROJECT", "delete_project");
 
 	define("PERM_LIST", [
 		module.exports.PERM_DELETE_PROJECT,
@@ -286,7 +296,14 @@
 		module.exports.PERM_VIEW_PROJECT,
 		module.exports.PERM_CREATE_PROJECT,
 		module.exports.PERM_PROJECT_ADMIN,
-		module.exports.PERM_EDIT_PROJECT
+		module.exports.PERM_EDIT_PROJECT,
+		module.exports.PERM_CREATE_MODEL,
+		module.exports.PERM_VIEW_MODEL
+	]);
+
+	define("ACCOUNT_PERM_LIST", [
+		module.exports.PERM_ASSIGN_LICENCE,
+		module.exports.PERM_CREATE_PROJECT
 	]);
 
 	//-----------------------------------------------------------------------------

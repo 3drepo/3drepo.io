@@ -41,6 +41,7 @@
 		billingUser: String,
 		assignedUser: String,
 		job: String,
+		permissions: [String],
 		expiredAt: Date,
 		
 		limits: {
