@@ -187,6 +187,10 @@
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
 				} else if (event.type === EventService.EVENT.VIEWER.LOAD_PROJECT) {
+					v.account = event.value.account;
+					v.project = event.value.project;
+					v.branch = event.value.branch;
+					v.revision = event.value.revision;
 					v.viewer.loadModel(event.value.account, event.value.project, event.value.branch, event.value.revision);
 				} else {
 					v.initialised.promise.then(function() {
