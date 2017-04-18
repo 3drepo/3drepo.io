@@ -36,10 +36,10 @@ describe('Project', function () {
 	let server;
 	let agent;
 	let username = 'project_username';
-	let password = 'password';
-	let email = 'test3drepo_project@mailinator.com';
+	let password = 'project_username';
 	let project = 'project1';
 	let projectFed = 'projectFed1';
+	let projectGroup = 'projectgroup'
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'm';
@@ -51,13 +51,12 @@ describe('Project', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
-				username, password, email,
-				done: function(err, _agent){
-					agent = _agent;
-					done(err);
-				}
+			agent = request.agent(server);
+			agent.post('/login')
+			.send({ username, password })
+			.expect(200, function(err, res){
+				expect(res.body.username).to.equal(username);
+				done(err);
 			});
 			
 		});
@@ -76,28 +75,54 @@ describe('Project', function () {
 
 	it('should be created successfully', function(done){
 
-		agent.post(`/${username}/${project}`)
-		.send({ desc, type, unit, code })
-		.expect(200, function(err ,res) {
+		async.series([
+			callback => {
 
-			expect(res.body.project).to.equal(project);
+				agent.post(`/${username}/${project}`)
+				.send({ desc, type, unit, code, projectGroup })
+				.expect(200, function(err ,res) {
+					expect(res.body.project).to.equal(project);
+					callback(err);
+				});
 
-			if(err){
-				return done(err);
+			},
+			callback => {
+				agent.get(`/${username}/${project}.json`)
+				.expect(200, function(err, res){
+					expect(res.body.desc).to.equal(desc);
+					expect(res.body.type).to.equal(type);
+					expect(res.body.properties.unit).to.equal(unit);
+					expect(res.body.properties.code).to.equal(code);
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}.json`)
+				.expect(200, function(err, res){
+
+					const pg = res.body.projectGroups.find(pg => pg._id === projectGroup._id);
+					expect(pg).to.exist;
+					const model = pg.models.find(model => model.project === project);
+					expect(model).to.exist;
+
+				});
 			}
+		] , err => done(err));
 
-			agent.get(`/${username}/${project}.json`)
-			.expect(200, function(err, res){
-				expect(res.body.desc).to.equal(desc);
-				expect(res.body.type).to.equal(type);
-				expect(res.body.properties.unit).to.equal(unit);
-				expect(res.body.properties.code).to.equal(code);
-				done(err);
-			})
-			
-		});
 	});
 
+
+	it('should fail if project group supplied is not found', function(done){
+
+		agent.post(`/${username}/project22`)
+		.send({ desc, type, unit, code, projectGroup: 'noexist' })
+		.expect(400, function(err ,res) {
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			done(err);
+		});
+
+	});
 
 	it('should fail if no unit specified', function(done){
 

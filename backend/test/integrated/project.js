@@ -193,5 +193,23 @@ describe('Project groups', function () {
 
 		], (err, res) => done(err));
 
-	})
+	});
+
+	it('should fail to update a project group that doesnt exist', function(done){
+		agent.put(`/${username}/project-groups/notexist`)
+		.send({})
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+	it('should fail to delete a project group that doesnt exist', function(done){
+		agent.delete(`/${username}/project-groups/notexist`)
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
 });
