@@ -32,7 +32,6 @@ var getDbColOptions = function(req){
 };
 
 
-
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
@@ -61,6 +60,7 @@ router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAc
 router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+
 router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
 
 //search master tree

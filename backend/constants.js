@@ -306,6 +306,14 @@
 		module.exports.PERM_CREATE_PROJECT
 	]);
 
+	define("PROJECT_PERM_LIST", [
+		module.exports.PERM_CREATE_MODEL,
+		module.exports.PERM_PROJECT_ADMIN,
+		module.exports.PERM_VIEW_PROJECT,
+		module.exports.PERM_EDIT_PROJECT,
+		module.exports.PERM_DELETE_PROJECT
+	]);
+
 	//-----------------------------------------------------------------------------
 	//
 	// User templates
@@ -347,7 +355,8 @@
 		"forgot-password",
 		"password",
 		"subscriptions",
-		"billings"
+		"billings",
+		"projects"
 	]);
 
 
