@@ -26,74 +26,345 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-
-describe('Viewing a project', function () {
+let C = require('../../constants');
+let async = require('async');
+let Role = require('../../models/role');
+let ProjectSetting = require('../../models/projectSetting');
+let User = require('../../models/user');
+describe('Project', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
-	let username = 'testing';
-	let password = 'testing';
-	let project = 'testproject';
+	let username = 'project_username';
+	let password = 'password';
+	let email = 'test3drepo_project@mailinator.com';
+	let project = 'project1';
+	let projectFed = 'projectFed1';
+	let desc = 'desc';
+	let type = 'type';
+	let unit = 'm';
+	let code = '00011';
+
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			agent = request.agent(server);
-			agent.post('/login')
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
+			helpers.signUpAndLogin({
+				server, request, agent, expect, User, systemLogger,
+				username, password, email,
+				done: function(err, _agent){
+					agent = _agent;
+					done(err);
+				}
 			});
-
+			
 		});
 
 	});
 
 	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
-			done();
+		let q = require('../../services/queue');
+		q.channel.purgeQueue(q.workerQName).then(() => {
+			server.close(function(){
+				console.log('API test server is closed');
+				done();
+			});
 		});
 	});
 
-	it('should succee if getting head.x3d.mp', function(done){
+	it('should be created successfully', function(done){
 
-		agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
-		.expect(200, function(err ,res){
+		agent.post(`/${username}/${project}`)
+		.send({ desc, type, unit, code })
+		.expect(200, function(err ,res) {
+
+			expect(res.body.project).to.equal(project);
+
+			if(err){
+				return done(err);
+			}
+
+			agent.get(`/${username}/${project}.json`)
+			.expect(200, function(err, res){
+				expect(res.body.desc).to.equal(desc);
+				expect(res.body.type).to.equal(type);
+				expect(res.body.properties.unit).to.equal(unit);
+				expect(res.body.properties.code).to.equal(code);
+				done(err);
+			})
+			
+		});
+	});
+
+
+	it('should fail if no unit specified', function(done){
+
+		agent.post(`/${username}/${project}_no_unit`)
+		.send({ desc, type })
+		.expect(400, function(err ,res) {
+
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NO_UNIT.value);
+			done(err);
+			
+		});
+	});
+
+	it('update project code with invalid format', function(done){
+
+
+		function updateProjectCode(code, done){
+			agent.put(`/${username}/${project}/settings`)
+			.send({code}).expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_CODE.value);
+				done(err);
+			});
+		}
+
+		async.series([
+			function(done){
+				updateProjectCode('$', done)
+			}, 
+			function(done){
+				updateProjectCode('123456', done)
+			}
+		], done)
+
+	});
+
+	it('update issues type with duplicate values', function(done){
+			agent.put(`/${username}/${project}/settings`)
+			.send({
+				topicTypes: ['For Info', 'for info']
+			}).expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
+				done(err);
+			});
+	});
+	
+
+	it('update settings should be successful', function(done){
+
+		let body = {
+
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				unit: 'cm',
+				code: '00222',
+				topicTypes: ['For Info', '3D Repo', 'Vr']
+
+		};
+		
+		let expectedReturn = {
+
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				unit: 'cm',
+				code: '00222',
+				topicTypes: [{
+					label: 'For Info', 
+					value: 'for_info'
+				}, {
+					label: '3D Repo',
+					value: '3d_repo'
+				}, {
+					label: 'Vr',
+					value: 'vr'
+				}]
+
+		};
+
+		agent.put(`/${username}/${project}/settings`)
+		.send(body).expect(200, function(err ,res) {
+
+			expect(res.body.properties).to.deep.equal(expectedReturn);
+
+			if(err){
+				return done(err);
+			}
+
+			agent.get(`/${username}/${project}.json`)
+			.expect(200, function(err, res){
+				expect(res.body.properties).to.deep.equal(expectedReturn);
+				done(err);
+			})
+			
+		});
+	});
+
+
+
+	it('should return error message if project name already exists', function(done){
+
+		agent.post(`/${username}/${project}`)
+		.send({ desc, type, unit })
+		.expect(400, function(err ,res) {
+			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
 			done(err);
 		});
-
 	});
 
 
-	it('should succee if getting json.mpc', function(done){
+	C.REPO_BLACKLIST_PROJECT.forEach(projectName => {
 
-		agent.get(`/${username}/${project}/d2a73c6e-b6d8-43dd-bf31-e1d65300d721.json.mpc`)
-		.expect(200, function(err ,res){
-			done(err);
+
+		it(`should return error message if project name is blacklisted - ${projectName}`, function(done){
+
+			if([
+				'database',
+				'verify',
+				'forgot-password',
+				'subscriptions'
+			].indexOf(projectName) !== -1){
+				//skip these project name because they are actually other APIs.
+				return done();
+			}
+
+			agent.post(`/${username}/${projectName}`)
+			.send({ desc, type, unit })
+			.expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
+				done(err);
+			});
 		});
 
 	});
 
-	it('should succee if getting x3d.mpc', function(done){
 
-		agent.get(`/${username}/${project}/d2a73c6e-b6d8-43dd-bf31-e1d65300d721.x3d.mpc`)
-		.expect(200, function(err ,res){
+
+	it('should return error message if project name contains spaces', function(done){
+
+		agent.post('/' + username + '/you%20are%20genius')
+		.send({ desc, type, unit })
+		.expect(400, function(err ,res) {
+			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
 			done(err);
+		});
+	});
+
+
+	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
+
+		agent.post(`/${username} + '_someonelese' /${project}`)
+		.send({ desc, type, unit })
+		.expect(401, function(err ,res) {
+			done(err);
+		});
+	});
+
+	describe('Download latest file', function(){ 
+
+		let username = 'testing';
+		let password = 'testing';
+		let project = 'testproject';
+
+		before(function(done){
+			async.series([
+				function logout(done){
+					agent.post('/logout').send({}).expect(200, done);
+				},
+				function login(done){
+					agent.post('/login').send({
+						username, password
+					}).expect(200, done);
+				}
+			], done);
+		});
+
+		it('should success and get the latest file', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, function(err, res){
+
+				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
+				
+				done(err);
+			});
 		});
 
 	});
 
-	it('should succee if getting src.mpc', function(done){
 
-		agent.get(`/${username}/${project}/d2a73c6e-b6d8-43dd-bf31-e1d65300d721.src.mpc`)
-		.expect(200, function(err ,res){
-			done(err);
+	describe('Delete a project', function(){
+
+		let username = 'projectshared';
+		let password = 'password';
+		let project = 'sample_project';
+
+		let collaboratorUsername = 'testing';
+
+		before(function(done){
+			async.series([
+				function logout(done){
+					agent.post('/logout').send({}).expect(200, done);
+				},
+				function login(done){
+					agent.post('/login').send({
+						username, password
+					}).expect(200, done);
+				}, function(done){
+					// check if the project is shared and roles are in place
+					Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+						expect(role).to.not.be.null;
+						return Role.findByRoleID(`${username}.${project}.collaborator`);
+					}).then(role => {
+						expect(role).to.not.be.null;
+						done();
+					});
+				}, function(done){
+					// check if the project is shared and roles are in place
+					ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+						expect(setting).to.not.be.null;
+						done();
+					});
+				}, function(done){
+					// check if the project is shared and roles are in place
+					return User.findByUserName(collaboratorUsername).then(user => {
+						expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.not.be.undefined;
+						done();
+					});
+				}
+			], done);
+
 		});
 
-	});
 
+		it('should success', function(done){
+			agent.delete(`/${username}/${project}`).expect(200, done);
+		});
+
+		it('should fail if delete again', function(done){
+			agent.delete(`/${username}/${project}`).expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+		});
+
+		it('should remove all the roles in roles collection', function(){
+			return Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+				expect(role).to.be.null;
+				return Role.findByRoleID(`${username}.${project}.collaborator`);
+			}).then(role => {
+				expect(role).to.be.null;
+			});
+		});
+
+		it('should remove setting in settings collection', function() {
+			return ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+				expect(setting).to.be.null;
+			});
+		});
+
+		it('should remove role from collaborator user.roles', function(){
+			return User.findByUserName(collaboratorUsername).then(user => {
+				expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
+			});
+		});
+
+	})
 });
