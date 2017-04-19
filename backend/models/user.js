@@ -36,6 +36,7 @@ var C = require('../constants');
 var userBilling = require("./userBilling");
 var job = require('./job');
 var permissionTemplate = require('./permissionTemplate');
+var Project = require('./project');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -526,7 +527,7 @@ schema.methods.listAccounts = function(){
 			}
 		});
 
-		let getQuotaPromises = [];
+		let accountInfoPromises = [];
 
 		accounts.forEach(account => {
 			account.projects.sort((a, b) => {
@@ -539,7 +540,7 @@ schema.methods.listAccounts = function(){
 				}
 			});
 
-			getQuotaPromises.push(
+			accountInfoPromises.push(
 				User.findByUserName(account.account).then(user => {
 					if(user){
 						account.quota = user.customData.billing.subscriptions.getSubscriptionLimits();
@@ -562,6 +563,11 @@ schema.methods.listAccounts = function(){
 				})
 			);
 
+			accountInfoPromises.push(
+				Project.find({account: account.account}, {}).then(projectGroups => {
+					account.projectGroups = projectGroups;
+				})
+			);
 		});
 
 		accounts.sort((a, b) => {
@@ -582,7 +588,7 @@ schema.methods.listAccounts = function(){
 			accounts.unshift(myAccount);
 		}
 
-		return Promise.all(getQuotaPromises).then(() => {
+		return Promise.all(accountInfoPromises).then(() => {
 			return Promise.resolve(accounts);
 		});
 	});
@@ -593,6 +599,8 @@ schema.methods.listProjectsAndAccountAdmins = function(options){
 
 	let ProjectHelper = require('./helper/project');
 	let adminAccounts = [];
+
+
 	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
 
 		return Role.listProjectsAndAccountAdmin(roles);

@@ -61,7 +61,7 @@ describe('Project groups', function () {
 	it('should able to create project group', function(done){
 
 		const projectgroup = {
-			_id: 'project1'
+			name: 'project1'
 		};
 
 		async.series([
@@ -77,8 +77,13 @@ describe('Project groups', function () {
 			callback => {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
-					const pg = res.body.projectGroups.find(pg => pg._id === projectgroup._id);
+
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
 					expect(pg).to.exist;
+
 					callback(err);
 				});
 			}
@@ -89,7 +94,7 @@ describe('Project groups', function () {
 
 	it('should fail to create project group with name default', function(done){
 		agent.post(`/${username}/project-groups`)
-		.send({_id: 'default'})
+		.send({name: 'default'})
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
 			done(err);
@@ -100,7 +105,7 @@ describe('Project groups', function () {
 	it('should fail to create project group with dup name', function(done){
 
 		const projectgroup = {
-			_id: 'project_exists'
+			name: 'project_exists'
 		};
 
 		agent.post(`/${username}/project-groups`)
@@ -116,11 +121,48 @@ describe('Project groups', function () {
 
 
 		const projectgroup = {
-			_id: 'project2_new',
+			name: 'project2',
 			permissions: [{
 				user: 'testing',
 				permissions: ['create_model', 'view_project']
 			}]
+		};
+
+		async.series([
+			
+			callback => {
+				agent.put(`/${username}/project-groups/${projectgroup.name}`)
+				.send(projectgroup)
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}.json`)
+				.expect(200, function(err, res){
+
+
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
+					expect(pg).to.exist;
+
+					expect(pg.permissions).to.deep.equal(projectgroup.permissions);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+	});
+
+
+	it('should be able to update project group name', function(done){
+
+
+		const projectgroup = {
+			name: 'project2_new'
 		};
 
 		async.series([
@@ -136,9 +178,14 @@ describe('Project groups', function () {
 			callback => {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
-					const pg = res.body.projectGroups.find(pg => pg._id === projectgroup._id);
+
+
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
 					expect(pg).to.exist;
-					expect(pg.permissions).to.deep.equal(projectgroup.permissions);
+
 					callback(err);
 				});
 			}
@@ -146,18 +193,17 @@ describe('Project groups', function () {
 		], (err, res) => done(err));
 	});
 
-
 	it('should fail to update project group for invalid permissions', function(done){
 
 		const projectgroup = {
-			_id: 'project3',
+			name: 'project3',
 			permissions: [{
 				user: 'testing',
 				permissions: ['create_issue']
 			}]
 		};
 
-		agent.put(`/${username}/project-groups/${projectgroup._id}`)
+		agent.put(`/${username}/project-groups/${projectgroup.name}`)
 		.send(projectgroup)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
@@ -169,13 +215,13 @@ describe('Project groups', function () {
 	it('should able to delete project group', function(done){
 
 		const projectgroup = {
-			_id: 'project4'
+			name: 'project4'
 		};
 
 		async.series([
 			
 			callback => {
-				agent.delete(`/${username}/project-groups/${projectgroup._id}`)
+				agent.delete(`/${username}/project-groups/${projectgroup.name}`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -185,8 +231,13 @@ describe('Project groups', function () {
 			callback => {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
-					const pg = res.body.projectGroups.find(pg => pg._id === projectgroup._id);
+
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
 					expect(pg).to.not.exist;
+
 					callback(err);
 				});
 			}

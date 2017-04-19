@@ -117,7 +117,7 @@ describe('Project', function () {
 
 		agent.post(`/${username}/project22`)
 		.send({ desc, type, unit, code, projectGroup: 'noexist' })
-		.expect(400, function(err ,res) {
+		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);
 		});
@@ -364,7 +364,7 @@ describe('Project', function () {
 		});
 
 		it('should fail if delete again', function(done){
-			agent.delete(`/${username}/${project}`).expect(400, function(err, res){
+			agent.delete(`/${username}/${project}`).expect(404, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
 			});

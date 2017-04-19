@@ -415,4 +415,6 @@
 	//-----------------------------------------------------------------------------
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
+	define("PROJECT_DEFAULT_ID", "default");
+	
 })();

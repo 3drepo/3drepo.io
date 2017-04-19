@@ -296,6 +296,17 @@ function Utils() {
     this.ucFirst = function(s){
         return s.charAt(0).toUpperCase() + s.slice(1);
     };
+
+    /**
+    * Make an error for mongoose middleware from our responseCode because mongoose middleware 
+    * only recognize obj instanceof Error to be an error
+    * 
+    * @param {Object} responseCode
+    * @return {Error} error object
+    */
+    this.makeError = function(responseCode){
+        return Object.assign(Object.create(Error.prototype), responseCode);
+    };
 }
 
 module.exports = new Utils();
