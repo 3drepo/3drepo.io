@@ -195,6 +195,10 @@ schema.methods.isPermissionAssigned = function(permission){
 	return this.permissions.find(perm => perm.permission === permission) ?  true : false;
 };
 
+schema.methods.findPermissionByUser = function(username){
+	return this.permissions.find(perm => perm.user === username);
+};
+
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',
 	schema,

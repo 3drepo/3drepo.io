@@ -102,6 +102,10 @@
 
 	};
 
+	schema.methods.findPermsByUser = function(username){
+		return this.permissions.find(perm => perm.user === username);
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,

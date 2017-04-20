@@ -24,7 +24,7 @@ var User = require('../models/user');
 var RoleTemplates = require('../models/role_templates');
 var utils = require("../utils");
 var config = require('../config');
-
+var Project = require('../models/project');
 
 // init ampq and import queue object
 var importQueue = require('../services/queue');
@@ -275,6 +275,50 @@ function hasReadAccessToIssue(req, res, next){
 }
 
 
+// get permission from db adapter
+function getPermissionsAdapter(account) {
+	'use strict';
+
+	return {
+		getUser: function(){
+			if(this.dbUser){
+				return Promise.resolve(this.dbUser);
+			} else {
+				return User.findByUserName(account).then(user => {
+					this.dbUser = user;
+					return this.dbUser;
+				});
+			}
+		},
+
+		accountLevel: function(username){
+			return this.getUser().then(user => {
+				const sub = user.customData.billing.subscriptions.findByAssignedUser(username);
+				return sub && sub.permissions;
+			});
+		},
+
+		projectLevel: function(username, projectGroup){
+			return Project.findOne({account}, { name: projectGroup}).then(project => {
+				return project.findPermsByUser(username).permissions;
+			});
+		},
+
+		modelLevel: function(username, project){
+			let user;
+			this.getUser().then(_user => {
+				user = _user;
+				return ProjectSetting.findById({account, project}, project);
+
+			}).then(setting => {
+				return user.customData.permissionTemplates.findById(setting.findPermissionByUser(username).permission).permissions;
+			});
+		}
+	};
+}
+
+let checkPermissions = require('../middlewares/checkPermissions');
+
 var middlewares = {
 
 	// Real middlewares taking req, res, next
@@ -295,7 +339,8 @@ var middlewares = {
 	checkRole,
 	hasReadAccessToProjectHelper,
 	isAccountAdminHelper,
-	createQueueInstance
+	createQueueInstance,
+	checkPermissions
 };
 
 module.exports = middlewares;

@@ -462,6 +462,10 @@
 		return this.subscriptions.filter(sub => sub.job === job);
 	};
 
+	Subscriptions.prototype.findByAssignedUser = function(user){
+		return this.subscriptions.find(sub => sub.assignedUser === user);
+	};
+
 	module.exports = Subscriptions;
 
 })();

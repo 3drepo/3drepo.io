@@ -205,7 +205,7 @@
 		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
 		DUP_PERM_TEMPLATE: {message: 'Duplicate template ID', status: 400},
 		PERM_NOT_FOUND: {message: 'Permission template not found', status: 404},
-		INVALID_PERM: {message: 'Invalid permission', status: 400}
+		INVALID_PERM: {message: 'Invalid permission', status: 400},
 		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
 
 	};

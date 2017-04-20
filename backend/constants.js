@@ -262,7 +262,6 @@
 
 
 	//team space
-
 	define("PERM_ASSIGN_LICENCE", "assign_licence");
 	define("PERM_CREATE_PROJECT", "create_project");
 
@@ -284,6 +283,7 @@
 	define("PERM_EDIT_PROJECT", "edit_project");
 	define("PERM_DELETE_PROJECT", "delete_project");
 
+	//all
 	define("PERM_LIST", [
 		module.exports.PERM_DELETE_PROJECT,
 		module.exports.PERM_CHANGE_PROJECT_SETTINGS,
@@ -301,17 +301,31 @@
 		module.exports.PERM_VIEW_MODEL
 	]);
 
+	//team space
 	define("ACCOUNT_PERM_LIST", [
 		module.exports.PERM_ASSIGN_LICENCE,
 		module.exports.PERM_CREATE_PROJECT
 	]);
 
+	//project level permission
 	define("PROJECT_PERM_LIST", [
 		module.exports.PERM_CREATE_MODEL,
 		module.exports.PERM_PROJECT_ADMIN,
 		module.exports.PERM_VIEW_PROJECT,
 		module.exports.PERM_EDIT_PROJECT,
 		module.exports.PERM_DELETE_PROJECT
+	]);
+
+	// models
+	define("MODEL_PERM_LIST",[
+		module.exports.PERM_CHANGE_PROJECT_SETTINGS,
+		module.exports.PERM_UPLOAD_FILES,
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_DOWNLOAD_PROJECT,
+		module.exports.PERM_VIEW_MODEL
+
 	]);
 
 	//-----------------------------------------------------------------------------
