@@ -153,11 +153,15 @@ module.exports = {
 
 		mongooseModel.update = function(options){
 
-			self.db.db(options.account).collection(self.__collectionName(modelName, options));
+			//self.db.db(options.account).collection(self.__collectionName(modelName, options));
+
+			let collection = self.db.db(options.account).collection(self.__collectionName(modelName, options));
+			mongooseModel.collection = collection;
+
 			var args = Array.prototype.slice.call(arguments);
 			args.shift();
 
-			update.apply(mongooseModel, args);
+			return update.apply(mongooseModel, args);
 		};
 
 		mongooseModel.prototype.model = modelName => {

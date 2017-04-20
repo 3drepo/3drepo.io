@@ -38,6 +38,7 @@ var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
+var Project = require('../project');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -87,6 +88,8 @@ function convertToErrorCode(errCode){
 function createAndAssignRole(project, account, username, data) {
 	'use strict';
 
+	let projectGroup;
+
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
@@ -103,8 +106,25 @@ function createAndAssignRole(project, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
+	let promise = Promise.resolve();
 
-	return ProjectSetting.findById({account, project}, project).then(setting => {
+	if(data.projectGroup){
+		promise = Project.findOne({account}, {name: data.projectGroup}).then(_projectGroup => {
+
+			if(!_projectGroup){
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else {
+				projectGroup = _projectGroup;
+			}
+
+		});
+	} 
+
+	return promise.then(() => {
+
+		return ProjectSetting.findById({account, project}, project);
+
+	}).then(setting => {
 
 		if(setting){
 			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
@@ -148,6 +168,16 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(setting => {
 
+
+		if(projectGroup){
+			projectGroup.models.push(project);
+			return projectGroup.save().then(() => setting);
+		}
+
+		return setting;
+		
+
+	}).then(setting => {
 
 		let projectData = {
 			account,
@@ -1139,6 +1169,10 @@ function removeProject(account, project){
 		});
 
 		return Promise.all(promises);
+	}).then(() => {
+
+		//remove from project group
+		return Project.update({account}, { models: project }, { '$pull' : { 'models': project}});
 	});
 
 }

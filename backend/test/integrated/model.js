@@ -81,6 +81,7 @@ describe('Project', function () {
 				agent.post(`/${username}/${project}`)
 				.send({ desc, type, unit, code, projectGroup })
 				.expect(200, function(err ,res) {
+					console.log(res.body);
 					expect(res.body.project).to.equal(project);
 					callback(err);
 				});
@@ -101,11 +102,18 @@ describe('Project', function () {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
 
-					const pg = res.body.projectGroups.find(pg => pg._id === projectGroup._id);
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const pg = account.projectGroups.find(pg => pg.name === projectGroup);
 					expect(pg).to.exist;
+
+					console.log(pg);
+
 					const model = pg.models.find(model => model.project === project);
 					expect(model).to.exist;
 
+					callback(err);
 				});
 			}
 		] , err => done(err));
@@ -115,7 +123,7 @@ describe('Project', function () {
 
 	it('should fail if project group supplied is not found', function(done){
 
-		agent.post(`/${username}/project22`)
+		agent.post(`/${username}/project2`)
 		.send({ desc, type, unit, code, projectGroup: 'noexist' })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
@@ -126,7 +134,7 @@ describe('Project', function () {
 
 	it('should fail if no unit specified', function(done){
 
-		agent.post(`/${username}/${project}_no_unit`)
+		agent.post(`/${username}/project3`)
 		.send({ desc, type })
 		.expect(400, function(err ,res) {
 
@@ -140,7 +148,7 @@ describe('Project', function () {
 
 
 		function updateProjectCode(code, done){
-			agent.put(`/${username}/${project}/settings`)
+			agent.put(`/${username}/project4/settings`)
 			.send({code}).expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_CODE.value);
 				done(err);
@@ -159,7 +167,7 @@ describe('Project', function () {
 	});
 
 	it('update issues type with duplicate values', function(done){
-			agent.put(`/${username}/${project}/settings`)
+			agent.put(`/${username}/project5/settings`)
 			.send({
 				topicTypes: ['For Info', 'for info']
 			}).expect(400, function(err ,res) {
@@ -206,7 +214,7 @@ describe('Project', function () {
 
 		};
 
-		agent.put(`/${username}/${project}/settings`)
+		agent.put(`/${username}/project6/settings`)
 		.send(body).expect(200, function(err ,res) {
 
 			expect(res.body.properties).to.deep.equal(expectedReturn);
@@ -215,7 +223,7 @@ describe('Project', function () {
 				return done(err);
 			}
 
-			agent.get(`/${username}/${project}.json`)
+			agent.get(`/${username}/project6.json`)
 			.expect(200, function(err, res){
 				expect(res.body.properties).to.deep.equal(expectedReturn);
 				done(err);
@@ -228,7 +236,7 @@ describe('Project', function () {
 
 	it('should return error message if project name already exists', function(done){
 
-		agent.post(`/${username}/${project}`)
+		agent.post(`/${username}/project7`)
 		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
@@ -388,6 +396,22 @@ describe('Project', function () {
 		it('should remove role from collaborator user.roles', function(){
 			return User.findByUserName(collaboratorUsername).then(user => {
 				expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
+			});
+		});
+
+		it('should remove from project group', function(done){
+			agent.get(`/${username}.json`).expect(200, function(err, res){
+				
+				const account = res.body.accounts.find(account => account.account === username);
+				expect(account).to.exist;
+
+				const pg = account.projectGroups.find(pg => pg.name === 'project1');
+				expect(pg).to.exist;
+
+				const model = pg.models.find(model => model.project === 'sample_project');
+				expect(model).to.not.exist;
+
+				done(err);
 			});
 		});
 

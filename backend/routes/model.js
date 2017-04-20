@@ -89,6 +89,10 @@ function updateSettings(req, res, next){
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
 
+		if(!projectSetting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		}
+
 		projectSetting.updateProperties(req.body);
 		return projectSetting.save();
 
@@ -189,7 +193,8 @@ function createProject(req, res, next){
 		subProjects: req.body.subProjects, 
 		federate: federate,
 		code: req.body.code,
-		topicTypes: req.body.topicTypes
+		topicTypes: req.body.topicTypes,
+		projectGroup: req.body.projectGroup
 	};
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
@@ -240,7 +245,8 @@ function deleteProject(req, res, next){
 	let account = req.params.account;
 
 	//delete
-	ProjectHelpers.removeProject(account, project).then(() => {
+	ProjectHelpers.removeProject(account, project).then(data => {
+		console.log('del proj', data);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);

@@ -565,6 +565,30 @@ schema.methods.listAccounts = function(){
 
 			accountInfoPromises.push(
 				Project.find({account: account.account}, {}).then(projectGroups => {
+
+					projectGroups.forEach((projectGroup, i) => {
+					
+						projectGroup = projectGroup.toObject();
+
+						projectGroups[i] = projectGroup;
+
+						projectGroup.models.forEach((model, i) => {
+
+							let fullModel = account.projects.find(project => project.project === model);
+
+							if(!fullModel){
+								fullModel = account.fedProjects.find(project => project.project === model);
+							}
+
+							if(!fullModel){
+								fullModel = { project: model};
+							}
+
+							projectGroup.models[i] = fullModel;
+						});
+
+					});
+
 					account.projectGroups = projectGroups;
 				})
 			);
