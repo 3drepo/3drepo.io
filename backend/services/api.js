@@ -118,8 +118,11 @@
 
 		//groups handler
 		app.use("/:account/:project/groups", require("../routes/group"));
+		
 		//issues handler
+		app.use("/:account/:project", require("../routes/issueAnalytic"));
 		app.use("/:account/:project", require("../routes/issue"));
+
 		//mesh handler
 		app.use("/:account/:project", require("../routes/mesh"));
 		//texture handler

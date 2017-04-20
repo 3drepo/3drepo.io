@@ -40,6 +40,7 @@
 					menuOption: "<",
 					importBcf: "&",
 					selectedIssue: "<",
+					displayIssue: "<",
 					userRoles: "<",
 					issueDisplay: "<",
 					availableRoles: "<"
@@ -47,9 +48,9 @@
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
@@ -259,6 +260,17 @@
 					}
 				}
 			}
+
+			if(changes.hasOwnProperty('displayIssue') && this.displayIssue){
+				//console.log('changes.displayIssue', this.displayIssue)
+				var that = this;
+
+				this.editIssue(this.displayIssue);
+				$timeout(function(){
+					showIssue(that.displayIssue);
+				}, 1500);
+
+			}
 		};
 
 		/**
@@ -352,6 +364,7 @@
 		 * @param issue
 		 */
 		function showIssue (issue) {
+
 			var data,
 				pinHighlightColour = [1.0000, 0.7, 0.0];
 
