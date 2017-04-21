@@ -275,7 +275,7 @@ function hasReadAccessToIssue(req, res, next){
 }
 
 
-// get permission from db adapter
+// get permissions adapter
 function getPermissionsAdapter(account) {
 	'use strict';
 
@@ -317,7 +317,32 @@ function getPermissionsAdapter(account) {
 	};
 }
 
-let checkPermissions = require('../middlewares/checkPermissions');
+const checkPermissionsHelper = require('../middlewares/checkPermissions');
+
+function checkPermissions(permsRequest){
+
+	return function(req, res, next){
+		
+		const username = req.session.user.username;
+		const account = req.params.account;
+		const project = req.params.project;
+		const projectGroup = req.params.projectGroup;
+
+		checkPermissionsHelper(username, account, projectGroup, project, permsRequest, getPermissionsAdapter).then(granted => {
+
+			if(granted){
+				next();
+			} else {
+				return Promise.reject(responseCodes.NOT_AUTHORIZED);
+			}
+
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		});
+	};
+
+}
 
 var middlewares = {
 
@@ -332,7 +357,7 @@ var middlewares = {
 	isAccountAdmin: [loggedIn, isAccountAdmin],
 	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 	connectQueue,
-
+	checkPermissions,
 	// Helpers
 	freeSpace,
 	loggedIn,
@@ -340,7 +365,8 @@ var middlewares = {
 	hasReadAccessToProjectHelper,
 	isAccountAdminHelper,
 	createQueueInstance,
-	checkPermissions
+	checkPermissionsHelper,
+
 };
 
 module.exports = middlewares;
