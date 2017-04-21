@@ -26,6 +26,7 @@ const log_iface = require("../../logger.js");
 const systemLogger = log_iface.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const async = require('async');
+const _ = require('lodash');
 
 
 describe('Permission templates', function () {
@@ -129,7 +130,10 @@ describe('Permission templates', function () {
 
 	it('should able to assign permission to user on model level', function(done){
 
-		let permissions = [{ user: 'testing', permission: 'customB'}, { user: 'user1', permission: 'customB'}];
+		let permissions = [
+			{ user: 'testing', permission: 'customB'}, 
+			{ user: 'user1', permission: 'customB'}
+		];
 
 		async.series([callback => {
 			
@@ -143,7 +147,11 @@ describe('Permission templates', function () {
 
 			agent.get(`/${username}/${model}/permissions`)
 			.expect(200, function(err, res){
-				expect(res.body).to.deep.equal(permissions);
+
+				permissions.forEach(permission => {
+					expect(_.find(res.body, permission)).to.exist
+				});
+
 				callback(err);
 			})
 
