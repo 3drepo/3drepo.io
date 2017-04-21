@@ -124,7 +124,7 @@ describe('Project groups', function () {
 			name: 'project2',
 			permissions: [{
 				user: 'testing',
-				permissions: ['create_model', 'view_project']
+				permissions: ['create_model', 'edit_project']
 			}]
 		};
 
