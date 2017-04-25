@@ -159,6 +159,9 @@ describe('Permission templates', function () {
 
 	});
 
+	// model1 should appear in user: testing's project listing
+
+
 	it('should fail to assign a non existing permission to user', function(done){
 
 		agent.post(`/${username}/${model}/permissions`)
@@ -180,4 +183,32 @@ describe('Permission templates', function () {
 		});
 
 	});
+
+	it('should able to re-assign permission to user on model level', function(done){
+
+		let permissions = [
+		];
+
+		async.series([callback => {
+			
+			agent.post(`/${username}/model2/permissions`)
+			.send(permissions)
+			.expect(200, function(err, res){
+				callback(err);
+			});
+
+		}, callback => {
+
+			agent.get(`/${username}/model2/permissions`)
+			.expect(200, function(err, res){
+
+				expect(res.body).to.deep.equal(permissions);
+				callback(err);
+			})
+
+		}], done);
+
+	});
+
+	// model2 should not appear in user: testing's project listing
 });

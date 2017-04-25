@@ -126,6 +126,31 @@ describe('Account permission', function () {
 
 	});
 
+
+	it('should able to update permissions to a licence(user)', function(done){
+
+		async.series([
+			callback => {
+				agent.put(`/${username}/subscriptions/${subId}/assign`)
+				.send({ permissions: ['create_project']})
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/subscriptions`)
+				.expect(200, function(err, res){
+					expect(res.body.find(sub => sub._id === subId).permissions).to.deep.equal(['create_project']);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
+
 	it('should fail to update non team space permissions to a licence(user)', function(done){
 		agent.put(`/${username}/subscriptions/${subId}/assign`)
 		.send({ permissions: ['view_issue']})
