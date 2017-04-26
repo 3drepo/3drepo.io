@@ -106,7 +106,8 @@
 
 		app.use("/:account", require("../routes/job"));
 		app.use("/:account", require("../routes/permissionTemplate"));
-
+		app.use("/:account", require("../routes/accountPermission"));
+		
 		// projects (project groups) handlers
 		app.use("/:account", require("../routes/project"));
 

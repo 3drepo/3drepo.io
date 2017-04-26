@@ -35,9 +35,6 @@ describe('Account permission', function () {
 	let username = 'accountPerm';
 	let password = 'accountPerm';
 
-	let subId = '58ef9c8d70f65b5587e6dae5';
-	let subId2 = '58ef9c8d70f65b5587e6dae6';
-
 	before(function(done){
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
@@ -61,8 +58,8 @@ describe('Account permission', function () {
 		});
 	});
 
-	it('should fail to assign permissions to a licence(user) that doesnt exist', function(done){
-		agent.post(`/${username}/subscriptions/${subId}/assign`)
+	it('should fail to assign permissions to a user that doesnt exist', function(done){
+		agent.post(`/${username}/permissions`)
 		.send({ user: 'nonsense', permissions: ['create_project']})
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
@@ -70,8 +67,8 @@ describe('Account permission', function () {
 		});
 	});
 
-	it('should fail to assign non team space permissions to a licence(user)', function(done){
-		agent.post(`/${username}/subscriptions/${subId2}/assign`)
+	it('should fail to assign non team space permissions to a user', function(done){
+		agent.post(`/${username}/permissions`)
 		.send({ user: 'user1', permissions: ['view_issue']})
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
@@ -79,21 +76,24 @@ describe('Account permission', function () {
 		});
 	});
 
-	it('should able to assign permissions to a licence(user)', function(done){
+	it('should able to assign permissions to a user', function(done){
+
+		const permission = { user: 'testing', permissions: ['create_project']};
 
 		async.series([
 			callback => {
-				agent.post(`/${username}/subscriptions/${subId}/assign`)
-				.send({ user: 'testing', permissions: ['create_project']})
+				agent.post(`/${username}/permissions`)
+				.send(permission)
 				.expect(200, function(err, res){
 					callback(err);
 				});
 			},
 
 			callback => {
-				agent.get(`/${username}/subscriptions`)
+				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).permissions).to.deep.equal(['create_project']);
+
+					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 					callback(err);
 				});
 			}
@@ -103,11 +103,11 @@ describe('Account permission', function () {
 	});
 
 
-	it('should able to update permissions to a licence(user)', function(done){
+	it('should able to update users permissions', function(done){
 
 		async.series([
 			callback => {
-				agent.put(`/${username}/subscriptions/${subId}/assign`)
+				agent.put(`/${username}/permissions/user2`)
 				.send({ permissions: []})
 				.expect(200, function(err, res){
 					callback(err);
@@ -115,9 +115,9 @@ describe('Account permission', function () {
 			},
 
 			callback => {
-				agent.get(`/${username}/subscriptions`)
+				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).permissions).to.deep.equal([]);
+					expect(res.body.find(perm => perm.user === 'user2')).to.deep.equal({user: 'user2', permissions:[]});
 					callback(err);
 				});
 			}
@@ -127,11 +127,11 @@ describe('Account permission', function () {
 	});
 
 
-	it('should able to update permissions to a licence(user)', function(done){
+	it('should able to update user\'s permissions', function(done){
 
 		async.series([
 			callback => {
-				agent.put(`/${username}/subscriptions/${subId}/assign`)
+				agent.put(`/${username}/permissions/user2`)
 				.send({ permissions: ['create_project']})
 				.expect(200, function(err, res){
 					callback(err);
@@ -139,9 +139,9 @@ describe('Account permission', function () {
 			},
 
 			callback => {
-				agent.get(`/${username}/subscriptions`)
+				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).permissions).to.deep.equal(['create_project']);
+					expect(res.body.find(perm => perm.user === 'user2')).to.deep.equal({user: 'user2', permissions:['create_project']});
 					callback(err);
 				});
 			}
@@ -151,13 +151,61 @@ describe('Account permission', function () {
 	});
 
 
-	it('should fail to update non team space permissions to a licence(user)', function(done){
-		agent.put(`/${username}/subscriptions/${subId}/assign`)
+	it('should fail to update non team space permissions', function(done){
+		agent.put(`/${username}/permissions/user2`)
 		.send({ permissions: ['view_issue']})
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
 			done(err);
 		});
+	});
+
+	it('should fail to assign permissions to a user twice', function(done){
+		agent.post(`/${username}/permissions`)
+		.send({ user: 'user3', permissions: ['create_project']})
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.DUP_ACCOUNT_PERM.value);
+			done(err);
+		});
+	});
+
+	it('should fail to update permission for an non existing record', function(done){
+		agent.put(`/${username}/permissions/user4`)
+		.send({ permissions: ['create_project']})
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+	it('should fail to remove permission for an non existing record', function(done){
+		agent.delete(`/${username}/permissions/user4`)
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+	it('should able to remove user permission', function(done){
+
+		async.series([
+			callback => {
+				agent.delete(`/${username}/permissions/user3`)
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/permissions`)
+				.expect(200, function(err, res){
+					console.log(res.body)
+					expect(res.body.find(perm => perm.user === 'user3')).to.not.exist;
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
 	});
 
 });

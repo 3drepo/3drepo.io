@@ -366,7 +366,7 @@
 			}
 
 			user = _user;
-			return user.listAccounts_new();
+			return user.listAccounts();
 
 		}).then(databases => {
 

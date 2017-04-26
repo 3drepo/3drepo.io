@@ -293,8 +293,8 @@ function getPermissionsAdapter(account) {
 
 		accountLevel: function(username){
 			return this.getUser().then(user => {
-				const sub = user.customData.billing.subscriptions.findByAssignedUser(username);
-				return sub && sub.permissions;
+				const permission = user.customData.permissions.findByUser(username);
+				return permission && permission.permissions;
 			});
 		},
 

@@ -36,6 +36,7 @@ var C = require('../constants');
 var userBilling = require("./userBilling");
 var job = require('./job');
 var permissionTemplate = require('./permissionTemplate');
+var accountPermission = require('./accountPermission');
 var Project = require('./project');
 
 var schema = mongoose.Schema({
@@ -82,6 +83,13 @@ var schema = mongoose.Schema({
 			type: [permissionTemplate.schema],
 			get: function(permissionTemplates){
 				return permissionTemplate.methods.init(this, permissionTemplates);
+			}
+		},
+		//teamspace level permissions
+		permissions: {
+			type: [accountPermission.schema],
+			get: function(permissions){
+				return accountPermission.methods.init(this, permissions)
 			}
 		},
 		// fields to speed up listing all projects and models the user has access to
@@ -957,13 +965,13 @@ schema.statics.findAccountsUserHasAccess = function(user){
 	//find all team spaces (accounts) user has access to
 	return User.find( 
 		{account: 'admin'},
-		{ 'customData.billing.subscriptions': { 
+		{ 'customData.permissions': { 
 			$elemMatch: {
-				assignedUser: user, 
+				user: user, 
 				permissions: { '$in': [C.PERM_CREATE_PROJECT, C.PERM_TEAMSPACE_ADMIN] }
 			}
 		}},
-		{ 'customData.billing.subscriptions.$' : 1, 'user': 1}
+		{ 'customData.permissions.$' : 1, 'user': 1}
 	);
 }
 
