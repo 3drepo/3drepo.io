@@ -159,6 +159,15 @@ var UnityUtil;
 			UnityUtil.objectSelectedCallback(point);
 	}
 
+	UnityUtil.prototype.doubleClicked = function(pointInfo)
+	{
+		var point = JSON.parse(pointInfo);
+		if(point.position)
+		{
+			UnityUtil.centreToPoint(point.position);	
+		}
+	}
+
 	UnityUtil.prototype.loaded = function(bboxStr)
 	{
 		var res = {};
@@ -225,6 +234,14 @@ var UnityUtil;
 	/*
 	 * =============== TO UNITY ====================
 	 */
+
+
+	UnityUtil.prototype.centreToPoint = function(position)
+	{
+		var params = {};
+		params.position = position;
+		toUnity("CentreToPoint", LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
 
 	UnityUtil.prototype.changePinColour = function(id, colour)
 	{
