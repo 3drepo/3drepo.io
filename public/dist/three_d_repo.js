@@ -2933,7 +2933,6 @@ var UnityUtil;
 
 	UnityUtil.prototype.doubleClicked = function(pointInfo)
 	{
-		console.log("Double click alert");
 		var point = JSON.parse(pointInfo);
 		if(point.position)
 		{
@@ -3159,6 +3158,11 @@ var UnityUtil;
 		}
 		vpPromise = promise;
 		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
+	}
+
+	UnityUtil.prototype.setAPIHost = function(hostname)
+	{
+		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
 	}
 
 	UnityUtil.prototype.setNavigation = function(navMode)
@@ -3499,6 +3503,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
+				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()

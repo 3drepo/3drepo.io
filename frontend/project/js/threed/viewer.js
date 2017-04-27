@@ -279,6 +279,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
+				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(
 						function()

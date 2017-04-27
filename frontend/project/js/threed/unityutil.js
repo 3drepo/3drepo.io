@@ -388,6 +388,11 @@ var UnityUtil;
 		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
+	UnityUtil.prototype.setAPIHost = function(hostname)
+	{
+		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
+	}
+
 	UnityUtil.prototype.setNavigation = function(navMode)
 	{
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
