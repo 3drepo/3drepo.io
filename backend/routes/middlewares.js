@@ -14,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 (() => {
 	"use strict";
 
@@ -25,56 +26,10 @@
 	const User = require('../models/user');
 	const utils = require("../utils");
 	const config = require('../config');
-	const Project = require('../models/project');
 
 	// init ampq and import queue object
 	const importQueue = require('../services/queue');
-
-
-	// get permissions adapter
-	function getPermissionsAdapter(account) {
-
-		return {
-			getUser: function(){
-				if(this.dbUser){
-					return Promise.resolve(this.dbUser);
-				} else {
-					return User.findByUserName(account).then(user => {
-						this.dbUser = user;
-						return this.dbUser;
-					});
-				}
-			},
-
-			accountLevel: function(username){
-
-				return this.getUser().then(user => {
-					const permission = user.customData.permissions.findByUser(username);
-					return permission && permission.permissions;
-				});
-			},
-
-			projectLevel: function(username, projectGroup){
-
-				return Project.findOne({account}, { name: projectGroup}).then(project => {
-					return project.findPermsByUser(username).permissions;
-				});
-			},
-
-			modelLevel: function(username, project){
-				let user;
-
-				return this.getUser().then(_user => {
-					user = _user;
-					return ProjectSetting.findById({account, project}, project);
-
-				}).then(setting => {
-					return user.customData.permissionTemplates.findById(setting.findPermissionByUser(username).permission).permissions;
-				});
-			}
-		};
-	}
-
+	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
 	const checkPermissionsHelper = require('../middlewares/checkPermissions');
 
 	function checkPermissions(permsRequest){
