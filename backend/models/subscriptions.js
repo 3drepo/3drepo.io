@@ -21,8 +21,6 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ProjectSetting = require("./projectSetting");
-	const C = require('../constants');
-	const _ = require('lodash');
 
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
 		this.user = user;

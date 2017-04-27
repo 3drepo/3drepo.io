@@ -91,8 +91,6 @@
 
 		remove: function(user){
 
-			const currPermission = this.findByUser(user);
-
 			let index = -1;
 			
 			this.permissions.find((perm, i) => {

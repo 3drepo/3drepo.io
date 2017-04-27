@@ -89,7 +89,7 @@ var schema = mongoose.Schema({
 		permissions: {
 			type: [accountPermission.schema],
 			get: function(permissions){
-				return accountPermission.methods.init(this, permissions)
+				return accountPermission.methods.init(this, permissions);
 			}
 		},
 		// fields to speed up listing all projects and models the user has access to
@@ -637,8 +637,6 @@ function _fillInProjectDetails(accountName, setting, permissions){
 
 	const ProjectHelper = require('./helper/project');
 
-	let promises = [];
-
 	let project = {
 		federate: setting.federate,
 		permissions: permissions,
@@ -687,7 +685,7 @@ function _getAllProjects(accountName, permissions){
 			);
 		});
 
-		return Promise.all(promises).then(() => {return {projects, fedProjects}});
+		return Promise.all(promises).then(() => { return {projects, fedProjects}; });
 	});
 }
 
@@ -732,12 +730,12 @@ function _findProjectDetails(dbUserCache, username, project){
 	let dbUser;
 
 	if(dbUserCache[project.account]){
-		getUser = Promise.resolve(dbUserCache[project.account])
+		getUser = Promise.resolve(dbUserCache[project.account]);
 	} else {
 		getUser = User.findByUserName(project.account).then(user => {
 			dbUserCache[project.account] = user;
 			return dbUserCache[project.account];
-		})
+		});
 	}
 
 	return getUser.then(_user => {
@@ -774,10 +772,9 @@ function _calSpace(user){
 	});
 
 }
-schema.methods.listAccounts_new = function(options){
+schema.methods.listAccounts_new = function(){
 	'use strict';
 
-	const adminAccounts = [];
 	let accounts = [];
 
 	// team space level permission
@@ -792,7 +789,7 @@ schema.methods.listAccounts_new = function(options){
 				projects: [],
 				fedProjects: [],
 				isAdmin: true,
-				permissions: user.toObject().customData.billing.subscriptions[0].permissions
+				permissions: user.toObject().customData.permissions[0].permissions
 			};
 
 			accounts.push(account);
@@ -856,9 +853,9 @@ schema.methods.listAccounts_new = function(options){
 		return Promise.all(accounts.map(account => _addProjectGroups(account)))
 			.then(() => accounts);
 
-	})
+	});
 
-}
+};
 
 schema.methods.listProjectsAndAccountAdmins = function(options){
 	'use strict';
@@ -971,9 +968,9 @@ schema.statics.findAccountsUserHasAccess = function(user){
 				permissions: { '$in': [C.PERM_CREATE_PROJECT, C.PERM_TEAMSPACE_ADMIN] }
 			}
 		}},
-		{ 'customData.permissions.$' : 1, 'user': 1}
+		{ 'customData.permissions.$' : 1, 'user': 1, 'customData.billing': 1}
 	);
-}
+};
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	'use strict';
