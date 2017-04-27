@@ -1894,8 +1894,6 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	// Append building models and map tile images
 	MapTile.prototype.appendMapTileByViewPoint = function(noDraw){
 
-		console.log('appendMapTileByViewPoint', this.originBNG);
-
 		if(!this.enabled){
 			return;
 		}
@@ -2527,7 +2525,6 @@ var Pin = {};
 	 * @constructor
 	 * @this {Pin}
 	 * @param {number} id - Unique ID for this clipping plane
-	 * @param {Viewer} parentViewer - Parent viewer
 	 * @param {string} axis - Letter representing the axis: "X", "Y" or "Z"
 	 * @param {array} colour - Array representing the color of the slice
 	 * @param {number} percentage - Percentage along the bounding box to clip
@@ -2535,34 +2532,16 @@ var Pin = {};
 	 * @param {string} account - database it came from
 	 * @param {string} project - name of the project
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, project) {
+	Pin = function(id, position, norm, colours, viewpoint, account, project) {
 		var self = this;
 
 		self.id = id;
 
 		self.highlighted = false;
 
-		self.element = element;
-		self.trans = trans;
-		self.scale = scale;
 		self.viewpoint = viewpoint;
 		self.account = account;
 		self.project = project;
-
-		self.ghostConeIsHighlighted = null;
-		self.coneIsHighlighted = null;
-
-		self.ghostPinHeadNCol = null;
-		self.pinHeadNCol = null;
-
-		self.ghostPinHeadColour = null;
-		self.pinHeadColour = null;
-
-		self.ghostPinHeadIsHighlighted = null;
-		self.pinHeadIsHighlighted = null;
-
-		self.coneDepth = null;
-		self.pinHeadDepth = null;
 
 		// Initialize the colours and numColours that
 		// are passed in
@@ -2579,54 +2558,17 @@ var Pin = {};
 
 		self.colours = colours;
 
-		var parent = document.createElement("MatrixTransform");
-		parent.setAttribute("id", self.id);
-		parent.setAttribute("matrix", trans.toGL().toString());
-
-		// Transform the normal into the coordinate frame of the parent
-		self.modelTransform = document.createElement("Transform");
-
-		var axisAngle = ViewerUtil.rotAxisAngle([0, 1, 0], norm);
-		self.modelTransform.setAttribute("rotation", axisAngle.toString());
-		self.modelTransform.setAttribute("translation", position.join(" "));
-
-		parent.appendChild(self.modelTransform);
-
+		UnityUtil.dropPin(id, position, norm, colours[0]);
 		colours = colours.join(" ");
-		this.createBasicPinShape(self.modelTransform, "ALWAYS", GHOST_OPACITY, true);
-		this.createBasicPinShape(self.modelTransform, "LESS", OPAQUE_OPACITY, false);
-
-		self.element.appendChild(parent);
 	};
 
 	Pin.prototype.remove = function(id) {
-		var pinPlacement = document.getElementById(id);
-		if (pinPlacement !== null) {
-			pinPlacement.parentElement.removeChild(pinPlacement);
-		}
+		UnityUtil.removePin(id);
 	};
 
 	Pin.prototype.changeColour = function(colours) {
 		var self = this;
-		// Find both the material for the ghosted pin and the opaque pin
-
-		if ((typeof colours === "undefined") || (!colours.length)) {
-			colours = GREY_PIN;
-		}
-
-		if (typeof colours[0] === "number") {
-			self.numColours = 1;
-		} else {
-			self.numColours = colours.length;
-		}
-
-		self.colours = colours;
-
-		self.pinHeadNCol.setAttribute("value", self.numColours);
-		self.pinHeadColour.setAttribute("value", self.colours.join(" "));
-
-		self.ghostPinHeadNCol.setAttribute("value", self.numColours);
-		self.ghostPinHeadColour.setAttribute("value", self.colours.join(" "));
+		UnityUtil.changePinColour(self.id, colours[0]);
 	};
 
 	Pin.prototype.highlight = function()
@@ -2645,204 +2587,6 @@ var Pin = {};
 
 		self.pinHeadDepth.setAttribute("depthFunc", depthMode);
 		self.coneDepth.setAttribute("depthFunc", depthMode);
-	};
-
-	Pin.prototype.createBasicPinShape = function(parent, depthMode, opacity, ghostPin) {
-		var self = this;
-
-		var ORANGE_HIGHLIGHT = "1.0000 0.7 0.0";
-
-		var coneHeight = PIN_HEIGHT - 2 * PIN_RADIUS;
-		var pinshape = document.createElement("Group");
-		pinshape.setAttribute("onclick", "clickPin(event)");
-
-		var pinshapeapp = document.createElement("Appearance");
-		//pinshape.appendChild(pinshapeapp);
-
-		var pinshapescale = document.createElement("Transform");
-		pinshapescale.setAttribute("scale", self.scale + " " + self.scale + " " + self.scale);
-		pinshape.appendChild(pinshapescale);
-
-		var pinshapeconetrans = document.createElement("Transform");
-		pinshapeconetrans.setAttribute("translation", "0.0 " + (0.5 * coneHeight) + " 0.0");
-		pinshapescale.appendChild(pinshapeconetrans);
-
-		var pinshapeconerot = document.createElement("Transform");
-
-		pinshapeconerot.setAttribute("rotation", "1.0 0.0 0.0 3.1416");
-		pinshapeconetrans.appendChild(pinshapeconerot);
-
-		var pinshapeconeshape = document.createElement("Shape");
-		pinshapeconerot.appendChild(pinshapeconeshape);
-
-		var pinshapecone = document.createElement("Cone");
-		pinshapecone.setAttribute("bottomRadius", (PIN_RADIUS * 0.5).toString());
-		pinshapecone.setAttribute("height", coneHeight.toString());
-
-		var coneApp = pinshapeapp.cloneNode(true);
-
-		var coneshader = document.createElement("ComposedShader");
-		coneApp.appendChild(coneshader);
-
-		var coneMat = document.createElement("Material");
-		coneMat.setAttribute("diffuseColor", "1.0 1.0 1.0");
-		coneMat.setAttribute("transparency", opacity);
-		coneApp.appendChild(coneMat);
-
-		var conehighlight = document.createElement("field");
-		conehighlight.setAttribute("type", "SFVec3f");
-		conehighlight.setAttribute("name", "highlightColor");
-		conehighlight.setAttribute("value", ORANGE_HIGHLIGHT);
-		coneshader.appendChild(conehighlight);
-
-		var coneishighlighted = document.createElement("field");
-		//coneishighlighted.setAttribute("id", self.id + "_cone" + (ghostPin ? "_ghost" : "") + "_ishighlighted");
-		coneishighlighted.setAttribute("type", "SFBool");
-		coneishighlighted.setAttribute("name", "highlightPin");
-		coneishighlighted.setAttribute("value", "false");
-		coneshader.appendChild(coneishighlighted);
-
-		if (ghostPin)
-		{
-			self.ghostConeIsHighlighted = coneishighlighted;
-		} else {
-			self.coneIsHighlighted = coneishighlighted;
-		}
-
-		var coneuseclipplane = document.createElement("field");
-		coneuseclipplane.setAttribute("type", "SFBool");
-		coneuseclipplane.setAttribute("name", "useClipPlane");
-		coneuseclipplane.setAttribute("value", ghostPin);
-		coneshader.appendChild(coneuseclipplane);
-
-		var conevert = document.createElement("ShaderPart");
-		conevert.setAttribute("type", "VERTEX");
-		conevert.setAttribute("USE", "noShadeVert");
-		coneshader.appendChild(conevert);
-
-		var conefrag = document.createElement("ShaderPart");
-		conefrag.setAttribute("type", "FRAGMENT");
-		conefrag.setAttribute("USE", "noShadeFrag");
-		coneshader.appendChild(conefrag);
-
-		var conedepth = document.createElement("DepthMode");
-
-		if (!ghostPin) {
-			self.coneDepth = conedepth;
-		}
-
-		conedepth.setAttribute("depthFunc", depthMode);
-		conedepth.setAttribute("enableDepthTest", (!ghostPin).toString());
-		coneApp.appendChild(conedepth);
-
-		pinshapeconeshape.appendChild(coneApp);
-		pinshapeconeshape.appendChild(pinshapecone);
-
-		var pinshapeballtrans = document.createElement("Transform");
-		pinshapeballtrans.setAttribute("translation", "0.0 " + (1.4 * coneHeight) + " 0.0");
-		pinshapescale.appendChild(pinshapeballtrans);
-
-		var pinshapeballshape = document.createElement("Shape");
-		pinshapeballtrans.appendChild(pinshapeballshape);
-
-		var pinshapeball = document.createElement("Sphere");
-		pinshapeball.setAttribute("radius", PIN_RADIUS.toString());
-
-		var ballApp = pinshapeapp.cloneNode(true);
-
-		pinshapeballshape.appendChild(pinshapeball);
-		pinshapeballshape.appendChild(ballApp);
-
-		var pinheadMat = document.createElement("Material");
-		pinheadMat.setAttribute("diffuseColor", "1.0 1.0 1.0");
-		pinheadMat.setAttribute("transparency", opacity);
-		ballApp.appendChild(pinheadMat);
-
-		var pinshader = document.createElement("ComposedShader");
-		ballApp.appendChild(pinshader);
-
-		var pinheadradius = document.createElement("field");
-		pinheadradius.setAttribute("type", "SFFloat");
-		pinheadradius.setAttribute("name", "radius");
-		pinheadradius.setAttribute("value", PIN_RADIUS.toString());
-		pinshader.appendChild(pinheadradius);
-
-		var pinheadncol = document.createElement("field");
-		//self.pinheadncol.setAttribute("id", self.id + (ghostPin ? "_ghost" : "") + "_ncol");
-		pinheadncol.setAttribute("type", "SFFloat");
-		pinheadncol.setAttribute("name", "numColours");
-		pinheadncol.setAttribute("value", self.numColours);
-		pinshader.appendChild(pinheadncol);
-
-		if (ghostPin)
-		{
-			self.ghostPinHeadNCol = pinheadncol;
-		} else {
-			self.pinHeadNCol = pinheadncol;
-		}
-
-		var pinheadcolor = document.createElement("field");
-		//self.pinheadcolor.setAttribute("id", self.id + (ghostPin ? "_ghost" : "") + "_col");
-		pinheadcolor.setAttribute("type", "MFFloat");
-		pinheadcolor.setAttribute("name", "multicolours");
-		pinheadcolor.setAttribute("value", self.colours);
-		pinshader.appendChild(pinheadcolor);
-
-		if (ghostPin)
-		{
-			self.ghostPinHeadColour = pinheadcolor;
-		} else {
-			self.pinHeadColour = pinheadcolor;
-		}
-
-		var pinheadhighlight = document.createElement("field");
-		pinheadhighlight.setAttribute("type", "SFVec3f");
-		pinheadhighlight.setAttribute("name", "highlightColor");
-		pinheadhighlight.setAttribute("value", ORANGE_HIGHLIGHT);
-		pinshader.appendChild(pinheadhighlight);
-
-		var pinheadishighlighted = document.createElement("field");
-		//self.pinheadishighlighted.setAttribute("id", self.id + (ghostPin ? "_ghost" : "") + "_ishighlighted");
-		pinheadishighlighted.setAttribute("type", "SFBool");
-		pinheadishighlighted.setAttribute("name", "highlightPin");
-		pinheadishighlighted.setAttribute("value", "false");
-		pinshader.appendChild(pinheadishighlighted);
-
-		if (ghostPin)
-		{
-			self.ghostPinHeadIsHighlighted = pinheadishighlighted;
-		} else {
-			self.pinHeadIsHighlighted = pinheadishighlighted;
-		}
-
-		var pinuseclipplane = document.createElement("field");
-		pinuseclipplane.setAttribute("type", "SFBool");
-		pinuseclipplane.setAttribute("name", "useClipPlane");
-		pinuseclipplane.setAttribute("value", (!ghostPin).toString());
-		pinshader.appendChild(pinuseclipplane);
-
-		var pinvert = document.createElement("ShaderPart");
-		pinvert.setAttribute("type", "VERTEX");
-		pinvert.setAttribute("USE", "multiVert");
-		pinshader.appendChild(pinvert);
-
-		var pinfrag = document.createElement("ShaderPart");
-		pinfrag.setAttribute("type", "FRAGMENT");
-		pinfrag.setAttribute("USE", "multiFrag");
-		pinshader.appendChild(pinfrag);
-
-		var pinheaddepth = document.createElement("DepthMode");
-
-		if (!ghostPin) {
-			self.pinHeadDepth = pinheaddepth;
-			//.setAttribute("id", self.id + "_depth");
-		}
-
-		pinheaddepth.setAttribute("depthFunc", depthMode);
-		pinheaddepth.setAttribute("enableDepthTest", (!ghostPin).toString());
-		ballApp.appendChild(pinheaddepth);
-
-		parent.appendChild(pinshape);
 	};
 
 }());
@@ -3043,6 +2787,454 @@ var PinShader = null;
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+
+var UnityUtil;
+
+(function() {
+	"use strict";
+
+    angular.module("3drepo")
+        .factory("UnityUtil", UnityUtil);
+
+	
+	UnityUtil = function() {};
+
+	var LoadingState = { 
+		VIEWER_READY : 1,  //Viewer has been loaded
+		MODEL_LOADING : 2, //project information has been fetched, world offset determined, model starts loading
+		MODEL_LOADED : 3 //Models
+	};
+
+	var readyPromise;
+	var readyResolve;
+	var loadedPromise;
+	var loadedResolve;
+	var loadingPromise;
+	var loadingResolve;
+	var screenshotPromises = [];
+	var vpPromise = null;
+	var objectStatusPromise = null;
+	var loaded = false;
+	var UNITY_GAME_OBJECT = "WebGLInterface";
+
+	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;	
+	UnityUtil.prototype._SendMessage = function(gameObject, func, param)
+	{
+    	if (param === undefined) {
+	      if (!SendMessage_vss)
+    	    SendMessage_vss = Module.cwrap('SendMessage', 'void', ['string', 'string']);
+	      SendMessage_vss(gameObject, func);
+    	} else if (typeof param === "string") {
+	      if (!SendMessage_vsss)
+    	    SendMessage_vsss = Module.cwrap('SendMessageString', 'void', ['string', 'string', 'string']);
+	      SendMessage_vsss(gameObject, func, param);
+	    } else if (typeof param === "number") {
+    	  if (!SendMessage_vssn)
+	        SendMessage_vssn = Module.cwrap('SendMessageFloat', 'void', ['string', 'string', 'number']);
+    	 SendMessage_vssn(gameObject, func, param);
+	    } else
+    	    throw "" + param + " is does not have a type which is supported by SendMessage.";
+	}
+
+	UnityUtil.prototype.onLoaded = function()	
+	{
+		if(!loadedPromise)
+		{
+		   loadedPromise	= new Promise(function(resolve, reject)
+			{
+				loadedResolve = {resolve: resolve, reject: reject};
+			}	
+			);
+		}
+		return loadedPromise;
+		
+	}
+
+	UnityUtil.prototype.onLoading = function()	
+	{
+		if(!loadingPromise)
+		{
+		   loadingPromise	= new Promise(function(resolve, reject)
+			{
+				loadingResolve = {resolve: resolve, reject: reject};
+			}	
+			);
+		}
+		return loadingPromise;
+		
+	}
+
+
+	UnityUtil.prototype.onReady = function()	
+	{
+		if(!readyPromise)
+		{
+		   readyPromise	= new Promise(function(resolve, reject)
+			{
+				readyResolve = {resolve: resolve, reject: reject};
+			}	
+			);
+		}
+		return readyPromise;
+		
+	}
+
+
+	function toUnity(methodName, requireStatus, params)
+	{
+		if(requireStatus == LoadingState.MODEL_LOADED)
+		{
+			//Requires model to be loaded
+			UnityUtil.onLoaded().then(function()
+			{
+				SendMessage(UNITY_GAME_OBJECT, methodName, params);
+			
+			});
+		}
+		else if(requireStatus == LoadingState.MODEL_LOADING)
+		{
+			//Requires model to be loading
+			UnityUtil.onLoading().then(function()
+			{
+				SendMessage(UNITY_GAME_OBJECT, methodName, params);
+			
+			});
+		}
+		else
+		{
+			UnityUtil.onReady().then(function()
+			{
+				SendMessage(UNITY_GAME_OBJECT, methodName, params);
+			
+			});
+		}
+
+	}
+
+
+	/*
+	 * =============== FROM UNITY ====================
+	 */
+
+	UnityUtil.prototype.clipBroadcast = function(clipInfo)
+	{
+		if(UnityUtil.clipBroadcastCallback)
+		{
+			UnityUtil.clipBroadcastCallback(JSON.parse(clipInfo));
+		}
+	}
+
+	UnityUtil.prototype.currentPointInfo = function(pointInfo)
+	{
+		var point = JSON.parse(pointInfo);
+		if(UnityUtil.objectSelectedCallback)
+			UnityUtil.objectSelectedCallback(point);
+	}
+
+	UnityUtil.prototype.doubleClicked = function(pointInfo)
+	{
+		console.log("Double click alert");
+		var point = JSON.parse(pointInfo);
+		if(point.position)
+		{
+			UnityUtil.centreToPoint(point.position);	
+		}
+	}
+
+	UnityUtil.prototype.loaded = function(bboxStr)
+	{
+		var res = {};
+		res.bbox = JSON.parse(bboxStr);
+		loadedResolve.resolve(res);
+		loaded = true;
+	}
+
+	UnityUtil.prototype.loading = function(bboxStr)
+	{
+
+		loadingResolve.resolve();
+	}
+
+	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
+	{
+		objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		objectStatusPromise = null;
+		
+	}
+
+
+	UnityUtil.prototype.pickPointAlert = function(pointInfo)
+	{
+		var point = JSON.parse(pointInfo);
+		if(UnityUtil.pickPointCallback)
+			UnityUtil.pickPointCallback(point);
+	}
+
+	UnityUtil.prototype.ready = function()
+	{
+		//Overwrite the Send Message function to make it run quicker 
+		//This shouldn't need to be done in the future when the
+		//optimisation in added into unity.
+		SendMessage = UnityUtil._SendMessage;
+		readyResolve.resolve();
+	}
+	
+	UnityUtil.prototype.screenshotReady = function(screenshot)
+	{
+		var ssJSON = JSON.parse(screenshot);
+
+		screenshotPromises.forEach(function(promise)
+				{
+					promise.resolve(ssJSON.ssBytes);
+				}
+		);
+		screenshotPromises = [];
+	}
+
+	UnityUtil.prototype.viewpointReturned = function(vpInfo)	
+	{
+		if(vpPromise != null)
+		{
+			var viewpoint = JSON.parse(vpInfo);
+			vpPromise.resolve(viewpoint);
+			vpPromise = null;
+		}
+
+	}
+
+
+
+	/*
+	 * =============== TO UNITY ====================
+	 */
+
+
+	UnityUtil.prototype.centreToPoint = function(position)
+	{
+		var params = {};
+		params.position = position;
+		toUnity("CentreToPoint", LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	UnityUtil.prototype.changePinColour = function(id, colour)
+	{
+		var params =  {};	
+		params.color = colour;
+		params.pinName = id;
+		toUnity("ChangePinColor", LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	UnityUtil.prototype.clearHighlights = function()
+	{
+		toUnity("ClearHighlighting", LoadingState.MODEL_LOADED);
+	}
+	
+	UnityUtil.prototype.disableClippingPlanes = function()
+	{
+		toUnity("DisableClip");
+	}
+
+	UnityUtil.prototype.dropPin = function(id, position, normal, colour)
+	{
+		var params = {};
+		params.id = id;
+		params.position = position;
+		params.normal = normal;
+		params.color = colour;
+		toUnity("DropPin", LoadingState.MODEL_LOADING, JSON.stringify(params));
+
+	}
+
+	UnityUtil.prototype.getObjectsStatus = function(account, project, promise)
+	{
+		var nameSpace = "";
+		if(account && project)
+		{
+			nameSpace = account + "."  + project;
+		}
+		if(objectStatusPromise)
+		{
+			objectStatusPromise.then(function(blah){
+					_getObjectsStatus(nameSpace, promise);
+				}					
+			);
+		}
+		else
+			_getObjectsStatus(nameSpace, promise)
+
+	}
+
+	function _getObjectsStatus(nameSpace, promise)
+	{
+		objectStatusPromise = promise;
+		toUnity("GetObjectsStatus", LoadingState.MODEL_LOADED, nameSpace);
+	}
+
+	UnityUtil.prototype.getPointInfo = function()
+	{
+		toUnity("GetPointInfo", false, 0);
+	}
+
+	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color, toggleMode)
+	{
+		var params = {};
+		params.database = account;
+		params.project = project;
+		params.ids = idArr;
+		params.toggle = toggleMode;
+		if(color)
+			params.color = color;
+
+		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
+	}
+
+	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
+	{
+
+		UnityUtil.reset();	
+		if(!loaded && loadedResolve)
+		{
+			//If the previous project is being loaded but hasn't finished yet
+			loadedResolve.reject();
+			loadingResolve.reject();
+		}
+		
+		loadedPromise = null;
+		loadedResolve = null;
+		loadingPromise = null;
+		loadingResolve = null;
+		loaded  = false;
+		var params = {};
+		params.database = account;
+		params.project = project;
+		if(revision != "head")
+			params.revID = revision;	
+		
+		UnityUtil.onLoading(); //Initialise the promise
+		toUnity("LoadProject", LoadingState.VIEWER_READY, JSON.stringify(params));
+			
+		return UnityUtil.onLoaded();
+	}
+
+	UnityUtil.prototype.removePin = function(id)
+	{
+		toUnity("RemovePin", LoadingState.MODEL_LOADING, id);
+	}
+	
+	UnityUtil.prototype.reset = function()
+	{
+		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
+	}
+
+	UnityUtil.prototype.resetCamera = function()
+	{
+		toUnity("ResetCamera", LoadingState.VIEWER_READY);
+	}
+
+	UnityUtil.prototype.requestScreenShot = function(promise)
+	{
+		screenshotPromises.push(promise);
+		toUnity("RequestScreenShot", LoadingState.VIEWER_READY);
+	}
+
+	UnityUtil.prototype.requestViewpoint = function(account, project, promise)
+	{
+		if(vpPromise != null)
+		{
+			vpPromise.then(_requestViewpoint(account, project, promise));
+		}
+		else
+		{
+			_requestViewpoint(account, project, promise);
+		}
+
+	}
+
+	function _requestViewpoint(account, project, promise)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.namespace = account + "."  + project;
+		}
+		vpPromise = promise;
+		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
+	}
+
+	UnityUtil.prototype.setNavigation = function(navMode)
+	{
+		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
+	}
+
+	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, project)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+
+		param.position = pos;
+		param.up = up;
+		param.forward = forward;
+		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
+
+
+	}
+	
+	UnityUtil.prototype.toggleStats = function()
+	{
+		toUnity("ShowStats", LoadingState.VIEWER_READY);
+	}
+
+
+	UnityUtil.prototype.toggleVisibility = function(account, project, ids, visibility)
+	{
+		var param = {};
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+
+		param.ids = ids;
+		param.visible = visibility;
+		toUnity("ToggleVisibility",LoadingState.MODEL_LOADED, JSON.stringify(param));
+
+	}
+
+	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, project)
+	{
+		var param = {}
+		param.clip = clipPlane;
+		if(account && project)
+		{
+			param.nameSpace = account + "." + project;
+		}
+		param.requiresBroadcast = requireBroadcast;
+		toUnity("UpdateClip", LoadingState.MODEL_LOADING, JSON.stringify(param));
+	}
+
+	UnityUtil = new UnityUtil();
+}());
+
+
+/**
+ **  Copyright (C) 2014 3D Repo Ltd
+ **
+ **  This program is free software: you can redistribute it and/or modify
+ **  it under the terms of the GNU Affero General Public License as
+ **  published by the Free Software Foundation, either version 3 of the
+ **  License, or (at your option) any later version.
+ **
+ **  This program is distributed in the hope that it will be useful,
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **  GNU Affero General Public License for more details.
+ **
+ **  You should have received a copy of the GNU Affero General Public License
+ **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
 // --------------------- Control Interface ---------------------
 
 // Global functions to be passed to X3DOM elements
@@ -3050,7 +3242,7 @@ var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
 	onLoaded, onError, runtimeReady;
 
-x3dom.runtime.ready = runtimeReady;
+//x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 var Viewer = {};
@@ -3221,23 +3413,41 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// Set option param from viewerDirective
 				self.options = options;
 
-				// If we have a viewer manager then it
-				// will take care of initializing the runtime
-				// else we'll do it ourselves
-				x3dom.runtime.ready = self.initRuntime;
+				self.viewer = document.createElement("div");
+				var canvas = document.createElement("canvas");
+				canvas.className = "emscripten";
+				canvas.setAttribute("id", "canvas");
+				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+				canvas.setAttribute("height", "600px");
+				canvas.setAttribute("width", "960px");
+				canvas.addEventListener("mousedown", onMouseDown);
+				canvas.addEventListener("mouseup",  onMouseUp);
+				canvas.addEventListener("mousemove",  onMouseMove);
+				canvas.style["pointer-events"] = "all";
+				
+				var canvasScript = document.createElement("script");
+				canvasScript.setAttribute("type", "text/javascript");
 
-				self.addLogo();
+				var unitySettings = {
+				 	TOTAL_MEMORY: 2130706432,
+				    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
+				    compatibilitycheck: null,
+				    backgroundColor: "#222C36",
+				    splashStyle: "Light",
+				    dataUrl: "public/unity/Release/unity.data",
+				    codeUrl: "public/unity/Release/unity.js",
+				    asmUrl: "public/unity/Release/unity.asm.js",
+				    memUrl: "public/unity/Release/unity.mem"
+				};
+				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
+				canvasScript.appendChild(moduleSettings);
+				var canvasScript2 = document.createElement("script");
+				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
+								
 
-				// Set up the DOM elements
-				self.viewer = document.createElement("x3d");
-				self.viewer.setAttribute("id", self.name);
-				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
-				self.viewer.setAttribute("keysEnabled", "true");
-				self.viewer.setAttribute("disableTouch", "true");
-				self.viewer.addEventListener("mousedown", onMouseDown);
-				self.viewer.addEventListener("mouseup",  onMouseUp);
-				self.viewer.addEventListener("mousemove",  onMouseMove);
-				self.viewer.style["pointer-events"] = "all";
+				self.viewer.appendChild(canvas);
+				self.viewer.appendChild(canvasScript);
+				self.viewer.appendChild(canvasScript2);
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
@@ -3247,7 +3457,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				//self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
-				self.pinShader = new PinShader(self.scene);
+				//self.pinShader = new PinShader(self.scene);
 
 				self.bground = null;
 				self.currentNavMode = null;
@@ -3267,10 +3477,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.createViewpoint(self.name + "_default");
 
-				self.nav = document.createElement("navigationInfo");
-				self.nav.setAttribute("headlight", "false");
-				self.setNavMode(self.defaultNavMode);
-				self.scene.appendChild(self.nav);
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
@@ -3290,30 +3496,25 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
 				});
 
-				callback(self.EVENT.READY, {
-					name: self.name,
-					model: self.modelString
-				});
+				UnityUtil.pickPointCallback = self.pickPointEvent;
+				UnityUtil.objectSelectedCallback = self.objectSelected;
+				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
+				self.setNavMode(self.defaultNavMode);
+				UnityUtil.onReady().then(
+						function()
+						{
+							callback(self.EVENT.READY, {
+								name: self.name,
+								model: self.modelString
+							});
+													   
+						}
+					);
 			}
 		};
 
 		this.destroy = function() {
-			if (self.currentViewpoint) {
-				self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
-			}
-			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
-
-			self.removeLogo();
-
-			//self.viewer.removeEventListener("mousedown", onMouseDown);
-			//self.viewer.removeEventListener("mouseup", onMouseUp);
-			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
-
-			self.viewer.parentNode.removeChild(self.viewer);
-
-			ViewerUtil.offEventAll();
-
-			self.viewer = undefined;
+			UnityUtil.reset();
 		};
 
 		ViewerUtil.onEvent("onError", function(objEvent) {
@@ -3405,44 +3606,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED, {
-					bbox : {
-						min: self.getScene()._x3domNode.getVolume().min,
-						max: self.getScene()._x3domNode.getVolume().max
-					}
-				});
+
 			}
 		});
 
-		// This is called when the X3DOM runtime is initialized
-		// member of x3dom.runtime instance
-		this.initRuntime = function() {
-
-			if (this.doc.id === self.name) {
-				self.runtime = this;
-
-				callback(self.EVENT.RUNTIME_READY, {
-					name: self.name
-				});
-			}
-
-			self.runtime.enterFrame = function () {
-					if (self.gyroOrientation)
-					{
-							self.gyroscope(
-									self.gyroOrientation.alpha,
-									self.gyroOrientation.beta,
-									self.gyroOrientation.gamma
-							);
-					}
-			};
-
-			self.showAll = function() {
-				self.runtime.fitAll();
-
-				// TODO: This is a hack to get around a bug in X3DOM
-				self.getViewArea()._flyMat = null;
-			};
+		this.showAll = function() {
+			UnityUtil.resetCamera();
 		};
 
 		this.setAmbientLight = function(lightDescription) {
@@ -3615,6 +3784,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getProjectionMatrix();
 		};
 
+		this.getScreenshot = function(promise)
+		{
+			UnityUtil.requestScreenShot(promise);
+
+		}
+
 		this.onMouseUp = function(functionToBind) {
 			ViewerUtil.onEvent("onMouseUp", functionToBind);
 		};
@@ -3652,56 +3827,55 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
-		this.mouseDownPickPoint = function(event)
+		this.pickPointEvent = function(pointInfo)
 		{
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
 
-			if (pickingInfo.pickObj)
+			//User clicked a mesh
+			callback(self.EVENT.PICK_POINT, {
+				id: pointInfo.id,
+				position: pointInfo.position,
+				normal: pointInfo.normal,
+				//trans: self.getParentTransformation(self.account, self.project),
+				screenPos: pointInfo.mousePos
+			});
+		};
+
+		this.objectSelected = function(pointInfo)
+		{
+			if(!self.selectionDisabled && !self.pinDropMode)
 			{
-				var account, project;
-				var projectParts = null;
-
-				if (pickingInfo.pickObj._xmlNode)
+				if(pointInfo.id)
 				{
-					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
+					if(pointInfo.pin)
 					{
-						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+						//User clicked a pin
+						callback(self.EVENT.CLICK_PIN,
+							{id: pointInfo.id});
+
 					}
-				} else {
-					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-				}
-
-				if (projectParts)
+					else
+					{
+						callback(self.EVENT.OBJECT_SELECTED, {
+							account: pointInfo.database,
+							project: pointInfo.project,
+							id: pointInfo.id,
+							source: "viewer"						
+						});
+					}
+				}				
+				else
 				{
-					var objectID = pickingInfo.pickObj.partID ?
-						pickingInfo.pickObj.partID :
-						projectParts[2];
-
-					account = projectParts[0];
-					project = projectParts[1];
-
-                    console.trace(event);
-
-					callback(self.EVENT.PICK_POINT, {
-						id: objectID,
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project),
-						screenPos: [event.layerX, event.layerY]
-					});
-				} else {
-
-					callback(self.EVENT.PICK_POINT, {
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project)
-					});
+					//User clicked the background
+					callback(self.EVENT.BACKGROUND_SELECTED);
 				}
 			}
 		};
 
-		this.onMouseDown(this.mouseDownPickPoint);
+		this.mouseDownPickPoint = function(event)
+		{
+			UnityUtil.getPointInfo();
+		};
+
 
 		/*
 		this.mouseMovePoint = function (event) {
@@ -3749,260 +3923,27 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (!Array.isArray(part)) {
-				part = [part];
-			}
-
-			if (zoom) {
-				for (i = 0; i < part.length; i++) {
-					part[i].fit();
-				}
-			}
-
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
-				}
-			}
-
-			self.oldPart = part;
-
-			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(colour, "both");
-			}
-		};
-
-		/**
-		 * This is copied from selectParts()
-		 * @param highlightPart
-		 * @param unhighlightPart
-		 * @param zoom
-		 * @param colour
-		 */
-		this.selectAndUnselectParts = function(highlightPart, unhighlightPart, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (zoom) {
-				for (i = 0; i < highlightPart.length; i++) {
-					highlightPart[i].fit();
-				}
-				for (i = 0; i < unhighlightPart.length; i++) {
-					unhighlightPart[i].fit();
-				}
-			}
-
-			for (i = 0; i < highlightPart.length; i++) {
-				highlightPart[i].setEmissiveColor(colour, "both");
-			}
-
-			for (i = 0; i < unhighlightPart.length; i++) {
-				unhighlightPart[i].resetColor();
-			}
-
-			self.oldPart = highlightPart;
-		};
-
 		this.lastMultipart = null;
 
-		this.clickObject = function(objEvent) {
-			var account = null;
-			var project = null;
-			var id = null;
-
-			if ((objEvent.button === 1) && !self.selectionDisabled) {
-				if (objEvent.partID) {
-					id = objEvent.partID;
-
-					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
-					project = objEvent.part.multiPart._nameSpace.name.split("__")[1];
-
-				}
-			}
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: account,
-				project: project,
-				id: id,
-				source: "viewer"
-			});
-		};
-
-		this.highlightObjects = function(account, project, ids_in, zoom, colour) {
+		this.highlightObjects = function(account, project, ids_in, zoom, colour, multiOverride) {
 			if (!this.pinDropMode) {
-				var nameSpaceName = null;
-
-				// If we pass in a single id, then we might be selecting
-				// an old-style Group in X3DOM rather than multipart.
-				ids_in = ids_in || [];
-				ids_in = Array.isArray(ids_in) ? ids_in: [ids_in];
 				var ids = new Set(ids_in);
 
 				if(ids.size)
 				{
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						var fullPartsList = [];
-						var nsMultipartNodes;
-
-						// If account and project have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									fullPartsList.push(parts);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-
-						self.selectParts(fullPartsList, zoom, colour);
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							self.setApp(object[0], colour);
-						}
-					});
+					UnityUtil.highlightObjects(account, project, Array.from(ids), colour, multiOverride || this.multiSelectMode);
 				} else {
-					self.highlightAndUnhighlightObjects([]);
-					self.setApp(null);
+					UnityUtil.clearHighlights();
 				}
-			}
-		};
-
-		/**
-		 * This is copied from highlightObjects()
-		 * @param highlight_ids
-		 * @param unhighlight_ids
-		 * @param zoom
-		 * @param colour
-		 */
-		this.highlightAndUnhighlightObjects = function(highlight_ids, unhighlight_ids, zoom, colour) {
-			var nameSpaceName = null;
-
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullHighlightPartsList = [];
-				var fullUnhighlightPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
-						if (highlightParts && highlightParts.ids.length > 0) {
-							fullHighlightPartsList.push(highlightParts);
-						}
-
-						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
-						if (unhighlightParts && unhighlightParts.ids.length > 0) {
-							fullUnhighlightPartsList.push(unhighlightParts);
-						}
-					}
-				}
-
-				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
-
 			}
 		};
 
 		//this.switchedOldParts = [];
 		//this.switchedObjects = [];
 
-		this.__processSwitchVisibility = function(nameSpaceName, ids_in, state)
+		this.switchObjectVisibility = function(account, project, ids, visibility)
 		{
-			if (ids_in) {
-				var ids = new Set(ids_in); // Convert to Set if necessary
-
-				if (ids.size) {
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						var nsMultipartNodes;
-
-						// If account and project have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									parts.setVisibility(state);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							object[0].setAttribute("render", state.toString());
-						}
-					});
-				}
-			}
-		};
-
-		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
-			var nameSpaceName = null;
-
-			if (account && project) {
-				nameSpaceName = account + "__" + project;
-			}
-
-			if (visible_ids)
-			{
-				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
-			}
-
-			if (invisible_ids)
-			{
-				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
-			}
+			UnityUtil.toggleVisibility(account, project, ids, visibility);
 		};
 
 		ViewerUtil.onEvent("pinClick", function(clickInfo) {
@@ -4060,6 +4001,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				setTimeout(self.flyThroughTick, self.flyThroughTime);
 			}
 		};
+
+		this.getObjectsStatus = function(account, project, promise){
+			UnityUtil.getObjectsStatus(account, project, promise);
+		}
+
 
 		this.getViewpointGroupAndName = function(id) {
 			var splitID = id.trim().split("__");
@@ -4246,16 +4192,25 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.applyModelProperties = function(account, project, properties)
 		{
-			if (properties.properties)
+			if (properties)
 			{
-				if (properties.properties.hiddenNodes)
+				if (properties.hiddenNodes && properties.hiddenNodes.length > 0)
 				{
 					self.switchObjectVisibility(
-						null,
-						null,
-						null,
-						properties.properties.hiddenNodes
+						account,
+						project,
+						properties.hiddenNodes,
+						false
 					);
+				}
+
+				if(properties.subProjects)
+				{
+					for(var i = 0; i < properties.subProjects.length; i++)
+					{
+						var entry = properties.subProjects[i];
+						this.applyModelProperties(entry.account, entry.project, entry.properties);
+					}
 				}
 			}
 		}
@@ -4339,70 +4294,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.oneGrpNodes = [];
 		this.twoGrpNodes = [];
 
-		this.setApp = function(group, app) {
-			if (!group || !group.multipart) {
-				if (app === undefined) {
-					app = self.SELECT_COLOUR.EMISSIVE;
-				}
-
-				self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
-
-				// TODO: Make this more efficient
-				self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
-				self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
-
-				if (group) {
-					self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-					self.oneGrpNodes = group.getElementsByTagName("Material");
-				} else {
-					self.oneGrpNodes = [];
-					self.twoGrpNodes = [];
-				}
-
-				self.applyApp(self.oneGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, true);
-
-				self.viewer.render();
-			}
-		};
-
 		this.setNavMode = function(mode, force) {
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
-				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
-					waypoint.init();
-				}
-
-				if (self.currentNavMode === self.NAV_MODES.WAYFINDER) { // Exiting the wayfinding mode
-					waypoint.close();
-				}
-
-				if (mode === self.NAV_MODES.HELICOPTER) {
-					var vpInfo = self.getCurrentViewpointInfo();
-					var eye = vpInfo.position;
-					var viewDir = vpInfo.view_dir;
-
-					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
-					self.nav._x3domNode._vf.typeParams[1] = eye[1];
-
-					var bboxMax = self.getScene()._x3domNode.getVolume().max;
-					var bboxMin = self.getScene()._x3domNode.getVolume().min;
-					var bboxSize = bboxMax.subtract(bboxMin);
-					var calculatedSpeed = Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * 0.03;
-
-					self.nav.setAttribute("speed", calculatedSpeed);
-				}
-
 				self.currentNavMode = mode;
-				self.nav.setAttribute("type", mode);
+				UnityUtil.setNavigation(mode);
 
 				if (mode === self.NAV_MODES.WALK) {
 					self.disableClicking();
-					self.setApp(null);
 				}
 				/*else if (mode == "HELICOPTER") {
 					self.disableSelecting();
@@ -4411,18 +4311,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.enableClicking();
 				}
 
-				if ((mode === self.NAV_MODES.WAYFINDER) && waypoint) {
-					waypoint.resetViewer();
-				}
-
-				if (mode === self.NAV_MODES.TURNTABLE) {
-					self.nav.setAttribute("typeParams", "-0.4 60.0 0 3.14 0.00001");
-				}
 			}
 		};
 
 		this.reload = function() {
-			x3dom.reload();
+			//x3dom.reload();
 		};
 
 		this.startingPoint = [0.0, 0.0, 0.0];
@@ -4467,95 +4360,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
-			var origViewTrans = null;
-			if(account && project)
-			{
-					origViewTrans = self.getParentTransformation(account, project);
-
-			}
-
-			if (!viewDir)
-			{
-				viewDir = self.getCurrentViewpointInfo().view_dir;
-			}
-
-			if (!up)
-			{
-				up = self.getCurrentViewpointInfo().up;
-			}
-			up = ViewerUtil.normalize(up);
-
-			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
-			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
-			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				x3domUp = origViewTrans.multMatrixVec(x3domUp);
-				x3domView = origViewTrans.multMatrixVec(x3domView);
-				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
-
-			}
-
-			var x3domAt   = x3domFrom.add(x3domView.normalize());
-
-			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
-
-			var currViewpointNode = self.getCurrentViewpoint();
-			var currViewpoint = currViewpointNode._x3domNode;
-
-			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
-				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
-				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
-			}
-
-			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
-
-			if (!animate && rollerCoasterMode)
-			{
-				self.rollerCoasterMatrix = viewMatrix;
-			} else {
-				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
-			}
-
-			var x3domCenter = null;
-
-			if (!centerOfRotation)
-			{
-				var canvasWidth  = self.getViewArea()._doc.canvas.width;
-				var canvasHeight = self.getViewArea()._doc.canvas.height;
-
-				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-				if (self.pickObject.pickPos)
-				{
-					x3domCenter = self.pickObject.pickPos;
-				} else {
-					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
-					var bbox = self.getScene()._x3domNode.getVolume();
-					if(ry.intersect(bbox.min, bbox.max))
-					{
-						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
-					} else {
-						x3domCenter = x3domAt;
-					}
-				}
-			} else {
-				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
-			}
-
-			if (animate) {
-				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
-				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
-			}
-
-			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
-
-			self.setNavMode(self.currentNavMode);
-			self.getViewArea()._doc.needRender = true;
-			if (self.linked) {
-				self.manager.switchMaster(self.handle);
-			}
+			UnityUtil.setViewpoint(pos, up, viewDir, account, project);
 		};
 
 		this.linked = false;
@@ -4606,50 +4411,18 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.loadModel = function(account, project, branch, revision) {
-			var url = "";
-
-			if (revision === "head") {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
-			} else {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
-			}
-
 			self.account = account;
 			self.project = project;
 			self.branch = branch;
 			self.revision = revision;
-
-			self.modelString = account + "_" + project + "_" + branch + "_" + revision;
-
-			self.loadURL(url);
-		};
-
-		this.loadURL = function(url) {
-			if (self.inline) {
-				self.inline.parentNode.removeChild(self.inline);
-				self.inline = null; // Garbage collect
-			}
-
-			self.inline = document.createElement("inline");
-			self.scene.appendChild(self.inline);
-
-			if (self.account && self.project) {
-				self.rootName = self.account + "__" + self.project;
-			} else {
-				self.rootName = "model";
-			}
-
-			self.inline.setAttribute("namespacename", self.rootName);
-			self.inline.setAttribute("onload", "onLoaded(event);");
-			//self.inline.setAttribute("onerror", "onError(event);");
-			self.inline.setAttribute("url", url);
-			self.reload();
-
-			self.url = url;
-
-			callback(self.EVENT.START_LOADING, {
-				name: self.name
-			});
+			UnityUtil.loadProject(self.account, self.project,
+							self.branch, self.revision).then(
+				function(bbox)
+				{
+					callback(self.EVENT.LOADED, bbox);
+				}
+			);
+			callback(self.EVENT.START_LOADING);
 		};
 
 		this.getRoot = function() {
@@ -4664,83 +4437,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function(account, project) {
-			var viewPoint = {};
+		this.getCurrentViewpointInfo = function(account, project, promise) {
 
-			var origViewTrans = null;
-
-			if(account && project)
-			{
-				origViewTrans = self.getParentTransformation(account, project);
-
-			}
-
-			var viewMat = self.getViewMatrix().inverse();
-
-			var viewRight = viewMat.e0();
-			var viewUp = viewMat.e1();
-			var viewDir = viewMat.e2(); // Because OpenGL points out of screen
-			var viewPos = viewMat.e3();
-
-			var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
-
-			var lookAt = null;
-
-			if (center) {
-				lookAt = center.subtract(viewPos);
-			} else {
-				lookAt = viewPos.add(viewDir.multiply(-1));
-			}
-
-			var projMat = self.getProjectionMatrix();
-
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				var transInv = origViewTrans.inverse();
-				viewRight = transInv.multMatrixVec(viewRight);
-				viewUp = transInv.multMatrixVec(viewUp);
-				viewDir = transInv.multMatrixVec(viewDir);
-				viewPos = transInv.multMatrixPnt(viewPos);
-				lookAt = transInv.multMatrixVec(lookAt);
-
-			}
-
-			viewDir= viewDir.multiply(-1);
-
-			// More viewing direction than lookAt to sync with Assimp
-			viewPoint.up = [viewUp.x, viewUp.y, viewUp.z];
-			viewPoint.position = [viewPos.x, viewPos.y, viewPos.z];
-			viewPoint.look_at = [lookAt.x, lookAt.y, lookAt.z];
-			viewPoint.view_dir = [viewDir.x, viewDir.y, viewDir.z];
-			viewPoint.right = [viewRight.x, viewRight.y, viewRight.z];
-			viewPoint.unityHeight = 2.0 / projMat._00;
-			viewPoint.fov = Math.atan((1 / projMat._00)) * 2.0;
-			viewPoint.aspect_ratio = viewPoint.fov / projMat._11;
-
-
-			var f = projMat._23 / (projMat._22 + 1);
-			var n = (f * projMat._23) / (projMat._23 - 2 * f);
-
-			viewPoint.far = f;
-			viewPoint.near = n;
-
-			viewPoint.clippingPlanes = [];
-
-			if(origViewTrans)
-			{
-				for(var i = 0; i < self.clippingPlanes.length; ++i)
-				{
-					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));
-				}
-			}
-			else
-			{
-				viewPoint.clippingPlanes = self.clippingPlanes;
-			}
-
-
-			return viewPoint;
+			UnityUtil.requestViewpoint(account, project, promise);
 		};
 
 		this.speed = 2.0;
@@ -4908,9 +4607,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setMultiSelectMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			element.style.cursor =  on ? "copy" : "-webkit-grab";
+			//element.style.cursor =  on ? "copy" : "-webkit-grab";
 		};
 
 		/**
@@ -4918,93 +4617,54 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setPinDropMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.pinDropMode = on;
-			element.style.cursor = on ? "crosshair" : "-webkit-grab";
+			//element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};
 
 		/****************************************************************************
 		 * Clipping planes
 		 ****************************************************************************/
 
-		var clippingPlaneID = -1;
-		this.clippingPlanes = [];
+		/*
+		 * NOTE: Clipping planes are now all managed by unity use broadcast events to retrieve its info
+		 */
 
-		this.setClippingPlanes = function(clippingPlanes) {
-			self.clearClippingPlanes();
-
-			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
-				var clipPlaneIDX = self.addClippingPlane(
-					clippingPlanes[clipidx].axis,
-					clippingPlanes[clipidx].normal,
-					clippingPlanes[clipidx].distance,
-					clippingPlanes[clipidx].percentage,
-					clippingPlanes[clipidx].clipDirection
-				);
-			}
-		};
+		this.broadcastClippingPlane = function(clip)
+		{
+			callback(self.EVENT.CLIPPING_PLANE_BROADCAST, clip);
+		}
 
 		/**
-		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane
-		 * @param {number} distance - Distance along the bounding box to clip
-		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
-		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-		 * @param {string} account - name of database (optional)
-		 * @param {string} project - name of project (optional)
+		 * Update clipping planes on the viewer
+		 * @param {array} clipPlanes - array of clipping planes
+		 * @param {bool} fromPanel - indicate if the request came from clip panel
+		 * @param {account} account - (OPTIONAL) the account the clip plane came from
+		 * @param {project} project - (OPTIONAL) the project the clip plane came from
 		 */
-		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
-			clippingPlaneID += 1;
-			var parentGroup = null;
-			if(account && project){
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
-				parentGroup = self.groupNodes[fullParentGroupName];
-			}
-
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
-			self.clippingPlanes.push(newClipPlane);
-
-			return clippingPlaneID;
-		};
-
-		this.moveClippingPlane = function(axis, distance) {
-			// Only supports a single clipping plane at the moment.
-			if(self.clippingPlanes[0])
+		this.updateClippingPlanes = function(clipPlanes, fromPanel, account, project)
+		{
+			if(!clipPlanes || clipPlanes.length === 0)
 			{
-				self.clippingPlanes[0].movePlane(axis, distance);
+				UnityUtil.disableClippingPlanes();
 			}
-		};
 
-		this.changeAxisClippingPlane = function(axis) {
-			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].changeAxis(axis);
-		};
+			if(clipPlanes && clipPlanes.length > 0 )
+			{
+				UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, project);
+			}
 
-		/**
-		 * Clear out all clipping planes
-		 */
-		this.clearClippingPlanes = function() {
-			self.clippingPlanes.forEach(function(clipPlane) {
-				clipPlane.destroy();
+			if(clipPlanes && clipPlanes.length > 1)
+			{
+				console.log("More than 1 clipping planes requested!");
+			}
 
-			});
+		}
 
-			self.clippingPlanes = [];
-		};
-
-		/**
-		 * Clear out all clipping planes
-		 * @param {number} id - Get the clipping plane with matching unique ID
-		 */
-		this.getClippingPlane = function(id) {
-			// If the clipping plane no longer exists this
-			// will return undefined
-			return self.clippingPlanes.filter(function(clipPlane) {
-				return (clipPlane.getID() === id);
-			})[0];
-		};
-
+		this.clearClippingPlanes = function()
+		{
+			UnityUtil.disableClippingPlanes();
+		}
 		/****************************************************************************
 		 * Pins
 		 ****************************************************************************/
@@ -5015,9 +4675,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = self.getParentTransformation(account, project);
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
+				self.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, project);
 			}
 		};
 
@@ -5040,10 +4698,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					project: pin.project
 				});
 
-				callback(self.EVENT.SET_CLIPPING_PLANES, {
+				callback(self.EVENT.UPDATE_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes,
 					account: pin.account,
-					project: pin.project
+					project: pin.project,
+					fromClipPanel: false
 
 				});
 			}
@@ -5110,6 +4769,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	// States of the viewer
 	READY: "VIEWER_EVENT_READY",
 	START_LOADING: "VIEWING_START_LOADING",
+	LOAD_PROJECT: "VIEWER_LOAD_PROJECT",
 	LOADED: "VIEWER_EVENT_LOADED",
 	RUNTIME_READY: "VIEWING_RUNTIME_READY",
 
@@ -5123,9 +4783,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
-	HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
+	GET_CURRENT_OBJECT_STATUS: "VIEWER_GET_CURRENT_OBJECT_STATUS",
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
@@ -5141,12 +4801,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
-	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
-	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
-	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
+	UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
-	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
-	SET_SUBPROJECT_TRANS_INFO : "VIEWER_:SET_SUBPROJECT_TRANS_INFO",
+	CLIPPING_PLANE_BROADCAST: "VIEWER_CLIPPING_PLANE_BROADCAST",
 
 	// Pin events
 	CLICK_PIN: "VIEWER_CLICK_PIN",
@@ -5199,7 +4856,7 @@ var ViewerManager = {};
 			}
 		};
 		
-		x3dom.runtime.ready = this.initRuntime;
+		//x3dom.runtime.ready = this.initRuntime;
 	};
 	
 	ViewerManager.prototype.isValidViewerName = function(name) {
@@ -5937,6 +5594,7 @@ var ViewerManager = {};
 				type: "",
 				subProjects: []
 			};
+			vm.errorMessage = '';
 			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		};
 
@@ -6008,19 +5666,26 @@ var ViewerManager = {};
 			if (vm.federationOriginalData === null) {
 				promise = UtilsService.doPost(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
-					console.log(response);
-					vm.showInfo = false;
-					vm.newFederationData.timestamp = (new Date()).toString();
-					vm.newFederationData.permissions = response.data.permissions;
-					vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
-					vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
-					vm.closeDialog();
+					
+					if(response.status !== 200 && response.status !== 201){
+						vm.errorMessage = response.data.message;
+					} else {
+						vm.errorMessage = '';
+						vm.showInfo = false;
+						vm.newFederationData.timestamp = (new Date()).toString();
+						vm.newFederationData.permissions = response.data.permissions;
+						vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
+						vm.accountsToUse[vm.currentAccountIndex].fedProjects.push(vm.newFederationData);
+						vm.closeDialog();
 
-					AnalyticService.sendEvent({
-						eventCategory: 'Project',
-						eventAction: 'create',
-						eventLabel: 'federation'
-					});
+						AnalyticService.sendEvent({
+							eventCategory: 'Project',
+							eventAction: 'create',
+							eventLabel: 'federation'
+						});
+					}
+
+
 
 				});
 			}
@@ -6780,15 +6445,14 @@ var ViewerManager = {};
 			color: "#F44336"
 		};
 
-		/**
-		 * Display file uploading and info and setup watch if status is processing
-		 */
+
+		watchProjectStatus();
 
 		if (vm.project.status === "processing") {
+
 			vm.project.uploading = true;
-			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
-			watchProjectStatus();
+			vm.fileUploadInfo = 'Processing...';
+
 		}
 		
 
@@ -6995,24 +6659,18 @@ var ViewerManager = {};
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
 				else {
-					vm.project.uploading = true;
-					vm.showUploading = true;
-					vm.showFileUploadInfo = false;
 
 					// Check for file size limit
 					if (file.size > serverConfig.uploadSizeLimit) {
 						$timeout(function () {
-							vm.showUploading = false;
-							vm.showFileUploadInfo = true;
+
 							vm.fileUploadInfo = "File exceeds size limit";
 							$timeout(function () {
-								vm.project.uploading = false;
+								vm.fileUploadInfo = "";
 							}, infoTimeout);
 						});
 					}
 					else {
-
-						vm.uploadFileName = file.name;
 
 						formData = new FormData();
 						formData.append("file", file);
@@ -7031,16 +6689,15 @@ var ViewerManager = {};
 							console.log("uploadModel", response);
 							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
+								vm.project.uploading = false;
 								vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
-								vm.showUploading = false;
-								vm.showFileUploadInfo = true;
+
 								$timeout(function () {
-									vm.project.uploading = false;
+									vm.fileUploadInfo = "";
 								}, infoTimeout);
 							}
 							else {
-								console.log("Polling upload!");
-								watchProjectStatus();
+								
 								AnalyticService.sendEvent({
 									eventCategory: 'Project',
 									eventAction: 'upload'
@@ -7056,6 +6713,7 @@ var ViewerManager = {};
 		 * Watch file upload status
 		 */
 		function watchProjectStatus(){
+
 			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
@@ -7064,27 +6722,35 @@ var ViewerManager = {};
 						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
 						vm.project.timestamp = new Date();
 						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
-						vm.fileUploadInfo = "Uploaded";
+						vm.fileUploadInfo = "Model imported successfully";
 						// clear revisions cache
 						vm.revisions = null;
 					}
 
 					//status=ok can have an error message too
-					if (data.hasOwnProperty("errorReason")) {
+					if (data.hasOwnProperty("errorReason") && data.errorReason.message) {
 						vm.fileUploadInfo = data.errorReason.message;
 					} else if (data.status === "failed") {
-						vm.fileUploadInfo = "Failed to upload file";
+						vm.fileUploadInfo = "Failed to import model";
 					}
 
-					vm.showUploading = false;
-					vm.showFileUploadInfo = true;
+					vm.project.uploading = false;
+
 					$scope.$apply();
 					$timeout(function () {
-						vm.project.uploading = false;
+						vm.fileUploadInfo = "";
 					}, infoTimeout);
 					
+				} else if (data.status === 'uploading'){
 
-					NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+					vm.project.uploading = true;
+					vm.fileUploadInfo = 'Uploading...';
+					$scope.$apply();
+
+				} else if (data.status === 'processing'){
+					vm.project.uploading = true;
+					vm.fileUploadInfo = 'Processing...';
+					$scope.$apply();
 				}
 			});
 
@@ -7145,9 +6811,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService) {
 		var vm = this,
 			existingProjectToUpload,
 			existingProjectFileUploader,
@@ -7205,6 +6871,23 @@ var ViewerManager = {};
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 					// Only show add project menu for user account
 					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
+
+					if(vm.accounts[i].isAdmin){
+						NotificationService.subscribe.newProject(vm.accounts[i].account, function(data){
+							vm.newProjectFileToUpload = null;
+							vm.projectsExist = true;
+							// Add project to list
+							var project = {
+								project: data.project,
+								permissions: data.permissions,
+								canUpload: true,
+								timestamp: null
+							};
+							updateAccountProjects(data.account, project);
+							$scope.$apply();
+
+						});
+					}
 				}
 			}
 		});
@@ -10061,145 +9744,75 @@ var ViewerManager = {};
 		vm.sliderMin = 0;
 		vm.sliderMax = 100;
 		vm.sliderStep = 0.1;
-		vm.distance = 0;
 		vm.displayDistance = 0;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
-		vm.selectedAxis = "";
 		vm.visible = false;
-		vm.account = null;
-		vm.project = null;
-		vm.normal = null;
-		vm.projectTrans = {};
-		vm.offsetTrans = null;
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 		vm.units = "m";
 
-		function initClippingPlane () {
-			$timeout(function () {
-				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
-		
-				if(!vm.normal)
-				{	
-					if(vm.selectedAxis == "")
+		function updateClippingPlane()
+		{
+			if(vm.bbox)
+			{
+				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
 					{
-
-						vm.sliderPosition = vm.sliderMin;
-						vm.selectedAxis = "X";
-						calculateDistanceFromSlider(
-							function(){
-								updateClippingPlane(true, true, false, false);	
-							}		
-						);
-					}
-				}
-				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-
-
-				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
-				{
-					axis: translateAxis(vm.selectedAxis),
-					normal: vm.normal,
-					percentage: initPosition,
-					distance: vm.distance,
-					account: vm.account,
-					project: vm.project
-				});
-			});
+						clippingPlanes:[
+							{
+								normal: getNormal(),
+								distance: vm.displayDistance,
+								clipDirection: -1
+							}
+						],
+						fromClipPanel: true
+					});
+			}
 		}
 
-		vm.moveClippingPlane = function () {
-			if(vm.account && vm.project)
+		/**
+		 * Determine axis based on normal provided
+		 * @param normal normal vector
+		 */
+		function determineAxis(normal)
+		{
+			var res = "";
+			if(normal.length === 3)
 			{
-				vm.account = null;
-				vm.project = null;
-				vm.normal = null;
-				initClippingPlane();	
+				if(normal[1] === 0  && normal[2] === 0)
+				{
+					res = "X";
+				}
+				else if(normal[0] === 0 && normal[2] === 0)
+				{
+					res = "Z";
+				}
+				else if(normal[0] === 0 && normal[1] === 0)
+				{
+					res = "Y";
+				}
+			}
+
+			return res;
+		}
+
+		/**
+		 * Initialise display values
+		 * This is called when we know the bounding box of our model
+		 */
+		function setDisplayValues(axis, distance, moveClip, slider)
+		{
+			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
+			vm.displayDistance = distance;
+			vm.displayedAxis = axis;
+			if(slider != null)
+			{
+				vm.sliderPosition = slider;
+				if(moveClip) updateClippingPlane();
 			}
 			else
-			{
-				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
-				{
-					axis: translateAxis(vm.selectedAxis),
-					distance: vm.distance
-				});
-			}
-		}
+				updateDisplaySlider(false, moveClip);
 
-		/**
-		 * Determine axis based on vm.normal
-		 * @param {function} callback
-		 */
-		function determineAxis(callback)
-		{
-			//translate the normal and compare it to the axis
-			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
-			var transformedNormal = normal_x3d;
-
-			if(vm.project && vm.account)
-			{
-				var fullProjectName = vm.account + "__" + vm.project;
-				if(vm.projectTrans[fullProjectName])
-				{
-					transformedNormal = vm.projectTrans[fullProjectName].multMatrixVec(normal_x3d);
-					transformedNormal.normalize();
-					vm.normal = transformedNormal.toGL();
-					//Since it's normalized if we only need to check 1 axis
-					if(Math.abs(transformedNormal.x) === 1)
-					{
-						vm.selectedAxis = "X";
-						vm.normal = null;
-					}
-					else if(Math.abs(transformedNormal.y) === 1)
-					{
-						vm.selectedAxis = "Z";
-						vm.normal = null;
-					}
-					else if (Math.abs(transformedNormal.z) ===1)
-					{
-						vm.selectedAxis = "Y";
-						vm.normal = null;
-					}
-
-					var point = normal_x3d.multiply(-vm.distance);
-					point = vm.projectTrans[fullProjectName].multMatrixPnt(point);
-					vm.distance = -transformedNormal.dot(point) ;
-					vm.account = null;
-					vm.project = null;
-				}
-			}	
-			callback();
-		}
-
-		/**
-		 * update/create a clipping plane based on the given information
-		 * @param {string} account
-		 * @param {string} project
-		 * @param {array} normal vector
-		 * @param {number} distance from bbox
-		 */
-		function loadClippingPlane(account, project, normal, distance)
-		{
-
-			vm.project = project;
-			vm.account = account;
-			vm.normal = normal;
-			vm.distance = distance;
-
-			determineAxis(
-					function(){
-						updateClippingPlane(true, true, true, false);
-						if(vm.visible)
-						{
-							initClippingPlane(); 
-						}
-						else
-						{
-							vm.visible=true;
-						}
-					}
-			)
 		}
 
 		/*
@@ -10241,33 +9854,12 @@ var ViewerManager = {};
 			{
 				if (newValue )
 				{
-					initClippingPlane();
+					updateClippingPlane();
 				} else {
 					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
 				}
 			}
 		});
-
-		/**
-		 * Update clipping plane and its display values
-		 * @param {bool} update displayed distance
-		 * @param {bool} update displayed axis
-		 * @param {bool} update slider position
-		 * @param {bool} move the clipping plane
-		 */
-		function updateClippingPlane(updateDdist, updateDaxis, updateSlider, movePlane)
-		{
-		
-			vm.disableWatchDistance = updateDdist;
-			vm.disableWatchSlider = updateSlider;
-			vm.disableWatchAxis = updateDaxis;
-
-			updateDisplayValues( updateDdist, updateDaxis, updateSlider);
-
-			if(movePlane)
-				vm.moveClippingPlane();
-
-		}
 
 		/**
 		 * Returns the normal value based on axis
@@ -10276,18 +9868,18 @@ var ViewerManager = {};
 		function getNormal()
 		{
 
-			var normal = [1, 0, 0]; //X axis by default
+			var normal = [-1, 0, 0]; //X axis by default
 			if(vm.normal)
 				normal = vm.normal;
-			else if(vm.selectedAxis)
+			else if(vm.displayedAxis)
 			{
-				if(vm.selectedAxis == "Y")
+				if(vm.displayedAxis == "Y")
 				{
-					normal = [0, 0, 1];
+					normal = [0, 0, 1]; //Unity has flipped Z axis
 				}
-				else if(vm.selectedAxis == "Z")
+				else if(vm.displayedAxis == "Z")
 				{
-					normal = [0, 1, 0];
+					normal = [0, -1, 0];
 				}
 			}
 
@@ -10297,149 +9889,91 @@ var ViewerManager = {};
 		}
 
 		/**
-		 * Update display/internal distance base on the internal/display distance
-		 * @param {bool} update display distance if set to true, internal distance otherwise
+		 * Update displayed Distance based on slider position and axis
 		 */
-		function updateDistance(updateDisplayDistance)
+		function updateDisplayedDistance(updateSlider, moveClip)
 		{
-			var normal = getNormal();
-			var normal_x3d = new x3dom.fields.SFVec3f(normal[0], normal[1], normal[2]);
+			var min = 0;
+			var max = 0;
 
-			var distance = null;
-			var trans = null;
-			   
-			if(updateDisplayDistance)
+			if(vm.displayedAxis === "X")
 			{
-				distance = vm.distance;
-				trans = vm.offsetTrans;
+				min = vm.bbox.min[0];
+				max = vm.bbox.max[0];
+			}
+			else if(vm.displayedAxis === "Y")
+			{
+				min = vm.bbox.min[2];
+				max = vm.bbox.max[2];
+			}
+			else if(vm.displayedAxis === "Z")
+			{
+				min = vm.bbox.min[1];
+				max = vm.bbox.max[1];
 			}
 			else
+				return; //unknown axis, nothing would've been set. avoid infinity
+
+			var percentage = 1 - vm.sliderPosition/100;
+			if(!updateSlider)
+				vm.disableWatchDistance = true;
+			vm.displayDistance = min + (Math.abs(max - min) * percentage);
+			if(moveClip)
 			{
-				distance = vm.displayDistance;
-				trans = vm.offsetTrans.inverse();
+				updateClippingPlane();
 			}
-
-
-			var transformedNormal = trans.multMatrixVec(normal_x3d);
-			transformedNormal.normalize();
-
-			var point = normal_x3d.multiply(-distance);
-			point = trans.multMatrixPnt(point);
-
-			return -transformedNormal.dot(point);
-
 		}
-
 
 		/**
 		 * Update display slider based on current internal distance
 		 */
-		function updateDisplaySlider()
+		function updateDisplaySlider(updateDistance, moveClip)
 		{
 			var min = 0;
 			var max = 0;
-			if(vm.selectedAxis === "X")
+			if(vm.displayedAxis === "X")
 			{
-				min = vm.bbox.min.x;
-				max = vm.bbox.max.x;
+				min = vm.bbox.min[0];
+				max = vm.bbox.max[0];
 			}
-			else if(vm.selectedAxis === "Y")
+			else if(vm.displayedAxis === "Y")
 			{
-				min = vm.bbox.min.z;
-				max = vm.bbox.max.z;
+				min = vm.bbox.min[2];
+				max = vm.bbox.max[2];
 			}
-			else if(vm.selectedAxis === "Z")
+			else if(vm.displayedAxis === "Z")
 			{
-				min = vm.bbox.min.y;
-				max = vm.bbox.max.y;
+				min = vm.bbox.min[1];
+				max = vm.bbox.max[1];
 			}
+			else
+				return; //unknown axis, nothing would've been set. avoid infinity
 			
-			var distanceInverted = max - vm.distance + min;
-			var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
-			if(percentage < vm.sliderMin)
-			{
-				percentage = vm.sliderMin;
-			}
-			else if(percentage > vm.sliderMax)
-			{
-				percentage = vm.sliderMax;
-			}
-			vm.sliderPosition = percentage;
+			var percentage = (vm.displayDistance - min) / Math.abs(max-min);
+			if(!updateDistance)
+				vm.disableWatchSlider = true;
 
-		}
+			var value = (1.0 - percentage) * 100;
+			if(percentage > 100 || value < 0) value = 0;
+			if(percentage < 0 || value > 100) value = 100;
+			vm.sliderPosition = value;
 
-		/**
-		 *  Update display axis based on vm.selectedAxis
-		 */
-		function updateAxis()
-		{
-			vm.displayedAxis = vm.selectedAxis;
-		}
-
-		/**
-		 *  Update values displayed on cards
-		 *  @param {bool} update display distance
-		 *  @param {bool} update display axis
-		 *  @param {bool} update slider position
-		 */
-		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
-			if(changeDistance)
+			if(moveClip)
 			{
-				vm.displayDistance = updateDistance(true);
-			}
-			if(changeSlider)
-			{
-				updateDisplaySlider();
-			}
-			if(changeAxis)
-			{
-				updateAxis();
+				updateClippingPlane();
 			}
 
 		}
-
-		/**
-		 * Calculate distance base on slider position
-		 * @param {function} callback
-		 */
-		function calculateDistanceFromSlider(callback)
-		{
-				var min = 0;
-				var max = 0;
-				if(vm.selectedAxis === "X")
-				{
-					min = vm.bbox.min.x;
-					max = vm.bbox.max.x;
-				}
-				else if(vm.selectedAxis === "Y")
-				{
-					min = vm.bbox.min.z;
-					max = vm.bbox.max.z;
-				}
-				else if(vm.selectedAxis === "Z")
-				{
-					min = vm.bbox.min.y;
-					max = vm.bbox.max.y;
-				}
-				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
-				vm.distance = max - distanceDisplay + min;
-
-				if(callback)
-				{
-					callback();
-				}
-
-		}
-
 
 		/*
 		 * Change the clipping plane distance
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
-			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
-				vm.distance = updateDistance(false);
-				updateClippingPlane(false, false, true, true);
+			if(!vm.disableWatchDistance)
+			{
+				updateDisplaySlider(false, vm.visible);
 			}
+
 			vm.disableWatchDistance = false;
 		});
 
@@ -10448,14 +9982,11 @@ var ViewerManager = {};
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayedAxis", function (newValue) {
-			if (!vm.disableWatchAxis  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				vm.selectedAxis = newValue;
-				calculateDistanceFromSlider(
-					function(){
-						updateClippingPlane(true, false, false, true);	
-					}
-				);
+			if(!vm.disableWatchAxis)
+			{
+				updateDisplayedDistance(false, vm.visible);
 			}
+
 			vm.disableWatchAxis = false;
 		});
 
@@ -10463,39 +9994,18 @@ var ViewerManager = {};
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (!vm.disableWatchSlider && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				calculateDistanceFromSlider(
-					function(){
-						updateClippingPlane(true, false, false, true);	
-					}
-				);
-
+			if(!vm.disableWatchSlider)
+			{
+				updateDisplayedDistance(false, vm.visible);
 			}
+
 			vm.disableWatchSlider = false;
 
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(!event.value.clippingPlanes[0].normal)
-					{
-						//This is most likely old issue format. 
-						console.error("Trying to set clipping plane with no normal value.");
-
-					}
-					else 
-					{
-						loadClippingPlane(event.value.account, event.value.project, 
-							event.value.clippingPlanes[0].normal,
-						    event.value.clippingPlanes[0].distance);
-
-					}
-				} else {
-					vm.visible = false;
-					vm.sliderPosition = 0.0;
-				}
+			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
+				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
 			}
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
 			{
@@ -10506,7 +10016,7 @@ var ViewerManager = {};
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
-				updateClippingPlane(true, true, true, vm.visible);
+				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
 			}
 			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
 			{
@@ -10515,6 +10025,7 @@ var ViewerManager = {};
 		});
 	}
 }());
+
 
 /**
  *	Copyright (C) 2016 3D Repo Ltd
@@ -11287,13 +10798,10 @@ var ViewerManager = {};
 				data = {
 					source: "tree",
 					account: vm.account,
-					project: vm.project
+					project: vm.project,
+					ids: ids,
+					visible: visible
 				};
-				if (visible) {
-					data.visible_ids = ids;
-				} else {
-					data.invisible_ids = ids;
-				}
 				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, data);
 			}
 		}
@@ -11507,7 +11015,8 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
-	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", function($injector, $q, $http, serverConfig, EventService) {
+	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", "AnalyticService", 
+		function($injector, $q, $http, serverConfig, EventService, AnalyticService) {
 
 		var self = this;
 
@@ -11522,6 +11031,7 @@ var ViewerManager = {};
 			self.userRoles = data.roles;
 
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username, initialiser: data.initialiser });
+			AnalyticService.setUserId(self.username);
 
 			self.authPromise.resolve(self.loggedIn);
 		};
@@ -11830,9 +11340,7 @@ var ViewerManager = {};
 		};
 
 		this.changedState = {};
-
 		this.structure  = structure;
-
 		this.destroy = function()  {
 			delete this.state;
 			this.state = {};
@@ -12182,9 +11690,9 @@ var ViewerManager = {};
 angular.module('3drepo')
 .factory('AnalyticService', AnalyticService);
 
-AnalyticService.$inject = ["Auth"];
+AnalyticService.$inject = [];
 
-function AnalyticService(Auth){
+function AnalyticService(){
 	"use strict";
 
 	
@@ -12207,14 +11715,22 @@ function AnalyticService(Auth){
 		}
 
 		event.hitType = 'event';
-		event.dimension1 = Auth.username;
 
 		ga("send", event);
 	}
 
+	function setUserId(userId){
+		if(!isGoogleAnalyticEnabled()){
+			return;
+		}
+
+		ga("set", "userId", userId);
+	}
+
 	return {
 		sendPageView: sendPageView,
-		sendEvent: sendEvent
+		sendEvent: sendEvent,
+		setUserId: setUserId
 	}
 }
 /**
@@ -12389,12 +11905,16 @@ function AnalyticService(Auth){
 		if (angular.isDefined(serverConfig.legal)) {
 			vm.legalDisplays = serverConfig.legal;
 		}
-		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
+
+
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
-
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+			});
 			/*
 			 * Watch the state to handle moving to and from the login page
 			 */
@@ -12430,6 +11950,7 @@ function AnalyticService(Auth){
 					}
 				}
 			}, true);
+
 		});
 
 		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
@@ -12697,7 +12218,13 @@ function NotificationService(serverConfig, $injector){
 
 	function joinRoom(account, project){
 		
-		var room =  account + '::' + project;
+		var projectNameSpace = '';
+		
+		if(project){
+			projectNameSpace = '::' + project;
+		}
+
+		var room =  account + projectNameSpace;
 		if(joined.indexOf(room) === -1){
 
 			socket.emit('join', {account: account, project: project});
@@ -12707,6 +12234,12 @@ function NotificationService(serverConfig, $injector){
 
 	function getEventName(account, project, keys, event){
 
+		var projectNameSpace = '';
+		
+		if(project){
+			projectNameSpace = '::' + project;
+		}
+		
 		keys = keys || [];
 		var keyString = '';
 		
@@ -12714,7 +12247,7 @@ function NotificationService(serverConfig, $injector){
 			keyString =  '::' + keys.join('::');
 		}
 
-		return account + '::' + project +  keyString + '::' + event;
+		return account + projectNameSpace +  keyString + '::' + event;
 	}
 
 	function subscribe(account, project, keys, event, callback){
@@ -12789,6 +12322,15 @@ function NotificationService(serverConfig, $injector){
 	function unsubscribeProjectStatusChanged(account, project){
 		unsubscribe(account, project, [], 'projectStatusChanged');
 	}
+
+	function subscribeNewProject(account, callback){
+		subscribe(account, null, [], 'newProject', callback);
+	}
+
+	function unsubscribeNewProject(account, project){
+		unsubscribe(account, null, [], 'newProject');
+	}
+
 	return {
 		subscribe: {
 			newIssues: subscribeNewIssues,
@@ -12797,6 +12339,7 @@ function NotificationService(serverConfig, $injector){
 			commentDeleted: subscribeCommentDeleted,
 			issueChanged: subscribeIssueChanged,
 			projectStatusChanged: subscribeProjectStatusChanged,
+			newProject: subscribeNewProject
 
 		},
 		unsubscribe:{
@@ -12806,6 +12349,7 @@ function NotificationService(serverConfig, $injector){
 			commentDeleted: unsubscribeCommentDeleted,
 			issueChanged: unsubscribeIssueChanged,
 			projectStatusChanged: unsubscribeProjectStatusChanged,
+			newProject: unsubscribeNewProject
 		}
 	};
 };
@@ -12928,8 +12472,7 @@ angular.module('3drepo')
 
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: false, selected: false},
-			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false},
-			multi: {icon: "view_comfy", label: "Save the selected objects with the issue", hidden: this.data, selected: false}
+			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false}
 		};
 
 
@@ -13023,6 +12566,11 @@ angular.module('3drepo')
 					this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 					this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 
+					if(this.issueData.status === 'closed'){
+						this.canUpdate = false;
+						this.canComment = false;
+					}
+				
 					convertCommentTopicType();
 				}
 				else {
@@ -13039,39 +12587,6 @@ angular.module('3drepo')
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 				setContentHeight();
 			}
-
-			// Selected objects
-			// if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
-			// 	(currentAction !== null) && (currentAction === "multi")) {
-			// 	issueSelectedObjects = this.selectedObjects;
-			// }
-
-			// Event
-			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
-				/*
-				if ((this.actions[currentAction].action === "pin") &&
-					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(issueSelectedObjects !== null)) {
-					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
-				}
-				else if ((this.actions[currentAction].action === "multi") &&
-						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
-					issueSelectedObjects = null;
-				}
-				*/
-				// if ((currentAction === "multi") &&
-				// 	(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
-				// 	issueSelectedObjects = null;
-				// }
-			}
-
-			// Keys down
-/*			if (changes.hasOwnProperty("keysDown")) {
-				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
-					this.exit();
-				}
-			}*/
 
 			// Role
 			if (changes.hasOwnProperty("availableRoles")) {
@@ -13122,13 +12637,6 @@ angular.module('3drepo')
 		this.$onInit = function () {
 			var disableStatus;
 
-			// If there are selected objects register them and set the current action to multi
-			if (!this.data && this.selectedObjects) {
-				//issueSelectedObjects = this.selectedObjects;
-				//currentAction = "multi";
-				this.actions.multi.selected = true;
-			}
-
 			// Set up statuses
 			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
 			this.statuses = [
@@ -13170,6 +12678,7 @@ angular.module('3drepo')
 					topic_type: self.issueData.topic_type,
 					assigned_roles: self.issueData.assigned_roles
 				};
+
 				IssuesService.updateIssue(self.issueData, data)
 					.then(function (response) {
 						console.log(response);
@@ -13196,8 +12705,18 @@ angular.module('3drepo')
 						self.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = self.issueData;
 						setCanUpdateStatus(self.issueData);
+
 						commentAreaScrollToBottom();
 					});
+
+
+				if(self.issueData.status === 'closed'){
+					this.canUpdate = false;
+					this.canComment = false;
+				} else {
+					this.canUpdate = true;
+					this.canComment = true;
+				}
 
 				AnalyticService.sendEvent({
 					eventCategory: 'Issue',
@@ -13239,10 +12758,12 @@ angular.module('3drepo')
 
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
+					fromClipPanel: false,
 					account: self.issueData.account,
-					project: self.issueData.project,
+					project: self.issueData.project
+
 				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+				self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -13297,75 +12818,8 @@ angular.module('3drepo')
 					});
 					break;
 
-
-				case "multi":
-
-					//clear selection if not selected to avoid confusion
-					if(!selected){
-						// Remove highlight from any multi objects
-						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-						// clear selection
-						EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-					}
-
-
 			}
 
-			// if (currentAction === null) {
-			// 	currentAction = action;
-			// }
-			// else if (currentAction === action) {
-			// 	switch (action) {
-			// 		case "multi":
-			// 			issueSelectedObjects = this.selectedObjects;
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-			// 			break;
-			// 	}
-			// 	this.actions[currentAction].color = "";
-			// 	currentAction = null;
-			// }
-			// else {
-			// 	switch (action) {
-			// 		case "multi":
-			// 			issueSelectedObjects = this.selectedObjects;
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-			// 			break;
-			// 	}
-			// 	this.actions[currentAction].color = "";
-			// 	currentAction = action;
-			// }
-
-			// // New action
-			// if (currentAction !== null) {
-			// 	this.actions[currentAction].color = highlightBackground;
-
-			// 	switch (currentAction) {
-			// 		case "screen_shot":
-			// 			delete this.screenShot; // Remove any clicked on screen shot
-			// 			$mdDialog.show({
-			// 				controller: ScreenShotDialogController,
-			// 				controllerAs: "vm",
-			// 				templateUrl: "issueScreenShotDialog.html",
-			// 				targetEvent: event
-			// 			});
-			// 			break;
-			// 		case "multi":
-			// 			if (issueSelectedObjects !== null) {
-			// 				this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
-			// 			}
-			// 			else {
-			// 				issueSelectedObjects = this.selectedObjects;
-			// 			}
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
-			// 			break;
-			// 	}
-			// }
 		};
 
 		/**
@@ -13443,12 +12897,11 @@ angular.module('3drepo')
 		function saveIssue () {
 			var viewpointPromise = $q.defer(),
 				screenShotPromise = $q.defer(),
+				objectsPromise = $q.defer(),
 				data;
 
 			if(commentViewpoint)
 			{
-				console.log("has commentViewpoint");
-				console.log(commentViewpoint);
 				viewpointPromise.resolve(commentViewpoint);
 			}
 			else
@@ -13456,37 +12909,45 @@ angular.module('3drepo')
 				// Get the viewpoint
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
 			}
+
+			//Get selected objects
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS, value: {promise: objectsPromise, account: self.account, project: self.project}});
+
 			viewpointPromise.promise.then(function (viewpoint) {
-				if (savedScreenShot !== null) {
-					if (self.actions.multi.selected && self.selectedObjects) {
-						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
-							console.log("saving issue with viewpoint: " );
-							console.log(viewpoint);
-							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
-						});
-					}
-					else {
-						doSaveIssue(viewpoint, savedScreenShot);
-					}
-				}
-				else {
-					// Get a screen shot if not already created
-					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-					screenShotPromise.promise.then(function (screenShot) {
-						if (self.actions.multi.selected && self.selectedObjects) {
-							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
-								doSaveIssue(viewpoint, screenShot, response.data._id);
-							});
+				objectsPromise.promise.then(function (objectInfo)
+					{
+						console.log(objectInfo);
+						if (savedScreenShot !== null) {
+							if (objectInfo.highlightedNodes.length > 0) {
+									// Create a group of selected objects
+									data = {name: self.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+									UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+									doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+								});
+							}
+							else {
+								doSaveIssue(viewpoint, savedScreenShot);
+							}
 						}
 						else {
-							doSaveIssue(viewpoint, screenShot);
+							// Get a screen shot if not already created
+							self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+							screenShotPromise.promise.then(function (screenShot) {
+								if (objectInfo.highlightedNodes.length > 0) {
+									// Create a group of selected objects
+									data = {name: self.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+									UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+										doSaveIssue(viewpoint, screenShot, response.data._id);
+									});
+								}
+								else {
+									doSaveIssue(viewpoint, screenShot);
+								}
+							});
 						}
-					});
-				}
+					}
+			);
+
 			});
 		}
 
@@ -13548,7 +13009,6 @@ angular.module('3drepo')
 					// Hide some actions
 					self.actions.pin.hidden = true;
 					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
 					setContentHeight();
@@ -14339,8 +13799,6 @@ angular.module('3drepo')
 						id: newPinId,
 						account: self.account,
 						project: self.project,
-						position: position.toGL(),
-						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
@@ -15194,8 +14652,9 @@ angular.module('3drepo')
 				project: issue.project
 			});
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				project: issue.project
 			});
@@ -15598,7 +15057,7 @@ angular.module('3drepo')
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: pinHighlightColour
+				colours: [pinHighlightColour]
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
 
@@ -15614,10 +15073,11 @@ angular.module('3drepo')
 
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				project: issue.project,
 			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+			self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 
 			// Remove highlight from any multi objects
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
@@ -15629,19 +15089,34 @@ angular.module('3drepo')
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
+					console.log(response.data);
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
+						var key = obj.account + "@" +  obj.project;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
+						ids[key].push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
-					data = {
-						source: "tree",
-						account: self.account,
-						project: self.project,
-						ids: ids,
-						colour: response.data.colour
-					};
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					for(var key in ids)
+					{
+
+						var vals = key.split('@');
+						var account = vals[0];
+						var project = vals[1];
+
+						data = {
+							source: "tree",
+							account: account,
+							project: project,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true
+						
+						};
+						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					}
 				});
 			}
 		}
@@ -16099,8 +15574,8 @@ angular.module('3drepo')
 			config = {withCredentials: true};
 
 			if (issue.pickedPos !== null) {
-				issue.position = issue.pickedPos.toGL();
-				issue.norm = issue.pickedNorm.toGL();
+				issue.position = issue.pickedPos;
+				issue.norm = issue.pickedNorm;
 			}
 
 			$http.post(url, issue, config)
@@ -16207,8 +15682,8 @@ angular.module('3drepo')
 				id: pin.id,
 				account: pin.account,
 				project: pin.project,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours,
 				viewpoint: viewpoint
 			});
@@ -16225,8 +15700,8 @@ angular.module('3drepo')
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours
 			});
 		};
@@ -18763,7 +18238,7 @@ var Oculus = {};
 			PANEL_CARD_EDIT_MODE: "EVENT_PANEL_CARD_EDIT_MODE",
 			PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
 			PANEL_CONTENT_TOGGLED: "EVENT_PANEL_CONTENT_TOGGLED",
-			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
+			UPDATE_CLIPPING_PLANES: "EVENT_UPDATE_CLIPPING_PLANES",
 			SET_SUBPROJECT_TRANS_INFO: "EVENT_SET_SUBPROJECT_TRANS_INFO",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
 			SHOW_PROJECTS: "EVENT_SHOW_PROJECTS",
@@ -18815,7 +18290,7 @@ var Oculus = {};
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
-					console.trace("UNDEFINED EVENT TYPE");
+					console.trace("UNDEFINED EVENT TYPE" + type);
 				} else {
 					console.log("SEND: " + type);
 					console.log(value);
@@ -18974,14 +18449,15 @@ var Oculus = {};
 			if (changes.hasOwnProperty("keysDown")) {
 				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
 					multiMode = true;
+					console.log("Selected objects: ");
+					console.log(selectedObjects);
 					if (selectedObjects.length === 1) {
 						self.setSelectedObjects({selectedObjects: selectedObjects});
 					}
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+//					this.displaySelectedObjects(selectedObjects, deselectedObjects);
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode === true && ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
 				}
@@ -19020,7 +18496,7 @@ var Oculus = {};
 							deselectedObjects.push(selectedObjects[objectIndex]);
 							selectedObjects.splice(objectIndex, 1)
 						}
-						this.displaySelectedObjects(selectedObjects, deselectedObjects);
+//						this.displaySelectedObjects(selectedObjects, deselectedObjects);
 
 						if (selectedObjects.length > 0) {
 							self.setSelectedObjects({selectedObjects: selectedObjects});
@@ -19094,6 +18570,7 @@ var Oculus = {};
 		};
 	}
 }());
+
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -19215,14 +18692,14 @@ var Oculus = {};
 				// 	noToggle: true,
 				// 	icon: "fa-cloud-upload"
 				// },
-				// {
-				// 	value: "exportBCF",
-				// 	label: "Export BCF",
-				// 	selected: false,
-				// 	noToggle: true,
-				// 	icon: "fa-cloud-download",
-				// 	divider: true
-				// },
+				{
+					value: "exportBCF",
+					label: "Export BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-cloud-download",
+					divider: true
+				},
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
@@ -19393,17 +18870,7 @@ var Oculus = {};
 		});
 
 		$timeout(function () {
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {
-				name: "default",
-				account:  vm.account,
-				project:  vm.project,
-				branch:   vm.branch,
-				revision: vm.revision,
-				at:       StateManager.query.at,
-				up:       StateManager.query.up,
-				view:     StateManager.query.view
-			});
-
+			EventService.send(EventService.EVENT.VIEWER.LOAD_PROJECT, {account: vm.account, project: vm.project, branch: vm.branch, revision: vm.revision });
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 
@@ -19799,7 +19266,7 @@ var Oculus = {};
 
 			v.collision  = new Collision(v.viewer);
 
-			$scope.reload();
+			//$scope.reload();
 
 			v.loaded.promise.then(function() {
 				// TODO: Move this so that the attachment is contained
@@ -19812,14 +19279,8 @@ var Oculus = {};
 
 				v.collision  = new Collision(v.viewer);
 
-				v.branch = "master";
-				v.revision = "head";
-
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
-				function (json, status)
-				{
-					v.viewer.applyModelProperties(v.account, v.project, json);
-				});
+	//			v.branch = "master";
+	//			v.revision = "head";
 			});
 
 			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
@@ -19832,6 +19293,29 @@ var Oculus = {};
 			// });
 
 		};
+
+		function fetchModelProperties(account, project, branch, revision)
+		{
+
+			if(!branch)
+			{
+				if(!revision)
+					branch = "master";
+				else
+					branch = "";
+			}
+					
+
+			if(!revision)
+				revision = "head";
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + branch + "/" + revision + "/modelProperties.json")).success(
+			function (json, status)
+			{
+				if(json.properties)
+					v.viewer.applyModelProperties(account, project, json.properties);
+			});
+
+		}
 
 		$scope.enterVR = function() {
 			v.loaded.promise.then(function() {
@@ -19848,8 +19332,15 @@ var Oculus = {};
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					v.initialised.resolve();
+					fetchModelProperties(v.account, v.project, v.branch, v.revision);	
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
+				} else if (event.type === EventService.EVENT.VIEWER.LOAD_PROJECT) {
+					v.account = event.value.account;
+					v.project = event.value.project;
+					v.branch = event.value.branch;
+					v.revision = event.value.revision;
+					v.viewer.loadModel(event.value.account, event.value.project, event.value.branch, event.value.revision);
 				} else {
 					v.initialised.promise.then(function() {
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
@@ -19865,7 +19356,6 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
-								console.log('viewer project settings ready');
 								v.viewer.updateSettings(event.value.settings);
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
@@ -19875,8 +19365,8 @@ var Oculus = {};
 								event.value.account,
 								event.value.project,
 								event.value.id,
-								event.value.position,
-								event.value.norm,
+								event.value.pickedPos,
+								event.value.pickedNorm,
 								event.value.colours,
 								event.value.viewpoint);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
@@ -19894,18 +19384,16 @@ var Oculus = {};
 							v.viewer.setPinVisibility(event.value.id, event.value.visibility);
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
-						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
-							v.viewer.addClippingPlane(
-								event.value.axis,
-								event.value.normal,
-								event.value.distance ? event.value.distance : 0,
-								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1,
-								event.value.account, event.value.project);
-						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.distance);
-						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
+						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES) {
+							v.viewer.updateClippingPlanes(
+								event.value.clippingPlanes, event.value.fromClipPanel,
+								event.value.account, event.value.project);							
+						} else if ((event.type === EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS)) {
+							v.viewer.getObjectsStatus(
+								event.value.account,
+								event.value.project,
+								event.value.promise
+							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -19920,25 +19408,17 @@ var Oculus = {};
 								event.value.project,
 								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
-								event.value.colour
+								event.value.colour,
+								event.value.multi
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
-							v.viewer.highlightAndUnhighlightObjects(
-								event.value.account,
-								event.value.project,
-								event.value.highlight_ids,
-								event.value.unhighlight_ids,
-								event.value.zoom,
-								event.value.colour
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+						}  else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
 							v.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.project,
-								event.value.visible_ids,
-								event.value.invisible_ids
+								event.value.ids,
+								event.value.visible
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 							v.viewer.setCamera(
@@ -19953,11 +19433,11 @@ var Oculus = {};
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
+								v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().runtime.getScreenshot());
+								v.manager.getCurrentViewer().getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
@@ -20089,11 +19569,7 @@ var Oculus = {};
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
-					if (vm.viewers.hasOwnProperty(event.value.name)) {
-						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
-							name: event.value.name
-						});
-					} else {
+					if (!vm.viewers.hasOwnProperty(event.value.name)) {						
 						vm.viewers[event.value.name] = event.value;
 					}
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
@@ -20937,7 +20413,7 @@ var Oculus = {};
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.visible   = {};
-		vm.invisible = {};		
+		vm.invisible = {};
 
 		/**
 		 * Set the content height.
@@ -21000,34 +20476,46 @@ var Oculus = {};
 			});
 		}
 
+		function getAccountProjectKey(account, project)
+		{
+			return account + "@" + project;
+		}
+
 		/**
 		 * Add all child id of a node recursively, the parent node's id will also be added.
 		 * @param {Object} node
-		 * @param {Array} ids Array to push the ids to
+		 * @param {Array} nodes Array to push the nodes to
 		 */
-		function traverseNodeAndPushId(node, ids){
+		function traverseNodeAndPushId(node, nodes){
 			traverseNode(node, function(node){
-				if (!node.children)
+				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
-					ids.push(node._id);
+					var key = getAccountProjectKey(node.account, node.project);
+					if(!nodes[key]){
+						nodes[key] = [];
+					}
+
+					nodes[key].push(node._id);
 				}
 			});
 		}
 
 		function getVisibleArray(account, project){
-			if(!vm.visible[account + '@' + project]){
-				vm.visible[account + '@' + project] = new Set();
+			var key = getAccountProjectKey(account, project);
+			if(!vm.visible[key]){
+				vm.visible[key] = new Set();
 			}
 
-			return vm.visible[account + '@' + project];
+			return vm.visible[key];
 		}
 
 		function getInvisibleArray(account, project){
-			if(!vm.invisible[account + '@' + project]){
-				vm.invisible[account + '@' + project] = new Set();
+			var key = getAccountProjectKey(account, project);
+			if(!vm.invisible[key]){
+				vm.invisible[key] = new Set();
 			}
 
-			return vm.invisible[account + '@' + project];
+			return vm.invisible[key];
 		}
 
 		/**
@@ -21040,8 +20528,8 @@ var Oculus = {};
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			if (!node.children)
-			{		
+			if (!node.children && ((node.type || "mesh") === "mesh"))
+			{
 				if (visibility === "invisible")
 				{
 					if (invisible.has(node._id))
@@ -21063,6 +20551,7 @@ var Oculus = {};
 					invisible.delete(node._id);
 				}
 			}
+
 			node.toggleState = visibility;
 		};
 
@@ -21174,7 +20663,10 @@ var Oculus = {};
 								}
 							}
 
-							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+							if(vm.nodesToShow[index].children[i].hasOwnProperty("name")){
+								vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+							}
+							
 						}
 
 						// Redraw the tree if needed
@@ -21199,14 +20691,24 @@ var Oculus = {};
 		 * @param path
 		 * @param level
 		 */
+
+		var lastParentWithName = null;
+
 		function expandToSelection(path, level, noHighlight) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			// Force a redraw of the tree to get round the display problem
 			vm.showNodes = false;
-
-			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
+			var condLoop = true;
+			for (i = 0, length = vm.nodesToShow.length; i < length && condLoop; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
+
+					//console.log('name', vm.nodesToShow[i].name);
+					//console.log('selectedId', selectedId);
+					//console.log('length', vm.nodesToShow.length)
+					
+					lastParentWithName = vm.nodesToShow[i];
+
 					vm.nodesToShow[i].expanded = true;
 					vm.nodesToShow[i].selected = false;
 					childrenLength = vm.nodesToShow[i].children.length;
@@ -21215,19 +20717,36 @@ var Oculus = {};
 						selectedIndex = i;
 					}
 
+					var childWithNameCount = 0;
+
 					for (j = 0; j < childrenLength; j += 1) {
 						// Set child to not expanded
 						vm.nodesToShow[i].children[j].expanded = false;
 
 						if (vm.nodesToShow[i].children[j]._id === selectedId) {
-							// If the selected mesh doesn't have a name highlight the parent in the tree
-							// highlight the parent in the viewer
+
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
+								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
+								lastParentWithName = null;
+								selectedIndex = i + j + 1;
+
 							}
 							else if(!noHighlight){
+								// If the selected mesh doesn't have a name highlight the parent in the tree
+								// highlight the parent in the viewer
+
 								vm.selectNode(vm.nodesToShow[i]);
+								selectedId = vm.nodesToShow[i]._id;
+								selectedIndex = i;
+								//console.log('selectedIndex', selectedIndex);
+								//console.log(vm.nodesToShow[i]);
+								lastParentWithName = null;
+								//console.log('vm.nodesToShow[i]', vm.nodesToShow[i]);
+								selectedId = vm.nodesToShow[i]._id;
 							}
+
+							condLoop = false;
 						}
 						else {
 							// This will clear any previously selected node
@@ -21240,25 +20759,32 @@ var Oculus = {};
 						}
 
 						// Determine if child node has childern
-						if ("children" in vm.nodesToShow[i].children[j]) {
-							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
-						}
-						else {
-							vm.nodesToShow[i].children[j].hasChildren = false;
+						vm.nodesToShow[i].children[j].hasChildren = false;
+						if (("children" in vm.nodesToShow[i].children[j]) && (vm.nodesToShow[i].children[j].children.length > 0)) {
+							for (var k = 0, jLength = vm.nodesToShow[i].children[j].children.length; k < jLength; k++) {
+								if (vm.nodesToShow[i].children[j].children[k].hasOwnProperty("name")) {
+									vm.nodesToShow[i].children[j].hasChildren = true;
+									break;
+								}
+							}
 						}
 
 						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 							currentSelectedNode = vm.nodesToShow[i].children[j];
+
 						}
 
-						// Determine if more expansion is required
-						if ((level === (path.length - 2)) && !selectionFound) {
-							selectedIndex += 1;
-						}
+
 						vm.nodesToShow[i].children[j].level = level + 1;
-						vm.nodesToShow.splice(i + j + 1, 0, vm.nodesToShow[i].children[j]);
+
+						if(vm.nodesToShow[i].hasChildren && vm.nodesToShow[i].children[j].hasOwnProperty('name')){
+
+							vm.nodesToShow.splice(i + childWithNameCount + 1, 0, vm.nodesToShow[i].children[j]);
+							childWithNameCount++;
+						}
+						
 					}
 				}
 			}
@@ -21269,12 +20795,23 @@ var Oculus = {};
 				vm.showNodes = true;
 				$timeout(function() {
 					// Redraw the tree
-					vm.topIndex = selectedIndex - 2;
+
 					// Resize virtual repeater
 
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast('$md-resize');
+					//console.log('this selectedIndex', selectedIndex);
+					vm.topIndex = selectedIndex;
 				});
+
+				$timeout(function(){
+					var el = document.getElementById(selectedId);
+					if(!el){
+						//console.log('el not found')
+					}
+					el && el.scrollIntoView();
+				});
+
 			}
 		}
 
@@ -21296,7 +20833,11 @@ var Oculus = {};
 						}
 
 						initNodesToShow();
+						//console.log('path', path);
+						lastParentWithName = null;
 						expandToSelection(path, 0);
+						//console.log('lastParentWithName', lastParentWithName);
+						lastParentWithName && vm.selectNode(lastParentWithName);
 					}
 				}
 			}
@@ -21432,30 +20973,10 @@ var Oculus = {};
 
 		var toggleNode = function (node) {
 			var childNodes = [];
-			var pathArr = [];
-			var idx = 0, i = 0;
-
-			var visible = getVisibleArray(node.account, node.project);
-			var invisible = getInvisibleArray(node.account, node.project);
 
 			traverseNodeAndPushId(node, childNodes);
-
-			if (node.toggleState === "invisible")
-			{
-				for(i = 0; i < childNodes.length; i++)
-				{
-					invisible.add(childNodes[i]);
-					visible.delete(childNodes[i]);
-				}
-			} else {
-				for(i = 0; i < childNodes.length; i++)
-				{
-					visible.add(childNodes[i]);
-					invisible.delete(childNodes[i]);
-				}
-			}
-
-			for (var key in vm.visible){
+			
+			for (var key in childNodes){
 
 				var vals = key.split('@');
 				var account = vals[0];
@@ -21466,8 +20987,8 @@ var Oculus = {};
 					account: account,
 					project: project,
 					name: node.name,
-					visible_ids: getVisibleArray(account, project),
-					invisible_ids: getInvisibleArray(account, project)
+					visible : node.toggleState != "invisible",
+					ids: childNodes[key]
 				});
 			}
 
@@ -21554,6 +21075,7 @@ var Oculus = {};
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
+			//console.log('selectNode');
 			// Remove highlight from the current selection and highlight this node if not the same
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
@@ -21588,14 +21110,23 @@ var Oculus = {};
 					name: node.name
 				});
 
-				// Separately highlight the children
-				// but only for multipart meshes
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-					source: "tree",
-					account: node.account,
-					project: node.project,
-					ids: map
-				});
+				for(var key in map)
+				{
+					var vals = key.split("@");
+					var account = vals[0];
+					var project = vals[1];
+				
+					// Separately highlight the children
+					// but only for multipart meshes
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+						source: "tree",
+						account: account,
+						project: project,
+						ids: map[key],
+						multi: true
+
+					});
+				}
 			}
 		};
 
@@ -21773,7 +21304,7 @@ var Oculus = {};
 			}
 
 			var deferred = $q.defer(),
-				url = ts.baseURL + "fulltree_new.json";
+				url = ts.baseURL + "fulltree.json";
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
@@ -21876,6 +21407,67 @@ var Oculus = {};
 	}
 }());
 
+/**
+ *  Copyright (C) 2017 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//http://stackoverflow.com/questions/13478303/correct-way-to-use-modernizr-to-detect-ie
+var BrowserDetect = {
+        init: function () {
+            this.browser = this.searchString(this.dataBrowser) || "Other";
+            this.version = this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || "Unknown";
+        },
+        searchString: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                var dataString = data[i].string;
+                this.versionSearchString = data[i].subString;
+
+                if (dataString.indexOf(data[i].subString) !== -1) {
+                    return data[i].identity;
+                }
+            }
+        },
+        searchVersion: function (dataString) {
+            var index = dataString.indexOf(this.versionSearchString);
+            if (index === -1) {
+                return;
+            }
+
+            var rv = dataString.indexOf("rv:");
+            if (this.versionSearchString === "Trident" && rv !== -1) {
+                return parseFloat(dataString.substring(rv + 3));
+            } else {
+                return parseFloat(dataString.substring(index + this.versionSearchString.length + 1));
+            }
+        },
+
+        dataBrowser: [
+            {string: navigator.userAgent, subString: "Edge", identity: "MS Edge"},
+            {string: navigator.userAgent, subString: "MSIE", identity: "Explorer"},
+            {string: navigator.userAgent, subString: "Trident", identity: "Explorer"},
+            {string: navigator.userAgent, subString: "Firefox", identity: "Firefox"},
+            {string: navigator.userAgent, subString: "Opera", identity: "Opera"},  
+            {string: navigator.userAgent, subString: "OPR", identity: "Opera"},  
+
+            {string: navigator.userAgent, subString: "Chrome", identity: "Chrome"}, 
+            {string: navigator.userAgent, subString: "Safari", identity: "Safari"}       
+        ]
+};
+    
+BrowserDetect.init();
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

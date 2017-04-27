@@ -121,7 +121,7 @@ var UnityUtil;
 		}
 		else if(requireStatus == LoadingState.MODEL_LOADING)
 		{
-			//Requires model to be loaded
+			//Requires model to be loading
 			UnityUtil.onLoading().then(function()
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
@@ -319,6 +319,18 @@ var UnityUtil;
 	{
 
 		UnityUtil.reset();	
+		if(!loaded && loadedResolve)
+		{
+			//If the previous project is being loaded but hasn't finished yet
+			loadedResolve.reject();
+			loadingResolve.reject();
+		}
+		
+		loadedPromise = null;
+		loadedResolve = null;
+		loadingPromise = null;
+		loadingResolve = null;
+		loaded  = false;
 		var params = {};
 		params.database = account;
 		params.project = project;
@@ -338,18 +350,6 @@ var UnityUtil;
 	
 	UnityUtil.prototype.reset = function()
 	{
-		if(!loaded && loadedResolve)
-		{
-			//If the previous project is being loaded but hasn't finished yet
-			loadedResolve.reject();
-			loadingResolve.reject();
-		}
-		
-		loadedPromise = null;
-		loadedResolve = null;
-		loadingPromise = null;
-		loadingResolve = null;
-		loaded  = false;
 		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
 	}
 
