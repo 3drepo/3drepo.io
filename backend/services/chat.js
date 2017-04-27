@@ -121,7 +121,7 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('join', data => {
 				//check permission if the user have permission to join room
-				let auth = data.project ? middlewares.hasReadAccessToProjectHelper : middlewares.isAccountAdminHelper;
+				let auth = data.project ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				
 				auth(username, data.account, data.project).then(hasAccess => {
 

@@ -26,23 +26,27 @@
 
 		let getPermPromises = [];
 
+		getPermPromises.push(getPermissions(account).accountLevel(username));
+
 		// check what kind of permissions is requested before making db calls to save unnecessary db calls
-
-		if(_.intersection(C.ACCOUNT_PERM_LIST, permsRequest).length > 0){
-			getPermPromises.push(getPermissions(account).accountLevel(username));
-		}
-
 		if(_.intersection(C.PROJECT_PERM_LIST, permsRequest).length > 0){
 			getPermPromises.push(getPermissions(account).projectLevel(username, projectGroup));
 		}
 
 		if(_.intersection(C.MODEL_PERM_LIST, permsRequest).length > 0){
+
 			getPermPromises.push(getPermissions(account).modelLevel(username, project));
 
 		}
 
 		return Promise.all(getPermPromises).then(permissions => {
+			
 			permissions = _.flatten(permissions);
+			//god permission
+			if(permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+				return true;
+			}
+
 			//return true if user has the requested permissions
 			return _.difference(permsRequest, permissions).length === 0;
 		});

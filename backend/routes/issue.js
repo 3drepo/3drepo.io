@@ -50,10 +50,10 @@ router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
 
 router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasCommentAccessToIssue, updateIssue);
 
 router.post('/revision/:rid/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, updateIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.hasCommentAccessToIssue, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';

@@ -33,52 +33,51 @@ var getDbColOptions = function(req){
 
 
 // Get project info
-router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
+router.get('/:project.json', middlewares.hasReadAccessToModel, getProjectSetting);
 
-router.put('/:project/settings', middlewares.hasWriteAccessToProjectSettings, updateSettings);
+router.put('/:project/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:project', middlewares.connectQueue, middlewares.isAccountAdmin, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createProject);
 
 //update federated project
-router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
+router.put('/:project', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateProject);
 
 //model permission
-router.post('/:project/permissions', middlewares.hasWriteAccessToProject, updatePermissions);
+router.post('/:project/permissions', middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), updatePermissions);
 
 //model permission
-router.get('/:project/permissions', middlewares.hasWriteAccessToProject, getPermissions);
+router.get('/:project/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
 
 //get project roles
-router.get('/:project/roles.json', middlewares.hasReadAccessToProject, getRolesForProject);
+router.get('/:project/roles.json', middlewares.hasReadAccessToModel, getRolesForProject);
 
 //user roles for this project
-router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToProject, getUserRolesForProject);
+router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToModel, getUserRolesForProject);
 
 //master tree
-router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getProjectTree);
 
-router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
+router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
-router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToModel, getProjectTree);
 
-router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToProject, getModelProperties);
+router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
 //search master tree
-router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
+router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToModel, searchProjectTree);
 
-router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
+router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToModel, searchProjectTree);
 
-router.delete('/:project', middlewares.hasDeleteAccessToProject, deleteProject);
+router.delete('/:project', middlewares.hasDeleteAccessToModel, deleteProject);
 
-router.post('/:project/upload', middlewares.hasWriteAccessToProject, middlewares.connectQueue, uploadProject);
+router.post('/:project/upload', middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadProject);
 
+//to-be-delete
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
-
 router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.hasCollaboratorQuota, addCollaborator);
-
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
-router.get('/:project/download/latest', middlewares.hasDownloadAccessToProject, downloadLatest);
+router.get('/:project/download/latest', middlewares.hasDownloadAccessToModel, downloadLatest);
 
 function updateSettings(req, res, next){
 	'use strict';

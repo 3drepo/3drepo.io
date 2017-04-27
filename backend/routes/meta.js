@@ -26,7 +26,7 @@
 	const utils = require('../utils');
 
 	//Get meta data
-	router.get('/meta/:id.json', middlewares.hasReadAccessToProject, getMetadata);
+	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
 
 
 	function getMetadata(req, res, next){

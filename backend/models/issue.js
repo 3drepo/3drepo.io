@@ -419,7 +419,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 				let childProject = ref.project;
 
 				promises.push(
-					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
+					middlewares.hasReadAccessToModelHelper(username, childDbName, childProject).then(granted => {
 						if(granted){
 
 							let filter = {};

@@ -467,7 +467,7 @@ function getModelProperties(account, project, branch, rev, username){
 
 	return getHistory.then(_history => {
 		history = _history;
-		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+		return middlewares.hasReadAccessToModelHelper(username, account, project);
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
@@ -612,7 +612,7 @@ function getFullTree(account, project, branch, rev, username){
 			}
 
 			let status;
-			let getTree = middlewares.hasReadAccessToProjectHelper(username, ref.owner, ref.project).then(granted => {
+			let getTree = middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
 
 				if(!granted){
 					status = 'NO_ACCESS';
@@ -710,7 +710,7 @@ function searchTree(account, project, branch, rev, searchString, username){
 		});
 	};
 
-	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+	return middlewares.hasReadAccessToModelHelper(username, account, project).then(granted => {
 
 		if(granted){
 

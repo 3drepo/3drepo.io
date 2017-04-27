@@ -24,9 +24,10 @@
 	const middlewares = require('./middlewares');
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const C = require("../constants");
 
-	router.post("/jobs", middlewares.isAccountAdmin, createJob);
-	router.delete("/jobs/:jobId", middlewares.isAccountAdmin, deleteJob);
+	router.post("/jobs", middlewares.checkPermissions([C.PERM_CREATE_JOB]), createJob);
+	router.delete("/jobs/:jobId", middlewares.checkPermissions([C.PERM_DELETE_JOB]), deleteJob);
 
 
 	function createJob(req, res, next){

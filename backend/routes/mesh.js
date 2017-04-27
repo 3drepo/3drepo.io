@@ -29,11 +29,11 @@ var stash = require('../models/helper/stash');
 var repoGraphScene = require("../repo/repoGraphScene.js");
 var x3dEncoder = require("../encoders/x3dom_encoder");
 
-router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, generateSRC);
-router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, generateSRC);
+router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToModel, generateSRC);
+router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToModel, generateSRC);
 
-router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
-router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
+router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToModel, generateX3D);
+router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToModel, generateX3D);
 
 
 function generateSRC(req, res, next){

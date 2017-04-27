@@ -212,4 +212,21 @@ describe('Check permission function', function(){
 			});
 		});
 	});
+
+	describe('should return true if user has teamspace admin permission', function(){
+		it('case #1', function(){
+
+			function getPermissionsAdpater(){
+				return {
+					accountLevel: () => Promise.resolve(['teamspace_admin']),
+					projectLevel: () => Promise.resolve([]),
+					modelLevel: () => Promise.resolve([])
+				};
+			};
+
+			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue', 'comment_issue'], getPermissionsAdpater).then(granted => {
+				expect(granted).to.be.true;
+			});
+		});
+	})
 });

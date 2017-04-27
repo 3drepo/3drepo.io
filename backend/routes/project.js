@@ -8,10 +8,12 @@
 	const middlewares = require('./middlewares');
 	const Project = require("../models/project");
 	const utils = require("../utils");
-
-	router.post("/project-groups", middlewares.isAccountAdmin, createProject);
-	router.put("/project-groups/:projectGroup", middlewares.isAccountAdmin, updateProject);
-	router.delete("/project-groups/:projectGroup", middlewares.isAccountAdmin, deleteProject);
+	const C = require("../constants");
+	const checkPermissions = middlewares.checkPermissions;
+	
+	router.post("/project-groups", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
+	router.put("/project-groups/:projectGroup", checkPermissions([C.PERM_EDIT_PROJECT]), updateProject);
+	router.delete("/project-groups/:projectGroup", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
 	function createProject(req, res, next){
