@@ -26,8 +26,20 @@
 	const utils = require("../utils");
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
+	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
+	function listTemplates(req, res, next){
+
+		User.findByUserName(req.params.account).then(user => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.permissionTemplates.get());
+			
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
 	function createTemplate(req, res, next){
 

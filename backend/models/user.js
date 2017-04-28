@@ -282,6 +282,28 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 	cleanedCustomData.inactive = true;
 
+	//default permission
+	cleanedCustomData.permissions = [{
+		user: username,
+		permissions: [C.PERM_TEAMSPACE_ADMIN]
+	}];
+
+	//default templates
+	cleanedCustomData.permissionTemplates = [
+		{
+			_id: C.VIEWER_TEMPLATE,
+			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COMMENTER_TEMPLATE,
+			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COLLABORATOR_TEMPLATE,
+			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+		}
+	];
+
 	if(customData){
 		cleanedCustomData.emailVerifyToken = {
 			token: crypto.randomBytes(64).toString('hex'),
@@ -644,7 +666,6 @@ function _fillInProjectDetails(accountName, setting, permissions){
 		status: setting.status
 	};
 
-
 	return History.findByBranch({account: accountName, project: project.project}, C.MASTER_BRANCH_NAME).then(history => {
 
 		if(history){
@@ -658,7 +679,7 @@ function _fillInProjectDetails(accountName, setting, permissions){
 			//list all sub projects of a fed project
 			return ProjectHelper.listSubProjects(accountName, project.project, C.MASTER_BRANCH_NAME).then(subProjects => {
 				project.subProjects = subProjects;
-			});
+			}).then(() => project);
 
 		}
 

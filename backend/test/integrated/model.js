@@ -285,7 +285,7 @@ describe('Project', function () {
 
 	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
 
-		agent.post(`/${username} + '_someonelese' /${project}`)
+		agent.post(`/${username}_someonelese/${project}`)
 		.send({ desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
@@ -340,28 +340,31 @@ describe('Project', function () {
 					agent.post('/login').send({
 						username, password
 					}).expect(200, done);
-				}, function(done){
-					// check if the project is shared and roles are in place
-					Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
-						expect(role).to.not.be.null;
-						return Role.findByRoleID(`${username}.${project}.collaborator`);
-					}).then(role => {
-						expect(role).to.not.be.null;
-						done();
-					});
-				}, function(done){
-					// check if the project is shared and roles are in place
-					ProjectSetting.findById({account: username, project: project}, project).then(setting => {
-						expect(setting).to.not.be.null;
-						done();
-					});
-				}, function(done){
-					// check if the project is shared and roles are in place
-					return User.findByUserName(collaboratorUsername).then(user => {
-						expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.not.be.undefined;
-						done();
-					});
-				}
+				},
+				// function(done){
+				// 	// check if the project is shared and roles are in place
+				// 	Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+				// 		expect(role).to.not.be.null;
+				// 		return Role.findByRoleID(`${username}.${project}.collaborator`);
+				// 	}).then(role => {
+				// 		expect(role).to.not.be.null;
+				// 		done();
+				// 	});
+				// },
+				// function(done){
+				// 	// check if the project is shared and roles are in place
+				// 	ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+				// 		expect(setting).to.not.be.null;
+				// 		done();
+				// 	});
+				// },
+				// function(done){
+				// 	// check if the project is shared and roles are in place
+				// 	return User.findByUserName(collaboratorUsername).then(user => {
+				// 		expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.not.be.undefined;
+				// 		done();
+				// 	});
+				// }
 			], done);
 
 		});
@@ -378,14 +381,14 @@ describe('Project', function () {
 			});
 		});
 
-		it('should remove all the roles in roles collection', function(){
-			return Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
-				expect(role).to.be.null;
-				return Role.findByRoleID(`${username}.${project}.collaborator`);
-			}).then(role => {
-				expect(role).to.be.null;
-			});
-		});
+		// it('should remove all the roles in roles collection', function(){
+		// 	return Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+		// 		expect(role).to.be.null;
+		// 		return Role.findByRoleID(`${username}.${project}.collaborator`);
+		// 	}).then(role => {
+		// 		expect(role).to.be.null;
+		// 	});
+		// });
 
 		it('should remove setting in settings collection', function() {
 			return ProjectSetting.findById({account: username, project: project}, project).then(setting => {
@@ -393,13 +396,38 @@ describe('Project', function () {
 			});
 		});
 
-		it('should remove role from collaborator user.roles', function(){
-			return User.findByUserName(collaboratorUsername).then(user => {
-				expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
-			});
+		// it('should remove role from collaborator user.roles', function(){
+		// 	return User.findByUserName(collaboratorUsername).then(user => {
+		// 		expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
+		// 	});
+		// });
+
+		it('should be removed from collaborator\'s project listing', function(done){
+
+			const agent2 = request.agent(server);
+
+			async.series([
+				callback => {
+					agent2.post('/login').send({ username: 'testing', password: 'testing' }).expect(200, callback);
+				},
+				callback => {
+					agent2.get(`/testing.json`).expect(200, function(err, res){
+						
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.not.exist;
+
+						// const model = account.projects.find(myProject => myProject.project === project);
+						// expect(model).to.not.exist;
+
+						callback(err);
+					});
+				}
+			], done);
+
+
 		});
 
-		it('should remove from project group', function(done){
+		it('should be removed from project group', function(done){
 			agent.get(`/${username}.json`).expect(200, function(err, res){
 				
 				const account = res.body.accounts.find(account => account.account === username);

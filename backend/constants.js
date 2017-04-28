@@ -292,7 +292,7 @@
 	define("PERM_EDIT_FEDERATION", "edit_federation");
 	define("PERM_DELETE_FEDERATION", "delete_federation");
 	define("PERM_DELETE_MODEL", "delete_model");
-
+	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
 	//to be deleted
 	define("PERM_VIEW_PROJECT", "view_project"); 
 	define("PERM_DOWNLOAD_PROJECT", "download_project");
@@ -348,7 +348,6 @@
 		module.exports.PERM_EDIT_FEDERATION,
 		module.exports.PERM_DELETE_FEDERATION,
 		module.exports.PERM_DELETE_MODEL,
-
 		module.exports.PERM_MANAGE_MODEL_PERMISSION
 	]);
 
@@ -362,6 +361,28 @@
 	define("COLLABORATOR_TEMPLATE", "collaborator");
 	define("COMMENTER_TEMPLATE", "commenter");
 	define("VIEWER_TEMPLATE", "viewer");
+
+	define("VIEWER_TEMPLATE_PERMISSIONS", [
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL
+	]);
+
+	define("COMMENTER_TEMPLATE_PERMISSIONS", [
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL
+	]);
+
+	define("COLLABORATOR_TEMPLATE_PERMISSIONS",[
+		module.exports.PERM_UPLOAD_FILES,
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL,
+		module.exports.PERM_DOWNLOAD_MODEL,
+		module.exports.PERM_EDIT_FEDERATION,
+	]);
 
 	//-----------------------------------------------------------------------------
 	//

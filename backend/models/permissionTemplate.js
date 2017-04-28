@@ -28,6 +28,10 @@
 	const _ = require('lodash');
 
 	const methods = {
+		get: function(){
+			return this.permissions;
+		},
+
 		init: function(user, permissions) {
 
 			this.user = user;

@@ -47,7 +47,12 @@
 					}
 
 					const permission = user.customData.permissions.findByUser(username);
-					return permission && permission.permissions;
+
+					if(!permission){
+						return [];
+					}
+					
+					return permission.permissions;
 				});
 			},
 
