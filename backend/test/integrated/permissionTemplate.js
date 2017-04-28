@@ -39,9 +39,6 @@ describe('Permission templates', function () {
 	let permission1 = { _id: 'customB', permissions: ['view_issue', 'view_project', 'create_project', 'create_issue']};
 	let model = 'model1';
 
-	let subId = '58ecfbf94804d17bee4cdbbc';
-
-
 	before(function(done){
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
@@ -135,31 +132,48 @@ describe('Permission templates', function () {
 			{ user: 'user1', permission: 'customB'}
 		];
 
-		async.series([callback => {
+		const agent2 = request.agent(server);
+
+		async.series([
+			callback => {
 			
-			agent.post(`/${username}/${model}/permissions`)
-			.send(permissions)
-			.expect(200, function(err, res){
-				callback(err);
-			});
-
-		}, callback => {
-
-			agent.get(`/${username}/${model}/permissions`)
-			.expect(200, function(err, res){
-
-				permissions.forEach(permission => {
-					expect(_.find(res.body, permission)).to.exist
+				agent.post(`/${username}/${model}/permissions`)
+				.send(permissions)
+				.expect(200, function(err, res){
+					callback(err);
 				});
 
-				callback(err);
-			})
+			}, 
+			callback => {
 
-		}], done);
+				agent.get(`/${username}/${model}/permissions`)
+				.expect(200, function(err, res){
+
+					permissions.forEach(permission => {
+						expect(_.find(res.body, permission)).to.exist
+					});
+
+					callback(err);
+				})
+			},
+			callback => {
+				agent2.post('/login').send({username: 'testing', password: 'testing'}).expect(200, callback);
+			},
+			callback => {
+				agent2.get(`/testing.json`)
+				.expect(200, function(err, res){
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const accountModel = account.projects.find(project => project.project === model);
+					expect(accountModel).to.exist;
+
+					callback(err);
+				});
+			}
+		], done);
 
 	});
-
-	// model1 should appear in user: testing's project listing
 
 
 	it('should fail to assign a non existing permission to user', function(done){
@@ -186,29 +200,49 @@ describe('Permission templates', function () {
 
 	it('should able to re-assign permission to user on model level', function(done){
 
-		let permissions = [
-		];
+		let permissions = [];
 
-		async.series([callback => {
+		const agent2 = request.agent(server);
+
+		async.series([
+			callback => {
 			
-			agent.post(`/${username}/model2/permissions`)
-			.send(permissions)
-			.expect(200, function(err, res){
-				callback(err);
-			});
+				agent.post(`/${username}/model2/permissions`)
+				.send(permissions)
+				.expect(200, function(err, res){
+					callback(err);
+				});
 
-		}, callback => {
+			}, 
+			callback => {
 
-			agent.get(`/${username}/model2/permissions`)
-			.expect(200, function(err, res){
+				agent.get(`/${username}/model2/permissions`)
+				.expect(200, function(err, res){
 
-				expect(res.body).to.deep.equal(permissions);
-				callback(err);
-			})
+					expect(res.body).to.deep.equal(permissions);
+					callback(err);
+				})
 
-		}], done);
+			},
+			callback => {
+				agent2.post('/login').send({username: 'testing', password: 'testing'}).expect(200, callback);
+			},
+			callback => {
+				agent2.get(`/testing.json`)
+				.expect(200, function(err, res){
+
+					const account = res.body.accounts.find(account => account.account === username);
+					expect(account).to.exist;
+
+					const accountModel = account.projects.find(project => project.project === 'model2');
+					expect(accountModel).to.not.exist;
+
+					callback(err);
+				});
+			}
+		], done);
 
 	});
 
-	// model2 should not appear in user: testing's project listing
+
 });
