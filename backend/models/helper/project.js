@@ -1171,8 +1171,12 @@ function removeProject(account, project){
 		return Promise.all(promises);
 	}).then(() => {
 
-		//remove from project group
-		return Project.update({account}, { models: project }, { '$pull' : { 'models': project}});
+		//remove model from all project groups
+		return Project.removeModel(account, project);
+	}).then(() => {
+
+		//remove model from collaborator.customData.models
+		return User.removeModelFromAllUser(account, project);
 	});
 
 }

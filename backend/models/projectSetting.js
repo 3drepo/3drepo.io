@@ -206,16 +206,7 @@ schema.methods.changePermissions = function(permissions){
 		let removeUserPromises = [];
 
 		usersToRemove.forEach(user => {
-			const removeModels = User.update( {account: 'admin'}, {user}, {
-				$pull: { 
-					'customData.models' : {
-						account: account,
-						model: this._id
-					} 
-				} 
-			});
-
-			removeUserPromises.push(removeModels);
+			removeUserPromises.push(User.removeModel(user, account, this._id));
 		});
 
 		return Promise.all(removeUserPromises);

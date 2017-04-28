@@ -22,7 +22,7 @@
 	const ProjectSetting = require('../models/projectSetting');
 	const Project = require('../models/project');
 	const User = require('../models/user');
-	
+
 	// get permissions adapter
 	function getPermissionsAdapter(account) {
 
@@ -41,6 +41,11 @@
 			accountLevel: function(username){
 
 				return this.getUser().then(user => {
+
+					if(!user){
+						return [];
+					}
+
 					const permission = user.customData.permissions.findByUser(username);
 					return permission && permission.permissions;
 				});
@@ -49,7 +54,20 @@
 			projectLevel: function(username, projectGroup){
 
 				return Project.findOne({account}, { name: projectGroup}).then(project => {
-					return project.findPermsByUser(username).permissions;
+
+					if(!project){
+						return [];
+					}
+
+					const permission = project.findPermsByUser(username);
+					
+					if(!permission){
+						return [];
+					}
+					
+					return permission.permissions;
+
+					
 				});
 			},
 
@@ -62,7 +80,12 @@
 
 				}).then(setting => {
 
+					if(!setting){
+						return [];
+					}
+
 					const projectSettingPerm = setting.findPermissionByUser(username);
+
 					if(!projectSettingPerm){
 						return [];
 					}

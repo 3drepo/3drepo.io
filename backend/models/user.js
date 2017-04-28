@@ -744,8 +744,18 @@ function _findProjectDetails(dbUserCache, username, project){
 
 	}).then(setting => {
 
-		const template = setting.findPermissionByUser(username).permission;
-		const permissions = dbUser.customData.permissionTemplates.findById(template).permissions;
+		let permissions = [];
+
+		if(!setting){
+			setting = { _id: project.project };
+		} else {
+			const template = setting.findPermissionByUser(username);
+			
+			if (template){
+				permissions = dbUser.customData.permissionTemplates.findById(template.permission).permissions;
+			}
+		}
+
 		return {setting, permissions};
 	});
 }
@@ -1060,6 +1070,40 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 	});
 
 };
+
+// remove model record for models list
+schema.statics.removeModel = function(user, account, model){
+	'use strict';
+
+	return User.update( {account: 'admin'}, {user}, {
+		$pull: { 
+			'customData.models' : {
+				account: account,
+				model: model
+			} 
+		} 
+	});
+}
+
+schema.statics.removeModelFromAllUser = function(account, model){
+	'use strict';
+
+	return User.update( {account: 'admin'}, {
+		'customData.models':{
+			'$elemMatch':{
+				account: account,
+				model: model
+			}
+		}
+	}, {
+		$pull: { 
+			'customData.models' : {
+				account: account,
+				model: model
+			} 
+		} 
+	}, {'multi': true});
+}
 
 var User = ModelFactory.createClass(
 	'User',

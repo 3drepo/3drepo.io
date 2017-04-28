@@ -245,7 +245,6 @@ function deleteProject(req, res, next){
 
 	//delete
 	ProjectHelpers.removeProject(account, project).then(data => {
-		console.log('del proj', data);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
