@@ -54,10 +54,10 @@
 
 			var isUserAccount = account === vm.account;
 			return {
-				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_PROJECT, project.permissions)},
+				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, project.permissions)},
 				team: {label: "Team", icon: "group", hidden: !isUserAccount},
-				projectsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, project.permissions)},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, project.permissions)}
+				projectsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, project.permissions)},
+				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, project.permissions)}
 			};
 			
 		};
@@ -69,9 +69,9 @@
 		vm.showMenu = function(project, account){
 		
 			var isUserAccount = account === vm.account;
-			return Auth.hasPermission(serverConfig.permissions.PERM_EDIT_PROJECT, project.permissions) ||
-				Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, project.permissions) ||
-				Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, project.permissions) ||
+			return Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, project.permissions) ||
+				Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, project.permissions) ||
+				Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, project.permissions) ||
 				isUserAccount;
 		}
 

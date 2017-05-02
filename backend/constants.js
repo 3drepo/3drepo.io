@@ -293,6 +293,7 @@
 	define("PERM_DELETE_FEDERATION", "delete_federation");
 	define("PERM_DELETE_MODEL", "delete_model");
 	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
+	
 	//to be deleted
 	define("PERM_VIEW_PROJECT", "view_project"); 
 	define("PERM_DOWNLOAD_PROJECT", "download_project");

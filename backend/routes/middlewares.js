@@ -174,7 +174,7 @@
 		);
 	}
 
-	function isAccountAdminHelper(username, account){
+	function isAccountAdminHelper(username, account, project){
 		return checkPermissionsHelper(
 			username, 
 			account, 
