@@ -118,7 +118,8 @@ function _getProject(req){
 			//compute permissions by user role
 
 			return ProjectHelpers.getProjectPermission(
-				_setting.findPermissionByUser(req.session.user.username).permission, 
+				req.session.user.username,
+				_setting, 
 				req.params.account
 			).then(permissions => {
 

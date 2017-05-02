@@ -1181,16 +1181,32 @@ function removeProject(account, project){
 
 }
 
-function getProjectPermission(template, account){
+function getProjectPermission(username, setting, account){
 	'use strict';
+
+	if(!setting){
+		return Promise.resolve([]);
+	}
 
 	return User.findByUserName(account).then(dbUser => {
 		if(!dbUser){
 			return [];
 		}
-		
-		const permission = dbUser.customData.permissionTemplates.findById(template);
-		
+
+		const accountPerm = dbUser.customData.permissions.findByUser(username);
+
+		if(accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+			return C.MODEL_PERM_LIST;
+		}
+
+		const template = setting.findPermissionByUser(username);
+
+		if(!template){
+			return Promise.resolve([]);
+		}
+
+		const permission = dbUser.customData.permissionTemplates.findById(template.permission);
+
 		if(!permission || !permission.permissions){
 			return [];
 		}

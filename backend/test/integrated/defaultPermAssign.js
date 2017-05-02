@@ -82,6 +82,7 @@ describe('Default permission assignment', function () {
 		});
 	});
 
+
 	it('user should be able to create model', function(done){
 		agent.post(`/${username}/project1`)
 		.send({unit: 'm'})
@@ -90,6 +91,28 @@ describe('Default permission assignment', function () {
 		});
 	});
 
+	it('the model created should filled with correct permissions (account listing)', function(done){
+		agent.get(`/${username}.json`)
+		.expect(200, function(err, res){
+			
+			const account = res.body.accounts.find(account => account.account === username);
+			expect(account).to.exist;
+			
+			const model = account.projects.find(project => project.project === 'project1');
+			expect(model).to.exist;
+			expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+			done(err);
+		});
+	});
+
+
+	it('the model created should filled with correct permissions (project info)', function(done){
+		agent.get(`/${username}/project1.json`)
+		.expect(200, function(err, res){
+			expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+			done(err);
+		});
+	});
 
 	it('user should have default permission templates created', function(done){
 		agent.get(`/${username}/permission-templates`)
