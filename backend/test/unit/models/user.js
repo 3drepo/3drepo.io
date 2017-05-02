@@ -14,7 +14,7 @@ let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', {
 
 let sinon = require('sinon');
 let DB = require('../mock/db');
-
+const C = require('../../../constants');
 
 let User = proxyquire('../../../models/user', {
 	'../db/db': function() { 
@@ -147,11 +147,35 @@ describe('User', function(){
 			let options = {
 				'rubbish': 'should not be inserted into database',
 				'firstName': '123',
-				'email': 'test3drepo@mailinator.com'
+				'email': 'test3drepo@mailinator.com',
+				'permissions': [{
+					'user': username,
+					'permissions': [C.PERM_TEAMSPACE_ADMIN]
+				}],
+				'permissionTemplates':[
+					{
+						'_id': C.VIEWER_TEMPLATE,
+						'permissions': C.VIEWER_TEMPLATE_PERMISSIONS
+					},
+					{
+						'_id': C.COMMENTER_TEMPLATE,
+						'permissions': C.COMMENTER_TEMPLATE_PERMISSIONS
+					},
+					{
+						'_id': C.COLLABORATOR_TEMPLATE,
+						'permissions': C.COLLABORATOR_TEMPLATE_PERMISSIONS
+					}
+				]
 			};
 
 			let expectedCallWithOptions = {
-				customData: { firstName : options.firstName, inactive: true, email: options.email},
+				customData: { 
+					firstName : options.firstName, 
+					inactive: true, 
+					email: options.email,
+					permissions: options.permissions,
+					permissionTemplates: options.permissionTemplates
+				},
 				roles: []
 			}
 

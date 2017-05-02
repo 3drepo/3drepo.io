@@ -1181,21 +1181,21 @@ function removeProject(account, project){
 
 }
 
-function getProjectPermission(username, account, project){
+function getProjectPermission(template, account){
 	'use strict';
 
-	let permissions = [];
+	return User.findByUserName(account).then(dbUser => {
+		if(!dbUser){
+			return [];
+		}
+		
+		const permission = dbUser.customData.permissionTemplates.findById(template);
+		
+		if(!permission || !permission.permissions){
+			return [];
+		}
 
-	return User.findByUserName(username).then(user => {
-
-		return Role.viewRolesWithInheritedPrivs(user.roles);
-	}).then(roles => {
-
-		roles.forEach(role => {
-			permissions = permissions.concat(RoleTemplates.determinePermission(account, project, role));
-		});
-
-		return _.unique(permissions);
+		return permission.permissions;
 	});
 }
 

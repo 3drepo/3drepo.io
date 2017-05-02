@@ -1104,7 +1104,7 @@ schema.statics.removeModel = function(user, account, model){
 			} 
 		} 
 	});
-}
+};
 
 schema.statics.removeModelFromAllUser = function(account, model){
 	'use strict';
@@ -1124,7 +1124,7 @@ schema.statics.removeModelFromAllUser = function(account, model){
 			} 
 		} 
 	}, {'multi': true});
-}
+};
 
 var User = ModelFactory.createClass(
 	'User',

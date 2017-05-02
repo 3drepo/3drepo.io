@@ -116,9 +116,15 @@ function _getProject(req){
 			setting = _setting;
 			setting = setting.toObject();
 			//compute permissions by user role
-			return ProjectHelpers.getProjectPermission( req.session.user.username, req.params.account, req.params.project).then(permissions => {
+
+			return ProjectHelpers.getProjectPermission(
+				_setting.findPermissionByUser(req.session.user.username).permission, 
+				req.params.account
+			).then(permissions => {
+
 				setting.permissions = permissions;
 				return ProjectHelpers.listSubProjects(req.params.account, req.params.project, C.MASTER_BRANCH_NAME);
+
 			}).then(subProjects => {
 				//console.log('subProjects', subProjects)
 				setting.subProjects = subProjects;
@@ -244,7 +250,7 @@ function deleteProject(req, res, next){
 	let account = req.params.account;
 
 	//delete
-	ProjectHelpers.removeProject(account, project).then(data => {
+	ProjectHelpers.removeProject(account, project).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);

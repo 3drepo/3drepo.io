@@ -152,6 +152,8 @@ schema.methods.changePermissions = function(permissions){
 	const account = this._dbcolOptions.account;
 
 	//get list of valid permission name
+	permissions = _.uniq(permissions, 'user');
+	
 	return User.findByUserName(account).then(dbUser => {
 
 		let promises = [];

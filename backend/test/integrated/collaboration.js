@@ -17,16 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
+const request = require('supertest');
+const expect = require('chai').expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing'}) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
-let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
-let async = require('async');
+const log_iface = require("../../logger.js");
+const systemLogger = log_iface.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const helpers = require("./helpers");
+const async = require('async');
+const C = require('../../constants');
 
 describe('Sharing/Unsharing a project', function () {
 	let User = require('../../models/user');
@@ -171,6 +172,7 @@ describe('Sharing/Unsharing a project', function () {
 						expect(account).to.have.property('projects').that.is.an('array');
 						const projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -187,6 +189,13 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
 
 		it('and the viewer should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -312,7 +321,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('and the viewer should NOT be able to see raise issue', function(done){
 				agent.post(`/${username}/${project}/issues.json`)
-				.send({ })
+				.send({})
 				.expect(401 , done);
 			});
 		});
@@ -382,6 +391,7 @@ describe('Sharing/Unsharing a project', function () {
 						expect(account).to.have.property('projects').that.is.an('array');
 						let projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -398,6 +408,13 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
 
 		it('and the commenter should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -614,6 +631,7 @@ describe('Sharing/Unsharing a project', function () {
 						expect(account).to.have.property('projects').that.is.an('array');
 						let projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -630,6 +648,14 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
+		
 
 		it('and the editor should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -927,7 +953,7 @@ describe('Sharing/Unsharing a project', function () {
 			});
 			
 		});
-		
+
 		const permissions = [
 			{ user: username_viewer, permission: 'viewer'},
 			{ user: username_viewer, permission: 'viewer'}

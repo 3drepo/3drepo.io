@@ -89,7 +89,7 @@
 
 	schema.statics.removeModel = function(account, model){
 		return Project.update({account}, { models: model }, { '$pull' : { 'models': model}}, {'multi': true});
-	}
+	};
 
 	schema.methods.updateAttrs = function(data){
 		
