@@ -30,8 +30,7 @@
 			i, j = 0,
 			numIssues = 0,
 			numComments = 0,
-			availableRoles = [],
-			userRoles = [],
+			availableJobs = [],
 			obj = {},
 			newPinId = "newPinId",
 			updatedIssue = null,
@@ -297,41 +296,40 @@
 			});
 		};
 
-		obj.getRoles = function(account, project) {
-			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + project + '/roles.json');
+		obj.getJobs = function(account, project){
 
-			$http.get(url)
-				.then(
-					function(data) {
-						availableRoles = data.data;
-						deferred.resolve(availableRoles);
-					},
-					function() {
-						deferred.resolve([]);
-					}
-				);
+			var deferred = $q.defer();
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + project + '/jobs.json');
+
+			$http.get(url).then(
+				function(data) {
+					availableJobs = data.data;
+					deferred.resolve(availableJobs);
+				},
+				function() {
+					deferred.resolve([]);
+				}
+			);
 
 			return deferred.promise;
 		};
 
-		obj.getUserRolesForProject = function(account, project, username) {
+		obj.getUserJobForProject = function(account, project){
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/" + username + "/userRolesForProject.json");
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/userJobForProject.json");
 
-			$http.get(url)
-				.then(
-					function(data) {
-						userRoles = data.data;
-						deferred.resolve(userRoles);
-					},
-					function() {
-						deferred.resolve([]);
-					}
-				);
+			$http.get(url).then(
+				function(data) {
+					deferred.resolve(data.data);
+				},
+				function() {
+					deferred.resolve();
+				}
+			);
 
 			return deferred.promise;
-		};
+		}
+
 
 		obj.hexToRgb = function(hex) {
 			// If nothing comes end, then send nothing out.
@@ -360,13 +358,13 @@
 			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
 		};
 
-		obj.getRoleColor = function(role) {
+		obj.getJobColor = function(id) {
 			var i, length,
 				roleColor = null;
 
-			for (i = 0, length = availableRoles.length; i < length; i += 1) {
-				if (availableRoles[i].role === role && availableRoles[i].color) {
-					roleColor = availableRoles[i].color;
+			for (i = 0, length = availableJobs.length; i < length; i += 1) {
+				if (availableJobs[i]._id === id && availableJobs[i].color) {
+					roleColor = availableJobs[i].color;
 					break;
 				}
 			}

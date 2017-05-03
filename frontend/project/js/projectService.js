@@ -45,57 +45,6 @@
 			return deferred.promise;
 		};
 
-		var getRoles = function (account, project) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/roles.json");
-
-			$http.get(url)
-				.then(
-					function(data) {
-						deferred.resolve(data.data);
-					},
-					function () {
-						deferred.resolve([]);
-					}
-				);
-
-			return deferred.promise;
-		};
-
-		var getUserRolesForProject = function () {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
-
-			$http.get(url)
-				.then(
-					function(response) {
-						deferred.resolve(response.data);
-					},
-					function () {
-						deferred.resolve([]);
-					}
-				);
-
-			return deferred.promise;
-		};
-
-		var getUserRoles = function (account, project) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/" + Auth.username + "/userRolesForProject.json");
-
-			$http.get(url)
-				.then(
-					function(response) {
-						deferred.resolve(response.data);
-					},
-					function () {
-						deferred.resolve([]);
-					}
-				);
-
-			return deferred.promise;
-		};
-
 		function doPost(data, urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.project + "/" + urlEnd),
@@ -132,9 +81,6 @@
 		};
 
 		return {
-			getRoles: getRoles,
-			getUserRolesForProject: getUserRolesForProject,
-			getUserRoles: getUserRoles,
 			createProjectSummary: createProjectSummary,
 			getProjectSummary: getProjectSummary,
 			getProjectInfo: getProjectInfo

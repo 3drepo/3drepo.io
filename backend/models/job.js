@@ -61,6 +61,10 @@
 				return this.user.save();
 			}
 			
+		},
+
+		get: function(){
+			return this.jobs;
 		}
 	};
 

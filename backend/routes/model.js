@@ -26,6 +26,7 @@ var C = require("../constants");
 var ProjectHelpers = require('../models/helper/project');
 var History = require('../models/history');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
+var User = require('../models/user');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -53,6 +54,9 @@ router.get('/:project/roles.json', middlewares.hasReadAccessToModel, getRolesFor
 
 //user roles for this project
 router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToModel, getUserRolesForProject);
+
+router.get('/:project/jobs.json', middlewares.hasReadAccessToModel, getJobs);
+router.get('/:project/userJobForProject.json', middlewares.hasReadAccessToModel, getUserJobForProject);
 
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getProjectTree);
@@ -491,6 +495,50 @@ function getPermissions(req, res, next){
 		}
 	}).catch(err => {
 
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getJobs(req, res, next){
+	'use strict';
+
+	const account = req.params.account;
+	const project = req.params.project;
+
+	User.findByUserName(account).then(dbUser => {
+		if(!dbUser){
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		return dbUser.customData.jobs.get();
+
+	}).then(jobs => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
+	}).catch(err => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+
+}
+
+function getUserJobForProject(req, res, next){
+	'use strict';
+
+	const account = req.params.account;
+	const project = req.params.project;
+	const username = req.session.user.username;
+
+	User.findByUserName(account).then(dbUser => {
+		if(!dbUser){
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username).job;
+		return dbUser.customData.jobs.findById(job);
+
+	}).then(job => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job);
+	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }

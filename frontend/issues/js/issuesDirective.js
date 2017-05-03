@@ -54,8 +54,6 @@
 	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			promise,
-			rolesPromise,
-			projectUserRolesPromise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
 
@@ -68,8 +66,8 @@
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.availableRoles = null;
-		vm.projectUserRoles = [];
+		vm.availableJobs = null;
+		vm.projectUserJob;
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
@@ -100,10 +98,9 @@
 		/*
 		 * Get all the available roles for the project
 		 */
-		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
-		rolesPromise.then(function (data) {
-			console.log('Finish getting roles');
-			vm.availableRoles = data;
+		IssuesService.getJobs(vm.account, vm.project).then(function (data) {
+
+			vm.availableJobs = data;
 			setAllIssuesAssignedRolesColors();
 
 			var menu = [];
@@ -131,7 +128,7 @@
 		 */
 		function setAllIssuesAssignedRolesColors () {
 			var i, length;
-			if (vm.availableRoles !== null) {
+			if (vm.availableJobs !== null) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					setIssueAssignedRolesColors(vm.issues[i]);
 				}
@@ -149,7 +146,7 @@
 
 			issue.assignedRolesColors = [];
 			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-				roleColour = IssuesService.getRoleColor(issue.assigned_roles[i]);
+				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
@@ -158,9 +155,8 @@
 		/*
 		 * Get the user roles for the project
 		 */
-		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
-		projectUserRolesPromise.then(function (data) {
-			vm.projectUserRoles = data;
+		IssuesService.getUserJobForProject(vm.account, vm.project).then(function (data) {
+			vm.projectUserJob = data;
 		});
 
 		/*
@@ -265,7 +261,7 @@
 
 			if (issue !== null) {
 				for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-					roleColour = IssuesService.getRoleColor(issue.assigned_roles[i]);
+					roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 					pinColours.push(IssuesService.hexToRgb(roleColour));
 				}
 
@@ -479,6 +475,22 @@
 				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
+
+				$state.go('home.account.project.issue', 
+					{
+						account: vm.account, 
+						project: vm.project, 
+						revision: vm.revision,
+						issue: issue._id,
+						noSet: true
+					}, 
+					{notify: false}
+				);
+
+				AnalyticService.sendEvent({
+					eventCategory: 'Issue',
+					eventAction: 'view'
+				});
 			} else {
 				vm.selectedIssue = issue;
 			}
@@ -486,21 +498,7 @@
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
-			$state.go('home.account.project.issue', 
-				{
-					account: vm.account, 
-					project: vm.project, 
-					revision: vm.revision,
-					issue: issue._id,
-					noSet: true
-				}, 
-				{notify: false}
-			);
 
-			AnalyticService.sendEvent({
-				eventCategory: 'Issue',
-				eventAction: 'view'
-			});
 		};
 
 		/**

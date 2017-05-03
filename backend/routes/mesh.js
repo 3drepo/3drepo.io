@@ -68,7 +68,6 @@ function generateSRC(req, res, next){
 		req.params.format = 'src';
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -163,7 +162,6 @@ function generateX3D(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
 
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -195,7 +193,6 @@ function generateJsonMpc(req, res, next){
 	}).then(data => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -212,7 +209,6 @@ function generateX3DMpc(req, res, next){
 		const xml = x3dEncoder.generateMPC(account, project, uid, repoGraphScene(req[C.REQ_REPO].logger).decode(objs));
 		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

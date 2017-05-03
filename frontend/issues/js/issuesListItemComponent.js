@@ -26,7 +26,7 @@
 				templateUrl: "issuesListItem.html",
 				bindings: {
 					data: "<",
-					userRoles: "<"
+					userJob: "<"
 				}
 			}
 		);
@@ -63,13 +63,13 @@
 				setRoleIndicatorColour();
 
 				// Title
-				if (this.userRoles) {
+				if (this.userJob) {
 					this.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
 
 			// User roles
-			if (changes.hasOwnProperty("userRoles") && this.userRoles) {
+			if (changes.hasOwnProperty("userJob") && this.userJob) {
 				// Title
 				if (this.data) {
 					this.assignedToAUserRole = issueIsAssignedToAUserRole();
@@ -84,7 +84,7 @@
 			var assignedRoleColour;
 
 			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
-				assignedRoleColour = IssuesService.getRoleColor(self.data.assigned_roles[0]);
+				assignedRoleColour = IssuesService.getJobColor(self.data.assigned_roles[0]);
 				if (assignedRoleColour !== null) {
 					issueRoleIndicator.css("border", "none");
 					issueRoleIndicator.css("background", assignedRoleColour);
@@ -96,16 +96,7 @@
 		 * Check if the issue is assigned to one of the user's roles
 		 */
 		function issueIsAssignedToAUserRole () {
-			var i, iLength, j, jLength,
-				isAssignedToAUserRole = false;
-
-			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !isAssignedToAUserRole; i += 1) {
-				for (j = 0, jLength = self.data.assigned_roles.length; (j < jLength) && !isAssignedToAUserRole; j += 1) {
-					isAssignedToAUserRole = (self.userRoles[i] === self.data.assigned_roles[j]);
-				}
-			}
-
-			return isAssignedToAUserRole;
+			return self.data.assigned_roles.indexOf(self.userJob._id) !==  -1;
 		}
 	}
 }());
