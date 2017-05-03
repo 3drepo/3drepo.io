@@ -1056,7 +1056,7 @@ schema.methods.updateAttrs = function(data){
 			
 			//change status to for_approval if assigned roles is changed.
 			if(data.status === statusEnum.FOR_APPROVAL){
-				this.assigned_roles = [this.creator_role];
+				this.assigned_roles = this.creator_role ? [this.creator_role] : [];
 			}
 
 			if(data.status !== this.status){

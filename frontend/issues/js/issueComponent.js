@@ -360,9 +360,6 @@
 				if(self.issueData.status === 'closed'){
 					this.canUpdate = false;
 					this.canComment = false;
-				} else {
-					this.canUpdate = true;
-					this.canComment = true;
 				}
 
 				AnalyticService.sendEvent({
