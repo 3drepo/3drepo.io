@@ -30,6 +30,10 @@ var repoGraphScene = require("../repo/repoGraphScene.js");
 var x3dEncoder = require("../encoders/x3dom_encoder");
 
 router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToModel, generateSRC);
+
+router.get('/:uid.json.mpc',  middlewares.hasReadAccessToModel, generateJsonMpc);
+router.get('/:uid.x3d.mpc',  middlewares.hasReadAccessToModel, generateX3DMpc);
+
 router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToModel, generateSRC);
 
 router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToModel, generateX3D);
@@ -69,7 +73,7 @@ function generateSRC(req, res, next){
 	});
 }
 
-function getSceneObject(account, project, history){
+function getSceneObject(account, project, history, uid){
 	'use strict';
 
 	let projection = {
@@ -80,10 +84,18 @@ function getSceneObject(account, project, history){
 		uv_channels: 0
 	};
 
-	return Stash3DRepo.find({account, project}, {rev_id: history._id}, projection).then(objs => {
+	let query;
+
+	if(history){
+		query = { stash: {rev_id: history._id}, scene: { _id: {$in: history.current }}};
+	} else {
+		query = { stash: { _id: utils.stringToUUID(uid) }, scene: { _id: utils.stringToUUID(uid) } };
+	}
+
+	return Stash3DRepo.find({account, project}, query.stash, projection).then(objs => {
 
 		if(!objs.length){
-			return Scene.find({account, project}, { _id: {$in: history.current }}, projection);
+			return Scene.find({account, project}, query.scene, projection);
 		}
 
 		return objs;
@@ -156,5 +168,53 @@ function generateX3D(req, res, next){
 	});
 }
 
+function generateJsonMpc(req, res, next){
+	'use strict';
 
+	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let place = utils.APIInfo(req);
+
+	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+
+	let start = Promise.resolve(false);
+
+	if(!config.disableCache){
+		start = stash.findStashByFilename(dbCol, 'json_mpc', filename);
+	}
+
+	start.then(buffer => {
+
+		if(!buffer) {
+
+			return Promise.reject(responseCodes.MESH_STASH_NOT_FOUND);
+
+		} else {
+			return Promise.resolve(buffer);
+		}
+
+	}).then(data => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
+	}).catch(err => {
+		console.log(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function generateX3DMpc(req, res, next){
+	'use strict';
+
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const project = req.params.project;
+	const uid = req.params.uid;
+
+	getSceneObject(account, project, null, uid).then(objs => {
+		const xml = x3dEncoder.generateMPC(account, project, uid, repoGraphScene(req[C.REQ_REPO].logger).decode(objs));
+		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
+	}).catch(err => {
+		console.log(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+	
 module.exports = router;
