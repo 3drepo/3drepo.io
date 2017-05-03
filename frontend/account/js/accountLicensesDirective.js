@@ -68,6 +68,7 @@
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+			console.log('vm.unassigned', vm.unassigned)
 		});
 
 		/*
