@@ -128,7 +128,8 @@ function updateIssue(req, res, next){
 			
 			action = User.findByUserName(req.params.account).then(dbUser => {
 
-				const job = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username).job;
+				const sub = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username);
+				const job = sub && sub.job;
 				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
 				const isAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				
