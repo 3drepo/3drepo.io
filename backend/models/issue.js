@@ -42,6 +42,7 @@ var _ = require('lodash');
 var systemLogger = require("../logger.js").systemLogger;
 var Group = require('./group');
 var gm = require('gm');
+var C = require('../constants');
 
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -198,11 +199,12 @@ function parseXmlString(xml, options){
 //internal helper _find
 
 var statusEnum = {
-	'OPEN': 'open', 
-	'IN_PROGRESS': 'in progress', 
-	'FOR_APPROVAL': 'for approval', 
-	'CLOSED': 'closed'
+	'OPEN': C.ISSUE_STATUS_OPEN, 
+	'IN_PROGRESS': C.ISSUE_STATUS_IN_PROGRESS, 
+	'FOR_APPROVAL': C.ISSUE_STATUS_FOR_APPROVAL, 
+	'CLOSED': C.ISSUE_STATUS_CLOSED
 };
+
 var priorityEnum = {
 	'NONE': 'none', 
 	'LOW': 'low', 
@@ -246,7 +248,6 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 		}
 
 		return getHistory.then(history => {
-
 
 			if(!history){
 				return Promise.resolve([]);
@@ -1047,10 +1048,6 @@ schema.methods.updateAttrs = function(data){
 		if (_.map(statusEnum).indexOf(data.status) === -1){
 
 			throw responseCodes.ISSUE_INVALID_STATUS;
-
-		} else if (data.status === statusEnum.CLOSED && !data.isAdmin && data.owner_roles.indexOf(this.creator_role) === -1){
-
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 
 		} else {
 			

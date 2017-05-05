@@ -476,5 +476,14 @@
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
 	define("PROJECT_DEFAULT_ID", "default");
+
+
+	//issues
+
+	define('ISSUE_STATUS_OPEN', 'open'); 
+	define('ISSUE_STATUS_IN_PROGRESS', 'in progress'); 
+	define('ISSUE_STATUS_FOR_APPROVAL', 'for approval'); 
+	define('ISSUE_STATUS_CLOSED', 'closed'); 
+
 	
 })();

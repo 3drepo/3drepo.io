@@ -503,7 +503,6 @@ function getJobs(req, res, next){
 	'use strict';
 
 	const account = req.params.account;
-	const project = req.params.project;
 
 	User.findByUserName(account).then(dbUser => {
 		if(!dbUser){
@@ -525,7 +524,6 @@ function getUserJobForProject(req, res, next){
 	'use strict';
 
 	const account = req.params.account;
-	const project = req.params.project;
 	const username = req.session.user.username;
 
 	User.findByUserName(account).then(dbUser => {

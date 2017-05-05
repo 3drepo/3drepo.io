@@ -83,6 +83,7 @@
 		function setRoleIndicatorColour () {
 			var assignedRoleColour;
 
+			console.log('setRoleIndicatorColour', self.data.assigned_roles, IssuesService.getJobColor(self.data.assigned_roles[0]))
 			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
 				assignedRoleColour = IssuesService.getJobColor(self.data.assigned_roles[0]);
 				if (assignedRoleColour !== null) {

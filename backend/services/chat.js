@@ -101,7 +101,7 @@ module.exports.createApp = function (server, serverConfig){
 			//socket error handler, frontend will attempt to reconnect
 			socket.on('error', err => {
 				systemLogger.logError('Chat server - socket error - ' + err.message);
-				systemLogger.logError(err.stack)
+				systemLogger.logError(err.stack);
 			});
 
 			if(!_.get(socket, 'handshake.session.user')){

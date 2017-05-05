@@ -25,11 +25,10 @@ var Issue = require('../models/issue');
 var utils = require('../utils');
 var multer = require("multer");
 var config = require("../config.js");
-var ProjectHelpers = require('../models/helper/project');
-var RoleTemplates = require('../models/role_templates');
-var stringToUUID = utils.stringToUUID;
 
-var _ = require('lodash');
+var User = require('../models/user');
+
+var stringToUUID = utils.stringToUUID;
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToIssue, findIssueById);
 router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToIssue, getThumbnail);
@@ -94,38 +93,14 @@ function updateIssue(req, res, next){
 	let data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
-	data.isAdmin = false;
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
-	let projectRoles;
 
-	ProjectHelpers.getRolesForProject(req.params.account, req.params.project).then(_projectRoles => {
-
-		projectRoles = _.indexBy(_projectRoles, 'role');
-		return ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.session.user.username);
-
-	}).then(roles => {
-		
-		data.owner_roles = roles;
-		
-		roles.forEach(role => {
-			if(projectRoles[role] && 
-				_.intersection(
-					projectRoles[role].permissions, 
-					RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
-				).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
-				
-				data.isAdmin = true;
-			}
-		});
-
-		return Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 });
-
-	}).then(issue => {
+	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail.content': 0 }).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -151,7 +126,23 @@ function updateIssue(req, res, next){
 
 		} else {
 			
-			action = issue.updateAttrs(data);
+			action = User.findByUserName(req.params.account).then(dbUser => {
+
+				const job = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username).job;
+				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
+				const isAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+				
+				const canCloseIssue = (issue.creator_role === job && issue.creator_role && job) || 
+					req.session.user.username === issue.owner ||
+					isAdmin;
+
+				if(data.status === C.ISSUE_STATUS_CLOSED && !canCloseIssue){
+					return Promise.reject(responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED);
+				} else {
+					return issue.updateAttrs(data);
+				}
+
+			});
 		}
 
 		return action;

@@ -182,7 +182,9 @@
 			vm.assignedRolesColors = [];
 			for (i = 0, length = vm.roles.length; i < length; i += 1) {
 				if (vm.data.assigned_roles.indexOf(vm.roles[i]._id) !== -1) {
+
 					var roleColour = IssuesService.getJobColor(vm.roles[i]._id);
+
 					vm.assignedRolesColors.push(roleColour);
 					pinColours.push(IssuesService.hexToRgb(roleColour));
 				}

@@ -49,11 +49,10 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
 		var vm = this,
-			promise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
 
@@ -77,8 +76,8 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
-		promise.then(function (data) {
+		var getIssue = IssuesService.getIssues(vm.account, vm.project, vm.revision)
+		.then(function (data) {
 			vm.showProgress = false;
 			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
@@ -98,17 +97,16 @@
 		/*
 		 * Get all the available roles for the project
 		 */
-		IssuesService.getJobs(vm.account, vm.project).then(function (data) {
+		var getJob = IssuesService.getJobs(vm.account, vm.project).then(function (data) {
 
 			vm.availableJobs = data;
-			setAllIssuesAssignedRolesColors();
 
 			var menu = [];
 			data.forEach(function(role){
 				menu.push({
 					value: "filterRole",
-					role: role.role,
-					label: role.role,
+					role: role._id,
+					label: role._id,
 					keepCheckSpace: true,
 					toggle: true,
 					selected: true,
@@ -123,11 +121,16 @@
 			});
 		});
 
+		$q.all([getIssue, getJob]).then(function(){
+			setAllIssuesAssignedRolesColors();
+		});
+
 		/**
 		 * Define the assigned role colors for each issue
 		 */
 		function setAllIssuesAssignedRolesColors () {
 			var i, length;
+
 			if (vm.availableJobs !== null) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					setIssueAssignedRolesColors(vm.issues[i]);
@@ -145,8 +148,11 @@
 			var i, length, roleColour, pinColours = [];
 
 			issue.assignedRolesColors = [];
+
 			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
+
 				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
+	
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
@@ -185,7 +191,7 @@
 				vm.revisions = event.value;
 				watchNotification();
 			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
-				console.log('permission', event.value.permissions)
+
 				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 					vm.canAddIssue = true;
 				}
