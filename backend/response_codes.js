@@ -203,6 +203,7 @@
 		JOB_NOT_FOUND:{ message: 'Job not found', status: 404},
 		DUP_JOB: {message: 'Duplicate job id', status: 400},
 		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
+		JOB_ID_VALID: { message: 'Invalid job ID', status: 400},
 		DUP_PERM_TEMPLATE: {message: 'Duplicate template ID', status: 400},
 		PERM_NOT_FOUND: {message: 'Permission template not found', status: 404},
 		INVALID_PERM: {message: 'Invalid permission', status: 400},

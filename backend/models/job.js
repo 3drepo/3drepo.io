@@ -39,11 +39,13 @@
 		},
 
 		add: function(job) {
-			if (!this.findById(job._id)){
+			if(!job._id){
+				return Promise.reject(responseCodes.JOB_ID_VALID);
+			} else if (this.findById(job._id)){
+				return Promise.reject(responseCodes.DUP_JOB);
+			} else {
 				this.jobs.push(job);
 				return this.user.save();
-			} else {
-				return Promise.reject(responseCodes.DUP_JOB);
 			}
 
 		},
