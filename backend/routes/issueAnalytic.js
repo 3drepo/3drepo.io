@@ -31,12 +31,12 @@
 		
 		const place = utils.APIInfo(req);
 		const sort = parseInt(req.query.sort) || -1;
-		
+		const groups = req.query.groupBy.split(',');
+
 		IssueAnalytic.groupBy(
 			req.params.account, 
 			req.params.project, 
-			req.query.groupBy, 
-			req.query.secGroupBy, 
+			groups,
 			sort, 
 			req.params.format
 		).then(docs => {
