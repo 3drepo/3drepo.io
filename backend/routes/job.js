@@ -27,6 +27,7 @@
 	const C = require("../constants");
 
 	router.post("/jobs", middlewares.checkPermissions([C.PERM_CREATE_JOB]), createJob);
+	router.get("/jobs", middlewares.checkPermissions([C.PERM_ASSIGN_JOB]), listJobs);
 	router.delete("/jobs/:jobId", middlewares.checkPermissions([C.PERM_DELETE_JOB]), deleteJob);
 
 
@@ -34,6 +35,10 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
+			if(!user){
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+			
 			return user.customData.jobs.add({
 				_id: req.body._id,
 				color: req.body.color
@@ -53,12 +58,36 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
+			if(!user){
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+
 			return user.customData.jobs.remove(req.params.jobId);
 
 		}).then(() => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function listJobs(req, res, next){
+
+		const account = req.params.account;
+
+		User.findByUserName(account).then(user => {
+
+			if(!user){
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+
+			return user.customData.jobs.get();
+
+		}).then(jobs => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

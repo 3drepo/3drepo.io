@@ -329,7 +329,7 @@
 			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
 		}
 
-		if(data.job && !this.user.customData.jobs.findById(data.job)){
+		if(data.hasOwnProperty('job') && data.job!== '' && !this.user.customData.jobs.findById(data.job)){
 
 			return Promise.reject(responseCodes.JOB_NOT_FOUND);
 
@@ -337,6 +337,8 @@
 
 			if(data.job){
 				subscription.job = data.job;
+			} else if (data.job === ''){
+				subscription.job = undefined;
 			}
 		
 		}

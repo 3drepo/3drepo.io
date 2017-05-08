@@ -43,11 +43,15 @@
 						md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
 							div(layout="row", layout-align="start center", flex)
 								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-								.md-list-item-text(flex)
+								.md-list-item-text(flex=30)
 									p {{license.user}}
+								.md-list-item(flex=25)
+									md-select(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
+										md-option(ng-repeat="job in vm.jobs", value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
+
 							div(layout="row", layout-align="end center")
 								p#accountLicenseMessage {{license.deleteMessage}}
-								md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-if="license.showRemove")
+								md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-style="{'visibility': license.showRemove ? 'visible' : 'hidden'}")
 									md-icon.angular-material-icons remove_circle
 
 						// Unassigned

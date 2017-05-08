@@ -59,6 +59,7 @@
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,
 						id: vm.subscriptions[i]._id,
+						job: vm.subscriptions[i].job,
 						showRemove: (vm.subscriptions[i].assignedUser !== vm.account)
 					});
 				}
@@ -78,6 +79,27 @@
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
+
+		vm.jobs = [{ _id: ""}];
+		// get list of jobs
+
+		UtilsService.doGet(vm.account + "/jobs").then(function(data){
+			vm.jobs = vm.jobs.concat(data.data);
+			console.log(vm.jobs);
+		});
+
+		vm.assignJob = function(index){
+			var licence = vm.licenses[index];
+			console.log(licence);
+			UtilsService.doPut(
+				{job: licence.job},
+				vm.account + "/subscriptions/" + licence.id + "/assign"
+			).then(function(res){
+				if (res.status !== 200) {
+					vm.addMessage = res.data.message;
+				}
+			});
+		};
 
 		/**
 		 * Assign a license to the selected user

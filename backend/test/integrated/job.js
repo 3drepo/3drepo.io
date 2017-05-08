@@ -134,7 +134,7 @@ describe('Job', function () {
 
 	});
 
-	it('should fail to change assigment to a job that doesnt exist to a licence(user)', function(done){
+	it('should fail to change assignment to a job that doesnt exist to a licence(user)', function(done){
 		agent.put(`/${username}/subscriptions/${subId}/assign`)
 		.send({ job: `nonsense`})
 		.expect(404, function(err, res){
@@ -143,7 +143,7 @@ describe('Job', function () {
 		});
 	});
 
-	it('should able to change assigment to another job', function(done){
+	it('should able to change assignment to another job', function(done){
 		async.series([
 			callback => {
 				agent.put(`/${username}/subscriptions/${subId}/assign`)
@@ -164,7 +164,31 @@ describe('Job', function () {
 		], (err, res) => done(err));
 	});
 
-	it('should faile to remove a job if it is assigned to someone', function(done){
+
+	it('should able to unassign', function(done){
+
+		let subId = '591063b613f4b994b72df324';
+		async.series([
+			callback => {
+				agent.put(`/${username}/subscriptions/${subId}/assign`)
+				.send({ job: ''})
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/subscriptions`)
+				.expect(200, function(err, res){
+					expect(res.body.find(sub => sub._id === subId).job).to.not.exist;
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+	});
+
+	it('should fail to remove a job if it is assigned to someone', function(done){
 		agent.delete(`/${username}/jobs/${job2._id}`)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.JOB_ASSIGNED.value);
