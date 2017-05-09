@@ -861,24 +861,6 @@ schema.methods.updateAssignDetail = function(id, data){
 	});
 };
 
-
-schema.methods.getPrivileges = function(){
-	'use strict';
-
-	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
-
-		let privs = [];
-		if (roles && roles.length) {
-			for (let i = 0; i < roles.length; i++) {
-				privs = privs.concat(roles[i].inheritedPrivileges);
-			}
-		}
-
-		return Promise.resolve({inheritedPrivileges: privs});
-	});
-
-};
-
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
