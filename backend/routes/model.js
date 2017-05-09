@@ -49,12 +49,6 @@ router.post('/:project/permissions', middlewares.checkPermissions([C.PERM_MANAGE
 //model permission
 router.get('/:project/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
 
-//get project roles
-router.get('/:project/roles.json', middlewares.hasReadAccessToModel, getRolesForProject);
-
-//user roles for this project
-router.get('/:project/:username/userRolesForProject.json', middlewares.hasReadAccessToModel, getUserRolesForProject);
-
 router.get('/:project/jobs.json', middlewares.hasReadAccessToModel, getJobs);
 router.get('/:project/userJobForProject.json', middlewares.hasReadAccessToModel, getUserJobForProject);
 
@@ -75,11 +69,6 @@ router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessT
 router.delete('/:project', middlewares.hasDeleteAccessToModel, deleteProject);
 
 router.post('/:project/upload', middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadProject);
-
-//to-be-delete
-router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
-router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.hasCollaboratorQuota, addCollaborator);
-router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
 router.get('/:project/download/latest', middlewares.hasDownloadAccessToModel, downloadLatest);
 
@@ -262,57 +251,6 @@ function deleteProject(req, res, next){
 	});
 }
 
-function listCollaborators(req, res ,next){
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-
-	ProjectSetting.findById({account, project}, project).then(setting => {
-
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		}
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.collaborators);
-
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function addCollaborator(req, res ,next){
-	'use strict';
-
-	let username = req.body.user;
-	let project = req.params.project;
-	let account = req.params.account;
-	let role = req.body.role;
-	let email = req.body.email;
-
-	ProjectHelpers.addCollaborator(username, email, account, project, role).then(resRole => {
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function removeCollaborator(req, res ,next){
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-	let username = req.body.user;
-	let role = req.body.role;
-	let email = req.body.email;
-
-	ProjectHelpers.removeCollaborator(username, email, account, project, role).then(resRole => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
 function getProjectTree(req, res, next){
 	'use strict';
 
@@ -393,26 +331,6 @@ function downloadLatest(req, res, next){
 		res.writeHead(200, headers);
 		file.readStream.pipe(res);
 
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function getUserRolesForProject(req, res, next){
-	'use strict';
-	ProjectHelpers.getUserRolesForProject(req.params.account, req.params.project, req.params.username).then(role => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function getRolesForProject(req, res, next){
-	'use strict';
-	let removeViewer = true;
-
-	ProjectHelpers.getRolesForProject(req.params.account, req.params.project, removeViewer).then(role => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, role);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

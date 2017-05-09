@@ -21,6 +21,7 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ProjectSetting = require("./projectSetting");
+	const _ = require('lodash');
 
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
 		this.user = user;
@@ -396,8 +397,6 @@
 
 	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, user, cascadeRemove){
 
-		const ProjectHelper = require('./helper/project');
-
 		// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
 		// let subscription = this.subscriptions.id(id);
 		 let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
@@ -419,24 +418,35 @@
 
 			let foundProjects = [];
 			projects.forEach(project => {
-				project.collaborators.forEach(collaborator => {
-					if(collaborator.user === subscription.assignedUser){
-						foundProjects.push({ project: project._id, role: collaborator.role});
+				project.permissions.forEach(permission => {
+					if(permission.user === subscription.assignedUser){
+						foundProjects.push(project);
 					}
 				});
 			});
 
 			if(!cascadeRemove && foundProjects.length > 0){
-				return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+
+				return Promise.reject({ 
+					resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
+					info: {projects: _.map(foundProjects, p => { return { project: p._id}; } )}
+				});
+
 			} else {
 
 				let promises = [];
-				foundProjects.forEach(foundProject => {
-					promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, user, foundProject.project, foundProject.role));
+
+				foundProjects.forEach(project => {
+
+					const index = _.findIndex(project.permissions, p => p.user === subscription.assignedUser);
+
+					if(index !== -1){
+						console.log(project.permissions.splice(index, 1));
+						promises.push(project.changePermissions(project.permissions.splice(index, 1)));
+					}
 				});
 
 				return Promise.all(promises);
-
 			}
 
 		}).then(() => {

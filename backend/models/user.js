@@ -500,160 +500,6 @@ schema.statics.revokeRolesFromUser = function(username, db, role){
 	return ModelFactory.db.admin().command(cmd);
 };
 
-
-schema.methods.listAccounts = function(){
-	'use strict';
-
-	let accounts = [];
-
-	// group projects by accounts
-	return this.listProjectsAndAccountAdmins().then(data => {
-
-		let projects = data.projects;
-		let adminAccounts = data.adminAccounts;
-
-		projects.forEach(project => {
-
-			let account = _.find(accounts, account => account.account === project.account);
-
-			if(!account){
-
-				account = {
-					account: project.account,
-					projects: [],
-					fedProjects: []
-				};
-
-				accounts.push(account);
-			}
-
-			if(project.federate){
-				account.fedProjects.push({
-					project: project.project,
-					timestamp: project.timestamp,
-					status: project.status,
-					federate: project.federate,
-					subProjects: project.subProjects,
-					permissions: project.permissions
-				});
-			} else {
-				account.projects.push({
-					project: project.project,
-					timestamp: project.timestamp,
-					status: project.status,
-					subProjects: project.subProjects,
-					permissions: project.permissions
-				});
-			}
-
-
-		});
-
-		adminAccounts.forEach(account => {
-			let accObj = accounts.find(_account => _account.account === account);
-			if(accObj){
-				accObj.isAdmin = true;
-			} else {
-				accounts.push({
-					account: account,
-					projects: [],
-					fedProjects: [],
-					isAdmin: true
-				});
-			}
-		});
-
-		let accountInfoPromises = [];
-
-		accounts.forEach(account => {
-			account.projects.sort((a, b) => {
-				if(a.timestamp < b.timestamp){
-					return 1;
-				} else if (a.timestamp > b.timestamp){
-					return -1;
-				} else {
-					return 0;
-				}
-			});
-
-			accountInfoPromises.push(
-				User.findByUserName(account.account).then(user => {
-					if(user){
-						account.quota = user.customData.billing.subscriptions.getSubscriptionLimits();
-						//console.log(account.quota );
-						return User.historyChunksStats(account.account);
-					}
-
-				}).then(stats => {
-
-					if(stats && account.quota.spaceLimit > 0){
-						let totalSize = 0;
-						stats.forEach(stat => {
-							totalSize += stat.size;
-						});
-
-						account.quota.spaceUsed = totalSize;
-					} else if(account.quota) {
-						account.quota.spaceUsed = 0;
-					}
-				})
-			);
-
-			accountInfoPromises.push(
-				Project.find({account: account.account}, {}).then(projectGroups => {
-
-					projectGroups.forEach((projectGroup, i) => {
-					
-						projectGroup = projectGroup.toObject();
-
-						projectGroups[i] = projectGroup;
-
-						projectGroup.models.forEach((model, i) => {
-
-							let fullModel = account.projects.find(project => project.project === model);
-
-							if(!fullModel){
-								fullModel = account.fedProjects.find(project => project.project === model);
-							}
-
-							if(!fullModel){
-								fullModel = { project: model};
-							}
-
-							projectGroup.models[i] = fullModel;
-						});
-
-					});
-
-					account.projectGroups = projectGroups;
-				})
-			);
-		});
-
-		accounts.sort((a, b) => {
-			if (a.account.toLowerCase() < b.account.toLowerCase()){
-				return -1;
-			} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
-				return 1;
-			} else {
-				return 0;
-			}
-		});
-
-		// own acconut always ranks top of the list
-		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
-		if(myAccountIndex > -1){
-			let myAccount = accounts[myAccountIndex];
-			accounts.splice(myAccountIndex, 1);
-			accounts.unshift(myAccount);
-		}
-
-		return Promise.all(accountInfoPromises).then(() => {
-			return Promise.resolve(accounts);
-		});
-	});
-};
-
 function _fillInProjectDetails(accountName, setting, permissions){
 	'use strict';
 
@@ -803,7 +649,34 @@ function _calSpace(user){
 	});
 
 }
-schema.methods.listAccounts_new = function(){
+
+function _sortAccountsAndProjects(accounts){
+	'use strict';
+
+	accounts.forEach(account => {
+		account.projects.sort((a, b) => {
+			if(a.timestamp < b.timestamp){
+				return 1;
+			} else if (a.timestamp > b.timestamp){
+				return -1;
+			} else {
+				return 0;
+			}
+		});
+	});
+
+	accounts.sort((a, b) => {
+		if (a.account.toLowerCase() < b.account.toLowerCase()){
+			return -1;
+		} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
+}
+
+schema.methods.listAccounts = function(){
 	'use strict';
 
 	let accounts = [];
@@ -881,94 +754,23 @@ schema.methods.listAccounts_new = function(){
 
 	//add project groups and put projects into project groups for each account
 	}).then(() => {
+
+		//sorting models
+		_sortAccountsAndProjects(accounts);
+
+		// own acconut always ranks top of the list
+		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
+		if(myAccountIndex > -1){
+			let myAccount = accounts[myAccountIndex];
+			accounts.splice(myAccountIndex, 1);
+			accounts.unshift(myAccount);
+		}
+
 		return Promise.all(accounts.map(account => _addProjectGroups(account)))
 			.then(() => accounts);
 
 	});
 
-};
-
-schema.methods.listProjectsAndAccountAdmins = function(options){
-	'use strict';
-
-	let ProjectHelper = require('./helper/project');
-	let adminAccounts = [];
-
-
-	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
-
-		return Role.listProjectsAndAccountAdmin(roles);
-
-	}).then(data => {
-
-		let projects = data.projects;
-		adminAccounts = data.adminAccounts;
-
-		//get timestamp for project
-		if(options && options.skipTimestamp){
-			return Promise.resolve(projects);
-		}
-
-		let promises = [];
-		projects.forEach((project, index) => {
-			promises.push(
-				History.findByBranch(project, C.MASTER_BRANCH_NAME).then(history => {
-
-					if(history){
-						projects[index].timestamp = history.timestamp;
-					} else {
-						projects[index].timestamp = null;
-					}
-
-					return Promise.resolve();
-
-				}).catch(() => Promise.resolve())
-			);
-		});
-
-		return Promise.all(promises).then(() => Promise.resolve(projects));
-
-	}).then(projects => {
-
-		//get status for project
-		if(options && options.skipStatus){
-			return Promise.resolve(projects);
-		}
-
-		let promises = [];
-
-		projects.forEach((project, index) => {
-			promises.push(
-				ProjectSetting.findById(project, project.project).then(setting => {
-
-					if(setting){
-						projects[index].status = setting.status;
-						projects[index].federate = setting.federate;
-					}
-
-					return Promise.resolve();
-
-				}).then(() => {
-
-
-					if(projects[index].federate){
-						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, C.MASTER_BRANCH_NAME);
-					}
-
-					return Promise.resolve();
-
-				}).then(subProjects => {
-
-					if(subProjects){
-						projects[index].subProjects = subProjects;
-					}
-
-				}).catch(() => Promise.resolve())
-			);
-		});
-
-		return Promise.all(promises).then(() => Promise.resolve({projects, adminAccounts}));
-	});
 };
 
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){

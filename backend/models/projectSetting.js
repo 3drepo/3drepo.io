@@ -117,34 +117,6 @@ schema.methods.updateProperties = function(updateObj){
 
 };
 
-schema.methods.findCollaborator = function(user, role){
-	'use strict';
-
-	let len = this.collaborators.length;
-
-
-	for(let i=0; i<len ; i++){
-
-		let collaborator = this.collaborators[i];
-		if(collaborator.user === user && collaborator.role === role){
-			return collaborator;
-		}
-	}
-
-	return null;
-};
-
-schema.methods.removeCollaborator = function(user, role){
-	'use strict';
-
-	let collaborator = this.findCollaborator(user, role);
-	if(collaborator){
-		this.collaborators.pull(collaborator._id);
-	}
-
-	return collaborator;
-};
-
 schema.methods.changePermissions = function(permissions){
 	'use strict';
 
