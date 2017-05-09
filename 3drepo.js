@@ -39,8 +39,6 @@
 	let ssl_options = {};
 
 	if ("ssl" in config) {
-		let ssl_certs = {};
-
 		for (let certGroup in config.ssl)
 		{
 			let certGroupOptions = {};
@@ -54,26 +52,26 @@
 			}
 
 			certs[certGroup] = tls.createSecureContext(certGroupOptions);
-		}
+	
+			ssl_options[certGroup] = {
+				SNICallback: function(domain, callback)
+				{
+					let certGroup = certMap[domain];
+					callback(null, certs[certGroup]);
+				},
+				key: certGroupOptions.key,
+				cert: certGroupOptions.cert,
+				ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL",
+				//ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
+				honorCipherOrder: true,
+				ecdhCurve: "secp384r1",
+				secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION|constants.SSL_OP_NO_SSLv2|constants.SSL_OP_NO_SSLv3
+			};
 
-		ssl_options = {
-			SNICallback: function(domain, callback)
-			{
-				let certGroup = certMap[domain];
-				callback(null, certs[certGroup]);
-			},
-			key: fs.readFileSync(config.ssl["default"].key, "utf8"),
-			cert: fs.readFileSync(config.ssl["default"].cert, "utf8"),
-			ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL",
-			//ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
-			honorCipherOrder: true,
-			ecdhCurve: "secp384r1",
-			secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION|constants.SSL_OP_NO_SSLv2|constants.SSL_OP_NO_SSLv3
-		};
-
-		// This is the optional certificate authority
-		if (config.ssl["default"].ca) {
-			ssl_options.ca = fs.readFileSync(config.ssl["default"].ca, "utf8");
+			// This is the optional certificate authority
+			if (config.ssl[certGroup].ca) {
+				ssl_options.ca = certGroupOptions.ca;
+			}
 		}
 	}
 
@@ -137,10 +135,10 @@
 
 					if (!serverConfig.external)
 					{
+						let server = config.using_ssl ? https.createServer(ssl_options[myCertGroup]) : http.createServer();
+						
 						if(serverConfig.service == 'chat'){
 							//chat server has its own port and can't attach to express
-
-							let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer();
 							server.listen(serverConfig.port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.port));
 
 							require("./backend/services/" + serverConfig.service + ".js").createApp(server, serverConfig);
@@ -150,7 +148,7 @@
 							// server.listen(serverConfig.chat_port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.chat_port));
 
 						} else {
-							let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+							let app = require("./backend/services/" + serverConfig.service + ".js").createApp(server, serverConfig);
 							subDomainApp.use(serverConfig.host_dir, app);
 						}
 
@@ -185,7 +183,7 @@
 			}
 		}
 
-		let server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
+		let server = http.createServer(mainApp);
 		server.setTimeout(config.timeout * 1000);
 		server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
 	}
