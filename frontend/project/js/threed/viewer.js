@@ -653,7 +653,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-                    console.trace(event);
+                    //console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
