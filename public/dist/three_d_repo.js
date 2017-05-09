@@ -2367,6 +2367,7 @@ var MeasureTool = {};
         {
             var viewArea = self.viewer.getViewArea();
             var pickingInfo = viewArea._pickingInfo;
+            var doc = viewArea._doc;
 
                 if (!self.lineStarted)
                 {
@@ -2374,11 +2375,14 @@ var MeasureTool = {};
                     self.lineStarted      = true;
 
                     self.createMeasureLine();
+                    
+                    doc.inMeasureMode = true;
                     self.viewer.onMouseMove(self.measureMouseMove);
                 } else {
                     self.measureCoords[1] = pickingInfo.pickPos;
                     self.lineStarted      = false;
-
+                    
+                    doc.inMeasureMode = false;
                     self.viewer.offMouseMove(self.measureMouseMove);
                 }
         };
@@ -3681,7 +3685,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-                    console.trace(event);
+                    //console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
