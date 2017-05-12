@@ -8,6 +8,10 @@ toc_footers:
 
 includes:
   - auth
+  - account
+  - accountPermission
+  - permissionTemplate
+  - permission
   - errors
 
 search: true
