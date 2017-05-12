@@ -11,6 +11,9 @@ includes:
   - account
   - accountPermission
   - permissionTemplate
+  - job
+  - project
+  - model
   - permission
   - errors
 

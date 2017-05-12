@@ -247,14 +247,13 @@ jobs | | list of [job objects](#job-object)
 Attribute |  Format | Description
 --------- | ------- | ---------------
 account   | | account name
-projects  | | list of [model objects](#model-object)
-fedProjects | | list of [model objects](#model-object) federated
-projectGroups | | list of [projects (folders) objects](#project-object)
+projects  | | list of [model objects](#model-object), listed here if they do not belongs to any project
+fedProjects | | list of federated [model objects](#model-object) 
+projectGroups | | list of [projects (folders) objects](#project-object-in-account-info)
 isAdmin `deprecated` | | is user an account admin of this account
 permissions | list of [account level permission](#account-level)  | list of permissions user has on this account
 firstName ||
 lastName ||
-
 quota | [quota object](#quota-object) | 
 
 ### Quota object
@@ -265,13 +264,13 @@ spaceLimit          | account space limit           | integer, size in byte
 collaboratorLimit   | account collaborator limit    | integer, size in byte
 spaceUsed           | account space limit           | integer, size in byte
 
-### Project Object
+### Project Object (in account info)
 Attribute           |  Description                  
 ------------------- | ----------------------------- 
 _id |
 name | project name 
 permissions | list of [project level permissions](#project-level)
-models | list of [model objects](#model-object) in this project
+models | list of [model objects](#model-object) belong to this project
 
 ### Model Object
 Attribute           |  Description                                  | Format

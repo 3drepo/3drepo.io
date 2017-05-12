@@ -1,10 +1,10 @@
 # Permission template
 
 ## Template object
-Attribute | Required | Description
---------- | ------- | -------
-_id | Yes | template name
-permissions | Yes | list of [model level permissions](#model-level)
+Attribute | Description
+--------- | -------
+_id  | template name
+permissions | list of [model level permissions](#model-level)
 
 
 ## Get all templates
