@@ -49,9 +49,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -85,6 +85,16 @@
 			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
 			vm.showAddButton = true;
+
+
+			// if issue id is in url then select the issue
+			var issue = vm.issues.find(function(issue){
+				return issue._id === vm.issueId;
+			});
+
+			if(issue){
+				vm.displayIssue = issue;
+			}
 		});
 
 		/*
@@ -185,6 +195,8 @@
 				}
 				vm.subProjects = event.value.subProjects || [];
 				watchNotification();
+			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
+				vm.issueId = event.value;
 			}
 		});
 
@@ -274,6 +286,16 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
+				vm.displayIssue = null;
+				$state.go('home.account.project', 
+					{
+						account: vm.account, 
+						project: vm.project, 
+						revision: vm.revision,
+						noSet: true
+					}, 
+					{notify: false}
+				);
 			}
 		});
 
@@ -464,6 +486,16 @@
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
+			$state.go('home.account.project.issue', 
+				{
+					account: vm.account, 
+					project: vm.project, 
+					revision: vm.revision,
+					issue: issue._id,
+					noSet: true
+				}, 
+				{notify: false}
+			);
 
 			AnalyticService.sendEvent({
 				eventCategory: 'Issue',

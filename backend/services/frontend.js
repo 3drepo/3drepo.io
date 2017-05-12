@@ -178,9 +178,20 @@
 				"url": ":account",
 				"children": [{
 					"plugin": "project",
-					"children": [
-						{ "plugin": "revision" }
-					],
+					"url": "/:project/:revision",
+					"params": {
+						"revision": {
+							value: null,
+							squash: true
+						},
+						"noSet":{
+							value: false
+						}
+					},
+					"children":[{
+						"plugin": "issue",
+						"url": "/issues/:issue"
+					}],
 					"friends": [
 						"panel",
 						"filter",

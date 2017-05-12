@@ -29,6 +29,7 @@
 				project:  "=",
 				branch:   "=",
 				revision: "=",
+				issueId: "=",
 				state:    "="
 			},
 			templateUrl: "project.html",
@@ -296,10 +297,21 @@
 			}
 		});
 
+
 		$timeout(function () {
 			EventService.send(EventService.EVENT.VIEWER.LOAD_PROJECT, {account: vm.account, project: vm.project, branch: vm.branch, revision: vm.revision });
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
+
+		$scope.$watch("vm.issueId", function(){
+			if(vm.issueId){
+				// timeout to make sure event is sent after issue panel card is setup
+				$timeout(function () {
+					EventService.send(EventService.EVENT.SELECT_ISSUE, vm.issueId);
+				});
+			}
+		});
+
 
 		/*
 		 * Watch for events
