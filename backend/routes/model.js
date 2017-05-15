@@ -89,7 +89,7 @@ function updateSettings(req, res, next){
 		return projectSetting.save();
 
 	}).then(projectSetting => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -192,7 +192,6 @@ function createProject(req, res, next){
 		subProjects: req.body.subProjects, 
 		federate: federate,
 		code: req.body.code,
-		topicTypes: req.body.topicTypes,
 		projectGroup: req.body.projectGroup
 	};
 

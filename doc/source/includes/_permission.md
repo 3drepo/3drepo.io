@@ -1,10 +1,10 @@
 # Permission
 
-There are three level of permissions
+There are three levels of permissions
 
-* Account (team space) level permission
-* project level permission
-* model level permission
+* Account (team space) level permissions
+* project level permissions
+* model level permissions
 
 ## Account level
 

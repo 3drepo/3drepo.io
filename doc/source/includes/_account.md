@@ -330,6 +330,13 @@ Content-Type: image/png
 
 Upload an image. Only multipart form data content type will be accepted.
 
+Request body
+
+Attribute           |  Description                                  
+------------------- | ----------------------------------------------
+file             |  The image to be uploaded                          
+
+
 ## Update account info
 
 > Example request

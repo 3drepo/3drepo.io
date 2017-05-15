@@ -74,7 +74,7 @@ zNear |
 zFar |
 unit | cm, m, ft, mm
 mapTile | [map tile object](#map-tile-object), solely used for OS map plugin
-code | a short code represents this model
+code | a short code represents this model, contains only numbers and alphabets, no longer than 5 characters
 topicTypes | [topic type object](#topic-type-object)
 
 ### map tile object
@@ -92,13 +92,237 @@ label |
 
 ## Update model settings
 
+> Example request
+
+```http
+PUT /repoman/model1/settings HTTP/1.1
+```
+```json
+{
+	"code": "012",
+	"topicTypes": ["Type 1", "Type 2"],
+	"pinSize" : 1,
+	"avatarHeight": 1,
+	"visibilityLimit": 1,
+	"speed" : 1,
+	"zNear" : 1,
+	"zFar" : 1,
+	"unit": "m"
+	"mapTile": {
+		"lat": 1,
+		"lon": 1,
+		"y": 1
+	}
+}
+```
+
+> Example response
+
+```json
+{
+	"code": "012",
+	"topicTypes": [
+		{ "value": "type_1", "label": "Type 1"},
+		{ "value": "type_2", "label": "Type 2"}
+	],
+	"pinSize" : 1,
+	"avatarHeight": 1,
+	"visibilityLimit": 1,
+	"speed" : 1,
+	"zNear" : 1,
+	"zFar" : 1,
+	"unit": "m"
+	"mapTile": {
+		"lat": 1,
+		"lon": 1,
+		"y": 1
+	}
+}
+```
+
+### PUT /{accountName}/{modelName}/settings
+
+Update model settings.
+
+Request body
+[model propertie object](#model-propertie-object)
+
 ## Create a model
+
+> Example request
+
+```http
+POST /repoman/model1 HTTP/1.1
+```
+```json
+{
+	"desc": "this is a model",
+	"type": "Structural",
+	"code": "00123",
+	"unit": "m",
+	"subProjects": [{
+		"database": "repoman",
+		"project": "model11"
+	}],
+	"projectGroup": "project1"
+
+}
+```
+
+> Example response
+
+```json
+{
+    "account":"repoman",
+    "project":"model1",
+    "permissions":[
+        "change_model_settings",
+        "upload_files",
+        "create_issue",
+        "comment_issue",
+        "view_issue",
+        "view_model",
+        "download_model",
+        "edit_federation",
+        "delete_federation",
+        "delete_model",
+        "manage_model_permission"
+    ]
+}
+```
+
+### POST /{accountName}/{modelName} 
+
+Create a new model.
+
+URL parameters
+
+Parameter | Required | Description
+--------- | ------- | -------
+modelName | Yes | the new model name
+
+Request body
+
+Attribute       | Required | Description
+--------------- | ---------| ----------------------------------------------------
+desc | No | description
+type | No | model type
+subProjects | No | list of sub models, empty for non-federated model
+unit | Yes | cm, m, ft, mm
+code |  No | a short code represents this model, contains only numbers and alphabets, no longer than 5 characters
+projectGroup |  No | project this model belongs to
+
 
 ## Update a model
 
+> Example request
+
+```http
+PUT /repoman/model1 HTTP/1.1
+```
+```json
+{ "subProjects" : 
+	[
+		{
+			"database": "repoman",
+			"project": "model2"
+		}
+	]
+}
+```
+
+> Example response
+
+```json
+{
+	"account": "repoman"
+	"project": "model1"
+}
+```
+
+### PUT /{accountName}/{modelName}
+
+Update a model. This API is used to update sub models in a federated model only.
+
+Updating a non-federated model will return an error. To update model settings, see [Update model settings](#update-model-settings)
+
+Request body
+
+Attribute       | Required | Description
+--------------- | ---------| ----------------------------------------------------
+subProjects | Yes | list of [sub model objects](#sub-model-object)
+
+### Sub model object
+Attribute       | Description
+--------------- | --------------------------------------------------------
+database  | account name the model belongs to
+project   | model name
+
 ## Upload a model
 
+> Example request
+
+```http
+POST /repoman/model1/upload HTTP/1.1
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
+
+------WebKitFormBoundarySos0xligf1T8Sy8I
+Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
+Content-Type: application/octet-stream
+
+<binary content>
+------WebKitFormBoundarySos0xligf1T8Sy8I
+Content-Disposition: form-data; name="tag"
+
+rev1
+------WebKitFormBoundarySos0xligf1T8Sy8I
+Content-Disposition: form-data; name="desc"
+
+el paso
+------WebKitFormBoundarySos0xligf1T8Sy8I--
+```
+
+> Example response
+
+```json
+{"status":"uploaded"}
+```
+
+### POST /{accountName}/{modelName}/upload
+
+Upload a model. Only multipart/form-data content type will be accepted.
+
+Request body
+
+Attribute       | Required | Description
+--------------- | ---------| ----------------------------------------------------
+file | Yes | the model to be uploaded
+tag | No | revision name
+desc | No | revision description
+
+
 ## Download a model
+
+> Example request
+
+```http
+GET /repoman/model1/download/latest HTTP/1.1
+```
+
+> Example response
+
+```http
+HTTP/1.1 200 OK
+Content-Length: 671606
+Content-Disposition: attachment;filename=Tevolys.ifc
+Content-Type: binary/octet-stream
+
+<binary content>
+```
+
+### GET /{accountName/{modelName}/download/latest
+
+Download model of latest revision
 
 ## Delete a model
 
