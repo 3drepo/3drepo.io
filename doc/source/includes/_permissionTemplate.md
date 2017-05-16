@@ -1,5 +1,9 @@
 # Permission template
 
+Permission template is a grouping of [model level permissons](#model-level). An id is assigned to it as well.
+
+Three default permission templates are created by default. They are viewer, commenter and collaborator.
+
 ## Template object
 Attribute | Description
 --------- | -------

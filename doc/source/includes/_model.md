@@ -326,10 +326,135 @@ Download model of latest revision
 
 ## Delete a model
 
+> Example request
+
+```http
+DELETE /repoman/model1 HTTP/1.1
+```
+
+> Example response
+
+```json
+{
+	"account": "repoman",
+	"project": "model1"
+}
+
+```
+
+### DELETE /{accountName}/{modelName}
+
+Delete a model.
+
 ## Get model permissions
 
-## Update model permissions
+> Example request
+
+```http
+GET /repoman/model1/permissions HTTP/1.1
+```
+
+> Example response
+
+```json
+[
+	{
+		"user": "breakingbad",
+		"permission": "viewer"
+	}
+]
+```
+
+### GET /{accountName}/{modelName}/permissions
+
+Get list of permissions of this model assigned to users.
+
+Response body
+
+List of [model permission objects](#model-permission)
+
+### Model permission
+Attribute       | Description
+--------------- | ----------------------------------------------------
+user            |
+permission      | ID of [a permission template](#permission-template)
+
+## Update model permission
+
+> Example request
+
+```http
+POST /repoman/model1/permissions HTTP/1.1
+```
+```json
+[
+	{
+		"user": "breakingbad",
+		"permission": "customA"
+	},
+	{
+		"user": "mrwhite",
+		"permission": "viewer"
+	}
+]
+```
+
+> Example response
+
+```json
+[
+	{
+		"user": "breakingbad",
+		"permission": "customA"
+	},
+	{
+		"user": "mrwhite",
+		"permission": "viewer"
+	}
+]
+```
+
+### POST /{accountName}/{modelName}/permissions
+
+Update permissions assigned users for this model.
+
+Request body
+
+List of [model permission objects](#model-permission)
+
+<aside class="notice">
+The API replaces the whole array object with the request body, which means
+to remove a permission assigned to a user, just supply a new array without
+that particular model permission object.
+</aside>
+
 
 ## Get all jobs
 
-## Get user jobs
+### GET /{accountName}/{modelName}/jobs.json
+
+Same as [Get all jobs](#get-all-jobs) for an account.
+
+This API is created to get around the problem that some users may not
+have access to the [Get all jobs](#get-all-jobs) for an account API.
+
+## Get user job
+
+> Example request 
+
+```http
+GET /repoman/model1/userJobForProject HTTP/1.1
+```
+
+>Example response
+
+```json
+{"_id":"Actor", "color": "#000000"}
+```
+### GET /{accountName}/{modelName}/userJobForProject.json
+
+Get the job assigned to user for this team space
+
+Response body
+
+[Job object](#job-object)
