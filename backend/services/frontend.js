@@ -111,6 +111,8 @@
 				params.config_js += "\nserver_config.chatPath	= '" + '/' + config.chat_server.subdirectory + "';";
 			}
 
+			params.config_js += "\nserver_config.chatReconnectionAttempts = " + config.chat_reconnection_attempts + ";";
+
 			params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
 
 			if (serverConfig.backgroundImage) {
