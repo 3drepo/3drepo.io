@@ -9457,6 +9457,7 @@ var ViewerManager = {};
 			}
 		};
 
+
 		var home = function () {
 			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
 		};
@@ -9514,6 +9515,7 @@ var ViewerManager = {};
 				click: setViewingOption
 			}
 		];
+		
 		vm.selectedViewingOptionIndex = 2;
 
 		vm.leftButtons = [];
@@ -9525,6 +9527,7 @@ var ViewerManager = {};
 
 		vm.rightButtons = [];
 		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
+		setViewingOption(2);
 		/*
 		vm.rightButtons.push({
 			label: "Help",
@@ -11254,14 +11257,17 @@ var ViewerManager = {};
 					stateStack.push(parentState.children[i]);
 
 					(function(childState){
+						//console.log('childState.url', childState.url);
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
+							params: childState.params,
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
 							reloadOnSearch : false,
 							resolve: {
 								init: function(StateManager, $location, $stateParams)
 								{
 									StateManager.setState($stateParams);
+									//console.log('##state', StateManager.state);
 								}
 							}
 						});
@@ -11325,9 +11331,9 @@ var ViewerManager = {};
 
 			if (Object.keys(queryParams).length === 0)
 			{
-				StateManager.clearQuery();
+				//StateManager.clearQuery();
 			} else {
-				StateManager.setQuery(queryParams);
+				//StateManager.setQuery(queryParams);
 			}
 		});
 	}])
@@ -11611,13 +11617,18 @@ var ViewerManager = {};
 					self.changedState[varName] = value;
 				}
 			}
-
+			//console.log(varName, value);
 			self.state[varName] = value;
 		};
 
 		this.setState = function(stateParams) {
 			// Copy all state parameters and extra parameters
-			// to the state
+			// to the state#
+			//console.log('stateParams', stateParams);
+			if(stateParams.noSet){
+				return;
+			}
+
 			for (var state in stateParams) {
 				if (stateParams.hasOwnProperty(state)) {
 					self.setStateVar(state, stateParams[state]);
@@ -11668,6 +11679,8 @@ var ViewerManager = {};
 					self.updateState();
 				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
 					self.clearState();
+				} else if (event.type === EventService.EVENT.UPDATE_STATE){
+					self.updateState(true);
 				}
 			}
 		});
@@ -11887,9 +11900,9 @@ function AnalyticService(){
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig, $location) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -11924,7 +11937,10 @@ function AnalyticService(){
 			 * Watch the state to handle moving to and from the login page
 			 */
 			$scope.$watch("vm.state", function (newState, oldState) {
+
+				//console.log('newState', newState, oldState);
 				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
+					//console.log('in');
 					homeLoggedOut.empty();
 
 					vm.goToUserPage = false;
@@ -11989,7 +12005,11 @@ function AnalyticService(){
 					{
 						if(!event.value.initialiser) {
 							StateManager.setStateVar("loggedIn", true);
-							EventService.send(EventService.EVENT.GO_HOME);
+							EventService.send(EventService.EVENT.UPDATE_STATE);
+
+							if(!StateManager.state.account){
+								EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
+							}
 						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
@@ -12436,9 +12456,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -12594,7 +12614,7 @@ angular.module('3drepo')
 			}
 
 			// Role
-			if (changes.hasOwnProperty("availableRoles")) {
+			if (changes.hasOwnProperty("availableRoles") && this.availableRoles) {
 				console.log(this.availableRoles);
 				this.projectRoles = this.availableRoles.map(function (availableRole) {
 					/*
@@ -13020,6 +13040,17 @@ angular.module('3drepo')
 
 					startNotification();
 					self.saving = false;
+
+					$state.go('home.account.project.issue', 
+						{
+							account: self.account, 
+							project: self.project, 
+							revision: self.revision,
+							issue: self.data._id,
+							noSet: true
+						}, 
+						{notify: false}
+					);
 			});
 
 			AnalyticService.sendEvent({
@@ -14186,9 +14217,9 @@ angular.module('3drepo')
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -14222,6 +14253,16 @@ angular.module('3drepo')
 			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
 			vm.showAddButton = true;
+
+
+			// if issue id is in url then select the issue
+			var issue = vm.issues.find(function(issue){
+				return issue._id === vm.issueId;
+			});
+
+			if(issue){
+				vm.displayIssue = issue;
+			}
 		});
 
 		/*
@@ -14322,6 +14363,8 @@ angular.module('3drepo')
 				}
 				vm.subProjects = event.value.subProjects || [];
 				watchNotification();
+			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
+				vm.issueId = event.value;
 			}
 		});
 
@@ -14411,6 +14454,16 @@ angular.module('3drepo')
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
+				vm.displayIssue = null;
+				$state.go('home.account.project', 
+					{
+						account: vm.account, 
+						project: vm.project, 
+						revision: vm.revision,
+						noSet: true
+					}, 
+					{notify: false}
+				);
 			}
 		});
 
@@ -14601,6 +14654,16 @@ angular.module('3drepo')
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
+			$state.go('home.account.project.issue', 
+				{
+					account: vm.account, 
+					project: vm.project, 
+					revision: vm.revision,
+					issue: issue._id,
+					noSet: true
+				}, 
+				{notify: false}
+			);
 
 			AnalyticService.sendEvent({
 				eventCategory: 'Issue',
@@ -14744,6 +14807,7 @@ angular.module('3drepo')
 					menuOption: "<",
 					importBcf: "&",
 					selectedIssue: "<",
+					displayIssue: "<",
 					userRoles: "<",
 					issueDisplay: "<",
 					availableRoles: "<"
@@ -14751,9 +14815,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
 		var self = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
@@ -14963,6 +15027,17 @@ angular.module('3drepo')
 					}
 				}
 			}
+
+			if(changes.hasOwnProperty('displayIssue') && this.displayIssue){
+				//console.log('changes.displayIssue', this.displayIssue)
+				var that = this;
+
+				this.editIssue(this.displayIssue);
+				$timeout(function(){
+					showIssue(that.displayIssue);
+				}, 1500);
+
+			}
 		};
 
 		/**
@@ -15056,6 +15131,7 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		function showIssue (issue) {
+
 			var data,
 				pinHighlightColour = [1.0000, 0.7, 0.0];
 
@@ -18281,7 +18357,9 @@ var Oculus = {};
 			GO_HOME: "EVENT_GO_HOME",
 			CLEAR_STATE: "EVENT_CLEAR_STATE",
 			SET_STATE: "EVENT_SET_STATE",
-			STATE_CHANGED: "EVENT_STATE_CHANGED"
+			STATE_CHANGED: "EVENT_STATE_CHANGED",
+			SELECT_ISSUE: "EVENT_SELECT_ISSUE",
+			UPDATE_STATE: "EVENT_UPDATE_STATE"
 		};
 
 		var ERROR = {
@@ -18607,6 +18685,7 @@ var Oculus = {};
 				project:  "=",
 				branch:   "=",
 				revision: "=",
+				issueId: "=",
 				state:    "="
 			},
 			templateUrl: "project.html",
@@ -18874,10 +18953,21 @@ var Oculus = {};
 			}
 		});
 
+
 		$timeout(function () {
 			EventService.send(EventService.EVENT.VIEWER.LOAD_PROJECT, {account: vm.account, project: vm.project, branch: vm.branch, revision: vm.revision });
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
+
+		$scope.$watch("vm.issueId", function(){
+			if(vm.issueId){
+				// timeout to make sure event is sent after issue panel card is setup
+				$timeout(function () {
+					EventService.send(EventService.EVENT.SELECT_ISSUE, vm.issueId);
+				});
+			}
+		});
+
 
 		/*
 		 * Watch for events

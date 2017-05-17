@@ -66,6 +66,7 @@
 			}
 		};
 
+
 		var home = function () {
 			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
 		};
@@ -123,6 +124,7 @@
 				click: setViewingOption
 			}
 		];
+		
 		vm.selectedViewingOptionIndex = 2;
 
 		vm.leftButtons = [];
@@ -134,6 +136,7 @@
 
 		vm.rightButtons = [];
 		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
+		setViewingOption(2);
 		/*
 		vm.rightButtons.push({
 			label: "Help",
