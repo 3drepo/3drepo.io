@@ -131,7 +131,21 @@ module.exports = function(grunt) {
 					'public/dist/three_d_repo.min.css': ['public/dist/three_d_repo.css']
 				}
 			}
-		}
+		},
+
+        watch: {
+            // Running watch may throw an ENOSPC error see:
+            // http://stackoverflow.com/questions/22475849/node-js-error-enospc
+            // Fix:
+            // echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+            files: ['frontend/**/**'],
+            tasks: ['frontend'],
+            options: {
+                livereload: true
+            }
+
+        },
+
     });
 
 
@@ -142,9 +156,17 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-webfont');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-env');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont', 'concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
 	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
 	grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 	grunt.registerTask('frontend', ['concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
+    grunt.registerTask('watch-frontend', ['watch'])
+    
+    grunt.event.on('watch', function(action, filepath, target) {
+        grunt.log.writeln('Watch: ' + filepath + ' has ' + action);
+    });
+
+
 };

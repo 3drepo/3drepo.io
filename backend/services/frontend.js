@@ -323,6 +323,7 @@
 				"structure": JSON.stringify(pluginStructure),
 				"frontendJade": [],
 				"gaTrackId": config.gaTrackId,
+				"development" : config.development,
 				"googleConversionId": config.googleConversionId,
 				"userId": _.get(req, 'session.user.username')
 			};
