@@ -117,7 +117,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				this.convertToM = 0.001;
 			} else if (units === "ft") {
 				this.convertToM = 0.0032;
-			} 
+			}
 
 		}
 
@@ -1365,6 +1365,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.setNavMode = function(mode, force) {
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
+
+				self.setSpeed(self.speed);
 
 				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
 					waypoint.init();
