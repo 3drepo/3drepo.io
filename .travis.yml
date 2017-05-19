@@ -27,7 +27,10 @@ before_install:
     - sudo service mongod start
     - npm install -g grunt-cli
     - sleep 15
-    - cd submodules/tests/backend
+    - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
+    - cd submodules/tests
+    - git checkout $test_ver
+    - cd backend
     - mongorestore
 install: npm install
 services:
