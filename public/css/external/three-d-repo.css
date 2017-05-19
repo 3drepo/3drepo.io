@@ -3,16 +3,18 @@
 
 @font-face {
 	font-family:"three-d-repo";
-	src:url("../fonts/three-d-repo.eot?7c5ff102908e3adb0d4c284d04ff065c");
+	src:url("../fonts/three-d-repo.eot?7633cf9aeb87522d5158a734bbd8d03e");
 	src:url("../fonts/three-d-repo.eot?#iefix") format("embedded-opentype"),
-		url("../fonts/three-d-repo.woff?7c5ff102908e3adb0d4c284d04ff065c") format("woff"),
-		url("../fonts/three-d-repo.ttf?7c5ff102908e3adb0d4c284d04ff065c") format("truetype");
+		url("../fonts/three-d-repo.woff?7633cf9aeb87522d5158a734bbd8d03e") format("woff"),
+		url("../fonts/three-d-repo.ttf?7633cf9aeb87522d5158a734bbd8d03e") format("truetype");
 	font-weight:normal;
 	font-style:normal;
 }
 
 .icon {
-	font-family:"three-d-repo";
+	
+		font-family:"three-d-repo";
+	
 	display:inline-block;
 	vertical-align:middle;
 	line-height:1;

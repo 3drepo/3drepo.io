@@ -105,6 +105,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.multipartNodes = [];
 		this.multipartNodesByProject = {};
 
+		this.units = "m";
+		this.convertToM = 1.0;
+
+		this.setUnits = function(units)
+		{
+			this.units = units;
+
+			if (units === "mm")
+			{
+				this.convertToM = 0.001;
+			} else if (units === "ft") {
+				this.convertToM = 0.0032;
+			}
+
+		}
+
 		this.setHandle = function(handle) {
 			this.handle = handle;
 		};
@@ -653,7 +669,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-                    console.trace(event);
+                    //console.trace(event);
 
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
@@ -1181,6 +1197,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.setSpeed(self.settings.speed);
 				}
 
+				if (self.settings.hasOwnProperty("unit"))
+				{
+					self.setUnits(self.settings.unit);
+				}
+
 				if (self.settings.hasOwnProperty("avatarHeight")) {
 					self.changeAvatarHeight(self.settings.avatarHeight);
 				}
@@ -1345,6 +1366,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
+				self.setSpeed(self.speed);
+
 				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
 					waypoint.init();
 				}
@@ -1364,7 +1387,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					var bboxMax = self.getScene()._x3domNode.getVolume().max;
 					var bboxMin = self.getScene()._x3domNode.getVolume().min;
 					var bboxSize = bboxMax.subtract(bboxMin);
-					var calculatedSpeed = Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * 0.03;
+
+					// 10 m/s
+					var calculatedSpeed = Math.max.apply(Math, bboxSize.toGL()) / 5;//Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * self.convertToM;
 
 					self.nav.setAttribute("speed", calculatedSpeed);
 				}

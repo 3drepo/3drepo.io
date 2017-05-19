@@ -23,20 +23,22 @@
   ],
   "dependencies": {
     "angular": "1.5.5",
-    "angular-ui-router": "*",
-    "font-awesome": "~4.4.0",
-    "masonry": "~3.3.0",
-    "moment": "~2.10.6",
+    "angular-ui-router": "0.4.2",
+    "font-awesome": "4.4.0",
+    "masonry": "3.3.0",
+    "moment": "2.10.6",
     "socket.io-client": "1.4.5",
-    "angular-material": "~1.1.0",
-    "angular-animate": "~1.4.7",
-    "angular-aria": "~1.4.7",
-    "angular-sanitize": "~1.4.8",
-    "material-design-icons": "^2.2.3",
-    "angular-recaptcha": "^3.0.3",
+    "angular-material": "1.1.0",
+    "angular-animate": "1.4.7",
+    "angular-aria": "1.4.7",
+    "angular-sanitize": "1.4.8",
+    "material-design-icons": "2.2.3",
+    "angular-recaptcha": "3.0.3",
     "geodesy": "https://github.com/chrisveness/geodesy.git#1.0.2"
   },
   "resolutions": {
-    "angular": "1.5.5"
+    "angular": "1.5.5",
+    "angular-animate": "1.4.7",
+    "angular-aria": "1.4.7"
   }
 }
