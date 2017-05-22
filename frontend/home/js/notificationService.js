@@ -27,7 +27,11 @@ function NotificationService(serverConfig, $injector){
 		console.log('Chat server settings missing');
 	}
 
-	var socket = io(serverConfig.chatHost, {path: serverConfig.chatPath, transports: ['websocket']});
+	var socket = io(serverConfig.chatHost, {
+		path: serverConfig.chatPath, 
+		transports: ['websocket'],
+		reconnectionAttempts: serverConfig.chatReconnectionAttempts
+	});
 	var joined = [];
 
 	function addSocketIdToHeader(socketId){

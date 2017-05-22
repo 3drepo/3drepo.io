@@ -105,6 +105,22 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.multipartNodes = [];
 		this.multipartNodesByProject = {};
 
+		this.units = "m";
+		this.convertToM = 1.0;
+
+		this.setUnits = function(units)
+		{
+			this.units = units;
+
+			if (units === "mm")
+			{
+				this.convertToM = 0.001;
+			} else if (units === "ft") {
+				this.convertToM = 0.0032;
+			}
+
+		}
+
 		this.setHandle = function(handle) {
 			this.handle = handle;
 		};
@@ -648,6 +664,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				{
 					//User clicked the background
 					callback(self.EVENT.BACKGROUND_SELECTED);
+
 				}
 			}
 		};
@@ -936,6 +953,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.setSpeed(self.settings.speed);
 				}
 
+				if (self.settings.hasOwnProperty("unit"))
+				{
+					self.setUnits(self.settings.unit);
+				}
+
 				if (self.settings.hasOwnProperty("avatarHeight")) {
 					self.changeAvatarHeight(self.settings.avatarHeight);
 				}
@@ -1079,6 +1101,37 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
+<<<<<<< HEAD
+=======
+				self.setSpeed(self.speed);
+
+				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
+					waypoint.init();
+				}
+
+				if (self.currentNavMode === self.NAV_MODES.WAYFINDER) { // Exiting the wayfinding mode
+					waypoint.close();
+				}
+
+				if (mode === self.NAV_MODES.HELICOPTER) {
+					var vpInfo = self.getCurrentViewpointInfo();
+					var eye = vpInfo.position;
+					var viewDir = vpInfo.view_dir;
+
+					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
+					self.nav._x3domNode._vf.typeParams[1] = eye[1];
+
+					var bboxMax = self.getScene()._x3domNode.getVolume().max;
+					var bboxMin = self.getScene()._x3domNode.getVolume().min;
+					var bboxSize = bboxMax.subtract(bboxMin);
+
+					// 10 m/s
+					var calculatedSpeed = Math.max.apply(Math, bboxSize.toGL()) / 5;//Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * self.convertToM;
+
+					self.nav.setAttribute("speed", calculatedSpeed);
+				}
+
+>>>>>>> refs/remotes/origin/staging
 				self.currentNavMode = mode;
 				UnityUtil.setNavigation(mode);
 

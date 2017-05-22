@@ -1,1 +1,6 @@
-NODE_ENV=$1 NODE_CONFIG_DIR='./config' node $2 3drepo.js
+if [ -z "$1" ]
+  then
+    echo "No config argument supplied"
+else
+    NODE_ENV=$1 NODE_CONFIG_DIR='./config' node $2 3drepo.js
+fi

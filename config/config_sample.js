@@ -49,7 +49,8 @@ module.exports = {
 			service: "chat",
 			http_port: chat_port,
 			https_port: chat_port,
-			subdirectory: 'chat'
+			subdirectory: 'chat',
+			reconnection_attempts: 2
 		}
 	],
 	js_debug_level: 'debug',
