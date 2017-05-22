@@ -544,7 +544,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issue._id,
-				colours: pinHighlightColour
+				colours: [pinHighlightColour]
 			});
 
 			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
@@ -570,6 +570,9 @@
 				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
+					if(response.data.objects)
+				{
+
 					response.data.objects.forEach(function(obj){
 
 						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
@@ -583,7 +586,7 @@
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
-				});
+					}});
 			}
 		}
 
