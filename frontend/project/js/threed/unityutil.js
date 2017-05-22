@@ -159,12 +159,12 @@ var UnityUtil;
 			UnityUtil.objectSelectedCallback(point);
 	}
 
-	UnityUtil.prototype.doubleClicked = function(pointInfo)
+	UnityUtil.prototype.doubleClicked = function(meshInfo)
 	{
-		var point = JSON.parse(pointInfo);
-		if(point.position)
+		var point = JSON.parse(meshInfo);
+		if(point.meshID)
 		{
-			UnityUtil.centreToPoint(point.position);	
+			UnityUtil.centreToPoint(point.project, point.meshID);	
 		}
 	}
 
@@ -236,11 +236,12 @@ var UnityUtil;
 	 */
 
 
-	UnityUtil.prototype.centreToPoint = function(position)
+	UnityUtil.prototype.centreToPoint = function(project, id)
 	{
 		var params = {};
-		params.position = position;
-		toUnity("CentreToPoint", LoadingState.MODEL_LOADING, JSON.stringify(params));
+		params.project = project;
+		params.meshID = id
+		toUnity("CentreToObject", LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	UnityUtil.prototype.changePinColour = function(id, colour)
