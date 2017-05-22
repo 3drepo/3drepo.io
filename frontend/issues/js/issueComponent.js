@@ -359,6 +359,9 @@
 		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
+
+			//README: this should also highlight selected objects within this issue, but 
+			//will require a lot of rewriting for this to work at present!
 			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,

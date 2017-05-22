@@ -12771,6 +12771,7 @@ angular.module('3drepo')
 		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
+			console.log(self.issueData);
 			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
@@ -14641,9 +14642,12 @@ angular.module('3drepo')
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
+				// Remove highlight from any multi objects
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
 			if(issue){
+				showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});

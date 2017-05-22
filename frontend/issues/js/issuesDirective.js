@@ -473,9 +473,12 @@
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
+				// Remove highlight from any multi objects
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
 			if(issue){
+				showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
