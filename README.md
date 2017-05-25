@@ -23,6 +23,17 @@ Your pull requests should:
 5. Rebase your branch against [upstream's master](https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/) so that we don't pull redundant commits
 6. Sign our [3D Repo Individual CLA](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or if you are representing a legal entity, sign the [3D Repo Entity CLA](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2)
 
+Dependencies
+------------
+
+* Python v2
+* Node.js
+* npm 
+* MongoDB
+* RabbitMQ 
+* graphicsmagick
+* [3DRepoBouncer](https://github.com/3drepo/3drepobouncer)
+
 Installation
 ------------
 
@@ -33,11 +44,16 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 3. Check out latest release: `git checkout tags/latest`
 4. Update submodules: `git submodule update --init --progress` (You may want to used `--depth 1` to reduce transfer size)
 5. Setup the configuration file for running the 3D Repo web app as per the `Configuration` section below.
-6. Ensure [Python v2](https://www.python.org/), [Node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com) are installed. 
-7. MongoDB will also have to be running, alongside setting up a user named `adminUser` with in a `admin` database. for convienciece a script named `mongo-admin.js` is provided which will setup the admin user. It can be run as such: `mongo --eval "username='$mongo_node_username'; password='$mongo_node_password'" scripts/mongo-admin.js` 
-8. Install the required dependencies: `npm install`  
-9. Install the client dependencies: `bower install`  
-10. Compile the frontend: `grunt frontend` (for file watching/live reloading, see `Running the application` below)
+6. Install the required dependencies: `npm install`  
+7. Install the client dependencies: `bower install`  
+8. Compile the frontend: `grunt frontend` (for file watching/live reloading, see `Running the application` below)
+
+Database and Queue Setup 
+------------
+
+1. MongoDB will have to be running, alongside setting up a user named `adminUser` with in a `admin` database. For convenience a script named `mongo-admin.js` is provided which will setup the admin user. It can be run as such: `mongo --eval "username='$mongo_node_username'; password='$mongo_node_password'" scripts/mongo-admin.js` 
+2. RabitMQ will need to be running, and to have users and permissions setup. You can see `scripts/rabbitmq-setup.sh` for how this is done or run the script itself.
+3. 3D Repo Bouncer's bouncer_worker.js service will need be running
 
 Configuration
 -------------
@@ -65,6 +81,20 @@ Typically you will want to run the server using forever (install with `npm -g in
 
 **./forever_app \<config\>**
 * **config** This is the directory under config that the configuration resides in
+
+**SSL Errors**
+
+If you are running 3D Repo.io locally, you can disable the SSL section of the config to avoid errors regarding SSL, i.e.:
+
+```javascript
+	// ssl: {
+	// 	key: "my_key.pem",
+	// 	cert:"my_server.crt",
+	// 	ca: "my_server.ca"
+	// },
+```
+
+**Port Errors**
 
 The script may complain that you don't have access to the ports (EACCESS), in which case you need to set-up ip-routing under the `su` account.
 
