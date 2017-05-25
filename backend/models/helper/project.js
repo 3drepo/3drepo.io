@@ -501,7 +501,9 @@ function getModelProperties(account, project, branch, rev, username){
 		}
 
 		if(subProperties.length > 0)
+		{
 			properties.subProjects = [];
+		}
 		subProperties.forEach(subProperty => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
@@ -592,8 +594,10 @@ function getUnityAssets(account, project, branch, rev, username){
 
 		if(buf){
 			let projectAssets = JSON.parse(buf);
-			if(projectAssets != null)
+			if(projectAssets !== null)
+			{
 				projects.push(projectAssets);
+			}
 
 		}
 
@@ -609,7 +613,7 @@ function getUnityAssets(account, project, branch, rev, username){
 	});
 }
 
-function getUnityBundle(account, project, uid, username){
+function getUnityBundle(account, project, uid){
 	'use strict';
 
 	let bundleFileName;

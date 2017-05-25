@@ -363,7 +363,7 @@ function getUnityBundle(req, res, next){
 	let username = req.session.user.username;
 
 
-	ProjectHelpers.getUnityBundle(account, project, id, username).then(obj => {
+	ProjectHelpers.getUnityBundle(account, project, id).then(obj => {
 		req.params.format= 'unity3d';
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
