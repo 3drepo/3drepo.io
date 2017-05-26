@@ -192,7 +192,7 @@
 				case "projectsetting":
 					$location.search("proj", vm.project.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "projectsetting", callingPage: "repos", data: {tabIndex: 0}});
+					vm.onShowPage({page: "projectsetting", callingPage: "teamspaces", data: {tabIndex: 0}});
 					break;
 
 				case "upload":
@@ -240,7 +240,7 @@
 		 * Go to the billing page to add more licenses
 		 */
 		vm.setupAddLicenses = function () {
-			vm.onShowPage({page: "billing", callingPage: "repos"});
+			vm.onShowPage({page: "billing", callingPage: "teamspaces"});
 			UtilsService.closeDialog();
 		};
 

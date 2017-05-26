@@ -14,9 +14,6 @@
 						md-icon.angular-material-icons {{account.showProjectsIcon}}
 					p {{account.account}}
 					md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
-			.accountRight(ng-if="account.canAddProject")
-				md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event, account.account)")
-					md-icon.angular-material-icons.md-accent playlist_add
 
 		// Projects
 		md-list.projects(ng-if="account.showProjects")

@@ -44,7 +44,7 @@
 			promise;
 
 		/**
-		 * Go back to the repos page
+		 * Go back to the teamspaces page
 		 */
 		 console.log('data', vm.data);
 
@@ -52,7 +52,7 @@
 			$location.search("project", null);
 			$location.search("targetAcct", null);
 
-			vm.showPage({page: "repos", data: vm.data});
+			vm.showPage({page: "teamspaces", data: vm.data});
 		};
 
 		vm.units = server_config.units

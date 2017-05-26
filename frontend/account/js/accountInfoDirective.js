@@ -49,7 +49,7 @@
 		 * Init
 		 */
 		vm.accountOptions = {
-			repos: {label: "Teamspaces"},
+			teamspaces: {label: "Teamspaces"},
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
 			licenses: {label: "Licenses"}

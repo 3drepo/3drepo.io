@@ -19,12 +19,12 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountRepos", accountRepos);
+		.directive("accountTeamspaces", accountTeamspaces);
 
-	function accountRepos() {
+	function accountTeamspaces() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountRepos.html',
+			templateUrl: 'accountTeamspaces.html',
 			scope: {
 				account: "=",
 				accounts: "=",

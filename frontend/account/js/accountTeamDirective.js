@@ -73,11 +73,11 @@
 		});
 
 		/**
-		 * Go back to the repos page
+		 * Go back to the teamspaces page
 		 */
 		vm.goBack = function () {
 			$location.search("project", null);
-			vm.showPage({page: "repos"});
+			vm.showPage({page: "teamspaces"});
 		};
 
 		/**

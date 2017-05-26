@@ -56,7 +56,7 @@
 						vm.itemToShow = vm.query.page;
 					}
 					else {
-						vm.itemToShow = "repos";
+						vm.itemToShow = "teamspaces";
 					}
 
 					// Handle Billing Page
@@ -103,7 +103,7 @@
 					}
 				}
 				else {
-					vm.itemToShow = "repos";
+					vm.itemToShow = "teamspaces";
 					init();
 				}
 

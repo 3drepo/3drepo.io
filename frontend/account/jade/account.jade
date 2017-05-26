@@ -10,8 +10,8 @@ div(ng-if="!vm.state.project")
 		item-to-show="vm.itemToShow")
 
 		#accountItem(ng-switch="vm.itemToShow")
-			account-repos(
-			ng-switch-when="repos"
+			account-teamspaces(
+			ng-switch-when="teamspaces"
 			account="vm.account"
 			accounts="vm.accounts"
 			on-show-page="vm.showPage(page, callingPage, data)"

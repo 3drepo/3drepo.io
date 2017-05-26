@@ -374,7 +374,7 @@
 		function setupSetting(event, accountIndex, projectIndex){
 			$location.search("proj", vm.accountsToUse[accountIndex].fedProjects[projectIndex].project);
 			$location.search("targetAcct", vm.accountsToUse[accountIndex].account);
-			vm.onShowPage({page: "projectsetting", callingPage: "repos", data: {tabIndex: 1}});
+			vm.onShowPage({page: "projectsetting", callingPage: "teamspaces", data: {tabIndex: 1}});
 		}
 
 		/**
