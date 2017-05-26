@@ -3,23 +3,24 @@
 	input#existingProjectFileUploader(type="file")
 	input#newProjectFileUploader(type="file")
 
-	md-list#accountList(flex, ng-if="vm.projectsExist")
-		// Accounts
-		div(ng-repeat="account in vm.accounts", ng-if="account.showAccount")
-			div(layout="row", layout-align="space-between")
-				md-list-item(flex)
-					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
-						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showProjectsIcon}}
-						p {{account.account}}
-						md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
-				.accountRight(ng-if="account.canAddProject")
-					md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event, account.account)")
-						md-icon.angular-material-icons.md-accent playlist_add
 
-			// Projects
-			md-list.projects(ng-if="account.showProjects")
-				account-project(
+	// Accounts
+	div(ng-repeat="account in vm.accounts", ng-if="account.showAccount")
+
+		div(layout="row", layout-align="space-between")
+			md-list-item(flex)
+				.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
+					md-button.md-icon-button(aria-label="Folder")
+						md-icon.angular-material-icons {{account.showProjectsIcon}}
+					p {{account.account}}
+					md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
+			.accountRight(ng-if="account.canAddProject")
+				md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event, account.account)")
+					md-icon.angular-material-icons.md-accent playlist_add
+
+		// Projects
+		md-list.projects(ng-if="account.showProjects")
+			account-project(
 				ng-repeat="project in account.projects"
 				account="account.name"
 				is-account-admin="account.isAdmin"
@@ -32,7 +33,17 @@
 				on-setup-delete-project="vm.setupDeleteProject(event, project, account)",
 				quota="vm.quota"
 				subscriptions="vm.subscriptions")
-			md-divider
+
+		md-divider
+
+		md-list.federations(ng-if="account.showProjects")
+			account-federations(
+				account="vm.account"
+				accounts="vm.accounts"
+				on-show-page="vm.showPage(page, callingPage, data)"
+				quota="vm.quota"
+				subscriptions="vm.subscriptions")
+
 
 
 	div(ng-if="!vm.projectsExist")
