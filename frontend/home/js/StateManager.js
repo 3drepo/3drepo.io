@@ -169,9 +169,9 @@
 
 			if (Object.keys(queryParams).length === 0)
 			{
-				//StateManager.clearQuery();
+				StateManager.clearQuery();
 			} else {
-				//StateManager.setQuery(queryParams);
+				StateManager.setQuery(queryParams);
 			}
 		});
 	}])
