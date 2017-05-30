@@ -19,7 +19,7 @@ let UserBilling = proxyquire('../../../models/userBilling', {
 });
 
 let Subscriptions = proxyquire('../../../models/subscriptions', {
-	'./projectSetting' :  {}
+	'./modelSetting' :  {}
 });
 
 let C = require('../../../constants');

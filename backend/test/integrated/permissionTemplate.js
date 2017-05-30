@@ -165,7 +165,7 @@ describe('Permission templates', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const accountModel = account.projects.find(project => project.project === model);
+					const accountModel = account.models.find(m => m.model === model);
 					expect(accountModel).to.exist;
 
 					callback(err);
@@ -234,7 +234,7 @@ describe('Permission templates', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const accountModel = account.projects.find(project => project.project === 'model2');
+					const accountModel = account.models.find(m => m.model === 'model2');
 					expect(accountModel).to.not.exist;
 
 					callback(err);

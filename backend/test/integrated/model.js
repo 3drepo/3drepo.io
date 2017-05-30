@@ -29,16 +29,16 @@ let helpers = require("./helpers");
 let C = require('../../constants');
 let async = require('async');
 let Role = require('../../models/role');
-let ProjectSetting = require('../../models/projectSetting');
+let ModelSetting = require('../../models/modelSetting');
 let User = require('../../models/user');
-describe('Project', function () {
+describe('Model', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'project_username';
 	let password = 'project_username';
-	let project = 'project1';
-	let projectFed = 'projectFed1';
+	let model = 'project1';
+	let modelFed = 'projectFed1';
 	let projectGroup = 'projectgroup'
 	let desc = 'desc';
 	let type = 'type';
@@ -78,17 +78,17 @@ describe('Project', function () {
 		async.series([
 			callback => {
 
-				agent.post(`/${username}/${project}`)
+				agent.post(`/${username}/${model}`)
 				.send({ desc, type, unit, code, projectGroup })
 				.expect(200, function(err ,res) {
 					console.log(res.body);
-					expect(res.body.project).to.equal(project);
+					expect(res.body.model).to.equal(model);
 					callback(err);
 				});
 
 			},
 			callback => {
-				agent.get(`/${username}/${project}.json`)
+				agent.get(`/${username}/${model}.json`)
 				.expect(200, function(err, res){
 					expect(res.body.desc).to.equal(desc);
 					expect(res.body.type).to.equal(type);
@@ -110,8 +110,8 @@ describe('Project', function () {
 
 					console.log(pg);
 
-					const model = pg.models.find(model => model.project === project);
-					expect(model).to.exist;
+					const myModel = pg.models.find(_model => _model.model === model);
+					expect(myModel).to.exist;
 
 					callback(err);
 				});
@@ -123,7 +123,7 @@ describe('Project', function () {
 
 	it('should fail if project group supplied is not found', function(done){
 
-		agent.post(`/${username}/project2`)
+		agent.post(`/${username}/model2`)
 		.send({ desc, type, unit, code, projectGroup: 'noexist' })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
@@ -134,40 +134,40 @@ describe('Project', function () {
 
 	it('should fail if no unit specified', function(done){
 
-		agent.post(`/${username}/project3`)
+		agent.post(`/${username}/model3`)
 		.send({ desc, type })
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.PROJECT_NO_UNIT.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
 			done(err);
 			
 		});
 	});
 
-	it('update project code with invalid format', function(done){
+	it('update model code with invalid format', function(done){
 
 
-		function updateProjectCode(code, done){
-			agent.put(`/${username}/project4/settings`)
+		function updateModelCode(code, done){
+			agent.put(`/${username}/model4/settings`)
 			.send({code}).expect(400, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_CODE.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_CODE.value);
 				done(err);
 			});
 		}
 
 		async.series([
 			function(done){
-				updateProjectCode('$', done)
+				updateModelCode('$', done)
 			}, 
 			function(done){
-				updateProjectCode('123456', done)
+				updateModelCode('123456', done)
 			}
 		], done)
 
 	});
 
 	it('update issues type with duplicate values', function(done){
-			agent.put(`/${username}/project5/settings`)
+			agent.put(`/${username}/model5/settings`)
 			.send({
 				topicTypes: ['For Info', 'for info']
 			}).expect(400, function(err ,res) {
@@ -214,7 +214,8 @@ describe('Project', function () {
 
 		};
 
-		agent.put(`/${username}/project6/settings`)
+		let mymodel = "project6";
+		agent.put(`/${username}/${mymodel}/settings`)
 		.send(body).expect(200, function(err ,res) {
 
 			expect(res.body).to.deep.equal(expectedReturn);
@@ -223,7 +224,7 @@ describe('Project', function () {
 				return done(err);
 			}
 
-			agent.get(`/${username}/project6.json`)
+			agent.get(`/${username}/${mymodel}.json`)
 			.expect(200, function(err, res){
 				expect(res.body.properties).to.deep.equal(expectedReturn);
 				done(err);
@@ -234,21 +235,21 @@ describe('Project', function () {
 
 
 
-	it('should return error message if project name already exists', function(done){
+	it('should return error message if model name already exists', function(done){
 
-		agent.post(`/${username}/project7`)
+		agent.post(`/${username}/model7`)
 		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
-			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 			done(err);
 		});
 	});
 
 
-	C.REPO_BLACKLIST_PROJECT.forEach(projectName => {
+	C.REPO_BLACKLIST_MODEL.forEach(modelName => {
 
 
-		it(`should return error message if project name is blacklisted - ${projectName}`, function(done){
+		it(`should return error message if model name is blacklisted - ${modelName}`, function(done){
 
 			if([
 				'database',
@@ -256,15 +257,15 @@ describe('Project', function () {
 				'forgot-password',
 				'subscriptions',
 				'projects'
-			].indexOf(projectName) !== -1){
-				//skip these project name because they are actually other APIs.
+			].indexOf(modelName) !== -1){
+				//skip these model name because they are actually other APIs.
 				return done();
 			}
 
-			agent.post(`/${username}/${projectName}`)
+			agent.post(`/${username}/${modelName}`)
 			.send({ desc, type, unit })
 			.expect(400, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
+				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_MODEL_NAME.value);
 				done(err);
 			});
 		});
@@ -273,20 +274,20 @@ describe('Project', function () {
 
 
 
-	it('should return error message if project name contains spaces', function(done){
+	it('should return error message if model name contains spaces', function(done){
 
 		agent.post('/' + username + '/you%20are%20genius')
 		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
-			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+			expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
 			done(err);
 		});
 	});
 
 
-	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
+	it('should return error if creating a model in a database that doesn\'t exists or not authorized for', function(done){
 
-		agent.post(`/${username}_someonelese/${project}`)
+		agent.post(`/${username}_someonelese/${model}`)
 		.send({ desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
@@ -297,7 +298,7 @@ describe('Project', function () {
 
 		let username = 'testing';
 		let password = 'testing';
-		let project = 'testproject';
+		let model = 'testproject';
 
 		before(function(done){
 			async.series([
@@ -313,7 +314,7 @@ describe('Project', function () {
 		});
 
 		it('should success and get the latest file', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(200, function(err, res){
+			agent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res){
 
 				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
 				
@@ -324,11 +325,11 @@ describe('Project', function () {
 	});
 
 
-	describe('Delete a project', function(){
+	describe('Delete a model', function(){
 
 		let username = 'projectshared';
 		let password = 'password';
-		let project = 'sample_project';
+		let model = 'sample_project';
 
 		let collaboratorUsername = 'testing';
 
@@ -342,68 +343,45 @@ describe('Project', function () {
 						username, password
 					}).expect(200, done);
 				},
-				// function(done){
-				// 	// check if the project is shared and roles are in place
-				// 	Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
-				// 		expect(role).to.not.be.null;
-				// 		return Role.findByRoleID(`${username}.${project}.collaborator`);
-				// 	}).then(role => {
-				// 		expect(role).to.not.be.null;
-				// 		done();
-				// 	});
-				// },
-				// function(done){
-				// 	// check if the project is shared and roles are in place
-				// 	ProjectSetting.findById({account: username, project: project}, project).then(setting => {
-				// 		expect(setting).to.not.be.null;
-				// 		done();
-				// 	});
-				// },
-				// function(done){
-				// 	// check if the project is shared and roles are in place
-				// 	return User.findByUserName(collaboratorUsername).then(user => {
-				// 		expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.not.be.undefined;
-				// 		done();
-				// 	});
-				// }
+
 			], done);
 
 		});
 
 
 		it('should success', function(done){
-			agent.delete(`/${username}/${project}`).expect(200, done);
+			agent.delete(`/${username}/${model}`).expect(200, done);
 		});
 
 		it('should fail if delete again', function(done){
-			agent.delete(`/${username}/${project}`).expect(404, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			agent.delete(`/${username}/${model}`).expect(404, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
 				done(err);
 			});
 		});
 
 		// it('should remove all the roles in roles collection', function(){
-		// 	return Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+		// 	return Role.findByRoleID(`${username}.${model}.viewer`).then(role => {
 		// 		expect(role).to.be.null;
-		// 		return Role.findByRoleID(`${username}.${project}.collaborator`);
+		// 		return Role.findByRoleID(`${username}.${model}.collaborator`);
 		// 	}).then(role => {
 		// 		expect(role).to.be.null;
 		// 	});
 		// });
 
 		it('should remove setting in settings collection', function() {
-			return ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
 				expect(setting).to.be.null;
 			});
 		});
 
 		// it('should remove role from collaborator user.roles', function(){
 		// 	return User.findByUserName(collaboratorUsername).then(user => {
-		// 		expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
+		// 		expect(user.roles.find(role => role.role === `${model}.collaborator` && role.db === username)).to.be.undefined;
 		// 	});
 		// });
 
-		it('should be removed from collaborator\'s project listing', function(done){
+		it('should be removed from collaborator\'s model listing', function(done){
 
 			const agent2 = request.agent(server);
 
@@ -417,8 +395,8 @@ describe('Project', function () {
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.not.exist;
 
-						// const model = account.projects.find(myProject => myProject.project === project);
-						// expect(model).to.not.exist;
+						// const mm = account.models.find(m => m.model === model);
+						// expect(mm).to.not.exist;
 
 						callback(err);
 					});
@@ -428,7 +406,7 @@ describe('Project', function () {
 
 		});
 
-		it('should be removed from project group', function(done){
+		it('should be removed from model group', function(done){
 			agent.get(`/${username}.json`).expect(200, function(err, res){
 				
 				const account = res.body.accounts.find(account => account.account === username);
@@ -437,8 +415,8 @@ describe('Project', function () {
 				const pg = account.projectGroups.find(pg => pg.name === 'project1');
 				expect(pg).to.exist;
 
-				const model = pg.models.find(model => model.project === 'sample_project');
-				expect(model).to.not.exist;
+				const myModel = pg.models.find(_model => _model.model === 'sample_project');
+				expect(myModel).to.not.exist;
 
 				done(err);
 			});

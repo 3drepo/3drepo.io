@@ -75,7 +75,7 @@ describe('Verify', function () {
 			.expect(200, function(err, res){
 				
 				done(err);
-				// // give the system some time to import the toy project after users verified
+				// // give the system some time to import the toy model after users verified
 				// setTimeout(function(){
 				// 	done(err);
 				// }, 10000);
@@ -88,7 +88,7 @@ describe('Verify', function () {
 	});
 
 	// Can't test any more but logic moved to bouncer
-	// it('verified user should have toy project imported', function(done){
+	// it('verified user should have toy model imported', function(done){
 
 	// 	let agent = request.agent(server);
 		

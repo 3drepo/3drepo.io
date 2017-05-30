@@ -35,7 +35,7 @@ let utils = require("../mock/utils");
 
 let sinon = require('sinon');
 
-let ProjectSetting = proxyquire('../../../models/projectSetting', { 
+let ModelSetting = proxyquire('../../../models/modelSetting', { 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,
 });
@@ -43,7 +43,7 @@ let ProjectSetting = proxyquire('../../../models/projectSetting', {
 
 let DB = require('../mock/db');
 
-describe('Project Settings', function(){
+describe('Model Settings', function(){
 
 	before(function(done) {
 
@@ -61,8 +61,8 @@ describe('Project Settings', function(){
 	describe('#updateProperties', function(){
 
 		it('should have updateProperties function', function(){
-			let projectSetting = new ProjectSetting();
-			expect(projectSetting).to.have.property('updateProperties');
+			let modelSetting = new ModelSetting();
+			expect(modelSetting).to.have.property('updateProperties');
 		});
 
 		it('should update properties', function(){
@@ -97,10 +97,10 @@ describe('Project Settings', function(){
 				code: '09ABC'
 			};
 
-			let projectSetting = new ProjectSetting();
+			let modelSetting = new ModelSetting();
 			
-			projectSetting.updateProperties(props);
-			expect(projectSetting.toObject().properties).to.deep.equal(expectedReturn);
+			modelSetting.updateProperties(props);
+			expect(modelSetting.toObject().properties).to.deep.equal(expectedReturn);
 		
 
 		});

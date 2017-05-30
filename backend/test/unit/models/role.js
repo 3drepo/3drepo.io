@@ -26,7 +26,7 @@ let sinon = require('sinon');
 let C = require('../../../constants');
 let mongoose = require('mongoose');
 let mockgoose = require('mockgoose');
-let ProjectSetting = require('../../../models/projectSetting');
+let ModelSetting = require('../../../models/modelSetting');
 
 let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
 	'mongoose': mongoose, 
@@ -71,8 +71,8 @@ describe('Role templates model', function(){
 
 		it(`should create expected privileges for ${C.ADMIN_TEMPLATE} role`, function(){
 			let account = 'testacct';
-			let project = 'testproject';
-			let createCmd = RoleTemplates.createRoleFromTemplate(account, project, C.ADMIN_TEMPLATE);
+			let model = 'testproject';
+			let createCmd = RoleTemplates.createRoleFromTemplate(account, model, C.ADMIN_TEMPLATE);
 
 			expect(createCmd).to.deep.equal({
 				createRole: C.ADMIN_TEMPLATE,
@@ -86,9 +86,9 @@ describe('Role templates model', function(){
 
 		it(`should create expected privileges for ${C.ADMIN_TEMPLATE} role with custom role name`, function(){
 			let account = 'testacct';
-			let project = 'testproject';
+			let model = 'testproject';
 			let roleName = 'abc123'
-			let createCmd = RoleTemplates.createRoleFromTemplate(account, project, C.ADMIN_TEMPLATE, roleName);
+			let createCmd = RoleTemplates.createRoleFromTemplate(account, model, C.ADMIN_TEMPLATE, roleName);
 
 			expect(createCmd).to.deep.equal({
 				createRole: roleName,
@@ -102,15 +102,15 @@ describe('Role templates model', function(){
 
 		it(`should create expected privileges for ${C.VIEWER_TEMPLATE} role`, function(){
 			let account = 'testacct';
-			let project = 'testproject';
-			let createCmd = RoleTemplates.createRoleFromTemplate(account, project, C.VIEWER_TEMPLATE);
+			let model = 'testproject';
+			let createCmd = RoleTemplates.createRoleFromTemplate(account, model, C.VIEWER_TEMPLATE);
 
 			let expectedCreateCmd = {
-				createRole: `${project}.${C.VIEWER_TEMPLATE}`,
+				createRole: `${model}.${C.VIEWER_TEMPLATE}`,
 				privileges: [{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.history`
+						"collection" : `${model}.history`
 					},
 					"actions" : [ 
 						"find",
@@ -118,7 +118,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.scene`
+						"collection" : `${model}.scene`
 					},
 					"actions" : [ 
 						"find",
@@ -126,7 +126,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.chunks`
+						"collection" : `${model}.stash.3drepo.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -134,7 +134,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.files`
+						"collection" : `${model}.stash.3drepo.files`
 					},
 					"actions" : [ 
 						"find",
@@ -142,7 +142,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo`
+						"collection" : `${model}.stash.3drepo`
 					},
 					"actions" : [ 
 						"find",
@@ -150,7 +150,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.chunks`
+						"collection" : `${model}.stash.json_mpc.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -158,7 +158,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.files`
+						"collection" : `${model}.stash.json_mpc.files`
 					},
 					"actions" : [ 
 						"find",
@@ -166,7 +166,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.chunks`
+						"collection" : `${model}.stash.src.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -174,7 +174,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.files`
+						"collection" : `${model}.stash.src.files`
 					},
 					"actions" : [ 
 						"find",
@@ -182,7 +182,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.issues`
+						"collection" : `${model}.issues`
 					},
 					"actions" : [ 
 						"find",
@@ -201,15 +201,15 @@ describe('Role templates model', function(){
 
 		it(`should create expected privileges for ${C.COMMENTER_TEMPLATE} role`, function(){
 			let account = 'testacct';
-			let project = 'testproject';
-			let createCmd = RoleTemplates.createRoleFromTemplate(account, project, C.COMMENTER_TEMPLATE);
+			let model = 'testproject';
+			let createCmd = RoleTemplates.createRoleFromTemplate(account, model, C.COMMENTER_TEMPLATE);
 
 			let expectedCreateCmd = {
-				createRole: `${project}.${C.COMMENTER_TEMPLATE}`,
+				createRole: `${model}.${C.COMMENTER_TEMPLATE}`,
 				privileges: [{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.history`
+						"collection" : `${model}.history`
 					},
 					"actions" : [ 
 						"find",
@@ -217,7 +217,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.scene`
+						"collection" : `${model}.scene`
 					},
 					"actions" : [ 
 						"find",
@@ -225,7 +225,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.chunks`
+						"collection" : `${model}.stash.3drepo.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -233,7 +233,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.files`
+						"collection" : `${model}.stash.3drepo.files`
 					},
 					"actions" : [ 
 						"find",
@@ -241,7 +241,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo`
+						"collection" : `${model}.stash.3drepo`
 					},
 					"actions" : [ 
 						"find",
@@ -249,7 +249,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.chunks`
+						"collection" : `${model}.stash.json_mpc.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -257,7 +257,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.files`
+						"collection" : `${model}.stash.json_mpc.files`
 					},
 					"actions" : [ 
 						"find",
@@ -265,7 +265,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.chunks`
+						"collection" : `${model}.stash.src.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -273,7 +273,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.files`
+						"collection" : `${model}.stash.src.files`
 					},
 					"actions" : [ 
 						"find",
@@ -281,7 +281,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.issues`
+						"collection" : `${model}.issues`
 					},
 					"actions" : [ 
 						"find", "insert", "update"
@@ -298,15 +298,15 @@ describe('Role templates model', function(){
 
 		it(`should create expected privileges for ${C.COLLABORATOR_TEMPLATE} role`, function(){
 			let account = 'testacct';
-			let project = 'testproject';
-			let createCmd = RoleTemplates.createRoleFromTemplate(account, project, C.COLLABORATOR_TEMPLATE);
+			let model = 'testproject';
+			let createCmd = RoleTemplates.createRoleFromTemplate(account, model, C.COLLABORATOR_TEMPLATE);
 
 			let expectedCreateCmd = {
-				createRole: `${project}.${C.COLLABORATOR_TEMPLATE}`,
+				createRole: `${model}.${C.COLLABORATOR_TEMPLATE}`,
 				privileges: [{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.history`
+						"collection" : `${model}.history`
 					},
 					"actions" : [ 
 						"find", "insert"
@@ -314,7 +314,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.scene`
+						"collection" : `${model}.scene`
 					},
 					"actions" : [ 
 						"find",
@@ -322,7 +322,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.chunks`
+						"collection" : `${model}.stash.3drepo.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -330,7 +330,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo.files`
+						"collection" : `${model}.stash.3drepo.files`
 					},
 					"actions" : [ 
 						"find",
@@ -338,7 +338,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.3drepo`
+						"collection" : `${model}.stash.3drepo`
 					},
 					"actions" : [ 
 						"find",
@@ -346,7 +346,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.chunks`
+						"collection" : `${model}.stash.json_mpc.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -354,7 +354,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.json_mpc.files`
+						"collection" : `${model}.stash.json_mpc.files`
 					},
 					"actions" : [ 
 						"find",
@@ -362,7 +362,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.chunks`
+						"collection" : `${model}.stash.src.chunks`
 					},
 					"actions" : [ 
 						"find",
@@ -370,7 +370,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.stash.src.files`
+						"collection" : `${model}.stash.src.files`
 					},
 					"actions" : [ 
 						"find",
@@ -378,7 +378,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.history.chunks`
+						"collection" : `${model}.history.chunks`
 					},
 					"actions" : [ 
 						"find", "insert"
@@ -386,7 +386,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.history.files`
+						"collection" : `${model}.history.files`
 					},
 					"actions" : [ 
 						"find", "insert"
@@ -394,7 +394,7 @@ describe('Role templates model', function(){
 				},{
 					"resource" : {
 						"db" : account,
-						"collection" : `${project}.issues`
+						"collection" : `${model}.issues`
 					},
 					"actions" : [ 
 						"find", "insert", "update"
@@ -415,18 +415,18 @@ describe('Role templates model', function(){
 
 describe('Role model', function(){
 
-	function createViewerRole(roleName, account, projects){
+	function createViewerRole(roleName, account, models){
 		let role = {
 			role: roleName,
 			db: account,
 			inheritedPrivileges: []
 		}
 
-		projects.forEach(project => {
+		models.forEach(model => {
 			role.inheritedPrivileges.push({
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.history`
+					"collection" : `${model}.history`
 				},
 				"actions" : [ 
 					"find",
@@ -434,7 +434,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.scene`
+					"collection" : `${model}.scene`
 				},
 				"actions" : [ 
 					"find",
@@ -442,7 +442,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.3drepo.chunks`
+					"collection" : `${model}.stash.3drepo.chunks`
 				},
 				"actions" : [ 
 					"find",
@@ -450,7 +450,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.3drepo.files`
+					"collection" : `${model}.stash.3drepo.files`
 				},
 				"actions" : [ 
 					"find",
@@ -458,7 +458,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.3drepo`
+					"collection" : `${model}.stash.3drepo`
 				},
 				"actions" : [ 
 					"find",
@@ -466,7 +466,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.json_mpc.chunks`
+					"collection" : `${model}.stash.json_mpc.chunks`
 				},
 				"actions" : [ 
 					"find",
@@ -474,7 +474,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.json_mpc.files`
+					"collection" : `${model}.stash.json_mpc.files`
 				},
 				"actions" : [ 
 					"find",
@@ -482,7 +482,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.src.chunks`
+					"collection" : `${model}.stash.src.chunks`
 				},
 				"actions" : [ 
 					"find",
@@ -490,7 +490,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.stash.src.files`
+					"collection" : `${model}.stash.src.files`
 				},
 				"actions" : [ 
 					"find",
@@ -498,7 +498,7 @@ describe('Role model', function(){
 			},{
 				"resource" : {
 					"db" : account,
-					"collection" : `${project}.issues`
+					"collection" : `${model}.issues`
 				},
 				"actions" : [ 
 					"find",

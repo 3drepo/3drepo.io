@@ -23,10 +23,10 @@ let _ = require('lodash');
 
 let proxyquire = require('proxyquire').noCallThru();
 let sinon = require('sinon');
-let ProjectHelper = proxyquire('../../../models/helper/project', {
+let ModelHelper = proxyquire('../../../models/helper/model', {
 	'../role': {},
 	'../roleSetting': {},
-	'../projectSetting': {},
+	'../modelSetting': {},
 	'../user': {},
 	'../../response_codes': {},
 	'../../services/queue': {},
@@ -45,23 +45,23 @@ let ProjectHelper = proxyquire('../../../models/helper/project', {
 	'../chatEvent': {},
 });
 
-describe('Project Helpers', function(){
+describe('Model Helpers', function(){
 
-	describe('#projectNameRegExp', function(){
-		it('should have projectNameRegExp exposed', function(){
-			expect(ProjectHelper.projectNameRegExp).to.have.exists;
+	describe('#modelNameRegExp', function(){
+		it('should have modelNameRegExp exposed', function(){
+			expect(ModelHelper.modelNameRegExp).to.have.exists;
 		});
 
-		it('test project name format should succee', function(){
-			expect(ProjectHelper.projectNameRegExp.test('abc')).to.be.true;
-			expect(ProjectHelper.projectNameRegExp.test('123-4a')).to.be.true;
-			expect(ProjectHelper.projectNameRegExp.test('123_4a')).to.be.true;
-			expect(ProjectHelper.projectNameRegExp.test('123_4A')).to.be.true;
-			expect(ProjectHelper.projectNameRegExp.test('aa')).to.be.false;
-			expect(ProjectHelper.projectNameRegExp.test('aasa[')).to.be.false;
-			expect(ProjectHelper.projectNameRegExp.test('aasa/')).to.be.false;
-			expect(ProjectHelper.projectNameRegExp.test('aasa%')).to.be.false;
-			expect(ProjectHelper.projectNameRegExp.test('aaaaaaaaaaaaaaaaaaaaa')).to.be.false;
+		it('test model name format should succee', function(){
+			expect(ModelHelper.modelNameRegExp.test('abc')).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test('123-4a')).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test('123_4a')).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test('123_4A')).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test('aa')).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test('aasa[')).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test('aasa/')).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test('aasa%')).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test('aaaaaaaaaaaaaaaaaaaaa')).to.be.false;
 		});
 	});
 
