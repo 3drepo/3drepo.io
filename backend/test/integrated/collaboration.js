@@ -29,13 +29,13 @@ const helpers = require("./helpers");
 const async = require('async');
 const C = require('../../constants');
 
-describe('Sharing/Unsharing a project', function () {
+describe('Sharing/Unsharing a model', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'projectowner';
 	let password = 'password';
-	let project = 'testproject';
+	let model = 'testproject';
 	let email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
 
 
@@ -129,7 +129,7 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('should succee and the viewer is able to see the project', function(done){
+		it('should succee and the viewer is able to see the model', function(done){
 
 			const permissions = [
 				{ user: username_viewer, permission: 'viewer'}
@@ -138,7 +138,7 @@ describe('Sharing/Unsharing a project', function () {
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/permissions`)
+					agent.post(`/${username}/${model}/permissions`)
 					.send(permissions)
 					.expect(200, function(err, res){
 						done(err);
@@ -162,24 +162,24 @@ describe('Sharing/Unsharing a project', function () {
 						done(err);
 					});
 				},
-				function checkSharedProjectInList(done){
+				function checkSharedModelInList(done){
 
 					agent.get(`/${username_viewer}.json`)
 					.expect(200, function(err, res){
 
 						expect(res.body).to.have.property('accounts').that.is.an('array');
 						const account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property('projects').that.is.an('array');
-						const projectObj = account.projects.find( p => p.project === project);
-						expect(projectObj).to.have.property('project', project);
-						expect(projectObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+						expect(account).to.have.property('models').that.is.an('array');
+						const modelObj = account.models.find( _model => _model.model === model);
+						expect(modelObj).to.have.property('model', model);
+						expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
 				},
-				function ableToViewProject(done){
+				function ableToViewModel(done){
 
-					agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -190,7 +190,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('model info api shows correct permissions', function(done){
-			agent.get(`/${username}/${project}.json`).
+			agent.get(`/${username}/${model}.json`).
 			expect(200, function(err, res){
 				expect(res.body.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 				done(err);
@@ -198,33 +198,33 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('and the viewer should be able to see list of issues', function(done){
-			agent.get(`/${username}/${project}/issues.json`)
+			agent.get(`/${username}/${model}/issues.json`)
 			.expect(200, done);
 		});
 
-		it('and the viewer should not be able to download the project', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(401, done);
+		it('and the viewer should not be able to download the model', function(done){
+			agent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
 		it('and the viewer should NOT be able to upload model', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${model}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(401, done);
 		});
 
 		it('and the viewer should NOT be able to see raise issue', function(done){
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send({})
 			.expect(401 , done);
 		});
 
-		it('and the viewer should NOT be able to delete the project', function(done){
-			agent.delete(`/${username}/${project}`)
+		it('and the viewer should NOT be able to delete the model', function(done){
+			agent.delete(`/${username}/${model}`)
 			.send({})
 			.expect(401 , done);
 		});
 
-		it('and the viewer should NOT be able to update project settings', function(done){
+		it('and the viewer should NOT be able to update model settings', function(done){
 			let body = {
 
 					mapTile: {
@@ -236,7 +236,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			};
 			
-			agent.put(`/${username}/${project}/settings`)
+			agent.put(`/${username}/${model}/settings`)
 			.send(body).expect(401 , done);
 		});
 
@@ -253,7 +253,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function loginAsProjectOwner(done){
+					function loginAsModelOwner(done){
 
 						agent.post('/login')
 						.send({ username, password })
@@ -265,14 +265,14 @@ describe('Sharing/Unsharing a project', function () {
 				], done);
 			});
 
-			it('should succee and the viewer is NOT able to see the project', function(done){
+			it('should succee and the viewer is NOT able to see the model', function(done){
 
 				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.post(`/${username}/${project}/permissions`)
+						agent.post(`/${username}/${model}/permissions`)
 						.send(permissions)
 						.expect(200, function(err, res){
 							done(err);
@@ -296,7 +296,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function checkSharedProjectInList(done){
+					function checkSharedModelInList(done){
 
 						agent.get(`/${username_viewer}.json`)
 						.expect(200, function(err, res){
@@ -308,9 +308,9 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function notAbleToViewProject(done){
+					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -320,7 +320,7 @@ describe('Sharing/Unsharing a project', function () {
 			});
 
 			it('and the viewer should NOT be able to see raise issue', function(done){
-				agent.post(`/${username}/${project}/issues.json`)
+				agent.post(`/${username}/${model}/issues.json`)
 				.send({})
 				.expect(401 , done);
 			});
@@ -348,7 +348,7 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('should succee and the commenter is able to see the project', function(done){
+		it('should succee and the commenter is able to see the model', function(done){
 
 			const permissions = [
 				{ user: username_commenter, permission: 'commenter'}
@@ -357,7 +357,7 @@ describe('Sharing/Unsharing a project', function () {
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/permissions`)
+					agent.post(`/${username}/${model}/permissions`)
 					.send(permissions)
 					.expect(200, function(err, res){
 						done(err);
@@ -381,24 +381,24 @@ describe('Sharing/Unsharing a project', function () {
 						done(err);
 					});
 				},
-				function checkSharedProjectInList(done){
+				function checkSharedModelInList(done){
 
 					agent.get(`/${username_commenter}.json`)
 					.expect(200, function(err, res){
 
 						expect(res.body).to.have.property('accounts').that.is.an('array');
 						let account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property('projects').that.is.an('array');
-						let projectObj = account.projects.find( p => p.project === project);
-						expect(projectObj).to.have.property('project', project);
-						expect(projectObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
+						expect(account).to.have.property('models').that.is.an('array');
+						let modelObj = account.models.find( _model => _model.model === model);
+						expect(modelObj).to.have.property('model', model);
+						expect(modelObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
 				},
-				function ableToViewProject(done){
+				function ableToViewModel(done){
 
-					agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -409,7 +409,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('model info api shows correct permissions', function(done){
-			agent.get(`/${username}/${project}.json`).
+			agent.get(`/${username}/${model}.json`).
 			expect(200, function(err, res){
 				expect(res.body.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 				done(err);
@@ -417,12 +417,12 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('and the commenter should be able to see list of issues', function(done){
-			agent.get(`/${username}/${project}/issues.json`)
+			agent.get(`/${username}/${model}/issues.json`)
 			.expect(200, done);
 		});
 
-		it('and the commenter should not be able to download the project', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(401, done);
+		it('and the commenter should not be able to download the model', function(done){
+			agent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
 		it('and the commenter should be able to see raise issue', function(done){
@@ -449,24 +449,24 @@ describe('Sharing/Unsharing a project', function () {
 				"assigned_roles":["testproject.collaborator"],
 			};
 
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
 			.expect(200 , done);
 		});
 
 		it('and the commenter should NOT be able to upload model', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${model}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(401, done);
 		});
 
-		it('and the commenter should NOT be able to delete the project', function(done){
-			agent.delete(`/${username}/${project}`)
+		it('and the commenter should NOT be able to delete the model', function(done){
+			agent.delete(`/${username}/${model}`)
 			.send({})
 			.expect(401 , done);
 		});
 
-		it('and the commenter should NOT be able to update project settings', function(done){
+		it('and the commenter should NOT be able to update model settings', function(done){
 			let body = {
 
 					mapTile: {
@@ -478,7 +478,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			};
 			
-			agent.put(`/${username}/${project}/settings`)
+			agent.put(`/${username}/${model}/settings`)
 			.send(body).expect(401 , done);
 		});
 
@@ -494,7 +494,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function loginAsProjectOwner(done){
+					function loginAsModelOwner(done){
 
 						agent.post('/login')
 						.send({ username, password })
@@ -506,14 +506,14 @@ describe('Sharing/Unsharing a project', function () {
 				], done);
 			});
 
-			it('should succee and the commenter is NOT able to see the project', function(done){
+			it('should succee and the commenter is NOT able to see the model', function(done){
 
 				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.post(`/${username}/${project}/permissions`)
+						agent.post(`/${username}/${model}/permissions`)
 						.send(permissions)
 						.expect(200, function(err, res){
 							done(err);
@@ -537,7 +537,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function checkSharedProjectInList(done){
+					function checkSharedModelInList(done){
 
 						agent.get(`/${username_commenter}.json`)
 						.expect(200, function(err, res){
@@ -549,9 +549,9 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function notAbleToViewProject(done){
+					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -561,7 +561,7 @@ describe('Sharing/Unsharing a project', function () {
 			});
 
 			it('and the commenter should NOT be able to see raise issue', function(done){
-				agent.post(`/${username}/${project}/issues.json`)
+				agent.post(`/${username}/${model}/issues.json`)
 				.send({ })
 				.expect(401 , done);
 			});
@@ -588,7 +588,7 @@ describe('Sharing/Unsharing a project', function () {
 			.expect(200, done);
 		});
 
-		it('should succee and the editor is able to see the project', function(done){
+		it('should succee and the editor is able to see the model', function(done){
 
 			const permissions = [
 				{ user: username_editor, permission: 'collaborator'}
@@ -597,7 +597,7 @@ describe('Sharing/Unsharing a project', function () {
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/permissions`)
+					agent.post(`/${username}/${model}/permissions`)
 					.send(permissions)
 					.expect(200, function(err, res){
 						done(err);
@@ -621,24 +621,24 @@ describe('Sharing/Unsharing a project', function () {
 						done(err);
 					});
 				},
-				function checkSharedProjectInList(done){
+				function checkSharedModelInList(done){
 
 					agent.get(`/${username_editor}.json`)
 					.expect(200, function(err, res){
 
 						expect(res.body).to.have.property('accounts').that.is.an('array');
 						let account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property('projects').that.is.an('array');
-						let projectObj = account.projects.find( p => p.project === project);
-						expect(projectObj).to.have.property('project', project);
-						expect(projectObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
+						expect(account).to.have.property('models').that.is.an('array');
+						let modelObj = account.models.find( _model => _model.model === model);
+						expect(modelObj).to.have.property('model', model);
+						expect(modelObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
 				},
-				function ableToViewProject(done){
+				function ableToViewModel(done){
 
-					agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -649,7 +649,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('model info api shows correct permissions', function(done){
-			agent.get(`/${username}/${project}.json`).
+			agent.get(`/${username}/${model}.json`).
 			expect(200, function(err, res){
 				expect(res.body.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 				done(err);
@@ -658,7 +658,7 @@ describe('Sharing/Unsharing a project', function () {
 		
 
 		it('and the editor should be able to see list of issues', function(done){
-			agent.get(`/${username}/${project}/issues.json`)
+			agent.get(`/${username}/${model}/issues.json`)
 			.expect(200, done);
 		});
 
@@ -686,29 +686,29 @@ describe('Sharing/Unsharing a project', function () {
 				"assigned_roles":["testproject.collaborator"],
 			};
 
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
 			.expect(200 , done);
 		});
 
 		it('and the collaborator should be able to upload model', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${model}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, done);
 		});
 
 
-		it('and the collaborator should be able to download the project', function(done){
-			agent.get(`/${username}/${project}/download/latest`).expect(200, done);
+		it('and the collaborator should be able to download the model', function(done){
+			agent.get(`/${username}/${model}/download/latest`).expect(200, done);
 		});
 
-		it('and the collaborator should NOT be able to delete the project', function(done){
-			agent.delete(`/${username}/${project}`)
+		it('and the collaborator should NOT be able to delete the model', function(done){
+			agent.delete(`/${username}/${model}`)
 			.send({})
 			.expect(401 , done);
 		});
 
-		it('and the collaborator should NOT be able to update project settings', function(done){
+		it('and the collaborator should NOT be able to update model settings', function(done){
 			let body = {
 
 					mapTile: {
@@ -720,7 +720,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			};
 			
-			agent.put(`/${username}/${project}/settings`)
+			agent.put(`/${username}/${model}/settings`)
 			.send(body).expect(401 , done);
 		});
 
@@ -736,7 +736,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function loginAsProjectOwner(done){
+					function loginAsModelOwner(done){
 
 						agent.post('/login')
 						.send({ username, password })
@@ -748,14 +748,14 @@ describe('Sharing/Unsharing a project', function () {
 				], done);
 			});
 
-			it('should succee and the editor is NOT able to see the project', function(done){
+			it('should succee and the editor is NOT able to see the model', function(done){
 
 				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.post(`/${username}/${project}/permissions`)
+						agent.post(`/${username}/${model}/permissions`)
 						.send(permissions)
 						.expect(200, function(err, res){
 							done(err);
@@ -779,7 +779,7 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function checkSharedProjectInList(done){
+					function checkSharedModelInList(done){
 
 						agent.get(`/${username_editor}.json`)
 						.expect(200, function(err, res){
@@ -791,9 +791,9 @@ describe('Sharing/Unsharing a project', function () {
 							done(err);
 						});
 					},
-					function notAbleToViewProject(done){
+					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -803,7 +803,7 @@ describe('Sharing/Unsharing a project', function () {
 			});
 
 			it('and the editor should NOT be able to raise issue', function(done){
-				agent.post(`/${username}/${project}/issues.json`)
+				agent.post(`/${username}/${model}/issues.json`)
 				.send({})
 				.expect(401 , done);
 			});
@@ -831,7 +831,7 @@ describe('Sharing/Unsharing a project', function () {
 	// 			role: 'viewer'
 	// 		};
 
-	// 		agent.post(`/${username}/${project}/collaborators`)
+	// 		agent.post(`/${username}/${model}/collaborators`)
 	// 		.send(role)
 	// 		.expect(400, function(err, res){
 	// 			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
@@ -860,7 +860,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			const permissions = [{ user: username_viewer + '99', permission: 'collaborator'}];
 
-			agent.post(`/${username}/${project}/permissions`)
+			agent.post(`/${username}/${model}/permissions`)
 			.send(permissions)
 			.expect(404, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
@@ -874,7 +874,7 @@ describe('Sharing/Unsharing a project', function () {
 		// 		role: 'viewer'
 		// 	};
 
-		// 	agent.delete(`/${username}/${project}/collaborators`)
+		// 	agent.delete(`/${username}/${model}/collaborators`)
 		// 	.send(role)
 		// 	.expect(404, function(err, res){
 		// 		expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
@@ -894,7 +894,7 @@ describe('Sharing/Unsharing a project', function () {
 	// 			role: 'viewer'
 	// 		};
 
-	// 		agent.delete(`/${username}/${project}/collaborators`)
+	// 		agent.delete(`/${username}/${model}/collaborators`)
 	// 		.send(role)
 	// 		.expect(400, function(err, res){
 	// 			expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
@@ -912,7 +912,7 @@ describe('Sharing/Unsharing a project', function () {
 	// 			role: 'collaborator'
 	// 		};
 
-	// 		agent.post(`/${username}/${project}/collaborators`)
+	// 		agent.post(`/${username}/${model}/collaborators`)
 	// 		.send(role)
 	// 		.expect(400, function(err, res){
 	// 			expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
@@ -927,7 +927,7 @@ describe('Sharing/Unsharing a project', function () {
 	// 			role: 'collaborator'
 	// 		};
 
-	// 		agent.delete(`/${username}/${project}/collaborators`)
+	// 		agent.delete(`/${username}/${model}/collaborators`)
 	// 		.send(role)
 	// 		.expect(400, function(err, res){
 	// 			expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
@@ -963,14 +963,14 @@ describe('Sharing/Unsharing a project', function () {
 
 			async.series([
 				done => {
-					agent.post(`/${username}/${project}/permissions`)
+					agent.post(`/${username}/${model}/permissions`)
 					.send(permissions)
 					.expect(200, function(err, res){
 						done(err);
 					});
 				},
 				done => {
-					agent.get(`/${username}/${project}/permissions`)
+					agent.get(`/${username}/${model}/permissions`)
 					.expect(200, function(err, res){
 						expect(res.body).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
 						done(err);

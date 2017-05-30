@@ -195,7 +195,7 @@
 				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 					vm.canAddIssue = true;
 				}
-				vm.subProjects = event.value.subProjects || [];
+				vm.subModels = event.value.subModels || [];
 				watchNotification();
 			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
 				vm.issueId = event.value;
@@ -305,7 +305,7 @@
 		function watchNotification(){
 
 
-			 if(!vm.revisions || !vm.subProjects){
+			 if(!vm.revisions || !vm.subModels){
 			 	return;
 			 }
 
@@ -399,9 +399,9 @@
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, issueChangedListener);
 
-			//do the same for all subprojects
-			if(vm.subProjects){
-				vm.subProjects.forEach(function(subProject){
+			//do the same for all subModels
+			if(vm.subModels){
+				vm.subModels.forEach(function(subProject){
 					var subproject = true;
 					NotificationService.subscribe.newIssues(subProject.database, subProject.project, function(issues){ newIssueListener(issues, subproject) });
 					NotificationService.subscribe.issueChanged(subProject.database, subProject.project, issueChangedListener);
@@ -417,8 +417,8 @@
 			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
 
-			if(vm.subProjects){
-				vm.subProjects.forEach(function(subProject){
+			if(vm.subModels){
+				vm.subModels.forEach(function(subProject){
 					NotificationService.unsubscribe.newIssues(subProject.database, subProject.project);
 					NotificationService.unsubscribe.issueChanged(subProject.database, subProject.project);
 				});

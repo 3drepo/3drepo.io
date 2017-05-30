@@ -22,7 +22,7 @@
 	const _ = require('lodash');
 	const C	= require("../constants");
 	
-	function checkPermissions(username, account, projectGroup, project, permsRequest, getPermissions){
+	function checkPermissions(username, account, projectGroup, model, permsRequest, getPermissions){
 
 		let getPermPromises = [];
 
@@ -35,7 +35,7 @@
 
 		if(_.intersection(C.MODEL_PERM_LIST, permsRequest).length > 0){
 
-			getPermPromises.push(getPermissions(account).modelLevel(username, project));
+			getPermPromises.push(getPermissions(account).modelLevel(username, model));
 
 		}
 

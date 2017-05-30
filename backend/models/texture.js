@@ -41,7 +41,7 @@ var Texture = ModelFactory.createClass(
 	'Texture', 
 	textureSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 

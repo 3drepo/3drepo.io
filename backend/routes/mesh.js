@@ -43,10 +43,10 @@ router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToModel, generateX3D
 function generateSRC(req, res, next){
 	'use strict';
 
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
 
-	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+	let filename = `/${dbCol.account}/${dbCol.model}${req.url}`;
 
 	let start = Promise.resolve(false);
 
@@ -72,7 +72,7 @@ function generateSRC(req, res, next){
 	});
 }
 
-function getSceneObject(account, project, history, uid){
+function getSceneObject(account, model, history, uid){
 	'use strict';
 
 	let projection = {
@@ -91,10 +91,10 @@ function getSceneObject(account, project, history, uid){
 		query = { stash: { _id: utils.stringToUUID(uid) }, scene: { _id: utils.stringToUUID(uid) } };
 	}
 
-	return Stash3DRepo.find({account, project}, query.stash, projection).then(objs => {
+	return Stash3DRepo.find({account, model}, query.stash, projection).then(objs => {
 
 		if(!objs.length){
-			return Scene.find({account, project}, query.scene, projection);
+			return Scene.find({account, model}, query.scene, projection);
 		}
 
 		return objs;
@@ -111,7 +111,7 @@ function getSceneObject(account, project, history, uid){
 				let refAccount = objs[i].owner || account;
 				let promise = History.findByBranch({
 						account: refAccount, 
-						project: objs[i].project 
+						model: objs[i].project 
 					}, utils.uuidToString(objs[i]._rid), {
 						coordOffset: 1
 					}
@@ -135,30 +135,30 @@ function generateX3D(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 	let id = req.params.id;
 
 	let findHistory;
 
 	if(!id){
-		findHistory = History.findLatest({account, project});
+		findHistory = History.findLatest({account, model});
 	} else if(utils.isUUID(id)){
-		findHistory = History.findByUID({account, project}, id);
+		findHistory = History.findByUID({account, model}, id);
 	} else {
-		findHistory = History.findByTag({account, project}, id);
+		findHistory = History.findByTag({account, model}, id);
 	}
 
 	findHistory.then(history => {
 
 		if(!history){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		}
 
-		return getSceneObject(account, project, history);
+		return getSceneObject(account, model, history);
 
 	}).then(objs => {
 
-		let xml = x3dEncoder.render(account, project, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
+		let xml = x3dEncoder.render(account, model, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
 
 	}).catch(err => {
@@ -169,10 +169,10 @@ function generateX3D(req, res, next){
 function generateJsonMpc(req, res, next){
 	'use strict';
 
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
 
-	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+	let filename = `/${dbCol.account}/${dbCol.model}${req.url}`;
 
 	let start = Promise.resolve(false);
 
@@ -202,11 +202,11 @@ function generateX3DMpc(req, res, next){
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
-	const project = req.params.project;
+	const model = req.params.model;
 	const uid = req.params.uid;
 
-	getSceneObject(account, project, null, uid).then(objs => {
-		const xml = x3dEncoder.generateMPC(account, project, uid, repoGraphScene(req[C.REQ_REPO].logger).decode(objs));
+	getSceneObject(account, model, null, uid).then(objs => {
+		const xml = x3dEncoder.generateMPC(account, model, uid, repoGraphScene(req[C.REQ_REPO].logger).decode(objs));
 		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

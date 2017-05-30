@@ -33,10 +33,10 @@ function listRevisions(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
 
-	History.find({account, project}, {}, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}, {sort: {timestamp: -1}}).then(histories => {
+	History.find({account, model}, {}, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}, {sort: {timestamp: -1}}).then(histories => {
 		
 		histories = History.clean(histories);
 
@@ -56,10 +56,10 @@ function listRevisionsByBranch(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
 
-	History.listByBranch({account, project}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
+	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
 		
 		histories = History.clean(histories);
 
@@ -79,11 +79,11 @@ function updateRevisionTag(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
-	History.findByUID({account, project}, req.params.id, {_id : 1, tag: 1}).then(history => {
+	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
 		if (!history){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else {
 			history.tag = req.body.tag;
 			return history.save();

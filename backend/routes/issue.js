@@ -65,12 +65,12 @@ function storeIssue(req, res, next){
 	
 	data.revId = req.params.rid;
 
-	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
+	Issue.createIssue({account: req.params.account, model: req.params.model}, data).then(issue => {
 
 		// let resData = {
 		// 	_id: issue._id,
 		// 	account: req.params.account, 
-		// 	project: req.params.project, 
+		// 	model: req.params.model, 
 		// 	issue_id : issue._id, 
 		// 	number : issue.number, 
 		// 	created : issue.created, 
@@ -96,7 +96,7 @@ function updateIssue(req, res, next){
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let dbCol = {account: req.params.account, project: req.params.project};
+	let dbCol = {account: req.params.account, model: req.params.model};
 	let issueId = req.params.issueId;
 	let action;
 
@@ -153,7 +153,7 @@ function updateIssue(req, res, next){
 		let resData = {
 			_id: issueId,
 			account: req.params.account,
-			project: req.params.project,
+			model: req.params.model,
 			issue: issue,
 			issue_id : issueId,
 			number: issue.number,
@@ -174,7 +174,7 @@ function listIssues(req, res, next) {
 
 	//let params = req.params;
 	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let projection = {
 		extras: 0,
 		'comments': 0,
@@ -189,9 +189,9 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
+		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
@@ -207,14 +207,14 @@ function getIssuesBCF(req, res, next) {
 	
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 	
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, project, req.session.user.username, null, req.params.rid);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid);
 	} else {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, project, req.session.user.username, "master", null);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null);
 	}
 
 	getBCFZipRS.then(zipRS => {
@@ -237,7 +237,7 @@ function getIssuesBCF(req, res, next) {
 
 // 	let params = req.params;
 // 	let place = utils.APIInfo(req);
-// 	let dbCol =  {account: req.params.account, project: req.params.project};
+// 	let dbCol =  {account: req.params.account, model: req.params.model};
 
 // 	Issue.findBySharedId(dbCol, params.sid, req.query.number).then(issues => {
 // 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
@@ -252,7 +252,7 @@ function findIssueById(req, res, next) {
 
 	let params = req.params;
 	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project};
+	let dbCol =  {account: req.params.account, model: req.params.model};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
 
@@ -269,7 +269,7 @@ function renderIssuesHTML(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
 	let noClean = false;
 
@@ -288,9 +288,9 @@ function renderIssuesHTML(req, res, next){
 	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
+		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
+		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
@@ -375,7 +375,7 @@ function importBCF(req, res, next){
 		} else {
 
 
-			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.project, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);
@@ -388,7 +388,7 @@ function getScreenshot(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, project: req.params.project};
+	let dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
@@ -402,7 +402,7 @@ function getScreenshotSmall(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, project: req.params.project};
+	let dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
@@ -416,7 +416,7 @@ function getThumbnail(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, project: req.params.project};
+	let dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');

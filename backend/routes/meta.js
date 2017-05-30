@@ -21,7 +21,7 @@
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
-	const ProjectHelpers = require('../models/helper/project');
+	const ModelHelpers = require('../models/helper/model');
 	const middlewares = require('./middlewares');
 	const utils = require('../utils');
 
@@ -31,7 +31,7 @@
 
 	function getMetadata(req, res, next){
 
-		ProjectHelpers.getMetadata(req.params.account, req.params.project, req.params.id).then(meta => {
+		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id).then(meta => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {

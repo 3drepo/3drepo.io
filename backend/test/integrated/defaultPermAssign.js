@@ -38,7 +38,6 @@ describe('Default permission assignment', function () {
 	const username = 'defaultperm';
 	const password = 'defaultperm';
 	const email = 'test-defaultperm@3drepo.org'
-	const project = 'myproject';
 	const helpers = require('./helpers');
 
 	before(function(done){
@@ -75,7 +74,7 @@ describe('Default permission assignment', function () {
 
 	it('user should be able to create project', function(done){
 
-		agent.post(`/${username}/project-groups`)
+		agent.post(`/${username}/projects`)
 		.send({name: 'project1'})
 		.expect(200, function(err, res){
 			done(err);
@@ -84,7 +83,7 @@ describe('Default permission assignment', function () {
 
 
 	it('user should be able to create model', function(done){
-		agent.post(`/${username}/project1`)
+		agent.post(`/${username}/model1`)
 		.send({unit: 'm'})
 		.expect(200, function(err, res){
 			done(err);
@@ -98,7 +97,7 @@ describe('Default permission assignment', function () {
 			const account = res.body.accounts.find(account => account.account === username);
 			expect(account).to.exist;
 			
-			const model = account.projects.find(project => project.project === 'project1');
+			const model = account.models.find(model => model.model === 'model1');
 			expect(model).to.exist;
 			expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 			done(err);
@@ -106,8 +105,8 @@ describe('Default permission assignment', function () {
 	});
 
 
-	it('the model created should filled with correct permissions (project info)', function(done){
-		agent.get(`/${username}/project1.json`)
+	it('the model created should filled with correct permissions (model info)', function(done){
+		agent.get(`/${username}/model1.json`)
 		.expect(200, function(err, res){
 			expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 			done(err);

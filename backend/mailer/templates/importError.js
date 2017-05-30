@@ -16,11 +16,11 @@
  */
 
 var html = data => `
-	Toy project failed to import. Please help this user out.
+	Toy model failed to import. Please help this user out.
 	<br>
 	account: ${data.account}
 	<br>
-	project: ${data.project}
+	model: ${data.model}
 	<br>
 	Error: ${data.err}
 	<br>
@@ -29,7 +29,7 @@ var html = data => `
 	appId: ${data.appId}
 `;
 
-var subject = '[System] Toy project import error';
+var subject = '[System] Toy model import error';
 
 module.exports =  {
 	html: html,

@@ -31,7 +31,7 @@ var Subscription = require('./subscription');
 var config = require('../config');
 
 
-var ProjectSetting = require('./projectSetting');
+var ModelSetting = require('./modelSetting');
 var C = require('../constants');
 var userBilling = require("./userBilling");
 var job = require('./job');
@@ -44,10 +44,6 @@ var schema = mongoose.Schema({
 	user: String,
 	//db: String,
 	customData: {
-		projects: [{
-			account: String,
-			project: String
-		}],
 		firstName: String,
 		lastName: String,
 		email: String,
@@ -342,7 +338,7 @@ schema.statics.verify = function(username, token, options){
 	options = options || {};
 
 	let allowRepeatedVerify = options.allowRepeatedVerify;
-	let skipImportToyProject = options.skipImportToyProject;
+	let skipImportToyModel = options.skipImportToyModel;
 	let skipCreateBasicPlan = options.skipCreateBasicPlan;
 
 	let user;
@@ -375,13 +371,13 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(user => {
 
-		if(!skipImportToyProject){
+		if(!skipImportToyModel){
 
-			//import toy project
-			var ProjectHelper = require('./helper/project');
+			//import toy model
+			var ModelHelper = require('./helper/model');
 
-			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError('Failed to import toy project', { err : err && err.stack ? err.stack : err});
+			ModelHelper.importToyModel(username).catch(err => {
+				systemLogger.logError('Failed to import toy model', { err : err && err.stack ? err.stack : err});
 			});
 		}
 
@@ -500,63 +496,63 @@ schema.statics.revokeRolesFromUser = function(username, db, role){
 	return ModelFactory.db.admin().command(cmd);
 };
 
-function _fillInProjectDetails(accountName, setting, permissions){
+function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';
 
-	const ProjectHelper = require('./helper/project');
+	const ModelHelper = require('./helper/model');
 
-	let project = {
+	let model = {
 		federate: setting.federate,
 		permissions: permissions,
-		project: setting._id,
+		model: setting._id,
 		status: setting.status
 	};
 
-	return History.findByBranch({account: accountName, project: project.project}, C.MASTER_BRANCH_NAME).then(history => {
+	return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
 
 		if(history){
-			project.timestamp = history.timestamp;
+			model.timestamp = history.timestamp;
 		} else {
-			project.timestamp = null;
+			model.timestamp = null;
 		}
 
 		if(setting.federate){
 		
-			//list all sub projects of a fed project
-			return ProjectHelper.listSubProjects(accountName, project.project, C.MASTER_BRANCH_NAME).then(subProjects => {
-				project.subProjects = subProjects;
-			}).then(() => project);
+			//list all sub models of a fed model
+			return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
+				model.subModels = subModels;
+			}).then(() => model);
 
 		}
 
-		return project;
+		return model;
 	});
 
 }
-//list all projects in an account
-function _getAllProjects(accountName, permissions){
+//list all models in an account
+function _getAllModels(accountName, permissions){
 	'use strict';
 
-	let projects = [];
-	let fedProjects = [];
+	let models = [];
+	let fedModels = [];
 
-	return ProjectSetting.find({account: accountName}).then(settings => {
+	return ModelSetting.find({account: accountName}).then(settings => {
 
 		let promises = [];
 
 		settings.forEach(setting => {
 			promises.push(
-				_fillInProjectDetails(accountName, setting, permissions).then(project => {
-					setting.federate ? fedProjects.push(project) : projects.push(project);
+				_fillInModelDetails(accountName, setting, permissions).then(model => {
+					setting.federate ? fedModels.push(model) : models.push(model);
 				})
 			);
 		});
 
-		return Promise.all(promises).then(() => { return {projects, fedProjects}; });
+		return Promise.all(promises).then(() => { return {models, fedModels}; });
 	});
 }
 
-// find project groups and put projects into project groups 
+// find model groups and put models into project groups 
 function _addProjectGroups(account){
 	'use strict';
 
@@ -570,14 +566,14 @@ function _addProjectGroups(account){
 
 			projectGroup.models.forEach((model, i) => {
 
-				let fullModel = account.projects.find(project => project.project === model);
+				let fullModel = account.models.find(model => model.model === model);
 
 				if(!fullModel){
-					fullModel = account.fedProjects.find(project => project.project === model);
+					fullModel = account.fedModels.find(model => model.model === model);
 				}
 
 				if(!fullModel){
-					fullModel = { project: model};
+					fullModel = { model: model};
 				}
 
 				projectGroup.models[i] = fullModel;
@@ -590,31 +586,31 @@ function _addProjectGroups(account){
 }
 
 
-function _findProjectDetails(dbUserCache, username, project){
+function _findModelDetails(dbUserCache, username, model){
 	'use strict';
 
 	let getUser;
 	let dbUser;
 
-	if(dbUserCache[project.account]){
-		getUser = Promise.resolve(dbUserCache[project.account]);
+	if(dbUserCache[model.account]){
+		getUser = Promise.resolve(dbUserCache[model.account]);
 	} else {
-		getUser = User.findByUserName(project.account).then(user => {
-			dbUserCache[project.account] = user;
-			return dbUserCache[project.account];
+		getUser = User.findByUserName(model.account).then(user => {
+			dbUserCache[model.account] = user;
+			return dbUserCache[model.account];
 		});
 	}
 
 	return getUser.then(_user => {
 		dbUser = _user;
-		return ProjectSetting.findById({account: project.account}, project.project);
+		return ModelSetting.findById({account: model.account}, model.model);
 
 	}).then(setting => {
 
 		let permissions = [];
 
 		if(!setting){
-			setting = { _id: project.project };
+			setting = { _id: model.model };
 		} else {
 			const template = setting.findPermissionByUser(username);
 			
@@ -650,11 +646,11 @@ function _calSpace(user){
 
 }
 
-function _sortAccountsAndProjects(accounts){
+function _sortAccountsAndModels(accounts){
 	'use strict';
 
 	accounts.forEach(account => {
-		account.projects.sort((a, b) => {
+		account.models.sort((a, b) => {
 			if(a.timestamp < b.timestamp){
 				return 1;
 			} else if (a.timestamp > b.timestamp){
@@ -690,8 +686,8 @@ schema.methods.listAccounts = function(){
 			
 			let account = {
 				account: user.user,
-				projects: [],
-				fedProjects: [],
+				models: [],
+				fedModels: [],
 				isAdmin: true,
 				permissions: user.toObject().customData.permissions[0].permissions
 			};
@@ -699,10 +695,10 @@ schema.methods.listAccounts = function(){
 			accounts.push(account);
 
 			addAccountPromises.push(
-				// list all projects under this account as they have full access
-				_getAllProjects(account.account, C.MODEL_PERM_LIST).then(data => {
-					account.projects = data.projects;
-					account.fedProjects = data.fedProjects;
+				// list all models under this account as they have full access
+				_getAllModels(account.account, C.MODEL_PERM_LIST).then(data => {
+					account.models = data.models;
+					account.fedModels = data.fedModels;
 				}),
 				// add space usage stat info into account object
 				_calSpace(user).then(quota => account.quota = quota)
@@ -722,8 +718,8 @@ schema.methods.listAccounts = function(){
 		this.customData.models.forEach(model => {
 
 			const findModel = accounts.find(account => {
-				return account.projects.find(project => project.project === model.model) || 
-				account.fedProjects.find(project => project.project === model.model);
+				return account.models.find(_model => _model.model === model.model) || 
+				account.fedProjects.find(_model => _model.model === model.model);
 			});
 
 			//add project to list if not covered previously
@@ -732,18 +728,18 @@ schema.methods.listAccounts = function(){
 				let account = accounts.find(account => account.account === model.account);
 				
 				if(!account){
-					account = {account: model.account, projects: [], fedProjects: []};
+					account = {account: model.account, models: [], fedModels: []};
 					accounts.push(account);
 				}
 
 				addModelPromises.push(
-					_findProjectDetails(dbUserCache, this.user, { 
-						account: model.account, project: model.model 
+					_findModelDetails(dbUserCache, this.user, { 
+						account: model.account, model: model.model 
 					}).then(data => {
-						return _fillInProjectDetails(account.account, data.setting, data.permissions);
-					}).then(project => {
+						return _fillInModelDetails(account.account, data.setting, data.permissions);
+					}).then(_model => {
 						//push result to account object
-						project.federate ? account.fedProjects.push(project) : account.projects.push(project);
+						_model.federate ? account.fedModels.push(_model) : account.models.push(model);
 					})
 				);
 			}
@@ -752,11 +748,11 @@ schema.methods.listAccounts = function(){
 
 		return Promise.all(addModelPromises);
 
-	//add project groups and put projects into project groups for each account
+	//add project groups and put models into project groups for each account
 	}).then(() => {
 
 		//sorting models
-		_sortAccountsAndProjects(accounts);
+		_sortAccountsAndModels(accounts);
 
 		// own acconut always ranks top of the list
 		let myAccountIndex = accounts.findIndex(account => account.account === this.user);

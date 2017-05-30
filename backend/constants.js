@@ -485,5 +485,11 @@
 	define('ISSUE_STATUS_FOR_APPROVAL', 'for approval'); 
 	define('ISSUE_STATUS_CLOSED', 'closed'); 
 
+	define('MAIL_URLS',{
+		'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
+		'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
+		'model': data => `/${data.account}/${data.model}`
+	});
+
 	
 })();

@@ -19,7 +19,7 @@
 (() => {
 	"use strict";
 
-	const ProjectSetting = require('../models/projectSetting');
+	const ModelSetting = require('../models/modelSetting');
 	const Project = require('../models/project');
 	const User = require('../models/user');
 
@@ -76,12 +76,12 @@
 				});
 			},
 
-			modelLevel: function(username, project){
+			modelLevel: function(username, model){
 				let user;
 
 				return this.getUser().then(_user => {
 					user = _user;
-					return ProjectSetting.findById({account, project}, project);
+					return ModelSetting.findById({account, model}, model);
 
 				}).then(setting => {
 
@@ -89,12 +89,12 @@
 						return [];
 					}
 
-					const projectSettingPerm = setting.findPermissionByUser(username);
+					const perm = setting.findPermissionByUser(username);
 
-					if(!projectSettingPerm){
+					if(!perm){
 						return [];
 					}
-					return user.customData.permissionTemplates.findById(projectSettingPerm.permission).permissions;
+					return user.customData.permissionTemplates.findById(perm.permission).permissions;
 				});
 			}
 		};

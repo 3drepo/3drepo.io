@@ -20,108 +20,108 @@ var router = express.Router({mergeParams: true});
 // var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
-var ProjectSetting = require('../models/projectSetting');
+var ModelSetting = require('../models/modelSetting');
 var responseCodes = require('../response_codes');
 var C = require("../constants");
-var ProjectHelpers = require('../models/helper/project');
+var ModelHelpers = require('../models/helper/model');
 var History = require('../models/history');
-var createAndAssignRole = ProjectHelpers.createAndAssignRole;
+var createAndAssignRole = ModelHelpers.createAndAssignRole;
 var User = require('../models/user');
 
 var getDbColOptions = function(req){
-	return {account: req.params.account, project: req.params.project};
+	return {account: req.params.account, model: req.params.model};
 };
 
 
-// Get project info
-router.get('/:project.json', middlewares.hasReadAccessToModel, getProjectSetting);
+// Get model info
+router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
 
-router.put('/:project/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
+router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:project', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createProject);
+router.post('/:model', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
 
-//update federated project
-router.put('/:project', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateProject);
-
-//model permission
-router.post('/:project/permissions', middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), updatePermissions);
+//update federated model
+router.put('/:model', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 //model permission
-router.get('/:project/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
+router.post('/:model/permissions', middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), updatePermissions);
 
-router.get('/:project/jobs.json', middlewares.hasReadAccessToModel, getJobs);
-router.get('/:project/userJobForProject.json', middlewares.hasReadAccessToModel, getUserJobForProject);
+//model permission
+router.get('/:model/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
+
+router.get('/:model/jobs.json', middlewares.hasReadAccessToModel, getJobs);
+router.get('/:model/userJobForModel.json', middlewares.hasReadAccessToModel, getUserJobForModel);
 
 //master tree
-router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getProjectTree);
+router.get('/:model/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
 
-router.get('/:project/revision/master/head/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
+router.get('/:model/revision/master/head/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
-router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToModel, getProjectTree);
+router.get('/:model/revision/:rev/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
 
-router.get('/:project/revision/:rev/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
+router.get('/:model/revision/:rev/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
 //search master tree
-router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToModel, searchProjectTree);
+router.get('/:model/revision/master/head/searchtree.json', middlewares.hasReadAccessToModel, searchModelTree);
 
-router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToModel, searchProjectTree);
+router.get('/:model/revision/:rev/searchtree.json', middlewares.hasReadAccessToModel, searchModelTree);
 
-router.delete('/:project', middlewares.hasDeleteAccessToModel, deleteProject);
+router.delete('/:model', middlewares.hasDeleteAccessToModel, deleteModel);
 
-router.post('/:project/upload', middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadProject);
+router.post('/:model/upload', middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
 
-router.get('/:project/download/latest', middlewares.hasDownloadAccessToModel, downloadLatest);
+router.get('/:model/download/latest', middlewares.hasDownloadAccessToModel, downloadLatest);
 
 function updateSettings(req, res, next){
 	'use strict';
 
 
 	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
 
-		if(!projectSetting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		if(!modelSetting){
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
-		projectSetting.updateProperties(req.body);
-		return projectSetting.save();
+		modelSetting.updateProperties(req.body);
+		return modelSetting.save();
 
-	}).then(projectSetting => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting.properties);
+	}).then(modelSetting => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
 
-function _getProject(req){
+function _getModel(req){
 	'use strict';
 
 	let setting;
-	return ProjectSetting.findById(getDbColOptions(req), req.params.project).then(_setting => {
+	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
 
 		if(!_setting){
-			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
+			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 
 			setting = _setting;
 			setting = setting.toObject();
 			//compute permissions by user role
 
-			return ProjectHelpers.getProjectPermission(
+			return ModelHelpers.getModelPermission(
 				req.session.user.username,
 				_setting, 
 				req.params.account
 			).then(permissions => {
 
 				setting.permissions = permissions;
-				return ProjectHelpers.listSubProjects(req.params.account, req.params.project, C.MASTER_BRANCH_NAME);
+				return ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME);
 
-			}).then(subProjects => {
-				//console.log('subProjects', subProjects)
-				setting.subProjects = subProjects;
+			}).then(subModels => {
+				//console.log('subModels', subModels)
+				setting.subModels = subModels;
 				return setting;
 			});
 		}
@@ -129,15 +129,15 @@ function _getProject(req){
 }
 
 
-function getProjectSetting(req, res, next){
+function getModelSetting(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	_getProject(req).then(setting => {
+	_getModel(req).then(setting => {
 
 		//setting = setting.toObject();
 		
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subProjects'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subModels'];
 		let resObj = {};
 
 		whitelist.forEach(key => {
@@ -148,10 +148,10 @@ function getProjectSetting(req, res, next){
 		let proj  = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
 	       	let sort  = {sort: {branch: -1, timestamp: -1}};
 		let account = req.params.account;
-		let project = req.params.project;
+		let model = req.params.model;
 
 		// Calculate revision heads
-		History.find({account, project}, {}, proj, sort).then(histories => {
+		History.find({account, model}, {}, proj, sort).then(histories => {
 			histories = History.clean(histories);
 
 			histories.forEach(history => {
@@ -172,16 +172,16 @@ function getProjectSetting(req, res, next){
 
 
 
-function createProject(req, res, next){
+function createModel(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 	let username = req.session.user.username;
 
 	let federate;
-	if(req.body.subProjects){
+	if(req.body.subModels){
 		federate = true;
 	}
 
@@ -189,7 +189,7 @@ function createProject(req, res, next){
 		desc: req.body.desc, 
 		type: req.body.type, 
 		unit: req.body.unit, 
-		subProjects: req.body.subProjects, 
+		subModels: req.body.subModels, 
 		federate: federate,
 		code: req.body.code,
 		projectGroup: req.body.projectGroup
@@ -197,63 +197,63 @@ function createProject(req, res, next){
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	createAndAssignRole(project, account, username, data).then(data => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.project);
+	createAndAssignRole(model, account, username, data).then(data => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
-function updateProject(req, res, next){
+function updateModel(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 
 	let promise = Promise.resolve();
 
-	if(req.body.subProjects && req.body.subProjects.length > 0){
+	if(req.body.subModels && req.body.subModels.length > 0){
 
-		promise = ProjectSetting.findById({account}, project).then(setting => {
+		promise = ModelSetting.findById({account}, model).then(setting => {
 
 			if(!setting) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			} else if (!setting.federate){
-				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
+				return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
 			} else {
-				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+				return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
 			}
 		});
 
 	}
 
 	promise.then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
-function deleteProject(req, res, next){
+function deleteModel(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 
 	//delete
-	ProjectHelpers.removeProject(account, project).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	ModelHelpers.removeModel(account, model).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 }
 
-function getProjectTree(req, res, next){
+function getModelTree(req, res, next){
 	'use strict';
 
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 	let username = req.session.user.username;
 	let branch;
@@ -262,7 +262,7 @@ function getProjectTree(req, res, next){
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ProjectHelpers.getFullTree(account, project, branch, req.params.rev, username).then(obj => {
+	ModelHelpers.getFullTree(account, model, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -272,7 +272,7 @@ function getProjectTree(req, res, next){
 function getModelProperties(req, res, next) {
 	'use strict';
 
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 	let username = req.session.user.username;
 	let branch;
@@ -281,7 +281,7 @@ function getModelProperties(req, res, next) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ProjectHelpers.getModelProperties(account, project, branch, req.params.rev, username).then(properties => {
+	ModelHelpers.getModelProperties(account, model, branch, req.params.rev, username).then(properties => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -290,10 +290,10 @@ function getModelProperties(req, res, next) {
 
 
 
-function searchProjectTree(req, res, next){
+function searchModelTree(req, res, next){
 	'use strict';
 
-	let project = req.params.project;
+	let model = req.params.model;
 	let account = req.params.account;
 	let username = req.session.user.username;
 	let searchString = req.query.searchString;
@@ -304,7 +304,7 @@ function searchProjectTree(req, res, next){
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ProjectHelpers.searchTree(account, project, branch, req.params.rev, searchString, username).then(items => {
+	ModelHelpers.searchTree(account, model, branch, req.params.rev, searchString, username).then(items => {
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
 
@@ -316,7 +316,7 @@ function searchProjectTree(req, res, next){
 
 function downloadLatest(req, res, next){
 	'use strict';
-	ProjectHelpers.downloadLatest(req.params.account, req.params.project).then(file => {
+	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		let headers = {
 			'Content-Length': file.meta.length,
@@ -335,24 +335,24 @@ function downloadLatest(req, res, next){
 	});
 }
 
-function uploadProject(req, res, next){
+function uploadModel(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
-	let projectSetting;
+	let modelSetting;
 	let account = req.params.account;
 	let username = req.session.user.username;
-	let project = req.params.project;
+	let model = req.params.model;
 
-	//check project exists before upload
-	return ProjectSetting.findById({account, project}, project).then(_projectSetting => {
+	//check model exists before upload
+	return ModelSetting.findById({account, model}, model).then(_modelSetting => {
 		
-		projectSetting = _projectSetting;
+		modelSetting = _modelSetting;
 
-		if(!projectSetting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		if(!modelSetting){
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return ProjectHelpers.uploadFile(req);
+			return ModelHelpers.uploadFile(req);
 		}
 
 	}).then(file => {
@@ -368,9 +368,9 @@ function uploadProject(req, res, next){
 			type: 'upload',
 			file: file
 		};
-		//do not return this promise!, error will be logged in importProject function
+		//do not return this promise!, error will be logged in importModel function
 		//returning this promise may cause sending double http headers
-		ProjectHelpers.importProject(account, project, username, projectSetting, source, data);
+		ModelHelpers.importModel(account, model, username, modelSetting, source, data);
 
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
@@ -382,11 +382,11 @@ function updatePermissions(req, res, next){
 	'use strict';
 
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
-	return ProjectSetting.findById({account, project}, project).then(projectSetting => {
+	return ModelSetting.findById({account, model}, model).then(modelSetting => {
 
-		return projectSetting.changePermissions(req.body);
+		return modelSetting.changePermissions(req.body);
 
 	}).then(permission => {
 
@@ -401,12 +401,12 @@ function getPermissions(req, res, next){
 	'use strict';
 
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
-	return ProjectSetting.findById({account, project}, project).then(setting => {
+	return ModelSetting.findById({account, model}, model).then(setting => {
 
 		if(!setting){
-			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
+			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.permissions);
 		}
@@ -437,7 +437,7 @@ function getJobs(req, res, next){
 
 }
 
-function getUserJobForProject(req, res, next){
+function getUserJobForModel(req, res, next){
 	'use strict';
 
 	const account = req.params.account;

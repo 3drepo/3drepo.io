@@ -30,23 +30,23 @@
 		roles: []
 	});
 
-	schema.statics.createStandardRoles = function (account, project) {
+	schema.statics.createStandardRoles = function (account, model) {
 		let rolePromises = [];
 
-		RoleTemplates.projectRoleTemplateLists.forEach(role =>
+		RoleTemplates.modelRoleTemplateLists.forEach(role =>
 			{
-				rolePromises.push(this.createRole(account, project, role));
+				rolePromises.push(this.createRole(account, model, role));
 			}
 		);
 
 		return Promise.all(rolePromises);
 	};
 
-	schema.statics.createRole = function (account, project, role) {
+	schema.statics.createRole = function (account, model, role) {
 		
-		let roleId = `${account}.${project}.${role}`;
+		let roleId = `${account}.${model}.${role}`;
 		
-		if(!project){
+		if(!model){
 			roleId = `${account}.${role}`;
 		}
 		
@@ -55,7 +55,7 @@
 				roleFound = roleFound.toObject();
 				return { role: roleFound.role, db: roleFound.db};
 			} else {
-				return RoleTemplates.createRoleFromTemplate(account, project, role);
+				return RoleTemplates.createRoleFromTemplate(account, model, role);
 			}
 		});
 	};
@@ -85,21 +85,21 @@
 		return ModelFactory.db.admin().command(grantRoleCmd);
 	};
 
-	schema.statics.grantProjectRoleToUser = function (username, account, project, role) {
+	schema.statics.grantModelRoleToUser = function (username, account, model, role) {
 		
 		// lazily create the role from template if the role is not found
 
-		if(RoleTemplates.projectRoleTemplateLists.indexOf(role) === -1){
+		if(RoleTemplates.modelRoleTemplateLists.indexOf(role) === -1){
 			return Promise.reject(responseCodes.INVALID_ROLE_TEMPLATE);
 		}
 
-		return this.createRole(account, project, role).then(() => {
+		return this.createRole(account, model, role).then(() => {
 
 			let grantRoleCmd = {
 				grantRolesToUser: username,
 				roles: [{
 					db: account,
-					role: `${project}.${role}`
+					role: `${model}.${role}`
 				}]
 			};
 			

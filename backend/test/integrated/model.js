@@ -254,7 +254,8 @@ describe('Project', function () {
 				'database',
 				'verify',
 				'forgot-password',
-				'subscriptions'
+				'subscriptions',
+				'projects'
 			].indexOf(projectName) !== -1){
 				//skip these project name because they are actually other APIs.
 				return done();

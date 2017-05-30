@@ -53,7 +53,7 @@
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.units = serverConfig.units;
-		vm.projectRegExp = serverConfig.projectNameRegExp;
+		vm.projectRegExp = serverConfig.modelNameRegExp;
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");

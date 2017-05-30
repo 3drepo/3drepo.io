@@ -21,7 +21,7 @@
 
 	const responseCodes = require('../response_codes');
 	const C				= require("../constants");
-	const ProjectSetting = require('../models/projectSetting');
+	const ModelSetting = require('../models/modelSetting');
 	// var History = require('../models/history');
 	const User = require('../models/user');
 	const utils = require("../utils");
@@ -46,10 +46,10 @@
 
 				const username = req.session.user.username;
 				const account = req.params.account;
-				const project = req.params.project;
+				const model = req.params.model;
 				const projectGroup = req.params.projectGroup;
 
-				return checkPermissionsHelper(username, account, projectGroup, project, permsRequest, getPermissionsAdapter);
+				return checkPermissionsHelper(username, account, projectGroup, model, permsRequest, getPermissionsAdapter);
 
 			}).then(granted => {
 
@@ -107,17 +107,17 @@
 		let limits;
 
 		let account = req.params.account;
-		let project = req.params.project;
+		let model = req.params.model;
 
 		return User.findByUserName(account).then( dbUser => {
 
 			limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
 
-			return ProjectSetting.findById({account}, project);
+			return ModelSetting.findById({account}, model);
 
-		}).then(projectSetting => {
+		}).then(modelSetting => {
 
-			if(limits.collaboratorLimit - projectSetting.collaborators.length > 0){
+			if(limits.collaboratorLimit - modelSetting.collaborators.length > 0){
 				next();
 			} else {
 				responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
@@ -163,23 +163,23 @@
 
 	}
 
-	function hasReadAccessToModelHelper(username, account, project){
+	function hasReadAccessToModelHelper(username, account, model){
 		return checkPermissionsHelper(
 			username, 
 			account, 
 			'',
-			project, 
+			model, 
 			[C.PERM_VIEW_MODEL],
 			getPermissionsAdapter
 		);
 	}
 
-	function isAccountAdminHelper(username, account, project){
+	function isAccountAdminHelper(username, account, model){
 		return checkPermissionsHelper(
 			username, 
 			account, 
 			'',
-			project, 
+			model, 
 			[C.PERM_TEAMSPACE_ADMIN],
 			getPermissionsAdapter
 		);

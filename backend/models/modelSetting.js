@@ -76,14 +76,14 @@ schema.path('properties.topicTypes').get(function(v) {
 
 schema.set('toObject', { getters: true });
 
-schema.statics.projectCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
+schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
 
 	Object.keys(updateObj).forEach(key => {
 
-		if(key === 'code' && updateObj[key] && !schema.statics.projectCodeRegExp.test(updateObj[key])){
-			throw responseCodes.INVALID_PROJECT_CODE;
+		if(key === 'code' && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
+			throw responseCodes.INVALID_MODEL_CODE;
 		}
 
 		if(key === 'topicTypes'){
@@ -199,12 +199,12 @@ schema.methods.findPermissionByUser = function(username){
 	return this.permissions.find(perm => perm.user === username);
 };
 
-var ProjectSetting = ModelFactory.createClass(
-	'ProjectSetting',
+var ModelSetting = ModelFactory.createClass(
+	'ModelSetting',
 	schema,
 	() => {
 		return 'settings';
 	}
 );
 
-module.exports = ProjectSetting;
+module.exports = ModelSetting;

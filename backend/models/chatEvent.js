@@ -17,14 +17,14 @@
 
 var Queue = require('../services/queue');
 
-function insertEventQueue(event, emitter, account, project, extraKeys, data){
+function insertEventQueue(event, emitter, account, model, extraKeys, data){
 	'use strict';
 
 	let msg = {
 		event,
 		emitter,
 		account,
-		project,
+		model,
 		extraKeys,
 		data
 
@@ -33,45 +33,45 @@ function insertEventQueue(event, emitter, account, project, extraKeys, data){
 	return Queue.insertEventMessage(msg);
 }
 
-function newIssues(emitter, account, project, data){
+function newIssues(emitter, account, model, data){
 	'use strict';
-	return insertEventQueue('newIssues', emitter, account, project, null, data);
+	return insertEventQueue('newIssues', emitter, account, model, null, data);
 }
 
-function newComment(emitter, account, project, issueId, data){
+function newComment(emitter, account, model, issueId, data){
 	'use strict';
-	return insertEventQueue('newComment', emitter, account, project, [issueId], data);
+	return insertEventQueue('newComment', emitter, account, model, [issueId], data);
 }
 
-function commentChanged(emitter, account, project, issueId, data){
+function commentChanged(emitter, account, model, issueId, data){
 	'use strict';
-	return insertEventQueue('commentChanged', emitter, account, project, [issueId], data);
+	return insertEventQueue('commentChanged', emitter, account, model, [issueId], data);
 }
 
-function commentDeleted(emitter, account, project, issueId, data){
+function commentDeleted(emitter, account, model, issueId, data){
 	'use strict';
-	return insertEventQueue('commentDeleted', emitter, account, project, [issueId], data);
+	return insertEventQueue('commentDeleted', emitter, account, model, [issueId], data);
 }
 
 
-function projectStatusChanged(emitter, account, project, data){
+function modelStatusChanged(emitter, account, model, data){
 	'use strict';
-	return insertEventQueue('projectStatusChanged', emitter, account, project, null, data);
+	return insertEventQueue('modelStatusChanged', emitter, account, model, null, data);
 }
 
-function issueChanged(emitter, account, project, issueId, data){
+function issueChanged(emitter, account, model, issueId, data){
 	'use strict';
 
 	//send event to single issue changed listener and any issues changed listener
 	return Promise.all([
-		insertEventQueue('issueChanged', emitter, account, project, [issueId], data),
-		insertEventQueue('issueChanged', emitter, account, project, null, data)
+		insertEventQueue('issueChanged', emitter, account, model, [issueId], data),
+		insertEventQueue('issueChanged', emitter, account, model, null, data)
 	]);
 }
 
-function newProject(emitter, account, data){
+function newModel(emitter, account, data){
 	'use strict';
-	return insertEventQueue('newProject', emitter, account, null, null, data);
+	return insertEventQueue('newModel', emitter, account, null, null, data);
 }
 
 module.exports = {
@@ -79,7 +79,7 @@ module.exports = {
 	newComment,
 	commentChanged,
 	commentDeleted,
-	projectStatusChanged,
+	modelStatusChanged,
 	issueChanged,
-	newProject
+	newModel
 };

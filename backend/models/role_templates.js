@@ -31,7 +31,7 @@
 	};
 
 	let dbCollections = {
-		"project": ["history", "scene", "stash.3drepo.chunks", "stash.3drepo.files", "stash.3drepo", "stash.json_mpc.chunks", "stash.json_mpc.files", "stash.src.chunks", "stash.src.files"],
+		"model": ["history", "scene", "stash.3drepo.chunks", "stash.3drepo.files", "stash.3drepo", "stash.json_mpc.chunks", "stash.json_mpc.files", "stash.src.chunks", "stash.src.files"],
 		"settings": ["settings"],
 		"files": ["history.chunks", "history.files", "history"],
 		"issues": ["issues"],
@@ -46,36 +46,36 @@
 
 	let systemToDatabasePermissions = {};
 
-	systemToDatabasePermissions[C.PERM_DELETE_PROJECT] = { "project": DB_DELETE };
-	systemToDatabasePermissions[C.PERM_CHANGE_PROJECT_SETTINGS] = { "settings": DB_READ_WRITE_UPDATE };
+	systemToDatabasePermissions[C.PERM_DELETE_MODEL] = { "model": DB_DELETE };
+	systemToDatabasePermissions[C.PERM_CHANGE_MODEL_SETTINGS] = { "settings": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_ASSIGN_LICENCE] = { "system.users": DB_READ_WRITE };
 	systemToDatabasePermissions[C.PERM_UPLOAD_FILES] = { "files": DB_READ_WRITE };
-	systemToDatabasePermissions[C.PERM_EDIT_PROJECT] = { "files": DB_READ_WRITE };
+	systemToDatabasePermissions[C.PERM_EDIT_MODEL] = { "files": DB_READ_WRITE };
 	systemToDatabasePermissions[C.PERM_CREATE_ISSUE] = { "issues": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_COMMENT_ISSUE] = { "issues": DB_READ_WRITE_UPDATE };
 	systemToDatabasePermissions[C.PERM_VIEW_ISSUE] = { "issues": DB_READ };
-	systemToDatabasePermissions[C.PERM_DOWNLOAD_PROJECT] = { "files": DB_READ };
-	systemToDatabasePermissions[C.PERM_VIEW_PROJECT] = { "project": DB_READ };
-	systemToDatabasePermissions[C.PERM_CREATE_PROJECT] = { "project": DB_READ_WRITE };
+	systemToDatabasePermissions[C.PERM_DOWNLOAD_MODEL] = { "files": DB_READ };
+	systemToDatabasePermissions[C.PERM_VIEW_MODEL] = { "model": DB_READ };
+	systemToDatabasePermissions[C.PERM_CREATE_MODEL] = { "model": DB_READ_WRITE };
 
 	let roleTemplates = {};
 
-	roleTemplates[C.ADMIN_TEMPLATE] = [C.PERM_EDIT_PROJECT, C.PERM_DELETE_PROJECT, C.PERM_CHANGE_PROJECT_SETTINGS, C.PERM_ASSIGN_LICENCE, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_PROJECT, C.PERM_CREATE_PROJECT, C.PERM_VIEW_ISSUE];
-	roleTemplates[C.COLLABORATOR_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_PROJECT, C.PERM_VIEW_ISSUE];
-	roleTemplates[C.COMMENTER_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_COMMENT_ISSUE, C.PERM_VIEW_ISSUE];
-	roleTemplates[C.VIEWER_TEMPLATE] = [C.PERM_VIEW_PROJECT, C.PERM_VIEW_ISSUE];
+	roleTemplates[C.ADMIN_TEMPLATE] = [C.PERM_EDIT_MODEL, C.PERM_DELETE_MODEL, C.PERM_CHANGE_MODEL_SETTINGS, C.PERM_ASSIGN_LICENCE, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_MODEL, C.PERM_VIEW_MODEL, C.PERM_CREATE_MODEL, C.PERM_VIEW_ISSUE];
+	roleTemplates[C.COLLABORATOR_TEMPLATE] = [C.PERM_VIEW_MODEL, C.PERM_UPLOAD_FILES, C.PERM_CREATE_ISSUE, C.PERM_COMMENT_ISSUE, C.PERM_DOWNLOAD_MODEL, C.PERM_VIEW_ISSUE];
+	roleTemplates[C.COMMENTER_TEMPLATE] = [C.PERM_VIEW_MODEL, C.PERM_COMMENT_ISSUE, C.PERM_VIEW_ISSUE];
+	roleTemplates[C.VIEWER_TEMPLATE] = [C.PERM_VIEW_MODEL, C.PERM_VIEW_ISSUE];
 
-	//role templates for project
-	let projectRoleTemplateLists = [C.COLLABORATOR_TEMPLATE, C.COMMENTER_TEMPLATE, C.VIEWER_TEMPLATE];
+	//role templates for model
+	let modelRoleTemplateLists = [C.COLLABORATOR_TEMPLATE, C.COMMENTER_TEMPLATE, C.VIEWER_TEMPLATE];
 
-	let createRoleFromTemplate = function (account, project, template, roleName) {
+	let createRoleFromTemplate = function (account, model, template, roleName) {
 		if (!(template in roleTemplates)) {
 			return Promise.reject(responseCodes.INVALID_ROLE_TEMPLATE);
 		}
 
 		let createRoleCmd;
 
-		//C.ADMIN_TEMPLATE is a special situation, it means admin role on the entire db and therefore all the projects within that db
+		//C.ADMIN_TEMPLATE is a special situation, it means admin role on the entire db and therefore all the models within that db
 		if(template === C.ADMIN_TEMPLATE){
 
 			roleName = roleName || template;
@@ -86,7 +86,7 @@
 			};
 
 		} else {
-			roleName = roleName || `${project}.${template}`;
+			roleName = roleName || `${model}.${template}`;
 
 			createRoleCmd = {
 				"createRole": roleName
@@ -136,7 +136,7 @@
 				privileges.push({
 					"resource": {
 						"db": account,
-						"collection": `${project}.${coll}`
+						"collection": `${model}.${coll}`
 					},
 					"actions": dbPermissions[coll]
 				});
@@ -154,7 +154,7 @@
 
 	module.exports = {
 		roleTemplates: roleTemplates,
-		projectRoleTemplateLists: projectRoleTemplateLists,
+		modelRoleTemplateLists: modelRoleTemplateLists,
 		createRoleFromTemplate: createRoleFromTemplate,
 		dbCollections: dbCollections
 	};

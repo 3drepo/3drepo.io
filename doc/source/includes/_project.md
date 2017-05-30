@@ -25,7 +25,7 @@ permissions | list of [project level permissions](#project-level)
 > Example request
 
 ```http
-POST /repoman/project-groups HTTP/1.1
+POST /repoman/projects HTTP/1.1
 ```
 ```json
 {
@@ -43,7 +43,7 @@ POST /repoman/project-groups HTTP/1.1
 }
 ```
 
-### POST /{accountName}/project-groups
+### POST /{accountName}/projects
 
 Create a project
 
@@ -56,7 +56,7 @@ name | Yes | project name
 ## Update a project
 
 ```http
-PUT /repoman/project-groups/project1 HTTP/1.1
+PUT /repoman/projects/project1 HTTP/1.1
 ```
 ```json
 {
@@ -85,7 +85,7 @@ PUT /repoman/project-groups/project1 HTTP/1.1
 }
 ```
 
-### PUT /{accountName}/project-groups/{projectName}
+### PUT /{accountName}/projects/{projectName}
 
 Update a project.
 
@@ -101,7 +101,7 @@ permissions | No | list of [project permission objects](#project-permission-obje
 > Example request
 
 ```http
-DELETE /repoman/project-groups/project1 HTTP/1.1
+DELETE /repoman/projects/project1 HTTP/1.1
 ```
 
 > Example response
@@ -110,7 +110,7 @@ DELETE /repoman/project-groups/project1 HTTP/1.1
 {}
 ```
 
-### DELETE /{accountName}/project-groups/{projectName}
+### DELETE /{accountName}/projects/{projectName}
 
 Delete a project
 

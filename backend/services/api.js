@@ -29,7 +29,7 @@
 		const sharedSession = serverConfig.session;
 		const log_iface = require("../logger.js");
 		const express = require("express");
-		const routes = require("../routes/routes.js")();
+		//const routes = require("../routes/routes.js")();
 		const compress = require("compression");
 		const responseCodes = require("../response_codes");
 		const C = require("../constants");
@@ -40,10 +40,10 @@
 		let app = express();
 
 		// Attach the encoders to the router
-		require("../encoders/x3dom_encoder.js")
-			.route(routes);
-		require("../encoders/json_encoder.js")
-			.route(routes);
+		// require("../encoders/x3dom_encoder.js")
+		// 	.route(routes);
+		// require("../encoders/json_encoder.js")
+		// 	.route(routes);
 
 		// Configure various middleware
 		app.use(sharedSession);
@@ -111,28 +111,28 @@
 		// projects (project groups) handlers
 		app.use("/:account", require("../routes/project"));
 
-		//models(projects) handlers
+		//models handlers
 		app.use("/:account", require("../routes/model"));
 
 		//metadata handler
-		app.use("/:account/:project", require("../routes/meta"));
+		app.use("/:account/:model", require("../routes/meta"));
 
 		//groups handler
-		app.use("/:account/:project/groups", require("../routes/group"));
+		app.use("/:account/:model/groups", require("../routes/group"));
 		
 		//issues handler
-		app.use("/:account/:project", require("../routes/issueAnalytic"));
-		app.use("/:account/:project", require("../routes/issue"));
+		app.use("/:account/:model", require("../routes/issueAnalytic"));
+		app.use("/:account/:model", require("../routes/issue"));
 
 		//mesh handler
-		app.use("/:account/:project", require("../routes/mesh"));
+		app.use("/:account/:model", require("../routes/mesh"));
 		//texture handler
-		app.use("/:account/:project", require("../routes/texture"));
+		app.use("/:account/:model", require("../routes/texture"));
 
 		//history handler
-		app.use("/:account/:project", require("../routes/history"));
+		app.use("/:account/:model", require("../routes/history"));
 
-		app.use("/", routes.router);
+		//app.use("/", routes.router);
 
 		app.use(function(err, req, res, next) {
 			if(err){

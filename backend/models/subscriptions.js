@@ -20,7 +20,7 @@
 
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
-	const ProjectSetting = require("./projectSetting");
+	const ModelSetting = require("./modelSetting");
 	const _ = require('lodash');
 
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
@@ -414,35 +414,35 @@
 		}
 
 		//check if they are a collaborator
-		return ProjectSetting.find({ account: user }, {}).then(projects => {
+		return ModelSetting.find({ account: user }, {}).then(models => {
 
-			let foundProjects = [];
-			projects.forEach(project => {
-				project.permissions.forEach(permission => {
+			let foundModels = [];
+			models.forEach(model => {
+				model.permissions.forEach(permission => {
 					if(permission.user === subscription.assignedUser){
-						foundProjects.push(project);
+						foundModels.push(model);
 					}
 				});
 			});
 
-			if(!cascadeRemove && foundProjects.length > 0){
+			if(!cascadeRemove && foundModels.length > 0){
 
 				return Promise.reject({ 
 					resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
-					info: {projects: _.map(foundProjects, p => { return { project: p._id}; } )}
+					info: {models: _.map(foundModels, p => { return { model: p._id}; } )}
 				});
 
 			} else {
 
 				let promises = [];
 
-				foundProjects.forEach(project => {
+				foundModels.forEach(model => {
 
-					const index = _.findIndex(project.permissions, p => p.user === subscription.assignedUser);
+					const index = _.findIndex(model.permissions, p => p.user === subscription.assignedUser);
 
 					if(index !== -1){
-						console.log(project.permissions.splice(index, 1));
-						promises.push(project.changePermissions(project.permissions.splice(index, 1)));
+						console.log(model.permissions.splice(index, 1));
+						promises.push(model.changePermissions(model.permissions.splice(index, 1)));
 					}
 				});
 

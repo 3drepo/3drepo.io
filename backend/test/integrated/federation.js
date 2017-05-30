@@ -29,23 +29,23 @@ let helpers = require("./helpers");
 let C = require('../../constants');
 let async = require('async');
 let Role = require('../../models/role');
-let ProjectSetting = require('../../models/projectSetting');
+let ModelSetting = require('../../models/modelSetting');
 let User = require('../../models/user');
 let config = require('../../config');
 let fs = require('fs');
 let unit = 'm';
 
-describe('Federated Project', function () {
+describe('Federated Model', function () {
 
 	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'fed';
 	let password = '123456';
-	let subProjects = ['proj1', 'proj2'];
+	let subModels = ['proj1', 'proj2'];
 	let desc = 'desc';
 	let type = 'type';
-	let fedProject = 'fedproj';
+	let fedModel = 'fedproj';
 
 	before(function(done){
 
@@ -109,14 +109,14 @@ describe('Federated Project', function () {
 
 		}, 1000);
 
-		agent.post(`/${username}/${fedProject}`)
+		agent.post(`/${username}/${fedModel}`)
 		.send({ 
 			desc, 
 			type,
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
 		.expect(200, function(err ,res) {
@@ -125,11 +125,11 @@ describe('Federated Project', function () {
 				return done(err);
 			}
 
-			expect(res.body.project).to.equal(fedProject);
+			expect(res.body.model).to.equal(fedModel);
 
 			async.series([
 				done => {
-					agent.get(`/${username}/${fedProject}.json`)
+					agent.get(`/${username}/${fedModel}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
@@ -140,7 +140,7 @@ describe('Federated Project', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedProjects.find(p => p.project === fedProject);
+						let fed = account.fedModels.find(m => m.model === fedModel);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -154,7 +154,7 @@ describe('Federated Project', function () {
 	});
 
 
-	it('should be created successfully even if no sub projects are specified', function(done){
+	it('should be created successfully even if no sub models are specified', function(done){
 		let emptyFed = 'emptyFed';
 
 		agent.post(`/${username}/${emptyFed}`)
@@ -162,7 +162,7 @@ describe('Federated Project', function () {
 			desc, 
 			type, 
 			unit,
-			subProjects:[] 
+			subModels:[] 
 		})
 		.expect(200, function(err ,res) {
 
@@ -170,7 +170,7 @@ describe('Federated Project', function () {
 				return done(err);
 			}
 
-			expect(res.body.project).to.equal(emptyFed);
+			expect(res.body.model).to.equal(emptyFed);
 
 			async.series([
 				done => {
@@ -185,7 +185,7 @@ describe('Federated Project', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedProjects.find(p => p.project === emptyFed);
+						let fed = account.fedModels.find(p => p.model === emptyFed);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -198,42 +198,42 @@ describe('Federated Project', function () {
 		});
 	});
 
-	it('should fail if create federation using existing project name (fed or model)', function(done){
+	it('should fail if create federation using existing model name (fed or model)', function(done){
 
 
-		agent.post(`/${username}/${subProjects[0]}`)
+		agent.post(`/${username}/${subModels[0]}`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 			done(err);
 
 		});
 	});
 
-	it('should fail if create federation using invalid project name', function(done){
+	it('should fail if create federation using invalid model name', function(done){
 
 
 		agent.post(`/${username}/a%20c`)
 		.send({ 
 			desc, 
 			type, 
-			subProjects:[{
+			subModels:[{
 				"database": 'testing',
-				"project": 'testproject'
+				"model": 'testproject'
 			}] 
 		})
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+			expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
 			done(err);
 
 		});
@@ -248,9 +248,9 @@ describe('Federated Project', function () {
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": 'testing',
-				"project": 'testproject'
+				"model": 'testproject'
 			}] 
 		})
 		.expect(400, function(err ,res) {

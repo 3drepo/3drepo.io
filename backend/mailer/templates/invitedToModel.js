@@ -18,15 +18,15 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	You've been invited to collaborate on the project - ${data.project}
+	You've been invited to collaborate on the model - ${data.model}
 	<br><br>
-	<a href="${data.url}">Go to project ${data.project}</a>
+	<a href="${data.url}">Go to model ${data.model}</a>
 	<br><br>
 	Best,<br>
 	3D Repo
 `;
 
-var subject = data => `${data.project} - Invitation to collaborate`;
+var subject = data => `${data.model} - Invitation to collaborate`;
 
 module.exports =  {
 	html: html,

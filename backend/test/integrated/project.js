@@ -67,7 +67,7 @@ describe('Project groups', function () {
 		async.series([
 			
 			callback => {
-				agent.post(`/${username}/project-groups`)
+				agent.post(`/${username}/projects`)
 				.send(projectgroup)
 				.expect(200, function(err, res){
 					callback(err);
@@ -93,7 +93,7 @@ describe('Project groups', function () {
 
 
 	it('should fail to create project group with name default', function(done){
-		agent.post(`/${username}/project-groups`)
+		agent.post(`/${username}/projects`)
 		.send({name: 'default'})
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
@@ -108,7 +108,7 @@ describe('Project groups', function () {
 			name: 'project_exists'
 		};
 
-		agent.post(`/${username}/project-groups`)
+		agent.post(`/${username}/projects`)
 		.send(projectgroup)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
@@ -131,7 +131,7 @@ describe('Project groups', function () {
 		async.series([
 			
 			callback => {
-				agent.put(`/${username}/project-groups/${projectgroup.name}`)
+				agent.put(`/${username}/projects/${projectgroup.name}`)
 				.send(projectgroup)
 				.expect(200, function(err, res){
 					callback(err);
@@ -168,7 +168,7 @@ describe('Project groups', function () {
 		async.series([
 			
 			callback => {
-				agent.put(`/${username}/project-groups/project2`)
+				agent.put(`/${username}/projects/project2`)
 				.send(projectgroup)
 				.expect(200, function(err, res){
 					callback(err);
@@ -203,7 +203,7 @@ describe('Project groups', function () {
 			}]
 		};
 
-		agent.put(`/${username}/project-groups/${projectgroup.name}`)
+		agent.put(`/${username}/projects/${projectgroup.name}`)
 		.send(projectgroup)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
@@ -221,7 +221,7 @@ describe('Project groups', function () {
 		async.series([
 			
 			callback => {
-				agent.delete(`/${username}/project-groups/${projectgroup.name}`)
+				agent.delete(`/${username}/projects/${projectgroup.name}`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -247,7 +247,7 @@ describe('Project groups', function () {
 	});
 
 	it('should fail to update a project group that doesnt exist', function(done){
-		agent.put(`/${username}/project-groups/notexist`)
+		agent.put(`/${username}/projects/notexist`)
 		.send({})
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
@@ -256,7 +256,7 @@ describe('Project groups', function () {
 	});
 
 	it('should fail to delete a project group that doesnt exist', function(done){
-		agent.delete(`/${username}/project-groups/notexist`)
+		agent.delete(`/${username}/projects/notexist`)
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);

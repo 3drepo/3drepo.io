@@ -17,7 +17,7 @@
 var ModelFactory = require('../factory/modelFactory');
 var Role = require('../role');
 var RoleTemplates = require('../role_templates');
-var ProjectSetting = require('../projectSetting');
+var ModelSetting = require('../modelSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
 var importQueue = require('../../services/queue');
@@ -83,25 +83,25 @@ function convertToErrorCode(errCode){
 }
 
 
-function createAndAssignRole(project, account, username, data) {
+function createAndAssignRole(model, account, username, data) {
 	'use strict';
 
 	let projectGroup;
 
-	if(!project.match(projectNameRegExp)){
-		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
+	if(!model.match(modelNameRegExp)){
+		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
 	}
 
-	if(data.code && !ProjectSetting.projectCodeRegExp.test(data.code)){
-		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_CODE });
+	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)){
+		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
 	}
 
 	if(!data.unit){
-		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
+		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
 	}
 
-	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
-		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
+	if(C.REPO_BLACKLIST_MODEL.indexOf(model) !== -1){
+		return Promise.reject({ resCode: responseCodes.BLACKLISTED_MODEL_NAME });
 	}
 
 	let promise = Promise.resolve();
@@ -120,36 +120,36 @@ function createAndAssignRole(project, account, username, data) {
 
 	return promise.then(() => {
 
-		return ProjectSetting.findById({account, project}, project);
+		return ModelSetting.findById({account, model}, model);
 
 	}).then(setting => {
 
 		if(setting){
-			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 		}
 
-		return (data.federate ? createFederatedProject(account, project, data.subProjects) : Promise.resolve());
+		return (data.federate ? createFederatedModel(account, model, data.subModels) : Promise.resolve());
 
 	}).then(() => {
 
-		return Role.createStandardRoles(account, project);
+		return Role.createStandardRoles(account, model);
 
 	}).then(() => {
 
-		return Role.grantProjectRoleToUser(username, account, project, C.COLLABORATOR_TEMPLATE);
+		return Role.grantModelRoleToUser(username, account, model, C.COLLABORATOR_TEMPLATE);
 
 	}).then(() => {
 
-		return ProjectSetting.findById({account, project}, project);
+		return ModelSetting.findById({account, model}, model);
 
 	}).then(setting => {
 
-		setting = setting || ProjectSetting.createInstance({
+		setting = setting || ModelSetting.createInstance({
 			account: account,
-			project: project
+			model: model
 		});
 
-		setting._id = project;
+		setting._id = model;
 		setting.owner = username;
 		setting.desc = data.desc;
 		setting.type = data.type;
@@ -160,7 +160,7 @@ function createAndAssignRole(project, account, username, data) {
 			code: data.code,
 		});
 
-		setting.properties.topicTypes = ProjectSetting.defaultTopicTypes;
+		setting.properties.topicTypes = ModelSetting.defaultTopicTypes;
 
 		return setting.save();
 
@@ -168,7 +168,7 @@ function createAndAssignRole(project, account, username, data) {
 
 
 		if(projectGroup){
-			projectGroup.models.push(project);
+			projectGroup.models.push(model);
 			return projectGroup.save().then(() => setting);
 		}
 
@@ -177,28 +177,28 @@ function createAndAssignRole(project, account, username, data) {
 
 	}).then(setting => {
 
-		let projectData = {
+		let modelData = {
 			account,
-			project,
+			model,
 			permissions: C.MODEL_PERM_LIST
 		};
 
-		ChatEvent.newProject(data.sessionId, account, projectData);
+		ChatEvent.newModel(data.sessionId, account, modelData);
 
 		// this is true if only admin can create project
 		return {
 
 			setting,
-			project: projectData
+			model: modelData
 
 		};
 	});
 }
 
-function importToyProject(username){
+function importToyModel(username){
 	'use strict';
 
-	let project = 'sample_project';
+	let model = 'sample_project';
 	let account = username;
 	let desc = '';
 	let type = 'sample';
@@ -210,15 +210,15 @@ function importToyProject(username){
 		desc, type, unit: 'm'
 	};
 
-	return createAndAssignRole(project, account, username, data).then(data => {
+	return createAndAssignRole(model, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		return importProject(account, project, username, setting, {type: 'toy' });
+		return importModel(account, model, username, setting, {type: 'toy' });
 	}).catch(err => {
 
 		Mailer.sendImportError({
  			account,
- 			project,
+ 			model,
  			username,
  			err: err.message,
  			corID: err.corID,
@@ -229,18 +229,18 @@ function importToyProject(username){
 	});
 }
 
-function createFederatedProject(account, project, subProjects){
+function createFederatedModel(account, model, subModels){
 	'use strict';
 
 	let federatedJSON = {
 		database: account,
-		project: project,
+		project: model,
 		subProjects: []
 	};
 
 	let error;
 
-	let addSubProjects = [];
+	let addSubModels = [];
 
 	let files = function(data){
 		return [
@@ -249,20 +249,20 @@ function createFederatedProject(account, project, subProjects){
 		];
 	};
 
-	subProjects.forEach(subProject => {
+	subModels.forEach(subModel => {
 
-		if(subProject.database !== account){
+		if(subModel.database !== account){
 			error = responseCodes.FED_MODEL_IN_OTHER_DB;
 		}
 
-		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
+		addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
 			if(setting && setting.federate){
 				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
-			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
+			} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
 				federatedJSON.subProjects.push({
-					database: subProject.database,
-					project: subProject.project
+					database: subModel.database,
+					project: subModel.model
 				});
 			}
 		}));
@@ -273,14 +273,14 @@ function createFederatedProject(account, project, subProjects){
 		return Promise.reject(error);
 	}
 
-	if(subProjects.length === 0) {
+	if(subModels.length === 0) {
 		return Promise.resolve();
 	}
 
 	//console.log(federatedJSON);
-	return Promise.all(addSubProjects).then(() => {
+	return Promise.all(addSubModels).then(() => {
 
-		return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+		return importQueue.createFederatedModel(account, federatedJSON).catch(err => {
 			_deleteFiles(files(err));
 			return;
 		});
@@ -303,7 +303,7 @@ function createFederatedProject(account, project, subProjects){
 
 }
 
-function getModelProperties(account, project, branch, rev, username){
+function getModelProperties(account, model, branch, rev, username){
 	'use strict';
 
 	let subProperties;
@@ -312,16 +312,16 @@ function getModelProperties(account, project, branch, rev, username){
 	let status;
 
 	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, project }, rev);
+		getHistory = History.findByUID({ account, model }, rev);
 	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, project }, rev);
+		getHistory = History.findByTag({ account, model }, rev);
 	} else if (branch) {
-		getHistory = History.findByBranch({ account, project }, branch);
+		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
 	return getHistory.then(_history => {
 		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, project);
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
@@ -331,13 +331,13 @@ function getModelProperties(account, project, branch, rev, username){
 			return Promise.resolve([]);
 		} else {
 			revId = utils.uuidToString(history._id);
-			modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
+			modelPropertiesFileName = `/${account}/${model}/revision/${revId}/modelProperties.json`;
 
 			let filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
-			return Ref.find({ account, project }, filter);
+			return Ref.find({ account, model }, filter);
 		}
 	}).then(refs => {
 
@@ -359,7 +359,7 @@ function getModelProperties(account, project, branch, rev, username){
 					return Promise.resolve({
 						properties: obj.properties,
 						owner: ref.owner,
-						project: ref.project
+						model: ref.project
 					});
 				})
 			);
@@ -370,7 +370,7 @@ function getModelProperties(account, project, branch, rev, username){
 	}).then(_subProperties => {
 
 		subProperties = _subProperties;
-		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
+		return stash.findStashByFilename({ account, model }, 'json_mpc', modelPropertiesFileName);
 
 	}).then(buf => {
 		let properties = { hiddenNodes : null };
@@ -400,8 +400,8 @@ function getModelProperties(account, project, branch, rev, username){
 	});
 }
 
-// more efficient, no json parsing, no idToPath generation for fed project, but only support 1 level of fed
-function getFullTree(account, project, branch, rev, username){
+// more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
+function getFullTree(account, model, branch, rev, username){
 	'use strict';
 
 	let getHistory;
@@ -411,15 +411,15 @@ function getFullTree(account, project, branch, rev, username){
 
 	if(rev && utils.isUUID(rev)){
 
-		getHistory = History.findByUID({ account, project }, rev);
+		getHistory = History.findByUID({ account, model }, rev);
 
 	} else if (rev && !utils.isUUID(rev)) {
 
-		getHistory = History.findByTag({ account, project }, rev);
+		getHistory = History.findByTag({ account, model }, rev);
 
 	} else if (branch) {
 
-		getHistory = History.findByBranch({ account, project }, branch);
+		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
 	return getHistory.then(_history => {
@@ -431,9 +431,9 @@ function getFullTree(account, project, branch, rev, username){
 		}
 
 		let revId = utils.uuidToString(history._id);
-		let treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
-		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
 
 	}).then(buf => {
 
@@ -444,7 +444,7 @@ function getFullTree(account, project, branch, rev, username){
 			_id: { $in: history.current }
 		};
 
-		return Ref.find({ account, project }, filter);
+		return Ref.find({ account, model }, filter);
 
 	}).then(refs => {
 
@@ -457,7 +457,7 @@ function getFullTree(account, project, branch, rev, username){
 
 			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
 
-				getRefId = History.findByBranch({ account: ref.owner, project: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
+				getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
 					return _history ? utils.uuidToString(_history._id) : null;
 				});
 
@@ -481,7 +481,7 @@ function getFullTree(account, project, branch, rev, username){
 					}
 
 					let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-					return stash.findStashByFilename({ account: ref.owner, project: ref.project }, 'json_mpc', treeFileName);
+					return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
 				});
 
 			}).then(buf => {
@@ -504,7 +504,7 @@ function getFullTree(account, project, branch, rev, username){
 	});
 }
 
-function searchTree(account, project, branch, rev, searchString, username){
+function searchTree(account, model, branch, rev, searchString, username){
 	'use strict';
 
 	let items = [];
@@ -516,13 +516,13 @@ function searchTree(account, project, branch, rev, searchString, username){
 			name: new RegExp(searchString, 'i')
 		};
 
-		return Scene.find({account, project}, filter, { name: 1 }).then(objs => {
+		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
 
 			objs.forEach((obj, i) => {
 
 				objs[i] = obj.toJSON();
 				objs[i].account = account;
-				objs[i].project = project;
+				objs[i].model = model;
 				items.push(objs[i]);
 
 			});
@@ -532,7 +532,7 @@ function searchTree(account, project, branch, rev, searchString, username){
 				type: 'ref'
 			};
 
-			return Ref.find({account, project}, filter);
+			return Ref.find({account, model}, filter);
 
 		}).then(refs => {
 
@@ -564,18 +564,18 @@ function searchTree(account, project, branch, rev, searchString, username){
 		});
 	};
 
-	return middlewares.hasReadAccessToModelHelper(username, account, project).then(granted => {
+	return middlewares.hasReadAccessToModelHelper(username, account, model).then(granted => {
 
 		if(granted){
 
 			let getHistory;
 
 			if(rev && utils.isUUID(rev)){
-				getHistory = History.findByUID({account, project}, rev);
+				getHistory = History.findByUID({account, model}, rev);
 			} else if (rev && !utils.isUUID(rev)){
-				getHistory = History.findByTag({account, project}, rev);
+				getHistory = History.findByTag({account, model}, rev);
 			} else {
-				getHistory = History.findByBranch({account, project}, branch);
+				getHistory = History.findByBranch({account, model}, branch);
 			}
 
 			return getHistory.then(history => {
@@ -593,12 +593,12 @@ function searchTree(account, project, branch, rev, searchString, username){
 
 }
 
-function listSubProjects(account, project, branch){
+function listSubModels(account, model, branch){
 	'use strict';
 
-	let subProjects = [];
+	let subModels = [];
 
-	return History.findByBranch({ account, project }, branch).then(history => {
+	return History.findByBranch({ account, model }, branch).then(history => {
 
 
 		if(history){
@@ -607,7 +607,7 @@ function listSubProjects(account, project, branch){
 				_id: { $in: history.current }
 			};
 
-			return Ref.find({ account, project }, filter);
+			return Ref.find({ account, model }, filter);
 		} else {
 			return [];
 		}
@@ -616,22 +616,22 @@ function listSubProjects(account, project, branch){
 	}).then(refs => {
 
 		refs.forEach(ref => {
-			subProjects.push({
+			subModels.push({
 				database: ref.owner,
-				project: ref.project
+				model: ref.project
 			});
 		});
 
-		return Promise.resolve(subProjects);
+		return Promise.resolve(subModels);
 
 	});
 }
 
 
-function downloadLatest(account, project){
+function downloadLatest(account, model){
 	'use strict';
 
-	let bucket =  stash.getGridFSBucket(account, `${project}.history`);
+	let bucket =  stash.getGridFSBucket(account, `${model}.history`);
 
 	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
 
@@ -666,16 +666,16 @@ function uploadFile(req){
 	}
 
 	let account = req.params.account;
-	let project = req.params.project;
+	let model = req.params.model;
 
-	ChatEvent.projectStatusChanged(null, account, project, { status: 'uploading' });
-	//upload project with tag
+	ChatEvent.modelStatusChanged(null, account, model, { status: 'uploading' });
+	//upload model with tag
 	let checkTag = tag => {
 		if(!tag){
 			return Promise.resolve();
 		} else {
 			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, project}, tag, {_id: 1});
+				return History.findByTag({account, model}, tag, {_id: 1});
 			}).then(tag => {
 				if (!tag){
 					return Promise.resolve();
@@ -730,7 +730,7 @@ function uploadFile(req){
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
 			} else {
-				ChatEvent.projectStatusChanged(null, account, project, { status: 'uploaded' });
+				ChatEvent.modelStatusChanged(null, account, model, { status: 'uploaded' });
 				return resolve(req.file);
 			}
 		});
@@ -764,7 +764,7 @@ function _deleteFiles(files){
 	});
 }
 
-function _handleUpload(account, project, username, file, data){
+function _handleUpload(account, model, username, file, data){
 	'use strict';
 
 
@@ -780,7 +780,7 @@ function _handleUpload(account, project, username, file, data){
 		file.path,
 		file.originalname,
 		account,
-		project,
+		model,
 		username,
 		null,
 		data.tag,
@@ -791,7 +791,7 @@ function _handleUpload(account, project, username, file, data){
 
 		systemLogger.logInfo(`Job ${corID} imported without error`,{
 			account,
-			project,
+			model,
 			username
 		});
 
@@ -805,45 +805,45 @@ function _handleUpload(account, project, username, file, data){
 
 }
 
-function importProject(account, project, username, projectSetting, source, data){
+function importModel(account, model, username, modelSetting, source, data){
 	'use strict';
 
-	if(!projectSetting){
-		return Promise.reject({ message: `projectSetting is ${projectSetting}`});
+	if(!modelSetting){
+		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	ChatEvent.projectStatusChanged(null, account, project, { status: 'processing' });
+	ChatEvent.modelStatusChanged(null, account, model, { status: 'processing' });
 
-	projectSetting.status = 'processing';
+	modelSetting.status = 'processing';
 
-	return projectSetting.save().then(() => {
+	return modelSetting.save().then(() => {
 
 		if (source.type === 'upload'){
-			return _handleUpload(account, project, username, source.file, data);
+			return _handleUpload(account, model, username, source.file, data);
 
 		} else if (source.type === 'toy'){
 
-			return importQueue.importToyProject(account, project).then(obj => {
+			return importQueue.importToyModel(account, model).then(obj => {
 				let corID = obj.corID;
-				systemLogger.logInfo(`Job ${corID} imported without error`,{account, project, username});
+				systemLogger.logInfo(`Job ${corID} imported without error`,{account, model, username});
 			});
 		}
 
 	}).then(() => {
 
-		projectSetting.status = 'ok';
-		projectSetting.errorReason = undefined;
-		projectSetting.markModified('errorReason');
+		modelSetting.status = 'ok';
+		modelSetting.errorReason = undefined;
+		modelSetting.markModified('errorReason');
 
-		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
 
-		return projectSetting.save();
+		return modelSetting.save();
 
 	}).then(() => {
 
-		systemLogger.logInfo(`Project from source ${source.type} has imported successfully`, {
+		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
 			account,
-			project,
+			model,
 			username
 		});
 
@@ -852,22 +852,22 @@ function importProject(account, project, username, projectSetting, source, data)
 	}).catch(err => {
 
 		// import failed for some reason(s)...
-		//mark project failed
+		//mark model failed
 
-		systemLogger.logError(`Error while importing project from source ${source.type}`, {
+		systemLogger.logError(`Error while importing model from source ${source.type}`, {
 			stack : err.stack,
 			err: err,
 			account,
-			project,
+			model,
 			username
 		});
 
-		projectSetting.status = 'failed';
-		projectSetting.errorReason = err;
-		projectSetting.markModified('errorReason');
-		projectSetting.save();
+		modelSetting.status = 'failed';
+		modelSetting.errorReason = err;
+		modelSetting.markModified('errorReason');
+		modelSetting.save();
 
-		ChatEvent.projectStatusChanged(null, account, project, projectSetting);
+		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
 
 
 		return Promise.reject(err);
@@ -875,28 +875,28 @@ function importProject(account, project, username, projectSetting, source, data)
 	});
 }
 
-function removeProject(account, project){
+function removeModel(account, model){
 	'use strict';
 
 	let setting;
-	return ProjectSetting.findById({account, project}, project).then(_setting => {
+	return ModelSetting.findById({account, model}, model).then(_setting => {
 
 		setting = _setting;
 
 		if(!setting){
-			return Promise.reject({resCode: responseCodes.PROJECT_NOT_FOUND});
+			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
 		}
 
 	}).then(() => {
 		return ModelFactory.db.db(account).listCollections().toArray();
 
 	}).then(collections => {
-		//remove project collections
+		//remove model collections
 
 		let promises = [];
 
 		collections.forEach(collection => {
-			if(collection.name.startsWith(project + '.')){
+			if(collection.name.startsWith(model + '.')){
 				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
 			}
 		});
@@ -904,31 +904,31 @@ function removeProject(account, project){
 		return Promise.all(promises);
 
 	}).then(() => {
-		//remove project settings
+		//remove model settings
 		return setting.remove();
 
 	}).then(() => {
-		//remove roles related to this project from system.roles collection
+		//remove roles related to this model from system.roles collection
 		let promises = [];
 
-		RoleTemplates.projectRoleTemplateLists.forEach(role => {
-			promises.push(Role.dropRole(account, `${project}.${role}`));
+		RoleTemplates.modelRoleTemplateLists.forEach(role => {
+			promises.push(Role.dropRole(account, `${model}.${role}`));
 		});
 
 		return Promise.all(promises);
 	}).then(() => {
 
-		//remove model from all project groups
-		return Project.removeModel(account, project);
+		//remove model from all project
+		return Project.removeModel(account, model);
 	}).then(() => {
 
 		//remove model from collaborator.customData.models
-		return User.removeModelFromAllUser(account, project);
+		return User.removeModelFromAllUser(account, model);
 	});
 
 }
 
-function getProjectPermission(username, setting, account){
+function getModelPermission(username, setting, account){
 	'use strict';
 
 	if(!setting){
@@ -962,7 +962,7 @@ function getProjectPermission(username, setting, account){
 	});
 }
 
-function getMetadata(account, project, id){
+function getMetadata(account, model, id){
 	'use strict';
 
 	let projection = {
@@ -973,7 +973,7 @@ function getMetadata(account, project, id){
 		parents: 0
 	};
 
-	return Scene.findOne({account, project}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
+	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
 		if(obj){
 			return obj;
 		} else {
@@ -984,7 +984,7 @@ function getMetadata(account, project, id){
 }
 
 var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var projectNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
+var modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
 var acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -998,20 +998,20 @@ var acceptedFormat = [
 
 module.exports = {
 	createAndAssignRole,
-	importToyProject,
+	importToyModel,
 	convertToErrorCode,
-	createFederatedProject,
-	listSubProjects,
+	createFederatedModel,
+	listSubModels,
 	getFullTree,
 	getModelProperties,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	projectNameRegExp,
+	modelNameRegExp,
 	acceptedFormat,
 	uploadFile,
-	importProject,
-	removeProject,
-	getProjectPermission,
+	importModel,
+	removeModel,
+	getModelPermission,
 	getMetadata
 };

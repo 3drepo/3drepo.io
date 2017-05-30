@@ -37,7 +37,7 @@
 		const units = require("../models/unit");
 		const favicon = require("serve-favicon");
 		const History = require("../models/history");
-		const ProjectHelper = require("../models/helper/project");
+		const ModelHelper = require("../models/helper/model");
 		const User = require("../models/user");
 		const systemLogger = require("../logger.js").systemLogger;
 		const responseCodes = require("../response_codes.js");
@@ -133,10 +133,10 @@
 			params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
 			params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";
 			params.config_js += "\n\nserver_config.tagRegExp = " + History.tagRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.projectNameRegExp = " + ProjectHelper.projectNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.fileNameRegExp = " + ProjectHelper.fileNameRegExp.toString() + ";";
+			params.config_js += "\n\nserver_config.modelNameRegExp = " + ModelHelper.modelNameRegExp.toString() + ";";
+			params.config_js += "\n\nserver_config.fileNameRegExp = " + ModelHelper.fileNameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
+			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ModelHelper.acceptedFormat) + ";";
 
 			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
 			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({

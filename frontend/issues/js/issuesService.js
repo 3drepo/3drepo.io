@@ -72,8 +72,8 @@
 		};
 
 		obj.generateTitle = function(issue) {
-			if (issue.projectCode){
-				return issue.projectCode + "." + issue.number + " " + issue.name;
+			if (issue.modelCode){
+				return issue.modelCode + "." + issue.number + " " + issue.name;
 			} else if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
@@ -316,7 +316,7 @@
 
 		obj.getUserJobForProject = function(account, project){
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/userJobForProject.json");
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/userJobForModel.json");
 
 			$http.get(url).then(
 				function(data) {

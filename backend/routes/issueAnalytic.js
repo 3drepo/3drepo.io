@@ -34,7 +34,7 @@
 		
 		IssueAnalytic.groupBy(
 			req.params.account, 
-			req.params.project, 
+			req.params.model, 
 			req.query.groupBy, 
 			req.query.secGroupBy, 
 			sort, 

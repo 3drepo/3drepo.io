@@ -35,7 +35,7 @@ describe('Download', function () {
 	let agent;
 	let username = 'testing';
 	let password = 'testing';
-	let project = 'testproject';
+	let model = 'testproject';
 
 
 	before(function(done){
@@ -63,7 +63,7 @@ describe('Download', function () {
 
 	it('should succee', function(done){
 
-		agent.get(`/${username}/${project}/download/latest`)
+		agent.get(`/${username}/${model}/download/latest`)
 		.expect(200, function(err, res){
 			done(err);
 		});
