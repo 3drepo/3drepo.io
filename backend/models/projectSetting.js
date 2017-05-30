@@ -30,7 +30,11 @@ var schema = mongoose.Schema({
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
 	federate: Boolean,
-	permissions: [],
+	permissions: [{
+		_id: false,
+		user: String,
+		permission: String
+	}],
 	properties: {
 		"pinSize" : Number,
 		"avatarHeight" : Number,
@@ -113,34 +117,87 @@ schema.methods.updateProperties = function(updateObj){
 
 };
 
-schema.methods.findCollaborator = function(user, role){
+schema.methods.changePermissions = function(permissions){
 	'use strict';
 
-	let len = this.collaborators.length;
+	const User = require('./user');
+	const account = this._dbcolOptions.account;
+
+	//get list of valid permission name
+	permissions = _.uniq(permissions, 'user');
+	
+	return User.findByUserName(account).then(dbUser => {
+
+		let promises = [];
+
+		permissions.forEach(permission => {
+
+			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
+				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
+			}
 
 
-	for(let i=0; i<len ; i++){
+			let perm = this.permissions.find(perm => perm.user === permission.user);
 
-		let collaborator = this.collaborators[i];
-		if(collaborator.user === user && collaborator.role === role){
-			return collaborator;
-		}
-	}
+			if(perm) {
 
-	return null;
+				perm.permission = permission.permission;
+
+			} else {
+
+				promises.push(
+					User.findByUserName(permission.user).then(user => {
+						if(!user){
+							return Promise.reject(responseCodes.USER_NOT_FOUND);
+						} else {
+
+							user.customData.models.push({
+								account, 
+								model: this._id
+							});
+
+							return user.save();
+						}
+					})
+				);
+			}
+
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => {
+		
+		//delete user.customData.models first
+		const usersToRemove = _.difference(this.permissions.map(p => p.user), permissions.map(p => p.user));
+
+		this.permissions = permissions;
+
+		return this.save().then(() => usersToRemove);
+		
+	}).then(usersToRemove => {
+		
+		let removeUserPromises = [];
+
+		usersToRemove.forEach(user => {
+			removeUserPromises.push(User.removeModel(user, account, this._id));
+		});
+
+		return Promise.all(removeUserPromises);
+		
+	}).then(
+		() => this.permissions
+	);
+
 };
 
-schema.methods.removeCollaborator = function(user, role){
-	'use strict';
-
-	let collaborator = this.findCollaborator(user, role);
-	if(collaborator){
-		this.collaborators.pull(collaborator._id);
-	}
-
-	return collaborator;
+schema.methods.isPermissionAssigned = function(permission){
+	return this.permissions.find(perm => perm.permission === permission) ?  true : false;
 };
 
+schema.methods.findPermissionByUser = function(username){
+	return this.permissions.find(perm => perm.user === username);
+};
 
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',

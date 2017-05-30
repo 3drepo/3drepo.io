@@ -17,16 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
+const request = require('supertest');
+const expect = require('chai').expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing'}) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
-let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
-let async = require('async');
+const log_iface = require("../../logger.js");
+const systemLogger = log_iface.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const helpers = require("./helpers");
+const async = require('async');
+const C = require('../../constants');
 
 describe('Sharing/Unsharing a project', function () {
 	let User = require('../../models/user');
@@ -129,18 +130,17 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('should succee and the viewer is able to see the project', function(done){
-			let role = {
-				user: username_viewer,
-				role: 'viewer'
-			};
+
+			const permissions = [
+				{ user: username_viewer, permission: 'viewer'}
+			];
 
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/collaborators`)
-					.send(role)
+					agent.post(`/${username}/${project}/permissions`)
+					.send(permissions)
 					.expect(200, function(err, res){
-						expect(res.body).to.deep.equal(role);
 						done(err);
 					});
 				},
@@ -168,10 +168,11 @@ describe('Sharing/Unsharing a project', function () {
 					.expect(200, function(err, res){
 
 						expect(res.body).to.have.property('accounts').that.is.an('array');
-						let account = res.body.accounts.find( a => a.account === username);
+						const account = res.body.accounts.find( a => a.account === username);
 						expect(account).to.have.property('projects').that.is.an('array');
-						let projectObj = account.projects.find( p => p.project === project);
+						const projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -188,6 +189,13 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
 
 		it('and the viewer should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -233,7 +241,7 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 
-		describe('and then remove the role', function(){
+		describe('and then revoking the permission', function(){
 			before(function(done){
 				async.waterfall([
 					function logout(done){
@@ -259,18 +267,14 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('should succee and the viewer is NOT able to see the project', function(done){
 
-				let role = {
-					user: username_viewer,
-					role: 'viewer'
-				};
+				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.delete(`/${username}/${project}/collaborators`)
-						.send(role)
+						agent.post(`/${username}/${project}/permissions`)
+						.send(permissions)
 						.expect(200, function(err, res){
-							expect(res.body).to.deep.equal(role);
 							done(err);
 						});
 					},
@@ -317,7 +321,7 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('and the viewer should NOT be able to see raise issue', function(done){
 				agent.post(`/${username}/${project}/issues.json`)
-				.send({ })
+				.send({})
 				.expect(401 , done);
 			});
 		});
@@ -345,18 +349,17 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('should succee and the commenter is able to see the project', function(done){
-			let role = {
-				user: username_commenter,
-				role: 'commenter'
-			};
+
+			const permissions = [
+				{ user: username_commenter, permission: 'commenter'}
+			];
 
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/collaborators`)
-					.send(role)
+					agent.post(`/${username}/${project}/permissions`)
+					.send(permissions)
 					.expect(200, function(err, res){
-						expect(res.body).to.deep.equal(role);
 						done(err);
 					});
 				},
@@ -388,6 +391,7 @@ describe('Sharing/Unsharing a project', function () {
 						expect(account).to.have.property('projects').that.is.an('array');
 						let projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -404,6 +408,13 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
 
 		it('and the commenter should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -471,7 +482,7 @@ describe('Sharing/Unsharing a project', function () {
 			.send(body).expect(401 , done);
 		});
 
-		describe('and then remove the role', function(done){
+		describe('and then revoking the permissions', function(done){
 			before(function(done){
 				async.waterfall([
 					function logout(done){
@@ -497,18 +508,14 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('should succee and the commenter is NOT able to see the project', function(done){
 
-				let role = {
-					user: username_commenter,
-					role: 'commenter'
-				};
+				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.delete(`/${username}/${project}/collaborators`)
-						.send(role)
+						agent.post(`/${username}/${project}/permissions`)
+						.send(permissions)
 						.expect(200, function(err, res){
-							expect(res.body).to.deep.equal(role);
 							done(err);
 						});
 					},
@@ -582,18 +589,17 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('should succee and the editor is able to see the project', function(done){
-			let role = {
-				email: email('editor'),
-				role: 'collaborator'
-			};
+
+			const permissions = [
+				{ user: username_editor, permission: 'collaborator'}
+			];
 
 			async.series([
 				function share(done){
 
-					agent.post(`/${username}/${project}/collaborators`)
-					.send(role)
+					agent.post(`/${username}/${project}/permissions`)
+					.send(permissions)
 					.expect(200, function(err, res){
-						expect(res.body).to.deep.equal(role);
 						done(err);
 					});
 				},
@@ -625,6 +631,7 @@ describe('Sharing/Unsharing a project', function () {
 						expect(account).to.have.property('projects').that.is.an('array');
 						let projectObj = account.projects.find( p => p.project === project);
 						expect(projectObj).to.have.property('project', project);
+						expect(projectObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 
 						done(err);
 					});
@@ -641,6 +648,14 @@ describe('Sharing/Unsharing a project', function () {
 
 		});
 
+		it('model info api shows correct permissions', function(done){
+			agent.get(`/${username}/${project}.json`).
+			expect(200, function(err, res){
+				expect(res.body.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
+				done(err);
+			});
+		});
+		
 
 		it('and the editor should be able to see list of issues', function(done){
 			agent.get(`/${username}/${project}/issues.json`)
@@ -709,7 +724,7 @@ describe('Sharing/Unsharing a project', function () {
 			.send(body).expect(401 , done);
 		});
 
-		describe('and then remove the role', function(done){
+		describe('and then revoking the permissions', function(done){
 			before(function(done){
 				async.waterfall([
 					function logout(done){
@@ -735,18 +750,14 @@ describe('Sharing/Unsharing a project', function () {
 
 			it('should succee and the editor is NOT able to see the project', function(done){
 
-				let role = {
-					user: username_editor,
-					role: 'collaborator'
-				};
+				const permissions = [];
 					
 				async.waterfall([
 					function remove(done){
 
-						agent.delete(`/${username}/${project}/collaborators`)
-						.send(role)
+						agent.post(`/${username}/${project}/permissions`)
+						.send(permissions)
 						.expect(200, function(err, res){
-							expect(res.body).to.deep.equal(role);
 							done(err);
 						});
 					},
@@ -799,7 +810,39 @@ describe('Sharing/Unsharing a project', function () {
 		});
 	});
 
-	describe('for unassigned user', function(){
+	// this test case may not be valid any more for current business requirements
+	// describe('for unassigned user', function(){
+
+	// 	before(function(done){
+
+	// 		agent = request.agent(server);
+	// 		agent.post('/login')
+	// 		.send({ username, password })
+	// 		.expect(200, function(err, res){
+	// 			expect(res.body.username).to.equal(username);
+	// 			done(err);
+	// 		});
+			
+	// 	});
+
+	// 	it('should fail', function(done){
+	// 		let role = {
+	// 			user: username_viewer + '1',
+	// 			role: 'viewer'
+	// 		};
+
+	// 		agent.post(`/${username}/${project}/collaborators`)
+	// 		.send(role)
+	// 		.expect(400, function(err, res){
+	// 			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+	// 			done(err);
+	// 		});
+	// 	});
+	// });
+
+	describe('for non-existing user', function(){
+
+		let agent;
 
 		before(function(done){
 
@@ -814,135 +857,128 @@ describe('Sharing/Unsharing a project', function () {
 		});
 
 		it('should fail', function(done){
-			let role = {
-				user: username_viewer + '1',
-				role: 'viewer'
-			};
 
-			agent.post(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
-				done(err);
-			});
-		});
-	});
+			const permissions = [{ user: username_viewer + '99', permission: 'collaborator'}];
 
-	describe('for non-existing user', function(){
-
-		it('should fail (share)', function(done){
-			let role = {
-				user: username_viewer + '99',
-				role: 'viewer'
-			};
-
-			agent.post(`/${username}/${project}/collaborators`)
-			.send(role)
+			agent.post(`/${username}/${project}/permissions`)
+			.send(permissions)
 			.expect(404, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
 			});
 		});
 
-		it('should fail (unshare)', function(done){
-			let role = {
-				user: username_viewer + '99',
-				role: 'viewer'
-			};
+		// it('should fail (unshare)', function(done){
+		// 	let role = {
+		// 		user: username_viewer + '99',
+		// 		role: 'viewer'
+		// 	};
 
-			agent.delete(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(404, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
-				done(err);
-			});
-		});
+		// 	agent.delete(`/${username}/${project}/collaborators`)
+		// 	.send(role)
+		// 	.expect(404, function(err, res){
+		// 		expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+		// 		done(err);
+		// 	});
+		// });
 
 
 	});
 
 
-	describe('for a user dont have access', function(){
+	// describe('for a user dont have access', function(){
 
-		it('should fail (share)', function(done){
-			let role = {
-				user: username_viewer + '2',
-				role: 'viewer'
-			};
+	// 	it('should fail (share)', function(done){
+	// 		let role = {
+	// 			user: username_viewer + '2',
+	// 			role: 'viewer'
+	// 		};
 
-			agent.delete(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
-				done(err);
-			});
-		});
+	// 		agent.delete(`/${username}/${project}/collaborators`)
+	// 		.send(role)
+	// 		.expect(400, function(err, res){
+	// 			expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
+	// 			done(err);
+	// 		});
+	// 	});
 
-	});
+	// });
 
-	describe('to themselves', function(){
+	// describe('to themselves', function(){
 
-		it('should fail (share)', function(done){
-			let role = {
-				user: username,
-				role: 'collaborator'
-			};
+	// 	it('should fail (share)', function(done){
+	// 		let role = {
+	// 			user: username,
+	// 			role: 'collaborator'
+	// 		};
 
-			agent.post(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
-				done(err);
-			});
-		});
+	// 		agent.post(`/${username}/${project}/collaborators`)
+	// 		.send(role)
+	// 		.expect(400, function(err, res){
+	// 			expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
+	// 			done(err);
+	// 		});
+	// 	});
 
 
-		it('should fail (unshare)', function(done){
-			let role = {
-				user: username,
-				role: 'collaborator'
-			};
+	// 	it('should fail (unshare)', function(done){
+	// 		let role = {
+	// 			user: username,
+	// 			role: 'collaborator'
+	// 		};
 
-			agent.delete(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
-				done(err);
-			});
-		});
+	// 		agent.delete(`/${username}/${project}/collaborators`)
+	// 		.send(role)
+	// 		.expect(400, function(err, res){
+	// 			expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
+	// 			done(err);
+	// 		});
+	// 	});
 
-	});
+	// });
 
 
 	describe('to the same user twice', function(){
 
+		let agent;
 
-			let role = {
-				user: username_viewer,
-				role: 'viewer'
-			};
+		before(function(done){
 
-
-	
-			it('should fail (share)', function(done){
-				agent.post(`/${username}/${project}/collaborators`)
-				.send(role)
-				.expect(200, function(err, res){
-
-					expect(res.body).to.deep.equal(role);
-					if(!err){
-						agent.post(`/${username}/${project}/collaborators`)
-						.send(role)
-						.expect(400, function(err, res){
-							expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
-							done(err);
-						});
-					} else {
-						done(err);
-					}
-
-				});
+			agent = request.agent(server);
+			agent.post('/login')
+			.send({ username, password })
+			.expect(200, function(err, res){
+				expect(res.body.username).to.equal(username);
+				done(err);
 			});
+			
+		});
+
+		const permissions = [
+			{ user: username_viewer, permission: 'viewer'},
+			{ user: username_viewer, permission: 'viewer'}
+		];
+
+		it('should be ok and reduced to one by the backend', function(done){
+
+			async.series([
+				done => {
+					agent.post(`/${username}/${project}/permissions`)
+					.send(permissions)
+					.expect(200, function(err, res){
+						done(err);
+					});
+				},
+				done => {
+					agent.get(`/${username}/${project}/permissions`)
+					.expect(200, function(err, res){
+						expect(res.body).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
+						done(err);
+					});
+				}
+			], done);
+
+		});
 				
 	});
 

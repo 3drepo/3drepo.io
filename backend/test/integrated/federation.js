@@ -385,7 +385,7 @@ describe('Federated Project', function () {
 				"project": subProjects[0]
 			}] 
 		})
-		.expect(400, function(err ,res) {
+		.expect(404, function(err ,res) {
 
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);

@@ -38,8 +38,8 @@
 					selectedObjects: "<",
 					projectSettings: '<',
 					setInitialSelectedObjects: "&",
-					userRoles: "<",
-					availableRoles: "<"
+					userJob: "<",
+					availableJobs: "<"
 				}
 			}
 		);
@@ -108,9 +108,7 @@
 			}
 
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
-				self.userRoles.find(function(role){
-					return role === issueData.assigned_roles[0];
-				});
+				issueData.assigned_roles.indexOf(self.userJob._id) !== -1
 		}
 		/**
 		 * Monitor changes to parameters
@@ -149,12 +147,7 @@
 					// Issue owner or user with same role as issue creator role can update issue
 					this.canUpdate = (Auth.getUsername() === this.issueData.owner);
 					if (!this.canUpdate) {
-						for (i = 0, length = this.userRoles.length; i < length; i += 1) {
-							if (this.userRoles[i] === this.issueData.creator_role) {
-								this.canUpdate = true;
-								break;
-							}
-						}
+						this.canUpdate = this.userJob._id && this.issueData.creator_role && (this.userJob._id === this.issueData.creator_role);
 					}
 
 					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.projectSettings.permissions)){
@@ -236,16 +229,16 @@
 			}*/
 
 			// Role
-			if (changes.hasOwnProperty("availableRoles") && this.availableRoles) {
-				console.log(this.availableRoles);
-				this.projectRoles = this.availableRoles.map(function (availableRole) {
+			if (changes.hasOwnProperty("availableJobs") && this.availableJobs) {
+				console.log(this.availableJobs);
+				this.projectJobs = this.availableJobs.map(function (availableJob) {
 					/*
 					// Get the actual role and return the last part of it
 					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
 					*/
-					return availableRole.role;
+					return availableJob._id;
 				});
-				console.log(this.projectRoles);
+				console.log(this.projectJobs);
 			}
 		};
 
@@ -367,9 +360,6 @@
 				if(self.issueData.status === 'closed'){
 					this.canUpdate = false;
 					this.canComment = false;
-				} else {
-					this.canUpdate = true;
-					this.canComment = true;
 				}
 
 				AnalyticService.sendEvent({
@@ -683,7 +673,7 @@
 				objectId: null,
 				name: self.issueData.name,
 				viewpoint: viewpoint,
-				creator_role: self.userRoles[0],
+				creator_role: self.userJob._id,
 				pickedPos: null,
 				pickedNorm: null,
 				scale: 1.0,
@@ -936,9 +926,9 @@
 		 * @param {String} role
 		 */
 		function setRoleIndicatorColour (role) {
-			var roleColor = IssuesService.getRoleColor(role);
+			var roleColor = IssuesService.getJobColor(role);
 			if (roleColor !== null) {
-				issueRoleIndicator.css("background", IssuesService.getRoleColor(role));
+				issueRoleIndicator.css("background", IssuesService.getJobColor(role));
 				issueRoleIndicator.css("border", "none");
 			}
 			else {
@@ -952,14 +942,9 @@
 		 * @returns {boolean}
 		 */
 		function userHasCreatorRole () {
-			var i, iLength,
-				hasCreatorRole = false;
-
-			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasCreatorRole; i += 1) {
-				hasCreatorRole = (self.userRoles[i] === self.data.creator_role);
+			if(self.userJob._id && self.data.creator_role){
+				return self.userJob._id === self.data.creator_role;
 			}
-
-			return hasCreatorRole;
 		}
 
 		/**
@@ -970,12 +955,11 @@
 			var i, iLength, j, jLength,
 				hasAdminRole = false;
 
-
-			for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
-				for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
-					hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, self.availableRoles[j].permissions));
-				}
-			}
+			// for (i = 0, iLength = self.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
+			// 	for (j = 0, jLength = self.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
+			// 		hasAdminRole = (self.userRoles[i] === self.availableRoles[j].role) && (Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, self.availableRoles[j].permissions));
+			// 	}
+			// }
 
 			return hasAdminRole;
 		}

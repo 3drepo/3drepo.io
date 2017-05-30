@@ -26,7 +26,7 @@
 								label {{issue.timeStamp}}
 						#issuesListItemDescription
 							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
-			issues-list-item(data="issue", user-roles="$ctrl.userRoles")
+			issues-list-item(data="issue", user-job="$ctrl.userJob")
 
 			md-divider
 

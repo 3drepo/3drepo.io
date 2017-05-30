@@ -21,7 +21,6 @@
 	const C = require("../constants");
 	const ModelFactory = require("./factory/modelFactory");
 	const responseCodes = require("../response_codes");
-	const _ = require('lodash');
 
 	let flatten = function (arr) {
 		return [].concat.apply([], arr);
@@ -43,7 +42,7 @@
 	const DB_READ_WRITE_UPDATE = ["find", "insert", "update"];
 	const DB_READ_WRITE = ["find", "insert"];
 	const DB_READ = ["find"];
-	const DB_ALL = ["find", "insert", "update", "remove"];
+	//const DB_ALL = ["find", "insert", "update", "remove"];
 
 	let systemToDatabasePermissions = {};
 
@@ -153,63 +152,10 @@
 			});
 	};
 
-	let _matchPrivileges = function(privs, db, collection, actions){
-		return privs.find(priv => {
-			return priv.resource.db === db &&
-				priv.resource.collection === collection &&
-				_.intersection(priv.actions, actions).length === actions.length;
-		});
-	};
-
-	let determinePermission = function(db, project, role){
-
-		if(!role || !role.inheritedPrivileges){
-			return [];
-		}
-
-		// have DB_ALL permissions to '' collection (all collections) = admin
-		let adminPrivMatched = _matchPrivileges(role.inheritedPrivileges, db, '', DB_ALL);
-
-		if(adminPrivMatched){
-			return roleTemplates[C.ADMIN_TEMPLATE];
-		}
-
-		let permissions = [];
-
-		Object.keys(systemToDatabasePermissions).forEach(permission => {
-			
-			let dbPerm = systemToDatabasePermissions[permission];
-			let failedMatching = false;
-
-			Object.keys(dbPerm).forEach(collSet => {
-				
-				let actions = dbPerm[collSet];
-
-				dbCollections[collSet].forEach(collection => {
-
-					let privMatched = _matchPrivileges(role.inheritedPrivileges, db, `${project}.${collection}`, actions);
-
-					if(!privMatched){
-						failedMatching = true;
-					}
-				});
-			});
-
-			if(!failedMatching){
-				permissions.push(permission);
-			}
-
-		});
-
-		return permissions;
-	};
-
-
 	module.exports = {
 		roleTemplates: roleTemplates,
 		projectRoleTemplateLists: projectRoleTemplateLists,
 		createRoleFromTemplate: createRoleFromTemplate,
-		determinePermission: determinePermission,
 		dbCollections: dbCollections
 	};
 

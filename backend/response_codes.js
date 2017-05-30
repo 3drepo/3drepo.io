@@ -130,7 +130,7 @@
 		ISSUE_COMMENT_PERMISSION_DECLINED: { message: "Can't edit comment made by others", status: 400 },
 		ISSUE_COMMENT_SEALED: { message: "Can't edit a sealed comment or a comment in closed issue", status: 400 },
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },
-		PROJECT_NOT_FOUND: { message: "Project not found", status: 400 },
+		PROJECT_NOT_FOUND: { message: "Project not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -198,8 +198,18 @@
 		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500},
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
-		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
+		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
 
+		JOB_NOT_FOUND:{ message: 'Job not found', status: 404},
+		DUP_JOB: {message: 'Duplicate job id', status: 400},
+		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
+		JOB_ID_VALID: { message: 'Invalid job ID', status: 400},
+		DUP_PERM_TEMPLATE: {message: 'Duplicate template ID', status: 400},
+		PERM_NOT_FOUND: {message: 'Permission template not found', status: 404},
+		INVALID_PERM: {message: 'Invalid permission', status: 400},
+		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
+		DUP_ACCOUNT_PERM: { message: 'Duplicate account permission', status: 400},
+		ACCOUNT_PERM_NOT_FOUND: { message: 'Account permission not found', status: 404}
 
 	};
 

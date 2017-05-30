@@ -35,7 +35,7 @@
 		const C = require("../constants");
 		const cors = require("cors");
 		const bodyParser = require("body-parser");
-
+		const utils = require("../utils");
 		// Express app
 		let app = express();
 
@@ -90,6 +90,8 @@
 			}
 		});
 
+
+
 		app.use("/", require("../routes/plan"));
 		//auth handler
 		app.use("/", require("../routes/auth"));
@@ -102,8 +104,15 @@
 		// payment api header
 		app.use("/payment", require("../routes/payment"));
 
-		//project handlers
+		app.use("/:account", require("../routes/job"));
+		app.use("/:account", require("../routes/permissionTemplate"));
+		app.use("/:account", require("../routes/accountPermission"));
+		
+		// projects (project groups) handlers
 		app.use("/:account", require("../routes/project"));
+
+		//models(projects) handlers
+		app.use("/:account", require("../routes/model"));
 
 		//metadata handler
 		app.use("/:account/:project", require("../routes/meta"));
@@ -124,6 +133,13 @@
 		app.use("/:account/:project", require("../routes/history"));
 
 		app.use("/", routes.router);
+
+		app.use(function(err, req, res, next) {
+			if(err){
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			}
+			next(err);
+		});
 
 		return app;
 	};

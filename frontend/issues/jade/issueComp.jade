@@ -52,7 +52,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 				md-input-container(flex)
 					label Assign
 					md-select(ng-model="$ctrl.issueData.assigned_roles[0]", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
-						md-option(ng-repeat="role in $ctrl.projectRoles", value="{{role}}") {{role}}
+						md-option(ng-repeat="job in $ctrl.projectJobs", value="{{job}}") {{job}}
 				md-input-container(flex)
 					label Type
 					md-select(ng-model="$ctrl.issueData.topic_type", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")

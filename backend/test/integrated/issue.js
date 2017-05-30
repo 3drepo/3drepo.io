@@ -64,8 +64,8 @@ describe('Issues', function () {
 			"clippingPlanes":[]
 		},
 		"scale":1,
-		"creator_role":"project1.collaborator",
-		"assigned_roles":["project1.collaborator"],
+		"creator_role":"jobA",
+		"assigned_roles":["jobB"],
 	};
 
 	let bcf = {
@@ -497,9 +497,9 @@ describe('Issues', function () {
 
 		it('change assigned_roles should succee and create system comment', function(done){
 
-			let issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["project1.collaborator"]});
+			let issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
 			let issueId;
-			let data = { assigned_roles: ["project1.viewer"]};
+			let data = { assigned_roles: ["jobB"]};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${project}/issues.json`)
@@ -522,8 +522,8 @@ describe('Issues', function () {
 						expect(res.body.comments[0].action).to.deep.equal({
 							property: 'assigned_roles',
 							propertyText: 'Assigned',
-							from: 'project1.collaborator',
-							to: 'project1.viewer' 
+							from: 'jobA',
+							to: 'jobB' 
 						});
 						expect(res.body.comments[0].owner).to.equal(username);
 						done(err);
@@ -577,7 +577,7 @@ describe('Issues', function () {
 				'topic_type': 'for abcdef',
 				"status": "in progress",
 				"priority": "high",
-				"assigned_roles":["testproject.viewer"],
+				"assigned_roles":["jobB"],
 			};
 
 			async.series([
@@ -612,14 +612,14 @@ describe('Issues', function () {
 
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
-				"assigned_roles":["testproject.viewer"],
-				"creator_role": "project1.collaborator"
+				"assigned_roles":["jobB"],
+				"creator_role": "jobA"
 			});
 			
 			let issueId;
 			let updateData = { 
 				"status": "for approval",
-				"assigned_roles":["testproject.viewer"]
+				"assigned_roles":["jobB"]
 			};
 
 			async.series([
@@ -655,7 +655,7 @@ describe('Issues', function () {
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
 				"status": "for approval",
-				"assigned_roles":["testproject.viewer"]
+				"assigned_roles":["jobB"]
 			});
 			
 			//console.log(issue)
@@ -663,7 +663,7 @@ describe('Issues', function () {
 			let issueId;
 			let updateData = { 
 				"status": "open",
-				"assigned_roles":["testproject.collaborator"]
+				"assigned_roles":["jobA"]
 			};
 
 			async.series([
@@ -725,34 +725,79 @@ describe('Issues', function () {
 		});
 
 
-		it('user with different role but is an admin try to close an issue should succee', function(done){
+		describe('user with different role but is an admin', function(){
 
-			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'abcdef.123456'});
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
 			let issueId;
 			let close = { status: 'closed'};
-			async.series([
-				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
-					.send(issue)
-					.expect(200 , function(err, res){
-						issueId = res.body._id;
-						return done(err);
-						
-					});
-				},
-				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
-					.send(close)
-					.expect(200, done);
-				},
 
-			], done);
+			before(function(done){
+				async.series([
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username: username2, password})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post(`/${username}/${project}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return done(err);
+							
+						});
+					},
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username, password})
+						.expect(200, done);
+					}
+				],done);
+			});
+
+			it('try to close an issue should succee', function(done){
+
+				async.series([
+					function(done){
+						agent.put(`/${username}/${project}/issues/${issueId}.json`)
+						.send(close)
+						.expect(200, done);
+					},
+
+				], done);
+			});
+
 		});
 
 
 		describe('user with different role and is not an admin ', function(){
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+			let issueId;
+			let close = { status: 'closed'};
+
 			before(function(done){
 				async.series([
+					function(done){
+						agent.post(`/${username}/${project}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return done(err);
+							
+						});
+					},
 					function(done){
 						agent.post('/logout')
 						.send({})
@@ -783,23 +828,12 @@ describe('Issues', function () {
 
 			it('try to close an issue should fail', function(done){
 
-				let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'abcdef.123456'});
-				let issueId;
-				let close = { status: 'closed'};
 				async.series([
-					function(done){
-						agent.post(`/${username}/${project}/issues.json`)
-						.send(issue)
-						.expect(200 , function(err, res){
-							issueId = res.body._id;
-							return done(err);
-							
-						});
-					},
 					function(done){
 						agent.put(`/${username}/${project}/issues/${issueId}.json`)
 						.send(close)
 						.expect(400, function(err, res){
+
 							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 							done(err);
 						});

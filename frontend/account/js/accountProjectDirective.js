@@ -93,21 +93,21 @@
 			projectsetting: {
 				label: "Settings",
 				 icon: "settings", 
-				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, vm.project.permissions)
+				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.project.permissions)
 			}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
 			vm.projectOptions.download = {
 				label: "Download", 
 				icon: "cloud_download", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_PROJECT, vm.project.permissions)
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.project.permissions)
 			};
 		}
 		vm.uploadButtonDisabled = true;
 		vm.projectOptions.delete = {
 			label: "Delete", 
 			icon: "delete", 
-			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, vm.project.permissions), 
+			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.project.permissions), 
 			color: "#F44336"
 		};
 

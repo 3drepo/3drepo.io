@@ -37,13 +37,15 @@
     function RightPanelCtrl ($scope, $timeout, EventService) {
         var vm = this,
             addIssueMode = null,
-            measureMode = false,
-            autoMetaData = true,
+            
+           
             highlightBackground = "#FF9800";
 
         /*
          * Init
          */
+        vm.measureMode = false;
+        vm.metaData = true;
         vm.showPanel = true;
         vm.issueButtons = {
             "scribble": {
@@ -65,7 +67,7 @@
         vm.measureBackground = "";
         vm.metaBackground = highlightBackground;
         $timeout(function () {
-            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
+            EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
         });
 
         /*
@@ -129,18 +131,18 @@
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
             }
 
-            measureMode = !measureMode;
-            vm.measureBackground = measureMode ? highlightBackground : "";
-            EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
+            vm.measureMode = !vm.measureMode;
+            vm.measureBackground = vm.measureMode ? highlightBackground : "";
+            EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
         };
 
         /**
          * Toggle meta data auto display
          */
         vm.toggleAutoMetaData = function () {
-            autoMetaData = !autoMetaData;
-            vm.metaBackground = autoMetaData ? highlightBackground : "";
-            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
+            vm.metaData = !vm.metaData;
+            vm.metaBackground = vm.metaData ? highlightBackground : "";
+            EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
         };
     }
 }());

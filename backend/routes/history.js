@@ -24,9 +24,9 @@ var responseCodes = require('../response_codes.js');
 var History = require('../models/history');
 var utils = require('../utils');
 
-router.get('/revisions.json', middlewares.hasReadAccessToProject, listRevisions);
-router.get('/revisions/:branch.json', middlewares.hasReadAccessToProject, listRevisionsByBranch);
-router.put('/revisions/:id/tag', middlewares.hasReadAccessToProject, updateRevisionTag);
+router.get('/revisions.json', middlewares.hasReadAccessToModel, listRevisions);
+router.get('/revisions/:branch.json', middlewares.hasReadAccessToModel, listRevisionsByBranch);
+router.put('/revisions/:id/tag', middlewares.hasReadAccessToModel, updateRevisionTag);
 
 function listRevisions(req, res, next){
 	'use strict';

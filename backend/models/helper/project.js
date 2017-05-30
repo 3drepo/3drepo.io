@@ -17,7 +17,6 @@
 var ModelFactory = require('../factory/modelFactory');
 var Role = require('../role');
 var RoleTemplates = require('../role_templates');
-var RoleSetting = require('../roleSetting');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
@@ -34,10 +33,10 @@ var stash = require('./stash');
 var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
 var C = require("../../constants");
-var _ = require('lodash');
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
+var Project = require('../project');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -87,6 +86,8 @@ function convertToErrorCode(errCode){
 function createAndAssignRole(project, account, username, data) {
 	'use strict';
 
+	let projectGroup;
+
 	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
@@ -103,8 +104,25 @@ function createAndAssignRole(project, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
+	let promise = Promise.resolve();
 
-	return ProjectSetting.findById({account, project}, project).then(setting => {
+	if(data.projectGroup){
+		promise = Project.findOne({account}, {name: data.projectGroup}).then(_projectGroup => {
+
+			if(!_projectGroup){
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else {
+				projectGroup = _projectGroup;
+			}
+
+		});
+	} 
+
+	return promise.then(() => {
+
+		return ProjectSetting.findById({account, project}, project);
+
+	}).then(setting => {
 
 		if(setting){
 			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
@@ -149,10 +167,20 @@ function createAndAssignRole(project, account, username, data) {
 	}).then(setting => {
 
 
+		if(projectGroup){
+			projectGroup.models.push(project);
+			return projectGroup.save().then(() => setting);
+		}
+
+		return setting;
+		
+
+	}).then(setting => {
+
 		let projectData = {
 			account,
 			project,
-			permissions: RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]
+			permissions: C.MODEL_PERM_LIST
 		};
 
 		ChatEvent.newProject(data.sessionId, account, projectData);
@@ -200,150 +228,6 @@ function importToyProject(username){
 		return Promise.reject(err);
 	});
 }
-
-function addCollaborator(username, email, account, project, role, disableEmail){
-	'use strict';
-
-	let setting;
-	let user;
-
-	return ProjectSetting.findById({account, project}, project).then(_setting => {
-
-		setting = _setting;
-
-		if(username){
-			return User.findByUserName(username);
-		} else {
-			return User.findByEmail(email);
-		}
-
-	}).then(_user => {
-
-		user = _user;
-
-		if(!user){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		} else if (setting.findCollaborator(user.user, role)) {
-			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
-		} else if(setting.owner === user.user) {
-			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
-		}
-
-		return User.findByUserName(account);
-
-	}).then(dbUser => {
-
-		let found = false;
-		let subscriptions = dbUser.customData.billing.subscriptions.getActiveSubscriptions();
-
-		subscriptions.forEach(subscription => {
-			if(subscription.assignedUser === user.user){
-				found = true;
-			}
-		});
-
-		if(!found){
-			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-		}
-
-	}).then(() => {
-
-		return Role.grantProjectRoleToUser(user.user, account, project, role);
-
-	}).then(() => {
-
-		let roleObj = {
-			user: user.user,
-			role: role
-		};
-
-		setting.collaborators.push(roleObj);
-
-		return setting.save().then(() => {
-
-			if(!disableEmail){
-				Mailer.sendProjectInvitation(user.customData.email, {
-					account, project
-				}).catch(err => {
-					systemLogger.logError(`Email error - ${err.message}`);
-				});
-			}
-
-			let res = { role };
-
-			if(email){
-				res.email = email;
-			}  else if (username){
-				res.user = username;
-			}
-
-			return Promise.resolve(res);
-		});
-	});
-}
-
-function removeCollaborator(username, email, account, project, role){
-	'use strict';
-
-	let setting;
-	let user;
-	return ProjectSetting.findById({account, project}, project).then(_setting => {
-
-		setting = _setting;
-
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		} else {
-
-			if(username){
-				return User.findByUserName(username);
-			} else {
-				return User.findByEmail(email);
-			}
-		}
-
-
-	}).then(_user => {
-
-		user = _user;
-
-		if(!user){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		let deletedCol = setting.removeCollaborator(user.user, role);
-
-		if(!deletedCol){
-			return Promise.reject(responseCodes.NOT_IN_ROLE);
-		}
-
-		return Role.revokeRolesFromUser(user.user, [{
-			db: account,
-			role: `${project}.${role}`
-		}]);
-
-	}).then(() => {
-
-		return setting.save().then(() => {
-
-			let res = { role };
-
-			if(email){
-				res.email = email;
-			}  else if (username){
-				res.user = username;
-			}
-
-			return Promise.resolve(res);
-		});
-	});
-}
-
-
 
 function createFederatedProject(account, project, subProjects){
 	'use strict';
@@ -437,7 +321,7 @@ function getModelProperties(account, project, branch, rev, username){
 
 	return getHistory.then(_history => {
 		history = _history;
-		return middlewares.hasReadAccessToProjectHelper(username, account, project);
+		return middlewares.hasReadAccessToModelHelper(username, account, project);
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
@@ -582,7 +466,7 @@ function getFullTree(account, project, branch, rev, username){
 			}
 
 			let status;
-			let getTree = middlewares.hasReadAccessToProjectHelper(username, ref.owner, ref.project).then(granted => {
+			let getTree = middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
 
 				if(!granted){
 					status = 'NO_ACCESS';
@@ -680,7 +564,7 @@ function searchTree(account, project, branch, rev, searchString, username){
 		});
 	};
 
-	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+	return middlewares.hasReadAccessToModelHelper(username, account, project).then(granted => {
 
 		if(granted){
 
@@ -772,113 +656,6 @@ function downloadLatest(account, project){
 
 	});
 }
-
-function getRolesForProject(account, project, removeViewer){
-	'use strict';
-
-	let roleSettings;
-
-
-	return RoleSetting.find({ account }).then(_roleSetting => {
-
-		roleSettings = _.indexBy(_roleSetting, '_id');
-
-		return Role.find({ account: 'admin'}, {
-			'$or': [{
-				'privileges' : {
-					'$elemMatch': {
-						'resource.db': account,
-						'resource.collection': `${project}.history`,
-						'actions': 'find'
-					}
-				}
-			},{
-				'roles': {
-					'$elemMatch': {
-						"db" : account
-					}
-				}
-			}]
-
-		},{
-			role: 1, db: 1, _id: 0
-		});
-
-	}).then(roles => {
-
-		roles.forEach((role, i)  => roles[i] = role.toObject());
-		return Role.viewRolesWithInheritedPrivs(roles);
-
-	}).then(roles => {
-
-		//console.log(JSON.stringify(roles, null , 2));
-
-		//filter again because old role inherits viewer role and the first db query will get list of all roles inherited from other roles regardless of project name(collection name)
-		roles = roles.filter(role => {
-
-			return role.inheritedPrivileges.find(priv => {
-				return  priv.resource.db === account &&
-						(priv.resource.collection === `${project}.history` || priv.resource.collection === '' ) &&
-						priv.actions.indexOf('find') !== -1;
-			});
-		});
-
-		roles.forEach((role, i) => {
-
-			roles[i].permissions = RoleTemplates.determinePermission(account, project, role);
-
-			if(roleSettings[roles[i].role]){
-				roles[i].color = roleSettings[roles[i].role].color;
-				roles[i].desc = roleSettings[roles[i].role].desc;
-			}
-
-			roles[i] = _.pick(roles[i], ['role', 'db', 'color', 'desc', 'permissions']);
-		});
-
-		for(let i = roles.length - 1; i >= 0; i--){
-			if (removeViewer &&
-				roles[i].permissions.indexOf(C.PERM_COMMENT_ISSUE) === -1)
-			{
-				roles.splice(i, 1);
-			}
-		}
-
-		return roles;
-	});
-}
-
-function getUserRolesForProject(account, project, username){
-	'use strict';
-
-	let projectRoles;
-
-	return getRolesForProject(account, project).then(roles => {
-
-		projectRoles = roles;
-		return User.findByUserName(username);
-
-	}).then(user => {
-
-		let userRolesForProject = user.roles.filter(userRole => {
-
-			return projectRoles.find(projectRole => {
-				return projectRole.db === userRole.db && projectRole.role === userRole.role;
-			});
-
-		});
-
-		let roles = userRolesForProject.map(item => item.role);
-		// rank C.ADMIN_TEMPLATE role first
-		let adminRoleIndex = roles.indexOf(C.ADMIN_TEMPLATE);
-		if(adminRoleIndex !== -1){
-			roles.splice(adminRoleIndex, 1);
-			roles.unshift(C.ADMIN_TEMPLATE);
-		}
-
-		return roles;
-	});
-}
-
 
 
 function uploadFile(req){
@@ -1139,25 +916,49 @@ function removeProject(account, project){
 		});
 
 		return Promise.all(promises);
+	}).then(() => {
+
+		//remove model from all project groups
+		return Project.removeModel(account, project);
+	}).then(() => {
+
+		//remove model from collaborator.customData.models
+		return User.removeModelFromAllUser(account, project);
 	});
 
 }
 
-function getProjectPermission(username, account, project){
+function getProjectPermission(username, setting, account){
 	'use strict';
 
-	let permissions = [];
+	if(!setting){
+		return Promise.resolve([]);
+	}
 
-	return User.findByUserName(username).then(user => {
+	return User.findByUserName(account).then(dbUser => {
+		if(!dbUser){
+			return [];
+		}
 
-		return Role.viewRolesWithInheritedPrivs(user.roles);
-	}).then(roles => {
+		const accountPerm = dbUser.customData.permissions.findByUser(username);
 
-		roles.forEach(role => {
-			permissions = permissions.concat(RoleTemplates.determinePermission(account, project, role));
-		});
+		if(accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+			return C.MODEL_PERM_LIST;
+		}
 
-		return _.unique(permissions);
+		const template = setting.findPermissionByUser(username);
+
+		if(!template){
+			return Promise.resolve([]);
+		}
+
+		const permission = dbUser.customData.permissionTemplates.findById(template.permission);
+
+		if(!permission || !permission.permissions){
+			return [];
+		}
+
+		return permission.permissions;
 	});
 }
 
@@ -1199,8 +1000,6 @@ module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
-	addCollaborator,
-	removeCollaborator,
 	createFederatedProject,
 	listSubProjects,
 	getFullTree,
@@ -1210,8 +1009,6 @@ module.exports = {
 	fileNameRegExp,
 	projectNameRegExp,
 	acceptedFormat,
-	getUserRolesForProject,
-	getRolesForProject,
 	uploadFile,
 	importProject,
 	removeProject,
