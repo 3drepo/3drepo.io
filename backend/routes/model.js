@@ -89,7 +89,7 @@ function updateSettings(req, res, next){
 		return projectSetting.save();
 
 	}).then(projectSetting => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -192,7 +192,6 @@ function createProject(req, res, next){
 		subProjects: req.body.subProjects, 
 		federate: federate,
 		code: req.body.code,
-		topicTypes: req.body.topicTypes,
 		projectGroup: req.body.projectGroup
 	};
 
@@ -449,8 +448,14 @@ function getUserJobForProject(req, res, next){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username).job;
-		return dbUser.customData.jobs.findById(job);
+
+		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username);
+
+		if(job){
+			return dbUser.customData.jobs.findById(job.job);
+		}
+
+		return null;
 
 	}).then(job => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job);
