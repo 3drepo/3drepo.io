@@ -54,7 +54,7 @@
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 		vm.showList = true;
 
-		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/collaborators");
 		promise.then(function (response) {
 			console.log(response);
 			if (response.status === 200) {
@@ -76,7 +76,7 @@
 		 * Go back to the teamspaces page
 		 */
 		vm.goBack = function () {
-			$location.search("project", null);
+			$location.search("model", null);
 			vm.showPage({page: "teamspaces"});
 		};
 
@@ -90,7 +90,7 @@
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.model + "/collaborators");
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.members.push(data);
@@ -121,7 +121,7 @@
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.model + "/collaborators");
 			promise.then(function (response) {
 				if (response.status === 200) {
 					var member = vm.members.splice(index, 1);

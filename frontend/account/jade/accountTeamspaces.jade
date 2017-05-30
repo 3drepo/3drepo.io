@@ -7,10 +7,9 @@
 
 		div(layout="column", layout-align="space-between")
 		
-
-			account-projects(
-					account="vm.account"
-					accounts="vm.accounts"
-					on-show-page="vm.showPage(page, callingPage)"
-					quota="vm.quota"
-					subscriptions="vm.subscriptions")
+			account-models(
+				account="vm.account"
+				accounts="vm.accounts"
+				on-show-page="vm.showPage(page, callingPage)"
+				quota="vm.quota"
+				subscriptions="vm.subscriptions")

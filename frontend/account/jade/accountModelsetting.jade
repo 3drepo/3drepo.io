@@ -4,24 +4,24 @@
 			.md-toolbar-tools
 				md-button.md-icon-button(ng-click="vm.goBack()")
 					md-icon.angular-material-icons(aria-label="Close dialog") arrow_back
-				h2 Project Settings
+				h2 Model Settings
 		.userContent
 
 			div(layout="row")
 				md-input-container(flex)
-					label Project name
-					input(type="text", ng-model="vm.projectName", disabled)
+					label Model name
+					input(type="text", ng-model="vm.modelName", disabled)
 				md-input-container(flex)
 
 			div(layout="row")
 				md-input-container(flex)
-					label Project type
-					input(type="text", ng-model="vm.projectType", disabled)
+					label Model type
+					input(type="text", ng-model="vm.modelType", disabled)
 				md-input-container(flex)
 
 			div(layout="row")
 				md-input-container(flex)
-					label Project code
+					label Model code
 					input(type="text", ng-model="vm.code", maxlength=5)
 				md-input-container(flex)
 

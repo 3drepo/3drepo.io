@@ -20,33 +20,33 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProject", accountProject);
+		.directive("accountModel", accountModel);
 
-	function accountProject () {
+	function accountModel () {
 		return {
 			restrict: 'E',
-			templateUrl: 'accountProject.html',
+			templateUrl: 'accountModel.html',
 			scope: {
 				account: "=",
-				project: "=",
+				model: "=",
 				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
-				projectToUpload: "=",
+				modelToUpload: "=",
 				onShowPage: "&",
-				onSetupDeleteProject: "&",
+				onSetupDeleteModel: "&",
 				quota: "=",
 				isAccountAdmin: "=",
 				subscriptions: "="
 			},
-			controller: AccountProjectCtrl,
+			controller: AccountModelCtrl,
 			controllerAs: 'vm',
 			bindToController: true,
 			link: function (scope, element) {
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
 					scope.vm.uploadedFileWatch(); // Disable events watch
-					scope.vm.projectToUploadFileWatch();
+					scope.vm.modelToUploadFileWatch();
 
 				});
 			}
@@ -54,9 +54,9 @@
 	}
 
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -64,20 +64,20 @@
 			dialogCloseToId;
 
 		// Init
-		vm.projectToUpload = null;
-		vm.project.name = vm.project.project;
-		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
+		vm.modelToUpload = null;
+		vm.model.name = vm.model.model;
+		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
-		if (vm.project.timestamp !== null) {
-			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
+		if (vm.model.timestamp !== null) {
+			vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 		}
-		vm.project.canUpload = true;
+		vm.model.canUpload = true;
 		// Options
-		vm.projectOptions = {
+		vm.modelOptions = {
 			upload: {
 				label: "Upload file", 
 				icon: "cloud_upload", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
 			},
 			team: {
 				label: "Team", 
@@ -90,33 +90,33 @@
 				icon: "settings_backup_restore", 
 				hidden: false
 			},
-			projectsetting: {
+			modelsetting: {
 				label: "Settings",
 				 icon: "settings", 
-				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, vm.project.permissions)
+				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_model_SETTINGS, vm.model.permissions)
 			}
 		};
-		if(vm.project.timestamp && !vm.project.federate){
-			vm.projectOptions.download = {
+		if(vm.model.timestamp && !vm.model.federate){
+			vm.modelOptions.download = {
 				label: "Download", 
 				icon: "cloud_download", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_PROJECT, vm.project.permissions)
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_model, vm.model.permissions)
 			};
 		}
 		vm.uploadButtonDisabled = true;
-		vm.projectOptions.delete = {
+		vm.modelOptions.delete = {
 			label: "Delete", 
 			icon: "delete", 
-			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, vm.project.permissions), 
+			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_model, vm.model.permissions), 
 			color: "#F44336"
 		};
 
 
-		watchProjectStatus();
+		watchModelStatus();
 
-		if (vm.project.status === "processing") {
+		if (vm.model.status === "processing") {
 
-			vm.project.uploading = true;
+			vm.model.uploading = true;
 			vm.fileUploadInfo = 'Processing...';
 
 		}
@@ -127,28 +127,28 @@
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 
-			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name) && (vm.uploadedFile.account === vm.account)) {
+			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.model.name === vm.model.name) && (vm.uploadedFile.account === vm.account)) {
 
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
+				uploadFileToModel(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 
 			}
 		});
 
-		vm.projectToUploadFileWatch = $scope.$watch("vm.projectToUpload", function () {
-			if(vm.projectToUpload){
+		vm.modelToUploadFileWatch = $scope.$watch("vm.modelToUpload", function () {
+			if(vm.modelToUpload){
 
-				var names = vm.projectToUpload.name.split('.');
+				var names = vm.modelToUpload.name.split('.');
 				
 				vm.uploadErrorMessage = null;
 				
 				if(names.length === 1){
 					vm.uploadErrorMessage = 'Filename must have extension';
-					vm.projectToUpload = null;
+					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
 					vm.uploadErrorMessage = 'File format not supported';
-					vm.projectToUpload = null;
+					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else {
 					vm.uploadButtonDisabled = false;
@@ -158,23 +158,23 @@
 		});
 
 		/**
-		 * Go to the project viewer
+		 * Go to the model viewer
 		 */
-		vm.goToProject = function () {
-			if (!vm.project.uploading) {
-				if (vm.project.timestamp === null) {
+		vm.goToModel = function () {
+			if (!vm.model.uploading) {
+				if (vm.model.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.project.permissions)){
+					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)){
 						vm.tag = null;
 						vm.desc = null;
-						vm.projectToUpload = null;
-						UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+						vm.modelToUpload = null;
+						UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
 					AnalyticService.sendEvent({
-						eventCategory: 'Project',
+						eventCategory: 'Model',
 						eventAction: 'view'
 					});
 				}
@@ -183,35 +183,35 @@
 
 
 		/**
-		 * Handle project option selection
+		 * Handle model option selection
 		 * @param event
 		 * @param option
 		 */
-		vm.doProjectOption = function (event, option) {
+		vm.doModelOption = function (event, option) {
 			switch (option) {
-				case "projectsetting":
-					$location.search("proj", vm.project.name);
+				case "modelsetting":
+					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "projectsetting", callingPage: "teamspaces", data: {tabIndex: 0}});
+					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces", data: {tabIndex: 0}});
 					break;
 
 				case "upload":
 					vm.uploadErrorMessage = null;
-					vm.projectToUpload = null;
+					vm.modelToUpload = null;
 					vm.tag = null;
 					vm.desc = null;
-					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true, null, false, dialogCloseToId);
+					UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
 				case "download":
 					window.open(
-						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project.name + "/download/latest"),
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.name + "/download/latest"),
 						'_blank' 
 					);
 
 					AnalyticService.sendEvent({
-						eventCategory: 'Project',
+						eventCategory: 'Model',
 						eventAction: 'download'
 					});
 
@@ -222,12 +222,12 @@
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project, account: vm.account});
+					vm.onSetupDeleteModel({event: event, model: vm.model, account: vm.account});
 					break;
 
 				case "revision":
 					if(!vm.revisions){
-						UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+						UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
 							vm.revisions = response.data;
 						});
 					}
@@ -255,7 +255,7 @@
 		 * When users click select file
 		 */
 		vm.selectFile = function(){
-			vm.onUploadFile({project: vm.project, account: vm.account});
+			vm.onUploadFile({model: vm.model, account: vm.account});
 		};
 
 
@@ -269,7 +269,7 @@
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
-				UtilsService.doGet(vm.account + "/" + vm.project.name + "/revisions.json").then(function(response){
+				UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
 					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
@@ -280,7 +280,7 @@
 					}
 
 					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {project: vm.project, account: vm.account, file: vm.projectToUpload, tag: vm.tag, desc: vm.desc};
+						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
 						vm.closeDialog();
 					}
 				});
@@ -291,20 +291,20 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
+			$location.path("/" + vm.account + "/" + vm.model.name + "/" + revId , "_self");
 			AnalyticService.sendEvent({
-				eventCategory: 'Project',
+				eventCategory: 'Model',
 				eventAction: 'view'
 			});
 		};
 
 		/**
-		 * Upload file/model to project
+		 * Upload file/model to model
 		 * @param file
 		 * @param tag
 		 * @param desc
 		 */
-		function uploadFileToProject(file, tag, desc) {
+		function uploadFileToModel(file, tag, desc) {
 			var promise,
 				formData;
 
@@ -349,13 +349,13 @@
 							formData.append('desc', desc);
 						}
 
-						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
 
 						promise.then(function (response) {
 							console.log("uploadModel", response);
 							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
-								vm.project.uploading = false;
+								vm.model.uploading = false;
 								vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
 
 								$timeout(function () {
@@ -365,7 +365,7 @@
 							else {
 								
 								AnalyticService.sendEvent({
-									eventCategory: 'Project',
+									eventCategory: 'Model',
 									eventAction: 'upload'
 								});
 							}
@@ -378,16 +378,16 @@
 		/**
 		 * Watch file upload status
 		 */
-		function watchProjectStatus(){
+		function watchModelStatus(){
 
-			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+			NotificationService.subscribe.projectstatusChanged(vm.account, vm.model.model, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
 						|| (data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_TEXTURES') 
 						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
-						vm.project.timestamp = new Date();
-						vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
+						vm.model.timestamp = new Date();
+						vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 						vm.fileUploadInfo = "Model imported successfully";
 						// clear revisions cache
 						vm.revisions = null;
@@ -400,7 +400,7 @@
 						vm.fileUploadInfo = "Failed to import model";
 					}
 
-					vm.project.uploading = false;
+					vm.model.uploading = false;
 
 					$scope.$apply();
 					$timeout(function () {
@@ -409,29 +409,29 @@
 					
 				} else if (data.status === 'uploading'){
 
-					vm.project.uploading = true;
+					vm.model.uploading = true;
 					vm.fileUploadInfo = 'Uploading...';
 					$scope.$apply();
 
 				} else if (data.status === 'processing'){
-					vm.project.uploading = true;
+					vm.model.uploading = true;
 					vm.fileUploadInfo = 'Processing...';
 					$scope.$apply();
 				}
 			});
 
 			$scope.$on('$destroy', function(){
-				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				NotificationService.unsubscribe.projectstatusChanged(vm.account, vm.model.model);
 			});
 		}
 
 		/**
-		 * Set up team of project
+		 * Set up team of model
 		 *
 		 * @param {Object} event
 		 */
 		function setupEditTeam (event) {
-			vm.item = vm.project;
+			vm.item = vm.model;
 			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 	}

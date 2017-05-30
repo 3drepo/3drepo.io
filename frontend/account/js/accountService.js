@@ -102,7 +102,7 @@
 			return doPut(passwords, username);
 		};
 
-		obj.getProjectsBid4FreeStatus = function (username) {
+		obj.getModelsBid4FreeStatus = function (username) {
 			bid4free = $q.defer();
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
 				.then(function (response) {
@@ -112,41 +112,41 @@
 		};
 
 		/**
-		 * Create a new project
+		 * Create a new model
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.newProject = function (projectData) {
+		obj.newModel = function (modelData) {
 			var data = {
 				desc: "",
-				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
-				unit: projectData.unit,
-				code: projectData.code
+				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
+				unit: modelData.unit,
+				code: modelData.code
 			};
-			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
+			return doPost(data, modelData.account + "/" + encodeURIComponent(modelData.name));
 		};
 
 		/**
 		 * Upload file/model to database
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadModel = function (projectData) {
+		obj.uploadModel = function (modelData) {
 			var data = new FormData();
-			data.append("file", projectData.uploadFile);
-			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+			data.append("file", modelData.uploadFile);
+			return doPost(data, modelData.account + "/" + modelData.model + "/upload", {'Content-Type': undefined});
 		};
 
 		/**
 		 * Get upload status
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadStatus = function (projectData) {
-			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
+		obj.uploadStatus = function (modelData) {
+			return UtilsService.doGet(modelData.account + "/" + modelData.model + ".json");
 		};
 
 		/**

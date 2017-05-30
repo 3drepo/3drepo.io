@@ -19,27 +19,27 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProjectsetting", accountProjectsetting);
+		.directive("accountModelsetting", accountModelsetting);
 
-	function accountProjectsetting() {
+	function accountModelsetting() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountProjectsetting.html',
+			templateUrl: 'accountModelsetting.html',
 			scope: {
 				account: "=",
 				showPage: "&",
 				subscriptions: "=",
 				data: "="
 			},
-			controller: AccountProjectsettingCtrl,
+			controller: AccountModelsettingCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountProjectsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
 
-	function AccountProjectsettingCtrl($scope, $location, UtilsService, StateManager) {
+	function AccountModelsettingCtrl($scope, $location, UtilsService, StateManager) {
 		var vm = this,
 			promise;
 
@@ -49,7 +49,7 @@
 		 console.log('data', vm.data);
 
 		vm.goBack = function () {
-			$location.search("project", null);
+			$location.search("model", null);
 			$location.search("targetAcct", null);
 
 			vm.showPage({page: "teamspaces", data: vm.data});
@@ -58,7 +58,7 @@
 		vm.units = server_config.units
 
 		vm.mapTile = {};
-		vm.projectName = $location.search().proj;
+		vm.modelName = $location.search().proj;
 		vm.targetAcct = $location.search().targetAcct;
 
 
@@ -74,7 +74,7 @@
 		}
 
 
-		UtilsService.doGet(vm.targetAcct + "/" + vm.projectName + ".json")
+		UtilsService.doGet(vm.targetAcct + "/" + vm.modelName + ".json")
 		.then(function (response) {
 
 			if (response.status === 200 && response.data.properties) {
@@ -86,7 +86,7 @@
 					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
 				}
 
-				vm.projectType = response.data.type;
+				vm.modelType = response.data.type;
 
 				response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
 				response.data.properties.code && (vm.code = response.data.properties.code);
@@ -109,7 +109,7 @@
 				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
-			UtilsService.doPut(data, vm.targetAcct + "/" + vm.projectName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelName +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';

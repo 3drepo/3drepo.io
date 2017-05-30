@@ -36,47 +36,47 @@ account-dir .userContent .cardInfo {
   text-align: left;
 }
 
-/** Account Projects **************************************************************************************************/
-account-projects #accountList {
+/** Account Models **************************************************************************************************/
+account-models #accountList {
   overflow: auto;
 }
 
-account-projects md-list {
+account-models md-list {
   padding: 0;
 }
 
-account-projects .account,
-account-projects .project {
+account-models .account,
+account-models .model {
   outline: none;
   padding-left: 10px;
 }
-account-projects .account:hover,
-account-projects .project:hover {
+account-models .account:hover,
+account-models .model:hover {
   cursor: pointer;
   background: #EEE;
 }
 
-account-projects .projects {
+account-models .models {
   margin-left: 40px;
 }
 
-account-projects .projects .projectName,
-account-projects .projects md-icon {
+account-models .models .modelName,
+account-models .models md-icon {
   color: #4CAF50;
 }
-account-projects .projects md-icon {
+account-models .models md-icon {
   margin: 0 !important;
 }
-account-projects .projects .projectTimestamp {
+account-models .models .modelTimestamp {
   color: rgba(0, 0, 0, 0.3);
   margin-left: 20px;
 }
-account-projects .projects p {
+account-models .models p {
   margin: 0;
 }
 
-account-projects #existingProjectFileUploader,
-account-projects #newProjectFileUploader {
+account-models #existingModelFileUploader,
+account-models #newModelFileUploader {
   width: 0;
   height: 0;
   opacity: 0;
@@ -85,62 +85,62 @@ account-projects #newProjectFileUploader {
   z-index: -1;
 }
 
-account-projects .accountRight,
-account-projects .projectRight {
+account-models .accountRight,
+account-models .modelRight {
   margin-right: 10px !important;
 }
 
-account-projects #newDatabaseButton {
+account-models #newDatabaseButton {
   position: absolute;
   bottom: 0;
   right: 0;
 }
 
-account-projects .md-whiteframe-1dp {
+account-models .md-whiteframe-1dp {
   border-radius: 4px;
   background: #FFF;
 }
-account-projects md-toolbar {
+account-models md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   height: 40px;
   min-height: 40px;
 }
 
-account-projects .cardInfo md-progress-circular {
+account-models .cardInfo md-progress-circular {
   margin-left: 5px;
 }
 
-account-projects .projectUploadInfo {
+account-models .modelUploadInfo {
   margin-right: 20px;
 }
 
-account-projects .projectUploadFilename {
+account-models .modelUploadFilename {
   color: rgba(0,0,0,0.5);
   margin: 0 !important;
 }
 
-account-projects .projectUploadInfo {
+account-models .modelUploadInfo {
   color: rgba(0,0,0,0.7);
   margin: 0 0 0 10px !important;
 }
 
-account-projects .projectUploadIcon {
+account-models .modelUploadIcon {
   width: 15px;
   height: 15px;
   margin-left: 10px;
 }
 
-account-projects .projectRight .projectUploaded {
+account-models .modelRight .modelUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
 }
 
-account-projects .userContent {
+account-models .userContent {
   padding: 0 !important;
 }
 
-account-projects .accountProjectsSharedIcon {
+account-models .accountModelsSharedIcon {
   margin: 0 0 0 20px;
   color: rgba(0, 0, 0, 0.3);
 }
@@ -243,30 +243,30 @@ account-menu md-icon {
   display: block;
 }
 
-/** New Project Dialog ************************************************************************************************/
-.newProjectDialog {
+/** New Model Dialog ************************************************************************************************/
+.newModelDialog {
   min-width: 350px;
   min-height: 350px;
   overflow: hidden;
 }
 
-.newProjectDialog #newProjectIcon {
+.newModelDialog #newModelIcon {
   margin-right: 10px;
 }
 
-.newProjectDialog #projectDialogFilenameContainer {
+.newModelDialog #modelDialogFilenameContainer {
   margin: 0 0 20px 16px;
 }
-.newProjectDialog #projectDialogFilenameIntro {
+.newModelDialog #modelDialogFilenameIntro {
   color: rgba(0, 0, 0, 0.4);
   margin: 0 5px 0 0;
 }
-.newProjectDialog #projectDialogFilename {
+.newModelDialog #modelDialogFilename {
   color: rgba(0, 0, 0, 0.7);
   margin: 0;
 }
 
-.newProjectDialog #projectDialogError {
+.newModelDialog #modelDialogError {
   margin: 0;
   color: #F44336;
 }
@@ -297,7 +297,7 @@ account-menu md-icon {
   overflow: hidden;
 }
 
-.newDatabaseDialog #newProjectIcon {
+.newDatabaseDialog #newModelIcon {
   margin-right: 10px;
 }
 
@@ -400,10 +400,10 @@ account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
 
-account-team #project {
+account-team #model {
   margin: -10px 0 10px;
 }
-account-team #project md-icon {
+account-team #model md-icon {
   margin: 0 !important;
 }
 
@@ -449,33 +449,33 @@ account-team #accountTeamSubHeader {
 }
 
 
-/** Account Project Setting ******************************************************************************************/
-account-projectsetting .collaboratorIcon {
+/** Account Model Setting ******************************************************************************************/
+account-modelsetting .collaboratorIcon {
   margin: 0 10px !important;
 }
 
-account-projectsetting #project {
+account-modelsetting #model {
   margin: -10px 0 10px;
 }
-account-projectsetting #project md-icon {
+account-modelsetting #model md-icon {
   margin: 0 !important;
 }
 
-account-projectsetting #accountTeamAdd {
+account-modelsetting #accountTeamAdd {
   margin-top: 20px;
   margin-bottom: 30px;
 }
 
-account-projectsetting #accountTeamMemberRoleGroup {
+account-modelsetting #accountTeamMemberRoleGroup {
   margin: 20px 0 0 10px;
 }
 
-account-projectsetting #accountTeamMemberRole {
+account-modelsetting #accountTeamMemberRole {
   margin-left: 10px;
   color: rgba(0, 0, 0, 0.5);
 }
 
-account-projectsetting #accountTeamSubHeader {
+account-modelsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
 }
 
@@ -502,7 +502,7 @@ account-projectsetting #accountTeamSubHeader {
   margin-left: -20px;
 }
 
-#federationDialog .federationProject {
+#federationDialog .federationModel {
   padding-left: 20px;
 }
 
@@ -512,11 +512,11 @@ account-projectsetting #accountTeamSubHeader {
 }
 
 
-#federationDialog #federatedProjectAccount {
+#federationDialog #federatedModelAccount {
   color: rgba(0, 0, 0, 0.5);
 }
 
-#federationDialog .projectDialogError{
+#federationDialog .modelDialogError{
   color: #F44336;
 }
 /** Account Federations ***********************************************************************************************/
@@ -531,7 +531,7 @@ account-federations .md-list-item-text {
   color: rgb(67, 160, 71);
 }
 
-account-federations .federationProjectsList {
+account-federations .federationModelsList {
   margin: -20px 0 10px 100px;
   color: rgba(0, 0, 0, 0.5);
   font-size: 14px;

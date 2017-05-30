@@ -112,7 +112,7 @@
 				vm.firstName       = null;
 				vm.lastName        = null;
 				vm.email           = null;
-				vm.projectsGrouped = null;
+				vm.modelsGrouped = null;
 				vm.avatarUrl = null;
 			}
 		});

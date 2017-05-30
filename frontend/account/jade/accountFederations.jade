@@ -4,14 +4,14 @@
 		// Account
 
 		// Federation
-		div(ng-if="account.showProjects")
+		div(ng-if="account.showModels")
 			div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedProjects")
 				div(layout="row", layout-align="start center")
 					md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
 						md-button.md-icon-button.md-accent(aria-label="Federation")
 							md-icon.angular-material-icons border_all
 						.md-list-item-text(flex="40")
-							p {{federation.project}}
+							p {{federation.model}}
 					//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
 						md-icon.angular-material-icons edit
 					#federationInfoRight(layout="row")
@@ -26,10 +26,10 @@
 											p(flex, style="color:{{value.color}}") {{value.label}}
 											md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
 
-				// Projects list
-				p.federationProjectsList
-					span(ng-repeat="subProject in federation.subProjects")
-						| {{subProject.project}}
+				// Models list
+				p.federationModelsList
+					span(ng-repeat="subModel in federation.subModels")
+						| {{subModel.model}}
 						span(ng-if="!$last")
 							| ,
 							=" "

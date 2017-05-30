@@ -51,10 +51,10 @@
 		};
 
 		/**
-		 * Show user projects
+		 * Show user models
 		 */
-		vm.showProjects = function () {
-			EventService.send(EventService.EVENT.SHOW_PROJECTS);
+		vm.showModels = function () {
+			EventService.send(EventService.EVENT.SHOW_models);
 		};
 
 		/**
@@ -65,7 +65,7 @@
 		};
 
 		vm.openUserManual = function(){
-			window.open('http://3drepo.org/projects/3drepo-io-user-manual/', '_blank');
+			window.open('http://3drepo.org/models/3drepo-io-user-manual/', '_blank');
 		};
 	}
 }());

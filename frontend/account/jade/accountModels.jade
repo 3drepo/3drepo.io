@@ -1,7 +1,7 @@
 .userContent
 
-	input#existingProjectFileUploader(type="file")
-	input#newProjectFileUploader(type="file")
+	input#existingModelFileUploader(type="file")
+	input#newModelFileUploader(type="file")
 
 
 	// Accounts
@@ -9,31 +9,31 @@
 
 		div(layout="row", layout-align="space-between")
 			md-list-item(flex)
-				.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
+				.account(ng-click="vm.toggleModelsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
 					md-button.md-icon-button(aria-label="Folder")
-						md-icon.angular-material-icons {{account.showProjectsIcon}}
+						md-icon.angular-material-icons {{account.showModelsIcon}}
 					p {{account.account}}
-					md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
+					md-icon.angular-material-icons.accountModelsSharedIcon(ng-if="!account.canAddModel") group
 
-		// Projects
-		md-list.projects(ng-if="account.showProjects")
-			account-project(
-				ng-repeat="project in account.projects"
+		// Models
+		md-list.models(ng-if="account.showModels")
+			account-model(
+				ng-repeat="model in account.models"
 				account="account.name"
 				is-account-admin="account.isAdmin"
-				project="project"
+				model="model"
 				user-account="vm.account"
-				on-upload-file="vm.uploadFile(project)"
+				on-upload-file="vm.uploadFile(model)"
 				uploaded-file="vm.uploadedFile"
-				project-to-upload="vm.projectToUpload"
+				model-to-upload="vm.modelToUpload"
 				on-show-page="vm.showPage(page, callingPage)"
-				on-setup-delete-project="vm.setupDeleteProject(event, project, account)",
+				on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
 				quota="vm.quota"
 				subscriptions="vm.subscriptions")
 
 		md-divider
 
-		md-list.federations(ng-if="account.showProjects")
+		md-list.federations(ng-if="account.showModels")
 			account-federations(
 				account="vm.account"
 				accounts="vm.accounts"
@@ -43,7 +43,7 @@
 
 
 
-	div(ng-if="!vm.projectsExist")
+	div(ng-if="!vm.modelsExist")
 		.cardInfo(layout="row", layout-align="center center")
 			p {{vm.info}}
 			md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")

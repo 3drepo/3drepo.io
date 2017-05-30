@@ -140,7 +140,7 @@
 					var message = UtilsService.getErrorMessage(response.data);
 					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
 						vm.licenseAssigneeIndex = index;
-						vm.userProjects = response.data.projects;
+						vm.userModels = response.data.models;
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);
 					}
 				}
@@ -148,7 +148,7 @@
 		};
 
 		/**
-		 * Remove license from user who is a team member of a project
+		 * Remove license from user who is a team member of a model
 		 */
 		vm.removeLicenseConfirmed = function () {
 			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[vm.licenseAssigneeIndex].id + "/assign?cascadeRemove=true");

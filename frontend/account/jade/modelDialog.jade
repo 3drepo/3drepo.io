@@ -1,0 +1,44 @@
+md-dialog.newModelDialog(aria-label="New model")
+	md-toolbar
+		.md-toolbar-tools
+			h2 New Model
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		div(layout="column")
+			md-input-container
+				input(placeholder="Model name", tdr-focus="true", ng-model="vm.newModelData.name", ng-keypress="vm.saveNewModel($event)", ng-pattern="vm.modelRegExp" maxlength=20)
+				.inputHint Letters, numbers, hyphen and underscore only
+			
+			md-input-container
+				input(placeholder="Model Code (Optional)", ng-model="vm.newModelData.code", maxlength=5)
+
+			md-input-container
+				label Model type
+				md-select(ng-model="vm.newModelData.type")
+					md-option(ng-repeat="modelType in vm.modelTypes", value="{{modelType}}") {{modelType}}
+			md-input-container(ng-if="vm.showModelTypeOtherInput")
+				input(placeholder="Other model type", ng-model="vm.newModelData.otherType")
+
+
+			md-input-container
+				label Unit
+				md-select(ng-model="vm.newModelData.unit")
+					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+
+			md-input-container(ng-if="vm.newModelFileToUpload")
+				input(placeholder="Revision name (optional)", ng-model="vm.tag")
+				.inputHint Letters, numbers and underscore only
+
+			md-input-container(ng-if="vm.newModelFileToUpload")
+				textarea(placeholder="Revision description (optional)", ng-model="vm.desc")
+
+			md-input-container
+				md-button.md-accent(ng-click="vm.uploadFileForNewModel()") Upload File
+				md-button.md-raised.md-accent(ng-disabled="vm.newModelButtonDisabled", ng-click="vm.saveNewModel()") Save
+			#modelDialogFilenameContainer(layout="row", ng-if="vm.newModelFileToUpload")
+				p#modelDialogFilenameIntro Selected file
+				p#modelDialogFilename {{vm.newModelFileToUpload.name}}
+			p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
