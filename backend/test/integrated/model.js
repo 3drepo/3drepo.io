@@ -217,7 +217,7 @@ describe('Project', function () {
 		agent.put(`/${username}/project6/settings`)
 		.send(body).expect(200, function(err ,res) {
 
-			expect(res.body.properties).to.deep.equal(expectedReturn);
+			expect(res.body).to.deep.equal(expectedReturn);
 
 			if(err){
 				return done(err);
