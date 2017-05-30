@@ -30,7 +30,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 					md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") keyboard_arrow_down
 
 		// Info
-		.issueCompItemContainer#issueCompInfoArea(layout="row", layout-align="start end", flex="none", ng-if="$ctrl.showAdditional")
+		.issueCompItemContainer#issueCompInfoArea(layout="row", layout-align="start center", flex="none", ng-if="$ctrl.showAdditional")
 			div(flex="10")
 				md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
 			.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
@@ -86,12 +86,19 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditDescription($event)", ng-if="$ctrl.canUpdate")
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit
+				//.issueCompThumbnail(
+					layout="row"
+					layout-align="center"
+					ng-if="$ctrl.descriptionThumbnail"
+					ng-click="$ctrl.showScreenShot($event, $ctrl.issueData.viewpoint)")
+				
 				.issueCompThumbnail(
-				layout="row"
-				layout-align="center"
 				ng-if="$ctrl.descriptionThumbnail"
+				ng-style="{'background-image': 'url({{$ctrl.descriptionThumbnail}})' }"
 				ng-click="$ctrl.showScreenShot($event, $ctrl.issueData.viewpoint)")
-					img.issueCompThumbnailImage(ng-src="{{$ctrl.descriptionThumbnail}}")
+					
+						
+					//img.issueCompThumbnailImage(ng-src="{{}}")
 
 		// Comments
 		.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.issueData.comments.length>0")
@@ -133,13 +140,19 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 					flex)
 						label {{comment.owner}}
 						label {{comment.timeStamp}}
+
 					// Or Auto comment
-					.issueCompAutoComment(
+					.issueCompCommentTitle(
 					ng-if="comment.action"
-					layout="row"
-					layout-align="space-between"
 					flex)
-						label {{comment.action.propertyText}}:  "{{comment.action.from}}" -> "{{comment.action.to}}" by {{comment.owner}}
+						label {{comment.action.propertyText}}: {{comment.action.from}} to {{comment.action.to}} by {{comment.owner}}
+						
+					.issueCompCommentOwner(
+						ng-if="comment.action" 
+						layout="row"
+						layout-align="space-between"
+						flex) 
+						label.issueNotification Notification 
 						label {{comment.timeStamp}}
 
 				// Thumbnail

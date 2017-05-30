@@ -162,6 +162,7 @@ issues-list .issueListItem div:first-child {
 
 issues-list #issuesListItemContent {
   padding: 10px;
+  padding-right: 40px;
 }
 
 issues-list #issuesListItemTitle {
@@ -177,10 +178,12 @@ issues-list #issuesListItemInfo {
 issues-list #issuesListItemInfo label,
 issues-list #issuesListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
+  word-wrap: break-word;
 }
 
 issues-list #issuesListItemDescription {
   height: 60px;
+  font-size: 13px;
 }
 issues-list #issuesListItemDescription label {
   overflow: hidden;
@@ -193,7 +196,7 @@ issues-list #issuesListItemEnter {
   position: absolute;
   top: 0;
   right: 0;
-  width: 50px;
+  width: 32px;
   height: 100%;
   background: rgb(0, 69, 148);
   outline: none;
@@ -262,6 +265,7 @@ issue-comp .issueCompItemContainer div {
 
 issue-comp #issueCompTitleArea {
   padding-top: 0;
+  padding-bottom: 0;
   outline: none;
 }
 issue-comp .issueCompTitleArea:hover {
@@ -273,7 +277,8 @@ issue-comp .issueCompTitleArea #issueCompTitle {
 }
 
 issue-comp #issueCompInfoArea {
-  margin: -20px 0 10px;
+  padding-top: 5px;
+  padding-bottom: 20px;
 }
 
 issue-comp #issueCompTitleInput {
@@ -284,10 +289,10 @@ issue-comp #issueCompTitleInput {
 issue-comp #issueCompTitle {
   margin: 10px 0;
 }
-
+/*
 issue-comp #issueCompStatus {
   margin: 10px 0 0;
-}
+}*/
 
 issue-comp .issueCompItemStatus {
   margin-right: 5px;
@@ -296,6 +301,11 @@ issue-comp .issueCompItemStatus {
 issue-comp .issueCompThumbnail {
   position: relative;
   display: inline-block;
+  padding: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  background-position-y: 50%;
+  height: 200px;
 }
 issue-comp .issueCompThumbnailImage:hover {
   cursor: pointer;
@@ -306,7 +316,7 @@ issue-comp .issueCompThumbnailImage {
 }
 
 issue-comp .issueCompIssueOwner {
-  margin-top: -10px;
+  margin-top: 0;
 }
 
 issue-comp .issueCompAutoComment,
@@ -317,11 +327,17 @@ issue-comp .issueCompCommentOwner {
 issue-comp .issueCompIssueOwner label,
 issue-comp .issueCompCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+issue-comp .issueCompCommentOwner .issueNotification {
+  color: #43a047;
 }
 
 issue-comp .issueCompAutoComment label {
   color: rgba(0, 0, 0, 0.5);
-  font-style: italic;
+  /*font-style: italic;*/
+  font-size: 14px;
 }
 
 issue-comp .issueCompComment {
@@ -330,6 +346,7 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
+  font-size: 14px;
 }
 
 issue-comp .issueCompTextActions {
@@ -338,7 +355,7 @@ issue-comp .issueCompTextActions {
 
 issue-comp #issueCompDescription {
   outline: none;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 issue-comp #issueCompDescription label {
   word-break: break-all;
@@ -359,15 +376,29 @@ issue-comp #additionalInfoButton {
 }
 
 issue-comp #issueCompAdditional {
-  margin: -20px 0;
+  margin: -10px 0;
+  padding-top: 5px;
+}
+
+issue-comp #issueCompNewComment {
+  padding-top: 20px;
+  padding-bottom: 0px;
 }
 
 issue-comp #issueCompNewComment md-input-container {
-  margin: 0 0 -35px;
+  margin: 0px;
+}
+
+
+
+issue-comp #issueCompAdditional md-input-container {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 issue-comp #descriptionAndComments {
-  overflow-y:auto;
+  overflow-y:scroll;
   overflow-x:hidden;
 }
 

@@ -27,6 +27,7 @@
 						#issuesListItemDescription
 							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
 			issues-list-item(data="issue", user-job="$ctrl.userJob")
+
 			md-divider
 
 			#issuesListItemEnter(ng-if="issue.selected", ng-click="$ctrl.editIssue(issue)", layout="column", layout-align="center center")

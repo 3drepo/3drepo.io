@@ -227,7 +227,7 @@ account-menu {
   top: 0;
   right: 0;
   z-index: 1;
-  padding-right: 6px;
+  padding-right: 10px;
 }
 account-menu md-icon {
   color: #FFFFFF;
