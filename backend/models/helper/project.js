@@ -896,7 +896,7 @@ function removeProject(account, project){
 		let promises = [];
 
 		collections.forEach(collection => {
-			if(collection.name.startsWith(project)){
+			if(collection.name.startsWith(project + '.')){
 				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
 			}
 		});

@@ -15,155 +15,119 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var hostname   = "example.org";
+var hostname   = "www.example.org";
 var http_port  = 80;
 var https_port = 443;
-var chat_port = 3000;
 
 module.exports = {
-	port: http_port,
 	host: hostname,
-	http_port: http_port,
-	https_port: https_port,
 	cookie: {
-	    secret: "a",
-	    parser_secret: "b"
+		secret: "a",
+		parser_secret : "b"
 	},
-	default_format: "html",
 	servers: [
 		{
 			service: "api",
 			subdirectory: "api",
 			public_port: http_port,
-			public_protocol: "http",
-			http_port: http_port,
-			https_port: https_port,
-
+			public_protocol: "http"
 		},
 		{
 			service: "frontend",
-			template:   "frontend.jade",
-			public_port: http_port,
+			template:   "frontend.jade"
 		},
 		{
 			service: "chat",
-			http_port: chat_port,
-			https_port: chat_port,
+			http_port: 3000,
+			https_port: 3000,
 			subdirectory: 'chat'
 		}
 	],
 	js_debug_level: 'debug',
 	logfile: {
-		filename: '/var/log/3drepo.log',
-		console_level: 'debug',
+		filename: './3drepo.log',
+		console_level: 'info',
 		file_level: 'debug'
 	},
 	db: {
 		host: 'localhost',
 		port: 27017,
-		username: '',
-		password: ''
+		username: 'adminUser',
+		password: 'some_secure_password'
 	},
-	ssl: {
-		default: {
-			key: 'my_key.pem',
-			cert:'my_server.crt',
-			ca: 'my_server.ca'
-		}
-	},
-	cn_queue: {
-		host: 'amqp://localhost:5672',
-		worker_queue: 'jobq',
-		callback_queue: 'callbackq',
-		upload_dir: 'uploads',
-		shared_storage: 'D:/sharedSpace/'
-	},
+	// ssl: {
+	// 	key: "my_key.pem",
+	// 	cert:"my_server.crt",
+	// 	ca: "my_server.ca"
+	// },
+	mail: {
+        smtpConfig: {
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // use SSL
+            auth: {
+                user: 'someemail@example.org',
+                pass: 'some_secure_password'
+            }
+        },
+
+        sender: '"3D Repo" <no-reply@3drepo.org>',
+
+        urls: {
+            'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
+            'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
+        }
+    },
 	os: {
 		keys: {
-			'property': '',
-			'place': '',
-			'map': ''
+			'property': '<your key>',
+			'place': '<your key>',
+			'map': '<your key>'
 		},
 		endpoints:{
 			bbox: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox',
 			radius: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/radius',
-			uprn: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/uprn',
 			dimensions: params => { return `https://api2.ordnancesurvey.co.uk/insights/beta/properties/${params.uprn}/dimensions` },
 			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
 		}
 	},
 
-	crossOrigin: true,
-	test_helper_api: false,
-	disableCache: true,
-
+	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
-
-	mail: {
-		smtpConfig: {
-			host: '',
-			port: 465,
-			secure: true, // use SSL
-			auth: {
-				user: '',
-				pass: ''
-			}
-		},
-
-		sender: '"3D Repo" <support@3drepo.org>',
-
-		urls: {
-			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
-			'project': data => `/${data.account}/${data.project}`
-		}
-	},
-	
-	captcha: {
-		'validateUrl': 'https://www.google.com/recaptcha/api/siteverify',
-		'secretKey': '',
-		'clientKey': ''
-	},
-
 	auth: {
-		captcha: true,
-		register: true,
-		allowPlusSignInEmail: false 
+		captcha: false,
+		register: true
+	},	crossOrigin: true,
+	cn_queue: {
+		host: 'amqp://localhost:5672',
+		worker_queue: 'jobq',
+		callback_queue: 'callbackq',
+		upload_dir: '/tmp/uploads',
+		shared_storage: '/tmp/uploads',
+		event_exchange: 'eventExchange'
 	},
-
-	contact:{
-		email: 'support@3drepo.org'
-	},
-
+	uploadSizeLimit: 8388608, // 8MB in test enviroment
+	test_helper_api: false,
 	paypal:{
-		
-		validateIPN: true,
-		ipnValidateUrl: 'https://www.paypal.com/cgi-bin/webscr',
-		mode: 'live', //sandbox or live
-		client_id: '',
-		client_secret: '',
+		validateIPN: false,
+		ipnValidateUrl: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
+		mode: 'sandbox', //sandbox or live
+		//for travis only
+		client_id: 'AWog5lbf6LTb07XvRzvl4KAXVrmUyv4rEopFBNxHwO3nNieukILfTSxm8xCdsoAalrWTOPo9oQcrm3R-',
+		client_secret: 'EGIwoNlM_vq6rYsmIF2gOGDs0h2uilsiXyKiWjHT3TCqJLrdRHpneFAt5TvVmzjYFvrdZpYF9-zrfNmQ',
 		debug:{
 			forceExecuteAgreementError: false,
+			showFullAgreement: true
 		}
 	},
-
-	uploadSizeLimit: 209715200,
-	gaTrackId: '',
-	invoice_dir: '/tmp',
-	bcf_dir: '/tmp',
-	pdf: {
-		debug: {
-			allowRegenerate: false
-		}
-	},
-
 	vat: {
 		checkUrl: 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl',
 		debug: {
-			skipNonGBChecking: false
+			skipChecking: true
 		}
 	},
+	bcf_dir: '/tmp'
 }

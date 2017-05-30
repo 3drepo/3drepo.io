@@ -9,8 +9,9 @@
     "postinstall": "node ./postinstall.js",
     "upgrade": "git checkout master && git pull && npm restart",
     "test": "NODE_ENV=test grunt test",
-    "test-int-clean-up": "chmod 755 ./backend/test/cleanup/prompt.sh && ./backend/test/cleanup/prompt.sh && mongo localhost/admin ./backend/test/cleanup/db.js && NODE_ENV=test node ./backend/test/cleanup/queue.js && mongorestore ./submodules/tests/backend/dump",
+    "test-int-clean": "./backend/test/cleanup/cleanup.sh",
     "test-int": "NODE_ENV=test npm run create-ghost && grunt test-integrated",
+    "test-clean-and-int": "npm run test-int-clean && npm run test-int",
     "test-all": "NODE_ENV=test npm run test && npm run test-int-clean-up && npm run test-int",
     "dev": "nodemon 3drepo.js",
     "create-ghost": "node scripts/createGhost"
@@ -73,6 +74,7 @@
     "grunt-contrib-cssmin": "1.0.0",
     "grunt-contrib-jshint": "0.11.3",
     "grunt-contrib-uglify": "0.9.2",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-env": "0.4.4",
     "grunt-environment": "0.4.2",
     "grunt-mocha-test": "0.12.7",

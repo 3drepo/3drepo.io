@@ -44,6 +44,7 @@ var MeasureTool = {};
         {
             var viewArea = self.viewer.getViewArea();
             var pickingInfo = viewArea._pickingInfo;
+            var doc = viewArea._doc;
 
                 if (!self.lineStarted)
                 {
@@ -51,11 +52,14 @@ var MeasureTool = {};
                     self.lineStarted      = true;
 
                     self.createMeasureLine();
+                    
+                    doc.inMeasureMode = true;
                     self.viewer.onMouseMove(self.measureMouseMove);
                 } else {
                     self.measureCoords[1] = pickingInfo.pickPos;
                     self.lineStarted      = false;
-
+                    
+                    doc.inMeasureMode = false;
                     self.viewer.offMouseMove(self.measureMouseMove);
                 }
         };
