@@ -449,11 +449,14 @@ function getUserJobForProject(req, res, next){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username).job;
-		return dbUser.customData.jobs.findById(job);
+		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username);
+		
+		if(job){
+			return dbUser.customData.jobs.findById(job.job);
+		}
 
 	}).then(job => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job || {});
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
