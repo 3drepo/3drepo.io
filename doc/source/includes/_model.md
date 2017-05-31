@@ -37,7 +37,7 @@ GET /repoman/model1.json HTTP/1.1
 		]
 	},
 	"status": "ok",
-	"subProjects": [],
+	"subModels": [],
 	"headRevisions": {
 		"master": "abf8f711-3756-4dd3-b50f-21db7859042c"
 	}
@@ -59,7 +59,7 @@ permissions | list of [model level permissions](#model-level)
 properties | [model propertie object](#model-propertie-object)
 status | model upload status. ok, processing, failed
 errorReason |  error reason if status is failed
-subProjects | list of sub models, empty for non-federated model
+subModels | list of sub models, empty for non-federated model
 headRevisions | id of head of all branches
 federate | true if model is a federate
 
@@ -160,11 +160,11 @@ POST /repoman/model1 HTTP/1.1
 	"type": "Structural",
 	"code": "00123",
 	"unit": "m",
-	"subProjects": [{
+	"subModels": [{
 		"database": "repoman",
-		"project": "model11"
+		"model": "model11"
 	}],
-	"projectGroup": "project1"
+	"project": "project1"
 
 }
 ```
@@ -174,7 +174,7 @@ POST /repoman/model1 HTTP/1.1
 ```json
 {
     "account":"repoman",
-    "project":"model1",
+    "model":"model1",
     "permissions":[
         "change_model_settings",
         "upload_files",
@@ -207,10 +207,10 @@ Attribute       | Required | Description
 --------------- | ---------| ----------------------------------------------------
 desc | No | description
 type | No | model type
-subProjects | No | list of sub models, empty for non-federated model
+subModels | No | list of sub models, empty for non-federated model
 unit | Yes | cm, m, ft, mm
 code |  No | a short code represents this model, contains only numbers and alphabets, no longer than 5 characters
-projectGroup |  No | project this model belongs to
+project |  No | project this model belongs to
 
 
 ## Update a model
@@ -221,11 +221,11 @@ projectGroup |  No | project this model belongs to
 PUT /repoman/model1 HTTP/1.1
 ```
 ```json
-{ "subProjects" : 
+{ "subModels" : 
 	[
 		{
 			"database": "repoman",
-			"project": "model2"
+			"model": "model2"
 		}
 	]
 }
@@ -236,7 +236,7 @@ PUT /repoman/model1 HTTP/1.1
 ```json
 {
 	"account": "repoman"
-	"project": "model1"
+	"model": "model1"
 }
 ```
 
@@ -250,13 +250,13 @@ Request body
 
 Attribute       | Required | Description
 --------------- | ---------| ----------------------------------------------------
-subProjects | Yes | list of [sub model objects](#sub-model-object)
+subModels | Yes | list of [sub model objects](#sub-model-object)
 
 ### Sub model object
 Attribute       | Description
 --------------- | --------------------------------------------------------
 database  | account name the model belongs to
-project   | model name
+model   | model name
 
 ## Upload a model
 
@@ -337,7 +337,7 @@ DELETE /repoman/model1 HTTP/1.1
 ```json
 {
 	"account": "repoman",
-	"project": "model1"
+	"model": "model1"
 }
 
 ```
@@ -443,7 +443,7 @@ have access to the [Get all jobs](#get-all-jobs) for an account API.
 > Example request 
 
 ```http
-GET /repoman/model1/userJobForProject HTTP/1.1
+GET /repoman/model1/userJobForModel HTTP/1.1
 ```
 
 >Example response
@@ -451,7 +451,7 @@ GET /repoman/model1/userJobForProject HTTP/1.1
 ```json
 {"_id":"Actor", "color": "#000000"}
 ```
-### GET /{accountName}/{modelName}/userJobForProject.json
+### GET /{accountName}/{modelName}/userJobForModel.json
 
 Get the job assigned to user for this team space
 

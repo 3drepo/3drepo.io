@@ -100,7 +100,7 @@ GET /repoman.json HTTP/1.1
 	"accounts": [
 		{
 			"account": "repoman",
-			"projects": [
+			"models": [
 				{
 					"permissions": [
 						"change_model_settings",
@@ -115,12 +115,12 @@ GET /repoman.json HTTP/1.1
 						"delete_model",
 						"manage_model_permission"
 					],
-					"project": "ufo",
+					"model": "ufo",
 					"status": "ok",
 					"timestamp": "2016-07-26T15:52:11.000Z"
 				}
 			],
-			"fedProjects": [],
+			"fedModels": [],
 			"isAdmin": true,
 			"permissions": [
 				"teamspace_admin"
@@ -130,11 +130,11 @@ GET /repoman.json HTTP/1.1
 				"collaboratorLimit": 5,
 				"spaceUsed": 12478764
 			},
-			"projectGroups": []
+			"projects": []
 		},
 		{
 			"account": "breakingbad",
-			"projects": [
+			"models": [
 				{
 					"permissions": [
 						"view_issue",
@@ -142,12 +142,12 @@ GET /repoman.json HTTP/1.1
 						"upload_files",
 						"create_issue"
 					],
-					"project": "homelab",
+					"model": "homelab",
 					"status": "ok",
 					"timestamp": null
 				}
 			],
-			"fedProjects": [
+			"fedModels": [
 				{
 					"federate": true,
 					"permissions": [
@@ -166,19 +166,19 @@ GET /repoman.json HTTP/1.1
 					"project": "fed1",
 					"status": "ok",
 					"timestamp": "2017-05-11T12:49:59.000Z",
-					"subProjects": [
+					"subModels": [
 						{
 							"database": "breakingbad",
-							"project": "homelab"
+							"model": "homelab"
 						},
 						{
 							"database": "breakingbad",
-							"project": "laundrylab"
+							"model": "laundrylab"
 						}
 					]
 				}
 			],
-			"projectGroups": [
+			"projects": [
 				{
 					"_id": "58f78c8ededbb13a982114ee",
 					"name": "folder1",
@@ -191,7 +191,7 @@ GET /repoman.json HTTP/1.1
 								"upload_files",
 								"create_issue"
 							],
-							"project": "laundrylab",
+							"model": "laundrylab",
 							"status": "ok",
 							"timestamp": null
 						}
@@ -230,7 +230,7 @@ GET /repoman.json HTTP/1.1
 
 ### GET /{accountName}.json
 
-Return list of projects group by account this account have access to and account information.
+Return account information and list of projects and models grouped by teamspace (account) this account have access to.
 
 ### Return body
 
@@ -247,9 +247,9 @@ jobs | | list of [job objects](#job-object)
 Attribute |  Format | Description
 --------- | ------- | ---------------
 account   | | account name
-projects  | | list of [model objects](#model-object), listed here if they do not belongs to any project
-fedProjects | | list of federated [model objects](#model-object) 
-projectGroups | | list of [projects (folders) objects](#project-object-in-account-info)
+models  | | list of [model objects](#model-object), listed here if they do not belongs to any project
+fedModels | | list of federated [model objects](#model-object), listed here if they do not belongs to any project
+projects | | list of [projects (folders) objects](#project-object-in-account-info)
 isAdmin `deprecated` | | is user an account admin of this account
 permissions | list of [account level permission](#account-level)  | list of permissions user has on this account
 firstName ||
@@ -275,12 +275,12 @@ models | list of [model objects](#model-object) belong to this project
 ### Model Object
 Attribute           |  Description                                  | Format
 ------------------- | ----------------------------------------------|----------------------
-project             |  model name                                   |
+model             |  model name                                   |
 status              |  upload status                                | ok, processing, failed
 timestamp           |  date last changed                            | ISO 8601
 permissions         |  lise of [model level permissions](#model-level)      |
 federate            |  is the model a federated model               | always true, attribute absent for non-federated project
-subProjects         |  list of sub models if it is a federated model
+subModels         |  list of sub models if it is a federated model
 
 ## Get avatar
 
