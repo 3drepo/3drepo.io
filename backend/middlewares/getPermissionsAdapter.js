@@ -56,9 +56,9 @@
 				});
 			},
 
-			projectLevel: function(username, projectGroup){
+			projectLevel: function(username, project){
 
-				return Project.findOne({account}, { name: projectGroup}).then(project => {
+				return Project.findOne({account}, { name: project}).then(project => {
 
 					if(!project){
 						return [];

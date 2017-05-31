@@ -47,9 +47,9 @@
 				const username = req.session.user.username;
 				const account = req.params.account;
 				const model = req.params.model;
-				const projectGroup = req.params.projectGroup;
+				const project = req.params.project;
 
-				return checkPermissionsHelper(username, account, projectGroup, model, permsRequest, getPermissionsAdapter);
+				return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
 
 			}).then(granted => {
 

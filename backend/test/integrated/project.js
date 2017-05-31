@@ -28,7 +28,7 @@ const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
 
-describe('Project groups', function () {
+describe('Projects', function () {
 
 	let server;
 	let agent;
@@ -58,9 +58,9 @@ describe('Project groups', function () {
 	});
 
 
-	it('should able to create project group', function(done){
+	it('should able to create project', function(done){
 
-		const projectgroup = {
+		const project = {
 			name: 'project1'
 		};
 
@@ -68,7 +68,7 @@ describe('Project groups', function () {
 			
 			callback => {
 				agent.post(`/${username}/projects`)
-				.send(projectgroup)
+				.send(project)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -81,7 +81,7 @@ describe('Project groups', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
+					const pg = account.projects.find(pg => pg.name === project.name);
 					expect(pg).to.exist;
 
 					callback(err);
@@ -92,7 +92,7 @@ describe('Project groups', function () {
 	});
 
 
-	it('should fail to create project group with name default', function(done){
+	it('should fail to create project with name default', function(done){
 		agent.post(`/${username}/projects`)
 		.send({name: 'default'})
 		.expect(400, function(err, res){
@@ -102,14 +102,14 @@ describe('Project groups', function () {
 	});
 
 
-	it('should fail to create project group with dup name', function(done){
+	it('should fail to create project with dup name', function(done){
 
-		const projectgroup = {
+		const project = {
 			name: 'project_exists'
 		};
 
 		agent.post(`/${username}/projects`)
-		.send(projectgroup)
+		.send(project)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
 			done(err);
@@ -117,10 +117,10 @@ describe('Project groups', function () {
 	});
 
 
-	it('should be able to update project group', function(done){
+	it('should be able to update project', function(done){
 
 
-		const projectgroup = {
+		const project = {
 			name: 'project2',
 			permissions: [{
 				user: 'testing',
@@ -131,8 +131,8 @@ describe('Project groups', function () {
 		async.series([
 			
 			callback => {
-				agent.put(`/${username}/projects/${projectgroup.name}`)
-				.send(projectgroup)
+				agent.put(`/${username}/projects/${project.name}`)
+				.send(project)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -146,10 +146,10 @@ describe('Project groups', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
+					const pg = account.projects.find(pg => pg.name === project.name);
 					expect(pg).to.exist;
 
-					expect(pg.permissions).to.deep.equal(projectgroup.permissions);
+					expect(pg.permissions).to.deep.equal(project.permissions);
 					callback(err);
 				});
 			}
@@ -158,10 +158,10 @@ describe('Project groups', function () {
 	});
 
 
-	it('should be able to update project group name', function(done){
+	it('should be able to update project name', function(done){
 
 
-		const projectgroup = {
+		const project = {
 			name: 'project2_new'
 		};
 
@@ -169,7 +169,7 @@ describe('Project groups', function () {
 			
 			callback => {
 				agent.put(`/${username}/projects/project2`)
-				.send(projectgroup)
+				.send(project)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -183,7 +183,7 @@ describe('Project groups', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
+					const pg = account.projects.find(pg => pg.name === project.name);
 					expect(pg).to.exist;
 
 					callback(err);
@@ -193,9 +193,9 @@ describe('Project groups', function () {
 		], (err, res) => done(err));
 	});
 
-	it('should fail to update project group for invalid permissions', function(done){
+	it('should fail to update project for invalid permissions', function(done){
 
-		const projectgroup = {
+		const project = {
 			name: 'project3',
 			permissions: [{
 				user: 'testing',
@@ -203,8 +203,8 @@ describe('Project groups', function () {
 			}]
 		};
 
-		agent.put(`/${username}/projects/${projectgroup.name}`)
-		.send(projectgroup)
+		agent.put(`/${username}/projects/${project.name}`)
+		.send(project)
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
 			done(err);
@@ -212,16 +212,16 @@ describe('Project groups', function () {
 	});
 
 
-	it('should able to delete project group', function(done){
+	it('should able to delete project', function(done){
 
-		const projectgroup = {
+		const project = {
 			name: 'project4'
 		};
 
 		async.series([
 			
 			callback => {
-				agent.delete(`/${username}/projects/${projectgroup.name}`)
+				agent.delete(`/${username}/projects/${project.name}`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -235,7 +235,7 @@ describe('Project groups', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const pg = account.projectGroups.find(pg => pg.name === projectgroup.name);
+					const pg = account.projects.find(pg => pg.name === project.name);
 					expect(pg).to.not.exist;
 
 					callback(err);
@@ -246,7 +246,7 @@ describe('Project groups', function () {
 
 	});
 
-	it('should fail to update a project group that doesnt exist', function(done){
+	it('should fail to update a project that doesnt exist', function(done){
 		agent.put(`/${username}/projects/notexist`)
 		.send({})
 		.expect(404, function(err, res){
@@ -255,7 +255,7 @@ describe('Project groups', function () {
 		});
 	});
 
-	it('should fail to delete a project group that doesnt exist', function(done){
+	it('should fail to delete a project that doesnt exist', function(done){
 		agent.delete(`/${username}/projects/notexist`)
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);

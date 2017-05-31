@@ -37,9 +37,9 @@ describe('Model', function () {
 	let agent;
 	let username = 'project_username';
 	let password = 'project_username';
-	let model = 'project1';
+	let model = 'model12345';
 	let modelFed = 'projectFed1';
-	let projectGroup = 'projectgroup'
+	let project = 'projectgroup'
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'm';
@@ -79,7 +79,7 @@ describe('Model', function () {
 			callback => {
 
 				agent.post(`/${username}/${model}`)
-				.send({ desc, type, unit, code, projectGroup })
+				.send({ desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
 					console.log(res.body);
 					expect(res.body.model).to.equal(model);
@@ -105,7 +105,7 @@ describe('Model', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
-					const pg = account.projectGroups.find(pg => pg.name === projectGroup);
+					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
 
 					console.log(pg);
@@ -121,10 +121,10 @@ describe('Model', function () {
 	});
 
 
-	it('should fail if project group supplied is not found', function(done){
+	it('should fail if project supplied is not found', function(done){
 
 		agent.post(`/${username}/model2`)
-		.send({ desc, type, unit, code, projectGroup: 'noexist' })
+		.send({ desc, type, unit, code, project: 'noexist' })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);
@@ -420,7 +420,7 @@ describe('Model', function () {
 				const account = res.body.accounts.find(account => account.account === username);
 				expect(account).to.exist;
 
-				const pg = account.projectGroups.find(pg => pg.name === 'project1');
+				const pg = account.projects.find(pg => pg.name === 'project1');
 				expect(pg).to.exist;
 
 				const myModel = pg.models.find(_model => _model.model === 'sample_project');

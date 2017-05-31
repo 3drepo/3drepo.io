@@ -86,7 +86,7 @@ function convertToErrorCode(errCode){
 function createAndAssignRole(model, account, username, data) {
 	'use strict';
 
-	let projectGroup;
+	let project;
 
 	if(!model.match(modelNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
@@ -106,13 +106,13 @@ function createAndAssignRole(model, account, username, data) {
 
 	let promise = Promise.resolve();
 
-	if(data.projectGroup){
-		promise = Project.findOne({account}, {name: data.projectGroup}).then(_projectGroup => {
+	if(data.project){
+		promise = Project.findOne({account}, {name: data.project}).then(_project => {
 
-			if(!_projectGroup){
+			if(!_project){
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
-				projectGroup = _projectGroup;
+				project = _project;
 			}
 
 		});
@@ -167,9 +167,9 @@ function createAndAssignRole(model, account, username, data) {
 	}).then(setting => {
 
 
-		if(projectGroup){
-			projectGroup.models.push(model);
-			return projectGroup.save().then(() => setting);
+		if(project){
+			project.models.push(model);
+			return project.save().then(() => setting);
 		}
 
 		return setting;

@@ -192,7 +192,7 @@ function createModel(req, res, next){
 		subModels: req.body.subModels, 
 		federate: federate,
 		code: req.body.code,
-		projectGroup: req.body.projectGroup
+		project: req.body.project
 	};
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];

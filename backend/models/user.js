@@ -553,19 +553,19 @@ function _getAllModels(accountName, permissions){
 	});
 }
 
-// find model groups and put models into project groups 
-function _addProjectGroups(account){
+// find model groups and put models into project
+function _addProjects(account){
 	'use strict';
 
-	return Project.find({account: account.account}, {}).then(projectGroups => {
+	return Project.find({account: account.account}, {}).then(projects => {
 
-		projectGroups.forEach((projectGroup, i) => {
+		projects.forEach((project, i) => {
 		
-			projectGroup = projectGroup.toObject();
+			project = project.toObject();
 
-			projectGroups[i] = projectGroup;
+			projects[i] = project;
 
-			projectGroup.models.forEach((model, i) => {
+			project.models.forEach((model, i) => {
 
 				let fullModel = account.models.find(model => model.model === model);
 
@@ -577,12 +577,12 @@ function _addProjectGroups(account){
 					fullModel = { model: model};
 				}
 
-				projectGroup.models[i] = fullModel;
+				project.models[i] = fullModel;
 			});
 
 		});
 
-		account.projectGroups = projectGroups;
+		account.projects = projects;
 	});
 }
 
@@ -750,7 +750,7 @@ schema.methods.listAccounts = function(){
 
 		return Promise.all(addModelPromises);
 
-	//add project groups and put models into project groups for each account
+	//add projects and put models into projects for each account
 	}).then(() => {
 
 		//sorting models
@@ -764,7 +764,7 @@ schema.methods.listAccounts = function(){
 			accounts.unshift(myAccount);
 		}
 
-		return Promise.all(accounts.map(account => _addProjectGroups(account)))
+		return Promise.all(accounts.map(account => _addProjects(account)))
 			.then(() => accounts);
 
 	});

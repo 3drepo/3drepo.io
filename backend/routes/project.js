@@ -12,8 +12,8 @@
 	const checkPermissions = middlewares.checkPermissions;
 	
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
-	router.put("/projects/:projectGroup", checkPermissions([C.PERM_EDIT_PROJECT]), updateProject);
-	router.delete("/projects/:projectGroup", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
+	router.put("/projects/:project", checkPermissions([C.PERM_EDIT_PROJECT]), updateProject);
+	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
 	function createProject(req, res, next){
@@ -27,7 +27,7 @@
 
 	function updateProject(req, res, next){
 
-		Project.findOne({ account: req.params.account }, {name: req.params.projectGroup}).then(project => {
+		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
 			if(!project){
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
@@ -42,7 +42,7 @@
 
 	function deleteProject(req, res, next){
 		
-		Project.delete(req.params.account, req.params.projectGroup).then(project => {
+		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
