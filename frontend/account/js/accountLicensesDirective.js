@@ -27,8 +27,7 @@
 			templateUrl: 'accountLicenses.html',
 			scope: {
 				account: "=",
-				showPage: "&",
-				subscriptions: "="
+				showPage: "&"
 			},
 			controller: AccountLicensesCtrl,
 			controllerAs: 'vm',
@@ -43,10 +42,19 @@
 			i,
 			promise;
 
+		UtilsService.doGet(vm.account + "/subscriptions").then(function(res){
+			vm.subscriptions = res.data;
+		});
+
 		/*
 		 * Watch subscriptions
 		 */
 		$scope.$watch("vm.subscriptions", function () {
+
+			if(!vm.subscriptions){
+				return;
+			}
+
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
@@ -59,6 +67,7 @@
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,
 						id: vm.subscriptions[i]._id,
+						job: vm.subscriptions[i].job,
 						showRemove: (vm.subscriptions[i].assignedUser !== vm.account)
 					});
 				}
@@ -68,6 +77,7 @@
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+			console.log('vm.unassigned', vm.unassigned)
 		});
 
 		/*
@@ -77,6 +87,54 @@
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
+
+		vm.jobs = [];
+		// get list of jobs
+
+		UtilsService.doGet(vm.account + "/jobs").then(function(data){
+			vm.jobs = data.data
+			console.log(vm.jobs);
+		});
+
+		vm.assignJob = function(index){
+			var licence = vm.licenses[index];
+	
+			UtilsService.doPut(
+				{job: licence.job},
+				vm.account + "/subscriptions/" + licence.id + "/assign"
+			).then(function(res){
+				if (res.status !== 200) {
+
+					vm.addMessage = res.data.message;
+				}
+			});
+		};
+
+		vm.addJob = function(){
+
+			var job = { _id: vm.newJob };
+			vm.addJobMessage = null;
+
+			UtilsService.doPost( job, vm.account + "/jobs").then(function(res){
+				if (res.status !== 200) {
+					vm.addJobMessage = res.data.message;
+				} else {
+					vm.jobs.push(job);
+				}
+			});
+		}
+
+		vm.removeJob = function(index){
+
+			vm.deleteJobMessage = null;
+			UtilsService.doDelete(null, vm.account + "/jobs/" + vm.jobs[index]._id).then(function(res){
+				if (res.status !== 200) {
+					vm.deleteJobMessage = res.data.message;
+				} else {
+					vm.jobs.splice(index, 1);
+				}
+			});
+		}
 
 		/**
 		 * Assign a license to the selected user

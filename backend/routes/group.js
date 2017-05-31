@@ -27,15 +27,15 @@ var utils = require('../utils');
 // var uuidToString = utils.uuidToString;
 //var mongo    = require("mongodb");
 
-router.get('/', middlewares.hasReadAccessToProject, listGroups);
-router.get('/:uid', middlewares.hasWriteAccessToProject, findGroup);
-router.put('/:uid', middlewares.hasWriteAccessToProject, updateGroup);
-router.post('/', middlewares.hasWriteAccessToProject, createGroup);
-router.delete('/:id', middlewares.hasWriteAccessToProject, deleteGroup);
+router.get('/', middlewares.hasReadAccessToIssue, listGroups);
+router.get('/:uid', middlewares.hasWriteAccessToIssue, findGroup);
+router.put('/:uid', middlewares.hasWriteAccessToIssue, updateGroup);
+router.post('/', middlewares.hasWriteAccessToIssue, createGroup);
+router.delete('/:id', middlewares.hasWriteAccessToIssue, deleteGroup);
 
 
 var getDbColOptions = function(req){
-	return {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
 function listGroups(req, res, next){

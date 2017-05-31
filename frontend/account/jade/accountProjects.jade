@@ -1,0 +1,41 @@
+.userContent
+
+	input#existingProjectFileUploader(type="file")
+	input#newProjectFileUploader(type="file")
+
+	md-list#accountList(flex, ng-if="vm.projectsExist")
+		// Accounts
+		div(ng-repeat="account in vm.accounts", ng-if="account.showAccount")
+			div(layout="row", layout-align="space-between")
+				md-list-item(flex)
+					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
+						md-button.md-icon-button(aria-label="Folder")
+							md-icon.angular-material-icons {{account.showProjectsIcon}}
+						p {{account.account}}
+						md-icon.angular-material-icons.accountProjectsSharedIcon(ng-if="!account.canAddProject") group
+				.accountRight(ng-if="account.canAddProject")
+					md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event, account.account)")
+						md-icon.angular-material-icons.md-accent playlist_add
+
+			// Projects
+			md-list.projects(ng-if="account.showProjects")
+				account-project(
+				ng-repeat="project in account.models"
+				account="account.name"
+				is-account-admin="account.isAdmin"
+				project="project"
+				user-account="vm.account"
+				on-upload-file="vm.uploadFile(project)"
+				uploaded-file="vm.uploadedFile"
+				project-to-upload="vm.projectToUpload"
+				on-show-page="vm.showPage(page, callingPage)"
+				on-setup-delete-project="vm.setupDeleteProject(event, project, account)",
+				quota="vm.quota"
+				subscriptions="vm.subscriptions")
+			md-divider
+
+
+	div(ng-if="!vm.projectsExist")
+		.cardInfo(layout="row", layout-align="center center")
+			p {{vm.info}}
+			md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")

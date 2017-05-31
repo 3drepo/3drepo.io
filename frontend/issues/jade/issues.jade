@@ -8,10 +8,6 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-#issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue")
-		md-icon.angular-material-icons add
-
 md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
 
 #issuesContent(ng-switch="vm.toShow")
@@ -30,12 +26,12 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 	keys-down="vm.keysDown"
 	content-height="vm.setContentHeight(height)"
 	menu-option="vm.selectedMenuOption"
-	user-roles="vm.projectUserRoles"
+	user-job="vm.projectUserJob"
 	tree-map="vm.treeMap"
 	selected-issue="vm.selectedIssue"
 	display-issue="vm.displayIssue"
 	issue-display="vm.issueDisplay"
-	available-roles="vm.availableRoles"
+	available-jobs="vm.availableJobs"
 	)
 
 	// Issue
@@ -54,7 +50,12 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 	selected-objects="vm.selectedObjects"
 	revision="vm.revision"
 	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
-	user-roles="vm.projectUserRoles"
-	available-roles="vm.availableRoles")
+	user-job="vm.projectUserJob"
+	available-jobs="vm.availableJobs")
+
+
+#issuesAddButton(ng-if="vm.showAddButton", layout-margin)
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue")
+		md-icon.angular-material-icons add
 
 

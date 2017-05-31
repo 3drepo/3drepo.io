@@ -1,3 +1,27 @@
+/** Hijack x3dom progress bar **/
+
+.x3dom-progress {
+    bottom: 0px !important;
+    top: auto !important;
+    color: #fff !important;
+    background-color: rgb(0, 69, 148) !important;
+}
+
+/** Make the filter placholder text white **/
+
+#panelCardFilterInput::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: white;
+}
+#panelCardFilterInput::-moz-placeholder { /* Firefox 19+ */
+  color: white;
+}
+#panelCardFilterInput:-ms-input-placeholder { /* IE 10+ */
+  color: white;
+}
+#panelCardFilterInput:-moz-placeholder { /* Firefox 18- */
+  color: white;
+}
+
 /** Panel *************************************************************************************************************/
 
 panel  {
@@ -28,7 +52,7 @@ panel #buttons .panelButtonGroup button {
 }
 panel #buttons .panelButtonGroup label {
   color: #FFFFFF;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px rgb(0, 0, 0);
   font-weight: bold;
   font-size: 14px;
 }

@@ -54,7 +54,8 @@
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 		vm.showList = true;
 
-		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/collaborators");
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
+
 		promise.then(function (response) {
 			console.log(response);
 			if (response.status === 200) {
@@ -84,13 +85,15 @@
 		 * Add the selected member to the team
 		 */
 		vm.addMember = function () {
-			var i, length,
-				data = {
-					role: vm.memberRole,
-					user: vm.selectedUser.user
-				};
+			var i, length;
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.model + "/collaborators");
+			var	data = {
+				permission: vm.memberRole,
+				user: vm.selectedUser.user
+			};
+
+			promise = UtilsService.doPost(vm.members.concat([data]), vm.account + "/" + vm.item.model + "/permissions");
+
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.members.push(data);
@@ -121,13 +124,19 @@
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.model + "/collaborators");
+
+			var member = vm.members.splice(index, 1);
+
+			promise = UtilsService.doPost(vm.members, vm.account + "/" + vm.item.model + "/permissions");
+
 			promise.then(function (response) {
 				if (response.status === 200) {
-					var member = vm.members.splice(index, 1);
+					
 					vm.collaborators.push(member[0]);
 					vm.addDisabled = false;
 					vm.allLicenseAssigneesMembers = false;
+				} else {
+					vm.members.splice(index, 0, member);
 				}
 			});
 		};

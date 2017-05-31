@@ -91,7 +91,7 @@ function genglX(format, req, res){
 	};
 
 	//TO-DO: hard coded account for stashing 3d building grids
-	let dbCol =  {account: 'ordnancesurvey', project: 'properties_dimensions', logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: 'ordnancesurvey', model: 'properties_dimensions', logger: req[C.REQ_REPO].logger};
 
 	var method = req.query.method;
 
@@ -99,11 +99,11 @@ function genglX(format, req, res){
 	let binUrl;
 	
 	if(format === 'gltf'){
-		gltfUrl = `/${dbCol.account}/${dbCol.project}${req.url}`;
+		gltfUrl = `/${dbCol.account}/${dbCol.model}${req.url}`;
 		binUrl  = gltfUrl.replace('gltf', 'bin');
 
 	} else {
-		binUrl = `/${dbCol.account}/${dbCol.project}${req.url}`;
+		binUrl = `/${dbCol.account}/${dbCol.model}${req.url}`;
 		gltfUrl  = binUrl.replace('bin', 'gltf');
 	}
 
@@ -385,7 +385,7 @@ function getMapTiles(req, res){
 	z = req.params.z;
 
 	//TO-DO: hard coded account for stashing map images
-	let dbCol =  {account: 'ordnancesurvey', project: 'map_images', logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: 'ordnancesurvey', model: 'map_images', logger: req[C.REQ_REPO].logger};
 	
 	let filename = `${req.params.style}/${z}/${x}/${y}.png`;
 

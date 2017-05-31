@@ -37,7 +37,7 @@
 		const units = require("../models/unit");
 		const favicon = require("serve-favicon");
 		const History = require("../models/history");
-		const ProjectHelper = require("../models/helper/project");
+		const ModelHelper = require("../models/helper/model");
 		const User = require("../models/user");
 		const systemLogger = require("../logger.js").systemLogger;
 		const responseCodes = require("../response_codes.js");
@@ -133,24 +133,24 @@
 			params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
 			params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";
 			params.config_js += "\n\nserver_config.tagRegExp = " + History.tagRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.projectNameRegExp = " + ProjectHelper.projectNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.fileNameRegExp = " + ProjectHelper.fileNameRegExp.toString() + ";";
+			params.config_js += "\n\nserver_config.modelNameRegExp = " + ModelHelper.modelNameRegExp.toString() + ";";
+			params.config_js += "\n\nserver_config.fileNameRegExp = " + ModelHelper.fileNameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
+			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ModelHelper.acceptedFormat) + ";";
 
 			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
 			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({
-				'PERM_DELETE_PROJECT': C.PERM_DELETE_PROJECT,
-				'PERM_CHANGE_PROJECT_SETTINGS': C.PERM_CHANGE_PROJECT_SETTINGS,
+				'PERM_DELETE_MODEL': C.PERM_DELETE_MODEL,
+				'PERM_CHANGE_MODEL_SETTINGS': C.PERM_CHANGE_MODEL_SETTINGS,
 				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
 				'PERM_UPLOAD_FILES': C.PERM_UPLOAD_FILES,
 				'PERM_CREATE_ISSUE': C.PERM_CREATE_ISSUE,
 				'PERM_COMMENT_ISSUE': C.PERM_COMMENT_ISSUE,
 				'PERM_VIEW_ISSUE': C.PERM_VIEW_ISSUE,
-				'PERM_DOWNLOAD_PROJECT': C.PERM_DOWNLOAD_PROJECT,
-				'PERM_VIEW_PROJECT': C.PERM_VIEW_PROJECT,
-				'PERM_CREATE_PROJECT': C.PERM_CREATE_PROJECT,
-				'PERM_EDIT_PROJECT': C.PERM_EDIT_PROJECT
+				'PERM_DOWNLOAD_MODEL': C.PERM_DOWNLOAD_MODEL,
+				'PERM_VIEW_MODEL': C.PERM_VIEW_MODEL,
+				'PERM_CREATE_MODEL': C.PERM_CREATE_MODEL,
+				'PERM_EDIT_FEDERATION': C.PERM_EDIT_FEDERATION
 			}) + ";";
 
 			res.header("Content-Type", "text/javascript");

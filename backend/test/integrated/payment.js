@@ -52,7 +52,7 @@ describe('Enrolling to a subscription', function () {
 	let password3 = 'payment_user3';
 	let email3 = 'test3drepo_payment3@mailinator.com';
 
-	let project = 'testproject';
+	let model = 'testproject';
 	let email = 'test3drepo_payment@mailinator.com'
 	let billingId = 'I-000000000000';
 
@@ -608,7 +608,7 @@ describe('Enrolling to a subscription', function () {
 					});
 				});
 
-				it('should fail if the user is a collaborator of a project', function(){
+				it('should fail if the user is a collaborator of a model', function(){
 					//to-do
 				});
 

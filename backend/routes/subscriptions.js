@@ -29,6 +29,7 @@
 	router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 	router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
 	router.post("/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
+	router.put("/subscriptions/:sid/assign", middlewares.isAccountAdmin, updateAssignDetail);
 	router.delete("/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
 
 	function createSubscription(req, res, next) {
@@ -89,7 +90,30 @@
 					userData.user = req.body.user;
 				}
 
+				if (req.body.job) {
+					userData.job = req.body.job;
+				}
+
+				if (req.body.permissions){
+					userData.permissions = req.body.permissions;
+				}
+
 				return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+			})
+			.then(subscription => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+			})
+			.catch(err => {
+				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			});
+	}
+
+	function updateAssignDetail(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account)
+			.then(dbUser => {
+
+				return dbUser.updateAssignDetail(req.params.sid, req.body);
 			})
 			.then(subscription => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);

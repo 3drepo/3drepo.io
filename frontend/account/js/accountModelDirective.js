@@ -64,9 +64,11 @@
 			dialogCloseToId;
 
 		// Init
+
 		vm.modelToUpload = null;
 		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
+
 		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.model.timestamp !== null) {
 			vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
@@ -93,21 +95,21 @@
 			modelsetting: {
 				label: "Settings",
 				 icon: "settings", 
-				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_model_SETTINGS, vm.model.permissions)
+				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
 			}
 		};
 		if(vm.model.timestamp && !vm.model.federate){
 			vm.modelOptions.download = {
 				label: "Download", 
 				icon: "cloud_download", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_model, vm.model.permissions)
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
 			};
 		}
 		vm.uploadButtonDisabled = true;
 		vm.modelOptions.delete = {
 			label: "Delete", 
 			icon: "delete", 
-			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_model, vm.model.permissions), 
+			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
 			color: "#F44336"
 		};
 
@@ -170,8 +172,12 @@
 						vm.modelToUpload = null;
 						UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, dialogCloseToId);
 					}
+					else {
+						console.warn("Incorrect permissions")
+					}
 				}
 				else {
+					console.log("location path being called")
 					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
@@ -380,7 +386,8 @@
 		 */
 		function watchModelStatus(){
 
-			NotificationService.subscribe.projectstatusChanged(vm.account, vm.model.model, function(data){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.model.model, function(data){
+
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
@@ -421,7 +428,7 @@
 			});
 
 			$scope.$on('$destroy', function(){
-				NotificationService.unsubscribe.projectstatusChanged(vm.account, vm.model.model);
+				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.model.model);
 			});
 		}
 
