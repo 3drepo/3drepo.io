@@ -95,7 +95,8 @@ describe('Uploading a model', function () {
 				}
 
 				//create a model
-				agent2.post(`/testing/testmodel/upload`)
+				let myModel = 'testproject';
+				agent2.post(`/testing/${myModel}/upload`)
 				.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);

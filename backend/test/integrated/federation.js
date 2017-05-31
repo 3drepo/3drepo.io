@@ -289,7 +289,7 @@ describe('Federated Model', function () {
 			
 				//check the request json file
 
-				expect(json.subModels.length).to.equal(1);
+				expect(json.subProjects.length).to.equal(1);
 
 				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 

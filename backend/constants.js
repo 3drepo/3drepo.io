@@ -409,7 +409,7 @@
 		"false"
 	]);
 
-	define("REPO_BLACKLIST_PROJECT", [
+	define("REPO_BLACKLIST_MODEL", [
 		"database",
 		"verify",
 		"forgot-password",

@@ -148,7 +148,10 @@ describe('Model', function () {
 
 
 		function updateModelCode(code, done){
-			agent.put(`/${username}/model4/settings`)
+
+			let model = 'project4';
+
+			agent.put(`/${username}/${model}/settings`)
 			.send({code}).expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_CODE.value);
 				done(err);
@@ -167,7 +170,10 @@ describe('Model', function () {
 	});
 
 	it('update issues type with duplicate values', function(done){
-			agent.put(`/${username}/model5/settings`)
+
+			let model = 'project5';
+
+			agent.put(`/${username}/${model}/settings`)
 			.send({
 				topicTypes: ['For Info', 'for info']
 			}).expect(400, function(err ,res) {
@@ -237,7 +243,9 @@ describe('Model', function () {
 
 	it('should return error message if model name already exists', function(done){
 
-		agent.post(`/${username}/model7`)
+		let model = 'project7';
+		
+		agent.post(`/${username}/${model}`)
 		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);

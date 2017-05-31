@@ -499,6 +499,7 @@ schema.statics.revokeRolesFromUser = function(username, db, role){
 function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';
 
+	//console.log('permissions', permissions)
 	const ModelHelper = require('./helper/model');
 
 	let model = {
@@ -719,7 +720,7 @@ schema.methods.listAccounts = function(){
 
 			const findModel = accounts.find(account => {
 				return account.models.find(_model => _model.model === model.model) || 
-				account.fedProjects.find(_model => _model.model === model.model);
+				account.fedModels.find(_model => _model.model === model.model);
 			});
 
 			//add project to list if not covered previously
@@ -736,10 +737,11 @@ schema.methods.listAccounts = function(){
 					_findModelDetails(dbUserCache, this.user, { 
 						account: model.account, model: model.model 
 					}).then(data => {
+						//console.log('data', JSON.stringify(data, null ,2))
 						return _fillInModelDetails(account.account, data.setting, data.permissions);
 					}).then(_model => {
 						//push result to account object
-						_model.federate ? account.fedModels.push(_model) : account.models.push(model);
+						_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
 					})
 				);
 			}

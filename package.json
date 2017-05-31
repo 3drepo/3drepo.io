@@ -12,7 +12,7 @@
     "test-int-clean": "./backend/test/cleanup/cleanup.sh",
     "test-int": "NODE_ENV=test npm run create-ghost && grunt test-integrated",
     "test-clean-and-int": "npm run test-int-clean && npm run test-int",
-    "test-all": "NODE_ENV=test npm run test && npm run test-int-clean-up && npm run test-int",
+    "test-all": "NODE_ENV=test npm run test && npm run test-int-clean && npm run test-int",
     "dev": "nodemon 3drepo.js",
     "create-ghost": "node scripts/createGhost"
   },
