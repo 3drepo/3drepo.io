@@ -179,8 +179,8 @@
 				"plugin": "account",
 				"url": ":account",
 				"children": [{
-					"plugin": "project",
-					"url": "/:project/:revision",
+					"plugin": "model",
+					"url": "/:model/:revision",
 					"params": {
 						"revision": {
 							value: null,

@@ -82,8 +82,8 @@
 
 		return {
 			createmodelSummary: createModelSummary,
-			getmodelSummary: getModelSummary,
-			getmodelInfo: getModelInfo
+			getModelSummary: getModelSummary,
+			getModelInfo: getModelInfo
 		};
 	}
 }());
