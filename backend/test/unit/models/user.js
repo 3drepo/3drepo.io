@@ -158,6 +158,7 @@ describe('User', function(){
 
 			let stubs = [];
 			stubs.push(sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0)));
+			stubs.push(sinon.stub(User, 'isUserNameTaken').returns(Promise.resolve(0)));
 			stubs.push(
 				sinon.stub(User, 'findByUserName').returns(Promise.resolve({
 					save: () => Promise.resolve(),
