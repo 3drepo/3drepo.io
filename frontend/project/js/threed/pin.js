@@ -41,9 +41,9 @@ var Pin = {};
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 * @param {string} account - database it came from
-	 * @param {string} project - name of the project
+	 * @param {string} model - name of the model
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, project) {
+	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint, account, model) {
 		var self = this;
 
 		self.id = id;
@@ -55,7 +55,7 @@ var Pin = {};
 		self.scale = scale;
 		self.viewpoint = viewpoint;
 		self.account = account;
-		self.project = project;
+		self.model = model;
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;

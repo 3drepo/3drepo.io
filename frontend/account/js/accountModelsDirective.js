@@ -100,7 +100,7 @@
 						vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
 
 						if(vm.accounts[i].isAdmin){
-							NotificationService.subscribe.newProject(vm.accounts[i].account, function(data){
+							NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
 								vm.newModelFileToUpload = null;
 								vm.modelsExist = true;
 								// Add model to list

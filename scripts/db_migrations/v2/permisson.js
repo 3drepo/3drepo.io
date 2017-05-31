@@ -117,7 +117,7 @@ while(users.hasNext()){
 
             var roleNameParts = role.role.split('.');
             var permTemplate = roleNameParts.length > 1 && roleNameParts[roleNameParts.length - 1];
-            var project = roleNameParts[0];
+            var model = roleNameParts[0];
 
             if(permTemplate !== 'collaborator' && permTemplate !== 'viewer' && permTemplate !== 'commenter'){
                 var roleDetail = db.getSiblingDB('admin').system.roles.findOne(role);
@@ -134,7 +134,7 @@ while(users.hasNext()){
                     }
 
                     if(roleDetail.privileges[0] && roleDetail.privileges[0].resource && roleDetail.privileges[0].resource.collection){
-                        project = roleDetail.privileges[0].resource.collection.split('.')[0];
+                        model = roleDetail.privileges[0].resource.collection.split('.')[0];
                     }
                     // convert this custom role to job
                     print('creating job for this role as it is a custom role');
@@ -183,12 +183,12 @@ while(users.hasNext()){
             db.getSiblingDB('admin').system.users.update({ _id: user._id }, { '$addToSet': {
                 'customData.models': {
                     account: role.db,
-                    model: project
+                    model: model
                 }
             }});
 
             var currPerm = db.getSiblingDB(role.db).settings.findOne({ 
-                _id: project, 
+                _id: model, 
                 'permissions.user': user.user 
             }, {
                 'permissions.$' : 1
@@ -203,7 +203,7 @@ while(users.hasNext()){
 
                 if(updatePerm){
                     print('updating permission for this user on this role');
-                    db.getSiblingDB(role.db).settings.update({ _id: project, 'permissions.user': user.user }, {
+                    db.getSiblingDB(role.db).settings.update({ _id: model, 'permissions.user': user.user }, {
                         '$set':{
                             'permissions.$.permission': permTemplate
                         }
@@ -215,7 +215,7 @@ while(users.hasNext()){
             } else {
 
                 print('adding permission for this user on this role');
-                db.getSiblingDB(role.db).settings.update({ _id: project}, {
+                db.getSiblingDB(role.db).settings.update({ _id: model}, {
                     '$addToSet':{
                         permissions: {
                             user: user.user,

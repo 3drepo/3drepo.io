@@ -29,7 +29,7 @@
 				packageName: "=",
 				inviteAccepted: "=",
 				account: "=",
-				project: "="
+				model: "="
 			},
 			controller: BidWorkspaceCtrl,
 			controllerAs: "vm",
@@ -69,7 +69,7 @@
 
 		vm.showInput = function (index) {
 			$location
-				.path(vm.account + "/" + vm.project + "/bid4free/bid4freeWorkspace", "_self")
+				.path(vm.account + "/" + vm.model + "/bid4free/bid4freeWorkspace", "_self")
 				.search({
 					package: BidService.currentPackage.name,
 					tab: index

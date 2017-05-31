@@ -19,32 +19,32 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("bidProjectSummary", bidProjectSummary);
+		.directive("bidmodelSummary", bidmodelSummary);
 
-	function bidProjectSummary() {
+	function bidmodelSummary() {
 		return {
 			restrict: 'E',
-			templateUrl: 'bidProjectSummary.html',
+			templateUrl: 'bidmodelSummary.html',
 			scope: {},
-			controller: BidProjectSummaryCtrl,
+			controller: BidmodelSummaryCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "Auth", "ProjectService", "BidService"];
+	BidmodelSummaryCtrl.$inject = ["$location", "Auth", "modelService", "BidService"];
 
-	function BidProjectSummaryCtrl($location, Auth, ProjectService, BidService) {
+	function BidmodelSummaryCtrl($location, Auth, modelService, BidService) {
 		var vm = this,
 			promise;
 
 		vm.Auth = Auth;
 
-		// Get the project summary
-		promise = ProjectService.getProjectSummary();
+		// Get the model summary
+		promise = modelService.getmodelSummary();
 		promise.then(function (data) {
-			vm.projectSummary = data.data;
-			vm.projectSummary.completedByPretty = BidService.prettyDate(new Date(vm.projectSummary.completedBy));
+			vm.modelSummary = data.data;
+			vm.modelSummary.completedByPretty = BidService.prettyDate(new Date(vm.modelSummary.completedBy));
 		});
 
 		vm.home = function () {

@@ -27,7 +27,7 @@
 			templateUrl: 'bid4free.html',
 			scope: {
 				account:  "=",
-				project:  "=",
+				model:  "=",
 				branch:   "=",
 				revision: "=",
 				state:    "="
@@ -38,11 +38,11 @@
 		};
 	}
 
-	Bid4FreeCtrl.$inject = ["$scope", "$element", "$timeout", "BidService", "ProjectService"];
+	Bid4FreeCtrl.$inject = ["$scope", "$element", "$timeout", "BidService", "modelService"];
 
-	function Bid4FreeCtrl($scope, $element, $timeout, BidService, ProjectService) {
+	function Bid4FreeCtrl($scope, $element, $timeout, BidService, modelService) {
 		var vm = this,
-			promise, projectUserRolesPromise, projectSummaryPromise,
+			promise, modelUserRolesPromise, modelSummaryPromise,
 			currentSelectedPackageIndex;
 
 		// Init view/model vars
@@ -51,11 +51,11 @@
 		vm.responded = false;
 		vm.packageSelected = false;
 		vm.statusInfo = "No package currently selected";
-		vm.saveProjectSummaryDisabled = true;
+		vm.savemodelSummaryDisabled = true;
 		vm.savePackageDisabled = true;
-		vm.showProjectSummaryInput = true;
+		vm.showmodelSummaryInput = true;
 
-		BidService.setAccountAndProject(vm.account, vm.project);
+		BidService.setAccountAndmodel(vm.account, vm.model);
 
 		// Setup sub contractors
 		vm.subContractors = [
@@ -80,8 +80,8 @@
 		];
 		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 
-		// Setup the project summary defaults
-		vm.projectSummary = {
+		// Setup the model summary defaults
+		vm.modelSummary = {
 			site: {label: "Site", type: "input", inputType: "text", value: undefined},
 			code: {label: "Code", type: "input", inputType: "text", value: undefined},
 			client: {label: "Client", type: "input", inputType: "text", value: undefined},
@@ -101,24 +101,24 @@
 			completedBy: {label: "Completed by", type: "date", value: undefined}
 		};
 
-		// Get the project summary
-		projectSummaryPromise = ProjectService.getProjectSummary();
-		projectSummaryPromise.then(function (response) {
+		// Get the model summary
+		modelSummaryPromise = modelService.getmodelSummary();
+		modelSummaryPromise.then(function (response) {
 			console.log(response);
 			if ((response.hasOwnProperty("data")) && !((response.data === null) || (response.data === ""))) {
-				vm.showProjectSummaryInput = false;
-				vm.projectSummary.name = {value: response.data.name};
-				vm.projectSummary.site.value = response.data.site;
-				vm.projectSummary.code.value = response.data.code;
-				vm.projectSummary.client.value = response.data.client;
-				vm.projectSummary.budget.value = response.data.budget;
-				vm.projectSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
+				vm.showmodelSummaryInput = false;
+				vm.modelSummary.name = {value: response.data.name};
+				vm.modelSummary.site.value = response.data.site;
+				vm.modelSummary.code.value = response.data.code;
+				vm.modelSummary.client.value = response.data.client;
+				vm.modelSummary.budget.value = response.data.budget;
+				vm.modelSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
 			}
 		});
 
 		// Get type of role
-		projectUserRolesPromise = ProjectService.getUserRolesForProject();
-		projectUserRolesPromise.then(function (data) {
+		modelUserRolesPromise = modelService.getUserRolesFormodel();
+		modelUserRolesPromise.then(function (data) {
 			var i, length;
 			vm.userIsASubContractor = false;
 			for (i = 0, length = data.length; i < length; i += 1) {
@@ -130,15 +130,15 @@
 			vm.userIsAMainContractor = !vm.userIsASubContractor;
 			if (vm.userIsAMainContractor) {
 				vm.listTitle = "Packages";
-				// Get all packages for project
+				// Get all packages for model
 				promise = BidService.getPackage();
 				promise.then(function (response) {
 					console.log(response);
 					var i, length;
 					vm.packages = response.data;
 					if (vm.packages.length === 0) {
-						vm.summaryInfo = "There are no packages for this project";
-						vm.statusInfo = "There are no packages for this project";
+						vm.summaryInfo = "There are no packages for this model";
+						vm.statusInfo = "There are no packages for this model";
 					}
 					else {
 						vm.summaryInfo = "No packages currently selected";
@@ -148,7 +148,7 @@
 							vm.packages[i].selected = false;
 						}
 
-						vm.fileUploadAction = "/api/" + vm.account + "/" + vm.project + "/packages/" +  vm.packages[0].name + "/attachments";
+						vm.fileUploadAction = "/api/" + vm.account + "/" + vm.model + "/packages/" +  vm.packages[0].name + "/attachments";
 					}
 				});
 			}
@@ -158,14 +158,14 @@
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
 		});
 
-		$scope.$watch("vm.projectSummary", function (newValue, oldValue) {
+		$scope.$watch("vm.modelSummary", function (newValue, oldValue) {
 			var input;
 			if (angular.isDefined(newValue)) {
 				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-					vm.saveProjectSummaryDisabled = false;
-					for (input in vm.projectSummary) {
-						if (vm.projectSummary.hasOwnProperty(input) && (angular.isUndefined(vm.projectSummary[input].value))) {
-							vm.saveProjectSummaryDisabled = true;
+					vm.savemodelSummaryDisabled = false;
+					for (input in vm.modelSummary) {
+						if (vm.modelSummary.hasOwnProperty(input) && (angular.isUndefined(vm.modelSummary[input].value))) {
+							vm.savemodelSummaryDisabled = true;
 							break;
 						}
 					}
@@ -190,22 +190,22 @@
 		}, true);
 
 		/**
-		 * Save the project summary
+		 * Save the model summary
 		 */
-		vm.saveProjectSummary = function () {
+		vm.savemodelSummary = function () {
 			var data = {}, input;
-			for (input in vm.projectSummary) {
-				if (vm.projectSummary.hasOwnProperty(input)) {
-					data[input] = vm.projectSummary[input].value;
+			for (input in vm.modelSummary) {
+				if (vm.modelSummary.hasOwnProperty(input)) {
+					data[input] = vm.modelSummary[input].value;
 				}
 			}
-			vm.saveProjectSummaryDisabled = true;
-			vm.showProjectSummaryInput = false;
-			promise = ProjectService.createProjectSummary(data);
+			vm.savemodelSummaryDisabled = true;
+			vm.showmodelSummaryInput = false;
+			promise = modelService.createmodelSummary(data);
 			promise.then(function (response) {
 				console.log(response);
-				vm.projectSummary.name = {value: response.data.name};
-				vm.projectSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
+				vm.modelSummary.name = {value: response.data.name};
+				vm.modelSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
 			});
 		};
 

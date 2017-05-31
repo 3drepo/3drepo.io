@@ -19,12 +19,12 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProjects", accountProjects);
+		.directive("accountModels", accountModels);
 
-	function accountProjects() {
+	function accountModels() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountProjects.html',
+			templateUrl: 'accountModels.html',
 			scope: {
 				account: "=",
 				accounts: "=",
@@ -32,45 +32,45 @@
 				quota: "=",
 				subscriptions: "="
 			},
-			controller: AccountProjectsCtrl,
+			controller: AccountModelsCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService"];
+	AccountModelsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService) {
+	function AccountModelsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
-			newProjectFileUploader;
+			existingModelToUpload,
+			existingModelFileUploader,
+			newModelFileUploader;
 
 		/*
 		 * Init
 		 */
-		vm.info = "Retrieving projects...";
+		vm.info = "Retrieving models...";
 		vm.showProgress = true;
-		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
+		vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.units = serverConfig.units;
-		vm.projectRegExp = serverConfig.modelNameRegExp;
+		vm.modelRegExp = serverConfig.modelNameRegExp;
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
+		existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
+		existingModelFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.projectToUpload = this.files[0];
-				//vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				vm.modelToUpload = this.files[0];
+				//vm.uploadedFile = {model: existingModelToUpload, file: this.files[0]};
 				$scope.$apply();
 			},
 			false
 		);
-		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
-		newProjectFileUploader.addEventListener(
+		newModelFileUploader = $element[0].querySelector("#newModelFileUploader");
+		newModelFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.newProjectFileToUpload = this.files[0];
+				vm.newModelFileToUpload = this.files[0];
 
 				$scope.$apply();
 			},
@@ -78,7 +78,7 @@
 		);
 
 		/*
-		 * Added data to accounts and projects for UI
+		 * Added data to accounts and models for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
@@ -86,31 +86,31 @@
 			if (angular.isDefined(vm.accounts)) {
 				//console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
-				vm.projectsExist = (vm.accounts.length > 0);
-				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				vm.modelsExist = (vm.accounts.length > 0);
+				vm.info = vm.modelsExist ? "" : "There are currently no models";
 				// Accounts
 				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
-					vm.accounts[i].showProjects = true;
-					vm.accounts[i].showProjectsIcon = "folder_open";
+					vm.accounts[i].showModels = true;
+					vm.accounts[i].showModelsIcon = "folder_open";
 					// Always show user account
-					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+					// Don't show account if it doesn't have any models - possible when user is a team member of a federation but not a member of a model in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].models.length !== 0));
-					// Only show add project menu for user account
-					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
+					// Only show add model menu for user account
+					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
 
 					if(vm.accounts[i].isAdmin){
-						NotificationService.subscribe.newProject(vm.accounts[i].account, function(data){
-							vm.newProjectFileToUpload = null;
-							vm.projectsExist = true;
-							// Add project to list
-							var project = {
-								project: data.project,
+						NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
+							vm.newModelFileToUpload = null;
+							vm.modelsExist = true;
+							// Add model to list
+							var model = {
+								model: data.model,
 								permissions: data.permissions,
 								canUpload: true,
 								timestamp: null
 							};
-							updateAccountProjects(data.account, project);
+							updateAccountmodels(data.account, model);
 							$scope.$apply();
 
 						});
@@ -120,54 +120,54 @@
 		});
 
 		/*
-		 * Watch the new project type
+		 * Watch the new model type
 		 */
-		$scope.$watch("vm.newProjectData.type", function (newValue) {
+		$scope.$watch("vm.newModelData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				vm.showProjectTypeOtherInput = (newValue.toString() === "Other");
+				vm.showModelTypeOtherInput = (newValue.toString() === "Other");
 			}
 		});
 
 		/*
-		 * Watch new project data
+		 * Watch new model data
 		 */
 
 
-		$scope.$watch('{a : vm.newProjectData, b: vm.newProjectFileToUpload.name}', function (data){
+		$scope.$watch('{a : vm.newModelData, b: vm.newModelFileToUpload.name}', function (data){
 
-			var newValue = vm.newProjectData;
+			var newValue = vm.newModelData;
 
 
 			if (angular.isDefined(newValue)) {
-				vm.newProjectButtonDisabled =
+				vm.newModelButtonDisabled =
 					(angular.isUndefined(newValue.name) || (angular.isDefined(newValue.name) && (newValue.name === "")));
 				
-				if (!vm.newProjectButtonDisabled && (newValue.type === "Other")) {
-					vm.newProjectButtonDisabled =
+				if (!vm.newModelButtonDisabled && (newValue.type === "Other")) {
+					vm.newModelButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
 
 				if(!newValue.unit){
-					vm.newProjectButtonDisabled = true;
+					vm.newModelButtonDisabled = true;
 				}
 				
 			
 			}
 
 
-			if(vm.newProjectFileToUpload){
-				var names = vm.newProjectFileToUpload.name.split('.');
+			if(vm.newModelFileToUpload){
+				var names = vm.newModelFileToUpload.name.split('.');
 
-				vm.showNewProjectErrorMessage = false;
-				vm.newProjectErrorMessage = '';
+				vm.showNewModelErrorMessage = false;
+				vm.newModelErrorMessage = '';
 				if(names.length === 1){
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = 'Filename must have extension';
-					vm.newProjectFileToUpload = null;
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = 'Filename must have extension';
+					vm.newModelFileToUpload = null;
 				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = 'File format not supported';
-					vm.newProjectFileToUpload = null
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = 'File format not supported';
+					vm.newModelFileToUpload = null
 				}
 			}
 
@@ -184,29 +184,29 @@
 		}, true);
 
 		/**
-		 * Toggle display of projects for an account
+		 * Toggle display of models for an account
 		 *
 		 * @param {Number} index
 		 */
-		vm.toggleProjectsList = function (index) {
-			vm.accounts[index].showProjects = !vm.accounts[index].showProjects;
-			vm.accounts[index].showProjectsIcon = vm.accounts[index].showProjects ? "folder_open" : "folder";
+		vm.togglemodelsList = function (index) {
+			vm.accounts[index].showModels = !vm.accounts[index].showModels;
+			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
 		};
 
 		/**
-		 * Bring up dialog to add a new project
+		 * Bring up dialog to add a new model
 		 */
-		vm.newProject = function (event, accountForProject) {
+		vm.newmodel = function (event, accountForModel) {
 			vm.tag = null;
 			vm.desc = null;
-			vm.showNewProjectErrorMessage = false;
-			vm.newProjectFileToUpload = null;
-			vm.newProjectData = {
-				account: accountForProject,
-				type: vm.projectTypes[0]
+			vm.showNewModelErrorMessage = false;
+			vm.newModelFileToUpload = null;
+			vm.newModelData = {
+				account: accountForModel,
+				type: vm.modelTypes[0]
 			};
-			vm.newProjectFileToUpload = null;
-			UtilsService.showDialog("projectDialog.html", $scope, event, true);
+			vm.newModelFileToUpload = null;
+			UtilsService.showDialog("modelDialog.html", $scope, event, true);
 		};
 		
 		/**
@@ -217,10 +217,10 @@
 		};
 
 		/**
-		 * Save a new project
+		 * Save a new model
 		 */
-		vm.saveNewProject = function (event) {
-			var project,
+		vm.saveNewModel = function (event) {
+			var model,
 				promise,
 				enterKey = 13,
 				doSave = false;
@@ -237,38 +237,38 @@
 			if (doSave) {
 
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = 'Invalid revision name';
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = 'Invalid revision name';
 					return;
 				}
 				
-				if(!vm.newProjectData.name){
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = 'Invalid project name';
+				if(!vm.newModelData.name){
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = 'Invalid model name';
 					return;
 				}
 
-				promise = AccountService.newProject(vm.newProjectData);
+				promise = AccountService.newModel(vm.newModelData);
 				promise.then(function (response) {
 					console.log(response);
 					if (response.data.status === 400) {
-						vm.showNewProjectErrorMessage = true;
-						vm.newProjectErrorMessage = response.data.message;
+						vm.showNewModelErrorMessage = true;
+						vm.newModelErrorMessage = response.data.message;
 					}
 					else {
-						vm.projectsExist = true;
-						// Add project to list
-						project = {
+						vm.modelsExist = true;
+						// Add model to list
+						model = {
 							model: response.data.model,
 							permissions: response.data.permissions,
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountProjects(response.data.account, project);
+						updateAccountModels(response.data.account, model);
 						vm.closeDialog();
 
 						AnalyticService.sendEvent({
-							eventCategory: 'Project',
+							eventCategory: 'model',
 							eventAction: 'create'
 						});
 					}
@@ -279,21 +279,21 @@
 		/**
 		 * Upload a file
 		 *
-		 * @param {Object} project
+		 * @param {Object} model
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
+		vm.uploadFile = function (model) {
+			console.log(model);
+			existingModelFileUploader.value = "";
+			existingModelToUpload = model;
+			existingModelFileUploader.click();
 		};
 
 		/**
 		 * Upload a file
 		 */
-		vm.uploadFileForNewProject = function () {
-			newProjectFileUploader.value = "";
-			newProjectFileUploader.click();
+		vm.uploadFileForNewModel = function () {
+			newModelFileUploader.value = "";
+			newModelFileUploader.click();
 		};
 
 		/**
@@ -329,35 +329,35 @@
 		};
 
 		/**
-		 * Set up deleting of project
+		 * Set up deleting of model
 		 *
 		 * @param {Object} event
-		 * @param {Object} project
+		 * @param {Object} model
 		 */
-		vm.setupDeleteProject = function (event, project, account) {
-			vm.projectToDelete = project;
+		vm.setupDeletemodel = function (event, model, account) {
+			vm.modelToDelete = model;
 			vm.deleteError = null;
-			vm.deleteTitle = "Delete Project";
+			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.projectToDelete.name;
-			vm.targetAccountToDeleteProject = account;
+			vm.deleteName = vm.modelToDelete.name;
+			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
 		/**
-		 * Delete project
+		 * Delete model
 		 */
 		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteProject + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
-					// Remove project from list
+					// Remove model from list
 					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
 						if (vm.accounts[i].name === response.data.account) {
 							for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
-								if (vm.accounts[i].models[j].name === response.data.project) {
+								if (vm.accounts[i].models[j].name === response.data.model) {
 									vm.accounts[i].models.splice(j, 1);
 									break;
 								}
@@ -367,12 +367,12 @@
 					vm.closeDialog();
 
 					AnalyticService.sendEvent({
-						eventCategory: 'Project',
+						eventCategory: 'Model',
 						eventAction: 'delete'
 					});
 				}
 				else {
-					vm.deleteError = "Error deleting project";
+					vm.deleteError = "Error deleting model";
 				}
 			});
 		};
@@ -391,38 +391,38 @@
 		};
 
 		/**
-		 * Add a project to an existing or create newly created account
+		 * Add a model to an existing or create newly created account
 		 *
 		 * @param account
-		 * @param project
+		 * @param model
 		 */
-		function updateAccountProjects (account, project) {
+		function updateAccountmodels (account, model) {
 			var i, length,
 				accountToUpdate;
 
 			for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 				if (vm.accounts[i].name === account) {
 					accountToUpdate = vm.accounts[i];
-					accountToUpdate.models.push(project);
+					accountToUpdate.models.push(model);
 					break;
 				}
 			}
 			if (angular.isUndefined(accountToUpdate)) {
 				accountToUpdate = {
 					name: account,
-					projects: [project],
-					showProjects: true,
-					showProjectsIcon: "folder_open"
+					models: [model],
+					showModels: true,
+					showModelsIcon: "folder_open"
 				};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
 
 			console.log('vmaccounts', vm.accounts);
-			// Save model to project
-			if (vm.newProjectFileToUpload !== null) {
+			// Save model to model
+			if (vm.newModelFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {account: account, project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc, newProject: true};
+					vm.uploadedFile = {account: account, model: model, file: vm.newModelFileToUpload, tag: vm.tag, desc: vm.desc, newModel: true};
 				});
 			}
 		}

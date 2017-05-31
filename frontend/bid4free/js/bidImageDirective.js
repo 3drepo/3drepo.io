@@ -27,7 +27,7 @@
 			templateUrl: 'bidImage.html',
 			scope: {
 				account: "=",
-				project: "="
+				model: "="
 			},
 			controller: BidImageCtrl,
 			controllerAs: "vm",
@@ -43,7 +43,7 @@
 		vm.thumbnailPath = "/public/images/bid4free_bid_thumbnail.png";
 
 		vm.showViewer = function () {
-			$window.open(vm.account + "/" + vm.project, '_blank');
+			$window.open(vm.account + "/" + vm.model, '_blank');
 		};
 	}
 }());

@@ -34,7 +34,7 @@
 			controllerAs: 'vm',
 			bindToController: true,
 			account: null,
-			project: null,
+			model: null,
 			disableRedefinition: false
 		};
 	}
@@ -61,9 +61,9 @@
 		vm.selectedAxis = "";
 		vm.visible = false;
 		vm.account = null;
-		vm.project = null;
+		vm.model = null;
 		vm.normal = null;
-		vm.projectTrans = {};
+		vm.modelTrans = {};
 		vm.offsetTrans = null;
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
@@ -97,16 +97,16 @@
 					percentage: initPosition,
 					distance: vm.distance,
 					account: vm.account,
-					project: vm.project
+					model: vm.model
 				});
 			});
 		}
 
 		vm.moveClippingPlane = function () {
-			if(vm.account && vm.project)
+			if(vm.account && vm.model)
 			{
 				vm.account = null;
-				vm.project = null;
+				vm.model = null;
 				vm.normal = null;
 				initClippingPlane();	
 			}
@@ -130,12 +130,12 @@
 			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
 			var transformedNormal = normal_x3d;
 
-			if(vm.project && vm.account)
+			if(vm.model && vm.account)
 			{
-				var fullProjectName = vm.account + "__" + vm.project;
-				if(vm.projectTrans[fullProjectName])
+				var fullModelName = vm.account + "__" + vm.model;
+				if(vm.modelTrans[fullModelName])
 				{
-					transformedNormal = vm.projectTrans[fullProjectName].multMatrixVec(normal_x3d);
+					transformedNormal = vm.modelTrans[fullModelName].multMatrixVec(normal_x3d);
 					transformedNormal.normalize();
 					vm.normal = transformedNormal.toGL();
 					//Since it's normalized if we only need to check 1 axis
@@ -156,10 +156,10 @@
 					}
 
 					var point = normal_x3d.multiply(-vm.distance);
-					point = vm.projectTrans[fullProjectName].multMatrixPnt(point);
+					point = vm.modelTrans[fullModelName].multMatrixPnt(point);
 					vm.distance = -transformedNormal.dot(point) ;
 					vm.account = null;
-					vm.project = null;
+					vm.model = null;
 				}
 			}	
 			callback();
@@ -168,14 +168,14 @@
 		/**
 		 * update/create a clipping plane based on the given information
 		 * @param {string} account
-		 * @param {string} project
+		 * @param {string} model
 		 * @param {array} normal vector
 		 * @param {number} distance from bbox
 		 */
-		function loadClippingPlane(account, project, normal, distance)
+		function loadClippingPlane(account, model, normal, distance)
 		{
 
-			vm.project = project;
+			vm.model = model;
 			vm.account = account;
 			vm.normal = normal;
 			vm.distance = distance;
@@ -480,7 +480,7 @@
 					}
 					else 
 					{
-						loadClippingPlane(event.value.account, event.value.project, 
+						loadClippingPlane(event.value.account, event.value.model, 
 							event.value.clippingPlanes[0].normal,
 						    event.value.clippingPlanes[0].distance);
 
@@ -490,18 +490,18 @@
 					vm.sliderPosition = 0.0;
 				}
 			}
-			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
+			else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO)
 			{
-				vm.projectTrans[event.value.projectNameSpace] = event.value.projectTrans;
-				if(event.value.isMainProject)
-					vm.offsetTrans = event.value.projectTrans;
+				vm.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
+				if(event.value.isMainModel)
+					vm.offsetTrans = event.value.modelTrans;
 			}
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
 				updateClippingPlane(true, true, true, vm.visible);
 			}
-			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
+			else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY)
 			{
 				vm.units = event.value.settings.unit;
 			}

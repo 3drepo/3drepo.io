@@ -189,7 +189,7 @@
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
-				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
+				} else if (event.type === EventService.EVENT.SHOW_MODELS) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
 					Auth.init();
 				} else if (event.type === EventService.EVENT.GO_HOME) {

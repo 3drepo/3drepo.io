@@ -29,7 +29,7 @@
 			scope: {
 				manager: "=",
 				account: "@",
-				project: "@",
+				model: "@",
 				branch: "@",
 				revision: "@",
 				name: "@",
@@ -82,7 +82,7 @@
 		}
 
 		$scope.reload = function() {
-			v.viewer.loadModel(v.account, v.project, v.branch, v.revision);
+			v.viewer.loadModel(v.account, v.model, v.branch, v.revision);
 		};
 
 		$scope.init = function() {
@@ -151,18 +151,18 @@
 				v.branch = "master";
 				v.revision = "head";
 
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.model + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
 				function (json, status)
 				{
-					v.viewer.applyModelProperties(v.account, v.project, json);
+					v.viewer.applyModelProperties(v.account, v.model, json);
 				});
 			});
 
-			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
+			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.model + ".json")).success(
 			// 	function(json, status) {
-			// 		EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+			// 		EventService.send(EventService.EVENT.model_SETTINGS_READY, {
 			// 			account: v.account,
-			// 			project: v.project,
+			// 			model: v.model,
 			// 			settings: json.properties
 			// 	});
 			// });
@@ -198,10 +198,10 @@
 							v.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
 							v.viewer.onMouseMove(event.value.callback);
-						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
-							if (event.value.account === v.account && event.value.project === v.project)
+						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+							if (event.value.account === v.account && event.value.model === v.model)
 							{
-								console.log('viewer project settings ready');
+								console.log('viewer model settings ready');
 								v.viewer.updateSettings(event.value.settings);
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
@@ -209,7 +209,7 @@
 						else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
 							v.viewer.addPin(
 								event.value.account,
-								event.value.project,
+								event.value.model,
 								event.value.id,
 								event.value.position,
 								event.value.norm,
@@ -237,7 +237,7 @@
 								event.value.distance ? event.value.distance : 0,
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1,
-								event.value.account, event.value.project);
+								event.value.account, event.value.model);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.axis, event.value.distance);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
@@ -245,7 +245,7 @@
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
-								event.value.project,
+								event.value.model,
 								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
 								event.value.colour
@@ -253,7 +253,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,
-								event.value.project,
+								event.value.model,
 								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
 								event.value.colour
@@ -261,7 +261,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
 							v.viewer.highlightAndUnhighlightObjects(
 								event.value.account,
-								event.value.project,
+								event.value.model,
 								event.value.highlight_ids,
 								event.value.unhighlight_ids,
 								event.value.zoom,
@@ -272,7 +272,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
 							v.viewer.switchObjectVisibility(
 								event.value.account,
-								event.value.project,
+								event.value.model,
 								event.value.visible_ids,
 								event.value.invisible_ids
 							);
@@ -285,11 +285,11 @@
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode,
 								event.value.account,
-								event.value.project
+								event.value.model
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.project));
+								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model));
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
@@ -301,7 +301,7 @@
 							v.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
-							$location.path("/" + v.account + '/' + v.project).search({
+							$location.path("/" + v.account + '/' + v.model).search({
 								at: event.value.at,
 								view: event.value.view,
 								up: event.value.up

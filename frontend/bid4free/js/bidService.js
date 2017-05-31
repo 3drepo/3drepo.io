@@ -38,7 +38,7 @@
 		 */
 		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.model + "/" + urlEnd),
 				config = {withCredentials: true};
 
 			if (angular.isDefined(headers)) {
@@ -59,7 +59,7 @@
 		 */
 		function doGet(urlEnd, param) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, self.account + "/" + self.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.GET_API, self.account + "/" + self.model + "/" + urlEnd);
 
 			var params = {};
 			if (angular.isDefined(param)) {
@@ -83,7 +83,7 @@
 		 */
 		function doPut(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.model + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -94,9 +94,9 @@
 			return deferred.promise;
 		}
 
-		obj.setAccountAndProject = function (account, project) {
+		obj.setAccountAndmodel = function (account, model) {
 			self.account = account;
-			self.project = project;
+			self.model = model;
 		};
 
 		obj.addPackage = function (data) {
@@ -133,13 +133,13 @@
 		/**
 		 * Get all or named package(s)
 		 * @param account
-		 * @param project
+		 * @param model
 		 * @param name
 		 * @returns {*}
 		 */
-		obj.getProjectPackage = function (account, project, name) {
+		obj.getmodelPackage = function (account, model, name) {
 			state.account = account;
-			state.project = project;
+			state.model = model;
 			var part = angular.isDefined(name) ? ("/" + name) : "";
 			return doGet("packages" + part + ".json");
 		};
@@ -165,13 +165,13 @@
 		/**
 		 * Get user bids for a package
 		 * @param account
-		 * @param project
+		 * @param model
 		 * @param packageName
 		 * @returns {*}
 		 */
-		obj.getProjectUserBids = function (account, project, packageName) {
+		obj.getmodelUserBids = function (account, model, packageName) {
 			state.account = account;
-			state.project = project;
+			state.model = model;
 			return doGet("packages/" + packageName + "/bids/mine.json");
 		};
 

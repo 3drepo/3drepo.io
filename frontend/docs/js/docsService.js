@@ -24,12 +24,12 @@
 	DocsService.$inject = ["$http", "$q", "serverConfig"];
 
 	function DocsService($http, $q, serverConfig) {
-		var getDocs = function (account, project, metadataId) {
+		var getDocs = function (account, model, metadataId) {
 			var i,
 				length,
 				data = {},
 				deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/meta/" + metadataId + ".json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/meta/" + metadataId + ".json");
 
 			$http.get(url)
 				.then(
@@ -50,7 +50,7 @@
 							data[dataType].data.push(json.data.meta[i]);
 
 							// Setup PDF url
-							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + '/' + json.data.meta[i]._id + ".pdf");
+							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + '/' + json.data.meta[i]._id + ".pdf");
 						}
 						deferred.resolve(data);
 					},

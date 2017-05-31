@@ -28,7 +28,7 @@
 			scope: {
 				packageName: "=",
 				account: "=",
-				project: "=",
+				model: "=",
 				branch: "=",
 				revision: "="
 			},
@@ -67,7 +67,7 @@
 		EventService.send(EventService.EVENT.CREATE_VIEWER, {
 			name: "default",
 			account:  vm.account,
-			project:  vm.project,
+			model:  vm.model,
 			branch:   vm.branch,
 			revision: vm.revision
 		});
@@ -75,7 +75,7 @@
 		// Get the user's bid information for the package
 		promise = BidService.getUserBid(vm.packageName);
 		promise.then(function (response) {
-			vm.title = vm.project + " / " + response.data.packageName;
+			vm.title = vm.model + " / " + response.data.packageName;
 		});
 
 		// Get Terms and Conditions
@@ -240,7 +240,7 @@
 		 */
 		vm.goToMainPage = function () {
 			$location
-				.path(vm.account + "/" + vm.project + "/bid4free", "_self")
+				.path(vm.account + "/" + vm.model + "/bid4free", "_self")
 				.search({package: vm.packageName});
 		};
 

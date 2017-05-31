@@ -19,35 +19,35 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.directive("project", project);
+	.directive("model", model);
 
-    function project() {
+    function model() {
         return {
             restrict: "E",
             scope: {
 				account:  "=",
-				project:  "=",
+				model:  "=",
 				branch:   "=",
 				revision: "=",
 				issueId: "=",
 				state:    "="
 			},
-			templateUrl: "project.html",
-            controller: ProjectCtrl,
+			templateUrl: "model.html",
+            controller: ModelCtrl,
 			controllerAs: "vm",
 			bindToController: true
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService", "TreeService", "RevisionsService"];
+	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService"];
 
-	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService, TreeService, RevisionsService) {
+	function ModelCtrl($timeout, $scope, $element, $compile, EventService, ModelService, TreeService, RevisionsService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
 				right: []
 			},
-			projectUI,
+			modelUI,
 			issueArea,
 			issuesCardIndex = 0;
 
@@ -75,7 +75,7 @@
 		var popStateHandler = function () {
 			// the fake state has already been popped by user at this moment
 
-			if(confirm('It will go back to project listing page, are you sure?')){
+			if(confirm('It will go back to model listing page, are you sure?')){
 				// pop one more state if user actually wants to go back
 				history.go(-1);
 			} else {
@@ -93,10 +93,10 @@
 		});
 
 		/*
-		 * Get the project element
+		 * Get the model element
 		 */
 		$timeout(function () {
-			projectUI = angular.element($element[0].querySelector('#projectUI'));
+			modelUI = angular.element($element[0].querySelector('#modelUI'));
 		});
 
 		panelCard.left.push({
@@ -147,8 +147,8 @@
 					secondSelected: false
 				},
 				{
-					value: "showSubProjects",
-					label: "Show sub project issues",
+					value: "showSubModels",
+					label: "Show sub model issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
@@ -244,19 +244,19 @@
 		});
 
 
-		$scope.$watchGroup(["vm.account","vm.project"], function()
+		$scope.$watchGroup(["vm.account","vm.model"], function()
 		{
-			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
+			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
 
 
-				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+				ModelService.getModelInfo(vm.account, vm.model).then(function (data) {
 					vm.settings = data;
 
 					var index = -1;
 
 					if(!data.federate){
 						panelCard.left[issuesCardIndex].menu.find(function(item, i){
-							if(item.value === 'showSubProjects'){
+							if(item.value === 'showSubModels'){
 								index = i;
 							}
 
@@ -267,14 +267,14 @@
 						}
 					}
 
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, data);
+					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 				});
 
-				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
 					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
 
-				TreeService.init(vm.account, vm.project, vm.branch, vm.revision).then(function(data){
+				TreeService.init(vm.account, vm.model, vm.branch, vm.revision).then(function(data){
 					vm.treeMap = TreeService.getMap(data.nodes);
 					EventService.send(EventService.EVENT.TREE_READY, data);
 				});
@@ -286,7 +286,7 @@
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {
 				name: "default",
 				account:  vm.account,
-				project:  vm.project,
+				model:  vm.model,
 				branch:   vm.branch,
 				revision: vm.revision,
 				at:       StateManager.query.at,
@@ -326,7 +326,7 @@
 						vm.issueAreaType = event.value.type;
 						issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 					}
-					projectUI.prepend(issueArea);
+					modelUI.prepend(issueArea);
 					$compile(issueArea)($scope);
 				}
 				else {
@@ -340,8 +340,8 @@
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
-					angular.element($element[0].querySelector("#project")).append(element);
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' model='vm.model' settings='vm.settings' ></tdr-measure>");
+					angular.element($element[0].querySelector("#model")).append(element);
 					$compile(element)($scope);
 
 				}

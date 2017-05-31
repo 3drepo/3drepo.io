@@ -28,27 +28,27 @@
             //userControlTimeout = null,
 			loading = null;
 
-        function getWalkthroughs(account, project, index) {
-			var projectKey = account + "__" + project;
+        function getWalkthroughs(account, model, index) {
+			var modelKey = account + "__" + model;
 
 			if (angular.isUndefined(index))
 			{
 				index = "all";
 			}
 
-            var url = "/" + account + "/" + project + "/walkthrough/" + index + ".json",
+            var url = "/" + account + "/" + model + "/walkthrough/" + index + ".json",
                 i = 0,
                 length = 0;
 
 			loading = $q.defer();
 			var needLoading = false;
 
-			if (!walkthroughs.hasOwnProperty(projectKey))
+			if (!walkthroughs.hasOwnProperty(modelKey))
 			{
-				walkthroughs[projectKey] = [];
+				walkthroughs[modelKey] = [];
 				needLoading = true;
 			} else {
-				if (!walkthroughs[projectKey].hasOwnProperty(index))
+				if (!walkthroughs[modelKey].hasOwnProperty(index))
 				{
 					needLoading = true;
 				}
@@ -59,23 +59,23 @@
 				$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 					.then(function(data) {
 						for (i = 0, length = data.data.length; i < length; i++) {
-							walkthroughs[projectKey][data.data[i].index] = data.data[i].cameraData;
+							walkthroughs[modelKey][data.data[i].index] = data.data[i].cameraData;
 						}
 
-						loading.resolve(walkthroughs[projectKey][index]);
+						loading.resolve(walkthroughs[modelKey][index]);
 					});
 			} else {
-				loading.resolve(walkthroughs[projectKey][index]);
+				loading.resolve(walkthroughs[modelKey][index]);
 			}
 
 			return loading.promise;
         }
 
-		var saveRecording = function (account, project, index, recording) {
-            var postUrl = "/" + account + "/" + project + "/walkthrough";
-			var projectKey = account + "__" + project;
+		var saveRecording = function (account, model, index, recording) {
+            var postUrl = "/" + account + "/" + model + "/walkthrough";
+			var modelKey = account + "__" + model;
 
-			walkthroughs[projectKey][index] = recording;
+			walkthroughs[modelKey][index] = recording;
 
             $http.post(serverConfig.apiUrl(serverConfig.POST_API, postUrl), {index: index, cameraData: recording})
                 .then(function() {

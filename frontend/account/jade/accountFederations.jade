@@ -5,7 +5,7 @@
 
 		// Federation
 		div(ng-if="account.showModels")
-			div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedProjects")
+			div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedModels")
 				div(layout="row", layout-align="start center")
 					md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
 						md-button.md-icon-button.md-accent(aria-label="Federation")

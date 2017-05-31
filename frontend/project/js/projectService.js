@@ -19,21 +19,21 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("ProjectService", ProjectService);
+		.factory("ModelService", ModelService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "Auth"];
+	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "Auth"];
 
-	function ProjectService($http, $q, StateManager, serverConfig, HttpService, Auth) {
+	function ModelService($http, $q, StateManager, serverConfig, HttpService, Auth) {
 		var state = StateManager.state;
 
-		var getProjectInfo = function (account, project) {
+		var getModelInfo = function (account, model) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + ".json");
 
 			$http.get(url).then(function(res){
 				var data = res.data;
 				data.account = account;
-				data.project = project;
+				data.model = model;
 				data.settings = data.properties;
 				
 				deferred.resolve(data, function(){
@@ -47,7 +47,7 @@
 
 		function doPost(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.model + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -58,14 +58,14 @@
 			return deferred.promise;
 		}
 
-		var createProjectSummary = function (data) {
-			data.name = state.project;
+		var createModelSummary = function (data) {
+			data.name = state.model;
 			return doPost(data, "info.json");
 		};
 
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.model + "/" + urlEnd);
 			$http.get(url).then(
 				function (response) {
 					deferred.resolve(response);
@@ -76,14 +76,14 @@
 			return deferred.promise;
 		}
 
-		var getProjectSummary = function () {
+		var getModelSummary = function () {
 			return doGet("info.json");
 		};
 
 		return {
-			createProjectSummary: createProjectSummary,
-			getProjectSummary: getProjectSummary,
-			getProjectInfo: getProjectInfo
+			createmodelSummary: createModelSummary,
+			getmodelSummary: getModelSummary,
+			getmodelInfo: getModelInfo
 		};
 	}
 }());

@@ -25,7 +25,7 @@
 				controller: MultiSelectCtrl,
 				bindings: {
 					account: "<",
-					project: "<",
+					model: "<",
 					treeMap: "<",
 					keysDown: "<",
 					sendEvent: "&",
@@ -99,7 +99,7 @@
 			// Events
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) 
-					&& changes.event.currentValue.value.account && changes.event.currentValue.value.project 
+					&& changes.event.currentValue.value.account && changes.event.currentValue.value.model 
 					&& changes.event.currentValue.value.id) {
 
 					var sharedId = self.treeMap.uidToSharedId[changes.event.currentValue.value.id];
@@ -122,7 +122,7 @@
 								id: changes.event.currentValue.value.id,
 								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
-								project: changes.event.currentValue.value.project
+								model: changes.event.currentValue.value.model
 							});
 						}
 						else {
@@ -144,7 +144,7 @@
 								id: changes.event.currentValue.value.id,
 								shared_id: sharedId,
 								account: changes.event.currentValue.value.account,
-								project: changes.event.currentValue.value.project
+								model: changes.event.currentValue.value.model
 						}];
 					}
 				}
@@ -195,7 +195,7 @@
 			var data = {
 				source: "tree",
 				account: this.account,
-				project: this.project,
+				model: this.model,
 				highlight_ids: highlightIds,
 				unhighlight_ids: unHighlightIds
 			};

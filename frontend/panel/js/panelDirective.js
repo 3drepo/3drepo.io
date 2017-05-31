@@ -27,12 +27,12 @@
             templateUrl: "panel.html",
             scope: {
 				account:  "=",
-				project:  "=",
+				model:  "=",
 				branch:   "=",
 				revision: "=",
 				position: "@",
 				keysDown: "=",
-				projectSettings: "=",
+				modelSettings: "=",
 				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"

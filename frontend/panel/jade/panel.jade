@@ -3,11 +3,11 @@ div(ng-show="vm.showPanel")
 		div(ng-repeat="contentItem in vm.contentItems")
 			panel-card(
 			account="vm.account"
-			project="vm.project"
+			model="vm.model"
 			branch="vm.branch"
 			revision="vm.revision"
 			position="vm.position"
-			project-settings="vm.projectSettings"
+			model-settings="vm.modelSettings"
 			tree-map="vm.treeMap"
 			content-data='contentItem'
 			ng-show='contentItem.show'

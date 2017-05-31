@@ -94,7 +94,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.selectionDisabled = false;
 
 		this.account = null;
-		this.project = null;
+		this.model = null;
 		this.branch = null;
 		this.revision = null;
 		this.modelString = null;
@@ -103,7 +103,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.inlineRoots = {};
 		this.groupNodes = null;
 		this.multipartNodes = [];
-		this.multipartNodesByProject = {};
+		this.multipartNodesByModel = {};
 
 		this.units = "m";
 		this.convertToM = 1.0;
@@ -325,23 +325,23 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 
-				if(nameSpace == self.account + "__"+self.project && self.groupNodes==null)
+				if(nameSpace == self.account + "__"+self.model && self.groupNodes==null)
 				{
 					self.groupNodes={};
-					var projectTrans = {};
+					var modelTrans = {};
 					var vol = null;
-					//loaded x3dom file for current project, figure out the groups
+					//loaded x3dom file for current model, figure out the groups
 					var groups = document.getElementsByTagName("Group");
 					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
 					{
-						var fullProjectName = groups[gIdx].id;
-						self.groupNodes[fullProjectName] = groups[gIdx];
-						var res = fullProjectName.split("__");
+						var fullModelName = groups[gIdx].id;
+						self.groupNodes[fullModelName] = groups[gIdx];
+						var res = fullModelName.split("__");
 						if(res.length == 4)
 						{
 							//valid name
 							var accProj = res[2] + "__" + res[3];
-							projectTrans[accProj] = {trans: groups[gIdx]._x3domNode.getCurrentTransform() }
+							modelTrans[accProj] = {trans: groups[gIdx]._x3domNode.getCurrentTransform() }
 
 						}
 
@@ -349,11 +349,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				}
 				var accProj = nameSpace.split("__");
-				callback(self.EVENT.SET_SUBPROJECT_TRANS_INFO,
+				callback(self.EVENT.SET_SUBMODEL_TRANS_INFO,
 							{
-								projectNameSpace: nameSpace,
-								projectTrans: self.getParentTransformation(accProj[0], accProj[1]),
-								isMainProject: accProj[0] === self.account && accProj[1] === self.project
+								modelNameSpace: nameSpace,
+								modelTrans: self.getParentTransformation(accProj[0], accProj[1]),
+								isMainModel: accProj[0] === self.account && accProj[1] === self.model
 
 							}
 
@@ -362,15 +362,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				if (self.multipartNodes.indexOf(objEvent.target) === -1)
 				{
 					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						self.multipartNodesByProject[nameSpaceName] = {};
+					if (!self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
+						self.multipartNodesByModel[nameSpaceName] = {};
 					}
 
 					var multipartName = objEvent.target.getAttribute("id");
 					var multipartNameParts = multipartName.split("__");
 					var multipartID = multipartNameParts[multipartNameParts.length - 1];
 
-					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+					self.multipartNodesByModel[nameSpaceName][multipartID] = objEvent.target;
 
 					self.multipartNodes.push(objEvent.target);
 				}
@@ -584,10 +584,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getViewMatrix();
 		};
 
-		this.getParentTransformation = function(account, project)
+		this.getParentTransformation = function(account, model)
 		{
 			var trans = null;
-			var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+			var fullParentGroupName = self.account + "__"+ self.model + "__" + account + "__" + model;
 			var parentGroup = self.groupNodes[fullParentGroupName];
 			if(parentGroup)
 			{
@@ -647,27 +647,27 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			if (pickingInfo.pickObj)
 			{
-				var account, project;
-				var projectParts = null;
+				var account, model;
+				var modelParts = null;
 
 				if (pickingInfo.pickObj._xmlNode)
 				{
 					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
 					{
-						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+						modelParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
 					}
 				} else {
-					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+					modelParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
 				}
 
-				if (projectParts)
+				if (modelParts)
 				{
 					var objectID = pickingInfo.pickObj.partID ?
 						pickingInfo.pickObj.partID :
-						projectParts[2];
+						modelParts[2];
 
-					account = projectParts[0];
-					project = projectParts[1];
+					account = modelParts[0];
+					model = modelParts[1];
 
                     //console.trace(event);
 
@@ -675,7 +675,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project),
+						trans: self.getParentTransformation(self.account, self.model),
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
@@ -683,7 +683,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.project)
+						trans: self.getParentTransformation(self.account, self.model)
 					});
 				}
 			}
@@ -801,7 +801,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.clickObject = function(objEvent) {
 			var account = null;
-			var project = null;
+			var model = null;
 			var id = null;
 
 			if ((objEvent.button === 1) && !self.selectionDisabled) {
@@ -809,20 +809,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					id = objEvent.partID;
 
 					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
-					project = objEvent.part.multiPart._nameSpace.name.split("__")[1];
+					model = objEvent.part.multiPart._nameSpace.name.split("__")[1];
 
 				}
 			}
 
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
-				project: project,
+				model: model,
 				id: id,
 				source: "viewer"
 			});
 		};
 
-		this.highlightObjects = function(account, project, ids_in, zoom, colour) {
+		this.highlightObjects = function(account, model, ids_in, zoom, colour) {
 			if (!this.pinDropMode) {
 				var nameSpaceName = null;
 
@@ -834,15 +834,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				if(ids.size)
 				{
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					// Is this a multipart model
+					if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
 						var fullPartsList = [];
 						var nsMultipartNodes;
 
-						// If account and project have been specified
+						// If account and model have been specified
 						// this helps narrow the search
 						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+							nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
 						} else {
 							// Otherwise iterate over everything
 							nsMultipartNodes = self.multipartNodes;
@@ -891,16 +891,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.highlightAndUnhighlightObjects = function(highlight_ids, unhighlight_ids, zoom, colour) {
 			var nameSpaceName = null;
 
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+			// Is this a multipart model
+			if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
 				var fullHighlightPartsList = [];
 				var fullUnhighlightPartsList = [];
 				var nsMultipartNodes;
 
-				// If account and project have been specified
+				// If account and model have been specified
 				// this helps narrow the search
 				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
 				} else {
 					// Otherwise iterate over everything
 					nsMultipartNodes = self.multipartNodes;
@@ -934,14 +934,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var ids = new Set(ids_in); // Convert to Set if necessary
 
 				if (ids.size) {
-					// Is this a multipart project
-					if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					// Is this a multipart model
+					if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
 						var nsMultipartNodes;
 
-						// If account and project have been specified
+						// If account and model have been specified
 						// this helps narrow the search
 						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+							nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
 						} else {
 							// Otherwise iterate over everything
 							nsMultipartNodes = self.multipartNodes;
@@ -975,11 +975,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
-		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
+		this.switchObjectVisibility = function(account, model, visible_ids, invisible_ids) {
 			var nameSpaceName = null;
 
-			if (account && project) {
-				nameSpaceName = account + "__" + project;
+			if (account && model) {
+				nameSpaceName = account + "__" + model;
 			}
 
 			if (visible_ids)
@@ -1237,7 +1237,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
-		this.applyModelProperties = function(account, project, properties)
+		this.applyModelProperties = function(account, model, properties)
 		{
 			if (properties.properties)
 			{
@@ -1459,15 +1459,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project);
+		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
+			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
 			var origViewTrans = null;
-			if(account && project)
+			if(account && model)
 			{
-					origViewTrans = self.getParentTransformation(account, project);
+					origViewTrans = self.getParentTransformation(account, model);
 
 			}
 
@@ -1602,21 +1602,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.changeStepHeight(self.stepHeight);
 		};
 
-		this.loadModel = function(account, project, branch, revision) {
+		this.loadModel = function(account, model, branch, revision) {
 			var url = "";
 
 			if (revision === "head") {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + model + "/revision/" + branch + "/head.x3d.mp");
 			} else {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + model + "/revision/" + revision + ".x3d.mp");
 			}
 
 			self.account = account;
-			self.project = project;
+			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
 
-			self.modelString = account + "_" + project + "_" + branch + "_" + revision;
+			self.modelString = account + "_" + model + "_" + branch + "_" + revision;
 
 			self.loadURL(url);
 		};
@@ -1630,8 +1630,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.inline = document.createElement("inline");
 			self.scene.appendChild(self.inline);
 
-			if (self.account && self.project) {
-				self.rootName = self.account + "__" + self.project;
+			if (self.account && self.model) {
+				self.rootName = self.account + "__" + self.model;
 			} else {
 				self.rootName = "model";
 			}
@@ -1661,14 +1661,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function(account, project) {
+		this.getCurrentViewpointInfo = function(account, model) {
 			var viewPoint = {};
 
 			var origViewTrans = null;
 
-			if(account && project)
+			if(account && model)
 			{
-				origViewTrans = self.getParentTransformation(account, project);
+				origViewTrans = self.getParentTransformation(account, model);
 
 			}
 
@@ -1949,13 +1949,13 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 		 * @param {string} account - name of database (optional)
-		 * @param {string} project - name of project (optional)
+		 * @param {string} model - name of model (optional)
 		 */
-		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, project) {
+		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, model) {
 			clippingPlaneID += 1;
 			var parentGroup = null;
-			if(account && project){
-				var fullParentGroupName = self.account + "__"+ self.project + "__" + account + "__" + project;
+			if(account && model){
+				var fullParentGroupName = self.account + "__"+ self.model + "__" + account + "__" + model;
 				parentGroup = self.groupNodes[fullParentGroupName];
 			}
 
@@ -2007,14 +2007,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 ****************************************************************************/
 		self.pins = {};
 
-		this.addPin = function(account, project, id, position, norm, colours, viewpoint) {
+		this.addPin = function(account, model, id, position, norm, colours, viewpoint) {
 			if (self.pins.hasOwnProperty(id)) {
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = self.getParentTransformation(account, project);
+				var trans = self.getParentTransformation(account, model);
 
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, project);
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, model);
 			}
 		};
 
@@ -2034,13 +2034,13 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					view_dir : pin.viewpoint.view_dir,
 					up: pin.viewpoint.up,
 					account: pin.account,
-					project: pin.project
+					model: pin.model
 				});
 
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes,
 					account: pin.account,
-					project: pin.project
+					model: pin.model
 
 				});
 			}
@@ -2143,7 +2143,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
 	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
-	SET_SUBPROJECT_TRANS_INFO : "VIEWER_:SET_SUBPROJECT_TRANS_INFO",
+	SET_SUBMODEL_TRANS_INFO : "VIEWER_:SET_SUBMODEL_TRANS_INFO",
 
 	// Pin events
 	CLICK_PIN: "VIEWER_CLICK_PIN",

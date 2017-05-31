@@ -386,7 +386,7 @@
 		 */
 		function watchModelStatus(){
 
-			NotificationService.subscribe.projectStatusChanged(vm.account, vm.model.model, function(data){
+			NotificationService.subscribe.modelStatusChanged(vm.account, vm.model.model, function(data){
 
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
@@ -428,7 +428,7 @@
 			});
 
 			$scope.$on('$destroy', function(){
-				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.model.model);
+				NotificationService.unsubscribe.modelStatusChanged(vm.account, vm.model.model);
 			});
 		}
 

@@ -70,18 +70,18 @@
 		.filter("prettyDate", function () {
 			return function(input, showSeconds) {
 				var date = new Date(input),
-					projectDate;
+					modelDate;
 
-				projectDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+				modelDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
 					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
 					date.getFullYear();
 
 				if (angular.isDefined(showSeconds) && showSeconds) {
-					projectDate += ", " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+					modelDate += ", " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
 						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 				}
 
-				return projectDate;
+				return modelDate;
 			};
 		})
 

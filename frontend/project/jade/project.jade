@@ -1,22 +1,22 @@
-//.container-fluid#project(global ng-if="!vm.state.bid4free")
+//.container-fluid#model(global ng-if="!vm.state.bid4free")
 
 // tabindex is required for ng-keydown to work on a div/directive
-#project(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
-	#project-viewport-container.row(tabindex="0", tdr-focus="true")
+#model(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
+	#model-viewport-container.row(tabindex="0", tdr-focus="true")
 		viewermanager
 
-	#projectUI
+	#modelUI
 		revisions(
 		account="vm.account"
-		project="vm.project"
+		model="vm.model"
 		revision="vm.revision")
 
 		panel#leftPanel(
 		account="vm.account"
-		project="vm.project"
+		model="vm.model"
 		branch="vm.branch"
 		revision="vm.revision"
-		project-settings="vm.settings"
+		model-settings="vm.settings"
 		position="left"
 		tree-map="vm.treeMap"
 		style="pointer-events:{{vm.pointerEvents}}"
@@ -26,7 +26,7 @@
 
 		panel#rightPanel(
 		account="vm.account"
-		project="vm.project"
+		model="vm.model"
 		branch="vm.branch"
 		tree-map="vm.treeMap"
 		revision="vm.revision"
@@ -39,7 +39,7 @@
 
 multi-select(
 account="vm.account"
-project="vm.project"
+model="vm.model"
 keys-down="vm.keysDown"
 send-event="vm.sendEvent(type, value)"
 event="vm.event"

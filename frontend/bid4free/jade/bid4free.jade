@@ -2,27 +2,27 @@
 	// Sub Contractor
 	.bidInfoSubContractor(ng-if="vm.userIsASubContractor" layout="column" layout-align="space-between")
 		div(layout="row" flex="45" layout-align="space-between")
-			bid-project-summary(layout="column" flex="30")
+			bid-model-summary(layout="column" flex="30")
 			bid-summary(layout="column" flex="30" on-select-package="vm.selectPackage(packageName)")
 			bid-status(layout="column" flex="30" package-name="vm.selectedPackageName" on-invite-accepted="vm.inviteAccepted()")
 
 
 		div(layout="row" flex="45" layout-align="space-between")
-			bid-image(layout="column" flex="30" account="vm.account" project="vm.project")
+			bid-image(layout="column" flex="30" account="vm.account" model="vm.model")
 			bid-docs(layout="column" flex="30" package-name="vm.selectedPackageName" invite-accepted="vm.packageInviteAccepted")
-			bid-workspace(layout="column" flex="30" package-name="vm.selectedPackageName" invite-accepted="vm.packageInviteAccepted" account="vm.account" project="vm.project")
+			bid-workspace(layout="column" flex="30" package-name="vm.selectedPackageName" invite-accepted="vm.packageInviteAccepted" account="vm.account" model="vm.model")
 
 	// Main Contractor
 	.bidContent(layout="row" layout-align="space-between" ng-if="vm.userIsAMainContractor" flex layout-fill)
-		// Project Summary
+		// model Summary
 		.md-whiteframe-1dp(flex=25 layout="column")
 			md-toolbar
 				.md-toolbar-tools
-					h2 Project Summary
+					h2 model Summary
 			.packageContent
 				md-content
-					.projectSummaryInput(ng-if="vm.showProjectSummaryInput")
-						span(ng-repeat="input in vm.projectSummary")
+					.modelSummaryInput(ng-if="vm.showmodelSummaryInput")
+						span(ng-repeat="input in vm.modelSummary")
 							md-input-container.md-block(ng-if="input.type==='input'")
 								label {{input.label}}
 								input(required name="name" ng-model="input.value")
@@ -31,38 +31,38 @@
 								md-datepicker(ng-model="input.value", md-placeholder="Enter date")
 						md-divider
 						div(layout="row", layout-align="center center")
-							md-button.md-accent(ng-click="vm.saveProjectSummary()", ng-disabled="vm.saveProjectSummaryDisabled") Save
+							md-button.md-accent(ng-click="vm.savemodelSummary()", ng-disabled="vm.savemodelSummaryDisabled") Save
 
-					div(ng-if="!vm.showProjectSummaryInput")
+					div(ng-if="!vm.showmodelSummaryInput")
 						md-list
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Site
-									p {{vm.projectSummary.site.value}}
+									p {{vm.modelSummary.site.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Name
-									p {{vm.projectSummary.name.value}}
+									p {{vm.modelSummary.name.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Site
-									p {{vm.projectSummary.site.value}}
+									p {{vm.modelSummary.site.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Code
-									p {{vm.projectSummary.code.value}}
+									p {{vm.modelSummary.code.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Client
-									p {{vm.projectSummary.client.value}}
+									p {{vm.modelSummary.client.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Budget
-									p {{vm.projectSummary.budget.value}}
+									p {{vm.modelSummary.budget.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Completed by
-									p {{vm.projectSummary.completedByPretty}}
+									p {{vm.modelSummary.completedByPretty}}
 
 		// Package List
 		.bidPackageList.md-whiteframe-1dp(flex=20)
@@ -185,4 +185,4 @@
 							p {{vm.statusInfo}}
 
 div(ng-if="vm.state.bid4freeWorkspace" layout-fill)
-	bid4free-workspace(package-name="vm.selectedPackageName" account="vm.account" project="vm.project" branch="vm.branch" revision="vm.revision")
+	bid4free-workspace(package-name="vm.selectedPackageName" account="vm.account" model="vm.model" branch="vm.branch" revision="vm.revision")
