@@ -1,11 +1,12 @@
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 5px 20px 5px 0;
+    margin: 10px 10px 10px 10px
 }
 
 sign-up-form {
     width: 750px;
     padding: 0 30px;
+    padding-top: 10px;
 }
 
 sign-up-form #tc {
@@ -38,6 +39,12 @@ sign-up-form .sign-up-button {
     width: 80%;
 }
 
+sign-up-form .sign-up-button md-progress-circular {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px !important;
+}
+
 sign-up-form #loginCaptcha > div {
     margin-left: 20px;  
 }
@@ -58,8 +65,9 @@ sign-up-form #loginPricing {
 
 sign-up-form .registerError {
     color: #F44336;
-    margin: 5px 0 5px;
+    margin: 20px 20px 5px;
     font-weight: normal;
+    text-align: center;
 }
 
 sign-up-form .rc-anchor-light {

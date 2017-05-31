@@ -50,13 +50,14 @@ form
 					p(ng-bind-html="vm.legalText")
 		md-input-container(flex)
 			#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
+	
+	h4.registerError {{vm.registerErrorMessage}}
 
 	div(layout="row", layout-xs="column", layout-align="start center")
-		md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") {{vm.buttonLabel}}
-		#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
-			p Signing up...
-			md-progress-circular(md-mode="indeterminate", md-diameter="20")
-	h4.registerError {{vm.registerErrorMessage}}
+		md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") 
+			span(ng-if="!vm.registering"){{vm.buttonLabel}} 
+			md-progress-circular(ng-if="vm.registering" md-mode="indeterminate", md-diameter="20")
+
 	div.bottom-links
 		a.registerLinks(target="_blank", href="http://3drepo.org/pricing/") Pricing
 		a.registerLinks(href="/") Log in
