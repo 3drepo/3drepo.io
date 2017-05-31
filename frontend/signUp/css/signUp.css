@@ -1,11 +1,12 @@
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 5px 20px 5px 0;
+    margin: 10px 10px 10px 10px
 }
 
 sign-up-form {
     width: 750px;
     padding: 0 30px;
+    padding-top: 10px;
 }
 
 sign-up-form #tc {
@@ -30,10 +31,24 @@ sign-up-form #tc a {
     outline: none;
 }
 
-/*sign-up-form #loginCaptcha {
-    margin: 10px 30px 10px 0;
+sign-up-form .sign-up-button {
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 80%;
 }
-*/
+
+sign-up-form .sign-up-button md-progress-circular {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px !important;
+}
+
+sign-up-form #loginCaptcha > div {
+    margin-left: 20px;  
+}
+
 sign-up-form #registerWait {
     height: 30px;
 }
@@ -50,16 +65,34 @@ sign-up-form #loginPricing {
 
 sign-up-form .registerError {
     color: #F44336;
-    margin: 5px 0 5px;
+    margin: 20px 20px 5px;
     font-weight: normal;
+    text-align: center;
 }
 
 sign-up-form .rc-anchor-light {
     background: red;
 }
 
+sign-up-form form md-input-container {
+    margin: 10px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
 sign-up-form #signUpFormHiddenInputs {
     position: absolute;
     top: 0;
     opacity: 0;
+}
+
+sign-up-form .bottom-links {
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    sign-up-form {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
