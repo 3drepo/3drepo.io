@@ -65,7 +65,7 @@
 
 		// Init
 		vm.projectToUpload = null;
-		vm.project.name = vm.project.project;
+		vm.project.name = vm.project.model;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.project.timestamp !== null) {
@@ -380,7 +380,7 @@
 		 */
 		function watchProjectStatus(){
 
-			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.model, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
@@ -421,7 +421,7 @@
 			});
 
 			$scope.$on('$destroy', function(){
-				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.model);
 			});
 		}
 

@@ -95,7 +95,7 @@
 					vm.accounts[i].showProjectsIcon = "folder_open";
 					// Always show user account
 					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
-					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
+					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].models.length !== 0));
 					// Only show add project menu for user account
 					vm.accounts[i].canAddProject = vm.accounts[i].isAdmin;
 
@@ -259,7 +259,7 @@
 						vm.projectsExist = true;
 						// Add project to list
 						project = {
-							project: response.data.project,
+							model: response.data.model,
 							permissions: response.data.permissions,
 							canUpload: true,
 							timestamp: null
@@ -356,9 +356,9 @@
 					// Remove project from list
 					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
 						if (vm.accounts[i].name === response.data.account) {
-							for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
-								if (vm.accounts[i].projects[j].name === response.data.project) {
-									vm.accounts[i].projects.splice(j, 1);
+							for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
+								if (vm.accounts[i].models[j].name === response.data.project) {
+									vm.accounts[i].models.splice(j, 1);
 									break;
 								}
 							}
@@ -403,7 +403,7 @@
 			for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 				if (vm.accounts[i].name === account) {
 					accountToUpdate = vm.accounts[i];
-					accountToUpdate.projects.push(project);
+					accountToUpdate.models.push(project);
 					break;
 				}
 			}

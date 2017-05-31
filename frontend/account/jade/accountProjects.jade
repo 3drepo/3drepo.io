@@ -20,7 +20,7 @@
 			// Projects
 			md-list.projects(ng-if="account.showProjects")
 				account-project(
-				ng-repeat="project in account.projects"
+				ng-repeat="project in account.models"
 				account="account.name"
 				is-account-admin="account.isAdmin"
 				project="project"
