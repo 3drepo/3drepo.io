@@ -48,7 +48,7 @@ account-models md-list {
 account-models .account,
 account-models .model {
   outline: none;
-  padding-left: 10px;
+  /*padding-left: 10px;*/
 }
 account-models .account:hover,
 account-models .model:hover {
@@ -57,7 +57,7 @@ account-models .model:hover {
 }
 
 account-models .models {
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 account-models .models .modelName,
@@ -555,9 +555,17 @@ account-federations .account:hover {
 }
 
 account-federations .federation {
-  padding-left: 30px;
+  /*padding-left: 30px;*/
+}
+
+account-federations div.md-button {
+  padding-left: 0px !important;
 }
 
 account-federations #federationInfoRight p:only-child {
   margin-right: 20px;
+}
+
+account-teamspaces label, account-teamspaces p {
+  font-size: 14px;
 }

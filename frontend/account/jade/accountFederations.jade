@@ -1,38 +1,34 @@
-.userContent
 
-	div(ng-repeat="(accountIndex, account) in vm.accountsToUse")
-		// Account
+div(ng-if="vm.account.showModels")
 
-		// Federation
-		div(ng-if="account.showModels")
-			div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedModels")
-				div(layout="row", layout-align="start center")
-					md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
-						md-button.md-icon-button.md-accent(aria-label="Federation")
-							md-icon.angular-material-icons border_all
-						.md-list-item-text(flex="40")
-							p {{federation.model}}
-					//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
-						md-icon.angular-material-icons edit
-					#federationInfoRight(layout="row")
-						p.federationTimestamp {{federation.timestamp | prettyDate:true}}
-						md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(federation, account.account)", id="{{vm.dialogCloseTo}}")
-							md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
-								md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
-							md-menu-content(width="3")
-								md-menu-item(ng-repeat="(key, value) in federation.federationOptions", ng-if="!value.hidden")
-									md-button(ng-click="vm.doFederationOption($event, key, accountIndex, federationIndex)")
-										div(layout="row", flex)
-											p(flex, style="color:{{value.color}}") {{value.label}}
-											md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
+	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.account.fedModels")
+		div(layout="row", layout-align="start center")
+			md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
+				md-button.md-icon-button.md-accent(aria-label="Federation")
+					md-icon.angular-material-icons border_all
+				.md-list-item-text(flex="100")
+					p {{federation.model}}
+			//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
+				md-icon.angular-material-icons edit
+			#federationInfoRight(layout="row")
+				p.federationTimestamp {{federation.timestamp | prettyDate:true}}
+				md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(federation, account.account)", id="{{vm.dialogCloseTo}}")
+					md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
+						md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
+					md-menu-content(width="3")
+						md-menu-item(ng-repeat="(key, value) in federation.federationOptions", ng-if="!value.hidden")
+							md-button(ng-click="vm.doFederationOption($event, key, accountIndex, federationIndex)")
+								div(layout="row", flex)
+									p(flex, style="color:{{value.color}}") {{value.label}}
+									md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
 
 
-				// Models list
-				p.federationModelsList
-					span(ng-repeat="subModel in federation.subModels")
-						| {{subModel.model}}
-						span(ng-if="!$last")
-							| ,
-							=" "
-		md-divider
+		// Models list
+		md-list-item
+			p.federationModelsList
+				span(ng-repeat="subModel in federation.subModels")
+					| {{subModel.model}}
+					span(ng-if="!$last")
+						| ,
+						=" "
 

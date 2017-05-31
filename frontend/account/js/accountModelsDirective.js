@@ -188,7 +188,7 @@
 		 *
 		 * @param {Number} index
 		 */
-		vm.togglemodelsList = function (index) {
+		vm.toggleModelsList = function (index) {
 			vm.accounts[index].showModels = !vm.accounts[index].showModels;
 			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
 		};
