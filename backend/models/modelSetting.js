@@ -23,6 +23,7 @@ var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	_id : String,
+	name: String, // model name
 	owner: String,
 	users: [String],
 	desc: String,
@@ -77,6 +78,8 @@ schema.path('properties.topicTypes').get(function(v) {
 schema.set('toObject', { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
+
+
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
 

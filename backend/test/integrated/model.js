@@ -38,6 +38,7 @@ describe('Model', function () {
 	let username = 'project_username';
 	let password = 'project_username';
 	let model = 'model12345';
+	let modelId;
 	let modelFed = 'projectFed1';
 	let project = 'projectgroup'
 	let desc = 'desc';
@@ -83,12 +84,13 @@ describe('Model', function () {
 				.expect(200, function(err ,res) {
 					console.log(res.body);
 					expect(res.body.model).to.equal(model);
+					modelId = res.body._id;
 					callback(err);
 				});
 
 			},
 			callback => {
-				agent.get(`/${username}/${model}.json`)
+				agent.get(`/${username}/${modelId}.json`)
 				.expect(200, function(err, res){
 					expect(res.body.desc).to.equal(desc);
 					expect(res.body.type).to.equal(type);
@@ -110,7 +112,7 @@ describe('Model', function () {
 
 					console.log(pg);
 
-					const myModel = pg.models.find(_model => _model.model === model);
+					const myModel = pg.models.find(_model => _model.model === modelId);
 					expect(myModel).to.exist;
 
 					callback(err);

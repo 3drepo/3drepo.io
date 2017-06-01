@@ -27,6 +27,7 @@ let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let moment = require("moment");
+let async = require('async');
 
 describe('Uploading a model', function () {
 	let User = require('../../models/user');
@@ -36,7 +37,7 @@ describe('Uploading a model', function () {
 	let password = 'password';
 	let email = 'test3drepo_upload@mailinator.com';
 	let model = 'project1';
-
+	let modelId;
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'meter';
@@ -46,14 +47,27 @@ describe('Uploading a model', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			helpers.signUpAndLoginAndCreateModel({
-				server, request, agent, expect, User, systemLogger,
-				username, password, email, model, desc, type, noBasicPlan: true, unit,
-				done: function(err, _agent){
-					agent = _agent;
-					done(err);
+			async.series([
+				function(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username, password, email, model, desc, type, noBasicPlan: true, unit,
+						done: function(err, _agent){
+							agent = _agent;
+							done(err);
+						}
+					});
+				},
+				function(done){
+					//create a model
+					agent.post(`/${username}/${model}`)
+					.send({ type, desc, unit })
+					.expect(200, function(err, res){
+						modelId = res.body._id;
+						done(err);
+					});
 				}
-			});
+			], done);
 			
 		});
 
@@ -74,7 +88,7 @@ describe('Uploading a model', function () {
 	describe('without quota', function(){
 
 		it('should return error (no subscriptions)', function(done){
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
@@ -118,7 +132,7 @@ describe('Uploading a model', function () {
 		});
 
 		it('should succee', function(done){
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, function(err, res){
 				done(err);
@@ -148,7 +162,7 @@ describe('Uploading a model', function () {
 		});
 
 		it('should succee (uppercase extension)', function(done){
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/upper.OBJ')
 			.expect(200, function(err, res){
 				done(err);
@@ -157,7 +171,7 @@ describe('Uploading a model', function () {
 		
 		it('but empty file size should fail', function(done){
 
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/empty.ifc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -168,7 +182,7 @@ describe('Uploading a model', function () {
 
 		it('but unaccepted extension should failed', function(done){
 
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy.abc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -179,7 +193,7 @@ describe('Uploading a model', function () {
 
 		it('but no extension should failed', function(done){
 
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
@@ -190,7 +204,7 @@ describe('Uploading a model', function () {
 
 		it('but file size exceeded fixed single file size limit should fail', function(done){
 
-			agent.post(`/${username}/${model}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy.ifc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);

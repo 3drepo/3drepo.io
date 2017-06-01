@@ -80,7 +80,12 @@ function Utils() {
     * Generate a random UUID
     * @returns {Buffer} - Binary representation of a UUID
     *******************************************************************************/
-    this.generateUUID = function() {
+    this.generateUUID = function(options) {
+        
+        if(options && options.string){
+            return nodeuuid.v4();
+        }
+
        return self.stringToUUID(nodeuuid.v4());
     };
 

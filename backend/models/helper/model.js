@@ -83,12 +83,14 @@ function convertToErrorCode(errCode){
 }
 
 
-function createAndAssignRole(model, account, username, data) {
+function createAndAssignRole(modelName, account, username, data) {
 	'use strict';
 
 	let project;
+	//generate model id
+	const model = utils.generateUUID({string: true});
 
-	if(!model.match(modelNameRegExp)){
+	if(!modelName.match(modelNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
 	}
 
@@ -100,7 +102,7 @@ function createAndAssignRole(model, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
 	}
 
-	if(C.REPO_BLACKLIST_MODEL.indexOf(model) !== -1){
+	if(C.REPO_BLACKLIST_MODEL.indexOf(modelName) !== -1){
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_MODEL_NAME });
 	}
 
@@ -119,12 +121,12 @@ function createAndAssignRole(model, account, username, data) {
 	} 
 
 	return promise.then(() => {
+		
+		return ModelSetting.count({account, model}, {name: modelName});
 
-		return ModelSetting.findById({account, model}, model);
+	}).then(count => {
 
-	}).then(setting => {
-
-		if(setting){
+		if(count){
 			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 		}
 
@@ -150,6 +152,7 @@ function createAndAssignRole(model, account, username, data) {
 		});
 
 		setting._id = model;
+		setting.name = modelName;
 		setting.owner = username;
 		setting.desc = data.desc;
 		setting.type = data.type;
@@ -179,7 +182,8 @@ function createAndAssignRole(model, account, username, data) {
 
 		let modelData = {
 			account,
-			model,
+			model: modelName,
+			_id: model.toString(),
 			permissions: C.MODEL_PERM_LIST
 		};
 
@@ -198,7 +202,7 @@ function createAndAssignRole(model, account, username, data) {
 function importToyModel(username){
 	'use strict';
 
-	let model = 'sample_project';
+	let modelName = 'sample_project';
 	let account = username;
 	let desc = '';
 	let type = 'sample';
@@ -210,7 +214,7 @@ function importToyModel(username){
 		desc, type, unit: 'm'
 	};
 
-	return createAndAssignRole(model, account, username, data).then(data => {
+	return createAndAssignRole(modelName, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
 		return importModel(account, model, username, setting, {type: 'toy' });

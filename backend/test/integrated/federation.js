@@ -45,7 +45,8 @@ describe('Federated Model', function () {
 	let subModels = ['proj1', 'proj2'];
 	let desc = 'desc';
 	let type = 'type';
-	let fedModel = 'fedproj';
+	let fedModelName = 'fedproj';
+	let fedModelId;
 
 	before(function(done){
 
@@ -109,7 +110,7 @@ describe('Federated Model', function () {
 
 		}, 1000);
 
-		agent.post(`/${username}/${fedModel}`)
+		agent.post(`/${username}/${fedModelName}`)
 		.send({ 
 			desc, 
 			type,
@@ -125,11 +126,12 @@ describe('Federated Model', function () {
 				return done(err);
 			}
 
-			expect(res.body.model).to.equal(fedModel);
+			expect(res.body.model).to.equal(fedModelName);
+			fedModelId = res.body._id;
 
 			async.series([
 				done => {
-					agent.get(`/${username}/${fedModel}.json`)
+					agent.get(`/${username}/${fedModelId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
@@ -140,7 +142,7 @@ describe('Federated Model', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedModels.find(m => m.model === fedModel);
+						let fed = account.fedModels.find(m => m.model === fedModelId);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -156,6 +158,7 @@ describe('Federated Model', function () {
 
 	it('should be created successfully even if no sub models are specified', function(done){
 		let emptyFed = 'emptyFed';
+		let emptyFedId;
 
 		agent.post(`/${username}/${emptyFed}`)
 		.send({ 
@@ -171,10 +174,12 @@ describe('Federated Model', function () {
 			}
 
 			expect(res.body.model).to.equal(emptyFed);
+			emptyFedId = res.body._id;
+
 
 			async.series([
 				done => {
-					agent.get(`/${username}/${emptyFed}.json`)
+					agent.get(`/${username}/${emptyFedId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
@@ -185,7 +190,7 @@ describe('Federated Model', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedModels.find(p => p.model === emptyFed);
+						let fed = account.fedModels.find(p => p.model === emptyFedId);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -199,7 +204,6 @@ describe('Federated Model', function () {
 	});
 
 	it('should fail if create federation using existing model name (fed or model)', function(done){
-
 
 		agent.post(`/${username}/${subModels[0]}`)
 		.send({ 
@@ -343,7 +347,7 @@ describe('Federated Model', function () {
 			unit,
 			subModels:[{
 				"database": username,
-				"model": fedModel
+				"model": fedModelId
 			}] 
 		})
 		.expect(400, function(err ,res) {
@@ -425,7 +429,7 @@ describe('Federated Model', function () {
 
 		}, 1000);
 
-		agent.put(`/${username}/${fedModel}`)
+		agent.put(`/${username}/${fedModelId}`)
 		.send({ 
 			desc, 
 			type, 
@@ -436,8 +440,6 @@ describe('Federated Model', function () {
 			}] 
 		})
 		.expect(200, function(err ,res) {
-
-			expect(res.body.model).to.equal(fedModel);
 			return done(err);
 		});
 	});
