@@ -110,8 +110,6 @@ describe('Model', function () {
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
 
-					console.log(pg);
-
 					const myModel = pg.models.find(_model => _model.model === modelId);
 					expect(myModel).to.exist;
 
