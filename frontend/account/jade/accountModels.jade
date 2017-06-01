@@ -3,66 +3,119 @@
 	input#existingModelFileUploader(type="file")
 	input#newModelFileUploader(type="file")
 
-	md-list#accountList(flex, ng-if="vm.modelsExist")
+	md-list#accountList.tree-branch(flex, ng-if="vm.modelsExist")
 		// Accounts
-		div(ng-repeat="account in vm.accounts", ng-if="account.showAccount")
-
-			div(layout="row", layout-align="space-between")
-				md-list-item(flex)
-					.account(ng-click="vm.toggleModelsList($index)", layout="row", layout-align="start center", md-ink-ripple, flex)
+		div(ng-repeat="account in vm.accounts")
+			div
+			div(layout="row", layout-align="space-between", ng-click="vm.toggleTeamspace($index)")
+				md-list-item.tree-node(flex)
+					.account(layout="row", layout-align="start center", md-ink-ripple, flex)
 						md-button.md-icon-button(aria-label="Folder")
 							md-icon.angular-material-icons {{account.showModelsIcon}}
 						p {{account.account}}
 						md-icon.angular-material-icons.accountModelsSharedIcon(ng-if="!account.canAddModel") group
-				//.accountRight(ng-if="account.canAddModel")
-					md-button.md-icon-button(aria-label="New model", ng-click="vm.newmodel($event, account.account)")
-						md-icon.angular-material-icons.md-accent playlist_add
 
-			// Projects
-			md-list.models()
-				md-list-item(flex, md-ink-ripple)
-					md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showModelsIcon}} 
-					p Projects
-					
-				// Models and Federations
-				md-list.models(ng-if="account.showModels")
-					md-list-item(flex)
+
+			div(ng-if="account.showAccount")
+				md-divider
+				// Projects
+				md-list.tree-branch
+					md-list-item.tree-node(flex, md-ink-ripple)
 						md-button.md-icon-button(aria-label="Folder")
-								md-icon.angular-material-icons {{account.showModelsIcon}} 
-						p Models
-						
-					account-model(
-					ng-repeat="model in account.models"
-					account="account.name"
-					is-account-admin="account.isAdmin"
-					model="model"
-					user-account="vm.account"
-					on-upload-file="vm.uploadFile(model)"
-					uploaded-file="vm.uploadedFile"
-					model-to-upload="vm.modelToUpload"
-					on-show-page="vm.showPage(page, callingPage)"
-					on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
-					quota="vm.quota"
-					subscriptions="vm.subscriptions")
+							md-icon.angular-material-icons folder_open 
+						p Projects
 
-					md-list-item(flex)
-						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showModelsIcon}} 
-						p Federations
-					
-					account-federations(
-					account="account"
-					)
-					p(ng-if="!account.fedModels.length") No federations created
-			
-		md-divider
-		div(layout="row" flex layout-align="end center")
-			md-button.md-accent.md-fab.md-mini(aria-label="Add")
-				md-icon.angular-material-icons add
+					md-list.tree-branch(ng-repeat="project in account.projects")
+						md-list-item.tree-node(flex, md-ink-ripple)
+							md-button.md-icon-button(aria-label="Folder")
+								md-icon.angular-material-icons folder_open 
+							p {{project.name}} 
+
+						// Project Models and Federations
+						md-list.tree-branch
+
+							md-list-item.tree-node(flex)
+								md-button.md-icon-button(aria-label="Folder")
+									md-icon.angular-material-icons folder_open 
+								p Models
+							
+							div(ng-repeat="model in project.models")
+								account-model(
+								account="account.name"
+								is-account-admin="account.isAdmin"
+								model="model"
+								user-account="vm.account"
+								on-upload-file="vm.uploadFile(model)"
+								uploaded-file="vm.uploadedFile"
+								model-to-upload="vm.modelToUpload"
+								on-show-page="vm.showPage(page, callingPage)"
+								on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+								quota="vm.quota"
+								subscriptions="vm.subscriptions")
+
+							md-list-item.tree-node(flex)
+								md-button.md-icon-button(aria-label="Folder")
+									md-icon.angular-material-icons folder_open 
+								p Federations
+
+							account-federations(
+							ng-if="vm.hasFederations(project.models)"
+							federations="project.models",
+							account="account",
+							accounts="vm.accounts")
+							p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
 
 
-	div(ng-if="!vm.modelsExist")
+					// Default - unassigned models and federations
+					md-list.tree-branch(ng-if="account.models.length || account.models.length")
+						md-list-item.tree-node(flex, md-ink-ripple)
+							md-button.md-icon-button(aria-label="Folder")
+								md-icon.angular-material-icons {{account.showModelsIcon}}
+							p Default
+
+						// Unassigned Models and Federations
+						md-list.tree-branch()
+
+							md-list-item.tree-node(flex)
+								md-button.md-icon-button(aria-label="Folder")
+									md-icon.angular-material-icons {{account.showModelsIcon}} 
+								p Models
+
+							account-model(
+							
+							ng-repeat="model in account.models"
+							account="account.name"
+							is-account-admin="account.isAdmin"
+							model="model"
+							user-account="vm.account"
+							on-upload-file="vm.uploadFile(model)"
+							uploaded-file="vm.uploadedFile"
+							model-to-upload="vm.modelToUpload"
+							on-show-page="vm.showPage(page, callingPage)"
+							on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+							quota="vm.quota"
+							subscriptions="vm.subscriptions")
+
+							md-list-item.tree-node(flex)
+								md-button.md-icon-button(aria-label="Folder")
+									md-icon.angular-material-icons {{account.showFederationsIcon}} 
+								p Federations
+
+							account-federations(
+							ng-if="account.showFederations",
+							federations="account.fedModels",
+							account="account",
+							accounts="vm.accounts"
+							)
+							p(ng-if="!account.fedModels.length") No federations created
+
+md-divider
+div(layout="row" flex layout-align="end center")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add")
+		md-icon.angular-material-icons add
+
+
+	//div(ng-if="!vm.modelsExist")
 		.cardInfo(layout="row", layout-align="center center")
 			p {{vm.info}}
 			md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")

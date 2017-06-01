@@ -567,10 +567,10 @@ function _addProjects(account){
 
 			project.models.forEach((model, i) => {
 
-				let fullModel = account.models.find(model => model.model === model);
+				let fullModel = account.models.find(m => m.model === model);
 
 				if(!fullModel){
-					fullModel = account.fedModels.find(model => model.model === model);
+					fullModel = account.fedModels.find(m => m.model === model);
 				}
 
 				if(!fullModel){

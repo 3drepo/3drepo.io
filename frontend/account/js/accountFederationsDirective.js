@@ -29,6 +29,7 @@
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
+				federations: "=",
 				quota: "=",
 				subscriptions: "="
 			},
@@ -89,7 +90,7 @@
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 
 						if (i === 0) {
-							vm.accounts[i].showModels = true;
+							vm.accounts[i].showFederations = true;
 							accountsToUse.push(vm.accounts[i]);
 							if (vm.accounts[i].fedModels.length > 0) {
 								vm.showInfo = false;
@@ -98,7 +99,7 @@
 						}
 
 						else if (vm.accounts[i].fedModels.length > 0) {
-							vm.accounts[i].showModels = true;
+							vm.accounts[i].showFederations = true;
 
 							accountsToUse.push(vm.accounts[i]);
 							vm.showInfo = false;
@@ -165,9 +166,9 @@
 		 *
 		 * @param index
 		 */
-		vm.toggleShowModels = function (index) {
-			vm.accountsToUse[index].showModels = !vm.accountsToUse[index].showModels;
-			vm.accountsToUse[index].showModelsIcon = vm.accountsToUse[index].showModels ? "folder_open" : "folder";
+		vm.toggleShowFederations = function (index) {
+			vm.accountsToUse[index].showFederations = !vm.accountsToUse[index].showFederations;
+			vm.accountsToUse[index].showFederationsIcon = vm.accountsToUse[index].showFederations ? "folder_open" : "folder";
 		};
 
 		/**
@@ -269,6 +270,7 @@
 		 */
 
 		vm.viewFederation = function (event, accountIndex, modelIndex) {
+
 			console.log(vm.accountsToUse[accountIndex]);
 
 			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedModels[modelIndex].hasOwnProperty("subModels")) {
@@ -342,10 +344,12 @@
 		 *
 		 * @param {Number} index
 		 */
-		vm.toggleModelsList = function (index) {
-			vm.accountsToUse[index].showModels = !vm.accountsToUse[index].showModels;
-			vm.accountsToUse[index].showModelsIcon = vm.accountsToUse[index].showModels ? "folder_open" : "folder";
+		vm.toggleFederationsList = function (index) {
+			console.log("Toggling Federations")
+			vm.accountsToUse[index].showFederations = !vm.accountsToUse[index].showFederations;
+			vm.accountsToUse[index].showFederationsIcon = vm.accountsToUse[index].showFederationsIcon ? "folder_open" : "folder";
 		};
+
 
 		/**
 		 * Edit a federation

@@ -26,7 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'accountModels.html',
 			scope: {
-				account: "=",
+				account: "=",	
 				accounts: "=",
 				onShowPage: "&",
 				quota: "=",
@@ -77,6 +77,20 @@
 			false
 		);
 
+		vm.toggleTeamspace = function(index) {
+			vm.accounts[index].showAccount = !vm.accounts[index].showAccount
+		}
+
+		vm.hasFederations = function(models) {
+			var feds = false;
+			if (models) {
+				models.forEach(function(model){
+					if (model.federate) feds = true;
+				})
+				return feds;
+			}
+		};
+
 		/*
 		 * Added data to accounts and models for UI
 		 */
@@ -93,6 +107,8 @@
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showModels = true;
 					vm.accounts[i].showModelsIcon = "folder_open";
+					vm.accounts[i].showFederations = true;
+					vm.accounts[i].showFederationsIcon = "folder_open";
 					// Always show user account
 					// Don't show account if it doesn't have any models - possible when user is a team member of a federation but not a member of a model in that federation!
 					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].models.length !== 0));
@@ -188,9 +204,24 @@
 		 *
 		 * @param {Number} index
 		 */
-		vm.toggleModelsList = function (index) {
+		vm.toggleModelsAndFederationsList = function (index) {
+			console.log("Toggling models and fed list");
 			vm.accounts[index].showModels = !vm.accounts[index].showModels;
 			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
+			vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
+			vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
+		};
+
+		vm.toggleModelsList = function (index) {
+			console.log("Toggling models list");
+			vm.accounts[index].showModels = !vm.accounts[index].showModels;
+			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
+		};
+
+		vm.toggleFederationsList = function (index) {
+			console.log("Toggling feds list");
+			vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
+			vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
 		};
 
 		/**
@@ -412,7 +443,9 @@
 					name: account,
 					models: [model],
 					showModels: true,
-					showModelsIcon: "folder_open"
+					showModelsIcon: "folder_open",
+					showFederations: true,
+					showFederationsIcon: "folder_open"
 				};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);

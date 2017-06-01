@@ -41,8 +41,21 @@ account-models #accountList {
   overflow: auto;
 }
 
+account-models .no-federations {
+  padding-left: 43px;
+  color: rgb(67, 160, 71);
+}
+
+account-models .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
 account-models md-list {
   padding: 0;
+}
+
+account-models .model-indent {
+  padding-left: 10px;
 }
 
 account-models .account,
@@ -50,13 +63,13 @@ account-models .model {
   outline: none;
   /*padding-left: 10px;*/
 }
-account-models .account:hover,
-account-models .model:hover {
+
+account-models .tree-node:hover{
   cursor: pointer;
   background: #EEE;
 }
 
-account-models .models {
+account-models .tree-branch {
   margin-left: 20px;
 }
 
@@ -87,7 +100,7 @@ account-models #newModelFileUploader {
 
 account-models .accountRight,
 account-models .modelRight {
-  margin-right: 10px !important;
+  /*margin-right: 10px !important;*/
 }
 
 account-models #newDatabaseButton {
@@ -527,14 +540,15 @@ account-federations .userContent {
 account-federations md-list {
   padding: 0;
 }
+  
 account-federations .md-list-item-text {
   color: rgb(67, 160, 71);
 }
 
 account-federations .federationModelsList {
-  margin: -20px 0 10px 100px;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 14px;
+    margin: 0px 0 5px 50px;
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 13px;
 }
 
 account-federations .federationTimestamp {
@@ -552,14 +566,6 @@ account-federations .account {
 account-federations .account:hover {
   cursor: pointer;
   background: #EEE;
-}
-
-account-federations .federation {
-  /*padding-left: 30px;*/
-}
-
-account-federations div.md-button {
-  padding-left: 0px !important;
 }
 
 account-federations #federationInfoRight p:only-child {

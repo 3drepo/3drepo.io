@@ -1,19 +1,18 @@
 div(layout="row", layout-align="start center", flex)
-	md-list-item(flex, layout-fill)
-		.model(
-		ng-click="vm.goToModel()"
-		layout="row"
-		md-ink-ripple
-		layout-align="start center"
-		layout-fill
-		ng-disabled="vm.model.uploading")
-			md-button.md-icon-button(aria-label="Dashboard")
-				md-icon.angular-material-icons dashboard
-			p.modelName(flex) {{vm.model.name}}
+	md-list-item.model-indent(
+	flex, 
+	ng-click="vm.goToModel()",
+	layout="row",
+	layout-align="start center",
+	layout-fill,
+	ng-disabled="vm.model.uploading")
+		md-button.md-icon-button(aria-label="Dashboard")
+			md-icon.angular-material-icons dashboard
+		p.modelName.md-list-item-text(flex="100"){{vm.model.name}}
 
 	.modelRight(layout="row", layout-align="start center")
-		.modelUploadInfo(layout="row", layout-align="start center")
-			//p.modelUploadFilename {{vm.uploadFileName}}
+		//.modelUploadInfo(layout="row", layout-align="start center")
+			p.modelUploadFilename {{vm.uploadFileName}}
 			p.modelUploadInfo() {{vm.fileUploadInfo}}
 			md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.model.uploading")
 
