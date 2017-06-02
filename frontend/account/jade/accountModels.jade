@@ -1,4 +1,4 @@
-.userContent
+.userContent(ng-style="vm.addButtons && { 'opacity' : 0.4 }")
 
 	input#existingModelFileUploader(type="file")
 	input#newModelFileUploader(type="file")
@@ -49,13 +49,14 @@
 										account-model(
 										account="account.name"
 										is-account-admin="account.isAdmin"
+										project="project"
 										model="model"
 										user-account="vm.account"
 										on-upload-file="vm.uploadFile(model)"
 										uploaded-file="vm.uploadedFile"
 										model-to-upload="vm.modelToUpload"
 										on-show-page="vm.showPage(page, callingPage)"
-										on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+										on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
 										quota="vm.quota"
 										subscriptions="vm.subscriptions")
 								
@@ -97,12 +98,13 @@
 									account="account.name"
 									is-account-admin="account.isAdmin"
 									model="model"
+									project="project"
 									user-account="vm.account"
 									on-upload-file="vm.uploadFile(model)"
 									uploaded-file="vm.uploadedFile"
 									model-to-upload="vm.modelToUpload"
 									on-show-page="vm.showPage(page, callingPage)"
-									on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+									on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
 									quota="vm.quota"
 									subscriptions="vm.subscriptions")
 
@@ -120,9 +122,15 @@
 									p(ng-if="!account.fedModels.length") No federations created
 
 md-divider
+
 div(layout="row" flex layout-align="end center")
-	md-button.md-accent.md-fab.md-mini(aria-label="Add")
-		md-icon.angular-material-icons add
+	#floating-button(layout="column" ng-if="vm.addButtons")
+		md-button(layout="row" ng-click="vm.newModel($event, vm.accounts)") Add Model
+		md-button(layout="row" ng-click="vm.setupNewFederation($event, accountIndex)") Add Federation 
+		md-button(layout="row") Add Project
+div(layout="row" flex layout-align="end center")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add", ng-click="vm.addButtonsToggle()")
+		md-icon.angular-material-icons {{vm.addButtonType}}
 
 
 	//div(ng-if="!vm.modelsExist")

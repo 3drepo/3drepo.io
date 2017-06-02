@@ -29,6 +29,7 @@
 			scope: {
 				account: "=",
 				model: "=",
+				project: "=",
 				userAccount: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
@@ -228,7 +229,7 @@
 					break;
 
 				case "delete":
-					vm.onSetupDeleteModel({event: event, model: vm.model, account: vm.account});
+					vm.onSetupDeleteModel({event: event, model: vm.model, account: vm.account, project: vm.project});
 					break;
 
 				case "revision":

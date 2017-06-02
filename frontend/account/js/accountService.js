@@ -120,11 +120,12 @@
 		obj.newModel = function (modelData) {
 			var data = {
 				desc: "",
+				project : modelData.project,
 				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
 				unit: modelData.unit,
 				code: modelData.code
 			};
-			return doPost(data, modelData.account + "/" + encodeURIComponent(modelData.name));
+			return doPost(data, modelData.teamspace + "/" + encodeURIComponent(modelData.name));
 		};
 
 		/**
@@ -136,7 +137,7 @@
 		obj.uploadModel = function (modelData) {
 			var data = new FormData();
 			data.append("file", modelData.uploadFile);
-			return doPost(data, modelData.account + "/" + modelData.model + "/upload", {'Content-Type': undefined});
+			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {'Content-Type': undefined});
 		};
 
 		/**
@@ -146,33 +147,33 @@
 		 * @returns {*|promise}
 		 */
 		obj.uploadStatus = function (modelData) {
-			return UtilsService.doGet(modelData.account + "/" + modelData.model + ".json");
+			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
 		};
 
 		/**
 		 * Create a new database
 		 *
-		 * @param account
+		 * @param teamspace
 		 * @param databaseName
 		 * @returns {*|promise}
 		 */
-		obj.newDatabase = function (account, databaseName) {
+		obj.newDatabase = function (teamspace, databaseName) {
 			var data = {
 				database: databaseName,
 				plan: "THE-100-QUID-PLAN"
 			};
-			return doPost(data, account + "/database");
+			return doPost(data, teamspace + "/database");
 		};
 
 		/**
 		 * Create a new subscription
 		 *
-		 * @param account
+		 * @param teamspace
 		 * @param data
 		 * @returns {*|promise}
 		 */
-		obj.newSubscription = function (account, data) {
-			return doPost(data, account + "/subscriptions");
+		obj.newSubscription = function (teamspace, data) {
+			return doPost(data, teamspace + "/subscriptions");
 		};
 
 		/**

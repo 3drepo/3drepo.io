@@ -8,36 +8,68 @@ md-dialog.newModelDialog(aria-label="New model")
 	md-content(layout-margin)
 		div(layout="column")
 			md-input-container
-				input(placeholder="Model name", tdr-focus="true", ng-model="vm.newModelData.name", ng-keypress="vm.saveNewModel($event)", ng-pattern="vm.modelRegExp" maxlength=20)
+				md-select(placeholder="Teamspace", tdr-focus="true", ng-model="vm.newModelData.teamspace", ng-keypress="vm.saveNewModel($event)")
+					md-option(
+						ng-repeat="teamspace in vm.accounts",
+						value="{{teamspace.name}}") {{teamspace.name}}
+
+			md-input-container(ng-if="vm.newModelData.teamspace !== undefined")
+				md-select(placeholder="Project", tdr-focus="true", ng-model="vm.newModelData.project", ng-keypress="vm.saveNewModel($event)")
+					md-option(
+						ng-repeat="project in vm.getProjectsByTeamspaceName(vm.newModelData.teamspace)",
+						value="{{project.name}}") {{project.name}}
+			
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+				input(
+				placeholder="Model name", tdr-focus="true", 
+				ng-model="vm.newModelData.name", 
+				ng-keypress="vm.saveNewModel($event)", 
+				ng-pattern="vm.modelRegExp" maxlength=20)
 				.inputHint Letters, numbers, hyphen and underscore only
 			
-			md-input-container
-				input(placeholder="Model Code (Optional)", ng-model="vm.newModelData.code", maxlength=5)
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+				input(
+				ng-if="vm.teamspaceAndProjectSelected",
+				placeholder="Model Code (Optional)", 
+				ng-model="vm.newModelData.code", 
+				maxlength=5)
 
-			md-input-container
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				label Model type
 				md-select(ng-model="vm.newModelData.type")
 					md-option(ng-repeat="modelType in vm.modelTypes", value="{{modelType}}") {{modelType}}
-			md-input-container(ng-if="vm.showModelTypeOtherInput")
-				input(placeholder="Other model type", ng-model="vm.newModelData.otherType")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.showModelTypeOtherInput")
+				input(
+				ng-if="vm.teamspaceAndProjectSelected", 
+				placeholder="Other model type", 
+				ng-model="vm.newModelData.otherType")
 
 
-			md-input-container
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				label Unit
-				md-select(ng-model="vm.newModelData.unit")
+				md-select(
+					ng-if="vm.teamspaceAndProjectSelected",
+					ng-model="vm.newModelData.unit")
 					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 
 
-			md-input-container(ng-if="vm.newModelFileToUpload")
-				input(placeholder="Revision name (optional)", ng-model="vm.tag")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+				input(
+				ng-if="vm.teamspaceAndProjectSelected",
+				placeholder="Revision name (optional)", 
+				ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
-			md-input-container(ng-if="vm.newModelFileToUpload")
-				textarea(placeholder="Revision description (optional)", ng-model="vm.desc")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+				textarea(
+				ng-if="vm.teamspaceAndProjectSelected",
+				placeholder="Revision description (optional)", ng-model="vm.desc")
 
-			md-input-container
-				md-button.md-accent(ng-click="vm.uploadFileForNewModel()") Upload File
-				md-button.md-raised.md-accent(ng-disabled="vm.newModelButtonDisabled", ng-click="vm.saveNewModel()") Save
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+				md-button.md-accent(
+					ng-if="vm.teamspaceAndProjectSelected",
+					ng-click="vm.uploadFileForNewModel()") Upload File
+				md-button.md-raised.md-accent(ng-disabled="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected", ng-click="vm.saveNewModel()") Save
 			#modelDialogFilenameContainer(layout="row", ng-if="vm.newModelFileToUpload")
 				p#modelDialogFilenameIntro Selected file
 				p#modelDialogFilename {{vm.newModelFileToUpload.name}}

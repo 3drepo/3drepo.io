@@ -150,24 +150,65 @@
 			return models.filter(function() { return models.federate });
 		}
 
+		vm.addButtons = false;
+		vm.addButtonType = "add";
+
+		vm.addButtonsToggle = function() {
+			vm.addButtons = !vm.addButtons;
+			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
+		}
+
+		vm.getProjectsByTeamspaceName = function(name) {
+
+			var projects = [];
+			vm.accounts.forEach(function(teamspace){
+				if (teamspace.name === name) {
+					projects = teamspace.projects
+				}
+			})
+			return projects
+	
+		}
+
+		vm.teamspaceAndProjectSelected = false;
+
+		$scope.$watch("vm.newModelData.teamspace", function (newValue) {
+			if (newValue && vm.newModelData.project) {
+				vm.teamspaceAndProjectSelected = true;
+			} else {
+				vm.teamspaceAndProjectSelected = false;
+			}
+		});
+
+		$scope.$watch("vm.newModelData.project", function (newValue) {
+			if (newValue && vm.newModelData.teamspace) {
+				vm.teamspaceAndProjectSelected = true;
+			} else {
+				vm.teamspaceAndProjectSelected = false;
+			}
+		});
+		
+
 		/*
 		 * Added data to accounts and models for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
-			console.log(vm)
-			
+
+			console.debug("vm.accounts has changed")
+	
 			if (angular.isDefined(vm.accounts)) {
-				console.log('vm.accounts', vm.accounts);
+
 				vm.showProgress = false;
 				vm.modelsExist = (vm.accounts.length > 0);
 				vm.info = vm.modelsExist ? "" : "There are currently no models";
+				
 				// Accounts
 				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
-					console.log("Changed accoutns projects", vm.accounts[i])
+
 					if (vm.accounts[i].projects) {
-						console.log("setting show project")
+
 						vm.accounts[i].projects.forEach(function(project){
 							project.showProject = false;
 						})
@@ -176,12 +217,12 @@
 					// Always show user account
 					// Don't show account if it doesn't have any models - 
 					// possible when user is a team member of a federation but not a member of a model in that federation!
-					//vm.accounts[i].showTeamspace = false;
 
 					// Only show add model menu for user account
 					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
 
 					if(vm.accounts[i].isAdmin){
+						console.log("Is admin")
 						NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
 							vm.newModelFileToUpload = null;
 							vm.modelsExist = true;
@@ -192,7 +233,8 @@
 								canUpload: true,
 								timestamp: null
 							};
-							updateAccountmodels(data.account, model);
+							console.log("vm.watch - updateAccountModels");
+							updateAccountModels(data.account, model);
 							$scope.$apply();
 
 						});
@@ -265,35 +307,11 @@
 			}
 		}, true);
 
-		/**
-		 * Toggle display of models for an account
-		 *
-		 * @param {Number} index
-		 */
-		// vm.toggleModelsAndFederationsList = function (index) {
-		// 	console.log("Toggling models and fed list");
-		// 	vm.accounts[index].showModels = !vm.accounts[index].showModels;
-		// 	vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
-		// 	vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
-		// 	vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
-		// };
-
-		// vm.toggleModelsList = function (index) {
-		// 	console.log("Toggling models list");
-		// 	vm.accounts[index].showModels = !vm.accounts[index].showModels;
-		// 	vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
-		// };
-
-		// vm.toggleFederationsList = function (index) {
-		// 	console.log("Toggling feds list");
-		// 	vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
-		// 	vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
-		// };
 
 		/**
 		 * Bring up dialog to add a new model
 		 */
-		vm.newmodel = function (event, accountForModel) {
+		vm.newModel = function (event, accountForModel) {
 			vm.tag = null;
 			vm.desc = null;
 			vm.showNewModelErrorMessage = false;
@@ -361,7 +379,8 @@
 							canUpload: true,
 							timestamp: null
 						};
-						updateAccountModels(response.data.account, model);
+						console.log("saveNewModel - updateAccountModels")
+						updateAccountModels(response.data.account, model, vm.newModelData.project);
 						vm.closeDialog();
 
 						AnalyticService.sendEvent({
@@ -431,8 +450,10 @@
 		 * @param {Object} event
 		 * @param {Object} model
 		 */
-		vm.setupDeletemodel = function (event, model, account) {
+		vm.setupDeleteModel = function (event, model, account, project) {
+			console.log("setupDeleteModel,", project )
 			vm.modelToDelete = model;
+			vm.projectToDeleteFrom = project;
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
@@ -445,20 +466,43 @@
 		 * Delete model
 		 */
 		vm.delete = function () {
+			console.log("Calling delete")
 			var i, iLength, j, jLength,
 				promise;
 			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
+
+					console.log("Attempting to delete")
+
 					// Remove model from list
 					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
+						console.log(vm.accounts[i]);
 						if (vm.accounts[i].name === response.data.account) {
-							for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
-								if (vm.accounts[i].models[j].name === response.data.model) {
-									vm.accounts[i].models.splice(j, 1);
-									break;
+
+							console.log("Teamspace found")
+							if (vm.projectToDeleteFrom) {
+								// If we have a project
+								console.log("projectToDeleteFrom", vm.projectToDeleteFrom)
+								vm.accounts[i].projects.forEach(function(project) {
+									if (project === vm.projectToDeleteFrom) {
+										project.models.forEach(function(model, i) {
+											console.log("Deleting", vm.projectToDeleteFrom)
+											project.models.splice(i, 1);
+										})
+									}
+								});
+
+							} else {
+								// If default
+								for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
+									if (vm.accounts[i].models[j].name === response.data.model) {
+										vm.accounts[i].models.splice(j, 1);
+										break;
+									}
 								}
 							}
+						
 						}
 					}
 					vm.closeDialog();
@@ -493,31 +537,40 @@
 		 * @param account
 		 * @param model
 		 */
-		function updateAccountmodels (account, model) {
+		function updateAccountModels (account, model, projectName) {
+			console.log("updateAccountModels", account, model)
+
 			var i, length,
 				accountToUpdate;
-
+			
+			var found = false;
 			for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 				if (vm.accounts[i].name === account) {
 					accountToUpdate = vm.accounts[i];
-					accountToUpdate.models.push(model);
+					// Check if the project exists and it if so
+					accountToUpdate.projects.forEach(function(project){
+						if (project.name === projectName ) {
+							project.models.push(model)
+							found = true;
+						} 
+					})
+					// If not just put it in default/unassigned models
+					if (!found) {
+						accountToUpdate.models.push(model);
+					}
 					break;
 				}
 			}
 			if (angular.isUndefined(accountToUpdate)) {
+				console.log("updateAccountModels - isUndefined")
 				accountToUpdate = {
 					name: account,
 					models: [model],
-					showModels: true,
-					showModelsIcon: "folder_open",
-					showFederations: true,
-					showFederationsIcon: "folder_open"
 				};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
 
-			console.log('vmaccounts', vm.accounts);
 			// Save model to model
 			if (vm.newModelFileToUpload !== null) {
 				$timeout(function () {
