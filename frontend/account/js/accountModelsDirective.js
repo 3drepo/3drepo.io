@@ -54,7 +54,6 @@
 		vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.units = serverConfig.units;
 		vm.modelRegExp = serverConfig.modelNameRegExp;
-
 		// Setup file uploaders
 		existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
 		existingModelFileUploader.addEventListener(
@@ -77,41 +76,108 @@
 			false
 		);
 
+
+		var getState = function(node, prop) {
+			if (node[prop] === undefined) {
+				node[prop] = false;
+			}
+			return node[prop];
+		}
+
+		vm.shouldShowProjects = function(projects) {
+			return getState(projects, "state");
+		};
+
+		vm.shouldShowModelsAndFeds = function(project) {
+			return getState(project, "state");
+		};
+
+		vm.shouldShowModels = function(project) {
+			return getState(project, "modelsState")
+		};
+
+		vm.shouldShowFeds = function(project) {
+			return getState(project, "fedsState")
+		};
+
+		vm.shouldShowTeamspace = function(index) {
+			return vm.accounts[index].showTeamspace;
+		}
+
 		vm.toggleTeamspace = function(index) {
-			vm.accounts[index].showAccount = !vm.accounts[index].showAccount
+			vm.accounts[index].showTeamspace = !vm.accounts[index].showTeamspace
+		}
+
+		vm.showDefault = {
+			project : false,
+			models : false,
+			feds : false
+		} 
+
+		vm.toggleDefault = function(type) {
+			vm.showDefault[type] = !vm.showDefault[type];
+			return vm.showDefault[type];
+		}
+
+		vm.toggleProjects = function(projects) {
+			projects.state = !projects.state;
+			projects.forEach(function(project) {
+				project.showProject = projects.state;
+			});
+		}
+
+		vm.toggleProject = function(project) {
+			project.state = !project.state;
+			project.models.forEach(function(model) {
+				model.modelState = project.state;
+				model.fedState = project.state;
+			});
+		}
+
+		vm.toggleModels = function(project) {
+			project.modelsState = !project.modelsState;
+		}
+
+		vm.toggleFederations = function(project) {
+			project.fedsState = !project.fedsState;
 		}
 
 		vm.hasFederations = function(models) {
-			var feds = false;
-			if (models) {
-				models.forEach(function(model){
-					if (model.federate) feds = true;
-				})
-				return feds;
-			}
+			return vm.getFederations(models).length > 0;
 		};
+
+		vm.getFederations = function(models) {
+			return models.filter(function() { return models.federate });
+		}
 
 		/*
 		 * Added data to accounts and models for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
+			console.log(vm)
 			
 			if (angular.isDefined(vm.accounts)) {
-				//console.log('vm.accounts', vm.accounts);
+				console.log('vm.accounts', vm.accounts);
 				vm.showProgress = false;
 				vm.modelsExist = (vm.accounts.length > 0);
 				vm.info = vm.modelsExist ? "" : "There are currently no models";
 				// Accounts
 				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
-					vm.accounts[i].showModels = true;
-					vm.accounts[i].showModelsIcon = "folder_open";
-					vm.accounts[i].showFederations = true;
-					vm.accounts[i].showFederationsIcon = "folder_open";
+					console.log("Changed accoutns projects", vm.accounts[i])
+					if (vm.accounts[i].projects) {
+						console.log("setting show project")
+						vm.accounts[i].projects.forEach(function(project){
+							project.showProject = false;
+						})
+					}
+					
 					// Always show user account
-					// Don't show account if it doesn't have any models - possible when user is a team member of a federation but not a member of a model in that federation!
-					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].models.length !== 0));
+					// Don't show account if it doesn't have any models - 
+					// possible when user is a team member of a federation but not a member of a model in that federation!
+					//vm.accounts[i].showTeamspace = false;
+
 					// Only show add model menu for user account
 					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
 
@@ -204,25 +270,25 @@
 		 *
 		 * @param {Number} index
 		 */
-		vm.toggleModelsAndFederationsList = function (index) {
-			console.log("Toggling models and fed list");
-			vm.accounts[index].showModels = !vm.accounts[index].showModels;
-			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
-			vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
-			vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
-		};
+		// vm.toggleModelsAndFederationsList = function (index) {
+		// 	console.log("Toggling models and fed list");
+		// 	vm.accounts[index].showModels = !vm.accounts[index].showModels;
+		// 	vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
+		// 	vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
+		// 	vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
+		// };
 
-		vm.toggleModelsList = function (index) {
-			console.log("Toggling models list");
-			vm.accounts[index].showModels = !vm.accounts[index].showModels;
-			vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
-		};
+		// vm.toggleModelsList = function (index) {
+		// 	console.log("Toggling models list");
+		// 	vm.accounts[index].showModels = !vm.accounts[index].showModels;
+		// 	vm.accounts[index].showModelsIcon = vm.accounts[index].showModels ? "folder_open" : "folder";
+		// };
 
-		vm.toggleFederationsList = function (index) {
-			console.log("Toggling feds list");
-			vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
-			vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
-		};
+		// vm.toggleFederationsList = function (index) {
+		// 	console.log("Toggling feds list");
+		// 	vm.accounts[index].showFederations = !vm.accounts[index].showFederations;
+		// 	vm.accounts[index].showFederations = vm.accounts[index].showFederations ? "folder_open" : "folder";
+		// };
 
 		/**
 		 * Bring up dialog to add a new model

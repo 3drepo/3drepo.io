@@ -1,5 +1,4 @@
-
-div(ng-if="vm.account.showModels" ng-repeat="(accountIndex, account) in vm.accountsToUse")
+div(ng-repeat="(accountIndex, account) in vm.accountsToUse")
 	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.federations")
 		div(ng-if="federation.federate" layout="row", layout-align="start center")
 			div(flex, layout-fill)

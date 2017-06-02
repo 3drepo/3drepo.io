@@ -6,108 +6,118 @@
 	md-list#accountList.tree-branch(flex, ng-if="vm.modelsExist")
 		// Accounts
 		div(ng-repeat="account in vm.accounts")
-			div
 			div(layout="row", layout-align="space-between", ng-click="vm.toggleTeamspace($index)")
 				md-list-item.tree-node(flex)
 					.account(layout="row", layout-align="start center", md-ink-ripple, flex)
 						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showModelsIcon}}
+							md-icon.angular-material-icons folder_open
 						p {{account.account}}
 						md-icon.angular-material-icons.accountModelsSharedIcon(ng-if="!account.canAddModel") group
 
 
-			div(ng-if="account.showAccount")
+			div(ng-if="vm.shouldShowTeamspace($index)")
 				md-divider
 				// Projects
+				
 				md-list.tree-branch
-					md-list-item.tree-node(flex, md-ink-ripple)
-						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons folder_open 
-						p Projects
-
-					md-list.tree-branch(ng-repeat="project in account.projects")
+					div(ng-click="vm.toggleProjects(account.projects)")
 						md-list-item.tree-node(flex, md-ink-ripple)
 							md-button.md-icon-button(aria-label="Folder")
 								md-icon.angular-material-icons folder_open 
-							p {{project.name}} 
+							p Projects
+					
+					div(ng-if="vm.shouldShowProjects(account.projects)")
+						md-list.tree-branch(ng-repeat="project in account.projects")
 
-						// Project Models and Federations
-						md-list.tree-branch
+							div(ng-click="vm.toggleProject(project)")
+								md-list-item.tree-node(flex, md-ink-ripple)
+									md-button.md-icon-button(aria-label="Folder")
+										md-icon.angular-material-icons folder_open 
+									p {{project.name}} 
 
-							md-list-item.tree-node(flex)
-								md-button.md-icon-button(aria-label="Folder")
-									md-icon.angular-material-icons folder_open 
-								p Models
-							
-							div(ng-repeat="model in project.models")
-								account-model(
-								account="account.name"
-								is-account-admin="account.isAdmin"
-								model="model"
-								user-account="vm.account"
-								on-upload-file="vm.uploadFile(model)"
-								uploaded-file="vm.uploadedFile"
-								model-to-upload="vm.modelToUpload"
-								on-show-page="vm.showPage(page, callingPage)"
-								on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
-								quota="vm.quota"
-								subscriptions="vm.subscriptions")
+							// Project Models and Federations
+							md-list.tree-branch(ng-if="vm.shouldShowModelsAndFeds(project)")
 
-							md-list-item.tree-node(flex)
-								md-button.md-icon-button(aria-label="Folder")
-									md-icon.angular-material-icons folder_open 
-								p Federations
+								div(ng-click="vm.toggleModels(project)")
+									md-list-item.tree-node(flex)
+										md-button.md-icon-button(aria-label="Folder")
+											md-icon.angular-material-icons folder_open 
+										p Models
+								
+								div(ng-if="vm.shouldShowModels(project)")
+									div(ng-repeat="model in project.models")
+										account-model(
+										account="account.name"
+										is-account-admin="account.isAdmin"
+										model="model"
+										user-account="vm.account"
+										on-upload-file="vm.uploadFile(model)"
+										uploaded-file="vm.uploadedFile"
+										model-to-upload="vm.modelToUpload"
+										on-show-page="vm.showPage(page, callingPage)"
+										on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+										quota="vm.quota"
+										subscriptions="vm.subscriptions")
+								
+								div(ng-click="vm.toggleFederations(project)")
+									md-list-item.tree-node(flex)
+										md-button.md-icon-button(aria-label="Folder")
+											md-icon.angular-material-icons folder_open 
+										p Federations
+									
+								div(ng-if="vm.shouldShowFeds(project)")
+									account-federations(
+									ng-if="vm.hasFederations(project.models)"
+									federations="vm.getFederations(project.models)",
+									account="account",
+									accounts="vm.accounts")
+									p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
 
-							account-federations(
-							ng-if="vm.hasFederations(project.models)"
-							federations="project.models",
-							account="account",
-							accounts="vm.accounts")
-							p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
 
+						// Default - unassigned models and federations
+						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
+							div(ng-click="vm.toggleDefault('project')")
+								md-list-item.tree-node(flex, md-ink-ripple)
+									md-button.md-icon-button(aria-label="Folder")
+										md-icon.angular-material-icons folder_open 
+									p Unassigned Models / Federations
 
-					// Default - unassigned models and federations
-					md-list.tree-branch(ng-if="account.models.length || account.models.length")
-						md-list-item.tree-node(flex, md-ink-ripple)
-							md-button.md-icon-button(aria-label="Folder")
-								md-icon.angular-material-icons {{account.showModelsIcon}}
-							p Default
+							// Unassigned Models and Federations
+							md-list.tree-branch(ng-if="vm.showDefault['project']")
 
-						// Unassigned Models and Federations
-						md-list.tree-branch()
+								div(ng-click="vm.toggleDefault('models')")
+									md-list-item.tree-node(flex)
+										md-button.md-icon-button(aria-label="Folder")
+											md-icon.angular-material-icons folder_open 
+										p Models
+								
+								div(ng-if="vm.showDefault['models']")
+									account-model(	
+									ng-repeat="model in account.models"
+									account="account.name"
+									is-account-admin="account.isAdmin"
+									model="model"
+									user-account="vm.account"
+									on-upload-file="vm.uploadFile(model)"
+									uploaded-file="vm.uploadedFile"
+									model-to-upload="vm.modelToUpload"
+									on-show-page="vm.showPage(page, callingPage)"
+									on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
+									quota="vm.quota"
+									subscriptions="vm.subscriptions")
 
-							md-list-item.tree-node(flex)
-								md-button.md-icon-button(aria-label="Folder")
-									md-icon.angular-material-icons {{account.showModelsIcon}} 
-								p Models
+								div(ng-click="vm.toggleDefault('feds')")
+									md-list-item.tree-node(flex)
+										md-button.md-icon-button(aria-label="Folder")
+											md-icon.angular-material-icons folder_open 
+										p Federations
 
-							account-model(
-							
-							ng-repeat="model in account.models"
-							account="account.name"
-							is-account-admin="account.isAdmin"
-							model="model"
-							user-account="vm.account"
-							on-upload-file="vm.uploadFile(model)"
-							uploaded-file="vm.uploadedFile"
-							model-to-upload="vm.modelToUpload"
-							on-show-page="vm.showPage(page, callingPage)"
-							on-setup-delete-model="vm.setupDeleteModel(event, model, account)",
-							quota="vm.quota"
-							subscriptions="vm.subscriptions")
-
-							md-list-item.tree-node(flex)
-								md-button.md-icon-button(aria-label="Folder")
-									md-icon.angular-material-icons {{account.showFederationsIcon}} 
-								p Federations
-
-							account-federations(
-							ng-if="account.showFederations",
-							federations="account.fedModels",
-							account="account",
-							accounts="vm.accounts"
-							)
-							p(ng-if="!account.fedModels.length") No federations created
+								div(ng-if="vm.showDefault['feds']")
+									account-federations(
+									federations="account.fedModels",
+									account="account",
+									accounts="vm.accounts")
+									p(ng-if="!account.fedModels.length") No federations created
 
 md-divider
 div(layout="row" flex layout-align="end center")

@@ -102,14 +102,14 @@
 			return doPut(passwords, username);
 		};
 
-		obj.getModelsBid4FreeStatus = function (username) {
-			bid4free = $q.defer();
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
-				.then(function (response) {
-					bid4free.resolve(response);
-				});
-			return bid4free.promise;
-		};
+		// obj.getModelsBid4FreeStatus = function (username) {
+		// 	bid4free = $q.defer();
+		// 	$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
+		// 		.then(function (response) {
+		// 			bid4free.resolve(response);
+		// 		});
+		// 	return bid4free.promise;
+		// };
 
 		/**
 		 * Create a new model
