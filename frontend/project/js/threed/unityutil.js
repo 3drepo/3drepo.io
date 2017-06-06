@@ -162,10 +162,7 @@ var UnityUtil;
 	UnityUtil.prototype.doubleClicked = function(meshInfo)
 	{
 		var point = JSON.parse(meshInfo);
-		if(point.meshID)
-		{
-			UnityUtil.centreToPoint(point.project, point.meshID);	
-		}
+		UnityUtil.centreToPoint(point.project, point.meshID);	
 	}
 
 	UnityUtil.prototype.loaded = function(bboxStr)
