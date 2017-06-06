@@ -28,10 +28,16 @@
 			scope: {
 				account: "=",
 				accounts: "=",
+				federation: "=",
+				project: "=",
+				federationData: "=",
+				federationIndex: "=",
 				onShowPage: "&",
-				federations: "=",
 				quota: "=",
-				subscriptions: "="
+				subscriptions: "=",
+				getPotentialFederationModels: "=",
+				saveFederation: "=",
+				addToFederation: "="
 			},
 			controller: AccountFederationsCtrl,
 			controllerAs: 'vm',
@@ -39,9 +45,9 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth", "AnalyticService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth", "AnalyticService", "AccountDataService"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth, AnalyticService) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth, AnalyticService, AccountDataService) {
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
@@ -52,29 +58,34 @@
 
 		
 		// Init
-		function getFederationOptions(model, account){
+		// function getFederationOptions(model, account){
 
-			var isUserAccount = account === vm.account;
-			return {
-				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-				team: {label: "Team", icon: "group", hidden: !isUserAccount},
-				modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
-			};
+		// 	var isUserAccount = account.account === vm.account.account;
+		// 	return {
+		// 		edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
+		// 		team: {label: "Team", icon: "group", hidden: !isUserAccount},
+		// 		modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
+		// 		delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
+		// 	};
 			
-		};
+		// };
+
+		vm.getProjects = function(teamspace) {
+			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
+			return projects;
+		}
 
 		vm.units = server_config.units;
-		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
+		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
 
 		vm.showMenu = function(model, account){
-
-			var isUserAccount = account === vm.account;
+			
+			var isUserAccount = account.account === vm.account.account;
 			return Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
-				Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
-				Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
-				isUserAccount;
+				   Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
+				   Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
+				   isUserAccount;
 		}
 
 		/*
@@ -82,76 +93,68 @@
 		 */
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
+			var account;
 
 			if (angular.isDefined(vm.accounts)) {
-				vm.showInfo = true;
+				// vm.showInfo = true;
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						account = vm.accounts[i];
 
-						if (i === 0) {
-							vm.accounts[i].showFederations = true;
-							accountsToUse.push(vm.accounts[i]);
-							if (vm.accounts[i].fedModels.length > 0) {
-								vm.showInfo = false;
-							}
-							userAccount = vm.accounts[i];
-						}
-
-						else if (vm.accounts[i].fedModels.length > 0) {
-							vm.accounts[i].showFederations = true;
-
-							accountsToUse.push(vm.accounts[i]);
-							vm.showInfo = false;
-						}
-
-
-						if(vm.accounts[i].fedModels){
-							vm.accounts[i].fedModels.forEach(function(fedModel){
-								fedModel.federationOptions = getFederationOptions(fedModel, vm.accounts[i].account);
+						// Default / Unassigned
+						if(account.fedModels){
+							account.fedModels.forEach(function(fedModel){
+								fedModel.federationOptions = getFederationOptions(fedModel, account.account);
 							});
 						}
 
+						// Assigned models to projects
+						if (account.projects) {
+							account.projects.forEach(function(project) {
+								project.models.forEach(function(model) {
+									if (model.federate) {
+										model.federationOptions = getFederationOptions(model, account.account);
+									}
+								})
+								
+							});
+						}
+						
+
 					}
 
-
-
-					vm.accountsToUse = angular.copy(accountsToUse);
-					console.log('accountsToUse', vm.accountsToUse);
+					//vm.accountsToUse = angular.copy(accountsToUse);
 				}
 			}
 		});
 
-		/*
-		 * Watch for change in edited federation
-		 */
-		$scope.$watch("vm.newFederationData", function () {
-			if (vm.federationOriginalData === null) {
-				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.model)) || (vm.newFederationData.model === "" || !vm.newFederationData.unit);
-			}
-			else {
-				vm.newFederationButtonDisabled = angular.equals(vm.newFederationData, vm.federationOriginalData);
-			}
-		}, true);
+
+		function getFederationOptions(model, account){
+
+			var isUserAccount = account.account === vm.account.account;
+			return {
+				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
+				// team: {label: "Team", icon: "group", hidden: !isUserAccount},
+				// modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
+				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
+			};
+			
+		};
+
 
 		/**
-		 * Open the federation dialog
-		 *
-		 * @param event
+		 * Reset federation data back to empty object
 		 */
-		vm.setupNewFederation = function (event, accountIndex) {
+		vm.resetFederationData = function() {
+			vm.federationData = {};
+		}
 
-			vm.currentAccountIndex = accountIndex;
-			vm.userAccount = angular.copy(vm.accountsToUse[vm.currentAccountIndex]);
-			vm.federationOriginalData = null;
-			vm.newFederationData = {
-				desc: "",
-				type: "",
-				subModels: []
-			};
-			vm.errorMessage = '';
-			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
+
+		vm.removeFromFederation = function (modelName) {
+			AccountDataService.removeFromFederation(vm.federationData, modelName);
 		};
+
 
 		/**
 		 * Close the federation dialog
@@ -161,105 +164,6 @@
 			UtilsService.closeDialog();
 		};
 
-		/**
-		 * Toggle showing of models in an account
-		 *
-		 * @param index
-		 */
-		vm.toggleShowFederations = function (index) {
-			vm.accountsToUse[index].showFederations = !vm.accountsToUse[index].showFederations;
-			vm.accountsToUse[index].showFederationsIcon = vm.accountsToUse[index].showFederations ? "folder_open" : "folder";
-		};
-
-		/**
-		 * Add a model to a federation
-		 *
-		 * @param modelIndex
-		 */
-		vm.addToFederation = function (modelIndex) {
-			vm.showRemoveWarning = false;
-
-			vm.newFederationData.subModels.push({
-				database: vm.userAccount.account,
-				modelIndex: modelIndex,
-				model: vm.userAccount.models[modelIndex].model
-			});
-
-			vm.userAccount.models[modelIndex].federated = true;
-
-		};
-
-		/**
-		 * Remove a model from a federation
-		 *
-		 * @param index
-		 */
-		vm.removeFromFederation = function (index) {
-			var i, length,
-				item;
-
-
-			// Cannot have existing federation with no sub models
-			
-			if (vm.newFederationData.hasOwnProperty("timestamp") && vm.newFederationData.subModels.length === 1) {
-				vm.showRemoveWarning = true;
-			}
-			else {
-				item = vm.newFederationData.subModels.splice(index, 1);
-				for (i = 0, length = vm.userAccount.models.length; i < length; i += 1) {
-					if (vm.userAccount.models[i].model === item[0].model) {
-						vm.userAccount.models[i].federated = false;
-						break;
-					}
-				}
-			}
-		};
-
-		/**
-		 * Save a federation
-		 */
-		vm.saveFederation = function () {
-			var promise;
-
-			if (vm.federationOriginalData === null) {
-				promise = UtilsService.doPost(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account + "/" + vm.newFederationData.model);
-				promise.then(function (response) {
-					
-					if(response.status !== 200 && response.status !== 201){
-						vm.errorMessage = response.data.message;
-					} else {
-						vm.errorMessage = '';
-						vm.showInfo = false;
-						vm.newFederationData.timestamp = (new Date()).toString();
-						vm.newFederationData.permissions = response.data.permissions;
-						vm.newFederationData.federationOptions = getFederationOptions(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account);
-						vm.accountsToUse[vm.currentAccountIndex].fedModels.push(vm.newFederationData);
-						vm.closeDialog();
-
-						AnalyticService.sendEvent({
-							eventCategory: 'Model',
-							eventAction: 'create',
-							eventLabel: 'federation'
-						});
-					}
-
-
-
-				});
-			}
-			else {
-				promise = UtilsService.doPut(vm.newFederationData, vm.accountsToUse[vm.currentAccountIndex].account + "/" + vm.newFederationData.model);
-				promise.then(function (response) {
-					console.log(response);
-					vm.federationOriginalData.subModels = vm.newFederationData.subModels;
-					vm.closeDialog();
-				});
-			}
-
-			$timeout(function () {
-				$scope.$apply();
-			});
-		};
 
 		/**
 		 * Open the federation in the viewer if it has sub models otherwise open edit dialog
@@ -269,21 +173,21 @@
 		 * @param {Number} modelIndex
 		 */
 
-		vm.viewFederation = function (event, accountIndex, modelIndex) {
+		vm.viewFederation = function (event, account, project, model) {
 
-			console.log(vm.accountsToUse[accountIndex]);
-
-			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedModels[modelIndex].hasOwnProperty("subModels")) {
-				setupEditFederation(event, accountIndex, modelIndex);
+			if (!model.hasOwnProperty("subModels")) {
+				setupEditFederation(event, model);
 			}
 			else {
-				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedModels[modelIndex].model, "_self").search({});
+
+				$location.path("/" + account.name + "/" + model.name, "_self").search({});
 
 				AnalyticService.sendEvent({
 					eventCategory: 'Model',
 					eventAction: 'view',
 					eventLabel: 'federation'
 				});
+
 			}
 
 		};
@@ -295,36 +199,53 @@
 		 * @param option
 		 * @param federationIndex
 		 */
-		vm.doFederationOption = function (event, option, accountIndex, federationIndex) {
+		vm.doFederationOption = function (event, option, account, project, federation) {
 			switch (option) {
 				case "edit":
-					setupEditFederation(event, accountIndex, federationIndex);
+					console.log("project", project)
+					setupEditFederation(event, account, project, federation);
 					break;
 
 				case "team":
-					setupEditTeam(event, accountIndex, federationIndex);
+					setupEditTeam(event, account, project, federation);
 					break;
 
 				case "delete":
-					setupDelete(event, accountIndex, federationIndex);
+					setupDelete(event, account, project, federation);
 					break;
 
 				case "modelsetting":
-					setupSetting(event, accountIndex, federationIndex);
+					setupSetting(event, account, project, federation);
 			}
 		};
+
 
 		/**
 		 * Delete federation
 		 */
-		vm.delete = function () {
+		vm.delete = function (federation) {
 
-			var promise = UtilsService.doDelete({}, vm.accountsToUse[vm.currentAccountIndex].account + "/" + vm.accountsToUse[vm.currentAccountIndex].fedModels[federationToDeleteIndex].model);
+			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.deleteName);
 
 			promise.then(function (response) {
 				if (response.status === 200) {
-					vm.accountsToUse[vm.currentAccountIndex].fedModels.splice(federationToDeleteIndex, 1);
-					vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[vm.currentAccountIndex].fedModels.length === 0));
+					//vm.accountsToUse[vm.currentAccountIndex].fedModels.splice(federationToDeleteIndex, 1);
+					//vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[vm.currentAccountIndex].fedModels.length === 0));
+
+					vm.accounts.forEach(function(account) {
+						if (account.name === vm.currentAccount.name) {
+							account.projects.forEach(function(project) {
+								if (project.name === vm.projectToDeleteFrom.name) {
+									project.models.forEach(function(model, i) {
+										if (model.model === vm.deleteName) {
+											project.models.splice(i, 1);
+										}
+									})
+								}
+							});
+						}
+					})
+	
 					vm.closeDialog();
 
 					AnalyticService.sendEvent({
@@ -340,58 +261,23 @@
 		};
 
 		/**
-		 * Toggle display of models for an account
-		 *
-		 * @param {Number} index
-		 */
-		vm.toggleFederationsList = function (index) {
-			console.log("Toggling Federations")
-			vm.accountsToUse[index].showFederations = !vm.accountsToUse[index].showFederations;
-			vm.accountsToUse[index].showFederationsIcon = vm.accountsToUse[index].showFederationsIcon ? "folder_open" : "folder";
-		};
-
-
-		/**
 		 * Edit a federation
 		 *
 		 * @param event
 		 * @param modelIndex
 		 */
-		function setupEditFederation (event, accountIndex, modelIndex) {
-			var i, j, iLength, jLength;
-
-			vm.showRemoveWarning = false;
-
-			console.log('accountIndex', accountIndex);
-			vm.currentAccountIndex = accountIndex;
-			vm.userAccount = angular.copy(vm.accountsToUse[vm.currentAccountIndex]);
-
-			vm.federationOriginalData = vm.accountsToUse[vm.currentAccountIndex].fedModels[modelIndex];
-
-			vm.newFederationData = angular.copy(vm.federationOriginalData);
-			if (!vm.newFederationData.hasOwnProperty("subModels")) {
-				vm.newFederationData.subModels = [];
-			}
-
-			// Disable models in the models list that are federated
-			for (i = 0, iLength = vm.userAccount.models.length; i < iLength; i += 1) {
-				vm.userAccount.models[i].federated = false;
-				if (vm.federationOriginalData.hasOwnProperty("subModels")) {
-					for (j = 0, jLength = vm.federationOriginalData.subModels.length; j < jLength; j += 1) {
-						if (vm.federationOriginalData.subModels[j].model === vm.userAccount.models[i].model) {
-							vm.userAccount.models[i].federated = true;
-						}
-					}
-				}
-			}
-
-			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		function setupEditFederation (event, teamspace, project, model) {
+			vm.federationData = model;
+			vm.federationData.teamspace = teamspace.name;
+			vm.federationData.project = project.name;
+			vm.federationData._isEdit = true;
+			UtilsService.showDialog("federationDialog.html", $scope, event, true);
 		}
 
-		function setupSetting(event, accountIndex, modelIndex){
-			$location.search("proj", vm.accountsToUse[accountIndex].fedModels[modelIndex].model);
-			$location.search("targetAcct", vm.accountsToUse[accountIndex].account);
-			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces", data: {tabIndex: 1}});
+		function setupSetting(event, account, project, model){
+			$location.search("proj", model.name);
+			$location.search("targetAcct", account.account);
+			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
 
 		/**
@@ -400,13 +286,14 @@
 		 * @param {Object} event
 		 * @param {Object} index
 		 */
-		 function setupDelete (event, accountIndex, index) {
-			federationToDeleteIndex = index ;
+		 function setupDelete (event, account, project, model) {
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.accountsToUse[accountIndex].fedModels[federationToDeleteIndex].model;
-			vm.currentAccountIndex = accountIndex;
+			vm.deleteName = model.model;
+			vm.projectToDeleteFrom = project
+			vm.currentAccount = account
+			console.log("setting up delete", project)
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
@@ -416,9 +303,9 @@
 		 * @param {Object} event
 		 * @param {Object} index
 		 */
-		function setupEditTeam (event, accountIndex, index) {
-			vm.item = vm.accountsToUse[accountIndex].fedModels[index];
-			vm.currentAccountIndex = accountIndex;
+		function setupEditTeam (event, account, project, model) {
+			vm.item = model;
+			vm.currentAccount = account;
 			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 	}

@@ -1,4 +1,4 @@
-.userContent(ng-style="vm.addButtons && { 'opacity' : 0.4 }")
+.userContent(ng-style="vm.addButtons && { 'opacity' : 0.2, 'pointer-events' : 'none' }")
 
 	input#existingModelFileUploader(type="file")
 	input#newModelFileUploader(type="file")
@@ -45,7 +45,8 @@
 										p Models
 								
 								div(ng-if="vm.shouldShowModels(project)")
-									div(ng-repeat="model in project.models")
+									div(ng-repeat="model in vm.getNoneFederations(project.models)")
+										
 										account-model(
 										account="account.name"
 										is-account-admin="account.isAdmin"
@@ -67,16 +68,28 @@
 										p Federations
 									
 								div(ng-if="vm.shouldShowFeds(project)")
-									account-federations(
-									ng-if="vm.hasFederations(project.models)"
-									federations="vm.getFederations(project.models)",
-									account="account",
-									accounts="vm.accounts")
+
+									div(layout="column", 
+										layout-align="start", 
+										ng-repeat="federation in vm.getFederations(project.models) track by $index")
+										
+										account-federations(
+											federation="federation"
+											project="project"
+											account="account"
+											federation-data="vm.federationData"
+											setup-federation-data="vm.setupFederationData"
+											get-potential-federation-models="vm.getPotentialFederationModels"
+											add-to-federation="vm.addToFederation"
+											save-federation="vm.saveFederation"
+											accounts="vm.accounts")
+
 									p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
 
 
 						// Default - unassigned models and federations
-						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
+						// TODO - We need to fix this on the backend as it's adding models with assigned projects to account.models!'
+						//md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
 							div(ng-click="vm.toggleDefault('project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
@@ -84,7 +97,7 @@
 									p Unassigned Models / Federations
 
 							// Unassigned Models and Federations
-							md-list.tree-branch(ng-if="vm.showDefault['project']")
+							md-list.tree-branch(ng-if="true")
 
 								div(ng-click="vm.toggleDefault('models')")
 									md-list-item.tree-node(flex)
@@ -93,20 +106,22 @@
 										p Models
 								
 								div(ng-if="vm.showDefault['models']")
-									account-model(	
-									ng-repeat="model in account.models"
-									account="account.name"
-									is-account-admin="account.isAdmin"
-									model="model"
-									project="project"
-									user-account="vm.account"
-									on-upload-file="vm.uploadFile(model)"
-									uploaded-file="vm.uploadedFile"
-									model-to-upload="vm.modelToUpload"
-									on-show-page="vm.showPage(page, callingPage)"
-									on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
-									quota="vm.quota"
-									subscriptions="vm.subscriptions")
+									div(ng-repeat="model in account.models")
+
+										account-model(	
+											ng-if="!model.project"
+											account="account.name"
+											is-account-admin="account.isAdmin"
+											model="model"
+											project="project"
+											user-account="vm.account"
+											on-upload-file="vm.uploadFile(model)"
+											uploaded-file="vm.uploadedFile"
+											model-to-upload="vm.modelToUpload"
+											on-show-page="vm.showPage(page, callingPage)"
+											on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
+											quota="vm.quota"
+											subscriptions="vm.subscriptions")
 
 								div(ng-click="vm.toggleDefault('feds')")
 									md-list-item.tree-node(flex)
@@ -114,11 +129,14 @@
 											md-icon.angular-material-icons folder_open 
 										p Federations
 
-								div(ng-if="vm.showDefault['feds']")
+								div(ng-if="vm.showDefault['feds']"
+									ng-repeat="(federationIndex, federation) in account.fedModels")
 									account-federations(
-									federations="account.fedModels",
-									account="account",
-									accounts="vm.accounts")
+										ng-if="!federation.project"
+										federation="federation"
+										federationIndex="federationIndex",
+										account="account",
+										accounts="vm.accounts")
 									p(ng-if="!account.fedModels.length") No federations created
 
 md-divider
@@ -126,7 +144,7 @@ md-divider
 div(layout="row" flex layout-align="end center")
 	#floating-button(layout="column" ng-if="vm.addButtons")
 		md-button(layout="row" ng-click="vm.newModel($event, vm.accounts)") Add Model
-		md-button(layout="row" ng-click="vm.setupNewFederation($event, accountIndex)") Add Federation 
+		md-button(layout="row" ng-click="vm.setupNewFederation($event, vm.accounts)") Add Federation 
 		md-button(layout="row") Add Project
 div(layout="row" flex layout-align="end center")
 	md-button.md-accent.md-fab.md-mini(aria-label="Add", ng-click="vm.addButtonsToggle()")

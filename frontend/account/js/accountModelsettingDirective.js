@@ -49,8 +49,9 @@
 		 console.log('data', vm.data);
 
 		vm.goBack = function () {
-			$location.search("model", null);
-			$location.search("targetAcct", null);
+		
+			// $location.search("model", null);
+			// $location.search("targetAcct", null);
 
 			vm.showPage({page: "teamspaces", data: vm.data});
 		};

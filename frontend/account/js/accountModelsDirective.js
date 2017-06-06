@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountModelsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService"];
+	AccountModelsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "Auth", "AccountDataService"];
 
-	function AccountModelsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService) {
+	function AccountModelsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, Auth, AccountDataService) {
 		var vm = this,
 			existingModelToUpload,
 			existingModelFileUploader,
@@ -81,6 +81,7 @@
 			if (node[prop] === undefined) {
 				node[prop] = false;
 			}
+
 			return node[prop];
 		}
 
@@ -147,7 +148,17 @@
 		};
 
 		vm.getFederations = function(models) {
-			return models.filter(function() { return models.federate });
+			var feds = models.filter(function(model) { return model.subModels });
+			return feds
+		}
+
+		vm.getNoneFederations = function(models) {
+			return models.filter(function(model) { return !model.subModels });
+		}
+
+		vm.getProjects = function(teamspace) {
+			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
+			return projects;
 		}
 
 		vm.addButtons = false;
@@ -158,18 +169,37 @@
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
 		}
 
-		vm.getProjectsByTeamspaceName = function(name) {
-
-			var projects = [];
-			vm.accounts.forEach(function(teamspace){
-				if (teamspace.name === name) {
-					projects = teamspace.projects
-				}
-			})
-			return projects
-	
+		vm.getPotentialFederationModels = function() {
+			var models = AccountDataService.getNoneFederations(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
+			return AccountDataService.getNoneFederatedModels(vm.federationData, models)
 		}
 
+
+		vm.removeFromFederation = function (modelName) {
+			AccountDataService.removeFromFederation(vm.federationData, modelName);
+		};
+
+		/**
+		 * Add a model to a federation
+		 *
+		 * @param modelIndex
+		 */
+		vm.addToFederation = function (modelIndex, teamspaceName, models) {
+
+			vm.showRemoveWarning = false;
+
+			vm.federationData.subModels.push({
+				database: teamspaceName,
+				modelIndex: modelIndex,
+				model: models[modelIndex].model
+			});
+
+			models[modelIndex].federate = true;
+
+		};
+
+
+		// new models
 		vm.teamspaceAndProjectSelected = false;
 
 		$scope.$watch("vm.newModelData.teamspace", function (newValue) {
@@ -187,7 +217,32 @@
 				vm.teamspaceAndProjectSelected = false;
 			}
 		});
+
+
+		// New federations
+
+		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
+		var dialogCloseToId = "#" + vm.dialogCloseTo;
+		vm.fedTeamspaceAndProjectSelected = false;
 		
+		$scope.$watch("vm.federationData.teamspace", function (newValue) {
+			if (newValue && vm.federationData.project) {
+				vm.fedTeamspaceAndProjectSelected = true;
+			} else {
+				vm.fedTeamspaceAndProjectSelected = false;
+			}
+		});
+
+		$scope.$watch("vm.federationData.project", function (newValue) {
+			if (newValue && vm.federationData.teamspace) {
+				vm.fedTeamspaceAndProjectSelected = true;
+			} else {
+				vm.fedTeamspaceAndProjectSelected = false;
+			}
+		});
+
+		// vm.showRemoveWarning = true;
+
 
 		/*
 		 * Added data to accounts and models for UI
@@ -195,8 +250,6 @@
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
 
-			console.debug("vm.accounts has changed")
-	
 			if (angular.isDefined(vm.accounts)) {
 
 				vm.showProgress = false;
@@ -209,9 +262,9 @@
 
 					if (vm.accounts[i].projects) {
 
-						vm.accounts[i].projects.forEach(function(project){
-							project.showProject = false;
-						})
+						// vm.accounts[i].projects.forEach(function(project){
+						// 	project.showProject = false;
+						// })
 					}
 					
 					// Always show user account
@@ -222,22 +275,22 @@
 					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
 
 					if(vm.accounts[i].isAdmin){
-						console.log("Is admin")
-						NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
-							vm.newModelFileToUpload = null;
-							vm.modelsExist = true;
-							// Add model to list
-							var model = {
-								model: data.model,
-								permissions: data.permissions,
-								canUpload: true,
-								timestamp: null
-							};
-							console.log("vm.watch - updateAccountModels");
-							updateAccountModels(data.account, model);
-							$scope.$apply();
+						//console.log("Is admin")
+						// NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
+						// 	vm.newModelFileToUpload = null;
+						// 	vm.modelsExist = true;
+						// 	// Add model to list
+						// 	var model = {
+						// 		model: data.model,
+						// 		permissions: data.permissions,
+						// 		canUpload: true,
+						// 		timestamp: null
+						// 	};
+						// 	//console.log("vm.watch - updateAccountModels");
+						// 	updateAccountModels(data.account, model);
+						// 	$scope.$apply();
 
-						});
+						// });
 					}
 				}
 			}
@@ -246,11 +299,11 @@
 		/*
 		 * Watch the new model type
 		 */
-		$scope.$watch("vm.newModelData.type", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showModelTypeOtherInput = (newValue.toString() === "Other");
-			}
-		});
+		// $scope.$watch("vm.newModelData.type", function (newValue) {
+		// 	if (angular.isDefined(newValue)) {
+		// 		vm.showModelTypeOtherInput = (newValue.toString() === "Other");
+		// 	}
+		// });
 
 		/*
 		 * Watch new model data
@@ -260,7 +313,6 @@
 		$scope.$watch('{a : vm.newModelData, b: vm.newModelFileToUpload.name}', function (data){
 
 			var newValue = vm.newModelData;
-
 
 			if (angular.isDefined(newValue)) {
 				vm.newModelButtonDisabled =
@@ -300,13 +352,52 @@
 		/*
 		 * Watch new database name
 		 */
-		$scope.$watch("vm.newDatabaseName", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.newDatabaseButtonDisabled =
-					(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
-			}
+		// $scope.$watch("vm.newDatabaseName", function (newValue) {
+		// 	if (angular.isDefined(newValue)) {
+		// 		vm.newDatabaseButtonDisabled =
+		// 			(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
+		// 	}
+		// }, true);
+
+		/**
+		 * Remove a model from a federation
+		 *
+		 * @param index
+		 */
+
+
+
+		/*
+		 * Watch for change in edited federation
+		 */
+		$scope.$watch("vm.federationData", function (oldVal, newVal) {
+
+			// if (vm.federationOriginalData === null) {
+			// 	vm.newFederationButtonDisabled = (angular.isUndefined(vm.federationData.model)) ||
+			// 									 (vm.federationData.model === "" || !vm.federationData.unit);
+			// }
+			// else {
+			// 	vm.newFederationButtonDisabled = angular.equals(vm.federationData, vm.federationOriginalData);
+			// }
 		}, true);
 
+
+		/**
+		 * Open the federation dialog
+		 *
+		 * @param event
+		 */
+		vm.setupNewFederation = function (event, accounts) {
+
+			vm.federationOriginalData = null;
+			vm.federationData = {
+				desc: "",
+				type: "",
+				subModels: []
+			};
+			vm.errorMessage = '';
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		};
 
 		/**
 		 * Bring up dialog to add a new model
@@ -331,6 +422,65 @@
 			UtilsService.closeDialog();
 		};
 
+
+		/**
+		 * Save a federation
+		 */
+		vm.saveFederation = function (teamspaceName, projectName) {
+			var promise;
+			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
+			var isEdit = vm.federationData._isEdit
+
+			if (isEdit) {
+				delete vm.federationData._isEdit;
+				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+			} else {
+				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+			}
+			
+			promise.then(function (response) {
+				
+				if(response.status !== 200 && response.status !== 201){
+					vm.errorMessage = response.data.message;
+				} else {
+					vm.errorMessage = '';
+					vm.showInfo = false;
+					vm.federationData.teamspace = teamspaceName;
+					vm.federationData.project = projectName;
+					vm.federationData.federate = true;
+					vm.federationData.timestamp = (new Date()).toString();
+					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
+					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
+
+					// TODO: This should exist - backend problem : ISSUE_371
+					if (!isEdit) {
+						project.models.push(vm.federationData);
+					}
+		
+					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Model',
+						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
+						eventLabel: 'federation'
+					});
+				}
+
+			});
+
+			$timeout(function () {
+				$scope.$apply();
+			});
+		};
+
+		/**
+		 * Reset federation data back to empty object
+		 */
+		vm.resetFederationData = function() {
+			vm.federationData = {};
+		}
+
+
 		/**
 		 * Save a new model
 		 */
@@ -351,6 +501,8 @@
 
 			if (doSave) {
 
+				console.log("Project: ", vm.newModelData.project);
+
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
 					vm.showNewModelErrorMessage = true;
 					vm.newModelErrorMessage = 'Invalid revision name';
@@ -365,7 +517,7 @@
 
 				promise = AccountService.newModel(vm.newModelData);
 				promise.then(function (response) {
-					console.log(response);
+					//console.log(response);
 					if (response.data.status === 400) {
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = response.data.message;
@@ -375,11 +527,12 @@
 						// Add model to list
 						model = {
 							model: response.data.model,
+							project : vm.newModelData.project,
 							permissions: response.data.permissions,
 							canUpload: true,
 							timestamp: null
 						};
-						console.log("saveNewModel - updateAccountModels")
+						//console.log("saveNewModel - updateAccountModels")
 						updateAccountModels(response.data.account, model, vm.newModelData.project);
 						vm.closeDialog();
 
@@ -428,7 +581,6 @@
 		vm.saveNewDatabase = function () {
 			var promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
 			promise.then(function (response) {
-				console.log(response);
 				vm.newDatabaseToken = response.data.token;
 				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
 			});
@@ -466,24 +618,19 @@
 		 * Delete model
 		 */
 		vm.delete = function () {
-			console.log("Calling delete")
+
 			var i, iLength, j, jLength,
 				promise;
 			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 
-					console.log("Attempting to delete")
-
 					// Remove model from list
 					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
-						console.log(vm.accounts[i]);
+				
 						if (vm.accounts[i].name === response.data.account) {
-
-							console.log("Teamspace found")
 							if (vm.projectToDeleteFrom) {
 								// If we have a project
-								console.log("projectToDeleteFrom", vm.projectToDeleteFrom)
 								vm.accounts[i].projects.forEach(function(project) {
 									if (project === vm.projectToDeleteFrom) {
 										project.models.forEach(function(model, i) {

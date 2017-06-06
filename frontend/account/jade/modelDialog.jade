@@ -16,7 +16,7 @@ md-dialog.newModelDialog(aria-label="New model")
 			md-input-container(ng-if="vm.newModelData.teamspace !== undefined")
 				md-select(placeholder="Project", tdr-focus="true", ng-model="vm.newModelData.project", ng-keypress="vm.saveNewModel($event)")
 					md-option(
-						ng-repeat="project in vm.getProjectsByTeamspaceName(vm.newModelData.teamspace)",
+						ng-repeat="project in AccountDataService.getProjectsByTeamspaceName(vm.accounts, vm.newModelData.teamspace)",
 						value="{{project.name}}") {{project.name}}
 			
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")

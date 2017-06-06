@@ -65,7 +65,6 @@
 			dialogCloseToId;
 
 		// Init
-
 		vm.modelToUpload = null;
 		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
@@ -199,7 +198,8 @@
 				case "modelsetting":
 					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces", data: {tabIndex: 0}});
+					console.log("Showing page")
+					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 					break;
 
 				case "upload":
