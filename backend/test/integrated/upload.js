@@ -63,7 +63,7 @@ describe('Uploading a model', function () {
 					agent.post(`/${username}/${model}`)
 					.send({ type, desc, unit })
 					.expect(200, function(err, res){
-						modelId = res.body._id;
+						modelId = res.body.model;
 						done(err);
 					});
 				}

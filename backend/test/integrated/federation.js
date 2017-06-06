@@ -126,8 +126,8 @@ describe('Federated Model', function () {
 				return done(err);
 			}
 
-			expect(res.body.model).to.equal(fedModelName);
-			fedModelId = res.body._id;
+			expect(res.body.name).to.equal(fedModelName);
+			fedModelId = res.body.model;
 
 			async.series([
 				done => {
@@ -173,8 +173,8 @@ describe('Federated Model', function () {
 				return done(err);
 			}
 
-			expect(res.body.model).to.equal(emptyFed);
-			emptyFedId = res.body._id;
+			expect(res.body.name).to.equal(emptyFed);
+			emptyFedId = res.body.model;
 
 
 			async.series([

@@ -89,7 +89,7 @@ describe('Default permission assignment', function () {
 		agent.post(`/${username}/model1`)
 		.send({unit: 'm'})
 		.expect(200, function(err, res){
-			modelId = res.body._id;
+			modelId = res.body.model;
 			done(err);
 		});
 	});

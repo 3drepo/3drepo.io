@@ -5,7 +5,7 @@
 > Example request
 
 ```http
-GET /repoman/model1.json HTTP/1.1
+GET /repoman/00000000-0000-0000-0000-000000000000.json HTTP/1.1
 ```
 
 > Example response
@@ -44,7 +44,7 @@ GET /repoman/model1.json HTTP/1.1
 }
 ```
 
-### GET /{accountName}/{modelName}.json
+### GET /{accountName}/{modelId}.json
 
 Get model information
 
@@ -95,7 +95,7 @@ label |
 > Example request
 
 ```http
-PUT /repoman/model1/settings HTTP/1.1
+PUT /repoman/00000000-0000-0000-0000-000000000000/settings HTTP/1.1
 ```
 ```json
 {
@@ -140,7 +140,7 @@ PUT /repoman/model1/settings HTTP/1.1
 }
 ```
 
-### PUT /{accountName}/{modelName}/settings
+### PUT /{accountName}/{modelId}/settings
 
 Update model settings.
 
@@ -162,7 +162,7 @@ POST /repoman/model1 HTTP/1.1
 	"unit": "m",
 	"subModels": [{
 		"database": "repoman",
-		"model": "model11"
+		"model": "00000000-0000-0000-0000-000000000001"
 	}],
 	"project": "project1"
 
@@ -174,7 +174,8 @@ POST /repoman/model1 HTTP/1.1
 ```json
 {
     "account":"repoman",
-    "model":"model1",
+    "model":"00000000-0000-0000-0000-000000000000",
+    "name": "model1",
     "permissions":[
         "change_model_settings",
         "upload_files",
@@ -218,14 +219,14 @@ project |  No | project this model belongs to
 > Example request
 
 ```http
-PUT /repoman/model1 HTTP/1.1
+PUT /repoman/00000000-0000-0000-0000-000000000000 HTTP/1.1
 ```
 ```json
 { "subModels" : 
 	[
 		{
 			"database": "repoman",
-			"model": "model2"
+			"model": "00000000-0000-0000-0000-000000000001"
 		}
 	]
 }
@@ -236,11 +237,11 @@ PUT /repoman/model1 HTTP/1.1
 ```json
 {
 	"account": "repoman"
-	"model": "model1"
+	"model": "00000000-0000-0000-0000-000000000000"
 }
 ```
 
-### PUT /{accountName}/{modelName}
+### PUT /{accountName}/{modelID}
 
 Update a model. This API is used to update sub models in a federated model only.
 
@@ -263,7 +264,7 @@ model   | model name
 > Example request
 
 ```http
-POST /repoman/model1/upload HTTP/1.1
+POST /repoman/00000000-0000-0000-0000-000000000000/upload HTTP/1.1
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
 
 ------WebKitFormBoundarySos0xligf1T8Sy8I
@@ -288,7 +289,7 @@ el paso
 {"status":"uploaded"}
 ```
 
-### POST /{accountName}/{modelName}/upload
+### POST /{accountName}/{modelID}/upload
 
 Upload a model. Only multipart/form-data content type will be accepted.
 
@@ -306,7 +307,7 @@ desc | No | revision description
 > Example request
 
 ```http
-GET /repoman/model1/download/latest HTTP/1.1
+GET /repoman/00000000-0000-0000-0000-000000000000/download/latest HTTP/1.1
 ```
 
 > Example response
@@ -320,7 +321,7 @@ Content-Type: binary/octet-stream
 <binary content>
 ```
 
-### GET /{accountName/{modelName}/download/latest
+### GET /{accountName/{modelID}/download/latest
 
 Download model of latest revision
 
@@ -329,7 +330,7 @@ Download model of latest revision
 > Example request
 
 ```http
-DELETE /repoman/model1 HTTP/1.1
+DELETE /repoman/00000000-0000-0000-0000-000000000000 HTTP/1.1
 ```
 
 > Example response
@@ -337,12 +338,12 @@ DELETE /repoman/model1 HTTP/1.1
 ```json
 {
 	"account": "repoman",
-	"model": "model1"
+	"model": "00000000-0000-0000-0000-000000000000"
 }
 
 ```
 
-### DELETE /{accountName}/{modelName}
+### DELETE /{accountName}/{modelID}
 
 Delete a model.
 
@@ -351,7 +352,7 @@ Delete a model.
 > Example request
 
 ```http
-GET /repoman/model1/permissions HTTP/1.1
+GET /repoman/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
 ```
 
 > Example response
@@ -365,7 +366,7 @@ GET /repoman/model1/permissions HTTP/1.1
 ]
 ```
 
-### GET /{accountName}/{modelName}/permissions
+### GET /{accountName}/{modelID}/permissions
 
 Get list of permissions of this model assigned to users.
 
@@ -384,7 +385,7 @@ permission      | ID of [a permission template](#permission-template)
 > Example request
 
 ```http
-POST /repoman/model1/permissions HTTP/1.1
+POST /repoman/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
 ```
 ```json
 [
@@ -414,7 +415,7 @@ POST /repoman/model1/permissions HTTP/1.1
 ]
 ```
 
-### POST /{accountName}/{modelName}/permissions
+### POST /{accountName}/{modelID}/permissions
 
 Update permissions assigned users for this model.
 
@@ -431,7 +432,7 @@ that particular model permission object.
 
 ## Get all jobs
 
-### GET /{accountName}/{modelName}/jobs.json
+### GET /{accountName}/{modelID}/jobs.json
 
 Same as [Get all jobs](#get-all-jobs) for an account.
 
@@ -443,7 +444,7 @@ have access to the [Get all jobs](#get-all-jobs) for an account API.
 > Example request 
 
 ```http
-GET /repoman/model1/userJobForModel HTTP/1.1
+GET /repoman/00000000-0000-0000-0000-000000000000/userJobForModel HTTP/1.1
 ```
 
 >Example response
@@ -451,7 +452,7 @@ GET /repoman/model1/userJobForModel HTTP/1.1
 ```json
 {"_id":"Actor", "color": "#000000"}
 ```
-### GET /{accountName}/{modelName}/userJobForModel.json
+### GET /{accountName}/{modelID}/userJobForModel.json
 
 Get the job assigned to user for this team space
 

@@ -550,7 +550,18 @@ function _getAllModels(accountName, permissions){
 			);
 		});
 
-		return Promise.all(promises).then(() => { return {models, fedModels}; });
+		return Promise.all(promises).then(() => {
+			// fill in sub model name
+			fedModels.forEach(fedModel => {
+				fedModel.subModels.forEach(subModel => {
+					const model = models.find(m => m.model === subModel.model);
+					if(model){
+						subModel.name = model.name;
+					}
+				});
+			});
+
+		}).then(() => { return {models, fedModels}; });
 	});
 }
 

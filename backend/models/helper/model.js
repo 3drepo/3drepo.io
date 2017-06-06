@@ -182,8 +182,8 @@ function createAndAssignRole(modelName, account, username, data) {
 
 		let modelData = {
 			account,
-			model: modelName,
-			_id: model.toString(),
+			model:  model.toString(),
+			name: modelName,
 			permissions: C.MODEL_PERM_LIST
 		};
 
