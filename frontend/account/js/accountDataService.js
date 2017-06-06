@@ -25,14 +25,10 @@
 
 	function AccountDataService() {
 	
-	
+
 		/** FEDERATIONS */
 
-		var federationData = {};
 
-		var resetFederationData = function() {
-			federationData = {};
-		}
 
 
 		/** HELPERS */
@@ -81,7 +77,7 @@
 			
 		};
 
-		var getNoneFederations = function(accounts, teamspace, project) {
+		var getInividualModels = function(accounts, teamspace, project) {
 
 			return getModels(accounts, teamspace, project)
 			.filter(function(model) {
@@ -120,7 +116,7 @@
             getProject : getProject,
             getProjectsByTeamspaceName : getProjectsByTeamspaceName,
             getTeamspaceByName : getTeamspaceByName,
-			getNoneFederations : getNoneFederations,
+			getInividualModels : getInividualModels,
 			removeFromFederation: removeFromFederation
 
         };

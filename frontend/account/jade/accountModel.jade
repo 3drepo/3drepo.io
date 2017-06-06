@@ -11,7 +11,7 @@ div(layout="row", layout-align="start center", flex)
 		p.modelName.md-list-item-text(flex="100"){{vm.model.name}}
 
 	.modelRight(layout="row", layout-align="start center")
-		//.modelUploadInfo(layout="row", layout-align="start center")
+		.modelUploadInfo(layout="row", layout-align="start center")
 			p.modelUploadFilename {{vm.uploadFileName}}
 			p.modelUploadInfo() {{vm.fileUploadInfo}}
 			md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.model.uploading")
@@ -25,5 +25,5 @@ div(layout="row", layout-align="start center", flex)
 				md-menu-item(ng-repeat="(key, value) in vm.modelOptions", ng-if="!value.hidden")
 					md-button(ng-click="vm.doModelOption($event, key)")
 						div(layout="row", flex)
-							p(flex, style="color:{{value.color}}") {{value.label}}
+							span(flex, style="color:{{value.color}}") {{value.label}}
 							md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}

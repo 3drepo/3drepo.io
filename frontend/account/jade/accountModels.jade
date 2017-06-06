@@ -45,7 +45,7 @@
 										p Models
 								
 								div(ng-if="vm.shouldShowModels(project)")
-									div(ng-repeat="model in vm.getNoneFederations(project.models)")
+									div(ng-repeat="model in vm.getInividualModels(project.models)")
 										
 										account-model(
 										account="account.name"

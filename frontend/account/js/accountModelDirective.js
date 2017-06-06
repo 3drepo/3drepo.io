@@ -55,9 +55,9 @@
 	}
 
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -198,7 +198,6 @@
 				case "modelsetting":
 					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
-					console.log("Showing page")
 					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 					break;
 
@@ -264,7 +263,6 @@
 		vm.selectFile = function(){
 			vm.onUploadFile({model: vm.model, account: vm.account});
 		};
-
 
 		/**
 		 * When users click upload after selecting

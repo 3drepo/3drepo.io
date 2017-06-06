@@ -147,12 +147,11 @@
 			return vm.getFederations(models).length > 0;
 		};
 
-		vm.getFederations = function(models) {
-			var feds = models.filter(function(model) { return model.subModels });
-			return feds
+		vm.getFederations = function(models) { 
+			return models.filter(function(model) { return model.subModels });
 		}
 
-		vm.getNoneFederations = function(models) {
+		vm.getInividualModels = function(models) {
 			return models.filter(function(model) { return !model.subModels });
 		}
 
@@ -170,7 +169,7 @@
 		}
 
 		vm.getPotentialFederationModels = function() {
-			var models = AccountDataService.getNoneFederations(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
+			var models = AccountDataService.getInividualModels(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
 			return AccountDataService.getNoneFederatedModels(vm.federationData, models)
 		}
 
@@ -652,6 +651,7 @@
 						
 						}
 					}
+					$scope.$applyN
 					vm.closeDialog();
 
 					AnalyticService.sendEvent({
@@ -661,6 +661,8 @@
 				}
 				else {
 					vm.deleteError = "Error deleting model";
+					if (response.status === 404) vm.deleteError += " : File not found"
+					if (response.status === 500) vm.deleteError += " : There was a problem on the server"
 				}
 			});
 		};

@@ -80,6 +80,10 @@ account-models .models md-icon {
 account-models .models md-icon {
   margin: 0 !important;
 }
+account-models .modelTimestamp {
+  margin-left: 20px;
+}
+
 account-models .models .modelTimestamp {
   color: rgba(0, 0, 0, 0.3);
   margin-left: 20px;
