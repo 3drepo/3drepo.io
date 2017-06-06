@@ -38,7 +38,6 @@ describe('Model', function () {
 	let username = 'project_username';
 	let password = 'project_username';
 	let model = 'model12345';
-	let modelFed = 'projectFed1';
 	let project = 'projectgroup'
 	let desc = 'desc';
 	let type = 'type';
@@ -81,7 +80,6 @@ describe('Model', function () {
 				agent.post(`/${username}/${model}`)
 				.send({ desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
-					console.log(res.body);
 					expect(res.body.model).to.equal(model);
 					callback(err);
 				});
@@ -105,13 +103,15 @@ describe('Model', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
+					console.log(account);
+
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
 
-					console.log(pg);
-
 					const myModel = pg.models.find(_model => _model.model === model);
+
 					expect(myModel).to.exist;
+					expect(myModel.model).to.equal(model);
 
 					callback(err);
 				});
@@ -120,6 +120,23 @@ describe('Model', function () {
 
 	});
 
+	it('model added to a project should be listed on top level models array', function(done){
+
+		agent.get(`/${username}.json`)
+		.expect(200, function(err, res){
+
+			const account = res.body.accounts.find(account => account.account === username);
+			expect(account).to.exist;
+
+			let myModel = account.models.find(_model => _model.model === model);
+			expect(myModel).to.not.exist;
+
+			myModel = account.fedModels.find(_model => _model.model === model);
+			expect(myModel).to.not.exist;
+
+			done(err);
+		});
+	});
 
 	it('should fail if project supplied is not found', function(done){
 

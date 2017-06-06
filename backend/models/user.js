@@ -565,20 +565,21 @@ function _addProjects(account){
 
 			projects[i] = project;
 
+			const findModel = model => (m, i, models) => {
+				if (m.model === model){
+					models.splice(i, 1);
+					return true;
+				}
+			};
+
 			project.models.forEach((model, i) => {
 
-				let fullModel = account.models.find(model => model.model === model);
-
-				if(!fullModel){
-					fullModel = account.fedModels.find(model => model.model === model);
-				}
-
-				if(!fullModel){
-					fullModel = { model: model};
-				}
-
+				let fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
 				project.models[i] = fullModel;
+
 			});
+
+			project.models = _.compact(project.models);
 
 		});
 
