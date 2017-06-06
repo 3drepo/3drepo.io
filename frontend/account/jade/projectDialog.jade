@@ -1,0 +1,16 @@
+md-dialog.newModelDialog(aria-label="New project")
+	md-toolbar
+		.md-toolbar-tools
+			h2(ng-if="vm.isNewProject") New Project
+			h2(ng-if="!vm.isNewProject") Edit Project
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		div(layout="column")
+			md-input-container
+				input(placeholder="Project", tdr-focus="true", ng-model="vm.newProjectName")
+
+		md-input-container()
+					md-button.md-raised.md-accent(ng-disabled="!vm.newProjectName", ng-click="vm.saveNewProject(vm.newProjectName)") Save
+

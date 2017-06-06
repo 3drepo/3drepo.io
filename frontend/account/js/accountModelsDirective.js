@@ -421,6 +421,50 @@
 			UtilsService.closeDialog();
 		};
 
+		vm.newProject = function() {
+			vm.isNewProject = true;
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
+		}
+
+		vm.editProject = function(projectName) {
+			vm.isNewProject = false;
+			vm.currentProject = projectName;
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
+		}
+
+		vm.saveProject = function(accountName, newProjectName, oldProjectName) {
+			if (oldProjectName) {
+				vm.updateProject(accountName, oldProjectName, newProjectName)
+			} else {
+				vm.saveNewProject(accountName, newProjectName)
+			}
+		}
+
+		vm.saveNewProject = function(accountName, projectName) {
+			var promise = UtilsService.doPost({"name": projectName}, accountName + "/projects/");
+			vm.handleProjectPromise(promise);
+		}
+
+		vm.updateProject = function(accountName, oldProjectName, newProjectName) {
+			var promise = UtilsService.doPut({"name": newProjectName}, accountName + "/projects/" + oldProjectName);
+			vm.handleProjectPromise(promise);
+		}
+
+		vm.handleProjectPromise = function(promise) {
+			console.log("Handling promise")
+			promise.then(function (response) {
+				
+				if(response.status !== 200 && response.status !== 201){
+					vm.errorMessage = response.data.message;
+				} else {
+					vm.errorMessage = '';
+					vm.closeDialog();
+				}
+
+			});
+
+		}
+
 
 		/**
 		 * Save a federation
