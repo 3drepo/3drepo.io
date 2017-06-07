@@ -69,6 +69,14 @@ account-models .tree-node:hover{
   background: #EEE;
 }
 
+account-models .projectName {
+  color: #4CAF50;
+}
+
+account-models md-list-item.tree-node > div {
+    padding-left: 0px;
+}
+
 account-models .tree-branch {
   margin-left: 20px;
 }

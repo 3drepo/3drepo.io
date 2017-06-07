@@ -298,17 +298,15 @@
 		/*
 		 * Watch the new model type
 		 */
-		// $scope.$watch("vm.newModelData.type", function (newValue) {
-		// 	if (angular.isDefined(newValue)) {
-		// 		vm.showModelTypeOtherInput = (newValue.toString() === "Other");
-		// 	}
-		// });
+		$scope.$watch("vm.newModelData.type", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showModelTypeOtherInput = (newValue.toString() === "Other");
+			}
+		});
 
 		/*
 		 * Watch new model data
 		 */
-
-
 		$scope.$watch('{a : vm.newModelData, b: vm.newModelFileToUpload.name}', function (data){
 
 			var newValue = vm.newModelData;
@@ -325,8 +323,6 @@
 				if(!newValue.unit){
 					vm.newModelButtonDisabled = true;
 				}
-				
-			
 			}
 
 
@@ -349,35 +345,10 @@
 		}, true);
 
 		/*
-		 * Watch new database name
-		 */
-		// $scope.$watch("vm.newDatabaseName", function (newValue) {
-		// 	if (angular.isDefined(newValue)) {
-		// 		vm.newDatabaseButtonDisabled =
-		// 			(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
-		// 	}
-		// }, true);
-
-		/**
-		 * Remove a model from a federation
-		 *
-		 * @param index
-		 */
-
-
-
-		/*
 		 * Watch for change in edited federation
 		 */
 		$scope.$watch("vm.federationData", function (oldVal, newVal) {
 
-			// if (vm.federationOriginalData === null) {
-			// 	vm.newFederationButtonDisabled = (angular.isUndefined(vm.federationData.model)) ||
-			// 									 (vm.federationData.model === "" || !vm.federationData.unit);
-			// }
-			// else {
-			// 	vm.newFederationButtonDisabled = angular.equals(vm.federationData, vm.federationOriginalData);
-			// }
 		}, true);
 
 
@@ -421,49 +392,7 @@
 			UtilsService.closeDialog();
 		};
 
-		vm.newProject = function() {
-			vm.isNewProject = true;
-			UtilsService.showDialog("projectDialog.html", $scope, event, true);
-		}
-
-		vm.editProject = function(projectName) {
-			vm.isNewProject = false;
-			vm.currentProject = projectName;
-			UtilsService.showDialog("projectDialog.html", $scope, event, true);
-		}
-
-		vm.saveProject = function(accountName, newProjectName, oldProjectName) {
-			if (oldProjectName) {
-				vm.updateProject(accountName, oldProjectName, newProjectName)
-			} else {
-				vm.saveNewProject(accountName, newProjectName)
-			}
-		}
-
-		vm.saveNewProject = function(accountName, projectName) {
-			var promise = UtilsService.doPost({"name": projectName}, accountName + "/projects/");
-			vm.handleProjectPromise(promise);
-		}
-
-		vm.updateProject = function(accountName, oldProjectName, newProjectName) {
-			var promise = UtilsService.doPut({"name": newProjectName}, accountName + "/projects/" + oldProjectName);
-			vm.handleProjectPromise(promise);
-		}
-
-		vm.handleProjectPromise = function(promise) {
-			console.log("Handling promise")
-			promise.then(function (response) {
-				
-				if(response.status !== 200 && response.status !== 201){
-					vm.errorMessage = response.data.message;
-				} else {
-					vm.errorMessage = '';
-					vm.closeDialog();
-				}
-
-			});
-
-		}
+		
 
 
 		/**
@@ -544,7 +473,6 @@
 
 			if (doSave) {
 
-				console.log("Project: ", vm.newModelData.project);
 
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
 					vm.showNewModelErrorMessage = true;
@@ -731,7 +659,6 @@
 		 * @param model
 		 */
 		function updateAccountModels (account, model, projectName) {
-			console.log("updateAccountModels", account, model)
 
 			var i, length,
 				accountToUpdate;
@@ -755,7 +682,7 @@
 				}
 			}
 			if (angular.isUndefined(accountToUpdate)) {
-				console.log("updateAccountModels - isUndefined")
+
 				accountToUpdate = {
 					name: account,
 					models: [model],
@@ -771,5 +698,115 @@
 				});
 			}
 		}
+
+		// PROJECT SPECIFIC CODE
+
+		vm.projectOptions = {
+			edit: {
+				label: "Edit", 
+				icon: "edit", 
+			},
+			delete: {
+				label: "Delete", 
+				icon: "delete", 
+			},
+		}
+
+
+		vm.doProjectOption = function(option, project, teamspace) {
+			switch (option) {
+				case "delete":
+					vm.projectDeleteName = project.name;
+					vm.projectDeleteTeamspace = teamspace.name;
+					vm.deleteWarning = "This will remove the project from your teamspace!";
+					UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);	
+					break;
+
+				case "edit":
+					vm.editProject(project, teamspace);
+					break;
+			}
+		}
+
+		vm.newProject = function() {
+			vm.projectTeamspaceDialog = "";
+			vm.newProjectName = "";
+			vm.oldProjectName = "";
+			vm.errorMessage = '';
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
+		}
+
+		vm.editProject = function(project, teamspace) {
+			console.log(project)
+			vm.oldProjectName = project.name;
+			vm.projectTeamspaceDialog = teamspace.name;
+			vm.newProjectName = project.name;
+			vm.errorMessage = '';
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
+		}
+
+		vm.saveNewProject = function(teamspaceName, projectName) {
+			var promise = UtilsService.doPost({"name": projectName}, teamspaceName + "/projects/");
+			vm.handleProjectPromise(promise, teamspaceName, false);
+		}
+
+		vm.updateProject = function(teamspaceName, oldProjectName, newProjectName) {
+			var promise = UtilsService.doPut({"name": newProjectName}, teamspaceName + "/projects/" + oldProjectName);
+			vm.handleProjectPromise(promise, teamspaceName, {
+				edit  : true,
+				newProjectName: newProjectName, 
+				oldProjectName : oldProjectName
+			});
+		}
+
+		vm.deleteProject = function(teamspaceName, projectName) {
+			var promise = UtilsService.doDelete({}, teamspaceName + "/projects/" + projectName);
+			vm.handleProjectPromise(promise, teamspaceName, {
+				projectName : projectName,
+				delete: true
+			});
+		}
+
+		vm.handleProjectPromise = function(promise, teamspaceName, update) {
+			promise.then(function (response) {
+				
+				if(response.status !== 200 && response.status !== 201){
+					vm.errorMessage = response.data.message;
+				} else {
+
+					var project = response.data;
+					
+					if (update.edit) {
+						AccountDataService.renameProjectInTeamspace(
+							vm.accounts, 
+							teamspaceName, 
+							update.newProjectName, 
+							update.oldProjectName
+						);
+					} else if (update.delete) {
+						AccountDataService.removeProjectInTeamspace(
+							vm.accounts, 
+							teamspaceName, 
+							update.projectName, 
+						);
+					} else {
+						AccountDataService.addProjectToTeamspace(
+							vm.accounts, 
+							teamspaceName, 
+							project
+						);
+					}
+
+					vm.errorMessage = '';
+					delete vm.newProjectTeamspace;
+					delete vm.newProjectName;
+					vm.closeDialog();
+				}
+
+			});
+
+		}
+
+
 	}
 }());

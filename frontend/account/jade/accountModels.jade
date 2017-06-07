@@ -10,7 +10,8 @@
 				md-list-item.tree-node(flex)
 					.account(layout="row", layout-align="start center", md-ink-ripple, flex)
 						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons folder_open
+							md-icon.angular-material-icons(ng-if="vm.shouldShowTeamspace($index)") folder_open
+							md-icon.angular-material-icons(ng-if="!vm.shouldShowTeamspace($index)") folder
 						p {{account.account}}
 						md-icon.angular-material-icons.accountModelsSharedIcon(ng-if="!account.canAddModel") group
 
@@ -23,17 +24,31 @@
 					div(ng-click="vm.toggleProjects(account.projects)")
 						md-list-item.tree-node(flex, md-ink-ripple)
 							md-button.md-icon-button(aria-label="Folder")
-								md-icon.angular-material-icons folder_open 
+								md-icon.angular-material-icons(ng-if="vm.shouldShowProjects(account.projects)") folder_open
+								md-icon.angular-material-icons(ng-if="!vm.shouldShowProjects(account.projects)") folder
 							p Projects
 					
 					div(ng-if="vm.shouldShowProjects(account.projects)")
 						md-list.tree-branch(ng-repeat="project in account.projects")
 
-							div(ng-click="vm.toggleProject(project)")
+							div(ng-click="vm.toggleProject(project)" layout="row")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
-										md-icon.angular-material-icons folder_open 
-									p {{project.name}} 
+										md-icon.angular-material-icons(ng-if="vm.shouldShowModelsAndFeds(project)") folder_open
+										md-icon.angular-material-icons(ng-if="!vm.shouldShowModelsAndFeds(project)") folder 
+									p.projectName {{project.name}}
+
+								md-menu(md-position-mode="target-right target")
+									md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+										md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
+									md-menu-content(width="3")
+										md-menu-item(ng-repeat="(key, value) in vm.projectOptions")
+											md-button(ng-click="vm.doProjectOption(key, project, account)")
+												div(layout="row", flex)
+													span(flex, style="color:{{value.color}}") {{value.label}}
+													md-icon.angular-material-icons(
+														md-menu-align-target, 
+														style="color:{{value.color}}") {{value.icon}}
 
 							// Project Models and Federations
 							md-list.tree-branch(ng-if="vm.shouldShowModelsAndFeds(project)")
@@ -41,7 +56,8 @@
 								div(ng-click="vm.toggleModels(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons folder_open 
+											md-icon.angular-material-icons(ng-if="vm.shouldShowModels(project)") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.shouldShowModels(project)") folder
 										p Models
 								
 								div(ng-if="vm.shouldShowModels(project)")
@@ -67,7 +83,8 @@
 								div(ng-click="vm.toggleFederations(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons folder_open 
+											md-icon.angular-material-icons(ng-if="vm.shouldShowFeds(project)") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.shouldShowFeds(project)") folder
 										p Federations
 									
 								div(ng-if="vm.shouldShowFeds(project)")

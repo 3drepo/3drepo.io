@@ -25,17 +25,38 @@
 
 	function AccountDataService() {
 	
-
-		/** FEDERATIONS */
-
-
-
-
 		/** HELPERS */
-        var getProjectsByTeamspaceName = function(accounts, name) {
+
+		var removeProjectInTeamspace = function(teamspaces, teamspaceName, projectName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			teamspace.projects.forEach(function(project, i){
+				if (projectName === project.name) {
+					teamspace.projects.splice(i, 1);
+				}
+			});
+		}
+
+
+		var renameProjectInTeamspace = function(teamspaces, teamspaceName, newProjectName, oldProjectName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			teamspace.projects.forEach(function(project){
+				if (project.name === oldProjectName) {
+					project.name = newProjectName;
+				}
+			});
+		}
+
+
+		var addProjectToTeamspace = function(teamspaces, teamspaceName, project) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			teamspace.projects.push(project);
+		}
+
+
+        var getProjectsByTeamspaceName = function(teamspaces, name) {
 
 			var projects = [];
-			accounts.forEach(function(teamspace){
+			teamspaces.forEach(function(teamspace){
 				if (teamspace.name === name) {
 					projects = teamspace.projects
 				}
@@ -45,8 +66,8 @@
 	
 		}
 
-        var getTeamspaceByName = function(accounts, name) {
-			return accounts.filter(function(teamspace){
+        var getTeamspaceByName = function(teamspaces, name) {
+			return teamspaces.filter(function(teamspace){
 				return teamspace.name === name 
 			})[0];
 		}
@@ -77,9 +98,9 @@
 			
 		};
 
-		var getInividualModels = function(accounts, teamspace, project) {
+		var getInividualModels = function(teamspaces, teamspace, project) {
 
-			return getModels(accounts, teamspace, project)
+			return getModels(teamspaces, teamspace, project)
 			.filter(function(model) {
 				// Check it's not a federation itself
 				return !model.subModels;
@@ -110,6 +131,9 @@
 
 		var accountDataService = {
 
+			removeProjectInTeamspace : removeProjectInTeamspace,
+			renameProjectInTeamspace : renameProjectInTeamspace,
+			addProjectToTeamspace : addProjectToTeamspace,
 			isSubModel : isSubModel,
 			getNoneFederatedModels : getNoneFederatedModels,
             getModels : getModels,
