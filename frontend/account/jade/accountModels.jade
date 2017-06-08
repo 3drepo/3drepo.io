@@ -107,7 +107,7 @@
 
 
 						// Default - unassigned models and federations
-						//md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
+						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
 							div(ng-click="vm.toggleDefault('project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
@@ -142,6 +142,8 @@
 											quota="vm.quota"
 											subscriptions="vm.subscriptions")
 
+								p.no-federations(ng-if="account.models.length === 0") No unassigned models
+
 								div(ng-click="vm.toggleDefault('feds')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
@@ -163,7 +165,7 @@
 										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
 
-									p(ng-if="!account.fedModels.length") No federations created
+								p.no-federations(ng-if="account.fedModels.length === 0") No unassigned federations
 
 md-divider
 

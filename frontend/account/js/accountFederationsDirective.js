@@ -180,7 +180,7 @@
 			}
 			else {
 
-				$location.path("/" + account.name + "/" + model.name, "_self").search({});
+				$location.path("/" + account.name + "/" + model.model, "_self").search({});
 
 				AnalyticService.sendEvent({
 					eventCategory: 'Model',
@@ -210,6 +210,7 @@
 					break;
 
 				case "delete":
+					console.log("Delete")
 					setupDelete(event, account, project, federation);
 					break;
 
@@ -222,28 +223,27 @@
 		/**
 		 * Delete federation
 		 */
-		vm.delete = function (federation) {
+		vm.deleteModel = function (federation) {
 
 			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.deleteName);
 
 			promise.then(function (response) {
 				if (response.status === 200) {
-					//vm.accountsToUse[vm.currentAccountIndex].fedModels.splice(federationToDeleteIndex, 1);
-					//vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[vm.currentAccountIndex].fedModels.length === 0));
-
-					vm.accounts.forEach(function(account) {
-						if (account.name === vm.currentAccount.name) {
-							account.projects.forEach(function(project) {
-								if (project.name === vm.projectToDeleteFrom.name) {
-									project.models.forEach(function(model, i) {
-										if (model.model === vm.deleteName) {
-											project.models.splice(i, 1);
-										}
-									})
-								}
-							});
+					var account = vm.currentAccount;
+					if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
+						AccountDataService.removeModelByProjectName(vm.accounts, account.name, vm.projectToDeleteFrom.name, response.data.model);
+					} else {
+						
+						for (var j = 0; j < account.fedModels.length; j++) { 
+							console.log(account);
+							console.log("Deleting from default", account.fedModels[j].model, response.data.model);
+							if (account.fedModels[j].model === response.data.model) {
+								account.fedModels.splice(j, 1);
+								break;
+							}
 						}
-					})
+					}
+					
 	
 					vm.closeDialog();
 

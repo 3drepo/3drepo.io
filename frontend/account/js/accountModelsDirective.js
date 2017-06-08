@@ -54,23 +54,19 @@
 		vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.units = serverConfig.units;
 		vm.modelRegExp = serverConfig.modelNameRegExp;
+		
 		// Setup file uploaders
 		existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
-		existingModelFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.modelToUpload = this.files[0];
-				//vm.uploadedFile = {model: existingModelToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		existingModelFileUploader.addEventListener("change", function () {
+			vm.modelToUpload = this.files[0];
+			$scope.$apply();
+		}, false);
+
 		newModelFileUploader = $element[0].querySelector("#newModelFileUploader");
 		newModelFileUploader.addEventListener(
 			"change",
 			function () {
 				vm.newModelFileToUpload = this.files[0];
-
 				$scope.$apply();
 			},
 			false
@@ -88,17 +84,34 @@
 		
 		// HIDE / SHOW STATE
 
+		/**
+		 * Holding object for default/unassigned tree node hiding/showing
+		 */
 		vm.showDefault = {
 			project : false,
 			models : false,
 			feds : false
 		} 
 
+		/**
+		 * Get the show/hide state of a data object
+		 *
+		 * @param {Object} node The object to set the state on (true or false)
+		 * @param {String} prop The property to set (i.e. 'state')
+		 * @returns {Boolean} The state of the property (to show or hide)
+		 */
 		var getState = function(node, prop) {
 			if (node[prop] === undefined) node[prop] = false;
 			return node[prop];
 		}
 
+		/**
+		 * Check if a data object should be shown or hidden
+		 *
+		 * @param {Array} items The object to set the state on (true or false)
+		 * @param {String} type The type of the data object (project, projects, model, federation etc)
+		 * @returns {Boolean} The state of the property (to show or hide)
+		 */
 		vm.shouldShow = function(items, type) {
 			switch (type) {
 				// Special cases for models and federations
@@ -113,19 +126,36 @@
 			}
 		}
 
+		/**
+		 * Invert the state of a teamspace (to show or hide)
+		 * @param {Array} items The object to set the state on (true or false)
+		 */
 		vm.toggleTeamspace = function(teamspace) {
 			teamspace.state = !teamspace.state;
 		}
 
+		/**
+		 * Invert the state of a part of the default/unassigned tree 
+		 * @param {String} type 
+		 * @return {Boolean} if a part of the default tree should show or hide
+		 */
 		vm.toggleDefault = function(type) {
 			vm.showDefault[type] = !vm.showDefault[type];
 			return vm.showDefault[type];
 		}
 
+		/**
+		 * Invert the state of projects (to show or hide)
+		 * @param {Array} project The object to set the state on (true or false)
+		 */
 		vm.toggleProjects = function(projects) {
 			projects.state = !projects.state;
 		}
 
+		/**
+		 * Invert the state of a project and sub projects (to show or hide)
+		 * @param {Array} project The object to set the state on (true or false)
+		 */
 		vm.toggleProject = function(project) {
 			project.state = !project.state;
 			project.models.forEach(function(model) {
@@ -134,10 +164,18 @@
 			});
 		}
 
+		/**
+		 * Invert the models node
+		 * @param {Object} project the project to invert the models for 
+		 */
 		vm.toggleModels = function(project) {
 			project.modelsState = !project.modelsState;
 		}
 
+		/**
+		 * Invert the federations node
+		 * @param {Object} project the project to invert the federations for 
+		 */
 		vm.toggleFederations = function(project) {
 			project.fedsState = !project.fedsState;
 		}
@@ -266,23 +304,6 @@
 
 		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
 		var dialogCloseToId = "#" + vm.dialogCloseTo;
-		vm.fedTeamspaceAndProjectSelected = false;
-		
-		$scope.$watch("vm.federationData.teamspace", function (newValue) {
-			if (newValue && vm.federationData.project) {
-				vm.fedTeamspaceAndProjectSelected = true;
-			} else {
-				vm.fedTeamspaceAndProjectSelected = false;
-			}
-		});
-
-		$scope.$watch("vm.federationData.project", function (newValue) {
-			if (newValue && vm.federationData.teamspace) {
-				vm.fedTeamspaceAndProjectSelected = true;
-			} else {
-				vm.fedTeamspaceAndProjectSelected = false;
-			}
-		});
 
 		/*
 		 * Watch for change in edited federation
@@ -381,40 +402,39 @@
 		 * Delete model
 		 */
 		vm.deleteModel = function () {
-
-			var i, iLength, j, jLength,
-				promise;
-			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
+			
+			var account;
+			var promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
 			promise.then(function (response) {
+
 				if (response.status === 200) {
-
-					// Remove model from list
-					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
 				
-						if (vm.accounts[i].name === response.data.account) {
-							if (vm.projectToDeleteFrom) {
-								// If we have a project
-								vm.accounts[i].projects.forEach(function(project) {
-									if (project === vm.projectToDeleteFrom) {
-										project.models.forEach(function(model, i) {
-											project.models.splice(i, 1);
-										})
-									}
-								});
+						// Remove model from list
+						for (var i = 0; i < vm.accounts.length; i += 1) {
+							account = vm.accounts[i];
+							if (account.name === response.data.account) {
+								if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
 
-							} else {
-								// If default
-								for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
-									if (vm.accounts[i].models[j].name === response.data.model) {
-										vm.accounts[i].models.splice(j, 1);
-										break;
+									var projectToDeleteFrom = vm.projectToDeleteFrom.name;
+									// If we have a project
+									console.log(vm.accounts, account.name, vm.projectToDeleteFrom.name);
+									
+									AccountDataService.removeModelByProjectName(vm.accounts, account.name, projectToDeleteFrom, response.data.model);
+									AccountDataService.removeFromFederationByProjectName(vm.accounts, account.name, projectToDeleteFrom, response.data.model);
+									break
+
+								} else {
+									// If default
+									for (var j = 0; j < vm.accounts[i].models.length; j += 1) { 
+										if (account.models[j].name === response.data.model) {
+											account.models.splice(j, 1);
+											break;
+										}
 									}
 								}
 							}
-						
 						}
-					}
-					$scope.$applyN
+
 					vm.closeDialog();
 
 					AnalyticService.sendEvent({
@@ -441,6 +461,9 @@
 			}
 		});
 
+		/**
+		 * Bring up dialog to add a new model
+		 */
 		$scope.$watch("vm.newModelData.project", function (newValue) {
 			if (newValue && vm.newModelData.teamspace) {
 				vm.teamspaceAndProjectSelected = true;

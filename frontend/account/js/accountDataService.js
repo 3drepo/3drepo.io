@@ -144,6 +144,27 @@
 			return getProject(teamspaces, teamspaceName, projectName).models;
 		}
 
+		var removeModelByProjectName = function(teamspaces, teamspaceName, projectName, modelName) {
+			var models = getModels(teamspaces, teamspaceName, projectName);
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			models.forEach(function(model, i) {
+				if (model.model === modelName) {
+					project.models.splice(i, 1);
+					
+				}
+			});
+		}
+
+		var removeFromFederationByProjectName = function(teamspaces, teamspaceName, projectName, modelName) {		
+			var federations = getFederationsByProjectName(teamspaces, teamspaceName, projectName);
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			federations.forEach(function(model, i) {
+				if (model.model === modelName) {
+					model.subModels.splice(i, 1);
+				}
+			});
+		};
+
 
 		var accountDataService = {
 
@@ -162,7 +183,9 @@
 			getFederations : getFederations,
 			hasFederationsByProjectName : hasFederationsByProjectName,
 			getFederationsByProjectName : getFederationsByProjectName,
-			getIndividualModelsByProjectName : getIndividualModelsByProjectName
+			getIndividualModelsByProjectName : getIndividualModelsByProjectName,
+			removeFromFederationByProjectName : removeFromFederationByProjectName,
+			removeModelByProjectName : removeModelByProjectName
 
         };
 	
