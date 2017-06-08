@@ -131,7 +131,6 @@
 
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.model.name === vm.model.name) && (vm.uploadedFile.account === vm.account)) {
 
-				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToModel(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 
 			}
@@ -177,7 +176,6 @@
 					}
 				}
 				else {
-					console.log("location path being called")
 					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
@@ -350,7 +348,6 @@
 					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
-						console.log("uploadModel", response);
 						if ((response.status === 400) || (response.status === 404)) {
 							// Upload error
 							vm.model.uploading = false;
@@ -379,7 +376,6 @@
 
 			NotificationService.subscribe.modelStatusChanged(vm.account, vm.model.model, function(data){
 
-				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
 						|| (data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_TEXTURES') 

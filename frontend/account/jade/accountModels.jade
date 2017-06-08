@@ -90,9 +90,7 @@
 									
 								div(ng-if="vm.shouldShow(project, 'federations')")
 
-									div(layout="column", 
-										layout-align="start", 
-										ng-repeat="federation in vm.getFederations(project.models) track by $index")
+									div(ng-repeat="federation in vm.getFederations(project.models)")
 										
 										account-federations(
 											federation="federation"
@@ -109,32 +107,32 @@
 
 
 						// Default - unassigned models and federations
-						// TODO - We need to fix this on the backend as it's adding models with assigned projects to account.models!'
 						//md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
 							div(ng-click="vm.toggleDefault('project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
-										md-icon.angular-material-icons folder_open 
+										md-icon.angular-material-icons(ng-if="vm.showDefault['project']") folder_open
+										md-icon.angular-material-icons(ng-if="!vm.showDefault['project']") folder  
 									p Unassigned Models / Federations
 
 							// Unassigned Models and Federations
-							md-list.tree-branch(ng-if="true")
+							md-list.tree-branch(ng-if="vm.showDefault['project']")
 
 								div(ng-click="vm.toggleDefault('models')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons folder_open 
+											md-icon.angular-material-icons(ng-if="vm.showDefault['models']") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefault['models']") folder 
 										p Models
 								
 								div(ng-if="vm.showDefault['models']")
 									div(ng-repeat="model in account.models")
 
-										account-model(	
-											ng-if="!model.project"
+										account-model(
 											account="account.name"
 											is-account-admin="account.isAdmin"
-											model="model"
 											project="project"
+											model="model"
 											user-account="vm.account"
 											on-upload-file="vm.uploadFile(model)"
 											uploaded-file="vm.uploadedFile"
@@ -147,17 +145,24 @@
 								div(ng-click="vm.toggleDefault('feds')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons folder_open 
+											md-icon.angular-material-icons(ng-if="vm.showDefault['feds']") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefault['feds']") folder 
 										p Federations
 
 								div(ng-if="vm.showDefault['feds']"
 									ng-repeat="(federationIndex, federation) in account.fedModels")
+
 									account-federations(
-										ng-if="!federation.project"
 										federation="federation"
-										federationIndex="federationIndex",
-										account="account",
+										project="project"
+										account="account"
+										federation-data="vm.federationData"
+										setup-federation-data="vm.setupFederationData"
+										get-potential-federation-models="vm.getPotentialFederationModels"
+										add-to-federation="vm.addToFederation"
+										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
+
 									p(ng-if="!account.fedModels.length") No federations created
 
 md-divider

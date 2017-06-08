@@ -27,6 +27,20 @@
 	
 		/** HELPERS */
 
+		var hasFederationsByProjectName = function(teamspaces, teamspaceName, projectName) {
+			return getFederations(teamspaces, teamspaceName, projectName).length > 0;
+		};
+
+		var getFederationsByProjectName = function(teamspaces, teamspaceName, projectName) { 
+			var project = getProject(teamspaces, teamspaceName, projectName)
+			return project.models.filter(function(model) { return model.subModels });
+		}
+
+		var getIndividualModelsByProjectName = function(teamspaces, teamspaceName, projectName) {
+			var project = getProject(teamspaces, teamspaceName, projectName)
+			return project.models.filter(function(model) { return !model.subModels });
+		}
+
 		var hasFederations = function(models) {
 			return getFederations(models).length > 0;
 		};
@@ -145,7 +159,10 @@
 			getIndividualModels : getIndividualModels,
 			removeFromFederation: removeFromFederation,
 			hasFederations : hasFederations,
-			getFederations : getFederations
+			getFederations : getFederations,
+			hasFederationsByProjectName : hasFederationsByProjectName,
+			getFederationsByProjectName : getFederationsByProjectName,
+			getIndividualModelsByProjectName : getIndividualModelsByProjectName
 
         };
 	

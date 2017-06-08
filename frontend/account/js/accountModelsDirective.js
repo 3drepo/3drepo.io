@@ -150,7 +150,7 @@
 		};
 
 		vm.getFederations = function(models) { 
-			return AccountDataService.getIndividualModels(models); 
+			return AccountDataService.getFederations(models); 
 		}
 
 		vm.getIndividualModels = function(models) { 
@@ -173,9 +173,69 @@
 
 		// FEDERATIONS
 
+			
+		/** 
+		 * Save a federation
+		 */
+		vm.saveFederation = function (teamspaceName, projectName) {
+			var promise;
+			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
+			var isEdit = vm.federationData._isEdit
+
+			if (isEdit) {
+				delete vm.federationData._isEdit;
+				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+			} else {
+				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+			}
+			
+			promise.then(function (response) {
+				
+				if(response.status !== 200 && response.status !== 201){
+					vm.errorMessage = response.data.message;
+				} else {
+					vm.errorMessage = '';
+					vm.showInfo = false;
+					vm.federationData.teamspace = teamspaceName;
+					vm.federationData.project = projectName;
+					vm.federationData.federate = true;
+					vm.federationData.timestamp = (new Date()).toString();
+					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
+					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
+
+					// TODO: This should exist - backend problem : ISSUE_371
+					if (!isEdit) {
+						project.models.push(vm.federationData);
+					}
+		
+					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Model',
+						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
+						eventLabel: 'federation'
+					});
+				}
+
+			});
+
+			$timeout(function () {
+				$scope.$apply();
+			});
+		};
+
+
 		vm.getPotentialFederationModels = function() {
-			var models = AccountDataService.getIndividualModels(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
-			return AccountDataService.getNoneFederatedModels(vm.federationData, models)
+			var models = AccountDataService.getIndividualModelsByProjectName(
+				vm.accounts, 
+				vm.federationData.teamspace, 
+				vm.federationData.project
+			);
+			var noneFederated = AccountDataService.getNoneFederatedModels(
+				vm.federationData, 
+				models
+			);
+			return noneFederated
 		}
 
 
@@ -193,7 +253,7 @@
 			vm.showRemoveWarning = false;
 
 			vm.federationData.subModels.push({
-				teamspace: teamspaceName,
+				database: teamspaceName,
 				modelIndex: modelIndex,
 				model: models[modelIndex].model
 			});

@@ -46,7 +46,6 @@
 		/**
 		 * Go back to the teamspaces page
 		 */
-		 console.log('data', vm.data);
 
 		vm.goBack = function () {
 		

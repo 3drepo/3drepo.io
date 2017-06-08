@@ -62,19 +62,19 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(ng-if="vm.federationData.model && vm.federationData.unit")
 
 					// List
-					div(layout="row", flex)
+					div.addFederations(layout="row", flex)
 						// Available
 						div(layout="column", flex)
 							p(layout="row", layout-align="center center") Available
 							md-list
 								md-list
 									md-list-item.federationModel(
-									ng-repeat="model in vm.getPotentialFederationModels()"
-									ng-if="!vm.isSubModel(vm.federationData, model)"
-									style="opacity:{{model.federated? 0.13 : 1.0}}")
+									ng-repeat="potentialFedModel in vm.getPotentialFederationModels()"
+									ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
+									style="opacity:{{model.federated ? 0.13 : 1.0}}")
 
 										md-icon.angular-material-icons dashboard
-										p {{model.model}}
+										p {{potentialFedModel.model}}
 
 										span(flex)
 										md-button.md-icon-button(
@@ -92,14 +92,14 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 						div(layout="column", flex)
 							p(layout="row", layout-align="center center") Federated
 							md-list
-								div(ng-repeat="model in vm.federationData.subModels", layout="column")
+								div(ng-repeat="subModel in vm.federationData.subModels", layout="column")
 								
 									md-list-item.federationModel
 
 										md-icon.angular-material-icons dashboard
-										p {{model.model}}
+										p {{subModel.model}}
 										span(flex)
-										md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation(model.model)")
+										md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation(subModel.model)")
 											md-icon.angular-material-icons.md-accent remove_circle
 									div(ng-if="vm.showRemoveWarning")
 										p#federationWarning This model cannot be removed. Please delete federation.

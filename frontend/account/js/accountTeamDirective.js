@@ -57,7 +57,6 @@
 		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
 
 		promise.then(function (response) {
-			console.log(response);
 			if (response.status === 200) {
 				vm.members = response.data;
 				if (angular.isDefined("vm.subscriptions")) {

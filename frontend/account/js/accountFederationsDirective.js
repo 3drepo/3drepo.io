@@ -202,7 +202,6 @@
 		vm.doFederationOption = function (event, option, account, project, federation) {
 			switch (option) {
 				case "edit":
-					console.log("project", project)
 					setupEditFederation(event, account, project, federation);
 					break;
 
@@ -293,7 +292,6 @@
 			vm.deleteName = model.model;
 			vm.projectToDeleteFrom = project
 			vm.currentAccount = account
-			console.log("setting up delete", project)
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 

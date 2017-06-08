@@ -514,6 +514,9 @@ account-modelsetting #accountTeamSubHeader {
   color: #F44336;
 }
 
+.addFederations {
+  padding-bottom: 10px;
+}
 
 #federationDialog #federatedModelAccount {
   color: rgba(0, 0, 0, 0.5);
