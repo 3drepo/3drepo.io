@@ -76,44 +76,46 @@
 			false
 		);
 
+		// GENERIC FUNCTIONS
 
-		var getState = function(node, prop) {
-			if (node[prop] === undefined) {
-				node[prop] = false;
-			}
-
-			return node[prop];
-		}
-
-		vm.shouldShowProjects = function(projects) {
-			return getState(projects, "state");
+		/**
+		 * Close the dialog
+		 */
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
 		};
 
-		vm.shouldShowModelsAndFeds = function(project) {
-			return getState(project, "state");
-		};
-
-		vm.shouldShowModels = function(project) {
-			return getState(project, "modelsState")
-		};
-
-		vm.shouldShowFeds = function(project) {
-			return getState(project, "fedsState")
-		};
-
-		vm.shouldShowTeamspace = function(index) {
-			return vm.accounts[index].showTeamspace;
-		}
-
-		vm.toggleTeamspace = function(index) {
-			vm.accounts[index].showTeamspace = !vm.accounts[index].showTeamspace
-		}
+		
+		// HIDE / SHOW STATE
 
 		vm.showDefault = {
 			project : false,
 			models : false,
 			feds : false
 		} 
+
+		var getState = function(node, prop) {
+			if (node[prop] === undefined) node[prop] = false;
+			return node[prop];
+		}
+
+		vm.shouldShow = function(items, type) {
+			switch (type) {
+				// Special cases for models and federations
+				case "models":
+					return getState(items, "modelsState");
+				case "federations":
+					return getState(items, "fedsState")
+
+				// All other cases
+				default:
+					return getState(items, "state")
+			}
+		}
+
+		vm.toggleTeamspace = function(teamspace) {
+			teamspace.state = !teamspace.state;
+		}
 
 		vm.toggleDefault = function(type) {
 			vm.showDefault[type] = !vm.showDefault[type];
@@ -122,16 +124,13 @@
 
 		vm.toggleProjects = function(projects) {
 			projects.state = !projects.state;
-			projects.forEach(function(project) {
-				project.showProject = projects.state;
-			});
 		}
 
 		vm.toggleProject = function(project) {
 			project.state = !project.state;
 			project.models.forEach(function(model) {
-				model.modelState = project.state;
-				model.fedState = project.state;
+				model.modelState = !!project.state;
+				model.fedState = !!project.state;
 			});
 		}
 
@@ -143,22 +142,26 @@
 			project.fedsState = !project.fedsState;
 		}
 
-		vm.hasFederations = function(models) {
-			return vm.getFederations(models).length > 0;
+
+		// Checks
+
+		vm.hasFederations = function(models) { 
+			return AccountDataService.hasFederations(models) 
 		};
 
 		vm.getFederations = function(models) { 
-			return models.filter(function(model) { return model.subModels });
+			return AccountDataService.getIndividualModels(models); 
 		}
 
-		vm.getInividualModels = function(models) {
-			return models.filter(function(model) { return !model.subModels });
+		vm.getIndividualModels = function(models) { 
+			return AccountDataService.getIndividualModels(models); 
 		}
 
-		vm.getProjects = function(teamspace) {
-			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
-			return projects;
+		vm.getProjects = function(teamspace) { 
+			return AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace); 
 		}
+
+		// ADD PROJECTS/FEDERATIONS/MODELS
 
 		vm.addButtons = false;
 		vm.addButtonType = "add";
@@ -168,8 +171,10 @@
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
 		}
 
+		// FEDERATIONS
+
 		vm.getPotentialFederationModels = function() {
-			var models = AccountDataService.getInividualModels(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
+			var models = AccountDataService.getIndividualModels(vm.accounts, vm.federationData.teamspace, vm.federationData.project);
 			return AccountDataService.getNoneFederatedModels(vm.federationData, models)
 		}
 
@@ -188,7 +193,7 @@
 			vm.showRemoveWarning = false;
 
 			vm.federationData.subModels.push({
-				database: teamspaceName,
+				teamspace: teamspaceName,
 				modelIndex: modelIndex,
 				model: models[modelIndex].model
 			});
@@ -197,28 +202,7 @@
 
 		};
 
-
-		// new models
-		vm.teamspaceAndProjectSelected = false;
-
-		$scope.$watch("vm.newModelData.teamspace", function (newValue) {
-			if (newValue && vm.newModelData.project) {
-				vm.teamspaceAndProjectSelected = true;
-			} else {
-				vm.teamspaceAndProjectSelected = false;
-			}
-		});
-
-		$scope.$watch("vm.newModelData.project", function (newValue) {
-			if (newValue && vm.newModelData.teamspace) {
-				vm.teamspaceAndProjectSelected = true;
-			} else {
-				vm.teamspaceAndProjectSelected = false;
-			}
-		});
-
-
-		// New federations
+		// FEDERATIONS
 
 		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
 		var dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -240,60 +224,32 @@
 			}
 		});
 
-		// vm.showRemoveWarning = true;
-
-
 		/*
-		 * Added data to accounts and models for UI
+		 * Watch for change in edited federation
 		 */
-		$scope.$watch("vm.accounts", function () {
-			var i, length;
+		$scope.$watch("vm.federationData", function (oldVal, newVal) {
 
-			if (angular.isDefined(vm.accounts)) {
+		}, true);
 
-				vm.showProgress = false;
-				vm.modelsExist = (vm.accounts.length > 0);
-				vm.info = vm.modelsExist ? "" : "There are currently no models";
-				
-				// Accounts
-				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
-					vm.accounts[i].name = vm.accounts[i].account;
+		/**
+		 * Open the federation dialog
+		 *
+		 * @param event
+		 */
+		vm.setupNewFederation = function (event, accounts) {
 
-					if (vm.accounts[i].projects) {
+			vm.federationOriginalData = null;
+			vm.federationData = {
+				desc: "",
+				type: "",
+				subModels: []
+			};
+			vm.errorMessage = '';
+			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		};
 
-						// vm.accounts[i].projects.forEach(function(project){
-						// 	project.showProject = false;
-						// })
-					}
-					
-					// Always show user account
-					// Don't show account if it doesn't have any models - 
-					// possible when user is a team member of a federation but not a member of a model in that federation!
 
-					// Only show add model menu for user account
-					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
-
-					if(vm.accounts[i].isAdmin){
-						//console.log("Is admin")
-						// NotificationService.subscribe.newModel(vm.accounts[i].account, function(data){
-						// 	vm.newModelFileToUpload = null;
-						// 	vm.modelsExist = true;
-						// 	// Add model to list
-						// 	var model = {
-						// 		model: data.model,
-						// 		permissions: data.permissions,
-						// 		canUpload: true,
-						// 		timestamp: null
-						// 	};
-						// 	//console.log("vm.watch - updateAccountModels");
-						// 	updateAccountModels(data.account, model);
-						// 	$scope.$apply();
-
-						// });
-					}
-				}
-			}
-		});
+		// MODELS
 
 		/*
 		 * Watch the new model type
@@ -344,30 +300,94 @@
 
 		}, true);
 
-		/*
-		 * Watch for change in edited federation
+		/**
+		 * Set up deleting of model
+		 *
+		 * @param {Object} event
+		 * @param {Object} model
 		 */
-		$scope.$watch("vm.federationData", function (oldVal, newVal) {
-
-		}, true);
-
+		vm.setupDeleteModel = function (event, model, account, project) {
+			vm.modelToDelete = model;
+			vm.projectToDeleteFrom = project;
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete model";
+			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.modelToDelete.name;
+			vm.targetAccountToDeleteModel = account;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
+		};
 
 		/**
-		 * Open the federation dialog
-		 *
-		 * @param event
+		 * Delete model
 		 */
-		vm.setupNewFederation = function (event, accounts) {
+		vm.deleteModel = function () {
 
-			vm.federationOriginalData = null;
-			vm.federationData = {
-				desc: "",
-				type: "",
-				subModels: []
-			};
-			vm.errorMessage = '';
-			UtilsService.showDialog("federationDialog.html", $scope, event, true, null, false, dialogCloseToId);
+			var i, iLength, j, jLength,
+				promise;
+			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
+			promise.then(function (response) {
+				if (response.status === 200) {
+
+					// Remove model from list
+					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
+				
+						if (vm.accounts[i].name === response.data.account) {
+							if (vm.projectToDeleteFrom) {
+								// If we have a project
+								vm.accounts[i].projects.forEach(function(project) {
+									if (project === vm.projectToDeleteFrom) {
+										project.models.forEach(function(model, i) {
+											project.models.splice(i, 1);
+										})
+									}
+								});
+
+							} else {
+								// If default
+								for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
+									if (vm.accounts[i].models[j].name === response.data.model) {
+										vm.accounts[i].models.splice(j, 1);
+										break;
+									}
+								}
+							}
+						
+						}
+					}
+					$scope.$applyN
+					vm.closeDialog();
+
+					AnalyticService.sendEvent({
+						eventCategory: 'Model',
+						eventAction: 'delete'
+					});
+				}
+				else {
+					vm.deleteError = "Error deleting model";
+					if (response.status === 404) vm.deleteError += " : File not found"
+					if (response.status === 500) vm.deleteError += " : There was a problem on the server"
+				}
+			});
 		};
+
+
+		vm.teamspaceAndProjectSelected = false;
+
+		$scope.$watch("vm.newModelData.teamspace", function (newValue) {
+			if (newValue && vm.newModelData.project) {
+				vm.teamspaceAndProjectSelected = true;
+			} else {
+				vm.teamspaceAndProjectSelected = false;
+			}
+		});
+
+		$scope.$watch("vm.newModelData.project", function (newValue) {
+			if (newValue && vm.newModelData.teamspace) {
+				vm.teamspaceAndProjectSelected = true;
+			} else {
+				vm.teamspaceAndProjectSelected = false;
+			}
+		});
 
 		/**
 		 * Bring up dialog to add a new model
@@ -384,74 +404,6 @@
 			vm.newModelFileToUpload = null;
 			UtilsService.showDialog("modelDialog.html", $scope, event, true);
 		};
-		
-		/**
-		 * Close the dialog
-		 */
-		vm.closeDialog = function() {
-			UtilsService.closeDialog();
-		};
-
-		
-
-
-		/**
-		 * Save a federation
-		 */
-		vm.saveFederation = function (teamspaceName, projectName) {
-			var promise;
-			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
-			var isEdit = vm.federationData._isEdit
-
-			if (isEdit) {
-				delete vm.federationData._isEdit;
-				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
-			} else {
-				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.model);
-			}
-			
-			promise.then(function (response) {
-				
-				if(response.status !== 200 && response.status !== 201){
-					vm.errorMessage = response.data.message;
-				} else {
-					vm.errorMessage = '';
-					vm.showInfo = false;
-					vm.federationData.teamspace = teamspaceName;
-					vm.federationData.project = projectName;
-					vm.federationData.federate = true;
-					vm.federationData.timestamp = (new Date()).toString();
-					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
-
-					// TODO: This should exist - backend problem : ISSUE_371
-					if (!isEdit) {
-						project.models.push(vm.federationData);
-					}
-		
-					vm.closeDialog();
-
-					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
-						eventLabel: 'federation'
-					});
-				}
-
-			});
-
-			$timeout(function () {
-				$scope.$apply();
-			});
-		};
-
-		/**
-		 * Reset federation data back to empty object
-		 */
-		vm.resetFederationData = function() {
-			vm.federationData = {};
-		}
-
 
 		/**
 		 * Save a new model
@@ -488,7 +440,6 @@
 
 				promise = AccountService.newModel(vm.newModelData);
 				promise.then(function (response) {
-					//console.log(response);
 					if (response.data.status === 400) {
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = response.data.message;
@@ -503,7 +454,7 @@
 							canUpload: true,
 							timestamp: null
 						};
-						//console.log("saveNewModel - updateAccountModels")
+
 						updateAccountModels(response.data.account, model, vm.newModelData.project);
 						vm.closeDialog();
 
@@ -522,7 +473,6 @@
 		 * @param {Object} model
 		 */
 		vm.uploadFile = function (model) {
-			console.log(model);
 			existingModelFileUploader.value = "";
 			existingModelToUpload = model;
 			existingModelFileUploader.click();
@@ -537,27 +487,6 @@
 		};
 
 		/**
-		 * Create a new database
-		 */
-		vm.newDatabase = function (event) {
-			vm.newDatabaseName = "";
-			vm.showPaymentWait = false;
-			vm.newDatabaseToken = false;
-			UtilsService.showDialog("databaseDialog.html", $scope, event, true);
-		};
-
-		/**
-		 * Save a new database
-		 */
-		vm.saveNewDatabase = function () {
-			var promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
-			promise.then(function (response) {
-				vm.newDatabaseToken = response.data.token;
-				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
-			});
-		};
-
-		/**
 		 * Show waiting before going to payment page
 		 * $timeout required otherwise Submit does not work
 		 */
@@ -567,78 +496,7 @@
 			});
 		};
 
-		/**
-		 * Set up deleting of model
-		 *
-		 * @param {Object} event
-		 * @param {Object} model
-		 */
-		vm.setupDeleteModel = function (event, model, account, project) {
-			console.log("setupDeleteModel,", project )
-			vm.modelToDelete = model;
-			vm.projectToDeleteFrom = project;
-			vm.deleteError = null;
-			vm.deleteTitle = "Delete model";
-			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.name;
-			vm.targetAccountToDeleteModel = account;
-			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
-		};
-
-		/**
-		 * Delete model
-		 */
-		vm.delete = function () {
-
-			var i, iLength, j, jLength,
-				promise;
-			promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
-			promise.then(function (response) {
-				if (response.status === 200) {
-
-					// Remove model from list
-					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
-				
-						if (vm.accounts[i].name === response.data.account) {
-							if (vm.projectToDeleteFrom) {
-								// If we have a project
-								vm.accounts[i].projects.forEach(function(project) {
-									if (project === vm.projectToDeleteFrom) {
-										project.models.forEach(function(model, i) {
-											console.log("Deleting", vm.projectToDeleteFrom)
-											project.models.splice(i, 1);
-										})
-									}
-								});
-
-							} else {
-								// If default
-								for (j = 0, jLength = vm.accounts[i].models.length; j < jLength; j += 1) {
-									if (vm.accounts[i].models[j].name === response.data.model) {
-										vm.accounts[i].models.splice(j, 1);
-										break;
-									}
-								}
-							}
-						
-						}
-					}
-					$scope.$applyN
-					vm.closeDialog();
-
-					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: 'delete'
-					});
-				}
-				else {
-					vm.deleteError = "Error deleting model";
-					if (response.status === 404) vm.deleteError += " : File not found"
-					if (response.status === 500) vm.deleteError += " : There was a problem on the server"
-				}
-			});
-		};
-
+		
 		/**
 		 * Remove a collaborator
 		 *
@@ -701,24 +559,32 @@
 
 		// PROJECT SPECIFIC CODE
 
-		vm.projectOptions = {
-			edit: {
-				label: "Edit", 
-				icon: "edit", 
-			},
-			delete: {
-				label: "Delete", 
-				icon: "delete", 
-			},
-		}
-
+		vm.projectData = {
+			deleteName : "",
+			deleteTeamspace : "",
+			deleteWarning : "",
+			teamspaceName : "",
+			newProjectName : "",
+			oldProjectName : "",
+			errorMessage : "",
+			projectOptions : {
+				edit: {
+					label: "Edit", 
+					icon: "edit", 
+				},
+				delete: {
+					label: "Delete", 
+					icon: "delete", 
+				},
+			}
+		} 
 
 		vm.doProjectOption = function(option, project, teamspace) {
 			switch (option) {
 				case "delete":
-					vm.projectDeleteName = project.name;
-					vm.projectDeleteTeamspace = teamspace.name;
-					vm.deleteWarning = "This will remove the project from your teamspace!";
+					vm.projectData.deleteName = project.name;
+					vm.projectData.deleteTeamspace = teamspace.name;
+					vm.projectData.deleteWarning = "This will remove the project from your teamspace!";
 					UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);	
 					break;
 
@@ -729,19 +595,18 @@
 		}
 
 		vm.newProject = function() {
-			vm.projectTeamspaceDialog = "";
-			vm.newProjectName = "";
-			vm.oldProjectName = "";
-			vm.errorMessage = '';
+			vm.projectData.teamspaceName = "";
+			vm.projectData.newProjectName = "";
+			vm.projectData.oldProjectName = "";
+			vm.projectData.errorMessage = '';
 			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		}
 
 		vm.editProject = function(project, teamspace) {
-			console.log(project)
-			vm.oldProjectName = project.name;
-			vm.projectTeamspaceDialog = teamspace.name;
-			vm.newProjectName = project.name;
-			vm.errorMessage = '';
+			vm.projectData.oldProjectName = project.name;
+			vm.projectData.teamspaceName = teamspace.name;
+			vm.projectData.newProjectName = project.name;
+			vm.projectData.errorMessage = '';
 			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		}
 
@@ -771,7 +636,7 @@
 			promise.then(function (response) {
 				
 				if(response.status !== 200 && response.status !== 201){
-					vm.errorMessage = response.data.message;
+					vm.projectData.errorMessage = response.data.message;
 				} else {
 
 					var project = response.data;
@@ -806,6 +671,39 @@
 			});
 
 		}
+
+
+		// ACCOUNTS
+
+		vm.addEscape = function(event){
+			$element.bind('keydown keypress', function (event) {
+				if(event.which === 27) { // 27 = esc key
+					vm.addButtons = false;
+					$scope.$apply();
+					event.preventDefault();
+				}
+			});
+		}
+
+		/*
+		 * Added data to accounts and models for UI
+		 */
+		$scope.$watch("vm.accounts", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.accounts)) {
+
+				//vm.showProgress = false;
+				//vm.modelsExist = (vm.accounts.length > 0);
+				//vm.info = vm.modelsExist ? "" : "There are currently no models";
+				
+				// Accounts
+				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
+					vm.accounts[i].name = vm.accounts[i].account;
+					vm.accounts[i].canAddModel = vm.accounts[i].isAdmin;
+				}
+			}
+		});
 
 
 	}

@@ -27,6 +27,18 @@
 	
 		/** HELPERS */
 
+		var hasFederations = function(models) {
+			return getFederations(models).length > 0;
+		};
+
+		var getFederations = function(models) { 
+			return models.filter(function(model) { return model.subModels });
+		}
+
+		var getIndividualModels = function(models) {
+			return models.filter(function(model) { return !model.subModels });
+		}
+
 		var removeProjectInTeamspace = function(teamspaces, teamspaceName, projectName) {
 			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
 			teamspace.projects.forEach(function(project, i){
@@ -98,16 +110,6 @@
 			
 		};
 
-		var getInividualModels = function(teamspaces, teamspace, project) {
-
-			return getModels(teamspaces, teamspace, project)
-			.filter(function(model) {
-				// Check it's not a federation itself
-				return !model.subModels;
-			});
-
-		};
-
         var getProject = function(teamspaces, teamspaceName, projectName) {
 
 			// Return models that are not federated (federations)
@@ -140,8 +142,10 @@
             getProject : getProject,
             getProjectsByTeamspaceName : getProjectsByTeamspaceName,
             getTeamspaceByName : getTeamspaceByName,
-			getInividualModels : getInividualModels,
-			removeFromFederation: removeFromFederation
+			getIndividualModels : getIndividualModels,
+			removeFromFederation: removeFromFederation,
+			hasFederations : hasFederations,
+			getFederations : getFederations
 
         };
 	

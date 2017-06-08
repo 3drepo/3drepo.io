@@ -322,60 +322,52 @@
 					return account.account === vm.account;
 				});
 
-				var quota = targetAccount.quota;
-				vm.targetAccountQuota = quota;
+				//var quota = targetAccount.quota;
 
-				if (file.size > (quota.spaceLimit - quota.spaceUsed)) {
-					// Show the over quota dialog
-					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
+				// Check for file size limit
+				if (file.size > serverConfig.uploadSizeLimit) {
+					$timeout(function () {
+
+						vm.fileUploadInfo = "File exceeds size limit";
+						$timeout(function () {
+							vm.fileUploadInfo = "";
+						}, infoTimeout);
+					});
 				}
 				else {
 
-					// Check for file size limit
-					if (file.size > serverConfig.uploadSizeLimit) {
-						$timeout(function () {
+					formData = new FormData();
+					formData.append("file", file);
 
-							vm.fileUploadInfo = "File exceeds size limit";
+					if(tag){
+						formData.append('tag', tag);
+					}
+
+					if(desc){
+						formData.append('desc', desc);
+					}
+
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+
+					promise.then(function (response) {
+						console.log("uploadModel", response);
+						if ((response.status === 400) || (response.status === 404)) {
+							// Upload error
+							vm.model.uploading = false;
+							vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
+
 							$timeout(function () {
 								vm.fileUploadInfo = "";
 							}, infoTimeout);
-						});
-					}
-					else {
-
-						formData = new FormData();
-						formData.append("file", file);
-
-						if(tag){
-							formData.append('tag', tag);
 						}
-
-						if(desc){
-							formData.append('desc', desc);
+						else {
+							
+							AnalyticService.sendEvent({
+								eventCategory: 'Model',
+								eventAction: 'upload'
+							});
 						}
-
-						promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
-
-						promise.then(function (response) {
-							console.log("uploadModel", response);
-							if ((response.status === 400) || (response.status === 404)) {
-								// Upload error
-								vm.model.uploading = false;
-								vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
-
-								$timeout(function () {
-									vm.fileUploadInfo = "";
-								}, infoTimeout);
-							}
-							else {
-								
-								AnalyticService.sendEvent({
-									eventCategory: 'Model',
-									eventAction: 'upload'
-								});
-							}
-						});
-					}
+					});
 				}
 			});
 		}

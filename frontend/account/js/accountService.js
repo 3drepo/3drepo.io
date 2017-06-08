@@ -129,7 +129,7 @@
 		};
 
 		/**
-		 * Upload file/model to database
+		 * Upload file/model 
 		 *
 		 * @param modelData
 		 * @returns {*|promise}
@@ -150,20 +150,6 @@
 			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
 		};
 
-		/**
-		 * Create a new database
-		 *
-		 * @param teamspace
-		 * @param databaseName
-		 * @returns {*|promise}
-		 */
-		obj.newDatabase = function (teamspace, databaseName) {
-			var data = {
-				database: databaseName,
-				plan: "THE-100-QUID-PLAN"
-			};
-			return doPost(data, teamspace + "/database");
-		};
 
 		/**
 		 * Create a new subscription

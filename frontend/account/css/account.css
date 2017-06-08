@@ -115,12 +115,6 @@ account-models .modelRight {
   /*margin-right: 10px !important;*/
 }
 
-account-models #newDatabaseButton {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
 account-models .md-whiteframe-1dp {
   border-radius: 4px;
   background: #FFF;
@@ -313,22 +307,6 @@ account-menu md-icon {
 .deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
-}
-
-/** New Database Dialog ***********************************************************************************************/
-.newDatabaseDialog {
-  min-width: 350px;
-  min-height: 250px;
-  overflow: hidden;
-}
-
-.newDatabaseDialog #newModelIcon {
-  margin-right: 10px;
-}
-
-.newDatabaseDialog .databaseDialogInfo {
-  font-weight: normal;
-  color: rgba(0,0,0,0.7);
 }
 
 /** Account Billing ***************************************************************************************************/

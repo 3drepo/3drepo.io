@@ -10,30 +10,30 @@ md-dialog.newModelDialog(aria-label="New project")
 		div(layout="column")
 			md-input-container
 				md-select(
-					ng-disabled="vm.projectTeamspaceDialog != ''"
+					ng-disabled="vm.projectData.teamspaceName != ''"
 					placeholder="Teamspace"
 					tdr-focus="true"
-					ng-model="vm.newProjectTeamspace")
+					ng-model="vm.projectData.teamspaceName")
 					md-option(
 						ng-repeat="account in vm.accounts"
-						ng-selected="account.name == vm.projectTeamspaceDialog"
+						ng-selected="account.name == vm.projectData.teamspaceName"
 						value="{{account.name}}") {{account.name}}
 
 			md-input-container
 				input(
 					placeholder="Project"
-					ng-model="vm.newProjectName")
+					ng-model="vm.projectData.newProjectName")
 
 			md-input-container()
 				md-button.md-raised.md-accent(
-					ng-if="vm.oldProjectName == ''"
-					ng-disabled="!vm.newProjectName"
-					ng-click="vm.saveNewProject(vm.newProjectTeamspace, vm.newProjectName)") Save
+					ng-if="vm.projectData.oldProjectName == ''"
+					ng-disabled="!vm.projectData.newProjectName"
+					ng-click="vm.saveNewProject(vm.projectData.teamspaceName, vm.projectData.newProjectName)") Save
 
 				md-button.md-raised.md-accent(
-					ng-if="vm.oldProjectName != ''"
-					ng-disabled="vm.newProjectName == vm.oldProjectName"
-					ng-click="vm.updateProject(vm.newProjectTeamspace, vm.oldProjectName,vm.newProjectName)") Update
+					ng-if="vm.projectData.oldProjectName != ''"
+					ng-disabled="vm.projectData.newProjectName == vm.projectData.oldProjectName"
+					ng-click="vm.updateProject(vm.projectData.teamspaceName, vm.projectData.oldProjectName, vm.projectData.newProjectName)") Update
 
-				p#modelDialogError(ng-if="vm.errorMessage") {{vm.errorMessage}}
+				p#modelDialogError(ng-if="vm.projectData.errorMessage") {{vm.errorMessage}}
 
