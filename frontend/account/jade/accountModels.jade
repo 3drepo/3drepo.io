@@ -99,6 +99,7 @@
 											federation-data="vm.federationData"
 											setup-federation-data="vm.setupFederationData"
 											get-potential-federation-models="vm.getPotentialFederationModels"
+											is-default-federation="false"
 											add-to-federation="vm.addToFederation"
 											save-federation="vm.saveFederation"
 											accounts="vm.accounts")
@@ -106,14 +107,14 @@
 									p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
 
 
-						// Default - unassigned models and federations
+						// Default - default space models and federations
 						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
 							div(ng-click="vm.toggleDefault('project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
 										md-icon.angular-material-icons(ng-if="vm.showDefault['project']") folder_open
 										md-icon.angular-material-icons(ng-if="!vm.showDefault['project']") folder  
-									p Unassigned Models / Federations
+									p Default
 
 							// Unassigned Models and Federations
 							md-list.tree-branch(ng-if="vm.showDefault['project']")
@@ -137,12 +138,13 @@
 											on-upload-file="vm.uploadFile(model)"
 											uploaded-file="vm.uploadedFile"
 											model-to-upload="vm.modelToUpload"
+											is-default-federation="true"
 											on-show-page="vm.showPage(page, callingPage)"
 											on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
 											quota="vm.quota"
 											subscriptions="vm.subscriptions")
 
-								p.no-federations(ng-if="account.models.length === 0") No unassigned models
+								p.no-federations(ng-if="account.models.length === 0") No default models
 
 								div(ng-click="vm.toggleDefault('feds')")
 									md-list-item.tree-node(flex)
@@ -165,7 +167,7 @@
 										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
 
-								p.no-federations(ng-if="account.fedModels.length === 0") No unassigned federations
+								p.no-federations(ng-if="account.fedModels.length === 0") No default federations
 
 md-divider
 

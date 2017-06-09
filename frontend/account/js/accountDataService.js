@@ -41,6 +41,11 @@
 			return project.models.filter(function(model) { return !model.subModels });
 		}
 
+		var getIndividualTeamspaceModels = function(teamspaces, teamspaceName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			return teamspace.models.filter(function(model) { return !model.subModels });
+		}
+
 		var hasFederations = function(models) {
 			return getFederations(models).length > 0;
 		};
@@ -185,7 +190,8 @@
 			getFederationsByProjectName : getFederationsByProjectName,
 			getIndividualModelsByProjectName : getIndividualModelsByProjectName,
 			removeFromFederationByProjectName : removeFromFederationByProjectName,
-			removeModelByProjectName : removeModelByProjectName
+			removeModelByProjectName : removeModelByProjectName,
+			getIndividualTeamspaceModels : getIndividualTeamspaceModels
 
         };
 	

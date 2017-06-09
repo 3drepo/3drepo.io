@@ -262,13 +262,21 @@
 			});
 		};
 
-
-		vm.getPotentialFederationModels = function() {
-			var models = AccountDataService.getIndividualModelsByProjectName(
-				vm.accounts, 
-				vm.federationData.teamspace, 
-				vm.federationData.project
-			);
+		vm.getPotentialFederationModels = function(isDefault) {
+			var models;
+			if (isDefault) {
+				models = AccountDataService.getIndividualModelsByProjectName(
+					vm.accounts, 
+					vm.federationData.teamspace, 
+					vm.federationData.project
+				);
+			} else {
+				models = AccountDataService.getIndividualTeamspaceModels(
+					vm.accounts, 
+					vm.federationData.teamspace
+				);
+			}
+			
 			var noneFederated = AccountDataService.getNoneFederatedModels(
 				vm.federationData, 
 				models
@@ -402,7 +410,7 @@
 		 * Delete model
 		 */
 		vm.deleteModel = function () {
-			
+
 			var account;
 			var promise = UtilsService.doDelete({}, vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name);
 			promise.then(function (response) {

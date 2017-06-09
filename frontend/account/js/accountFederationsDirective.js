@@ -35,6 +35,7 @@
 				onShowPage: "&",
 				quota: "=",
 				subscriptions: "=",
+				isDefaultFederation: "@",
 				getPotentialFederationModels: "=",
 				saveFederation: "=",
 				addToFederation: "="
@@ -135,8 +136,6 @@
 			var isUserAccount = account.account === vm.account.account;
 			return {
 				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-				// team: {label: "Team", icon: "group", hidden: !isUserAccount},
-				// modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
 				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
 			};
 			
@@ -151,6 +150,9 @@
 		}
 
 
+		/**
+		 * Remove a model from a federation
+		 */
 		vm.removeFromFederation = function (modelName) {
 			AccountDataService.removeFromFederation(vm.federationData, modelName);
 		};
@@ -200,6 +202,7 @@
 		 * @param federationIndex
 		 */
 		vm.doFederationOption = function (event, option, account, project, federation) {
+			console.log(event, option, account, project, federation)
 			switch (option) {
 				case "edit":
 					setupEditFederation(event, account, project, federation);
@@ -268,7 +271,13 @@
 		function setupEditFederation (event, teamspace, project, model) {
 			vm.federationData = model;
 			vm.federationData.teamspace = teamspace.name;
-			vm.federationData.project = project.name;
+
+			// Default projects wont have a name
+			if (project && project.name) {
+				vm.federationData.project = project.name;
+			} else {
+				vm.federationData.project = "default";
+			}
 			vm.federationData._isEdit = true;
 			UtilsService.showDialog("federationDialog.html", $scope, event, true);
 		}
