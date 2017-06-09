@@ -219,10 +219,8 @@
 		 */
 		vm.keyAction = function (event) {
 			var i, tmp;
-			console.log("keyAction HERERERELLO")
 			// Update list, but avoid repeat
 			if (event.type === "keydown") {
-				console.log("Keydown", event.which)
 				if (vm.keysDown.indexOf(event.which) === -1) {
 					// Recreate list so that it changes are registered in components
 					tmp = vm.keysDown;
