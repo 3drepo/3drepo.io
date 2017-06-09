@@ -849,7 +849,7 @@
 						AccountDataService.removeProjectInTeamspace(
 							vm.accounts, 
 							teamspaceName, 
-							update.projectName, 
+							update.projectName
 						);
 					} else {
 						AccountDataService.addProjectToTeamspace(
