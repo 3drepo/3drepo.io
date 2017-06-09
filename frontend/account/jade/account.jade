@@ -59,6 +59,7 @@ div(ng-if="!vm.state.project")
 
 div(ng-if="vm.state.project")
 	project(
+	keys-down="vm.keysDown"
 	account="vm.state.account"
 	project="vm.state.project"
 	branch="vm.state.branch"

@@ -190,6 +190,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.handleKeyPresses = function(e) {
+			console.log("Handling key presses?")
 			if (e.charCode === "r".charCodeAt(0)) {
 				self.reset();
 				self.setApp(null);
@@ -213,6 +214,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var canvas = document.createElement("canvas");
 				canvas.className = "emscripten";
 				canvas.setAttribute("id", "canvas");
+				canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
 				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
 				canvas.setAttribute("height", "600px");
 				canvas.setAttribute("width", "960px");
@@ -225,7 +227,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvasScript.setAttribute("type", "text/javascript");
 
 				var unitySettings = {
-				 	TOTAL_MEMORY: 2130706432,
+				 	TOTAL_MEMORY: 2130706432 / 2,
 				    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",

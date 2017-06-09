@@ -94,6 +94,7 @@
 		vm.pointerEvents = "inherit";
 		vm.goToAccount = false;
 		vm.goToUserPage = false;
+		vm.keysDown = [];
 
 		vm.legalDisplays = [];
 		if (angular.isDefined(serverConfig.legal)) {
@@ -208,6 +209,42 @@
 				}
 			}
 		});
+
+
+		/**
+		 * Keep a list of keys held down
+		 * For changes to be registered by directives and especially components the list needs to be recreated
+		 *
+		 * @param event
+		 */
+		vm.keyAction = function (event) {
+			var i, tmp;
+			console.log("keyAction HERERERELLO")
+			// Update list, but avoid repeat
+			if (event.type === "keydown") {
+				console.log("Keydown", event.which)
+				if (vm.keysDown.indexOf(event.which) === -1) {
+					// Recreate list so that it changes are registered in components
+					tmp = vm.keysDown;
+					delete vm.keysDown;
+					vm.keysDown = angular.copy(tmp);
+					vm.keysDown.push(event.which);
+				}
+			}
+			else if (event.type === "keyup") {
+				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
+				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+					if (vm.keysDown[i] === event.which) {
+						vm.keysDown.splice(i, 1);
+					}
+				}
+				// Recreate list so that it changes are registered in components
+				tmp = vm.keysDown;
+				delete vm.keysDown;
+				vm.keysDown = angular.copy(tmp);
+			}
+		};
+
 
 		/**
 		 * Close the dialog
