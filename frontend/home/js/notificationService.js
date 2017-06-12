@@ -80,7 +80,7 @@ function NotificationService(serverConfig, $injector){
 		var room =  account + projectNameSpace;
 		if(joined.indexOf(room) === -1){
 
-			socket.emit('join', {account: account, project: project});
+			socket.emit('join', {account: account, model: project});
 			joined.push(room);
 		}
 	}
@@ -169,19 +169,19 @@ function NotificationService(serverConfig, $injector){
 	}
 
 	function subscribeProjectStatusChanged(account, project, callback){
-		subscribe(account, project, [], 'projectStatusChanged', callback);
+		subscribe(account, project, [], 'modelStatusChanged', callback);
 	}
 
 	function unsubscribeProjectStatusChanged(account, project){
-		unsubscribe(account, project, [], 'projectStatusChanged');
+		unsubscribe(account, project, [], 'modelStatusChanged');
 	}
 
 	function subscribeNewProject(account, callback){
-		subscribe(account, null, [], 'newProject', callback);
+		subscribe(account, null, [], 'newModel', callback);
 	}
 
 	function unsubscribeNewProject(account, project){
-		unsubscribe(account, null, [], 'newProject');
+		unsubscribe(account, null, [], 'newModel');
 	}
 
 	return {

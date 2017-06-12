@@ -247,23 +247,7 @@
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
-				// Add filtering options for the Issues card menu
-				/*
-				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
-					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.left[issuesCardIndex].menu.push(
-							{
-								value: "filterRole_" + data[i].role,
-								label: data[i].role,
-								toggle: true,
-								selected: true,
-								firstSelected: false,
-								secondSelected: false
-							}
-						);
-					}
-				});
-				*/
+
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
 					vm.settings = data;

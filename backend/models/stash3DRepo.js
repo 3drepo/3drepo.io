@@ -28,7 +28,7 @@ var Stash3DRepo = ModelFactory.createClass(
 	'Stash3DRepo', 
 	schema, 
 	arg => { 
-		return `${arg.project}.stash.3drepo`;
+		return `${arg.model}.stash.3drepo`;
 	}
 );
 

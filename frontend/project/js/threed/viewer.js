@@ -218,9 +218,13 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
 				canvas.setAttribute("height", "600px");
 				canvas.setAttribute("width", "960px");
-				canvas.addEventListener("mousedown", onMouseDown);
+				canvas.onmousedown = function(){
+					return false;
+				};
+				//canvas.addEventListener("mousedown", onMouseDown);
 				canvas.addEventListener("mouseup",  onMouseUp);
 				canvas.addEventListener("mousemove",  onMouseMove);
+
 				canvas.style["pointer-events"] = "all";
 				
 				var canvasScript = document.createElement("script");
@@ -755,7 +759,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		});
 
 		ViewerUtil.onEvent("onMouseDown", function() {
-			document.body.style["pointer-events"] = "none";
+			return false;
+			//document.body.style["pointer-events"] = "none";
 		});
 
 		ViewerUtil.onEvent("onMouseUp", function() {

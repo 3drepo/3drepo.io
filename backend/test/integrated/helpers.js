@@ -23,7 +23,7 @@ function signUpAndLogin(params){
 		return User.createUser(systemLogger, username, password, {
 			email: email
 		}, 200000).then(emailVerifyToken => {
-			return User.verify(username, emailVerifyToken.token, {skipImportToyProject : true, skipCreateBasicPlan: noBasicPlan});
+			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
 		}).then(user => {
 			
 			//login
@@ -44,7 +44,7 @@ function signUpAndLogin(params){
 
 }
 
-function signUpAndLoginAndCreateProject(params){
+function signUpAndLoginAndCreateModel(params){
 
 	let server = params.server;
 	let request = params.request;
@@ -58,7 +58,7 @@ function signUpAndLoginAndCreateProject(params){
 	let type = params.type;
 	let desc = params.desc;
 	let expect = params.expect;
-	let project = params.project;
+	let model = params.model;
 	let noBasicPlan = params.noBasicPlan;
 	let unit = params.unit;
 
@@ -73,8 +73,8 @@ function signUpAndLoginAndCreateProject(params){
 				return done(err, agent);
 			}
 
-			//create a project
-			agent.post(`/${username}/${project}`)
+			//create a model
+			agent.post(`/${username}/${model}`)
 			.send({ type, desc, unit })
 			.expect(200, function(err, res){
 				done(err, agent);
@@ -86,5 +86,5 @@ function signUpAndLoginAndCreateProject(params){
 
 module.exports = {
 	signUpAndLogin,
-	signUpAndLoginAndCreateProject
+	signUpAndLoginAndCreateModel
 }

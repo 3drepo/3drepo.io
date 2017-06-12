@@ -49,13 +49,10 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
 		var vm = this,
-			promise,
-			rolesPromise,
-			projectUserRolesPromise,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
 
@@ -68,8 +65,8 @@
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.availableRoles = null;
-		vm.projectUserRoles = [];
+		vm.availableJobs = null;
+		vm.projectUserJob;
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
@@ -79,8 +76,8 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
-		promise.then(function (data) {
+		var getIssue = IssuesService.getIssues(vm.account, vm.project, vm.revision)
+		.then(function (data) {
 			vm.showProgress = false;
 			vm.toShow = "showIssues";
 			vm.issues = (data === "") ? [] : data;
@@ -100,18 +97,16 @@
 		/*
 		 * Get all the available roles for the project
 		 */
-		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
-		rolesPromise.then(function (data) {
-			console.log('Finish getting roles');
-			vm.availableRoles = data;
-			setAllIssuesAssignedRolesColors();
+		var getJob = IssuesService.getJobs(vm.account, vm.project).then(function (data) {
+
+			vm.availableJobs = data;
 
 			var menu = [];
 			data.forEach(function(role){
 				menu.push({
 					value: "filterRole",
-					role: role.role,
-					label: role.role,
+					role: role._id,
+					label: role._id,
 					keepCheckSpace: true,
 					toggle: true,
 					selected: true,
@@ -126,12 +121,17 @@
 			});
 		});
 
+		$q.all([getIssue, getJob]).then(function(){
+			setAllIssuesAssignedRolesColors();
+		});
+
 		/**
 		 * Define the assigned role colors for each issue
 		 */
 		function setAllIssuesAssignedRolesColors () {
 			var i, length;
-			if (vm.availableRoles !== null) {
+
+			if (vm.availableJobs !== null) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					setIssueAssignedRolesColors(vm.issues[i]);
 				}
@@ -148,8 +148,11 @@
 			var i, length, roleColour, pinColours = [];
 
 			issue.assignedRolesColors = [];
+
 			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-				roleColour = IssuesService.getRoleColor(issue.assigned_roles[i]);
+
+				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
+	
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
@@ -158,9 +161,8 @@
 		/*
 		 * Get the user roles for the project
 		 */
-		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
-		projectUserRolesPromise.then(function (data) {
-			vm.projectUserRoles = data;
+		IssuesService.getUserJobForProject(vm.account, vm.project).then(function (data) {
+			vm.projectUserJob = data;
 		});
 
 		/*
@@ -189,11 +191,11 @@
 				vm.revisions = event.value;
 				watchNotification();
 			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
-				console.log('permission', event.value.permissions)
+
 				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 					vm.canAddIssue = true;
 				}
-				vm.subProjects = event.value.subProjects || [];
+				vm.subModels = event.value.subModels || [];
 				watchNotification();
 			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
 				vm.issueId = event.value;
@@ -265,7 +267,7 @@
 
 			if (issue !== null) {
 				for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-					roleColour = IssuesService.getRoleColor(issue.assigned_roles[i]);
+					roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 					pinColours.push(IssuesService.hexToRgb(roleColour));
 				}
 
@@ -303,7 +305,7 @@
 		function watchNotification(){
 
 
-			 if(!vm.revisions || !vm.subProjects){
+			 if(!vm.revisions || !vm.subModels){
 			 	return;
 			 }
 
@@ -397,9 +399,9 @@
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.project, issueChangedListener);
 
-			//do the same for all subprojects
-			if(vm.subProjects){
-				vm.subProjects.forEach(function(subProject){
+			//do the same for all subModels
+			if(vm.subModels){
+				vm.subModels.forEach(function(subProject){
 					var subproject = true;
 					NotificationService.subscribe.newIssues(subProject.database, subProject.project, function(issues){ newIssueListener(issues, subproject) });
 					NotificationService.subscribe.issueChanged(subProject.database, subProject.project, issueChangedListener);
@@ -415,8 +417,8 @@
 			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
 
-			if(vm.subProjects){
-				vm.subProjects.forEach(function(subProject){
+			if(vm.subModels){
+				vm.subModels.forEach(function(subProject){
 					NotificationService.unsubscribe.newIssues(subProject.database, subProject.project);
 					NotificationService.unsubscribe.issueChanged(subProject.database, subProject.project);
 				});
@@ -482,6 +484,22 @@
 				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
+
+				$state.go('home.account.project.issue', 
+					{
+						account: vm.account, 
+						project: vm.project, 
+						revision: vm.revision,
+						issue: issue._id,
+						noSet: true
+					}, 
+					{notify: false}
+				);
+
+				AnalyticService.sendEvent({
+					eventCategory: 'Issue',
+					eventAction: 'view'
+				});
 			} else {
 				vm.selectedIssue = issue;
 			}
@@ -489,21 +507,7 @@
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
-			$state.go('home.account.project.issue', 
-				{
-					account: vm.account, 
-					project: vm.project, 
-					revision: vm.revision,
-					issue: issue._id,
-					noSet: true
-				}, 
-				{notify: false}
-			);
 
-			AnalyticService.sendEvent({
-				eventCategory: 'Issue',
-				eventAction: 'view'
-			});
 		};
 
 		/**

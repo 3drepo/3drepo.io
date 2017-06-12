@@ -65,7 +65,7 @@
 
 		// Init
 		vm.projectToUpload = null;
-		vm.project.name = vm.project.project;
+		vm.project.name = vm.project.model;
 		vm.dialogCloseTo = "accountProjectsOptionsMenu_" + vm.account + "_" + vm.project.name;
 		dialogCloseToId = "#" + vm.dialogCloseTo;
 		if (vm.project.timestamp !== null) {
@@ -93,21 +93,21 @@
 			projectsetting: {
 				label: "Settings",
 				 icon: "settings", 
-				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_PROJECT_SETTINGS, vm.project.permissions)
+				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.project.permissions)
 			}
 		};
 		if(vm.project.timestamp && !vm.project.federate){
 			vm.projectOptions.download = {
 				label: "Download", 
 				icon: "cloud_download", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_PROJECT, vm.project.permissions)
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.project.permissions)
 			};
 		}
 		vm.uploadButtonDisabled = true;
 		vm.projectOptions.delete = {
 			label: "Delete", 
 			icon: "delete", 
-			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_PROJECT, vm.project.permissions), 
+			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.project.permissions), 
 			color: "#F44336"
 		};
 
@@ -380,7 +380,7 @@
 		 */
 		function watchProjectStatus(){
 
-			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.project, function(data){
+			NotificationService.subscribe.projectStatusChanged(vm.account, vm.project.model, function(data){
 				console.log('upload status changed',  data);
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
@@ -421,7 +421,7 @@
 			});
 
 			$scope.$on('$destroy', function(){
-				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.project);
+				NotificationService.unsubscribe.projectStatusChanged(vm.account, vm.project.model);
 			});
 		}
 

@@ -38,7 +38,7 @@ function _getGridFSBucket (dbCol, format){
 
 	return new GridFSBucket(
 		ModelFactory.db.db(dbCol.account),
-		{ bucketName:  `${dbCol.project}.stash.${format}`}
+		{ bucketName:  `${dbCol.model}.stash.${format}`}
 	);
 }
 

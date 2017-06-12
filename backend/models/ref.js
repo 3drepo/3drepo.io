@@ -45,7 +45,7 @@ var Ref = ModelFactory.createClass(
 	'Ref', 
 	refSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 

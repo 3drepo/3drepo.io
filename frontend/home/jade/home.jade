@@ -1,5 +1,5 @@
 div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
-	img#homeBackground(src="/public/images/viewer_background.jpg")
+	img#homeBackground(src="/public/images/viewer_background.png")
 	viewermanager
 	#legalLinks(layout="row")
 		a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{display.page}}") {{display.title}}

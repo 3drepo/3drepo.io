@@ -19,7 +19,7 @@ let UserBilling = proxyquire('../../../models/userBilling', {
 });
 
 let Subscriptions = proxyquire('../../../models/subscriptions', {
-	'./projectSetting' :  {}
+	'./modelSetting' :  {}
 });
 
 let C = require('../../../constants');
@@ -73,7 +73,7 @@ describe('UserBilling', function(){
 
 	function createPaymentTest(data){
 
-		let subscriptions = new Subscriptions('', {}, data.currentSubscriptions);
+		let subscriptions = new Subscriptions('', '', {}, data.currentSubscriptions);
 
 		subscriptions.now = data.paymentDate.toDate();
 		

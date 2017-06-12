@@ -19,13 +19,13 @@
 						md-icon.angular-material-icons.md-accent playlist_add
 			// Federation
 			div(ng-if="account.showProjects")
-				div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedProjects")
+				div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedModels")
 					div(layout="row", layout-align="start center")
 						md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
 							md-button.md-icon-button.md-accent(aria-label="Federation")
 								md-icon.angular-material-icons border_all
 							.md-list-item-text(flex="40")
-								p {{federation.project}}
+								p {{federation.model}}
 						//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
 							md-icon.angular-material-icons edit
 						#federationInfoRight(layout="row")
@@ -42,8 +42,8 @@
 
 					// Projects list
 					p.federationProjectsList
-						span(ng-repeat="subProject in federation.subProjects")
-							| {{subProject.project}}
+						span(ng-repeat="subProject in federation.subModels")
+							| {{subProject.model}}
 							span(ng-if="!$last")
 								| ,
 								=" "

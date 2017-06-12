@@ -22,9 +22,6 @@
 	const ModelFactory = require('./factory/modelFactory');
 	const RoleTemplates = require('./role_templates');
 	const responseCodes = require("../response_codes");
-	const ProjectSetting = require("./projectSetting");
-	const _ = require('lodash');
-	const C = require('../constants');
 
 	const schema = mongoose.Schema({
 		_id : String,
@@ -33,23 +30,23 @@
 		roles: []
 	});
 
-	schema.statics.createStandardRoles = function (account, project) {
+	schema.statics.createStandardRoles = function (account, model) {
 		let rolePromises = [];
 
-		RoleTemplates.projectRoleTemplateLists.forEach(role =>
+		RoleTemplates.modelRoleTemplateLists.forEach(role =>
 			{
-				rolePromises.push(this.createRole(account, project, role));
+				rolePromises.push(this.createRole(account, model, role));
 			}
 		);
 
 		return Promise.all(rolePromises);
 	};
 
-	schema.statics.createRole = function (account, project, role) {
+	schema.statics.createRole = function (account, model, role) {
 		
-		let roleId = `${account}.${project}.${role}`;
+		let roleId = `${account}.${model}.${role}`;
 		
-		if(!project){
+		if(!model){
 			roleId = `${account}.${role}`;
 		}
 		
@@ -58,7 +55,7 @@
 				roleFound = roleFound.toObject();
 				return { role: roleFound.role, db: roleFound.db};
 			} else {
-				return RoleTemplates.createRoleFromTemplate(account, project, role);
+				return RoleTemplates.createRoleFromTemplate(account, model, role);
 			}
 		});
 	};
@@ -88,21 +85,21 @@
 		return ModelFactory.db.admin().command(grantRoleCmd);
 	};
 
-	schema.statics.grantProjectRoleToUser = function (username, account, project, role) {
+	schema.statics.grantModelRoleToUser = function (username, account, model, role) {
 		
 		// lazily create the role from template if the role is not found
 
-		if(RoleTemplates.projectRoleTemplateLists.indexOf(role) === -1){
+		if(RoleTemplates.modelRoleTemplateLists.indexOf(role) === -1){
 			return Promise.reject(responseCodes.INVALID_ROLE_TEMPLATE);
 		}
 
-		return this.createRole(account, project, role).then(() => {
+		return this.createRole(account, model, role).then(() => {
 
 			let grantRoleCmd = {
 				grantRolesToUser: username,
 				roles: [{
 					db: account,
-					role: `${project}.${role}`
+					role: `${model}.${role}`
 				}]
 			};
 			
@@ -123,93 +120,6 @@
 		};
 
 		return ModelFactory.db.admin().command(cmd);
-	};
-
-	schema.statics.viewRolesWithInheritedPrivs = function(roles){
-
-		let viewRolesCmd = { rolesInfo : roles, showPrivileges: true };
-		return ModelFactory.db.admin().command(viewRolesCmd).then(doc => doc.roles);
-
-	};
-
-	schema.statics.listProjectsAndAccountAdmin = function(roles){
-
-		let projects = {};
-		let promises = [];
-		let adminAccounts = [];
-
-		function getProjectNames(privileges){
-
-			let collectionSuffix = '.history';
-			let projectNames = [];
-
-			for(let i=0 ; i < privileges.length ; i++){
-				let collectionName = privileges[i].resource.collection;
-				if(collectionName.endsWith(collectionSuffix)){
-					projectNames.push(collectionName.substr(0, collectionName.length - collectionSuffix.length));
-				}
-			}
-
-			return _.unique(projectNames);
-		}
-
-		function addToProjectList(account, project, permissions){
-			//if project not found in the list
-			if(!projects[`${account}.${project}`]){
-				projects[`${account}.${project}`] = {
-					project,
-					account,
-					permissions: permissions ? permissions : []
-				};
-			} else {
-				permissions && (projects[`${account}.${project}`].permissions = projects[`${account}.${project}`].permissions.concat(permissions));
-				projects[`${account}.${project}`].permissions  = _.unique(projects[`${account}.${project}`].permissions);
-			}
-		}
-
-		roles.forEach(role => {
-
-			let permissions = RoleTemplates.determinePermission(role.db, '', role);
-
-			if(_.intersection(permissions, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]).length === RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE].length){
-				// admin role list all projects on that db
-				adminAccounts.push(role.db);
-				promises.push(
-					ProjectSetting.find({account: role.db}).then(settings => {
-						settings.forEach(setting => {
-
-							let projectName = setting._id;
-							addToProjectList(role.db, projectName, RoleTemplates.roleTemplates[C.ADMIN_TEMPLATE]);
-
-						});
-					})
-				);
-
-			} else {
-
-				let projectNames = getProjectNames(role.inheritedPrivileges);
-				let permissions;
-
-				projectNames.forEach(projectName => {
-					if(projectName){
-						permissions = RoleTemplates.determinePermission(role.db, projectName, role);
-					}
-
-					if(permissions){
-						addToProjectList(role.db, projectName, permissions);
-					}
-				});
-
-			}
-		});
-
-		return Promise.all(promises).then(() => {
-			return {
-				projects:  _.values(projects),
-				adminAccounts: _.unique(adminAccounts)
-			};
-		});
-
 	};
 
 	var Role = ModelFactory.createClass(

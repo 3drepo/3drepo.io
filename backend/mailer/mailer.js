@@ -18,6 +18,7 @@
 
 var nodemailer = require('nodemailer');
 var config = require('../config');
+var C = require('../constants');
 var responseCodes = require('../response_codes');
 var getBaseURL = config.getBaseURL;
 var transporter;
@@ -66,11 +67,11 @@ function rejectNoUrl(name){
 function getURL(urlName, params){
 	'use strict';
 
-	if(!config.mail || !config.mail.urls || !config.mail.urls[urlName]){
+	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]){
 		return null;
 	}
 
-	return getBaseURL() + config.mail.urls[urlName](params);
+	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
 function sendVerifyUserEmail(to, data){
@@ -197,16 +198,16 @@ function sendPaymentErrorEmail(data){
 	return sendEmail(template, config.contact.email, data);
 }
 
-function sendProjectInvitation(to, data){
+function sendModelInvitation(to, data){
 	'use strict';
 
-	data.url = getURL('project', { account: data.account, project: data.project });
+	data.url = getURL('model', { account: data.account, model: data.model });
 
 	if(!data.url){
-		return rejectNoUrl('project');
+		return rejectNoUrl('model');
 	}
 
-	let template = require('./templates/invitedToProject');
+	let template = require('./templates/invitedToModel');
 	return sendEmail(template, to, data);
 }
 
@@ -224,7 +225,7 @@ module.exports = {
 	sendContactEmail,
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
-	sendProjectInvitation,
+	sendModelInvitation,
 	sendSubscriptionSuspendedEmail,
 	sendPaymentReceivedEmailToSales,
 	sendPaymentRefundedEmail,

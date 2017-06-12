@@ -38,7 +38,7 @@ describe('Notification', function () {
 	let agent2;
 	let username = 'testing';
 	let password = 'testing';
-	let project = 'testproject';
+	let model = 'testproject';
 
 	let cookies;
 	let socket;
@@ -128,10 +128,10 @@ describe('Notification', function () {
 		socket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory});
 		socket.on('connect', function(data){
 
-			socket.emit('join', {account: username, project: project});
+			socket.emit('join', {account: username, model: model});
 			
 			socket.on('joined', function(data){
-				if(data.account === username && data.project === project){
+				if(data.account === username && data.model === model){
 					done();
 				}
 			});
@@ -154,7 +154,7 @@ describe('Notification', function () {
 
 		mySocket.on('connect', function(data){
 			console.log('on connect')
-			mySocket.emit('join', {account: 'someaccount', project: 'someproject'});
+			mySocket.emit('join', {account: 'someaccount', model: 'someproject'});
 
 			mySocket.on('credentialError', function(err){
 				expect(err).to.exist
@@ -171,7 +171,7 @@ describe('Notification', function () {
 		let issue = Object.assign({"name":"Issue test"}, baseIssue);
 
 
-		socket.on(`${username}::${project}::newIssues`, function(issues){
+		socket.on(`${username}::${model}::newIssues`, function(issues){
 
 			expect(issues[0]).to.exist;
 			expect(issues[0].name).to.equal(issue.name);
@@ -196,7 +196,7 @@ describe('Notification', function () {
 			done();
 		});
 
-		agent2.post(`/${username}/${project}/issues.json`)
+		agent2.post(`/${username}/${model}/issues.json`)
 		.send(issue)
 		.expect(200 , function(err, res){
 			issueId = res.body._id;
@@ -211,7 +211,7 @@ describe('Notification', function () {
 	it('subscribe new comment notification should succee', function(done){
 		let comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 		
-		socket.on(`${username}::${project}::${issueId}::newComment`, function(resComment){
+		socket.on(`${username}::${model}::${issueId}::newComment`, function(resComment){
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			expect(resComment.viewpoint.up).to.deep.equal(comment.viewpoint.up);
@@ -229,7 +229,7 @@ describe('Notification', function () {
 			done();
 		});
 
-		agent2.put(`/${username}/${project}/issues/${issueId}.json`)
+		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
 		.send(comment)
 		.expect(200 , function(err, res){
 			expect(err).to.not.exist;
@@ -240,13 +240,13 @@ describe('Notification', function () {
 	it('subscribe comment changed notification should succee', function(done){
 		let comment ={"comment":"abc123456","edit":true,"commentIndex":0};
 
-		socket.on(`${username}::${project}::${issueId}::commentChanged`, function(resComment){
+		socket.on(`${username}::${model}::${issueId}::commentChanged`, function(resComment){
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			done();
 		});
 
-		agent2.put(`/${username}/${project}/issues/${issueId}.json`)
+		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
 		.send(comment)
 		.expect(200 , function(err, res){
 			expect(err).to.not.exist;
@@ -258,12 +258,12 @@ describe('Notification', function () {
 
 		let comment = {"comment":"","delete":true,"commentIndex":0}
 
-		socket.on(`${username}::${project}::${issueId}::commentDeleted`, function(resComment){
+		socket.on(`${username}::${model}::${issueId}::commentDeleted`, function(resComment){
 			expect(resComment).to.exist;
 			done();
 		});
 
-		agent2.put(`/${username}/${project}/issues/${issueId}.json`)
+		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
 		.send(comment)
 		.expect(200 , function(err, res){
 			expect(err).to.not.exist;
@@ -274,18 +274,18 @@ describe('Notification', function () {
 
 		let status = {"priority":"high","status":"open","topic_type":"for info","assigned_roles":["testproject.collaborator"]};
 
-		socket.off(`${username}::${project}::${issueId}::newComment`);
+		socket.off(`${username}::${model}::${issueId}::newComment`);
 
 		async.parallel([
 			function(done){
-				socket.on(`${username}::${project}::${issueId}::newComment`, function(resComment){
+				socket.on(`${username}::${model}::${issueId}::newComment`, function(resComment){
 					expect(resComment).to.exist;
 					expect(resComment.action).to.deep.equal({"property":"priority","from":"low","to":"high"});
 					done();
 				});
 			},
 			function(done){
-				socket.on(`${username}::${project}::${issueId}::issueChanged`, function(issue){
+				socket.on(`${username}::${model}::${issueId}::issueChanged`, function(issue){
 					expect(issue).to.exist;
 					expect(issue.priority).to.equal('high');
 					done();
@@ -296,7 +296,7 @@ describe('Notification', function () {
 
 
 
-		agent2.put(`/${username}/${project}/issues/${issueId}.json`)
+		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
 		.send(status)
 		.expect(200 , function(err, res){
 			expect(err).to.not.exist;

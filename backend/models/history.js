@@ -137,7 +137,7 @@ var History = ModelFactory.createClass(
 	'History', 
 	historySchema, 
 	arg => { 
-		return `${arg.project}.history`;
+		return `${arg.model}.history`;
 	}
 );
 

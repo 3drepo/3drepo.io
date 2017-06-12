@@ -20,9 +20,11 @@
 
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
-	const ProjectSetting = require("./projectSetting");
-	
-	let Subscriptions = function (billingUser, billingAddress, subscriptions) {
+	const ModelSetting = require("./modelSetting");
+	const _ = require('lodash');
+
+	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
+		this.user = user;
 		this.billingUser = billingUser;
 		this.subscriptions = subscriptions;
 		this.billingAddress = billingAddress;
@@ -320,6 +322,32 @@
 		}
 	};
 
+	Subscriptions.prototype.updateAssignDetail = function(id, data){
+
+		let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
+
+		if(!subscription){
+			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
+		}
+
+		if(data.hasOwnProperty('job') && data.job!== '' && !this.user.customData.jobs.findById(data.job)){
+
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+
+		} else {
+
+			if(data.job){
+				subscription.job = data.job;
+			} else if (data.job === ''){
+				subscription.job = undefined;
+			}
+		
+		}
+
+		return Promise.resolve(subscription);
+
+	};
+
 	Subscriptions.prototype.assignSubscriptionToUser = function(id, userData){
 		
 		const User = require("./user.js");
@@ -352,8 +380,15 @@
 				return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 			} else if(subscription.assignedUser){
 				return Promise.reject(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED);
+			} else if (userData.job && !this.user.customData.jobs.findById(userData.job)) {
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
 			} else {
 				subscription.assignedUser = user.user;
+
+				if(userData.job){
+					subscription.job = userData.job;
+				}
+
 				return subscription;
 			}
 
@@ -361,8 +396,6 @@
 	};
 
 	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, user, cascadeRemove){
-
-		const ProjectHelper = require('./helper/project');
 
 		// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
 		// let subscription = this.subscriptions.id(id);
@@ -381,28 +414,39 @@
 		}
 
 		//check if they are a collaborator
-		return ProjectSetting.find({ account: user }, {}).then(projects => {
+		return ModelSetting.find({ account: user }, {}).then(models => {
 
-			let foundProjects = [];
-			projects.forEach(project => {
-				project.collaborators.forEach(collaborator => {
-					if(collaborator.user === subscription.assignedUser){
-						foundProjects.push({ project: project._id, role: collaborator.role});
+			let foundModels = [];
+			models.forEach(model => {
+				model.permissions.forEach(permission => {
+					if(permission.user === subscription.assignedUser){
+						foundModels.push(model);
 					}
 				});
 			});
 
-			if(!cascadeRemove && foundProjects.length > 0){
-				return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+			if(!cascadeRemove && foundModels.length > 0){
+
+				return Promise.reject({ 
+					resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
+					info: {models: _.map(foundModels, p => { return { model: p._id}; } )}
+				});
+
 			} else {
 
 				let promises = [];
-				foundProjects.forEach(foundProject => {
-					promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, user, foundProject.project, foundProject.role));
+
+				foundModels.forEach(model => {
+
+					const index = _.findIndex(model.permissions, p => p.user === subscription.assignedUser);
+
+					if(index !== -1){
+						console.log(model.permissions.splice(index, 1));
+						promises.push(model.changePermissions(model.permissions.splice(index, 1)));
+					}
 				});
 
 				return Promise.all(promises);
-
 			}
 
 		}).then(() => {
@@ -410,6 +454,14 @@
 			return subscription;
 		});
 
+	};
+
+	Subscriptions.prototype.findByJob = function(job){
+		return this.subscriptions.filter(sub => sub.job === job);
+	};
+
+	Subscriptions.prototype.findByAssignedUser = function(user){
+		return this.subscriptions.find(sub => sub.assignedUser === user);
 	};
 
 	module.exports = Subscriptions;

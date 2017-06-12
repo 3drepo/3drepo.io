@@ -33,7 +33,7 @@ var groupSchema = Schema({
 		_id : false,
 		shared_id: Object,
 		account: String,
-		project: String
+		model: String
 	}],
 	issue_id: Object,
 	color: [Number]
@@ -83,7 +83,7 @@ groupSchema.methods.updateAttrs = function(data){
 		addPromises.push(
 			Mesh.addGroup(
 				obj.account,
-				obj.project,
+				obj.model,
 				id,
 				utils.uuidToString(this._id)
 			).then( mesh => {
@@ -105,7 +105,7 @@ groupSchema.methods.updateAttrs = function(data){
 			removePromises.push(
 				Mesh.removeGroup(
 					obj.account,
-					obj.project,
+					obj.model,
 					id,
 					utils.uuidToString(this._id)
 				)
@@ -142,7 +142,7 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 	let group = this.model('Group').createInstance({
 		account: dbCol.account, 
-		project: dbCol.project
+		model: dbCol.model
 	});
 
 
@@ -180,7 +180,7 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 		group.objects.forEach(obj => removePromises.push(
 			Mesh.removeGroup(
 				obj.account,
-				obj.project,
+				obj.model,
 				utils.uuidToString(obj.id),
 				id
 			)
@@ -195,7 +195,7 @@ var Group = ModelFactory.createClass(
 	'Group', 
 	groupSchema, 
 	arg => { 
-		return `${arg.project}.groups`;
+		return `${arg.model}.groups`;
 	}
 );
 

@@ -90,13 +90,13 @@
 	 * @param {filePath} filePath - Path to uploaded file
 	 * @param {orgFileName} orgFileName - Original file name of the file
 	 * @param {databaseName} databaseName - name of database to commit to
-	 * @param {projectName} projectName - name of project to commit to
+	 * @param {modelName} modelName - name of model to commit to
 	 * @param {userName} userName - name of user
 	 * @param {copy} copy - use fs.copy or fs.move, default fs.move
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	ImportQueue.prototype.importFile = function (filePath, orgFileName, databaseName, projectName, userName, copy, tag, desc) {
+	ImportQueue.prototype.importFile = function (filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
 		let corID = uuid.v1();
 
 		let newPath;
@@ -111,7 +111,7 @@
 				let json = {
 					file: newPath,
 					database: databaseName,
-					project: projectName,
+					project: modelName,
 					owner: userName,
 				};
 
@@ -149,11 +149,11 @@
 	};
 
 	/*******************************************************************************
-	 * Dispatch work to queue to create a federated project
+	 * Dispatch work to queue to create a federated model
 	 * @param {account} account - username
-	 * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
 	 *******************************************************************************/
-	ImportQueue.prototype.createFederatedProject = function (account, defObj) {
+	ImportQueue.prototype.createFederatedModel = function (account, defObj) {
 		let corID = uuid.v1();
 		let newFileDir = this.sharedSpacePath + "/" + corID;
 		let filename = `${newFileDir}/obj.json`;
@@ -208,21 +208,21 @@
 
 
 	/*******************************************************************************
-	 * Dispatch work to import toyproject
+	 * Dispatch work to import toy model
 	 * @param {database} database - database name
 	 *******************************************************************************/
-	ImportQueue.prototype.importToyProject = function (database, project) {
+	ImportQueue.prototype.importToyModel = function (database, model) {
 		let corID = uuid.v1();
 
 
-		let msg = `importToy ${database} ${project}`;
+		let msg = `importToy ${database} ${model}`;
 		
 		return this._dispatchWork(corID, msg).then(() => {
 
 			return new Promise((resolve, reject) => {
 				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, database, project}),
-					reject: (errCode, message, rep) => reject({ corID, errCode, database, project, message, appId: rep.properties.appId })
+					resolve: () => resolve({corID, database, model}),
+					reject: (errCode, message, rep) => reject({ corID, errCode, database, model, message, appId: rep.properties.appId })
 				};
 			});
 		});
@@ -238,9 +238,9 @@
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	ImportQueue.prototype._moveFileToSharedSpace = function (corID, orgFilePath, newFileName, copy) {
-		let ProjectHelper = require("../models/helper/project");
+		let ModelHelper = require("../models/helper/model");
 
-		newFileName = newFileName.replace(ProjectHelper.fileNameRegExp, "_");
+		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
 
 		let newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		let filePath = newFileDir + newFileName;

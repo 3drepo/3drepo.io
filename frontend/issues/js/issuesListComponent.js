@@ -41,9 +41,9 @@
 					importBcf: "&",
 					selectedIssue: "<",
 					displayIssue: "<",
-					userRoles: "<",
+					userJob: "<",
 					issueDisplay: "<",
-					availableRoles: "<"
+					availableJobs: "<"
 				}
 			}
 		);

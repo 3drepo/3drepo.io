@@ -10,7 +10,7 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 			// Federation name
 			div(layout="row", flex)
 				md-input-container(flex="50")
-					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.project", ng-disabled="vm.federationOriginalData", ng-pattern="vm.projectRegExp" maxlength=20)
+					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.model", ng-disabled="vm.federationOriginalData", ng-pattern="vm.projectRegExp" maxlength=20)
 					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers, hyphen and underscore only
 
 			div(ng-if="!vm.federationOriginalData" layout="row", flex)
@@ -33,10 +33,10 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 							p {{account.account}}
 						md-list
 							md-list-item.federationProject(
-							ng-repeat="project in vm.userAccount.projects"
+							ng-repeat="project in vm.userAccount.models"
 							style="opacity:{{project.federated? 0.2 : 1.0}}")
 								md-icon.angular-material-icons dashboard
-								p {{project.project}}
+								p {{project.model}}
 								span(flex)
 								md-button.md-icon-button(
 								aria-label="Add"
@@ -52,10 +52,10 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(layout="column", flex)
 					p(layout="row", layout-align="center center") Federated
 					md-list
-						div(ng-repeat="item in vm.newFederationData.subProjects", layout="column")
+						div(ng-repeat="item in vm.newFederationData.subModels", layout="column")
 							md-list-item.federationProject
 								md-icon.angular-material-icons dashboard
-								p {{item.project}}
+								p {{item.model}}
 								span(flex)
 								md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
 									md-icon.angular-material-icons.md-accent remove_circle
