@@ -103,13 +103,13 @@
 		};
 
 		vm.viewingOptions = [
-			{
+/*			{
 				mode: VIEWER_NAV_MODES.WALK,
 				label: "Walk",
 				icon: "fa fa-child",
 				click: setViewingOption,
 				iconClass: "bottomButtonIconWalk"
-			},
+			},*/
 			{
 				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
@@ -125,7 +125,7 @@
 			}
 		];
 		
-		vm.selectedViewingOptionIndex = 2;
+		vm.selectedViewingOptionIndex = 1;
 
 		vm.leftButtons = [];
 		vm.leftButtons.push({
@@ -136,7 +136,7 @@
 
 		vm.rightButtons = [];
 		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
-		setViewingOption(2);
+		setViewingOption(1);
 		/*
 		vm.rightButtons.push({
 			label: "Help",

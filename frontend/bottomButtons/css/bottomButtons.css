@@ -41,7 +41,7 @@ bottom-buttons .actionButton md-icon {
 bottom-buttons .viewingOptionButtons {
   position: absolute;
   right: 15px;
-  top: -120px;
+  top: -80px;
 }
 
 bottom-buttons label {
