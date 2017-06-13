@@ -27,7 +27,7 @@
 			templateUrl: "tree.html",
 			scope: {
 				account:  "=",
-				project:  "=",
+				model:  "=",
 				branch:   "=",
 				revision: "=",
 				filterText: "=",
@@ -137,9 +137,9 @@
 			});
 		}
 
-		function getAccountProjectKey(account, project)
+		function getAccountModelKey(account, model)
 		{
-			return account + "@" + project;
+			return account + "@" + model;
 		}
 
 		/**
@@ -151,7 +151,7 @@
 			traverseNode(node, function(node){
 				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
-					var key = getAccountProjectKey(node.account, node.project);
+					var key = getAccountModelKey(node.account, node.model);
 					if(!nodes[key]){
 						nodes[key] = [];
 					}
@@ -161,8 +161,8 @@
 			});
 		}
 
-		function getVisibleArray(account, project){
-			var key = getAccountProjectKey(account, project);
+		function getVisibleArray(account, model){
+			var key = getAccountModelKey(account, model);
 			if(!vm.visible[key]){
 				vm.visible[key] = new Set();
 			}
@@ -170,8 +170,8 @@
 			return vm.visible[key];
 		}
 
-		function getInvisibleArray(account, project){
-			var key = getAccountProjectKey(account, project);
+		function getInvisibleArray(account, model){
+			var key = getAccountModelKey(account, model);
 			if(!vm.invisible[key]){
 				vm.invisible[key] = new Set();
 			}
@@ -186,8 +186,8 @@
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
-			var visible = getVisibleArray(node.account, node.project);
-			var invisible = getInvisibleArray(node.account, node.project);
+			var visible = getVisibleArray(node.account, node.model);
+			var invisible = getInvisibleArray(node.account, node.model);
 
 			if (!node.children && ((node.type || "mesh") === "mesh"))
 			{
@@ -260,11 +260,11 @@
 					if (vm.nodesToShow[index].expanded) {
 						// Collapse
 
-						//if the target itself contains subProjectTree
+						//if the target itself contains subModelTree
 						if(vm.nodesToShow[index].hasSubProjTree){
-							//node containing sub project tree must have only one child
-							var subProjectNode = vm.subTreesById[vm.nodesToShow[index].children[0]._id];
-							_ids.push(subProjectNode._id);
+							//node containing sub model tree must have only one child
+							var subModelNode = vm.subTreesById[vm.nodesToShow[index].children[0]._id];
+							_ids.push(subModelNode._id);
 						}
 
 						while (!endOfSplice) {
@@ -272,8 +272,8 @@
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
 
 								if(vm.nodesToShow[index + 1].hasSubProjTree){
-									var subProjectNode = vm.subTreesById[vm.nodesToShow[index + 1].children[0]._id];
-									_ids.push(subProjectNode._id);
+									var subModelNode = vm.subTreesById[vm.nodesToShow[index + 1].children[0]._id];
+									_ids.push(subModelNode._id);
 								}
 
 								vm.nodesToShow.splice(index + 1, 1);
@@ -292,7 +292,7 @@
 						}
 
 						for (i = 0; i < numChildren; i += 1) {
-							// For federation - handle node of project that cannot be viewed or has been deleted
+							// For federation - handle node of model that cannot be viewed or has been deleted
 							// That node will be below level 0 only
 							if ((vm.nodesToShow[index].level === 0) &&
 								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
@@ -594,7 +594,7 @@
 
 				} else if(lastParent.parent){
 
-					//Get node parent and reconstruct the path in case it is a fed project
+					//Get node parent and reconstruct the path in case it is a fed model
 					lastParent = lastParent.parent;
 					path = lastParent.path.split("__").concat(path);
 					hasParent = true;
@@ -664,15 +664,15 @@
 
 				var vals = key.split('@');
 				var account = vals[0];
-				var project = vals[1];
+				var model = vals[1];
 
 				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
 					source: "tree",
 					account: account,
-					project: project,
+					model: model,
 					name: node.name,
-					visible_ids: getVisibleArray(account, project),
-					invisible_ids: getInvisibleArray(account, project)
+					visible_ids: getVisibleArray(account, model),
+					invisible_ids: getInvisibleArray(account, model)
 				});
 			}
 
@@ -789,7 +789,7 @@
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
-					project: node.project,
+					model: node.model,
 					id: node._id,
 					name: node.name
 				});
@@ -798,14 +798,14 @@
 				{
 					var vals = key.split("@");
 					var account = vals[0];
-					var project = vals[1];
+					var model = vals[1];
 				
 					// Separately highlight the children
 					// but only for multipart meshes
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
 						source: "tree",
 						account: account,
-						project: project,
+						model: model,
 						ids: map[key]
 					});
 				}

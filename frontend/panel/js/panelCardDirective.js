@@ -27,11 +27,11 @@
             templateUrl: "panelCard.html",
             scope: {
 				account: "=",
-				project: "=",
+				model: "=",
 				branch: "=",
 				revision: "=",
                 position: "=",
-                projectSettings: "=",
+                modelSettings: "=",
                 treeMap: "=",
                 contentData: "=",
 				onHeightRequest: "&",
@@ -182,9 +182,9 @@
 				"hide-item='vm.hideSelectedItem' " +
 				"show-edit='vm.showEdit' " +
 				"account='vm.account' " +
-				"project='vm.project' " +
+				"model='vm.model' " +
 				"branch='vm.branch' " +
-				"project-settings='vm.projectSettings' " +
+				"model-settings='vm.modelSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
 				"tree-map='vm.treeMap' " +

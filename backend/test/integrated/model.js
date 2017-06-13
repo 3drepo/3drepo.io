@@ -107,11 +107,14 @@ describe('Model', function () {
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
+					console.log(account);
+
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
 
 					const myModel = pg.models.find(_model => _model.model === modelId);
 					expect(myModel).to.exist;
+					expect(myModel.model).to.equal(modelId);
 
 					callback(err);
 				});
@@ -120,6 +123,23 @@ describe('Model', function () {
 
 	});
 
+	it('model added to a project should be listed on top level models array', function(done){
+
+		agent.get(`/${username}.json`)
+		.expect(200, function(err, res){
+
+			const account = res.body.accounts.find(account => account.account === username);
+			expect(account).to.exist;
+
+			let myModel = account.models.find(_model => _model.model === model);
+			expect(myModel).to.not.exist;
+
+			myModel = account.fedModels.find(_model => _model.model === model);
+			expect(myModel).to.not.exist;
+
+			done(err);
+		});
+	});
 
 	it('should fail if project supplied is not found', function(done){
 

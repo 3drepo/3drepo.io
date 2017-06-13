@@ -27,7 +27,7 @@
 			templateUrl: "measure.html",
 			scope: {
 				account: '=',
-				project: '=',
+				model: '=',
 				settings: '='
 			},
 			controller: MeasureCtrl,
@@ -36,9 +36,9 @@
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService"];
 
-	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
+	function MeasureCtrl ($scope, $element, EventService, ModelService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,

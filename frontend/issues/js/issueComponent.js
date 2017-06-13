@@ -26,7 +26,7 @@
 				templateUrl: "issueComp.html",
 				bindings: {
 					account: "<",
-					project: "<",
+					model: "<",
 					revision: "<",
 					data: "<",
 					keysDown: "<",
@@ -36,7 +36,7 @@
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
-					projectSettings: '<',
+					modelSettings: '<',
 					setInitialSelectedObjects: "&",
 					userJob: "<",
 					availableJobs: "<"
@@ -103,7 +103,7 @@
 		}
 
 		function setCanUpdateStatus(issueData){
-			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.projectSettings.permissions)){
+			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.modelSettings.permissions)){
 				return self.canUpdateStatus = false;
 			}
 
@@ -119,9 +119,9 @@
 				leftArrow = 37;
 			//console.log('issueComp on changes', changes);
 
-			if(changes.hasOwnProperty('projectSettings')){
-				this.topic_types = this.projectSettings.properties.topicTypes;
-				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.projectSettings.permissions);
+			if(changes.hasOwnProperty('modelSettings')){
+				this.topic_types = this.modelSettings.properties.topicTypes;
+				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
 				//convert comment topic_types
 				convertCommentTopicType();
 			}
@@ -150,7 +150,7 @@
 						this.canUpdate = this.userJob._id && this.issueData.creator_role && (this.userJob._id === this.issueData.creator_role);
 					}
 
-					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.projectSettings.permissions)){
+					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, this.modelSettings.permissions)){
 						this.canUpdate = false;
 					}
 
@@ -231,14 +231,14 @@
 			// Role
 			if (changes.hasOwnProperty("availableJobs") && this.availableJobs) {
 				console.log(this.availableJobs);
-				this.projectJobs = this.availableJobs.map(function (availableJob) {
+				this.modelJobs = this.availableJobs.map(function (availableJob) {
 					/*
 					// Get the actual role and return the last part of it
 					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
 					*/
 					return availableJob._id;
 				});
-				console.log(this.projectJobs);
+				console.log(this.modelJobs);
 			}
 		};
 
@@ -263,10 +263,10 @@
 
 			//unsubscribe on destroy
 			if(self.data){
-				NotificationService.unsubscribe.newComment(self.data.account, self.data.project, self.data._id);
-				NotificationService.unsubscribe.commentChanged(self.data.account, self.data.project, self.data._id);
-				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.project, self.data._id);
-				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.project, self.data._id);
+				NotificationService.unsubscribe.newComment(self.data.account, self.data.model, self.data._id);
+				NotificationService.unsubscribe.commentChanged(self.data.account, self.data.model, self.data._id);
+				NotificationService.unsubscribe.commentDeleted(self.data.account, self.data.model, self.data._id);
+				NotificationService.unsubscribe.issueChanged(self.data.account, self.data.model, self.data._id);
 			}
 			
 		};
@@ -396,14 +396,14 @@
 					view_dir : viewpoint.view_dir,
 					up: viewpoint.up,
 					account: self.issueData.account,
-					project: self.issueData.project
+					model: self.issueData.model
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
 					account: self.issueData.account,
-					project: self.issueData.project,
+					model: self.issueData.model,
 				};
 				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
 			}
@@ -617,14 +617,14 @@
 			else
 			{
 				// Get the viewpoint
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, model: self.model}});
 			}
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
 					if (self.actions.multi.selected && self.selectedObjects) {
 						// Create a group of selected objects
 						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+						UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
 							console.log("saving issue with viewpoint: " );
 							console.log(viewpoint);
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
@@ -641,7 +641,7 @@
 						if (self.actions.multi.selected && self.selectedObjects) {
 							// Create a group of selected objects
 							data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
 						}
@@ -669,7 +669,7 @@
 			// Save issue
 			issue = {
 				account: self.account,
-				project: self.project,
+				model: self.model,
 				objectId: null,
 				name: self.issueData.name,
 				viewpoint: viewpoint,
@@ -719,10 +719,10 @@
 					startNotification();
 					self.saving = false;
 
-					$state.go('home.account.project.issue', 
+					$state.go('home.account.model.issue', 
 						{
 							account: self.account, 
-							project: self.project, 
+							model: self.model, 
 							revision: self.revision,
 							issue: self.data._id,
 							noSet: true
@@ -752,7 +752,7 @@
 					});
 			}
 			else {
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, model: self.issueData.model}});
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
@@ -888,14 +888,14 @@
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, project: self.issueData.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.issueData.account, model: self.issueData.model}});
 
 			}
 			else {
 				// Description
 				self.descriptionThumbnail = data.screenShot;
 				
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, project: self.project}});
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, model: self.model}});
 			}
 
 			viewpointPromise.promise.then(function (viewpoint) {
@@ -1034,7 +1034,7 @@
 				/*
 				* Watch for new comments
 				*/
-				NotificationService.subscribe.newComment(self.data.account, self.data.project, self.data._id, function(comment){
+				NotificationService.subscribe.newComment(self.data.account, self.data.model, self.data._id, function(comment){
 
 					if(comment.action){
 						IssuesService.convertActionCommentToText(comment, self.topic_types);
@@ -1050,7 +1050,7 @@
 				/*
 				* Watch for comment changed
 				*/
-				NotificationService.subscribe.commentChanged(self.data.account, self.data.project, self.data._id, function(newComment){
+				NotificationService.subscribe.commentChanged(self.data.account, self.data.model, self.data._id, function(newComment){
 
 					var comment = self.issueData.comments.find(function(comment){
 						return comment.guid === newComment.guid;
@@ -1065,7 +1065,7 @@
 				/*
 				* Watch for comment deleted
 				*/
-				NotificationService.subscribe.commentDeleted(self.data.account, self.data.project, self.data._id, function(newComment){
+				NotificationService.subscribe.commentDeleted(self.data.account, self.data.model, self.data._id, function(newComment){
 
 					var deleteIndex;
 					self.issueData.comments.forEach(function(comment, i){
@@ -1088,7 +1088,7 @@
 				/*
 				* Watch for issue change
 				*/
-				NotificationService.subscribe.issueChanged(self.data.account, self.data.project, self.data._id, function(issue){
+				NotificationService.subscribe.issueChanged(self.data.account, self.data.model, self.data._id, function(issue){
 
 					self.issueData.topic_type = issue.topic_type;
 					self.issueData.desc = issue.desc;

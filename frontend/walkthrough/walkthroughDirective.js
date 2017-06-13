@@ -26,7 +26,7 @@
 			restrict: "EA",
 			scope: {
 				account: "@",
-				project: "@",
+				model: "@",
 				autoPlay: "@",
 				animate: "@",
 				fps: "@",
@@ -121,7 +121,7 @@
             wt.isRecording = false;
             $interval.cancel(wt.recordingInterval);
 			
-			WalkthroughService.saveRecording(wt.account, wt.project, wt.currentWalkthrough, wt.recording);
+			WalkthroughService.saveRecording(wt.account, wt.model, wt.currentWalkthrough, wt.recording);
         };
 			
 		wt.tickFunction = function() {
@@ -148,7 +148,7 @@
 
 		/*
 		wt.loadFrames = function () {
-			var url = "/public/plugins/walkthroughVr/" + wt.account + "/" + wt.project + "/frames.csv";
+			var url = "/public/plugins/walkthroughVr/" + wt.account + "/" + wt.model + "/frames.csv";
 			
 			wt.loading = $q.defer();
 			// Get the exported frames
@@ -203,13 +203,13 @@
 
         wt.setCurrentWalkthrough = function (index) {
             wt.currentWalkthrough = index;
-			wt.loading = WalkthroughService.getWalkthroughs(wt.account, wt.project, index);
+			wt.loading = WalkthroughService.getWalkthroughs(wt.account, wt.model, index);
         };
 		
 		// If the account changes then re-load the frames
-		$scope.$watchGroup(["account", "project"], function() {
+		$scope.$watchGroup(["account", "model"], function() {
 			wt.currentWalkthrough = 0;
-			wt.loading = WalkthroughService.getWalkthroughs(wt.account, wt.project);
+			wt.loading = WalkthroughService.getWalkthroughs(wt.account, wt.model);
 			//wt.play();
 		});
 		

@@ -33,7 +33,7 @@
 				onCommentAutoSaved: "&",
 				onToggleCloseIssue: "&",
 				availableJobs: "=",
-				projectUserJob: "=",
+				modelUserJob: "=",
 				onIssueAssignChange: "&"
 			},
 			controller: IssueCtrl,
@@ -200,8 +200,8 @@
 				length = 0;
 
 			vm.canModifyIssue = false;
-			if (angular.isDefined(vm.projectUserJob) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
-				vm.canModifyIssue = (vm.projectUserJob._id === vm.data.creator_role || vm.data.assigned_roles.indexOf(vm.projectUserJob._id) !== -1);
+			if (angular.isDefined(vm.modelUserJob) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+				vm.canModifyIssue = (vm.modelUserJob._id === vm.data.creator_role || vm.data.assigned_roles.indexOf(vm.modelUserJob._id) !== -1);
 			}
 		}
 

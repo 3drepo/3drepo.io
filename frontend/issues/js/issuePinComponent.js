@@ -25,7 +25,7 @@
 				controller: IssuesPinCtrl,
 				bindings: {
 					account: "<",
-					project: "<",
+					model: "<",
 					sendEvent: "&",
 					event: "<",
 					setPin: "&",
@@ -75,7 +75,7 @@
 					data = {
 						id: newPinId,
 						account: self.account,
-						project: self.project,
+						model: self.model,
 						position: position.toGL(),
 						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,

@@ -584,7 +584,7 @@ hr {
 	margin: 10px 0px;
 }
 
-.block-header-project-name{
+.block-header-model-name{
 	font-weight: bold;
 	color: #4183c4;
 }
@@ -656,13 +656,13 @@ hr {
 	margin-top: 10px;
 }
 
-/*Project items*/
+/*model items*/
 
-.account-projects {
+.account-models {
 	margin-left: 15px;
 }
 
-.project-title{
+.model-title{
 	position: relative;
 	background-color: #FFF;
 	margin-bottom: 20px;
@@ -671,7 +671,7 @@ hr {
   border-color: #DDD;
 }
 
-.project-title h2{
+.model-title h2{
 	color: #4183c4 !important;
 	font-size: 13pt;
 	font-weight: bold;
@@ -681,14 +681,14 @@ hr {
 	padding-bottom: 5px;
 }
 
-.project-title p{
+.model-title p{
 	color: #333;
 	margin: 0px;
 	padding: 10px;
 	padding-top: 0px;
 }
 
-.project-thumbnail {
+.model-thumbnail {
 	display: inline-block;
 	position: relative;
 	margin-bottom: -5px;
@@ -696,24 +696,24 @@ hr {
 	overflow: hidden;
 }
 
-#projects-thumbnails .item-masonry, .grid-sizer {
+#models-thumbnails .item-masonry, .grid-sizer {
 	width: calc(33.333% + 0px);
 }
 
-#projects-thumbnails .item-masonry-description {
+#models-thumbnails .item-masonry-description {
 	height: 22%;
 }
 
-#projects-thumbnails, #projects-thumbnails a {
+#models-thumbnails, #models-thumbnails a {
 	color: #000000;
 }
 
-#projects-thumbnails h5 {
+#models-thumbnails h5 {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
 
-p.project-owner {
+p.model-owner {
 	color: #666666;
 }
 
@@ -728,7 +728,7 @@ p.project-owner {
 	margin:0px auto;
 }
 
-.project-menu{
+.model-menu{
 	position: relative;
 	color: #666;
 	background-color: #FFF;
@@ -738,7 +738,7 @@ p.project-owner {
   border-color: #DDD;
 }
 
-.project-menu-section{
+.model-menu-section{
 	position: relative;
 	color: #666;
 	background-color: #FFF;
@@ -746,15 +746,15 @@ p.project-owner {
 	border-color: #EEE;
 }
 
-.project-menu-section h3{
+.model-menu-section h3{
 	font-size: 11pt !important;
 }
 
-.project-menu-section-selected{
+.model-menu-section-selected{
 	background-color: #FAFAFA !important;
 }
 
-.project-menu-section:hover{
+.model-menu-section:hover{
 	position: relative;
 	color: #666;
 	background-color: #FAFAFA;
@@ -762,16 +762,16 @@ p.project-owner {
 	border-color: #EEE;
 }
 
-.project-menu-section:first-child, .project-menu-section:hover:first-child{
+.model-menu-section:first-child, .model-menu-section:hover:first-child{
 	border-top: 0px solid;
 	border-radius: 3px 3px 0px 0px;
 }
 
-.project-menu-section:last-child, .project-menu-section:hover:last-child{
+.model-menu-section:last-child, .model-menu-section:hover:last-child{
 	border-radius: 0px 0px 3px 3px;
 }
 
-.project-menu-section h3{
+.model-menu-section h3{
 	font-size: 13pt;
 	height: 100%;
 	font-weight: normal;
@@ -780,7 +780,7 @@ p.project-owner {
 	padding: 10px;
 }
 
-.project-title-updated p{
+.model-title-updated p{
 	color: #AAA;
 	position: absolute;
   bottom: 0;
@@ -1062,12 +1062,12 @@ hr.fancy-line {
 	margin-bottom: 20px;
 }
 
-.project-line{
+.model-line{
 	border-bottom: 1px solid;
 	border-color: #DDD;
 }
 
-.project-line:last-child{
+.model-line:last-child{
 	border-bottom: 0px solid;
 }
 
@@ -1371,7 +1371,7 @@ header button.btn {
 	padding-top: 20px;
 }
 
-.block-header-project-name {
+.block-header-model-name {
 	font-weight: normal;
 }
 
@@ -1407,7 +1407,7 @@ header button.btn {
 	background: none;
 }
 
-.nav-project-title {
+.nav-model-title {
 	color: #ffffff;
 	position: absolute;
 	width: 10%;

@@ -1,5 +1,5 @@
 account-menu
-div(ng-if="!vm.state.project")
+div(ng-if="!vm.state.model")
 	#account(layout="row")
 		account-info(
 		username="vm.username"
@@ -10,8 +10,8 @@ div(ng-if="!vm.state.project")
 		item-to-show="vm.itemToShow")
 
 		#accountItem(ng-switch="vm.itemToShow")
-			account-repos(
-			ng-switch-when="repos"
+			account-teamspaces(
+			ng-switch-when="teamspaces"
 			account="vm.account"
 			accounts="vm.accounts"
 			on-show-page="vm.showPage(page, callingPage, data)"
@@ -49,18 +49,18 @@ div(ng-if="!vm.state.project")
 			show-page="vm.showPage(page, callingPage)"
 			subscriptions="vm.subscriptions")
 
-			account-projectsetting(
-			ng-switch-when="projectsetting"
+			account-modelsetting(
+			ng-switch-when="modelsetting"
 			account="vm.account"
-			project="vm.project"
+			model="vm.model"
 			data="vm.data"
 			show-page="vm.showPage(page, callingPage, data)"
 			subscriptions="vm.subscriptions")
 
-div(ng-if="vm.state.project")
-	project(
+div(ng-if="vm.state.model")
+	model(
 	account="vm.state.account"
-	project="vm.state.project"
+	model="vm.state.model"
 	branch="vm.state.branch"
 	revision="vm.state.revision"
 	issue-id="vm.state.issue"

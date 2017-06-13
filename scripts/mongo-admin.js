@@ -60,7 +60,7 @@ db.createUser({
         firstName: "Node",
         lastName: "User",
         email: "a@b.com",
-        projects: []
+        models: []
     },
     roles: [{
         role: "nodeUserRole",

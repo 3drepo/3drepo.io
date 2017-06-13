@@ -64,7 +64,7 @@
 
 				var metadataIds = vm.treeMap.oIdToMetaId[object.id];
 				if(metadataIds && metadataIds.length){
-					DocsService.getDocs(object.account, object.project, metadataIds[0]).then(function(data){
+					DocsService.getDocs(object.account, object.model, metadataIds[0]).then(function(data){
 
 						if(!data){
 							return;

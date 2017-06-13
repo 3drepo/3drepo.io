@@ -35,7 +35,7 @@
 		 */
 		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.model + "/" + urlEnd),
 				config = {withCredentials: true};
 
 			if (angular.isDefined(headers)) {
@@ -56,7 +56,7 @@
 		 */
 		function doGet(urlEnd, param) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, self.account + "/" + self.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.GET_API, self.account + "/" + self.model + "/" + urlEnd);
 
 			var params = {};
 			if (angular.isDefined(param)) {
@@ -80,7 +80,7 @@
 		 */
 		function doPut(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.model + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -99,7 +99,7 @@
 		 */
 		function doDelete(urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.model + "/" + urlEnd);
 			$http.delete(url)
 				.then(function (response) {
 					deferred.resolve(response);
@@ -108,14 +108,14 @@
 		}
 
 		/**
-		 * Setup the account and project info
+		 * Setup the account and model info
 		 *
 		 * @param {String} account
-		 * @param {String} project
+		 * @param {String} model
 		 */
-		obj.init = function (account, project) {
+		obj.init = function (account, model) {
 			self.account = account;
-			self.project = project;
+			self.model = model;
 		};
 
 		/**

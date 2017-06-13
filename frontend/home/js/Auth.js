@@ -113,16 +113,16 @@
 			return initPromise.promise;
 		};
 
-		this.loadProjectRoles = function(account, project)
+		this.loadModelRoles = function(account, model)
 		{
 			var rolesPromise = $q.defer();
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/roles.json"))
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/roles.json"))
 			.success(function(data) {
-				self.projectRoles = data;
+				self.modelRoles = data;
 				rolesPromise.resolve();
 			}).error(function() {
-				self.projectRoles = null;
+				self.modelRoles = null;
 				rolesPromise.resolve();
 			});
 

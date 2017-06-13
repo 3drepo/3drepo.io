@@ -27,7 +27,7 @@
 			templateUrl: 'groups.html',
 			scope: {
 				account: "=",
-				project: "=",
+				model: "=",
 				show: "=",
 				showAdd: "=",
 				showEdit: "=",
@@ -65,7 +65,7 @@
 		vm.toShow = "showLoading";
 		vm.loadingInfo = "Loading groups";
 		setContentHeight();
-		GroupsService.init(vm.account, vm.project);
+		GroupsService.init(vm.account, vm.model);
 
 		promise = GroupsService.getGroups();
 		promise.then(function (data) {
@@ -350,7 +350,7 @@
 				data = {
 					source: "tree",
 					account: vm.account,
-					project: vm.project
+					model: vm.model
 				};
 				if (highlight) {
 					data.ids = vm.selectedGroup.objects;
@@ -385,7 +385,7 @@
 				data = {
 					source: "tree",
 					account: vm.account,
-					project: vm.project
+					model: vm.model
 				};
 				if (visible) {
 					data.visible_ids = ids;

@@ -23,23 +23,23 @@
 		<!-- Predefine the app-->
 		<script>
 		angular.module('3drepo', ['ui.router'])
-		.constant('structure', {"plugin":"base","children":[{"plugin":"login","children":[{"plugin":"account","children":[{"plugin":"project","friends":["panel","filter","tree","viewpoints","issues","oculus","clip","bottomButtons","qrCodeReader","docs","utils","walkthroughVr"]}]}]}]})
-		.constant('parentStates', {"base":[""],"login":["base"],"account":["base.login"],"project":["base.login.account"],"panel":["base.login.account"],"filter":["base.login.account"],"tree":["base.login.account"],"viewpoints":["base.login.account"],"issues":["base.login.account"],"oculus":["base.login.account"],"clip":["base.login.account"],"bottomButtons":["base.login.account"],"qrCodeReader":["base.login.account"],"docs":["base.login.account"],"utils":["base.login.account"],"walkthroughVr":["base.login.account"]})
+		.constant('structure', {"plugin":"base","children":[{"plugin":"login","children":[{"plugin":"account","children":[{"plugin":"model","friends":["panel","filter","tree","viewpoints","issues","oculus","clip","bottomButtons","qrCodeReader","docs","utils","walkthroughVr"]}]}]}]})
+		.constant('parentStates', {"base":[""],"login":["base"],"account":["base.login"],"model":["base.login.account"],"panel":["base.login.account"],"filter":["base.login.account"],"tree":["base.login.account"],"viewpoints":["base.login.account"],"issues":["base.login.account"],"oculus":["base.login.account"],"clip":["base.login.account"],"bottomButtons":["base.login.account"],"qrCodeReader":["base.login.account"],"docs":["base.login.account"],"utils":["base.login.account"],"walkthroughVr":["base.login.account"]})
 		//.constant('pluginLevels', )
-		.constant('uiState', {"base.login.account.project":["oculus"]});
+		.constant('uiState', {"base.login.account.model":["oculus"]});
 		
 		</script>
 		<!-- Plugin JS and Angular files-->
 		<!--script(type="text/javascript", src='/public/dist/plugins.min.js')-->
 		<!-- Plugin JS Files-->
 		<script type="text/javascript" src="/public/plugins/base/controlinterface.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/viewermanager.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/pinShader.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/logo.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/viewerutil.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/viewer.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/gamepad.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/threed/collision.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/viewermanager.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/pinShader.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/logo.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/viewerutil.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/viewer.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/gamepad.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/threed/collision.js"></script>
 		<script type="text/javascript" src="/public/plugins/oculus/oculus.js"></script>
 		<!-- Plugin Angular Files-->
 		<script type="text/javascript" src="/public/plugins/base/serverConfig.js"></script>
@@ -47,9 +47,9 @@
 		<script type="text/javascript" src="/public/plugins/base/pageConfigProvider.js"></script>
 		<script type="text/javascript" src="/public/plugins/base/httpProvider.js"></script>
 		<script type="text/javascript" src="/public/plugins/base/StateManager.js"></script>
-		<script type="text/javascript" src="/public/plugins/base/projectPageConfig.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/eventService.js"></script>
-		<script type="text/javascript" src="/public/plugins/project/viewerDirective.js"></script>
+		<script type="text/javascript" src="/public/plugins/base/modelPageConfig.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/eventService.js"></script>
+		<script type="text/javascript" src="/public/plugins/model/viewerDirective.js"></script>
 		<script type="text/javascript" src="/public/plugins/base/autoLoginDirective.js"></script>
 		<script type="text/javascript" src="/public/plugins/walkthroughVr/walkthroughVrDirective.js"></script>
 		<script type="text/javascript" src="/public/plugins/walkthroughVr/VRDemoCtrl.js"></script>
@@ -62,12 +62,12 @@
 				<div class="VRDemoMenuItem" ng-click="goDemoTwo($event)">Demo 2</div>
 			</div>
 			<div ng-if="demoOne">
-				<viewer manager="manager" account="demo" project="demo1" branch="master" revision="head" class="project-viewport viewport" auto-init vr-mode />
-				<walkthrough-vr account="demo" project="demo1"></walkthrough-vr>
+				<viewer manager="manager" account="demo" model="demo1" branch="master" revision="head" class="model-viewport viewport" auto-init vr-mode />
+				<walkthrough-vr account="demo" model="demo1"></walkthrough-vr>
 			</div>
 			<div ng-if="demoTwo">
-				<viewer manager="manager" account="demo" project="demo2" branch="master" revision="head" class="project-viewport viewport" auto-init vr-mode />
-				<walkthrough-vr account="demo" project="demo2"></walkthrough-vr>			
+				<viewer manager="manager" account="demo" model="demo2" branch="master" revision="head" class="model-viewport viewport" auto-init vr-mode />
+				<walkthrough-vr account="demo" model="demo2"></walkthrough-vr>			
 			</div>
 		</div>
 	</body>
