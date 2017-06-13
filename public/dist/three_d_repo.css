@@ -36,47 +36,72 @@ account-dir .userContent .cardInfo {
   text-align: left;
 }
 
-/** Account Projects **************************************************************************************************/
-account-projects #accountList {
+/** Account Models **************************************************************************************************/
+account-models #accountList {
   overflow: auto;
 }
 
-account-projects md-list {
+account-models .no-federations {
+  padding-left: 43px;
+  color: rgb(67, 160, 71);
+}
+
+account-models .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-models md-list {
   padding: 0;
 }
 
-account-projects .account,
-account-projects .project {
-  outline: none;
+account-models .model-indent {
   padding-left: 10px;
 }
-account-projects .account:hover,
-account-projects .project:hover {
+
+account-models .account,
+account-models .model {
+  outline: none;
+  /*padding-left: 10px;*/
+}
+
+account-models .tree-node:hover{
   cursor: pointer;
   background: #EEE;
 }
 
-account-projects .projects {
-  margin-left: 40px;
-}
-
-account-projects .projects .projectName,
-account-projects .projects md-icon {
+account-models .projectName {
   color: #4CAF50;
 }
-account-projects .projects md-icon {
+
+account-models md-list-item.tree-node > div {
+    padding-left: 0px;
+}
+
+account-models .tree-branch {
+  margin-left: 20px;
+}
+
+account-models .models .modelName,
+account-models .models md-icon {
+  color: #4CAF50;
+}
+account-models .models md-icon {
   margin: 0 !important;
 }
-account-projects .projects .projectTimestamp {
+account-models .modelTimestamp {
+  margin-left: 20px;
+}
+
+account-models .models .modelTimestamp {
   color: rgba(0, 0, 0, 0.3);
   margin-left: 20px;
 }
-account-projects .projects p {
+account-models .models p {
   margin: 0;
 }
 
-account-projects #existingProjectFileUploader,
-account-projects #newProjectFileUploader {
+account-models #existingModelFileUploader,
+account-models #newModelFileUploader {
   width: 0;
   height: 0;
   opacity: 0;
@@ -85,62 +110,56 @@ account-projects #newProjectFileUploader {
   z-index: -1;
 }
 
-account-projects .accountRight,
-account-projects .projectRight {
-  margin-right: 10px !important;
+account-models .accountRight,
+account-models .modelRight {
+  /*margin-right: 10px !important;*/
 }
 
-account-projects #newDatabaseButton {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
-account-projects .md-whiteframe-1dp {
+account-models .md-whiteframe-1dp {
   border-radius: 4px;
   background: #FFF;
 }
-account-projects md-toolbar {
+account-models md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   height: 40px;
   min-height: 40px;
 }
 
-account-projects .cardInfo md-progress-circular {
+account-models .cardInfo md-progress-circular {
   margin-left: 5px;
 }
 
-account-projects .projectUploadInfo {
+account-models .modelUploadInfo {
   margin-right: 20px;
 }
 
-account-projects .projectUploadFilename {
+account-models .modelUploadFilename {
   color: rgba(0,0,0,0.5);
   margin: 0 !important;
 }
 
-account-projects .projectUploadInfo {
+account-models .modelUploadInfo {
   color: rgba(0,0,0,0.7);
   margin: 0 0 0 10px !important;
 }
 
-account-projects .projectUploadIcon {
+account-models .modelUploadIcon {
   width: 15px;
   height: 15px;
   margin-left: 10px;
 }
 
-account-projects .projectRight .projectUploaded {
+account-models .modelRight .modelUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
 }
 
-account-projects .userContent {
+account-models .userContent {
   padding: 0 !important;
 }
 
-account-projects .accountProjectsSharedIcon {
+account-models .accountModelsSharedIcon {
   margin: 0 0 0 20px;
   color: rgba(0, 0, 0, 0.3);
 }
@@ -227,7 +246,7 @@ account-menu {
   top: 0;
   right: 0;
   z-index: 1;
-  padding-right: 6px;
+  padding-right: 10px;
 }
 account-menu md-icon {
   color: #FFFFFF;
@@ -243,30 +262,30 @@ account-menu md-icon {
   display: block;
 }
 
-/** New Project Dialog ************************************************************************************************/
-.newProjectDialog {
+/** New Model Dialog ************************************************************************************************/
+.newModelDialog {
   min-width: 350px;
   min-height: 350px;
   overflow: hidden;
 }
 
-.newProjectDialog #newProjectIcon {
+.newModelDialog #newModelIcon {
   margin-right: 10px;
 }
 
-.newProjectDialog #projectDialogFilenameContainer {
+.newModelDialog #modelDialogFilenameContainer {
   margin: 0 0 20px 16px;
 }
-.newProjectDialog #projectDialogFilenameIntro {
+.newModelDialog #modelDialogFilenameIntro {
   color: rgba(0, 0, 0, 0.4);
   margin: 0 5px 0 0;
 }
-.newProjectDialog #projectDialogFilename {
+.newModelDialog #modelDialogFilename {
   color: rgba(0, 0, 0, 0.7);
   margin: 0;
 }
 
-.newProjectDialog #projectDialogError {
+.newModelDialog #modelDialogError {
   margin: 0;
   color: #F44336;
 }
@@ -288,22 +307,6 @@ account-menu md-icon {
 .deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
-}
-
-/** New Database Dialog ***********************************************************************************************/
-.newDatabaseDialog {
-  min-width: 350px;
-  min-height: 250px;
-  overflow: hidden;
-}
-
-.newDatabaseDialog #newProjectIcon {
-  margin-right: 10px;
-}
-
-.newDatabaseDialog .databaseDialogInfo {
-  font-weight: normal;
-  color: rgba(0,0,0,0.7);
 }
 
 /** Account Billing ***************************************************************************************************/
@@ -400,10 +403,10 @@ account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
 
-account-team #project {
+account-team #model {
   margin: -10px 0 10px;
 }
-account-team #project md-icon {
+account-team #model md-icon {
   margin: 0 !important;
 }
 
@@ -449,33 +452,33 @@ account-team #accountTeamSubHeader {
 }
 
 
-/** Account Project Setting ******************************************************************************************/
-account-projectsetting .collaboratorIcon {
+/** Account Model Setting ******************************************************************************************/
+account-modelsetting .collaboratorIcon {
   margin: 0 10px !important;
 }
 
-account-projectsetting #project {
+account-modelsetting #model {
   margin: -10px 0 10px;
 }
-account-projectsetting #project md-icon {
+account-modelsetting #model md-icon {
   margin: 0 !important;
 }
 
-account-projectsetting #accountTeamAdd {
+account-modelsetting #accountTeamAdd {
   margin-top: 20px;
   margin-bottom: 30px;
 }
 
-account-projectsetting #accountTeamMemberRoleGroup {
+account-modelsetting #accountTeamMemberRoleGroup {
   margin: 20px 0 0 10px;
 }
 
-account-projectsetting #accountTeamMemberRole {
+account-modelsetting #accountTeamMemberRole {
   margin-left: 10px;
   color: rgba(0, 0, 0, 0.5);
 }
 
-account-projectsetting #accountTeamSubHeader {
+account-modelsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
 }
 
@@ -502,7 +505,7 @@ account-projectsetting #accountTeamSubHeader {
   margin-left: -20px;
 }
 
-#federationDialog .federationProject {
+#federationDialog .federationModel {
   padding-left: 20px;
 }
 
@@ -511,12 +514,15 @@ account-projectsetting #accountTeamSubHeader {
   color: #F44336;
 }
 
+.addFederations {
+  padding-bottom: 10px;
+}
 
-#federationDialog #federatedProjectAccount {
+#federationDialog #federatedModelAccount {
   color: rgba(0, 0, 0, 0.5);
 }
 
-#federationDialog .projectDialogError{
+#federationDialog .modelDialogError{
   color: #F44336;
 }
 /** Account Federations ***********************************************************************************************/
@@ -527,14 +533,15 @@ account-federations .userContent {
 account-federations md-list {
   padding: 0;
 }
+  
 account-federations .md-list-item-text {
   color: rgb(67, 160, 71);
 }
 
-account-federations .federationProjectsList {
-  margin: -20px 0 10px 100px;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 14px;
+account-federations .federationModelsList {
+    margin: 0px 0 5px 50px;
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 13px;
 }
 
 account-federations .federationTimestamp {
@@ -554,353 +561,24 @@ account-federations .account:hover {
   background: #EEE;
 }
 
-account-federations .federation {
-  padding-left: 30px;
-}
-
 account-federations #federationInfoRight p:only-child {
   margin-right: 20px;
 }
 
-/* Done to counter bootstrap styling. This should really be set in a top level style file */
-.md-datepicker-input-mask {
-  width: 308px;
+account-teamspaces label, account-teamspaces p {
+  font-size: 14px;
 }
 
-/** Bid ***************************************************************************************************************/
-
-bid4free {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  background: #E8EAF6;
-  overflow-y: hidden;
+#floating-button {
+  position: absolute;
+  bottom: 52px;
+  right: 15px;
 }
 
-bid4free .bidInfo {
-  width: 100%;
-  height: 100%;
+.userContent {
+  min-height: 200px;
 }
 
-bid4free .bidInfo .bidInfoSubContractor {
-  height: 100%;
-  padding: 30px 20px 20px;
-}
-
-bid4free md-toolbar {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-bid4free .bidHeader {
-  width: 100%;
-  margin-bottom: 50px;
-}
-bid4free .bidHeader.md-whiteframe-1dp {
-  border-radius: 4px;
-}
-bid4free .bidHeader md-toolbar {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
-
-bid4free .bidContent {
-  padding: 30px 20px 20px;
-}
-
-bid4free md-list-item p {
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: 0.010em;
-  outline: none;
-  color: rgba(0, 0, 0, 0.7);
-}
-
-bid4free .md-whiteframe-1dp {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  background: #FFFFFF;
-}
-
-bid4free .bidInfoCardContent {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-bid4free .bidInfoCardContent .bidInfoCardLabel {
-  color: rgba(0,0,0,0.5);
-  margin-left: 5px;
-}
-
-bid4free .md-toolbar-tools,
-bid4free .md-toolbar-tools md-icon {
-  color: #C5CAE9;
-}
-
-bid4free .md-toolbar-tools md-icon {
-  font-size: 20px;
-}
-
-bid4free .packageContent {
-  overflow-y: auto;
-}
-
-bid4free .packageContent .bidDatePicker {
-  margin: -20px 0 20px;
-}
-bid4free .packageContent .bidDatePicker h5 {
-  color: rgba(0,0,0,0.5);
-}
-
-bid4free .bidInfoListTitle {
-  color: rgba(0,0,0,0.5);
-}
-
-bid4free .cardInfo {
-  text-align: center;
-  padding: 15px;
-  background: #E8EAF6;
-  margin: 15px;
-  border-radius: 4px;
-}
-bid4free .cardInfo p {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.7);
-  word-wrap: break-word;
-}
-bid4free .cardInfo md-icon {
-  margin: 0;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-/** Project Summary ***************************************************************************************************/
-
-.projectSummaryInput {
-  padding: 0 10px;
-}
-
-/** Packages **********************************************************************************************************/
-
-/** Package Summary ***************************************************************************************************/
-
-bid4free .packageSummaryInput {
-  padding: 0 10px;
-}
-
-.packageSummaryList {
-  overflow-y: auto;
-}
-
-bid4free .packageContent .fileUploader {
-  margin-top: 10px;
-  padding: 0 20px;
-  height: 250px;
-}
-
-/** Invite ************************************************************************************************************/
-bid4free .bidInvite .bidInviteContent {
-  width: 100%;
-  height: 400px;
-}
-bid4free .bidInvite .bidInviteContent md-list-item md-icon {
-  font-size: 1.5em;
-}
-bid4free .bidInvite .bidInviteIcon {
-  font-size: 1.5em;
-  margin: 15px;
-}
-
-bid4free .packageInvite {
-  padding: 0 20px;
-}
-
-/** Bid Image *********************************************************************************************************/
-bid-image md-content {
-  outline: none;
-  overflow: hidden;
-}
-bid-image md-content:hover {
-  cursor: pointer;
-}
-
-bid-image .bidThumbnailImage {
-  width: 100%;
-}
-
-/** Bid Docs **********************************************************************************************************/
-bid-docs md-icon {
-  font-size: 20px !important;
-  color: #9FA8DA;
-}
-
-.boqListTitles {
-  font-weight: bold;
-}
-
-.boqListRight {
-  text-align: right;
-}
-
-.bidDocsDialog {
-  min-width: 850px;
-  min-height: 600px;
-  overflow: hidden;
-}
-
-.bidDocsDialog .md-toolbar-tools {
-  color: #FFEB3B;
-}
-
-.bidDocsDialog .bidDocsIcon {
-  margin-top: 22px;
-  margin-right: 10px;
-  color: #FFEB3B;
-}
-
-.bidDocsDialog .bidDocsSow p {
-  max-width: 800px;
-}
-
-.bidDocsDialog .bidDocsUnderline {
-  text-decoration: underline;
-}
-.bidDocsDialog .bidDocsBold {
-  font-weight: bold;
-}
-
-.bidDocsDialog iframe {
-  min-width: 850px;
-  min-height: 600px;
-  border: none;
-}
-
-.bidDocsDialog .predefinedDocs {
-  overflow-y: auto;
-}
-
-/** Bid Summary *******************************************************************************************************/
-bid-summary md-list {
-  overflow-y: scroll;
-}
-
-bid-summary .bidSummaryPackageSelect {
-  margin: 30px 10px 10px 10px;
-}
-.md-datepicker-input-mask {
-  width: 308px; }
-
-/** Bid ************************************************************************************************************** */
-bid {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  padding-top: 20px;
-  background: #E8EAF6; }
-  bid .bidInfo {
-    width: 100%;
-    height: 100%; }
-    bid .bidInfo .bidInfoSubContractor {
-      height: 100%; }
-  bid md-toolbar {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px; }
-  bid .bidHeader {
-    width: 100%;
-    margin-bottom: 50px; }
-    bid .bidHeader .md-whiteframe-1dp {
-      border-radius: 4px; }
-
-/*# sourceMappingURL=bid4FreeTest.css.map */
-
-bid4free-workspace {
-  display: block;
-  background: #E8EAF6;
-  margin: 20px; }
-  bid4free-workspace .md-whiteframe-1dp {
-    border-radius: 4px; }
-  bid4free-workspace md-toolbar {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px; }
-  bid4free-workspace .bid4freeWorkspaceContainer {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    height: 100%; }
-  bid4free-workspace md-content {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px; }
-  bid4free-workspace md-tabs {
-    height: calc(100vh - 115px); }
-  bid4free-workspace md-tab-content {
-    overflow: hidden; }
-  bid4free-workspace md-radio-button {
-    display: inline; }
-  bid4free-workspace md-radio-button > * {
-    padding-right: 10px; }
-  bid4free-workspace .sectionInput > md-input-container,
-  bid4free-workspace .sectionInput > md-radio-group,
-  bid4free-workspace .itemInput > label,
-  bid4free-workspace .itemInput > md-radio-group {
-    font-size: 16px; }
-  bid4free-workspace .sectionInput .sectionInputRadioGroup {
-    margin-top: -16px; }
-  bid4free-workspace .sectionInput .md-button {
-    margin-top: -8px; }
-  bid4free-workspace .sectionInput .tableTitlesInput {
-    margin-top: -20px; }
-  bid4free-workspace .sectionInput .saveSection {
-    margin-top: -20px;
-    margin-bottom: 10px; }
-  bid4free-workspace .sections {
-    overflow-y: auto;
-    overflow-x: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    height: calc(100vh - 310px); }
-    bid4free-workspace .sections .section {
-      border-bottom: solid 1px rgba(0, 0, 0, 0.12); }
-    bid4free-workspace .sections .tableTitles {
-      margin-top: 20px;
-      color: rgba(0, 0, 0, 0.6); }
-    bid4free-workspace .sections .keyvalueValue {
-      margin: 10px 0 -10px 0;
-      overflow: hidden; }
-  bid4free-workspace .items label {
-    font-weight: normal;
-    color: rgba(0, 0, 0, 0.5);
-    font-size: 14px; }
-  bid4free-workspace .addNewItem {
-    margin-bottom: 20px; }
-  bid4free-workspace .boqTotal {
-    padding: 0 10px 20px; }
-    bid4free-workspace .boqTotal h3 {
-      padding: 0;
-      margin: 0; }
-  bid4free-workspace .boqList {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 0; }
-  bid4free-workspace .boqListTitles {
-    font-weight: bold;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-  bid4free-workspace .boqListInput {
-    margin: -12px 0 0 0;
-    padding: 0;
-    height: 20px; }
-    bid4free-workspace .boqListInput input {
-      text-align: center; }
-  bid4free-workspace .saveContainer label {
-    margin-top: 5px;
-    color: #66BB6A; }
-  bid4free-workspace .saveContainer md-icon {
-    font-size: 25px !important; }
 
 billing {
     position: absolute;
@@ -1004,18 +682,18 @@ bottom-buttons #showButtonIcon {
 bottom-buttons .actionButton md-icon {
   color: #FFFFFF !important;
   font-size: 25px;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px #000;
 }
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
   right: 15px;
-  top: -120px;
+  top: -80px;
 }
 
 bottom-buttons label {
   color: #FFFFFF;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px #000;
   font-weight: bold;
   font-size: 14px;
 }
@@ -1267,6 +945,18 @@ groups #groupsGroup md-checkbox {
   margin: 0;
 }
 
+@media print {
+    html, body, home {
+        overflow: visible !important;
+        height: 100% !important;
+    }
+    #legal #legalText {
+        height: 100% !important;
+    }
+}
+
+
+
 home {
     position: absolute;
     top: 0;
@@ -1286,20 +976,23 @@ home #homeLogo {
     position: absolute;
     z-index: 2;
     text-align: center;
-    width: 250px;
+    width: 150px;
     top: 10px;
     left: 0;
     right: 0;
     margin: auto;
     outline: none;
+    user-select: none;
 }
 home #homeLogo:hover {
     cursor: pointer;
+    user-select: none;
 }
 home #homeLogo img {
     width: inherit;
     pointer-events: inherit;
     outline: none;
+    user-select: none;
 }
 
 home .homeUserContent {
@@ -1358,15 +1051,23 @@ home .homeUserContent md-tabs-wrapper {
 }
 
 home #legalLinks {
+    user-select: none;
     position: absolute;
     bottom: 0;
+    margin-bottom: 2px;
     right: 0;
     z-index: 2;
+    color: white;
+    background: rgba(203, 202, 200, 0.05);
+    border-top-left-radius: 4px;
+    
 }
 home #legalLinks a {
-    font-size: 12px;
+    font-size: 13px;
+    color: white;
     margin: 10px 10px 5px;
-    opacity: 0.7;
+    opacity: 1;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.30);
 }
 
 home md-radio-button ._md-label {
@@ -1594,6 +1295,7 @@ issues-list .issueListItem div:first-child {
 
 issues-list #issuesListItemContent {
   padding: 10px;
+  padding-right: 40px;
 }
 
 issues-list #issuesListItemTitle {
@@ -1609,10 +1311,12 @@ issues-list #issuesListItemInfo {
 issues-list #issuesListItemInfo label,
 issues-list #issuesListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
+  word-wrap: break-word;
 }
 
 issues-list #issuesListItemDescription {
   height: 60px;
+  font-size: 13px;
 }
 issues-list #issuesListItemDescription label {
   overflow: hidden;
@@ -1625,7 +1329,7 @@ issues-list #issuesListItemEnter {
   position: absolute;
   top: 0;
   right: 0;
-  width: 50px;
+  width: 32px;
   height: 100%;
   background: rgb(0, 69, 148);
   outline: none;
@@ -1694,6 +1398,7 @@ issue-comp .issueCompItemContainer div {
 
 issue-comp #issueCompTitleArea {
   padding-top: 0;
+  padding-bottom: 0;
   outline: none;
 }
 issue-comp .issueCompTitleArea:hover {
@@ -1705,7 +1410,8 @@ issue-comp .issueCompTitleArea #issueCompTitle {
 }
 
 issue-comp #issueCompInfoArea {
-  margin: -20px 0 10px;
+  padding-top: 5px;
+  padding-bottom: 20px;
 }
 
 issue-comp #issueCompTitleInput {
@@ -1716,10 +1422,10 @@ issue-comp #issueCompTitleInput {
 issue-comp #issueCompTitle {
   margin: 10px 0;
 }
-
+/*
 issue-comp #issueCompStatus {
   margin: 10px 0 0;
-}
+}*/
 
 issue-comp .issueCompItemStatus {
   margin-right: 5px;
@@ -1728,6 +1434,11 @@ issue-comp .issueCompItemStatus {
 issue-comp .issueCompThumbnail {
   position: relative;
   display: inline-block;
+  padding: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  background-position-y: 50%;
+  height: 200px;
 }
 issue-comp .issueCompThumbnailImage:hover {
   cursor: pointer;
@@ -1738,7 +1449,7 @@ issue-comp .issueCompThumbnailImage {
 }
 
 issue-comp .issueCompIssueOwner {
-  margin-top: -10px;
+  margin-top: 0;
 }
 
 issue-comp .issueCompAutoComment,
@@ -1749,11 +1460,17 @@ issue-comp .issueCompCommentOwner {
 issue-comp .issueCompIssueOwner label,
 issue-comp .issueCompCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+issue-comp .issueCompCommentOwner .issueNotification {
+  color: #43a047;
 }
 
 issue-comp .issueCompAutoComment label {
   color: rgba(0, 0, 0, 0.5);
-  font-style: italic;
+  /*font-style: italic;*/
+  font-size: 14px;
 }
 
 issue-comp .issueCompComment {
@@ -1762,6 +1479,7 @@ issue-comp .issueCompComment {
 
 issue-comp .issueCompCommentTitle {
   margin: 10px 0;
+  font-size: 14px;
 }
 
 issue-comp .issueCompTextActions {
@@ -1770,7 +1488,7 @@ issue-comp .issueCompTextActions {
 
 issue-comp #issueCompDescription {
   outline: none;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 issue-comp #issueCompDescription label {
   word-break: break-all;
@@ -1791,15 +1509,29 @@ issue-comp #additionalInfoButton {
 }
 
 issue-comp #issueCompAdditional {
-  margin: -20px 0;
+  margin: -10px 0;
+  padding-top: 5px;
+}
+
+issue-comp #issueCompNewComment {
+  padding-top: 20px;
+  padding-bottom: 0px;
 }
 
 issue-comp #issueCompNewComment md-input-container {
-  margin: 0 0 -35px;
+  margin: 0px;
+}
+
+
+
+issue-comp #issueCompAdditional md-input-container {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 issue-comp #descriptionAndComments {
-  overflow-y:auto;
+  overflow-y:scroll;
   overflow-x:hidden;
 }
 
@@ -1919,6 +1651,30 @@ tdr-measure .md-whiteframe-1dp md-content p {
     color: rgba(0,0,0,0.7);
 }
 
+/** Hijack x3dom progress bar **/
+
+.x3dom-progress {
+    bottom: 0px !important;
+    top: auto !important;
+    color: #fff !important;
+    background-color: rgb(0, 69, 148) !important;
+}
+
+/** Make the filter placholder text white **/
+
+#panelCardFilterInput::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: white;
+}
+#panelCardFilterInput::-moz-placeholder { /* Firefox 19+ */
+  color: white;
+}
+#panelCardFilterInput:-ms-input-placeholder { /* IE 10+ */
+  color: white;
+}
+#panelCardFilterInput:-moz-placeholder { /* Firefox 18- */
+  color: white;
+}
+
 /** Panel *************************************************************************************************************/
 
 panel  {
@@ -1949,7 +1705,7 @@ panel #buttons .panelButtonGroup button {
 }
 panel #buttons .panelButtonGroup label {
   color: #FFFFFF;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px rgb(0, 0, 0);
   font-weight: bold;
   font-size: 14px;
 }
@@ -2097,70 +1853,6 @@ password-forgot md-input-container {
 password-forgot p {
     margin-top: 0;
 }
-pricing md-content.md-whiteframe-1dp,
-pricing md-content.md-whiteframe-8dp {
-    margin: 0 20px;
-}
-
-pricing md-toolbar h2 {
-    font-weight: bold !important;
-}
-
-pricing md-divider {
-    margin-bottom: 10px !important;
-    width: 100%;
-}
-
-pricing #pricingMiddlePanelTitle {
-    color: #FFFFFF;
-}
-
-pricing .pricingIcon {
-    font-size: 40px;
-    color: rgba(0,0,0,0.2);
-    margin-bottom: 10px;
-    width: 40px;
-}
-pricing .pricingIcon#pricingAdvancedIcon {
-    color: #FF9800;
-}
-
-pricing .pricingPrice {
-    height: 100px;
-}
-pricing .pricingPriceTitle {
-    margin: 0;
-    color: rgba(0,0,0,.6) !important;
-}
-pricing .pricingPriceSubtitle {
-    margin-top: -10px;
-    color: rgba(0,0,0,.6) !important;
-}
-
-pricing .pricingInfo {
-    height: 350px;
-    display: block;
-    overflow: auto;
-    width: 100%;
-}
-pricing .pricingInfo .pricingInfoLine {
-    margin: 10px 0;
-}
-pricing .pricingInfo .pricingInfoLine h3 {
-    margin: 0 0 0 0;
-    color: rgba(0,0,0,.6) !important;
-}
-pricing .pricingInfo .pricingInfoLine md-icon {
-    margin: 0 5px 0 0;
-    color: #C8E6C9;
-}
-
-pricing .pricingContent {
-    max-height: 600px !important;
-    height: calc(100vh - 200px);
-    overflow: auto;
-}
-
 canvas {
 	width: 100%;
 	height: 100%;
@@ -2185,7 +1877,7 @@ revisions {
     text-shadow: 1px 1px#666666;
     font-size: 14px;
     width: 250px;
-    top: 90px;
+    top: 65px;
     left: 50%;
     font-weight: bold;
     margin-left: -125px;
@@ -2223,7 +1915,7 @@ revisions {
 right-panel {
     position: absolute;
     top: 70px;
-    right: 0;
+    right: 5px;
 }
 
 right-panel #rightPanelButtons .rightPanelButtonGroup {
@@ -2240,18 +1932,19 @@ right-panel #rightPanelButtons .fa {
 
 right-panel #rightPanelButtons label {
     color: #FFFFFF;
-    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    text-shadow: 0 0 2px rgb(0, 0, 0);
     font-weight: bold;
     font-size: 14px;
 }
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 5px 20px 5px 0;
+    margin: 10px 10px 10px 10px
 }
 
 sign-up-form {
     width: 750px;
     padding: 0 30px;
+    padding-top: 10px;
 }
 
 sign-up-form #tc {
@@ -2276,10 +1969,24 @@ sign-up-form #tc a {
     outline: none;
 }
 
-/*sign-up-form #loginCaptcha {
-    margin: 10px 30px 10px 0;
+sign-up-form .sign-up-button {
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 80%;
 }
-*/
+
+sign-up-form .sign-up-button md-progress-circular {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px !important;
+}
+
+sign-up-form #loginCaptcha > div {
+    margin-left: 20px;  
+}
+
 sign-up-form #registerWait {
     height: 30px;
 }
@@ -2296,12 +2003,19 @@ sign-up-form #loginPricing {
 
 sign-up-form .registerError {
     color: #F44336;
-    margin: 5px 0 5px;
+    margin: 20px 20px 5px;
     font-weight: normal;
+    text-align: center;
 }
 
 sign-up-form .rc-anchor-light {
     background: red;
+}
+
+sign-up-form form md-input-container {
+    margin: 10px;
+    margin-bottom: 2px;
+    margin-top: 2px;
 }
 
 sign-up-form #signUpFormHiddenInputs {
@@ -2309,6 +2023,18 @@ sign-up-form #signUpFormHiddenInputs {
     top: 0;
     opacity: 0;
 }
+
+sign-up-form .bottom-links {
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    sign-up-form {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
 tree .virtualRepeatInfiniteScroll {
   overflow-y: auto;
   overflow-x: hidden;

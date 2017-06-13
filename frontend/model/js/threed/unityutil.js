@@ -29,7 +29,7 @@ var UnityUtil;
 
 	var LoadingState = { 
 		VIEWER_READY : 1,  //Viewer has been loaded
-		MODEL_LOADING : 2, //project information has been fetched, world offset determined, model starts loading
+		MODEL_LOADING : 2, //model information has been fetched, world offset determined, model starts loading
 		MODEL_LOADED : 3 //Models
 	};
 
@@ -162,7 +162,7 @@ var UnityUtil;
 	UnityUtil.prototype.doubleClicked = function(meshInfo)
 	{
 		var point = JSON.parse(meshInfo);
-		UnityUtil.centreToPoint(point.project, point.meshID);	
+		UnityUtil.centreToPoint(point.model, point.meshID);	
 	}
 
 	UnityUtil.prototype.loaded = function(bboxStr)
@@ -181,6 +181,7 @@ var UnityUtil;
 
 	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
 	{
+		console.log("nodeInfo: " + nodeInfo);
 		objectStatusPromise.resolve(JSON.parse(nodeInfo));
 		objectStatusPromise = null;
 		
@@ -233,10 +234,10 @@ var UnityUtil;
 	 */
 
 
-	UnityUtil.prototype.centreToPoint = function(project, id)
+	UnityUtil.prototype.centreToPoint = function(model, id)
 	{
 		var params = {};
-		params.project = project;
+		params.model = model;
 		params.meshID = id
 		toUnity("CentreToObject", LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -270,12 +271,12 @@ var UnityUtil;
 
 	}
 
-	UnityUtil.prototype.getObjectsStatus = function(account, project, promise)
+	UnityUtil.prototype.getObjectsStatus = function(account, model, promise)
 	{
 		var nameSpace = "";
-		if(account && project)
+		if(account && model)
 		{
-			nameSpace = account + "."  + project;
+			nameSpace = account + "."  + model;
 		}
 		if(objectStatusPromise)
 		{
@@ -300,11 +301,11 @@ var UnityUtil;
 		toUnity("GetPointInfo", false, 0);
 	}
 
-	UnityUtil.prototype.highlightObjects = function(account, project, idArr, color, toggleMode)
+	UnityUtil.prototype.highlightObjects = function(account, model, idArr, color, toggleMode)
 	{
 		var params = {};
 		params.database = account;
-		params.project = project;
+		params.model = model;
 		params.ids = idArr;
 		params.toggle = toggleMode;
 		if(color)
@@ -313,13 +314,13 @@ var UnityUtil;
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
-	UnityUtil.prototype.loadProject  = function(account, project, branch, revision)
+	UnityUtil.prototype.loadModel  = function(account, model, branch, revision)
 	{
 
 		UnityUtil.reset();	
 		if(!loaded && loadedResolve)
 		{
-			//If the previous project is being loaded but hasn't finished yet
+			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject();
 			loadingResolve.reject();
 		}
@@ -331,7 +332,7 @@ var UnityUtil;
 		loaded  = false;
 		var params = {};
 		params.database = account;
-		params.project = project;
+		params.model = model;
 		if(revision != "head")
 			params.revID = revision;	
 		
@@ -362,25 +363,26 @@ var UnityUtil;
 		toUnity("RequestScreenShot", LoadingState.VIEWER_READY);
 	}
 
-	UnityUtil.prototype.requestViewpoint = function(account, project, promise)
+	UnityUtil.prototype.requestViewpoint = function(account, model, promise)
 	{
 		if(vpPromise != null)
 		{
-			vpPromise.then(_requestViewpoint(account, project, promise));
+			vpPromise.then(_requestViewpoint(account, model, promise));
 		}
 		else
 		{
-			_requestViewpoint(account, project, promise);
+			_requestViewpoint(account, model, promise);
 		}
 
 	}
 
-	function _requestViewpoint(account, project, promise)
+	function _requestViewpoint(account, model, promise)
+
 	{
 		var param = {};
-		if(account && project)
+		if(account && model)
 		{
-			param.namespace = account + "."  + project;
+			param.namespace = account + "."  + model;
 		}
 		vpPromise = promise;
 		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
@@ -396,12 +398,12 @@ var UnityUtil;
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
 	}
 
-	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, project)
+	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model)
 	{
 		var param = {};
-		if(account && project)
+		if(account && model)
 		{
-			param.nameSpace = account + "." + project;
+			param.nameSpace = account + "." + model;
 		}
 
 		param.position = pos;
@@ -418,12 +420,12 @@ var UnityUtil;
 	}
 
 
-	UnityUtil.prototype.toggleVisibility = function(account, project, ids, visibility)
+	UnityUtil.prototype.toggleVisibility = function(account, model, ids, visibility)
 	{
 		var param = {};
-		if(account && project)
+		if(account && model)
 		{
-			param.nameSpace = account + "." + project;
+			param.nameSpace = account + "." + model;
 		}
 
 		param.ids = ids;
@@ -432,13 +434,13 @@ var UnityUtil;
 
 	}
 
-	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, project)
+	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, model)
 	{
 		var param = {}
 		param.clip = clipPlane;
-		if(account && project)
+		if(account && model)
 		{
-			param.nameSpace = account + "." + project;
+			param.nameSpace = account + "." + model;
 		}
 		param.requiresBroadcast = requireBroadcast;
 		toUnity("UpdateClip", LoadingState.MODEL_LOADING, JSON.stringify(param));

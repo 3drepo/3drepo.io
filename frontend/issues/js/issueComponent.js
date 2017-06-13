@@ -521,7 +521,6 @@
 			viewpointPromise.promise.then(function (viewpoint) {
 				objectsPromise.promise.then(function (objectInfo)
 					{
-						console.log(objectInfo);
 						if (savedScreenShot !== null) {
 							if (objectInfo.highlightedNodes.length > 0) {
 									// Create a group of selected objects

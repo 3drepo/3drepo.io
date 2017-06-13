@@ -201,7 +201,7 @@
 					fetchModelProperties(v.account, v.model, v.branch, v.revision);	
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
-				} else if (event.type === EventService.EVENT.VIEWER.LOAD_PROJECT) {
+				} else if (event.type === EventService.EVENT.VIEWER.LOAD_MODEL) {
 					v.account = event.value.account;
 					v.model = event.value.model;
 					v.branch = event.value.branch;

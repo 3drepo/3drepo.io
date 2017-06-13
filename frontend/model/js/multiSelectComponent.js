@@ -101,7 +101,7 @@
 	
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
-				} else if (changes.keysDown.currentValue.indexOf(escKey) === -1) {
+				} else if (changes.keysDown.currentValue.indexOf(escKey) !== -1) {
 					this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
 
 				}

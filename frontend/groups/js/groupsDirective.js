@@ -385,7 +385,7 @@
 				data = {
 					source: "tree",
 					account: vm.account,
-					model: vm.model
+					model: vm.model,
 					ids: ids,
 					visible: visible
 				};
