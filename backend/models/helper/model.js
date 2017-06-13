@@ -422,7 +422,7 @@ function getUnityAssets(account, model, branch, rev, username){
 
 	return getHistory.then(_history => {
 		history = _history;
-		return middlewares.hasReadAccessToProjectHelper(username, account, model);
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
