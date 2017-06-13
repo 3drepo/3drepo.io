@@ -114,7 +114,7 @@ describe('Model', function () {
 
 					const myModel = pg.models.find(_model => _model.model === modelId);
 					expect(myModel).to.exist;
-					expect(myModel.model).to.equal(modelId);
+					expect(myModel.name).to.equal(model);
 
 					callback(err);
 				});
