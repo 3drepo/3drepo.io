@@ -3,7 +3,7 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 		md-list-item.model-indent(ng-click="vm.viewFederation($event, vm.account, vm.project, vm.federation)", flex)
 			md-button.md-icon-button.federation(aria-label="Federation")
 				md-icon.angular-material-icons() border_all
-			p.modelName.md-list-item-text(flex="100"){{vm.federation.model}}
+			p.modelName.md-list-item-text(flex="100"){{vm.federation.name}}
 
 	div.modelRight(layout-align="start-center" layout="row")
 		.modelRight(layout="row", layout-align="start center")
@@ -22,7 +22,7 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 // Models list
 md-list-item.federationModelsList(ng-if="vm.federation.federate && vm.federation.subModels.length")
 	span(ng-repeat="subModel in vm.federation.subModels")
-		| {{subModel.model}}
+		| {{subModel.name}}
 		span(ng-if="!$last")
 			| , 
 			=" "
