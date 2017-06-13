@@ -63,34 +63,34 @@ function NotificationService(serverConfig, $injector){
 			room = room.split('::');
 
 			var account = room[0];
-			var project = room[1];
+			var model = room[1];
 
-			joinRoom(account, project);
+			joinRoom(account, model);
 		});
 	});
 
-	function joinRoom(account, project){
+	function joinRoom(account, model){
 		
-		var projectNameSpace = '';
+		var modelNameSpace = '';
 		
-		if(project){
-			projectNameSpace = '::' + project;
+		if(model){
+			modelNameSpace = '::' + model;
 		}
 
-		var room =  account + projectNameSpace;
+		var room =  account + modelNameSpace;
 		if(joined.indexOf(room) === -1){
 
-			socket.emit('join', {account: account, model: project});
+			socket.emit('join', {account: account, model: model});
 			joined.push(room);
 		}
 	}
 
-	function getEventName(account, project, keys, event){
+	function getEventName(account, model, keys, event){
 
-		var projectNameSpace = '';
+		var modelNameSpace = '';
 		
-		if(project){
-			projectNameSpace = '::' + project;
+		if(model){
+			modelNameSpace = '::' + model;
 		}
 		
 		keys = keys || [];
@@ -100,87 +100,87 @@ function NotificationService(serverConfig, $injector){
 			keyString =  '::' + keys.join('::');
 		}
 
-		return account + projectNameSpace +  keyString + '::' + event;
+		return account + modelNameSpace +  keyString + '::' + event;
 	}
 
-	function subscribe(account, project, keys, event, callback){
+	function subscribe(account, model, keys, event, callback){
 
-		joinRoom(account, project);
-		console.log('sub', getEventName(account, project, keys, event));
-		socket.on(getEventName(account, project, keys, event), function(data){
-			console.log('msg rec', getEventName(account, project, keys, event));
+		joinRoom(account, model);
+		console.log('sub', getEventName(account, model, keys, event));
+		socket.on(getEventName(account, model, keys, event), function(data){
+			console.log('msg rec', getEventName(account, model, keys, event));
 			callback(data);
 		});
 	}
 
-	function unsubscribe(account, project, keys, event){
-		console.log('unsub', getEventName(account, project, keys, event));
-		socket.off(getEventName(account, project, keys, event));
+	function unsubscribe(account, model, keys, event){
+		console.log('unsub', getEventName(account, model, keys, event));
+		socket.off(getEventName(account, model, keys, event));
 	}
 
-	function subscribeNewIssues(account, project, callback){
-		subscribe(account, project, [], 'newIssues', callback);
+	function subscribeNewIssues(account, model, callback){
+		subscribe(account, model, [], 'newIssues', callback);
 	}
 
-	function unsubscribeNewIssues(account, project){
-		unsubscribe(account, project, [], 'newIssues');
+	function unsubscribeNewIssues(account, model){
+		unsubscribe(account, model, [], 'newIssues');
 	}
 
-	function subscribeNewComment(account, project, issueId, callback){
-		subscribe(account, project, [issueId], 'newComment', callback);
+	function subscribeNewComment(account, model, issueId, callback){
+		subscribe(account, model, [issueId], 'newComment', callback);
 	}
 
-	function unsubscribeNewComment(account, project, issueId){
-		unsubscribe(account, project, [issueId], 'newComment');
+	function unsubscribeNewComment(account, model, issueId){
+		unsubscribe(account, model, [issueId], 'newComment');
 	}
 
-	function subscribeCommentChanged(account, project, issueId, callback){
-		subscribe(account, project, [issueId], 'commentChanged', callback);
+	function subscribeCommentChanged(account, model, issueId, callback){
+		subscribe(account, model, [issueId], 'commentChanged', callback);
 	}
 
-	function unsubscribeCommentChanged(account, project, issueId){
-		unsubscribe(account, project, [issueId], 'commentChanged');
+	function unsubscribeCommentChanged(account, model, issueId){
+		unsubscribe(account, model, [issueId], 'commentChanged');
 	}
 
-	function subscribeCommentDeleted(account, project, issueId, callback){
-		subscribe(account, project, [issueId], 'commentDeleted', callback);
+	function subscribeCommentDeleted(account, model, issueId, callback){
+		subscribe(account, model, [issueId], 'commentDeleted', callback);
 	}
 
-	function unsubscribeCommentDeleted(account, project, issueId){
-		unsubscribe(account, project, [issueId], 'commentDeleted');
+	function unsubscribeCommentDeleted(account, model, issueId){
+		unsubscribe(account, model, [issueId], 'commentDeleted');
 	}
 
-	function subscribeIssueChanged(account, project, issueId, callback){
+	function subscribeIssueChanged(account, model, issueId, callback){
 		if(arguments.length === 3){
 			callback = issueId;
-			subscribe(account, project, [], 'issueChanged', callback);
+			subscribe(account, model, [], 'issueChanged', callback);
 		} else {
-			subscribe(account, project, [issueId], 'issueChanged', callback);
+			subscribe(account, model, [issueId], 'issueChanged', callback);
 		}
 	}
 
-	function unsubscribeIssueChanged(account, project, issueId){
+	function unsubscribeIssueChanged(account, model, issueId){
 		if(arguments.length === 2){
-			unsubscribe(account, project, [], 'issueChanged');
+			unsubscribe(account, model, [], 'issueChanged');
 		} else {
-			unsubscribe(account, project, [issueId], 'issueChanged');
+			unsubscribe(account, model, [issueId], 'issueChanged');
 		}
 		
 	}
 
-	function subscribeProjectStatusChanged(account, project, callback){
-		subscribe(account, project, [], 'modelStatusChanged', callback);
+	function subscribeModelStatusChanged(account, model, callback){
+		subscribe(account, model, [], 'modelStatusChanged', callback);
 	}
 
-	function unsubscribeProjectStatusChanged(account, project){
-		unsubscribe(account, project, [], 'modelStatusChanged');
+	function unsubscribeModelStatusChanged(account, model){
+		unsubscribe(account, model, [], 'modelStatusChanged');
 	}
 
-	function subscribeNewProject(account, callback){
+	function subscribeNewModel(account, callback){
 		subscribe(account, null, [], 'newModel', callback);
 	}
 
-	function unsubscribeNewProject(account, project){
+	function unsubscribeNewModel(account, model){
 		unsubscribe(account, null, [], 'newModel');
 	}
 
@@ -191,8 +191,8 @@ function NotificationService(serverConfig, $injector){
 			commentChanged: subscribeCommentChanged,
 			commentDeleted: subscribeCommentDeleted,
 			issueChanged: subscribeIssueChanged,
-			projectStatusChanged: subscribeProjectStatusChanged,
-			newProject: subscribeNewProject
+			modelStatusChanged: subscribeModelStatusChanged,
+			newModel: subscribeNewModel
 
 		},
 		unsubscribe:{
@@ -201,8 +201,8 @@ function NotificationService(serverConfig, $injector){
 			commentChanged: unsubscribeCommentChanged,
 			commentDeleted: unsubscribeCommentDeleted,
 			issueChanged: unsubscribeIssueChanged,
-			projectStatusChanged: unsubscribeProjectStatusChanged,
-			newProject: unsubscribeNewProject
+			modelStatusChanged: unsubscribeModelStatusChanged,
+			newModel: unsubscribeNewModel
 		}
 	};
 };

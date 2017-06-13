@@ -41,20 +41,20 @@
 			return map;
 		};
 
-		var init = function(account, project, branch, revision) {
+		var init = function(account, model, branch, revision) {
 
 			console.log('tree init');
 
 			ts.account  = account;
-			ts.project  = project;
+			ts.model  = model;
 			ts.branch   = branch ? branch : "master";
 			//ts.revision = revision ? revision : "head";
 
 			if (!revision)
 			{
-				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
+				ts.baseURL = "/" + account + "/" + model + "/revision/master/head/";
 			} else {
-				ts.baseURL = "/" + account + "/" + project + "/revision/" + revision + "/";
+				ts.baseURL = "/" + account + "/" + model + "/revision/" + revision + "/";
 			}
 
 			var deferred = $q.defer(),
@@ -68,7 +68,7 @@
 
 					if(subTrees){
 
-						// idToObjRef only needed if project is a fed project. i.e. subTrees.length > 0
+						// idToObjRef only needed if model is a fed model. i.e. subTrees.length > 0
 						var idToObjRef = genIdToObjRef(mainTree.nodes);
 						mainTree.subProjIdToPath = {};
 

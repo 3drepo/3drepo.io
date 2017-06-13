@@ -5,10 +5,10 @@ md-dialog(aria-label="Remove License")
 			span(flex)
 	md-content(layout-margin, layout="column", layout-align="start")
 		.cardInfo
-			p User {{vm.licenses[vm.licenseAssigneeIndex].user}} is a team member of the project(s) below. Do you really want to remove this license?
+			p User {{vm.licenses[vm.licenseAssigneeIndex].user}} is a team member of the model(s) below. Do you really want to remove this license?
 		md-list
-			md-list-item(ng-repeat="project in vm.userProjects")
-				p {{project.project}} ({{project.role}})
+			md-list-item(ng-repeat="model in vm.userModels")
+				p {{model.model}} ({{model.role}})
 		div(layout="row", layout-align="start")
 			md-button.md-raised.md-accent(ng-click="vm.removeLicenseConfirmed()") Remove
 			md-button.md-accent(ng-click="utilsRemoveDialog()") Cancel

@@ -26,7 +26,7 @@
 				templateUrl: "issuesList.html",
 				bindings: {
 					account: "<",
-					project: "<",
+					model: "<",
 					allIssues: "<",
 					treeMap: "<",
 					filterText: "<",
@@ -61,7 +61,7 @@
 			showClosed = false,
 			focusedIssueIndex = null,
 			rightArrowDown = false,
-			showSubProjectIssues = false,
+			showSubModelIssues = false,
 			excludeRoles = [];
 
 		// Init
@@ -104,8 +104,8 @@
 					if (self.issueDisplay.sortOldestFirst) {
 						sortOldestFirst = self.issueDisplay.sortOldestFirst;
 					}
-					if (self.issueDisplay.showSubProjectIssues){
-						showSubProjectIssues = self.issueDisplay.showSubProjectIssues;
+					if (self.issueDisplay.showSubModelIssues){
+						showSubModelIssues = self.issueDisplay.showSubModelIssues;
 					}
 					setupIssuesToShow();
 					showPins();
@@ -187,9 +187,9 @@
 					showClosed = !showClosed;
 					self.issueDisplay.showClosed = showClosed;
 				}
-				else if (this.menuOption.value === "showSubProjects") {
-					showSubProjectIssues = !showSubProjectIssues;
-					self.issueDisplay.showSubProjectIssues = showSubProjectIssues;
+				else if (this.menuOption.value === "showSubModels") {
+					showSubModelIssues = !showSubModelIssues;
+					self.issueDisplay.showSubModelIssues = showSubModelIssues;
 				}
 				else if (this.menuOption.value === "print") {
 					var ids = [];
@@ -198,10 +198,10 @@
 						ids.push(issue._id);
 					});
 
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html?ids=" + ids.join(',')), "_blank");
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.model + "/issues.html?ids=" + ids.join(',')), "_blank");
 				}
 				else if (this.menuOption.value === "exportBCF") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.bcfzip"), "_blank");
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.model + "/issues.bcfzip"), "_blank");
 				}
 				else if (this.menuOption.value === "importBCF") {
 
@@ -380,7 +380,7 @@
 				view_dir : issue.viewpoint.view_dir,
 				up: issue.viewpoint.up,
 				account: issue.account,
-				project: issue.project
+				model: issue.model
 
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
@@ -389,7 +389,7 @@
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
-				project: issue.project,
+				model: issue.model,
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 
@@ -401,12 +401,12 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
 					console.log(response.data);
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						var key = obj.account + "@" +  obj.project;
+						var key = obj.account + "@" +  obj.model;
 						if(!ids[key]){
 							ids[key] = [];
 						}	
@@ -418,12 +418,12 @@
 
 						var vals = key.split('@');
 						var account = vals[0];
-						var project = vals[1];
+						var model = vals[1];
 
 						data = {
 							source: "tree",
 							account: account,
-							project: project,
+							model: model,
 							ids: ids[key],
 							colour: response.data.colour,
 							multi: true
@@ -535,9 +535,9 @@
 					}
 				}
 
-				// Sub projects
+				// Sub models
 				self.issuesToShow = self.issuesToShow.filter(function (issue) {
-					return showSubProjectIssues ? true : (issue.project === self.project);
+					return showSubModelIssues ? true : (issue.model === self.model);
 				});
 
 				//Roles Filter
@@ -594,7 +594,7 @@
                                 position: self.allIssues[i].position,
                                 norm: self.allIssues[i].norm,
                                 account: self.allIssues[i].account,
-                                project: self.allIssues[i].project
+                                model: self.allIssues[i].model
                             };
                             var pinColor = [0.5, 0, 0];
                             if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {

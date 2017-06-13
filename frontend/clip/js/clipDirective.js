@@ -34,7 +34,7 @@
 			controllerAs: 'vm',
 			bindToController: true,
 			account: null,
-			project: null,
+			model: null,
 			disableRedefinition: false
 		};
 	}
@@ -61,6 +61,7 @@
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 		vm.units = "m";
+
 
 		function updateClippingPlane()
 		{
@@ -122,7 +123,6 @@
 			}
 			else
 				updateDisplaySlider(false, moveClip);
-
 		}
 
 		/*
@@ -317,18 +317,18 @@
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
 				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
 			}
-			else if(event.type === EventService.EVENT.VIEWER.SET_SUBPROJECT_TRANS_INFO)
+			else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO)
 			{
-				vm.projectTrans[event.value.projectNameSpace] = event.value.projectTrans;
-				if(event.value.isMainProject)
-					vm.offsetTrans = event.value.projectTrans;
+				vm.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
+				if(event.value.isMainModel)
+					vm.offsetTrans = event.value.modelTrans;
 			}
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
 				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
 			}
-			else if(event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
+			else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY)
 			{
 				vm.units = event.value.settings.unit;
 			}

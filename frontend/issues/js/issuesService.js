@@ -81,11 +81,11 @@
 			}
 		};
 
-		obj.getIssue = function(account, project, issueId){
+		obj.getIssue = function(account, model, issueId){
 
 			var self = this;
 			var deferred = $q.defer();
-			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues/" + issueId + ".json");
+			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/issues/" + issueId + ".json");
 
 			$http.get(url).then(function(res){
 
@@ -101,13 +101,13 @@
 
 		};
 
-		obj.getIssues = function(account, project, revision) {
+		obj.getIssues = function(account, model, revision) {
 			var deferred = $q.defer();
 
 			if(revision){
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/revision/" + revision + "/issues.json");
 			} else {
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/issues.json");
 			}
 			
 
@@ -156,9 +156,9 @@
 				url;
 
 			if (issue.rev_id){
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/issues.json");
 			}
 
 			config = {withCredentials: true};
@@ -197,9 +197,9 @@
 			var url;
 
 			if(issue.rev_id){
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
 			} else {
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/issues/" + issue._id + ".json");
 			}
 				
 			var config = {withCredentials: true};
@@ -271,7 +271,7 @@
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
 				account: pin.account,
-				project: pin.project,
+				model: pin.model,
 				pickedPos: pin.position,
 				pickedNorm: pin.norm,
 				colours: colours,
@@ -296,10 +296,10 @@
 			});
 		};
 
-		obj.getJobs = function(account, project){
+		obj.getJobs = function(account, model){
 
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + project + '/jobs.json');
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + model + '/jobs.json');
 
 			$http.get(url).then(
 				function(data) {
@@ -314,9 +314,9 @@
 			return deferred.promise;
 		};
 
-		obj.getUserJobForProject = function(account, project){
+		obj.getUserJobFormodel = function(account, model){
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/userJobForModel.json");
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +model + "/userJobForModel.json");
 
 			$http.get(url).then(
 				function(data) {
@@ -414,13 +414,13 @@
 		/**
 		* Import bcf
 		*/
-		obj.importBcf = function(account, project, revision, file){
+		obj.importBcf = function(account, model, revision, file){
 
 			var deferred = $q.defer();
 
-			var url = account + "/" + project + "/issues.bcfzip";
+			var url = account + "/" + model + "/issues.bcfzip";
 			if(revision){
-				url = account + "/" + project + "/revision/" + revision + "/issues.bcfzip";
+				url = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
 			}
 
 			var formData = new FormData();

@@ -54,9 +54,9 @@
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 		vm.showList = true;
 
-		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/permissions");
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
+
 		promise.then(function (response) {
-			console.log(response);
 			if (response.status === 200) {
 				vm.members = response.data;
 				if (angular.isDefined("vm.subscriptions")) {
@@ -73,11 +73,11 @@
 		});
 
 		/**
-		 * Go back to the repos page
+		 * Go back to the teamspaces page
 		 */
 		vm.goBack = function () {
-			$location.search("project", null);
-			vm.showPage({page: "repos"});
+			$location.search("model", null);
+			vm.showPage({page: "teamspaces"});
 		};
 
 		/**
@@ -91,7 +91,8 @@
 				user: vm.selectedUser.user
 			};
 
-			promise = UtilsService.doPost(vm.members.concat([data]), vm.account + "/" + vm.item.project + "/permissions");
+			promise = UtilsService.doPost(vm.members.concat([data]), vm.account + "/" + vm.item.model + "/permissions");
+
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.members.push(data);
@@ -125,7 +126,8 @@
 
 			var member = vm.members.splice(index, 1);
 
-			promise = UtilsService.doPost(vm.members, vm.account + "/" + vm.item.project + "/permissions");
+			promise = UtilsService.doPost(vm.members, vm.account + "/" + vm.item.model + "/permissions");
+
 			promise.then(function (response) {
 				if (response.status === 200) {
 					

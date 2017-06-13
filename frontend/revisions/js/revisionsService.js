@@ -25,8 +25,8 @@
 
 	function RevisionsService(UtilsService) {
 
-		function listAll(account, project){
-			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+		function listAll(account, model){
+			return UtilsService.doGet(account + "/" + model + "/revisions.json").then(function(response){
 				if(response.status === 200){
 					return (response.data);
 				} else {

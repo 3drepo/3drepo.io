@@ -7,66 +7,110 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-content(layout-margin)
 		div(layout="column", flex)
-			// Federation name
-			div(layout="row", flex)
-				md-input-container(flex="50")
-					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.model", ng-disabled="vm.federationOriginalData", ng-pattern="vm.projectRegExp" maxlength=20)
-					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers, hyphen and underscore only
 
-			div(ng-if="!vm.federationOriginalData" layout="row", flex)
-				md-input-container(flex="50")
-					label Unit
-					md-select(ng-model="vm.newFederationData.unit")
-						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+			md-input-container()
+				md-select(
+					placeholder="Teamspace", 
+					tdr-focus="true"
+					ng-model="vm.federationData.teamspace" 
+					ng-disabled="vm.federationData.teamspace && vm.federationData._isEdit")
+					md-option(
+						ng-repeat="teamspace in vm.accounts"
+						ng-selected="vm.federationData.teamspace === teamspace.name"
+						value="{{teamspace.name}}") {{teamspace.name}}
+
+			md-input-container()
+				md-select(
+					placeholder="Project",
+					ng-model="vm.federationData.project"
+					ng-disabled="vm.federationData.project === 'default' || (vm.federationData.project && vm.federationData._isEdit)")
+					md-option(
+						ng-repeat="project in vm.getProjects(vm.federationData.teamspace)"
+						ng-selected="vm.federationData.project === project.name"
+						value="{{project.name}}") {{project.name}}
+
+			div(ng-if="(vm.federationData.teamspace && vm.federationData.project) || vm.federationData.project === 'default'")
+			
+				// Federation name
+
+				div(layout="row", flex)
+					md-input-container(flex="50")
+						input(
+						placeholder="{{vm.federationData.model || 'Federation name'}} "
+						value="{{vm.federationData.name}}"
+						tdr-focus="true"
+						ng-disabled="vm.federationData.model && vm.federationData._isEdit"
+						ng-model="vm.federationData.model"
+						ng-pattern="vm.modelRegExp" 
+						maxlength=20)
+						.inputHint(ng-if="!vm.federationData.model") Letters, numbers, hyphen and underscore only
+				
+				div( layout="row", flex)
+					md-input-container(flex="50")
+						label Unit
+						md-select(ng-model="vm.federationData.unit")
+							md-option(
+								ng-repeat="unit in vm.units", 
+								value="{{unit.value}}"
+								selected
+								) {{unit.name}}
 
 
-			md-divider
+				md-divider
 
-			// List
-			div(layout="row", flex)
-				// Available
-				div(layout="column", flex)
-					p(layout="row", layout-align="center center") Available
-					md-list
-						//md-list-item(ng-click="vm.toggleShowProjects($index)")
-							md-icon.angular-material-icons {{account.showProjectsIcon}}
-							p {{account.account}}
-						md-list
-							md-list-item.federationProject(
-							ng-repeat="project in vm.userAccount.models"
-							style="opacity:{{project.federated? 0.2 : 1.0}}")
-								md-icon.angular-material-icons dashboard
-								p {{project.model}}
-								span(flex)
-								md-button.md-icon-button(
-								aria-label="Add"
-								ng-click="vm.addToFederation($index)"
-								ng-if="!project.federated")
-									md-icon.angular-material-icons.md-accent add_circle
+				div(ng-if="vm.federationData.model && vm.federationData.unit")
 
-				// Divider
-				div(layout="row", layout-align="center")
-					#federationDivider(flex="none")
+					// List
+					div.addFederations(layout="row", flex)
+						// Available
+						div(layout="column", flex)
+							p(layout="row", layout-align="center center") Available
+							md-list
+								md-list
+									md-list-item.federationModel(
+									ng-repeat="potentialFedModel in vm.getPotentialFederationModels(vm.isDefaultFederation)"
+									ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
+									style="opacity:{{model.federated ? 0.13 : 1.0}}")
 
-				// Federated
-				div(layout="column", flex)
-					p(layout="row", layout-align="center center") Federated
-					md-list
-						div(ng-repeat="item in vm.newFederationData.subModels", layout="column")
-							md-list-item.federationProject
-								md-icon.angular-material-icons dashboard
-								p {{item.model}}
-								span(flex)
-								md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
-									md-icon.angular-material-icons.md-accent remove_circle
-							div(ng-if="vm.showRemoveWarning")
-								p#federationWarning This project cannot be removed. Please delete federation.
+										md-icon.angular-material-icons dashboard
+										p {{potentialFedModel.model}}
 
-			md-divider
+										span(flex)
+										md-button.md-icon-button(
+										aria-label="Add"
+										ng-click="vm.addToFederation($index, vm.federationData.teamspace, vm.getPotentialFederationModels(vm.isDefaultFederation))"
+										)
+											md-icon.angular-material-icons.md-accent add_circle
 
-			// Save/Cancel
-			#federationSave(layout="row", layout-align="start center")
-				md-button.md-raised.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.saveFederation()") Save
-				md-button.md-accent(ng-click="vm.closeDialog()") Cancel
 
-			p.projectDialogError(ng-if="vm.errorMessage") {{vm.errorMessage}}
+						// Divider
+						div(layout="row", layout-align="center")
+							#federationDivider(flex="none")
+
+						// Federated
+						div(layout="column", flex)
+							p(layout="row", layout-align="center center") Federated
+							md-list
+								div(ng-repeat="subModel in vm.federationData.subModels", layout="column")
+								
+									md-list-item.federationModel
+
+										md-icon.angular-material-icons dashboard
+										p {{subModel.model}}
+										span(flex)
+										md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation(subModel.model)")
+											md-icon.angular-material-icons.md-accent remove_circle
+									div(ng-if="vm.showRemoveWarning")
+										p#federationWarning This model cannot be removed. Please delete federation.
+
+					md-divider
+
+					// Save/Cancel
+					#federationSave(layout="row", layout-align="start center")
+						md-button.md-raised.md-accent(
+							ng-disabled="vm.newFederationButtonDisabled", 
+							ng-click="vm.saveFederation(vm.federationData.teamspace, vm.federationData.project)"
+							) Save
+						md-button.md-accent(ng-click="vm.closeDialog()") Cancel
+
+					p.modelDialogError(ng-if="vm.errorMessage") {{vm.errorMessage}}

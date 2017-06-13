@@ -77,7 +77,6 @@
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-			console.log('vm.unassigned', vm.unassigned)
 		});
 
 		/*
@@ -93,7 +92,6 @@
 
 		UtilsService.doGet(vm.account + "/jobs").then(function(data){
 			vm.jobs = data.data
-			console.log(vm.jobs);
 		});
 
 		vm.assignJob = function(index){
@@ -158,7 +156,6 @@
 					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
 				);
 				promise.then(function (response) {
-					console.log(response);
 					if (response.status === 200) {
 						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
@@ -186,7 +183,6 @@
 		vm.removeLicense = function (index) {
 			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[index].id + "/assign");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					vm.unassigned.push(vm.licenses[index].id);
 					vm.licenses.splice(index, 1);
@@ -198,7 +194,7 @@
 					var message = UtilsService.getErrorMessage(response.data);
 					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
 						vm.licenseAssigneeIndex = index;
-						vm.userProjects = response.data.projects;
+						vm.userModels = response.data.models;
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);
 					}
 				}
@@ -206,12 +202,11 @@
 		};
 
 		/**
-		 * Remove license from user who is a team member of a project
+		 * Remove license from user who is a team member of a model
 		 */
 		vm.removeLicenseConfirmed = function () {
 			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[vm.licenseAssigneeIndex].id + "/assign?cascadeRemove=true");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);

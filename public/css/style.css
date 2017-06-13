@@ -168,7 +168,7 @@ hr {
 	margin: 10px 0px;
 }
 
-.block-header-project-name{
+.block-header-model-name{
 	font-weight: bold;
 	color: #4183c4;
 }
@@ -219,9 +219,9 @@ hr {
 	background-position: center;
 }
 
-/*Project items*/
+/*model items*/
 
-.project-title{
+.model-title{
 	position: relative;
 	background-color: #FFF;
 	margin-bottom: 20px;
@@ -230,7 +230,7 @@ hr {
   border-color: #DDD;
 }
 
-.project-title h2{
+.model-title h2{
 	color: #4183c4 !important;
 	font-size: 13pt;
 	font-weight: bold;
@@ -240,7 +240,7 @@ hr {
 	padding-bottom: 5px;
 }
 
-.project-title p{
+.model-title p{
 	color: #333;
 	margin: 0px;
 	padding: 10px;
@@ -258,7 +258,7 @@ hr {
 	margin:0px auto;
 }
 
-.project-menu{
+.model-menu{
 	position: relative;
 	color: #666;
 	background-color: #FFF;
@@ -268,7 +268,7 @@ hr {
   border-color: #DDD;
 }
 
-.project-menu-section{
+.model-menu-section{
 	position: relative;
 	color: #666;
 	background-color: #FFF;
@@ -276,15 +276,15 @@ hr {
 	border-color: #EEE;
 }
 
-.project-menu-section h3{
+.model-menu-section h3{
 	font-size: 11pt !important;
 }
 
-.project-menu-section-selected{
+.model-menu-section-selected{
 	background-color: #FAFAFA !important;
 }
 
-.project-menu-section:hover{
+.model-menu-section:hover{
 	position: relative;
 	color: #666;
 	background-color: #FAFAFA;
@@ -292,16 +292,16 @@ hr {
 	border-color: #EEE;
 }
 
-.project-menu-section:first-child, .project-menu-section:hover:first-child{
+.model-menu-section:first-child, .model-menu-section:hover:first-child{
 	border-top: 0px solid;
 	border-radius: 3px 3px 0px 0px;
 }
 
-.project-menu-section:last-child, .project-menu-section:hover:last-child{
+.model-menu-section:last-child, .model-menu-section:hover:last-child{
 	border-radius: 0px 0px 3px 3px;
 }
 
-.project-menu-section h3{
+.model-menu-section h3{
 	font-size: 13pt;
 	height: 100%;
 	font-weight: normal;
@@ -310,7 +310,7 @@ hr {
 	padding: 10px;
 }
 
-.project-title-updated p{
+.model-title-updated p{
 	color: #AAA;
 	position: absolute; 
   bottom: 0;
@@ -597,12 +597,12 @@ hr.fancy-line {
 	margin-bottom: 20px;
 }
 
-.project-line{
+.model-line{
 	border-bottom: 1px solid;
 	border-color: #DDD;
 }
 
-.project-line:last-child{
+.model-line:last-child{
 	border-bottom: 0px solid;
 }
 

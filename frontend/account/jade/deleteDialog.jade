@@ -16,5 +16,5 @@ md-dialog.deleteDialog(aria-label="Delete")
 				p#deleteWarning {{vm.deleteWarning}}
 			md-input-container
 				md-button.md-raised.md-accent(ng-click="vm.closeDialog()") No
-				md-button.md-accent(ng-click="vm.delete()") Yes
+				md-button.md-accent(ng-click="vm.deleteModel()") Yes
 			p#deleteError(ng-if="vm.deleteError") {{vm.deleteError}}

@@ -27,7 +27,7 @@
 			templateUrl: 'panelCardOptionPrint.html',
 			scope: {
 				account: "=",
-				project: "="
+				model: "="
 			},
 			controller: PanelCardOptionPrintCtrl,
 			controllerAs: 'vm',
@@ -42,7 +42,7 @@
 
 		vm.doPrint = function(event) {
 			event.stopPropagation();
-			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project + "/issues.html"), "_blank");
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html"), "_blank");
 		};
 	}
 }());

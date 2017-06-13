@@ -84,7 +84,6 @@
 				newPassword: vm.newPassword
 			});
 			promise.then(function (response) {
-				console.log(response);
 				if (response.statusText === "OK") {
 					vm.passwordSaveInfo = "Saved";
 				} else {

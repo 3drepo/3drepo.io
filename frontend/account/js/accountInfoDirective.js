@@ -44,12 +44,11 @@
 	function AccountInfoCtrl ($location, $scope, serverConfig, UtilsService) {
 		var vm = this;
 		
-		console.log('accountinfo', $scope)
 		/*
 		 * Init
 		 */
 		vm.accountOptions = {
-			repos: {label: "Repos"},
+			teamspaces: {label: "Teamspaces"},
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
 			licenses: {label: "Licenses"}
@@ -98,11 +97,10 @@
 				UtilsService.doPost(formData, vm.username + "/avatar", {'Content-Type': undefined}).then(function(res){
 					vm.uploadingAvatar = false;
 					
-					console.log(res);
 					if(res.status === 200){
 						vm.avatarUrl = getAvatarUrl();
 					} else {
-						console.log('Upload avatar error', res.data);
+						console.error('Upload avatar error', res.data);
 					}
 
 				});

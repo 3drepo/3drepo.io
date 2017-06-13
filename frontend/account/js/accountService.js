@@ -102,77 +102,64 @@
 			return doPut(passwords, username);
 		};
 
-		obj.getProjectsBid4FreeStatus = function (username) {
-			bid4free = $q.defer();
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
-				.then(function (response) {
-					bid4free.resolve(response);
-				});
-			return bid4free.promise;
-		};
+		// obj.getModelsBid4FreeStatus = function (username) {
+		// 	bid4free = $q.defer();
+		// 	$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
+		// 		.then(function (response) {
+		// 			bid4free.resolve(response);
+		// 		});
+		// 	return bid4free.promise;
+		// };
 
 		/**
-		 * Create a new project
+		 * Create a new model
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.newProject = function (projectData) {
+		obj.newModel = function (modelData) {
 			var data = {
 				desc: "",
-				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
-				unit: projectData.unit,
-				code: projectData.code
+				project : modelData.project,
+				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
+				unit: modelData.unit,
+				code: modelData.code
 			};
-			return doPost(data, projectData.account + "/" + encodeURIComponent(projectData.name));
+			return doPost(data, modelData.teamspace + "/" + encodeURIComponent(modelData.name));
 		};
 
 		/**
-		 * Upload file/model to database
+		 * Upload file/model 
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadModel = function (projectData) {
+		obj.uploadModel = function (modelData) {
 			var data = new FormData();
-			data.append("file", projectData.uploadFile);
-			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+			data.append("file", modelData.uploadFile);
+			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {'Content-Type': undefined});
 		};
 
 		/**
 		 * Get upload status
 		 *
-		 * @param projectData
+		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadStatus = function (projectData) {
-			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
+		obj.uploadStatus = function (modelData) {
+			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
 		};
 
-		/**
-		 * Create a new database
-		 *
-		 * @param account
-		 * @param databaseName
-		 * @returns {*|promise}
-		 */
-		obj.newDatabase = function (account, databaseName) {
-			var data = {
-				database: databaseName,
-				plan: "THE-100-QUID-PLAN"
-			};
-			return doPost(data, account + "/database");
-		};
 
 		/**
 		 * Create a new subscription
 		 *
-		 * @param account
+		 * @param teamspace
 		 * @param data
 		 * @returns {*|promise}
 		 */
-		obj.newSubscription = function (account, data) {
-			return doPost(data, account + "/subscriptions");
+		obj.newSubscription = function (teamspace, data) {
+			return doPost(data, teamspace + "/subscriptions");
 		};
 
 		/**

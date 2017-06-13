@@ -1,0 +1,15 @@
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Teamspaces", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Teamspaces
+
+
+		div(layout="column", layout-align="space-between")
+		
+			account-models(
+				account="vm.account"
+				accounts="vm.accounts"
+				on-show-page="vm.showPage(page, callingPage)"
+				quota="vm.quota"
+				subscriptions="vm.subscriptions")

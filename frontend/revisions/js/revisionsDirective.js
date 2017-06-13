@@ -10,7 +10,7 @@
 			templateUrl: 'revisions.html',
 			scope: {
 				account: "=",
-				project: "=",
+				model: "=",
 				revision: "=",
 			},
 			controller: revisionsCtrl,
@@ -56,7 +56,7 @@
 		vm.openDialog = function(event){
 
 			if(!vm.revisions){
-				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
 					vm.revisions = revisions;
 				});
 			}
@@ -70,7 +70,7 @@
 		vm.goToRevision = function(revId){
 
 			UtilsService.closeDialog();
-			$location.path("/" + vm.account + "/" + vm.project + "/" + revId , "_self");
+			$location.path("/" + vm.account + "/" + vm.model + "/" + revId , "_self");
 
 		}
 

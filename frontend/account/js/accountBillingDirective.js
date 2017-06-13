@@ -60,7 +60,6 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				console.log(vm.numLicenses, vm.numNewLicenses);
 				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {
 					vm.saveDisabled = true;
 				}
@@ -167,7 +166,6 @@
 			UtilsService.showDialog("paypalDialog.html", $scope, null, true);
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					if (vm.numLicenses === vm.numNewLicenses) {
 						vm.payPalInfo = "Billing information updated.";

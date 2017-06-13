@@ -27,11 +27,11 @@
 			templateUrl: "issues.html",
 			scope: {
 				account: "=",
-				project: "=",
+				model: "=",
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
-				projectSettings: "=",
+				modelSettings: "=",
 				show: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
@@ -66,7 +66,7 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
 		vm.availableJobs = null;
-		vm.projectUserJob;
+		vm.modelUserJob;
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
@@ -76,7 +76,7 @@
 		/*
 		 * Get all the Issues
 		 */
-		var getIssue = IssuesService.getIssues(vm.account, vm.project, vm.revision)
+		var getIssue = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 		.then(function (data) {
 			vm.showProgress = false;
 			vm.toShow = "showIssues";
@@ -95,9 +95,9 @@
 		});
 
 		/*
-		 * Get all the available roles for the project
+		 * Get all the available roles for the model
 		 */
-		var getJob = IssuesService.getJobs(vm.account, vm.project).then(function (data) {
+		var getJob = IssuesService.getJobs(vm.account, vm.model).then(function (data) {
 
 			vm.availableJobs = data;
 
@@ -159,10 +159,10 @@
 		}
 
 		/*
-		 * Get the user roles for the project
+		 * Get the user roles for the model
 		 */
-		IssuesService.getUserJobForProject(vm.account, vm.project).then(function (data) {
-			vm.projectUserJob = data;
+		IssuesService.getUserJobFormodel(vm.account, vm.model).then(function (data) {
+			vm.modelUserJob = data;
 		});
 
 		/*
@@ -190,7 +190,7 @@
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
 				watchNotification();
-			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
+			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY){
 
 				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 					vm.canAddIssue = true;
@@ -289,10 +289,10 @@
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
 				vm.displayIssue = null;
-				$state.go('home.account.project', 
+				$state.go('home.account.model', 
 					{
 						account: vm.account, 
-						project: vm.project, 
+						model: vm.model, 
 						revision: vm.revision,
 						noSet: true
 					}, 
@@ -309,13 +309,13 @@
 			 	return;
 			 }
 
-			function newIssueListener(issues, subproject){
+			function newIssueListener(issues, submodel){
 
 				issues.forEach(function(issue){
 
 					var showIssue;
 
-					if(subproject){
+					if(submodel){
 						
 						showIssue = true;
 
@@ -392,19 +392,19 @@
 			/*
 			 * Watch for new issues
 			 */
-			NotificationService.subscribe.newIssues(vm.account, vm.project, newIssueListener);
+			NotificationService.subscribe.newIssues(vm.account, vm.model, newIssueListener);
 
 			/*
 			 * Watch for status changes for all issues
 			 */
-			NotificationService.subscribe.issueChanged(vm.account, vm.project, issueChangedListener);
+			NotificationService.subscribe.issueChanged(vm.account, vm.model, issueChangedListener);
 
 			//do the same for all subModels
 			if(vm.subModels){
-				vm.subModels.forEach(function(subProject){
-					var subproject = true;
-					NotificationService.subscribe.newIssues(subProject.database, subProject.project, function(issues){ newIssueListener(issues, subproject) });
-					NotificationService.subscribe.issueChanged(subProject.database, subProject.project, issueChangedListener);
+				vm.subModels.forEach(function(submodel){
+					var submodel = true;
+					NotificationService.subscribe.newIssues(subModel.database, subModel.model, function(issues){ newIssueListener(issues, submodel) });
+					NotificationService.subscribe.issueChanged(subModel.database, subModel.model, issueChangedListener);
 				});
 			}
 		}
@@ -414,13 +414,13 @@
 		* Unsubscribe notifcation on destroy
 		*/
 		$scope.$on('$destroy', function(){
-			NotificationService.unsubscribe.newIssues(vm.account, vm.project);
-			NotificationService.unsubscribe.issueChanged(vm.account, vm.project);
+			NotificationService.unsubscribe.newIssues(vm.account, vm.model);
+			NotificationService.unsubscribe.issueChanged(vm.account, vm.model);
 
 			if(vm.subModels){
-				vm.subModels.forEach(function(subProject){
-					NotificationService.unsubscribe.newIssues(subProject.database, subProject.project);
-					NotificationService.unsubscribe.issueChanged(subProject.database, subProject.project);
+				vm.subModels.forEach(function(subModel){
+					NotificationService.unsubscribe.newIssues(subModel.database, subModel.model);
+					NotificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
 				});
 			}
 
@@ -445,9 +445,9 @@
 
 			vm.importingBCF = true;
 
-			IssuesService.importBcf(vm.account, vm.project, vm.revision, file).then(function(){
+			IssuesService.importBcf(vm.account, vm.model, vm.revision, file).then(function(){
 
-				return IssuesService.getIssues(vm.account, vm.project, vm.revision);
+				return IssuesService.getIssues(vm.account, vm.model, vm.revision);
 
 			}).then(function(data){
 
@@ -481,14 +481,14 @@
 
 			if(issue){
 				showIssue(issue);
-				IssuesService.getIssue(issue.account, issue.project, issue._id).then(function(issue){
+				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
 
-				$state.go('home.account.project.issue', 
+				$state.go('home.account.model.issue', 
 					{
 						account: vm.account, 
-						project: vm.project, 
+						model: vm.model, 
 						revision: vm.revision,
 						issue: issue._id,
 						noSet: true
@@ -556,14 +556,14 @@
 				view_dir : issue.viewpoint.view_dir,
 				up: issue.viewpoint.up,
 				account: issue.account,
-				project: issue.project
+				model: issue.model
 			});
 
 			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
-				project: issue.project
+				model: issue.model
 			});
 
 			// Remove highlight from any multi objects
@@ -571,7 +571,7 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(issue.account + "/" + issue.project + "/groups/" + issue.group_id).then(function (response) {
+				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
 					if(response.data.objects)
@@ -585,7 +585,7 @@
 					data = {
 						source: "tree",
 						account: vm.account,
-						project: vm.project,
+						model: vm.model,
 						ids: ids,
 						colour: response.data.colour
 					};

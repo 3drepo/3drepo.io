@@ -57,7 +57,7 @@
 						vm.itemToShow = vm.query.page;
 					}
 					else {
-						vm.itemToShow = "repos";
+						vm.itemToShow = "teamspaces";
 					}
 
 					// Handle Billing Page
@@ -104,7 +104,7 @@
 					}
 				}
 				else {
-					vm.itemToShow = "repos";
+					vm.itemToShow = "teamspaces";
 					init();
 				}
 
@@ -113,7 +113,7 @@
 				vm.firstName       = null;
 				vm.lastName        = null;
 				vm.email           = null;
-				vm.projectsGrouped = null;
+				vm.modelsGrouped = null;
 				vm.avatarUrl = null;
 			}
 		});
