@@ -290,7 +290,8 @@
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			if (isDefault) {
+			console.log("isDefault", isDefault);
+			if (!isDefault) {
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -360,6 +361,7 @@
 		 */
 		vm.setupNewFederation = function (event, accounts) {
 
+			vm.isDefaultFederation = false; 
 			vm.federationOriginalData = null;
 			vm.federationData = {
 				desc: "",

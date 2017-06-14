@@ -68,19 +68,19 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 							md-list
 								md-list
 									md-list-item.federationModel(
-									ng-repeat="potentialFedModel in vm.getPotentialFederationModels(vm.isDefaultFederation)"
-									ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
-									style="opacity:{{model.federated ? 0.13 : 1.0}}")
+										ng-repeat="potentialFedModel in vm.getPotentialFederationModels(vm.isDefaultFederation)"
+										ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
+										style="opacity:{{model.federated ? 0.13 : 1.0}}")
 
-										md-icon.angular-material-icons dashboard
-										p {{potentialFedModel.name}}
+											md-icon.angular-material-icons dashboard
+											p {{potentialFedModel.name}}
 
-										span(flex)
-										md-button.md-icon-button(
-										aria-label="Add"
-										ng-click="vm.addToFederation($index, vm.federationData.teamspace, vm.getPotentialFederationModels(vm.isDefaultFederation))"
-										)
-											md-icon.angular-material-icons.md-accent add_circle
+											span(flex)
+											md-button.md-icon-button(
+											aria-label="Add"
+											ng-click="vm.addToFederation($index, vm.federationData.teamspace, vm.getPotentialFederationModels(vm.isDefaultFederation))"
+											)
+												md-icon.angular-material-icons.md-accent add_circle
 
 
 						// Divider

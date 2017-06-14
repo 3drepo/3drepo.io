@@ -20,8 +20,8 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 
 
 // Models list
-md-list-item.federationModelsList(ng-if="vm.federation.federate && vm.federation.subModels.length")
-	span(ng-repeat="subModel in vm.federation.subModels")
+md-list-item.federationModelsList(ng-if="vm.federation.federate && vm.federation.subModels.length > 0")
+	span(ng-repeat="subModel in vm.federation.subModels", ng-if="subModel.name")
 		| {{subModel.name}}
 		span(ng-if="!$last")
 			| , 
