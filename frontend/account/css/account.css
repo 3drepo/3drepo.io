@@ -368,11 +368,22 @@ account-licenses .licenseIcon {
 account-licenses #accountLicensesAdd {
   margin-top: -10px;
 }
-account-licenses #accountLicensesAdd md-input-container {
+account-licenses .userContent md-input-container {
   margin-bottom: 0;
+  width: 80%;
 }
-account-licenses #accountLicensesAdd .md-button {
-  margin-bottom: 30px;
+
+account-licenses .md-subheader .md-subheader-inner {
+  padding-left: 0px !important;
+}
+
+account-licenses #accountJobList #jobIcon md-icon {
+  padding-top: 12px;
+}
+
+account-licenses #accountLicensesUnassigned md-icon {
+  margin-bottom: 0px;
+  margin: 0px;
 }
 
 account-licenses #accountLicensesUnassigned {

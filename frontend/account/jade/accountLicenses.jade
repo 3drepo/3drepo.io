@@ -18,8 +18,8 @@
 							| to add licenses.
 
 				div(ng-switch-when="0+")
-					#accountLicensesAdd
-						div(flex="30", layout="column")
+					#accountLicensesAdd(layout="row")
+						div(flex="50", layout="column")
 							p Assign a license
 							md-input-container
 								label Username
@@ -29,7 +29,7 @@
 								tdr-focus="true"
 								ng-disabled="vm.allLicensesAssigned"
 								ng-keypress="vm.assignLicense($event)")
-						div(layout="row")
+						div(flex="50", layout="column", layout-align="end start")
 							md-button.md-raised.md-accent(ng-click="vm.assignLicense()", ng-disabled="vm.addDisabled") Assign
 							p {{vm.addMessage}}
 
@@ -43,7 +43,7 @@
 						md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
 							div(layout="row", layout-align="start center", flex)
 								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-								.md-list-item-text(flex=30)
+								.md-list-item-text(flex="50")
 									p {{license.user}}
 								.md-list-item(flex=25)
 									md-select(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
@@ -59,50 +59,53 @@
 						// Unassigned
 						md-list#accountLicensesUnassigned
 							md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
-								div(layout="row", layout-align="start center", flex)
+								div(layout="row", layout-align="start center", flex="50")
 									md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
 									.md-list-item-text
 										p Unassigned
-								md-button.md-icon-button(aria-label="Remove")
-									md-icon.angular-material-icons remove_circle
+								md-button.md-icon-button(aria-label="Remove", flex="30", layout-align="end start")
+									md-icon.angular-material-icons(layout-align="start start") remove_circle
 
 					md-divider
 						
+					// Add a job
+					md-content#accountJobList
+						p Add a job
+						div(layout="row")
+							.md-list-item(flex="50")
+								md-input-container
+									label Job
+									input(
+										flex
+										type="text"
+										ng-model="vm.newJob")
+							.md-list-item(flex="50")
+								md-button.md-raised.md-accent(ng-click="vm.addJob()") Add
+						div(layout="row" ng-if="vm.addJobMessage")
+							p {{vm.addJobMessage}}
 
-					p Add a job
-					div(layout="row")
-						.md-list-item(flex="30")
-							md-input-container
-								label Job
-								input(
-								type="text"
-								ng-model="vm.newJob")
-						.md-list-item(flex="30")
-							md-button.md-raised.md-accent(ng-click="vm.addJob()") Add
-					div(layout="row" ng-if="vm.addJobMessage")
-						p {{vm.addJobMessage}}
+						section(ng-if='vm.jobs.length')
+							md-subheader
+								div Jobs
 
-					section(ng-if='vm.jobs.length')
-						md-subheader
-							div Jobs
+						md-list-item(ng-repeat="job in vm.jobs", layout="row", layout-align="space-between", flex="100")
+							div(layout="row", flex="50")
+								div#jobIcon(layout-align="start center")
+									md-icon.angular-material-icons.licenseIcon(aria-label="Job") work
+								.md-list-item-text(flex="50")
+									p {{job._id}}
 
-					md-list-item(ng-repeat="job in vm.jobs", layout="row", layout-align="space-between", flex)
-						div(layout="row", layout-align="start center", flex)
-							md-icon.angular-material-icons.licenseIcon(aria-label="Job") work
-							.md-list-item-text(flex=30)
-								p {{job._id}}
+							div(layout="column", layout-align="end center")
+								md-button.md-icon-button.md-accent(ng-click="vm.removeJob($index)", aria-label="Close dialog")
+									md-icon.angular-material-icons remove_circle
 
-						div(layout="row", layout-align="end center")
-							md-button.md-icon-button.md-accent(ng-click="vm.removeJob($index)", aria-label="Close dialog")
-								md-icon.angular-material-icons remove_circle
+						p#accountLicenseMessage {{vm.deleteJobMessage}}
+						br
+						
 
-					p#accountLicenseMessage {{vm.deleteJobMessage}}
-					br
-					
-
-					div(ng-if="vm.allLicensesAssigned")
-						md-divider
-						p#accountLicensesBillingPage
-							| To add more licenses please go to the
-							=" "
-							a(href="", ng-click="vm.goToBillingPage()") Billing Page
+						div(ng-if="vm.allLicensesAssigned")
+							md-divider
+							p#accountLicensesBillingPage
+								| To add more licenses please go to the
+								=" "
+								a(href="", ng-click="vm.goToBillingPage()") Billing Page
