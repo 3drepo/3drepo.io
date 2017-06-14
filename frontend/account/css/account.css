@@ -377,6 +377,10 @@ account-licenses .md-subheader .md-subheader-inner {
   padding-left: 0px !important;
 }
 
+account-licenses #accountJobList {
+  padding-top: 20px;
+}
+
 account-licenses #accountJobList #jobIcon md-icon {
   padding-top: 12px;
 }
