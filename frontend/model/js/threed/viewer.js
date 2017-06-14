@@ -190,7 +190,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.handleKeyPresses = function(e) {
-			console.log("Handling key presses?")
+			/*console.log("Handling key presses?")
 			if (e.charCode === "r".charCodeAt(0)) {
 				self.reset();
 				self.setApp(null);
@@ -201,7 +201,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.enableClicking();
 			} else if (e.charCode === "u".charCodeAt(0)) {
 				self.revealAll();
-			}
+			}*/
 		};
 
 		this.init = function(options) {
@@ -1213,11 +1213,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.reset = function() {
-			self.setCurrentViewpoint("model__start");
+/*			self.setCurrentViewpoint("model__start");
 
 			self.changeCollisionDistance(self.collDistance);
 			self.changeAvatarHeight(self.avatarHeight);
-			self.changeStepHeight(self.stepHeight);
+			self.changeStepHeight(self.stepHeight);*/
+			UnityUtil.resetCamera();
 		};
 
 		this.loadModel = function(account, model, branch, revision) {
