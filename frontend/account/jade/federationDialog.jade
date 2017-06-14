@@ -36,14 +36,14 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(layout="row", flex)
 					md-input-container(flex="50")
 						input(
-						placeholder="{{vm.federationData.model || 'Federation name'}} "
+						placeholder="{{vm.federationData.name || 'Federation name'}} "
 						value="{{vm.federationData.name}}"
 						tdr-focus="true"
-						ng-disabled="vm.federationData.model && vm.federationData._isEdit"
-						ng-model="vm.federationData.model"
+						ng-disabled="vm.federationData.name && vm.federationData._isEdit"
+						ng-model="vm.federationData.name"
 						ng-pattern="vm.modelRegExp" 
 						maxlength=20)
-						.inputHint(ng-if="!vm.federationData.model") Letters, numbers, hyphen and underscore only
+						.inputHint(ng-if="!vm.federationData.name") Letters, numbers, hyphen and underscore only
 				
 				div( layout="row", flex)
 					md-input-container(flex="50")
@@ -58,7 +58,7 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 
 				md-divider
 
-				div(ng-if="vm.federationData.model && vm.federationData.unit")
+				div(ng-if="vm.federationData.name && vm.federationData.unit")
 
 					// List
 					div.addFederations(layout="row", flex)
@@ -68,19 +68,19 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 							md-list
 								md-list
 									md-list-item.federationModel(
-									ng-repeat="potentialFedModel in vm.getPotentialFederationModels(vm.isDefaultFederation)"
-									ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
-									style="opacity:{{model.federated ? 0.13 : 1.0}}")
+										ng-repeat="potentialFedModel in vm.getPotentialFederationModels(vm.isDefaultFederation)"
+										ng-if="!vm.isSubModel(vm.federationData, potentialFedModel)"
+										style="opacity:{{model.federated ? 0.13 : 1.0}}")
 
-										md-icon.angular-material-icons dashboard
-										p {{potentialFedModel.model}}
+											md-icon.angular-material-icons dashboard
+											p {{potentialFedModel.name}}
 
-										span(flex)
-										md-button.md-icon-button(
-										aria-label="Add"
-										ng-click="vm.addToFederation($index, vm.federationData.teamspace, vm.getPotentialFederationModels(vm.isDefaultFederation))"
-										)
-											md-icon.angular-material-icons.md-accent add_circle
+											span(flex)
+											md-button.md-icon-button(
+											aria-label="Add"
+											ng-click="vm.addToFederation($index, vm.federationData.teamspace, vm.getPotentialFederationModels(vm.isDefaultFederation))"
+											)
+												md-icon.angular-material-icons.md-accent add_circle
 
 
 						// Divider
@@ -96,7 +96,7 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 									md-list-item.federationModel
 
 										md-icon.angular-material-icons dashboard
-										p {{subModel.model}}
+										p {{subModel.name}}
 										span(flex)
 										md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation(subModel.model)")
 											md-icon.angular-material-icons.md-accent remove_circle

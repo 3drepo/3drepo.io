@@ -119,10 +119,10 @@
 			});
 		}
 
-		var removeFromFederation = function (federation, modelName) {
+		var removeFromFederation = function (federation, modelId) {
 			
 			federation.subModels.forEach(function(submodel, i) {
-				if (submodel.model === modelName) {
+				if (submodel.model === modelId) {
 					federation.subModels.splice(i, 1);
 				}
 			});

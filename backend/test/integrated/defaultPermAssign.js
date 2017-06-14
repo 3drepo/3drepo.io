@@ -82,10 +82,14 @@ describe('Default permission assignment', function () {
 	});
 
 
+	let modelId;
+
 	it('user should be able to create model', function(done){
+
 		agent.post(`/${username}/model1`)
 		.send({unit: 'm'})
 		.expect(200, function(err, res){
+			modelId = res.body.model;
 			done(err);
 		});
 	});
@@ -97,7 +101,7 @@ describe('Default permission assignment', function () {
 			const account = res.body.accounts.find(account => account.account === username);
 			expect(account).to.exist;
 			
-			const model = account.models.find(model => model.model === 'model1');
+			const model = account.models.find(model => model.model === modelId);
 			expect(model).to.exist;
 			expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 			done(err);
@@ -106,7 +110,7 @@ describe('Default permission assignment', function () {
 
 
 	it('the model created should filled with correct permissions (model info)', function(done){
-		agent.get(`/${username}/model1.json`)
+		agent.get(`/${username}/${modelId}.json`)
 		.expect(200, function(err, res){
 			expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 			done(err);

@@ -115,7 +115,8 @@ GET /repoman.json HTTP/1.1
 						"delete_model",
 						"manage_model_permission"
 					],
-					"model": "ufo",
+					"model": "00000000-0000-0000-0000-000000000000",
+					"name": "ufo",
 					"status": "ok",
 					"timestamp": "2016-07-26T15:52:11.000Z"
 				}
@@ -142,7 +143,8 @@ GET /repoman.json HTTP/1.1
 						"upload_files",
 						"create_issue"
 					],
-					"model": "homelab",
+					"model": "00000000-0000-0000-0000-000000000001"
+					"name": "homelab",
 					"status": "ok",
 					"timestamp": null
 				}
@@ -163,17 +165,20 @@ GET /repoman.json HTTP/1.1
 						"delete_model",
 						"manage_model_permission"
 					],
-					"project": "fed1",
+					"model": "00000000-0000-0000-0000-000000000003",
+					"name": "fed1",
 					"status": "ok",
 					"timestamp": "2017-05-11T12:49:59.000Z",
 					"subModels": [
 						{
 							"database": "breakingbad",
-							"model": "homelab"
+							"model": "00000000-0000-0000-0000-000000000001",
+							"name": "homelab"
 						},
 						{
 							"database": "breakingbad",
-							"model": "laundrylab"
+							"model": "00000000-0000-0000-0000-000000000002",
+							"name": "laundrylab"
 						}
 					]
 				}
@@ -191,7 +196,8 @@ GET /repoman.json HTTP/1.1
 								"upload_files",
 								"create_issue"
 							],
-							"model": "laundrylab",
+							"model": "00000000-0000-0000-0000-000000000004"
+							"name": "laundrylab",
 							"status": "ok",
 							"timestamp": null
 						}
@@ -275,7 +281,8 @@ models | list of [model objects](#model-object) belong to this project
 ### Model Object
 Attribute           |  Description                                  | Format
 ------------------- | ----------------------------------------------|----------------------
-model             |  model name                                   |
+model             |  model id                                       | UUID
+name                | model name                                    |
 status              |  upload status                                | ok, processing, failed
 timestamp           |  date last changed                            | ISO 8601
 permissions         |  lise of [model level permissions](#model-level)      |

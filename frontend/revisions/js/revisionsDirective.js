@@ -12,6 +12,7 @@
 				account: "=",
 				model: "=",
 				revision: "=",
+				modelName: "="
 			},
 			controller: revisionsCtrl,
 			controllerAs: 'vm',

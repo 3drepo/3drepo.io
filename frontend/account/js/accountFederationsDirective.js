@@ -228,7 +228,7 @@
 		 */
 		vm.deleteModel = function (federation) {
 
-			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.deleteName);
+			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.modelToDelete.model);
 
 			promise.then(function (response) {
 				if (response.status === 200) {
@@ -298,7 +298,8 @@
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
-			vm.deleteName = model.model;
+			vm.modelToDelete = model;
+			vm.deleteName = model.name;
 			vm.projectToDeleteFrom = project
 			vm.currentAccount = account
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);

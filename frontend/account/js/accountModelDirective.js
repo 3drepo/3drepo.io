@@ -66,6 +66,8 @@
 
 		// Init
 		vm.modelToUpload = null;
+
+		vm.model.displayName = vm.model.name;
 		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 

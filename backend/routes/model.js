@@ -38,7 +38,7 @@ router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
 
 router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:model', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
+router.post('/:modelName', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
 
 //Unity information
 router.get('/:model/revision/master/head/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
@@ -142,7 +142,7 @@ function getModelSetting(req, res, next){
 
 		//setting = setting.toObject();
 		
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subModels'];
+		let whitelist = ['name', 'owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subModels'];
 		let resObj = {};
 
 		whitelist.forEach(key => {
@@ -181,7 +181,7 @@ function createModel(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
-	let model = req.params.model;
+	let modelName = req.params.modelName;
 	let account = req.params.account;
 	let username = req.session.user.username;
 
@@ -202,7 +202,7 @@ function createModel(req, res, next){
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	createAndAssignRole(model, account, username, data).then(data => {
+	createAndAssignRole(modelName, account, username, data).then(data => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

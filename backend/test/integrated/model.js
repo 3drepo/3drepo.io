@@ -38,6 +38,8 @@ describe('Model', function () {
 	let username = 'project_username';
 	let password = 'project_username';
 	let model = 'model12345';
+	let modelId;
+	let modelFed = 'projectFed1';
 	let project = 'projectgroup'
 	let desc = 'desc';
 	let type = 'type';
@@ -80,13 +82,15 @@ describe('Model', function () {
 				agent.post(`/${username}/${model}`)
 				.send({ desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
-					expect(res.body.model).to.equal(model);
+					console.log(res.body);
+					expect(res.body.name).to.equal(model);
+					modelId = res.body.model;
 					callback(err);
 				});
 
 			},
 			callback => {
-				agent.get(`/${username}/${model}.json`)
+				agent.get(`/${username}/${modelId}.json`)
 				.expect(200, function(err, res){
 					expect(res.body.desc).to.equal(desc);
 					expect(res.body.type).to.equal(type);
@@ -108,10 +112,9 @@ describe('Model', function () {
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
 
-					const myModel = pg.models.find(_model => _model.model === model);
-
+					const myModel = pg.models.find(_model => _model.model === modelId);
 					expect(myModel).to.exist;
-					expect(myModel.model).to.equal(model);
+					expect(myModel.name).to.equal(model);
 
 					callback(err);
 				});

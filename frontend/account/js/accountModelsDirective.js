@@ -242,7 +242,7 @@
 				delete vm.federationData._isEdit;
 				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
 			} else {
-				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.name);
 			}
 			
 			promise.then(function (response) {
@@ -257,6 +257,8 @@
 					vm.federationData.federate = true;
 					vm.federationData.timestamp = (new Date()).toString();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
+					vm.federationData.name = response.data.name;
+					vm.federationData.model = response.data.model;
 					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
 
 					// TODO: This should exist - backend problem : ISSUE_371
@@ -288,7 +290,8 @@
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			if (isDefault) {
+			console.log("isDefault", isDefault);
+			if (!isDefault) {
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -314,8 +317,8 @@
 		 *
 		 * @param modelName
 		 */
-		vm.removeFromFederation = function (modelName) {
-			AccountDataService.removeFromFederation(vm.federationData, modelName);
+		vm.removeFromFederation = function (modelId) {
+			AccountDataService.removeFromFederation(vm.federationData, modelId);
 		};
 
 
@@ -331,7 +334,8 @@
 			vm.federationData.subModels.push({
 				database: teamspaceName,
 				modelIndex: modelIndex,
-				model: models[modelIndex].model
+				model: models[modelIndex].model,
+				name: models[modelIndex].name
 			});
 
 			models[modelIndex].federate = true;
@@ -357,6 +361,7 @@
 		 */
 		vm.setupNewFederation = function (event, accounts) {
 
+			vm.isDefaultFederation = false; 
 			vm.federationOriginalData = null;
 			vm.federationData = {
 				desc: "",
@@ -436,7 +441,7 @@
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.name;
+			vm.deleteName = vm.modelToDelete.displayName;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
@@ -589,6 +594,7 @@
 						// Add model to list
 						model = {
 							model: response.data.model,
+							name: response.data.name,
 							project : vm.newModelData.project,
 							permissions: response.data.permissions,
 							canUpload: true,

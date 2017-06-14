@@ -104,7 +104,8 @@
 											save-federation="vm.saveFederation"
 											accounts="vm.accounts")
 
-									p.no-federations(ng-if="!vm.hasFederations(project.models)") No federations created
+										p.no-federations(
+											ng-if="!vm.hasFederations(project.models)") No federations created
 
 
 						// Default - default space models and federations
@@ -167,7 +168,7 @@
 										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
 
-								p.no-federations(ng-if="account.fedModels.length === 0") No default federations
+								p.no-federations(ng-if="account.fedModels.length === 0 && vm.showDefault['feds']") No default federations
 
 md-divider
 
