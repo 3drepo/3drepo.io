@@ -337,7 +337,7 @@ var UnityUtil;
 			params.revID = revision;	
 		
 		UnityUtil.onLoading(); //Initialise the promise
-		toUnity("LoadProject", LoadingState.VIEWER_READY, JSON.stringify(params));
+		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
 			
 		return UnityUtil.onLoaded();
 	}
