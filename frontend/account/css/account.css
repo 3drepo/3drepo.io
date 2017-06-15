@@ -314,6 +314,10 @@ account-billing md-input-container {
   margin-right: 10px;
 }
 
+account-billing .accountBillingSave button {
+  margin-left: 0px;
+}
+
 account-billing .userContent {
   max-height: calc(100vh - 270px) !important;
 }
@@ -352,6 +356,7 @@ account-billing .accountBillingHistoryListItem .md-button {
 account-billing .accountBillingSave img {
   height: 20px;
   margin-top: 17px;
+  margin-left: 5px;
 }
 
 account-billing .accountBillingAddressInfo {
