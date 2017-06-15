@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
+    HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig, $location) {
+    function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig, $location) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -102,7 +102,18 @@
 		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
+		// Check for expired sessions
+		var checkExpiredSessionTime = 60 // Seconds
+		$interval(function() {
 
+			Auth.isLoggedIn().success(function(){
+				//console.log("Logged In");
+			}).error(function(){
+				console.log("User logged out due to expire session");
+				Auth.logout();
+			});
+
+		}, 1000 * checkExpiredSessionTime);
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
