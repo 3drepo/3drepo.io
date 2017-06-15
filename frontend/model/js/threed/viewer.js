@@ -232,7 +232,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				var unitySettings = {
 				 	TOTAL_MEMORY: 2130706432 / 2,
-				    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
+				    errorhandler: UnityUtil.onError,
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",
 				    splashStyle: "Light",
@@ -253,6 +253,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
+				
+				//Shouldn't need this, but for something it is not being recognised from unitySettings!
+				Module.errorhandler = UnityUtil.onError;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
