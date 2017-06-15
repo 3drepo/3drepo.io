@@ -131,6 +131,10 @@
 
 		this.getUsername = function() { return this.username; };
 
+		this.isLoggedIn = function(username) {
+			return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
+		}
+
 		this.login = function(username, password) {
 			self.authPromise = $q.defer();
 
