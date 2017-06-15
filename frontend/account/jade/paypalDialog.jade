@@ -7,7 +7,8 @@ md-dialog#paypalDialog(aria-label="Paypal")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	.userContent
 		.cardInfo
-			p {{vm.payPalInfo}}
+			h4 Unfortunately something went wrong contacting PayPal. 
+			p Details: {{vm.payPalInfo}}
 			br
 			div(ng-switch="vm.changeHelpToShow")
 				p(ng-switch-when="98")
