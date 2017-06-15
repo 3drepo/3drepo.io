@@ -373,6 +373,20 @@ account-licenses .userContent md-input-container {
   width: 80%;
 }
 
+account-licenses .selectJob {
+  margin-left: -10px;
+}
+
+account-licenses .assignButton {
+  margin-bottom: 25px;
+}
+
+account-licenses #errorMessage {
+  font-size: 12px;
+  color: red;
+  margin-bottom: 20px;
+}
+
 account-licenses .md-subheader .md-subheader-inner {
   padding-left: 0px !important;
 }

@@ -30,8 +30,15 @@
 								ng-disabled="vm.allLicensesAssigned"
 								ng-keypress="vm.assignLicense($event)")
 						div(flex="50", layout="column", layout-align="end start")
-							md-button.md-raised.md-accent(ng-click="vm.assignLicense()", ng-disabled="vm.addDisabled") Assign
-							p {{vm.addMessage}}
+							md-button.md-raised.md-accent.assignButton(
+								layout="column"
+								ng-click="vm.assignLicense()"
+								ng-disabled="vm.addDisabled") Assign
+							//div(layout="column")
+								p {{vm.addMessage}}
+
+					p#errorMessage(ng-if="vm.allLicensesAssigned") All licenses have been assigned
+
 
 					md-divider
 
@@ -46,7 +53,7 @@
 								.md-list-item-text(flex="50")
 									p {{license.user}}
 								.md-list-item(flex=25)
-									md-select(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
+									md-select.selectJob(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
 										md-option(value="") Unassign
 										md-option(ng-repeat="job in vm.jobs", value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
 
