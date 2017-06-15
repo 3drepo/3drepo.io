@@ -180,14 +180,15 @@
 				else {
 					vm.closeDialogEnabled = true;
 					vm.changeHelpToShow = response.data.value;
-					vm.payPalInfo = response.data.message;
+					vm.payPalError = "Unfortunately something went wrong contacting PayPal.";
+					vm.payPalInfo = "Details: " + response.data.message;
 				}
 			});
 		};
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
-		};
+		}; 
 
 		/**
 		 * Set up num licenses and price
