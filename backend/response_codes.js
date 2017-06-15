@@ -175,6 +175,7 @@
 		FED_MODEL_IN_OTHER_DB: { message: "Models of federation must reside in the same account", status: 400 },
 		FED_MODEL_IS_A_FED: { message: "Models of federation cannot be a federation", status: 400 },
 		MODEL_IS_NOT_A_FED: { message: "Model is not a federation", status: 400 },
+		MODEL_IS_A_SUBMODEL: { message: "Model cannot be deleted as it is currently a sub model of another federation", status: 400 },
 
 		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB` },
 		INVALID_USERNAME: { message: "Invalid username", status: 400 },
