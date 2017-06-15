@@ -401,7 +401,7 @@
 
 			//do the same for all subModels
 			if(vm.subModels){
-				vm.subModels.forEach(function(submodel){
+				vm.subModels.forEach(function(subModel){
 					var submodel = true;
 					NotificationService.subscribe.newIssues(subModel.database, subModel.model, function(issues){ newIssueListener(issues, submodel) });
 					NotificationService.subscribe.issueChanged(subModel.database, subModel.model, issueChangedListener);

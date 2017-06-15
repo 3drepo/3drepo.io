@@ -390,7 +390,7 @@ function getModelProperties(account, model, branch, rev, username){
 
 		if(subProperties.length > 0)
 		{
-			properties.subProjects = [];
+			properties.subModels = [];
 		}
 		subProperties.forEach(subProperty => {
 			// Model properties hidden nodes
@@ -399,7 +399,7 @@ function getModelProperties(account, model, branch, rev, username){
 
 			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0)
 			{
-				properties.subProjects.push({properties: subProperty.properties, account: subProperty.owner, project: subProperty.project});
+				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
 			}
 		});
 

@@ -1013,12 +1013,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					);
 				}
 
-				if(properties.subProjects)
+				if(properties.subModels)
 				{
-					for(var i = 0; i < properties.subProjects.length; i++)
+					for(var i = 0; i < properties.subModels.length; i++)
 					{
-						var entry = properties.subProjects[i];
-						this.applyModelProperties(entry.account, entry.project, entry.properties);
+						var entry = properties.subModels[i];
+						this.applyModelProperties(entry.account, entry.model, entry.properties);
 					}
 				}
 			}
