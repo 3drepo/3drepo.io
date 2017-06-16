@@ -164,8 +164,8 @@
 			config = {withCredentials: true};
 
 			if (issue.pickedPos !== null) {
-				issue.position = issue.pickedPos.toGL();
-				issue.norm = issue.pickedNorm.toGL();
+				issue.position = issue.pickedPos;
+				issue.norm = issue.pickedNorm;
 			}
 
 			$http.post(url, issue, config)
@@ -272,8 +272,8 @@
 				id: pin.id,
 				account: pin.account,
 				model: pin.model,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours,
 				viewpoint: viewpoint
 			});
@@ -290,8 +290,8 @@
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
-				position: pin.position,
-				norm: pin.norm,
+				pickedPos: pin.position,
+				pickedNorm: pin.norm,
 				colours: colours
 			});
 		};

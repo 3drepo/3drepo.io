@@ -633,34 +633,11 @@
 		};
 
 		var toggleNode = function (node) {
-			var childNodes = {};
-			var pathArr = [];
-			var idx = 0, i = 0;
+			var childNodes = [];
 
 			traverseNodeAndPushId(node, childNodes);
-
-			if (node.toggleState === "invisible")
-			{
-				for(var key in childNodes)
-				{
-					for(var i = 0; i < childNodes[key].length; i++)
-					{
-						vm.invisible[key].add(childNodes[key][i]);
-						vm.visible[key].delete(childNodes[key][i]);
-					}
-				}
-			} else {
-				for(var key in childNodes)
-				{
-					for(var i = 0; i < childNodes[key].length; i++)
-					{
-						vm.visible[key].add(childNodes[key][i]);
-						vm.invisible[key].delete(childNodes[key][i]);
-					}
-				}
-			}
-
-			for (var key in vm.visible){
+			
+			for (var key in childNodes){
 
 				var vals = key.split('@');
 				var account = vals[0];
@@ -671,8 +648,8 @@
 					account: account,
 					model: model,
 					name: node.name,
-					visible_ids: getVisibleArray(account, model),
-					invisible_ids: getInvisibleArray(account, model)
+					visible : node.toggleState != "invisible",
+					ids: childNodes[key]
 				});
 			}
 
@@ -806,7 +783,8 @@
 						source: "tree",
 						account: account,
 						model: model,
-						ids: map[key]
+						ids: map[key],
+						multi: true
 					});
 				}
 			}

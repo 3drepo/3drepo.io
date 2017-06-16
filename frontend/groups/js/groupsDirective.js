@@ -385,13 +385,10 @@
 				data = {
 					source: "tree",
 					account: vm.account,
-					model: vm.model
+					model: vm.model,
+					ids: ids,
+					visible: visible
 				};
-				if (visible) {
-					data.visible_ids = ids;
-				} else {
-					data.invisible_ids = ids;
-				}
 				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, data);
 			}
 		}

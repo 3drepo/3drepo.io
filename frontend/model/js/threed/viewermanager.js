@@ -40,7 +40,7 @@ var ViewerManager = {};
 			}
 		};
 		
-		x3dom.runtime.ready = this.initRuntime;
+		//x3dom.runtime.ready = this.initRuntime;
 	};
 	
 	ViewerManager.prototype.isValidViewerName = function(name) {

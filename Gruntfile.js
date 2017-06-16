@@ -1,5 +1,6 @@
 module.exports = function(grunt) {
-
+    grunt.loadNpmTasks('grunt-webfont');
+    
     grunt.initConfig({
 
         pkg: grunt.file.readJSON('package.json'),
@@ -112,12 +113,12 @@ module.exports = function(grunt) {
 			icons: {
 				src: 'icons/*.svg',
 				dest: 'public/css/fonts',
-				destCss: 'public/css/external'
-			},
-			options: {
-				font: 'three-d-repo',
-				fontFilename: 'three-d-repo',
-				htmlDemo: false
+				destCss: 'public/css/external',
+                options: {
+				    font: 'three-d-repo',
+				    fontFilename: 'three-d-repo',
+				    htmlDemo: false
+			    }
 			}
 		},
 

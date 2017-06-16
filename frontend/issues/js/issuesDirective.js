@@ -401,7 +401,7 @@
 
 			//do the same for all subModels
 			if(vm.subModels){
-				vm.subModels.forEach(function(submodel){
+				vm.subModels.forEach(function(subModel){
 					var submodel = true;
 					NotificationService.subscribe.newIssues(subModel.database, subModel.model, function(issues){ newIssueListener(issues, submodel) });
 					NotificationService.subscribe.issueChanged(subModel.database, subModel.model, issueChangedListener);
@@ -475,9 +475,12 @@
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				deselectPin(vm.selectedIssue._id);
+				// Remove highlight from any multi objects
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
 			if(issue){
+				showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
 					vm.selectedIssue = issue;
 				});
@@ -545,7 +548,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issue._id,
-				colours: pinHighlightColour
+				colours: [pinHighlightColour]
 			});
 
 			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
@@ -556,8 +559,9 @@
 				model: issue.model
 			});
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				model: issue.model
 			});
@@ -570,6 +574,9 @@
 				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
 					var ids = [];
+					if(response.data.objects)
+				{
+
 					response.data.objects.forEach(function(obj){
 
 						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
@@ -583,7 +590,7 @@
 						colour: response.data.colour
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
-				});
+					}});
 			}
 		}
 

@@ -28,7 +28,8 @@
 			scope: {
 				state: "=",
 				query: "=",
-				account: "="
+				account: "=",
+				keysDown: "="
 			},
 			controller: AccountCtrl,
 			controllerAs: "vm",

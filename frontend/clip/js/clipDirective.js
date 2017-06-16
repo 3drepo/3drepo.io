@@ -54,145 +54,75 @@
 		vm.sliderMin = 0;
 		vm.sliderMax = 100;
 		vm.sliderStep = 0.1;
-		vm.distance = 0;
 		vm.displayDistance = 0;
 		vm.sliderPosition = vm.sliderMin;
 		vm.axes = ["X", "Y", "Z"];
-		vm.selectedAxis = "";
 		vm.visible = false;
-		vm.account = null;
-		vm.model = null;
-		vm.normal = null;
-		vm.modelTrans = {};
-		vm.offsetTrans = null;
 		vm.bbox = null;
 		vm.onContentHeightRequest({height: 130});
 		vm.units = "m";
 
-		function initClippingPlane () {
-			$timeout(function () {
-				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
-		
-				if(!vm.normal)
-				{	
-					if(vm.selectedAxis == "")
+
+		function updateClippingPlane()
+		{
+			if(vm.bbox)
+			{
+				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
 					{
-
-						vm.sliderPosition = vm.sliderMin;
-						vm.selectedAxis = "X";
-						calculateDistanceFromSlider(
-							function(){
-								updateClippingPlane(true, true, false, false);	
-							}		
-						);
-					}
-				}
-				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-
-
-				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
-				{
-					axis: translateAxis(vm.selectedAxis),
-					normal: vm.normal,
-					percentage: initPosition,
-					distance: vm.distance,
-					account: vm.account,
-					model: vm.model
-				});
-			});
+						clippingPlanes:[
+							{
+								normal: getNormal(),
+								distance: vm.displayDistance,
+								clipDirection: -1
+							}
+						],
+						fromClipPanel: true
+					});
+			}
 		}
 
-		vm.moveClippingPlane = function () {
-			if(vm.account && vm.model)
+		/**
+		 * Determine axis based on normal provided
+		 * @param normal normal vector
+		 */
+		function determineAxis(normal)
+		{
+			var res = "";
+			if(normal.length === 3)
 			{
-				vm.account = null;
-				vm.model = null;
-				vm.normal = null;
-				initClippingPlane();	
+				if(normal[1] === 0  && normal[2] === 0)
+				{
+					res = "X";
+				}
+				else if(normal[0] === 0 && normal[2] === 0)
+				{
+					res = "Z";
+				}
+				else if(normal[0] === 0 && normal[1] === 0)
+				{
+					res = "Y";
+				}
+			}
+
+			return res;
+		}
+
+		/**
+		 * Initialise display values
+		 * This is called when we know the bounding box of our model
+		 */
+		function setDisplayValues(axis, distance, moveClip, slider)
+		{
+			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
+			vm.displayDistance = distance;
+			vm.displayedAxis = axis;
+			if(slider != null)
+			{
+				vm.sliderPosition = slider;
+				if(moveClip) updateClippingPlane();
 			}
 			else
-			{
-				EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
-				{
-					axis: translateAxis(vm.selectedAxis),
-					distance: vm.distance
-				});
-			}
-		}
-
-		/**
-		 * Determine axis based on vm.normal
-		 * @param {function} callback
-		 */
-		function determineAxis(callback)
-		{
-			//translate the normal and compare it to the axis
-			var normal_x3d = new x3dom.fields.SFVec3f(vm.normal[0], vm.normal[1], vm.normal[2]);
-			var transformedNormal = normal_x3d;
-
-			if(vm.model && vm.account)
-			{
-				var fullModelName = vm.account + "__" + vm.model;
-				if(vm.modelTrans[fullModelName])
-				{
-					transformedNormal = vm.modelTrans[fullModelName].multMatrixVec(normal_x3d);
-					transformedNormal.normalize();
-					vm.normal = transformedNormal.toGL();
-					//Since it's normalized if we only need to check 1 axis
-					if(Math.abs(transformedNormal.x) === 1)
-					{
-						vm.selectedAxis = "X";
-						vm.normal = null;
-					}
-					else if(Math.abs(transformedNormal.y) === 1)
-					{
-						vm.selectedAxis = "Z";
-						vm.normal = null;
-					}
-					else if (Math.abs(transformedNormal.z) ===1)
-					{
-						vm.selectedAxis = "Y";
-						vm.normal = null;
-					}
-
-					var point = normal_x3d.multiply(-vm.distance);
-					point = vm.modelTrans[fullModelName].multMatrixPnt(point);
-					vm.distance = -transformedNormal.dot(point) ;
-					vm.account = null;
-					vm.model = null;
-				}
-			}	
-			callback();
-		}
-
-		/**
-		 * update/create a clipping plane based on the given information
-		 * @param {string} account
-		 * @param {string} model
-		 * @param {array} normal vector
-		 * @param {number} distance from bbox
-		 */
-		function loadClippingPlane(account, model, normal, distance)
-		{
-
-			vm.model = model;
-			vm.account = account;
-			vm.normal = normal;
-			vm.distance = distance;
-
-			determineAxis(
-					function(){
-						updateClippingPlane(true, true, true, false);
-						if(vm.visible)
-						{
-							initClippingPlane(); 
-						}
-						else
-						{
-							vm.visible=true;
-						}
-					}
-			)
+				updateDisplaySlider(false, moveClip);
 		}
 
 		/*
@@ -234,33 +164,12 @@
 			{
 				if (newValue )
 				{
-					initClippingPlane();
+					updateClippingPlane();
 				} else {
 					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
 				}
 			}
 		});
-
-		/**
-		 * Update clipping plane and its display values
-		 * @param {bool} update displayed distance
-		 * @param {bool} update displayed axis
-		 * @param {bool} update slider position
-		 * @param {bool} move the clipping plane
-		 */
-		function updateClippingPlane(updateDdist, updateDaxis, updateSlider, movePlane)
-		{
-		
-			vm.disableWatchDistance = updateDdist;
-			vm.disableWatchSlider = updateSlider;
-			vm.disableWatchAxis = updateDaxis;
-
-			updateDisplayValues( updateDdist, updateDaxis, updateSlider);
-
-			if(movePlane)
-				vm.moveClippingPlane();
-
-		}
 
 		/**
 		 * Returns the normal value based on axis
@@ -269,18 +178,18 @@
 		function getNormal()
 		{
 
-			var normal = [1, 0, 0]; //X axis by default
+			var normal = [-1, 0, 0]; //X axis by default
 			if(vm.normal)
 				normal = vm.normal;
-			else if(vm.selectedAxis)
+			else if(vm.displayedAxis)
 			{
-				if(vm.selectedAxis == "Y")
+				if(vm.displayedAxis == "Y")
 				{
-					normal = [0, 0, 1];
+					normal = [0, 0, 1]; //Unity has flipped Z axis
 				}
-				else if(vm.selectedAxis == "Z")
+				else if(vm.displayedAxis == "Z")
 				{
-					normal = [0, 1, 0];
+					normal = [0, -1, 0];
 				}
 			}
 
@@ -290,149 +199,91 @@
 		}
 
 		/**
-		 * Update display/internal distance base on the internal/display distance
-		 * @param {bool} update display distance if set to true, internal distance otherwise
+		 * Update displayed Distance based on slider position and axis
 		 */
-		function updateDistance(updateDisplayDistance)
+		function updateDisplayedDistance(updateSlider, moveClip)
 		{
-			var normal = getNormal();
-			var normal_x3d = new x3dom.fields.SFVec3f(normal[0], normal[1], normal[2]);
+			var min = 0;
+			var max = 0;
 
-			var distance = null;
-			var trans = null;
-			   
-			if(updateDisplayDistance)
+			if(vm.displayedAxis === "X")
 			{
-				distance = vm.distance;
-				trans = vm.offsetTrans;
+				min = vm.bbox.min[0];
+				max = vm.bbox.max[0];
+			}
+			else if(vm.displayedAxis === "Y")
+			{
+				min = vm.bbox.min[2];
+				max = vm.bbox.max[2];
+			}
+			else if(vm.displayedAxis === "Z")
+			{
+				min = vm.bbox.min[1];
+				max = vm.bbox.max[1];
 			}
 			else
+				return; //unknown axis, nothing would've been set. avoid infinity
+
+			var percentage = 1 - vm.sliderPosition/100;
+			if(!updateSlider)
+				vm.disableWatchDistance = true;
+			vm.displayDistance = min + (Math.abs(max - min) * percentage);
+			if(moveClip)
 			{
-				distance = vm.displayDistance;
-				trans = vm.offsetTrans.inverse();
+				updateClippingPlane();
 			}
-
-
-			var transformedNormal = trans.multMatrixVec(normal_x3d);
-			transformedNormal.normalize();
-
-			var point = normal_x3d.multiply(-distance);
-			point = trans.multMatrixPnt(point);
-
-			return -transformedNormal.dot(point);
-
 		}
-
 
 		/**
 		 * Update display slider based on current internal distance
 		 */
-		function updateDisplaySlider()
+		function updateDisplaySlider(updateDistance, moveClip)
 		{
 			var min = 0;
 			var max = 0;
-			if(vm.selectedAxis === "X")
+			if(vm.displayedAxis === "X")
 			{
-				min = vm.bbox.min.x;
-				max = vm.bbox.max.x;
+				min = vm.bbox.min[0];
+				max = vm.bbox.max[0];
 			}
-			else if(vm.selectedAxis === "Y")
+			else if(vm.displayedAxis === "Y")
 			{
-				min = vm.bbox.min.z;
-				max = vm.bbox.max.z;
+				min = vm.bbox.min[2];
+				max = vm.bbox.max[2];
 			}
-			else if(vm.selectedAxis === "Z")
+			else if(vm.displayedAxis === "Z")
 			{
-				min = vm.bbox.min.y;
-				max = vm.bbox.max.y;
+				min = vm.bbox.min[1];
+				max = vm.bbox.max[1];
 			}
+			else
+				return; //unknown axis, nothing would've been set. avoid infinity
 			
-			var distanceInverted = max - vm.distance + min;
-			var percentage = (distanceInverted - min) / (Math.abs(max - min)/100) ;
-			if(percentage < vm.sliderMin)
-			{
-				percentage = vm.sliderMin;
-			}
-			else if(percentage > vm.sliderMax)
-			{
-				percentage = vm.sliderMax;
-			}
-			vm.sliderPosition = percentage;
+			var percentage = (vm.displayDistance - min) / Math.abs(max-min);
+			if(!updateDistance)
+				vm.disableWatchSlider = true;
 
-		}
+			var value = (1.0 - percentage) * 100;
+			if(percentage > 100 || value < 0) value = 0;
+			if(percentage < 0 || value > 100) value = 100;
+			vm.sliderPosition = value;
 
-		/**
-		 *  Update display axis based on vm.selectedAxis
-		 */
-		function updateAxis()
-		{
-			vm.displayedAxis = vm.selectedAxis;
-		}
-
-		/**
-		 *  Update values displayed on cards
-		 *  @param {bool} update display distance
-		 *  @param {bool} update display axis
-		 *  @param {bool} update slider position
-		 */
-		function updateDisplayValues(changeDistance, changeAxis, changeSlider) {
-			if(changeDistance)
+			if(moveClip)
 			{
-				vm.displayDistance = updateDistance(true);
-			}
-			if(changeSlider)
-			{
-				updateDisplaySlider();
-			}
-			if(changeAxis)
-			{
-				updateAxis();
+				updateClippingPlane();
 			}
 
 		}
-
-		/**
-		 * Calculate distance base on slider position
-		 * @param {function} callback
-		 */
-		function calculateDistanceFromSlider(callback)
-		{
-				var min = 0;
-				var max = 0;
-				if(vm.selectedAxis === "X")
-				{
-					min = vm.bbox.min.x;
-					max = vm.bbox.max.x;
-				}
-				else if(vm.selectedAxis === "Y")
-				{
-					min = vm.bbox.min.z;
-					max = vm.bbox.max.z;
-				}
-				else if(vm.selectedAxis === "Z")
-				{
-					min = vm.bbox.min.y;
-					max = vm.bbox.max.y;
-				}
-				var distanceDisplay = Math.abs(max - min)/100 * vm.sliderPosition + min;
-				vm.distance = max - distanceDisplay + min;
-
-				if(callback)
-				{
-					callback();
-				}
-
-		}
-
 
 		/*
 		 * Change the clipping plane distance
 		 */
 		$scope.$watch("vm.displayDistance", function (newValue) {
-			if (!vm.disableWatchDistance && newValue != "" && angular.isDefined(newValue)) {
-				vm.distance = updateDistance(false);
-				updateClippingPlane(false, false, true, true);
+			if(!vm.disableWatchDistance)
+			{
+				updateDisplaySlider(false, vm.visible);
 			}
+
 			vm.disableWatchDistance = false;
 		});
 
@@ -441,14 +292,11 @@
 		 * Change the clipping plane axis
 		 */
 		$scope.$watch("vm.displayedAxis", function (newValue) {
-			if (!vm.disableWatchAxis  && newValue != "" && angular.isDefined(newValue) && vm.show ) {
-				vm.selectedAxis = newValue;
-				calculateDistanceFromSlider(
-					function(){
-						updateClippingPlane(true, false, false, true);	
-					}
-				);
+			if(!vm.disableWatchAxis)
+			{
+				updateDisplayedDistance(false, vm.visible);
 			}
+
 			vm.disableWatchAxis = false;
 		});
 
@@ -456,39 +304,18 @@
 		 * Watch the slider position
 		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (!vm.disableWatchSlider && vm.selectedAxis != "" && angular.isDefined(newValue) && vm.show) {
-				calculateDistanceFromSlider(
-					function(){
-						updateClippingPlane(true, false, false, true);	
-					}
-				);
-
+			if(!vm.disableWatchSlider)
+			{
+				updateDisplayedDistance(false, vm.visible);
 			}
+
 			vm.disableWatchSlider = false;
 
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					// to avoid firing off multiple initclippingPlane() (vm.visible toggle fires an init)
-					if(!event.value.clippingPlanes[0].normal)
-					{
-						//This is most likely old issue format. 
-						console.error("Trying to set clipping plane with no normal value.");
-
-					}
-					else 
-					{
-						loadClippingPlane(event.value.account, event.value.model, 
-							event.value.clippingPlanes[0].normal,
-						    event.value.clippingPlanes[0].distance);
-
-					}
-				} else {
-					vm.visible = false;
-					vm.sliderPosition = 0.0;
-				}
+			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
+				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
 			}
 			else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO)
 			{
@@ -499,7 +326,7 @@
 			else if(event.type === EventService.EVENT.VIEWER.LOADED)
 			{
 				vm.bbox = event.value.bbox;
-				updateClippingPlane(true, true, true, vm.visible);
+				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
 			}
 			else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY)
 			{
@@ -508,3 +335,4 @@
 		});
 	}
 }());
+

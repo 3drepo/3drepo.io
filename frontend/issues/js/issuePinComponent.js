@@ -76,8 +76,6 @@
 						id: newPinId,
 						account: self.account,
 						model: self.model,
-						position: position.toGL(),
-						norm: normal.toGL(),
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
