@@ -151,7 +151,7 @@
 			traverseNode(node, function(node){
 				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
-					var key = getAccountModelKey(node.account, node.model);
+					var key = getAccountModelKey(node.account, node.project);
 					if(!nodes[key]){
 						nodes[key] = [];
 					}
@@ -186,8 +186,8 @@
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
-			var visible = getVisibleArray(node.account, node.model);
-			var invisible = getInvisibleArray(node.account, node.model);
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
 
 			if (!node.children && ((node.type || "mesh") === "mesh"))
 			{
@@ -766,7 +766,7 @@
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
-					model: node.model,
+					model: node.project,
 					id: node._id,
 					name: node.name
 				});
