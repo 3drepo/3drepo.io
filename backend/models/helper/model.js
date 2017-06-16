@@ -203,6 +203,7 @@ function importToyModel(username){
 	'use strict';
 
 	let modelName = 'sample_project';
+	let model;
 	let account = username;
 	let desc = '';
 	let type = 'sample';
@@ -217,6 +218,7 @@ function importToyModel(username){
 	return createAndAssignRole(modelName, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
+		model = setting._id;
 		return importModel(account, model, username, setting, {type: 'toy' });
 	}).catch(err => {
 
