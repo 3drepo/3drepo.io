@@ -237,7 +237,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
 
-schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
+schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime, skipCheckEmail){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
 
@@ -256,6 +256,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	if(!this.usernameRegExp.test(username)){
 		return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 	}
+
+	for(let i=0 ; i < C.REPO_BLACKLIST_USERNAME.length; i++){
+		if(C.REPO_BLACKLIST_USERNAME[i] === username){
+			return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
+		}
+	}
+
 
 	['firstName', 'lastName', 'email'].forEach(key => {
 		if (customData && customData[key]){
@@ -308,7 +315,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	}
 
 
-	return this.isEmailTaken(customData.email).then(count => {
+	let checkEmail = Promise.resolve(0);
+
+	if(!skipCheckEmail){
+		checkEmail = this.isEmailTaken(customData.email);
+	}
+
+	return checkEmail.then(count => {
 
 		if(count === 0){
 

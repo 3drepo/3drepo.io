@@ -406,7 +406,9 @@
 		"registerVerify",
 		"signUp",
 		"termsAndConditions",
-		"false"
+		"false",
+		"admin",
+		"root"
 	]);
 
 	define("REPO_BLACKLIST_MODEL", [
@@ -416,7 +418,8 @@
 		"password",
 		"subscriptions",
 		"billings",
-		"projects"
+		"projects",
+		"system"
 	]);
 
 

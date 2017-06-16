@@ -26,7 +26,7 @@ DB.getDB('default').then( db => {
 
 					console.log(`Ghost user ${username} not found. Creating...`);
 
-					return User.createUser(systemLogger, username, '', { email: 'support@3drepo.org' }, -1).then(() => {
+					return User.createUser(systemLogger, username, '', { email: 'support@3drepo.org' }, -1, true).then(() => {
 						console.log(`Ghost user ${username} created.`);
 					}).catch(err => {
 						console.log(`Failed to create ghost user ${username}`, err);
@@ -46,7 +46,7 @@ DB.getDB('default').then( db => {
 
 }).catch(err => {
 
-	console.error(err);
+	console.error(err.stack);
 	process.exit(-1);
 
 });
