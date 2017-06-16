@@ -443,4 +443,16 @@ describe('Federated Model', function () {
 			return done(err);
 		});
 	});
+
+	it('should fail to delete a model that is a sub model of another federation', function(done){
+		const model = 'f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40';
+		agent.delete(`/${username}/${model}`)
+		.send({})
+		.expect(400, function(err, res){
+			
+			expect(err).to.be.null;
+			expect(res.body.value).to.equal(responseCodes.MODEL_IS_A_SUBMODEL.value);
+			done();
+		});
+	})
 });

@@ -1009,7 +1009,24 @@ function removeModel(account, model){
 			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
 		}
 
+		return ModelSetting.find({ account, model}, { federate: true });
+
+	}).then(settings => {
+
+		let promises = [];
+
+		settings.forEach(modelSetting => {
+			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
+				if(subModels.find(subModel => subModel.model === model)){
+					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
+				}
+			}));
+		});
+
+		return Promise.all(promises);
+
 	}).then(() => {
+		
 		return ModelFactory.db.db(account).listCollections().toArray();
 
 	}).then(collections => {
