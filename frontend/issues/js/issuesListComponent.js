@@ -371,7 +371,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: pinHighlightColour
+				colours: [pinHighlightColour]
 			};
 			self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
 
@@ -387,10 +387,11 @@
 
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
 				account: issue.account,
 				model: issue.model,
 			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+			self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 
 			// Remove highlight from any multi objects
 			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
@@ -402,19 +403,34 @@
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
+					console.log(response.data);
 					var ids = [];
 					response.data.objects.forEach(function(obj){
-						ids.push(self.treeMap.sharedIdToUid[obj.shared_id]);
+						var key = obj.account + "@" +  obj.model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
+						ids[key].push(self.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
-					data = {
-						source: "tree",
-						account: self.account,
-						model: self.model,
-						ids: ids,
-						colour: response.data.colour
-					};
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					for(var key in ids)
+					{
+
+						var vals = key.split('@');
+						var account = vals[0];
+						var model = vals[1];
+
+						data = {
+							source: "tree",
+							account: account,
+							model: model,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true
+						
+						};
+						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					}
 				});
 			}
 		}

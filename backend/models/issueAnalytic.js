@@ -32,19 +32,21 @@
 
 	module.exports = {
 		
-		groupBy: (account, model, firstField, secondField, sort, format) => {
+		groupBy: (account, project, groups, sort, format) => {
 
 			const collection = ModelFactory.db.db(account).collection(`${model}.issues`);
 
-			let fields = {firstField: getField(firstField)};
+			let fields = {};
 
-			if(secondField){
-				fields.secondField = getField(secondField);
-			}
+			groups.forEach(group => {
+				fields[group] = getField(group);
+			});
+
+			const field = `_id.${groups[0]}`;
 
 			const pipeline = [
 				{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
-				{ '$sort': {'count': sort, '_id.firstField': sort}}
+				{ '$sort': {'count': sort, [field]: sort}}
 			];
 
 			if(!pipeline){
@@ -54,10 +56,14 @@
 			const promise = collection.aggregate(pipeline).toArray();
 
 			if(format === 'csv'){
-				let csvFields = ['_id.firstField'];
-				let csvFieldNames = [firstField];
 
-				secondField && csvFields.push('_id.secondField') && csvFieldNames.push(secondField);
+				let csvFields = [];
+				let csvFieldNames = [];
+
+				groups.forEach(group => {
+					csvFields.push(`_id.${group}`);
+					csvFieldNames.push(group);
+				});
 
 				csvFieldNames.push('count');
 				csvFields.push('count');

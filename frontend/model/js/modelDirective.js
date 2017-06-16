@@ -30,7 +30,8 @@
 				branch:   "=",
 				revision: "=",
 				issueId: "=",
-				state:    "="
+				state:    "=",
+				keysDown: "="
 			},
 			templateUrl: "model.html",
             controller: ModelCtrl,
@@ -55,7 +56,6 @@
 		 * Init
 		 */
 		vm.pointerEvents = "inherit";
-		vm.keysDown = [];
 
 		// Warn when user click refresh
 		var refreshHandler = function (e){
@@ -283,17 +283,7 @@
 
 
 		$timeout(function () {
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {
-				name: "default",
-				account:  vm.account,
-				model:  vm.model,
-				branch:   vm.branch,
-				revision: vm.revision,
-				at:       StateManager.query.at,
-				up:       StateManager.query.up,
-				view:     StateManager.query.view
-			});
-
+			EventService.send(EventService.EVENT.VIEWER.LOAD_MODEL, {account: vm.account, model: vm.model, branch: vm.branch, revision: vm.revision });
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 
@@ -353,39 +343,6 @@
 			}
 		});
 
-		/**
-		 * Keep a list of keys held down
-		 * For changes to be registered by directives and especially components the list needs to be recreated
-		 *
-		 * @param event
-		 */
-		vm.keyAction = function (event) {
-			var i,
-				tmp;
-
-			// Update list, but avoid repeat
-			if (event.type === "keydown") {
-				if (vm.keysDown.indexOf(event.which) === -1) {
-					// Recreate list so that it changes are registered in components
-					tmp = vm.keysDown;
-					delete vm.keysDown;
-					vm.keysDown = angular.copy(tmp);
-					vm.keysDown.push(event.which);
-				}
-			}
-			else if (event.type === "keyup") {
-				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
-					if (vm.keysDown[i] === event.which) {
-						vm.keysDown.splice(i, 1);
-					}
-				}
-				// Recreate list so that it changes are registered in components
-				tmp = vm.keysDown;
-				delete vm.keysDown;
-				vm.keysDown = angular.copy(tmp);
-			}
-		};
 
 		/**
 		 * Get the current multi selection

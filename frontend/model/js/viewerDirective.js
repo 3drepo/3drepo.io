@@ -135,7 +135,7 @@
 
 			v.collision  = new Collision(v.viewer);
 
-			$scope.reload();
+			//$scope.reload();
 
 			v.loaded.promise.then(function() {
 				// TODO: Move this so that the attachment is contained
@@ -147,15 +147,6 @@
 				v.gamepad.init();
 
 				v.collision  = new Collision(v.viewer);
-
-				v.branch = "master";
-				v.revision = "head";
-
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.model + "/revision/" + v.branch + "/" + v.revision + "/modelProperties.json")).success(
-				function (json, status)
-				{
-					v.viewer.applyModelProperties(v.account, v.model, json);
-				});
 			});
 
 			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.model + ".json")).success(
@@ -168,6 +159,29 @@
 			// });
 
 		};
+
+		function fetchModelProperties(account, model, branch, revision)
+		{
+
+			if(!branch)
+			{
+				if(!revision)
+					branch = "master";
+				else
+					branch = "";
+			}
+					
+
+			if(!revision)
+				revision = "head";
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json")).success(
+			function (json, status)
+			{
+				if(json.properties)
+					v.viewer.applyModelProperties(account, model, json.properties);
+			});
+
+		}
 
 		$scope.enterVR = function() {
 			v.loaded.promise.then(function() {
@@ -184,8 +198,15 @@
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					v.initialised.resolve();
+					fetchModelProperties(v.account, v.model, v.branch, v.revision);	
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
 					v.loaded.resolve();
+				} else if (event.type === EventService.EVENT.VIEWER.LOAD_MODEL) {
+					v.account = event.value.account;
+					v.model = event.value.model;
+					v.branch = event.value.branch;
+					v.revision = event.value.revision;
+					v.viewer.loadModel(event.value.account, event.value.model, event.value.branch, event.value.revision);
 				} else {
 					v.initialised.promise.then(function() {
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
@@ -201,7 +222,6 @@
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.model === v.model)
 							{
-								console.log('viewer model settings ready');
 								v.viewer.updateSettings(event.value.settings);
 								v.mapTile && v.mapTile.updateSettings(event.value.settings);
 							}
@@ -211,8 +231,8 @@
 								event.value.account,
 								event.value.model,
 								event.value.id,
-								event.value.position,
-								event.value.norm,
+								event.value.pickedPos,
+								event.value.pickedNorm,
 								event.value.colours,
 								event.value.viewpoint);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
@@ -230,18 +250,17 @@
 							v.viewer.setPinVisibility(event.value.id, event.value.visibility);
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
-						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
-							v.viewer.addClippingPlane(
-								event.value.axis,
-								event.value.normal,
-								event.value.distance ? event.value.distance : 0,
-								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1,
-								event.value.account, event.value.model);
-						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.distance);
-						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_AXIS_CLIPPING_PLANE) {
-							v.viewer.moveClippingPlane(event.value.axis, event.value.percentage);
+
+						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES) {
+							v.viewer.updateClippingPlanes(
+								event.value.clippingPlanes, event.value.fromClipPanel,
+								event.value.account, event.value.model);							
+						} else if ((event.type === EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS)) {
+							v.viewer.getObjectsStatus(
+								event.value.account,
+								event.value.model,
+								event.value.promise
+							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -256,7 +275,8 @@
 								event.value.model,
 								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
-								event.value.colour
+								event.value.colour,
+								event.value.multi
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
 							v.viewer.highlightAndUnhighlightObjects(
@@ -267,14 +287,14 @@
 								event.value.zoom,
 								event.value.colour
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+						}  else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
 							v.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.model,
-								event.value.visible_ids,
-								event.value.invisible_ids
+								event.value.ids,
+								event.value.visible
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 							v.viewer.setCamera(
@@ -289,11 +309,11 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model));
+								v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.manager.getCurrentViewer().runtime.getScreenshot());
+								v.manager.getCurrentViewer().getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);

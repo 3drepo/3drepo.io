@@ -40,6 +40,11 @@ router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, update
 
 router.post('/:modelName', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
 
+//Unity information
+router.get('/:model/revision/master/head/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
+router.get('/:model/revision/:rev/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
+router.get('/:model/:uid.unity3d', middlewares.hasReadAccessToModel, getUnityBundle);
+
 //update federated model
 router.put('/:model', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
@@ -460,6 +465,44 @@ function getUserJobForModel(req, res, next){
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
+
+function getUnityAssets(req, res, next){
+	'use strict';
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ModelHelpers.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getUnityBundle(req, res, next){
+	'use strict';
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let id = req.params.uid;
+	let username = req.session.user.username;
+
+
+	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
+		req.params.format= 'unity3d';
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
+	});
+}
+
+
 
 module.exports = router;
 

@@ -22,7 +22,7 @@ var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
 	onLoaded, onError, runtimeReady;
 
-x3dom.runtime.ready = runtimeReady;
+//x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 var Viewer = {};
@@ -190,6 +190,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.handleKeyPresses = function(e) {
+			/*console.log("Handling key presses?")
 			if (e.charCode === "r".charCodeAt(0)) {
 				self.reset();
 				self.setApp(null);
@@ -200,7 +201,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.enableClicking();
 			} else if (e.charCode === "u".charCodeAt(0)) {
 				self.revealAll();
-			}
+			}*/
 		};
 
 		this.init = function(options) {
@@ -209,33 +210,59 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// Set option param from viewerDirective
 				self.options = options;
 
-				// If we have a viewer manager then it
-				// will take care of initializing the runtime
-				// else we'll do it ourselves
-				x3dom.runtime.ready = self.initRuntime;
+				self.viewer = document.createElement("div");
+				var canvas = document.createElement("canvas");
+				canvas.className = "emscripten";
+				canvas.setAttribute("id", "canvas");
+				canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
+				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+				canvas.setAttribute("height", "600px");
+				canvas.setAttribute("width", "960px");
+				canvas.onmousedown = function(){
+					return false;
+				};
+				//canvas.addEventListener("mousedown", onMouseDown);
+				canvas.addEventListener("mouseup",  onMouseUp);
+				canvas.addEventListener("mousemove",  onMouseMove);
 
-				//self.addLogo();
+				canvas.style["pointer-events"] = "all";
+				
+				var canvasScript = document.createElement("script");
+				canvasScript.setAttribute("type", "text/javascript");
 
-				// Set up the DOM elements
-				self.viewer = document.createElement("x3d");
-				self.viewer.setAttribute("id", self.name);
-				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
-				self.viewer.setAttribute("keysEnabled", "true");
-				self.viewer.setAttribute("disableTouch", "true");
-				self.viewer.addEventListener("mousedown", onMouseDown);
-				self.viewer.addEventListener("mouseup",  onMouseUp);
-				self.viewer.addEventListener("mousemove",  onMouseMove);
-				self.viewer.style["pointer-events"] = "all";
+				var unitySettings = {
+				 	TOTAL_MEMORY: 2130706432 / 2,
+				    errorhandler: UnityUtil.onError,
+				    compatibilitycheck: null,
+				    backgroundColor: "#222C36",
+				    splashStyle: "Light",
+				    dataUrl: "public/unity/Release/unity.data",
+				    codeUrl: "public/unity/Release/unity.js",
+				    asmUrl: "public/unity/Release/unity.asm.js",
+				    memUrl: "public/unity/Release/unity.mem"
+				};
+				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
+				canvasScript.appendChild(moduleSettings);
+				var canvasScript2 = document.createElement("script");
+				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
+								
+
+				self.viewer.appendChild(canvas);
+				self.viewer.appendChild(canvasScript);
+				self.viewer.appendChild(canvasScript2);
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
+				
+				//Shouldn't need this, but for something it is not being recognised from unitySettings!
+				Module.errorhandler = UnityUtil.onError;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
 				//self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
-				self.pinShader = new PinShader(self.scene);
+				//self.pinShader = new PinShader(self.scene);
 
 				self.bground = null;
 				self.currentNavMode = null;
@@ -255,10 +282,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.createViewpoint(self.name + "_default");
 
-				self.nav = document.createElement("navigationInfo");
-				self.nav.setAttribute("headlight", "false");
-				self.setNavMode(self.defaultNavMode);
-				self.scene.appendChild(self.nav);
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
@@ -278,30 +301,26 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
 				});
 
-				callback(self.EVENT.READY, {
-					name: self.name,
-					model: self.modelString
-				});
+				UnityUtil.pickPointCallback = self.pickPointEvent;
+				UnityUtil.objectSelectedCallback = self.objectSelected;
+				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
+				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
+				self.setNavMode(self.defaultNavMode);
+				UnityUtil.onReady().then(
+						function()
+						{
+							callback(self.EVENT.READY, {
+								name: self.name,
+								model: self.modelString
+							});
+													   
+						}
+					);
 			}
 		};
 
 		this.destroy = function() {
-			if (self.currentViewpoint) {
-				self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
-			}
-			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
-
-			//self.removeLogo();
-
-			//self.viewer.removeEventListener("mousedown", onMouseDown);
-			//self.viewer.removeEventListener("mouseup", onMouseUp);
-			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
-
-			self.viewer.parentNode.removeChild(self.viewer);
-
-			ViewerUtil.offEventAll();
-
-			self.viewer = undefined;
+			UnityUtil.reset();
 		};
 
 		ViewerUtil.onEvent("onError", function(objEvent) {
@@ -393,44 +412,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 
 			if (!self.downloadsLeft) {
-				callback(self.EVENT.LOADED, {
-					bbox : {
-						min: self.getScene()._x3domNode.getVolume().min,
-						max: self.getScene()._x3domNode.getVolume().max
-					}
-				});
+
 			}
 		});
 
-		// This is called when the X3DOM runtime is initialized
-		// member of x3dom.runtime instance
-		this.initRuntime = function() {
-
-			if (this.doc.id === self.name) {
-				self.runtime = this;
-
-				callback(self.EVENT.RUNTIME_READY, {
-					name: self.name
-				});
-			}
-
-			self.runtime.enterFrame = function () {
-					if (self.gyroOrientation)
-					{
-							self.gyroscope(
-									self.gyroOrientation.alpha,
-									self.gyroOrientation.beta,
-									self.gyroOrientation.gamma
-							);
-					}
-			};
-
-			self.showAll = function() {
-				self.runtime.fitAll();
-
-				// TODO: This is a hack to get around a bug in X3DOM
-				self.getViewArea()._flyMat = null;
-			};
+		this.showAll = function() {
+			UnityUtil.resetCamera();
 		};
 
 		this.setAmbientLight = function(lightDescription) {
@@ -603,6 +590,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea().getProjectionMatrix();
 		};
 
+		this.getScreenshot = function(promise)
+		{
+			UnityUtil.requestScreenShot(promise);
+
+		}
+
 		this.onMouseUp = function(functionToBind) {
 			ViewerUtil.onEvent("onMouseUp", functionToBind);
 		};
@@ -640,56 +633,55 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			}
 		};
 
-		this.mouseDownPickPoint = function(event)
+		this.pickPointEvent = function(pointInfo)
 		{
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
 
-			if (pickingInfo.pickObj)
+
+			//User clicked a mesh
+			callback(self.EVENT.PICK_POINT, {
+				id: pointInfo.id,
+				position: pointInfo.position,
+				normal: pointInfo.normal,
+				screenPos: pointInfo.mousePos
+			});
+		};
+
+		this.objectSelected = function(pointInfo)
+		{
+			if(!self.selectionDisabled && !self.pinDropMode)
 			{
-				var account, model;
-				var modelParts = null;
-
-				if (pickingInfo.pickObj._xmlNode)
+				if(pointInfo.id)
 				{
-					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
+					if(pointInfo.pin)
 					{
-						modelParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+						//User clicked a pin
+						callback(self.EVENT.CLICK_PIN,
+							{id: pointInfo.id});
+
 					}
-				} else {
-					modelParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-				}
-
-				if (modelParts)
+					else
+					{
+						callback(self.EVENT.OBJECT_SELECTED, {
+							account: pointInfo.database,
+							model: pointInfo.model,
+							id: pointInfo.id,
+							source: "viewer"						
+						});
+					}
+				}				
+				else
 				{
-					var objectID = pickingInfo.pickObj.partID ?
-						pickingInfo.pickObj.partID :
-						modelParts[2];
-
-					account = modelParts[0];
-					model = modelParts[1];
-
-                    //console.trace(event);
-
-					callback(self.EVENT.PICK_POINT, {
-						id: objectID,
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.model),
-						screenPos: [event.layerX, event.layerY]
-					});
-				} else {
-
-					callback(self.EVENT.PICK_POINT, {
-						position: pickingInfo.pickPos,
-						normal: pickingInfo.pickNorm,
-						trans: self.getParentTransformation(self.account, self.model)
-					});
+					//User clicked the background
+					callback(self.EVENT.BACKGROUND_SELECTED);
 				}
 			}
 		};
 
-		this.onMouseDown(this.mouseDownPickPoint);
+		this.mouseDownPickPoint = function(event)
+		{
+			UnityUtil.getPointInfo();
+		};
+
 
 		/*
 		this.mouseMovePoint = function (event) {
@@ -737,260 +729,27 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (!Array.isArray(part)) {
-				part = [part];
-			}
-
-			if (zoom) {
-				for (i = 0; i < part.length; i++) {
-					part[i].fit();
-				}
-			}
-
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
-				}
-			}
-
-			self.oldPart = part;
-
-			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(colour, "both");
-			}
-		};
-
-		/**
-		 * This is copied from selectParts()
-		 * @param highlightPart
-		 * @param unhighlightPart
-		 * @param zoom
-		 * @param colour
-		 */
-		this.selectAndUnselectParts = function(highlightPart, unhighlightPart, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
-			if (zoom) {
-				for (i = 0; i < highlightPart.length; i++) {
-					highlightPart[i].fit();
-				}
-				for (i = 0; i < unhighlightPart.length; i++) {
-					unhighlightPart[i].fit();
-				}
-			}
-
-			for (i = 0; i < highlightPart.length; i++) {
-				highlightPart[i].setEmissiveColor(colour, "both");
-			}
-
-			for (i = 0; i < unhighlightPart.length; i++) {
-				unhighlightPart[i].resetColor();
-			}
-
-			self.oldPart = highlightPart;
-		};
-
 		this.lastMultipart = null;
 
-		this.clickObject = function(objEvent) {
-			var account = null;
-			var model = null;
-			var id = null;
-
-			if ((objEvent.button === 1) && !self.selectionDisabled) {
-				if (objEvent.partID) {
-					id = objEvent.partID;
-
-					account = objEvent.part.multiPart._nameSpace.name.split("__")[0];
-					model = objEvent.part.multiPart._nameSpace.name.split("__")[1];
-
-				}
-			}
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: account,
-				model: model,
-				id: id,
-				source: "viewer"
-			});
-		};
-
-		this.highlightObjects = function(account, model, ids_in, zoom, colour) {
+		this.highlightObjects = function(account, model, ids_in, zoom, colour, multiOverride) {
 			if (!this.pinDropMode) {
-				var nameSpaceName = null;
-
-				// If we pass in a single id, then we might be selecting
-				// an old-style Group in X3DOM rather than multipart.
-				ids_in = ids_in || [];
-				ids_in = Array.isArray(ids_in) ? ids_in: [ids_in];
 				var ids = new Set(ids_in);
 
 				if(ids.size)
 				{
-					// Is this a multipart model
-					if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
-						var fullPartsList = [];
-						var nsMultipartNodes;
-
-						// If account and model have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									fullPartsList.push(parts);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-
-						self.selectParts(fullPartsList, zoom, colour);
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							self.setApp(object[0], colour);
-						}
-					});
+					UnityUtil.highlightObjects(account, model, Array.from(ids), colour, multiOverride || this.multiSelectMode);
 				} else {
-					self.highlightAndUnhighlightObjects([]);
-					self.setApp(null);
+					UnityUtil.clearHighlights();
 				}
-			}
-		};
-
-		/**
-		 * This is copied from highlightObjects()
-		 * @param highlight_ids
-		 * @param unhighlight_ids
-		 * @param zoom
-		 * @param colour
-		 */
-		this.highlightAndUnhighlightObjects = function(highlight_ids, unhighlight_ids, zoom, colour) {
-			var nameSpaceName = null;
-
-			// Is this a multipart model
-			if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
-				var fullHighlightPartsList = [];
-				var fullUnhighlightPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and model have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var highlightParts = nsMultipartNodes[multipartNodeName].getParts(highlight_ids);
-						if (highlightParts && highlightParts.ids.length > 0) {
-							fullHighlightPartsList.push(highlightParts);
-						}
-
-						var unhighlightParts = nsMultipartNodes[multipartNodeName].getParts(unhighlight_ids);
-						if (unhighlightParts && unhighlightParts.ids.length > 0) {
-							fullUnhighlightPartsList.push(unhighlightParts);
-						}
-					}
-				}
-
-				self.selectAndUnselectParts(fullHighlightPartsList, fullUnhighlightPartsList, zoom, colour);
-
 			}
 		};
 
 		//this.switchedOldParts = [];
 		//this.switchedObjects = [];
 
-		this.__processSwitchVisibility = function(nameSpaceName, ids_in, state)
+		this.switchObjectVisibility = function(account, model, ids, visibility)
 		{
-			if (ids_in) {
-				var ids = new Set(ids_in); // Convert to Set if necessary
-
-				if (ids.size) {
-					// Is this a multipart model
-					if (!nameSpaceName || self.multipartNodesByModel.hasOwnProperty(nameSpaceName)) {
-						var nsMultipartNodes;
-
-						// If account and model have been specified
-						// this helps narrow the search
-						if (nameSpaceName) {
-							nsMultipartNodes = self.multipartNodesByModel[nameSpaceName];
-						} else {
-							// Otherwise iterate over everything
-							nsMultipartNodes = self.multipartNodes;
-						}
-
-						for (var multipartNodeName in nsMultipartNodes) {
-							if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-								var mp = nsMultipartNodes[multipartNodeName];
-								var parts = mp.getParts(Array.from(ids));
-
-								if (parts && parts.ids.length > 0) {
-									parts.setVisibility(state);
-
-									for(var i = 0; i < parts.ids.length; i++)
-									{
-										ids.delete(mp._x3domNode._idMap.mapping[parts.ids[i]].name);
-									}
-								}
-							}
-						}
-					}
-
-					ids.forEach(function(id) {
-						var object = document.querySelectorAll("[id$='" + id + "']");
-
-						if (object[0]) {
-							object[0].setAttribute("render", state.toString());
-						}
-					});
-				}
-			}
-		};
-
-		this.switchObjectVisibility = function(account, model, visible_ids, invisible_ids) {
-			var nameSpaceName = null;
-
-			if (account && model) {
-				nameSpaceName = account + "__" + model;
-			}
-
-			if (visible_ids)
-			{
-				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
-			}
-
-			if (invisible_ids)
-			{
-				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
-			}
+			UnityUtil.toggleVisibility(account, model, ids, visibility);
 		};
 
 		ViewerUtil.onEvent("pinClick", function(clickInfo) {
@@ -1002,7 +761,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		});
 
 		ViewerUtil.onEvent("onMouseDown", function() {
-			document.body.style["pointer-events"] = "none";
+			return false;
+			//document.body.style["pointer-events"] = "none";
 		});
 
 		ViewerUtil.onEvent("onMouseUp", function() {
@@ -1048,6 +808,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				setTimeout(self.flyThroughTick, self.flyThroughTime);
 			}
 		};
+
+		this.getObjectsStatus = function(account, model, promise){
+			UnityUtil.getObjectsStatus(account, model, promise);
+		}
+
 
 		this.getViewpointGroupAndName = function(id) {
 			var splitID = id.trim().split("__");
@@ -1239,16 +1004,25 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.applyModelProperties = function(account, model, properties)
 		{
-			if (properties.properties)
+			if (properties)
 			{
-				if (properties.properties.hiddenNodes)
+				if (properties.hiddenNodes && properties.hiddenNodes.length > 0)
 				{
 					self.switchObjectVisibility(
-						null,
-						null,
-						null,
-						properties.properties.hiddenNodes
+						account,
+						model,
+						properties.hiddenNodes,
+						false
 					);
+				}
+
+				if(properties.subModels)
+				{
+					for(var i = 0; i < properties.subModels.length; i++)
+					{
+						var entry = properties.subModels[i];
+						this.applyModelProperties(entry.account, entry.model, entry.properties);
+					}
 				}
 			}
 		}
@@ -1332,74 +1106,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.oneGrpNodes = [];
 		this.twoGrpNodes = [];
 
-		this.setApp = function(group, app) {
-			if (!group || !group.multipart) {
-				if (app === undefined) {
-					app = self.SELECT_COLOUR.EMISSIVE;
-				}
-
-				self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-				self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
-
-				// TODO: Make this more efficient
-				self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
-				self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
-
-				if (group) {
-					self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-					self.oneGrpNodes = group.getElementsByTagName("Material");
-				} else {
-					self.oneGrpNodes = [];
-					self.twoGrpNodes = [];
-				}
-
-				self.applyApp(self.oneGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, false);
-				self.applyApp(self.twoGrpNodes, 0.5, app, true);
-
-				self.viewer.render();
-			}
-		};
-
 		this.setNavMode = function(mode, force) {
 			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
-				self.setSpeed(self.speed);
-
-				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
-					waypoint.init();
-				}
-
-				if (self.currentNavMode === self.NAV_MODES.WAYFINDER) { // Exiting the wayfinding mode
-					waypoint.close();
-				}
-
-				if (mode === self.NAV_MODES.HELICOPTER) {
-					var vpInfo = self.getCurrentViewpointInfo();
-					var eye = vpInfo.position;
-					var viewDir = vpInfo.view_dir;
-
-					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
-					self.nav._x3domNode._vf.typeParams[1] = eye[1];
-
-					var bboxMax = self.getScene()._x3domNode.getVolume().max;
-					var bboxMin = self.getScene()._x3domNode.getVolume().min;
-					var bboxSize = bboxMax.subtract(bboxMin);
-
-					// 10 m/s
-					var calculatedSpeed = Math.max.apply(Math, bboxSize.toGL()) / 5;//Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * self.convertToM;
-
-					self.nav.setAttribute("speed", calculatedSpeed);
-				}
-
 				self.currentNavMode = mode;
-				self.nav.setAttribute("type", mode);
+				UnityUtil.setNavigation(mode);
 
 				if (mode === self.NAV_MODES.WALK) {
 					self.disableClicking();
-					self.setApp(null);
 				}
 				/*else if (mode == "HELICOPTER") {
 					self.disableSelecting();
@@ -1408,18 +1123,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.enableClicking();
 				}
 
-				if ((mode === self.NAV_MODES.WAYFINDER) && waypoint) {
-					waypoint.resetViewer();
-				}
-
-				if (mode === self.NAV_MODES.TURNTABLE) {
-					self.nav.setAttribute("typeParams", "-0.4 60.0 0 3.14 0.00001");
-				}
 			}
 		};
 
 		this.reload = function() {
-			x3dom.reload();
+			//x3dom.reload();
 		};
 
 		this.startingPoint = [0.0, 0.0, 0.0];
@@ -1463,96 +1171,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model);
 		};
 
+
 		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
-			var origViewTrans = null;
-			if(account && model)
-			{
-					origViewTrans = self.getParentTransformation(account, model);
-
-			}
-
-			if (!viewDir)
-			{
-				viewDir = self.getCurrentViewpointInfo().view_dir;
-			}
-
-			if (!up)
-			{
-				up = self.getCurrentViewpointInfo().up;
-			}
-			up = ViewerUtil.normalize(up);
-
-			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
-			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
-			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				x3domUp = origViewTrans.multMatrixVec(x3domUp);
-				x3domView = origViewTrans.multMatrixVec(x3domView);
-				x3domFrom = origViewTrans.multMatrixPnt(x3domFrom);
-
-			}
-
-			var x3domAt   = x3domFrom.add(x3domView.normalize());
-
-			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
-
-			var currViewpointNode = self.getCurrentViewpoint();
-			var currViewpoint = currViewpointNode._x3domNode;
-
-			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
-				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
-				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
-			}
-
-			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
-
-			if (!animate && rollerCoasterMode)
-			{
-				self.rollerCoasterMatrix = viewMatrix;
-			} else {
-				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
-			}
-
-			var x3domCenter = null;
-
-			if (!centerOfRotation)
-			{
-				var canvasWidth  = self.getViewArea()._doc.canvas.width;
-				var canvasHeight = self.getViewArea()._doc.canvas.height;
-
-				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-				if (self.pickObject.pickPos)
-				{
-					x3domCenter = self.pickObject.pickPos;
-				} else {
-					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
-					var bbox = self.getScene()._x3domNode.getVolume();
-					if(ry.intersect(bbox.min, bbox.max))
-					{
-						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
-					} else {
-						x3domCenter = x3domAt;
-					}
-				}
-			} else {
-				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
-			}
-
-			if (animate) {
-				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
-				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
-			}
-
-			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
-
-			self.setNavMode(self.currentNavMode);
-			self.getViewArea()._doc.needRender = true;
-			if (self.linked) {
-				self.manager.switchMaster(self.handle);
-			}
+			UnityUtil.setViewpoint(pos, up, viewDir, account, model);
 		};
 
 		this.linked = false;
@@ -1595,58 +1216,28 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.reset = function() {
-			self.setCurrentViewpoint("model__start");
+/*			self.setCurrentViewpoint("model__start");
 
 			self.changeCollisionDistance(self.collDistance);
 			self.changeAvatarHeight(self.avatarHeight);
-			self.changeStepHeight(self.stepHeight);
+			self.changeStepHeight(self.stepHeight);*/
+			UnityUtil.resetCamera();
 		};
 
 		this.loadModel = function(account, model, branch, revision) {
-			var url = "";
-
-			if (revision === "head") {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + model + "/revision/" + branch + "/head.x3d.mp");
-			} else {
-				url = server_config.apiUrl(server_config.GET_API, account + "/" + model + "/revision/" + revision + ".x3d.mp");
-			}
-
 			self.account = account;
 			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
+			UnityUtil.loadModel(self.account, self.model,
+							self.branch, self.revision).then(
+				function(bbox)
+				{
+					callback(self.EVENT.LOADED, bbox);
+				}
+			);
+			callback(self.EVENT.START_LOADING);
 
-			self.modelString = account + "_" + model + "_" + branch + "_" + revision;
-
-			self.loadURL(url);
-		};
-
-		this.loadURL = function(url) {
-			if (self.inline) {
-				self.inline.parentNode.removeChild(self.inline);
-				self.inline = null; // Garbage collect
-			}
-
-			self.inline = document.createElement("inline");
-			self.scene.appendChild(self.inline);
-
-			if (self.account && self.model) {
-				self.rootName = self.account + "__" + self.model;
-			} else {
-				self.rootName = "model";
-			}
-
-			self.inline.setAttribute("namespacename", self.rootName);
-			self.inline.setAttribute("onload", "onLoaded(event);");
-			//self.inline.setAttribute("onerror", "onError(event);");
-			self.inline.setAttribute("url", url);
-			self.reload();
-
-			self.url = url;
-
-			callback(self.EVENT.START_LOADING, {
-				name: self.name
-			});
 		};
 
 		this.getRoot = function() {
@@ -1661,83 +1252,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			return self.getViewArea()._scene.getViewpoint()._xmlNode;
 		};
 
-		this.getCurrentViewpointInfo = function(account, model) {
-			var viewPoint = {};
-
-			var origViewTrans = null;
-
-			if(account && model)
-			{
-				origViewTrans = self.getParentTransformation(account, model);
-
-			}
-
-			var viewMat = self.getViewMatrix().inverse();
-
-			var viewRight = viewMat.e0();
-			var viewUp = viewMat.e1();
-			var viewDir = viewMat.e2(); // Because OpenGL points out of screen
-			var viewPos = viewMat.e3();
-
-			var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
-
-			var lookAt = null;
-
-			if (center) {
-				lookAt = center.subtract(viewPos);
-			} else {
-				lookAt = viewPos.add(viewDir.multiply(-1));
-			}
-
-			var projMat = self.getProjectionMatrix();
-
-			//transform the vectors to the right space if TransformMatrix is present.
-			if(origViewTrans)
-			{
-				var transInv = origViewTrans.inverse();
-				viewRight = transInv.multMatrixVec(viewRight);
-				viewUp = transInv.multMatrixVec(viewUp);
-				viewDir = transInv.multMatrixVec(viewDir);
-				viewPos = transInv.multMatrixPnt(viewPos);
-				lookAt = transInv.multMatrixVec(lookAt);
-
-			}
-
-			viewDir= viewDir.multiply(-1);
-
-			// More viewing direction than lookAt to sync with Assimp
-			viewPoint.up = [viewUp.x, viewUp.y, viewUp.z];
-			viewPoint.position = [viewPos.x, viewPos.y, viewPos.z];
-			viewPoint.look_at = [lookAt.x, lookAt.y, lookAt.z];
-			viewPoint.view_dir = [viewDir.x, viewDir.y, viewDir.z];
-			viewPoint.right = [viewRight.x, viewRight.y, viewRight.z];
-			viewPoint.unityHeight = 2.0 / projMat._00;
-			viewPoint.fov = Math.atan((1 / projMat._00)) * 2.0;
-			viewPoint.aspect_ratio = viewPoint.fov / projMat._11;
-
-
-			var f = projMat._23 / (projMat._22 + 1);
-			var n = (f * projMat._23) / (projMat._23 - 2 * f);
-
-			viewPoint.far = f;
-			viewPoint.near = n;
-
-			viewPoint.clippingPlanes = [];
-
-			if(origViewTrans)
-			{
-				for(var i = 0; i < self.clippingPlanes.length; ++i)
-				{
-					viewPoint.clippingPlanes.push(self.clippingPlanes[i].getProperties(origViewTrans.inverse()));
-				}
-			}
-			else
-			{
-				viewPoint.clippingPlanes = self.clippingPlanes;
-			}
-
-
-			return viewPoint;
+		this.getCurrentViewpointInfo = function(account, model, promise) {
+			UnityUtil.requestViewpoint(account, model, promise);
 		};
 
 		this.speed = 2.0;
@@ -1905,9 +1421,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setMultiSelectMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.multiSelectMode = on;
-			element.style.cursor =  on ? "copy" : "-webkit-grab";
+			//element.style.cursor =  on ? "copy" : "-webkit-grab";
 		};
 
 		/**
@@ -1915,93 +1431,54 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * @param on
 		 */
 		this.setPinDropMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
+			//var element = document.getElementById("x3dom-default-canvas");
 			this.pinDropMode = on;
-			element.style.cursor = on ? "crosshair" : "-webkit-grab";
+			//element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};
 
 		/****************************************************************************
 		 * Clipping planes
 		 ****************************************************************************/
 
-		var clippingPlaneID = -1;
-		this.clippingPlanes = [];
+		/*
+		 * NOTE: Clipping planes are now all managed by unity use broadcast events to retrieve its info
+		 */
 
-		this.setClippingPlanes = function(clippingPlanes) {
-			self.clearClippingPlanes();
-
-			for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
-				var clipPlaneIDX = self.addClippingPlane(
-					clippingPlanes[clipidx].axis,
-					clippingPlanes[clipidx].normal,
-					clippingPlanes[clipidx].distance,
-					clippingPlanes[clipidx].percentage,
-					clippingPlanes[clipidx].clipDirection
-				);
-			}
-		};
+		this.broadcastClippingPlane = function(clip)
+		{
+			callback(self.EVENT.CLIPPING_PLANE_BROADCAST, clip);
+		}
 
 		/**
-		 * Adds a clipping plane to the viewer
-		 * @param {string} axis - Axis through which the plane clips (overrides normal)
-		 * @param {number} normal - the normal of the plane
-		 * @param {number} distance - Distance along the bounding box to clip
-		 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
-		 * @param {number} clipDirection - Direction of clipping (-1 or 1)
-		 * @param {string} account - name of database (optional)
-		 * @param {string} model - name of model (optional)
+		 * Update clipping planes on the viewer
+		 * @param {array} clipPlanes - array of clipping planes
+		 * @param {bool} fromPanel - indicate if the request came from clip panel
+		 * @param {account} account - (OPTIONAL) the account the clip plane came from
+		 * @param {model} model - (OPTIONAL) the model the clip plane came from
 		 */
-		this.addClippingPlane = function(axis, normal, distance, percentage, clipDirection, account, model) {
-			clippingPlaneID += 1;
-			var parentGroup = null;
-			if(account && model){
-				var fullParentGroupName = self.account + "__"+ self.model + "__" + account + "__" + model;
-				parentGroup = self.groupNodes[fullParentGroupName];
-			}
-
-			var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, normal, [1, 1, 1], distance, percentage, clipDirection, parentGroup);
-			self.clippingPlanes.push(newClipPlane);
-
-			return clippingPlaneID;
-		};
-
-		this.moveClippingPlane = function(axis, distance) {
-			// Only supports a single clipping plane at the moment.
-			if(self.clippingPlanes[0])
+		this.updateClippingPlanes = function(clipPlanes, fromPanel, account, model)
+		{
+			if(!clipPlanes || clipPlanes.length === 0)
 			{
-				self.clippingPlanes[0].movePlane(axis, distance);
+				UnityUtil.disableClippingPlanes();
 			}
-		};
 
-		this.changeAxisClippingPlane = function(axis) {
-			// Only supports a single clipping plane at the moment.
-			self.clippingPlanes[0].changeAxis(axis);
-		};
+			if(clipPlanes && clipPlanes.length > 0 )
+			{
+				UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
+			}
 
-		/**
-		 * Clear out all clipping planes
-		 */
-		this.clearClippingPlanes = function() {
-			self.clippingPlanes.forEach(function(clipPlane) {
-				clipPlane.destroy();
+			if(clipPlanes && clipPlanes.length > 1)
+			{
+				console.log("More than 1 clipping planes requested!");
+			}
 
-			});
+		}
 
-			self.clippingPlanes = [];
-		};
-
-		/**
-		 * Clear out all clipping planes
-		 * @param {number} id - Get the clipping plane with matching unique ID
-		 */
-		this.getClippingPlane = function(id) {
-			// If the clipping plane no longer exists this
-			// will return undefined
-			return self.clippingPlanes.filter(function(clipPlane) {
-				return (clipPlane.getID() === id);
-			})[0];
-		};
-
+		this.clearClippingPlanes = function()
+		{
+			UnityUtil.disableClippingPlanes();
+		}
 		/****************************************************************************
 		 * Pins
 		 ****************************************************************************/
@@ -2011,10 +1488,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (self.pins.hasOwnProperty(id)) {
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
-
-				var trans = self.getParentTransformation(account, model);
-
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint, account, model);
+				self.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, model);
 			}
 		};
 
@@ -2037,11 +1511,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					model: pin.model
 				});
 
-				callback(self.EVENT.SET_CLIPPING_PLANES, {
+				callback(self.EVENT.UPDATE_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes,
 					account: pin.account,
-					model: pin.model
-
+					model: pin.model,
+					fromClipPanel: false
 				});
 			}
 		};
@@ -2107,6 +1581,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	// States of the viewer
 	READY: "VIEWER_EVENT_READY",
 	START_LOADING: "VIEWING_START_LOADING",
+	LOAD_MODEL: "VIEWER_LOAD_MODEL",
 	LOADED: "VIEWER_EVENT_LOADED",
 	RUNTIME_READY: "VIEWING_RUNTIME_READY",
 
@@ -2120,9 +1595,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
-	HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
+	GET_CURRENT_OBJECT_STATUS: "VIEWER_GET_CURRENT_OBJECT_STATUS",
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
@@ -2138,12 +1613,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",
-	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
-	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
-	CHANGE_AXIS_CLIPPING_PLANE: "VIEWER_CHANGE_AXIS_CLIPPING_PLANE",
+	UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
-	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
-	SET_SUBMODEL_TRANS_INFO : "VIEWER_:SET_SUBMODEL_TRANS_INFO",
+	CLIPPING_PLANE_BROADCAST: "VIEWER_CLIPPING_PLANE_BROADCAST",
 
 	// Pin events
 	CLICK_PIN: "VIEWER_CLICK_PIN",

@@ -94,11 +94,7 @@
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
-					if (vm.viewers.hasOwnProperty(event.value.name)) {
-						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
-							name: event.value.name
-						});
-					} else {
+					if (!vm.viewers.hasOwnProperty(event.value.name)) {						
 						vm.viewers[event.value.name] = event.value;
 					}
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {

@@ -390,19 +390,135 @@ function getModelProperties(account, model, branch, rev, username){
 			properties.hiddenNodes = [];
 		}
 
+		if(subProperties.length > 0)
+		{
+			properties.subModels = [];
+		}
 		subProperties.forEach(subProperty => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
 
-			if (subProperty.properties.hiddenNodes)
+			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0)
 			{
-				properties.hiddenNodes = properties.hiddenNodes.concat(subProperty.properties.hiddenNodes);
+				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
 			}
 		});
 
 		return Promise.resolve({properties, status});
 
+	});
+}
+
+function getUnityAssets(account, model, branch, rev, username){
+	'use strict';
+
+	let subAssets;
+	let revId, assetsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getUnityProps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getUnityProps.push(
+				getUnityAssets(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						models: obj.models,
+						owner: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getUnityProps);
+
+	}).then(_subAssets => {
+
+		subAssets = _subAssets;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', assetsFileName);
+
+	}).then(buf => {
+		let models = [];
+
+		if(buf){
+			let modelAssets = JSON.parse(buf);
+			if(modelAssets !== null)
+			{
+				models.push(modelAssets);
+			}
+
+		}
+
+		subAssets.forEach(subAsset => {
+			if (subAsset.models)
+			{
+				models = models.concat(subAsset.models);
+			}
+		});
+
+		return Promise.resolve({models, status});
+
+	});
+}
+
+function getUnityBundle(account, model, uid){
+	'use strict';
+
+	let bundleFileName;
+
+	bundleFileName = `/${account}/${model}/${uid}.unity3d`;
+
+	return stash.findStashByFilename({ account, model }, 'unity3d', bundleFileName).then(buf => {
+		if(!buf)
+		{
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
+		}
+		else
+		{
+			return Promise.resolve(buf);
+		}
 	});
 }
 
@@ -1010,6 +1126,8 @@ module.exports = {
 	listSubModels,
 	getFullTree,
 	getModelProperties,
+	getUnityAssets,
+	getUnityBundle,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,

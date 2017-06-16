@@ -45,126 +45,70 @@
 			deselectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
+			escKey = 27,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
 			multiMode = false,
 			pinDropMode = false;
 
-		// Init
-		this.setSelectedObjects({selectedObjects: null});
+
 
 		/**
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
-
-
-			if (event.type === EventService.EVENT.RESET_SELECTED_OBJS) {
-				if (selectedObjects.length > 0) {
-					
-					selectedObjects = [];
-					self.setSelectedObjects({selectedObjects: null});
-				}
-			} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-					pinDropMode = event.value;
+			
+			if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+				pinDropMode = event.value;
 			}
 
 		});
+
+		var isMacKey = function(keysDown) {
+			return isMac && keysDown.currentValue.indexOf(cmdKey) !== -1
+		}
+
+		var isNotMacKey = function(keysDown) {
+			return !isMac && keysDown.currentValue.indexOf(ctrlKey) !== -1
+		}
+
+		var isKeyDown = function(keysDown) {
+			return isMacKey(keysDown) || isNotMacKey(keysDown);
+		}
+
+		var isKeyDownNotCtrl = function(keysDown) {
+			return ((isMac && keysDown.currentValue.indexOf(cmdKey) === -1) 
+				   || (!isMac && keysDown.currentValue.indexOf(ctrlKey) === -1))
+		}
 
 		/**
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
 			// Keys down
-
 			if (pinDropMode) {
 				return;
 			}
 
 			if (changes.hasOwnProperty("keysDown")) {
-				if ((isMac && changes.keysDown.currentValue.indexOf(cmdKey) !== -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) !== -1)) {
+
+				if (isKeyDown(changes.keysDown)) {
+
 					multiMode = true;
-					if (selectedObjects.length === 1) {
-						self.setSelectedObjects({selectedObjects: selectedObjects});
-					}
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-					this.displaySelectedObjects(selectedObjects, deselectedObjects);
+
 				}
-				else if (((isMac && changes.keysDown.currentValue.indexOf(cmdKey) === -1) || (!isMac && changes.keysDown.currentValue.indexOf(ctrlKey) === -1))) {
+				else if (multiMode === true && isKeyDownNotCtrl(changes.keysDown)) {
+	
 					multiMode = false;
 					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+				} else if (changes.keysDown.currentValue.indexOf(escKey) !== -1) {
+					this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
+
 				}
+
+				
 			}
 
-			// Events
-			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) 
-					&& changes.event.currentValue.value.account && changes.event.currentValue.value.model 
-					&& changes.event.currentValue.value.id) {
-
-					var sharedId = self.treeMap.uidToSharedId[changes.event.currentValue.value.id];
-
-					if (multiMode) {
-						// Collect objects in multi mode
-						deselectedObjects = [];
-						objectIndex = -1;
-						selectedObjects.find(function(obj, i){
-							if(obj.shared_id === sharedId){
-								objectIndex = i;
-							}
-						});
-						if (objectIndex === -1) {
-
-							
-							//console.log('sharedId', sharedId);
-
-							selectedObjects.push({
-								id: changes.event.currentValue.value.id,
-								shared_id: sharedId,
-								account: changes.event.currentValue.value.account,
-								model: changes.event.currentValue.value.model
-							});
-						}
-						else {
-							deselectedObjects.push(selectedObjects[objectIndex]);
-							selectedObjects.splice(objectIndex, 1)
-						}
-						this.displaySelectedObjects(selectedObjects, deselectedObjects);
-
-						if (selectedObjects.length > 0) {
-							self.setSelectedObjects({selectedObjects: selectedObjects});
-						}
-						else {
-							self.setSelectedObjects({selectedObjects: null});
-						}
-					}
-					else {
-						// Can only select one object at a time when not in multi mode
-						selectedObjects = [{
-								id: changes.event.currentValue.value.id,
-								shared_id: sharedId,
-								account: changes.event.currentValue.value.account,
-								model: changes.event.currentValue.value.model
-						}];
-					}
-				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-
-					if (selectedObjects.length > 0) {
-						
-						selectedObjects = [];
-						self.setSelectedObjects({selectedObjects: null});
-					}
-				}
-			}
-
-			// Initialise selected objects
-			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
-				selectedObjects = this.initialSelectedObjects;
-				this.displaySelectedObjects(selectedObjects, deselectedObjects);
-			}
 		};
 
 		/**
@@ -172,34 +116,6 @@
 		 */
 		this.$onDestroy = function () {
 			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
-		};
-
-		/**
-		 * Highlight and unhighlight objects
-		 * @param selectedObjects
-		 * @param deselectedObjects
-		 */
-		this.displaySelectedObjects = function (selectedObjects, deselectedObjects) {
-
-			var highlightIds = [];
-			var unHighlightIds = [];
-
-			selectedObjects.forEach(function(obj){
-				highlightIds.push(obj.id);
-			});
-
-			deselectedObjects.forEach(function(obj){
-				unHighlightIds.push(obj.id);
-			});
-			
-			var data = {
-				source: "tree",
-				account: this.account,
-				model: this.model,
-				highlight_ids: highlightIds,
-				unhighlight_ids: unHighlightIds
-			};
-			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS, value: data});
 		};
 	}
 }());

@@ -740,8 +740,6 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	// Append building models and map tile images
 	MapTile.prototype.appendMapTileByViewPoint = function(noDraw){
 
-		console.log('appendMapTileByViewPoint', this.originBNG);
-
 		if(!this.enabled){
 			return;
 		}

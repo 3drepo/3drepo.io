@@ -85,8 +85,7 @@
 
 		this.actions = {
 			screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: false, selected: false},
-			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false},
-			multi: {icon: "view_comfy", label: "Save the selected objects with the issue", hidden: this.data, selected: false}
+			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false}
 		};
 
 
@@ -195,39 +194,6 @@
 				setContentHeight();
 			}
 
-			// Selected objects
-			// if (changes.hasOwnProperty("selectedObjects") && this.selectedObjects &&
-			// 	(currentAction !== null) && (currentAction === "multi")) {
-			// 	issueSelectedObjects = this.selectedObjects;
-			// }
-
-			// Event
-			if ((changes.hasOwnProperty("event") && this.event) && (currentAction !== null)) {
-				/*
-				if ((this.actions[currentAction].action === "pin") &&
-					((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
-					(this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
-					(issueSelectedObjects !== null)) {
-					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
-				}
-				else if ((this.actions[currentAction].action === "multi") &&
-						 (this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
-					issueSelectedObjects = null;
-				}
-				*/
-				// if ((currentAction === "multi") &&
-				// 	(this.event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED)) {
-				// 	issueSelectedObjects = null;
-				// }
-			}
-
-			// Keys down
-/*			if (changes.hasOwnProperty("keysDown")) {
-				if (!textInputHasFocus && (changes.keysDown.currentValue.indexOf(leftArrow) !== -1)) {
-					this.exit();
-				}
-			}*/
-
 			// Role
 			if (changes.hasOwnProperty("availableJobs") && this.availableJobs) {
 				console.log(this.availableJobs);
@@ -276,13 +242,6 @@
 		 */
 		this.$onInit = function () {
 			var disableStatus;
-
-			// If there are selected objects register them and set the current action to multi
-			if (!this.data && this.selectedObjects) {
-				//issueSelectedObjects = this.selectedObjects;
-				//currentAction = "multi";
-				this.actions.multi.selected = true;
-			}
 
 			// Set up statuses
 			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
@@ -390,6 +349,9 @@
 		 * @param viewpoint Can be undefined for action comments
 		 */
 		this.showViewpoint = function (event, viewpoint) {
+
+			//README: this should also highlight selected objects within this issue, but 
+			//will require a lot of rewriting for this to work at present!
 			if (viewpoint && (event.type === "click")) {
 				var data = {
 					position : viewpoint.position,
@@ -402,10 +364,11 @@
 
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
+					fromClipPanel: false,
 					account: self.issueData.account,
-					model: self.issueData.model,
+					model: self.issueData.model
 				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, value: data});
+				self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
 			}
 		};
 
@@ -460,75 +423,8 @@
 					});
 					break;
 
-
-				case "multi":
-
-					//clear selection if not selected to avoid confusion
-					if(!selected){
-						// Remove highlight from any multi objects
-						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-						// clear selection
-						EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-					}
-
-
 			}
 
-			// if (currentAction === null) {
-			// 	currentAction = action;
-			// }
-			// else if (currentAction === action) {
-			// 	switch (action) {
-			// 		case "multi":
-			// 			issueSelectedObjects = this.selectedObjects;
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-			// 			break;
-			// 	}
-			// 	this.actions[currentAction].color = "";
-			// 	currentAction = null;
-			// }
-			// else {
-			// 	switch (action) {
-			// 		case "multi":
-			// 			issueSelectedObjects = this.selectedObjects;
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-			// 			break;
-			// 	}
-			// 	this.actions[currentAction].color = "";
-			// 	currentAction = action;
-			// }
-
-			// // New action
-			// if (currentAction !== null) {
-			// 	this.actions[currentAction].color = highlightBackground;
-
-			// 	switch (currentAction) {
-			// 		case "screen_shot":
-			// 			delete this.screenShot; // Remove any clicked on screen shot
-			// 			$mdDialog.show({
-			// 				controller: ScreenShotDialogController,
-			// 				controllerAs: "vm",
-			// 				templateUrl: "issueScreenShotDialog.html",
-			// 				targetEvent: event
-			// 			});
-			// 			break;
-			// 		case "multi":
-			// 			if (issueSelectedObjects !== null) {
-			// 				this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
-			// 			}
-			// 			else {
-			// 				issueSelectedObjects = this.selectedObjects;
-			// 			}
-			// 			break;
-			// 		case "pin":
-			// 			self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
-			// 			break;
-			// 	}
-			// }
 		};
 
 		/**
@@ -606,12 +502,11 @@
 		function saveIssue () {
 			var viewpointPromise = $q.defer(),
 				screenShotPromise = $q.defer(),
+				objectsPromise = $q.defer(),
 				data;
 
 			if(commentViewpoint)
 			{
-				console.log("has commentViewpoint");
-				console.log(commentViewpoint);
 				viewpointPromise.resolve(commentViewpoint);
 			}
 			else
@@ -619,37 +514,44 @@
 				// Get the viewpoint
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: self.account, model: self.model}});
 			}
+
+			//Get selected objects
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS, value: {promise: objectsPromise, account: self.account, model: self.model}});
+
 			viewpointPromise.promise.then(function (viewpoint) {
-				if (savedScreenShot !== null) {
-					if (self.actions.multi.selected && self.selectedObjects) {
-						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-						UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
-							console.log("saving issue with viewpoint: " );
-							console.log(viewpoint);
-							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
-						});
-					}
-					else {
-						doSaveIssue(viewpoint, savedScreenShot);
-					}
-				}
-				else {
-					// Get a screen shot if not already created
-					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-					screenShotPromise.promise.then(function (screenShot) {
-						if (self.actions.multi.selected && self.selectedObjects) {
-							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], objects: self.selectedObjects};
-							UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
-								doSaveIssue(viewpoint, screenShot, response.data._id);
-							});
+				objectsPromise.promise.then(function (objectInfo)
+					{
+						if (savedScreenShot !== null) {
+							if (objectInfo.highlightedNodes.length > 0) {
+									// Create a group of selected objects
+									data = {name: self.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+									UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
+									doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+								});
+							}
+							else {
+								doSaveIssue(viewpoint, savedScreenShot);
+							}
 						}
 						else {
-							doSaveIssue(viewpoint, screenShot);
+							// Get a screen shot if not already created
+							self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+							screenShotPromise.promise.then(function (screenShot) {
+								if (objectInfo.highlightedNodes.length > 0) {
+									// Create a group of selected objects
+									data = {name: self.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+									UtilsService.doPost(data, self.account + "/" + self.model + "/groups").then(function (response) {
+										doSaveIssue(viewpoint, screenShot, response.data._id);
+									});
+								}
+								else {
+									doSaveIssue(viewpoint, screenShot);
+								}
+							});
 						}
-					});
-				}
+					}
+			);
+
 			});
 		}
 
@@ -711,7 +613,6 @@
 					// Hide some actions
 					self.actions.pin.hidden = true;
 					self.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-					self.actions.multi.hidden = true;
 
 					self.submitDisabled = true;
 					setContentHeight();
