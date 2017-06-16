@@ -2842,6 +2842,14 @@ var UnityUtil;
     	    throw "" + param + " is does not have a type which is supported by SendMessage.";
 	}
 
+	UnityUtil.prototype.onError = function(err, url, line){
+		if(confirm("Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\nPlease ensure you are using a 64bit web browser (Chrome or FireFox for best results), reduce your memory usage and try again.\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:\n\n\"Error " + err + " occured at line " + line + "\"\n\n\nClick ok to refresh this page.\n"))
+		{
+			window.location.reload();
+		}
+		return true;
+	}
+
 	UnityUtil.prototype.onLoaded = function()	
 	{
 		if(!loadedPromise)
@@ -3115,7 +3123,7 @@ var UnityUtil;
 			params.revID = revision;	
 		
 		UnityUtil.onLoading(); //Initialise the promise
-		toUnity("LoadProject", LoadingState.VIEWER_READY, JSON.stringify(params));
+		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
 			
 		return UnityUtil.onLoaded();
 	}
@@ -3420,7 +3428,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.handleKeyPresses = function(e) {
-			console.log("Handling key presses?")
+			/*console.log("Handling key presses?")
 			if (e.charCode === "r".charCodeAt(0)) {
 				self.reset();
 				self.setApp(null);
@@ -3431,7 +3439,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.enableClicking();
 			} else if (e.charCode === "u".charCodeAt(0)) {
 				self.revealAll();
-			}
+			}*/
 		};
 
 		this.init = function(options) {
@@ -3462,7 +3470,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				var unitySettings = {
 				 	TOTAL_MEMORY: 2130706432 / 2,
-				    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
+				    errorhandler: UnityUtil.onError,
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",
 				    splashStyle: "Light",
@@ -3483,6 +3491,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
+				
+				//Shouldn't need this, but for something it is not being recognised from unitySettings!
+				Module.errorhandler = UnityUtil.onError;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
@@ -4243,12 +4254,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					);
 				}
 
-				if(properties.subProjects)
+				if(properties.subModels)
 				{
-					for(var i = 0; i < properties.subProjects.length; i++)
+					for(var i = 0; i < properties.subModels.length; i++)
 					{
-						var entry = properties.subProjects[i];
-						this.applyModelProperties(entry.account, entry.project, entry.properties);
+						var entry = properties.subModels[i];
+						this.applyModelProperties(entry.account, entry.model, entry.properties);
 					}
 				}
 			}
@@ -4443,11 +4454,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.reset = function() {
-			self.setCurrentViewpoint("model__start");
+/*			self.setCurrentViewpoint("model__start");
 
 			self.changeCollisionDistance(self.collDistance);
 			self.changeAvatarHeight(self.avatarHeight);
-			self.changeStepHeight(self.stepHeight);
+			self.changeStepHeight(self.stepHeight);*/
+			UnityUtil.resetCamera();
 		};
 
 		this.loadModel = function(account, model, branch, revision) {
@@ -5232,14 +5244,15 @@ var ViewerManager = {};
 				else {
 					vm.closeDialogEnabled = true;
 					vm.changeHelpToShow = response.data.value;
-					vm.payPalInfo = response.data.message;
+					vm.payPalError = "Unfortunately something went wrong contacting PayPal.";
+					vm.payPalInfo = "Details: " + response.data.message;
 				}
 			});
 		};
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
-		};
+		}; 
 
 		/**
 		 * Set up num licenses and price
@@ -5391,10 +5404,10 @@ var ViewerManager = {};
 			});
 		}
 
-		var removeFromFederation = function (federation, modelName) {
+		var removeFromFederation = function (federation, modelId) {
 			
 			federation.subModels.forEach(function(submodel, i) {
-				if (submodel.model === modelName) {
+				if (submodel.model === modelId) {
 					federation.subModels.splice(i, 1);
 				}
 			});
@@ -5917,7 +5930,7 @@ var ViewerManager = {};
 		 */
 		vm.deleteModel = function (federation) {
 
-			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.deleteName);
+			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.modelToDelete.model);
 
 			promise.then(function (response) {
 				if (response.status === 200) {
@@ -5987,7 +6000,8 @@ var ViewerManager = {};
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
-			vm.deleteName = model.model;
+			vm.modelToDelete = model;
+			vm.deleteName = model.name;
 			vm.projectToDeleteFrom = project
 			vm.currentAccount = account
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true, null, false, dialogCloseToId);
@@ -6490,6 +6504,8 @@ var ViewerManager = {};
 
 		// Init
 		vm.modelToUpload = null;
+
+		vm.model.displayName = vm.model.name;
 		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
@@ -7099,7 +7115,7 @@ var ViewerManager = {};
 				delete vm.federationData._isEdit;
 				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
 			} else {
-				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.name);
 			}
 			
 			promise.then(function (response) {
@@ -7114,6 +7130,8 @@ var ViewerManager = {};
 					vm.federationData.federate = true;
 					vm.federationData.timestamp = (new Date()).toString();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
+					vm.federationData.name = response.data.name;
+					vm.federationData.model = response.data.model;
 					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
 
 					// TODO: This should exist - backend problem : ISSUE_371
@@ -7145,7 +7163,8 @@ var ViewerManager = {};
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			if (isDefault) {
+			console.log("isDefault", isDefault);
+			if (!isDefault) {
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -7171,8 +7190,8 @@ var ViewerManager = {};
 		 *
 		 * @param modelName
 		 */
-		vm.removeFromFederation = function (modelName) {
-			AccountDataService.removeFromFederation(vm.federationData, modelName);
+		vm.removeFromFederation = function (modelId) {
+			AccountDataService.removeFromFederation(vm.federationData, modelId);
 		};
 
 
@@ -7188,7 +7207,8 @@ var ViewerManager = {};
 			vm.federationData.subModels.push({
 				database: teamspaceName,
 				modelIndex: modelIndex,
-				model: models[modelIndex].model
+				model: models[modelIndex].model,
+				name: models[modelIndex].name
 			});
 
 			models[modelIndex].federate = true;
@@ -7214,6 +7234,7 @@ var ViewerManager = {};
 		 */
 		vm.setupNewFederation = function (event, accounts) {
 
+			vm.isDefaultFederation = false; 
 			vm.federationOriginalData = null;
 			vm.federationData = {
 				desc: "",
@@ -7293,7 +7314,7 @@ var ViewerManager = {};
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.name;
+			vm.deleteName = vm.modelToDelete.displayName;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
@@ -7446,6 +7467,7 @@ var ViewerManager = {};
 						// Add model to list
 						model = {
 							model: response.data.model,
+							name: response.data.name,
 							project : vm.newModelData.project,
 							permissions: response.data.permissions,
 							canUpload: true,
@@ -13751,7 +13773,7 @@ angular.module('3drepo')
 
 			//do the same for all subModels
 			if(vm.subModels){
-				vm.subModels.forEach(function(submodel){
+				vm.subModels.forEach(function(subModel){
 					var submodel = true;
 					NotificationService.subscribe.newIssues(subModel.database, subModel.model, function(issues){ newIssueListener(issues, submodel) });
 					NotificationService.subscribe.issueChanged(subModel.database, subModel.model, issueChangedListener);
@@ -15572,7 +15594,7 @@ angular.module('3drepo')
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
-					console.trace("UNDEFINED EVENT TYPE" + type + JSON.stringify(value));
+					console.trace("UNDEFINED EVENT TYPE" + type);
 				} else {
 					console.log("SEND: " + type);
 					console.log(value);
@@ -18772,6 +18794,7 @@ var Oculus = {};
 				account: "=",
 				model: "=",
 				revision: "=",
+				modelName: "="
 			},
 			controller: revisionsCtrl,
 			controllerAs: 'vm',
@@ -19538,7 +19561,7 @@ var Oculus = {};
 			traverseNode(node, function(node){
 				if (!node.children && ((node.type || "mesh") === "mesh"))
 				{
-					var key = getAccountModelKey(node.account, node.model);
+					var key = getAccountModelKey(node.account, node.project);
 					if(!nodes[key]){
 						nodes[key] = [];
 					}
@@ -19573,8 +19596,8 @@ var Oculus = {};
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
-			var visible = getVisibleArray(node.account, node.model);
-			var invisible = getInvisibleArray(node.account, node.model);
+			var visible = getVisibleArray(node.account, node.project);
+			var invisible = getInvisibleArray(node.account, node.project);
 
 			if (!node.children && ((node.type || "mesh") === "mesh"))
 			{
@@ -20153,7 +20176,7 @@ var Oculus = {};
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
-					model: node.model,
+					model: node.project,
 					id: node._id,
 					name: node.name
 				});

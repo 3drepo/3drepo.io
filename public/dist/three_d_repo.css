@@ -314,6 +314,10 @@ account-billing md-input-container {
   margin-right: 10px;
 }
 
+account-billing .accountBillingSave button {
+  margin-left: 0px;
+}
+
 account-billing .userContent {
   max-height: calc(100vh - 270px) !important;
 }
@@ -352,6 +356,7 @@ account-billing .accountBillingHistoryListItem .md-button {
 account-billing .accountBillingSave img {
   height: 20px;
   margin-top: 17px;
+  margin-left: 5px;
 }
 
 account-billing .accountBillingAddressInfo {
@@ -368,11 +373,40 @@ account-licenses .licenseIcon {
 account-licenses #accountLicensesAdd {
   margin-top: -10px;
 }
-account-licenses #accountLicensesAdd md-input-container {
+account-licenses .userContent md-input-container {
   margin-bottom: 0;
+  width: 80%;
 }
-account-licenses #accountLicensesAdd .md-button {
-  margin-bottom: 30px;
+
+account-licenses .selectJob {
+  margin-left: -10px;
+}
+
+account-licenses .assignButton {
+  margin-bottom: 25px;
+}
+
+account-licenses #errorMessage {
+  font-size: 12px;
+  color: red;
+  margin-bottom: 20px;
+}
+
+account-licenses .md-subheader .md-subheader-inner {
+  padding-left: 0px !important;
+}
+
+account-licenses #accountJobList {
+  padding-top: 20px;
+}
+
+account-licenses #accountJobList #jobIcon md-icon {
+  padding-top: 12px;
+}
+
+account-licenses #accountLicensesUnassigned md-icon {
+  margin-bottom: 0px;
+  margin: 0px;
 }
 
 account-licenses #accountLicensesUnassigned {
