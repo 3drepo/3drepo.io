@@ -32,13 +32,26 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model};
 };
 
+function convertProjectToParam(req, res, next){
+	if(req.body.project){
+		req.params.project = req.body.project;
+	}
+
+	next();
+}
+
 
 // Get model info
 router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
 
 router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:modelName', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
+router.post('/:modelName', 
+	convertProjectToParam, 
+	middlewares.connectQueue,
+	middlewares.checkPermissions([C.PERM_CREATE_MODEL]), 
+	createModel
+);
 
 //Unity information
 router.get('/:model/revision/master/head/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
@@ -201,6 +214,7 @@ function createModel(req, res, next){
 	};
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	data.userPermissions = req.session.user.permissions;
 
 	createAndAssignRole(modelName, account, username, data).then(data => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
@@ -491,7 +505,6 @@ function getUnityBundle(req, res, next){
 	let model = req.params.model;
 	let account = req.params.account;
 	let id = req.params.uid;
-	let username = req.session.user.username;
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {

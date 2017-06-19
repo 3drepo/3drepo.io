@@ -36,8 +36,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', [], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', [], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -51,8 +51,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -66,8 +66,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project', 'assign_licence'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_project', 'assign_licence'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -81,8 +81,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', { '$or' : [['assign_licence'], ['create_project']] }, getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', { '$or' : [['assign_licence'], ['create_project']] }, getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 
 		});
@@ -97,8 +97,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_model'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_model'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -112,8 +112,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_model', 'create_federation'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_model', 'create_federation'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -127,8 +127,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', {'$or': [['create_model'], ['create_federation', 'delete_project'] ]}, getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', {'$or': [['create_model'], ['create_federation', 'delete_project'] ]}, getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 
 		});
@@ -143,8 +143,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['view_issue'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['view_issue'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -158,8 +158,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['view_issue', 'view_model'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['view_issue', 'view_model'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -173,8 +173,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', { '$or': [['comment_issue'], ['view_issue', 'view_model']] }, getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', { '$or': [['comment_issue'], ['view_issue', 'view_model']] }, getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -188,8 +188,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -204,8 +204,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', { '$or': [ ['revoke_licence'], ['create_project', 'create_model', 'view_issue']] }, getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', { '$or': [ ['revoke_licence'], ['create_project', 'create_model', 'view_issue']] }, getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 
@@ -223,8 +223,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.false;
+			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.false;
 			});
 		});
 
@@ -238,8 +238,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.false;
+			return checkPermission('', '', '', '', ['create_project'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.false;
 			});
 		});
 
@@ -253,8 +253,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_model', 'delete_project'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.false;
+			return checkPermission('', '', '', '', ['create_model', 'delete_project'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.false;
 			});
 		});
 
@@ -268,8 +268,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue', 'comment_issue'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.false;
+			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue', 'comment_issue'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.false;
 			});
 		});
 
@@ -283,8 +283,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', [ ['create_project', 'create_model'], ['view_issue', 'comment_issue']], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.false;
+			return checkPermission('', '', '', '', [ ['create_project', 'create_model'], ['view_issue', 'comment_issue']], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.false;
 			});
 		});
 	});
@@ -300,8 +300,8 @@ describe('Check permission function', function(){
 				};
 			};
 
-			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue', 'comment_issue'], getPermissionsAdpater).then(granted => {
-				expect(granted).to.be.true;
+			return checkPermission('', '', '', '', ['create_project', 'create_model', 'view_issue', 'comment_issue'], getPermissionsAdpater).then(res => {
+				expect(res.granted).to.be.true;
 			});
 		});
 	})

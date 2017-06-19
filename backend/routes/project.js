@@ -11,8 +11,16 @@
 	const C = require("../constants");
 	const checkPermissions = middlewares.checkPermissions;
 	
+	function editCheckPermission(req, res, next){
+		if(req.body.permissions){
+			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
+		} else {
+			checkPermissions([C.PERM_CREATE_PROJECT])(req, res, next);
+		}
+	}
+
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
-	router.put("/projects/:project", checkPermissions([C.PERM_EDIT_PROJECT]), updateProject);
+	router.put("/projects/:project", editCheckPermission, updateProject);
 	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 

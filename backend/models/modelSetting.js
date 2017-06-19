@@ -56,12 +56,7 @@ var schema = mongoose.Schema({
 			label: String
 		}]
 
-	},
-	//redundant field to speed up listing collaborators
-	collaborators: [{
-		user: String,
-		role: {type: String}
-	}],
+	}
 
 });
 

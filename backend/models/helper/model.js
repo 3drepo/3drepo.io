@@ -180,6 +180,19 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	}).then(setting => {
 
+		if(data.userPermissions && data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
+
+			return setting.changePermissions([{
+				user: username,
+				permission: C.ADMIN_TEMPLATE
+			}]).then(() => setting);
+
+		}
+
+		return Promise.resolve(setting);
+
+	}).then(setting => {
+
 		let modelData = {
 			account,
 			model:  model.toString(),

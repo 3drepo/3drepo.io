@@ -385,6 +385,10 @@
 		module.exports.PERM_EDIT_FEDERATION,
 	]);
 
+	define("ADMIN_TEMPLATE_PERMISSIONS",[
+		module.exports.PERM_MANAGE_MODEL_PERMISSION
+	]);
+
 	//-----------------------------------------------------------------------------
 	//
 	// Blacklist

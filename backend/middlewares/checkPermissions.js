@@ -49,7 +49,7 @@
 			userPermissions = _.flatten(userPermissions);
 			//god permission
 			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
-				return true;
+				return { granted: true, userPermissions };
 			}
 
 			function hasRequiredPermissions(perms) {
@@ -58,11 +58,11 @@
 
 			//if it contains or relationship
 			if(Array.isArray(requiredPerms['$or'])){
-				return requiredPerms['$or'].some(hasRequiredPermissions);
+				return { granted: requiredPerms['$or'].some(hasRequiredPermissions), userPermissions };
 			}
 
 			//return true if user has the requested permissions
-			return hasRequiredPermissions(requiredPerms);
+			return { granted: hasRequiredPermissions(requiredPerms), userPermissions };
 		});
 	}
 

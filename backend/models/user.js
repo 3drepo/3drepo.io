@@ -294,6 +294,10 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	//default templates
 	cleanedCustomData.permissionTemplates = [
 		{
+			_id: C.ADMIN_TEMPLATE,
+			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+		},
+		{
 			_id: C.VIEWER_TEMPLATE,
 			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
 		},

@@ -32,6 +32,8 @@
 	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
 	const checkPermissionsHelper = require('../middlewares/checkPermissions');
 
+	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION]] };
+
 	function checkPermissions(permsRequest){
 
 		return function(req, res, next){
@@ -51,9 +53,13 @@
 
 				return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
 
-			}).then(granted => {
+			}).then(data => {
 
-				if(granted){
+				if (data.userPermissions) {
+					req.session.user.permissions = data.userPermissions;
+				}
+
+				if(data.granted){
 					next();
 				} else {
 					return Promise.reject(responseCodes.NOT_AUTHORIZED);
@@ -169,9 +175,9 @@
 			account, 
 			'',
 			model, 
-			[C.PERM_VIEW_MODEL],
+			readAccessToModel,
 			getPermissionsAdapter
-		);
+		).then(data => data.granted);
 	}
 
 	function isAccountAdminHelper(username, account, model){
@@ -182,7 +188,7 @@
 			model, 
 			[C.PERM_TEAMSPACE_ADMIN],
 			getPermissionsAdapter
-		);
+		).then(data => data.granted);
 	}
 
 	var middlewares = {
@@ -194,7 +200,7 @@
 		hasReadAccessToIssue: checkPermissions([C.PERM_VIEW_ISSUE]),
 
 		//models
-		hasReadAccessToModel: checkPermissions([C.PERM_VIEW_MODEL]),
+		hasReadAccessToModel: checkPermissions(readAccessToModel),
 		hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
 		hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
 		hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
