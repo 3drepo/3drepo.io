@@ -22,33 +22,47 @@
 	const _ = require('lodash');
 	const C	= require("../constants");
 	
-	function checkPermissions(username, account, project, model, permsRequest, getPermissions){
+
+
+	function checkPermissions(username, account, project, model, requiredPerms, getPermissions){
 
 		let getPermPromises = [];
 
 		getPermPromises.push(getPermissions(account).accountLevel(username));
 
 		// check what kind of permissions is requested before making db calls to save unnecessary db calls
-		if(_.intersection(C.PROJECT_PERM_LIST, permsRequest).length > 0){
+
+		const flattenRequiredPerms = requiredPerms['$or'] ? _.flatten(requiredPerms['$or']) : _.flatten(requiredPerms);
+
+		if(_.intersection(C.PROJECT_PERM_LIST, flattenRequiredPerms).length > 0){
 			getPermPromises.push(getPermissions(account).projectLevel(username, project));
 		}
 
-		if(_.intersection(C.MODEL_PERM_LIST, permsRequest).length > 0){
+		if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0){
 
 			getPermPromises.push(getPermissions(account).modelLevel(username, model));
 
 		}
 
-		return Promise.all(getPermPromises).then(permissions => {
+		return Promise.all(getPermPromises).then(userPermissions => {
 			
-			permissions = _.flatten(permissions);
+			userPermissions = _.flatten(userPermissions);
 			//god permission
-			if(permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
 				return true;
 			}
 
+			function hasRequiredPermissions(perms) {
+				return _.difference(perms, userPermissions).length === 0;
+			}
+
+			//if it contains or relationship
+			if(Array.isArray(requiredPerms['$or'])){
+				return requiredPerms['$or'].some(hasRequiredPermissions);
+			}
+
 			//return true if user has the requested permissions
-			return _.difference(permsRequest, permissions).length === 0;
+			return hasRequiredPermissions(requiredPerms);
 		});
 	}
 
