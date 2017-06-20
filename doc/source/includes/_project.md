@@ -20,6 +20,89 @@ user |
 permissions | list of [project level permissions](#project-level)
 
 
+## Get projects
+
+```http
+GET /repoman/projects HTTP/1.1
+```
+> Example response
+
+```json
+[
+    {
+        "_id": "5943d7346d826657ecc3877f",
+        "name": "project1",
+        "__v": 13,
+        "permissions": [
+            {
+                "user": "projectuser",
+                "permissions": [
+                    "create_model"
+                ]
+            },
+            {
+                "user": "projectuser2",
+                "permissions": [
+                    "create_federation"
+                ]
+            },
+            {
+                "user": "projectuser3",
+                "permissions": [
+                    "admin_project"
+                ]
+            },
+            {
+                "user": "projectuser4",
+                "permissions": [
+                    "edit_project"
+                ]
+            },
+            {
+                "user": "projectuser5",
+                "permissions": [
+                    "delete_project"
+                ]
+            }
+        ],
+        "models": [
+            "18ea3858-b2df-4260-a6ed-38ef407dc39e"
+        ]
+    },
+    {
+        "_id": "5948e5c591d9661fd6048217",
+        "name": "project2",
+        "__v": 0,
+        "permissions": [],
+        "models": []
+    }
+]
+```
+### GET /{accountName}/projects
+
+Get all projects in a teamsapce, returns a list of [project objects](#project-object)
+
+## Get a project
+
+```http
+GET /repoman/projects/project2 HTTP/1.1
+```
+> Example response
+
+```json
+{
+    "_id": "5948e5c591d9661fd6048217",
+    "name": "project2",
+    "__v": 0,
+    "permissions": [],
+    "models": []
+}
+```
+
+### GET /{accountName}/projects/{projectName}
+
+Get a project specified by teamspace and project name, returns a [project objects](#project-object)
+
 ## Create a project
 
 > Example request
@@ -42,6 +125,7 @@ POST /repoman/projects HTTP/1.1
 	"permissions": []
 }
 ```
+
 
 ### POST /{accountName}/projects
 
