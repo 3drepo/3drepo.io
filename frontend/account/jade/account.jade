@@ -57,6 +57,14 @@ div(ng-if="!vm.state.model")
 			show-page="vm.showPage(page, callingPage, data)"
 			subscriptions="vm.subscriptions")
 
+			account-assign(
+			ng-switch-when="assign"
+			account="vm.account"
+			model="vm.model"
+			data="vm.data"
+			show-page="vm.showPage(page, callingPage, data)"
+			subscriptions="vm.subscriptions")
+
 div(ng-if="vm.state.model")
 	model(
 	keys-down="vm.keysDown"

@@ -1,0 +1,123 @@
+.homeUserContent#accountAssignPage
+	md-content.md-whiteframe-1dp(aria-label="Assign", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Assign Permissions
+
+		md-tabs(md-dynamic-height, md-border-bottom)
+			md-tab(label="Teamspace")
+				div.assignTabHolder(layout="row" ng-if="vm.loading")
+					h3 Loading...
+
+				div.assignTabHolder(layout="column" ng-if="!vm.loading", flex="100")
+
+					div(flex="100")
+						md-label Select Teamspace
+						md-select(ng-model="vm.teamspaceSelected", ng-required="true")
+							md-option(ng-repeat="teamspace in vm.teamspaces", value="{{teamspace.account}}") {{teamspace.account}}
+
+					table.scrollable(
+						ng-if="vm.teamspaceSelected"
+						layout="column", 
+						flex)
+						thead(layout="row")
+							tr: th.userColumn User
+							tr(ng-repeat="(permission, value) in vm.teamspacePermissions", layout-align="center center"): th {{value}}
+						
+						tbody(layout="row")
+							tr(
+								layout-align="center center", 
+								ng-repeat="user in vm.selectedTeamspace.assignUsers"
+								ng-if="user.permissions !== undefined")
+
+								td.userColumn.userInput
+									p {{user.assignedUser}}
+								td(ng-repeat="(permission, value) in vm.teamspacePermissions") 
+									md-checkbox(
+										aria-label="Checkbox {{value}}"
+										layout-align="center center"
+										ng-click="vm.stateChange(user, permission)"
+										ng-checked="vm.userHasPermissions(user, permission)")
+
+
+			md-tab(label="Project")
+				div.assignTabHolder(layout="row" ng-if="vm.projectsLoading")
+					h3 Loading...
+
+				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
+
+					div(layout="row")
+						div(flex="50", layout="column")
+							md-label Select Teamspace
+							md-select(ng-model="vm.teamspaceSelected", ng-required="true")
+								md-option(ng-repeat="teamspace in vm.teamspaces", value="{{teamspace.account}}") {{teamspace.account}}
+						div(flex="50", layout="column", ng-disabled="!vm.teamspaceSelected")
+							md-label Select Project
+							md-select.rowSelects(ng-model="vm.projectSelected", ng-required="true")
+								md-option(ng-repeat="project in vm.projects", value="{{project.name}}") {{project.name}}
+
+					table.scrollable(
+						ng-if="vm.projectSelected"
+						layout="column", 
+						flex)
+						thead(layout="row")
+							tr: th.userColumn User
+							tr(ng-repeat="(permission, value) in vm.projectPermissions", layout-align="center center"): th {{value}}
+						
+						tbody(layout="row")
+							tr(
+								layout-align="center center", 
+								ng-repeat="user in vm.selectedTeamspace.assignUsers"
+								ng-if="user.permissions !== undefined")
+
+								td.userColumn.userInput
+									p {{user.assignedUser}}
+								td(ng-repeat="(permission, value) in vm.projectPermissions") 
+									md-checkbox(
+										layout-align="center center"
+										ng-click="vm.projectStateChange(user, permission)"
+										ng-checked="vm.userHasProjectPermissions(user, permission)")
+
+
+			md-tab(label="Models & Federations")
+				div.assignTabHolder(layout="row" ng-if="vm.loading")
+					h3 Loading...
+
+				div.assignTabHolder(layout="column")
+					div(layout="row")
+						div(flex="33", layout="column")
+							md-label Select Teamspace
+							md-select.rowSelects(ng-model="vm.teamspaceSelected", ng-required="true")
+								md-option(ng-repeat="teamspace in vm.teamspaces", value="{{teamspace.account}}") {{teamspace.account}}
+
+						div(flex="33", layout="column")
+							md-label Select Project
+							md-select.rowSelects(ng-model="vm.projectSelected", ng-required="true")
+								md-option(ng-repeat="project in vm.projects", value="{{project.name}}") {{project.name}}
+
+						div(flex="33", layout="column")
+							md-label(ng-if="vm.modelsAreLoaded()") Select Model
+							md-label(ng-if="!vm.modelsAreLoaded()") Awaiting Models...
+							md-select.rowSelects(ng-model="vm.modelSelected", ng-required="true",  ng-disabled="!vm.modelsAreLoaded()")
+								md-option(ng-repeat="model in vm.models", value="{{model.name}}") {{model.name}}
+
+					table.scrollable(
+						ng-if="vm.modelSelected"
+						layout="column", 
+						flex)
+						thead(layout="row")
+							tr: th.userColumn User
+							tr(ng-repeat="value in vm.modelRoles", layout-align="center center"): th {{value}}
+						
+						tbody(layout="row")
+							tr(
+								layout-align="center center", 
+								ng-repeat="user in vm.selectedTeamspace.assignUsers"
+								)
+
+								td.userColumn.userInput
+									p {{user.assignedUser}}
+								
+								td(ng-repeat="value in vm.modelRoles", layout-align="center center")
+									md-radio-group(ng-model="vm.selectedRole", layout-align="center center", layout="row")
+										md-radio-button(layout-align="center center", ng-value="value")
