@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.10.3";
+	const VERSION="1.13.0";
 
 	let config = require("app-config")
 		.config;
@@ -143,6 +143,8 @@
 	config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 	config.cookie_domain = coalesce(config.cookie.domain, config.host);
 
+	config.chat_reconnection_attempts = coalesce(config.chat_reconnection_attempts, 5);
+
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {
 		console.log("Cookie secret phrase has the default value. Update the config");
@@ -186,11 +188,13 @@
 			}
 
 			config.apiUrls[server.type].push(server.location_url);
+
 		} else if (server.service === "chat") {
 
 			fillInServerDetails(server, "chat", config.using_ssl, config.host, server.http_port, server.https_port);
 			server.chat_host = server.base_url_no_port + ":" + server.port;
 			config.chat_server = server;
+			config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== 'undefined' ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
 		} else if (server.service === "frontend"){
 

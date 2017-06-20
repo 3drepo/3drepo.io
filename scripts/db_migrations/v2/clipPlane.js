@@ -1,60 +1,7 @@
-// add basic licence if dun have one
-print('init: create basic licence for everyone if they do not have one');
-db.getSiblingDB('admin').system.users.update({ 'customData.billing.subscriptions.plan': {'$ne':'BASIC'}}, { 
-    '$push': {
-        'customData.billing.subscriptions': {
-                    "plan" : "BASIC",
-                    "createdAt" : ISODate(),
-                    "updatedAt" : ISODate(),
-                    "active" : true,
-                    "expiredAt" : null,
-                    "_id" : ObjectId(),
-                    "limits" : {
-                        "spaceLimit" : 209715200,
-                        "collaboratorLimit" : 0
-                    },
-                    "permissions" : []
-                }
-     }
-    
-}, {multi: true});
-
-var permissionTemplates = [
-    {
-        _id: 'admin',
-        permissions: ['manage_model_permission']
-    },
-    {
-        _id: 'viewer',
-        permissions: ['view_issue','view_model']
-    },
-    {
-        _id: 'commenter',
-        permissions: ['create_issue','comment_issue','view_issue','view_model']
-    },
-    {
-        _id: 'collaborator',
-        permissions: ['upload_files','create_issue','comment_issue','view_issue','view_model','download_model','edit_federation']
-    },
-];
-
-print('init: create default permission templates(viwer, commenter, collaborator) for everyone');
-// generate default permission templates 
-db.getSiblingDB('admin').system.users.update({}, { '$addToSet': {
-        'customData.permissionTemplates': { '$each': permissionTemplates }
-    } 
-}, { multi: true});
-
-function groupByDB(items){
-    var obj = {};
-    items.forEach(function(item){
-        if(obj[item.db]){
-            obj[item.db].push(item);
-        } else {
-            obj[item.db] = [item]
-        }
-    });
-    return obj;
+function findOffset(id)
+{
+	print("NEED TO GET OFFSET FOR FED!!!!");
+	return [1,1,1];
 }
 
 var users = db.getSiblingDB('admin').system.users.find();
@@ -63,7 +10,51 @@ while(users.hasNext()){
     var user = users.next();
     
     print('processing user [' + user.user + ']');
-    
+	var modelSettings = db.getSiblingDB(user.user).getCollection('settings').find();
+	while(modelSettings.hasNext())
+	{
+		var modelSetting = modelSettings.next();
+		var modelName = modelSetting._id;
+		var modelHistoryCol = modelName+".history";
+		print("in : " + modelHistoryCol);
+		var revs = db.getSiblingDB(user.user).getCollection(modelHistoryCol).find().sort({"timestamp": -1}).limit(1);
+		var offset = null;
+		if(revs.hasNext()){
+			var latestRev = revs.next();
+			offset = latestRev.coordOffset;
+			if(!offset ){
+				offset = findOffset(modelName);
+			}
+		}
+		else
+		{
+			print("Model: " + modelName + " ("+modelSetting.name+") has no revisions, skipping...");
+			continue;
+		}
+
+		if(!offset) continue;
+
+		print("Offset is known to be:" + offset);
+		var modelIssuesCol = modelName + ".issues";
+		var issues = db.getSiblingDB(user.user).getCollection(modelIssuesCol).find();
+		var count = 0;
+		while(issues.hasNext())
+		{
+			var issue = issues.next();
+			if(issue.viewpoints)
+			{
+				for(var i = 0; i < issue.viewpoints.length; ++i)
+				{
+					if(issue.viewpoints[i].clippingPlanes.length > 0)
+					{
+						print("found clipping plane:" + JSON.stringify(issue.viewpoints[i].clippingPlanes[0]));
+					}
+				}
+			}
+		}
+
+	}
+/*
     var rolesByDB = groupByDB(user.roles);
     for(database in rolesByDB){
 
@@ -234,7 +225,7 @@ while(users.hasNext()){
 
         
     }
-
+*/
     print ('Finish processing user: ' + user.user);
     print ('-------------------------------------');
 }

@@ -21,6 +21,8 @@
 
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
 	router.put("/projects/:project", editCheckPermission, updateProject);
+	router.get("/projects", middlewares.isAccountAdmin, listProjects);
+	router.get("/projects/:project", checkPermissions([C.PERM_PROJECT_ADMIN]), listProject);
 	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
@@ -52,6 +54,26 @@
 		
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function listProjects(req, res, next){
+		Project.find({ account: req.params.account }, {}).then(projects => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function listProject(req, res, next){
+		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
+			if(!project){
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+			}
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
