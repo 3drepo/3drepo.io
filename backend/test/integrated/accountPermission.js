@@ -199,7 +199,6 @@ describe('Account permission', function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					console.log(res.body)
 					expect(res.body.find(perm => perm.user === 'user3')).to.not.exist;
 					callback(err);
 				});
@@ -208,4 +207,22 @@ describe('Account permission', function () {
 		], (err, res) => done(err));
 	});
 
+	let projectName = 'project567';
+
+	it('should able to create_project on other teamspace if given create_project on the target teamspace', function(done){
+
+		const teamspace = 'testing';
+
+		agent.post(`/${teamspace}/projects`)
+		.send({ name: projectName })
+		.expect(200, done);
+	});
+
+	it('should able to access the project created by the users themselves', function(done){
+
+		const teamspace = 'testing';
+
+		agent.get(`/${teamspace}/projects/${projectName}`)
+		.expect(200, done);
+	});
 });

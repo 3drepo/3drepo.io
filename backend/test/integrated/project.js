@@ -211,6 +211,23 @@ describe('Projects', function () {
 		});
 	});
 
+	it('should fail to update project for invalid permission object structure', function(done){
+
+		const project = {
+			name: 'project3',
+			permissions: [{
+				permissions: ['edit_project']
+			}]
+		};
+
+		agent.put(`/${username}/projects/${project.name}`)
+		.send(project)
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(900); // mongoose invalid code
+			done(err);
+		});
+	});
+
 
 	it('should able to delete project', function(done){
 

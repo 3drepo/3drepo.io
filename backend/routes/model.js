@@ -36,10 +36,8 @@ function convertProjectToParam(req, res, next){
 	if(req.body.project){
 		req.params.project = req.body.project;
 	}
-
 	next();
 }
-
 
 // Get model info
 router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
@@ -49,7 +47,7 @@ router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, update
 router.post('/:modelName', 
 	convertProjectToParam, 
 	middlewares.connectQueue,
-	middlewares.checkPermissions([C.PERM_CREATE_MODEL]), 
+	middlewares.canCreateModel, 
 	createModel
 );
 
@@ -62,10 +60,10 @@ router.get('/:model/:uid.unity3d', middlewares.hasReadAccessToModel, getUnityBun
 router.put('/:model', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 //model permission
-router.post('/:model/permissions', middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), updatePermissions);
+router.post('/:model/permissions', middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 //model permission
-router.get('/:model/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
+router.get('/:model/permissions',  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
 router.get('/:model/jobs.json', middlewares.hasReadAccessToModel, getJobs);
 router.get('/:model/userJobForModel.json', middlewares.hasReadAccessToModel, getUserJobForModel);

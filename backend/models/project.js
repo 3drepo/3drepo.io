@@ -30,7 +30,7 @@
 		models: [String],
 		permissions: [{
 			_id: false,
-			user: String,
+			user: { type: String, required: true },
 			permissions: [String]
 		}]
 	});
@@ -68,10 +68,18 @@
 		return next();
 	});
 
-	schema.statics.createProject = function(account, name){
+	schema.statics.createProject = function(account, name, username, userPermissions){
 
 		let project = Project.createInstance({account});
 		project.name = name;
+
+		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
+			project.permissions = [{
+				user: username,
+				permissions: [C.PERM_PROJECT_ADMIN]
+			}];
+		}
+
 		return project.save();
 
 	};

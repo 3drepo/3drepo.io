@@ -36,7 +36,7 @@ let getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 let sinon = require('sinon');
 
 let url = require('url');
-describe('Enrolling to a subscription', function () {
+describe.skip('Enrolling to a subscription', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;

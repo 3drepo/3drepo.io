@@ -32,6 +32,7 @@ describe('Project Permissions', function () {
 
 	let server;
 	let agentCanCreateModel;
+	let agentCanCreateFed;
 	let agentNoPermission;
 	let agentCanUpdateProject;
 	let agentProjectAdmin;
@@ -43,6 +44,11 @@ describe('Project Permissions', function () {
 		username: 'projectuser',
 		password: 'projectuser'
 	};
+
+	const userCanCreateFed = {
+		username: 'projectuser2',
+		password: 'projectuser2'
+	}
 
 	const userCanUpdateProject = {
 		username: 'projectuser4',
@@ -80,6 +86,16 @@ describe('Project Permissions', function () {
 					.send({ username: userCanCreateModel.username, password: userCanCreateModel.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userCanCreateModel.username);
+						done(err);
+					});
+				},
+
+				done =>{
+					agentCanCreateFed = request.agent(server);
+					agentCanCreateFed.post('/login')
+					.send({ username: userCanCreateFed.username, password: userCanCreateFed.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userCanCreateFed.username);
 						done(err);
 					});
 				},
@@ -126,7 +142,7 @@ describe('Project Permissions', function () {
 		});
 	});
 
-	it('user without create_model permission in a project cannot create model', function(done){
+	it('user without create_model permission on a project cannot create model', function(done){
 
 		const modelName = 'model001';
 
@@ -140,10 +156,35 @@ describe('Project Permissions', function () {
 	});
 
 
+	it('user without create_federation permission on a project cannot create federation', function(done){
+
+		const modelName = 'model001';
+
+		agentNoPermission
+		.post(`/${teamspace}/${modelName}`)
+		.send(Object.assign({ subModels: [] }, modelDetail))
+		.expect(401, function(err, res){
+			done(err);
+		});
+
+	});
+
+
+	it('user without edit_project permission on a project cannot edit project', function(done){
+
+		agentNoPermission
+		.put(`/${teamspace}/projects/${project}`)
+		.send({ name: project})
+		.expect(401, function(err, res){
+			done(err);
+		});
+
+	});
+
 
 	let modelId;
 
-	it('user with create_model permission in a project can create model', function(done){
+	it('user with create_model permission on a project can create model', function(done){
 
 		const modelName = 'model001';
 		
@@ -158,10 +199,100 @@ describe('Project Permissions', function () {
 
 	it('Users (non teamspace admin) have access to the model created by themselves', function(done){
 		agentCanCreateModel
-		.get(`/${teamspace}/${modelId}.json`)
+		.get(`/${teamspace}/${modelId}/permissions`)
 		.expect(200, function(err, res){
+			expect(err).to.be.null;
+			const perm = res.body.find(p => p.user === userCanCreateModel.username);
+			expect(perm).to.exists;
+			expect(perm.permission).to.equal('admin');
+			done();
+		});
+	});
+
+
+	it('user with create_model permission on a project cannot create fed model', function(done){
+
+		const modelName = 'fedmodel001';
+		
+		agentCanCreateModel
+		.post(`/${teamspace}/${modelName}`)
+		.send(Object.assign({ subModels: [] }, modelDetail))
+		.expect(401, done);
+	});
+
+
+	it('user with create_federation permission on a project can create fed model', function(done){
+
+		const modelName = 'fedmodel002';
+		
+		agentCanCreateFed
+		.post(`/${teamspace}/${modelName}`)
+		.send(Object.assign({ subModels: [] }, modelDetail))
+		.expect(200, done);
+
+	});
+
+	it('user with create_federation permission on a project cannot create model', function(done){
+
+		const modelName = 'fedmodel002';
+		
+		agentCanCreateFed
+		.post(`/${teamspace}/${modelName}`)
+		.send(modelDetail)
+		.expect(401, done);
+
+	});
+
+	it('Users with edit_project permission can edit a project', function(done){
+		agentCanUpdateProject
+		.put(`/${teamspace}/projects/project2`)
+		.send({ name: 'project2'})
+		.expect(200, done);
+	});
+
+	it('Users with edit_project permission cannot edit project permissions', function(done){
+		agentCanUpdateProject
+		.put(`/${teamspace}/projects/project2`)
+		.send({ permissions: []})
+		.expect(401, done);
+	});
+
+	it('Users with admin_project permission can edit a project', function(done){
+		agentProjectAdmin
+		.put(`/${teamspace}/projects/${project}`)
+		.send({ name: project})
+		.expect(200, done);
+	});
+
+	it('Users with admin_project permission on a project can create models in it', function(done){
+
+		const modelName = 'model002';
+		
+		agentProjectAdmin
+		.post(`/${teamspace}/${modelName}`)
+		.send(modelDetail)
+		.expect(200, function(err, res){
+			modelId = res.body.model;
 			done(err);
 		});
+	});
+
+	it('Users with admin_project permission on a project can access a model in it', function(done){
+
+		const modelId = '4b130bee-caba-46c1-a64d-32b7d1a41d6f';
+
+		agentProjectAdmin
+		.get(`/${teamspace}/${modelId}/permissions`)
+		.expect(200, done);
+	});
+
+	it('Users with admin_project permission on a project can access a model in it', function(done){
+
+		const modelId = '4b130bee-caba-46c1-a64d-32b7d1a41d6f';
+
+		agentProjectAdmin
+		.get(`/${teamspace}/${modelId}/jobs.json`)
+		.expect(200, done);
 	});
 
 });

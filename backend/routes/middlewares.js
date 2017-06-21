@@ -32,7 +32,7 @@
 	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
 	const checkPermissionsHelper = require('../middlewares/checkPermissions');
 
-	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION]] };
+	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] };
 
 	function checkPermissions(permsRequest){
 
@@ -191,6 +191,14 @@
 		).then(data => data.granted);
 	}
 
+	function canCreateModel(req, res, next){
+		if(req.body.subModels){
+			checkPermissions({ '$or': [[C.PERM_PROJECT_ADMIN], [C.PERM_CREATE_FEDERATION]]})(req, res, next);
+		} else {
+			checkPermissions({ '$or': [[C.PERM_PROJECT_ADMIN], [C.PERM_CREATE_MODEL]]})(req, res, next);
+		}
+	}
+
 	var middlewares = {
 
 
@@ -200,13 +208,15 @@
 		hasReadAccessToIssue: checkPermissions([C.PERM_VIEW_ISSUE]),
 
 		//models
+		canCreateModel: canCreateModel,
 		hasReadAccessToModel: checkPermissions(readAccessToModel),
-		hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
-		hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
-		hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
-		hasDownloadAccessToModel: checkPermissions([C.PERM_DOWNLOAD_MODEL]),
-		hasEditAccessToFedModel: checkPermissions([C.PERM_EDIT_FEDERATION]),
-		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
+		hasUploadAccessToModel: checkPermissions({ '$or': [[C.PERM_UPLOAD_FILES], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasWriteAccessToModelSettings: checkPermissions({ '$or': [[C.PERM_CHANGE_MODEL_SETTINGS], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasDeleteAccessToModel: checkPermissions({ '$or': [[C.PERM_DELETE_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasDownloadAccessToModel: checkPermissions({ '$or': [[C.PERM_DOWNLOAD_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasEditAccessToFedModel: checkPermissions({ '$or': [[C.PERM_EDIT_FEDERATION], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasDeleteAccessToFedModel: checkPermissions({ '$or': [[C.PERM_DELETE_FEDERATION], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasEditPermissionsAccessToModel: checkPermissions({ '$or': [[C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],

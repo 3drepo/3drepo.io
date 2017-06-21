@@ -11,23 +11,23 @@
 	const C = require("../constants");
 	const checkPermissions = middlewares.checkPermissions;
 	
-	function editCheckPermission(req, res, next){
+	function canUpdate(req, res, next){
 		if(req.body.permissions){
 			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
 		} else {
-			checkPermissions([C.PERM_CREATE_PROJECT])(req, res, next);
+			checkPermissions({ '$or':[[C.PERM_EDIT_PROJECT], [C.PERM_PROJECT_ADMIN]] })(req, res, next);
 		}
 	}
 
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
-	router.put("/projects/:project", editCheckPermission, updateProject);
+	router.put("/projects/:project", canUpdate, updateProject);
 	router.get("/projects", middlewares.isAccountAdmin, listProjects);
 	router.get("/projects/:project", checkPermissions([C.PERM_PROJECT_ADMIN]), listProject);
 	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
 	function createProject(req, res, next){
-		Project.createProject(req.params.account, req.body.name).then(project => {
+		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

@@ -77,24 +77,38 @@
 			},
 
 			modelLevel: function(username, model){
-				let user;
 
-				return this.getUser().then(_user => {
+				let user;
+				let projectPerms = [];
+
+				const projectQuery = { models: model, 'permissions.user': username };
+				// project admin have access to models underneath it.
+				return Project.findOne({account}, projectQuery, { 'permissions.$' : 1 } ).then(project => {
+
+					if(project && project.permissions){
+						projectPerms = project.permissions[0].permissions;
+					}
+
+					return this.getUser();
+
+				}).then(_user => {
+
 					user = _user;
 					return ModelSetting.findById({account, model}, model);
 
 				}).then(setting => {
 
 					if(!setting){
-						return [];
+						return projectPerms;
 					}
 
 					const perm = setting.findPermissionByUser(username);
 
 					if(!perm){
-						return [];
+						return projectPerms;
 					}
-					return user.customData.permissionTemplates.findById(perm.permission).permissions;
+
+					return projectPerms.concat(user.customData.permissionTemplates.findById(perm.permission).permissions);
 				});
 			}
 		};

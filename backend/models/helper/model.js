@@ -180,7 +180,10 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	}).then(setting => {
 
-		if(data.userPermissions && data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
+		if(data.userPermissions && 
+			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 && 
+			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
+		){
 
 			return setting.changePermissions([{
 				user: username,

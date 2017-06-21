@@ -21,6 +21,7 @@
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
+	const utils = require('./utils');
 
 	/**
 	 * List of response and error codes
@@ -337,6 +338,8 @@
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
 		
+		resCode = utils.mongoErrorToResCode(resCode);
+		
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -346,7 +349,9 @@
 				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 			}
 
-			resCode = responseCodes.PROCESS_ERROR(resCode);
+			if(!resCode.value){
+				resCode = responseCodes.PROCESS_ERROR(resCode);
+			}
 
 		}
 
