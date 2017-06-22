@@ -69,6 +69,7 @@
 	});
 
 	schema.statics.createProject = function(account, name, username, userPermissions){
+		const User = require('./user');
 
 		let project = Project.createInstance({account});
 		project.name = name;
@@ -80,19 +81,29 @@
 			}];
 		}
 
-		return project.save();
+		return project.save().then(project => {
+			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
+				return User.addProject(username, account, project.name);
+			}
+		}).then(() => project);
 
 	};
 
 	schema.statics.delete = function(account, name){
 
-		return Project.findOneAndRemove({account}, {name}).then(project => {
+		const User = require('./user');
+		let project;
+
+		return Project.findOneAndRemove({account}, {name}).then(_project => {
+
+			project = _project;
+
 			if(!project){
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
-				return project;
+				return User.removeProjectFromAllUser(account, project.name);
 			}
-		});
+		}).then(() => project);
 	};
 
 	schema.statics.removeModel = function(account, model){
@@ -101,8 +112,25 @@
 
 	schema.methods.updateAttrs = function(data){
 		
+		const account = this._dbcolOptions.account;
 		const whitelist = ['name', 'permissions'];
-		
+		const User = require('./user');
+
+		let usersToRemove = [];
+		let usersToAdd = [];
+
+		if(data.permissions){
+			// user to delete
+			for(let i = data.permissions.length -1; i >=0; i--){
+				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0){
+					data.permissions.splice(i ,1);
+				}
+			}
+
+			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
+			usersToAdd = _.difference(data.permissions.map(p => p.user), this.permissions.map(p => p.user));
+		}
+
 		Object.keys(data).forEach(key => {
 			if(whitelist.indexOf(key) !== -1){
 
@@ -110,7 +138,35 @@
 			}
 		});
 
-		return this.save();
+		let check = Promise.resolve();
+
+		if(this.permissions.length){
+			
+			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
+
+				const someUserNotAssignedWithLicence = this.permissions.some(
+					perm => !teamspace.customData.billing.subscriptions.findByAssignedUser(perm.user)
+				);
+
+				if(someUserNotAssignedWithLicence){
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
+
+			});
+		}
+
+		return check.then(() => {
+
+			let userPromises = [];
+
+			usersToRemove.forEach(user => userPromises.push(User.removeProject(user, account, this.name)) );
+			usersToAdd.forEach(user => userPromises.push(User.addProject(user, account, this.name)) );
+
+			return Promise.all(userPromises);
+
+		}).then(() => {
+			return this.save();
+		});
 
 	};
 

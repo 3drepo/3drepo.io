@@ -9071,7 +9071,7 @@ var ViewerManager = {};
 			{
 				if(vm.displayedAxis == "Y")
 				{
-					normal = [0, 0, 1]; //Unity has flipped Z axis
+					normal = [0, 0, -1]; //Unity has flipped Z axis
 				}
 				else if(vm.displayedAxis == "Z")
 				{
@@ -9109,7 +9109,7 @@ var ViewerManager = {};
 			}
 			else
 				return; //unknown axis, nothing would've been set. avoid infinity
-
+			
 			var percentage = 1 - vm.sliderPosition/100;
 			if(!updateSlider)
 				vm.disableWatchDistance = true;
@@ -9118,6 +9118,7 @@ var ViewerManager = {};
 			{
 				updateClippingPlane();
 			}
+
 		}
 
 		/**

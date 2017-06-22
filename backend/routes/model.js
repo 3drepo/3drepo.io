@@ -403,6 +403,10 @@ function updatePermissions(req, res, next){
 
 	return ModelSetting.findById({account, model}, model).then(modelSetting => {
 
+		if(!modelSetting){
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+
 		return modelSetting.changePermissions(req.body);
 
 	}).then(permission => {

@@ -33,8 +33,8 @@ describe('Permission templates', function () {
 
 	let server;
 	let agent;
-	let username = 'job';
-	let password = 'job';
+	let username = 'permissionTemplate';
+	let password = 'permissionTemplate';
 	let permission = { _id: 'customA', permissions: ['view_issue', 'view_project']};
 	let permission1 = { _id: 'customB', permissions: ['view_issue', 'view_project', 'create_project', 'create_issue']};
 	let model = 'model1';
@@ -191,8 +191,8 @@ describe('Permission templates', function () {
 
 		agent.post(`/${username}/${model}/permissions`)
 		.send([{ user: 'nonses', permission: 'customB'}])
-		.expect(404, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 			done(err);
 		});
 
@@ -244,5 +244,13 @@ describe('Permission templates', function () {
 
 	});
 
+	it('should fail to remove admin template', function(done){
+		agent.delete(`/${username}/permission-templates/admin`)
+		.expect(400, function(err, res){
+			expect(res.body.value).equal(responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE.value);
+			done(err);
+		});
+	
+	});
 
 });

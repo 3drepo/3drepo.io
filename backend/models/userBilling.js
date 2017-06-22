@@ -34,28 +34,9 @@
 
 	let getSubscription = Subscription.getSubscription;
 
-	let subscriptionSchema = mongoose.Schema({
-		active: Boolean,
-		updatedAt: Date,
-		createdAt: Date,
-		billingUser: String,
-		assignedUser: String,
-		job: String,
-		expiredAt: Date,
-		
-		limits: {
-			collaboratorLimit : {type: Number, default: 0},
-			spaceLimit : {type: Number, default: 0}
-		},
-
-		plan: String,
-		inCurrentAgreement: Boolean,
-		pendingDelete: Boolean,
-	});
-
 	let billingSchema = mongoose.Schema({
 		subscriptions: { 
-			type: [subscriptionSchema], 
+			type: [Subscriptions.schema], 
 			get: function (subs) { 
 				//console.log('subs', subs)
 				return new Subscriptions(this._parent, this.billingUser, this.billingInfo, subs); 

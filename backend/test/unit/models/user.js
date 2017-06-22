@@ -28,7 +28,8 @@ let User = proxyquire('../../../models/user', {
 	'./factory/modelFactory':  modelFactoryMock,
 	'../mailer/mailer': {},
 	'../logger.js': {},
-	'./userBilling': {}
+	'./userBilling': {},
+	'./project': {}
 });
 
 

@@ -93,6 +93,12 @@ var schema = mongoose.Schema({
 			_id: false,
 			account: String,
 			model: String
+		}],
+		// fields to speed up listing all projects and models the user has access to
+		projects: [{
+			_id: false,
+			account: String,
+			project: String
 		}]
 	},
 	roles: [{}]
@@ -519,6 +525,10 @@ function _fillInModelDetails(accountName, setting, permissions){
 	//console.log('permissions', permissions)
 	const ModelHelper = require('./helper/model');
 
+	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
+
 	let model = {
 		federate: setting.federate,
 		permissions: permissions,
@@ -583,14 +593,29 @@ function _getAllModels(accountName, permissions){
 }
 
 // find model groups and put models into project
-function _addProjects(account){
+function _addProjects(account, username){
 	'use strict';
+
+	account.projects = account.projects || [];
 
 	return Project.find({account: account.account}, {}).then(projects => {
 
 		projects.forEach((project, i) => {
 		
 			project = project.toObject();
+			if(account.permissions && account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+				project.permissions = C.PROJECT_PERM_LIST;
+			} else {
+
+				let permissions = project.permissions.find(p => p.user === username);
+				permissions = _.get(permissions, 'permissions') || [];
+				
+				if(permissions.indexOf(C.PERM_PROJECT_ADMIN) !== -1){
+					permissions = C.PROJECT_PERM_LIST;
+				}		
+				
+				project.permissions = permissions;
+			}
 
 			projects[i] = project;
 
@@ -612,7 +637,7 @@ function _addProjects(account){
 
 		});
 
-		account.projects = projects;
+		account.projects = account.projects.concat(projects);
 	});
 }
 
@@ -719,26 +744,59 @@ schema.methods.listAccounts = function(){
 				account: user.user,
 				models: [],
 				fedModels: [],
+				//deprecated, use permissions instead
 				isAdmin: true,
 				permissions: user.toObject().customData.permissions[0].permissions
 			};
 
 			accounts.push(account);
 
-			addAccountPromises.push(
-				// list all models under this account as they have full access
-				_getAllModels(account.account, C.MODEL_PERM_LIST).then(data => {
-					account.models = data.models;
-					account.fedModels = data.fedModels;
-				}),
-				// add space usage stat info into account object
-				_calSpace(user).then(quota => account.quota = quota)
-			);
-			
+			if (account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+				addAccountPromises.push(
+					// list all models under this account as they have full access
+					_getAllModels(account.account, C.MODEL_PERM_LIST).then(data => {
+						account.models = data.models;
+						account.fedModels = data.fedModels;
+
+						// add space usage stat info into account object
+						return _calSpace(user)
+					})
+					.then(quota => account.quota = quota)
+					.then(() => _addProjects(account, this.user))	
+				);
+			}
 		});
 
 		return Promise.all(addAccountPromises);
 
+	// project level permission
+	}).then(() => {
+		
+		let promises = [];
+		this.customData.projects.forEach(project => {
+			let account = accounts.find(account => account.account === project.account);
+			
+			if(!account){
+				account = {account: project.account, models: [], fedModels: [], projects: []};
+				accounts.push(account);
+			}
+
+			const projection = { 'permissions': { '$elemMatch': { user: this.user }, 'name': 1, 'models': 1 }};
+			promises.push(
+				Project.findOne({account: account.account}, { name: project.project }, projection).then(_proj => {
+					_proj = _proj.toObject();
+					_proj.permissions = _proj.permissions[0].permissions;
+
+					if(_proj.permissions .indexOf(C.PERM_PROJECT_ADMIN) !== -1){
+						_proj.permissions  = C.PROJECT_PERM_LIST;
+					}
+				
+					account.projects.push(_proj);
+				})
+			);
+		});
+
+		return Promise.all(promises);
 	// model level permission
 	}).then(() => {
 
@@ -753,7 +811,7 @@ schema.methods.listAccounts = function(){
 				account.fedModels.find(_model => _model.model === model.model);
 			});
 
-			//add project to list if not covered previously
+			//add model to list if not covered previously
 			if(!findModel){
 
 				let account = accounts.find(account => account.account === model.account);
@@ -794,7 +852,8 @@ schema.methods.listAccounts = function(){
 			accounts.unshift(myAccount);
 		}
 
-		return Promise.all(accounts.map(account => _addProjects(account)))
+		return accounts;
+		return Promise.all(accounts.map(account => _addProjects(account, this.user)))
 			.then(() => accounts);
 
 	});
@@ -933,6 +992,54 @@ schema.statics.removeModelFromAllUser = function(account, model){
 			'customData.models' : {
 				account: account,
 				model: model
+			} 
+		} 
+	}, {'multi': true});
+};
+
+// remove project record for models list
+schema.statics.removeProject = function(user, account, project){
+	'use strict';
+
+	return User.update( {account: 'admin'}, {user}, {
+		$pull: { 
+			'customData.projects' : {
+				account: account,
+				project: project
+			} 
+		} 
+	});
+};
+
+schema.statics.addProject = function(user, account, project){
+	'use strict';
+
+	return User.update( {account: 'admin'}, {user}, {
+		$addToSet: { 
+			'customData.projects' : {
+				account: account,
+				project: project
+			} 
+		} 
+	});
+};
+
+
+schema.statics.removeProjectFromAllUser = function(account, project){
+	'use strict';
+
+	return User.update( {account: 'admin'}, {
+		'customData.projects':{
+			'$elemMatch':{
+				account: account,
+				project: project
+			}
+		}
+	}, {
+		$pull: { 
+			'customData.projects' : {
+				account: account,
+				project: project
 			} 
 		} 
 	}, {'multi': true});

@@ -60,6 +60,10 @@
 
 		remove: function(id){
 
+			if(id === C.ADMIN_TEMPLATE){
+				return Promise.reject(responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE);
+			}
+
 			let permission = this.findById(id);
 			
 			 if (!permission) {

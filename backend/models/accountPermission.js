@@ -29,37 +29,35 @@
 	const _ = require('lodash');
 
 	const methods = {
-		init: function(user, permissions) {
+		init(user, permissions) {
 
 			this.user = user;
 			this.permissions = permissions;
 			return this;
 		},
 
-		findByUser: function(user){
+		findByUser(user){
 			return this.permissions.find(perm => perm.user === user);
 		},
 
 		_check(user, permission){
 
-			const User = require('./user');
-			
-			return User.findByUserName(user).then(user => {
-				if(!user){
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-			}).then(() => {
+			if(!this.user.customData.billing.subscriptions.findByAssignedUser(user)){
+				return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+			}
 
-				const isPermissionInvalid = permission.permissions && 
-					_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
+			const isPermissionInvalid = permission.permissions && 
+				_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
 
-				if (isPermissionInvalid) {
-					return Promise.reject(responseCodes.INVALID_PERM);
-				}
-			});
+			if (isPermissionInvalid) {
+				return Promise.reject(responseCodes.INVALID_PERM);
+			}
+
+			return Promise.resolve();
+
 		},
 
-		add: function(permission){
+		add(permission){
 
 			return this._check(permission.user, permission).then(() => {
 				
@@ -73,7 +71,7 @@
 			});
 		},
 
-		update: function(user, permission){
+		update(user, permission){
 
 			return this._check(user, permission).then(() => {
 
@@ -89,7 +87,7 @@
 			});
 		},
 
-		remove: function(user){
+		remove(user){
 
 			let index = -1;
 			

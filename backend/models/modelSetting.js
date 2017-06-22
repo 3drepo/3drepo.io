@@ -134,6 +134,9 @@ schema.methods.changePermissions = function(permissions){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
+			if(!dbUser.customData.billing.subscriptions.findByAssignedUser(permission.user)){
+				return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
+			}
 
 			let perm = this.permissions.find(perm => perm.user === permission.user);
 

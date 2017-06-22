@@ -61,8 +61,8 @@ describe('Account permission', function () {
 	it('should fail to assign permissions to a user that doesnt exist', function(done){
 		agent.post(`/${username}/permissions`)
 		.send({ user: 'nonsense', permissions: ['create_project']})
-		.expect(404, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 			done(err);
 		});
 	});

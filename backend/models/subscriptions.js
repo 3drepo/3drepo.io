@@ -21,6 +21,7 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ModelSetting = require("./modelSetting");
+	const mongoose = require("mongoose");
 	const _ = require('lodash');
 
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
@@ -33,6 +34,25 @@
 
 		//console.log('Subscriptions init --')
 	};
+
+	Subscriptions.schema = mongoose.Schema({
+		active: Boolean,
+		updatedAt: Date,
+		createdAt: Date,
+		billingUser: String,
+		assignedUser: String,
+		job: String,
+		expiredAt: Date,
+		
+		limits: {
+			collaboratorLimit : {type: Number, default: 0},
+			spaceLimit : {type: Number, default: 0}
+		},
+
+		plan: String,
+		inCurrentAgreement: Boolean,
+		pendingDelete: Boolean,
+	});
 
 	Subscriptions.prototype.addSubscriptionByPlan = function (plan) {
 		// Add subscription
