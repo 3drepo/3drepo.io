@@ -262,13 +262,17 @@
 								event.value.promise
 							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-							v.viewer.highlightObjects(
-								event.value.account,
-								event.value.model,
-								event.value.id ? [event.value.id] : event.value.ids,
-								event.value.zoom,
-								event.value.colour
-							);
+							if(!event.value.noHighlight)
+							{
+
+								v.viewer.highlightObjects(
+									event.value.account,
+									event.value.model,
+									event.value.id ? [event.value.id] : event.value.ids,
+									event.value.zoom,
+									event.value.colour
+								);
+							}
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,

@@ -3096,7 +3096,7 @@ var UnityUtil;
 		params.toggle = toggleMode;
 		if(color)
 			params.color = color;
-
+		console.log("Highlighting object: " + JSON.stringify(params));
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
@@ -9071,7 +9071,7 @@ var ViewerManager = {};
 			{
 				if(vm.displayedAxis == "Y")
 				{
-					normal = [0, 0, 1]; //Unity has flipped Z axis
+					normal = [0, 0, -1]; //Unity has flipped Z axis
 				}
 				else if(vm.displayedAxis == "Z")
 				{
@@ -9109,7 +9109,7 @@ var ViewerManager = {};
 			}
 			else
 				return; //unknown axis, nothing would've been set. avoid infinity
-
+			
 			var percentage = 1 - vm.sliderPosition/100;
 			if(!updateSlider)
 				vm.disableWatchDistance = true;
@@ -9118,6 +9118,7 @@ var ViewerManager = {};
 			{
 				updateClippingPlane();
 			}
+
 		}
 
 		/**
@@ -16538,13 +16539,17 @@ angular.module('3drepo')
 								event.value.promise
 							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-							v.viewer.highlightObjects(
-								event.value.account,
-								event.value.model,
-								event.value.id ? [event.value.id] : event.value.ids,
-								event.value.zoom,
-								event.value.colour
-							);
+							if(!event.value.noHighlight)
+							{
+
+								v.viewer.highlightObjects(
+									event.value.account,
+									event.value.model,
+									event.value.id ? [event.value.id] : event.value.ids,
+									event.value.zoom,
+									event.value.colour
+								);
+							}
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -20195,7 +20200,8 @@ var Oculus = {};
 					account: node.account,
 					model: node.project,
 					id: node._id,
-					name: node.name
+					name: node.name,
+					noHighlight : true
 				});
 
 				for(var key in map)
@@ -20211,7 +20217,7 @@ var Oculus = {};
 						account: account,
 						model: model,
 						ids: map[key],
-						multi: true
+						multi: false
 					});
 				}
 			}

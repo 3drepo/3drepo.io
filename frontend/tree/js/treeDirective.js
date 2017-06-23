@@ -768,7 +768,8 @@
 					account: node.account,
 					model: node.project,
 					id: node._id,
-					name: node.name
+					name: node.name,
+					noHighlight : true
 				});
 
 				for(var key in map)
@@ -784,7 +785,7 @@
 						account: account,
 						model: model,
 						ids: map[key],
-						multi: true
+						multi: false
 					});
 				}
 			}
