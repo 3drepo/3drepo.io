@@ -3,7 +3,7 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 		md-list-item.model-indent(ng-click="vm.viewFederation($event, vm.account, vm.project, vm.federation)", flex)
 			md-button.md-icon-button.federation(aria-label="Federation")
 				md-icon.angular-material-icons() border_all
-			p.modelName.md-list-item-text(flex="100"){{vm.federation.name}}
+			p.modelName.md-list-item-text(flex="100") {{vm.federation.name}}
 
 	div.modelRight(layout-align="start-center" layout="row")
 		.modelRight(layout="row", layout-align="start center")
