@@ -389,6 +389,10 @@
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
+								if(!noHighlight)
+								{
+									vm.selectNode(vm.nodesToShow[i]);
+								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;
 
@@ -497,8 +501,8 @@
 						//console.log('path', path);
 						lastParentWithName = null;
 						expandToSelection(path, 0);
-						//console.log('lastParentWithName', lastParentWithName);
 						lastParentWithName && vm.selectNode(lastParentWithName);
+
 					}
 				}
 			}
@@ -736,7 +740,6 @@
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-			//console.log('selectNode');
 			// Remove highlight from the current selection and highlight this node if not the same
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
@@ -768,9 +771,9 @@
 					account: node.account,
 					model: node.project,
 					id: node._id,
-					name: node.name
+					name: node.name,
+					noHighlight : true
 				});
-
 				for(var key in map)
 				{
 					var vals = key.split("@");
@@ -784,7 +787,7 @@
 						account: account,
 						model: model,
 						ids: map[key],
-						multi: true
+						multi: false
 					});
 				}
 			}
