@@ -175,7 +175,7 @@
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'view'
@@ -344,7 +344,7 @@
 						formData.append('desc', desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
