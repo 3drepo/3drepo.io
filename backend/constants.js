@@ -289,6 +289,8 @@
 	define("PERM_COMMENT_ISSUE_ALL_MODELS", "comment_issue_all_models");
 	define("PERM_VIEW_ISSUE_ALL_MODELS", "view_issue_all_models");
 	define("PERM_VIEW_MODEL_ALL_MODELS", "view_model_all_models");
+	define("PERM_DOWNLOAD_MODEL_ALL_MODELS", "download_model_all_models");
+	define("PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS", "change_model_settings_all_models");
 
 	// models
 	define("PERM_CHANGE_MODEL_SETTINGS", "change_model_settings");
@@ -327,7 +329,9 @@
 		module.exports.PERM_CREATE_ISSUE_ALL_MODELS,
 		module.exports.PERM_COMMENT_ISSUE_ALL_MODELS,
 		module.exports.PERM_VIEW_ISSUE_ALL_MODELS,
-		module.exports.PERM_VIEW_MODEL_ALL_MODELS
+		module.exports.PERM_VIEW_MODEL_ALL_MODELS,
+		module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS,
+		module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS
 	]);
 
 	// models

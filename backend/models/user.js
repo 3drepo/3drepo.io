@@ -775,30 +775,39 @@ schema.methods.listAccounts = function(){
 		let addAccountPromises = [];
 
 		dbUsers.forEach(user => {
-			
+
+			const isTeamspaceAdmin = user.toObject().customData.permissions[0].permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+			const canViewProjects = user.toObject().customData.permissions[0].permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
+
 			let account = {
 				account: user.user,
 				models: [],
 				fedModels: [],
 				projects: [],
 				//deprecated, use permissions instead
-				isAdmin: true,
+				isAdmin: isTeamspaceAdmin,
 				permissions: user.toObject().customData.permissions[0].permissions
 			};
 
 			accounts.push(account);
 
-			if (account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+			if (isTeamspaceAdmin || canViewProjects){
+
+				const inheritedModelPermissions = isTeamspaceAdmin && C.MODEL_PERM_LIST || 
+					canViewProjects && [C.PERM_VIEW_MODEL, C.PERM_VIEW_ISSUE] || [];
+
 				addAccountPromises.push(
 					// list all models under this account as they have full access
-					_getModels(account.account, null, C.MODEL_PERM_LIST).then(data => {
+					_getModels(account.account, null, inheritedModelPermissions).then(data => {
 						account.models = data.models;
 						account.fedModels = data.fedModels;
 
 						// add space usage stat info into account object
-						return _calSpace(user);
+						if (isTeamspaceAdmin){
+							return _calSpace(user).then(quota => account.quota = quota);
+						}
 					})
-					.then(quota => account.quota = quota)
+					
 					.then(() => _addProjects(account, this.user))	
 				);
 			}
@@ -826,7 +835,6 @@ schema.methods.listAccounts = function(){
 				Project.findOne({account: account.account}, { name: project.project }, projection).then(_proj => {
 
 					if(_proj.permissions.length === 0){
-						console.log('someone tempered the database directly, data in database fucked up. halting...');
 						return;
 					}
 
@@ -838,7 +846,6 @@ schema.methods.listAccounts = function(){
 						myProj.permissions = myProj.permissions[0].permissions;
 					} else {
 						myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
-						console.log('merge permissions', myProj);
 					}
 
 
@@ -917,7 +924,6 @@ schema.methods.listAccounts = function(){
 
 					if(existingModel){
 						
-						console.log('existingModel', existingModel);
 						existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
 						return;
 					}

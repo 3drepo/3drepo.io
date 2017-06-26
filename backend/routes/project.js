@@ -19,10 +19,12 @@
 		}
 	}
 
+	const canViewProject = { '$or':[[C.PERM_VIEW_PROJECTS], [C.PERM_PROJECT_ADMIN]] };
+
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
 	router.put("/projects/:project", canUpdate, updateProject);
-	router.get("/projects", middlewares.isAccountAdmin, listProjects);
-	router.get("/projects/:project", checkPermissions([C.PERM_PROJECT_ADMIN]), listProject);
+	router.get("/projects", checkPermissions(canViewProject), listProjects);
+	router.get("/projects/:project", checkPermissions(canViewProject), listProject);
 	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
