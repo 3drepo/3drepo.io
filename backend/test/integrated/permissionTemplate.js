@@ -35,8 +35,8 @@ describe('Permission templates', function () {
 	let agent;
 	let username = 'permissionTemplate';
 	let password = 'permissionTemplate';
-	let permission = { _id: 'customA', permissions: ['view_issue', 'view_project']};
-	let permission1 = { _id: 'customB', permissions: ['view_issue', 'view_project', 'create_project', 'create_issue']};
+	let permission = { _id: 'customA', permissions: ['view_issue', 'view_model']};
+	let permission1 = { _id: 'customB', permissions: ['view_issue', 'view_model', 'comment_issue', 'create_issue']};
 	let model = 'model1';
 
 	before(function(done){

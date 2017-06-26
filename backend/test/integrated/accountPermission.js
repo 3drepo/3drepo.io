@@ -28,10 +28,11 @@ const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
 
-describe('Account permission', function () {
+describe('Account permission::', function () {
 
 	let server;
 	let agent;
+	let agentAdmin;
 	let username = 'accountPerm';
 	let password = 'accountPerm';
 
@@ -225,4 +226,33 @@ describe('Account permission', function () {
 		agent.get(`/${teamspace}/projects/${projectName}`)
 		.expect(200, done);
 	});
+
+	it('non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked', function(done){
+
+		const teamspace = 'testing';
+
+		async.series([
+			callback => {
+				agentAdmin = request.agent(server);
+				agentAdmin.post('/login')
+				.send({ username: 'testing', password: 'testing' })
+				.expect(200, function(err, res){
+					expect(res.body.username).to.equal('testing');
+					callback(err);
+				});
+			},
+
+			callback => {
+				agentAdmin.delete(`/${teamspace}/permissions/${username}`)
+				.expect(200, callback);
+			},
+
+			callback => {
+				agent.get(`/${teamspace}/projects/${projectName}`)
+				.expect(401, callback);
+			}
+
+		], done);
+	});
+
 });

@@ -24,6 +24,7 @@
 	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
 	const _ = require('lodash');
+	const ModelSetting = require('./modelSetting');
 
 	const schema = mongoose.Schema({
 		name: { type: String, unique: true},
@@ -111,7 +112,7 @@
 	};
 
 	schema.methods.updateAttrs = function(data){
-		
+
 		const account = this._dbcolOptions.account;
 		const whitelist = ['name', 'permissions'];
 		const User = require('./user');
@@ -159,7 +160,18 @@
 
 			let userPromises = [];
 
-			usersToRemove.forEach(user => userPromises.push(User.removeProject(user, account, this.name)) );
+			usersToRemove.forEach(user => {
+				userPromises.push(User.removeProject(user, account, this.name));
+				// remove all model permissions in this project as well, if any
+				userPromises.push(
+					ModelSetting.find(this._dbcolOptions, { 'permissions.user': user}).then(settings => 
+						Promise.all(
+							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
+						)
+					)
+				);
+			});
+
 			usersToAdd.forEach(user => userPromises.push(User.addProject(user, account, this.name)) );
 
 			return Promise.all(userPromises);

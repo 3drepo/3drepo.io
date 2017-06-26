@@ -601,9 +601,7 @@ function _getModels(accountName, ids, permissions){
 // find projects and put models into project
 function _addProjects(account, username, models){
 	'use strict';
-
-	account.projects = account.projects || [];
-
+	
 	let query = {};
 
 	if (models){
@@ -717,8 +715,7 @@ function _calSpace(user){
 function _sortAccountsAndModels(accounts){
 	'use strict';
 
-	accounts.forEach(account => {
-		account.models.sort((a, b) => {
+	function sortModel(a, b) {
 			if(a.timestamp < b.timestamp){
 				return 1;
 			} else if (a.timestamp > b.timestamp){
@@ -726,7 +723,12 @@ function _sortAccountsAndModels(accounts){
 			} else {
 				return 0;
 			}
-		});
+	}
+
+	accounts.forEach(account => {
+		account.models.sort(sortModel);
+		account.fedModels.sort(sortModel);
+		account.projects.forEach(p => p.models.sort(sortModel));
 	});
 
 	accounts.sort((a, b) => {
@@ -759,8 +761,8 @@ function _sortAccountsAndModels(accounts){
 function _findModel(id, account){
 	return account.models.find(m => m.model === id) ||
 		account.fedModels.find(m => m.model === id) ||
-		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id) , null)
-};
+		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id) , null);
+}
 
 schema.methods.listAccounts = function(){
 	'use strict';
@@ -778,6 +780,7 @@ schema.methods.listAccounts = function(){
 				account: user.user,
 				models: [],
 				fedModels: [],
+				projects: [],
 				//deprecated, use permissions instead
 				isAdmin: true,
 				permissions: user.toObject().customData.permissions[0].permissions
@@ -793,7 +796,7 @@ schema.methods.listAccounts = function(){
 						account.fedModels = data.fedModels;
 
 						// add space usage stat info into account object
-						return _calSpace(user)
+						return _calSpace(user);
 					})
 					.then(quota => account.quota = quota)
 					.then(() => _addProjects(account, this.user))	
@@ -872,11 +875,11 @@ schema.methods.listAccounts = function(){
 					}
 
 					const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
-					console.log('newModelIds', newModelIds)
+
 					if(newModelIds.length){
 						return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 							myProj.models = models.models.concat(models.fedModels);
-						})
+						});
 					}
 
 				})

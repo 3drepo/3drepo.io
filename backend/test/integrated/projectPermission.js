@@ -28,7 +28,7 @@ const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
 
-describe('Project Permissions', function () {
+describe('Project Permissions::', function () {
 
 	let server;
 	let agentCanCreateModel;
@@ -36,6 +36,7 @@ describe('Project Permissions', function () {
 	let agentNoPermission;
 	let agentCanUpdateProject;
 	let agentProjectAdmin;
+	let agentTeamspaceAdmin;
 
 	const teamspace = 'projperm';
 	const project = 'project1';
@@ -79,6 +80,16 @@ describe('Project Permissions', function () {
 			console.log('API test server is listening on port 8080!');
 
 			async.parallel([ 
+
+				done => {
+					agentTeamspaceAdmin = request.agent(server);
+					agentTeamspaceAdmin.post('/login')
+					.send({ username: teamspace, password: teamspace })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(teamspace);
+						done(err);
+					});
+				},
 
 				done => {
 					agentCanCreateModel = request.agent(server);
@@ -197,7 +208,7 @@ describe('Project Permissions', function () {
 		});
 	});
 
-	it('Users (non teamspace admin) have access to the model created by themselves', function(done){
+	it('non teamspace admin users have access to the model created by themselves', function(done){
 		agentCanCreateModel
 		.get(`/${teamspace}/${modelId}/permissions`)
 		.expect(200, function(err, res){
@@ -219,6 +230,54 @@ describe('Project Permissions', function () {
 		.send(Object.assign({ subModels: [] }, modelDetail))
 		.expect(401, done);
 	});
+
+	it('non teamspace admin users will have permissions revoked on any models including the one created by themselves if parent project level permissions has been revoked', function(done){
+		
+		let permissions;
+
+		async.series([
+
+			callback => {
+				agentTeamspaceAdmin
+				.get(`/${teamspace}/projects/${project}`)
+				.expect(200, function(err, res){
+
+					expect(err).to.be.null;
+					expect(res.body.permissions).to.exists;
+
+					permissions = res.body.permissions;
+
+					const userPerm = permissions.find(p => p.user === userCanCreateModel.username);
+					expect(userPerm).to.exists;
+
+					userPerm.permissions = [];
+					callback(err);
+				});
+			},
+
+			
+			callback => {
+				console.log('permissions', permissions);
+
+				agentTeamspaceAdmin
+				.put(`/${teamspace}/projects/${project}`)
+				.send({ permissions })
+				.expect(200, callback);
+			},
+
+			
+			callback => {
+
+				agentCanCreateModel
+				.get(`/${teamspace}/${modelId}/permissions`)
+				.expect(401, callback);
+			}
+
+		], done);
+
+
+	});
+
 
 
 	it('user with create_federation permission on a project can create fed model', function(done){

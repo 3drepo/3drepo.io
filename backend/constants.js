@@ -269,10 +269,12 @@
 	define("PERM_REVOKE_LICENCE","revoke_licence");
 	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
 	define("PERM_CREATE_PROJECT", "create_project");
+
 	define("PERM_CREATE_JOB","create_job");
 	define("PERM_DELETE_JOB","delete_job");
 	define("PERM_ASSIGN_JOB","assign_job");
 
+	define("PERM_VIEW_PROJECTS", "view_projects"),
 
 	//project level permission
 	define("PERM_CREATE_MODEL", "create_model");
@@ -280,6 +282,13 @@
 	define("PERM_PROJECT_ADMIN", "admin_project");
 	define("PERM_EDIT_PROJECT", "edit_project");
 	define("PERM_DELETE_PROJECT", "delete_project");
+
+	define("PERM_UPLOAD_FILES_ALL_MODELS", "upload_files_all_models");
+	define("PERM_EDIT_FEDERATION_ALL_MODELS", "edit_federation_all_models");
+	define("PERM_CREATE_ISSUE_ALL_MODELS", "create_issue_all_models");
+	define("PERM_COMMENT_ISSUE_ALL_MODELS", "comment_issue_all_models");
+	define("PERM_VIEW_ISSUE_ALL_MODELS", "view_issue_all_models");
+	define("PERM_VIEW_MODEL_ALL_MODELS", "view_model_all_models");
 
 	// models
 	define("PERM_CHANGE_MODEL_SETTINGS", "change_model_settings");
@@ -293,29 +302,6 @@
 	define("PERM_DELETE_FEDERATION", "delete_federation");
 	define("PERM_DELETE_MODEL", "delete_model");
 	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
-	
-	//to be deleted
-	define("PERM_VIEW_PROJECT", "view_project"); 
-	define("PERM_DOWNLOAD_PROJECT", "download_project");
-	define("PERM_CHANGE_PROJECT_SETTINGS", "change_project_settings");
-
-	//all
-	define("PERM_LIST", [
-		module.exports.PERM_DELETE_PROJECT,
-		module.exports.PERM_CHANGE_PROJECT_SETTINGS,
-		module.exports.PERM_ASSIGN_LICENCE,
-		module.exports.PERM_UPLOAD_FILES,
-		module.exports.PERM_CREATE_ISSUE,
-		module.exports.PERM_COMMENT_ISSUE,
-		module.exports.PERM_VIEW_ISSUE,
-		module.exports.PERM_DOWNLOAD_PROJECT,
-		module.exports.PERM_VIEW_PROJECT,
-		module.exports.PERM_CREATE_PROJECT,
-		module.exports.PERM_PROJECT_ADMIN,
-		module.exports.PERM_EDIT_PROJECT,
-		module.exports.PERM_CREATE_MODEL,
-		module.exports.PERM_VIEW_MODEL
-	]);
 
 	//team space
 	define("ACCOUNT_PERM_LIST", [
@@ -325,7 +311,8 @@
 		module.exports.PERM_CREATE_PROJECT,
 		module.exports.PERM_CREATE_JOB,
 		module.exports.PERM_DELETE_JOB,
-		module.exports.PERM_ASSIGN_JOB
+		module.exports.PERM_ASSIGN_JOB,
+		module.exports.PERM_VIEW_PROJECTS
 	]);
 
 	//project level permission
@@ -334,7 +321,13 @@
 		module.exports.PERM_CREATE_FEDERATION,
 		module.exports.PERM_PROJECT_ADMIN,
 		module.exports.PERM_EDIT_PROJECT,
-		module.exports.PERM_DELETE_PROJECT
+		module.exports.PERM_DELETE_PROJECT,
+		module.exports.PERM_UPLOAD_FILES_ALL_MODELS,
+		module.exports.PERM_EDIT_FEDERATION_ALL_MODELS,
+		module.exports.PERM_CREATE_ISSUE_ALL_MODELS,
+		module.exports.PERM_COMMENT_ISSUE_ALL_MODELS,
+		module.exports.PERM_VIEW_ISSUE_ALL_MODELS,
+		module.exports.PERM_VIEW_MODEL_ALL_MODELS
 	]);
 
 	// models

@@ -27,6 +27,7 @@
 	const responseCodes = require('../response_codes.js');
 	const C = require('../constants');
 	const _ = require('lodash');
+	const Project = require('./project');
 
 	const methods = {
 		init(user, permissions) {
@@ -102,7 +103,17 @@
 				return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
 			} else {
 				this.permissions.splice(index, 1);
-				return this.user.save();
+				return this.user.save().then(() => {
+					// remove all project permissions in this project as well, if any
+					return Project.find({ account: this.user.user },{ 'permissions.user': user} );
+				}).then(projects => {
+					return Promise.all(
+						projects.map(proj => proj.updateAttrs({ 
+							permissions: proj.permissions.filter(perm => perm.user !== user) 
+						}))
+					);
+				}).then(() => this.user);
+
 			}
 
 		}
