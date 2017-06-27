@@ -6348,7 +6348,12 @@ var ViewerManager = {};
 					var message = UtilsService.getErrorMessage(response.data);
 					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
 						vm.licenseAssigneeIndex = index;
-						vm.userModels = response.data.models;
+						vm.models = response.data.models;
+						vm.projects = response.data.projects;
+						if(response.data.teamspace){
+							vm.teamspacePerms = response.data.teamspace.permissions.join(', ');
+						}
+						
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);
 					}
 				}
