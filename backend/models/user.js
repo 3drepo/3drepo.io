@@ -98,7 +98,7 @@ var schema = mongoose.Schema({
 		projects: [{
 			_id: false,
 			account: String,
-			project: String
+			project: mongoose.Schema.Types.ObjectId
 		}]
 	},
 	roles: [{}]
@@ -832,7 +832,7 @@ schema.methods.listAccounts = function(){
 
 			let myProj;
 			promises.push(
-				Project.findOne({account: account.account}, { name: project.project }, projection).then(_proj => {
+				Project.findOne({account: account.account}, { _id: project.project }, projection).then(_proj => {
 
 					if(_proj.permissions.length === 0){
 						return;

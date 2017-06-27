@@ -84,7 +84,7 @@
 
 		return project.save().then(project => {
 			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
-				return User.addProject(username, account, project.name);
+				return User.addProject(username, account, project._id);
 			}
 		}).then(() => project);
 
@@ -102,7 +102,7 @@
 			if(!project){
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
-				return User.removeProjectFromAllUser(account, project.name);
+				return User.removeProjectFromAllUser(account, project._id);
 			}
 		}).then(() => project);
 	};
@@ -161,7 +161,7 @@
 			let userPromises = [];
 
 			usersToRemove.forEach(user => {
-				userPromises.push(User.removeProject(user, account, this.name));
+				userPromises.push(User.removeProject(user, account, this._id));
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
 					ModelSetting.find(this._dbcolOptions, { 'permissions.user': user}).then(settings => 
@@ -172,7 +172,7 @@
 				);
 			});
 
-			usersToAdd.forEach(user => userPromises.push(User.addProject(user, account, this.name)) );
+			usersToAdd.forEach(user => userPromises.push(User.addProject(user, account, this._id)) );
 
 			return Promise.all(userPromises);
 

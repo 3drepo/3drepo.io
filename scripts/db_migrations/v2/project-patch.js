@@ -11,7 +11,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 					db.getSiblingDB('admin').system.users.update({ user: permission.user}, { '$addToSet': {
 						'customData.projects': {
 							account: database.name,
-							project: project.name,
+							project: project._id,
 						}
 					} })
 				}
