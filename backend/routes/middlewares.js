@@ -32,7 +32,7 @@
 	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
 	const checkPermissionsHelper = require('../middlewares/checkPermissions');
 
-	const readAccessToModel = { '$or': [[C.PERM_VIEW_ISSUE_ALL_MODELS], [C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] };
+	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL_ALL_MODELS], [C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] };
 
 	function checkPermissions(permsRequest){
 

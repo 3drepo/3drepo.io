@@ -856,29 +856,22 @@ schema.methods.listAccounts = function(){
 						inheritedModelPerms = C.MODEL_PERM_LIST;
 					} else {
 
-						if(myProj.permissions.indexOf(C.PERM_UPLOAD_FILES_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_UPLOAD_FILES);
-						}
+						[
+							{ proj: C.PERM_UPLOAD_FILES_ALL_MODELS, model: C.PERM_UPLOAD_FILES },
+							{ proj: C.PERM_EDIT_FEDERATION_ALL_MODELS, model: C.PERM_EDIT_FEDERATION },
+							{ proj: C.PERM_CREATE_ISSUE_ALL_MODELS, model: C.PERM_CREATE_ISSUE },
+							{ proj: C.PERM_COMMENT_ISSUE_ALL_MODELS, model: C.PERM_COMMENT_ISSUE },
+							{ proj: C.PERM_VIEW_ISSUE_ALL_MODELS, model: C.PERM_VIEW_ISSUE },
+							{ proj: C.PERM_DOWNLOAD_MODEL_ALL_MODELS, model: C.PERM_DOWNLOAD_MODEL },
+							{ proj: C.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS, model: C.PERM_CHANGE_MODEL_SETTINGS },
+							{ proj: C.PERM_VIEW_MODEL_ALL_MODELS, model: C.PERM_VIEW_MODEL}
 
-						if(myProj.permissions.indexOf(C.PERM_EDIT_FEDERATION_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_EDIT_FEDERATION);
-						}
-
-						if(myProj.permissions.indexOf(C.PERM_CREATE_ISSUE_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_CREATE_ISSUE);
-						}
-
-						if(myProj.permissions.indexOf(C.PERM_COMMENT_ISSUE_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_COMMENT_ISSUE);
-						}
-
-						if(myProj.permissions.indexOf(C.PERM_VIEW_ISSUE_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_VIEW_ISSUE);
-						}
-
-						if(myProj.permissions.indexOf(C.PERM_VIEW_MODEL_ALL_MODELS) !== -1){
-							inheritedModelPerms.push(C.PERM_VIEW_MODEL);
-						}
+						].forEach(permission => {
+							if(myProj.permissions.indexOf(permission.proj) !== -1){
+								inheritedModelPerms.push(permission.model);
+							}
+						});
+						
 					}
 
 					const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));

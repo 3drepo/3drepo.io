@@ -32,7 +32,7 @@ let async = require('async');
 let moment = require('moment-timezone');
 let User = require('../../models/user');
 let url = require('url');
-describe.skip('Billing agreement price from PayPal', function () {
+describe('Billing agreement price from PayPal', function () {
 
 	let User = require('../../models/user');
 	let server;
