@@ -256,8 +256,6 @@
 					} else {
 						
 						for (var j = 0; j < account.fedModels.length; j++) { 
-							console.log(account);
-							console.log("Deleting from default", account.fedModels[j].model, response.data.model);
 							if (account.fedModels[j].model === response.data.model) {
 								account.fedModels.splice(j, 1);
 								break;
@@ -277,6 +275,10 @@
 				}
 				else {
 					vm.deleteError = "Error deleting federation";
+					if (response.data.message) {
+						vm.deleteError = response.data.message;
+					} 
+
 				}
 			});
 		};

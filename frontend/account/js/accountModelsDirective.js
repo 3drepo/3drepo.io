@@ -460,7 +460,7 @@
 		vm.deleteModel = function () {
 
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name;
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
 			var promise = UtilsService.doDelete({}, url);
 
 			promise.then(function (response) {
@@ -510,12 +510,10 @@
 				}
 				else {
 					vm.deleteError = "Error deleting model";
-					if (response.status === 404) {
-						vm.deleteError += " : File not found"
-					}
-					if (response.status === 500) { 
-						vm.deleteError += " : There was a problem on the server"
-					}
+					console.log(response)
+					if (response.data.message) {
+						vm.deleteError = "Error: " + response.data.message;
+					} 
 				}
 			});
 		};
