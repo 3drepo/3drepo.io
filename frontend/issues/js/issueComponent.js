@@ -137,13 +137,14 @@
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 
+					startNotification();
 					var disableStatus;
 
 					// Set up statuses
 					disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(Auth.getUsername() === this.data.owner);
 					this.statuses[0].disabled = disableStatus;
 					this.statuses[3].disabled = disableStatus;
-					
+
 					this.issueData = angular.copy(this.data);
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
@@ -1014,9 +1015,6 @@
 				});
 			}
 		}
-
-		startNotification();
-
 
 	}
 }());
