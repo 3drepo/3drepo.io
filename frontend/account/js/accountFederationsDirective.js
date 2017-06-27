@@ -135,8 +135,27 @@
 
 			var isUserAccount = account.account === vm.account.account;
 			return {
-				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
+				edit: {
+					label: "Edit",
+					 icon: "edit", 
+					 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
+				},
+				delete: {
+					label: "Delete", 
+					icon: "delete", 
+					color: "#F44336", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
+				},
+				team: {
+					label: "Team", 
+					icon: "group", 
+					hidden: !vm.account === vm.userAccount
+				},
+				modelsetting: {
+					label: "Settings",
+					icon: "settings", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
+				}
 			};
 			
 		};
@@ -213,7 +232,6 @@
 					break;
 
 				case "delete":
-					console.log("Delete")
 					setupDelete(event, account, project, federation);
 					break;
 
@@ -283,9 +301,10 @@
 			UtilsService.showDialog("federationDialog.html", $scope, event, true);
 		}
 
-		function setupSetting(event, account, project, model){
-			$location.search("proj", model.name);
-			$location.search("targetAcct", account.account);
+		function setupSetting(event, teamspace, project, federation){
+			console.log("Setup setting", federation.name, teamspace.account);
+			$location.search("proj", federation.name);
+			$location.search("targetAcct", teamspace.account);
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
 

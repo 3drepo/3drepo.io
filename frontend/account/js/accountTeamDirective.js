@@ -50,7 +50,7 @@
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.numSubscriptions = vm.subscriptions.length;
+		vm.numSubscriptions = (vm.subscriptions) ? vm.subscriptions.length : 0;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 		vm.showList = true;
 
