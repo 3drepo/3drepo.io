@@ -90,6 +90,7 @@
 			$element.bind('keydown keypress', function (event) {
 				if(event.which === 27) { // 27 = esc key
 					vm.addButtons = false;
+					vm.addButtonType = "add";
 					$scope.$apply();
 					event.preventDefault();
 				}
@@ -258,7 +259,7 @@
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = (new Date()).toString();
+					vm.federationData.timestamp = new Date();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
 					vm.federationData.model = response.data.model;
 				
@@ -266,9 +267,11 @@
 					if (!isEdit) {
 						project.models.push(vm.federationData);
 					}
-		
-					vm.closeDialog();
 
+					vm.addButtons = false;
+					vm.addButtonType = "add";
+					vm.closeDialog();
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
@@ -498,7 +501,8 @@
 					}
 
 					vm.closeDialog();
-
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete'
@@ -611,8 +615,10 @@
 							model, 
 							vm.newModelData.project
 						);
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
-
+						
 						AnalyticService.sendEvent({
 							eventCategory: 'model',
 							eventAction: 'create'
@@ -873,6 +879,8 @@
 					vm.errorMessage = '';
 					delete vm.newProjectTeamspace;
 					delete vm.newProjectName;
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
 				}
 

@@ -247,9 +247,10 @@
 						}
 					}
 					
-	
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
-
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete',

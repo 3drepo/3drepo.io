@@ -283,6 +283,8 @@
 
 					if(!vm.uploadErrorMessage){
 						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
 					}
 				});
