@@ -102,12 +102,17 @@
 		}
 
 		function setCanUpdateStatus(issueData){
+
+			console.log('setCanUpdateStatus', issueData, self.modelSettings.permissions, Auth.getUsername());
 			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.modelSettings.permissions)){
+				console.log('no create issue permissions')
 				return self.canUpdateStatus = false;
 			}
 
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
 				issueData.assigned_roles.indexOf(self.userJob._id) !== -1
+
+			console.log(self.canUpdateStatus);
 		}
 		/**
 		 * Monitor changes to parameters
@@ -119,6 +124,8 @@
 			//console.log('issueComp on changes', changes);
 
 			if(changes.hasOwnProperty('modelSettings')){
+				console.log('onchanges modelsettings', this.modelSettings);
+
 				this.topic_types = this.modelSettings.properties.topicTypes;
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
 				//convert comment topic_types
@@ -129,6 +136,14 @@
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
+
+					var disableStatus;
+
+					// Set up statuses
+					disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(Auth.getUsername() === this.data.owner);
+					this.statuses[0].disabled = disableStatus;
+					this.statuses[3].disabled = disableStatus;
+					
 					this.issueData = angular.copy(this.data);
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
@@ -242,15 +257,8 @@
 		 */
 		this.$onInit = function () {
 			var disableStatus;
-
+			console.log('oninit data', self.data);
 			// Set up statuses
-			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
-			this.statuses = [
-				{value: "open", label: "Open", disabled: disableStatus},
-				{value: "in progress", label: "In progress", disabled: false},
-				{value: "for approval", label: "For approval", disabled: false},
-				{value: "closed", label: "Closed", disabled: disableStatus}
-			];
 		};
 
 		/**
