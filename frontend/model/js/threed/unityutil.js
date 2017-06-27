@@ -64,11 +64,26 @@ var UnityUtil;
     	    throw "" + param + " is does not have a type which is supported by SendMessage.";
 	}
 
-	UnityUtil.prototype.onError = function(err, url, line){
-		if(confirm("Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\nPlease ensure you are using a 64bit web browser (Chrome or FireFox for best results), reduce your memory usage and try again.\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:\n\n\"Error " + err + " occured at line " + line + "\"\n\n\nClick ok to refresh this page.\n"))
+	UnityUtil.prototype.onError = function(err, url, line)
+	{
+
+		var conf = "Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\n" + 
+					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results)," + 
+					"reduce your memory usage and try again." + 
+					"\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:" + 
+					"\n\n\"Error " + err + " occured at line " + line + 
+					"\"\n\n\nClick ok to refresh this page.\n"
+		
+
+		if (err.indexOf("Array buffer allocation failed") !== -1 ||
+			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1)
 		{
-			window.location.reload();
+			if(confirm(conf))
+			{
+				window.location.reload();
+			}
 		}
+
 		return true;
 	}
 

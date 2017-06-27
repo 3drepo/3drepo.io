@@ -184,8 +184,9 @@
 		 * Invert the models node
 		 * @param {Object} project the project to invert the models for 
 		 */
-		vm.toggleModels = function(project) {
-			project.modelsState = !project.modelsState;
+		vm.toggleModels = function(model) {
+			console.log(model)
+			model.modelsState = !model.modelsState;
 		}
 
 		/**
@@ -250,6 +251,8 @@
 				if(response.status !== 200 && response.status !== 201){
 					vm.errorMessage = response.data.message;
 				} else {
+
+					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
@@ -257,10 +260,8 @@
 					vm.federationData.federate = true;
 					vm.federationData.timestamp = (new Date()).toString();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					vm.federationData.name = response.data.name;
 					vm.federationData.model = response.data.model;
-					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
-
+				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
 						project.models.push(vm.federationData);
@@ -290,8 +291,12 @@
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			console.log("isDefault", isDefault);
+
+			// isDefault is a string for some reason?
+			if (typeof(isDefault) === "string") isDefault = (isDefault === "true")
+			
 			if (!isDefault) {
+
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -441,7 +446,7 @@
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.displayName;
+			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};

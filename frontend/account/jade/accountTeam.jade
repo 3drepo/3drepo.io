@@ -34,7 +34,7 @@ md-content(layout-margin)
 				md-button.md-icon-button(aria-label="Dashboard")
 					md-icon.angular-material-icons(ng-if="!vm.item.federate") dashboard
 					md-icon.angular-material-icons(ng-if="vm.item.federate") border_all
-				p(flex) {{vm.item.model}}
+				p(flex) {{vm.item.name}}
 
 			div(ng-if="vm.noLicensesAssigned")
 				.cardInfo

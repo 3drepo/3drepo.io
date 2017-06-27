@@ -2842,11 +2842,26 @@ var UnityUtil;
     	    throw "" + param + " is does not have a type which is supported by SendMessage.";
 	}
 
-	UnityUtil.prototype.onError = function(err, url, line){
-		if(confirm("Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\nPlease ensure you are using a 64bit web browser (Chrome or FireFox for best results), reduce your memory usage and try again.\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:\n\n\"Error " + err + " occured at line " + line + "\"\n\n\nClick ok to refresh this page.\n"))
+	UnityUtil.prototype.onError = function(err, url, line)
+	{
+
+		var conf = "Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\n" + 
+					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results)," + 
+					"reduce your memory usage and try again." + 
+					"\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:" + 
+					"\n\n\"Error " + err + " occured at line " + line + 
+					"\"\n\n\nClick ok to refresh this page.\n"
+		
+
+		if (err.indexOf("Array buffer allocation failed") !== -1 ||
+			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1)
 		{
-			window.location.reload();
+			if(confirm(conf))
+			{
+				window.location.reload();
+			}
 		}
+
 		return true;
 	}
 
@@ -6504,9 +6519,6 @@ var ViewerManager = {};
 
 		// Init
 		vm.modelToUpload = null;
-
-		vm.model.displayName = vm.model.name;
-		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6616,7 +6628,7 @@ var ViewerManager = {};
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'view'
@@ -6785,7 +6797,7 @@ var ViewerManager = {};
 						formData.append('desc', desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
@@ -7057,8 +7069,9 @@ var ViewerManager = {};
 		 * Invert the models node
 		 * @param {Object} project the project to invert the models for 
 		 */
-		vm.toggleModels = function(project) {
-			project.modelsState = !project.modelsState;
+		vm.toggleModels = function(model) {
+			console.log(model)
+			model.modelsState = !model.modelsState;
 		}
 
 		/**
@@ -7123,6 +7136,8 @@ var ViewerManager = {};
 				if(response.status !== 200 && response.status !== 201){
 					vm.errorMessage = response.data.message;
 				} else {
+
+					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
@@ -7130,10 +7145,8 @@ var ViewerManager = {};
 					vm.federationData.federate = true;
 					vm.federationData.timestamp = (new Date()).toString();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					vm.federationData.name = response.data.name;
 					vm.federationData.model = response.data.model;
-					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
-
+				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
 						project.models.push(vm.federationData);
@@ -7163,8 +7176,12 @@ var ViewerManager = {};
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			console.log("isDefault", isDefault);
+
+			// isDefault is a string for some reason?
+			if (typeof(isDefault) === "string") isDefault = (isDefault === "true")
+			
 			if (!isDefault) {
+
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -7314,7 +7331,7 @@ var ViewerManager = {};
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.displayName;
+			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
@@ -11121,14 +11138,18 @@ function AnalyticService(){
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 		// Check for expired sessions
-		var checkExpiredSessionTime = 60 // Seconds
+		var checkExpiredSessionTime = 5 // Seconds
 		$interval(function() {
 
 			Auth.isLoggedIn().success(function(){
 				//console.log("Logged In");
 			}).error(function(){
-				console.log("User logged out due to expire session");
-				Auth.logout();
+				if (StateManager.state.loggedIn) {
+					//console.log("User logged out due to expire session");
+					Auth.logout();
+				} else {
+					//console.log("User is not logged in, not redirecting")
+				}
 			});
 
 		}, 1000 * checkExpiredSessionTime);
@@ -16539,13 +16560,17 @@ angular.module('3drepo')
 								event.value.promise
 							);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-							v.viewer.highlightObjects(
-								event.value.account,
-								event.value.model,
-								event.value.id ? [event.value.id] : event.value.ids,
-								event.value.zoom,
-								event.value.colour
-							);
+							if(!event.value.noHighlight)
+							{
+
+								v.viewer.highlightObjects(
+									event.value.account,
+									event.value.model,
+									event.value.id ? [event.value.id] : event.value.ids,
+									event.value.zoom,
+									event.value.colour
+								);
+							}
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,
@@ -19817,6 +19842,10 @@ var Oculus = {};
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
+								if(!noHighlight)
+								{
+									vm.selectNode(vm.nodesToShow[i]);
+								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;
 
@@ -19925,8 +19954,8 @@ var Oculus = {};
 						//console.log('path', path);
 						lastParentWithName = null;
 						expandToSelection(path, 0);
-						//console.log('lastParentWithName', lastParentWithName);
 						lastParentWithName && vm.selectNode(lastParentWithName);
+
 					}
 				}
 			}
@@ -20164,7 +20193,6 @@ var Oculus = {};
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-			//console.log('selectNode');
 			// Remove highlight from the current selection and highlight this node if not the same
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
@@ -20196,9 +20224,9 @@ var Oculus = {};
 					account: node.account,
 					model: node.project,
 					id: node._id,
-					name: node.name
+					name: node.name,
+					noHighlight : true
 				});
-
 				for(var key in map)
 				{
 					var vals = key.split("@");
@@ -20212,7 +20240,7 @@ var Oculus = {};
 						account: account,
 						model: model,
 						ids: map[key],
-						multi: true
+						multi: false
 					});
 				}
 			}

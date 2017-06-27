@@ -104,14 +104,18 @@
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 		// Check for expired sessions
-		var checkExpiredSessionTime = 60 // Seconds
+		var checkExpiredSessionTime = 5 // Seconds
 		$interval(function() {
 
 			Auth.isLoggedIn().success(function(){
 				//console.log("Logged In");
 			}).error(function(){
-				console.log("User logged out due to expire session");
-				Auth.logout();
+				if (StateManager.state.loggedIn) {
+					//console.log("User logged out due to expire session");
+					Auth.logout();
+				} else {
+					//console.log("User is not logged in, not redirecting")
+				}
 			});
 
 		}, 1000 * checkExpiredSessionTime);
