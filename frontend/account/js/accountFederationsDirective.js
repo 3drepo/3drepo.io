@@ -304,7 +304,6 @@
 		}
 
 		function setupSetting(event, teamspace, project, federation){
-			console.log("Setup setting", federation.name, teamspace.account);
 			$location.search("proj", federation.name);
 			$location.search("targetAcct", teamspace.account);
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});

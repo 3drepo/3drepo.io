@@ -238,7 +238,8 @@
 		vm.saveFederation = function (teamspaceName, projectName) {
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
-			var isEdit = vm.federationData._isEdit
+			var isEdit = vm.federationData._isEdit;
+			console.log("IS EDIT", isEdit)
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -250,6 +251,7 @@
 			promise.then(function (response) {
 				
 				if(response.status !== 200 && response.status !== 201){
+					console.log("ERROR", response.data.message);
 					vm.errorMessage = response.data.message;
 				} else {
 
@@ -259,9 +261,12 @@
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = new Date();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
 					vm.federationData.model = response.data.model;
+					if (response.data.timestamp) {
+						vm.federationData.timestamp = response.data.timestamp;
+					}
+
 				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
