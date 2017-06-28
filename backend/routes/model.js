@@ -229,10 +229,13 @@ function updateModel(req, res, next){
 	let account = req.params.account;
 
 	let promise = Promise.resolve();
+	let setting;
 
 	if(req.body.subModels && req.body.subModels.length > 0){
 
-		promise = ModelSetting.findById({account}, model).then(setting => {
+		promise = ModelSetting.findById({account}, model).then(_setting => {
+
+			setting = _setting;
 
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
@@ -241,6 +244,11 @@ function updateModel(req, res, next){
 			} else {
 				return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
 			}
+
+		}).then(() => {
+			setting.subModels = req.body.subModels;
+			setting.timestamp = new Date();
+			return setting.save();
 		});
 
 	}

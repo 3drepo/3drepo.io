@@ -56,8 +56,14 @@ var schema = mongoose.Schema({
 			label: String
 		}]
 
-	}
+	},
 
+	timestamp: Date,
+	subModels: [{
+		_id: false,
+		database: String,
+		model: String
+	}]
 });
 
 

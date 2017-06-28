@@ -22,7 +22,6 @@ var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
-var History = require('./history');
 var Role = require('./role');
 
 var systemLogger = require("../logger.js").systemLogger;
@@ -523,8 +522,6 @@ function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';
 
 	//console.log('permissions', permissions)
-	const ModelHelper = require('./helper/model');
-
 	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
 		permissions = C.MODEL_PERM_LIST.slice(0);
 	}
@@ -534,30 +531,34 @@ function _fillInModelDetails(accountName, setting, permissions){
 		permissions: permissions,
 		model: setting._id,
 		name: setting.name,
-		status: setting.status
+		status: setting.status,
+		subModels: setting.federate && setting.toObject().subModels || undefined,
+		timestamp: setting.timestamp || null
 	};
 
-	//return Promise.resolve(model);
+	return Promise.resolve(model);
 
-	return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
+	// the following is not needed any more after caching timestamp and submodels in model settings
 
-		if(history){
-			model.timestamp = history.timestamp;
-		} else {
-			model.timestamp = null;
-		}
+	// return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
 
-		if(setting.federate){
+	// 	if(history){
+	// 		model.timestamp = history.timestamp;
+	// 	} else {
+	// 		model.timestamp = null;
+	// 	}
+
+	// 	if(setting.federate){
 		
-			//list all sub models of a fed model
-			return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
-				model.subModels = subModels;
-			}).then(() => model);
+	// 		//list all sub models of a fed model
+	// 		return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
+	// 			model.subModels = subModels;
+	// 		}).then(() => model);
 
-		}
+	// 	}
 
-		return model;
-	});
+	// 	return model;
+	// });
 
 }
 //list all models in an account

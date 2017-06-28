@@ -156,7 +156,13 @@ function createAndAssignRole(modelName, account, username, data) {
 		setting.owner = username;
 		setting.desc = data.desc;
 		setting.type = data.type;
-		setting.federate = data.federate;
+
+		if(data.federate){
+			setting.federate = data.federate;
+			setting.subModels = data.subModels;
+			setting.timestamp = new Date();
+		}
+
 
 		setting.updateProperties({
 			unit: data.unit,
@@ -971,6 +977,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
+		modelSetting.timestamp = new Date();
 		modelSetting.markModified('errorReason');
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
