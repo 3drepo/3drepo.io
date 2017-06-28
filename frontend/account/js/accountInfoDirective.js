@@ -31,7 +31,8 @@
 				lastName: "=",
 				email: "=",
 				itemToShow: "=",
-				hasAvatar: "="
+				hasAvatar: "=",
+				loading: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',

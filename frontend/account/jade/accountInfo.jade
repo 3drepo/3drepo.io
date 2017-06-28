@@ -1,19 +1,24 @@
 .homeUserContent
+
 	md-content.md-whiteframe-1dp(aria-label="Models", flex)
 		md-toolbar
 			.md-toolbar-tools
 				h2 {{vm.username}}
 
 		#accountInfoContent(layout="column")
+
 			div(layout="row", flex="none")
 				img.account-avatar-image(ng-if="vm.avatarUrl && !vm.uploadingAvatar", src='{{vm.avatarUrl}}', ng-click="vm.upload()")
 				md-progress-circular.avatarUploadIcon(md-mode="indeterminate", md-diameter="55", ng-if="vm.uploadingAvatar")
 				#noAvatarIcon(ng-if="!vm.avatarUrl && !vm.uploadingAvatar", flex, layout="row")
 					//md-icon(class="fa fa-user", ng-click="vm.upload()")
 					md-icon.angular-material-icons.avatar-upload(ng-if="!vm.hasAvatar", ng-click="vm.upload()") person
+			
 			md-list
+
 				md-list-item.md-2-line
-					div.md-list-item-text
+					div.md-list-item-text(ng-if="vm.loading") Loading...
+					div.md-list-item-text(ng-if="!vm.loading")
 						h3 {{vm.firstName}} {{vm.lastName}}
 						p {{vm.email}}
 					md-divider
