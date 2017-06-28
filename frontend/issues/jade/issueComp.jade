@@ -1,4 +1,4 @@
-div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
+div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 	div
 		// Title
 		.issueCompItemContainer#issueCompTitleArea(
@@ -94,7 +94,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 				
 				.issueCompThumbnail(
 				ng-if="$ctrl.descriptionThumbnail"
-				ng-style="{'background-image': 'url({{$ctrl.descriptionThumbnail}})' }"
+				ng-style="{'background-image': 'url({{$ctrl.descriptionThumbnail}})', 'background-repeat' : 'no-repeat', 'background-size': 'contain'}"
 				ng-click="$ctrl.showScreenShot($event, $ctrl.issueData.viewpoint)")
 					
 						
@@ -118,8 +118,8 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 						// Saved auto comment
 
 						// Editing normal comment
-						md-input-container(flex, ng-if="comment.editing")
-							textarea(ng-model="comment.comment"
+						md-input-container.fillHeight(flex, ng-if="comment.editing")
+							textarea.fillHeight(ng-model="comment.comment"
 								flex
 								aria-label="Description"
 								tdr-focus="true"
@@ -168,7 +168,7 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 
 	// New comment
 	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="$ctrl.data")
-		md-input-container(flex, md-no-float)
+		md-input-container.fillHeight(flex, md-no-float)
 			textarea(
 			ng-model="$ctrl.comment"
 			ng-change="$ctrl.commentChange()"
@@ -176,8 +176,8 @@ div(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true")
 			ng-blur="$ctrl.textInputHasFocus(false)"
 			ng-disabled="!$ctrl.canComment"
 			placeholder="{{$ctrl.canComment ? 'Comment' : ($ctrl.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
-		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
-			img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
+			.issueCompThumbnail.fillHeight(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
+				img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
 
 
 	md-divider

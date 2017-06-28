@@ -118,7 +118,7 @@
 				leftArrow = 37;
 			//console.log('issueComp on changes', changes);
 
-			if(changes.hasOwnProperty('modelSettings')){
+			if(changes.hasOwnProperty('modelSettings') && changes.modelSettings.hasOwnProperty('properties') ){
 				this.topic_types = this.modelSettings.properties.topicTypes;
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
 				//convert comment topic_types
