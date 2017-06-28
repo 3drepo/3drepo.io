@@ -537,6 +537,8 @@ function _fillInModelDetails(accountName, setting, permissions){
 		status: setting.status
 	};
 
+	//return Promise.resolve(model);
+
 	return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
 
 		if(history){
@@ -583,18 +585,7 @@ function _getModels(accountName, ids, permissions){
 			);
 		});
 
-		return Promise.all(promises).then(() => {
-			// fill in sub model name
-			fedModels.forEach(fedModel => {
-				fedModel.subModels.forEach(subModel => {
-					const model = models.find(m => m.model === subModel.model);
-					if(model){
-						subModel.name = model.name;
-					}
-				});
-			});
-
-		}).then(() => { return {models, fedModels}; });
+		return Promise.all(promises).then(() => { return {models, fedModels}; });
 	});
 }
 
@@ -761,7 +752,7 @@ function _sortAccountsAndModels(accounts){
 function _findModel(id, account){
 	return account.models.find(m => m.model === id) ||
 		account.fedModels.find(m => m.model === id) ||
-		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id) , null);
+		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
 }
 
 schema.methods.listAccounts = function(){
@@ -888,6 +879,7 @@ schema.methods.listAccounts = function(){
 
 		return Promise.all(promises);
 
+	//model level
 	}).then(() => {
 
 		//find all models (and therefore its team space but with limited access) user has access to
@@ -954,8 +946,29 @@ schema.methods.listAccounts = function(){
 
 		return Promise.all(addModelPromises);
 
-	//add projects and put models into projects for each account
+	
 	}).then(() => {
+
+		//fill in all subModels name
+		accounts.forEach(account => {
+			//all fed models
+			const allFedModels = account.fedModels.concat(
+				account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+			);
+
+			//all models
+			const allModels = account.models.concat(
+				account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+			);
+
+			allFedModels.forEach(fed => {
+				fed.subModels.forEach(subModel => {
+					const foundModel = allModels.find(m => m.model === subModel.model);
+					subModel.name = foundModel && foundModel.name;
+				});
+			});
+		});
+
 
 		//sorting models
 		_sortAccountsAndModels(accounts);
