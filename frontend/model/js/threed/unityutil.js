@@ -15,7 +15,6 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-
 var UnityUtil;
 
 (function() {
@@ -118,6 +117,7 @@ var UnityUtil;
 
 	UnityUtil.prototype.onReady = function()	
 	{
+	
 		if(!readyPromise)
 		{
 		   readyPromise	= new Promise(function(resolve, reject)

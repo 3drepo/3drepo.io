@@ -43,6 +43,13 @@
 		 */
 		vm.version = serverConfig.apiVersion;
 
+		vm.unityLoaded = false;
+		vm.unityLoading = UnityUtil.onReady();
+		vm.unityLoading.then(function(resolved){
+			console.log("Loaded", resolved);
+			vm.unityLoaded = true;
+		})
+
 		Auth.isLoggedIn().success(function(response){
 			StateManager.setStateVar("loggedIn", true);
 			EventService.send(EventService.EVENT.UPDATE_STATE);
@@ -96,6 +103,12 @@
 					}
 				}
 			}
+		});
+
+		$scope.$watch("vm.unityLoading", function(event) {
+
+			console.log(vm.unityLoading);
+
 		});
 	}
 }());

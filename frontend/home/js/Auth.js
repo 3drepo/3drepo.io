@@ -91,17 +91,24 @@
 				// Initialize
 				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login")).success(function _initSuccess(data)
 					{
+						// If we are not logging in because of an interval
+						// then we are initializing the auth plugin
 						if (!interval)
 						{
 							data.initialiser = true;
+							self.loginSuccess(data);
+						} else if (!self.loggedIn) {
+							// If we are logging in using an interval,
+							// we only need to run login success if the self.loggedIn
+							// says we are not logged in.
+							self.loginSuccess(data);
 						}
-						self.loginSuccess(data);
 					}).error(function _initFailure(reason)
 					{
 						if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code)
 						{
 							self.loginSuccess(reason);
-						} else {
+						} else if (self.loggedIn === null || (interval && self.loggedIn)) {
 							reason.initialiser = true;
 							
 							self.loginFailure(reason);
@@ -127,9 +134,10 @@
 		};
 
 		// Check for expired sessions
-		var checkExpiredSessionTime = 10 // Seconds
+		var checkExpiredSessionTime = 5 // Seconds
 
 			this.intervalCaller = $interval(function() {
+				console.log("Running Init")
 				self.init(true);
 			}, 1000 * checkExpiredSessionTime);
 
