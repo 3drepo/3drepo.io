@@ -92,13 +92,16 @@
 		var currentError = {};
 
 		var send = function (type, value) {
+			var stack = (new Error()).stack;
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
 					console.trace("UNDEFINED EVENT TYPE" + type);
+					
 				} else {
-					console.log("SEND: " + type);
+					// console.log("SEND: " + type);
 					console.log(value);
+					// console.log(stack);
 					currentEvent = {type: type, value: value};
 				}
 			});

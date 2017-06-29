@@ -186,7 +186,6 @@
 		 * @param {Object} project the project to invert the models for 
 		 */
 		vm.toggleModels = function(model) {
-			console.log(model)
 			model.modelsState = !model.modelsState;
 		}
 
@@ -239,7 +238,6 @@
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
 			var isEdit = vm.federationData._isEdit;
-			console.log("IS EDIT", isEdit)
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -251,11 +249,9 @@
 			promise.then(function (response) {
 				
 				if(response.status !== 200 && response.status !== 201){
-					console.log("ERROR", response.data.message);
 					vm.errorMessage = response.data.message;
 				} else {
 
-					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
@@ -515,7 +511,6 @@
 				}
 				else {
 					vm.deleteError = "Error deleting model";
-					console.log(response)
 					if (response.data.message) {
 						vm.deleteError = "Error: " + response.data.message;
 					} 

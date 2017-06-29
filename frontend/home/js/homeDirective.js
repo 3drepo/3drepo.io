@@ -103,24 +103,11 @@
 		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-		// Check for expired sessions
-		var checkExpiredSessionTime = 5 // Seconds
-		$interval(function() {
 
-			Auth.isLoggedIn().success(function(){
-				//console.log("Logged In");
-			}).error(function(){
-				if (StateManager.state.loggedIn) {
-					//console.log("User logged out due to expire session");
-					Auth.logout();
-				} else {
-					//console.log("User is not logged in, not redirecting")
-				}
-			});
-
-		}, 1000 * checkExpiredSessionTime);
 
 		$timeout(function () {
+			var login = angular.element("<login></login>");
+			var elementRef, elementScope;
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {
 				name: "default",
@@ -130,10 +117,13 @@
 			 */
 			$scope.$watch("vm.state", function (newState, oldState) {
 
-				//console.log('newState', newState, oldState);
 				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
-					//console.log('in');
-					homeLoggedOut.empty();
+
+					if (elementRef)
+					{
+						elementRef.remove();
+						elementScope.$destroy();
+					}
 
 					vm.goToUserPage = false;
 					for (i = 0; i < vm.functions.length; i++) {
@@ -150,16 +140,18 @@
 
 							notLoggedInElement = angular.element(element);
 							homeLoggedOut.append(notLoggedInElement);
-							$compile(notLoggedInElement)($scope);
+							elementScope = $scope.$new();
+							elementRef = $compile(notLoggedInElement)(elementScope);
 							break;
 						}
 					}
 
 					if (!vm.state.loggedIn && !vm.goToUserPage) {
 						// Create login element
-						notLoggedInElement = angular.element("<login></login>");
+						notLoggedInElement = login;
 						homeLoggedOut.append(notLoggedInElement);
-						$compile(notLoggedInElement)($scope);
+						elementScope = $scope.$new();
+						elementRef = $compile(notLoggedInElement)(elementScope);
 					}
 				}
 			}, true);
@@ -203,6 +195,10 @@
 								EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
 							}
 						}
+					} else {
+
+						EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+					
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);

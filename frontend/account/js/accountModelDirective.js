@@ -193,7 +193,6 @@
 		vm.doModelOption = function (event, option) {
 			switch (option) {
 				case "modelsetting":
-					console.log("Setup setting", vm.model.name, vm.account);
 					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});

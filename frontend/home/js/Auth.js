@@ -19,8 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", "AnalyticService", 
-		function($injector, $q, $http, serverConfig, EventService, AnalyticService) {
+	.service("Auth", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
+		function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
 
 		var self = this;
 
@@ -51,7 +51,7 @@
 
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, initialiser: initialiser, error: reason });
 
-			self.authPromise.resolve(self.loggedIn);
+			self.authPromise.resolve(reason);
 		};
 
 		this.logoutSuccess = function()
@@ -77,23 +77,36 @@
 			self.authPromise.resolve(self.loggedIn);
 		};
 
-		this.init = function() {
+
+		this.init = function(interval) {
 			var initPromise = $q.defer();
+
+			interval = !!interval;
 
 			// If we are not logged in, check
 			// with the API server whether we
 			// are or not
-			if(self.loggedIn === null)
+			if(self.loggedIn === null || interval)
 			{
 				// Initialize
 				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login")).success(function _initSuccess(data)
 					{
-						data.initialiser = true;
+						if (!interval)
+						{
+							data.initialiser = true;
+						}
 						self.loginSuccess(data);
 					}).error(function _initFailure(reason)
 					{
-						reason.initialiser = true;
-						self.loginFailure(reason);
+						if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code)
+						{
+							self.loginSuccess(reason);
+						} else {
+							reason.initialiser = true;
+							
+							self.loginFailure(reason);
+						}
+							
 					});
 
 				self.authPromise.promise.then(function() {
@@ -112,6 +125,13 @@
 
 			return initPromise.promise;
 		};
+
+		// Check for expired sessions
+		var checkExpiredSessionTime = 10 // Seconds
+
+			this.intervalCaller = $interval(function() {
+				self.init(true);
+			}, 1000 * checkExpiredSessionTime);
 
 		this.loadModelRoles = function(account, model)
 		{

@@ -45,6 +45,8 @@
 		// require("../encoders/json_encoder.js")
 		// 	.route(routes);
 
+		app.disable('etag');
+
 		// Configure various middleware
 		app.use(sharedSession);
 		app.use(cors({ origin: true, credentials: true }));

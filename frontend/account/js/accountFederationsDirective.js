@@ -221,7 +221,7 @@
 		 * @param federationIndex
 		 */
 		vm.doFederationOption = function (event, option, account, project, federation) {
-			console.log(event, option, account, project, federation)
+
 			switch (option) {
 				case "edit":
 					setupEditFederation(event, account, project, federation);
