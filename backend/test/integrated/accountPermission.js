@@ -28,10 +28,11 @@ const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
 
-describe('Account permission', function () {
+describe('Account permission::', function () {
 
 	let server;
 	let agent;
+	let agentAdmin;
 	let username = 'accountPerm';
 	let password = 'accountPerm';
 
@@ -61,8 +62,8 @@ describe('Account permission', function () {
 	it('should fail to assign permissions to a user that doesnt exist', function(done){
 		agent.post(`/${username}/permissions`)
 		.send({ user: 'nonsense', permissions: ['create_project']})
-		.expect(404, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 			done(err);
 		});
 	});
@@ -199,13 +200,59 @@ describe('Account permission', function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					console.log(res.body)
 					expect(res.body.find(perm => perm.user === 'user3')).to.not.exist;
 					callback(err);
 				});
 			}
 
 		], (err, res) => done(err));
+	});
+
+	let projectName = 'project567';
+
+	it('should able to create_project on other teamspace if given create_project on the target teamspace', function(done){
+
+		const teamspace = 'testing';
+
+		agent.post(`/${teamspace}/projects`)
+		.send({ name: projectName })
+		.expect(200, done);
+	});
+
+	it('should able to access the project created by the users themselves', function(done){
+
+		const teamspace = 'testing';
+
+		agent.get(`/${teamspace}/projects/${projectName}`)
+		.expect(200, done);
+	});
+
+	it('non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked', function(done){
+
+		const teamspace = 'testing';
+
+		async.series([
+			callback => {
+				agentAdmin = request.agent(server);
+				agentAdmin.post('/login')
+				.send({ username: 'testing', password: 'testing' })
+				.expect(200, function(err, res){
+					expect(res.body.username).to.equal('testing');
+					callback(err);
+				});
+			},
+
+			callback => {
+				agentAdmin.delete(`/${teamspace}/permissions/${username}`)
+				.expect(200, callback);
+			},
+
+			callback => {
+				agent.get(`/${teamspace}/projects/${projectName}`)
+				.expect(401, callback);
+			}
+
+		], done);
 	});
 
 });

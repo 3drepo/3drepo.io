@@ -156,7 +156,13 @@ function createAndAssignRole(modelName, account, username, data) {
 		setting.owner = username;
 		setting.desc = data.desc;
 		setting.type = data.type;
-		setting.federate = data.federate;
+
+		if(data.federate){
+			setting.federate = data.federate;
+			setting.subModels = data.subModels;
+			setting.timestamp = new Date();
+		}
+
 
 		setting.updateProperties({
 			unit: data.unit,
@@ -177,6 +183,22 @@ function createAndAssignRole(modelName, account, username, data) {
 
 		return setting;
 		
+
+	}).then(setting => {
+
+		if(data.userPermissions && 
+			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 && 
+			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
+		){
+
+			return setting.changePermissions([{
+				user: username,
+				permission: C.ADMIN_TEMPLATE
+			}]).then(() => setting);
+
+		}
+
+		return Promise.resolve(setting);
 
 	}).then(setting => {
 
@@ -955,6 +977,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
+		modelSetting.timestamp = new Date();
 		modelSetting.markModified('errorReason');
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);

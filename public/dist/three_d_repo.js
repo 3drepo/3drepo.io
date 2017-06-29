@@ -2842,11 +2842,26 @@ var UnityUtil;
     	    throw "" + param + " is does not have a type which is supported by SendMessage.";
 	}
 
-	UnityUtil.prototype.onError = function(err, url, line){
-		if(confirm("Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\nPlease ensure you are using a 64bit web browser (Chrome or FireFox for best results), reduce your memory usage and try again.\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:\n\n\"Error " + err + " occured at line " + line + "\"\n\n\nClick ok to refresh this page.\n"))
+	UnityUtil.prototype.onError = function(err, url, line)
+	{
+
+		var conf = "Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\n" + 
+					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results)," + 
+					"reduce your memory usage and try again." + 
+					"\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:" + 
+					"\n\n\"Error " + err + " occured at line " + line + 
+					"\"\n\n\nClick ok to refresh this page.\n"
+		
+
+		if (err.indexOf("Array buffer allocation failed") !== -1 ||
+			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1)
 		{
-			window.location.reload();
+			if(confirm(conf))
+			{
+				window.location.reload();
+			}
 		}
+
 		return true;
 	}
 
@@ -3096,7 +3111,7 @@ var UnityUtil;
 		params.toggle = toggleMode;
 		if(color)
 			params.color = color;
-		console.log("Highlighting object: " + JSON.stringify(params));
+
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
@@ -5949,9 +5964,10 @@ var ViewerManager = {};
 						}
 					}
 					
-	
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
-
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete',
@@ -6333,7 +6349,12 @@ var ViewerManager = {};
 					var message = UtilsService.getErrorMessage(response.data);
 					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
 						vm.licenseAssigneeIndex = index;
-						vm.userModels = response.data.models;
+						vm.models = response.data.models;
+						vm.projects = response.data.projects;
+						if(response.data.teamspace){
+							vm.teamspacePerms = response.data.teamspace.permissions.join(', ');
+						}
+						
 						UtilsService.showDialog("removeLicenseDialog.html", $scope);
 					}
 				}
@@ -6504,9 +6525,6 @@ var ViewerManager = {};
 
 		// Init
 		vm.modelToUpload = null;
-
-		vm.model.displayName = vm.model.name;
-		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -6616,7 +6634,7 @@ var ViewerManager = {};
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'view'
@@ -6724,6 +6742,8 @@ var ViewerManager = {};
 
 					if(!vm.uploadErrorMessage){
 						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
 					}
 				});
@@ -6785,7 +6805,7 @@ var ViewerManager = {};
 						formData.append('desc', desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
@@ -6963,6 +6983,7 @@ var ViewerManager = {};
 			$element.bind('keydown keypress', function (event) {
 				if(event.which === 27) { // 27 = esc key
 					vm.addButtons = false;
+					vm.addButtonType = "add";
 					$scope.$apply();
 					event.preventDefault();
 				}
@@ -7057,8 +7078,9 @@ var ViewerManager = {};
 		 * Invert the models node
 		 * @param {Object} project the project to invert the models for 
 		 */
-		vm.toggleModels = function(project) {
-			project.modelsState = !project.modelsState;
+		vm.toggleModels = function(model) {
+			console.log(model)
+			model.modelsState = !model.modelsState;
 		}
 
 		/**
@@ -7123,24 +7145,26 @@ var ViewerManager = {};
 				if(response.status !== 200 && response.status !== 201){
 					vm.errorMessage = response.data.message;
 				} else {
+
+					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = (new Date()).toString();
+					vm.federationData.timestamp = new Date();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					vm.federationData.name = response.data.name;
 					vm.federationData.model = response.data.model;
-					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
-
+				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
 						project.models.push(vm.federationData);
 					}
-		
-					vm.closeDialog();
 
+					vm.addButtons = false;
+					vm.addButtonType = "add";
+					vm.closeDialog();
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
@@ -7163,8 +7187,12 @@ var ViewerManager = {};
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			console.log("isDefault", isDefault);
+
+			// isDefault is a string for some reason?
+			if (typeof(isDefault) === "string") isDefault = (isDefault === "true")
+			
 			if (!isDefault) {
+
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -7314,7 +7342,7 @@ var ViewerManager = {};
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.displayName;
+			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
@@ -7366,7 +7394,8 @@ var ViewerManager = {};
 					}
 
 					vm.closeDialog();
-
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete'
@@ -7479,8 +7508,10 @@ var ViewerManager = {};
 							model, 
 							vm.newModelData.project
 						);
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
-
+						
 						AnalyticService.sendEvent({
 							eventCategory: 'model',
 							eventAction: 'create'
@@ -7741,6 +7772,8 @@ var ViewerManager = {};
 					vm.errorMessage = '';
 					delete vm.newProjectTeamspace;
 					delete vm.newProjectName;
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
 				}
 
@@ -11121,14 +11154,18 @@ function AnalyticService(){
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 		// Check for expired sessions
-		var checkExpiredSessionTime = 60 // Seconds
+		var checkExpiredSessionTime = 5 // Seconds
 		$interval(function() {
 
 			Auth.isLoggedIn().success(function(){
 				//console.log("Logged In");
 			}).error(function(){
-				console.log("User logged out due to expire session");
-				Auth.logout();
+				if (StateManager.state.loggedIn) {
+					//console.log("User logged out due to expire session");
+					Auth.logout();
+				} else {
+					//console.log("User is not logged in, not redirecting")
+				}
 			});
 
 		}, 1000 * checkExpiredSessionTime);
@@ -11757,12 +11794,17 @@ angular.module('3drepo')
 		}
 
 		function setCanUpdateStatus(issueData){
+
+			console.log('setCanUpdateStatus', issueData, self.modelSettings.permissions, Auth.getUsername());
 			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, self.modelSettings.permissions)){
+				console.log('no create issue permissions')
 				return self.canUpdateStatus = false;
 			}
 
 			self.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
 				issueData.assigned_roles.indexOf(self.userJob._id) !== -1
+
+			console.log(self.canUpdateStatus);
 		}
 		/**
 		 * Monitor changes to parameters
@@ -11774,6 +11816,8 @@ angular.module('3drepo')
 			//console.log('issueComp on changes', changes);
 
 			if(changes.hasOwnProperty('modelSettings')){
+				console.log('onchanges modelsettings', this.modelSettings);
+
 				this.topic_types = this.modelSettings.properties.topicTypes;
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
 				//convert comment topic_types
@@ -11784,6 +11828,15 @@ angular.module('3drepo')
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
+
+					startNotification();
+					var disableStatus;
+
+					// Set up statuses
+					disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(Auth.getUsername() === this.data.owner);
+					this.statuses[0].disabled = disableStatus;
+					this.statuses[3].disabled = disableStatus;
+
 					this.issueData = angular.copy(this.data);
 					this.issueData.comments = this.issueData.comments || [];
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
@@ -11897,15 +11950,8 @@ angular.module('3drepo')
 		 */
 		this.$onInit = function () {
 			var disableStatus;
-
+			console.log('oninit data', self.data);
 			// Set up statuses
-			disableStatus = this.data ? (!userHasCreatorRole() && !userHasAdminRole()) : false;
-			this.statuses = [
-				{value: "open", label: "Open", disabled: disableStatus},
-				{value: "in progress", label: "In progress", disabled: false},
-				{value: "for approval", label: "For approval", disabled: false},
-				{value: "closed", label: "Closed", disabled: disableStatus}
-			];
 		};
 
 		/**
@@ -12661,9 +12707,6 @@ angular.module('3drepo')
 				});
 			}
 		}
-
-		startNotification();
-
 
 	}
 }());
@@ -19821,6 +19864,10 @@ var Oculus = {};
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
+								if(!noHighlight)
+								{
+									vm.selectNode(vm.nodesToShow[i]);
+								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;
 
@@ -19929,8 +19976,8 @@ var Oculus = {};
 						//console.log('path', path);
 						lastParentWithName = null;
 						expandToSelection(path, 0);
-						//console.log('lastParentWithName', lastParentWithName);
 						lastParentWithName && vm.selectNode(lastParentWithName);
+
 					}
 				}
 			}
@@ -20168,7 +20215,6 @@ var Oculus = {};
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-			//console.log('selectNode');
 			// Remove highlight from the current selection and highlight this node if not the same
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
@@ -20203,7 +20249,6 @@ var Oculus = {};
 					name: node.name,
 					noHighlight : true
 				});
-
 				for(var key in map)
 				{
 					var vals = key.split("@");

@@ -46,7 +46,7 @@
 		add: function(permission){
 
 			let isPermissionInvalid = !Array.isArray(permission.permissions) || 
-				_.intersection(C.PERM_LIST, permission.permissions).length !== permission.permissions.length;
+				_.intersection(permission.permissions, C.MODEL_PERM_LIST).length !== permission.permissions.length;
 
 			if (this.findById(permission._id)){
 				return Promise.reject(responseCodes.DUP_PERM_TEMPLATE);
@@ -59,6 +59,10 @@
 		},
 
 		remove: function(id){
+
+			if(id === C.ADMIN_TEMPLATE){
+				return Promise.reject(responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE);
+			}
 
 			let permission = this.findById(id);
 			
