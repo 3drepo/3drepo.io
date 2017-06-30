@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.13.1";
+	const VERSION="1.13.2";
 
 	let config = require("app-config")
 		.config;

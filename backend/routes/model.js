@@ -196,17 +196,11 @@ function createModel(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	let federate;
-	if(req.body.subModels){
-		federate = true;
-	}
-
 	let data = {
 		desc: req.body.desc, 
 		type: req.body.type, 
 		unit: req.body.unit, 
 		subModels: req.body.subModels, 
-		federate: federate,
 		code: req.body.code,
 		project: req.body.project
 	};

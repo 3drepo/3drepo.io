@@ -603,6 +603,17 @@ account-teamspaces label, account-teamspaces p {
   font-size: 14px;
 }
 
+account-teamspaces .loadingText {
+  padding-top: 100px;
+  min-height: 200px;
+  text-align: center;
+}
+
+account-teamspaces .loadingText md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+}
+
 #floating-button {
   position: absolute;
   bottom: 52px;
@@ -1465,6 +1476,14 @@ issue-comp .issueCompItemStatus {
   margin-right: 5px;
 }
 
+issue-comp .heightFix {
+  height: initial;
+}
+
+issue-comp .fullHeight {
+  height: 100%;
+}
+
 issue-comp .issueCompThumbnail {
   position: relative;
   display: inline-block;
@@ -1565,7 +1584,7 @@ issue-comp #issueCompAdditional md-input-container {
 }
 
 issue-comp #descriptionAndComments {
-  overflow-y:scroll;
+  overflow-y:auto;
   overflow-x:hidden;
 }
 
@@ -1659,6 +1678,27 @@ login #loginHiddenInputs {
   top: 0;
   opacity: 0;
 }
+
+/*login md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+login .loadingBox {
+  text-align: center;
+}*/
+
+/*login .loadingBox div {
+  padding-top: 7%;
+  display: inline-block;
+  margin: 0 auto;
+}*/
+
+/*login .loginBox {
+  min-width: 30vw;
+}*/
+
+
 tdr-measure {
     position: absolute;
 }

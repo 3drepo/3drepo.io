@@ -391,7 +391,7 @@
 								vm.nodesToShow[i].children[j].selected = true;
 								if(!noHighlight)
 								{
-									vm.selectNode(vm.nodesToShow[i]);
+									vm.selectNode(vm.nodesToShow[i].children[j]);
 								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;

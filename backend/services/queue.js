@@ -209,13 +209,15 @@
 
 	/*******************************************************************************
 	 * Dispatch work to import toy model
-	 * @param {database} database - database name
+	 * @param {string} database - database name
+	 * @param {string} model - model id
+	 * @param {string} modeDirName - the dir name of the model database dump staying in 
 	 *******************************************************************************/
-	ImportQueue.prototype.importToyModel = function (database, model) {
+	ImportQueue.prototype.importToyModel = function (database, model, options) {
 		let corID = uuid.v1();
 
-
-		let msg = `importToy ${database} ${model}`;
+		const skip = options.skip && JSON.stringify(options.skip) || '';
+		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
 		return this._dispatchWork(corID, msg).then(() => {
 
