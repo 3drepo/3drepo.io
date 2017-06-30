@@ -71,7 +71,6 @@
 			self.username  = null;
 			self.userRoles = null;
 			localStorage.setItem("tdrLoggedIn", "false");
-
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
 
 			self.authPromise.resolve(self.loggedIn);
@@ -110,7 +109,6 @@
 							self.loginSuccess(reason);
 						} else if (self.loggedIn === null || (interval && self.loggedIn)) {
 							reason.initialiser = true;
-							
 							self.loginFailure(reason);
 						}
 							
@@ -137,7 +135,7 @@
 		var checkExpiredSessionTime = 5 // Seconds
 
 			this.intervalCaller = $interval(function() {
-				console.log("Running Init")
+				//console.log("Running Init")
 				self.init(true);
 			}, 1000 * checkExpiredSessionTime);
 

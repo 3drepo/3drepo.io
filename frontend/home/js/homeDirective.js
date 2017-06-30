@@ -201,8 +201,15 @@
 					
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
-					EventService.send(EventService.EVENT.CLEAR_STATE);
-					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+					
+					// Only fire the Logout Event if we're on the home page
+					var currentPage = $location.path();
+					//console.log("currentPage", currentPage)
+					if (currentPage !== "/terms" && currentPage !== "/privacy") {
+						EventService.send(EventService.EVENT.CLEAR_STATE);
+						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+					}
+
 				} else if (event.type === EventService.EVENT.SHOW_MODELS) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
 					Auth.init();
