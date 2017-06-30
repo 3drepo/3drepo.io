@@ -103,7 +103,15 @@
 		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-
+		// Pages to not attempt a interval triggered logout from
+		vm.doNotLogout = [
+			"/terms", 
+			"/privacy",
+			"/signUp", 
+			"/passwordForgot", 
+			"/registerRequest", 
+			"/registerVerify"
+		];
 
 		$timeout(function () {
 			var login = angular.element("<login></login>");
@@ -205,7 +213,7 @@
 					// Only fire the Logout Event if we're on the home page
 					var currentPage = $location.path();
 					//console.log("currentPage", currentPage)
-					if (currentPage !== "/terms" && currentPage !== "/privacy") {
+					if (vm.doNotLogout.indexOf(currentPage) === -1) {
 						EventService.send(EventService.EVENT.CLEAR_STATE);
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
