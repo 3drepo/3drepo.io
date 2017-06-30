@@ -132,12 +132,12 @@
 		};
 
 		// Check for expired sessions
-		var checkExpiredSessionTime = 5 // Seconds
+		var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
 
-			this.intervalCaller = $interval(function() {
-				//console.log("Running Init")
-				self.init(true);
-			}, 1000 * checkExpiredSessionTime);
+		this.intervalCaller = $interval(function() {
+			//console.log("running init in interval call")
+			self.init(true);
+		}, 1000 * checkExpiredSessionTime);
 
 		this.loadModelRoles = function(account, model)
 		{

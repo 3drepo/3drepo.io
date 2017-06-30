@@ -145,6 +145,9 @@
 
 	config.chat_reconnection_attempts = coalesce(config.chat_reconnection_attempts, 5);
 
+	// Check user login interval
+	config.login_check_interval = coalesce(config.login_check_interval, 8); // seconds
+
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {
 		console.log("Cookie secret phrase has the default value. Update the config");
