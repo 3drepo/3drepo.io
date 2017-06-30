@@ -66,9 +66,6 @@
 
 		// Init
 		vm.modelToUpload = null;
-
-		vm.model.displayName = vm.model.name;
-		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -178,7 +175,7 @@
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'view'
@@ -286,6 +283,8 @@
 
 					if(!vm.uploadErrorMessage){
 						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
 					}
 				});
@@ -347,7 +346,7 @@
 						formData.append('desc', desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {

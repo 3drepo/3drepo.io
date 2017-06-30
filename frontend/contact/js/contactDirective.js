@@ -63,7 +63,6 @@
 			vm.sending = true;
 			promise = UtilsService.doPost(vm.contact, "contact");
 			promise.then(function (response) {
-				console.log(response);
 				vm.sending = false;
 				if (response.status === 200) {
 					vm.sent = true;

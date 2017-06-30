@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "Auth", "EventService", "serverConfig", "UtilsService"];
 
-	function LoginCtrl($scope, Auth, EventService, serverConfig, UtilsService) {
+	function LoginCtrl($scope, $location, Auth, EventService, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13;
 
@@ -42,6 +42,18 @@
 		 * Init
 		 */
 		vm.version = serverConfig.apiVersion;
+
+		vm.unityLoaded = false;
+		vm.unityLoading = UnityUtil.onReady();
+		vm.unityLoading.then(function(resolved){
+			console.log("Loaded", resolved);
+			vm.unityLoaded = true;
+		})
+
+		Auth.isLoggedIn().success(function(response){
+			StateManager.setStateVar("loggedIn", true);
+			EventService.send(EventService.EVENT.UPDATE_STATE);
+		});
 
 		/**
 		 * Attempt to login
@@ -55,7 +67,23 @@
 				}
 			}
 			else {
-				Auth.login(vm.user.username, vm.user.password);
+				if (vm.user && vm.user.username && vm.user.password) {
+					vm.errorMessage = "";
+					Auth.login(vm.user.username, vm.user.password).then(function(response){
+						//console.log(response);
+					});
+				} else {
+
+					vm.errorMessage = "Username and/or password not provided";
+					if (vm.user && vm.user.password && !vm.user.username) {
+						vm.errorMessage = "Username not provided";
+					} else if (vm.user && vm.user.username && !vm.user.password) {
+						vm.errorMessage = "Password not provided";
+					}
+					
+				}
+
+					
 			}
 		};
 
@@ -63,9 +91,10 @@
 		 * Event watch
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
+
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				if (event.value.hasOwnProperty("error")) {
+				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
 					}
@@ -74,6 +103,12 @@
 					}
 				}
 			}
+		});
+
+		$scope.$watch("vm.unityLoading", function(event) {
+
+			console.log(vm.unityLoading);
+
 		});
 	}
 }());

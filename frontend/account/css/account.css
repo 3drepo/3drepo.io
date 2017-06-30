@@ -603,6 +603,17 @@ account-teamspaces label, account-teamspaces p {
   font-size: 14px;
 }
 
+account-teamspaces .loadingText {
+  padding-top: 100px;
+  min-height: 200px;
+  text-align: center;
+}
+
+account-teamspaces .loadingText md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+}
+
 #floating-button {
   position: absolute;
   bottom: 52px;

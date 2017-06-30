@@ -32,13 +32,24 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model};
 };
 
+function convertProjectToParam(req, res, next){
+	if(req.body.project){
+		req.params.project = req.body.project;
+	}
+	next();
+}
 
 // Get model info
 router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
 
 router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:modelName', middlewares.connectQueue, middlewares.checkPermissions([C.PERM_CREATE_MODEL]), createModel);
+router.post('/:modelName', 
+	convertProjectToParam, 
+	middlewares.connectQueue,
+	middlewares.canCreateModel, 
+	createModel
+);
 
 //Unity information
 router.get('/:model/revision/master/head/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
@@ -49,10 +60,10 @@ router.get('/:model/:uid.unity3d', middlewares.hasReadAccessToModel, getUnityBun
 router.put('/:model', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 //model permission
-router.post('/:model/permissions', middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), updatePermissions);
+router.post('/:model/permissions', middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 //model permission
-router.get('/:model/permissions',  middlewares.checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]), getPermissions);
+router.get('/:model/permissions',  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
 router.get('/:model/jobs.json', middlewares.hasReadAccessToModel, getJobs);
 router.get('/:model/userJobForModel.json', middlewares.hasReadAccessToModel, getUserJobForModel);
@@ -201,6 +212,7 @@ function createModel(req, res, next){
 	};
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	data.userPermissions = req.session.user.permissions;
 
 	createAndAssignRole(modelName, account, username, data).then(data => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
@@ -217,10 +229,13 @@ function updateModel(req, res, next){
 	let account = req.params.account;
 
 	let promise = Promise.resolve();
+	let setting;
 
 	if(req.body.subModels && req.body.subModels.length > 0){
 
-		promise = ModelSetting.findById({account}, model).then(setting => {
+		promise = ModelSetting.findById({account}, model).then(_setting => {
+
+			setting = _setting;
 
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
@@ -229,6 +244,11 @@ function updateModel(req, res, next){
 			} else {
 				return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
 			}
+
+		}).then(() => {
+			setting.subModels = req.body.subModels;
+			setting.timestamp = new Date();
+			return setting.save();
 		});
 
 	}
@@ -391,6 +411,10 @@ function updatePermissions(req, res, next){
 
 	return ModelSetting.findById({account, model}, model).then(modelSetting => {
 
+		if(!modelSetting){
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+
 		return modelSetting.changePermissions(req.body);
 
 	}).then(permission => {
@@ -491,7 +515,6 @@ function getUnityBundle(req, res, next){
 	let model = req.params.model;
 	let account = req.params.account;
 	let id = req.params.uid;
-	let username = req.session.user.username;
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {

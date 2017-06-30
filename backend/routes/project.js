@@ -11,13 +11,25 @@
 	const C = require("../constants");
 	const checkPermissions = middlewares.checkPermissions;
 	
+	function canUpdate(req, res, next){
+		if(req.body.permissions){
+			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
+		} else {
+			checkPermissions({ '$or':[[C.PERM_EDIT_PROJECT], [C.PERM_PROJECT_ADMIN]] })(req, res, next);
+		}
+	}
+
+	const canViewProject = { '$or':[[C.PERM_VIEW_PROJECTS], [C.PERM_PROJECT_ADMIN]] };
+
 	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
-	router.put("/projects/:project", checkPermissions([C.PERM_EDIT_PROJECT]), updateProject);
+	router.put("/projects/:project", canUpdate, updateProject);
+	router.get("/projects", checkPermissions(canViewProject), listProjects);
+	router.get("/projects/:project", checkPermissions(canViewProject), listProject);
 	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
 
 
 	function createProject(req, res, next){
-		Project.createProject(req.params.account, req.body.name).then(project => {
+		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -44,6 +56,26 @@
 		
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function listProjects(req, res, next){
+		Project.find({ account: req.params.account }, {}).then(projects => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function listProject(req, res, next){
+		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
+			if(!project){
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+			}
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

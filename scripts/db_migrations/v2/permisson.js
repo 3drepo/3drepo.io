@@ -21,6 +21,10 @@ db.getSiblingDB('admin').system.users.update({ 'customData.billing.subscriptions
 
 var permissionTemplates = [
     {
+        _id: 'admin',
+        permissions: ['manage_model_permission']
+    },
+    {
         _id: 'viewer',
         permissions: ['view_issue','view_model']
     },

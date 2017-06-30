@@ -54,7 +54,6 @@
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/invoices");
 			billingsPromise.then(function (response) {
-				console.log("**billings**", response);
 				if ((response.data.length > 0) &&
 					(parseInt(vm.query.item) >= 0) &&
 					(parseInt(vm.query.item) < response.data.length)) {

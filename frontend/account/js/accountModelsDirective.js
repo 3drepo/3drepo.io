@@ -90,6 +90,7 @@
 			$element.bind('keydown keypress', function (event) {
 				if(event.which === 27) { // 27 = esc key
 					vm.addButtons = false;
+					vm.addButtonType = "add";
 					$scope.$apply();
 					event.preventDefault();
 				}
@@ -184,8 +185,8 @@
 		 * Invert the models node
 		 * @param {Object} project the project to invert the models for 
 		 */
-		vm.toggleModels = function(project) {
-			project.modelsState = !project.modelsState;
+		vm.toggleModels = function(model) {
+			model.modelsState = !model.modelsState;
 		}
 
 		/**
@@ -236,7 +237,7 @@
 		vm.saveFederation = function (teamspaceName, projectName) {
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
-			var isEdit = vm.federationData._isEdit
+			var isEdit = vm.federationData._isEdit;
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -250,24 +251,28 @@
 				if(response.status !== 200 && response.status !== 201){
 					vm.errorMessage = response.data.message;
 				} else {
+
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = (new Date()).toString();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					vm.federationData.name = response.data.name;
 					vm.federationData.model = response.data.model;
-					//vm.federationData.federationOptions = getFederationOptions(vm.federationData, teamspaceName);
+					if (response.data.timestamp) {
+						vm.federationData.timestamp = response.data.timestamp;
+					}
 
+				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
 						project.models.push(vm.federationData);
 					}
-		
-					vm.closeDialog();
 
+					vm.addButtons = false;
+					vm.addButtonType = "add";
+					vm.closeDialog();
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
@@ -290,8 +295,12 @@
 		 */
 		vm.getPotentialFederationModels = function(isDefault) {
 			var models;
-			console.log("isDefault", isDefault);
+
+			// isDefault is a string for some reason?
+			if (typeof(isDefault) === "string") isDefault = (isDefault === "true")
+			
 			if (!isDefault) {
+
 				models = AccountDataService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
@@ -441,7 +450,7 @@
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete model";
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.modelToDelete.displayName;
+			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
@@ -452,7 +461,7 @@
 		vm.deleteModel = function () {
 
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name;
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
 			var promise = UtilsService.doDelete({}, url);
 
 			promise.then(function (response) {
@@ -493,7 +502,8 @@
 					}
 
 					vm.closeDialog();
-
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete'
@@ -501,12 +511,9 @@
 				}
 				else {
 					vm.deleteError = "Error deleting model";
-					if (response.status === 404) {
-						vm.deleteError += " : File not found"
-					}
-					if (response.status === 500) { 
-						vm.deleteError += " : There was a problem on the server"
-					}
+					if (response.data.message) {
+						vm.deleteError = "Error: " + response.data.message;
+					} 
 				}
 			});
 		};
@@ -606,8 +613,10 @@
 							model, 
 							vm.newModelData.project
 						);
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
-
+						
 						AnalyticService.sendEvent({
 							eventCategory: 'model',
 							eventAction: 'create'
@@ -868,6 +877,8 @@
 					vm.errorMessage = '';
 					delete vm.newProjectTeamspace;
 					delete vm.newProjectName;
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
 				}
 

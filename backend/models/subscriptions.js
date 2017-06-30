@@ -21,7 +21,7 @@
 	const Subscription = require("./subscription.js");
 	const responseCodes = require("../response_codes.js");
 	const ModelSetting = require("./modelSetting");
-	const _ = require('lodash');
+	const mongoose = require("mongoose");
 
 	let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
 		this.user = user;
@@ -33,6 +33,25 @@
 
 		//console.log('Subscriptions init --')
 	};
+
+	Subscriptions.schema = mongoose.Schema({
+		active: Boolean,
+		updatedAt: Date,
+		createdAt: Date,
+		billingUser: String,
+		assignedUser: String,
+		job: String,
+		expiredAt: Date,
+		
+		limits: {
+			collaboratorLimit : {type: Number, default: 0},
+			spaceLimit : {type: Number, default: 0}
+		},
+
+		plan: String,
+		inCurrentAgreement: Boolean,
+		pendingDelete: Boolean,
+	});
 
 	Subscriptions.prototype.addSubscriptionByPlan = function (plan) {
 		// Add subscription
@@ -395,11 +414,14 @@
 		});
 	};
 
-	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, user, cascadeRemove){
+	Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, account, cascadeRemove){
 
 		// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
 		// let subscription = this.subscriptions.id(id);
-		 let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
+
+		const Project = require('./project');
+
+		let subscription = this.subscriptions.find(subscription => subscription.id.toString() === id);
 
 		if(!subscription){
 			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_FOUND);
@@ -409,44 +431,56 @@
 			return Promise.reject(responseCodes.SUBSCRIPTION_NOT_ASSIGNED);
 		}
 
-		if(subscription.assignedUser === user){
+		if(subscription.assignedUser === account){
 			return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 		}
 
-		//check if they are a collaborator
-		return ModelSetting.find({ account: user }, {}).then(models => {
 
-			let foundModels = [];
-			models.forEach(model => {
-				model.permissions.forEach(permission => {
-					if(permission.user === subscription.assignedUser){
-						foundModels.push(model);
-					}
-				});
-			});
+		let foundProjects;
+		let foundModels;
+		let teamspacePerm = this.user.customData.permissions.findByUser(subscription.assignedUser);
 
-			if(!cascadeRemove && foundModels.length > 0){
+		//check if they have any permissions assigned
+		return Project.find({ account }, { 'permissions.user':  subscription.assignedUser}).then(projects => {
+			
+			foundProjects = projects;
+			return ModelSetting.find({ account: account }, { 'permissions.user': subscription.assignedUser});
+		
+		}).then(models => {
+
+			foundModels = models;
+
+			if(!cascadeRemove && (foundModels.length || foundProjects.length || teamspacePerm)){
 
 				return Promise.reject({ 
 					resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
-					info: {models: _.map(foundModels, p => { return { model: p._id}; } )}
+					info: {
+						models: foundModels.map(m => { return { model: m.name}; }),
+						projects: foundProjects.map(p => p.name),
+						teamspace: teamspacePerm
+					}
 				});
 
 			} else {
 
-				let promises = [];
+				//remove all permissions assigned
+				let removeTeamspacePermission = Promise.resolve();
 
-				foundModels.forEach(model => {
-
-					const index = _.findIndex(model.permissions, p => p.user === subscription.assignedUser);
-
-					if(index !== -1){
-						console.log(model.permissions.splice(index, 1));
-						promises.push(model.changePermissions(model.permissions.splice(index, 1)));
-					}
-				});
-
-				return Promise.all(promises);
+				if(teamspacePerm){
+					removeTeamspacePermission = this.user.customData.permissions.remove(subscription.assignedUser);
+				}
+				
+				return Promise.all(
+					[].concat(
+						foundModels.map(model => 
+							model.changePermissions(model.permissions.filter(p => p.user !== subscription.assignedUser))
+						),
+						foundProjects.map(project => 
+							project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== subscription.assignedUser) })
+						),
+						removeTeamspacePermission
+					)
+				);
 			}
 
 		}).then(() => {
@@ -455,6 +489,7 @@
 		});
 
 	};
+
 
 	Subscriptions.prototype.findByJob = function(job){
 		return this.subscriptions.filter(sub => sub.job === job);

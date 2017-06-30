@@ -205,7 +205,6 @@
 					vm.selectedGroup.color = colour;
 					promise = GroupsService.updateGroup(vm.selectedGroup);
 					promise.then(function (data) {
-						console.log(data);
 						setSelectedGroupHighlightStatus(true);
 					});
 				}, 500);
