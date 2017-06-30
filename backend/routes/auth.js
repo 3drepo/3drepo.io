@@ -65,6 +65,7 @@
 
 	function createSession(place, req, res, next, user){
 		req.session.regenerate(function(err) {
+			req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
 			if(err) {
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
@@ -117,7 +118,7 @@
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.");
-			//res.clearCookie("connect.sid", { domain: config.cookie.domain, path: "/" });
+			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}

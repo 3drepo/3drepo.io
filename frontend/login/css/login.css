@@ -33,3 +33,23 @@ login #loginHiddenInputs {
   top: 0;
   opacity: 0;
 }
+
+/*login md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+login .loadingBox {
+  text-align: center;
+}*/
+
+/*login .loadingBox div {
+  padding-top: 7%;
+  display: inline-block;
+  margin: 0 auto;
+}*/
+
+/*login .loginBox {
+  min-width: 30vw;
+}*/
+

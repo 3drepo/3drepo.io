@@ -6,8 +6,13 @@
 
 
 		div(layout="column", layout-align="space-between")
-		
+
+			div.loadingText(ng-if="vm.loading") 
+				md-progress-circular
+				h4 Loading...
+
 			account-models(
+				ng-if="!vm.loading"
 				account="vm.account"
 				accounts="vm.accounts"
 				on-show-page="vm.showPage(page, callingPage)"

@@ -1,7 +1,9 @@
 account-menu
 div(ng-if="!vm.state.model")
 	#account(layout="row")
+
 		account-info(
+		loading="vm.loadingAccount"
 		username="vm.username"
 		first-name="vm.firstName"
 		last-name="vm.lastName"
@@ -11,6 +13,7 @@ div(ng-if="!vm.state.model")
 
 		#accountItem(ng-switch="vm.itemToShow")
 			account-teamspaces(
+			loading="vm.loadingAccount"
 			ng-switch-when="teamspaces"
 			account="vm.account"
 			accounts="vm.accounts"

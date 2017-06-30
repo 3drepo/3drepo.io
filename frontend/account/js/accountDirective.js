@@ -41,7 +41,7 @@
 
 	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService) {
 		var vm = this;
-
+		vm.loadingAccount = true;
 		/*
 		 * Get the account data
 		 */
@@ -77,6 +77,7 @@
 							getUserInfo();
 
 							// Made a payment
+							
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
 							UtilsService.showDialog("paypalDialog.html", $scope);
@@ -207,6 +208,9 @@
 						}
 					}
 				}
+
+				vm.loadingAccount = false;
+
 			});
 
 		}

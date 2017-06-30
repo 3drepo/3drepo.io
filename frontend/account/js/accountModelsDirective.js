@@ -186,7 +186,6 @@
 		 * @param {Object} project the project to invert the models for 
 		 */
 		vm.toggleModels = function(model) {
-			console.log(model)
 			model.modelsState = !model.modelsState;
 		}
 
@@ -238,7 +237,7 @@
 		vm.saveFederation = function (teamspaceName, projectName) {
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
-			var isEdit = vm.federationData._isEdit
+			var isEdit = vm.federationData._isEdit;
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -253,15 +252,17 @@
 					vm.errorMessage = response.data.message;
 				} else {
 
-					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = new Date();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
 					vm.federationData.model = response.data.model;
+					if (response.data.timestamp) {
+						vm.federationData.timestamp = response.data.timestamp;
+					}
+
 				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
@@ -460,7 +461,7 @@
 		vm.deleteModel = function () {
 
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name;
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
 			var promise = UtilsService.doDelete({}, url);
 
 			promise.then(function (response) {
@@ -510,12 +511,9 @@
 				}
 				else {
 					vm.deleteError = "Error deleting model";
-					if (response.status === 404) {
-						vm.deleteError += " : File not found"
-					}
-					if (response.status === 500) { 
-						vm.deleteError += " : There was a problem on the server"
-					}
+					if (response.data.message) {
+						vm.deleteError = "Error: " + response.data.message;
+					} 
 				}
 			});
 		};

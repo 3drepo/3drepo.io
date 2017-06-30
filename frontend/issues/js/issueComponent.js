@@ -121,10 +121,8 @@
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
-			//console.log('issueComp on changes', changes);
 
-			if(changes.hasOwnProperty('modelSettings')){
-				console.log('onchanges modelsettings', this.modelSettings);
+			if(changes.hasOwnProperty('modelSettings') && changes.modelSettings.hasOwnProperty('properties') ){
 
 				this.topic_types = this.modelSettings.properties.topicTypes;
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
