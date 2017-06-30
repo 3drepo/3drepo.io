@@ -32,7 +32,7 @@ before_install:
     - git checkout $test_ver
     - cd backend
     - mongorestore
-install: npm install
+install: sudo npm install
 services:
   - rabbitmq
 script:
