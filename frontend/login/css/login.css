@@ -11,6 +11,14 @@ login .homeUserContent md-toolbar {
   min-height: 40px;
 }
 
+login .welcome {
+  margin: 0px;
+}
+
+login .loginBox {
+  margin-bottom: 15px;
+}
+
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
