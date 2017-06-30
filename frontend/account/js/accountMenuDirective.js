@@ -62,6 +62,7 @@
 		 */
 		vm.logout = function () {
 			Auth.logout();
+			UnityUtil.reset();
 		};
 
 		vm.openUserManual = function(){
