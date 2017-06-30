@@ -43,6 +43,7 @@ let ModelHelper = proxyquire('../../../models/helper/model', {
 	'./stash': {},
 	'../ref': {},
 	'../chatEvent': {},
+	'../project': {}
 });
 
 describe('Model Helpers', function(){

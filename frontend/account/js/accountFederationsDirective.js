@@ -135,8 +135,27 @@
 
 			var isUserAccount = account.account === vm.account.account;
 			return {
-				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
+				edit: {
+					label: "Edit",
+					 icon: "edit", 
+					 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
+				},
+				delete: {
+					label: "Delete", 
+					icon: "delete", 
+					color: "#F44336", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
+				},
+				team: {
+					label: "Team", 
+					icon: "group", 
+					hidden: !vm.account === vm.userAccount
+				},
+				modelsetting: {
+					label: "Settings",
+					icon: "settings", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
+				}
 			};
 			
 		};
@@ -202,7 +221,7 @@
 		 * @param federationIndex
 		 */
 		vm.doFederationOption = function (event, option, account, project, federation) {
-			console.log(event, option, account, project, federation)
+
 			switch (option) {
 				case "edit":
 					setupEditFederation(event, account, project, federation);
@@ -213,7 +232,6 @@
 					break;
 
 				case "delete":
-					console.log("Delete")
 					setupDelete(event, account, project, federation);
 					break;
 
@@ -238,8 +256,6 @@
 					} else {
 						
 						for (var j = 0; j < account.fedModels.length; j++) { 
-							console.log(account);
-							console.log("Deleting from default", account.fedModels[j].model, response.data.model);
 							if (account.fedModels[j].model === response.data.model) {
 								account.fedModels.splice(j, 1);
 								break;
@@ -247,9 +263,10 @@
 						}
 					}
 					
-	
+					vm.addButtons = false;
+					vm.addButtonType = "add";
 					vm.closeDialog();
-
+					
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'delete',
@@ -258,6 +275,10 @@
 				}
 				else {
 					vm.deleteError = "Error deleting federation";
+					if (response.data.message) {
+						vm.deleteError = response.data.message;
+					} 
+
 				}
 			});
 		};
@@ -282,9 +303,9 @@
 			UtilsService.showDialog("federationDialog.html", $scope, event, true);
 		}
 
-		function setupSetting(event, account, project, model){
-			$location.search("proj", model.name);
-			$location.search("targetAcct", account.account);
+		function setupSetting(event, teamspace, project, federation){
+			$location.search("proj", federation.name);
+			$location.search("targetAcct", teamspace.account);
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
 

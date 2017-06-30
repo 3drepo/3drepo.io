@@ -11,6 +11,14 @@ login .homeUserContent md-toolbar {
   min-height: 40px;
 }
 
+login .welcome {
+  margin: 0px;
+}
+
+login .loginBox {
+  margin-bottom: 15px;
+}
+
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
@@ -33,3 +41,23 @@ login #loginHiddenInputs {
   top: 0;
   opacity: 0;
 }
+
+/*login md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+login .loadingBox {
+  text-align: center;
+}*/
+
+/*login .loadingBox div {
+  padding-top: 7%;
+  display: inline-block;
+  margin: 0 auto;
+}*/
+
+/*login .loginBox {
+  min-width: 30vw;
+}*/
+

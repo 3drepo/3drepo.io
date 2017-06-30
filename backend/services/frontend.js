@@ -28,7 +28,7 @@
 
 		const express = require("express");
 		const config = require("../config.js");
-		const sharedSession = serverConfig.session;
+		//const sharedSession = serverConfig.session;
 		const bodyParser = require("body-parser");
 		const compress = require("compression");
 		const fs = require("fs");
@@ -46,7 +46,7 @@
 
 		let app = express();
 
-		app.use(sharedSession);
+		//app.use(sharedSession);
 		app.use(compress({ level: 9 }));
 
 		app.use(bodyParser.urlencoded({
@@ -137,6 +137,7 @@
 			params.config_js += "\n\nserver_config.fileNameRegExp = " + ModelHelper.fileNameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ModelHelper.acceptedFormat) + ";";
+			params.config_js += "\n\nserver_config.login_check_interval = " + config.login_check_interval + ";"
 
 			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
 			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({

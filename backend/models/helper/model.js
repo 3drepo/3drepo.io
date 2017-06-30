@@ -122,7 +122,7 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	return promise.then(() => {
 		
-		return ModelSetting.count({account, model}, {name: modelName});
+		return ModelSetting.count({account, model}, {name: modelName, _id: { '$in' : project.models} });
 
 	}).then(count => {
 
@@ -130,7 +130,7 @@ function createAndAssignRole(modelName, account, username, data) {
 			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 		}
 
-		return (data.federate ? createFederatedModel(account, model, data.subModels) : Promise.resolve());
+		return (data.subModels ? createFederatedModel(account, model, data.subModels) : Promise.resolve());
 
 	}).then(() => {
 
@@ -156,7 +156,13 @@ function createAndAssignRole(modelName, account, username, data) {
 		setting.owner = username;
 		setting.desc = data.desc;
 		setting.type = data.type;
-		setting.federate = data.federate;
+
+		if(data.subModels){
+			setting.federate = true;
+			setting.subModels = data.subModels;
+			setting.timestamp = new Date();
+		}
+
 
 		setting.updateProperties({
 			unit: data.unit,
@@ -180,6 +186,22 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	}).then(setting => {
 
+		if(data.userPermissions && 
+			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 && 
+			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
+		){
+
+			return setting.changePermissions([{
+				user: username,
+				permission: C.ADMIN_TEMPLATE
+			}]).then(() => setting);
+
+		}
+
+		return Promise.resolve(setting);
+
+	}).then(setting => {
+
 		let modelData = {
 			account,
 			model:  model.toString(),
@@ -199,12 +221,49 @@ function createAndAssignRole(modelName, account, username, data) {
 	});
 }
 
-function importToyModel(username){
+function importToyProject(account, username){
+	'use strict';
+	// create a project named Sample_Project
+	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+
+		return Promise.all([
+
+			importToyModel(account, username, 'Sample_House', 'Sample_House', project.name),
+			importToyModel(account, username, 'Sample_Tree', 'Sample_Tree', project.name)
+
+		]).then(models => {
+
+			//skip some steps when importing fed models
+			const skip = { tree: 1 };
+
+			const subModels = models.map(m => {
+				
+				m = m.toObject();
+				return {
+					model: m._id,
+					database: account
+				};
+			});
+
+			return importToyModel(account, username, 'Sample_Federation', 'Sample_Federation', project.name, subModels, skip);
+		});
+
+	}).catch(err => {
+
+		Mailer.sendImportError({
+ 			account,
+ 			username,
+ 			err: err.message
+ 		});
+
+		return Promise.reject(err);
+	});
+}
+
+function importToyModel(account, username, modelName, modelDirName, project, subModels, skip){
 	'use strict';
 
-	let modelName = 'sample_project';
 	let model;
-	let account = username;
 	let desc = '';
 	let type = 'sample';
 
@@ -212,14 +271,14 @@ function importToyModel(username){
 	// let copy = true;
 
 	let data = {
-		desc, type, unit: 'm'
+		desc, type, project, unit: 'm', subModels
 	};
 
 	return createAndAssignRole(modelName, account, username, data).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
 		model = setting._id;
-		return importModel(account, model, username, setting, {type: 'toy' });
+		return importModel(account, model, username, setting, {type: 'toy', modelDirName, skip });
 	}).catch(err => {
 
 		Mailer.sendImportError({
@@ -945,7 +1004,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		} else if (source.type === 'toy'){
 
-			return importQueue.importToyModel(account, model).then(obj => {
+			return importQueue.importToyModel(account, model, source).then(obj => {
 				let corID = obj.corID;
 				systemLogger.logInfo(`Job ${corID} imported without error`,{account, model, username});
 			});
@@ -955,6 +1014,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
+		modelSetting.timestamp = new Date();
 		modelSetting.markModified('errorReason');
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
@@ -969,7 +1029,7 @@ function importModel(account, model, username, modelSetting, source, data){
 			username
 		});
 
-		return;
+		return modelSetting;
 
 	}).catch(err => {
 
@@ -997,7 +1057,7 @@ function importModel(account, model, username, modelSetting, source, data){
 	});
 }
 
-function removeModel(account, model){
+function removeModel(account, model, forceRemove){
 	'use strict';
 
 	let setting;
@@ -1016,7 +1076,7 @@ function removeModel(account, model){
 		let promises = [];
 
 		settings.forEach(modelSetting => {
-			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
+			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
 				if(subModels.find(subModel => subModel.model === model)){
 					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
 				}
@@ -1138,6 +1198,7 @@ var acceptedFormat = [
 module.exports = {
 	createAndAssignRole,
 	importToyModel,
+	importToyProject,
 	convertToErrorCode,
 	createFederatedModel,
 	listSubModels,

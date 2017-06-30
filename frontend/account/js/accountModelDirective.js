@@ -66,9 +66,6 @@
 
 		// Init
 		vm.modelToUpload = null;
-
-		vm.model.displayName = vm.model.name;
-		vm.model.name = vm.model.model;
 		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
 		dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -178,7 +175,7 @@
 					}
 				}
 				else {
-					$location.path("/" + vm.account + "/" + vm.model.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
 						eventCategory: 'Model',
 						eventAction: 'view'
@@ -212,7 +209,7 @@
 
 				case "download":
 					window.open(
-						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.name + "/download/latest"),
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
 						'_blank' 
 					);
 
@@ -233,7 +230,7 @@
 
 				case "revision":
 					if(!vm.revisions){
-						UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
+						UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 							vm.revisions = response.data;
 						});
 					}
@@ -274,7 +271,7 @@
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
-				UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
+				UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
@@ -286,6 +283,8 @@
 
 					if(!vm.uploadErrorMessage){
 						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
+						vm.addButtons = false;
+						vm.addButtonType = "add";
 						vm.closeDialog();
 					}
 				});
@@ -296,7 +295,7 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			$location.path("/" + vm.account + "/" + vm.model.name + "/" + revId , "_self");
+			$location.path("/" + vm.account + "/" + vm.model.model + "/" + revId , "_self");
 			AnalyticService.sendEvent({
 				eventCategory: 'Model',
 				eventAction: 'view'
@@ -347,7 +346,7 @@
 						formData.append('desc', desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.name + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {

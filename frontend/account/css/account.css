@@ -285,6 +285,12 @@ account-menu md-icon {
   margin: 0;
 }
 
+.newModelDialog #modelRequiredHint {
+  text-align: center;
+  margin: 0;
+  color: #a3a3a3;
+}
+
 .newModelDialog #modelDialogError {
   margin: 0;
   color: #F44336;
@@ -602,6 +608,17 @@ account-federations #federationInfoRight p:only-child {
 
 account-teamspaces label, account-teamspaces p {
   font-size: 14px;
+}
+
+account-teamspaces .loadingText {
+  padding-top: 100px;
+  min-height: 200px;
+  text-align: center;
+}
+
+account-teamspaces .loadingText md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
 }
 
 #floating-button {

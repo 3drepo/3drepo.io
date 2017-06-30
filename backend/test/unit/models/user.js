@@ -28,7 +28,8 @@ let User = proxyquire('../../../models/user', {
 	'./factory/modelFactory':  modelFactoryMock,
 	'../mailer/mailer': {},
 	'../logger.js': {},
-	'./userBilling': {}
+	'./userBilling': {},
+	'./project': {}
 });
 
 
@@ -153,6 +154,10 @@ describe('User', function(){
 					'permissions': [C.PERM_TEAMSPACE_ADMIN]
 				}],
 				'permissionTemplates':[
+					{
+						'_id': C.ADMIN_TEMPLATE,
+						'permissions': C.ADMIN_TEMPLATE_PERMISSIONS
+					},
 					{
 						'_id': C.VIEWER_TEMPLATE,
 						'permissions': C.VIEWER_TEMPLATE_PERMISSIONS

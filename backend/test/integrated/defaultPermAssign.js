@@ -121,6 +121,10 @@ describe('Default permission assignment', function () {
 		agent.get(`/${username}/permission-templates`)
 		.expect(200, function(err, res){
 
+			const admin = res.body.find(t => t._id === C.ADMIN_TEMPLATE);
+			expect(admin).to.exist;
+			expect(admin.permissions).to.deep.equal(C.ADMIN_TEMPLATE_PERMISSIONS);
+
 			const viewer = res.body.find(t => t._id === C.VIEWER_TEMPLATE);
 			expect(viewer).to.exist;
 			expect(viewer.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);

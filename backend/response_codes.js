@@ -21,6 +21,7 @@
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
+	const utils = require('./utils');
 
 	/**
 	 * List of response and error codes
@@ -214,7 +215,8 @@
 		INVALID_PERM: {message: 'Invalid permission', status: 400},
 		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
 		DUP_ACCOUNT_PERM: { message: 'Duplicate account permission', status: 400},
-		ACCOUNT_PERM_NOT_FOUND: { message: 'Account permission not found', status: 404}
+		ACCOUNT_PERM_NOT_FOUND: { message: 'Account permission not found', status: 404},
+		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: 'Admin permission template cannot be changed or deleted', status: 400}
 
 	};
 
@@ -337,6 +339,8 @@
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
 		
+		resCode = utils.mongoErrorToResCode(resCode);
+		
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -346,7 +350,9 @@
 				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 			}
 
-			resCode = responseCodes.PROCESS_ERROR(resCode);
+			if(!resCode.value){
+				resCode = responseCodes.PROCESS_ERROR(resCode);
+			}
 
 		}
 

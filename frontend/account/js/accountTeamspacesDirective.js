@@ -31,6 +31,7 @@
 				onShowPage: "&",
 				quota: "=",
 				subscriptions: "=",
+				loading: "=",
 				selectedIndex: "="
 			},
 			controller: AccountReposCtrl,

@@ -3,27 +3,39 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Log in
+				//h2(ng-if="vm.unityLoaded") Log in
+				//h2(ng-if="!vm.unityLoaded") Loading...
 		.userContent(layout="column")
 
-			// Register or login
-			div(layout="row")
+			div.loginBox.loadingBox(layout="row")
+				h3.welcome Welcome to 3D Repo!
+				//div(ng-if="!vm.unityLoaded")
+					md-progress-circular
+					h4 Initialising Unity...
+
+			// Register or login#
+			//div.loginBox(layout="row", ng-if="vm.unityLoaded")
+			div.loginBox(layout="row")
 				// Login
 				div(layout="column", flex)
-					md-input-container.md-block
-						label Username
-						input(type='text', ng-model='vm.user.username', ng-required, tdr-focus="true", ng-keypress="vm.login($event)")
+					div
+						md-input-container.md-block
+							label Username
+							input(type='text', ng-model='vm.user.username', ng-required, tdr-focus="true", ng-keypress="vm.login($event)")
 
-					// Hidden inputs to prevent autofill
-					#loginHiddenInputs(ng-show="false", layout="column")
-						input(type='text')
-						input(type='password')
+						// Hidden inputs to prevent autofill
+						#loginHiddenInputs(ng-show="false", layout="column")
+							input(type='text')
+							input(type='password')
 
-					md-input-container.md-block
-						label Password
-						input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
+						md-input-container.md-block
+							label Password
+							input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
 
 					div(layout="row", layout-align="start" flex="none")
-						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
+						md-button.md-accent.md-raised(
+							ng-click="vm.login()"
+						) Log In
 					h4.loginError {{vm.errorMessage}}
 					div(layout="row", layout-align="start center", flex="none")
 						a.loginLinks(href="passwordForgot") Forgot password?

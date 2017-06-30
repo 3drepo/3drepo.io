@@ -298,6 +298,14 @@ issue-comp .issueCompItemStatus {
   margin-right: 5px;
 }
 
+issue-comp .heightFix {
+  height: initial;
+}
+
+issue-comp .fullHeight {
+  height: 100%;
+}
+
 issue-comp .issueCompThumbnail {
   position: relative;
   display: inline-block;
@@ -398,7 +406,7 @@ issue-comp #issueCompAdditional md-input-container {
 }
 
 issue-comp #descriptionAndComments {
-  overflow-y:scroll;
+  overflow-y:auto;
   overflow-x:hidden;
 }
 
