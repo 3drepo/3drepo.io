@@ -36,6 +36,8 @@
 		const cors = require("cors");
 		const bodyParser = require("body-parser");
 		const utils = require("../utils");
+		const config = require('../config');
+
 		// Express app
 		let app = express();
 
@@ -51,7 +53,20 @@
 		app.use(log_iface.startRequest);
 
 		// Configure various middleware
-		app.use(sharedSession);
+		app.use((req, res, next) => {
+			sharedSession(req, res, myNext);
+
+			function myNext(err){
+				if(err){
+					// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
+					res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
+				} else {
+					next();
+				}
+			}
+		});
+
 		app.use(cors({ origin: true, credentials: true }));
 
 		// init the singleton db connection for modelFactory

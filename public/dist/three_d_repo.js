@@ -6474,6 +6474,7 @@ var ViewerManager = {};
 		 */
 		vm.logout = function () {
 			Auth.logout();
+			UnityUtil.reset();
 		};
 
 		vm.openUserManual = function(){
@@ -10318,7 +10319,6 @@ var ViewerManager = {};
 			self.username  = null;
 			self.userRoles = null;
 			localStorage.setItem("tdrLoggedIn", "false");
-
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
 
 			self.authPromise.resolve(self.loggedIn);
@@ -10357,7 +10357,6 @@ var ViewerManager = {};
 							self.loginSuccess(reason);
 						} else if (self.loggedIn === null || (interval && self.loggedIn)) {
 							reason.initialiser = true;
-							
 							self.loginFailure(reason);
 						}
 							
@@ -10384,7 +10383,7 @@ var ViewerManager = {};
 		var checkExpiredSessionTime = 5 // Seconds
 
 			this.intervalCaller = $interval(function() {
-				console.log("Running Init")
+				//console.log("Running Init")
 				self.init(true);
 			}, 1000 * checkExpiredSessionTime);
 
@@ -11202,7 +11201,15 @@ function AnalyticService(){
 		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-
+		// Pages to not attempt a interval triggered logout from
+		vm.doNotLogout = [
+			"/terms", 
+			"/privacy",
+			"/signUp", 
+			"/passwordForgot", 
+			"/registerRequest", 
+			"/registerVerify"
+		];
 
 		$timeout(function () {
 			var login = angular.element("<login></login>");
@@ -11300,8 +11307,15 @@ function AnalyticService(){
 					
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
-					EventService.send(EventService.EVENT.CLEAR_STATE);
-					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+					
+					// Only fire the Logout Event if we're on the home page
+					var currentPage = $location.path();
+					//console.log("currentPage", currentPage)
+					if (vm.doNotLogout.indexOf(currentPage) === -1) {
+						EventService.send(EventService.EVENT.CLEAR_STATE);
+						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+					}
+
 				} else if (event.type === EventService.EVENT.SHOW_MODELS) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
 					Auth.init();
@@ -19947,7 +19961,7 @@ var Oculus = {};
 								vm.nodesToShow[i].children[j].selected = true;
 								if(!noHighlight)
 								{
-									vm.selectNode(vm.nodesToShow[i]);
+									vm.selectNode(vm.nodesToShow[i].children[j]);
 								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;

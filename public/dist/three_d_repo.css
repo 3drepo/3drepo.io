@@ -285,6 +285,12 @@ account-menu md-icon {
   margin: 0;
 }
 
+.newModelDialog #modelRequiredHint {
+  text-align: center;
+  margin: 0;
+  color: #a3a3a3;
+}
+
 .newModelDialog #modelDialogError {
   margin: 0;
   color: #F44336;
@@ -1654,6 +1660,14 @@ login {
 login .homeUserContent md-toolbar {
   height: 40px;
   min-height: 40px;
+}
+
+login .welcome {
+  margin: 0px;
+}
+
+login .loginBox {
+  margin-bottom: 15px;
 }
 
 login #loginVersion{
