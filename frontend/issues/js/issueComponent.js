@@ -83,8 +83,11 @@
 			{value: "closed", label: "Closed"}
 		];
 
+		
+		console.log("this.data: ", this.data)
+		console.log("this.data - self.issueData", self.issueData)
 		this.actions = {
-			screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: false, selected: false},
+			screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: this.data, selected: false},
 			pin: {icon: "place", label: "Pin", hidden: this.data, selected: false}
 		};
 

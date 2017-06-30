@@ -186,10 +186,12 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 	.issueCompItemContainer#issueCompFooterButtons(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
-			ng-repeat="(action, actionData) in $ctrl.actions"
-			aria-label="{{action}}"
-			ng-click="$ctrl.doAction($event, action)"
-			ng-if="!actionData.hidden")
+				ng-repeat="(action, actionData) in $ctrl.actions"
+				aria-label="{{action}}"
+				ng-click="$ctrl.doAction($event, action)"
+				ng-if="!$ctrl.submitDisabled"
+				)
+
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
 		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()" ng-if="!$ctrl.saving")

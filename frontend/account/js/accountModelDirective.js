@@ -209,7 +209,7 @@
 
 				case "download":
 					window.open(
-						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.name + "/download/latest"),
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
 						'_blank' 
 					);
 
@@ -230,7 +230,7 @@
 
 				case "revision":
 					if(!vm.revisions){
-						UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
+						UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 							vm.revisions = response.data;
 						});
 					}
@@ -271,7 +271,7 @@
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
-				UtilsService.doGet(vm.account + "/" + vm.model.name + "/revisions.json").then(function(response){
+				UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
@@ -295,7 +295,7 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			$location.path("/" + vm.account + "/" + vm.model.name + "/" + revId , "_self");
+			$location.path("/" + vm.account + "/" + vm.model.model + "/" + revId , "_self");
 			AnalyticService.sendEvent({
 				eventCategory: 'Model',
 				eventAction: 'view'
