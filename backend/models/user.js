@@ -398,7 +398,7 @@ schema.statics.verify = function(username, token, options){
 			//import toy model
 			var ModelHelper = require('./helper/model');
 
-			ModelHelper.importToyModel(username).catch(err => {
+			ModelHelper.importToyProject(username, username).catch(err => {
 				systemLogger.logError('Failed to import toy model', { err : err && err.stack ? err.stack : err});
 			});
 		}

@@ -2793,7 +2793,6 @@ var PinShader = null;
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-
 var UnityUtil;
 
 (function() {
@@ -2896,6 +2895,7 @@ var UnityUtil;
 
 	UnityUtil.prototype.onReady = function()	
 	{
+	
 		if(!readyPromise)
 		{
 		   readyPromise	= new Promise(function(resolve, reject)
@@ -5543,7 +5543,7 @@ var ViewerManager = {};
 
 	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService) {
 		var vm = this;
-
+		vm.loadingAccount = true;
 		/*
 		 * Get the account data
 		 */
@@ -5579,6 +5579,7 @@ var ViewerManager = {};
 							getUserInfo();
 
 							// Made a payment
+							
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
 							UtilsService.showDialog("paypalDialog.html", $scope);
@@ -5709,6 +5710,9 @@ var ViewerManager = {};
 						}
 					}
 				}
+
+				vm.loadingAccount = false;
+
 			});
 
 		}
@@ -5852,8 +5856,27 @@ var ViewerManager = {};
 
 			var isUserAccount = account.account === vm.account.account;
 			return {
-				edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-				delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
+				edit: {
+					label: "Edit",
+					 icon: "edit", 
+					 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
+				},
+				delete: {
+					label: "Delete", 
+					icon: "delete", 
+					color: "#F44336", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
+				},
+				team: {
+					label: "Team", 
+					icon: "group", 
+					hidden: !vm.account === vm.userAccount
+				},
+				modelsetting: {
+					label: "Settings",
+					icon: "settings", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
+				}
 			};
 			
 		};
@@ -5919,7 +5942,7 @@ var ViewerManager = {};
 		 * @param federationIndex
 		 */
 		vm.doFederationOption = function (event, option, account, project, federation) {
-			console.log(event, option, account, project, federation)
+
 			switch (option) {
 				case "edit":
 					setupEditFederation(event, account, project, federation);
@@ -5930,7 +5953,6 @@ var ViewerManager = {};
 					break;
 
 				case "delete":
-					console.log("Delete")
 					setupDelete(event, account, project, federation);
 					break;
 
@@ -5955,8 +5977,6 @@ var ViewerManager = {};
 					} else {
 						
 						for (var j = 0; j < account.fedModels.length; j++) { 
-							console.log(account);
-							console.log("Deleting from default", account.fedModels[j].model, response.data.model);
 							if (account.fedModels[j].model === response.data.model) {
 								account.fedModels.splice(j, 1);
 								break;
@@ -5976,6 +5996,10 @@ var ViewerManager = {};
 				}
 				else {
 					vm.deleteError = "Error deleting federation";
+					if (response.data.message) {
+						vm.deleteError = response.data.message;
+					} 
+
 				}
 			});
 		};
@@ -6000,9 +6024,9 @@ var ViewerManager = {};
 			UtilsService.showDialog("federationDialog.html", $scope, event, true);
 		}
 
-		function setupSetting(event, account, project, model){
-			$location.search("proj", model.name);
-			$location.search("targetAcct", account.account);
+		function setupSetting(event, teamspace, project, federation){
+			$location.search("proj", federation.name);
+			$location.search("targetAcct", teamspace.account);
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
 
@@ -6070,7 +6094,8 @@ var ViewerManager = {};
 				lastName: "=",
 				email: "=",
 				itemToShow: "=",
-				hasAvatar: "="
+				hasAvatar: "=",
+				loading: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -7079,7 +7104,6 @@ var ViewerManager = {};
 		 * @param {Object} project the project to invert the models for 
 		 */
 		vm.toggleModels = function(model) {
-			console.log(model)
 			model.modelsState = !model.modelsState;
 		}
 
@@ -7131,7 +7155,7 @@ var ViewerManager = {};
 		vm.saveFederation = function (teamspaceName, projectName) {
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
-			var isEdit = vm.federationData._isEdit
+			var isEdit = vm.federationData._isEdit;
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -7146,15 +7170,17 @@ var ViewerManager = {};
 					vm.errorMessage = response.data.message;
 				} else {
 
-					console.log(response.data)
 					vm.errorMessage = '';
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
 					vm.federationData.federate = true;
-					vm.federationData.timestamp = new Date();
 					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
 					vm.federationData.model = response.data.model;
+					if (response.data.timestamp) {
+						vm.federationData.timestamp = response.data.timestamp;
+					}
+
 				
 					// TODO: This should exist - backend problem : ISSUE_371
 					if (!isEdit) {
@@ -7353,7 +7379,7 @@ var ViewerManager = {};
 		vm.deleteModel = function () {
 
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.name;
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
 			var promise = UtilsService.doDelete({}, url);
 
 			promise.then(function (response) {
@@ -7403,12 +7429,9 @@ var ViewerManager = {};
 				}
 				else {
 					vm.deleteError = "Error deleting model";
-					if (response.status === 404) {
-						vm.deleteError += " : File not found"
-					}
-					if (response.status === 500) { 
-						vm.deleteError += " : There was a problem on the server"
-					}
+					if (response.data.message) {
+						vm.deleteError = "Error: " + response.data.message;
+					} 
 				}
 			});
 		};
@@ -8317,7 +8340,7 @@ var ViewerManager = {};
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.numSubscriptions = vm.subscriptions.length;
+		vm.numSubscriptions = (vm.subscriptions) ? vm.subscriptions.length : 0;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 		vm.showList = true;
 
@@ -8496,6 +8519,7 @@ var ViewerManager = {};
 				onShowPage: "&",
 				quota: "=",
 				subscriptions: "=",
+				loading: "=",
 				selectedIndex: "="
 			},
 			controller: AccountReposCtrl,
@@ -8572,7 +8596,6 @@ var ViewerManager = {};
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/invoices");
 			billingsPromise.then(function (response) {
-				console.log("**billings**", response);
 				if ((response.data.length > 0) &&
 					(parseInt(vm.query.item) >= 0) &&
 					(parseInt(vm.query.item) < response.data.length)) {
@@ -9322,7 +9345,6 @@ var ViewerManager = {};
 			vm.sending = true;
 			promise = UtilsService.doPost(vm.contact, "contact");
 			promise.then(function (response) {
-				console.log(response);
 				vm.sending = false;
 				if (response.status === 200) {
 					vm.sent = true;
@@ -9848,7 +9870,6 @@ var ViewerManager = {};
 					vm.selectedGroup.color = colour;
 					promise = GroupsService.updateGroup(vm.selectedGroup);
 					promise.then(function (data) {
-						console.log(data);
 						setSelectedGroupHighlightStatus(true);
 					});
 				}, 500);
@@ -10245,8 +10266,8 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
-	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", "AnalyticService", 
-		function($injector, $q, $http, serverConfig, EventService, AnalyticService) {
+	.service("Auth", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
+		function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
 
 		var self = this;
 
@@ -10277,7 +10298,7 @@ var ViewerManager = {};
 
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, initialiser: initialiser, error: reason });
 
-			self.authPromise.resolve(self.loggedIn);
+			self.authPromise.resolve(reason);
 		};
 
 		this.logoutSuccess = function()
@@ -10303,23 +10324,43 @@ var ViewerManager = {};
 			self.authPromise.resolve(self.loggedIn);
 		};
 
-		this.init = function() {
+
+		this.init = function(interval) {
 			var initPromise = $q.defer();
+
+			interval = !!interval;
 
 			// If we are not logged in, check
 			// with the API server whether we
 			// are or not
-			if(self.loggedIn === null)
+			if(self.loggedIn === null || interval)
 			{
 				// Initialize
 				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login")).success(function _initSuccess(data)
 					{
-						data.initialiser = true;
-						self.loginSuccess(data);
+						// If we are not logging in because of an interval
+						// then we are initializing the auth plugin
+						if (!interval)
+						{
+							data.initialiser = true;
+							self.loginSuccess(data);
+						} else if (!self.loggedIn) {
+							// If we are logging in using an interval,
+							// we only need to run login success if the self.loggedIn
+							// says we are not logged in.
+							self.loginSuccess(data);
+						}
 					}).error(function _initFailure(reason)
 					{
-						reason.initialiser = true;
-						self.loginFailure(reason);
+						if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code)
+						{
+							self.loginSuccess(reason);
+						} else if (self.loggedIn === null || (interval && self.loggedIn)) {
+							reason.initialiser = true;
+							
+							self.loginFailure(reason);
+						}
+							
 					});
 
 				self.authPromise.promise.then(function() {
@@ -10338,6 +10379,14 @@ var ViewerManager = {};
 
 			return initPromise.promise;
 		};
+
+		// Check for expired sessions
+		var checkExpiredSessionTime = 5 // Seconds
+
+			this.intervalCaller = $interval(function() {
+				console.log("Running Init")
+				self.init(true);
+			}, 1000 * checkExpiredSessionTime);
 
 		this.loadModelRoles = function(account, model)
 		{
@@ -11153,24 +11202,11 @@ function AnalyticService(){
 		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-		// Check for expired sessions
-		var checkExpiredSessionTime = 5 // Seconds
-		$interval(function() {
 
-			Auth.isLoggedIn().success(function(){
-				//console.log("Logged In");
-			}).error(function(){
-				if (StateManager.state.loggedIn) {
-					//console.log("User logged out due to expire session");
-					Auth.logout();
-				} else {
-					//console.log("User is not logged in, not redirecting")
-				}
-			});
-
-		}, 1000 * checkExpiredSessionTime);
 
 		$timeout(function () {
+			var login = angular.element("<login></login>");
+			var elementRef, elementScope;
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {
 				name: "default",
@@ -11180,10 +11216,13 @@ function AnalyticService(){
 			 */
 			$scope.$watch("vm.state", function (newState, oldState) {
 
-				//console.log('newState', newState, oldState);
 				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
-					//console.log('in');
-					homeLoggedOut.empty();
+
+					if (elementRef)
+					{
+						elementRef.remove();
+						elementScope.$destroy();
+					}
 
 					vm.goToUserPage = false;
 					for (i = 0; i < vm.functions.length; i++) {
@@ -11200,16 +11239,18 @@ function AnalyticService(){
 
 							notLoggedInElement = angular.element(element);
 							homeLoggedOut.append(notLoggedInElement);
-							$compile(notLoggedInElement)($scope);
+							elementScope = $scope.$new();
+							elementRef = $compile(notLoggedInElement)(elementScope);
 							break;
 						}
 					}
 
 					if (!vm.state.loggedIn && !vm.goToUserPage) {
 						// Create login element
-						notLoggedInElement = angular.element("<login></login>");
+						notLoggedInElement = login;
 						homeLoggedOut.append(notLoggedInElement);
-						$compile(notLoggedInElement)($scope);
+						elementScope = $scope.$new();
+						elementRef = $compile(notLoggedInElement)(elementScope);
 					}
 				}
 			}, true);
@@ -11253,6 +11294,10 @@ function AnalyticService(){
 								EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
 							}
 						}
+					} else {
+
+						EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+					
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
@@ -11813,10 +11858,8 @@ angular.module('3drepo')
 		this.$onChanges = function (changes) {
 			var i, length,
 				leftArrow = 37;
-			//console.log('issueComp on changes', changes);
 
-			if(changes.hasOwnProperty('modelSettings')){
-				console.log('onchanges modelsettings', this.modelSettings);
+			if(changes.hasOwnProperty('modelSettings') && changes.modelSettings.hasOwnProperty('properties') ){
 
 				this.topic_types = this.modelSettings.properties.topicTypes;
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
@@ -15400,9 +15443,9 @@ angular.module('3drepo')
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "Auth", "EventService", "serverConfig", "UtilsService"];
 
-	function LoginCtrl($scope, Auth, EventService, serverConfig, UtilsService) {
+	function LoginCtrl($scope, $location, Auth, EventService, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13;
 
@@ -15410,6 +15453,18 @@ angular.module('3drepo')
 		 * Init
 		 */
 		vm.version = serverConfig.apiVersion;
+
+		vm.unityLoaded = false;
+		vm.unityLoading = UnityUtil.onReady();
+		vm.unityLoading.then(function(resolved){
+			console.log("Loaded", resolved);
+			vm.unityLoaded = true;
+		})
+
+		Auth.isLoggedIn().success(function(response){
+			StateManager.setStateVar("loggedIn", true);
+			EventService.send(EventService.EVENT.UPDATE_STATE);
+		});
 
 		/**
 		 * Attempt to login
@@ -15423,7 +15478,23 @@ angular.module('3drepo')
 				}
 			}
 			else {
-				Auth.login(vm.user.username, vm.user.password);
+				if (vm.user && vm.user.username && vm.user.password) {
+					vm.errorMessage = "";
+					Auth.login(vm.user.username, vm.user.password).then(function(response){
+						//console.log(response);
+					});
+				} else {
+
+					vm.errorMessage = "Username and/or password not provided";
+					if (vm.user && vm.user.password && !vm.user.username) {
+						vm.errorMessage = "Username not provided";
+					} else if (vm.user && vm.user.username && !vm.user.password) {
+						vm.errorMessage = "Password not provided";
+					}
+					
+				}
+
+					
 			}
 		};
 
@@ -15431,9 +15502,10 @@ angular.module('3drepo')
 		 * Event watch
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
+
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				if (event.value.hasOwnProperty("error")) {
+				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
 					}
@@ -15442,6 +15514,12 @@ angular.module('3drepo')
 					}
 				}
 			}
+		});
+
+		$scope.$watch("vm.unityLoading", function(event) {
+
+			console.log(vm.unityLoading);
+
 		});
 	}
 }());
@@ -15652,13 +15730,16 @@ angular.module('3drepo')
 		var currentError = {};
 
 		var send = function (type, value) {
+			var stack = (new Error()).stack;
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
 					console.trace("UNDEFINED EVENT TYPE" + type);
+					
 				} else {
 					console.log("SEND: " + type);
 					console.log(value);
+					console.log(stack);
 					currentEvent = {type: type, value: value};
 				}
 			});
