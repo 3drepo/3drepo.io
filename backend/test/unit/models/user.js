@@ -148,29 +148,7 @@ describe('User', function(){
 			let options = {
 				'rubbish': 'should not be inserted into database',
 				'firstName': '123',
-				'email': 'test3drepo@mailinator.com',
-				'permissions': [{
-					'user': username,
-					'permissions': [C.PERM_TEAMSPACE_ADMIN]
-				}],
-				'permissionTemplates':[
-					{
-						'_id': C.ADMIN_TEMPLATE,
-						'permissions': C.ADMIN_TEMPLATE_PERMISSIONS
-					},
-					{
-						'_id': C.VIEWER_TEMPLATE,
-						'permissions': C.VIEWER_TEMPLATE_PERMISSIONS
-					},
-					{
-						'_id': C.COMMENTER_TEMPLATE,
-						'permissions': C.COMMENTER_TEMPLATE_PERMISSIONS
-					},
-					{
-						'_id': C.COLLABORATOR_TEMPLATE,
-						'permissions': C.COLLABORATOR_TEMPLATE_PERMISSIONS
-					}
-				]
+				'email': 'test3drepo@mailinator.com'
 			};
 
 			let expectedCallWithOptions = {
@@ -178,8 +156,29 @@ describe('User', function(){
 					firstName : options.firstName, 
 					inactive: true, 
 					email: options.email,
-					permissions: options.permissions,
-					permissionTemplates: options.permissionTemplates
+					permissions: [{
+						'user': username,
+						'permissions': [C.PERM_TEAMSPACE_ADMIN]
+					}],
+					permissionTemplates: [
+						{
+							'_id': C.ADMIN_TEMPLATE,
+							'permissions': C.ADMIN_TEMPLATE_PERMISSIONS
+						},
+						{
+							'_id': C.VIEWER_TEMPLATE,
+							'permissions': C.VIEWER_TEMPLATE_PERMISSIONS
+						},
+						{
+							'_id': C.COMMENTER_TEMPLATE,
+							'permissions': C.COMMENTER_TEMPLATE_PERMISSIONS
+						},
+						{
+							'_id': C.COLLABORATOR_TEMPLATE,
+							'permissions': C.COLLABORATOR_TEMPLATE_PERMISSIONS
+						}
+					],
+					jobs: C.DEFAULT_JOBS
 				},
 				roles: []
 			}

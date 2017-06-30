@@ -316,6 +316,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	];
 
+	cleanedCustomData.jobs = C.DEFAULT_JOBS;
+	
 	if(customData){
 		cleanedCustomData.emailVerifyToken = {
 			token: crypto.randomBytes(64).toString('hex'),

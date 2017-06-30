@@ -137,7 +137,7 @@
 			params.config_js += "\n\nserver_config.fileNameRegExp = " + ModelHelper.fileNameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
 			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ModelHelper.acceptedFormat) + ";";
-			params.config_js += "\n\nserver_config.login_check_interval = " + config.login_check_interval + ";"
+			params.config_js += "\n\nserver_config.login_check_interval = " + config.login_check_interval + ";";
 
 			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
 			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({
