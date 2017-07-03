@@ -231,7 +231,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvasScript.setAttribute("type", "text/javascript");
 
 				var unitySettings = {
-				 	TOTAL_MEMORY: 2130706432 / 2,
+				 	TOTAL_MEMORY: 2130706432,
 				    errorhandler: UnityUtil.onError,
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",

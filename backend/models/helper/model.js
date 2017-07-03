@@ -581,6 +581,114 @@ function getUnityBundle(account, model, uid){
 	});
 }
 
+// tree main tree and urls of sub trees only and let frontend to do the remaining work :)
+function getFullTree_noSubTree(account, model, branch, rev, username, out){
+	'use strict';
+
+	let getHistory;
+	let history;
+
+	out.write("{");
+
+	if(rev && utils.isUUID(rev)){
+
+		getHistory = History.findByUID({ account, model }, rev);
+
+	} else if (rev && !utils.isUUID(rev)) {
+
+		getHistory = History.findByTag({ account, model }, rev);
+
+	} else if (branch) {
+
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+
+		history = _history;
+
+		if(!history){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		let revId = utils.uuidToString(history._id);
+		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
+
+		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
+
+	}).then(rs => {
+
+		//trees.mainTree = buf.toString();
+
+		return new Promise(function(resolve, reject){
+
+			out.write('"mainTree": ');
+
+			rs.on('data', d => out.write(d));
+			rs.on('end', ()=> resolve());
+			rs.on('error', err => reject(err));
+
+		});
+
+	}).then(() => {
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, model }, filter);
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		out.write(', "subTrees":[');
+
+		return new Promise((resolve) => {
+
+			function eachRef(refIndex){
+
+				const ref = refs[refIndex];
+				//write buffer
+				//done
+				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
+
+				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
+					url = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
+				} 
+
+				if(refIndex > 0){
+					out.write(",");
+				}
+
+				out.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+
+				if(refIndex+1 < refs.length){
+					eachRef(refIndex+1);
+				} else {
+					resolve();
+				}
+
+			}
+
+			if(refs.length){
+				eachRef(0);
+			} else {
+				resolve();
+			}
+		});
+
+
+	}).then(() => {
+
+		out.write(']');
+		out.write("}");
+		out.end();
+
+	});
+}
+
 // more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
 function getFullTree(account, model, branch, rev, username, out){
 	'use strict';
@@ -1262,5 +1370,6 @@ module.exports = {
 	importModel,
 	removeModel,
 	getModelPermission,
-	getMetadata
+	getMetadata,
+	getFullTree_noSubTree
 };

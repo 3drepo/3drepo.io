@@ -281,7 +281,7 @@ function getModelTree(req, res, next){
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.getFullTree(account, model, branch, req.params.rev, username, res).then(() => {
+	ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username, res).then(() => {
 		//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
