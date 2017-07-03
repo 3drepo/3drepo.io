@@ -300,6 +300,35 @@
 
 		// MODELS
 
+		$scope.$watch("vm.modelSelected", function(){
+			// Find the matching project to the one selected
+			console.log(vm.modelSelected );
+			vm.modelReady = false;
+			vm.selectedModel = vm.models[vm.modelSelected];
+
+			console.log("Model changed", vm.selectedModel)
+			return $q(function(resolve, reject) {
+
+				var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions"
+				var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+				$http.get(url).then(function(response){
+					var users = response.data;
+					vm.selectedModel.assignableUsers = users;
+					vm.modelReady = true;
+					console.log("VM MODEL READY");
+					resolve();
+				})
+				.catch(function(error){
+					console.log("Error", error)
+					reject(error);
+				});	
+				
+			});		
+
+		});
+
+		
+
 		vm.modelsAreLoaded = function() {
 			//console.log(vm.modelIds, vm.models)
 			return Object.keys(vm.models).length && 
@@ -326,16 +355,17 @@
 			//vm.postProjectPermissionChange(user, permission, addOrRemove)
 		}
 
-		vm.userHasModelPermissions = function(user, permission) {
-			var hasPermission = false;
-			// vm.selectedModel.permissions.forEach(function(permissionUser){
-			// 	if (permissionUser.user === user.assignedUser) {
-			// 		if (permissionUser.permissions) {
-			// 			hasPermission = permissionUser.permissions.indexOf(permission) !== -1;
-			// 		}
-			// 	}
-			// });
-			return hasPermission;
+		vm.userIsInTeam = function(user) {
+			var isInTeam = false;
+			console.log(vm.selectedModel.assignableUsers)
+			vm.selectedModel.assignableUsers.forEach(function(assignable){
+				console.log(user, assignable.user)
+				if (assignable.user === user.assignedUser) {
+					isInTeam = true;
+				}
+			});
+			console.log(isInTeam);
+			return isInTeam;
 		}
 
 		vm.postProjectPermissionChange = function(user, permission, addOrRemove) {

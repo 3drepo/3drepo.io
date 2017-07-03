@@ -74,6 +74,7 @@
 									p {{user.assignedUser}}
 								td(ng-repeat="(permission, value) in vm.projectPermissions") 
 									md-checkbox(
+										aria-label="Project Permission {{value}}"
 										layout-align="center center"
 										ng-click="vm.projectStateChange(user, permission)"
 										ng-checked="vm.userHasProjectPermissions(user, permission)")
@@ -83,23 +84,33 @@
 				div.assignTabHolder(layout="row" ng-if="vm.loading")
 					h3 Loading...
 
-				div.assignTabHolder(layout="column")
+				div.assignTabHolder(layout="column", ng-if="!vm.projectsLoading", flex="100")
 					div(layout="row")
 						div(flex="33", layout="column")
 							md-label Select Teamspace
-							md-select.rowSelects(ng-model="vm.teamspaceSelected", ng-required="true")
+							md-select.rowSelects(
+								aria-label="Selection for Teamspace"
+								ng-model="vm.teamspaceSelected"
+								ng-required="true")
 								md-option(ng-repeat="teamspace in vm.teamspaces", value="{{teamspace.account}}") {{teamspace.account}}
 
 						div(flex="33", layout="column")
 							md-label Select Project
-							md-select.rowSelects(ng-model="vm.projectSelected", ng-required="true")
+							md-select.rowSelects(
+								aria-label="Selection for Project"
+								ng-model="vm.projectSelected"
+								ng-required="true")
 								md-option(ng-repeat="project in vm.projects", value="{{project.name}}") {{project.name}}
 
 						div(flex="33", layout="column")
 							md-label(ng-if="vm.modelsAreLoaded()") Select Model
 							md-label(ng-if="!vm.modelsAreLoaded()") Awaiting Models...
-							md-select.rowSelects(ng-model="vm.modelSelected", ng-required="true",  ng-disabled="!vm.modelsAreLoaded()")
-								md-option(ng-repeat="model in vm.models", value="{{model.name}}") {{model.name}}
+							md-select.rowSelects(
+								aria-label="Selection for Model"
+								ng-model="vm.modelSelected"
+								ng-required="true" 
+								ng-disabled="!vm.modelsAreLoaded()")
+								md-option(ng-repeat="(id, model) in vm.models", value="{{id}}") {{model.name}}
 
 					table.scrollable(
 						ng-if="vm.modelSelected"
@@ -113,6 +124,7 @@
 							tr(
 								layout-align="center center", 
 								ng-repeat="user in vm.selectedTeamspace.assignUsers"
+								ng-if="vm.selectedModel && vm.modelReady && vm.userIsInTeam(user)"
 								)
 
 								td.userColumn.userInput
