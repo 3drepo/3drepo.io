@@ -665,7 +665,7 @@ account-assign td, account-assign th {
 }
 
 account-assign .userColumn {
-  width: 130px;
+  /*width: 130px;*/
 }
 
 account-assign .rowSelects {
@@ -679,3 +679,28 @@ account-assign md-checkbox .md-container {
 account-assign .radioButtons {
   margin-left: 8px;
 }
+
+account-assign md-radio-button > div {
+  margin-left: 50%;
+}
+
+account-assign .fixedWidth {
+  /*width: 50px;*/
+}
+
+account-assign table td, account-assign table th {
+    width: 120px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+account-assign .checkboxes p {
+  margin-top: 0px;
+}
+
+account-assign .radiobuttons p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+

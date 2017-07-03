@@ -48,6 +48,7 @@
 		vm.teamspaces = [];
 		vm.projects = [];
 		vm.models= {};
+		vm.selectedRole = {};
 
 		// GET TEAMSPACES
 		var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
@@ -302,7 +303,7 @@
 
 		$scope.$watch("vm.modelSelected", function(){
 			// Find the matching project to the one selected
-			console.log(vm.modelSelected );
+
 			vm.modelReady = false;
 			vm.selectedModel = vm.models[vm.modelSelected];
 
@@ -314,12 +315,14 @@
 				$http.get(url).then(function(response){
 					var users = response.data;
 					vm.selectedModel.assignableUsers = users;
+					vm.selectedModel.assignableUsers.forEach(function(user) {
+						vm.selectedRole[user.user] = user.permission;
+					})
 					vm.modelReady = true;
-					console.log("VM MODEL READY");
 					resolve();
 				})
 				.catch(function(error){
-					console.log("Error", error)
+					console.error("Error", error)
 					reject(error);
 				});	
 				
@@ -350,56 +353,46 @@
 		}
 
 
-		vm.modelStateChange = function(user, permission) {
-			var addOrRemove = vm.userHasModelPermissions(user, permission) === true ? "remove" : "add";
-			//vm.postProjectPermissionChange(user, permission, addOrRemove)
+		vm.modelStateChange = function(user, role) {
+
+			// Loop through the list of available users and find the selected user
+			vm.selectedModel.assignableUsers.forEach(function(assignableUser) {
+				if (user.assignedUser === assignableUser.user) {
+					// Change the users role to the newly selected permission
+					assignableUser.permission = role;
+				}
+			});
+			
+			// Send the update to the server
+			vm.postModelRoleChange(user, role)
 		}
 
 		vm.userIsInTeam = function(user) {
 			var isInTeam = false;
-			console.log(vm.selectedModel.assignableUsers)
 			vm.selectedModel.assignableUsers.forEach(function(assignable){
-				console.log(user, assignable.user)
 				if (assignable.user === user.assignedUser) {
 					isInTeam = true;
 				}
 			});
-			console.log(isInTeam);
 			return isInTeam;
 		}
 
-		vm.postProjectPermissionChange = function(user, permission, addOrRemove) {
+		vm.postModelRoleChange = function(user, role) {
 
-			//Add or remove a permission
-
-			if (addOrRemove === "add") {
-
-			// 	var targetUser = vm.selectedProject.permissions.find(function(projectUser){
-			// 		return projectUser.user === user.assignedUser;
-			// 	});
-
-			// 	// If the user is already in the list we can add the persmission
-			// 	if (targetUser) {
-			// 		if (targetUser.permissions.indexOf(permission) === -1) {
-			// 			targetUser.permissions.push(permission);
-			// 		}
-			// 	} 
-			// 	// Else we create a new object and add it in
-			// 	else {
-			// 		vm.selectedProject.permissions.push({
-			// 			user : user.assignedUser,
-			// 			permissions: [permission]
-			// 		});
-			// 	}
-				
-			}
-
-			// //Update the permissions user for the selected teamspace
-			// var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
-			// var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-			// $http.put(url, {
-			// 	permissions: vm.selectedProject.permissions
-			// });
+			//Update the permissions user for the selected teamspace
+			// POST /{accountName}/{modelID}/permissions
+			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
+			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+			
+			// We can use the assignable users object as its matches the required 
+			// data structure the API expects
+			$http.post(url, vm.selectedModel.assignableUsers)
+			.then(function(response){
+				console.log(response);
+			})
+			.catch(function(error) {
+				console.error("Error: ", error);
+			});
 
 		}
 
