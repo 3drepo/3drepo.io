@@ -622,10 +622,12 @@ function getFullTree(account, model, branch, rev, username, out){
 		//trees.mainTree = buf.toString();
 
 		return new Promise(function(resolve, reject){
+
 			out.write('"mainTree": ');
 
 			rs.on('data', d => out.write(d));
 			rs.on('end', ()=> resolve());
+			rs.on('error', err => reject(err));
 
 		});
 
@@ -640,11 +642,10 @@ function getFullTree(account, model, branch, rev, username, out){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getTrees = [];
-
 		out.write(', "subTrees":[');
 
 		return new Promise((resolve, reject) => {
+
 			function eachRef(refIndex){
 
 				const ref = refs[refIndex];
@@ -663,7 +664,7 @@ function getFullTree(account, model, branch, rev, username, out){
 				}
 
 				let status;
-				let getTree = middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
+				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
 
 					if(!granted){
 						status = 'NO_ACCESS';
@@ -683,17 +684,11 @@ function getFullTree(account, model, branch, rev, username, out){
 					});
 
 				}).then(rs => {
-					// return {
-					// 	status,
-					// 	buf: buf && buf.toString(),
-					// 	_id: utils.uuidToString(ref._id)
-					// };
 
+					return new Promise(function(_resolve, _reject){
 
-					return new Promise(function(_resolve, reject){
-						console.log('refIndex', refIndex)
 						if(refIndex > 0){
-							out.write(",")
+							out.write(",");
 						}
 
 						let statusString = status && `"status": "${status}" ,` || '';
@@ -703,48 +698,37 @@ function getFullTree(account, model, branch, rev, username, out){
 						rs.on('data', d => out.write(d));
 						rs.on('end', () => {
 							out.write('}');
-							_resolve()
+							_resolve();
 						});
+						rs.on('error', err => _reject(err));
 
 					});
+
 				}).then(() => {
 					if(refIndex+1 < refs.length){
 						eachRef(refIndex+1);
 					} else {
 						resolve();
 					}
+				}).catch(err => {
+					reject(err);
 				});
-
-				//getTrees.push(getTree);
-
-
 			}
 
 			if(refs.length){
 				eachRef(0);
 			} else {
-				 resolve();
+				resolve();
 			}
 		});
 
 
-
-		// refs.forEach((ref, refIndex) => {
-
-
-
-		// });
-
-		//return Promise.all(getTrees);
-
-	}).then(subTrees => {
+	}).then(() => {
 
 		out.write(']');
-		//trees.subTrees = subTrees;
-
 		out.write("}");
 		out.end();
-		//return trees;
+
 	});
 }
 
