@@ -62,7 +62,8 @@
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
-					var mainTree = JSON.parse(json.data.mainTree);
+					//var mainTree = JSON.parse(json.data.mainTree);
+					var mainTree = json.data.mainTree;
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
 
@@ -77,7 +78,8 @@
 							if(idToObjRef[tree._id]){
 
 								if(tree.buf){
-									var obj = JSON.parse(tree.buf);
+									//var obj = JSON.parse(tree.buf);
+									var obj = tree.buf;
 
 									var subTree = obj.nodes;
 									subTree.parent = idToObjRef[tree._id];
