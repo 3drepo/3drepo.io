@@ -283,11 +283,18 @@ function getModelTree(req, res, next){
 
 	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
 
-	responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, data.readStream);
+	data.readStreamPromise.then(readStream => {
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
+	
 
-	data.promise.catch(err => {
+	// There may be some errors generated during the streaming process but it is to late and unable to return to client anymore
+	data.outputingPromise.catch(err => {
 		// log error
-		req[C.REQ_REPO].logger.logError(err);
+		req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+		req[C.REQ_REPO].logger.logError(err.stack);
 	});
 }
 

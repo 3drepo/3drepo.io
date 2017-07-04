@@ -145,7 +145,13 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	return promise.then(() => {
 		
-		return ModelSetting.count({account, model}, {name: modelName, _id: { '$in' : project.models} });
+		const query =  {name: modelName};
+
+		if(data.project){
+			query._id = { '$in' : project.models};
+		}
+
+		return ModelSetting.count({account, model}, query);
 
 	}).then(count => {
 
@@ -611,10 +617,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	let getHistory;
 	let history;
-
-	var pass = new stream.PassThrough();
-
-	pass.write("{");
+	let stashRs;
 
 	if(rev && utils.isUUID(rev)){
 
@@ -629,7 +632,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
-	const promise = getHistory.then(_history => {
+	const readStreamPromise = getHistory.then(_history => {
 
 		history = _history;
 
@@ -646,14 +649,30 @@ function getFullTree_noSubTree(account, model, branch, rev){
 	}).then(rs => {
 
 		//trees.mainTree = buf.toString();
+		if(!rs) {
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		stashRs = rs;
+
+		return stream.PassThrough();
+
+	});
+
+
+	let pass;
+
+	const outputingPromise = readStreamPromise.then(_pass => {
+
+		pass = _pass;
 
 		return new Promise(function(resolve, reject){
 
-			pass.write('"mainTree": ');
+			pass.write('{"mainTree": ');
 
-			rs.on('data', d => pass.write(d));
-			rs.on('end', ()=> resolve());
-			rs.on('error', err => reject(err));
+			stashRs.on('data', d => pass.write(d));
+			stashRs.on('end', ()=> resolve());
+			stashRs.on('error', err => reject(err));
 
 		});
 
@@ -711,11 +730,12 @@ function getFullTree_noSubTree(account, model, branch, rev){
 		pass.end();
 
 	}).catch(err => {
-		pass.end();
+
+		pass && pass.end();
 		return Promise.reject(err);
 	});
 
-	return {readStream: pass, promise};
+	return {readStreamPromise, outputingPromise};
 }
 
 // more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
