@@ -82,6 +82,10 @@
 		FILE_IMPORT_INVALID_ARGS: { message: "Invalid arguments", status: 500 },
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Unknown error", status: 500 },
 		FILE_IMPORT_UNKNOWN_CMD: { message: "Unknown command", status: 500 },
+
+		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "Bouncer failed to start", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_FAIL: { message: "Failed to import file to scene", status: 500},
+
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 404 },
@@ -127,6 +131,13 @@
 		
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
 		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 500 },
+
+
+		FILE_IMPORT_GET_FILE_FAILED: { message: "Failed to get file from project", status: 500 },
+		FILE_IMPORT_CRASHED: { message: "Failed to finish", status: 500 },
+		FILE_IMPORT_FILE_READ_FAILED: { message: "Failed to read import parameters from file (Unity)", status: 500 },
+		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Failed to generate asset bundles (Unity)", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Untriangulated meshes", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },

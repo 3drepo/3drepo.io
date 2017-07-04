@@ -43,16 +43,16 @@ const stream = require('stream');
  * Converts error code from repobouncerclient to a response error object
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
-function convertToErrorCode(errCode){
+function convertToErrorCode(bouncerErrorCode){
 
     var errObj;
 
-    switch (errCode) {
+    switch (bouncerErrorCode) {
         case 0:
             errObj = responseCodes.OK;
             break;
         case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
             break;
         case 2:
             errObj = responseCodes.NOT_AUTHORIZED;
@@ -60,8 +60,11 @@ function convertToErrorCode(errCode){
         case 3:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
             break;
+        case 4:
+        	errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+        	break;
         case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
 			break;
         case 6:
             errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
@@ -69,18 +72,37 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 8:
+        	errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+        	break;
         case 9:
         	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
         	break;
 		case 10:
 			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
 			break;
+		case 11:
+			errObj = responseCodes.FILE_IMPORT_GET_FILE_FAILED;
+			break;
+		case 12:
+			errObj = responseCodes.FILE_IMPORT_CRASHED;
+			break;
+		case 13:
+			errObj = responseCodes.FILE_IMPORT_FILE_READ_FAILED;
+			break;
+		case 14:
+			errObj = responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED;
+			break;
+		case 15:
+			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
+			break;
 		default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
 
     }
-    return errObj;
+    
+    return Object.assign({bouncerErrorCode}, errObj);
 }
 
 
@@ -1361,7 +1383,6 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
-	convertToErrorCode,
 	createFederatedModel,
 	listSubModels,
 	getFullTree,
