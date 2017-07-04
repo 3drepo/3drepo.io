@@ -125,9 +125,8 @@
 			var i, length,
 				leftArrow = 37;
 
-			if(changes.hasOwnProperty('modelSettings') && changes.modelSettings.hasOwnProperty('properties') ){
-
-				this.topic_types = this.modelSettings.properties.topicTypes;
+			if(changes.hasOwnProperty('modelSettings')){
+				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
 				this.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, this.modelSettings.permissions);
 				//convert comment topic_types
 				convertCommentTopicType();

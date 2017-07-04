@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.13.1";
+	const VERSION="1.13.2";
 
 	let config = require("app-config")
 		.config;
@@ -144,6 +144,9 @@
 	config.cookie_domain = coalesce(config.cookie.domain, config.host);
 
 	config.chat_reconnection_attempts = coalesce(config.chat_reconnection_attempts, 5);
+
+	// Check user login interval
+	config.login_check_interval = coalesce(config.login_check_interval, 8); // seconds
 
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {

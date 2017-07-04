@@ -495,5 +495,16 @@
 		'model': data => `/${data.account}/${data.model}`
 	});
 
+	define('DEFAULT_JOBS',[
+		{ _id: 'Client' },
+		{ _id: 'Architect'},
+		{ _id: 'Structural Engineer'},
+		{ _id: 'MEP Engineer'},
+		{ _id: 'Project Manager'},
+		{ _id: 'Quantity Surveyor'},
+		{ _id: 'Asset Manager'},
+		{ _id: 'Main Contractor'},
+		{ _id: 'Supplier'}
+	]);
 	
 })();

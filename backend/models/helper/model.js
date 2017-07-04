@@ -581,14 +581,14 @@ function getUnityBundle(account, model, uid){
 	});
 }
 
-// more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
-function getFullTree(account, model, branch, rev, username){
+// tree main tree and urls of sub trees only and let frontend to do the remaining work :)
+function getFullTree_noSubTree(account, model, branch, rev, username, out){
 	'use strict';
 
 	let getHistory;
 	let history;
 
-	let trees = {};
+	out.write("{");
 
 	if(rev && utils.isUUID(rev)){
 
@@ -614,11 +614,24 @@ function getFullTree(account, model, branch, rev, username){
 		let revId = utils.uuidToString(history._id);
 		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
 
-	}).then(buf => {
+	}).then(rs => {
 
-		trees.mainTree = buf.toString();
+		//trees.mainTree = buf.toString();
+
+		return new Promise(function(resolve, reject){
+
+			out.write('"mainTree": ');
+
+			rs.on('data', d => out.write(d));
+			rs.on('end', ()=> resolve());
+			rs.on('error', err => reject(err));
+
+		});
+
+	}).then(() => {
 
 		let filter = {
 			type: "ref",
@@ -630,58 +643,200 @@ function getFullTree(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getTrees = [];
+		out.write(', "subTrees":[');
 
-		refs.forEach(ref => {
+		return new Promise((resolve) => {
 
-			let getRefId;
+			function eachRef(refIndex){
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				const ref = refs[refIndex];
+				//write buffer
+				//done
+				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
 
-				getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
-					return _history ? utils.uuidToString(_history._id) : null;
-				});
+				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
+					url = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
+				} 
 
-			} else {
-				getRefId = Promise.resolve(utils.uuidToString(ref._rid));
-			}
-
-			let status;
-			let getTree = middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
-
-				if(!granted){
-					status = 'NO_ACCESS';
-					return;
+				if(refIndex > 0){
+					out.write(",");
 				}
 
-				return getRefId.then(revId => {
+				out.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
 
-					if(!revId){
-						status = 'NOT_FOUND';
-						return;
-					}
+				if(refIndex+1 < refs.length){
+					eachRef(refIndex+1);
+				} else {
+					resolve();
+				}
 
-					let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-					return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
-				});
+			}
 
-			}).then(buf => {
-				return {
-					status,
-					buf: buf && buf.toString(),
-					_id: utils.uuidToString(ref._id)
-				};
-			});
+			if(refs.length){
+				eachRef(0);
+			} else {
+				resolve();
+			}
+		});
 
-			getTrees.push(getTree);
+
+	}).then(() => {
+
+		out.write(']');
+		out.write("}");
+		out.end();
+
+	});
+}
+
+// more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
+function getFullTree(account, model, branch, rev, username, out){
+	'use strict';
+
+	let getHistory;
+	let history;
+	//let trees = {};
+	out.write("{");
+
+	if(rev && utils.isUUID(rev)){
+
+		getHistory = History.findByUID({ account, model }, rev);
+
+	} else if (rev && !utils.isUUID(rev)) {
+
+		getHistory = History.findByTag({ account, model }, rev);
+
+	} else if (branch) {
+
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+
+		history = _history;
+
+		if(!history){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		let revId = utils.uuidToString(history._id);
+		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
+
+		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
+
+	}).then(rs => {
+
+		//trees.mainTree = buf.toString();
+
+		return new Promise(function(resolve, reject){
+
+			out.write('"mainTree": ');
+
+			rs.on('data', d => out.write(d));
+			rs.on('end', ()=> resolve());
+			rs.on('error', err => reject(err));
 
 		});
 
-		return Promise.all(getTrees);
+	}).then(() => {
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
 
-	}).then(subTrees => {
-		trees.subTrees = subTrees;
-		return trees;
+		return Ref.find({ account, model }, filter);
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		out.write(', "subTrees":[');
+
+		return new Promise((resolve, reject) => {
+
+			function eachRef(refIndex){
+
+				const ref = refs[refIndex];
+				//write buffer
+				//done
+				let getRefId;
+
+				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+
+					getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
+						return _history ? utils.uuidToString(_history._id) : null;
+					});
+
+				} else {
+					getRefId = Promise.resolve(utils.uuidToString(ref._rid));
+				}
+
+				let status;
+				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
+
+					if(!granted){
+						status = 'NO_ACCESS';
+						return;
+					}
+
+					return getRefId.then(revId => {
+
+						if(!revId){
+							status = 'NOT_FOUND';
+							return;
+						}
+
+						let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
+						//return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
+						return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName, true);
+					});
+
+				}).then(rs => {
+
+					return new Promise(function(_resolve, _reject){
+
+						if(refIndex > 0){
+							out.write(",");
+						}
+
+						let statusString = status && `"status": "${status}" ,` || '';
+
+						out.write(`{ ${statusString} "_id": "${utils.uuidToString(ref._id)}", "buf": `);
+
+						rs.on('data', d => out.write(d));
+						rs.on('end', () => {
+							out.write('}');
+							_resolve();
+						});
+						rs.on('error', err => _reject(err));
+
+					});
+
+				}).then(() => {
+					if(refIndex+1 < refs.length){
+						eachRef(refIndex+1);
+					} else {
+						resolve();
+					}
+				}).catch(err => {
+					reject(err);
+				});
+			}
+
+			if(refs.length){
+				eachRef(0);
+			} else {
+				resolve();
+			}
+		});
+
+
+	}).then(() => {
+
+		out.write(']');
+		out.write("}");
+		out.end();
+
 	});
 }
 
@@ -1215,5 +1370,6 @@ module.exports = {
 	importModel,
 	removeModel,
 	getModelPermission,
-	getMetadata
+	getMetadata,
+	getFullTree_noSubTree
 };

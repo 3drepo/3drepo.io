@@ -62,10 +62,11 @@
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
-					var mainTree = JSON.parse(json.data.mainTree);
+					//var mainTree = JSON.parse(json.data.mainTree);
+					var mainTree = json.data.mainTree;
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
-
+					var getSubTrees = [];
 					if(subTrees){
 
 						// idToObjRef only needed if model is a fed model. i.e. subTrees.length > 0
@@ -76,29 +77,49 @@
 							//attach the sub tree back on main tree
 							if(idToObjRef[tree._id]){
 
-								if(tree.buf){
-									var obj = JSON.parse(tree.buf);
+								if(tree.url){
+									//var obj = JSON.parse(tree.buf);
+									var getSubTree = $http.get(serverConfig.apiUrl(serverConfig.GET_API, tree.url)).then(function(res){
 
-									var subTree = obj.nodes;
-									subTree.parent = idToObjRef[tree._id];
-									
-									angular.extend(mainTree.subProjIdToPath, obj.idToPath);
+										if(res.status === 401){
+											tree.status = 'NO_ACCESS';
+										}
 
-									idToObjRef[tree._id].children = [subTree];
-									idToObjRef[tree._id].hasSubProjTree = true;
-									subTreesById[subTree._id] = subTree;
+										if(res.status === 404){
+											tree.status = 'NOT_FOUND';
+										}
+
+										if(tree.status){
+											idToObjRef[tree._id].status = tree.status;
+										}
+
+										tree.buf = res.data.mainTree;
+										var obj = tree.buf;
+
+										var subTree = obj.nodes;
+										subTree.parent = idToObjRef[tree._id];
+										
+										angular.extend(mainTree.subProjIdToPath, obj.idToPath);
+
+										idToObjRef[tree._id].children = [subTree];
+										idToObjRef[tree._id].hasSubProjTree = true;
+										subTreesById[subTree._id] = subTree;
+
+									});
+
+									getSubTrees.push(getSubTree);
 								}
 
-								if(tree.status){
-									idToObjRef[tree._id].status = tree.status;
-								}
 							}
 						});
 
 						mainTree.subTreesById = subTreesById;
 					}
 
-					deferred.resolve(mainTree);
+					Promise.all(getSubTrees).then(function(){
+						deferred.resolve(mainTree);
+					});
+				
 				});
 
 			return deferred.promise;
