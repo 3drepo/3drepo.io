@@ -47,7 +47,7 @@
 		vm.loading = true;
 		vm.teamspaces = [];
 		vm.projects = [];
-		vm.models= {};
+		vm.models = {};
 		vm.selectedRole = {};
 
 		// GET TEAMSPACES
@@ -77,20 +77,22 @@
 		);
 
 		// GET PROJECTS
-		var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/projects");
-		$http.get(url)
-		.then(
-			function(response) {
-				console.log("assign data", response)
-				vm.projects = response.data;
-				vm.projectsLoading = false;
 
-			},
-			function (err) {
-				console.trace(err);
-			}
-		);
-
+		vm.setProjects = function(account) {
+			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/projects");
+			$http.get(url)
+			.then(
+				function(response) {
+					console.log("assign data", response)
+					vm.projects = response.data;
+					vm.projectsLoading = false;
+				},
+				function (err) {
+					console.trace(err);
+				}
+			);
+		}
+		
 
 		vm.teamspacePermissions = {
 
@@ -178,14 +180,23 @@
 
 		$scope.$watch("vm.teamspaceSelected", function(){
 
+			vm.projectSelected = undefined;
+			vm.selectedProject = undefined;
+			vm.models = {};
+			vm.modelReady = false;
+
 			if (vm.teamspaces.length) {
-			
+
+
 				// Find the matching teamspace to the one selected
 				vm.selectedTeamspace = vm.teamspaces.find(function(teamspace){
-					return teamspace.account === vm.teamspaceSelected
+					return teamspace.account === vm.teamspaceSelected;
 				});
 
-				console.log(vm.selectedTeamspace);
+				if (vm.selectedTeamspace) {
+					console.log("Teamnspace selected", vm.selectedTeamspace)
+					vm.setProjects(vm.teamspaceSelected);
+				}
 
 				// The property is set async so it won't be there immediately
 				return $q(function(resolve, reject) {

@@ -29,7 +29,7 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser")
+									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
 
 									td.userColumn.userInput
 										p {{user.assignedUser}}
@@ -74,7 +74,7 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser")
+									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
 
 									//- p {{vm.selectedTeamspacel.account}}
 
@@ -133,7 +133,7 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="vm.selectedTeamspace.account != user.assignedUser"
+									ng-if="vm.selectedTeamspace.account != user.assignedUser && user.assignedUser"
 									)
 
 									td.fixedWidth.userColumn.userInput()
