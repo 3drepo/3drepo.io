@@ -28,7 +28,7 @@ let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let async = require('async');
 let http = require('http');
-let newXhr = require('socket.io-client-cookie'); 
+//let newXhr = require('socket.io-client-cookie'); 
 let io = require('socket.io-client');
 
 describe('Notification', function () {
@@ -124,8 +124,10 @@ describe('Notification', function () {
 		//https://gist.github.com/jfromaniello/4087861
 		//socket-io.client send the cookies!
 
-		newXhr.setCookies(`connect.sid=${connectSid}; `);
-		socket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory});
+		//newXhr.setCookies(`connect.sid=${connectSid}; `);
+		socket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory, extraHeaders:{
+			Cookie: `connect.sid=${connectSid}; `
+		}});
 		socket.on('connect', function(data){
 
 			socket.emit('join', {account: username, model: model});
@@ -147,10 +149,12 @@ describe('Notification', function () {
 
 	it('join a room that user has no access to should fail', function(done){
 
-		newXhr.setCookies(`connect.sid=${connectSid}; `);
+		//newXhr.setCookies(`connect.sid=${connectSid}; `);
 		
 		//https://github.com/socketio/socket.io-client/issues/318 force new connection
-		let mySocket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory, 'force new connection': true});
+		let mySocket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory, 'force new connection': true, extraHeaders:{
+			Cookie: `connect.sid=${connectSid}; `
+		}});
 
 		mySocket.on('connect', function(data){
 			console.log('on connect')

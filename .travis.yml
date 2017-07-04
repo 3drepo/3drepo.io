@@ -2,7 +2,7 @@ language: node_js
 git:
   submodules: false
 node_js:
-    - "4.3"
+    - "6.11"
 env:
   - CXX=g++-4.8
 sudo: required
