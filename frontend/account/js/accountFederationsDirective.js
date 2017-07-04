@@ -333,6 +333,10 @@
 		 * @param {Object} index
 		 */
 		function goToPermissions (event, account, project, model) {
+			$location.search('model', model);
+			$location.search('project', model);
+			$location.search('account', account);
+
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}
 	}

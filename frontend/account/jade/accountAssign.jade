@@ -4,7 +4,7 @@
 			.md-toolbar-tools
 				h2 Assign Permissions
 
-		md-tabs(md-dynamic-height, md-border-bottom)
+		md-tabs(md-dynamic-height, md-border-bottom, md-selected="vm.selectedIndex")
 			md-tab(label="Teamspace")
 				div.assignTabHolder(layout="row" ng-if="vm.loading")
 					h3 Loading...
@@ -92,7 +92,7 @@
 				div.assignTabHolder(layout="row" ng-if="vm.loading")
 					h3 Loading...
 
-				div.assignTabHolder(layout="column", ng-if="!vm.projectsLoading", flex="100")
+				div.assignTabHolder(layout="column", ng-if="!vm.loading &&!vm.projectsLoading", flex="100")
 					div(layout="row")
 						div(flex="33", layout="column")
 							md-label Select Teamspace

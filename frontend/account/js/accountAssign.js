@@ -34,9 +34,9 @@
 		};
 	}
 
-	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "UtilsService", "serverConfig", "$q"];
+	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$location", "UtilsService", "serverConfig"];
 
-	function accountAssignCtrl($scope, $window, $http, UtilsService, serverConfig, $q) {
+	function accountAssignCtrl($scope, $window, $http,  $q, $location, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -50,24 +50,34 @@
 		vm.models = {};
 		vm.selectedRole = {};
 
+		var check = $location.search();
+		if (check.account && check.project && check.model) {
+			vm.selectedIndex = 2;
+		}
+
+		var getStateFromParams = function() {
+			
+			if (check) {
+				vm.fromURL = {}
+				vm.fromURL.projectSelected = check.project;
+				vm.fromURL.modelSelected = check.model;
+
+				// Trigger the first watcher (teamspace)
+				vm.teamspaceSelected = check.account;
+			}
+		}
+
 		// GET TEAMSPACES
 		var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
 		$http.get(url)
 		.then(
 			function(response) {
-				console.log("assign data", response)
 				vm.teamspaces = response.data.accounts.filter(function(teamspace){
-					//var isAdmin = teamspace.isAdmin === true;
-					// if (isAdmin) {
-					// 	teamspace.projects.forEach(function(project){
-					// 		project.teamspace = teamspace.account // Should be teamspace
-					// 		vm.projects.push(project);
-					// 	});
-					// }
 					return teamspace.isAdmin === true;
 				});
 
 				vm.teamspaces.forEach(getUsers);
+				getStateFromParams();
 				vm.loading = false;
 
 			},
@@ -80,17 +90,16 @@
 
 		vm.setProjects = function(account) {
 			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/projects");
-			$http.get(url)
-			.then(
-				function(response) {
-					console.log("assign data", response)
-					vm.projects = response.data;
-					vm.projectsLoading = false;
-				},
-				function (err) {
-					console.trace(err);
-				}
-			);
+			return $http.get(url)
+						.then(
+							function(response) {
+								vm.projects = response.data;
+								vm.projectsLoading = false;
+							},
+							function (err) {
+								console.trace(err);
+							}
+						);
 		}
 		
 
@@ -121,9 +130,7 @@
 		vm.postPermissionChange = function(user, permission, addOrRemove) {
 			
 			// Add or remove a permission
-			console.log("Add/remove permission")
 			if (addOrRemove === "add") {
-				console.log("Add", user, permission)
 				user.permissions.push(permission); 
 			} else {
 				var index = user.permissions.indexOf(permission);
@@ -139,7 +146,6 @@
 		}
 
 		vm.stateChange = function(user, permission) {
-			console.log("state change", user, permission)
 			var addOrRemove = vm.userHasPermissions(user, permission) === true ? "remove" : "add";
 			vm.postPermissionChange(user, permission, addOrRemove)
 		}
@@ -187,28 +193,33 @@
 
 			if (vm.teamspaces.length) {
 
-
 				// Find the matching teamspace to the one selected
 				vm.selectedTeamspace = vm.teamspaces.find(function(teamspace){
 					return teamspace.account === vm.teamspaceSelected;
 				});
 
 				if (vm.selectedTeamspace) {
-					console.log("Teamnspace selected", vm.selectedTeamspace)
-					vm.setProjects(vm.teamspaceSelected);
+					vm.setProjects(vm.teamspaceSelected).then(function(){
+						// The property is set async so it won't be there immediately
+						return $q(function(resolve, reject) {
+							if (vm.selectedTeamspace && vm.selectedTeamspace.assignUsers) {				
+								vm.appendUserPermissions(vm.selectedTeamspace).then(function(){
+									vm.setPermissionTemplates(vm.selectedTeamspace).then(function() {
+										if (vm.fromURL.projectSelected) {
+											vm.projectSelected = vm.fromURL.projectSelected;
+											delete vm.fromURL.projectSelected;
+										}
+										resolve(vm.selectedTeamspace.assignUsers);
+									});
+								});
+							} else {
+								resolve([]);
+							}
+						});		
+					});
 				}
 
-				// The property is set async so it won't be there immediately
-				return $q(function(resolve, reject) {
-					if (vm.selectedTeamspace && vm.selectedTeamspace.assignUsers) {				
-						vm.appendUserPermissions(vm.selectedTeamspace);
-						vm.setPermissionTemplates(vm.selectedTeamspace);	
-						resolve(vm.selectedTeamspace.assignUsers);
-						
-					} else {
-						resolve([]);
-					}
-				});		
+				
 
 			}
 		
@@ -247,14 +258,16 @@
 				return project.name === vm.projectSelected
 			});
 
-			return $q(function(resolve, reject) {
-				if (vm.selectedProject && vm.selectedProject.models) {
-					vm.modelIds = vm.selectedProject.models;
-					vm.modelIds.forEach(vm.appendModelObjects)
-					resolve(vm.models);
-				}
-			});		
-
+			if (vm.teamspaceSelected && vm.projectSelected) {
+				return $q(function(resolve, reject) {
+					if (vm.selectedProject && vm.selectedProject.models) {
+						vm.modelIds = vm.selectedProject.models;
+						vm.modelIds.forEach(vm.appendModelObjects);
+						resolve(vm.models);
+					}
+				});
+			} 
+			
 		});
 
 
@@ -316,35 +329,37 @@
 			// Find the matching project to the one selected
 
 			vm.modelReady = false;
-			vm.selectedModel = vm.models[vm.modelSelected];
+			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
 
-			console.log("Model changed", vm.selectedModel)
-			return $q(function(resolve, reject) {
-
-				var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions"
-				var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-				$http.get(url).then(function(response){
-					var users = response.data;
-					vm.selectedModel.assignableUsers = users;
-					vm.selectedModel.assignableUsers.forEach(function(user) {
-						vm.selectedRole[user.user] = user.permission;
-					})
-					vm.modelReady = true;
-					resolve();
-				})
-				.catch(function(error){
-					console.error("Error", error)
-					reject(error);
-				});	
+				vm.selectedModel = vm.models[vm.modelSelected];
 				
-			});		
+				return $q(function(resolve, reject) {
+
+					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions"
+					var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+					$http.get(url).then(function(response){
+						var users = response.data;
+						vm.selectedModel.assignableUsers = users;
+						vm.selectedModel.assignableUsers.forEach(function(user) {
+							vm.selectedRole[user.user] = user.permission;
+						})
+						vm.modelReady = true;
+						resolve();
+					})
+					.catch(function(error){
+						console.error("Error", error)
+						reject(error);
+					});	
+					
+				});		
+			}
+			
 
 		});
 
 		
 
 		vm.modelsAreLoaded = function() {
-			//console.log(vm.modelIds, vm.models)
 			return Object.keys(vm.models).length && 
 				   vm.modelIds.length && 
 				   Object.keys(vm.models).length === vm.modelIds.length;
@@ -355,8 +370,11 @@
 			var modelUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
 			return $http.get(modelUrl)
 						.then(function(response){
-							//console.log("RESPONSE", response.data);
 							vm.models[modelId] = response.data;
+							if (vm.fromURL.modelSelected && vm.fromURL.modelSelected === modelId) {
+								vm.modelSelected = vm.fromURL.modelSelected;
+								delete vm.fromURL.modelSelected;
+							}
 						})
 						.catch(function(response){
 							console.log("error", response);

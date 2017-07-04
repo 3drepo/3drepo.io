@@ -55,9 +55,9 @@
 	}
 
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService", "StateManager"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService, StateManager) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -111,7 +111,6 @@
 			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
 			color: "#F44336"
 		};
-
 
 		watchModelStatus();
 
@@ -221,7 +220,7 @@
 					break;
 
 				case "permissions":
-					goToPermissions(event);
+					goToPermissions(event, vm.account, vm.project, vm.model);
 					break;
 
 				case "delete":
@@ -425,8 +424,15 @@
 		 *
 		 * @param {Object} event
 		 */
-		function goToPermissions (event) {
+		function goToPermissions(event, account, project, model) {
+			//vm.account, vm.project, vm.model
+			console.log("VALUES", account, project.name, model.model);
+			$location.search('account', account);
+			$location.search('project', project.name);
+			$location.search('model', model.model);
+			$location.search('page', "assign");
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
+
 		}
 	}
 }());
