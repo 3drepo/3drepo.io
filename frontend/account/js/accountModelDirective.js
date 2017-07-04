@@ -80,8 +80,8 @@
 				icon: "cloud_upload", 
 				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
 			},
-			team: {
-				label: "Team", 
+			permissions: {
+				label: "Permissions", 
 				icon: "group", 
 				// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
 				hidden: !isUserAccount
@@ -195,7 +195,7 @@
 				case "modelsetting":
 					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
+					vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
 					break;
 
 				case "upload":
@@ -220,8 +220,8 @@
 
 					break;
 
-				case "team":
-					setupEditTeam(event);
+				case "permissions":
+					goToPermissions(event);
 					break;
 
 				case "delete":
@@ -243,7 +243,7 @@
 		 * Go to the billing page to add more licenses
 		 */
 		vm.setupAddLicenses = function () {
-			vm.onShowPage({page: "billing", callingPage: "teamspaces"});
+			vm.onShowPage({page: "billing", callingPage: "permissionsspaces"});
 			UtilsService.closeDialog();
 		};
 
@@ -421,13 +421,12 @@
 		}
 
 		/**
-		 * Set up team of model
+		 * Set up permissions of model
 		 *
 		 * @param {Object} event
 		 */
-		function setupEditTeam (event) {
-			vm.item = vm.model;
-			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		function goToPermissions (event) {
+			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}
 	}
 }());

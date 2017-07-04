@@ -64,7 +64,7 @@
 		// 	var isUserAccount = account.account === vm.account.account;
 		// 	return {
 		// 		edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-		// 		team: {label: "Team", icon: "group", hidden: !isUserAccount},
+		// 		permissions: {label: "permissions", icon: "group", hidden: !isUserAccount},
 		// 		modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
 		// 		delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
 		// 	};
@@ -146,8 +146,8 @@
 					color: "#F44336", 
 					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
 				},
-				team: {
-					label: "Team", 
+				permissions: {
+					label: "Permissions", 
 					icon: "group", 
 					hidden: !vm.account === vm.userAccount
 				},
@@ -227,8 +227,8 @@
 					setupEditFederation(event, account, project, federation);
 					break;
 
-				case "team":
-					setupEditTeam(event, account, project, federation);
+				case "permissions":
+					goToPermissions(event, account, project, federation);
 					break;
 
 				case "delete":
@@ -327,15 +327,13 @@
 		}
 
 		/**
-		 * Set up team of federation
+		 * Set up permissions of federation
 		 *
 		 * @param {Object} event
 		 * @param {Object} index
 		 */
-		function setupEditTeam (event, account, project, model) {
-			vm.item = model;
-			vm.currentAccount = account;
-			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		function goToPermissions (event, account, project, model) {
+			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}
 	}
 }());
