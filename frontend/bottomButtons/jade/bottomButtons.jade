@@ -5,14 +5,24 @@ div(layout="row", flex, layout-align="space-between")
 				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
 			label {{button.label}}
 
-	#rightButtons(ng-if="vm.showButtons", layout="row")
-		span(ng-repeat="button in vm.rightButtons", ng-click="button.click()" layout="column", layout-align="start center")
-			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
-				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
-			label {{button.label}}
+	#rightButtons.ignoreClick(ng-if="vm.showButtons", layout="row")
+		span(
+			ng-repeat="button in vm.rightButtons"
+			ng-click="button.click()" 
+			layout="column"
+			layout-align="start center")
+			
+			md-button.ignoreClick.md-icon-button.actionButton(aria-label="{{button.label}}")
+				md-icon.ignoreClick(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+			label.ignoreClick {{button.label}}
 
-.viewingOptionButtons(layout="column", ng-if="vm.showViewingOptionButtons", layout-align="center center")
-	md-button.md-icon-button.actionButton(ng-repeat="option in vm.viewingOptions" ng-click="vm.viewingOptions[$index].click($index)" aria-label="{{vm.viewingOptions[$index].label}}")
+.viewingOptionButtons(
+	layout="column", ng-if="vm.showViewingOptionButtons", layout-align="center center")
+	md-button.md-icon-button.actionButton(
+			ng-repeat="option in vm.viewingOptions"
+			ng-click="vm.viewingOptions[$index].click($index)" 
+			ng-if="vm.viewingOptions[$index].label !== vm.rightButtons[0].label"
+			aria-label="{{vm.viewingOptions[$index].label}}")
 		md-icon(md-font-icon="{{vm.viewingOptions[$index].icon}}", ng-class="vm.viewingOptions[$index].iconClass")
 
 compass(ng-click="vm.toggleElements()")

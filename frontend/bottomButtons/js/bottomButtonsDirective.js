@@ -38,7 +38,6 @@
 		var vm = this,
 			measureMode = false;
 
-
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
@@ -89,6 +88,13 @@
 		document.addEventListener('mozfullscreenchange', exitFullScreen, false);
 		document.addEventListener('fullscreenchange', exitFullScreen, false);
 		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
+
+		// This is pretty horrible 
+		document.addEventListener('click', function(event) {
+			if (!event.target.classList.contains("ignoreClick")) {
+				vm.showViewingOptionButtons = false;
+			} 
+		}, false);
 
 		var enterOculusDisplay = function () {
 			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);

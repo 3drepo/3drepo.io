@@ -7,7 +7,7 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 
 	div.modelRight(layout-align="start-center" layout="row")
 		.modelRight(layout="row", layout-align="start center")
-			p.modelTimestamp(ng-if="vm.federation.timestamp") {{vm.federation.timestamp | prettyDate:true}}
+			p.modelTimestamp(ng-if="vm.federation.timestamp && vm.federation.subModels.length > 0") {{vm.federation.timestamp | prettyDate:true}}
 			md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(vm.federation, vm.account)", id="{{vm.dialogCloseTo}}")
 				md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
 					md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
