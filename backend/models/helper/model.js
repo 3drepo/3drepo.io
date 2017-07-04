@@ -37,6 +37,7 @@ var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
 var Project = require('../project');
+const stream = require('stream');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -582,13 +583,16 @@ function getUnityBundle(account, model, uid){
 }
 
 // tree main tree and urls of sub trees only and let frontend to do the remaining work :)
-function getFullTree_noSubTree(account, model, branch, rev, username, out){
+// returning a readstream for piping and a promise for error catching
+function getFullTree_noSubTree(account, model, branch, rev){
 	'use strict';
 
 	let getHistory;
 	let history;
 
-	out.write("{");
+	var pass = new stream.PassThrough();
+
+	pass.write("{");
 
 	if(rev && utils.isUUID(rev)){
 
@@ -603,7 +607,7 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
-	return getHistory.then(_history => {
+	const promise = getHistory.then(_history => {
 
 		history = _history;
 
@@ -623,9 +627,9 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 
 		return new Promise(function(resolve, reject){
 
-			out.write('"mainTree": ');
+			pass.write('"mainTree": ');
 
-			rs.on('data', d => out.write(d));
+			rs.on('data', d => pass.write(d));
 			rs.on('end', ()=> resolve());
 			rs.on('error', err => reject(err));
 
@@ -641,9 +645,8 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 		return Ref.find({ account, model }, filter);
 
 	}).then(refs => {
-
 		//for all refs get their tree
-		out.write(', "subTrees":[');
+		pass.write(', "subTrees":[');
 
 		return new Promise((resolve) => {
 
@@ -659,10 +662,10 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 				} 
 
 				if(refIndex > 0){
-					out.write(",");
+					pass.write(",");
 				}
 
-				out.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -679,14 +682,18 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 			}
 		});
 
-
 	}).then(() => {
 
-		out.write(']');
-		out.write("}");
-		out.end();
+		pass.write(']');
+		pass.write("}");
+		pass.end();
 
+	}).catch(err => {
+		pass.end();
+		return Promise.reject(err);
 	});
+
+	return {readStream: pass, promise};
 }
 
 // more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed

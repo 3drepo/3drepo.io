@@ -409,6 +409,22 @@
 		//next();
 	};
 
+	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
+
+		let length = 0;
+
+		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
+		readStream.on('end', () => {
+			res.end();
+			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { httpCode: responseCodes.OK.status, contentLength: length });
+		});
+
+		readStream.on('data', data => {
+			res.write(data);
+			length += data.length;
+		});
+	};
+
 	// On error respond with error code and errInfo (containing helpful information)
 	// On OK, response with OK status and extraInfo
 	/**

@@ -281,10 +281,13 @@ function getModelTree(req, res, next){
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username, res).then(() => {
-		//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
+
+	responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, data.readStream);
+
+	data.promise.catch(err => {
+		// log error
+		req[C.REQ_REPO].logger.logError(err);
 	});
 }
 
@@ -346,8 +349,7 @@ function downloadLatest(req, res, next){
 			headers['Content-Type'] = file.meta.contentType;
 		}
 
-		res.writeHead(200, headers);
-		file.readStream.pipe(res);
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
