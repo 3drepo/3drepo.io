@@ -85,13 +85,7 @@ var internal_files = {
 		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.ttf',
 		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff',
 		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff2'
-	],
-
-	// x3dom_files: [
-	// 	//'submodules/x3dom/dist/ammo.js',
-	// 	'submodules/x3dom/dist/x3dom.js',
-	// 	'submodules/x3dom/dist/x3dom.css'
-	// ]
+	]
 };
 
 var public_dir_js	= path.normalize("public/js/external");
@@ -100,7 +94,6 @@ var public_dir_font	= path.normalize("public/fonts/external");
 
 install_bower();
 write_common_files_list();
-// install_x3dom();
 
 /*
  * install bower components and publicize the relevant files.
@@ -122,27 +115,6 @@ function install_bower(){
 		});
 	});
 }
-
-/*
- * install x3dom and publicize the relevant files.
- */
-// function install_x3dom(){
-
-// 	exec('cd ' + path.normalize('submodules/x3dom') + ' && python manage.py --build && cd '+ path.normalize('../../'),
-// 			{maxBuffer: 1024 * 500},
-// 			function (error, stdout, stderr) {
-// 				if (error !== null) {
-// 					console.log(error);
-// 				}
-// 				else{
-// 					console.log('X3Dom installation successful!');
-// 				}
-
-// 				//create symlinks on callback to ensure the files exist (or windows will be unhappy)
-// 				publicize_files(internal_files.x3dom_files, public_dir_js, public_dir_css);
-// 			});
-
-// }
 
 /*
  * Create a symbolic link of file to target_dir.
