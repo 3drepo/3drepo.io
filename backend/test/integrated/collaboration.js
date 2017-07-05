@@ -972,7 +972,11 @@ describe('Sharing/Unsharing a model', function () {
 				done => {
 					agent.get(`/${username}/${model}/permissions`)
 					.expect(200, function(err, res){
-						expect(res.body.toJSON()).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
+						//expect(res.body.toJSON()).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
+						// Or maybe
+						expect(res.body.user).to.equal(username_viewer);
+						expect(res.body.permission).to.equal('viewer');
+						
 						done(err);
 					});
 				}

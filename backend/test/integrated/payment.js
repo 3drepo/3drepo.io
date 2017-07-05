@@ -418,6 +418,7 @@ describe('Enrolling to a subscription', function () {
 				+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
 
 			return new Promise((resolve, reject) => {
+
 				agent.post(`/payment/paypal/food`)
 				.send(fakePaymentMsg)
 				.expect(200, function(err, res){
@@ -425,17 +426,19 @@ describe('Enrolling to a subscription', function () {
 						if(err){
 							reject(err);
 						} else {
-							resolve();
+							resolve(res);
 						}
 					}, 3000);
 				});
-			}).then(() => {
 
-				resolve();
+			})
+			// .then(() => {
 
-			}).catch(err => {
-				resolve(err);
-			});
+			// 	resolve();
+
+			// }).catch(err => {
+			// 	resolve(err);
+			// });
 
 		});
 
