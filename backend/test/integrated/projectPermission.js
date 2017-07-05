@@ -74,78 +74,75 @@ describe('Project Permissions::', function () {
 		project: project
 	};
 
-	before(function(){
+	before(function(done){
 		server = app.listen(8080, function () {
 
 			console.log('API test server is listening on port 8080!');
-			
-			return async.parallel([ 
 
-				() => {
+			async.parallel([ 
+
+				done => {
 					agentTeamspaceAdmin = request.agent(server);
-					return agentTeamspaceAdmin
-						.post('/login')
-						.send({ username: teamspace, password: teamspace })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(teamspace);
-						});
+					agentTeamspaceAdmin.post('/login')
+					.send({ username: teamspace, password: teamspace })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(teamspace);
+						done(err);
+					});
 				},
 
-				() => {
+				done => {
 					agentCanCreateModel = request.agent(server);
-					return agentCanCreateModel
-						.post('/login')
-						.send({ username: userCanCreateModel.username, password: userCanCreateModel.password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(userCanCreateModel.username);
-							done(err);
-						});
+					agentCanCreateModel.post('/login')
+					.send({ username: userCanCreateModel.username, password: userCanCreateModel.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userCanCreateModel.username);
+						done(err);
+					});
 				},
 
-				() =>{
+				done =>{
 					agentCanCreateFed = request.agent(server);
-					return agentCanCreateFed
-						.post('/login')
-						.send({ username: userCanCreateFed.username, password: userCanCreateFed.password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(userCanCreateFed.username);
-							done(err);
-						});
+					agentCanCreateFed.post('/login')
+					.send({ username: userCanCreateFed.username, password: userCanCreateFed.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userCanCreateFed.username);
+						done(err);
+					});
 				},
 
-				() => {
+				done => {
 					agentCanUpdateProject = request.agent(server);
-					return agentCanUpdateProject
-						.post('/login')
-						.send({ username: userCanUpdateProject.username, password: userCanUpdateProject.password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(userCanUpdateProject.username);
-							done(err);
-						});
+					agentCanUpdateProject.post('/login')
+					.send({ username: userCanUpdateProject.username, password: userCanUpdateProject.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userCanUpdateProject.username);
+						done(err);
+					});
 				},
 
-				() => {
+				done => {
 					agentProjectAdmin = request.agent(server);
-					return agentProjectAdmin
-						.post('/login')
-						.send({ username: userProjectAdmin.username, password: userProjectAdmin.password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(userProjectAdmin.username);
-							done(err);
-						});
+					agentProjectAdmin.post('/login')
+					.send({ username: userProjectAdmin.username, password: userProjectAdmin.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userProjectAdmin.username);
+						done(err);
+					});
 				},
 
-				() => {
+				done => {
 					agentNoPermission = request.agent(server);
-					return agentNoPermission
-						.post('/login')
-						.send({ username: userNoPermission.username, password: userNoPermission.password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(userNoPermission.username);
-						});
+					agentNoPermission.post('/login')
+					.send({ username: userNoPermission.username, password: userNoPermission.password })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(userNoPermission.username);
+						done(err);
+					});
 				}
 
-			]);
+			], done);
+
 		});
 	});
 
