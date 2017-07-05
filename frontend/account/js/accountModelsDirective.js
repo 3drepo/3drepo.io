@@ -228,7 +228,8 @@
 
 		// FEDERATIONS
 
-			
+		vm.isSaving = false;
+
 		/**
 		 * Save a federationt to a project
 		 * @param {String} teamspaceName The name of the teamspace to save to
@@ -238,6 +239,7 @@
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
 			var isEdit = vm.federationData._isEdit;
+			vm.isSaving = true;
 
 			if (isEdit) {
 				delete vm.federationData._isEdit;
@@ -250,6 +252,7 @@
 				
 				if(response.status !== 200 && response.status !== 201){
 					vm.errorMessage = response.data.message;
+					vm.isSaving = false;
 				} else {
 
 					vm.errorMessage = '';
@@ -271,6 +274,7 @@
 
 					vm.addButtons = false;
 					vm.addButtonType = "add";
+					vm.isSaving = false;
 					vm.closeDialog();
 					
 					AnalyticService.sendEvent({
@@ -280,6 +284,10 @@
 					});
 				}
 
+			})
+			.catch(function(error){
+				vm.errorMessage = "Something went wrong on our servers saving the federation!";
+				vm.isSaving = false;
 			});
 
 			$timeout(function () {
