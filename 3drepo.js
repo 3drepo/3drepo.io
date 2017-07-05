@@ -106,7 +106,7 @@
 				if(!req.headers['user-agent'] || req.headers['user-agent'].toLowerCase().indexOf('msie 6') === -1){
 					res.redirect("https://" + req.headers.host + req.url);
 				} else {
-					res.sendFile(__dirname + '/jade/ie6.html');
+					res.sendFile(__dirname + '/pug/ie6.html');
 				}
 			});
 

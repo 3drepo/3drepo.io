@@ -55,7 +55,7 @@ form
 
 	div(layout="row", layout-xs="column", layout-align="start center")
 		md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") 
-			span(ng-if="!vm.registering"){{vm.buttonLabel}} 
+			span(ng-if="!vm.registering") {{vm.buttonLabel}} 
 			md-progress-circular(ng-if="vm.registering" md-mode="indeterminate", md-diameter="20")
 
 	div.bottom-links

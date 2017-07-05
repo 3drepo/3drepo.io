@@ -317,7 +317,7 @@ function renderIssuesHTML(req, res, next){
 			}
 		}
 
-		res.render("issues.jade", {
+		res.render("issues.pug", {
 			issues : splitIssues, 
 			url: function (path){
 				return config.apiAlgorithm.apiUrl(C.GET_API, path);

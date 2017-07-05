@@ -53,10 +53,10 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			let template = "invoice.jade";
+			let template = "invoice.pug";
 
 			if(invoice.type === "refund"){
-				template = "refund.jade";
+				template = "refund.pug";
 			}
 
 			//console.log( invoice.toJSON());

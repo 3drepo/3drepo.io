@@ -147,8 +147,8 @@ module.exports = function(grunt) {
                 files: ['frontend/**/**.css'],
                 tasks: ['concat:allCSS', 'cssmin:allCSS']
             },
-            jade: {
-                files: ['frontend/**/**.jade'],
+            pug: {
+                files: ['frontend/**/**.pug'],
                 tasks: ['']
             },
             options: {
