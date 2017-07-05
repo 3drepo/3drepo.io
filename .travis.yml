@@ -2,7 +2,7 @@ language: node_js
 git:
   submodules: false
 node_js:
-    - "4.1"
+    - "6.11"
 env:
   - CXX=g++-4.8
 sudo: required
@@ -32,7 +32,8 @@ before_install:
     - git checkout $test_ver
     - cd backend
     - mongorestore
-install: sudo $(which npm) install
+    - cd ../../../
+install: npm install
 services:
   - rabbitmq
 script:
