@@ -974,11 +974,14 @@ describe('Sharing/Unsharing a model', function () {
 					.expect(200, function(err, res){
 						//expect(res.body.toJSON()).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
 						// Or maybe
-						expect(res.body).be.an('object');
-						expect(res.body).to.have.property('user');
-						expect(res.body).to.have.property('permission');
-						expect(res.body.user).to.equal(username_viewer);
-						expect(res.body.permission).to.equal('viewer');
+						expect(res.body).be.an('array');
+						expect(res.body).to.have.length(1);
+						
+						expect(res.body[0]).to.have.property('permission');
+						expect(res.body[0]["permission"]).to.be('viewer');
+
+						expect(res.body[0]).to.have.property('user');
+						expect(res.body[0]["user"]).to.be(username_viewer)
 						
 						done(err);
 					});
