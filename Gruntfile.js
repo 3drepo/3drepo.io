@@ -139,8 +139,18 @@ module.exports = function(grunt) {
             // http://stackoverflow.com/questions/22475849/node-js-error-enospc
             // Fix:
             // echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-            files: ['frontend/**/**'],
-            tasks: ['frontend'],
+            js: {
+                files: ['frontend/**/**.js'],
+                tasks: ['concat:allJS', 'uglify:allJS']
+            },
+            css: {
+                files: ['frontend/**/**.css'],
+                tasks: ['concat:allCSS', 'cssmin:allCSS']
+            },
+            jade: {
+                files: ['frontend/**/**.jade'],
+                tasks: ['']
+            },
             options: {
                 livereload: true
             }
