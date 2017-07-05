@@ -9,7 +9,7 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 		.modelRight(layout="row", layout-align="start center")
 			p.modelTimestamp(ng-if="vm.federation.timestamp && vm.federation.subModels.length > 0") {{vm.federation.timestamp | prettyDate:true}}
 			md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(vm.federation, vm.account)", id="{{vm.dialogCloseTo}}")
-				md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
+				md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
 					md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 				md-menu-content(width="3")
 					md-menu-item(ng-repeat="(key, value) in vm.federation.federationOptions", ng-if="!value.hidden")
@@ -21,8 +21,8 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 
 // Models list
 md-list-item.federationModelsList(ng-if="vm.federation.federate && vm.federation.subModels.length > 0")
-	span(ng-repeat="subModel in vm.federation.subModels", ng-if="subModel.name")
-		| {{subModel.name}}
+	span.modelSpacing(ng-repeat="subModel in vm.federation.subModels", ng-if="subModel.name")
+		| {{subModel.name }}
 		span(ng-if="!$last")
 			| , 
 			=" "

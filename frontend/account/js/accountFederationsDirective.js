@@ -38,7 +38,8 @@
 				isDefaultFederation: "@",
 				getPotentialFederationModels: "=",
 				saveFederation: "=",
-				addToFederation: "="
+				addToFederation: "=",
+				isSaving: "="
 			},
 			controller: AccountFederationsCtrl,
 			controllerAs: 'vm',
@@ -55,6 +56,7 @@
 			accountsToUse, // For listing federations
 			dialogCloseToId;
 
+		vm.isSaving = false;
 		vm.modelRegExp = serverConfig.modelNameRegExp;
 
 		
