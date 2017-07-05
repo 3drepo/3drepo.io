@@ -269,11 +269,9 @@
 	define("PERM_REVOKE_LICENCE","revoke_licence");
 	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
 	define("PERM_CREATE_PROJECT", "create_project");
-
 	define("PERM_CREATE_JOB","create_job");
 	define("PERM_DELETE_JOB","delete_job");
 	define("PERM_ASSIGN_JOB","assign_job");
-
 	define("PERM_VIEW_PROJECTS", "view_projects"),
 
 	//project level permission

@@ -37,21 +37,22 @@ var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
 var Project = require('../project');
+const stream = require('stream');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
-function convertToErrorCode(errCode){
+function convertToErrorCode(bouncerErrorCode){
 
     var errObj;
 
-    switch (errCode) {
+    switch (bouncerErrorCode) {
         case 0:
             errObj = responseCodes.OK;
             break;
         case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
             break;
         case 2:
             errObj = responseCodes.NOT_AUTHORIZED;
@@ -59,8 +60,11 @@ function convertToErrorCode(errCode){
         case 3:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
             break;
+        case 4:
+        	errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+        	break;
         case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
 			break;
         case 6:
             errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
@@ -68,18 +72,37 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 8:
+        	errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+        	break;
         case 9:
         	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
         	break;
 		case 10:
 			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
 			break;
+		case 11:
+			errObj = responseCodes.FILE_IMPORT_GET_FILE_FAILED;
+			break;
+		case 12:
+			errObj = responseCodes.FILE_IMPORT_CRASHED;
+			break;
+		case 13:
+			errObj = responseCodes.FILE_IMPORT_FILE_READ_FAILED;
+			break;
+		case 14:
+			errObj = responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED;
+			break;
+		case 15:
+			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
+			break;
 		default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
 
     }
-    return errObj;
+    
+    return Object.assign({bouncerErrorCode}, errObj);
 }
 
 
@@ -122,7 +145,13 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	return promise.then(() => {
 		
-		return ModelSetting.count({account, model}, {name: modelName, _id: { '$in' : project.models} });
+		const query =  {name: modelName};
+
+		if(data.project){
+			query._id = { '$in' : project.models};
+		}
+
+		return ModelSetting.count({account, model}, query);
 
 	}).then(count => {
 
@@ -582,13 +611,13 @@ function getUnityBundle(account, model, uid){
 }
 
 // tree main tree and urls of sub trees only and let frontend to do the remaining work :)
-function getFullTree_noSubTree(account, model, branch, rev, username, out){
+// returning a readstream for piping and a promise for error catching
+function getFullTree_noSubTree(account, model, branch, rev){
 	'use strict';
 
 	let getHistory;
 	let history;
-
-	out.write("{");
+	let stashRs;
 
 	if(rev && utils.isUUID(rev)){
 
@@ -603,7 +632,7 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
-	return getHistory.then(_history => {
+	const readStreamPromise = getHistory.then(_history => {
 
 		history = _history;
 
@@ -620,14 +649,30 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 	}).then(rs => {
 
 		//trees.mainTree = buf.toString();
+		if(!rs) {
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		stashRs = rs;
+
+		return stream.PassThrough();
+
+	});
+
+
+	let pass;
+
+	const outputingPromise = readStreamPromise.then(_pass => {
+
+		pass = _pass;
 
 		return new Promise(function(resolve, reject){
 
-			out.write('"mainTree": ');
+			pass.write('{"mainTree": ');
 
-			rs.on('data', d => out.write(d));
-			rs.on('end', ()=> resolve());
-			rs.on('error', err => reject(err));
+			stashRs.on('data', d => pass.write(d));
+			stashRs.on('end', ()=> resolve());
+			stashRs.on('error', err => reject(err));
 
 		});
 
@@ -641,9 +686,8 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 		return Ref.find({ account, model }, filter);
 
 	}).then(refs => {
-
 		//for all refs get their tree
-		out.write(', "subTrees":[');
+		pass.write(', "subTrees":[');
 
 		return new Promise((resolve) => {
 
@@ -659,10 +703,10 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 				} 
 
 				if(refIndex > 0){
-					out.write(",");
+					pass.write(",");
 				}
 
-				out.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -679,14 +723,19 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 			}
 		});
 
-
 	}).then(() => {
 
-		out.write(']');
-		out.write("}");
-		out.end();
+		pass.write(']');
+		pass.write("}");
+		pass.end();
 
+	}).catch(err => {
+
+		pass && pass.end();
+		return Promise.reject(err);
 	});
+
+	return {readStreamPromise, outputingPromise};
 }
 
 // more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
@@ -1354,7 +1403,6 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
-	convertToErrorCode,
 	createFederatedModel,
 	listSubModels,
 	getFullTree,

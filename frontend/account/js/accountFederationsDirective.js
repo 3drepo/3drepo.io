@@ -184,6 +184,7 @@
 		 *
 		 */
 		vm.closeDialog = function () {
+			vm.isSaving = false;
 			UtilsService.closeDialog();
 		};
 

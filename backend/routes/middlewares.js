@@ -32,7 +32,7 @@
 	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
 	const checkPermissionsHelper = require('../middlewares/checkPermissions');
 
-	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL_ALL_MODELS], [C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] };
+	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL_ALL_MODELS], [C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN], [C.PERM_VIEW_PROJECTS], ] };
 
 	function checkPermissions(permsRequest){
 
@@ -205,7 +205,7 @@
 		//issues
 		hasWriteAccessToIssue: checkPermissions({ '$or': [[C.PERM_CREATE_ISSUE_ALL_MODELS], [C.PERM_CREATE_ISSUE]] }),
 		hasCommentAccessToIssue: checkPermissions({'$or': [[C.PERM_COMMENT_ISSUE_ALL_MODELS], [C.PERM_COMMENT_ISSUE]] }),
-		hasReadAccessToIssue: checkPermissions({'$or': [[C.PERM_VIEW_ISSUE_ALL_MODELS], [C.PERM_VIEW_ISSUE]] }),
+		hasReadAccessToIssue: checkPermissions({'$or': [[C.PERM_VIEW_ISSUE_ALL_MODELS], [C.PERM_VIEW_ISSUE], [C.PERM_VIEW_PROJECTS] ] }),
 
 		//models
 		canCreateModel: canCreateModel,

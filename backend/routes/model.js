@@ -281,10 +281,20 @@ function getModelTree(req, res, next){
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username, res).then(() => {
-		//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
+
+	data.readStreamPromise.then(readStream => {
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream);
 	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
+	
+
+	// There may be some errors generated during the streaming process but it is to late and unable to return to client anymore
+	data.outputingPromise.catch(err => {
+		// log error
+		req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+		req[C.REQ_REPO].logger.logError(err.stack);
 	});
 }
 
@@ -346,8 +356,7 @@ function downloadLatest(req, res, next){
 			headers['Content-Type'] = file.meta.contentType;
 		}
 
-		res.writeHead(200, headers);
-		file.readStream.pipe(res);
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

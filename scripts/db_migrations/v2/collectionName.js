@@ -1,6 +1,6 @@
 'use strict';
 
-const uuidV4 = require('uuid/v4');
+const uuidV4 = require('node-uuid').v4;
 const mongodb = require('mongodb');
 const MongoClient = mongodb.MongoClient;
 const url = process.argv[2];
