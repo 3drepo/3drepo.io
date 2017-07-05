@@ -286,8 +286,9 @@
 
 			})
 			.catch(function(error){
-				vm.errorMessage = "Something went wrong on our servers saving the federation!";
+				vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
 				vm.isSaving = false;
+
 			});
 
 			$timeout(function () {
