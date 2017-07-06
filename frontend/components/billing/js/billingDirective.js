@@ -18,6 +18,7 @@
 (function () {
 	"use strict";
 
+
 	angular.module("3drepo")
 		.directive("billing", billing);
 

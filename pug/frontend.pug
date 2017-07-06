@@ -56,7 +56,7 @@ html(lang="en" ng-app="3drepo")
 		script(type="text/javascript", src='/public/dist/three_d_repo.dependencies.min.js')
 	
 		script.
-			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
+			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'vcRecaptcha'])
 				   .constant('structure', !{structure})
 				   .constant('parentStates', !{parentStateJSON})
 				   .constant('uiState', !{uistate});

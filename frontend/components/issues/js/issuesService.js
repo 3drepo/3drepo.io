@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService", "$sanitize"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "UtilsService"];
 
-	function IssuesService($http, $q,  serverConfig, EventService, UtilsService, $sanitize) {
+	function IssuesService($http, $q,  serverConfig, EventService, UtilsService) {
 		var url = "",
 			data = {},
 			config = {},

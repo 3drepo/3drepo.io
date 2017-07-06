@@ -95,7 +95,7 @@
 
 		.filter("revisionDate", function () {
 			return function(input) {
-				return moment(input).format('DD/MM/YYYY HH:mm');
+				return new Date(Date.parse(input)).toLocaleString()
 			};
 		});
 
