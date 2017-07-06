@@ -310,7 +310,7 @@
 		 * @param {Object} params - updates with information from plugin structure
 		 */
 		function setupPug(params) {
-			let pathToStatesAndPlugins = "./frontend",
+			let pathToStatesAndPlugins = "./frontend/components",
 				statesAndPlugins;
 
 			// Get all available states and plugins in the file system

@@ -25,7 +25,7 @@ html(lang="en" ng-app="3drepo")
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
 		// JS Files
-		each val, key in jsfiles
+		//each val, key in jsfiles
 			script(type="text/javascript", src=val)
 
 
@@ -49,32 +49,26 @@ html(lang="en" ng-app="3drepo")
 
 
 		// Predefine the app
-		script.
-			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
-			.constant('structure', !{structure})
-			.constant('parentStates', !{parentStateJSON})
-			//.constant('pluginLevels', !{pluginLevelsJSON})
-			.constant('uiState', !{uistate});
 
 		// Plugin JS and Angular files
 		//script(type="text/javascript", src='/public/dist/plugins.min.js')
-		script(type="text/javascript", src='/public/dist/three_d_repo.js')
+		
+		script(type="text/javascript", src='/public/dist/three_d_repo.dependencies.min.js')
+	
+		script.
+			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
+				   .constant('structure', !{structure})
+				   .constant('parentStates', !{parentStateJSON})
+				   .constant('uiState', !{uistate});
 
-		// Plugin JS Files
-		//each val in pluginJS
-			script(type="text/javascript", src=val)
+		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
+		//script.
+		//	angular.element(document).ready((function() {
+		//		angular.bootstrap(document, ['3drepo']);
+		//	}));
 
-		// Plugin Angular Files
-		//each plugin in pluginAngular
-			each file in plugin.files
-				script(type="text/javascript", src=file)
-
-		// Plugin CSS Files
-		//each css in pluginCSS
-			link(href=css, rel='stylesheet', type="text/css")
 
 	body
-
 		style.
 			#notSupported {
 				position: fixed;
@@ -126,7 +120,7 @@ html(lang="en" ng-app="3drepo")
 	|<![endif]-->
 
 	script.
-		if(BrowserDetect && BrowserDetect.browser === 'Explorer'){
+		if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
 			document.getElementById('notSupported').style.visibility='visible';
 			if (BrowserDetect.version <= 10){
 				document.getElementById('notSupportedButton').style.display = 'none';
