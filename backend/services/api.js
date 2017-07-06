@@ -94,8 +94,8 @@
 			extended: true
 		}));
 
-		app.set("views", "./jade");
-		app.set("view_engine", "jade");
+		app.set("views", "./pug");
+		app.set("view_engine", "pug");
 
 		app.use(bodyParser.json({ limit: "2mb" }));
 

@@ -523,6 +523,7 @@ account-modelsetting #accountTeamSubHeader {
 }
 
 /** Federation Dialog *************************************************************************************************/
+
 #federationDialog #federationDivider {
   width: 1px;
   height: 100%;
@@ -554,6 +555,24 @@ account-modelsetting #accountTeamSubHeader {
   color: #F44336;
 }
 
+.isSavingProgress {
+  width: 14px !important;
+  display: inline-block;
+  height: 14px !important;
+  margin-top: 5px !important;
+  margin-left: 10px;
+}
+
+.isSavingProgress svg { 
+  width: 14px !important;
+  height: 14px !important;
+  transform-origin: initial !important;
+}
+
+.isSavingProgress svg path {
+  stroke: grey;
+}
+
 .addFederations {
   padding-bottom: 10px;
 }
@@ -582,6 +601,10 @@ account-federations .federationModelsList {
     margin: 0px 0 5px 50px;
     color: rgba(0, 0, 0, 0.55);
     font-size: 13px;
+}
+
+account-federations .federationModelsList .modelSpacing {
+    margin-left: 5px;
 }
 
 account-federations .federationTimestamp {

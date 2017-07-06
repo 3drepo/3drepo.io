@@ -63,4 +63,4 @@ tools/release/tmp
 tools/release/*.exe
 
 #legal
-jade/legal
+pug/legal

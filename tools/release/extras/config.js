@@ -47,7 +47,7 @@ module.exports = {
 		},
 		{
 			service: "frontend",
-			template:   "frontend.jade"
+			template:   "frontend.pug"
 		}
 	],
 	js_debug_level: 'debug',

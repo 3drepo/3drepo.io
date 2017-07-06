@@ -66,13 +66,14 @@
 				if (vm.allowMove) {
 					if (point)
 					{
-						coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
-						coordVector = coords[0].subtract(coords[1]);
-						vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
-						vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
-						vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
+						// TODO: WE don't use X3DOM anymore
+						// coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+						// coordVector = coords[0].subtract(coords[1]);
+						// vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
+						// vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
+						// vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
 
-						vm.totalDistance = coordVector.length().toFixed(3);
+						// vm.totalDistance = coordVector.length().toFixed(3);
 
 						angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
 						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");

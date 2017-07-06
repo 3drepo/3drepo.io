@@ -32,7 +32,7 @@
 		const bodyParser = require("body-parser");
 		const compress = require("compression");
 		const fs = require("fs");
-		const jade = require("jade");
+		const pug = require("pug");
 		const addressMeta = require("../models/addressMeta");
 		const units = require("../models/unit");
 		const favicon = require("serve-favicon");
@@ -54,8 +54,8 @@
 		}));
 		app.use(bodyParser.json());
 
-		app.set("views", "./jade");
-		app.set("view_engine", "jade");
+		app.set("views", "./pug");
+		app.set("view_engine", "pug");
 		app.locals.pretty = true;
 
 		app.use(favicon("public/images/favicon.ico"));
@@ -155,7 +155,7 @@
 			}) + ";";
 
 			res.header("Content-Type", "text/javascript");
-			res.render("config.jade", params);
+			res.render("config.pug", params);
 		});
 
 		app.use("/public", express.static(__dirname + "/../../public"));
@@ -233,37 +233,37 @@
 		}
 
 		/**
-		 * Get the jade files for the required state or plugin
+		 * Get the pug files for the required state or plugin
 		 *
 		 * @param {string} required - Name of required plugin
 		 * @param {string} pathToStatesAndPlugins - Root path of plugins 
 		 * @param {Object} params - Updates with information from plugin structure 
 		 */
-		function getJadeFiles(required, pathToStatesAndPlugins, params) {
+		function getPugFiles(required, pathToStatesAndPlugins, params) {
 			let requiredFiles,
 				requiredDir,
 				fileSplit;
 
-			requiredDir = pathToStatesAndPlugins + "/" + required + "/jade";
+			requiredDir = pathToStatesAndPlugins + "/" + required + "/pug";
 			try {
 				fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
 
 				requiredFiles = fs.readdirSync(requiredDir);
 				requiredFiles.forEach(function (file) {
 					fileSplit = file.split(".");
-					params.frontendJade.push({
+					params.frontendPug.push({
 						id: fileSplit[0] + ".html",
 						path: requiredDir + "/" + file
 					});
 				});
 			} catch (e) {
-				// Jade files don't exist
+				// Pug files don't exist
 				systemLogger.logFatal(e.message);
 			}
 		}
 
 		/**
-		 * Setup loading only the required states and plugins jade files
+		 * Setup loading only the required states and plugins pug files
 		 *
 		 * @private
 		 * @param {string[]} statesAndPlugins - List of states and plugins to load 
@@ -271,17 +271,17 @@
 		 * @param {string} pathToStatesAndPlugins - Base directory to load plugins from
 		 * @param {Object} params - Updates with information from plugin structure
 		 */
-		function setupRequiredJade(statesAndPlugins, required, pathToStatesAndPlugins, params) {
+		function setupRequiredPug(statesAndPlugins, required, pathToStatesAndPlugins, params) {
 			let i, length;
 
 			if (statesAndPlugins.indexOf(required.plugin) !== -1) {
-				getJadeFiles(required.plugin, pathToStatesAndPlugins, params);
+				getPugFiles(required.plugin, pathToStatesAndPlugins, params);
 
 				// Friends
 				if (required.hasOwnProperty("friends")) {
 					for (i = 0, length = required.friends.length; i < length; i += 1) {
 						if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
-							getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
+							getPugFiles(required.friends[i], pathToStatesAndPlugins, params);
 						}
 					}
 				}
@@ -290,7 +290,7 @@
 				if (required.hasOwnProperty("functions")) {
 					for (i = 0, length = required.functions.length; i < length; i += 1) {
 						if (statesAndPlugins.indexOf(required.functions[i]) !== -1) {
-							getJadeFiles(required.functions[i], pathToStatesAndPlugins, params);
+							getPugFiles(required.functions[i], pathToStatesAndPlugins, params);
 						}
 					}
 				}
@@ -298,7 +298,7 @@
 				// Recurse for children
 				if (required.hasOwnProperty("children")) {
 					for (i = 0, length = required.children.length; i < length; i += 1) {
-						setupRequiredJade(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
+						setupRequiredPug(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
 					}
 				}
 			}
@@ -309,13 +309,13 @@
 		 *
 		 * @param {Object} params - updates with information from plugin structure
 		 */
-		function setupJade(params) {
+		function setupPug(params) {
 			let pathToStatesAndPlugins = "./frontend",
 				statesAndPlugins;
 
 			// Get all available states and plugins in the file system
 			statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
-			setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
+			setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 		}
 
 		app.get("*", function (req, res) {
@@ -324,16 +324,16 @@
 				"jsfiles": config.external.js,
 				"cssfiles": config.external.css,
 				"pluginLoaded": [],
-				"pluginJade": [],
+				"pluginPug": [],
 				"pluginJS": [],
 				"pluginAngular": {},
 				"parentStateJSON": {},
 				"ui": {},
 				"uistate": {},
 				"pluginCSS": [],
-				"renderMe": jade.renderFile,
+				"renderMe": pug.renderFile,
 				"structure": JSON.stringify(pluginStructure),
-				"frontendJade": [],
+				"frontendPug": [],
 				"gaTrackId": config.gaTrackId,
 				"development" : config.development,
 				"googleConversionId": config.googleConversionId,
@@ -349,7 +349,7 @@
 				params.legalTemplates = config.legal;
 			}
 
-			setupJade(params);
+			setupPug(params);
 			res.render(serverConfig.template, params);
 		});
 

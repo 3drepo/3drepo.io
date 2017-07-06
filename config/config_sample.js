@@ -34,7 +34,7 @@ module.exports = {
 		},
 		{
 			service: "frontend",
-			template:   "frontend.jade"
+			template:   "frontend.pug"
 		},
 		{
 			service: "chat",
