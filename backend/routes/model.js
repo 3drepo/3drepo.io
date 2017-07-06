@@ -136,7 +136,7 @@ function _getModel(req){
 				return ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME);
 
 			}).then(subModels => {
-				//console.log('subModels', subModels)
+
 				setting.subModels = subModels;
 				return setting;
 			});
