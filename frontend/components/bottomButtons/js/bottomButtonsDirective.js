@@ -119,14 +119,14 @@
 			{
 				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
-				icon: "icon icon_helicopter",
+				icon: "../public/icons/helicopter.svg",
 				click: setViewingOption,
 				iconClass: "bottomButtonIconHelicopter"
 			},
 			{
 				mode: VIEWER_NAV_MODES.TURNTABLE,
 				label: "Turntable",
-				icon: "icon icon_turntable",
+				icon: "../public/icons/turntable.svg",
 				click: setViewingOption
 			}
 		];

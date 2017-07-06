@@ -13,6 +13,7 @@ certs
 public/images/logos
 
 .DS_Store
+.directory
 
 sessions
 

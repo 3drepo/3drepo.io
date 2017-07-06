@@ -48,24 +48,17 @@ html(lang="en" ng-app="3drepo")
 			script(src="//localhost:35729/livereload.js", async, defer)
 
 
-		// Predefine the app
-
-		// Plugin JS and Angular files
-		//script(type="text/javascript", src='/public/dist/plugins.min.js')
-		
+		// Load the NPM Dependencies first
 		script(type="text/javascript", src='/public/dist/three_d_repo.dependencies.min.js')
 	
 		script.
-			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'vcRecaptcha'])
+			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
 				   .constant('structure', !{structure})
 				   .constant('parentStates', !{parentStateJSON})
 				   .constant('uiState', !{uistate});
 
 		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-		//script.
-		//	angular.element(document).ready((function() {
-		//		angular.bootstrap(document, ['3drepo']);
-		//	}));
+
 
 
 	body

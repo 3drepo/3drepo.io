@@ -1,6 +1,6 @@
 const gulp = require("gulp");
 const webpack = require('webpack-stream');
-const merge = require('merge-stream');
+// const merge = require('merge-stream');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 const gutil = require('gulp-util');
@@ -11,9 +11,10 @@ const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
 
-
 const allCss = './components/**/**.css';
-const allJs = './components/**/**.js'
+const allJs = './components/**/**.js';
+const allPug = './components/**/**.pug';
+const icons = './icons/*.svg';
 const nodeRoot = path.join( __dirname, 'node_modules' )
 
 gulp.task('dependencies', function() {
@@ -57,14 +58,30 @@ gulp.task('css', function() {
          .pipe(livereload())
 });
 
+gulp.task('pug', function(){
+  // Eventually this should also compile pug :)
+  gulp.src(allPug).pipe(livereload());
+})
+
+// Watch for changes and live reload
 gulp.task('watch', function() {
   livereload.listen({host: 'localhost', port: '35729', start: true })
-  gulp.watch(allCss, ['css']);
-  gulp.watch(allJs, ['components']);
   gulp.watch("./entry.js", ['dependencies']);
+  gulp.watch(allJs, ['components']);
+  gulp.watch(allCss, ['css']);
+  gulp.watch(allPug, ['pug']);
+  gulp.watch(icons, ['fonts']);
 });
 
 gulp.task('build', ['javascript', 'css']);
+
+gulp.task('fonts', function () {
+  return gulp.src('./icons/*.svg')
+    .pipe(print())
+    .pipe(gulp.dest('./../public/icons/'))
+    .pipe(livereload())
+});
+
 
 // Something like this in the future after we just serve statically:
 
