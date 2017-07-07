@@ -7,3 +7,5 @@ angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 
         .constant('structure', _PUG_VARS.structure)
         .constant('parentStates',  _PUG_VARS.parentStateJSON)
         .constant('uiState',  _PUG_VARS.uiState);
+
+        

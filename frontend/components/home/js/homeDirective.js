@@ -20,7 +20,7 @@
 
     angular.module("3drepo")
         .directive("home", home)
-        .config(function($injector)
+        .config(["$injector", function($injector)
 		{
 			if ($injector.has("$mdThemingProvider"))
 			{
@@ -58,7 +58,7 @@
                 })
                 .warnPalette("red");
 			}
-        });
+        }]);
 
     function home() {
         return {

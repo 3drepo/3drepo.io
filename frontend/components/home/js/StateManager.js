@@ -19,8 +19,7 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.config([
-	"$stateProvider", "$urlRouterProvider", "$locationProvider", "structure",
+	.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "structure",
 	function($stateProvider, $urlRouterProvider, $locationProvider, structure) {
 
 		$locationProvider.html5Mode(true);

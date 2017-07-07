@@ -205,7 +205,11 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.init = function(options) {
-			if (!self.initialized) {
+			return new Promise(function(resolve, reject) {
+
+				if (self.initialized) {
+					resolve()
+				}
 
 				// Set option param from viewerDirective
 				self.options = options;
@@ -231,15 +235,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvasScript.setAttribute("type", "text/javascript");
 
 				var unitySettings = {
-				 	TOTAL_MEMORY: 2130706432 / 2,
-				    errorhandler: UnityUtil.onError,
-				    compatibilitycheck: null,
-				    backgroundColor: "#222C36",
-				    splashStyle: "Light",
-				    dataUrl: "public/unity/Release/unity.data",
-				    codeUrl: "public/unity/Release/unity.js",
-				    asmUrl: "public/unity/Release/unity.asm.js",
-				    memUrl: "public/unity/Release/unity.mem"
+					TOTAL_MEMORY: 2130706432 / 2,
+					errorhandler: UnityUtil.onError,
+					compatibilitycheck: null,
+					backgroundColor: "#222C36",
+					splashStyle: "Light",
+					dataUrl: "public/unity/Release/unity.data",
+					codeUrl: "public/unity/Release/unity.js",
+					asmUrl: "public/unity/Release/unity.asm.js",
+					memUrl: "public/unity/Release/unity.mem"
 				};
 				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
 				canvasScript.appendChild(moduleSettings);
@@ -306,17 +310,16 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
-				UnityUtil.onReady().then(
-						function()
-						{
-							callback(self.EVENT.READY, {
-								name: self.name,
-								model: self.modelString
-							});
-													   
-						}
-					);
-			}
+				UnityUtil.onReady().then(function() {
+					resolve();
+					callback(self.EVENT.READY, {
+						name: self.name,
+						model: self.modelString
+					});
+				});
+				
+			});
+			
 		};
 
 		this.destroy = function() {

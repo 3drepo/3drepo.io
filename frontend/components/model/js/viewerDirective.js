@@ -123,40 +123,35 @@
 				plugins: {
 					'mapTile': v.mapTile
 				}
-			});
-			// TODO: Move this so that the attachment is contained
-			// within the plugins themselves.
-			// Comes free with oculus support and gamepad support
-			v.oculus     = new Oculus(v.viewer);
-			v.gamepad    = new Gamepad(v.viewer);
-			v.gamepad.init();
-
-			v.measure    = new MeasureTool(v.viewer);
-
-			v.collision  = new Collision(v.viewer);
-
-			//$scope.reload();
-
-			v.loaded.promise.then(function() {
+			}).then(function(){
+					;
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
 				v.oculus     = new Oculus(v.viewer);
 				v.gamepad    = new Gamepad(v.viewer);
-
 				v.gamepad.init();
 
-				v.collision  = new Collision(v.viewer);
-			});
+				v.measure    = new MeasureTool(v.viewer);
 
-			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.model + ".json")).success(
-			// 	function(json, status) {
-			// 		EventService.send(EventService.EVENT.model_SETTINGS_READY, {
-			// 			account: v.account,
-			// 			model: v.model,
-			// 			settings: json.properties
-			// 	});
-			// });
+				v.collision  = new Collision(v.viewer);
+
+				//$scope.reload();
+
+				v.loaded.promise.then(function() {
+					// TODO: Move this so that the attachment is contained
+					// within the plugins themselves.
+					// Comes free with oculus support and gamepad support
+					v.oculus     = new Oculus(v.viewer);
+					v.gamepad    = new Gamepad(v.viewer);
+
+					v.gamepad.init();
+
+					v.collision  = new Collision(v.viewer);
+				});
+
+			});
+			
 
 		};
 

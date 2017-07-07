@@ -18,7 +18,7 @@
   "dependencies": {
     "angular": "1.5.5",
     "angular-aria": "1.4.7",
-    "angular-material": "1.1.0",
+    "angular-material": "1.1.4",
     "angular-recaptcha": "3.0.3",
     "angular-sanitize": "1.4.8",
     "angular-ui-router": "0.4.2",
@@ -27,6 +27,7 @@
     "socket.io-client": "^2.0.3"
   },
   "devDependencies": {
+    "angular-material": "^1.1.4",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
@@ -38,7 +39,6 @@
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
-    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.0.0",
     "webpack-stream": "^3.2.0"
   }

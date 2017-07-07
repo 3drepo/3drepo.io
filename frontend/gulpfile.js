@@ -1,6 +1,5 @@
 const gulp = require("gulp");
 const webpack = require('webpack-stream');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 const gutil = require('gulp-util');
@@ -109,9 +108,6 @@ gulp.task('javascript', function() {
           output: {
             filename: 'three_d_repo.dependencies.min.js',
           },
-          plugins: [
-            new UglifyJSPlugin() // Uglifying here saves A LOT of size, but slows down build
-          ]
          }, require('webpack')))
         .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
 
@@ -127,7 +123,7 @@ gulp.task('javascript', function() {
   return merge(dependencies, components)
           .pipe(sourcemaps.init())
           .pipe(concat("three_d_repo.min.js"))
-          .pipe(uglify({mangle: false})) // Mangle causes error for some reason
+          .pipe(uglify({mangle: true})) // Mangle causes error for some reason
             .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
           .pipe(size())
           .pipe(sourcemaps.write('./maps'))

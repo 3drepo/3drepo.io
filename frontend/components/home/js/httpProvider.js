@@ -31,7 +31,7 @@
 			}
 		};
 	}])
-	.config(function ($httpProvider) {
+	.config(["$httpProvider", function ($httpProvider) {
 		var checkAuthorization = ["$q", "$location", function($q, $location) {
 			var onSuccess = function (res) { return res;};
 			var onError = function(res) {
@@ -50,5 +50,5 @@
 		$httpProvider.interceptors.push(checkAuthorization);
 		$httpProvider.defaults.withCredentials = true;
 		$httpProvider.interceptors.push("authInterceptor");
-	});
+	}]);
 })();
