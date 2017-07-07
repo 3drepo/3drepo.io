@@ -33,8 +33,6 @@ var jsonCache = {};
 
 var mathjs		= require('mathjs');
 
-var dbInterface  = require('../db/db_interface.js');
-
 var utils       = require('../utils.js');
 
 var deferred    = require("deferred");
@@ -716,52 +714,52 @@ function X3D_AddToShape(xmlDoc, shape, account, project, mesh, subMeshID, mode, 
 			break;
 
 
-		case "pbf":
-			var popGeometry = xmlDoc.createElement('PopGeometry');
-			popCache.getPopCache(dbInterface, project, false, null, mesh['id'], function(err, cacheObj) {
-				if (mesh['id'] in GLOBAL.pbfCache) {
-					var cacheMesh = GLOBAL.pbfCache[mesh['id']];
+		// case "pbf":
+		// 	var popGeometry = xmlDoc.createElement('PopGeometry');
+		// 	popCache.getPopCache(dbInterface, project, false, null, mesh['id'], function(err, cacheObj) {
+		// 		if (mesh['id'] in GLOBAL.pbfCache) {
+		// 			var cacheMesh = GLOBAL.pbfCache[mesh['id']];
 
-					popGeometry.setAttribute('id', 'tst');
-					popGeometry.setAttribute('vertexCount', mesh.faces_count * 3);
-					popGeometry.setAttribute('vertexBufferSize', mesh.vertices_count);
-					popGeometry.setAttribute('primType', "TRIANGLES");
-					popGeometry.setAttribute('attributeStride', cacheMesh.stride);
-					popGeometry.setAttribute('normalOffset', 8);
-					popGeometry.setAttribute('bbMin', bbox.min.join(' '));
+		// 			popGeometry.setAttribute('id', 'tst');
+		// 			popGeometry.setAttribute('vertexCount', mesh.faces_count * 3);
+		// 			popGeometry.setAttribute('vertexBufferSize', mesh.vertices_count);
+		// 			popGeometry.setAttribute('primType', "TRIANGLES");
+		// 			popGeometry.setAttribute('attributeStride', cacheMesh.stride);
+		// 			popGeometry.setAttribute('normalOffset', 8);
+		// 			popGeometry.setAttribute('bbMin', bbox.min.join(' '));
 
-					if (cacheMesh.has_tex) {
-						popGeometry.setAttribute('texcoordOffset', 12);
-					}
+		// 			if (cacheMesh.has_tex) {
+		// 				popGeometry.setAttribute('texcoordOffset', 12);
+		// 			}
 
-					popGeometry.setAttribute('size', bbox.size.join(' '));
-					popGeometry.setAttribute('tightSize', bbox.size.join(' '));
-					popGeometry.setAttribute('maxBBSize', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('size', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('tightSize', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('maxBBSize', bbox.size.join(' '));
 
-					if ('min_texcoordu' in cacheMesh) {
-						popGeometry.setAttribute('texcoordMinU', cacheMesh.minTexcoordU);
-						popGeometry.setAttribute('texcoordScaleU', (cacheMesh.maxTexcoordu - cacheMesh.minTexcoordU));
-						popGeometry.setAttribute('texcoordMinV', cacheMesh.minTexcoordV);
-						popGeometry.setAttribute('texcoordScaleV', (cacheMesh.maxTexcoordV - cacheMesh.minTexcoordV));
-					}
+		// 			if ('min_texcoordu' in cacheMesh) {
+		// 				popGeometry.setAttribute('texcoordMinU', cacheMesh.minTexcoordU);
+		// 				popGeometry.setAttribute('texcoordScaleU', (cacheMesh.maxTexcoordu - cacheMesh.minTexcoordU));
+		// 				popGeometry.setAttribute('texcoordMinV', cacheMesh.minTexcoordV);
+		// 				popGeometry.setAttribute('texcoordScaleV', (cacheMesh.maxTexcoordV - cacheMesh.minTexcoordV));
+		// 			}
 
-					for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
-						var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
+		// 			for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
+		// 				var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
 
-						popGeometryLevel.setAttribute('src', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
-						popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
-						popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
+		// 				popGeometryLevel.setAttribute('src', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
+		// 				popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
+		// 				popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
 
-						popGeometryLevel.textContent = ' ';
-						popGeometry.appendChild(popGeometryLevel);
-					}
+		// 				popGeometryLevel.textContent = ' ';
+		// 				popGeometry.appendChild(popGeometryLevel);
+		// 			}
 
-					shape.appendChild(popGeometry);
+		// 			shape.appendChild(popGeometry);
 
-					//shape.setAttribute('bboxCenter', bbox.center.join(' '));
-					//shape.setAttribute('bboxSize', bbox.size.join(' '));
-				}
-			});
+		// 			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+		// 			//shape.setAttribute('bboxSize', bbox.size.join(' '));
+		// 		}
+		// 	});
 
 		break;
 	}
