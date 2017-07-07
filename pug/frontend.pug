@@ -6,7 +6,6 @@ html(lang="en" ng-app="3drepo")
 		// Meta, title, CSS, favicons, etc.
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
-		link(rel="shortcut icon" href="/public/images/favicon.ico")
 
 		title 3D Repo | Online BIM collaboration platform
 
@@ -40,15 +39,14 @@ html(lang="en" ng-app="3drepo")
 			script(src="//localhost:35729/livereload.js", async, defer)
 
 
-		// Load the NPM Dependencies first
-		script(type="text/javascript", src='/public/dist/three_d_repo.dependencies.min.js')
-	
 		script.
-			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
-				   .constant('structure', !{structure})
-				   .constant('parentStates', !{parentStateJSON})
-				   .constant('uiState', !{uistate});
+			_PUG_VARS = {
+				structure: !{structure},
+				parentStateJSON: !{parentStateJSON},
+				uiState: !{uistate}
+			}
 
+		// Load NPM dependencies and 3D Repo JavaScript
 		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
 
 	body

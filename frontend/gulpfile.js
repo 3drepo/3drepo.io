@@ -11,7 +11,8 @@ const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
 const sourcemaps = require('gulp-sourcemaps');
-// const merge = require('merge-stream');
+const merge = require('merge-stream');
+const size = require('gulp-size');
 
 
 const allImages = [
@@ -33,54 +34,15 @@ const allPug = './components/**/**.pug';
 const icons = './icons/*.svg';
 const nodeRoot = path.join( __dirname, 'node_modules' )
 
-gulp.task('dependencies', function() {
-
-  return gulp.src('./entry.js')
-        .pipe(sourcemaps.init())
-        .pipe(webpack({
-          output: {
-            filename: 'three_d_repo.dependencies.min.js',
-          },
-          plugins: [
-            new UglifyJSPlugin()
-          ]
-         }, require('webpack')))
-        .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
-        .pipe(gulp.dest("./../public/dist/"))
-        .pipe(sourcemaps.write('./../public/dist/'))
-        .pipe(livereload())
-
-});
-
-gulp.task('components', function(){
-  return gulp.src(allJs)
-        .pipe(sourcemaps.init())
-        .pipe(order([
-          'components/model/js/threed/viewerutil.js',
-          'components/model/js/threed/mapTile.js',
-          'components/model/js/threed/*.js',
-          'components/**/**.js'
-        ], { base: './' })) // Required for order to work correctly
-        //.pipe(print()) // If you want nice printing of the order of concat
-        .pipe(concat("three_d_repo.min.js"))
-         //.pipe(uglify()) // Minify or not
-        .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
-        .pipe(sourcemaps.write('./../public/dist/'))
-        .pipe(gulp.dest("./../public/dist/"))
-        .pipe(livereload())
-});
-
-// Dependencies and written components
-gulp.task('javascript', ['dependencies', 'components']);
-
 gulp.task('css', function() {
 
   return gulp.src(allCss)
-         .pipe(print())
+         //.pipe(print())
          .pipe(concat("three_d_repo.min.css"))
          .pipe(cssnano())
          .pipe(gulp.dest("./../public/dist/"))
          .pipe(livereload())
+
 });
 
 gulp.task('pug', function(){
@@ -88,20 +50,9 @@ gulp.task('pug', function(){
   gulp.src(allPug).pipe(livereload());
 })
 
-// Watch for changes and live reload
-gulp.task('watch', function() {
-  livereload.listen({host: 'localhost', port: '35729', start: true })
-  gulp.watch("./entry.js", ['dependencies']);
-  gulp.watch(allJs, ['components']);
-  gulp.watch(allCss, ['css']);
-  gulp.watch(allPug, ['pug']);
-  gulp.watch(icons, ['icons']);
-  gulp.watch(allImages, ['images']);
-});
-
 gulp.task('icons', function () {
   return gulp.src('./icons/*.svg')
-    .pipe(print())
+    //.pipe(print())
     .pipe(gulp.dest('./../public/icons/'))
     .pipe(livereload())
 });
@@ -119,14 +70,84 @@ gulp.task('unity', function() {
 });
 
 
+// JavaScript
+// We have one dev task and one production task because the time taken to do 
+// minifcation + source maps is so long
+
+gulp.task('javascript-dev', function() {
+
+  const dependencies = gulp.src('./entry.js')
+        .pipe(sourcemaps.init())
+        .pipe(webpack({
+          output: {
+            filename: 'three_d_repo.dependencies.min.js',
+          },
+         }, require('webpack')))
+        .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+
+  const components = gulp.src(allJs)
+        .pipe(order([
+          'components/entry/js/entry.js',
+          'components/model/js/threed/viewerutil.js',
+          'components/model/js/threed/mapTile.js',
+          'components/model/js/threed/*.js',
+          'components/**/**.js'
+        ], { base: './' })) // Required for order to work correctly
+
+  return merge(dependencies, components)
+          .pipe(concat("three_d_repo.min.js"))
+          .pipe(gulp.dest("./../public/dist/"))
+          .pipe(livereload())
+
+});
+
+gulp.task('javascript', function() {
+
+  const dependencies = gulp.src('./entry.js')
+        .pipe(sourcemaps.init())
+        .pipe(webpack({
+          output: {
+            filename: 'three_d_repo.dependencies.min.js',
+          },
+          plugins: [
+            new UglifyJSPlugin() // Uglifying here saves A LOT of size, but slows down build
+          ]
+         }, require('webpack')))
+        .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+
+  const components = gulp.src(allJs)
+        .pipe(order([
+          'components/entry/js/entry.js',
+          'components/model/js/threed/viewerutil.js',
+          'components/model/js/threed/mapTile.js',
+          'components/model/js/threed/*.js',
+          'components/**/**.js'
+        ], { base: './' })) // Required for order to work correctly
+
+  return merge(dependencies, components)
+          .pipe(sourcemaps.init())
+          .pipe(concat("three_d_repo.min.js"))
+          .pipe(uglify({mangle: false})) // Mangle causes error for some reason
+            .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+          .pipe(size())
+          .pipe(sourcemaps.write('./maps'))
+          .pipe(gulp.dest("./../public/dist/"))
+
+});
+
+
+// Watch for changes and live reload in development
+gulp.task('watch', function() {
+  livereload.listen({host: 'localhost', port: '35729', start: true })
+  gulp.watch("./entry.js", ['javascript-dev']);
+  gulp.watch(allJs, ['javascript-dev']);
+  gulp.watch(allCss, ['css']);
+  gulp.watch(allPug, ['pug']);
+  gulp.watch(icons, ['icons']);
+  gulp.watch(allImages, ['images']);
+});
+
+// Final task to build everything for the frontend (public folder)
+// It will use 'javascript' task rather than the dev version which includes maps
 gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity']);
 
-
-
-// Something like this in the future after we just serve statically:
-
-// return merge(dependencies, threedrepo)
-//   .pipe(concat("three_d_repo.min.js"))
-//   .pipe(uglify())
-//   .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
-//   .pipe(gulp.dest("./../public/dist/"))

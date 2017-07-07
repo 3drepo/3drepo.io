@@ -33,9 +33,12 @@
     "gulp-livereload": "^3.8.1",
     "gulp-order": "^1.1.1",
     "gulp-print": "^2.0.1",
+    "gulp-size": "^2.1.0",
+    "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
+    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.0.0",
     "webpack-stream": "^3.2.0"
   }
