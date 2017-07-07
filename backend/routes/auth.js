@@ -29,7 +29,6 @@
 	var addressMeta = require("../models/addressMeta");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
-	//var Role = require('../models/role');
 	//var crypto = require('crypto');
 
 	var multer = require("multer");

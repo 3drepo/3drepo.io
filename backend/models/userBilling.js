@@ -29,7 +29,6 @@
 	const Paypal = require("./paypal.js");
 	const Invoice = require("./invoice.js");
 	const responseCodes = require("../response_codes.js");
-	const Role = require('./role');
 	const Mailer = require('../mailer/mailer');
 
 	let getSubscription = Subscription.getSubscription;
@@ -304,12 +303,6 @@
 			if(invoice){
 				return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
 			}
-
-			return Role.createRole(user, null, C.ADMIN_TEMPLATE);
-
-		}).then(role => {
-
-			return Role.grantRolesToUser(this.billingUser, [role]);
 
 		}).then(() => {
 

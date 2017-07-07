@@ -28,7 +28,6 @@ let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
 let async = require('async');
-let Role = require('../../models/role');
 let ModelSetting = require('../../models/modelSetting');
 let User = require('../../models/user');
 let config = require('../../config');

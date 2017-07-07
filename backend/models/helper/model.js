@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var ModelFactory = require('../factory/modelFactory');
-var Role = require('../role');
-var RoleTemplates = require('../role_templates');
 var ModelSetting = require('../modelSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
@@ -160,14 +158,6 @@ function createAndAssignRole(modelName, account, username, data) {
 		}
 
 		return (data.subModels ? createFederatedModel(account, model, data.subModels) : Promise.resolve());
-
-	}).then(() => {
-
-		return Role.createStandardRoles(account, model);
-
-	}).then(() => {
-
-		return Role.grantModelRoleToUser(username, account, model, C.COLLABORATOR_TEMPLATE);
 
 	}).then(() => {
 
@@ -1316,15 +1306,6 @@ function removeModel(account, model, forceRemove){
 		//remove model settings
 		return setting.remove();
 
-	}).then(() => {
-		//remove roles related to this model from system.roles collection
-		let promises = [];
-
-		RoleTemplates.modelRoleTemplateLists.forEach(role => {
-			promises.push(Role.dropRole(account, `${model}.${role}`));
-		});
-
-		return Promise.all(promises);
 	}).then(() => {
 
 		//remove model from all project

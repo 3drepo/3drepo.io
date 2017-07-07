@@ -22,7 +22,6 @@ var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
-var Role = require('./role');
 
 var systemLogger = require("../logger.js").systemLogger;
 
@@ -412,13 +411,6 @@ schema.statics.verify = function(username, token, options){
 
 		return Promise.resolve();
 
-	}).then(() => {
-
-		return Role.createRole(username, null, C.ADMIN_TEMPLATE);
-
-	}).then(role => {
-
-		return Role.grantRolesToUser(username, [role]);
 	});
 };
 
@@ -481,44 +473,6 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 };
 
-schema.statics.grantRoleToUser = function(username, db, role){
-	'use strict';
-
-	return this.findByUserName(username).then(user => {
-
-		let dup = false;
-		user.roles.forEach(_role => {
-			if(_role.role === role && _role.db === db){
-				dup = true;
-			}
-		});
-
-		if(!dup){
-			user.roles.push({ role, db});
-
-			let grantRoleCmd = {
-				grantRolesToUser: username,
-				roles: user.roles
-			};
-
-			return ModelFactory.db.admin().command(grantRoleCmd);
-		}
-
-		return Promise.resolve();
-
-	});
-};
-
-schema.statics.revokeRolesFromUser = function(username, db, role){
-	'use strict';
-
-	let cmd = {
-		revokeRolesFromUser: username,
-		roles: [{ role, db }]
-	};
-
-	return ModelFactory.db.admin().command(cmd);
-};
 
 function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';

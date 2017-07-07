@@ -28,7 +28,6 @@ let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
 let async = require('async');
-let Role = require('../../models/role');
 let ModelSetting = require('../../models/modelSetting');
 let User = require('../../models/user');
 describe('Model', function () {
@@ -388,14 +387,7 @@ describe('Model', function () {
 			});
 		});
 
-		// it('should remove all the roles in roles collection', function(){
-		// 	return Role.findByRoleID(`${username}.${model}.viewer`).then(role => {
-		// 		expect(role).to.be.null;
-		// 		return Role.findByRoleID(`${username}.${model}.collaborator`);
-		// 	}).then(role => {
-		// 		expect(role).to.be.null;
-		// 	});
-		// });
+
 
 		it('should remove setting in settings collection', function() {
 			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
@@ -403,11 +395,6 @@ describe('Model', function () {
 			});
 		});
 
-		// it('should remove role from collaborator user.roles', function(){
-		// 	return User.findByUserName(collaboratorUsername).then(user => {
-		// 		expect(user.roles.find(role => role.role === `${model}.collaborator` && role.db === username)).to.be.undefined;
-		// 	});
-		// });
 
 		it('should be removed from collaborator\'s model listing', function(done){
 
