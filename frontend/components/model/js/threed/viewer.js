@@ -235,6 +235,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvasScript.setAttribute("type", "text/javascript");
 
 				var unitySettings = {
+<<<<<<< HEAD:frontend/components/model/js/threed/viewer.js
 					TOTAL_MEMORY: 2130706432 / 2,
 					errorhandler: UnityUtil.onError,
 					compatibilitycheck: null,
@@ -244,6 +245,17 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					codeUrl: "public/unity/Release/unity.js",
 					asmUrl: "public/unity/Release/unity.asm.js",
 					memUrl: "public/unity/Release/unity.mem"
+=======
+				 	TOTAL_MEMORY: 2130706432,
+				    errorhandler: UnityUtil.onError,
+				    compatibilitycheck: null,
+				    backgroundColor: "#222C36",
+				    splashStyle: "Light",
+				    dataUrl: "public/unity/Release/unity.data",
+				    codeUrl: "public/unity/Release/unity.js",
+				    asmUrl: "public/unity/Release/unity.asm.js",
+				    memUrl: "public/unity/Release/unity.mem"
+>>>>>>> cd1b9c1a64a1b755397fb14ed34993711ae565ba:frontend/model/js/threed/viewer.js
 				};
 				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
 				canvasScript.appendChild(moduleSettings);

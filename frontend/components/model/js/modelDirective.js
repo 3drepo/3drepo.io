@@ -268,16 +268,17 @@
 					}
 
 					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+
+					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
+						vm.treeMap = TreeService.getMap(tree.nodes);
+						EventService.send(EventService.EVENT.TREE_READY, tree);
+					});
 				});
 
 				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
 					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 				});
 
-				TreeService.init(vm.account, vm.model, vm.branch, vm.revision).then(function(data){
-					vm.treeMap = TreeService.getMap(data.nodes);
-					EventService.send(EventService.EVENT.TREE_READY, data);
-				});
 			}
 		});
 

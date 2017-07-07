@@ -41,7 +41,7 @@
 			return map;
 		};
 
-		var init = function(account, model, branch, revision) {
+		var init = function(account, model, branch, revision, setting) {
 
 			console.log('tree init');
 
@@ -64,6 +64,28 @@
 				.then(function(json) {
 					//var mainTree = JSON.parse(json.data.mainTree);
 					var mainTree = json.data.mainTree;
+					
+					//replace model id with model name in the tree if it is a federate model
+					if(setting.federate){
+						mainTree.nodes.children.forEach(function(child){
+							var name = child.name.split(':');
+							
+							var subModel = setting.subModels.find(function(m){
+								return m.model === name[1];
+							});
+
+							if(subModel){
+								name[1] = subModel.name;
+								child.name = name.join(':');
+							}
+
+							if(subModel && child.children && child.children[0]){
+								child.children[0].name = subModel.name;
+							}
+
+						});
+					}
+
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
 					var getSubTrees = [];

@@ -68,6 +68,19 @@
   },
   "devDependencies": {
     "chai": "3.5.0",
+<<<<<<< HEAD
+=======
+    "grunt": "0.4.1",
+    "grunt-contrib-concat": "1.0.1",
+    "grunt-contrib-cssmin": "2.2.0",
+    "grunt-contrib-jshint": "1.1.0",
+    "grunt-contrib-uglify": "3.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-env": "0.4.4",
+    "grunt-environment": "0.4.2",
+    "grunt-mocha-test": "0.13.2",
+    "grunt-webfont": "1.7.0",
+>>>>>>> cd1b9c1a64a1b755397fb14ed34993711ae565ba
     "jshint": "2.9.5",
     "minify": "2.1.8",
     "mockgoose": "6.0.3",
