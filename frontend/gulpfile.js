@@ -1,6 +1,5 @@
 const gulp = require("gulp");
 const webpack = require('webpack-stream');
-// const merge = require('merge-stream');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 const gutil = require('gulp-util');
@@ -10,6 +9,7 @@ const livereload = require('gulp-livereload');
 const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
+// const merge = require('merge-stream');
 
 const allCss = './components/**/**.css';
 const allJs = './components/**/**.js';
