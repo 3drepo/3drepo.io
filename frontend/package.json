@@ -18,10 +18,12 @@
   "dependencies": {
     "angular": "1.5.5",
     "angular-aria": "1.4.7",
-    "angular-sanitize": "1.4.8",
     "angular-material": "1.1.0",
     "angular-recaptcha": "3.0.3",
+    "angular-sanitize": "1.4.8",
     "angular-ui-router": "0.4.2",
+    "font-awesome": "^4.7.0",
+    "material-design-icons": "^3.0.1",
     "socket.io-client": "^2.0.3"
   },
   "devDependencies": {

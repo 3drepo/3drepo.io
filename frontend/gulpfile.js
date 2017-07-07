@@ -11,7 +11,21 @@ const cssnano = require('gulp-cssnano');
 const path = require('path');
 // const merge = require('merge-stream');
 
-const allCss = './components/**/**.css';
+
+const allImages = [
+  './images/**'
+]
+
+const allFonts = [
+  './node_modules/material-design-icons/iconfont/*.{eot,svg,ttf,woff,woff2}',
+  './node_modules/font-awesome/fonts/*.{eot,svg,ttf,woff,woff2}'
+]
+const allCss = [ 
+    './css/ui.css',
+    './node_modules/angular-material/angular-material.css', 
+    './node_modules/font-awesome/css/font-awesome.css',
+    './components/**/**.css'
+]
 const allJs = './components/**/**.js';
 const allPug = './components/**/**.pug';
 const icons = './icons/*.svg';
@@ -51,7 +65,9 @@ gulp.task('components', function(){
 gulp.task('javascript', ['dependencies', 'components']);
 
 gulp.task('css', function() {
+
   return gulp.src(allCss)
+         .pipe(print())
          .pipe(concat("three_d_repo.min.css"))
          .pipe(cssnano())
          .pipe(gulp.dest("./../public/dist/"))
@@ -70,17 +86,27 @@ gulp.task('watch', function() {
   gulp.watch(allJs, ['components']);
   gulp.watch(allCss, ['css']);
   gulp.watch(allPug, ['pug']);
-  gulp.watch(icons, ['fonts']);
+  gulp.watch(icons, ['icons']);
+  gulp.watch(allImages, ['images']);
 });
 
-gulp.task('build', ['javascript', 'css']);
-
-gulp.task('fonts', function () {
+gulp.task('icons', function () {
   return gulp.src('./icons/*.svg')
     .pipe(print())
     .pipe(gulp.dest('./../public/icons/'))
     .pipe(livereload())
 });
+
+gulp.task('images', function() {
+  return gulp.src(allImages).pipe(gulp.dest('./../public/images/'));
+});
+
+gulp.task('fonts', function() {
+  return gulp.src(allFonts).pipe(gulp.dest('./../public/fonts/'));
+});
+
+gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images']);
+
 
 
 // Something like this in the future after we just serve statically:

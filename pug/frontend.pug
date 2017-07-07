@@ -6,6 +6,7 @@ html(lang="en" ng-app="3drepo")
 		// Meta, title, CSS, favicons, etc.
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+		link(rel="shortcut icon" href="/public/images/favicon.ico")
 
 		title 3D Repo | Online BIM collaboration platform
 
@@ -14,20 +15,11 @@ html(lang="en" ng-app="3drepo")
 		// ReCapthca
 		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async, defer)
 
-		// CSS Files
-		each val, key in cssfiles
-			link(rel='stylesheet', type='text/css', href=val)
-
 		// All CSS minified
 		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-
-		// JS Files
-		//each val, key in jsfiles
-			script(type="text/javascript", src=val)
-
 
 		if !development
 			if gaTrackId
@@ -58,8 +50,6 @@ html(lang="en" ng-app="3drepo")
 				   .constant('uiState', !{uistate});
 
 		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-
-
 
 	body
 		style.

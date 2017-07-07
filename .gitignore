@@ -1,7 +1,6 @@
 node_modules
 
 *.swp
-/public/css/*.css~
 /*.log
 config/*
 !config/test/
@@ -52,12 +51,8 @@ create_node_user.js
 #WebStorm config files
 .idea/sasslintPlugin.xml
 
-public/css/fonts/three-d-repo.eot
-public/css/fonts/three-d-repo.ttf
-public/css/fonts/three-d-repo.woff
-
 #Distribution files
-public/dist
+public/
 
 #installation temporary files
 tools/release/tmp

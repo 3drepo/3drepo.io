@@ -321,8 +321,8 @@
 		app.get("*", function (req, res) {
 			// Generate the list of files to load for the plugins
 			let params = {
-				"jsfiles": config.external.js,
-				"cssfiles": config.external.css,
+				// "jsfiles": config.external.js,
+				// "cssfiles": config.external.css,
 				"pluginLoaded": [],
 				"pluginPug": [],
 				"pluginJS": [],
