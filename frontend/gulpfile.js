@@ -1,5 +1,6 @@
 const gulp = require("gulp");
 const webpack = require('webpack-stream');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 const gutil = require('gulp-util');
@@ -9,6 +10,7 @@ const livereload = require('gulp-livereload');
 const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
+const sourcemaps = require('gulp-sourcemaps');
 // const merge = require('merge-stream');
 
 
@@ -34,19 +36,25 @@ const nodeRoot = path.join( __dirname, 'node_modules' )
 gulp.task('dependencies', function() {
 
   return gulp.src('./entry.js')
+        .pipe(sourcemaps.init())
         .pipe(webpack({
           output: {
             filename: 'three_d_repo.dependencies.min.js',
-          }
-        }, require('webpack')))
+          },
+          plugins: [
+            new UglifyJSPlugin()
+          ]
+         }, require('webpack')))
         .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
         .pipe(gulp.dest("./../public/dist/"))
+        .pipe(sourcemaps.write('./../public/dist/'))
         .pipe(livereload())
 
 });
 
 gulp.task('components', function(){
   return gulp.src(allJs)
+        .pipe(sourcemaps.init())
         .pipe(order([
           'components/model/js/threed/viewerutil.js',
           'components/model/js/threed/mapTile.js',
@@ -57,6 +65,7 @@ gulp.task('components', function(){
         .pipe(concat("three_d_repo.min.js"))
          //.pipe(uglify()) // Minify or not
         .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+        .pipe(sourcemaps.write('./../public/dist/'))
         .pipe(gulp.dest("./../public/dist/"))
         .pipe(livereload())
 });
@@ -105,7 +114,12 @@ gulp.task('fonts', function() {
   return gulp.src(allFonts).pipe(gulp.dest('./../public/fonts/'));
 });
 
-gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images']);
+gulp.task('unity', function() {
+  return gulp.src("./unity/**").pipe(gulp.dest('./../public/unity/'));
+});
+
+
+gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity']);
 
 
 
