@@ -236,7 +236,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				var unitySettings = {
 
-				 	TOTAL_MEMORY: 2130706432,
+				 	TOTAL_MEMORY: 2130706432 / 3,
 				    errorhandler: UnityUtil.onError,
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",
@@ -293,8 +293,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.viewer.addEventListener("keypress", self.handleKeyPresses);
 
-				self.initialized = true;
-
 				if (manager) {
 					manager.registerMe(self);
 				}
@@ -313,6 +311,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
 				UnityUtil.onReady().then(function() {
+					self.initialized = true;
 					resolve();
 					callback(self.EVENT.READY, {
 						name: self.name,

@@ -660,6 +660,23 @@ account-assign .assignTabHolder {
   padding: 20px;
 }
 
+account-assign .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+account-assign .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-assign .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+}
+
 account-assign .scrollable {
   overflow-x: auto;
 }

@@ -336,11 +336,15 @@
 		 * @param {Object} index
 		 */
 		function goToPermissions (event, account, project, model) {
-			$location.search('account', account);
+			console.log("goToPermissions", account, project, model)
+			// Account is an object here
+			$location.search('account', account.account);
 			$location.search('project', project.name);
 			$location.search('model', model.model);
 			$location.search('page', "assign");
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}
+
+
 	}
 }());

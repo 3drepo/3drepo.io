@@ -6,8 +6,9 @@
 
 		md-tabs(md-dynamic-height, md-border-bottom, md-selected="vm.selectedIndex")
 			md-tab(label="Teamspace")
-				div.assignTabHolder(layout="row" ng-if="vm.loading")
-					h3 Loading...
+				div.assignTabHolder.loadingHolder(layout="row" ng-if="vm.loading")
+					md-progress-circular.loading
+					h3 Loading Teamspace Data...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.loading", flex="100")
 
@@ -42,8 +43,9 @@
 
 
 			md-tab(label="Project")
-				div.assignTabHolder(layout="row" ng-if="vm.projectsLoading")
-					h3 Loading...
+				div.assignTabHolder.loadingHolder(layout="row" ng-if="vm.projectsLoading")
+					md-progress-circular.loading
+					h3 Loading Teamspace Data...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
 
@@ -89,10 +91,11 @@
 
 
 			md-tab(label="Models & Federations")
-				div.assignTabHolder(layout="row" ng-if="vm.loading")
-					h3 Loading...
+				div.assignTabHolder.loadingHolder(layout="row", ng-if="vm.loading || vm.projectsLoading || (vm.isFromUrl && !vm.modelReady)")
+					md-progress-circular.loading
+					h3 Loading Teamspace Data...
 
-				div.assignTabHolder(layout="column", ng-if="!vm.loading &&!vm.projectsLoading", flex="100")
+				div.assignTabHolder(layout="column", ng-if="(!vm.isFromUrl && !vm.loading && !vm.projectsLoading) || (vm.isFromUrl && vm.modelReady)", flex="100")
 					div(layout="row")
 						div(flex="33", layout="column")
 							md-label Select Teamspace
@@ -103,16 +106,18 @@
 								md-option(ng-repeat="teamspace in vm.teamspaces", value="{{teamspace.account}}") {{teamspace.account}}
 
 						div(flex="33", layout="column")
-							md-label Select Project
+							md-label(ng-if="vm.projectReady") Select Project
+							md-label(ng-if="!vm.projectReady") Awaiting Project...
 							md-select.rowSelects(
 								aria-label="Selection for Project"
 								ng-model="vm.projectSelected"
+								ng-disabled="!vm.projectReady"
 								ng-required="true")
 								md-option(ng-repeat="project in vm.projects", value="{{project.name}}") {{project.name}}
 
 						div(flex="33", layout="column")
-							md-label(ng-if="vm.modelsAreLoaded()") Select Model
-							md-label(ng-if="!vm.modelsAreLoaded()") Awaiting Models...
+							md-label(ng-if="vm.modelsAreLoaded()") Select Model / Federation
+							md-label(ng-if="!vm.modelsAreLoaded()") Awaiting Models / Federations...
 							md-select.rowSelects(
 								aria-label="Selection for Model"
 								ng-model="vm.modelSelected"
@@ -138,7 +143,7 @@
 
 									td.fixedWidth.userColumn.userInput()
 										p {{user.assignedUser}}
-									
+
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 										md-radio-group(ng-model="vm.selectedRole[user.assignedUser]", layout-align="center center", layout="row")
 											md-radio-button(

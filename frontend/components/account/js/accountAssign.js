@@ -45,13 +45,15 @@
 		 */	
 
 		vm.loading = true;
+		vm.modelReady = false;
 		vm.teamspaces = [];
 		vm.projects = [];
 		vm.models = {};
 		vm.selectedRole = {};
 
 		var check = $location.search();
-		if (check.account && check.project && check.model) {
+		vm.isFromUrl = check.account && check.project && check.model;
+		if (vm.isFromUrl) {
 			vm.selectedIndex = 2;
 		}
 
@@ -190,6 +192,7 @@
 			vm.selectedProject = undefined;
 			vm.models = {};
 			vm.modelReady = false;
+			vm.projectReady = false;
 
 			if (vm.teamspaces.length) {
 
@@ -209,10 +212,12 @@
 											vm.projectSelected = vm.fromURL.projectSelected;
 											delete vm.fromURL.projectSelected;
 										}
+										vm.projectReady = true;
 										resolve(vm.selectedTeamspace.assignUsers);
 									});
 								});
 							} else {
+								vm.projectReady = true;
 								resolve([]);
 							}
 						});		
