@@ -17,6 +17,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "angular": "1.5.5",
+    "angular-animate": "1.5.5",
     "angular-aria": "1.4.7",
     "angular-material": "1.1.4",
     "angular-recaptcha": "3.0.3",
@@ -27,7 +28,6 @@
     "socket.io-client": "^2.0.3"
   },
   "devDependencies": {
-    "angular-material": "^1.1.4",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
