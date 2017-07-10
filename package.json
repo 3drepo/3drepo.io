@@ -6,7 +6,6 @@
     "start": "./forever_app default",
     "stop": "forever stop 3drepo.js",
     "restart": "npm stop; npm start",
-    "postinstall": "node ./postinstall.js",
     "upgrade": "git checkout master && git pull && npm restart",
     "test": "NODE_ENV=test grunt test",
     "test-int-clean": "./backend/test/cleanup/cleanup.sh",

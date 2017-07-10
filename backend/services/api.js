@@ -77,7 +77,7 @@
 		// init the singleton db connection for modelFactory
 		app.use((req, res, next) => {
 			// init the singleton db connection
-			let DB = require("../db/db")(req[C.REQ_REPO].logger);
+			const DB = require("../db/db");
 			DB.getDB("admin")
 				.then(db => {
 					// set db to singleton modelFactory class

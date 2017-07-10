@@ -123,13 +123,13 @@ schema.statics.historyChunksStats = function(dbName){
 schema.statics.authenticate = function(logger, username, password){
 	'use strict';
 
-	let authDB = DB(logger).getAuthDB();
-
 	if(!username || !password){
 		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
-	return authDB.authenticate(username, password).then(() => {
+	return DB.getAuthDB().then(authDB => {
+		return authDB.authenticate(username, password);
+	}).then(() => {
 		return this.findByUserName(username);
 	}).then(user => {
 		if(user.customData && user.customData.inactive) {

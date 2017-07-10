@@ -46,7 +46,7 @@ module.exports.createApp = function (server, serverConfig){
 
 	io.use((socket, next) => {
 		// init the singleton db connection
-		let DB = require("../db/db")(systemLogger);
+		let DB = require("../db/db");
 		DB.getDB("admin").then( db => {
 			// set db to singleton modelFactory class
 			require("../models/factory/modelFactory").setDB(db);
