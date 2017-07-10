@@ -28,7 +28,7 @@
 			name: "home",
 			url: "/",
 			resolve: {
-				init: function(Auth, StateManager, $q)
+				init: ["Auth", "StateManager", "$q", function(Auth, StateManager, $q)
 				{
 					StateManager.state.authInitialized = false;
 
@@ -44,7 +44,7 @@
 					});
 
 					return finishedAuth.promise;
-				}
+				}]
 			}
 		});
 
@@ -72,11 +72,11 @@
 							name: childFunction,
 							url: childFunction,
 							resolve: {
-								init: function (StateManager, $location, $stateParams) {
+								init: ["StateManager", "$location", "$stateParams", function (StateManager, $location, $stateParams) {
 									$stateParams[childFunction] = true;
 
 									StateManager.setState($stateParams);
-								}
+								}]
 							}
 						});
 					})(childFunction);
@@ -101,11 +101,11 @@
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
 							reloadOnSearch : false,
 							resolve: {
-								init: function(StateManager, $location, $stateParams)
+								init: ["StateManager", "$location", "$stateParams", function(StateManager, $location, $stateParams)
 								{
 									StateManager.setState($stateParams);
 									//console.log('##state', StateManager.state);
-								}
+								}]
 							}
 						});
 					})(childState);
