@@ -71,6 +71,7 @@
     "grunt-env": "0.4.4",
     "grunt-environment": "0.4.2",
     "grunt-mocha-test": "0.13.2",
+    "grunt-contrib-jshint": "0.11.3",
     "jshint": "2.9.5",
     "minify": "2.1.8",
     "mockgoose": "6.0.3",
