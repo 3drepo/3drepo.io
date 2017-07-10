@@ -14,20 +14,11 @@ html(lang="en" ng-app="3drepo")
 		// ReCapthca
 		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async, defer)
 
-		// CSS Files
-		each val, key in cssfiles
-			link(rel='stylesheet', type='text/css', href=val)
-
 		// All CSS minified
 		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-
-		// JS Files
-		each val, key in jsfiles
-			script(type="text/javascript", src=val)
-
 
 		if !development
 			if gaTrackId
@@ -48,33 +39,17 @@ html(lang="en" ng-app="3drepo")
 			script(src="//localhost:35729/livereload.js", async, defer)
 
 
-		// Predefine the app
 		script.
-			angular.module('3drepo', ['ui.router', 'ngMaterial', 'ngAnimate', 'ngSanitize', 'vcRecaptcha'])
-			.constant('structure', !{structure})
-			.constant('parentStates', !{parentStateJSON})
-			//.constant('pluginLevels', !{pluginLevelsJSON})
-			.constant('uiState', !{uistate});
+			_PUG_VARS = {
+				structure: !{structure},
+				parentStateJSON: !{parentStateJSON},
+				uiState: !{uistate}
+			}
 
-		// Plugin JS and Angular files
-		//script(type="text/javascript", src='/public/dist/plugins.min.js')
-		script(type="text/javascript", src='/public/dist/three_d_repo.js')
-
-		// Plugin JS Files
-		//each val in pluginJS
-			script(type="text/javascript", src=val)
-
-		// Plugin Angular Files
-		//each plugin in pluginAngular
-			each file in plugin.files
-				script(type="text/javascript", src=file)
-
-		// Plugin CSS Files
-		//each css in pluginCSS
-			link(href=css, rel='stylesheet', type="text/css")
+		// Load NPM dependencies and 3D Repo JavaScript
+		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
 
 	body
-
 		style.
 			#notSupported {
 				position: fixed;
@@ -126,7 +101,7 @@ html(lang="en" ng-app="3drepo")
 	|<![endif]-->
 
 	script.
-		if(BrowserDetect && BrowserDetect.browser === 'Explorer'){
+		if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
 			document.getElementById('notSupported').style.visibility='visible';
 			if (BrowserDetect.version <= 10){
 				document.getElementById('notSupportedButton').style.display = 'none';

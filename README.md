@@ -44,9 +44,9 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 3. Check out latest release: `git checkout tags/latest`
 4. Update submodules: `git submodule update --init --progress` (You may want to used `--depth 1` to reduce transfer size)
 5. Setup the configuration file for running the 3D Repo web app as per the `Configuration` section below.
-6. Install the required dependencies: `npm install`  
-7. Install the client dependencies: `bower install`  
-8. Compile the frontend: `grunt frontend` (for file watching/live reloading, see `Running the application` below)
+6. Install the required backend dependencies: `npm install`
+7. Install the required frontend dependencies: `cd frontend && npm install`
+8. Compile the frontend: `cd frontend && gulp frontend` (for file watching/live reloading, see `Running the application` below)
 
 Database and Queue Setup 
 ------------
@@ -102,7 +102,9 @@ The script may complain that you don't have access to the ports (EACCESS), in wh
 
 Although, this depends on the type of server/application you are running.
 
-For development purposes a file watching and livereloading command is provided. You need to include `development: true` in your configuration file and then you can run `grunt watch` which will check the frontend folder for changes, rerunning the build step (as per `grunt frontend`). If you encounter an ENOSPC error, on Linux you can run `fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p` fix.
+### File Watching & Live Reloading
+
+For development purposes a file watching and livereloading command is provided. You need to include `development: true` in your configuration file and then you can run `gulp watch` from the frontend directory. This will watch the folder for changes and reload the page (or not for CSS!). If you encounter an ENOSPC error, on Linux you can run `fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p` fix.
 
 Locally running the application
 -------------------------------

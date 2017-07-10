@@ -310,7 +310,7 @@
 		 * @param {Object} params - updates with information from plugin structure
 		 */
 		function setupPug(params) {
-			let pathToStatesAndPlugins = "./frontend",
+			let pathToStatesAndPlugins = "./frontend/components",
 				statesAndPlugins;
 
 			// Get all available states and plugins in the file system
@@ -321,8 +321,8 @@
 		app.get("*", function (req, res) {
 			// Generate the list of files to load for the plugins
 			let params = {
-				"jsfiles": config.external.js,
-				"cssfiles": config.external.css,
+				// "jsfiles": config.external.js,
+				// "cssfiles": config.external.css,
 				"pluginLoaded": [],
 				"pluginPug": [],
 				"pluginJS": [],

@@ -22,7 +22,7 @@
 
 	let config = require("app-config")
 		.config;
-	const frontend_scripts = require("../common_public_files.js");
+	//const frontend_scripts = require("../common_public_files.js");
 	const sessionFactory = require("./services/session.js");
 
 	/*******************************************************************************
@@ -242,7 +242,7 @@
 	config.backgroundImage = coalesce(config.backgroundImage, "public/images/dummies/login-background.jpg");
 
 	config.default_format = coalesce(config.default_format, "html");
-	config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
+	//config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 	// Log file options
 	config.logfile = coalesce(config.logfile, {});
