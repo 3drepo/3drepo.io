@@ -616,7 +616,9 @@ function _addProjects(account, username, models){
 				
 				if(permissions.indexOf(C.PERM_PROJECT_ADMIN) !== -1){
 					permissions = C.PROJECT_PERM_LIST;
-				}		
+				} else if (account.permissions && account.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1){
+					permissions.push(C.PERM_VIEW_ISSUE_ALL_MODELS, C.PERM_VIEW_MODEL_ALL_MODELS);
+				}	
 				
 				project.permissions = permissions;
 			}
@@ -758,6 +760,10 @@ function _findModel(id, account){
 		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
 }
 
+function _makeAccountObject(name){
+	return {account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false};
+}
+
 schema.methods.listAccounts = function(){
 	'use strict';
 
@@ -780,8 +786,12 @@ schema.methods.listAccounts = function(){
 				projects: [],
 				//deprecated, use permissions instead
 				isAdmin: isTeamspaceAdmin,
-				permissions: user.toObject().customData.permissions[0].permissions
+				permissions: user.toObject().customData.permissions[0].permissions || []
 			};
+
+			if(account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
+				account.permissions = C.ACCOUNT_PERM_LIST;
+			}
 
 			accounts.push(account);
 
@@ -817,7 +827,7 @@ schema.methods.listAccounts = function(){
 			let account = accounts.find(account => account.account === project.account);
 			
 			if(!account){
-				account = {account: project.account, models: [], fedModels: [], projects: []};
+				account = _makeAccountObject(project.account);
 				accounts.push(account);
 			}
 
@@ -895,7 +905,7 @@ schema.methods.listAccounts = function(){
 			let account = accounts.find(account => account.account === model.account);
 			
 			if(!account){
-				account = {account: model.account, models: [], fedModels: [], projects: []};
+				account = _makeAccountObject(model.account);
 				accounts.push(account);
 			}
 

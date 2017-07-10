@@ -37,21 +37,22 @@ var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
 var Project = require('../project');
+const stream = require('stream');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
-function convertToErrorCode(errCode){
+function convertToErrorCode(bouncerErrorCode){
 
     var errObj;
 
-    switch (errCode) {
+    switch (bouncerErrorCode) {
         case 0:
             errObj = responseCodes.OK;
             break;
         case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
             break;
         case 2:
             errObj = responseCodes.NOT_AUTHORIZED;
@@ -59,8 +60,11 @@ function convertToErrorCode(errCode){
         case 3:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
             break;
+        case 4:
+        	errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+        	break;
         case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
 			break;
         case 6:
             errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
@@ -68,18 +72,37 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 8:
+        	errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+        	break;
         case 9:
         	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
         	break;
 		case 10:
 			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
 			break;
+		case 11:
+			errObj = responseCodes.FILE_IMPORT_GET_FILE_FAILED;
+			break;
+		case 12:
+			errObj = responseCodes.FILE_IMPORT_CRASHED;
+			break;
+		case 13:
+			errObj = responseCodes.FILE_IMPORT_FILE_READ_FAILED;
+			break;
+		case 14:
+			errObj = responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED;
+			break;
+		case 15:
+			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
+			break;
 		default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
 
     }
-    return errObj;
+    
+    return Object.assign({bouncerErrorCode}, errObj);
 }
 
 
@@ -122,7 +145,13 @@ function createAndAssignRole(modelName, account, username, data) {
 
 	return promise.then(() => {
 		
-		return ModelSetting.count({account, model}, {name: modelName, _id: { '$in' : project.models} });
+		const query =  {name: modelName};
+
+		if(data.project){
+			query._id = { '$in' : project.models};
+		}
+
+		return ModelSetting.count({account, model}, query);
 
 	}).then(count => {
 
@@ -581,14 +610,14 @@ function getUnityBundle(account, model, uid){
 	});
 }
 
-// tree main tree and urls of sub trees only and let frontend to do the remaining work :)
-function getFullTree_noSubTree(account, model, branch, rev, username, out){
+// return main tree and urls of sub trees only and let frontend to do the remaining work :)
+// returning a readstream for piping and a promise for error catching while streaming
+function getFullTree_noSubTree(account, model, branch, rev){
 	'use strict';
 
 	let getHistory;
 	let history;
-
-	out.write("{");
+	let stashRs;
 
 	if(rev && utils.isUUID(rev)){
 
@@ -603,7 +632,7 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
 
-	return getHistory.then(_history => {
+	const readStreamPromise = getHistory.then(_history => {
 
 		history = _history;
 
@@ -620,14 +649,30 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 	}).then(rs => {
 
 		//trees.mainTree = buf.toString();
+		if(!rs) {
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		stashRs = rs;
+
+		return stream.PassThrough();
+
+	});
+
+
+	let pass;
+
+	const outputingPromise = readStreamPromise.then(_pass => {
+
+		pass = _pass;
 
 		return new Promise(function(resolve, reject){
 
-			out.write('"mainTree": ');
+			pass.write('{"mainTree": ');
 
-			rs.on('data', d => out.write(d));
-			rs.on('end', ()=> resolve());
-			rs.on('error', err => reject(err));
+			stashRs.on('data', d => pass.write(d));
+			stashRs.on('end', ()=> resolve());
+			stashRs.on('error', err => reject(err));
 
 		});
 
@@ -642,16 +687,14 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 
 	}).then(refs => {
 
-		//for all refs get their tree
-		out.write(', "subTrees":[');
+		pass.write(', "subTrees":[');
 
 		return new Promise((resolve) => {
 
 			function eachRef(refIndex){
 
 				const ref = refs[refIndex];
-				//write buffer
-				//done
+
 				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
 
 				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
@@ -659,10 +702,10 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 				} 
 
 				if(refIndex > 0){
-					out.write(",");
+					pass.write(",");
 				}
 
-				out.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -679,166 +722,172 @@ function getFullTree_noSubTree(account, model, branch, rev, username, out){
 			}
 		});
 
-
 	}).then(() => {
 
-		out.write(']');
-		out.write("}");
-		out.end();
+		pass.write(']');
+		pass.write("}");
+		pass.end();
+
+	}).catch(err => {
+
+		pass && pass.end();
+		return Promise.reject(err);
 
 	});
+
+	return {readStreamPromise, outputingPromise};
 }
 
 // more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
-function getFullTree(account, model, branch, rev, username, out){
-	'use strict';
+// function getFullTree(account, model, branch, rev, username, out){
+// 	'use strict';
 
-	let getHistory;
-	let history;
-	//let trees = {};
-	out.write("{");
+// 	let getHistory;
+// 	let history;
+// 	//let trees = {};
+// 	out.write("{");
 
-	if(rev && utils.isUUID(rev)){
+// 	if(rev && utils.isUUID(rev)){
 
-		getHistory = History.findByUID({ account, model }, rev);
+// 		getHistory = History.findByUID({ account, model }, rev);
 
-	} else if (rev && !utils.isUUID(rev)) {
+// 	} else if (rev && !utils.isUUID(rev)) {
 
-		getHistory = History.findByTag({ account, model }, rev);
+// 		getHistory = History.findByTag({ account, model }, rev);
 
-	} else if (branch) {
+// 	} else if (branch) {
 
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
+// 		getHistory = History.findByBranch({ account, model }, branch);
+// 	}
 
-	return getHistory.then(_history => {
+// 	return getHistory.then(_history => {
 
-		history = _history;
+// 		history = _history;
 
-		if(!history){
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
+// 		if(!history){
+// 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+// 		}
 
-		let revId = utils.uuidToString(history._id);
-		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
+// 		let revId = utils.uuidToString(history._id);
+// 		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
-		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
+// 		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+// 		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
 
-	}).then(rs => {
+// 	}).then(rs => {
 
-		//trees.mainTree = buf.toString();
+// 		//trees.mainTree = buf.toString();
 
-		return new Promise(function(resolve, reject){
+// 		return new Promise(function(resolve, reject){
 
-			out.write('"mainTree": ');
+// 			out.write('"mainTree": ');
 
-			rs.on('data', d => out.write(d));
-			rs.on('end', ()=> resolve());
-			rs.on('error', err => reject(err));
+// 			rs.on('data', d => out.write(d));
+// 			rs.on('end', ()=> resolve());
+// 			rs.on('error', err => reject(err));
 
-		});
+// 		});
 
-	}).then(() => {
-		let filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
+// 	}).then(() => {
+// 		let filter = {
+// 			type: "ref",
+// 			_id: { $in: history.current }
+// 		};
 
-		return Ref.find({ account, model }, filter);
+// 		return Ref.find({ account, model }, filter);
 
-	}).then(refs => {
+// 	}).then(refs => {
 
-		//for all refs get their tree
-		out.write(', "subTrees":[');
+// 		//for all refs get their tree
+// 		out.write(', "subTrees":[');
 
-		return new Promise((resolve, reject) => {
+// 		return new Promise((resolve, reject) => {
 
-			function eachRef(refIndex){
+// 			function eachRef(refIndex){
 
-				const ref = refs[refIndex];
-				//write buffer
-				//done
-				let getRefId;
+// 				const ref = refs[refIndex];
+// 				//write buffer
+// 				//done
+// 				let getRefId;
 
-				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+// 				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
 
-					getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
-						return _history ? utils.uuidToString(_history._id) : null;
-					});
+// 					getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
+// 						return _history ? utils.uuidToString(_history._id) : null;
+// 					});
 
-				} else {
-					getRefId = Promise.resolve(utils.uuidToString(ref._rid));
-				}
+// 				} else {
+// 					getRefId = Promise.resolve(utils.uuidToString(ref._rid));
+// 				}
 
-				let status;
-				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
+// 				let status;
+// 				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
 
-					if(!granted){
-						status = 'NO_ACCESS';
-						return;
-					}
+// 					if(!granted){
+// 						status = 'NO_ACCESS';
+// 						return;
+// 					}
 
-					return getRefId.then(revId => {
+// 					return getRefId.then(revId => {
 
-						if(!revId){
-							status = 'NOT_FOUND';
-							return;
-						}
+// 						if(!revId){
+// 							status = 'NOT_FOUND';
+// 							return;
+// 						}
 
-						let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-						//return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
-						return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName, true);
-					});
+// 						let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
+// 						//return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
+// 						return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName, true);
+// 					});
 
-				}).then(rs => {
+// 				}).then(rs => {
 
-					return new Promise(function(_resolve, _reject){
+// 					return new Promise(function(_resolve, _reject){
 
-						if(refIndex > 0){
-							out.write(",");
-						}
+// 						if(refIndex > 0){
+// 							out.write(",");
+// 						}
 
-						let statusString = status && `"status": "${status}" ,` || '';
+// 						let statusString = status && `"status": "${status}" ,` || '';
 
-						out.write(`{ ${statusString} "_id": "${utils.uuidToString(ref._id)}", "buf": `);
+// 						out.write(`{ ${statusString} "_id": "${utils.uuidToString(ref._id)}", "buf": `);
 
-						rs.on('data', d => out.write(d));
-						rs.on('end', () => {
-							out.write('}');
-							_resolve();
-						});
-						rs.on('error', err => _reject(err));
+// 						rs.on('data', d => out.write(d));
+// 						rs.on('end', () => {
+// 							out.write('}');
+// 							_resolve();
+// 						});
+// 						rs.on('error', err => _reject(err));
 
-					});
+// 					});
 
-				}).then(() => {
-					if(refIndex+1 < refs.length){
-						eachRef(refIndex+1);
-					} else {
-						resolve();
-					}
-				}).catch(err => {
-					reject(err);
-				});
-			}
+// 				}).then(() => {
+// 					if(refIndex+1 < refs.length){
+// 						eachRef(refIndex+1);
+// 					} else {
+// 						resolve();
+// 					}
+// 				}).catch(err => {
+// 					reject(err);
+// 				});
+// 			}
 
-			if(refs.length){
-				eachRef(0);
-			} else {
-				resolve();
-			}
-		});
+// 			if(refs.length){
+// 				eachRef(0);
+// 			} else {
+// 				resolve();
+// 			}
+// 		});
 
 
-	}).then(() => {
+// 	}).then(() => {
 
-		out.write(']');
-		out.write("}");
-		out.end();
+// 		out.write(']');
+// 		out.write("}");
+// 		out.end();
 
-	});
-}
+// 	});
+// }
 
 function searchTree(account, model, branch, rev, searchString, username){
 	'use strict';
@@ -951,14 +1000,20 @@ function listSubModels(account, model, branch){
 
 	}).then(refs => {
 
-		refs.forEach(ref => {
-			subModels.push({
-				database: ref.owner,
-				model: ref.project
-			});
-		});
 
-		return Promise.resolve(subModels);
+		const proms = refs.map(ref => 
+
+			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(model => {
+				subModels.push({
+					database: ref.owner,
+					model: ref.project,
+					name: model.name
+				});
+			})
+
+		);
+
+		return Promise.all(proms).then(() => Promise.resolve(subModels));
 
 	});
 }
@@ -1354,10 +1409,9 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
-	convertToErrorCode,
 	createFederatedModel,
 	listSubModels,
-	getFullTree,
+	// getFullTree,
 	getModelProperties,
 	getUnityAssets,
 	getUnityBundle,

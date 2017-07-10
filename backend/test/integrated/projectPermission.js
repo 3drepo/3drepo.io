@@ -309,7 +309,7 @@ describe('Project Permissions::', function () {
 		.expect(200, done);
 	});
 
-	it('Users with edit_project permission cannot edit project permissions', function(done){
+	it('Users without edit_project permission cannot edit project permissions', function(done){
 		agentCanUpdateProject
 		.put(`/${teamspace}/projects/project2`)
 		.send({ permissions: []})

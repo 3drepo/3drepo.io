@@ -1,0 +1,63 @@
+form
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex)
+			label Username
+			input(type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true")
+		md-input-container(flex)
+			label Password
+			input(type='password', ng-model='vm.newUser.password', required ng-keypress="vm.register($event)")
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex)
+			label First name
+			input(type="text", ng-model="vm.newUser.firstName", required)
+		md-input-container(flex)
+			label Last name
+			input(type="text", ng-model="vm.newUser.lastName", required)
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex)
+			label Email
+			input(type='email', ng-model='vm.newUser.email', required, ng-keypress="vm.register($event)")
+		md-input-container(flex)
+			label Phone number
+			input(type="text", ng-model="vm.newUser.phoneNo")
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex)
+			label Company
+			input(type="text", ng-model="vm.newUser.company", required)
+		md-input-container(flex)
+			label Job title
+			md-select(ng-model="vm.newUser.jobTitle", required)
+				md-option(ng-repeat="jobTitle in vm.jobTitles", value="{{jobTitle}}") {{jobTitle}}
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex ng-if="vm.newUser.jobTitle!='Other'")
+		md-input-container(flex)
+			label Country
+			md-select#country-select(ng-model="vm.newUser.country", required)
+				md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
+		md-input-container(flex ng-if="vm.newUser.jobTitle=='Other'")
+			input(type='text', ng-model='vm.newUser.otherJobTitle', placeholder='Please specify' ng-required="vm.newUser.jobTitle=='Other'")
+
+	div(layout="row", layout-xs="column")
+		md-input-container(flex)
+			#tc(layout="row", layout-align="start start", flex, ng-if="vm.showLegalText")
+				md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
+				div(layout="row", layout-align="start center")
+					p(ng-bind-html="vm.legalText")
+		md-input-container(flex)
+			#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
+	
+	h4.registerError {{vm.registerErrorMessage}}
+
+	div(layout="row", layout-xs="column", layout-align="start center")
+		md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") 
+			span(ng-if="!vm.registering") {{vm.buttonLabel}} 
+			md-progress-circular(ng-if="vm.registering" md-mode="indeterminate", md-diameter="20")
+
+	div.bottom-links
+		a.registerLinks(target="_blank", href="http://3drepo.org/pricing/") Pricing
+		a.registerLinks(href="/") Log in
