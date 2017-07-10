@@ -55,9 +55,9 @@
 	}
 
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService", "StateManager"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService, StateManager) {
 
 		var vm = this,
 			infoTimeout = 4000,
@@ -80,8 +80,8 @@
 				icon: "cloud_upload", 
 				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
 			},
-			team: {
-				label: "Team", 
+			permissions: {
+				label: "Permissions", 
 				icon: "group", 
 				// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
 				hidden: !isUserAccount
@@ -111,7 +111,6 @@
 			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
 			color: "#F44336"
 		};
-
 
 		watchModelStatus();
 
@@ -195,7 +194,7 @@
 				case "modelsetting":
 					$location.search("proj", vm.model.name);
 					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
+					vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
 					break;
 
 				case "upload":
@@ -220,8 +219,8 @@
 
 					break;
 
-				case "team":
-					setupEditTeam(event);
+				case "permissions":
+					goToPermissions(event, vm.account, vm.project, vm.model);
 					break;
 
 				case "delete":
@@ -243,7 +242,7 @@
 		 * Go to the billing page to add more licenses
 		 */
 		vm.setupAddLicenses = function () {
-			vm.onShowPage({page: "billing", callingPage: "teamspaces"});
+			vm.onShowPage({page: "billing", callingPage: "permissionsspaces"});
 			UtilsService.closeDialog();
 		};
 
@@ -421,13 +420,19 @@
 		}
 
 		/**
-		 * Set up team of model
+		 * Set up permissions of model
 		 *
 		 * @param {Object} event
 		 */
-		function setupEditTeam (event) {
-			vm.item = vm.model;
-			UtilsService.showDialog("teamDialog.html", $scope, event, true, null, false, dialogCloseToId);
+		function goToPermissions(event, account, project, model) {
+			//vm.account, vm.project, vm.model
+			console.log("VALUES", account, project.name, model.model);
+			$location.search('account', account);
+			$location.search('project', project.name);
+			$location.search('model', model.model);
+			$location.search('page', "assign");
+			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
+
 		}
 	}
 }());

@@ -29,7 +29,7 @@ account-dir .dataContainer {
 }
 
 account-dir #account #accountItem {
-  width: 44%;
+  width: 47%;
 }
 
 account-dir .userContent .cardInfo {
@@ -584,6 +584,7 @@ account-modelsetting #accountTeamSubHeader {
 #federationDialog .modelDialogError{
   color: #F44336;
 }
+
 /** Account Federations ***********************************************************************************************/
 account-federations .userContent {
   padding: 0 !important;
@@ -652,4 +653,94 @@ account-teamspaces .loadingText md-progress-circular {
 .userContent {
   min-height: 200px;
 }
+
+
+/** Account Assign ***********************************************************************************************/
+account-assign .assignTabHolder {
+  padding: 20px;
+}
+
+account-assign .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+account-assign .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-assign .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+}
+
+account-assign .scrollable {
+  overflow-x: auto;
+}
+
+account-assign thead { 
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+account-assign .md-label {
+  line-height: 4;
+}
+
+account-assign h5 {
+  margin: 0;
+}
+
+account-assign md-checkbox span { 
+  font-size: 12px;
+}
+
+account-assign td, account-assign th {
+  min-width: 100px;
+  width: 100px;
+  text-align: center;
+}
+
+account-assign .userColumn {
+  /*width: 130px;*/
+}
+
+account-assign .rowSelects {
+    padding-right: 20px;
+}
+
+account-assign md-checkbox .md-container {
+  margin-left: 25%;
+}
+
+account-assign .radioButtons {
+  margin-left: 8px;
+}
+
+account-assign md-radio-button > div {
+  margin-left: 50%;
+}
+
+account-assign .fixedWidth {
+  /*width: 50px;*/
+}
+
+account-assign table td, account-assign table th {
+    width: 120px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+account-assign .checkboxes p {
+  margin-top: 0px;
+}
+
+account-assign .radiobuttons p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 

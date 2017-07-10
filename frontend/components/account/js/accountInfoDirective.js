@@ -52,7 +52,8 @@
 			teamspaces: {label: "Teamspaces"},
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
-			licenses: {label: "Licenses"}
+			licenses: {label: "Licenses"},
+			assign: {label: "Assign Permissons" }
 		};
 
 		/**
