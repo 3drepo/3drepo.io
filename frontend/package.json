@@ -39,6 +39,7 @@
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
+    "merge-stream": "^1.0.1",
     "webpack": "^3.0.0",
     "webpack-stream": "^3.2.0"
   }
