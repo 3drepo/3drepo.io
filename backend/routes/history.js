@@ -36,7 +36,7 @@ function listRevisions(req, res, next){
 	let model = req.params.model;
 
 
-	History.find({account, model}, {}, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}, {sort: {timestamp: -1}}).then(histories => {
+	History.listByBranch({account, model}, null, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
 		
 		histories = History.clean(histories);
 
