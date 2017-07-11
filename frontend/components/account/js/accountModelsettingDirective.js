@@ -27,6 +27,7 @@
 			templateUrl: 'accountModelsetting.html',
 			scope: {
 				account: "=",
+				model: "=",
 				showPage: "&",
 				subscriptions: "=",
 				data: "="
@@ -40,26 +41,72 @@
 	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
 
 	function AccountModelsettingCtrl($scope, $location, UtilsService, StateManager) {
-		var vm = this,
-			promise;
+		
+		var vm = this;
 
+		/**
+		 * Init
+		 */
+		vm.$onInit = function() {
+			vm.units = server_config.units
+			vm.mapTile = {};
+
+			// TODO: We should use statemanager eventually
+			vm.urlData = $location.search();
+			vm.modelId = vm.urlData["modelId"];
+			vm.modelName = vm.urlData["modelName"];
+			vm.targetAcct = vm.urlData["targetAcct"];
+
+
+			UtilsService.doGet(vm.account + "/" + vm.modelId + ".json")
+			.then(function (response) {
+
+				if (response.status === 200 && response.data && response.data.properties) {
+					console.log("DATE: ", response.data)
+					var props = response.data.properties;
+
+					if(props.mapTile) {
+						props.mapTile.lat && (vm.mapTile.lat = props.mapTile.lat);
+						props.mapTile.lon && (vm.mapTile.lon = props.mapTile.lon);
+						props.mapTile.y && (vm.mapTile.y = props.mapTile.y);
+					}
+					if (response.data.type) {
+						vm.modelType = response.data.type;
+					}
+					if (props.topicTypes) {
+						vm.topicTypes = convertTopicTypesToString(props.topicTypes)
+					}
+					if (props.code) {
+						vm.code = props.code
+					} 
+					if (props.unit) {
+						vm.unit = props.unit
+						vm.oldUnit = vm.unit;	
+					}
+					
+		
+				} else {
+					vm.message = response.data.message;
+				}
+
+
+			});
+
+		}
+
+	
 		/**
 		 * Go back to the teamspaces page
 		 */
 
 		vm.goBack = function () {
 		
-			// $location.search("model", null);
-			// $location.search("targetAcct", null);
+			$location.search("modelId", null);
+			$location.search("modelName", null);
+			$location.search("targetAcct", null);
 
 			vm.showPage({page: "teamspaces", data: vm.data});
 		};
-
-		vm.units = server_config.units
-
-		vm.mapTile = {};
-		vm.modelName = $location.search().proj;
-		vm.targetAcct = $location.search().targetAcct;
 
 
 		function convertTopicTypesToString(topicTypes){
@@ -73,33 +120,6 @@
 			return result.join('\n');
 		}
 
-
-		UtilsService.doGet(vm.targetAcct + "/" + vm.modelName + ".json")
-		.then(function (response) {
-
-			if (response.status === 200 && response.data.properties) {
-
-				if(response.data.properties.mapTile){
-
-					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
-					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
-					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
-				}
-
-				vm.modelType = response.data.type;
-
-				response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
-				response.data.properties.code && (vm.code = response.data.properties.code);
-				response.data.properties.unit && (vm.unit = response.data.properties.unit);
-				vm.oldUnit = vm.unit;
-
-			} else {
-				vm.message = response.data.message;
-			}
-
-
-		});
-
 		vm.save = function(){
 
 			var data = {
@@ -109,17 +129,17 @@
 				topicTypes: vm.topicTypes.replace(/\r/g, '').split('\n')
 			};
 
-			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelName +  "/settings")
+			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
 			.then(function(response){
 				if(response.status === 200){
 					vm.message = 'Saved';
-					response.data.properties.topicTypes && (vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes));
+					if (response.data && response.data.properties && response.data.properties.topicTypes) {
+						vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes);
+					}
 					vm.oldUnit = vm.unit;
 				} else {
 					vm.message = response.data.message;
 				}
-
-
 			})
 		}
 	}

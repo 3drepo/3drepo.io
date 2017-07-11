@@ -1,14 +1,14 @@
 div(layout="row", layout-align="start center", flex)
 	md-list-item.model-indent(
-	flex, 
-	ng-click="vm.goToModel()",
-	layout="row",
-	layout-align="start center",
-	layout-fill,
-	ng-disabled="vm.model.uploading")
-		md-button.md-icon-button(aria-label="Dashboard")
-			md-icon.angular-material-icons dashboard
-		p.modelName.md-list-item-text(flex="100") {{vm.model.name}}
+		flex, 
+		ng-click="vm.goToModel()",
+		layout="row",
+		layout-align="start center",
+		layout-fill,
+		ng-disabled="vm.model.uploading")
+			md-button.md-icon-button(aria-label="Dashboard")
+				md-icon.angular-material-icons dashboard
+			p.modelName.md-list-item-text(flex="100") {{vm.model.name}}
 
 	.modelRight(layout="row", layout-align="start center")
 		.modelUploadInfo(layout="row", layout-align="start center")

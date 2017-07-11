@@ -67,8 +67,6 @@
 		vm.$onInit = function() {
 
 			vm.modelToUpload = null;
-
-			console.log("MODEL: ", vm.model)
 			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
@@ -198,7 +196,9 @@
 		vm.doModelOption = function (event, option) {
 			switch (option) {
 				case "modelsetting":
-					$location.search("proj", vm.model.name);
+
+					$location.search("modelName", vm.model.name);
+					$location.search("modelId", vm.model.model);
 					$location.search("targetAcct", vm.account);
 					vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
 					break;
