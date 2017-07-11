@@ -17,12 +17,10 @@ let DB = require('../mock/db');
 const C = require('../../../constants');
 
 let User = proxyquire('../../../models/user', {
-	'../db/db': function() { 
-		return { 
-			getAuthDB : function(){ 
-				return  { authenticate: function(u, p){ return Promise.resolve()}  };
-			} 
-		};
+	'../db/db': { 
+		getAuthDB : function(){ 
+			return  Promise.resolve({ authenticate: function(u, p){ return Promise.resolve()}  });
+		} 
 	}, 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,

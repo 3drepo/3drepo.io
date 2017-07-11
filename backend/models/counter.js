@@ -26,25 +26,19 @@ var schema = mongoose.Schema({
 //inc counter and return the number atomically
 schema.statics.findAndIncInvoiceNumber = function(){
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
-	return new Promise((resolve, reject) => {
 
-		DB({}).dbCallback("admin", function(err, db) {
-
-			db.db('admin')
+	return DB.getDB('admin')
+	.then(db => {
+		return db.db('admin')
 			.collection('counters')
 			.findOneAndUpdate(
 				{ type: 'invoice' },
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
-			).then(doc => {
-				resolve('SO-' + doc.value.count);
-			}).catch(err => {
-				reject(err);
-			});
-		});
+			);
+	})
+	.then(doc => 'SO-' + doc.value.count);
 
-
-	});
 };
 
 
@@ -54,25 +48,18 @@ schema.statics.findAndIncRefundNumber = function(){
 
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
-	return new Promise((resolve, reject) => {
-
-		DB({}).dbCallback("admin", function(err, db) {
-
-			db.db('admin')
+	return DB.getDB('admin')
+	.then(db => {
+		return db.db('admin')
 			.collection('counters')
 			.findOneAndUpdate(
 				{ type: 'refund' },
 				{ '$inc': {'count': 1 }},
 				{ upsert : true, returnOriginal: false }
-			).then(doc => {
-				resolve('CN-' + doc.value.count);
-			}).catch(err => {
-				reject(err);
-			});
-		});
+			);
+	})
+	.then(doc => 'CN-' + doc.value.count);
 
-
-	});
 };
 
 var Counter = ModelFactory.createClass(

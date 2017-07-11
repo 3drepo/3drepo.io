@@ -30,6 +30,7 @@
 	const Invoice = require("./invoice.js");
 	const responseCodes = require("../response_codes.js");
 	const Mailer = require('../mailer/mailer');
+	const systemLogger = require("../logger.js").systemLogger;
 
 	let getSubscription = Subscription.getSubscription;
 

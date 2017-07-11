@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 
 		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
-		.directive('tdrFocus', function($timeout) {
+		.directive('tdrFocus', ["$timeout", function($timeout) {
 			return {
 				scope: { trigger: '@tdrFocus' },
 				link: function(scope, element) {
@@ -34,5 +34,5 @@
 					});
 				}
 			};
-		});
+		}]);
 }());
