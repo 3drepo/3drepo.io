@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("ModelService", ModelService);
 
-	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "Auth"];
+	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "AuthService"];
 
-	function ModelService($http, $q, StateManager, serverConfig, HttpService, Auth) {
+	function ModelService($http, $q, StateManager, serverConfig, HttpService, AuthService) {
 		var state = StateManager.state;
 
 		var getModelInfo = function (account, model) {

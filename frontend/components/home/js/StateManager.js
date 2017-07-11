@@ -28,7 +28,7 @@
 			name: "home",
 			url: "/",
 			resolve: {
-				init: ["Auth", "StateManager", "$q", function(Auth, StateManager, $q)
+				init: ["AuthService", "StateManager", "$q", function(AuthService, StateManager, $q)
 				{
 					StateManager.state.authInitialized = false;
 
@@ -36,9 +36,8 @@
 
 					StateManager.state.changing = true;
 
-					Auth.init().then(function (loggedIn) {
+					AuthService.init().then(function (loggedIn) {
 						StateManager.state.authInitialized = true;
-						StateManager.state.loggedIn = loggedIn;
 
 						finishedAuth.resolve();
 					});
@@ -118,8 +117,8 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", "AnalyticService",
-		function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout, AnalyticService) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "AuthService", "$timeout", "AnalyticService",
+		function($location, $rootScope, $state, uiState, StateManager, AuthService, $timeout, AnalyticService) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
@@ -174,7 +173,7 @@
 			}
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", function($q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -348,9 +347,9 @@
 				// If we are not trying to access a function
 				// and yet there is no account set. Then
 				// we need to go back to the account page if possible.
-				if ((functionList.length === 0) && self.state.loggedIn && !self.state.account)
+				if ((functionList.length === 0) && AuthService.loggedIn && !self.state.account)
 				{
-					self.setStateVar("account", Auth.username);
+					self.setStateVar("account", AuthService.username);
 					self.updateState();
 				} else {
 					self.updateState(true);

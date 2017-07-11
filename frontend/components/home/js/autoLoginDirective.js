@@ -34,16 +34,16 @@
 		};	
 	}
 	
-	AutoLoginCtrl.$inject = ["Auth"];
+	AutoLoginCtrl.$inject = ["AuthService"];
 	
-	function AutoLoginCtrl(Auth) {
+	function AutoLoginCtrl(AuthService) {
 		var al = this;
 		
 		al.getTemplateUrl = function() {
 			return al.templateUrl;
 		};
 		
-		Auth.login(al.account, al.password);
+		AuthService.login(al.account, al.password);
 	}
 
 }());

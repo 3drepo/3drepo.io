@@ -47,9 +47,9 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "Auth", "AnalyticService", "AccountDataService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountDataService"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, Auth, AnalyticService, AccountDataService) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountDataService) {
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
@@ -75,9 +75,9 @@
 		vm.showMenu = function(model, account){
 			
 			var isUserAccount = account.account === vm.account.account;
-			return Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
-				   Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
-				   Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
+			return AuthService.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
+				   AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
+				   AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
 				   isUserAccount;
 		}
 
@@ -130,13 +130,13 @@
 				edit: {
 					label: "Edit",
 					 icon: "edit", 
-					 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
+					 hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
 				},
 				delete: {
 					label: "Delete", 
 					icon: "delete", 
 					color: "#F44336", 
-					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
+					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
 				},
 				permissions: {
 					label: "Permissions", 
@@ -146,7 +146,7 @@
 				modelsetting: {
 					label: "Settings",
 					icon: "settings", 
-					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
+					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
 				}
 			};
 			
@@ -326,7 +326,7 @@
 		 * @param {Object} index
 		 */
 		function goToPermissions (event, account, project, model) {
-			console.log("goToPermissions", account, project, model)
+
 			// Account is an object here
 			$location.search('account', account.account);
 			$location.search('project', project.name);

@@ -15,5 +15,5 @@ div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
 				account='vm.state.account'
 				state='vm.state'
 				query='vm.query'
-				ng-if="vm.state.loggedIn"
+				ng-if="vm.AuthService.loggedIn"
 				keys-down="vm.keysDown")

@@ -34,9 +34,9 @@
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["Auth", "EventService"];
+	AccountMenuCtrl.$inject = ["AuthService", "EventService"];
 
-	function AccountMenuCtrl (Auth, EventService) {
+	function AccountMenuCtrl (AuthService, EventService) {
 		var vm = this,
 			promise;
 
@@ -61,7 +61,7 @@
 		 * Logout
 		 */
 		vm.logout = function () {
-			Auth.logout();
+			AuthService.logout();
 			UnityUtil.reset();
 		};
 
