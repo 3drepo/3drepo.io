@@ -57,6 +57,32 @@
 			if (vm.isFromUrl) {
 				vm.selectedIndex = 2;
 			}
+			vm.getTeamspaces();
+
+			vm.teamspacePermissions = {
+
+				teamspace_admin : "Admin",
+				assign_licence	: "Assign Licence",
+				revoke_licence	: "Assign Licence",
+				create_project	: "Create Project",
+				create_job	: "Create Job",
+				delete_job	: "Delete Job",
+				assign_job : "Assign Job"
+
+			};
+
+			vm.projectPermissions = {
+
+				create_model : "Create Model",
+				create_federation : "Create Federation",
+				admin_project : "Admin Project",
+				edit_project :  "Edit Project",
+				delete_project : "Delete Federation"
+
+			};
+
+			vm.modelRoles = [];
+			
 		}
 
 		var getStateFromParams = function() {
@@ -72,10 +98,13 @@
 		}
 
 		// GET TEAMSPACES
-		var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
-		$http.get(url)
-		.then(
-			function(response) {
+		vm.getTeamspaces = function() {
+			
+			var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
+			$http.get(url)
+			.then(function(response) {
+				console.log(response);
+				
 				vm.teamspaces = response.data.accounts.filter(function(teamspace){
 					return teamspace.isAdmin === true;
 				});
@@ -84,11 +113,11 @@
 				getStateFromParams();
 				vm.loading = false;
 
-			},
-			function (err) {
+			})
+			.catch(function (err) {
 				console.trace(err);
-			}
-		);
+			});
+		}
 
 		// GET PROJECTS
 
@@ -105,31 +134,7 @@
 							}
 						);
 		}
-		
-
-		vm.teamspacePermissions = {
-
-			teamspace_admin : "Admin",
-			assign_licence	: "Assign Licence",
-			revoke_licence	: "Assign Licence",
-			create_project	: "Create Project",
-			create_job	: "Create Job",
-			delete_job	: "Delete Job",
-			assign_job : "Assign Job"
-
-		};
-
-		vm.projectPermissions = {
-
-			create_model : "Create Model",
-			create_federation : "Create Federation",
-			admin_project : "Admin Project",
-			edit_project :  "Edit Project",
-			delete_project : "Delete Federation"
-
-		};
-
-		vm.modelRoles = [];
+	
 
 		vm.postPermissionChange = function(user, permission, addOrRemove) {
 			

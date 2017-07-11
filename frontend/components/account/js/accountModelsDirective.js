@@ -211,7 +211,6 @@
 		}
 
 		vm.getIndividualModels = function(models) {
-			console.log("getIndividualModels...", models)
 			return AccountDataService.getIndividualModels(models); 
 		}
 
