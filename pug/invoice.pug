@@ -9,16 +9,8 @@ html(lang="en" ng-app="3drepo")
 
 		title 3D Repo
 
-		// CSS Files
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/font-awesome.min.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/ui.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/angular-material.min.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/three-d-repo.css')
-
-
-
 		// All CSS minified
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/dist/three_d_repo.min.css')
+		link(rel='stylesheet', type='text/css', href=baseURL + '/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
@@ -26,13 +18,6 @@ html(lang="en" ng-app="3drepo")
 	body
 		billing.ng-scope.ng-isolate-scope(username='vm.query.username', token='vm.query.token', query='vm.query')
 			div(layout-fill, layout="column", class="layout-fill layout-column")
-				// md-toolbar.noPrint
-				// 	.md-toolbar-tools
-				// 		span(flex)
-				// 		img(src="/public/images/3drepo-logo-white.png")
-				// 		span(flex)
-				// 		md-button.md-icon-button(aria-label="Home", ng-click="home()")
-				// 			md-icon.angular-material-icons home
 
 				md-content(ng-if="showBilling", layout="row", flex="none", layout-align="center", class="ng-scope _md layout-align-center-stretch layout-row flex-none")
 					div(layout="column", class="layout-column", style="width:90%")
@@ -52,7 +37,7 @@ html(lang="en" ng-app="3drepo")
 							span.flex(flex)
 
 							div(layout="column", layout-align="end end", class="layout-align-end-end layout-column")
-								img#billingInvoiceLogo(src="#{baseURL}/public/images/logo.png" style="height:57.5px")
+								img#billingInvoiceLogo(src=baseURL+"/public/images/logo.png" style="height:57.5px")
 								p.md-display-1.ng-binding 
 														| #{billing.pending ? 'Order confirmation': 'Invoice'}
 
