@@ -23,6 +23,8 @@
 			"issuesScreenShot",
 			{
 				controller: IssuesScreenShotCtrl,
+				controllerAs: "vm",
+           		bindToController: true,
 				templateUrl: "issueScreenShot.html",
 				bindings: {
 					sendEvent: "&",
@@ -36,7 +38,7 @@
 	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService"];
 
 	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
-		var self = this,
+		var vm = this,
 			currentActionIndex = null,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
@@ -57,8 +59,8 @@
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
-		if (typeof this.screenShot !== "undefined") {
-			self.screenShotUse = this.screenShot;
+		if (typeof vm.screenShot !== "undefined") {
+			vm.screenShotUse = vm.screenShot;
 		}
 		else {
 			$timeout(function () {
@@ -75,20 +77,20 @@
 				setupScribble();
 
 				// Pen indicator
-				self.showPenIndicator = false;
+				vm.showPenIndicator = false;
 				penIndicator = angular.element($element[0].querySelector("#issueScreenShotPenIndicator"));
 				penIndicator.css("font-size", penIndicatorSize + "px");
 
-				self.actionsPointerEvents = "auto";
+				vm.actionsPointerEvents = "auto";
 
 				// Get the screen shot
-				self.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+				vm.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 				screenShotPromise.promise.then(function (screenShot) {
-					self.screenShotUse = screenShot;
+					vm.screenShotUse = screenShot;
 				});
 
 				// Set up action buttons
-				self.actions = [
+				vm.actions = [
 					{icon: "border_color", action: "draw", label: "Draw", color: highlightBackground},
 					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
 				];
@@ -96,9 +98,9 @@
 			});
 		}
 
-		this.closeDialog = function () {
+		vm.closeDialog = function () {
 			UtilsService.closeDialog();
-			this.close();
+			vm.close();
 		};
 
 		/**
@@ -119,7 +121,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-				self.actionsPointerEvents = "none";
+				vm.actionsPointerEvents = "none";
 			}, false);
 
 			canvas.addEventListener('mouseup', function (evt) {
@@ -135,7 +137,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				self.actionsPointerEvents = "auto";
+				vm.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mouseout', function (evt) {
@@ -151,7 +153,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				self.actionsPointerEvents = "auto";
+				vm.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mousemove', function (evt) {
@@ -159,9 +161,9 @@
 				mouse_drag_x = evt.layerX;
 				mouse_drag_y = evt.layerY;
 
-				if (!mouse_dragging && !self.showPenIndicator) {
+				if (!mouse_dragging && !vm.showPenIndicator) {
 					$timeout(function () {
-						self.showPenIndicator = true;
+						vm.showPenIndicator = true;
 					});
 				}
 				else {
@@ -232,22 +234,22 @@
 		}
 
 
-		this.doAction = function (index) {
+		vm.doAction = function (index) {
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
+				vm.actions[currentActionIndex].color = highlightBackground;
 			}
 			else if (currentActionIndex === index) {
-				this.actions[currentActionIndex].color = "";
+				vm.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
 			}
 			else {
-				this.actions[currentActionIndex].color = "";
+				vm.actions[currentActionIndex].color = "";
 				currentActionIndex = index;
-				this.actions[currentActionIndex].color = highlightBackground;
+				vm.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			switch (this.actions[currentActionIndex].action) {
+			switch (vm.actions[currentActionIndex].action) {
 				case "draw":
 					setupScribble();
 					break;
@@ -258,7 +260,7 @@
 			}
 		};
 
-		this.save = function () {
+		vm.save = function () {
 			var	screenShotCanvas = document.getElementById("screenShotCanvas"),
 				screenShotCanvasContext = screenShotCanvas.getContext("2d"),
 				screenShotImage = new Image(),
@@ -266,7 +268,7 @@
 
 			screenShotCanvas.width = scribbleCanvas.width;
 			screenShotCanvas.height = scribbleCanvas.height;
-			screenShotImage.src = this.screenShotUse;
+			screenShotImage.src = vm.screenShotUse;
 			screenShotCanvasContext.drawImage(screenShotImage, 0, 0, screenShotCanvas.width, screenShotCanvas.height);
 			screenShotCanvasContext.drawImage(scribbleCanvas, 0, 0);
 
@@ -274,9 +276,9 @@
 			// Remove base64 header text
 			//screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
 			//console.log(screenShot);
-			this.screenShotSave({screenShot: screenShot});
+			vm.screenShotSave({screenShot: screenShot});
 
-			this.closeDialog();
+			vm.closeDialog();
 		};
 
 		/**

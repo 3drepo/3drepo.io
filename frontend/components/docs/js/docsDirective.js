@@ -50,8 +50,10 @@
 		/*
 		 * Init
 		 */
-		vm.showDocsGetProgress = false;
-		vm.onContentHeightRequest({height: 80});
+		vm.$onInit = function() {
+			vm.showDocsGetProgress = false;
+			vm.onContentHeightRequest({height: 80});
+		}
 
 		/*
 		 * Set up event watching

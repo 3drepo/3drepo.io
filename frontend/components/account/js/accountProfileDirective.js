@@ -46,11 +46,13 @@
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.showChangePassword = false;
-		vm.firstNameNew = vm.firstName;
-		vm.lastNameNew = vm.lastName;
-		vm.emailNew = vm.email;
+		vm.$onInit = function() {
+			vm.showInfo = true;
+			vm.showChangePassword = false;
+			vm.firstNameNew = vm.firstName;
+			vm.lastNameNew = vm.lastName;
+			vm.emailNew = vm.email;
+		}
 
 		/**
 		 * Update the user info

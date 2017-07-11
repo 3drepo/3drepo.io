@@ -56,20 +56,20 @@
 								div(ng-if="vm.shouldShow(project, 'models')")
 									div(ng-repeat="model in vm.getIndividualModels(project.models)"
 										ng-if="model.name")
-										
+								
 										account-model(
-										account="account.name"
-										is-account-admin="account.isAdmin"
-										project="project"
-										model="model"
-										user-account="vm.account"
-										on-upload-file="vm.uploadFile(model)"
-										uploaded-file="vm.uploadedFile"
-										model-to-upload="vm.modelToUpload"
-										on-show-page="vm.showPage(page, callingPage)"
-										on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
-										quota="vm.quota"
-										subscriptions="vm.subscriptions")
+											account="account.name"
+											is-account-admin="account.isAdmin"
+											project="project"
+											model="model"
+											user-account="vm.account"
+											on-upload-file="vm.uploadFile(model)"
+											uploaded-file="vm.uploadedFile"
+											model-to-upload="vm.modelToUpload"
+											on-show-page="vm.showPage(page, callingPage)"
+											on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
+											quota="vm.quota"
+											subscriptions="vm.subscriptions")
 
 									p.no-federations(ng-if="vm.getIndividualModels(project.models).length == 0") No models created
 

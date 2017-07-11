@@ -1,38 +1,22 @@
-#issuesListContainer(ng-switch="$ctrl.toShow", tabindex="0", tdr-focus="true", ng-mousemove="$ctrl.initSetFocus()")
+#issuesListContainer(ng-switch="vm.toShow", tabindex="0", tdr-focus="true", ng-mousemove="vm.initSetFocus()")
 	// List
 	div(ng-switch-when="list")
 		.issueListItem(
-		ng-repeat="issue in $ctrl.issuesToShow"
+		ng-repeat="issue in vm.issuesToShow"
 		layout="column"
-		ng-click="$ctrl.select($event, issue)"
-		ng-mouseenter="$ctrl.setFocus(issue, $index)"
-		ng-mouseleave="$ctrl.removeFocus($event, issue)"
+		ng-click="vm.select($event, issue)"
+		ng-mouseenter="vm.setFocus(issue, $index)"
+		ng-mouseleave="vm.removeFocus($event, issue)"
 		ng-class="{issueListItemFocus: issue.focus}")
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
-			//#issuesListItemContent(layout='column')
-				#issueRoleIndicator(flex)
-				div(layout='row')
-					.issueListItemThumbnail(layout="column", layout-align="center center", ng-if="issue.thumbnail")
-						img(ng-src="{{issue.thumbnailPath}}")
-					div(flex, layout="column")
-						label#issuesListItemTitle(flex="none") {{issue.title}}
-						#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
-							div(flex="15")
-								md-icon.angular-material-icons#issueCompStatus(
-								style="color:{{$ctrl.IssuesService.getStatusIcon(issue).colour}}") {{$ctrl.IssuesService.getStatusIcon(issue).icon}}
-							label(flex) {{issue.owner}}
-							div(layout="row", layout-align="end", flex="30")
-								label {{issue.timeStamp}}
-						#issuesListItemDescription
-							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
-			issues-list-item(data="issue", user-job="$ctrl.userJob")
+			issues-list-item(data="issue", user-job="vm.userJob")
 
 			md-divider
 
-			#issuesListItemEnter(ng-if="issue.selected", ng-click="$ctrl.editIssue(issue)", layout="column", layout-align="center center")
+			#issuesListItemEnter(ng-if="issue.selected", ng-click="vm.editIssue(issue)", layout="column", layout-align="center center")
 				md-icon.angular-material-icons arrow_forward
 
 	// Info
 	.cardInfo(ng-switch-when="info")
-		p {{$ctrl.info}}
+		p {{vm.info}}

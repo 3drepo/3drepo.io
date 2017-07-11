@@ -56,28 +56,32 @@
 		/*
 		 * Init
 		 */
-		vm.saveDisabled = true;
-		vm.canAdd = true;
-		vm.selectedGroup = null;
-		vm.editingGroup = false;
-		vm.editingText = "Start";
-		vm.colourPickerColour = [255, 255, 255];
-		vm.toShow = "showLoading";
-		vm.loadingInfo = "Loading groups";
-		setContentHeight();
-		GroupsService.init(vm.account, vm.model);
-
-		promise = GroupsService.getGroups();
-		promise.then(function (data) {
-			vm.groups = data.data;
-			if (vm.groups.length > 0) {
-				vm.toShow = "showGroups";
-			}
-			else {
-				vm.toShow = "showInfo";
-			}
+		vm.$onInit = function() {
+			
+			vm.saveDisabled = true;
+			vm.canAdd = true;
+			vm.selectedGroup = null;
+			vm.editingGroup = false;
+			vm.editingText = "Start";
+			vm.colourPickerColour = [255, 255, 255];
+			vm.toShow = "showLoading";
+			vm.loadingInfo = "Loading groups";
 			setContentHeight();
-		});
+			GroupsService.init(vm.account, vm.model);
+
+			promise = GroupsService.getGroups();
+			promise.then(function (data) {
+				vm.groups = data.data;
+				if (vm.groups.length > 0) {
+					vm.toShow = "showGroups";
+				}
+				else {
+					vm.toShow = "showInfo";
+				}
+				setContentHeight();
+			});
+
+		}
 
 		/*
 		 * Handle showing of adding a new issue

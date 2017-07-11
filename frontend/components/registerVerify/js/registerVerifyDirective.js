@@ -43,25 +43,28 @@
         /*
          * Init
          */
-        vm.verified = false;
-        vm.showPaymentWait = false;
-        vm.databaseName = username;
+        vm.$onInit = function() {
 
-        vm.verifyErrorMessage = "Verifying. Please wait...";
-        promise = UtilsService.doPost({token: token}, username + "/verify");
-        promise.then(function (response) {
-            if (response.status === 200) {
-                vm.verified = true;
-                vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
-            }
-            else if (response.data.code === 'ALREADY_VERIFIED') {
-                vm.verified = true;
-                vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
-            }
-            else {
-                vm.verifyErrorMessage = "Error with verification";
-            }
-        });
+            vm.verified = false;
+            vm.showPaymentWait = false;
+            vm.databaseName = username;
+
+            vm.verifyErrorMessage = "Verifying. Please wait...";
+            promise = UtilsService.doPost({token: token}, username + "/verify");
+            promise.then(function (response) {
+                if (response.status === 200) {
+                    vm.verified = true;
+                    vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
+                }
+                else if (response.data.code === 'ALREADY_VERIFIED') {
+                    vm.verified = true;
+                    vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+                }
+                else {
+                    vm.verifyErrorMessage = "Error with verification";
+                }
+            });
+        }
 
         vm.goToLoginPage = function () {
 			EventService.send(EventService.EVENT.GO_HOME);

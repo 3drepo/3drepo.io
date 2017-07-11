@@ -58,12 +58,16 @@
 		/*
 		 * Init
 		 */
-        vm.showHelp = false;
-		vm.showFilter = false;
-		vm.visibleStatus = false;
-		vm.showClearFilterButton = false;
-		vm.showAdd = false;
-		vm.hideMenuButton = false;
+		vm.$onInit = function() {
+
+			vm.showHelp = false;
+			vm.showFilter = false;
+			vm.visibleStatus = false;
+			vm.showClearFilterButton = false;
+			vm.showAdd = false;
+			vm.hideMenuButton = false;
+			
+		}
 
 		/*
 		 * Watch type on contentData to create content and tool bar options

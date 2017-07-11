@@ -53,15 +53,17 @@
 		/*
 		 * Initialise view vars
 		 */
-		vm.showComments = true;
-		vm.numNewComments = 0;
-		vm.saveCommentDisabled = true;
-		vm.autoSaveComment = false;
-		vm.showInfo = false;
-		vm.editingComment = false;
-		vm.assignedRolesColors = [];
-		vm.savingComment = false;
-		vm.togglingIssueState = true;
+		vm.$onInit = function() {
+			vm.showComments = true;
+			vm.numNewComments = 0;
+			vm.saveCommentDisabled = true;
+			vm.autoSaveComment = false;
+			vm.showInfo = false;
+			vm.editingComment = false;
+			vm.assignedRolesColors = [];
+			vm.savingComment = false;
+			vm.togglingIssueState = true;
+		}
 
 		/*
 		 * Handle the list of available roles

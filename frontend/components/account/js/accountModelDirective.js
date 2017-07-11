@@ -60,68 +60,74 @@
 	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService, StateManager) {
 
 		var vm = this,
-			infoTimeout = 4000,
-			isUserAccount = (vm.account === vm.userAccount),
-			dialogCloseToId;
-
+		infoTimeout = 4000,
+		isUserAccount = (vm.account === vm.userAccount)
 		// Init
-		vm.modelToUpload = null;
-		vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
-		dialogCloseToId = "#" + vm.dialogCloseTo;
-		if (vm.model.timestamp !== null) {
-			vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
-		}
-		vm.model.canUpload = true;
-		// Options
-		vm.modelOptions = {
-			upload: {
-				label: "Upload file", 
-				icon: "cloud_upload", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
-			},
-			permissions: {
-				label: "Permissions", 
-				icon: "group", 
-				// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
-				hidden: !isUserAccount
-			},
-			revision: {
-				label: "Revisions", 
-				icon: "settings_backup_restore", 
-				hidden: false
-			},
-			modelsetting: {
-				label: "Settings",
-				 icon: "settings", 
-				 hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
+		vm.$onInit = function() {
+
+			vm.modelToUpload = null;
+
+			console.log("MODEL: ", vm.model)
+			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
+
+			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
+			if (vm.model.timestamp !== null) {
+				vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 			}
-		};
-		if(vm.model.timestamp && !vm.model.federate){
-			vm.modelOptions.download = {
-				label: "Download", 
-				icon: "cloud_download", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
+			
+			vm.model.canUpload = true;
+			// Options
+			vm.modelOptions = {
+				upload: {
+					label: "Upload file", 
+					icon: "cloud_upload", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
+				},
+				permissions: {
+					label: "Permissions", 
+					icon: "group", 
+					// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
+					hidden: !isUserAccount
+				},
+				revision: {
+					label: "Revisions", 
+					icon: "settings_backup_restore", 
+					hidden: false
+				},
+				modelsetting: {
+					label: "Settings",
+					icon: "settings", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
+				}
 			};
-		}
-		vm.uploadButtonDisabled = true;
-		vm.modelOptions.delete = {
-			label: "Delete", 
-			icon: "delete", 
-			hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
-			color: "#F44336"
-		};
+			if(vm.model.timestamp && !vm.model.federate){
+				vm.modelOptions.download = {
+					label: "Download", 
+					icon: "cloud_download", 
+					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
+				};
+			}
+			vm.uploadButtonDisabled = true;
+			vm.modelOptions.delete = {
+				label: "Delete", 
+				icon: "delete", 
+				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
+				color: "#F44336"
+			};
 
-		watchModelStatus();
+			watchModelStatus();
 
-		if (vm.model.status === "processing") {
+			if (vm.model.status === "processing") {
 
-			vm.model.uploading = true;
-			vm.fileUploadInfo = 'Processing...';
+				vm.model.uploading = true;
+				vm.fileUploadInfo = 'Processing...';
+
+			}
+			
 
 		}
 		
-
 		/*
 		 * Watch changes in upload file
 		 */
@@ -167,7 +173,7 @@
 						vm.tag = null;
 						vm.desc = null;
 						vm.modelToUpload = null;
-						UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, dialogCloseToId);
+						UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 					}
 					else {
 						console.warn("Incorrect permissions")
@@ -202,7 +208,7 @@
 					vm.modelToUpload = null;
 					vm.tag = null;
 					vm.desc = null;
-					UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, dialogCloseToId);
+					UtilsService.showDialog("uploadModelDialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 					//vm.uploadFile();
 					break;
 
@@ -233,7 +239,7 @@
 							vm.revisions = response.data;
 						});
 					}
-					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, dialogCloseToId);
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 					break;
 			}
 		};

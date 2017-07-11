@@ -49,11 +49,13 @@
 		/*
 		 * Init
 		 */
-		vm.info = "Retrieving models...";
-		vm.showProgress = true;
-		vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-		vm.units = serverConfig.units;
-		vm.modelRegExp = serverConfig.modelNameRegExp;
+		vm.$onInit = function() {
+			vm.info = "Retrieving models...";
+			vm.showProgress = true;
+			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
+			vm.units = serverConfig.units;
+			vm.modelRegExp = serverConfig.modelNameRegExp;
+		}
 		
 		// SETUP FILE UPLOADERS
 		
@@ -208,7 +210,8 @@
 			return AccountDataService.getFederations(models); 
 		}
 
-		vm.getIndividualModels = function(models) { 
+		vm.getIndividualModels = function(models) {
+			console.log("getIndividualModels...", models)
 			return AccountDataService.getIndividualModels(models); 
 		}
 

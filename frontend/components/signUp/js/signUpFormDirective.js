@@ -47,81 +47,85 @@
 		/*
 		 * Init
 		 */
-		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
-		vm.version = serverConfig.apiVersion;
-		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.captchaKey = serverConfig.captcha_client_key;
-		vm.tcAgreed = false;
-		vm.useReCapthca = false;
-		vm.registering = false;
-		vm.showLegalText = false;
+		vm.$onInit = function() {
 
-		vm.jobTitles = [
-			"Director",
-			"Architect",
-			"Architectural assistant",
-			"BIM Manager",
-			"Structural engineer",
-			"Civil engineer",
-			"MEP engineer",
-			"Mechanical engineer",
-			"Facilities Manager",
-			"Other"
-		];
+			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
+			vm.version = serverConfig.apiVersion;
+			vm.logo = "/public/images/3drepo-logo-white.png";
+			vm.captchaKey = serverConfig.captcha_client_key;
+			vm.tcAgreed = false;
+			vm.useReCapthca = false;
+			vm.registering = false;
+			vm.showLegalText = false;
 
-		vm.countries = serverConfig.countries.concat();
-		var gbIndex;
-		
-		vm.countries.find(function(country, i){
-			if(country.code === 'GB'){
-				gbIndex = i;
-			}
-		});
+			vm.jobTitles = [
+				"Director",
+				"Architect",
+				"Architectural assistant",
+				"BIM Manager",
+				"Structural engineer",
+				"Civil engineer",
+				"MEP engineer",
+				"Mechanical engineer",
+				"Facilities Manager",
+				"Other"
+			];
 
-		vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
+			vm.countries = serverConfig.countries.concat();
+			var gbIndex;
+			
+			vm.countries.find(function(country, i){
+				if(country.code === 'GB'){
+					gbIndex = i;
+				}
+			});
 
-		/*
-		 * Auth stuff
-		 */
-		if (serverConfig.hasOwnProperty("auth")) {
-			if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
-				vm.useReCapthca = true;
-			}
-		}
+			vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
-		// Legal text
-		if (angular.isDefined(serverConfig.legal)) {
-			vm.showLegalText = true;
-			vm.legalText = "";
-			for (legalItem in serverConfig.legal) {
-				if (serverConfig.legal.hasOwnProperty(legalItem)) {
-					if (serverConfig.legal[legalItem].type === "agreeTo") {
-						if (agreeToText === "") {
-							agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
-						}
-						else {
-							agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
-						}
-					}
-					else if (serverConfig.legal[legalItem].type === "haveRead") {
-						if (haveReadText === "") {
-							haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
-						}
-						else {
-							haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
-						}
-					}
+			/*
+			* Auth stuff
+			*/
+			if (serverConfig.hasOwnProperty("auth")) {
+				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+					vm.useReCapthca = true;
 				}
 			}
 
-			vm.legalText = agreeToText;
-			if (vm.legalText !== "") {
-				vm.legalText += " and ";
+			// Legal text
+			if (angular.isDefined(serverConfig.legal)) {
+				vm.showLegalText = true;
+				vm.legalText = "";
+				for (legalItem in serverConfig.legal) {
+					if (serverConfig.legal.hasOwnProperty(legalItem)) {
+						if (serverConfig.legal[legalItem].type === "agreeTo") {
+							if (agreeToText === "") {
+								agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+							}
+							else {
+								agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+							}
+						}
+						else if (serverConfig.legal[legalItem].type === "haveRead") {
+							if (haveReadText === "") {
+								haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+							}
+							else {
+								haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+							}
+						}
+					}
+				}
+
+				vm.legalText = agreeToText;
+				if (vm.legalText !== "") {
+					vm.legalText += " and ";
+				}
+				vm.legalText += haveReadText;
+				if (vm.legalText !== "") {
+					vm.legalText += ".";
+				}
 			}
-			vm.legalText += haveReadText;
-			if (vm.legalText !== "") {
-				vm.legalText += ".";
-			}
+
 		}
 
 		/*

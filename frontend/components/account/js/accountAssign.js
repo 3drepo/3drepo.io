@@ -38,23 +38,25 @@
 
 	function accountAssignCtrl($scope, $window, $http,  $q, $location, UtilsService, serverConfig) {
 		var vm = this,
-			promise;
+			promise,
+			check
 
 		/*
 		 * Init
 		 */	
+		vm.$onInit = function() {
+			vm.loading = true;
+			vm.modelReady = false;
+			vm.teamspaces = [];
+			vm.projects = [];
+			vm.models = {};
+			vm.selectedRole = {};
 
-		vm.loading = true;
-		vm.modelReady = false;
-		vm.teamspaces = [];
-		vm.projects = [];
-		vm.models = {};
-		vm.selectedRole = {};
-
-		var check = $location.search();
-		vm.isFromUrl = check.account && check.project && check.model;
-		if (vm.isFromUrl) {
-			vm.selectedIndex = 2;
+			check = $location.search();
+			vm.isFromUrl = check.account && check.project && check.model;
+			if (vm.isFromUrl) {
+				vm.selectedIndex = 2;
+			}
 		}
 
 		var getStateFromParams = function() {

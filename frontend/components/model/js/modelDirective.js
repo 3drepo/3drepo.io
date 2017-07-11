@@ -55,193 +55,196 @@
 		/*
 		 * Init
 		 */
-		vm.pointerEvents = "inherit";
+		vm.$onInit = function() {
+			vm.pointerEvents = "inherit";
+			
+			// Warn when user click refresh
+			var refreshHandler = function (e){
+				var confirmationMessage = "This will reload the whole model, are you sure?";
 
-		// Warn when user click refresh
-		var refreshHandler = function (e){
-			var confirmationMessage = "This will reload the whole model, are you sure?";
-
-			e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
-			return confirmationMessage;              // Gecko, WebKit, Chrome <34
-		}
-
-		window.addEventListener("beforeunload", refreshHandler);
-
-
-		// create a fake state to prevent the back button
-		history.pushState(null, null, document.URL);
-
-		// popup when user click back button
-		var popStateHandler = function () {
-			// the fake state has already been popped by user at this moment
-
-			if(confirm('It will go back to model listing page, are you sure?')){
-				// pop one more state if user actually wants to go back
-				history.go(-1);
-			} else {
-				// recreate a fake state
-				history.pushState(null, null, document.URL);
+				e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+				return confirmationMessage;              // Gecko, WebKit, Chrome <34
 			}
-		};
 
-		//listen for user clicking the back button
-		window.addEventListener('popstate', popStateHandler);
+			window.addEventListener("beforeunload", refreshHandler);
 
-		$scope.$on('$destroy', function(){
-			window.removeEventListener("beforeunload", refreshHandler);
-			window.removeEventListener('popstate', popStateHandler);
-		});
 
-		/*
-		 * Get the model element
-		 */
-		$timeout(function () {
-			modelUI = angular.element($element[0].querySelector('#modelUI'));
-		});
+			// create a fake state to prevent the back button
+			history.pushState(null, null, document.URL);
 
-		panelCard.left.push({
-			type: "issues",
-			title: "Issues",
-			show: true,
-			help: "List current issues",
-			icon: "place",
-			menu: [
-				{
-					value: "print",
-					label: "Print",
-					selected: false,
-					noToggle: true,
-					icon: "fa-print"
-				},
-				// {
-				// 	value: "importBCF",
-				// 	label: "Import BCF",
-				// 	selected: false,
-				// 	noToggle: true,
-				// 	icon: "fa-cloud-upload"
-				// },
-				{
-					value: "exportBCF",
-					label: "Export BCF",
-					selected: false,
-					noToggle: true,
-					icon: "fa-cloud-download",
-					divider: true
-				},
-				{
-					value: "sortByDate",
-					label: "Sort by Date",
-					firstSelectedIcon: "fa-sort-amount-desc",
-					secondSelectedIcon: "fa-sort-amount-asc",
-					toggle: false,
-					selected: true,
-					firstSelected: true,
-					secondSelected: false
-				},
-				{
-					value: "showClosed",
-					label: "Show resolved issues",
-					toggle: true,
-					selected: false,
-					firstSelected: false,
-					secondSelected: false
-				},
-				{
-					value: "showSubModels",
-					label: "Show sub model issues",
-					toggle: true,
-					selected: false,
-					firstSelected: false,
-					secondSelected: false,
-				},{
-					upperDivider: true,
-					label: "Created by: "
+			// popup when user click back button
+			var popStateHandler = function () {
+				// the fake state has already been popped by user at this moment
+
+				if(confirm('It will go back to model listing page, are you sure?')){
+					// pop one more state if user actually wants to go back
+					history.go(-1);
+				} else {
+					// recreate a fake state
+					history.pushState(null, null, document.URL);
 				}
-			],
-			minHeight: 260,
-			fixedHeight: false,
-			options: [
-				{type: "menu", visible: true},
-				{type: "filter", visible: true},
-				{type: "pin", visible: false},
-				{type: "erase", visible: false},
-				{type: "scribble", visible: false}
-			],
-			add: true
-		});
+			};
 
-		 panelCard.left.push({
-			 type: "tree",
-			 title: "Tree",
-			 show: false,
-			 help: "Model elements shown in a tree structure",
-			 icon: "device_hub",
-			 minHeight: 80,
-			 fixedHeight: false,
-			 options: [
-			 	{type: "filter", visible: true}
-			 ]
-		 });
+			//listen for user clicking the back button
+			window.addEventListener('popstate', popStateHandler);
 
-		/*
-		panelCard.left.push({
-			type: "groups",
-			title: "Groups",
-			show: true,
-			help: "groups of objects",
-			icon: "view_comfy",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "menu", visible: true}
-			],
-			menu: [
-				{
-					value: "hideAll",
-					label: "Hide Groups",
-					selected: false,
-					toggle: true
-				}
-			],
-			add: true
-		});
-		*/
+			$scope.$on('$destroy', function(){
+				window.removeEventListener("beforeunload", refreshHandler);
+				window.removeEventListener('popstate', popStateHandler);
+			});
 
-		panelCard.left.push({
-			type: "clip",
-			title: "Clip",
-			show: false,
-			help: "Clipping plane",
-			icon: "crop_original",
-			fixedHeight: true,
-			options: [
-				{type: "visible", visible: true}
-			]
-		});
+			/*
+			* Get the model element
+			*/
+			$timeout(function () {
+				modelUI = angular.element($element[0].querySelector('#modelUI'));
+			});
 
-		panelCard.right.push({
-			type: "docs",
-			title: "Data",
-			show: false,
-			help: "Documents",
-			icon: "content_copy",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "close", visible: true}
-			]
-		});
+			panelCard.left.push({
+				type: "issues",
+				title: "Issues",
+				show: true,
+				help: "List current issues",
+				icon: "place",
+				menu: [
+					{
+						value: "print",
+						label: "Print",
+						selected: false,
+						noToggle: true,
+						icon: "fa-print"
+					},
+					// {
+					// 	value: "importBCF",
+					// 	label: "Import BCF",
+					// 	selected: false,
+					// 	noToggle: true,
+					// 	icon: "fa-cloud-upload"
+					// },
+					{
+						value: "exportBCF",
+						label: "Export BCF",
+						selected: false,
+						noToggle: true,
+						icon: "fa-cloud-download",
+						divider: true
+					},
+					{
+						value: "sortByDate",
+						label: "Sort by Date",
+						firstSelectedIcon: "fa-sort-amount-desc",
+						secondSelectedIcon: "fa-sort-amount-asc",
+						toggle: false,
+						selected: true,
+						firstSelected: true,
+						secondSelected: false
+					},
+					{
+						value: "showClosed",
+						label: "Show resolved issues",
+						toggle: true,
+						selected: false,
+						firstSelected: false,
+						secondSelected: false
+					},
+					{
+						value: "showSubModels",
+						label: "Show sub model issues",
+						toggle: true,
+						selected: false,
+						firstSelected: false,
+						secondSelected: false,
+					},{
+						upperDivider: true,
+						label: "Created by: "
+					}
+				],
+				minHeight: 260,
+				fixedHeight: false,
+				options: [
+					{type: "menu", visible: true},
+					{type: "filter", visible: true},
+					{type: "pin", visible: false},
+					{type: "erase", visible: false},
+					{type: "scribble", visible: false}
+				],
+				add: true
+			});
 
-		panelCard.right.push({
-			type: "building",
-			title: "Building",
-			show: false,
-			help: "Building",
-			icon: "fa-cubes",
-			fixedHeight: true,
-			options: [
-			]
-		});
+			panelCard.left.push({
+				type: "tree",
+				title: "Tree",
+				show: false,
+				help: "Model elements shown in a tree structure",
+				icon: "device_hub",
+				minHeight: 80,
+				fixedHeight: false,
+				options: [
+					{type: "filter", visible: true}
+				]
+			});
+
+			/*
+			panelCard.left.push({
+				type: "groups",
+				title: "Groups",
+				show: true,
+				help: "groups of objects",
+				icon: "view_comfy",
+				minHeight: 80,
+				fixedHeight: false,
+				options: [
+					{type: "menu", visible: true}
+				],
+				menu: [
+					{
+						value: "hideAll",
+						label: "Hide Groups",
+						selected: false,
+						toggle: true
+					}
+				],
+				add: true
+			});
+			*/
+
+			panelCard.left.push({
+				type: "clip",
+				title: "Clip",
+				show: false,
+				help: "Clipping plane",
+				icon: "crop_original",
+				fixedHeight: true,
+				options: [
+					{type: "visible", visible: true}
+				]
+			});
+
+			panelCard.right.push({
+				type: "docs",
+				title: "Data",
+				show: false,
+				help: "Documents",
+				icon: "content_copy",
+				minHeight: 80,
+				fixedHeight: false,
+				options: [
+					{type: "close", visible: true}
+				]
+			});
+
+			panelCard.right.push({
+				type: "building",
+				title: "Building",
+				show: false,
+				help: "Building",
+				icon: "fa-cubes",
+				fixedHeight: true,
+				options: [
+				]
+			});
+
+		}
 
 
 		$scope.$watchGroup(["vm.account","vm.model"], function()

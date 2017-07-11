@@ -47,8 +47,10 @@
         /*
          * Init
          */
-        vm.passwordChanged = false;
-        vm.showProgress = false;
+        vm.$onInit = function() {
+            vm.passwordChanged = false;
+            vm.showProgress = false;
+        }
 
         /*
          * Watch inputs to clear any message

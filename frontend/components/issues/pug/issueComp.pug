@@ -5,58 +5,58 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 		layout="column"
 		layout-align="start"
 		flex
-		ng-class="{issueCompTitleArea: $ctrl.data}"
-		ng-click="$ctrl.toggleShowAdditional()")
+		ng-class="{issueCompTitleArea: vm.data}"
+		ng-click="vm.toggleShowAdditional()")
 			div(layout="row", flex, layout-align="space-between")
 				div(layout="row", flex)
 					#issueRoleIndicator
-					md-input-container#issueCompTitleInput(ng-if="!$ctrl.data", flex, md-no-float)
+					md-input-container#issueCompTitleInput(ng-if="!vm.data", flex, md-no-float)
 						input(
 						type="text"
-						ng-model="$ctrl.issueData.name"
-						ng-change="$ctrl.nameChange()"
-						ng-disabled="$ctrl.data"
-						ng-focus="$ctrl.textInputHasFocus(true)"
-						ng-blur="$ctrl.textInputHasFocus(false)"
+						ng-model="vm.issueData.name"
+						ng-change="vm.nameChange()"
+						ng-disabled="vm.data"
+						ng-focus="vm.textInputHasFocus(true)"
+						ng-blur="vm.textInputHasFocus(false)"
 						aria-label="Title"
 						tdr-focus="true"
 						required
 						placeholder="Title",
-						ng-click="$ctrl.titleInputClick($event)")
-					label#issueCompTitle(ng-if="$ctrl.data") {{$ctrl.issueData.name}}
+						ng-click="vm.titleInputClick($event)")
+					label#issueCompTitle(ng-if="vm.data") {{vm.issueData.name}}
 				span(flex="5")
 				md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
-					md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") keyboard_arrow_right
-					md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") keyboard_arrow_down
+					md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
+					md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
 
 		// Info
-		.issueCompItemContainer#issueCompInfoArea(layout="row", layout-align="start center", flex="none", ng-if="$ctrl.showAdditional")
+		.issueCompItemContainer#issueCompInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 			div(flex="10")
-				md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
-			.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
-				label {{$ctrl.data.owner}}
-				label {{$ctrl.data.timeStamp}}
+				md-icon.angular-material-icons#issueCompStatus(style="color:{{vm.statusIcon.colour}}") {{vm.statusIcon.icon}}
+			.issueCompIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
+				label {{vm.data.owner}}
+				label {{vm.data.timeStamp}}
 
 		// Status
-		.issueCompItemContainer#issueCompAdditional(layout="column", ng-if="$ctrl.showAdditional")
+		.issueCompItemContainer#issueCompAdditional(layout="column", ng-if="vm.showAdditional")
 			div(layout="row")
 				md-input-container.issueCompItemStatus(flex)
 					label Priority
-					md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
-						md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}
+					md-select(ng-model="vm.issueData.priority", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+						md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
 				md-input-container.issueCompItemStatus(flex)
 					label Status
-					md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdateStatus")
-						md-option(ng-repeat="status in $ctrl.statuses", value="{{status.value}}", ng-disabled="status.disabled") {{status.label}}
+					md-select(ng-model="vm.issueData.status", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdateStatus")
+						md-option(ng-repeat="status in vm.statuses", value="{{status.value}}", ng-disabled="status.disabled") {{status.label}}
 			div(layout="row")
 				md-input-container(flex)
 					label Assign
-					md-select(ng-model="$ctrl.issueData.assigned_roles[0]", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
-						md-option(ng-repeat="job in $ctrl.modelJobs", value="{{job}}") {{job}}
+					md-select(ng-model="vm.issueData.assigned_roles[0]", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+						md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
 				md-input-container(flex)
 					label Type
-					md-select(ng-model="$ctrl.issueData.topic_type", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
-						md-option(ng-repeat="type in $ctrl.topic_types", value="{{type.value}}") {{type.label}}
+					md-select(ng-model="vm.issueData.topic_type", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
 	md-divider
 
@@ -64,46 +64,46 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 		// Description
 		.issueCompItemContainer(layout="column", layout-align="start", flex)
 			div(layout="column", layout-align="start", flex)
-				div(ng-if="!$ctrl.data", flex, layout="column")
-					md-input-container(flex, ng-if="!$ctrl.hideDescription")
+				div(ng-if="!vm.data", flex, layout="column")
+					md-input-container(flex, ng-if="!vm.hideDescription")
 						label Description
 						textarea(
-						ng-model="$ctrl.issueData.desc"
-						ng-disabled="$ctrl.data"
-						ng-focus="$ctrl.textInputHasFocus(true)"
-						ng-blur="$ctrl.textInputHasFocus(false)")
-				#issueCompDescription(ng-if="$ctrl.data", layout="column", ng-click="$ctrl.showViewpoint($event, $ctrl.issueData.viewpoint)")
+						ng-model="vm.issueData.desc"
+						ng-disabled="vm.data"
+						ng-focus="vm.textInputHasFocus(true)"
+						ng-blur="vm.textInputHasFocus(false)")
+				#issueCompDescription(ng-if="vm.data", layout="column", ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
 					div(layout='row', layout-align="space-between", flex)
-						label(ng-if="!$ctrl.editingDescription", ng-bind-html="$ctrl.issueData.desc | linky:'_blank'") {{$ctrl.issueData.desc}}
-						md-input-container(flex, ng-if="$ctrl.editingDescription")
+						label(ng-if="!vm.editingDescription", ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
+						md-input-container(flex, ng-if="vm.editingDescription")
 							textarea(
-							ng-model="$ctrl.issueData.desc"
+							ng-model="vm.issueData.desc"
 							aria-label="Description"
 							tdr-focus="true"
-							ng-focus="$ctrl.textInputHasFocus(true)"
-							ng-blur="$ctrl.textInputHasFocus(false)")
-						.issueCompTextActions(layout="row", ng-if="$ctrl.canEditDescription")
-							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditDescription($event)", ng-if="$ctrl.canUpdate")
+							ng-focus="vm.textInputHasFocus(true)"
+							ng-blur="vm.textInputHasFocus(false)")
+						.issueCompTextActions(layout="row", ng-if="vm.canEditDescription")
+							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditDescription($event)", ng-if="vm.canUpdate")
 								md-tooltip(md-direction="bottom") edit
-								md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit
+								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 				//.issueCompThumbnail(
 					layout="row"
 					layout-align="center"
-					ng-if="$ctrl.descriptionThumbnail"
-					ng-click="$ctrl.showScreenShot($event, $ctrl.issueData.viewpoint)")
+					ng-if="vm.descriptionThumbnail"
+					ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
 				
 				.issueCompThumbnail(
-				ng-if="$ctrl.descriptionThumbnail"
-				ng-style="{'background-image': 'url({{$ctrl.descriptionThumbnail}})', 'background-repeat' : 'no-repeat', 'background-size': 'contain'}"
-				ng-click="$ctrl.showScreenShot($event, $ctrl.issueData.viewpoint)")
+				ng-if="vm.descriptionThumbnail"
+				ng-style="{'background-image': 'url({{vm.descriptionThumbnail}})', 'background-repeat' : 'no-repeat', 'background-size': 'contain'}"
+				ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
 					
 						
 					//img.issueCompThumbnailImage(ng-src="{{}}")
 
 		// Comments
-		.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.issueData.comments.length>0")
-			div(ng-repeat="comment in $ctrl.issueData.comments", layout="column", layout-align="start", flex)
-				div(ng-click="$ctrl.showViewpoint($event, comment.viewpoint)"
+		.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="vm.issueData.comments.length>0")
+			div(ng-repeat="comment in vm.issueData.comments", layout="column", layout-align="start", flex)
+				div(ng-click="vm.showViewpoint($event, comment.viewpoint)"
 					layout="column"
 					layout-align="start"
 					flex
@@ -123,18 +123,18 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 								flex
 								aria-label="Description"
 								tdr-focus="true"
-								ng-focus="$ctrl.textInputHasFocus(true)"
-								ng-blur="$ctrl.textInputHasFocus(false)")
+								ng-focus="vm.textInputHasFocus(true)"
+								ng-blur="vm.textInputHasFocus(false)")
 						.issueCompTextActions(layout="row", ng-if="!comment.sealed && !comment.action", flex="none")
-							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditComment($event, $index)")
+							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditComment($event, $index)")
 								md-tooltip(md-direction="bottom") edit
-								md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit
-							md-button.md-icon-button.md-accent(aria-label="Delete Comment", ng-click="$ctrl.deleteComment($event, $index)")
+								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
+							md-button.md-icon-button.md-accent(aria-label="Delete Comment", ng-click="vm.deleteComment($event, $index)")
 								md-tooltip(md-direction="bottom") delete
 								md-icon.angular-material-icons close
 					// Info
 					.issueCompCommentOwner(
-					ng-if="$ctrl.data && !comment.action"
+					ng-if="vm.data && !comment.action"
 					layout="row"
 					layout-align="space-between"
 					flex)
@@ -160,24 +160,24 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 				layout="row"
 				layout-align="center"
 				ng-if="comment.viewpoint.screenshot"
-				ng-click="$ctrl.showScreenShot($event, comment.viewpoint)"
+				ng-click="vm.showScreenShot($event, comment.viewpoint)"
 				flex)
 					img.issueCompThumbnailImage(ng-src="{{comment.viewpoint.screenshotPath}}")
 
 	md-divider
 
 	// New comment
-	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="$ctrl.data")
+	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="vm.data")
 		md-input-container.fillHeight(flex, md-no-float)
 			textarea(
-			ng-model="$ctrl.comment"
-			ng-change="$ctrl.commentChange()"
-			ng-focus="$ctrl.textInputHasFocus(true)"
-			ng-blur="$ctrl.textInputHasFocus(false)"
-			ng-disabled="!$ctrl.canComment"
-			placeholder="{{$ctrl.canComment ? 'Comment' : ($ctrl.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
-			.issueCompThumbnail.fillHeight(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
-				img.issueCompThumbnailImage(ng-src="{{$ctrl.commentThumbnail}}")
+			ng-model="vm.comment"
+			ng-change="vm.commentChange()"
+			ng-focus="vm.textInputHasFocus(true)"
+			ng-blur="vm.textInputHasFocus(false)"
+			ng-disabled="!vm.canComment"
+			placeholder="{{vm.canComment ? 'Comment' : (vm.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
+			.issueCompThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
+				img.issueCompThumbnailImage(ng-src="{{vm.commentThumbnail}}")
 
 
 	md-divider
@@ -186,24 +186,24 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 	.issueCompItemContainer#issueCompFooterButtons(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
-				ng-repeat="(action, actionData) in $ctrl.actions"
+				ng-repeat="(action, actionData) in vm.actions"
 				aria-label="{{action}}"
-				ng-click="$ctrl.doAction($event, action)"
-				ng-if="!$ctrl.submitDisabled"
+				ng-click="vm.doAction($event, action)"
+				ng-if="!vm.submitDisabled"
 				)
 
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
-		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()" ng-if="!$ctrl.saving")
+		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
 			md-tooltip(md-direction="bottom") Submit
 			md-icon.angular-material-icons save
-		md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="$ctrl.saving")
+		md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
 
 	// Action components
 	issues-pin(
-	account="$ctrl.account"
-	model="$ctrl.model"
-	send-event="$ctrl.sendEvent({type: type, value: value})"
-	event="$ctrl.event"
-	set-pin="$ctrl.setPin({data: data})"
-	clear-pin="$ctrl.clearPin")
+	account="vm.account"
+	model="vm.model"
+	send-event="vm.sendEvent({type: type, value: value})"
+	event="vm.event"
+	set-pin="vm.setPin({data: data})"
+	clear-pin="vm.clearPin")

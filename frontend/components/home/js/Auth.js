@@ -88,7 +88,8 @@
 			if(self.loggedIn === null || interval)
 			{
 				// Initialize
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login")).success(function _initSuccess(data)
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"))
+					.then(function _initSuccess(data)
 					{
 						// If we are not logging in because of an interval
 						// then we are initializing the auth plugin
@@ -102,7 +103,8 @@
 							// says we are not logged in.
 							self.loginSuccess(data);
 						}
-					}).error(function _initFailure(reason)
+					})
+					.catch(function _initFailure(reason)
 					{
 						if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code)
 						{
@@ -144,10 +146,10 @@
 			var rolesPromise = $q.defer();
 
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/roles.json"))
-			.success(function(data) {
+			.then(function(data) {
 				self.modelRoles = data;
 				rolesPromise.resolve();
-			}).error(function() {
+			}).catch(function() {
 				self.modelRoles = null;
 				rolesPromise.resolve();
 			});
@@ -165,8 +167,16 @@
 			self.authPromise = $q.defer();
 
 			var postData = {username: username, password: password};
-
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData).success(self.loginSuccess).error(self.loginFailure);
+			console.log("LOGIN")
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
+			.then(function(response){ 
+				console.log("RESPONSE:" , response.data)
+				self.loginSuccess(response.data)
+			})
+			.catch(function(response){
+				console.log("RESPONSE:" , response.data)
+				self.loginFailure(response.data)
+			});
 
 			return self.authPromise.promise;
 		};
@@ -174,7 +184,7 @@
 		this.logout = function() {
 			self.authPromise = $q.defer();
 
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout")).success(self.logoutSuccess).error(self.logoutFailure);
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout")).then(self.logoutSuccess).catch(self.logoutFailure);
 
 			return self.authPromise.promise;
 		};

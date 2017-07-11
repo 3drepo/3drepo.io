@@ -51,17 +51,18 @@
 		/*
 		 * Init
 		 */
-		vm.sliderMin = 0;
-		vm.sliderMax = 100;
-		vm.sliderStep = 0.1;
-		vm.displayDistance = 0;
-		vm.sliderPosition = vm.sliderMin;
-		vm.axes = ["X", "Y", "Z"];
-		vm.visible = false;
-		vm.bbox = null;
-		vm.onContentHeightRequest({height: 130});
-		vm.units = "m";
-
+		vm.$onInit = function() {
+			vm.sliderMin = 0;
+			vm.sliderMax = 100;
+			vm.sliderStep = 0.1;
+			vm.displayDistance = 0;
+			vm.sliderPosition = vm.sliderMin;
+			vm.axes = ["X", "Y", "Z"];
+			vm.visible = false;
+			vm.bbox = null;
+			vm.onContentHeightRequest({height: 130});
+			vm.units = "m";
+		}
 
 		function updateClippingPlane()
 		{

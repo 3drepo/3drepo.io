@@ -88,87 +88,90 @@
 		/*
 		 * Init
 		 */
-		vm.state = StateManager.state;
-		vm.query = StateManager.query;
-		vm.functions = StateManager.functions;
-		vm.pointerEvents = "inherit";
-		vm.goToAccount = false;
-		vm.goToUserPage = false;
-		vm.keysDown = [];
+		vm.$onInit = function() {
+			vm.state = StateManager.state;
+			vm.query = StateManager.query;
+			vm.functions = StateManager.functions;
+			vm.pointerEvents = "inherit";
+			vm.goToAccount = false;
+			vm.goToUserPage = false;
+			vm.keysDown = [];
 
-		vm.legalDisplays = [];
-		if (angular.isDefined(serverConfig.legal)) {
-			vm.legalDisplays = serverConfig.legal;
-		}
-		vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
-		vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
+			vm.legalDisplays = [];
+			if (angular.isDefined(serverConfig.legal)) {
+				vm.legalDisplays = serverConfig.legal;
+			}
+			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
+			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-		// Pages to not attempt a interval triggered logout from
-		vm.doNotLogout = [
-			"/terms", 
-			"/privacy",
-			"/signUp", 
-			"/passwordForgot", 
-			"/registerRequest", 
-			"/registerVerify"
-		];
+			// Pages to not attempt a interval triggered logout from
+			vm.doNotLogout = [
+				"/terms", 
+				"/privacy",
+				"/signUp", 
+				"/passwordForgot", 
+				"/registerRequest", 
+				"/registerVerify"
+			];
 
-		$timeout(function () {
-			var login = angular.element("<login></login>");
-			var elementRef, elementScope;
-			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {
-				name: "default",
-			});
-			/*
-			 * Watch the state to handle moving to and from the login page
-			 */
-			$scope.$watch("vm.state", function (newState, oldState) {
+			$timeout(function () {
+				var login = angular.element("<login></login>");
+				var elementRef, elementScope;
+				homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
+				EventService.send(EventService.EVENT.CREATE_VIEWER, {
+					name: "default",
+				});
+				/*
+				* Watch the state to handle moving to and from the login page
+				*/
+				$scope.$watch("vm.state", function (newState, oldState) {
 
-				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
+					if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
 
-					if (elementRef)
-					{
-						elementRef.remove();
-						elementScope.$destroy();
-					}
+						if (elementRef)
+						{
+							elementRef.remove();
+							elementScope.$destroy();
+						}
 
-					vm.goToUserPage = false;
-					for (i = 0; i < vm.functions.length; i++) {
-						func = vm.functions[i];
+						vm.goToUserPage = false;
+						for (i = 0; i < vm.functions.length; i++) {
+							func = vm.functions[i];
 
-						if (vm.state[func]) {
-							vm.goToUserPage = true;
-							// Create element
-							element = "<" + UtilsService.snake_case(func, "-") +
-								" username='vm.query.username'" +
-								" token='vm.query.token'" +
-								" query='vm.query'>" +
-								"</" + UtilsService.snake_case(func, "-") + ">";
+							if (vm.state[func]) {
+								vm.goToUserPage = true;
+								// Create element
+								element = "<" + UtilsService.snake_case(func, "-") +
+									" username='vm.query.username'" +
+									" token='vm.query.token'" +
+									" query='vm.query'>" +
+									"</" + UtilsService.snake_case(func, "-") + ">";
 
-							notLoggedInElement = angular.element(element);
+								notLoggedInElement = angular.element(element);
+								homeLoggedOut.append(notLoggedInElement);
+								elementScope = $scope.$new();
+								elementRef = $compile(notLoggedInElement)(elementScope);
+								break;
+							}
+						}
+
+						if (!vm.state.loggedIn && !vm.goToUserPage) {
+							// Create login element
+							notLoggedInElement = login;
 							homeLoggedOut.append(notLoggedInElement);
 							elementScope = $scope.$new();
 							elementRef = $compile(notLoggedInElement)(elementScope);
-							break;
 						}
 					}
+				}, true);
 
-					if (!vm.state.loggedIn && !vm.goToUserPage) {
-						// Create login element
-						notLoggedInElement = login;
-						homeLoggedOut.append(notLoggedInElement);
-						elementScope = $scope.$new();
-						elementRef = $compile(notLoggedInElement)(elementScope);
-					}
-				}
-			}, true);
+			});
 
-		});
+			if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
+			{
+				Auth.login(vm.account, vm.password);
+			}
 
-		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
-		{
-			Auth.login(vm.account, vm.password);
 		}
 
         vm.logout = function () {

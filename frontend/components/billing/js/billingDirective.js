@@ -49,37 +49,39 @@
 		/*
 		 * Init
 		 */
-		vm.showBilling = false;
-		vm.B2B_EU = false;
+		vm.$onInit = function() {
+			vm.showBilling = false;
+			vm.B2B_EU = false;
 
-		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
-			billingsPromise = UtilsService.doGet(vm.query.user + "/invoices");
-			billingsPromise.then(function (response) {
-				if ((response.data.length > 0) &&
-					(parseInt(vm.query.item) >= 0) &&
-					(parseInt(vm.query.item) < response.data.length)) {
-					vm.showBilling = true;
-					vm.billing = response.data[parseInt(vm.query.item)];
-					vm.billing.netAmount = parseFloat(vm.billing.amount - vm.billing.taxAmount).toFixed(2);
-					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
+			if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
+				billingsPromise = UtilsService.doGet(vm.query.user + "/invoices");
+				billingsPromise.then(function (response) {
+					if ((response.data.length > 0) &&
+						(parseInt(vm.query.item) >= 0) &&
+						(parseInt(vm.query.item) < response.data.length)) {
+						vm.showBilling = true;
+						vm.billing = response.data[parseInt(vm.query.item)];
+						vm.billing.netAmount = parseFloat(vm.billing.amount - vm.billing.taxAmount).toFixed(2);
+						vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
-					// Check if B2B EU
-					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1) && (vm.billing.info.hasOwnProperty("vat"));
+						// Check if B2B EU
+						vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1) && (vm.billing.info.hasOwnProperty("vat"));
 
-					// Type
-					vm.type = vm.billing.pending ? "Order confirmation" : "Invoice";
+						// Type
+						vm.type = vm.billing.pending ? "Order confirmation" : "Invoice";
 
-					// Get country from country code
-					if (serverConfig.hasOwnProperty("countries")) {
-						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
-							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
-								vm.billing.info.country = serverConfig.countries[i].name;
-								break;
+						// Get country from country code
+						if (serverConfig.hasOwnProperty("countries")) {
+							for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
+								if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
+									vm.billing.info.country = serverConfig.countries[i].name;
+									break;
+								}
 							}
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 
 		vm.home = function () {

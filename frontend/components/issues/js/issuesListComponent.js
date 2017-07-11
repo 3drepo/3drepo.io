@@ -23,6 +23,8 @@
 			"issuesList",
 			{
 				controller: IssuesListCtrl,
+				controllerAs: 'vm',
+				bindToController: true,
 				templateUrl: "issuesList.html",
 				bindings: {
 					account: "<",
@@ -65,11 +67,12 @@
 			excludeRoles = [];
 
 		// Init
-		this.UtilsService = UtilsService;
-		this.IssuesService = IssuesService;
-		this.setFocus = setFocus;
-
-
+		this.$onInit = function() {
+			this.UtilsService = UtilsService;
+			this.IssuesService = IssuesService;
+			this.setFocus = setFocus;
+		}
+		
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes

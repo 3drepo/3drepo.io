@@ -46,24 +46,26 @@
 		/*
 		 * Init
 		 */
-		vm.memberRole = "collaborator";
-		vm.collaborators = [];
-		vm.members = [];
-		vm.addDisabled = false;
-		vm.numSubscriptions = (vm.subscriptions) ? vm.subscriptions.length : 0;
-		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
-		vm.showList = true;
+		vm.$onInit = function() {
+			vm.memberRole = "collaborator";
+			vm.collaborators = [];
+			vm.members = [];
+			vm.addDisabled = false;
+			vm.numSubscriptions = (vm.subscriptions) ? vm.subscriptions.length : 0;
+			vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
+			vm.showList = true;
 
-		promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
+			promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
 
-		promise.then(function (response) {
-			if (response.status === 200) {
-				vm.members = response.data;
-				if (angular.isDefined("vm.subscriptions")) {
-					setupTeam();
+			promise.then(function (response) {
+				if (response.status === 200) {
+					vm.members = response.data;
+					if (angular.isDefined("vm.subscriptions")) {
+						setupTeam();
+					}
 				}
-			}
-		});
+			});
+		}
 
 		/*
 		 * Watch changes to the new member name

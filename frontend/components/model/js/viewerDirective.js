@@ -43,11 +43,11 @@
 			link: function (scope, element) {
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
-					scope.v.viewer.destroy(); // Remove events watch
+					scope.vm.viewer.destroy(); // Remove events watch
 				});
 			},
 			controller: ViewerCtrl,
-			controllerAs: "v",
+			controllerAs: "vm",
 			bindToController: true
 		};
 	}
@@ -56,43 +56,49 @@
 
 	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
-		var v = this;
+		var vm = this;
 
-		v.initialised = $q.defer();
-		v.loaded      = $q.defer();
+		vm.$onInit = function() {
+			vm.initialised = $q.defer();
+			vm.loaded      = $q.defer();
 
-		v.branch   = v.branch ? v.branch : "master";
-		v.revision = v.revision ? v.revision : "head";
+			vm.branch   = vm.branch ? vm.branch : "master";
+			vm.revision = vm.revision ? vm.revision : "head";
 
-		v.pointerEvents = "auto";
+			vm.pointerEvents = "auto";
 
-		if (!angular.isDefined(v.eventService))
-		{
-			v.EventService = EventService;
+			if (!angular.isDefined(vm.eventService))
+			{
+				vm.EventService = EventService;
+			}
+
+			vm.initViewer();
+
+
 		}
 
 		function errCallback(errorType, errorValue)
 		{
-			v.eventService.sendError(errorType, errorValue);
+			vm.eventService.sendError(errorType, errorValue);
 		}
 
 		function eventCallback(type, value)
 		{
-			v.eventService.send(type, value);
+			vm.eventService.send(type, value);
 		}
 
-		$scope.reload = function() {
-			v.viewer.loadModel(v.account, v.model, v.branch, v.revision);
+		vm.reload = function() {
+			vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
 		};
 
-		$scope.init = function() {
+		vm.initViewer = function() {
 
-			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
+			vm.viewer = new Viewer(vm.name, $element[0], vm.manager, eventCallback, errCallback);
 
 			var options = {};
-			var startLatLon = v.at && v.at.split(',');
+			var startLatLon = vm.at && vm.at.split(',');
 
-			var view = v.view && v.view.split(',');
+			var view = vm.view && vm.view.split(',');
 
 			view && view.forEach(function(val, i){
 				view[i] = parseFloat(val);
@@ -100,7 +106,7 @@
 
 			options.view = view;
 
-			var up = v.up && v.up.split(',');
+			var up = vm.up && vm.up.split(',');
 			up && up.forEach(function(val, i){
 				up[i] = parseFloat(val);
 			});
@@ -117,37 +123,37 @@
 			}
 
 
-			v.mapTile = new MapTile(v.viewer, eventCallback, options);
-			v.viewer.init({
+			vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
+			vm.viewer.init({
 				showAll : showAll,
 				plugins: {
-					'mapTile': v.mapTile
+					'mapTile': vm.mapTile
 				}
 			}).then(function(){
 					;
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
-				v.oculus     = new Oculus(v.viewer);
-				v.gamepad    = new Gamepad(v.viewer);
-				v.gamepad.init();
+				vm.oculus     = new Oculus(vm.viewer);
+				vm.gamepad    = new Gamepad(vm.viewer);
+				vm.gamepad.init();
 
-				v.measure    = new MeasureTool(v.viewer);
+				vm.measure    = new MeasureTool(vm.viewer);
 
-				v.collision  = new Collision(v.viewer);
+				vm.collision  = new Collision(vm.viewer);
 
-				//$scope.reload();
+				//vm.reload();
 
-				v.loaded.promise.then(function() {
+				vm.loaded.promise.then(function() {
 					// TODO: Move this so that the attachment is contained
 					// within the plugins themselves.
 					// Comes free with oculus support and gamepad support
-					v.oculus     = new Oculus(v.viewer);
-					v.gamepad    = new Gamepad(v.viewer);
+					vm.oculus     = new Oculus(vm.viewer);
+					vm.gamepad    = new Gamepad(vm.viewer);
 
-					v.gamepad.init();
+					vm.gamepad.init();
 
-					v.collision  = new Collision(v.viewer);
+					vm.collision  = new Collision(vm.viewer);
 				});
 
 			});
@@ -169,60 +175,62 @@
 
 			if(!revision)
 				revision = "head";
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json")).success(
-			function (json, status)
-			{
-				if(json.properties)
-					v.viewer.applyModelProperties(account, model, json.properties);
+
+			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+			.then(function(json, status) {
+				if(json.properties) {
+					vm.viewer.applyModelProperties(account, model, json.properties);
+				}
 			});
 
 		}
 
-		$scope.enterVR = function() {
-			v.loaded.promise.then(function() {
-				v.oculus.switchVR();
+		vm.enterVR = function() {
+			vm.loaded.promise.then(function() {
+				vm.oculus.switchVR();
 			});
 		};
 
-		$scope.$watch(v.branch, function(blah)
+		$scope.$watch(vm.branch, function(blah)
 		{
 			console.log(JSON.stringify(blah));
 		});
 
-		$scope.$watch(v.eventService.currentEvent, function(event) {
+		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
-					v.initialised.resolve();
-					fetchModelProperties(v.account, v.model, v.branch, v.revision);	
+					vm.initialised.resolve();
+					fetchModelProperties(vm.account, vm.model, vm.branch, vm.revision);	
 				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
-					v.loaded.resolve();
+					vm.loaded.resolve();
 				} else if (event.type === EventService.EVENT.VIEWER.LOAD_MODEL) {
-					v.account = event.value.account;
-					v.model = event.value.model;
-					v.branch = event.value.branch;
-					v.revision = event.value.revision;
-					v.viewer.loadModel(event.value.account, event.value.model, event.value.branch, event.value.revision);
+					vm.account = event.value.account;
+					vm.model = event.value.model;
+					vm.branch = event.value.branch;
+					vm.revision = event.value.revision;
+					vm.viewer.loadModel(event.value.account, event.value.model, event.value.branch, event.value.revision);
 				} else {
-					v.initialised.promise.then(function() {
+					vm.initialised.promise.then(function() {
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
-							v.viewer.showAll();
+							vm.viewer.showAll();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
-							v.viewer.switchFullScreen(null);
+							vm.viewer.switchFullScreen(null);
 						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							v.oculus.switchVR();
+							vm.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
-							v.viewer.onViewpointChanged(event.value.callback);
+							vm.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
-							v.viewer.onMouseMove(event.value.callback);
+							vm.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
-							if (event.value.account === v.account && event.value.model === v.model)
+							if (event.value.account === vm.account && event.value.model === vm.model)
 							{
-								v.viewer.updateSettings(event.value.settings);
-								v.mapTile && v.mapTile.updateSettings(event.value.settings);
+								vm.viewer.updateSettings(event.value.settings);
+								vm.mapTile && vm.mapTile.updateSettings(event.value.settings);
 							}
 						}
 						else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
-							v.viewer.addPin(
+							vm.viewer.addPin(
 								event.value.account,
 								event.value.model,
 								event.value.id,
@@ -231,27 +239,27 @@
 								event.value.colours,
 								event.value.viewpoint);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
-							v.viewer.removePin(
+							vm.viewer.removePin(
 								event.value.id
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
-							v.viewer.changePinColours(
+							vm.viewer.changePinColours(
 								event.value.id,
 								event.value.colours
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-							v.viewer.clickPin(event.value.id);
+							vm.viewer.clickPin(event.value.id);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_PIN_VISIBILITY) {
-							v.viewer.setPinVisibility(event.value.id, event.value.visibility);
+							vm.viewer.setPinVisibility(event.value.id, event.value.visibility);
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
-							v.viewer.clearClippingPlanes();
+							vm.viewer.clearClippingPlanes();
 
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES) {
-							v.viewer.updateClippingPlanes(
+							vm.viewer.updateClippingPlanes(
 								event.value.clippingPlanes, event.value.fromClipPanel,
 								event.value.account, event.value.model);							
 						} else if ((event.type === EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS)) {
-							v.viewer.getObjectsStatus(
+							vm.viewer.getObjectsStatus(
 								event.value.account,
 								event.value.model,
 								event.value.promise
@@ -260,7 +268,7 @@
 							if(!event.value.noHighlight)
 							{
 
-								v.viewer.highlightObjects(
+								vm.viewer.highlightObjects(
 									event.value.account,
 									event.value.model,
 									event.value.id ? [event.value.id] : event.value.ids,
@@ -269,7 +277,7 @@
 								);
 							}*/
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
-							v.viewer.highlightObjects(
+							vm.viewer.highlightObjects(
 								event.value.account,
 								event.value.model,
 								event.value.id ? [event.value.id] : event.value.ids,
@@ -278,7 +286,7 @@
 								event.value.multi
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
-							v.viewer.highlightAndUnhighlightObjects(
+							vm.viewer.highlightAndUnhighlightObjects(
 								event.value.account,
 								event.value.model,
 								event.value.highlight_ids,
@@ -287,16 +295,16 @@
 								event.value.colour
 							);
 						}  else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-							v.viewer.highlightObjects();
+							vm.viewer.highlightObjects();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
-							v.viewer.switchObjectVisibility(
+							vm.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.model,
 								event.value.ids,
 								event.value.visible
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
-							v.viewer.setCamera(
+							vm.viewer.setCamera(
 								event.value.position,
 								event.value.view_dir,
 								event.value.up,
@@ -308,42 +316,40 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								v.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
+								vm.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
-								v.manager.getCurrentViewer().getScreenshot(event.value.promise);
+								vm.manager.getCurrentViewer().getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							v.manager.getCurrentViewer().setNavMode(event.value.mode);
+							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							v.measure.measureMode(event.value);
+							vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
-							$location.path("/" + v.account + '/' + v.model).search({
+							$location.path("/" + vm.account + '/' + vm.model).search({
 								at: event.value.at,
 								view: event.value.view,
 								up: event.value.up
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
-							v.viewer.setMultiSelectMode(event.value);
+							vm.viewer.setMultiSelectMode(event.value);
 						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-							v.viewer.setPinDropMode(event.value);
+							vm.viewer.setPinDropMode(event.value);
 						}
 
 					});
 
-					/*v.loaded.promise.then(function() {
+					/*vm.loaded.promise.then(function() {
 					});*/
 				}
 			}
 		});
 
-		$scope.init();
-
-		if (angular.isDefined(v.vrMode))
+		if (angular.isDefined(vm.vrMode))
 		{
-			$scope.enterVR();
+			vm.enterVR();
 		}
 	}
 }());

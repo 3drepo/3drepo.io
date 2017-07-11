@@ -45,10 +45,14 @@
 		/*
 		 * Init
 		 */
-		vm.red = 200;
-		vm.green = 150;
-		vm.blue = 100;
+		vm.$onInit = function() {
 
+			vm.red = 200;
+			vm.green = 150;
+			vm.blue = 100;
+
+		}
+	
 		/*
 		 * Watch for slider changes
 		 */

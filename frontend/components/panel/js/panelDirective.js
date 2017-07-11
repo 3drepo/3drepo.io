@@ -56,15 +56,19 @@
 		/*
 		 * Init
 		 */
-		vm.contentItems = [];
-        vm.showPanel = true;
-		vm.window = $window;
-		vm.activate = true;
+		vm.$onInit = function() {
+
+			vm.contentItems = [];
+			vm.showPanel = true;
+			vm.window = $window;
+			vm.activate = true;
+		
+		}
 
 		/*
 		 * Watch for events
 		 */
-		 console.log('watch event setup!');
+		
         $scope.$watch(EventService.currentEvent, function (event) {
 
 			var i;

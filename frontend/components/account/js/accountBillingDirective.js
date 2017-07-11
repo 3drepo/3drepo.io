@@ -48,13 +48,15 @@
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.saveDisabled = true;
-		vm.countries = serverConfig.countries;
-		vm.usStates = serverConfig.usStates;
-		vm.showStates = false;
-		vm.newBillingAddress = {};
-
+		vm.$onInit = function() {
+			vm.showInfo = true;
+			vm.saveDisabled = true;
+			vm.countries = serverConfig.countries;
+			vm.usStates = serverConfig.usStates;
+			vm.showStates = false;
+			vm.newBillingAddress = {};
+		}
+		
 		/*
 		 * Watch for change in licenses
 		 */

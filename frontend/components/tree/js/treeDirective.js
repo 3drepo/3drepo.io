@@ -64,17 +64,21 @@
 		/*
 		 * Init
 		 */
-		vm.nodes = [];
-		vm.showNodes = true;
-		vm.showTree = true;
-		vm.showFilterList = false;
-		vm.currentFilterItemSelected = null;
-		vm.viewerSelectedObject = null;
-		vm.showProgress = true;
-		vm.progressInfo = "Loading full tree structure";
-		vm.onContentHeightRequest({height: 70}); // To show the loading progress
-		vm.visible   = {};
-		vm.invisible = {};
+		vm.$onInit = function() {
+
+			vm.nodes = [];
+			vm.showNodes = true;
+			vm.showTree = true;
+			vm.showFilterList = false;
+			vm.currentFilterItemSelected = null;
+			vm.viewerSelectedObject = null;
+			vm.showProgress = true;
+			vm.progressInfo = "Loading full tree structure";
+			vm.onContentHeightRequest({height: 70}); // To show the loading progress
+			vm.visible   = {};
+			vm.invisible = {};
+
+		}
 
 		/**
 		 * Set the content height.

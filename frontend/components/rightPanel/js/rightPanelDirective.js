@@ -37,38 +37,40 @@
     function RightPanelCtrl ($scope, $timeout, EventService) {
         var vm = this,
             addIssueMode = null,
-            
-           
             highlightBackground = "#FF9800";
 
         /*
          * Init
          */
-        vm.measureMode = false;
-        vm.metaData = true;
-        vm.showPanel = true;
-        vm.issueButtons = {
-            "scribble": {
-                label: "Scribble",
-                icon: "border_color",
-                background: ""
-            },
-            "erase": {
-                label: "Erase",
-                faIcon: "fa fa-eraser",
-                background: ""
-            },
-            "pin": {
-                label: "Pin",
-                icon: "pin_drop",
-                background: ""
-            }
-        };
-        vm.measureBackground = "";
-        vm.metaBackground = highlightBackground;
-        $timeout(function () {
-            EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
-        });
+        vm.$onInit = function() {
+
+            vm.measureMode = false;
+            vm.metaData = true;
+            vm.showPanel = true;
+            vm.issueButtons = {
+                "scribble": {
+                    label: "Scribble",
+                    icon: "border_color",
+                    background: ""
+                },
+                "erase": {
+                    label: "Erase",
+                    faIcon: "fa fa-eraser",
+                    background: ""
+                },
+                "pin": {
+                    label: "Pin",
+                    icon: "pin_drop",
+                    background: ""
+                }
+            };
+            vm.measureBackground = "";
+            vm.metaBackground = highlightBackground;
+            $timeout(function () {
+                EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
+            });
+
+        }
 
         /*
          * Setup event watch

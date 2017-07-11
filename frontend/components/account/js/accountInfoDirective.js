@@ -48,13 +48,15 @@
 		/*
 		 * Init
 		 */
-		vm.accountOptions = {
-			teamspaces: {label: "Teamspaces"},
-			profile: {label: "Profile"},
-			billing: {label: "Billing"},
-			licenses: {label: "Licenses"},
-			assign: {label: "Assign Permissons" }
-		};
+		vm.$onInit = function() {
+			vm.accountOptions = {
+				teamspaces: {label: "Teamspaces"},
+				profile: {label: "Profile"},
+				billing: {label: "Billing"},
+				licenses: {label: "Licenses"},
+				assign: {label: "Assign Permissons" }
+			};
+		}
 
 		/**
 		 * Show account "page"

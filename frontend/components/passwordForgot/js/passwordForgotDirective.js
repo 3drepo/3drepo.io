@@ -43,7 +43,9 @@
         /*
          * Init
          */
-        vm.showProgress = false;
+        vm.$onInit = function() {
+            vm.showProgress = false;
+        }
 
         /*
          * Watch inputs to clear any message

@@ -56,31 +56,21 @@
 			accountsToUse, // For listing federations
 			dialogCloseToId;
 
-		vm.isSaving = false;
-		vm.modelRegExp = serverConfig.modelNameRegExp;
 
-		
-		// Init
-		// function getFederationOptions(model, account){
+		vm.$onInit = function() {
+			vm.isSaving = false;
+			vm.modelRegExp = serverConfig.modelNameRegExp;
+			vm.units = server_config.units;
+			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
+			dialogCloseToId = "#" + vm.dialogCloseTo;
 
-		// 	var isUserAccount = account.account === vm.account.account;
-		// 	return {
-		// 		edit: {label: "Edit", icon: "edit", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)},
-		// 		permissions: {label: "permissions", icon: "group", hidden: !isUserAccount},
-		// 		modelsetting: {label: "Settings", icon: "settings", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)},
-		// 		delete: {label: "Delete", icon: "delete", color: "#F44336", hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)}
-		// 	};
-			
-		// };
+		}
 
 		vm.getProjects = function(teamspace) {
 			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
 			return projects;
 		}
 
-		vm.units = server_config.units;
-		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
-		dialogCloseToId = "#" + vm.dialogCloseTo;
 
 		vm.showMenu = function(model, account){
 			

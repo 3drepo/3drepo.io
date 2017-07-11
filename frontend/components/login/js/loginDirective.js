@@ -41,19 +41,21 @@
 		/*
 		 * Init
 		 */
-		vm.version = serverConfig.apiVersion;
+		vm.$onInit = function() {
+			vm.version = serverConfig.apiVersion;
 
-		vm.unityLoaded = false;
-		vm.unityLoading = UnityUtil.onReady();
-		vm.unityLoading.then(function(resolved){
-			console.log("Loaded", resolved);
-			vm.unityLoaded = true;
-		})
+			vm.unityLoaded = false;
+			vm.unityLoading = UnityUtil.onReady();
+			vm.unityLoading.then(function(resolved){
+				console.log("Loaded", resolved);
+				vm.unityLoaded = true;
+			})
 
-		Auth.isLoggedIn().success(function(response){
-			StateManager.setStateVar("loggedIn", true);
-			EventService.send(EventService.EVENT.UPDATE_STATE);
-		});
+			Auth.isLoggedIn().then(function(response){
+				StateManager.setStateVar("loggedIn", true);
+				EventService.send(EventService.EVENT.UPDATE_STATE);
+			});
+		}
 
 		/**
 		 * Attempt to login

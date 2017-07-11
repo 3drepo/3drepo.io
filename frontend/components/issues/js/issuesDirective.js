@@ -60,19 +60,35 @@
 		/*
 		 * Init
 		 */
-		vm.saveIssueDisabled = true;
-		vm.issues = [];
-		vm.issuesToShow = [];
-		vm.showProgress = true;
-		vm.progressInfo = "Loading issues";
-		vm.availableJobs = null;
-		vm.modelUserJob;
-		vm.selectedIssue = null;
-		vm.autoSaveComment = false;
-		vm.onContentHeightRequest({height: 70}); // To show the loading progress
-		vm.savingIssue = false;
-		vm.issueDisplay = {};
-		
+		vm.$onInit = function() {
+			vm.saveIssueDisabled = true;
+			vm.issues = [];
+			vm.issuesToShow = [];
+			vm.showProgress = true;
+			vm.progressInfo = "Loading issues";
+			vm.availableJobs = null;
+			vm.modelUserJob;
+			vm.selectedIssue = null;
+			vm.autoSaveComment = false;
+			vm.onContentHeightRequest({height: 70}); // To show the loading progress
+			vm.savingIssue = false;
+			vm.issueDisplay = {};
+
+
+			/*
+			* Get the user roles for the model
+			*/
+			IssuesService.getUserJobFormodel(vm.account, vm.model).then(function (data) {
+				vm.modelUserJob = data;
+			});
+
+
+			$q.all([getIssue, getJob]).then(function(){
+				setAllIssuesAssignedRolesColors();
+			});
+
+		}
+
 		/*
 		 * Get all the Issues
 		 */
@@ -121,10 +137,6 @@
 			});
 		});
 
-		$q.all([getIssue, getJob]).then(function(){
-			setAllIssuesAssignedRolesColors();
-		});
-
 		/**
 		 * Define the assigned role colors for each issue
 		 */
@@ -158,12 +170,6 @@
 			}
 		}
 
-		/*
-		 * Get the user roles for the model
-		 */
-		IssuesService.getUserJobFormodel(vm.account, vm.model).then(function (data) {
-			vm.modelUserJob = data;
-		});
 
 		/*
 		 * New issue must have type and non-empty title

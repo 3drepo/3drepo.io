@@ -12,7 +12,7 @@
  *	GNU Affero General Public License for more details.
  *
  *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	along with vm program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function () {
@@ -27,25 +27,23 @@
 				bindings: {
 					data: "<",
 					userJob: "<"
-				}
+				},
+				controllerAs: 'vm',
+				bindToController: true,
 			}
 		);
 
 	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
 
 	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
-		var self = this,
+		var vm = this,
 			issueRoleIndicator = null;
 
-		/*
-		 * Init
-		 */
-		this.IssuesService = IssuesService;
 
 		/**
-		 * Init callback
+		 * Init
 		 */
-		this.$onInit = function () {
+		vm.$onInit = function () {
 			// Role indicator
 			$timeout(function () {
 				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
@@ -57,22 +55,22 @@
 		 * Monitor changes to parameters
 		 * @param {Object} changes
 		 */
-		this.$onChanges = function (changes) {
+		vm.$onChanges = function (changes) {
 			// Data
-			if (changes.hasOwnProperty("data") && this.data) {
+			if (changes.hasOwnProperty("data") && vm.data) {
 				setRoleIndicatorColour();
 
 				// Title
-				if (this.userJob) {
-					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				if (vm.userJob) {
+					vm.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
 
 			// User roles
-			if (changes.hasOwnProperty("userJob") && this.userJob) {
+			if (changes.hasOwnProperty("userJob") && vm.userJob) {
 				// Title
-				if (this.data) {
-					this.assignedToAUserRole = issueIsAssignedToAUserRole();
+				if (vm.data) {
+					vm.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
 		};
@@ -83,8 +81,8 @@
 		function setRoleIndicatorColour () {
 			var assignedRoleColour;
 
-			if (self.data && (self.data.assigned_roles.length > 0) && issueRoleIndicator) {
-				assignedRoleColour = IssuesService.getJobColor(self.data.assigned_roles[0]);
+			if (vm.data && (vm.data.assigned_roles.length > 0) && issueRoleIndicator) {
+				assignedRoleColour = IssuesService.getJobColor(vm.data.assigned_roles[0]);
 				if (assignedRoleColour !== null) {
 					issueRoleIndicator.css("border", "none");
 					issueRoleIndicator.css("background", assignedRoleColour);
@@ -96,7 +94,7 @@
 		 * Check if the issue is assigned to one of the user's roles
 		 */
 		function issueIsAssignedToAUserRole () {
-			return self.data.assigned_roles.indexOf(self.userJob._id) !==  -1;
+			return vm.data.assigned_roles.indexOf(vm.userJob._id) !==  -1;
 		}
 	}
 }());
