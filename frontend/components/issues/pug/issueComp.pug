@@ -58,12 +58,8 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 					md-select(ng-model="vm.issueData.topic_type", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
-	md-divider
-
-	#descriptionAndComments(flex)
-		// Description
-		h4 Description
 		.issueCompItemContainer(layout="column", layout-align="start", flex)
+			label.commendsAndDescription Description
 			div(layout="column", layout-align="start", flex)
 				div(ng-if="!vm.data", flex, layout="column")
 					md-input-container(flex, ng-if="!vm.hideDescription")
@@ -93,9 +89,13 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 					ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
 					img.issueCompThumbnailImage(ng-src="{{vm.descriptionThumbnail}}")
 
+	md-divider
+
+	#descriptionAndComments(flex)
+
 		// Comments
 		.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="vm.issueData.comments.length>0")
-			h4 Comments
+			label.commendsAndDescription Comments
 			div(ng-repeat="comment in vm.issueData.comments", layout="column", layout-align="start", flex)
 				div(ng-click="vm.showViewpoint($event, comment.viewpoint)"
 					layout="column"
@@ -178,7 +178,8 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 				ng-focus="vm.textInputHasFocus(true)"
 				ng-blur="vm.textInputHasFocus(false)"
 				ng-disabled="!vm.canComment"
-				placeholder="{{vm.canComment ? 'Comment' : (vm.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
+				ng-required="true"
+				placeholder="{{vm.getPlaceholderText()}}")
 
 			.issueCompThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
 				img.issueCompThumbnailImage(ng-src="{{vm.commentThumbnail}}")

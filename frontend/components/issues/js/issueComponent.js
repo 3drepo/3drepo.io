@@ -99,6 +99,18 @@
 
 		}
 
+		vm.getPlaceholderText = function() {
+			if (vm.canComment) {
+				return 'Write a new comment';
+			}
+			else if (vm.issueData.status === 'closed') {
+				return 'You cannot comment on a closed issue';
+			} 
+			else {
+				return 'You do not have permission to leave comments';
+			}
+		}
+
 	
 		vm.convertCommentTopicType = function() {
 			vm.issueData && vm.issueData.comments.forEach(function(comment){
@@ -941,7 +953,9 @@
 
 			$timeout(function(){
 				var commentArea = document.getElementById('descriptionAndComments');
-				commentArea.scrollTop = commentArea.scrollHeight;
+				if (commentArea) {
+					commentArea.scrollTop = commentArea.scrollHeight;
+				}
 			});
 		}
 

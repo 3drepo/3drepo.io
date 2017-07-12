@@ -317,14 +317,19 @@ issue-comp .issueCompThumbnail {
   background-repeat: no-repeat;
   background-size: contain;
 }
-issue-comp .issueCompThumbnail:hover {
-  cursor: pointer;
-  opacity: 0.8;
-}
 
 issue-comp .issueCompThumbnailImage {
   width: 100%;
   height: 100%;
+}
+
+issue-comp .issueCompThumbnailImage:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+issue-comp .commendsAndDescription {
+  padding-bottom: 10px;
 }
 
 issue-comp .issueCompIssueOwner {
