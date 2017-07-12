@@ -27,7 +27,6 @@
            		bindToController: true,
 				templateUrl: "issueScreenShot.html",
 				bindings: {
-					close: "&",
 					screenShotSave: "&",
 					screenShot: "="
 				}
@@ -109,7 +108,6 @@
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
-			vm.close();
 		};
 
 		/**
@@ -284,7 +282,8 @@
 			screenShot = screenShotCanvas.toDataURL('image/png');
 			// Remove base64 header text
 			//screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
-			//console.log(screenShot);
+			console.log("screenshot: saveScreenshot");
+			console.log("screenshot", vm.screenShotSave);
 			vm.screenShotSave({screenShot: screenShot});
 
 			vm.closeDialog();

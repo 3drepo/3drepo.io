@@ -87,7 +87,7 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 				
-				.issueCompThumbnail(
+				//.issueCompThumbnail(
 					ng-if="vm.descriptionThumbnail"
 					ng-style="{'background-image': 'url({{vm.descriptionThumbnail}})'}"
 					ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
@@ -151,12 +151,11 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 						label {{comment.timeStamp}}
 
 				// Thumbnail
-				p Screenshot: {{comment.viewpoint}}
 				.issueCompThumbnail(
 					layout="row"
 					layout-align="center"
-					ng-style="{'background-image': 'url({{comment.viewpoint.screenshot}})'}"
-					ng-if="comment.viewpoint.screenshot"
+					ng-style="{'background-image': 'url({{comment.viewpoint.screenshotPath}})'}"
+					ng-if="comment.viewpoint.screenshotPath"
 					ng-click="vm.showScreenShot($event, comment.viewpoint)"
 					flex)
 					
@@ -167,12 +166,13 @@ div.heightFix(flex, layout="column", layout-fill, tabindex="0", tdr-focus="true"
 	.issueCompItemContainer#issueCompNewComment(layout="column", layout-align="start", ng-if="vm.data")
 		md-input-container.fillHeight(flex, md-no-float)
 			textarea(
-			ng-model="vm.comment"
-			ng-change="vm.commentChange()"
-			ng-focus="vm.textInputHasFocus(true)"
-			ng-blur="vm.textInputHasFocus(false)"
-			ng-disabled="!vm.canComment"
-			placeholder="{{vm.canComment ? 'Comment' : (vm.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
+				ng-model="vm.comment"
+				ng-change="vm.commentChange()"
+				ng-focus="vm.textInputHasFocus(true)"
+				ng-blur="vm.textInputHasFocus(false)"
+				ng-disabled="!vm.canComment"
+				placeholder="{{vm.canComment ? 'Comment' : (vm.issueData.status === 'closed' ? 'You cannot comment on a closed issue' : 'You do not have permission to leave comments')}}")
+
 			.issueCompThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
 				img.issueCompThumbnailImage(ng-src="{{vm.commentThumbnail}}")
 

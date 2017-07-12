@@ -383,10 +383,6 @@
 		vm.showScreenShot = function (event, viewpoint) {
 			vm.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
 			$mdDialog.show({
-				controller: function () {
-					vm.dialogCaller = vm;
-				},
-				controllerAs: "vm",
 				templateUrl: "issueScreenShotDialog.html",
 				targetEvent: event
 			});
@@ -414,13 +410,14 @@
 
 				case "screen_shot":
 
+					console.log("screenshot: doAction")
 					// There is no concept of selected in screenshot as there will be a popup once you click the button
 					vm.actions[action].selected = false;
 
 					delete vm.screenShot; // Remove any clicked on screen shot
 					$mdDialog.show({
-						controller: ScreenShotDialogController,
-						controllerAs: "vm",
+						controller: function () { this.issueComponent = vm; },
+						controllerAs: 'vm',
 						templateUrl: "issueScreenShotDialog.html",
 						targetEvent: event
 					});
@@ -663,7 +660,11 @@
 					});
 			}
 			else {
-				vm.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}});
+				EventService.send(
+					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
+				);
+				
 				viewpointPromise.promise.then(function (viewpoint) {
 					IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
 						.then(function (response) {
@@ -684,6 +685,9 @@
 		 * @param comment
 		 */
 		function afterNewComment(comment, noDeleteInput) {
+
+			console.log("screenshot: afterNewComment func", comment);
+
 			// mark all other comments sealed
 			vm.issueData.comments.forEach(function(comment){
 				comment.sealed = true;
@@ -694,6 +698,7 @@
 			}
 
 			if(comment.viewpoint && comment.viewpoint.screenshot){
+				console.log("screenshot, afternewcomment", comment.viewpoint.screenshot)
 				comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			}
 
@@ -792,13 +797,18 @@
 		vm.screenShotSave = function (data) {
 			var viewpointPromise = $q.defer();
 
+			console.log("screenshot: screenshotSave", data)
 			savedScreenShot = data.screenShot;
+
 			if (typeof vm.data === "object") {
+
+				console.log("screenshot: setting commentThumbnail")
 				// Comment
 				vm.commentThumbnail = data.screenShot;
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
+				console.log("screenshot: sending event")
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT,
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
@@ -816,28 +826,16 @@
 			}
 
 			viewpointPromise.promise.then(function (viewpoint) {
-				console.log("screenshot", viewpoint)
+				console.log("Resolved screenshot", viewpoint)
 				commentViewpoint = viewpoint;
 				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
-			});
+			}).catch(function(error){
+				console.error("Screenshot request failed: ", error);
+			})
 
 			setContentHeight();
 		};
 
-		/**
-		 * Controller for screen shot dialog
-		 */
-		function ScreenShotDialogController () {
-			vm.dialogCaller = vm;
-
-			/**
-			 * Deselect the screen shot action button after close the screen shot dialog
-			 */
-			vm.closeScreenShot = function () {
-				// vm.actions[currentAction].color = "";
-				// currentAction = null;
-			};
-		}
 
 		/**
 		 * Set the role indicator colour
@@ -934,9 +932,9 @@
 				}
 			}
 
+			console.log("screenshot:: issueComponent")
 			vm.contentHeight({height: height});
 
-			
 		}
 
 		function commentAreaScrollToBottom(){

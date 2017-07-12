@@ -322,6 +322,10 @@ issue-comp .issueCompThumbnail:hover {
   opacity: 0.8;
 }
 
+issue-comp .issueCompThumbnailImage {
+  width: 100%;
+}
+
 issue-comp .issueCompIssueOwner {
   margin-top: 0;
 }

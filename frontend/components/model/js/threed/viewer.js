@@ -598,7 +598,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		{
 			console.log("Viewer screenshot", promise);
 			UnityUtil.requestScreenShot(promise);
-
 		}
 
 		this.onMouseUp = function(functionToBind) {
