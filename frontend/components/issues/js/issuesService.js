@@ -36,6 +36,90 @@
 			updatedIssue = null,
 			issueDisplay = {};
 
+
+		obj.deselectPin = function(issue) {
+			var data;
+			// Issue with position means pin
+			if (issue.position.length > 0) {
+				data = {
+					id: issue._id,
+					colours: [[0.5, 0, 0]]
+				};
+				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
+			}
+		}
+
+		obj.showIssue = function(issue) {
+			var data,
+				pinHighlightColour = [1.0000, 0.7, 0.0];
+
+			// Highlight pin, move camera and setup clipping plane
+			data = {
+				id: issue._id,
+				colours: [pinHighlightColour]
+			};
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
+
+			data = {
+				position : issue.viewpoint.position,
+				view_dir : issue.viewpoint.view_dir,
+				up: issue.viewpoint.up,
+				account: issue.account,
+				model: issue.model
+
+			};
+			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, data);
+
+			data = {
+				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
+				account: issue.account,
+				model: issue.model,
+			};
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, data);
+
+			// Remove highlight from any multi objects
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+
+			// clear selection
+			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+
+			// Show multi objects
+			if (issue.hasOwnProperty("group_id")) {
+				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
+
+					console.log(response.data);
+					var ids = [];
+					response.data.objects.forEach(function(obj){
+						var key = obj.account + "@" +  obj.model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
+						ids[key].push(vm.treeMap.sharedIdToUid[obj.shared_id]);
+					});
+
+					for(var key in ids)
+					{
+
+						var vals = key.split('@');
+						var account = vals[0];
+						var model = vals[1];
+
+						data = {
+							source: "tree",
+							account: account,
+							model: model,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true
+						
+						};
+						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+					}
+				});
+			}
+		}
+
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
 			var date = new Date(time),

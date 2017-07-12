@@ -95,8 +95,6 @@
 
 			vm.notificationStarted = false;
 
-			console.log("userJob", vm.userJob)
-
 		}
 
 		vm.getPlaceholderText = function() {
@@ -368,6 +366,8 @@
 			//README: vm should also highlight selected objects within vm issue, but 
 			//will require a lot of rewriting for vm to work at present!
 			if (viewpoint && (event.type === "click")) {
+
+				// TODO: make this work via ssues Service
 				var data = {
 					position : viewpoint.position,
 					view_dir : viewpoint.view_dir,
@@ -377,6 +377,7 @@
 				};
 				vm.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 
+
 				data = {
 					clippingPlanes: viewpoint.clippingPlanes,
 					fromClipPanel: false,
@@ -384,6 +385,7 @@
 					model: vm.issueData.model
 				};
 				vm.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
+
 			}
 		};
 

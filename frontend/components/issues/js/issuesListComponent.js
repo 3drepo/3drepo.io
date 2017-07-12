@@ -53,7 +53,7 @@
 	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
 	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
-		var self = this,
+		var vm = this,
 			selectedIssue = null,
 			selectedIssueIndex = null,
 			issuesListItemHeight = 141,
@@ -67,17 +67,17 @@
 			excludeRoles = [];
 
 		// Init
-		this.$onInit = function() {
-			this.UtilsService = UtilsService;
-			this.IssuesService = IssuesService;
-			this.setFocus = setFocus;
+		vm.$onInit = function() {
+			vm.UtilsService = UtilsService;
+			vm.IssuesService = IssuesService;
+			vm.setFocus = setFocus;
 		}
 		
 		/**
 		 * Monitor changes to parameters
 		 * @param {Object} changes
 		 */
-		this.$onChanges = function (changes) {
+		vm.$onChanges = function (changes) {
 			var i, length,
 				index,
 				upArrow = 38,
@@ -88,40 +88,40 @@
 				updatedIssue = IssuesService.updatedIssue;
 
 			// All issues
-			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
-				if (this.allIssues.length > 0) {
-					self.toShow = "list";
+			if (changes.hasOwnProperty("allIssues") && vm.allIssues) {
+				if (vm.allIssues.length > 0) {
+					vm.toShow = "list";
 
 					// Check for updated issue
 					if (updatedIssue) {
-						index = this.allIssues.findIndex(function (issue) {
+						index = vm.allIssues.findIndex(function (issue) {
 							return (issue._id === updatedIssue._id);
 						});
-						this.allIssues[index] = updatedIssue;
+						vm.allIssues[index] = updatedIssue;
 					}
 
 					// Check for issue display
-					if (self.issueDisplay.showClosed) {
-						showClosed = self.issueDisplay.showClosed;
+					if (vm.issueDisplay.showClosed) {
+						showClosed = vm.issueDisplay.showClosed;
 					}
-					if (self.issueDisplay.sortOldestFirst) {
-						sortOldestFirst = self.issueDisplay.sortOldestFirst;
+					if (vm.issueDisplay.sortOldestFirst) {
+						sortOldestFirst = vm.issueDisplay.sortOldestFirst;
 					}
-					if (self.issueDisplay.showSubModelIssues){
-						showSubModelIssues = self.issueDisplay.showSubModelIssues;
+					if (vm.issueDisplay.showSubModelIssues){
+						showSubModelIssues = vm.issueDisplay.showSubModelIssues;
 					}
 					setupIssuesToShow();
 					showPins();
 				}
 				else {
-					self.toShow = "info";
-					self.info = "There are currently no open issues";
-					self.contentHeight({height: infoHeight});
+					vm.toShow = "info";
+					vm.info = "There are currently no open issues";
+					vm.contentHeight({height: infoHeight});
 				}
 			}
 
 			// Filter text
-			if (changes.hasOwnProperty("filterText") && (typeof this.filterText !== "undefined")) {
+			if (changes.hasOwnProperty("filterText") && (typeof vm.filterText !== "undefined")) {
 				setupIssuesToShow();
 				showPins();
 			}
@@ -131,16 +131,16 @@
 				// Up/Down arrow
 				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
 					// This is done to overcome the problem where focus is sometimes set on an issue when the scroll bar moves
-					this.setFocus = null;
+					vm.setFocus = null;
 
 					// Handle focused issue
 					if (focusedIssueIndex !== null) {
-						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (vm.issuesToShow.length - 1))) {
 							if (selectedIssue !== null) {
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
 							}
-							this.issuesToShow[focusedIssueIndex].focus = false;
+							vm.issuesToShow[focusedIssueIndex].focus = false;
 							focusedIssueIndex += 1;
 							selectedIssueIndex = focusedIssueIndex;
 						}
@@ -149,16 +149,16 @@
 								selectedIssue.selected = false;
 								selectedIssue.focus = false;
 							}
-							this.issuesToShow[focusedIssueIndex].focus = false;
+							vm.issuesToShow[focusedIssueIndex].focus = false;
 							focusedIssueIndex -= 1;
 							selectedIssueIndex = focusedIssueIndex;
 						}
-						this.select(event, this.issuesToShow[selectedIssueIndex]);
+						vm.select(event, vm.issuesToShow[selectedIssueIndex]);
 					}
 
 					// Handle selected issue
 					else if (selectedIssueIndex !== null) {
-						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
 							selectedIssue.selected = false;
 							selectedIssueIndex += 1;
 						}
@@ -167,7 +167,7 @@
 							selectedIssueIndex -= 1;
 						}
 						deselectPin(selectedIssue);
-						this.select(event, this.issuesToShow[selectedIssueIndex]);
+						vm.select(event, vm.issuesToShow[selectedIssueIndex]);
 					}
 				}
 				// Right arrow - do action on key up
@@ -176,37 +176,37 @@
 				}
 				else if (rightArrowDown && (changes.keysDown.currentValue.indexOf(rightArrow) === -1)) {
 					rightArrowDown = false;
-					self.editIssue(selectedIssue);
+					vm.editIssue(selectedIssue);
 				}
 			}*/
 
 			// Menu option
-			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
-				if (this.menuOption.value === "sortByDate") {
+			if (changes.hasOwnProperty("menuOption") && vm.menuOption) {
+				if (vm.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
-					self.issueDisplay.sortOldestFirst = sortOldestFirst;
+					vm.issueDisplay.sortOldestFirst = sortOldestFirst;
 				}
-				else if (this.menuOption.value === "showClosed") {
+				else if (vm.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
-					self.issueDisplay.showClosed = showClosed;
+					vm.issueDisplay.showClosed = showClosed;
 				}
-				else if (this.menuOption.value === "showSubModels") {
+				else if (vm.menuOption.value === "showSubModels") {
 					showSubModelIssues = !showSubModelIssues;
-					self.issueDisplay.showSubModelIssues = showSubModelIssues;
+					vm.issueDisplay.showSubModelIssues = showSubModelIssues;
 				}
-				else if (this.menuOption.value === "print") {
+				else if (vm.menuOption.value === "print") {
 					var ids = [];
 					
-					this.issuesToShow.forEach(function(issue){
+					vm.issuesToShow.forEach(function(issue){
 						ids.push(issue._id);
 					});
 
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.model + "/issues.html?ids=" + ids.join(',')), "_blank");
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(',')), "_blank");
 				}
-				else if (this.menuOption.value === "exportBCF") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.model + "/issues.bcfzip"), "_blank");
+				else if (vm.menuOption.value === "exportBCF") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.bcfzip"), "_blank");
 				}
-				else if (this.menuOption.value === "importBCF") {
+				else if (vm.menuOption.value === "importBCF") {
 
 					var file = document.createElement('input');
 					file.setAttribute('type', 'file');
@@ -214,19 +214,19 @@
 					file.click();
 
 					file.addEventListener("change", function () {
-						self.importBcf({file: file.files[0]});
+						vm.importBcf({file: file.files[0]});
 					});
-				} else if(this.menuOption.value === "filterRole"){
+				} else if(vm.menuOption.value === "filterRole"){
 					
-					var index = excludeRoles.indexOf(this.menuOption.role);
+					var index = excludeRoles.indexOf(vm.menuOption.role);
 
-					if(this.menuOption.selected){
+					if(vm.menuOption.selected){
 						if(index !== -1){
 							excludeRoles.splice(index, 1);
 						}
 					} else {
 						if(index === -1){
-							excludeRoles.push(this.menuOption.role);
+							excludeRoles.push(vm.menuOption.role);
 						}
 					}
 
@@ -237,25 +237,25 @@
 			}
 
 			// Updated issue
-			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
-				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
-					if (this.updatedIssue._id === this.allIssues[i]._id) {
-						this.allIssues[i] = this.updatedIssue;
+			if (changes.hasOwnProperty("updatedIssue") && vm.updatedIssue) {
+				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
+					if (vm.updatedIssue._id === vm.allIssues[i]._id) {
+						vm.allIssues[i] = vm.updatedIssue;
 						break;
 					}
 				}
 			}
 
 			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && this.issuesToShow) {
-				for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
+			if (changes.hasOwnProperty("selectedIssue") && vm.issuesToShow) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
-					this.issuesToShow[i].selected = false;
-					this.issuesToShow[i].focus = false;
+					vm.issuesToShow[i].selected = false;
+					vm.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
-					if (this.selectedIssue && this.issuesToShow[i]._id === this.selectedIssue._id) {
-						selectedIssue = this.issuesToShow[i];
+					if (vm.selectedIssue && vm.issuesToShow[i]._id === vm.selectedIssue._id) {
+						selectedIssue = vm.issuesToShow[i];
 						selectedIssue.selected = true;
 						selectedIssue.focus = true;
 						focusedIssueIndex = i;
@@ -264,11 +264,11 @@
 				}
 			}
 
-			if(changes.hasOwnProperty('displayIssue') && this.displayIssue){
-				//console.log('changes.displayIssue', this.displayIssue)
+			if(changes.hasOwnProperty('displayIssue') && vm.displayIssue){
+				//console.log('changes.displayIssue', vm.displayIssue)
 				var that = this;
 
-				this.editIssue(this.displayIssue);
+				vm.editIssue(vm.displayIssue);
 				$timeout(function(){
 					showIssue(that.displayIssue);
 				}, 1500);
@@ -281,28 +281,41 @@
 		 * @param event
 		 * @param issue
 		 */
-		this.select = function (event, issue) {
+		vm.select = function (event, issue) {
 			if (event.type === "click") {
+
 				if ((selectedIssue === null) || (selectedIssue._id === issue._id)) {
-					selectedIssue = issue;
-					selectedIssue.selected = true;
-					selectedIssue.focus = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
+					resetViewerState(issue);
+					setViewerState(issue);
 				}
 				else {
-					selectedIssue.selected = false;
-					selectedIssue.focus = false;
-					deselectPin(selectedIssue);
-					selectedIssue = issue;
-					selectedIssue.selected = true;
-					selectedIssue.focus = true;
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
+					setViewerState(issue);
 				}
-				this.onSelectIssue({issue: selectedIssue});
+
+				vm.onSelectIssue({issue: selectedIssue});
 			}
 		};
+
+		function resetViewerState(issue) {
+
+			selectedIssue = issue;
+			selectedIssue.selected = false;
+			selectedIssue.focus = false;
+
+			deselectPin(selectedIssue);
+
+		}
+
+		function setViewerState(issue) {
+
+			selectedIssue = issue;
+			selectedIssue.selected = true;
+			selectedIssue.focus = true;
+
+			showIssue(selectedIssue);
+			setSelectedIssueIndex(selectedIssue);
+
+		}
 
 		/**
 		 * Set focus on issue
@@ -320,9 +333,9 @@
 		/**
 		 * Allow set focus
 		 */
-		this.initSetFocus = function () {
-			if (this.setFocus === null) {
-				this.setFocus = setFocus;
+		vm.initSetFocus = function () {
+			if (vm.setFocus === null) {
+				vm.setFocus = setFocus;
 			}
 		};
 
@@ -331,7 +344,7 @@
 		 * @param event
 		 * @param issue
 		 */
-		this.removeFocus = function (event, issue) {
+		vm.removeFocus = function (event, issue) {
 			focusedIssueIndex = null;
 			issue.focus = false;
 		};
@@ -339,8 +352,8 @@
 		/**
 		 * Set up editing of issue
 		 */
-		this.editIssue = function (issue) {
-			this.onEditIssue({issue: issue});
+		vm.editIssue = function (issue) {
+			vm.onEditIssue({issue: issue});
 		};
 
 		/**
@@ -351,8 +364,8 @@
 			var i, length;
 
 			if (selectedIssue !== null) {
-				for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
-					if (self.issuesToShow[i]._id === selectedIssue._id) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (vm.issuesToShow[i]._id === selectedIssue._id) {
 						selectedIssueIndex = i;
 					}
 				}
@@ -367,75 +380,7 @@
 		 * @param issue
 		 */
 		function showIssue (issue) {
-
-			var data,
-				pinHighlightColour = [1.0000, 0.7, 0.0];
-
-			// Highlight pin, move camera and setup clipping plane
-			data = {
-				id: issue._id,
-				colours: [pinHighlightColour]
-			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
-
-			data = {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				model: issue.model
-
-			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
-
-			data = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model,
-			};
-			self.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
-
-			// Remove highlight from any multi objects
-			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
-
-			// clear selection
-			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-
-			// Show multi objects
-			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
-
-					console.log(response.data);
-					var ids = [];
-					response.data.objects.forEach(function(obj){
-						var key = obj.account + "@" +  obj.model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-						ids[key].push(self.treeMap.sharedIdToUid[obj.shared_id]);
-					});
-
-					for(var key in ids)
-					{
-
-						var vals = key.split('@');
-						var account = vals[0];
-						var model = vals[1];
-
-						data = {
-							source: "tree",
-							account: account,
-							model: model,
-							ids: ids[key],
-							colour: response.data.colour,
-							multi: true
-						
-						};
-						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
-					}
-				});
-			}
+			IssuesService.showIssue(issue);
 		}
 
 		/**
@@ -443,15 +388,7 @@
 		 * @param issue
 		 */
 		function deselectPin (issue) {
-			var data;
-			// Issue with position means pin
-			if (issue.position.length > 0) {
-				data = {
-					id: issue._id,
-					colours: [[0.5, 0, 0]]
-				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, value: data});
-			}
+			IssuesService.deselectPin(issue);
 		}
 
 		/**
@@ -461,27 +398,27 @@
 			var i = 0, j = 0, length = 0,
 				sortedIssuesLength;
 
-			self.issuesToShow = [];
+			vm.issuesToShow = [];
 			issuesToShowWithPinsIDs = {};
 
-			if (self.allIssues.length > 0) {
+			if (vm.allIssues.length > 0) {
 				// Sort
-				self.issuesToShow = [self.allIssues[0]];
-				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
-					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((self.allIssues[i].created < self.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((self.allIssues[i].created > self.issuesToShow[j].created) && (!sortOldestFirst))) {
-							self.issuesToShow.splice(j, 0, self.allIssues[i]);
+				vm.issuesToShow = [vm.allIssues[0]];
+				for (i = 1, length = vm.allIssues.length; i < length; i += 1) {
+					for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
+						if (((vm.allIssues[i].created < vm.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((vm.allIssues[i].created > vm.issuesToShow[j].created) && (!sortOldestFirst))) {
+							vm.issuesToShow.splice(j, 0, vm.allIssues[i]);
 							break;
 						}
-						else if (j === (self.issuesToShow.length - 1)) {
-							self.issuesToShow.push(self.allIssues[i]);
+						else if (j === (vm.issuesToShow.length - 1)) {
+							vm.issuesToShow.push(vm.allIssues[i]);
 						}
 					}
 				}
 
 				// Filter text
-				if (angular.isDefined(self.filterText) && self.filterText !== "") {
+				if (angular.isDefined(vm.filterText) && vm.filterText !== "") {
 
 					// Helper function for searching strings
 					var stringSearch = function(superString, subString)
@@ -493,15 +430,15 @@
 						return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 					};
 
-					self.issuesToShow = ($filter('filter')(self.issuesToShow, function(issue) {
+					vm.issuesToShow = ($filter('filter')(vm.issuesToShow, function(issue) {
 						// Required custom filter due to the fact that Angular
 						// does not allow compound OR filters
 						var i;
 
 						// Search the title
-						var show = stringSearch(issue.title, self.filterText);
-						show = show || stringSearch(issue.timeStamp, self.filterText);
-						show = show || stringSearch(issue.owner, self.filterText);
+						var show = stringSearch(issue.title, vm.filterText);
+						show = show || stringSearch(issue.timeStamp, vm.filterText);
+						show = show || stringSearch(issue.owner, vm.filterText);
 
 						// Search the list of assigned issues
 						if (!show && issue.hasOwnProperty("assigned_roles"))
@@ -509,7 +446,7 @@
 							i = 0;
 							while(!show && (i < issue.assigned_roles.length))
 							{
-								show = show || stringSearch(issue.assigned_roles[i], self.filterText);
+								show = show || stringSearch(issue.assigned_roles[i], vm.filterText);
 								i += 1;
 							}
 						}
@@ -521,8 +458,8 @@
 
 							while(!show && (i < issue.comments.length))
 							{
-								show = show || stringSearch(issue.comments[i].comment, self.filterText);
-								show = show || stringSearch(issue.comments[i].owner, self.filterText);
+								show = show || stringSearch(issue.comments[i].comment, vm.filterText);
+								show = show || stringSearch(issue.comments[i].owner, vm.filterText);
 								i += 1;
 							}
 						}
@@ -532,39 +469,39 @@
 				}
 
 				// Closed
-				for (i = (self.issuesToShow.length - 1); i >= 0; i -= 1) {
-					if (!showClosed && (self.issuesToShow[i].status === "closed")) {
-						self.issuesToShow.splice(i, 1);
+				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+					if (!showClosed && (vm.issuesToShow[i].status === "closed")) {
+						vm.issuesToShow.splice(i, 1);
 					}
 				}
 
 				// Sub models
-				self.issuesToShow = self.issuesToShow.filter(function (issue) {
-					return showSubModelIssues ? true : (issue.model === self.model);
+				vm.issuesToShow = vm.issuesToShow.filter(function (issue) {
+					return showSubModelIssues ? true : (issue.model === vm.model);
 				});
 
 				//Roles Filter
-				self.issuesToShow = self.issuesToShow.filter(function(issue){
+				vm.issuesToShow = vm.issuesToShow.filter(function(issue){
 					return excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			}
 
 			// Create list of issues to show with pins
-			for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
-				if (self.issuesToShow[i].position.length > 0) {
-					issuesToShowWithPinsIDs[self.issuesToShow[i]._id] = true;
+			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+				if (vm.issuesToShow[i].position.length > 0) {
+					issuesToShowWithPinsIDs[vm.issuesToShow[i]._id] = true;
 				}
 			}
 
 			// Setup what to show
-			if (self.issuesToShow.length > 0) {
-				self.toShow = "list";
-				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+			if (vm.issuesToShow.length > 0) {
+				vm.toShow = "list";
+				vm.contentHeight({height: vm.issuesToShow.length * issuesListItemHeight});
 			}
 			else {
-				self.toShow = "info";
-				self.info = "No issues to show";
-				self.contentHeight({height: infoHeight});
+				vm.toShow = "info";
+				vm.info = "No issues to show";
+				vm.contentHeight({height: infoHeight});
 			}
 		}
 
@@ -577,12 +514,12 @@
 				pinData;
 
 			// Go through all issues with pins
-			for (i = 0, length = self.allIssues.length; i < length; i += 1) {
-				if (self.allIssues[i].position.length > 0) {
-					pin = angular.element(document.getElementById(self.allIssues[i]._id));
+			for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
+				if (vm.allIssues[i].position.length > 0) {
+					pin = angular.element(document.getElementById(vm.allIssues[i]._id));
 					if (pin.length > 0) {
 						// Existing pin
-						if (issuesToShowWithPinsIDs[self.allIssues[i]._id]) {
+						if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
 							pin[0].setAttribute("render", "true");
 						}
 						else {
@@ -590,20 +527,20 @@
 						}
 					}
 					else {
-                        if (issuesToShowWithPinsIDs[self.allIssues[i]._id]) {
+                        if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
                             // Create new pin
                             pinData = {
-                                id: self.allIssues[i]._id,
-                                position: self.allIssues[i].position,
-                                norm: self.allIssues[i].norm,
-                                account: self.allIssues[i].account,
-                                model: self.allIssues[i].model
+                                id: vm.allIssues[i]._id,
+                                position: vm.allIssues[i].position,
+                                norm: vm.allIssues[i].norm,
+                                account: vm.allIssues[i].account,
+                                model: vm.allIssues[i].model
                             };
                             var pinColor = [0.5, 0, 0];
-                            if (self.selectedIssue && self.allIssues[i]._id === self.selectedIssue._id) {
+                            if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
                                 pinColor = [1.0, 0.7, 0];
                             }
-                            IssuesService.addPin(pinData, [pinColor], self.allIssues[i].viewpoint);
+                            IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
                         }
 					}
 				}
