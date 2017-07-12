@@ -46,9 +46,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "Auth", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, Auth, $timeout, $scope, serverConfig, AnalyticService, $state) {
+	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -110,12 +110,12 @@
 
 		vm.setCanUpdateStatus = function(issueData) {
 
-			if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
+			if(!AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
 				console.log('no create issue permissions')
 				return vm.canUpdateStatus = false;
 			}
 
-			vm.canUpdateStatus = (Auth.getUsername() === issueData.owner) ||
+			vm.canUpdateStatus = (AuthService.getUsername() === issueData.owner) ||
 								 issueData.assigned_roles.indexOf(vm.userJob._id) !== -1
 
 		}
@@ -130,7 +130,7 @@
 
 			if(changes.hasOwnProperty('modelSettings')){
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
-				vm.canComment = Auth.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
+				vm.canComment = AuthService.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
 				//convert comment topic_types
 				vm.convertCommentTopicType();
 			}
@@ -144,7 +144,7 @@
 					var disableStatus;
 
 					// Set up statuses
-					disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(Auth.getUsername() === vm.data.owner);
+					disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(AuthService.getUsername() === vm.data.owner);
 					vm.statuses[0].disabled = disableStatus;
 					vm.statuses[3].disabled = disableStatus;
 
@@ -153,7 +153,7 @@
 					vm.issueData.name = IssuesService.generateTitle(vm.issueData); // Change name to title for display purposes
 					vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
 					vm.issueData.comments.forEach(function(comment){
-						if(comment.owner !== Auth.getUsername()){
+						if(comment.owner !== AuthService.getUsername()){
 							comment.sealed = true;
 						}
 					});
@@ -163,12 +163,12 @@
 						vm.descriptionThumbnail = UtilsService.getServerUrl(vm.issueData.viewpoint.screenshotSmall);
 					}
 					// Issue owner or user with same role as issue creator role can update issue
-					vm.canUpdate = (Auth.getUsername() === vm.issueData.owner);
+					vm.canUpdate = (AuthService.getUsername() === vm.issueData.owner);
 					if (!vm.canUpdate) {
 						vm.canUpdate = vm.userJob._id && vm.issueData.creator_role && (vm.userJob._id === vm.issueData.creator_role);
 					}
 
-					if(!Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
+					if(!AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
 						vm.canUpdate = false;
 					}
 
@@ -689,7 +689,7 @@
 				comment.sealed = true;
 			});
 
-			if(comment.owner !== Auth.getUsername()){
+			if(comment.owner !== AuthService.getUsername()){
 				comment.sealed = true;
 			}
 
@@ -868,7 +868,7 @@
 
 			// for (i = 0, iLength = vm.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
 			// 	for (j = 0, jLength = vm.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
-			// 		hasAdminRole = (vm.userRoles[i] === vm.availableRoles[j].role) && (Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.availableRoles[j].permissions));
+			// 		hasAdminRole = (vm.userRoles[i] === vm.availableRoles[j].role) && (AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.availableRoles[j].permissions));
 			// 	}
 			// }
 

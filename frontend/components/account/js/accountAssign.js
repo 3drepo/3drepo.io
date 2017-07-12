@@ -103,8 +103,7 @@
 			var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
 			$http.get(url)
 			.then(function(response) {
-				console.log(response);
-				
+
 				vm.teamspaces = response.data.accounts.filter(function(teamspace){
 					return teamspace.isAdmin === true;
 				});

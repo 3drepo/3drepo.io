@@ -55,9 +55,9 @@
 	}
 
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "Auth", "AnalyticService", "AccountDataService", "StateManager"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountDataService", "StateManager"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, Auth, AnalyticService, AccountDataService, StateManager) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, AuthService, AnalyticService, AccountDataService, StateManager) {
 
 		var vm = this,
 		infoTimeout = 4000,
@@ -80,12 +80,12 @@
 				upload: {
 					label: "Upload file", 
 					icon: "cloud_upload", 
-					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
+					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
 				},
 				permissions: {
 					label: "Permissions", 
 					icon: "group", 
-					// !isUserAccount will be changed to Auth.hasPermission... when someone can pay for other accounts other than their own
+					// !isUserAccount will be changed to AuthService.hasPermission... when someone can pay for other accounts other than their own
 					hidden: !isUserAccount
 				},
 				revision: {
@@ -96,21 +96,21 @@
 				modelsetting: {
 					label: "Settings",
 					icon: "settings", 
-					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
+					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
 				}
 			};
 			if(vm.model.timestamp && !vm.model.federate){
 				vm.modelOptions.download = {
 					label: "Download", 
 					icon: "cloud_download", 
-					hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
+					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
 				};
 			}
 			vm.uploadButtonDisabled = true;
 			vm.modelOptions.delete = {
 				label: "Delete", 
 				icon: "delete", 
-				hidden: !Auth.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
+				hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
 				color: "#F44336"
 			};
 
@@ -167,7 +167,7 @@
 			if (!vm.model.uploading) {
 				if (vm.model.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					if(Auth.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)){
+					if(AuthService.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)){
 						vm.tag = null;
 						vm.desc = null;
 						vm.modelToUpload = null;
@@ -432,7 +432,7 @@
 		 */
 		function goToPermissions(event, account, project, model) {
 			//vm.account, vm.project, vm.model
-			console.log("VALUES", account, project.name, model.model);
+
 			$location.search('account', account);
 			$location.search('project', project.name);
 			$location.search('model', model.model);

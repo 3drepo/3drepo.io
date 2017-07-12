@@ -83,7 +83,7 @@
 			vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
 			/*
-			* Auth stuff
+			* AuthService stuff
 			*/
 			if (serverConfig.hasOwnProperty("auth")) {
 				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {

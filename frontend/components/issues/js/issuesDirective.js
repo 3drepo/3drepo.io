@@ -49,9 +49,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "Auth", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, Auth, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
 		var vm = this,
 			issue,
 			pinHighlightColour = [1.0000, 0.7, 0.0];
@@ -198,7 +198,7 @@
 				watchNotification();
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY){
 
-				if(Auth.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+				if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 					vm.canAddIssue = true;
 				}
 				vm.subModels = event.value.subModels || [];

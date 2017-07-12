@@ -24,9 +24,22 @@
 	AccountService.$inject = ["$http", "$q", "serverConfig", "UtilsService"];
 
 	function AccountService($http, $q, serverConfig, UtilsService) {
-		var obj = {},
-			deferred,
-			bid4free;
+		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
+
+		var service = {
+			getUserInfo : getUserInfo,
+			newSubscription : newSubscription,
+			uploadStatus : uploadStatus,
+			uploadModel : uploadModel,
+			newModel : newModel,
+			updatePassword : updatePassword,
+			updateInfo : updateInfo,
+		}
+
+		return service;
+
+
+		///////////
 
 		/**
 		 * Do POST
@@ -87,7 +100,7 @@
 		 * @param {Object} info
 		 * @returns {*}
 		 */
-		obj.updateInfo = function (username, info) {
+		function updateInfo(username, info) {
 			return doPut(info, username);
 		};
 
@@ -98,18 +111,9 @@
 		 * @param {Object} passwords
 		 * @returns {*}
 		 */
-		obj.updatePassword = function (username, passwords) {
+		function updatePassword(username, passwords) {
 			return doPut(passwords, username);
 		};
-
-		// obj.getModelsBid4FreeStatus = function (username) {
-		// 	bid4free = $q.defer();
-		// 	$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
-		// 		.then(function (response) {
-		// 			bid4free.resolve(response);
-		// 		});
-		// 	return bid4free.promise;
-		// };
 
 		/**
 		 * Create a new model
@@ -117,7 +121,7 @@
 		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.newModel = function (modelData) {
+		function newModel(modelData) {
 			var data = {
 				desc: "",
 				project : modelData.project,
@@ -134,7 +138,7 @@
 		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadModel = function (modelData) {
+		function uploadModel(modelData) {
 			var data = new FormData();
 			data.append("file", modelData.uploadFile);
 			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {'Content-Type': undefined});
@@ -146,7 +150,7 @@
 		 * @param modelData
 		 * @returns {*|promise}
 		 */
-		obj.uploadStatus = function (modelData) {
+		function uploadStatus(modelData) {
 			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
 		};
 
@@ -158,7 +162,7 @@
 		 * @param data
 		 * @returns {*|promise}
 		 */
-		obj.newSubscription = function (teamspace, data) {
+		function newSubscription(teamspace, data) {
 			return doPost(data, teamspace + "/subscriptions");
 		};
 
@@ -168,10 +172,10 @@
 		 * @param username
 		 * @returns {*|promise}
 		 */
-		obj.getUserInfo = function (username) {
+		function getUserInfo(username) {
 			return UtilsService.doGet(username + ".json");
 		};
 
-		return obj;
+
 	}
 }());

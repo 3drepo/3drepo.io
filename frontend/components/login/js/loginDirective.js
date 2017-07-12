@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$location", "Auth", "EventService", "serverConfig", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "serverConfig", "UtilsService"];
 
-	function LoginCtrl($scope, $location, Auth, EventService, serverConfig, UtilsService) {
+	function LoginCtrl($scope, $location, AuthService, EventService, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13;
 
@@ -51,7 +51,7 @@
 				vm.unityLoaded = true;
 			})
 
-			Auth.isLoggedIn().then(function(response){
+			AuthService.isLoggedIn().then(function(response){
 				StateManager.setStateVar("loggedIn", true);
 				EventService.send(EventService.EVENT.UPDATE_STATE);
 			});
@@ -65,13 +65,13 @@
 		vm.login = function(event) {
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
-					Auth.login(vm.user.username, vm.user.password);
+					AuthService.login(vm.user.username, vm.user.password);
 				}
 			}
 			else {
 				if (vm.user && vm.user.username && vm.user.password) {
 					vm.errorMessage = "";
-					Auth.login(vm.user.username, vm.user.password).then(function(response){
+					AuthService.login(vm.user.username, vm.user.password).then(function(response){
 						//console.log(response);
 					});
 				} else {
@@ -94,7 +94,9 @@
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
 
+			
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
+				console.log("412: login event", event)
 				// Show an error message for incorrect login
 				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
