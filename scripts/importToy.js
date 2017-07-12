@@ -6,7 +6,7 @@
 const log_iface = require("../backend/logger.js");
 const systemLogger = log_iface.systemLogger;
 const config = require("../backend/config.js");
-const DB = require('../backend/db/db')(systemLogger);
+const DB = require('../backend/db/db');
 const ModelHelper = require('../backend/models/helper/model');
 const Project = require('../backend/models/project');
 const C = require("../backend/constants");
@@ -14,7 +14,7 @@ const C = require("../backend/constants");
 const username = process.argv[2];
 const account = process.argv[3];
 
-const middleware = require('../backend/routes/middlewares');
+const middleware = require('../backend/middlewares/middlewares');
 const SAMPLE_PROJECT = 'Sample_Project';
 
 if(!username || !account){

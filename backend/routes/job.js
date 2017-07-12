@@ -21,14 +21,13 @@
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
-	const middlewares = require('./middlewares');
+	const middlewares = require('../middlewares/middlewares');
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const C = require("../constants");
 
-	router.post("/jobs", middlewares.checkPermissions([C.PERM_CREATE_JOB]), createJob);
-	router.get("/jobs", middlewares.checkPermissions([C.PERM_ASSIGN_JOB]), listJobs);
-	router.delete("/jobs/:jobId", middlewares.checkPermissions([C.PERM_DELETE_JOB]), deleteJob);
+	router.post("/jobs", middlewares.job.canCreate, createJob);
+	router.get("/jobs", middlewares.job.canView, listJobs);
+	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
 
 	function createJob(req, res, next){

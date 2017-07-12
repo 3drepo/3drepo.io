@@ -17,7 +17,7 @@
 
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var middlewares = require('./middlewares');
+var middlewares = require('../middlewares/middlewares');
 // var config = require('../config');
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
@@ -27,11 +27,11 @@ var utils = require('../utils');
 // var uuidToString = utils.uuidToString;
 //var mongo    = require("mongodb");
 
-router.get('/', middlewares.hasReadAccessToIssue, listGroups);
-router.get('/:uid', middlewares.hasWriteAccessToIssue, findGroup);
-router.put('/:uid', middlewares.hasWriteAccessToIssue, updateGroup);
-router.post('/', middlewares.hasWriteAccessToIssue, createGroup);
-router.delete('/:id', middlewares.hasWriteAccessToIssue, deleteGroup);
+router.get('/', middlewares.issue.canView, listGroups);
+router.get('/:uid', middlewares.issue.canView, findGroup);
+router.put('/:uid', middlewares.issue.canCreate, updateGroup);
+router.post('/', middlewares.issue.canCreate, createGroup);
+router.delete('/:id', middlewares.issue.canCreate, deleteGroup);
 
 
 var getDbColOptions = function(req){

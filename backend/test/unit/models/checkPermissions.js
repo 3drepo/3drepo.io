@@ -19,7 +19,11 @@
 const chai = require("chai");
 const expect = require('chai').expect;
 const _ = require('lodash');
-const checkPermission  = require('../../../middlewares/checkPermissions');
+const proxyquire = require('proxyquire').noCallThru();
+const checkPermission  = proxyquire('../../../middlewares/checkPermissions', {
+	'./getPermissionsAdapter': {},
+	'../response_codes': {}
+}).checkPermissionsHelper;
 
 
 describe('Check permission function', function(){

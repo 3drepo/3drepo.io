@@ -25,7 +25,7 @@ var generateglTF = require('../libs/generateglTF');
 var config = require('../config.js');
 var stash = require('../models/helper/stash');
 var C = require('../constants');
-var middlewares = require("./middlewares");
+var middlewares = require("../middlewares/middlewares");
 
 // wrapper for os get apis
 var OSGet = require('../libs/OSGet')(config.os);

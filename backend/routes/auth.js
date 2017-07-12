@@ -21,7 +21,7 @@
 	var router = express.Router({mergeParams: true});
 	var responseCodes = require("../response_codes.js");
 	var C = require("../constants");
-	var middlewares = require("./middlewares");
+	var middlewares = require("../middlewares/middlewares");
 	var config = require('../config');
 	//var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");

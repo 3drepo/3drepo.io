@@ -20,12 +20,12 @@
 
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
-	const middlewares = require('./middlewares');
+	const middlewares = require('../middlewares/middlewares');
 	const responseCodes = require('../response_codes.js');
 	const IssueAnalytic = require('../models/issueAnalytic');
 	const utils = require("../utils");
 
-	router.get('/issues/analytics.:format', middlewares.hasReadAccessToIssue, getIssueAnalytics);
+	router.get('/issues/analytics.:format', middlewares.issue.canView, getIssueAnalytics);
 
 	function getIssueAnalytics(req, res, next){
 		

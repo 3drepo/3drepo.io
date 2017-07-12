@@ -29,49 +29,12 @@
 
 	// init ampq and import queue object
 	const importQueue = require('../services/queue');
-	const getPermissionsAdapter = require('../middlewares/getPermissionsAdapter');
-	const checkPermissionsHelper = require('../middlewares/checkPermissions');
+	const getPermissionsAdapter = require('./getPermissionsAdapter');
+	const checkPermissionsHelper = require('./checkPermissions').checkPermissionsHelper;
+	const checkPermissions = require('./checkPermissions').checkPermissions;
 
-	const readAccessToModel = { '$or': [[C.PERM_VIEW_MODEL_ALL_MODELS], [C.PERM_VIEW_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN], [C.PERM_VIEW_PROJECTS], ] };
+	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
-	function checkPermissions(permsRequest){
-
-		return function(req, res, next){
-
-			let checkLogin = Promise.resolve();
-
-			if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-				checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
-			}
-
-			checkLogin.then(() => {
-
-				const username = req.session.user.username;
-				const account = req.params.account;
-				const model = req.params.model;
-				const project = req.params.project;
-
-				return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
-
-			}).then(data => {
-
-				if (data.userPermissions) {
-					req.session.user.permissions = data.userPermissions;
-				}
-
-				if(data.granted){
-					next();
-				} else {
-					return Promise.reject(responseCodes.NOT_AUTHORIZED);
-				}
-
-			}).catch(err => {
-
-				responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
-			});
-		};
-
-	}
 
 	function loggedIn(req, res, next){
 
@@ -193,30 +156,28 @@
 
 	function canCreateModel(req, res, next){
 		if(req.body.subModels){
-			checkPermissions({ '$or': [[C.PERM_PROJECT_ADMIN], [C.PERM_CREATE_FEDERATION]]})(req, res, next);
+			checkPermissions([C.PERM_CREATE_FEDERATION])(req, res, next);
 		} else {
-			checkPermissions({ '$or': [[C.PERM_PROJECT_ADMIN], [C.PERM_CREATE_MODEL]]})(req, res, next);
+			checkPermissions([C.PERM_CREATE_MODEL])(req, res, next);
 		}
 	}
 
 	var middlewares = {
 
-
-		//issues
-		hasWriteAccessToIssue: checkPermissions({ '$or': [[C.PERM_CREATE_ISSUE_ALL_MODELS], [C.PERM_CREATE_ISSUE]] }),
-		hasCommentAccessToIssue: checkPermissions({'$or': [[C.PERM_COMMENT_ISSUE_ALL_MODELS], [C.PERM_COMMENT_ISSUE]] }),
-		hasReadAccessToIssue: checkPermissions({'$or': [[C.PERM_VIEW_ISSUE_ALL_MODELS], [C.PERM_VIEW_ISSUE], [C.PERM_VIEW_PROJECTS] ] }),
+		project: require('./project'),
+		job: require('./job'),
+		issue: require('./issue'),
 
 		//models
 		canCreateModel: canCreateModel,
 		hasReadAccessToModel: checkPermissions(readAccessToModel),
-		hasUploadAccessToModel: checkPermissions({ '$or': [[C.PERM_UPLOAD_FILES_ALL_MODELS], [C.PERM_UPLOAD_FILES], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasWriteAccessToModelSettings: checkPermissions({ '$or': [[C.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS],[C.PERM_CHANGE_MODEL_SETTINGS], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasDeleteAccessToModel: checkPermissions({ '$or': [[C.PERM_DELETE_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasDownloadAccessToModel: checkPermissions({ '$or': [[C.PERM_DOWNLOAD_MODEL_ALL_MODELS], [C.PERM_DOWNLOAD_MODEL], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasEditAccessToFedModel: checkPermissions({ '$or': [[C.PERM_EDIT_FEDERATION_ALL_MODELS],[C.PERM_EDIT_FEDERATION], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasDeleteAccessToFedModel: checkPermissions({ '$or': [[C.PERM_DELETE_FEDERATION], [C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
-		hasEditPermissionsAccessToModel: checkPermissions({ '$or': [[C.PERM_MANAGE_MODEL_PERMISSION], [C.PERM_PROJECT_ADMIN]] }),
+		hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
+		hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
+		hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
+		hasDownloadAccessToModel: checkPermissions([C.PERM_DOWNLOAD_MODEL]),
+		hasEditAccessToFedModel: checkPermissions([C.PERM_EDIT_FEDERATION]),
+		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
+		hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
@@ -224,7 +185,7 @@
 		loggedIn,
 
 		// Helpers
-		checkPermissions,
+		// checkPermissions,
 		freeSpace,
 		hasReadAccessToModelHelper,
 		isAccountAdminHelper,

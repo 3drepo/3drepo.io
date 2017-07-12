@@ -22,7 +22,7 @@
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
 	const ModelHelpers = require('../models/helper/model');
-	const middlewares = require('./middlewares');
+	const middlewares = require('../middlewares/middlewares');
 	const utils = require('../utils');
 
 	//Get meta data

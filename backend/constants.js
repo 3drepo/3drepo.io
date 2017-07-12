@@ -347,6 +347,61 @@
 		module.exports.PERM_MANAGE_MODEL_PERMISSION
 	]);
 
+	define("IMPLIED_PERM", {
+		[module.exports.PERM_TEAMSPACE_ADMIN]:{
+			'account': module.exports.ACCOUNT_PERM_LIST,
+			'project': module.exports.PROJECT_PERM_LIST,
+			'model': module.exports.MODEL_PERM_LIST
+		},
+
+		[module.exports.PERM_VIEW_PROJECTS]:{
+			'project': [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
+			'model': [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
+		},
+
+		[module.exports.PERM_PROJECT_ADMIN]: {
+			'project': module.exports.PROJECT_PERM_LIST,
+			'model': module.exports.MODEL_PERM_LIST
+		},
+
+		[module.exports.PERM_UPLOAD_FILES_ALL_MODELS]: {
+			'model': [module.exports.PERM_UPLOAD_FILES]
+		},
+
+		[module.exports.PERM_EDIT_FEDERATION_ALL_MODELS]: {
+			'model': [module.exports.PERM_EDIT_FEDERATION]
+		},
+
+		[module.exports.PERM_CREATE_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_CREATE_ISSUE]
+		},
+
+		[module.exports.PERM_COMMENT_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_COMMENT_ISSUE]
+		},
+
+		[module.exports.PERM_VIEW_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_VIEW_ISSUE]
+		},
+
+		[module.exports.PERM_VIEW_MODEL_ALL_MODELS]: {
+			'model': [module.exports.PERM_VIEW_MODEL]
+		},
+
+		[module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS]: {
+			'model': [module.exports.PERM_DOWNLOAD_MODEL]
+		},
+
+		[module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS]: {
+			'model': [module.exports.PERM_CHANGE_MODEL_SETTINGS]
+		},
+
+		[module.exports.PERM_MANAGE_MODEL_PERMISSION]: {
+			'model': module.exports.MODEL_PERM_LIST
+		}
+
+	});
+
 	//-----------------------------------------------------------------------------
 	//
 	// User templates

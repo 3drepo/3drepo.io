@@ -19,7 +19,7 @@ var express = require('express');
 var router = express.Router({mergeParams: true});
 // var _ = require('lodash');
 var utils = require('../utils');
-var middlewares = require('./middlewares');
+var middlewares = require('../middlewares/middlewares');
 var ModelSetting = require('../models/modelSetting');
 var responseCodes = require('../response_codes');
 var C = require("../constants");
@@ -222,7 +222,7 @@ function updateModel(req, res, next){
 	let model = req.params.model;
 	let account = req.params.account;
 
-	let promise = Promise.resolve();
+	let promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
 	let setting;
 
 	if(req.body.subModels && req.body.subModels.length > 0){

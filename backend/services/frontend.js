@@ -154,6 +154,8 @@
 				'PERM_EDIT_FEDERATION': C.PERM_EDIT_FEDERATION
 			}) + ";";
 
+			params.config_js += '\n\nserver_config.impliedPermission = ' + JSON.stringify(C.IMPLIED_PERM) + ';';
+
 			res.header("Content-Type", "text/javascript");
 			res.render("config.pug", params);
 		});

@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const middlewares = require("./middlewares");
+	const middlewares = require("../middlewares/middlewares");
 	const express = require("express");
 	const router = express.Router({ mergeParams: true });
 	const User = require("../models/user");
