@@ -82,60 +82,64 @@
 				vm.modelUserJob = data;
 			});
 
+			/*
+			* Get all the Issues
+			*/
+			vm.getIssue = IssuesService.getIssues(vm.account, vm.model, vm.revision)
+			.then(function (data) {
+				vm.showProgress = false;
+				vm.toShow = "showIssues";
+				vm.issues = (data === "") ? [] : data;
+				vm.showAddButton = true;
 
-			$q.all([getIssue, getJob]).then(function(){
+
+				// if issue id is in url then select the issue
+				var issue = vm.issues.find(function(issue){
+					return issue._id === vm.issueId;
+				});
+
+				if(issue){
+					vm.displayIssue = issue;
+				}
+			});
+
+					
+
+			/*
+			* Get all the available roles for the model
+			*/
+			vm.getJob = IssuesService.getJobs(vm.account, vm.model)
+			.then(function (data) {
+
+				vm.availableJobs = data;
+
+				var menu = [];
+				data.forEach(function(role){
+					menu.push({
+						value: "filterRole",
+						role: role._id,
+						label: role._id,
+						keepCheckSpace: true,
+						toggle: true,
+						selected: true,
+						firstSelected: false,
+						secondSelected: false
+					});
+				});
+
+				EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
+					type: 'issues',
+					menu: menu
+				});
+
+			});
+
+			$q.all([vm.getIssue, vm.getJob]).then(function(){
 				setAllIssuesAssignedRolesColors();
 			});
 
 		}
 
-		/*
-		 * Get all the Issues
-		 */
-		var getIssue = IssuesService.getIssues(vm.account, vm.model, vm.revision)
-		.then(function (data) {
-			vm.showProgress = false;
-			vm.toShow = "showIssues";
-			vm.issues = (data === "") ? [] : data;
-			vm.showAddButton = true;
-
-
-			// if issue id is in url then select the issue
-			var issue = vm.issues.find(function(issue){
-				return issue._id === vm.issueId;
-			});
-
-			if(issue){
-				vm.displayIssue = issue;
-			}
-		});
-
-		/*
-		 * Get all the available roles for the model
-		 */
-		var getJob = IssuesService.getJobs(vm.account, vm.model).then(function (data) {
-
-			vm.availableJobs = data;
-
-			var menu = [];
-			data.forEach(function(role){
-				menu.push({
-					value: "filterRole",
-					role: role._id,
-					label: role._id,
-					keepCheckSpace: true,
-					toggle: true,
-					selected: true,
-					firstSelected: false,
-					secondSelected: false
-				});
-			});
-
-			EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
-				type: 'issues',
-				menu: menu
-			});
-		});
 
 		/**
 		 * Define the assigned role colors for each issue

@@ -138,7 +138,7 @@
 			// Data
 
 			if (changes.hasOwnProperty("data")) {
-				if (vm.data) {
+				if (vm.data && vm.statuses && vm.statuses.length) {
 
 					startNotification();
 					var disableStatus;
@@ -799,17 +799,24 @@
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				vm.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}});
+				EventService.send(
+					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT,
+					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
+				);
 
 			}
 			else {
 				// Description
 				vm.descriptionThumbnail = data.screenShot;
 				
-				vm.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: vm.account, model: vm.model}});
+				EventService.send(
+					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+					{promise: viewpointPromise, account: vm.account, model: vm.model}
+				);
 			}
 
 			viewpointPromise.promise.then(function (viewpoint) {
+				console.log("screenshot", viewpoint)
 				commentViewpoint = viewpoint;
 				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 			});
@@ -880,7 +887,7 @@
 		 */
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 285,
+				newIssueHeight = 430,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
@@ -913,6 +920,8 @@
 						}
 					}
 				}
+
+				
 			}
 			else {
 				height = newIssueHeight;
@@ -926,6 +935,8 @@
 			}
 
 			vm.contentHeight({height: height});
+
+			
 		}
 
 		function commentAreaScrollToBottom(){

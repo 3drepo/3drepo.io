@@ -23,7 +23,7 @@ md-content#issueScreenShotContent(layout="row", layout-align="center center")
 				ng-if="action.icon.indexOf('fa fa-') !== -1"
 				class="fa fa-eraser"
 				style="color:{{action.color}}")
-			md-button.md-fab.md-mini(ng-click="vm.save()")
+			md-button.md-fab.md-mini(ng-click="vm.saveScreenshot()")
 				md-icon.angular-material-icons(aria-label="Save") save
 
 canvas#screenShotCanvas

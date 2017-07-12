@@ -319,7 +319,9 @@
 								vm.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
+							console.log("screenshot EventService outside is defined", event.value.promise)
 							if (angular.isDefined(event.value.promise)) {
+								console.log("screenshot EventService", event.value.promise)
 								vm.manager.getCurrentViewer().getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {

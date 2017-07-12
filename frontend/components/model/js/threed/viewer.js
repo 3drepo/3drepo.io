@@ -596,6 +596,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.getScreenshot = function(promise)
 		{
+			console.log("Viewer screenshot", promise);
 			UnityUtil.requestScreenShot(promise);
 
 		}
