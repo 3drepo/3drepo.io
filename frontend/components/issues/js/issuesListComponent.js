@@ -19,36 +19,32 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.component(
-			"issuesList",
-			{
-				controller: IssuesListCtrl,
-				controllerAs: 'vm',
-				bindToController: true,
-				templateUrl: "issuesList.html",
-				bindings: {
-					account: "<",
-					model: "<",
-					allIssues: "<",
-					treeMap: "<",
-					filterText: "<",
-					sendEvent: "&",
-					event: "<",
-					onEditIssue: "&",
-					onSelectIssue: "&",
-					nonListSelect: "<",
-					keysDown: "<",
-					contentHeight: "&",
-					menuOption: "<",
-					importBcf: "&",
-					selectedIssue: "<",
-					displayIssue: "<",
-					userJob: "<",
-					issueDisplay: "<",
-					availableJobs: "<"
-				}
+		.component("issuesList", {
+			controller: IssuesListCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+			templateUrl: "issuesList.html",
+			bindings: {
+				account: "<",
+				model: "<",
+				allIssues: "<",
+				treeMap: "<",
+				filterText: "<",
+				event: "<",
+				onEditIssue: "&",
+				onSelectIssue: "&",
+				nonListSelect: "<",
+				keysDown: "<",
+				contentHeight: "&",
+				menuOption: "<",
+				importBcf: "&",
+				selectedIssue: "<",
+				displayIssue: "<",
+				userJob: "<",
+				issueDisplay: "<",
+				availableJobs: "<"
 			}
-		);
+		});
 
 	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
@@ -125,60 +121,6 @@
 				setupIssuesToShow();
 				showPins();
 			}
-
-/*			// Keys down - check for down followed by up
-			if (changes.hasOwnProperty("keysDown")) {
-				// Up/Down arrow
-				if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) || (changes.keysDown.currentValue.indexOf(upArrow) !== -1)) {
-					// This is done to overcome the problem where focus is sometimes set on an issue when the scroll bar moves
-					vm.setFocus = null;
-
-					// Handle focused issue
-					if (focusedIssueIndex !== null) {
-						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (focusedIssueIndex !== (vm.issuesToShow.length - 1))) {
-							if (selectedIssue !== null) {
-								selectedIssue.selected = false;
-								selectedIssue.focus = false;
-							}
-							vm.issuesToShow[focusedIssueIndex].focus = false;
-							focusedIssueIndex += 1;
-							selectedIssueIndex = focusedIssueIndex;
-						}
-						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (focusedIssueIndex !== 0)) {
-							if (selectedIssue !== null) {
-								selectedIssue.selected = false;
-								selectedIssue.focus = false;
-							}
-							vm.issuesToShow[focusedIssueIndex].focus = false;
-							focusedIssueIndex -= 1;
-							selectedIssueIndex = focusedIssueIndex;
-						}
-						vm.select(event, vm.issuesToShow[selectedIssueIndex]);
-					}
-
-					// Handle selected issue
-					else if (selectedIssueIndex !== null) {
-						if ((changes.keysDown.currentValue.indexOf(downArrow) !== -1) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
-							selectedIssue.selected = false;
-							selectedIssueIndex += 1;
-						}
-						else if ((changes.keysDown.currentValue.indexOf(upArrow) !== -1) && (selectedIssueIndex !== 0)) {
-							selectedIssue.selected = false;
-							selectedIssueIndex -= 1;
-						}
-						deselectPin(selectedIssue);
-						vm.select(event, vm.issuesToShow[selectedIssueIndex]);
-					}
-				}
-				// Right arrow - do action on key up
-				else if (changes.keysDown.currentValue.indexOf(rightArrow) !== -1) {
-					rightArrowDown = true;
-				}
-				else if (rightArrowDown && (changes.keysDown.currentValue.indexOf(rightArrow) === -1)) {
-					rightArrowDown = false;
-					vm.editIssue(selectedIssue);
-				}
-			}*/
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && vm.menuOption) {
@@ -360,7 +302,7 @@
 		 * Set the selected issue index
 		 * @param selectedIssue
 		 */
-		function setSelectedIssueIndex (selectedIssue) {
+		function setSelectedIssueIndex(selectedIssue) {
 			var i, length;
 
 			if (selectedIssue !== null) {
@@ -496,7 +438,9 @@
 			// Setup what to show
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "list";
-				vm.contentHeight({height: vm.issuesToShow.length * issuesListItemHeight});
+				var buttonSpace = 70;
+				var issuesHeight = vm.issuesToShow.length * issuesListItemHeight + buttonSpace;
+				vm.contentHeight({height: issuesHeight });
 			}
 			else {
 				vm.toShow = "info";

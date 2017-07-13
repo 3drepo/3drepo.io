@@ -23,12 +23,13 @@
 			"multiSelect",
 			{
 				controller: MultiSelectCtrl,
+				contollerAs: "vm",
+				bindToController: true,
 				bindings: {
 					account: "<",
 					model: "<",
 					treeMap: "<",
 					keysDown: "<",
-					sendEvent: "&",
 					event: "<",
 					setSelectedObjects: "&",
 					initialSelectedObjects: "<"
@@ -39,7 +40,7 @@
 	MultiSelectCtrl.$inject = ["EventService", "$scope"];
 
 	function MultiSelectCtrl (EventService, $scope) {
-		var self = this,
+		var vm = this,
 			objectIndex,
 			selectedObjects = [],
 			deselectedObjects = [],
@@ -83,7 +84,7 @@
 		/**
 		 * Handle component input changes
 		 */
-		this.$onChanges = function (changes) {
+		vm.$onChanges = function (changes) {
 			// Keys down
 			if (pinDropMode) {
 				return;
@@ -94,15 +95,15 @@
 				if (isKeyDown(changes.keysDown)) {
 
 					multiMode = true;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
+					EventService.send(EventService.EVENT.MULTI_SELECT_MODE, true);
 
 				}
 				else if (multiMode === true && isKeyDownNotCtrl(changes.keysDown)) {
 	
 					multiMode = false;
-					this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+					EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
 				} else if (changes.keysDown.currentValue.indexOf(escKey) !== -1) {
-					this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 
 				}
 
@@ -114,8 +115,8 @@
 		/**
 		 * Handle remove
 		 */
-		this.$onDestroy = function () {
-			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+		vm.$onDestroy = function () {
+			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
 		};
 	}
 }());

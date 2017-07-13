@@ -20,12 +20,12 @@
 
 	angular.module("3drepo")
 		.component(
-			"issueComp",
+			"issue",
 			{
-				controller: IssueCompCtrl,
+				controller: IssueCtrl,
 				controllerAs: "vm",
            		bindToController: true,
-				templateUrl: "issueComp.html",
+				templateUrl: "issue.html",
 				bindings: {
 					account: "<",
 					model: "<",
@@ -33,8 +33,8 @@
 					data: "<",
 					keysDown: "<",
 					exit: "&",
-					sendEvent: "&",
 					event: "<",
+					selectedIssueLoaded: "<",
 					issueCreated: "&",
 					contentHeight: "&",
 					selectedObjects: "<",
@@ -46,9 +46,9 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
+	IssueCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
 
-	function IssueCompCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
+	function IssueCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
@@ -66,10 +66,11 @@
 		 * Init
 		 */
 		vm.$onInit = function() { 
+			vm.issueProgressInfo = "Loading Issue...";
 
-			vm.UtilsService = UtilsService;
 			vm.hideDescription = false;
 			vm.submitDisabled = true;
+			vm.pinDisabled = true;
 			vm.pinData = null;
 			vm.showAdditional = true;
 			vm.editingDescription = false;
@@ -89,8 +90,22 @@
 			];
 
 			vm.actions = {
-				screen_shot: {icon: "camera_alt", label: "Screen shot", hidden: vm.data, selected: false},
-				pin: {icon: "place", label: "Pin", hidden: vm.data, selected: false}
+				screen_shot: {
+					icon: "camera_alt", 
+					label: "Screen shot", 
+					disabled: function() { 
+						return vm.submitDisabled 
+					}, 
+					selected: false
+				},
+				pin: {
+					icon: "place", 
+					label: "Pin", 
+					disabled: function() { 
+						return (vm.submitDisabled || vm.canComment) 
+					},
+					selected: false
+				}
 			};
 
 			vm.notificationStarted = false;
@@ -121,7 +136,6 @@
 		vm.setCanUpdateStatus = function(issueData) {
 
 			if(!AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
-				console.log('no create issue permissions')
 				return vm.canUpdateStatus = false;
 			}
 
@@ -225,7 +239,6 @@
 
 			// Role
 			if (changes.hasOwnProperty("availableJobs") && vm.availableJobs) {
-				//console.log(vm.availableJobs);
 				vm.modelJobs = vm.availableJobs.map(function (availableJob) {
 					/*
 					// Get the actual role and return the last part of it
@@ -233,7 +246,6 @@
 					*/
 					return availableJob._id;
 				});
-				//console.log(vm.modelJobs);
 			}
 		};
 
@@ -242,6 +254,7 @@
 		 * Cancel editing comment
 		 */
 		vm.$onDestroy = function () {
+
 			aboutToBeDestroyed = true;
 			if (vm.comment) {
 				IssuesService.updatedIssue = vm.issueData; // So that issues list is notified
@@ -251,10 +264,10 @@
 				vm.issueData.comments[editingCommentIndex].editing = false;
 			}
 			// Get out of pin drop mode
-			//if ((currentAction !== null) && (currentAction === "pin")) {
-				vm.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
-				vm.clearPin = true;
-			//}
+
+			EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+			vm.clearPin = true;
+			
 
 			//unsubscribe on destroy
 			if(vm.data){
@@ -289,6 +302,7 @@
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
+			console.log("ISSUE COMPONENT status change", vm.data)
 
 			if (vm.data) {
 				data = {
@@ -299,34 +313,33 @@
 				};
 
 				IssuesService.updateIssue(vm.issueData, data)
-					.then(function (response) {
-						//console.log(response);
+				.then(function (response) {
 
-						// Add info for new comment
-						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
-						IssuesService.convertActionCommentToText(comment, vm.topic_types);
-						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-						vm.issueData.comments.push(comment);
+					// Add info for new comment
+					comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+					IssuesService.convertActionCommentToText(comment, vm.topic_types);
+					comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+					vm.issueData.comments.push(comment);
 
-						// Update last but one comment in case it was "sealed"
-						if (vm.issueData.comments.length > 1) {
-							// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
-							// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							// if (comment.action) {
-							// 	IssuesService.convertActionCommentToText(comment, vm.topic_types);
-							// }
-							//vm.issueData.comments[vm.issueData.comments.length - 2] = comment;
-							vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
-						}
+					// Update last but one comment in case it was "sealed"
+					if (vm.issueData.comments.length > 1) {
+						// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
+						// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						// if (comment.action) {
+						// 	IssuesService.convertActionCommentToText(comment, vm.topic_types);
+						// }
+						//vm.issueData.comments[vm.issueData.comments.length - 2] = comment;
+						vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
+					}
 
-						// The status could have changed due to assigning role
-						vm.issueData.status = response.data.issue.status;
-						vm.issueData.assigned_roles = response.data.issue.assigned_roles;
-						IssuesService.updatedIssue = vm.issueData;
-						vm.setCanUpdateStatus(vm.issueData);
+					// The status could have changed due to assigning role
+					vm.issueData.status = response.data.issue.status;
+					vm.issueData.assigned_roles = response.data.issue.assigned_roles;
+					IssuesService.updatedIssue = vm.issueData;
+					vm.setCanUpdateStatus(vm.issueData);
 
-						commentAreaScrollToBottom();
-					});
+					commentAreaScrollToBottom();
+				});
 
 
 				if(vm.issueData.status === 'closed'){
@@ -362,29 +375,13 @@
 		 * @param viewpoint Can be undefined for action comments
 		 */
 		vm.showViewpoint = function (event, viewpoint) {
-
+		
 			//README: vm should also highlight selected objects within vm issue, but 
 			//will require a lot of rewriting for vm to work at present!
 			if (viewpoint && (event.type === "click")) {
 
-				// TODO: make this work via ssues Service
-				var data = {
-					position : viewpoint.position,
-					view_dir : viewpoint.view_dir,
-					up: viewpoint.up,
-					account: vm.issueData.account,
-					model: vm.issueData.model
-				};
-				vm.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
-
-
-				data = {
-					clippingPlanes: viewpoint.clippingPlanes,
-					fromClipPanel: false,
-					account: vm.issueData.account,
-					model: vm.issueData.model
-				};
-				vm.sendEvent({type: EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, value: data});
+				var viewpointData = Object.assign(vm.issueData, {viewpoint : viewpoint});
+				IssuesService.showIssue(viewpointData);
 
 			}
 		};
@@ -396,11 +393,21 @@
 		 */
 		vm.showScreenShot = function (event, viewpoint) {
 			vm.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+			vm.showScreenshotDialog(event);
+		};
+
+		/**
+		 * Show screen shot dialog 
+		 * @param event
+		 */
+		vm.showScreenshotDialog = function(event) {
 			$mdDialog.show({
+				controller: function () { this.issueComponent = vm; },
+				controllerAs: 'vm',
 				templateUrl: "issueScreenShotDialog.html",
 				targetEvent: event
 			});
-		};
+		}
 
 		/**
 		 * Do an action
@@ -416,25 +423,19 @@
 				case "pin":
 
 					if(selected){
-						vm.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: true});
+						EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
 					} else {
-						vm.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+						EventService.send(EventService.EVENT.PIN_DROP_MODE,false);
 					}
 					break;
 
 				case "screen_shot":
 
-					console.log("screenshot: doAction")
 					// There is no concept of selected in screenshot as there will be a popup once you click the button
 					vm.actions[action].selected = false;
 
 					delete vm.screenShot; // Remove any clicked on screen shot
-					$mdDialog.show({
-						controller: function () { this.issueComponent = vm; },
-						controllerAs: 'vm',
-						templateUrl: "issueScreenShotDialog.html",
-						targetEvent: event
-					});
+					vm.showScreenshotDialog(event);
 					break;
 
 			}
@@ -475,16 +476,16 @@
 						desc: vm.issueData.desc
 					};
 					IssuesService.updateIssue(vm.issueData, data)
-						.then(function (data) {
-							IssuesService.updatedIssue = vm.issueData;
-							savedDescription = vm.issueData.desc;
+					.then(function (data) {
+						IssuesService.updatedIssue = vm.issueData;
+						savedDescription = vm.issueData.desc;
 
-							// Add info for new comment
-							var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
-							IssuesService.convertActionCommentToText(comment, vm.topic_types);
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							vm.issueData.comments.push(comment);
-						});
+						// Add info for new comment
+						var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
+						IssuesService.convertActionCommentToText(comment, vm.topic_types);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						vm.issueData.comments.push(comment);
+					});
 				}
 
 			}
@@ -526,52 +527,67 @@
 			else
 			{
 				// Get the viewpoint
-				vm.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise, account: vm.account, model: vm.model}});
+				EventService.send(
+					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+					{promise: viewpointPromise, account: vm.account, model: vm.model
+				});
 			}
 
 			//Get selected objects
-			vm.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS, value: {promise: objectsPromise, account: vm.account, model: vm.model}});
-
-			viewpointPromise.promise.then(function (viewpoint) {
-				objectsPromise.promise.then(function (objectInfo)
-					{
-						if (savedScreenShot !== null) {
-							if (objectInfo.highlightedNodes.length > 0) {
-									// Create a group of selected objects
-								data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-								UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups")
-								.then(function (response) {
-									console.log("RESPONSE", response)
-									vm.doSaveIssue(viewpoint, savedScreenShot, response.data._id);
-								})
-								.catch(function(error) {
-									console.error("Error saving issue: ", error);
-								});
-							}
-							else {
-								vm.doSaveIssue(viewpoint, savedScreenShot);
-							}
-						}
-						else {
-							// Get a screen shot if not already created
-							vm.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-							screenShotPromise.promise.then(function (screenShot) {
-								if (objectInfo.highlightedNodes.length > 0) {
-									// Create a group of selected objects
-									data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-									UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups").then(function (response) {
-										vm.doSaveIssue(viewpoint, screenShot, response.data._id);
-									});
-								}
-								else {
-									vm.doSaveIssue(viewpoint, screenShot);
-								}
-							});
-						}
-					}
+			EventService.send(
+				EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS, 
+				{promise: objectsPromise, account: vm.account, model: vm.model}
 			);
 
+			viewpointPromise.promise.then(function (viewpoint) {
+				objectsPromise.promise.then(function(objectInfo) {
+					handleObjects(objectInfo, screenShotPromise)
+				}).catch(function(error){
+					console.error(error);
+				})
+			}).catch(function(error){
+				console.error(error);
 			});
+		}
+
+		function handleObjects (objectInfo, screenShotPromise) {
+			if (savedScreenShot !== null) {
+				if (objectInfo.highlightedNodes.length > 0) {
+						// Create a group of selected objects
+					data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+					UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups")
+					.then(function (response) {
+						vm.doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+					})
+					.catch(function(error) {
+						console.error("Error saving issue: ", error);
+					});
+				}
+				else {
+					vm.doSaveIssue(viewpoint, savedScreenShot);
+				}
+			}
+			else {
+				// Get a screen shot if not already created
+				EventService.send(
+					EventService.EVENT.VIEWER.GET_SCREENSHOT, 
+					{promise: screenShotPromise}
+				);
+
+				screenShotPromise.promise.then(function (screenShot) {
+					if (objectInfo.highlightedNodes.length > 0) {
+						// Create a group of selected objects
+						data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+						UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups").then(function (response) {
+							vm.doSaveIssue(viewpoint, screenShot, response.data._id);
+						});
+					}
+					else {
+						vm.doSaveIssue(viewpoint, screenShot);
+					}
+				});
+				
+			}
 		}
 
 		/**
@@ -582,8 +598,6 @@
 		 */
 		vm.doSaveIssue = function(viewpoint, screenShot, groupId) {
 			var	issue;
-
-			console.log("vm.doSaveIssue", vm.userData)
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
@@ -633,7 +647,7 @@
 
 					// Hide some actions
 					vm.actions.pin.hidden = true;
-					vm.sendEvent({type: EventService.EVENT.PIN_DROP_MODE, value: false});
+					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 
 					vm.submitDisabled = true;
 					setContentHeight();
@@ -700,8 +714,6 @@
 		 */
 		function afterNewComment(comment, noDeleteInput) {
 
-			console.log("screenshot: afterNewComment func", comment);
-
 			// mark all other comments sealed
 			vm.issueData.comments.forEach(function(comment){
 				comment.sealed = true;
@@ -712,7 +724,6 @@
 			}
 
 			if(comment.viewpoint && comment.viewpoint.screenshot){
-				console.log("screenshot, afternewcomment", comment.viewpoint.screenshot)
 				comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
 			}
 
@@ -730,16 +741,6 @@
 				viewpoint: comment.viewpoint,
 				action: comment.action
 			});
-
-			// Mark any previous comment as 'sealed' - no longer deletable or editable
-			// This logic now moved to backend
-			// if (vm.issueData.comments.length > 1) {
-			// 	IssuesService.sealComment(vm.issueData, (vm.issueData.comments.length - 2))
-			// 		.then(function(response) {
-			// 			console.log(response);
-			// 			vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
-			// 		});
-			// }
 
 			if(!noDeleteInput){
 				delete vm.comment;
@@ -811,18 +812,15 @@
 		vm.screenShotSave = function (data) {
 			var viewpointPromise = $q.defer();
 
-			console.log("screenshot: screenshotSave", data)
 			savedScreenShot = data.screenShot;
 
 			if (typeof vm.data === "object") {
 
-				console.log("screenshot: setting commentThumbnail")
 				// Comment
 				vm.commentThumbnail = data.screenShot;
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				console.log("screenshot: sending event")
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT,
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
@@ -840,7 +838,6 @@
 			}
 
 			viewpointPromise.promise.then(function (viewpoint) {
-				console.log("Resolved screenshot", viewpoint)
 				commentViewpoint = viewpoint;
 				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 			}).catch(function(error){
@@ -946,7 +943,6 @@
 				}
 			}
 
-			console.log("screenshot:: issueComponent")
 			vm.contentHeight({height: height});
 
 		}

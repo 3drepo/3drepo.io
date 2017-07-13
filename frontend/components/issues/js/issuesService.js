@@ -58,18 +58,21 @@
 				id: issue._id,
 				colours: [pinHighlightColour]
 			};
+			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 
+			// Set the camera position
 			data = {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
 				up: issue.viewpoint.up,
 				account: issue.account,
 				model: issue.model
-
 			};
+
 			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, data);
 
+			// Set the clipping planes
 			data = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,

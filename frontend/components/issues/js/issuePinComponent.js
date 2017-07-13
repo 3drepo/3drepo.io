@@ -28,7 +28,6 @@
 				bindings: {
 					account: "<",
 					model: "<",
-					sendEvent: "&",
 					event: "<",
 					setPin: "&",
 					clearPin: "<"
@@ -69,7 +68,6 @@
 
 					removePin();
 
-
 					var trans = changes.event.currentValue.value.trans;
 					position = changes.event.currentValue.value.position;
 					normal = changes.event.currentValue.value.normal;
@@ -90,7 +88,7 @@
 						colours: [[1.0, 0.7,  0]]
 
 					};
-					vm.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
+					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
 					vm.setPin({data: data});
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
@@ -115,7 +113,7 @@
 		};
 
 		function removePin () {
-			vm.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
+			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {id: newPinId});
 			vm.setPin({data: null});
 		}
 	}

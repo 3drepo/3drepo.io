@@ -368,13 +368,6 @@
 			});
 		};
 
-		/**
-		 * Send event
-		 * @param type
-		 * @param value
-		 */
-		vm.sendEvent = function (type, value) {
-			EventService.send(type, value);
-		};
+
 	}
 }());

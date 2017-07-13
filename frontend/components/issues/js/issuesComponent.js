@@ -19,13 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("issues", issues);
-
-	function issues() {
-		return {
-			restrict: "EA",
+		.component("issues", {
+			restrict: "E",
 			templateUrl: "issues.html",
-			scope: {
+			controller: IssuesCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+			bindings: {
 				account: "=",
 				model: "=",
 				branch:  "=",
@@ -42,19 +42,14 @@
 				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
-			},
-			controller: IssuesCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			}
+		})
 
 	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
 	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
 		var vm = this,
-			issue,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			issue
 
 
 		/*
@@ -73,7 +68,8 @@
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
-
+			vm.selectedIssueLoaded = false;
+			console.log("ISSUE COMPONENT LOADING")
 
 			/*
 			* Get the user roles for the model
@@ -85,8 +81,11 @@
 			/*
 			* Get all the Issues
 			*/
-			vm.getIssue = IssuesService.getIssues(vm.account, vm.model, vm.revision)
+			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 			.then(function (data) {
+
+				console.log("ISSUE COMPONENT", data)
+
 				vm.showProgress = false;
 				vm.toShow = "showIssues";
 				vm.issues = (data === "") ? [] : data;
@@ -104,11 +103,10 @@
 			});
 
 					
-
 			/*
 			* Get all the available roles for the model
 			*/
-			vm.getJob = IssuesService.getJobs(vm.account, vm.model)
+			vm.getJobs = IssuesService.getJobs(vm.account, vm.model)
 			.then(function (data) {
 
 				vm.availableJobs = data;
@@ -134,7 +132,8 @@
 
 			});
 
-			$q.all([vm.getIssue, vm.getJob]).then(function(){
+			$q.all([vm.getIssues, vm.getJobs]).then(function(){
+				console.log("ISSUE COMPONENT, all")
 				setAllIssuesAssignedRolesColors();
 			});
 
@@ -214,24 +213,6 @@
 
 
 		/**
-		 * The roles assigned to the issue have been changed
-		 */
-		vm.issueAssignChange = function () {
-			setIssueAssignedRolesColors(vm.selectedIssue);
-			vm.showPins();
-		};
-
-		/**
-		 * Show an issue alert
-		 *
-		 * @param {String} title
-		 */
-		vm.showAlert = function(title) {
-			vm.showAddAlert = true;
-			vm.addAlertText = title;
-		};
-
-		/**
 		 * Close the add alert
 		 */
 		vm.closeAddAlert = function () {
@@ -240,55 +221,11 @@
 		};
 
 		/**
-		 * A comment has been saved
-		 */
-		vm.commentSaved = function () {
-			vm.setContentHeight();
-		};
-
-		/**
-		 * A comment has been auto saved
-		 */
-		vm.commentAutoSaved = function (index) {
-			vm.selectedIndex = index;
-			vm.infoText = "Comment on issue #" + vm.issuesToShow[vm.selectedIndex].title + " auto-saved";
-			vm.issuesToShow[vm.selectedIndex].showInfo = true;
-			vm.infoTimeout = $timeout(function() {
-				vm.issuesToShow[vm.selectedIndex].showInfo = false;
-			}, 4000);
-		};
-
-		/**
-		 * Hide issue info
-		 */
-		vm.hideInfo = function() {
-			vm.issuesToShow[vm.selectedIndex].showInfo = false;
-			$timeout.cancel(vm.infoTimeout);
-		};
-		/**
 		 * Set the content height
 		 */
 		vm.setContentHeight = function (height) {
 			vm.onContentHeightRequest({height: height});
 		};
-
-		function setPinToAssignedRoleColours (issue) {
-			var i, length, pinColours = [], roleColour;
-
-			if (issue !== null) {
-				for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-					roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
-					pinColours.push(IssuesService.hexToRgb(roleColour));
-				}
-
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-					id: issue._id,
-					colours: pinColours
-				});
-			}
-		}
-
-		/* New Stuff **************************************************************************************************/
 
 		/*
 		 * Go back to issues list
@@ -312,92 +249,11 @@
 		});
 
 
-		function watchNotification(){
+		function watchNotification() {
 
-
-			 if(!vm.revisions || !vm.subModels){
-			 	return;
-			 }
-
-			function newIssueListener(issues, submodel){
-
-				issues.forEach(function(issue){
-
-					var showIssue;
-
-					if(submodel){
-						
-						showIssue = true;
-
-					} else {
-
-						var issueRevision = vm.revisions.find(function(rev){
-							return rev._id === issue.rev_id;
-						});
-
-						var currentRevision;
-
-						if(!vm.revision){
-							currentRevision = vm.revisions[0];
-						} else {
-							currentRevision = vm.revisions.find(function(rev){
-								return rev._id === vm.revision || rev.tag === vm.revision;
-							});
-						}
-
-						showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
-					}
-
-
-					if(showIssue){
-						
-						issue.title = IssuesService.generateTitle(issue);
-						issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-						issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-						vm.issues.unshift(issue);
-						
-					}
-
-				});
-
-				vm.issues = vm.issues.slice(0);
-				$scope.$apply();
-
+			if(!vm.revisions || !vm.subModels){
+				return;
 			}
-
-			function issueChangedListener(issue){
-
-
-				issue.title = IssuesService.generateTitle(issue);
-				issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-				issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-				vm.issues.find(function(oldIssue, i){
-					if(oldIssue._id === issue._id){
-
-
-						if(issue.status === 'closed'){
-							
-							vm.issues[i].justClosed = true;
-							
-							$timeout(function(){
-
-								vm.issues[i] = issue;
-								vm.issues = vm.issues.slice(0);
-
-							}, 4000);
-
-						} else {
-							vm.issues[i] = issue;
-						}
-					}
-				});
-
-				vm.issues = vm.issues.slice(0);
-				$scope.$apply();
-			}
-
 
 			/*
 			 * Watch for new issues
@@ -409,14 +265,103 @@
 			 */
 			NotificationService.subscribe.issueChanged(vm.account, vm.model, issueChangedListener);
 
-			//do the same for all subModels
+			// Do the same for all subModels
 			if(vm.subModels){
 				vm.subModels.forEach(function(subModel){
 					var submodel = true;
-					NotificationService.subscribe.newIssues(subModel.database, subModel.model, function(issues){ newIssueListener(issues, submodel) });
-					NotificationService.subscribe.issueChanged(subModel.database, subModel.model, issueChangedListener);
+					NotificationService.subscribe.newIssues(
+						subModel.database, 
+						subModel.model, 
+						function(issues){ 
+							newIssueListener(issues, submodel) 
+						}
+					);
+					NotificationService.subscribe.issueChanged(
+						subModel.database,
+						subModel.model, 
+						issueChangedListener
+					);
 				});
 			}
+
+		}
+
+		function newIssueListener(issues, submodel) {
+
+			issues.forEach(function(issue) {
+
+				var showIssue;
+
+				if(submodel){
+					
+					showIssue = true;
+
+				} else {
+
+					var issueRevision = vm.revisions.find(function(rev){
+						return rev._id === issue.rev_id;
+					});
+
+					var currentRevision;
+
+					if(!vm.revision){
+						currentRevision = vm.revisions[0];
+					} else {
+						currentRevision = vm.revisions.find(function(rev){
+							return rev._id === vm.revision || rev.tag === vm.revision;
+						});
+					}
+
+					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+				}
+
+				if(showIssue){
+					
+					issue.title = IssuesService.generateTitle(issue);
+					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+					issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+					vm.issues.unshift(issue);
+					
+				}
+
+			});
+
+			vm.issues = vm.issues.slice(0);
+			$scope.$apply();
+
+		}
+
+		function issueChangedListener(issue) {
+
+			issue.title = IssuesService.generateTitle(issue);
+			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
+			issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+
+			vm.issues.find(function(oldIssue, i){
+				if(oldIssue._id === issue._id){
+
+
+					if(issue.status === 'closed'){
+						
+						vm.issues[i].justClosed = true;
+						
+						$timeout(function(){
+
+							vm.issues[i] = issue;
+							vm.issues = vm.issues.slice(0);
+
+						}, 4000);
+
+					} else {
+						vm.issues[i] = issue;
+					}
+				}
+			});
+
+			vm.issues = vm.issues.slice(0);
+			$scope.$apply();
+			
 		}
 
 
@@ -436,14 +381,6 @@
 
 		});
 
-		/**
-		 * Send event
-		 * @param type
-		 * @param value
-		 */
-		vm.sendEvent = function (type, value) {
-			EventService.send(type, value);
-		};
 
 		/**
 		* import bcf
@@ -471,7 +408,6 @@
 				
 			});
 
-
 		}
 
 		/**
@@ -480,18 +416,18 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
-				deselectPin(vm.selectedIssue._id);
+				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
 			if(issue){
-				showIssue(issue);
+				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
+					vm.selectedIssueLoaded = true;
 					vm.selectedIssue = issue;
 				});
 
@@ -517,7 +453,6 @@
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
-
 		};
 
 		/**
@@ -526,7 +461,7 @@
 		 */
 		vm.selectIssue = function (issue) {
 			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				deselectPin(vm.selectedIssue._id);
+				IssuesService.deselectPin(vm.selectedIssue);
 			}
 			vm.selectedIssue = issue;
 		};
@@ -548,71 +483,5 @@
 			vm.selectedIssue = issue;
 		};
 
-		/**
-		 * Show issue details
-		 * @param issue
-		 */
-		function showIssue (issue) {
-			var data;
-
-			// Highlight pin, move camera and setup clipping plane
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issue._id,
-				colours: [pinHighlightColour]
-			});
-
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				model: issue.model
-			});
-
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			});
-
-			// Remove highlight from any multi objects
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-
-			// Show multi objects
-			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
-
-					var ids = [];
-					if(response.data.objects)
-				{
-
-					response.data.objects.forEach(function(obj){
-
-						ids.push(vm.treeMap.sharedIdToUid[obj.shared_id]);
-					});
-
-					data = {
-						source: "tree",
-						account: vm.account,
-						model: vm.model,
-						ids: ids,
-						colour: response.data.colour
-					};
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
-					}});
-			}
-		}
-
-		/**
-		 * Set the pin to look deselected
-		 * @param issueId
-		 */
-		function deselectPin (issueId) {
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issueId,
-				colours: [[0.5, 0, 0]]
-			});
-		}
 	}
 }());
