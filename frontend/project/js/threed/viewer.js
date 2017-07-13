@@ -20,7 +20,7 @@
 // Global functions to be passed to X3DOM elements
 var bgroundClick, clickObject, clickPin, onMouseOver,
 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
-	onLoaded, onError, runtimeReady;
+	onLoaded, onError, runtimeReady, offMouseMove;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -42,6 +42,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 	onLoaded          = ViewerUtil.eventFactory("onLoaded");
 	onError           = ViewerUtil.eventFactory("onError");
 	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
+	offMouseMove	  = ViewerUtil.eventFactory("offMouseMove");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
 		// Properties
@@ -2117,6 +2118,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	SWITCH_FULLSCREEN: "VIEWER_SWITCH_FULLSCREEN",
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
+	UNREGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_UNREGISTER_MOUSE_MOVE_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
