@@ -75,7 +75,6 @@
 		let project = Project.createInstance({account});
 		project.name = name;
 
-		console.log('userPermissions' , userPermissions);
 		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
 			project.permissions = [{
 				user: username,
@@ -83,7 +82,6 @@
 			}];
 		}
 
-		console.log('project.permissions', project.permissions)
 		return project.save().then(project => {
 			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
 				return User.addProject(username, account, project._id);

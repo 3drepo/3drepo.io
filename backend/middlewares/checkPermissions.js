@@ -60,11 +60,6 @@
 
 			userPermissions = _.unique(impliedPerms);
 
-			//god permission
-			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
-				return { granted: true, userPermissions };
-			}
-
 			function hasRequiredPermissions(perms) {
 				return _.difference(perms, userPermissions).length === 0;
 			}
