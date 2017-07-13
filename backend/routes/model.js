@@ -149,37 +149,31 @@ function getModelSetting(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
+	let resObj = {};
+
 	_getModel(req).then(setting => {
 
 		//setting = setting.toObject();
 		
 		let whitelist = ['name', 'owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subModels'];
-		let resObj = {};
+
 
 		whitelist.forEach(key => {
 			resObj[key] = setting[key];
 		});
 
 		resObj.headRevisions = {};
-		let proj  = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
-	       	let sort  = {sort: {branch: -1, timestamp: -1}};
+
 		let account = req.params.account;
 		let model = req.params.model;
 
 		// Calculate revision heads
-		History.find({account, model}, {}, proj, sort).then(histories => {
-			histories = History.clean(histories);
+		return History.getHeadRevisions({account, model});
 
-			histories.forEach(history => {
-				var branch = history.branch || C.MASTER_BRANCH_NAME;
-				if (!resObj.headRevisions[branch])
-				{
-					resObj.headRevisions[branch] = history._id;
-				}
-			});
-
-			responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
-		});
+	}).then(headRevisions => {
+		
+		resObj.headRevisions = headRevisions;
+		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

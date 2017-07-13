@@ -38,6 +38,7 @@ var historySchema = Schema({
 		author: String,
 		desc: String,
 		timestamp: Date,
+		incomplete: Number,
 		coordOffset: [],
 		current: []
 });
@@ -46,10 +47,11 @@ historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 	
-	var query = {};
+	var query = {'incomplete': {'$exists': false}};
+
 	if(branch === C.MASTER_BRANCH_NAME){
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
-	} else {
+	} else if(branch) {
 		query.shared_id = stringToUUID(branch);
 	}
 
@@ -64,7 +66,8 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 // get the head of a branch
 historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	
-	var query = {};
+	var query = { 'incomplete': {'$exists': false}};
+
 	projection = projection || {};
 
 	if(!branch || branch === C.MASTER_BRANCH_NAME){
@@ -131,7 +134,32 @@ historySchema.methods.clean = function(){
 	return clean;
 };
 
-//
+historySchema.statics.getHeadRevisions = function(dbColOptions){
+	'use strict';
+
+	let proj  = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
+	let sort  = {sort: {branch: -1, timestamp: -1}};
+
+	return History.find(dbColOptions, {'incomplete': {'$exists': false}}, proj, sort).then(histories => {
+
+		histories = History.clean(histories);
+		let headRevisions = {};
+
+		histories.forEach(history => {
+
+			var branch = history.branch || C.MASTER_BRANCH_NAME;
+
+			if (!headRevisions[branch])
+			{
+				headRevisions[branch] = history._id;
+			}
+		});
+
+		return headRevisions;
+	});
+
+};
+
 
 var History = ModelFactory.createClass(
 	'History', 
