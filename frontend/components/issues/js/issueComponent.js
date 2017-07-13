@@ -96,6 +96,9 @@
 					disabled: function() { 
 						return vm.submitDisabled 
 					}, 
+					visible: function(){ 
+						return true 
+					},
 					selected: false
 				},
 				pin: {
@@ -103,6 +106,9 @@
 					label: "Pin", 
 					disabled: function() { 
 						return (vm.submitDisabled || vm.canComment) 
+					},
+					visible: function() {
+						return !vm.canComment;
 					},
 					selected: false
 				}

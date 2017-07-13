@@ -205,6 +205,7 @@ div.heightFix(
 				ng-repeat="(action, actionData) in vm.actions"
 				aria-label="{{action}}"
 				ng-click="vm.doAction($event, action)"
+				ng-if="actionData.visible()"
 				ng-disabled="actionData.disabled()")
 
 				md-tooltip(md-direction="bottom") {{actionData.label}}

@@ -36,6 +36,11 @@
 			updatedIssue = null,
 			issueDisplay = {};
 
+		obj.pinColours = {
+			blue : [0, 69/255, 148/255],
+			yellow : [255/255, 255/255, 54/255]
+		}
+
 
 		obj.deselectPin = function(issue) {
 			var data;
@@ -43,20 +48,19 @@
 			if (issue.position.length > 0) {
 				data = {
 					id: issue._id,
-					colours: [[0.5, 0, 0]]
+					colours: [obj.pinColours.blue]
 				};
 				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 			}
 		}
 
 		obj.showIssue = function(issue) {
-			var data,
-				pinHighlightColour = [1.0000, 0.7, 0.0];
-
+			var data
+				
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: [pinHighlightColour]
+				colours: [obj.pinColours.yellow]
 			};
 			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);

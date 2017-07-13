@@ -480,9 +480,9 @@
                                 account: vm.allIssues[i].account,
                                 model: vm.allIssues[i].model
                             };
-                            var pinColor = [0.5, 0, 0];
+                            var pinColor = IssuesService.pinColours.blue;
                             if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
-                                pinColor = [1.0, 0.7, 0];
+                                pinColor = IssuesService.pinColours.yellow;
                             }
                             IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
                         }

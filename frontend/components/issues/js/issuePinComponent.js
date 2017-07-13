@@ -68,6 +68,7 @@
 
 					removePin();
 
+
 					var trans = changes.event.currentValue.value.trans;
 					position = changes.event.currentValue.value.position;
 					normal = changes.event.currentValue.value.normal;
@@ -77,7 +78,6 @@
 						position = trans.inverse().multMatrixPnt(position);
 					}
 
-
 					data = {
 						id: newPinId,
 						account: vm.account,
@@ -85,7 +85,7 @@
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
-						colours: [[1.0, 0.7,  0]]
+						colours: [IssuesService.pinColours.yellow]
 
 					};
 					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
