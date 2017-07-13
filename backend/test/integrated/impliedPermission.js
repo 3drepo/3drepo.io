@@ -113,6 +113,16 @@ describe('Implied permission::', function () {
 			});
 		});
 
+		it('list model info should show correct inherited and implied permissions', function(done){
+			agent
+			.get(`/${sharedTeamspace}/${modelId}.json`)
+			.expect(200, function(err, res){
+				expect(err).to.not.exist;
+				expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+				done();
+			});
+		});
+
 		it('can create project', function(done){
 			agent
 			.post(`/${sharedTeamspace}/projects`)
@@ -364,6 +374,17 @@ describe('Implied permission::', function () {
 
 				done();
 
+			});
+		});
+
+
+		it('list model info should show correct inherited and implied permissions', function(done){
+			agent
+			.get(`/${sharedTeamspace}/${modelId}.json`)
+			.expect(200, function(err, res){
+				expect(err).to.not.exist;
+				expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+				done();
 			});
 		});
 
@@ -720,6 +741,16 @@ describe('Implied permission::', function () {
 			});
 		});
 
+		it('list model info should show correct inherited and implied permissions', function(done){
+			agent
+			.get(`/${sharedTeamspace}/${modelId}.json`)
+			.expect(200, function(err, res){
+				expect(err).to.not.exist;
+				expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+				done();
+			});
+		});
+
 		it('cannot create project', function(done){
 			agent
 			.post(`/${sharedTeamspace}/projects`)
@@ -999,6 +1030,16 @@ describe('Implied permission::', function () {
 
 				done();
 
+			});
+		});
+
+		it('list model info should show correct inherited and implied permissions', function(done){
+			agent
+			.get(`/${sharedTeamspace}/${modelId}.json`)
+			.expect(200, function(err, res){
+				expect(err).to.not.exist;
+				expect(res.body.permissions).to.deep.equal([C.PERM_VIEW_MODEL]);
+				done();
 			});
 		});
 
@@ -1283,6 +1324,7 @@ describe('Implied permission::', function () {
 
 			});
 		});
+
 
 		it('cannot create project', function(done){
 			agent
