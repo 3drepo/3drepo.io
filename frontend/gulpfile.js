@@ -87,9 +87,10 @@ gulp.task('javascript-dev', function() {
   const components = gulp.src(allJs)
         .pipe(order([
           'components/entry/js/entry.js',
-          'components/model/js/threed/viewerutil.js',
-          'components/model/js/threed/mapTile.js',
-          'components/model/js/threed/*.js',
+          'components/viewer/js/unityUtil.js',
+          'components/viewer/js/viewerUtil.js',
+          'components/viewer/js/threed/mapTile.js',
+          'components/viewer/js/threed/*.js',
           'components/**/**.js'
         ], { base: './' })) // Required for order to work correctly
 

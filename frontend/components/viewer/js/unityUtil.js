@@ -90,7 +90,7 @@ var UnityUtil;
 	{
 		if(!loadedPromise)
 		{
-		   loadedPromise	= new Promise(function(resolve, reject)
+		   loadedPromise = new Promise(function(resolve, reject)
 			{
 				loadedResolve = {resolve: resolve, reject: reject};
 			}	
@@ -131,6 +131,17 @@ var UnityUtil;
 		
 	}
 
+	function userAlert(message, reload) {
+		var prefix = "Something went wrong loading Unity, " + 
+					 "press okay to refresh! Error: ";
+		if(alert(prefix + message)){
+
+		}
+		else if (reload) {
+			window.location.reload(); 
+		}
+	}
+
 
 	function toUnity(methodName, requireStatus, params)
 	{
@@ -144,6 +155,7 @@ var UnityUtil;
 			
 			}).catch(function(error){
 				console.error("UnityUtil.onLoaded() failed: ", error);
+				userAlert(error, true);
 			})
 		}
 		else if(requireStatus == LoadingState.MODEL_LOADING)
@@ -152,6 +164,7 @@ var UnityUtil;
 			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			}).catch(function(error){
+				userAlert(error, true);
 				console.error("UnityUtil.onLoading() failed: ", error);
 			})
 		}
@@ -162,6 +175,7 @@ var UnityUtil;
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
+				userAlert(error, true);
 				console.error("UnityUtil.onReady() failed: ", error);
 			})
 		}

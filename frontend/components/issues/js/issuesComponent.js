@@ -69,6 +69,7 @@
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
 			vm.selectedIssueLoaded = false;
+			vm.modelLoaded = false;
 
 			/*
 			* Get the user roles for the model
@@ -131,7 +132,6 @@
 
 			$q.all([vm.getIssues, vm.getJobs]).then(function(){
 				setAllIssuesAssignedRolesColors();
-				console.log("fitring isssues readyy")
 				EventService.send(EventService.EVENT.ISSUES_READY, true);
 			});
 
@@ -187,6 +187,7 @@
 
 			vm.event = event;
 
+		
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					if (vm.issues[i]._id === event.value.id) {
@@ -194,6 +195,10 @@
 						break;
 					}
 				}
+			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
+
+				vm.modelLoaded = true;
+			
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
 				watchNotification();
@@ -421,10 +426,13 @@
 			}
 
 			if(issue){
+
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
 					vm.selectedIssueLoaded = true;
 					vm.selectedIssue = issue;
+				}).catch(function(error) {
+					console.error(error);
 				});
 
 				$state.go('home.account.model.issue', 

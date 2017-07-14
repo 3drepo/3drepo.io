@@ -84,55 +84,54 @@
 
 			vm.initialisedPromise = $q.defer();
 
-			vm.viewer = new Viewer(vm.name, $element[0], vm.manager, eventCallback, errCallback);
+			vm.viewer = new Viewer(vm.name, $element[0], eventCallback, errCallback);
 
-			var options = {};
-			var startLatLon = vm.at && vm.at.split(',');
+			// var options = {};
+			// var startLatLon = vm.at && vm.at.split(',');
 
-			var view = vm.view && vm.view.split(',');
+			// var view = vm.view && vm.view.split(',');
 
-			view && view.forEach(function(val, i){
-				view[i] = parseFloat(val);
-			});
+			// view && view.forEach(function(val, i){
+			// 	view[i] = parseFloat(val);
+			// });
 
-			options.view = view;
+			// options.view = view;
 
-			var up = vm.up && vm.up.split(',');
-			up && up.forEach(function(val, i){
-				up[i] = parseFloat(val);
-			});
+			// var up = vm.up && vm.up.split(',');
+			// up && up.forEach(function(val, i){
+			// 	up[i] = parseFloat(val);
+			// });
 
-			options.up = up;
+			// options.up = up;
 
 			var showAll = true;
 
-			if(startLatLon){
-				showAll = false;
-				options.lat = parseFloat(startLatLon[0]),
-				options.lon = parseFloat(startLatLon[1]),
-				options.y = parseFloat(startLatLon[2])
-			}
+			// if(startLatLon){
+			// 	showAll = false;
+			// 	options.lat = parseFloat(startLatLon[0]),
+			// 	options.lon = parseFloat(startLatLon[1]),
+			// 	options.y = parseFloat(startLatLon[2])
+			// }
 
-
-			vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
+			//vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
 			vm.viewer.init({
 				showAll : showAll,
-				plugins: {
-					'mapTile': vm.mapTile
-				}
+				// plugins: {
+				// 	'mapTile': vm.mapTile
+				// }
 			})
 			.then(function(){
 		
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
-				vm.oculus     = new Oculus(vm.viewer);
-				vm.gamepad    = new Gamepad(vm.viewer);
-				vm.gamepad.init();
+				//vm.oculus     = new Oculus(vm.viewer);
+				// vm.gamepad    = new Gamepad(vm.viewer);
+				// vm.gamepad.init();
 
-				vm.measure    = new MeasureTool(vm.viewer);
+				// vm.measure    = new MeasureTool(vm.viewer);
 
-				vm.collision  = new Collision(vm.viewer);
+				// vm.collision  = new Collision(vm.viewer);
 
 			})
 			.catch(function(error){
@@ -142,8 +141,7 @@
 
 		};
 
-		function fetchModelProperties(account, model, branch, revision)
-		{
+		function fetchModelProperties(account, model, branch, revision) {
 
 			if(!branch)
 			{
@@ -154,9 +152,10 @@
 			}
 					
 
-			if(!revision)
+			if(!revision) {
 				revision = "head";
-
+			}
+			
 			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 			.then(function(json, status) {
@@ -167,16 +166,16 @@
 
 		}
 
-		vm.enterVR = function() {
-			vm.loaded.promise.then(function() {
-				vm.oculus.switchVR();
-			});
-		};
+		// vm.enterVR = function() {
+		// 	vm.loaded.promise.then(function() {
+		// 		vm.oculus.switchVR();
+		// 	});
+		// };
 
-		$scope.$watch(vm.branch, function(blah)
-		{
-			console.log(JSON.stringify(blah));
-		});
+		// $scope.$watch(vm.branch, function(blah)
+		// {
+		// 	console.log(JSON.stringify(blah));
+		// });
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 
@@ -321,14 +320,14 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								vm.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
+								vm.viewer.getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
 							if (angular.isDefined(event.value.promise)) {
-								vm.manager.getCurrentViewer().getScreenshot(event.value.promise);
+								vm.viewer.getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
+							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 							vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
@@ -358,12 +357,12 @@
 
 			// Set the current model in the viewer
 			vm.currentModel = vm.model;
-			
+
 		}
 
-		if (angular.isDefined(vm.vrMode))
-		{
-			vm.enterVR();
-		}
+		// if (angular.isDefined(vm.vrMode))
+		// {
+		// 	vm.enterVR();
+		// }
 	}
 }());

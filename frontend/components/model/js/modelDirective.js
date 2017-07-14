@@ -78,6 +78,7 @@
 
 				if(confirm('It will go back to model listing page, are you sure?')){
 					// pop one more state if user actually wants to go back
+					UnityUtil.reset();
 					history.go(-1);
 				} else {
 					// recreate a fake state
@@ -246,46 +247,49 @@
 
 			$timeout(function () {
 				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
+				vm.setupModelInfo();
 			});
 
 		}
 
+		vm.setupModelInfo = function() {
+
+			ModelService.getModelInfo(vm.account, vm.model).then(function (data) {
+				vm.settings = data;
+
+				var index = -1;
+
+				if(!data.federate){
+					panelCard.left[issuesCardIndex].menu.find(function(item, i){
+						if(item.value === 'showSubModels'){
+							index = i;
+						}
+
+					});
+
+					if(index !== -1){
+						panelCard.left[issuesCardIndex].menu.splice(index, 1);
+					}
+				}
+
+				EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+
+				TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
+					vm.treeMap = TreeService.getMap(tree.nodes);
+					EventService.send(EventService.EVENT.TREE_READY, tree);
+				});
+			});
+
+			RevisionsService.listAll(vm.account, vm.model).then(function(revisions) {
+				EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
+			});
+
+		}
 
 		$scope.$watchGroup(["vm.account","vm.model"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
-
-
-				ModelService.getModelInfo(vm.account, vm.model).then(function (data) {
-					vm.settings = data;
-
-					var index = -1;
-
-					if(!data.federate){
-						panelCard.left[issuesCardIndex].menu.find(function(item, i){
-							if(item.value === 'showSubModels'){
-								index = i;
-							}
-
-						});
-
-						if(index !== -1){
-							panelCard.left[issuesCardIndex].menu.splice(index, 1);
-						}
-					}
-
-					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
-
-					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
-						vm.treeMap = TreeService.getMap(tree.nodes);
-						EventService.send(EventService.EVENT.TREE_READY, tree);
-					});
-				});
-
-				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
-					EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
-				});
-
+				vm.setupModelInfo();
 			}
 		});
 
