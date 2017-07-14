@@ -28,8 +28,7 @@
 					data: "<",
 					userJob: "<"
 				},
-				controllerAs: 'vm',
-				bindToController: true,
+				controllerAs: 'vm'
 			}
 		);
 

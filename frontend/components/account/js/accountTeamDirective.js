@@ -19,23 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountTeam", accountTeam);
-
-	function accountTeam() {
-		return {
+		.component("accountTeam", {
 			restrict: 'EA',
 			templateUrl: 'accountTeam.html',
-			scope: {
+			bindings: {
 				account: "=",
 				item: "=",
 				showPage: "&",
 				subscriptions: "="
 			},
 			controller: AccountTeamCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager"];
 

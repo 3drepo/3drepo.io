@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("contact", contact);
-
-	function contact() {
-		return {
+		.component("contact", {
 			restrict: "E",
-			scope: {},
+			bindings: {},
 			templateUrl: "contact.html",
 			controller: ContactCtrl,
 			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+		});
 
 	ContactCtrl.$inject = ["$scope", "UtilsService"];
 

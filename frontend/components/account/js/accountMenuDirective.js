@@ -19,20 +19,15 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountMenu", accountMenu);
-
-	function accountMenu() {
-		return {
+		.component("accountMenu", {
 			restrict: "EA",
 			templateUrl: "accountMenu.html",
-			scope: {
+			bindings: {
 				account: "="
 			},
 			controller: AccountMenuCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	AccountMenuCtrl.$inject = ["AuthService", "EventService"];
 

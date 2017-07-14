@@ -19,22 +19,17 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("tdrMeasure", measure);
-
-	function measure() {
-		return {
+		.component("tdrMeasure", {
 			restrict: "EA",
 			templateUrl: "measure.html",
-			scope: {
+			bindings: {
 				account: '=',
 				model: '=',
 				settings: '='
 			},
 			controller: MeasureCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService"];
 

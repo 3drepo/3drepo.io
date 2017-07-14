@@ -19,23 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProfile", accountProfile);
-
-	function accountProfile() {
-		return {
+		.component("accountProfile", {
 			restrict: 'EA',
 			templateUrl: 'accountProfile.html',
-			scope: {
+			bindings: {
 				username: "=",
 				firstName: "=",
 				lastName: "=",
 				email: "="
 			},
 			controller: AccountProfileCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	AccountProfileCtrl.$inject = ["AccountService"];
 

@@ -19,20 +19,15 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardOptionClose", panelCardOptionClose);
-
-	function panelCardOptionClose() {
-		return {
+		.component("panelCardOptionClose", {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionClose.html',
-			scope: {
+			bindings: {
 				show: "="
 			},
 			controller: panelCardOptionCloseCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	function panelCardOptionCloseCtrl() {
 		var vm = this;

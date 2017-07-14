@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountFederations", accountFederations);
-
-	function accountFederations() {
-		return {
+		.component("accountFederations", {
 			restrict: 'EA',
 			templateUrl: 'accountFederations.html',
-			scope: {
+			bindings: {
 				account: "=",
 				accounts: "=",
 				federation: "=",
@@ -42,10 +39,8 @@
 				isSaving: "="
 			},
 			controller: AccountFederationsCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountDataService"];
 

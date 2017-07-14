@@ -19,13 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("groups", groups);
+		.component("groups", groups);
 
 	function groups() {
 		return {
 			restrict: 'EA',
 			templateUrl: 'groups.html',
-			scope: {
+			bindings: {
 				account: "=",
 				model: "=",
 				show: "=",
@@ -39,8 +39,7 @@
 
 			},
 			controller: GroupsCtrl,
-			controllerAs: 'vm',
-			bindToController: true
+			controllerAs: 'vm'
 		};
 	}
 

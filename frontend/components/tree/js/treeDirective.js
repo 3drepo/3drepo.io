@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("tree", tree);
-
-	function tree() {
-		return {
+		.component("tree", {
 			restrict: "EA",
 			templateUrl: "tree.html",
-			scope: {
+			bindings: {
 				account:  "=",
 				model:  "=",
 				branch:   "=",
@@ -34,10 +31,8 @@
 				onContentHeightRequest: "&"
 			},
 			controller: TreeCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
 

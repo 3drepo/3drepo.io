@@ -19,22 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("docs", docs);
-
-	function docs() {
-		return {
+		.component("docs", {
 			restrict: 'EA',
 			templateUrl: 'docs.html',
-			scope: {
+			bindings: {
 				show: "=",
 				onContentHeightRequest: "&",
 				treeMap: "="
 			},
 			controller: DocsCtrl,
 			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			
+		});
 
 	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService", "UtilsService"];
 

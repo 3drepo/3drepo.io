@@ -19,12 +19,9 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.directive("model", model);
-
-    function model() {
-        return {
+	.component("model", {
             restrict: "E",
-            scope: {
+            bindings: {
 				account:  "=",
 				model:  "=",
 				branch:   "=",
@@ -35,10 +32,8 @@
 			},
 			templateUrl: "model.html",
             controller: ModelCtrl,
-			controllerAs: "vm",
-			bindToController: true
-        };
-    }
+			controllerAs: "vm"
+        });
 
 	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService"];
 

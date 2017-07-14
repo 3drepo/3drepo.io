@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountInfo", accountInfo);
-
-	function accountInfo() {
-		return {
+		.component("accountInfo", {
 			restrict: 'E',
 			templateUrl: 'accountInfo.html',
-			scope: {
+			bindings: {
 				username: "=",
 				firstName: "=",
 				lastName: "=",
@@ -35,10 +32,8 @@
 				loading: "="
 			},
 			controller: AccountInfoCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
 

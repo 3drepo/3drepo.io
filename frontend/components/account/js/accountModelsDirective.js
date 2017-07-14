@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountModels", accountModels);
-
-	function accountModels() {
-		return {
+		.component("accountModels", {
 			restrict: 'EA',
 			templateUrl: 'accountModels.html',
-			scope: {
+			bindings: {
 				account: "=",	
 				accounts: "=",
 				onShowPage: "&",
@@ -34,9 +31,8 @@
 			},
 			controller: AccountModelsCtrl,
 			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			
+		});
 
 	AccountModelsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
 

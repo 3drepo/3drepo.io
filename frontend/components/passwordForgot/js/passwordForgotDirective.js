@@ -19,18 +19,13 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("passwordForgot", passwordForgot);
-
-    function passwordForgot() {
-        return {
+        .component("passwordForgot", {
             restrict: "E",
-            scope: {},
+            bindings: {},
             templateUrl: "passwordForgot.html",
             controller: PasswordForgotCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
 

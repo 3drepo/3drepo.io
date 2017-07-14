@@ -24,7 +24,6 @@
 			templateUrl: "issues.html",
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
-			bindToController: true,
 			bindings: {
 				account: "=",
 				model: "=",

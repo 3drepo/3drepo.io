@@ -20,21 +20,15 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProject", accountProject);
-
-	function accountProject () {
-		return {
+		.component("accountProject", {
 			restrict: 'E',
 			templateUrl: 'accountProject.html',
-			scope: {
+			bindings: {
 				projectData : "="
 			},
 			controller: AccountProjectCtrl,
-			controllerAs: 'vm',
-			bindToController: true,
-			
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 
 	AccountProjectCtrl.$inject = ["$scope"];

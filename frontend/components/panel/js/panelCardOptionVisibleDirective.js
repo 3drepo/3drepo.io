@@ -19,20 +19,15 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardOptionVisible", panelCardOptionVisible);
-
-	function panelCardOptionVisible() {
-		return {
+		.component("panelCardOptionVisible", {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionVisible.html',
-			scope: {
+			bindings: {
 				visible: "="
 			},
 			controller: PanelCardOptionVisibleCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	function PanelCardOptionVisibleCtrl() {
 		var vm = this;

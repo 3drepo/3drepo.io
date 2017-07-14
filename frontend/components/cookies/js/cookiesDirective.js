@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("cookies", cookies);
-
-	function cookies() {
-		return {
+		.component("cookies", {
 			restrict: "E",
-			scope: {},
+			bindings: {},
 			templateUrl: "cookies.html",
 			controller: CookiesCtrl,
 			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+		});
 
 	CookiesCtrl.$inject = ["EventService"];
 

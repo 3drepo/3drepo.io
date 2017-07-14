@@ -19,18 +19,13 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("registerVerify", registerVerify);
-
-    function registerVerify() {
-        return {
+        .component("registerVerify", {
             restrict: "E",
-            scope: {},
+            bindings: {},
             templateUrl: "registerVerify.html",
             controller: RegisterVerifyCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager"];
 

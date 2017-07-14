@@ -19,22 +19,17 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountLicenses", accountLicenses);
-
-	function accountLicenses() {
-		return {
+		.component("accountLicenses", {
 			restrict: 'EA',
 			templateUrl: 'accountLicenses.html',
-			scope: {
+			bindings: {
 				account: "=",
 				showPage: "&"
 			},
 			controller: AccountLicensesCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
-
+			controllerAs: 'vm'
+		});
+	
 	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
 
 	function AccountLicensesCtrl($scope, UtilsService, StateManager) {

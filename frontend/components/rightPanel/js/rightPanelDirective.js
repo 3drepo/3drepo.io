@@ -19,18 +19,13 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("rightPanel", rightPanel);
-
-    function rightPanel() {
-        return {
+        .component("rightPanel", {
             restrict: "E",
-            scope: {},
+            bindings: {},
             templateUrl: "rightPanel.html",
             controller: RightPanelCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService"];
 

@@ -19,20 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardOptionFilter", panelCardOptionFilter);
-
-	function panelCardOptionFilter() {
-		return {
+		.component("panelCardOptionFilter", {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionFilter.html',
-			scope: {
+			bindings: {
 				showFilter: "="
 			},
 			controller: PanelCardOptionFilterCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
+
 
 	function PanelCardOptionFilterCtrl() {
 		var vm = this;

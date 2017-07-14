@@ -24,7 +24,6 @@
 			{
 				controller: IssuesPinCtrl,
 				controllerAs: "vm",
-           		bindToController: true,
 				bindings: {
 					account: "<",
 					model: "<",

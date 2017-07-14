@@ -19,21 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardFilter", panelCardFilter);
-
-	function panelCardFilter() {
-		return {
+		.component("panelCardFilter", {
 			restrict: 'E',
 			templateUrl: 'panelCardFilter.html',
-			scope: {
+			bindings: {
 				showFilter: "=",
 				filterText: "="
 			},
 			controller: PanelCardFilterCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	PanelCardFilterCtrl.$inject = ["$scope", "$timeout", "$element"];
 

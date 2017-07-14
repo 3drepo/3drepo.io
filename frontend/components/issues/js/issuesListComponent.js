@@ -22,7 +22,6 @@
 		.component("issuesList", {
 			controller: IssuesListCtrl,
 			controllerAs: 'vm',
-			bindToController: true,
 			templateUrl: "issuesList.html",
 			bindings: {
 				account: "<",

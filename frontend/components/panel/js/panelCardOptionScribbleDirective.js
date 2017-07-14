@@ -19,18 +19,13 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("panelCardOptionScribble", panelCardOptionScribble);
-
-    function panelCardOptionScribble() {
-        return {
+        .component("panelCardOptionScribble", {
             restrict: 'E',
             templateUrl: 'panelCardOptionScribble.html',
-            scope: {},
+            bindings: {},
             controller: PanelCardOptionScribbleCtrl,
-            controllerAs: 'vm',
-            bindToController: true
-        };
-    }
+            controllerAs: 'vm'
+        });
 
     PanelCardOptionScribbleCtrl.$inject = ["EventService"];
 

@@ -19,20 +19,19 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("building", building);
+		.component("building", building);
 
 	function building() {
 		return {
 			restrict: "EA",
 			templateUrl: "building.html",
-			scope: {
+			bindings: {
 				show: "=",
 				visible: "=",
 				onContentHeightRequest: "&"
 			},
 			controller: BuildingCtrl,
-			controllerAs: 'vm',
-			bindToController: true
+			controllerAs: 'vm'
 		};
 	}
 

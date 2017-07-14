@@ -19,12 +19,12 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("walkthrough", walkthroughVr);
+		.component("walkthrough", walkthroughVr);
 
 	function walkthroughVr() {
 		return {
 			restrict: "EA",
-			scope: {
+			bindings: {
 				account: "@",
 				model: "@",
 				autoPlay: "@",
@@ -34,8 +34,7 @@
 			},
 			template: "walkthrough.html",
 			controller: WalkthroughCtrl,
-			controllerAs: "wt",
-			bindToController: true
+			controllerAs: "wt"
 		};
 	}
 

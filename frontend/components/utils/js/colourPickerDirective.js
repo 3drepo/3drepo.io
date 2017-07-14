@@ -19,23 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("tdrColourPicker", colourPicker);
-
-	function colourPicker() {
-		return {
+		.component("tdrColourPicker", {
 			restrict: 'EA',
 			templateUrl: 'colourPicker.html',
-			scope: {
+			bindings: {
 				title: "@",
 				colour: "=",
 				onColourChange: "&",
 				offset: "@"
 			},
 			controller: ColourPickerCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	ColourPickerCtrl.$inject = ["$scope"];
 

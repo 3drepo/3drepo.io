@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountTeamspaces", accountTeamspaces);
-
-	function accountTeamspaces() {
-		return {
+		.component("accountTeamspaces", {
 			restrict: 'EA',
 			templateUrl: 'accountTeamspaces.html',
-			scope: {
+			bindings: {
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
@@ -35,10 +32,8 @@
 				selectedIndex: "="
 			},
 			controller: AccountReposCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	AccountReposCtrl.$inject = [];
 

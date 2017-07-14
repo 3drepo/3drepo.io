@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("bottomButtons", bottomButtons);
-
-	function bottomButtons () {
-		return {
+		.component("bottomButtons", {
 			restrict: 'E',
 			templateUrl: 'bottomButtons.html',
-			scope: {},
+			bindings: {},
 			controller: BottomButtonsCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	BottomButtonsCtrl.$inject = ["EventService"];
 

@@ -19,13 +19,10 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("panel", panel);
-
-    function panel () {
-        return {
+        .component("panel", {
             restrict: "E",
             templateUrl: "panel.html",
-            scope: {
+            bindings: {
 				account:  "=",
 				model:  "=",
 				branch:   "=",
@@ -38,10 +35,8 @@
 				setInitialSelectedObjects: "&"
             },
             controller: PanelCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService"];
 

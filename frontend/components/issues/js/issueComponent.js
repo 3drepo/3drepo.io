@@ -19,32 +19,28 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.component(
-			"issue",
-			{
-				controller: IssueCtrl,
-				controllerAs: "vm",
-           		bindToController: true,
-				templateUrl: "issue.html",
-				bindings: {
-					account: "<",
-					model: "<",
-					revision: "<",
-					data: "<",
-					keysDown: "<",
-					exit: "&",
-					event: "<",
-					selectedIssueLoaded: "<",
-					issueCreated: "&",
-					contentHeight: "&",
-					selectedObjects: "<",
-					modelSettings: '<',
-					setInitialSelectedObjects: "&",
-					userJob: "<",
-					availableJobs: "<"
-				}
+		.component("issue", {
+			controller: IssueCtrl,
+			controllerAs: "vm",
+			templateUrl: "issue.html",
+			bindings: {
+				account: "<",
+				model: "<",
+				revision: "<",
+				data: "<",
+				keysDown: "<",
+				exit: "&",
+				event: "<",
+				selectedIssueLoaded: "<",
+				issueCreated: "&",
+				contentHeight: "&",
+				selectedObjects: "<",
+				modelSettings: '<',
+				setInitialSelectedObjects: "&",
+				userJob: "<",
+				availableJobs: "<"
 			}
-		);
+		});
 
 	IssueCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
 

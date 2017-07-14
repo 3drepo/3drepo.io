@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("privacy", privacy);
-
-	function privacy() {
-		return {
+		.component("privacy", {
 			restrict: "E",
-			scope: {},
+			bindings: {},
 			templateUrl: "privacy.html",
 			controller: PrivacyCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	PrivacyCtrl.$inject = ["EventService"];
 

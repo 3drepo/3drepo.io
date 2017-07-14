@@ -38,16 +38,15 @@
 	}
 
 	angular.module("3drepo")
-		.directive("compass", compass);
+		.component("compass", compass);
 
 	function compass () {
 		return {
 			restrict: "E",
 			templateUrl: "compass.html",
-			scope: {},
+			bindings: {},
 			controller: CompassCtrl,
-			controllerAs: "cc",
-			bindToController: true,
+			controllerAs: "cc"		
 		};
 	}
 

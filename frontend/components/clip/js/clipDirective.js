@@ -19,25 +19,20 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("clip", clip);
-
-	function clip() {
-		return {
+		.component("clip", {
 			restrict: "EA",
 			templateUrl: "clip.html",
-			scope: {
+			bindings: {
 				show: "=",
 				visible: "=",
 				onContentHeightRequest: "&"
 			},
 			controller: ClipCtrl,
 			controllerAs: 'vm',
-			bindToController: true,
 			account: null,
 			model: null,
 			disableRedefinition: false
-		};
-	}
+		})
 
 	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
 

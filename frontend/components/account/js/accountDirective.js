@@ -19,23 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountDir", accountDir);
-
-	function accountDir() {
-		return {
+		.component("accountDir", {
 			restrict: "EA",
 			templateUrl: "account.html",
-			scope: {
+			bindings: {
 				state: "=",
 				query: "=",
 				account: "=",
 				keysDown: "="
 			},
 			controller: AccountCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "UtilsService"];
 

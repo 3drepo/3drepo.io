@@ -19,21 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardOptionMenu", panelCardOptionMenu);
-
-	function panelCardOptionMenu() {
-		return {
+		.component("panelCardOptionMenu", {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionMenu.html',
-			scope: {
+			bindings: {
 				menu: "=",
 				selectedMenuOption: "="
 			},
 			controller: PanelCardOptionMenuCtrl,
 			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+		});
 
 	PanelCardOptionMenuCtrl.$inject = ["$timeout"];
 

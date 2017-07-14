@@ -19,20 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardAdd", panelCardAdd);
-
-	function panelCardAdd() {
-		return {
+		.component("panelCardAdd", {
 			restrict: 'EA',
 			templateUrl: 'panelCardAdd.html',
-			scope: {
+			bindings: {
 				showAdd: "="
 			},
 			controller: PanelCardAddCtrl,
 			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+		});
+	
 
 	PanelCardAddCtrl.$inject = [];
 

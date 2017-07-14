@@ -24,7 +24,6 @@
 			{
 				controller: MultiSelectCtrl,
 				contollerAs: "vm",
-				bindToController: true,
 				bindings: {
 					account: "<",
 					model: "<",

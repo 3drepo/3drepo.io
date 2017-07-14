@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("payment", payment);
-
-	function payment() {
-		return {
+		.component("payment", {
 			restrict: "E",
-			scope: {},
+			bindings: {},
 			templateUrl: "payment.html",
 			controller: paymentCtrl,
 			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+		});
 
 	paymentCtrl.$inject = ["EventService"];
 

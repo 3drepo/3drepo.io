@@ -19,21 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("autoLogin", autoLogin);
-
-	function autoLogin() {
-		return {
+		.component("autoLogin", {
 			restrict: "E",
-			scope: { 
+			bindings: { 
 				account: "@",
 				password: "@"
 			},
 			controller: AutoLoginCtrl,
-			controllerAs: "al",
-			bindToController: true			
-		};	
-	}
-	
+			controllerAs: "al",	
+		});
+
 	AutoLoginCtrl.$inject = ["AuthService"];
 	
 	function AutoLoginCtrl(AuthService) {

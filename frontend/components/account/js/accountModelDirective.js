@@ -20,13 +20,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountModel", accountModel);
-
-	function accountModel () {
-		return {
+		.component("accountModel", {
 			restrict: 'E',
 			templateUrl: 'accountModel.html',
-			scope: {
+			bindings: {
 				account: "=",
 				model: "=",
 				project: "=",
@@ -42,7 +39,6 @@
 			},
 			controller: AccountModelCtrl,
 			controllerAs: 'vm',
-			bindToController: true,
 			link: function (scope, element) {
 				// Cleanup when destroyed
 				element.on('$destroy', function(){
@@ -51,9 +47,7 @@
 
 				});
 			}
-		};
-	}
-
+		});
 
 	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountDataService", "StateManager"];
 

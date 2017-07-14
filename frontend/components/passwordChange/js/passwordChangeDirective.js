@@ -19,21 +19,16 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("passwordChange", passwordChange);
-
-    function passwordChange() {
-        return {
+        .component("passwordChange", {
             restrict: "E",
-            scope: {
+            bindings: {
                 username: "=",
                 token: "="
             },
             templateUrl: "passwordChange.html",
             controller: PasswordChangeCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
 

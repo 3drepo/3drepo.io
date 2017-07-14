@@ -19,18 +19,17 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("signUpForm", signUpForm);
+		.component("signUpForm", signUpForm);
 
 	function signUpForm() {
 		return {
 			restrict: "EA",
 			templateUrl: "signUpForm.html",
-			scope: {
+			bindings: {
 				buttonLabel: "@"
 			},
 			controller: SignUpFormCtrl,
-			controllerAs: "vm",
-			bindToController: true
+			controllerAs: "vm"
 		};
 	}
 

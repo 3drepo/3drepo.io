@@ -19,20 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountAssign", accountAssign);
-
-	function accountAssign() {
-		return {
+		.component("accountAssign", {
 			restrict: 'EA',
 			templateUrl: 'accountAssign.html',
-			scope: {
+			bindings: {
 				account: "=",
 			},
 			controller: accountAssignCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		})
+	
 
 	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$location", "UtilsService", "serverConfig"];
 

@@ -19,21 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardOptionPrint", panelCardOptionPrint);
-
-	function panelCardOptionPrint() {
-		return {
+		.component("panelCardOptionPrint", {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionPrint.html',
-			scope: {
+			bindings: {
 				account: "=",
 				model: "="
 			},
 			controller: PanelCardOptionPrintCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	PanelCardOptionPrintCtrl.$inject = ["$window", "serverConfig"];
 

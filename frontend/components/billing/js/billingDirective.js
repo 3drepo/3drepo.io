@@ -20,20 +20,15 @@
 
 
 	angular.module("3drepo")
-		.directive("billing", billing);
-
-	function billing() {
-		return {
+		.component("billing", {
 			restrict: "E",
-			scope: {
+			bindings: {
 				query: "="
 			},
 			templateUrl: "billing.html",
 			controller: BillingCtrl,
 			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+		});
 
 	BillingCtrl.$inject = ["EventService", "UtilsService", "serverConfig"];
 

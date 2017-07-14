@@ -19,13 +19,10 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountBilling", accountBilling);
-
-	function accountBilling() {
-		return {
+		.component("accountBilling", {
 			restrict: 'EA',
 			templateUrl: 'accountBilling.html',
-			scope: {
+			bindings: {
 				account: "=",
 				billingAddress: "=",
 				quota: "=",
@@ -35,9 +32,8 @@
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
+		});
+
 
 	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "serverConfig"];
 

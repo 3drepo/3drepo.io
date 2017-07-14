@@ -19,26 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("viewer", viewer);
-
-	viewer.$inject = ["EventService"];
-
-	function viewer(EventService) {
-		return {
+		.component("viewer", {
 			restrict: "E",
-			scope: {
-
+			bindings: {
 				account: "<",
 				model: "<",
 				branch: "<",
 				revision: "<",
-				// name: "@",
-				// autoInit: "@",
-				// vrMode: "@",
-				// at: "@",
-				// up: "@",
-				// view: "@",
-				// eventService: "="
 			},
 			link: function (scope, element) {
 				// Cleanup when destroyed
@@ -47,10 +34,8 @@
 				});
 			},
 			controller: ViewerCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 

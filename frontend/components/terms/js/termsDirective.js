@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("terms", terms);
-
-	function terms() {
-		return {
+		.component("terms", {
 			restrict: "E",
-			scope: {},
+			bindings: {},
 			templateUrl: "terms.html",
 			controller: TermsCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	TermsCtrl.$inject = ["EventService"];
 

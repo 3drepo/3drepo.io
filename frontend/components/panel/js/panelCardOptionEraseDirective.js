@@ -19,18 +19,13 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("panelCardOptionErase", panelCardOptionErase);
-
-    function panelCardOptionErase() {
-        return {
+        .component("panelCardOptionErase", {
             restrict: 'E',
             templateUrl: 'panelCardOptionErase.html',
-            scope: {},
+            bindings: {},
             controller: PanelCardOptionEraseCtrl,
-            controllerAs: 'vm',
-            bindToController: true
-        };
-    }
+            controllerAs: 'vm'
+        });
 
     PanelCardOptionEraseCtrl.$inject = ["EventService"];
 

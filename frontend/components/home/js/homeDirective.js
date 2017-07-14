@@ -19,7 +19,18 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home)
+        .component("home", {
+            restrict: "E",
+            templateUrl: "home.html",
+			bindings: {
+				account: "@",
+				password: "@",
+				loggedInUrl: "@",
+				loggedOutUrl: "@"
+			},
+            controller: HomeCtrl,
+            controllerAs: "vm",
+        })
         .config(["$injector", function($injector)
 		{
 			if ($injector.has("$mdThemingProvider"))
@@ -59,22 +70,6 @@
                 .warnPalette("red");
 			}
         }]);
-
-    function home() {
-        return {
-            restrict: "E",
-            templateUrl: "home.html",
-			scope: {
-				account: "@",
-				password: "@",
-				loggedInUrl: "@",
-				loggedOutUrl: "@"
-			},
-            controller: HomeCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
 
     HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 

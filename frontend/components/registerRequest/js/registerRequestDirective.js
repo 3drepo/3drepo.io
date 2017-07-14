@@ -19,20 +19,15 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("registerRequest", registerRequest);
-
-    function registerRequest() {
-        return {
+        .component("registerRequest", {
             restrict: "E",
-            scope: {
+            bindings: {
                 state: "="
             },
             templateUrl: "registerRequest.html",
             controller: RegisterRequestCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+            controllerAs: "vm"
+        });
 
     RegisterRequestCtrl.$inject = ["$scope", "$window"];
 

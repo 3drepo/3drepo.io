@@ -2,23 +2,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("revisions", revisions);
-
-	function revisions () {
-		return {
+		.component("revisions", {
 			restrict: 'E',
 			templateUrl: 'revisions.html',
-			scope: {
+			bindings: {
 				account: "=",
 				model: "=",
 				revision: "=",
 				modelName: "="
 			},
 			controller: revisionsCtrl,
-			controllerAs: 'vm',
-			bindToController: true,
-		};
-	}
+			controllerAs: 'vm'
+		});
 
 	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter", "EventService"];
 

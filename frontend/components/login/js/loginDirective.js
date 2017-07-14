@@ -19,18 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login);
-
-	function login() {
-		return {
+		.component("login", {
 			restrict: "EA",
 			templateUrl: "login.html",
-			scope: {},
+			bindings: {},
 			controller: LoginCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+			controllerAs: "vm"
+		});
 
 	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "serverConfig", "UtilsService"];
 

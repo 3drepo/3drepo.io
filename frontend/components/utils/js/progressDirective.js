@@ -19,20 +19,15 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("tdrProgress", tdrProgress);
-
-	function tdrProgress() {
-		return {
+		.component("tdrProgress", {
 			restrict: "EA",
 			templateUrl: "tdrProgress.html",
-			scope: {
+			bindings: {
 				info: "="
 			},
 			controller: TdrProgressCtrl,
 			controllerAs: "vm",
-			bindToController: true
-		};
-	}
+		});
 
 	TdrProgressCtrl.$inject = ["$scope"];
 
