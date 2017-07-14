@@ -29,11 +29,10 @@
 		self.username = null;
 
 		this.loginSuccess = function(response) {
-			console.log("412 : loginSuccess", response.data)
 			self.loggedIn = true;
 			self.username = response.data.username;
 			self.userRoles = response.data.roles;
-			console.log(self.username)
+
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: response.data.username, initialiser: response.data.initialiser });
 			AnalyticService.setUserId(self.username);
 
@@ -168,7 +167,7 @@
 			self.authPromise = $q.defer();
 
 			var postData = {username: username, password: password};
-			console.log("LOGIN")
+
 			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
 			.then(self.loginSuccess)
 			.catch(self.loginFailure);

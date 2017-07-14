@@ -95,7 +95,6 @@
 			if (issue.hasOwnProperty("group_id")) {
 				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
-					console.log(response.data);
 					var ids = [];
 					response.data.objects.forEach(function(obj){
 						var key = obj.account + "@" +  obj.model;

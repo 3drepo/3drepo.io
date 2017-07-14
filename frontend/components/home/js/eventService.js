@@ -81,7 +81,8 @@
 			SET_STATE: "EVENT_SET_STATE",
 			STATE_CHANGED: "EVENT_STATE_CHANGED",
 			SELECT_ISSUE: "EVENT_SELECT_ISSUE",
-			UPDATE_STATE: "EVENT_UPDATE_STATE"
+			UPDATE_STATE: "EVENT_UPDATE_STATE",
+			ISSUES_READY: "EVENT_ISSUES_READY"
 		};
 
 		var ERROR = {
@@ -100,7 +101,6 @@
 					
 				} else {
 					currentEvent = {type: type, value: value, stack: stack};
-					console.log(currentEvent);
 				}
 			});
 		};

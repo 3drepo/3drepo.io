@@ -64,10 +64,8 @@
 					(changes.event.currentValue.value.hasOwnProperty("id")) &&
 					pinDropMode) {
 
-					console.log("Changes to pin", changes.event.currentValue)
 
 					removePin();
-
 
 					var trans = changes.event.currentValue.value.trans;
 					position = changes.event.currentValue.value.position;

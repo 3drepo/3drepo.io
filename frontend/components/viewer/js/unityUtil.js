@@ -90,11 +90,12 @@ var UnityUtil;
 	{
 		if(!loadedPromise)
 		{
-		   loadedPromise	= new Promise(function(resolve, reject)
+		   loadedPromise = new Promise(function(resolve, reject)
 			{
 				loadedResolve = {resolve: resolve, reject: reject};
 			}	
 			);
+
 		}
 		return loadedPromise;
 		
@@ -104,10 +105,10 @@ var UnityUtil;
 	{
 		if(!loadingPromise)
 		{
-		   loadingPromise	= new Promise(function(resolve, reject)
+		   loadingPromise	= new Promise( function(resolve, reject)
 			{
 				loadingResolve = {resolve: resolve, reject: reject};
-			}	
+			}
 			);
 		}
 		return loadingPromise;
@@ -130,9 +131,21 @@ var UnityUtil;
 		
 	}
 
+	function userAlert(message, reload) {
+		var prefix = "Something went wrong loading Unity, " + 
+					 "press okay to refresh! Error: ";
+		if(alert(prefix + message)){
+
+		}
+		else if (reload) {
+			window.location.reload(); 
+		}
+	}
+
 
 	function toUnity(methodName, requireStatus, params)
 	{
+
 		if(requireStatus == LoadingState.MODEL_LOADED)
 		{
 			//Requires model to be loaded
@@ -140,16 +153,20 @@ var UnityUtil;
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
-			});
+			}).catch(function(error){
+				console.error("UnityUtil.onLoaded() failed: ", error);
+				userAlert(error, true);
+			})
 		}
 		else if(requireStatus == LoadingState.MODEL_LOADING)
 		{
 			//Requires model to be loading
-			UnityUtil.onLoading().then(function()
-			{
+			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
-			
-			});
+			}).catch(function(error){
+				userAlert(error, true);
+				console.error("UnityUtil.onLoading() failed: ", error);
+			})
 		}
 		else
 		{
@@ -157,7 +174,10 @@ var UnityUtil;
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
-			});
+			}).catch(function(error){
+				userAlert(error, true);
+				console.error("UnityUtil.onReady() failed: ", error);
+			})
 		}
 
 	}
@@ -204,7 +224,6 @@ var UnityUtil;
 
 	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
 	{
-		console.log("nodeInfo: " + nodeInfo);
 		objectStatusPromise.resolve(JSON.parse(nodeInfo));
 		objectStatusPromise = null;
 		
@@ -339,7 +358,7 @@ var UnityUtil;
 
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision)
 	{
-
+		
 		UnityUtil.reset();	
 		if(!loaded && loadedResolve)
 		{
@@ -359,10 +378,11 @@ var UnityUtil;
 		if(revision != "head")
 			params.revID = revision;	
 		
-		UnityUtil.onLoading(); //Initialise the promise
+		UnityUtil.onLoading();
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
-			
+		
 		return UnityUtil.onLoaded();
+	
 	}
 
 	UnityUtil.prototype.removePin = function(id)

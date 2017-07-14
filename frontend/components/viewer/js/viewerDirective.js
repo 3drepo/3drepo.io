@@ -27,18 +27,18 @@
 		return {
 			restrict: "E",
 			scope: {
-				manager: "=",
-				account: "@",
-				model: "@",
-				branch: "@",
-				revision: "@",
-				name: "@",
-				autoInit: "@",
-				vrMode: "@",
-				at: "@",
-				up: "@",
-				view: "@",
-				eventService: "="
+
+				account: "<",
+				model: "<",
+				branch: "<",
+				revision: "<",
+				// name: "@",
+				// autoInit: "@",
+				// vrMode: "@",
+				// at: "@",
+				// up: "@",
+				// view: "@",
+				// eventService: "="
 			},
 			link: function (scope, element) {
 				// Cleanup when destroyed
@@ -59,32 +59,21 @@
 		var vm = this;
 
 		vm.$onInit = function() {
-			vm.initialised = $q.defer();
-			vm.loaded      = $q.defer();
 
 			vm.branch   = vm.branch ? vm.branch : "master";
 			vm.revision = vm.revision ? vm.revision : "head";
-
 			vm.pointerEvents = "auto";
-
-			if (!angular.isDefined(vm.eventService))
-			{
-				vm.EventService = EventService;
-			}
-
-			vm.initViewer();
-
+			vm.initialisedViewer = false;
+			vm.currentModel = null;
 
 		}
 
-		function errCallback(errorType, errorValue)
-		{
-			vm.eventService.sendError(errorType, errorValue);
+		function errCallback(errorType, errorValue) {
+			EventService.sendError(errorType, errorValue);
 		}
 
-		function eventCallback(type, value)
-		{
-			vm.eventService.send(type, value);
+		function eventCallback(type, value) {
+			EventService.send(type, value);
 		}
 
 		vm.reload = function() {
@@ -93,76 +82,66 @@
 
 		vm.initViewer = function() {
 
-			vm.viewer = new Viewer(vm.name, $element[0], vm.manager, eventCallback, errCallback);
+			vm.initialisedPromise = $q.defer();
 
-			var options = {};
-			var startLatLon = vm.at && vm.at.split(',');
+			vm.viewer = new Viewer(vm.name, $element[0], eventCallback, errCallback);
 
-			var view = vm.view && vm.view.split(',');
+			// var options = {};
+			// var startLatLon = vm.at && vm.at.split(',');
 
-			view && view.forEach(function(val, i){
-				view[i] = parseFloat(val);
-			});
+			// var view = vm.view && vm.view.split(',');
 
-			options.view = view;
+			// view && view.forEach(function(val, i){
+			// 	view[i] = parseFloat(val);
+			// });
 
-			var up = vm.up && vm.up.split(',');
-			up && up.forEach(function(val, i){
-				up[i] = parseFloat(val);
-			});
+			// options.view = view;
 
-			options.up = up;
+			// var up = vm.up && vm.up.split(',');
+			// up && up.forEach(function(val, i){
+			// 	up[i] = parseFloat(val);
+			// });
+
+			// options.up = up;
 
 			var showAll = true;
 
-			if(startLatLon){
-				showAll = false;
-				options.lat = parseFloat(startLatLon[0]),
-				options.lon = parseFloat(startLatLon[1]),
-				options.y = parseFloat(startLatLon[2])
-			}
+			// if(startLatLon){
+			// 	showAll = false;
+			// 	options.lat = parseFloat(startLatLon[0]),
+			// 	options.lon = parseFloat(startLatLon[1]),
+			// 	options.y = parseFloat(startLatLon[2])
+			// }
 
-
-			vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
+			//vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
 			vm.viewer.init({
 				showAll : showAll,
-				plugins: {
-					'mapTile': vm.mapTile
-				}
-			}).then(function(){
-					;
+				// plugins: {
+				// 	'mapTile': vm.mapTile
+				// }
+			})
+			.then(function(){
+		
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
-				vm.oculus     = new Oculus(vm.viewer);
-				vm.gamepad    = new Gamepad(vm.viewer);
-				vm.gamepad.init();
+				//vm.oculus     = new Oculus(vm.viewer);
+				// vm.gamepad    = new Gamepad(vm.viewer);
+				// vm.gamepad.init();
 
-				vm.measure    = new MeasureTool(vm.viewer);
+				// vm.measure    = new MeasureTool(vm.viewer);
 
-				vm.collision  = new Collision(vm.viewer);
+				// vm.collision  = new Collision(vm.viewer);
 
-				//vm.reload();
-
-				vm.loaded.promise.then(function() {
-					// TODO: Move this so that the attachment is contained
-					// within the plugins themselves.
-					// Comes free with oculus support and gamepad support
-					vm.oculus     = new Oculus(vm.viewer);
-					vm.gamepad    = new Gamepad(vm.viewer);
-
-					vm.gamepad.init();
-
-					vm.collision  = new Collision(vm.viewer);
-				});
-
-			});
+			})
+			.catch(function(error){
+				console.error("Error creating Viewer Directive: ", error);
+			})
 			
 
 		};
 
-		function fetchModelProperties(account, model, branch, revision)
-		{
+		function fetchModelProperties(account, model, branch, revision) {
 
 			if(!branch)
 			{
@@ -173,9 +152,10 @@
 			}
 					
 
-			if(!revision)
+			if(!revision) {
 				revision = "head";
-
+			}
+			
 			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 			.then(function(json, status) {
@@ -186,32 +166,56 @@
 
 		}
 
-		vm.enterVR = function() {
-			vm.loaded.promise.then(function() {
-				vm.oculus.switchVR();
-			});
-		};
+		// vm.enterVR = function() {
+		// 	vm.loaded.promise.then(function() {
+		// 		vm.oculus.switchVR();
+		// 	});
+		// };
 
-		$scope.$watch(vm.branch, function(blah)
-		{
-			console.log(JSON.stringify(blah));
-		});
+		// $scope.$watch(vm.branch, function(blah)
+		// {
+		// 	console.log(JSON.stringify(blah));
+		// });
 
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+
+			var validEvent = angular.isDefined(event) && angular.isDefined(event.type);
+			
+			if (validEvent) {
+
+				if (event.type === EventService.EVENT.ISSUES_READY) {
+					
+					// If no model is loaded it is the first time 
+					// the viewer has loaded
+			
+					if (!vm.currentModel) {
+						// Initialise the viewer
+						vm.initViewer();
+					} else {
+						// Load the model
+						vm.loadViewerModel();	
+					}
+					
+				}
+
+				if (event.type === EventService.EVENT.VIEWER.UNITY_READY) {
+					// When the viewer and unity are ready send a load model event 
+					// to load the model
+					if (!vm.currentModel) {
+						vm.loadViewerModel();	
+					}
+
+				}
+
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
-					vm.initialised.resolve();
+
+					vm.initialisedPromise.resolve();
 					fetchModelProperties(vm.account, vm.model, vm.branch, vm.revision);	
-				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
-					vm.loaded.resolve();
-				} else if (event.type === EventService.EVENT.VIEWER.LOAD_MODEL) {
-					vm.account = event.value.account;
-					vm.model = event.value.model;
-					vm.branch = event.value.branch;
-					vm.revision = event.value.revision;
-					vm.viewer.loadModel(event.value.account, event.value.model, event.value.branch, event.value.revision);
-				} else {
-					vm.initialised.promise.then(function() {
+
+				} else if (vm.initialisedPromise)  {
+
+					vm.initialisedPromise.promise.then(function() {
+
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
 							vm.viewer.showAll();
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
@@ -316,20 +320,18 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								vm.manager.getCurrentViewer().getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
+								vm.viewer.getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
-							console.log("screenshot EventService outside is defined", event.value.promise)
 							if (angular.isDefined(event.value.promise)) {
-								console.log("screenshot EventService", event.value.promise)
-								vm.manager.getCurrentViewer().getScreenshot(event.value.promise);
+								vm.viewer.getScreenshot(event.value.promise);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
+							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 							vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-							//console.log('update url!!');
+					
 							$location.path("/" + vm.account + '/' + vm.model).search({
 								at: event.value.at,
 								view: event.value.view,
@@ -343,15 +345,24 @@
 
 					});
 
-					/*vm.loaded.promise.then(function() {
-					});*/
 				}
+					
+
 			}
 		});
 
-		if (angular.isDefined(vm.vrMode))
-		{
-			vm.enterVR();
+		vm.loadViewerModel = function(event) {
+
+			vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
+
+			// Set the current model in the viewer
+			vm.currentModel = vm.model;
+
 		}
+
+		// if (angular.isDefined(vm.vrMode))
+		// {
+		// 	vm.enterVR();
+		// }
 	}
 }());

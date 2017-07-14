@@ -257,7 +257,7 @@
 				teamspace.assignUsers = response.data;
 			})
 			.catch(function(response){
-				console.log("error", response);
+				console.error("error", response);
 			});
 		}
 

@@ -26,7 +26,7 @@ var bgroundClick, clickObject, clickPin, onMouseOver,
 
 // ----------------------------------------------------------
 var Viewer = {};
-var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
+// var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 (function() {
 	"use strict";
@@ -43,7 +43,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 	onError           = ViewerUtil.eventFactory("onError");
 	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
-	Viewer = function(name, element, manager, callback, errCallback) {
+	Viewer = function(name, element, callback, errCallback) {
 		// Properties
 		var self = this;
 
@@ -82,8 +82,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.zNear = -1;
 		this.zFar = -1;
-
-		this.manager = manager;
 
 		this.initialized = false;
 
@@ -214,7 +212,21 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				// Set option param from viewerDirective
 				self.options = options;
 
+				
+				// TODO: This should probably just be a pug template?
+
 				self.viewer = document.createElement("div");
+
+				self.loadingText = "Loading Viewer..."
+				self.loadingDiv = document.createElement("div");
+				self.loadingDivText = document.createElement("p");
+				self.loadingDiv.appendChild(self.loadingDivText);
+
+				self.loadingDivText.innerHTML = self.loadingText;
+				document.body.style.cursor = "wait";
+				self.loadingDiv.className += "loadingViewer"
+				self.loadingDivText.className += "loadingViewerText"
+
 				var canvas = document.createElement("canvas");
 				canvas.className = "emscripten";
 				canvas.setAttribute("id", "canvas");
@@ -225,37 +237,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				canvas.onmousedown = function(){
 					return false;
 				};
-				//canvas.addEventListener("mousedown", onMouseDown);
+			;
 				canvas.addEventListener("mouseup",  onMouseUp);
 				canvas.addEventListener("mousemove",  onMouseMove);
 
 				canvas.style["pointer-events"] = "all";
 				
-				var canvasScript = document.createElement("script");
-				canvasScript.setAttribute("type", "text/javascript");
-
-				var unitySettings = {
-
-				 	TOTAL_MEMORY: 2130706432 / 3,
-				    errorhandler: UnityUtil.onError,
-				    compatibilitycheck: null,
-				    backgroundColor: "#222C36",
-				    splashStyle: "Light",
-				    dataUrl: "public/unity/Release/unity.data",
-				    codeUrl: "public/unity/Release/unity.js",
-				    asmUrl: "public/unity/Release/unity.asm.js",
-				    memUrl: "public/unity/Release/unity.mem"
-
-				};
-				var moduleSettings = document.createTextNode("var Module = " + JSON.stringify(unitySettings));
-				canvasScript.appendChild(moduleSettings);
-				var canvasScript2 = document.createElement("script");
-				canvasScript2.setAttribute("src", "public/unity/Release/UnityLoader.js");
-								
+				var unityLoaderScript = document.createElement("script");
+				unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
+				unityLoaderScript.async = true;
 
 				self.viewer.appendChild(canvas);
-				self.viewer.appendChild(canvasScript);
-				self.viewer.appendChild(canvasScript2);
+				self.viewer.appendChild(self.loadingDiv);
+				self.viewer.appendChild(unityLoaderScript);
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
@@ -293,30 +287,31 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.viewer.addEventListener("keypress", self.handleKeyPresses);
 
-				if (manager) {
-					manager.registerMe(self);
-				}
-
 				self.enableClicking();
 
-
-				self.plugins = self.options.plugins;
-				Object.keys(self.plugins).forEach(function(key){
-					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
-				});
+				if (self.options && self.options.plugins) {
+					self.plugins = self.options.plugins;
+					Object.keys(self.plugins).forEach(function(key){
+						self.plugins[key].initCallback && self.plugins[key].initCallback(self);
+					});
+				}
 
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
+
 				UnityUtil.onReady().then(function() {
 					self.initialized = true;
-					resolve();
-					callback(self.EVENT.READY, {
+					self.loadingDivText.innerHTML = "";
+					callback(self.EVENT.UNITY_READY, {
 						name: self.name,
 						model: self.modelString
 					});
+					resolve();
+				}).catch(function(error){
+					console.error("UnityUtil.onReady failed: ", error);
 				});
 				
 			});
@@ -372,15 +367,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				}
 				var accProj = nameSpace.split("__");
-				callback(self.EVENT.SET_SUBMODEL_TRANS_INFO,
-							{
-								modelNameSpace: nameSpace,
-								modelTrans: self.getParentTransformation(accProj[0], accProj[1]),
-								isMainModel: accProj[0] === self.account && accProj[1] === self.model
+				callback(self.EVENT.SET_SUBMODEL_TRANS_INFO, {
+					modelNameSpace: nameSpace,
+					modelTrans: self.getParentTransformation(accProj[0], accProj[1]),
+					isMainModel: accProj[0] === self.account && accProj[1] === self.model
+				});
 
-							}
-
-						);
 			} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
 				if (self.multipartNodes.indexOf(objEvent.target) === -1)
 				{
@@ -407,7 +399,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.pinSize = sceneSize / 20;
 			}
 
-			//console.log('my op', options);
 
 			var options = self.options;
 			// don't show all if lat,lon,height is set in URL
@@ -596,7 +587,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.getScreenshot = function(promise)
 		{
-			console.log("Viewer screenshot", promise);
 			UnityUtil.requestScreenShot(promise);
 		}
 
@@ -686,22 +676,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			UnityUtil.getPointInfo();
 		};
 
-
-		/*
-		this.mouseMovePoint = function (event) {
-			if (event.hasOwnProperty("target")) {
-				console.log(event.hitPnt);
-			}
-			else {
-				console.log(event.clientX, event.clientY);
-				var viewArea = self.getViewArea();
-				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
-			}
-		};
-
-		this.onMouseMove(this.mouseMovePoint);
-		*/
-
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
 		};
@@ -711,7 +685,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.viewPointChanged = function(event) {
-			//console.log('vp changed');
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
@@ -1180,11 +1153,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			UnityUtil.setViewpoint(pos, up, viewDir, account, model);
 		};
 
-		this.linked = false;
-
-		this.managerSwitchMaster = function() {
-			self.manager.switchMaster(self.handle);
-		};
+		//this.linked = false;
 
 		this.linkMe = function() {
 			// Need to be attached to the viewer master
@@ -1192,12 +1161,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				return;
 			}
 
-			self.manager.linkMe(self.handle);
-			self.onViewpointChanged(self.manager.viewpointLinkFunction);
+			//self.manager.linkMe(self.handle);
+			//self.onViewpointChanged(self.manager.viewpointLinkFunction);
 
-			self.viewer.addEventListener("mousedown", self.managerSwitchMaster);
+			//self.viewer.addEventListener("mousedown", self.managerSwitchMaster);
 
-			self.linked = true;
+			//self.linked = true;
 		};
 
 
@@ -1233,15 +1202,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
-			UnityUtil.loadModel(self.account, self.model,
-							self.branch, self.revision).then(
-				function(bbox)
-				{
-					callback(self.EVENT.LOADED, bbox);
-				}
-			);
+			//self.loadingDivText.innerHTML = ""; //This could be set to Loading Model
+			document.body.style.cursor = "wait";
+			
 			callback(self.EVENT.START_LOADING);
-
+			UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
+			.then(function(bbox){
+				document.body.style.cursor = "initial";
+				self.loadingDivText.innerHTML = "";
+				callback(self.EVENT.LOADED, bbox);
+			}).catch(function(error){
+				console.error("Unity error loading model: ", error)
+			})
+			
 		};
 
 		this.getRoot = function() {
@@ -1583,7 +1556,8 @@ var VIEWER_NAV_MODES = Viewer.prototype.NAV_MODES = {
 
 var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	// States of the viewer
-	READY: "VIEWER_EVENT_READY",
+	INITIALISE: "VIEWER_EVENT_INITIALISE",
+	UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 	START_LOADING: "VIEWING_START_LOADING",
 	LOAD_MODEL: "VIEWER_LOAD_MODEL",
 	LOADED: "VIEWER_EVENT_LOADED",

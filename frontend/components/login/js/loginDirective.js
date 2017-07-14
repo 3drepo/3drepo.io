@@ -47,7 +47,6 @@
 			vm.unityLoaded = false;
 			vm.unityLoading = UnityUtil.onReady();
 			vm.unityLoading.then(function(resolved){
-				console.log("Loaded", resolved);
 				vm.unityLoaded = true;
 			})
 
@@ -96,7 +95,6 @@
 
 			
 			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
-				console.log("412: login event", event)
 				// Show an error message for incorrect login
 				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
