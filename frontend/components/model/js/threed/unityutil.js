@@ -95,6 +95,7 @@ var UnityUtil;
 				loadedResolve = {resolve: resolve, reject: reject};
 			}	
 			);
+
 		}
 		return loadedPromise;
 		
@@ -104,10 +105,10 @@ var UnityUtil;
 	{
 		if(!loadingPromise)
 		{
-		   loadingPromise	= new Promise(function(resolve, reject)
+		   loadingPromise	= new Promise( function(resolve, reject)
 			{
 				loadingResolve = {resolve: resolve, reject: reject};
-			}	
+			}
 			);
 		}
 		return loadingPromise;
@@ -133,6 +134,8 @@ var UnityUtil;
 
 	function toUnity(methodName, requireStatus, params)
 	{
+		console.log("toUnity", methodName, requireStatus, params);
+
 		if(requireStatus == LoadingState.MODEL_LOADED)
 		{
 			//Requires model to be loaded
@@ -140,16 +143,18 @@ var UnityUtil;
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
-			});
+			}).catch(function(error){
+				console.error("UnityUtil.onLoaded() failed: ", error);
+			})
 		}
 		else if(requireStatus == LoadingState.MODEL_LOADING)
 		{
 			//Requires model to be loading
-			UnityUtil.onLoading().then(function()
-			{
+			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
-			
-			});
+			}).catch(function(error){
+				console.error("UnityUtil.onLoading() failed: ", error);
+			})
 		}
 		else
 		{
@@ -157,7 +162,9 @@ var UnityUtil;
 			{
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
-			});
+			}).catch(function(error){
+				console.error("UnityUtil.onReady() failed: ", error);
+			})
 		}
 
 	}
@@ -339,10 +346,12 @@ var UnityUtil;
 
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision)
 	{
-
+		
+		console.log("UnityUtil, load model", loaded)
 		UnityUtil.reset();	
 		if(!loaded && loadedResolve)
 		{
+			console.log("Rejecting...")
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject();
 			loadingResolve.reject();
@@ -359,10 +368,13 @@ var UnityUtil;
 		if(revision != "head")
 			params.revID = revision;	
 		
-		UnityUtil.onLoading(); //Initialise the promise
+		UnityUtil.onLoading();
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
-			
+		
+		console.log("UnityUtil.onLoaded", UnityUtil.onLoaded());
+		
 		return UnityUtil.onLoaded();
+	
 	}
 
 	UnityUtil.prototype.removePin = function(id)

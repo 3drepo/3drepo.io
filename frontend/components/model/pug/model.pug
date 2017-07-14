@@ -2,35 +2,35 @@
 // tabindex is required for ng-keydown to work on a div/directive
 #model()
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
-		#viewermanager
+		
 	#modelUI
 		revisions(
-		account="vm.account"
-		model="vm.model"
-		model-name="vm.settings.name"
-		revision="vm.revision")
+			account="vm.account"
+			model="vm.model"
+			model-name="vm.settings.name"
+			revision="vm.revision")
 
 		panel#leftPanel(
-		account="vm.account"
-		model="vm.model"
-		branch="vm.branch"
-		revision="vm.revision"
-		model-settings="vm.settings"
-		position="left"
-		tree-map="vm.treeMap"
-		style="pointer-events:{{vm.pointerEvents}}"
-		keys-down="vm.keysDown"
-		selected-objects="vm.selectedObjects"
-		set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
+			account="vm.account"
+			model="vm.model"
+			branch="vm.branch"
+			revision="vm.revision"
+			model-settings="vm.settings"
+			position="left"
+			tree-map="vm.treeMap"
+			style="pointer-events:{{vm.pointerEvents}}"
+			keys-down="vm.keysDown"
+			selected-objects="vm.selectedObjects"
+			set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 		panel#rightPanel(
-		account="vm.account"
-		model="vm.model"
-		branch="vm.branch"
-		tree-map="vm.treeMap"
-		revision="vm.revision"
-		position="right"
-		style="pointer-events:{{vm.pointerEvents}}")
+			account="vm.account"
+			model="vm.model"
+			branch="vm.branch"
+			tree-map="vm.treeMap"
+			revision="vm.revision"
+			position="right"
+			style="pointer-events:{{vm.pointerEvents}}")
 
 		right-panel(style="pointer-events:{{vm.pointerEvents}}")
 		bottom-buttons(style="pointer-events:{{vm.pointerEvents}}")

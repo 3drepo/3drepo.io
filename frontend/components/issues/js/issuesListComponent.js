@@ -207,7 +207,6 @@
 			}
 
 			if(changes.hasOwnProperty('displayIssue') && vm.displayIssue){
-				//console.log('changes.displayIssue', vm.displayIssue)
 				var that = this;
 
 				vm.editIssue(vm.displayIssue);

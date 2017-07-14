@@ -69,7 +69,6 @@
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
 			vm.selectedIssueLoaded = false;
-			console.log("ISSUE COMPONENT LOADING")
 
 			/*
 			* Get the user roles for the model
@@ -83,8 +82,6 @@
 			*/
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 			.then(function (data) {
-
-				console.log("ISSUE COMPONENT", data)
 
 				vm.showProgress = false;
 				vm.toShow = "showIssues";
@@ -133,8 +130,9 @@
 			});
 
 			$q.all([vm.getIssues, vm.getJobs]).then(function(){
-				console.log("ISSUE COMPONENT, all")
 				setAllIssuesAssignedRolesColors();
+				console.log("fitring isssues readyy")
+				EventService.send(EventService.EVENT.ISSUES_READY, true);
 			});
 
 		}
@@ -231,7 +229,6 @@
 		 * Go back to issues list
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
-			console.log('hideItem changed', newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
@@ -404,7 +401,6 @@
 			}).catch(function(err){
 
 				vm.importingBCF = false;
-				console.log('Error while importing bcf', err);
 				
 			});
 

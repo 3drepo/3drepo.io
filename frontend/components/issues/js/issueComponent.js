@@ -308,7 +308,6 @@
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
-			console.log("ISSUE COMPONENT status change", vm.data)
 
 			if (vm.data) {
 				data = {

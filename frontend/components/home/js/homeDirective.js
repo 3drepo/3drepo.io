@@ -163,9 +163,7 @@
 			$timeout(function () {
 				var loginMarkup = "<login></login>";
 				homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
-				EventService.send(EventService.EVENT.CREATE_VIEWER, {
-					name: "default",
-				});
+
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/

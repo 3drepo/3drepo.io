@@ -236,7 +236,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				var unitySettings = {
 
-				 	TOTAL_MEMORY: 2130706432 / 3,
+				 	TOTAL_MEMORY: 2130706432 / 4,
 				    errorhandler: UnityUtil.onError,
 				    compatibilitycheck: null,
 				    backgroundColor: "#222C36",
@@ -310,13 +310,18 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
+
+				console.log("Unity util on ready")
 				UnityUtil.onReady().then(function() {
 					self.initialized = true;
-					resolve();
-					callback(self.EVENT.READY, {
+					console.log("viewer.js - UnityUtil.onReady then")
+					callback(self.EVENT.UNITY_READY, {
 						name: self.name,
 						model: self.modelString
 					});
+					resolve();
+				}).catch(function(error){
+					console.error("UnityUtil.onReady failed: ", error);
 				});
 				
 			});
@@ -596,7 +601,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.getScreenshot = function(promise)
 		{
-			console.log("Viewer screenshot", promise);
 			UnityUtil.requestScreenShot(promise);
 		}
 
@@ -686,22 +690,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			UnityUtil.getPointInfo();
 		};
 
-
-		/*
-		this.mouseMovePoint = function (event) {
-			if (event.hasOwnProperty("target")) {
-				console.log(event.hitPnt);
-			}
-			else {
-				console.log(event.clientX, event.clientY);
-				var viewArea = self.getViewArea();
-				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
-			}
-		};
-
-		this.onMouseMove(this.mouseMovePoint);
-		*/
-
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
 		};
@@ -711,7 +699,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.viewPointChanged = function(event) {
-			//console.log('vp changed');
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
@@ -1233,13 +1220,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
-			UnityUtil.loadModel(self.account, self.model,
-							self.branch, self.revision).then(
-				function(bbox)
-				{
-					callback(self.EVENT.LOADED, bbox);
-				}
-			);
+			
+			console.log("Load model from viewer.js", self.initialized)
+			UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
+			.then(function(bbox){
+				console.debug("Unity model loaded: ", bbox)
+				callback(self.EVENT.LOADED, bbox);
+			}).catch(function(error){
+				console.error("Unity error loading model: ", error)
+			})
 			callback(self.EVENT.START_LOADING);
 
 		};
@@ -1583,7 +1572,8 @@ var VIEWER_NAV_MODES = Viewer.prototype.NAV_MODES = {
 
 var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	// States of the viewer
-	READY: "VIEWER_EVENT_READY",
+	INITIALISE: "VIEWER_EVENT_INITIALISE",
+	UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 	START_LOADING: "VIEWING_START_LOADING",
 	LOAD_MODEL: "VIEWER_LOAD_MODEL",
 	LOADED: "VIEWER_EVENT_LOADED",

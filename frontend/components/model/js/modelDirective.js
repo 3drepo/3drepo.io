@@ -244,6 +244,10 @@
 				]
 			});
 
+			$timeout(function () {
+				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
+			});
+
 		}
 
 
@@ -286,11 +290,6 @@
 		});
 
 
-		$timeout(function () {
-			EventService.send(EventService.EVENT.VIEWER.LOAD_MODEL, {account: vm.account, model: vm.model, branch: vm.branch, revision: vm.revision });
-			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
-		});
-
 		$scope.$watch("vm.issueId", function(){
 			if(vm.issueId){
 				// timeout to make sure event is sent after issue panel card is setup
@@ -308,7 +307,7 @@
 			var element;
 
 			vm.event = event;
-
+			
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
 					issueArea = angular.element("<issue-area></issue-area>");
