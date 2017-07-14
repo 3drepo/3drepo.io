@@ -25,7 +25,7 @@ module.exports.createApp = function (server, serverConfig){
 	let session = require('./session').session(config);
 	
 	let log_iface = require("../logger.js");
-	let middlewares = require('../routes/middlewares');
+	let middlewares = require('../middlewares/middlewares');
 	let systemLogger = log_iface.systemLogger;
 
 	//console.log(serverConfig);

@@ -28,7 +28,7 @@ var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
-var middlewares = require('../routes/middlewares');
+var middlewares = require('../middlewares/middlewares');
 var _ = require('lodash');
 
 var ChatEvent = require('./chatEvent');

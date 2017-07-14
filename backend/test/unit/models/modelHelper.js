@@ -33,7 +33,7 @@ let ModelHelper = proxyquire('../../../models/helper/model', {
 	'../../constants': {},
 	'../../mailer/mailer': {},
 	'../../logger.js': {},
-	'../../routes/middlewares': {},
+	'../../middlewares/middlewares': {},
 	'../../config': {},
 	'../../utils': {},
 	'../history': {},

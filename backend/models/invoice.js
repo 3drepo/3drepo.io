@@ -345,7 +345,10 @@
 			User.findByUserName(user.customData.billing.billingUser).then(billingUser => {
 				Mailer.sendPaymentRefundedEmail(billingUser.customData.email, {
 					amount: `${data.currency}${data.amount}`
-				}, attachments);
+				}, attachments)
+				.catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
 
 				//make a copy to sales
 				Mailer.sendPaymentReceivedEmailToSales({
@@ -354,7 +357,10 @@
 					email: billingUser.customData.email,
 					invoiceNo: invoice.invoiceNo,
 					type: invoice.type
-				}, attachments);
+				}, attachments)
+				.catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
 			});
 
 			return invoice;

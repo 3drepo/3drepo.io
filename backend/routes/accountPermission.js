@@ -21,7 +21,7 @@
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
-	const middlewares = require('./middlewares');
+	const middlewares = require('../middlewares/middlewares');
 	const User = require("../models/user");
 	const utils = require("../utils");
 

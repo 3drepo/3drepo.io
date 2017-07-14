@@ -158,7 +158,9 @@
 			if(err){
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			}
-			next(err);
+
+			err.stack && req[C.REQ_REPO].logger.logError(err.stack);
+			//next(err);
 		});
 
 		return app;

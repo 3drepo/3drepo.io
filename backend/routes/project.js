@@ -1,3 +1,19 @@
+/**
+ *	Copyright (C) 2014 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 (function() {
 	"use strict";
@@ -5,27 +21,15 @@
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
-	const middlewares = require('./middlewares');
+	const middlewares = require('../middlewares/middlewares');
 	const Project = require("../models/project");
 	const utils = require("../utils");
-	const C = require("../constants");
-	const checkPermissions = middlewares.checkPermissions;
 	
-	function canUpdate(req, res, next){
-		if(req.body.permissions){
-			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
-		} else {
-			checkPermissions({ '$or':[[C.PERM_EDIT_PROJECT], [C.PERM_PROJECT_ADMIN]] })(req, res, next);
-		}
-	}
-
-	const canViewProject = { '$or':[[C.PERM_VIEW_PROJECTS], [C.PERM_PROJECT_ADMIN]] };
-
-	router.post("/projects", checkPermissions([C.PERM_CREATE_PROJECT]), createProject);
-	router.put("/projects/:project", canUpdate, updateProject);
-	router.get("/projects", checkPermissions(canViewProject), listProjects);
-	router.get("/projects/:project", checkPermissions(canViewProject), listProject);
-	router.delete("/projects/:project", checkPermissions([C.PERM_DELETE_PROJECT]), deleteProject);
+	router.post("/projects", middlewares.project.canCreate, createProject);
+	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
+	router.get("/projects", middlewares.project.canList, listProjects);
+	router.get("/projects/:project",  middlewares.project.canView, listProject);
+	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
 
 
 	function createProject(req, res, next){

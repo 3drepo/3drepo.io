@@ -561,22 +561,15 @@ function _addProjects(account, username, models){
 		projects.forEach((project, i) => {
 		
 			project = project.toObject();
-			if(account.permissions && account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
-				project.permissions = C.PROJECT_PERM_LIST;
-			} else {
 
-				let permissions = project.permissions.find(p => p.user === username);
-				permissions = _.get(permissions, 'permissions') || [];
-				
-				if(permissions.indexOf(C.PERM_PROJECT_ADMIN) !== -1){
-					permissions = C.PROJECT_PERM_LIST;
-				} else if (account.permissions && account.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1){
-					permissions.push(C.PERM_VIEW_ISSUE_ALL_MODELS, C.PERM_VIEW_MODEL_ALL_MODELS);
-				}	
-				
-				project.permissions = permissions;
-			}
-
+			let permissions = project.permissions.find(p => p.user === username);
+			permissions = _.get(permissions, 'permissions') || [];
+			// show inherited and implied permissions
+			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+			permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
+			
+			project.permissions = _.uniq(_.compact(_.flatten(permissions)));
+			
 			projects[i] = project;
 
 			const findModel = model => (m, i, models) => {
@@ -743,17 +736,16 @@ schema.methods.listAccounts = function(){
 				permissions: user.toObject().customData.permissions[0].permissions || []
 			};
 
-			if(account.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
-				account.permissions = C.ACCOUNT_PERM_LIST;
-			}
+			//show all implied and inherted permissions
+			account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
 
 			accounts.push(account);
 
 			if (isTeamspaceAdmin || canViewProjects){
 
-				const inheritedModelPermissions = isTeamspaceAdmin && C.MODEL_PERM_LIST || 
-					canViewProjects && [C.PERM_VIEW_MODEL, C.PERM_VIEW_ISSUE] || [];
-
+				//show all implied and inherted permissions
+				const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
+				
 				addAccountPromises.push(
 					// list all models under this account as they have full access
 					_getModels(account.account, null, inheritedModelPermissions).then(data => {
@@ -806,31 +798,12 @@ schema.methods.listAccounts = function(){
 						myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
 					}
 
+					// show implied and inherited permissions
+					myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+					myProj.permissions = _.uniq(_.flatten(myProj.permissions));
 
-					let inheritedModelPerms = [];
-
-					if(myProj.permissions.indexOf(C.PERM_PROJECT_ADMIN) !== -1){
-						myProj.permissions  = C.PROJECT_PERM_LIST;
-						inheritedModelPerms = C.MODEL_PERM_LIST;
-					} else {
-
-						[
-							{ proj: C.PERM_UPLOAD_FILES_ALL_MODELS, model: C.PERM_UPLOAD_FILES },
-							{ proj: C.PERM_EDIT_FEDERATION_ALL_MODELS, model: C.PERM_EDIT_FEDERATION },
-							{ proj: C.PERM_CREATE_ISSUE_ALL_MODELS, model: C.PERM_CREATE_ISSUE },
-							{ proj: C.PERM_COMMENT_ISSUE_ALL_MODELS, model: C.PERM_COMMENT_ISSUE },
-							{ proj: C.PERM_VIEW_ISSUE_ALL_MODELS, model: C.PERM_VIEW_ISSUE },
-							{ proj: C.PERM_DOWNLOAD_MODEL_ALL_MODELS, model: C.PERM_DOWNLOAD_MODEL },
-							{ proj: C.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS, model: C.PERM_CHANGE_MODEL_SETTINGS },
-							{ proj: C.PERM_VIEW_MODEL_ALL_MODELS, model: C.PERM_VIEW_MODEL}
-
-						].forEach(permission => {
-							if(myProj.permissions.indexOf(permission.proj) !== -1){
-								inheritedModelPerms.push(permission.model);
-							}
-						});
-						
-					}
+					let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+					inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
 					const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 
@@ -854,7 +827,6 @@ schema.methods.listAccounts = function(){
 		let addModelPromises = [];
 		// model level permission
 		this.customData.models.forEach(model => {
-
 
 			let account = accounts.find(account => account.account === model.account);
 			
@@ -950,8 +922,6 @@ schema.methods.listAccounts = function(){
 
 
 		return accounts;
-		// return Promise.all(accounts.map(account => _addProjects(account, this.user)))
-		// 	.then(() => accounts);
 
 	});
 

@@ -18,7 +18,7 @@
 
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var middlewares = require('./middlewares');
+var middlewares = require('../middlewares/middlewares');
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Texture = require('../models/texture');

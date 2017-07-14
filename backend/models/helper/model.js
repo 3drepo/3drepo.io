@@ -29,13 +29,14 @@ var Ref = require('../ref');
 var utils = require("../../utils");
 var stash = require('./stash');
 var Ref = require('../ref');
-var middlewares = require('../../routes/middlewares');
+var middlewares = require('../../middlewares/middlewares');
 var C = require("../../constants");
 var multer = require("multer");
 var fs = require('fs');
 var ChatEvent = require('../chatEvent');
 var Project = require('../project');
 const stream = require('stream');
+var _ = require('lodash');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -1244,6 +1245,16 @@ function importModel(account, model, username, modelSetting, source, data){
 			username
 		});
 
+		const partialOKCodes = [
+			responseCodes.FILE_IMPORT_MISSING_TEXTURES.value,
+			responseCodes.FILE_IMPORT_MISSING_NODES.value,
+			responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES.value
+		];
+
+		if(err && err.bouncerErrorCode && partialOKCodes.indexOf(err.value) !== -1){
+			modelSetting.timestamp = new Date();
+		}
+
 		modelSetting.status = 'failed';
 		modelSetting.errorReason = err;
 		modelSetting.markModified('errorReason');
@@ -1325,30 +1336,49 @@ function getModelPermission(username, setting, account){
 		return Promise.resolve([]);
 	}
 
-	return User.findByUserName(account).then(dbUser => {
+	let permissions = [];
+	let dbUser;
+
+	return User.findByUserName(account).then(_dbUser => {
+
+		dbUser = _dbUser;
+
 		if(!dbUser){
 			return [];
 		}
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
 
-		if(accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1){
-			return C.MODEL_PERM_LIST;
+		if(accountPerm && accountPerm.permissions){
+			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
+		}
+
+		const projectQuery = { models: setting._id, 'permissions.user': username };
+		// project admin have access to models underneath it.
+		return Project.findOne({account}, projectQuery, { 'permissions.$' : 1 });
+
+	}).then(project => {
+
+		if(project && project.permissions){
+			permissions = permissions.concat(
+				 _.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
+			);
 		}
 
 		const template = setting.findPermissionByUser(username);
 
-		if(!template){
-			return Promise.resolve([]);
+		if(template){
+
+			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
+
+			if(permission && permission.permissions){
+				permissions = permissions.concat(
+					_.flatten(permission.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || p))
+				);
+			}
 		}
 
-		const permission = dbUser.customData.permissionTemplates.findById(template.permission);
-
-		if(!permission || !permission.permissions){
-			return [];
-		}
-
-		return permission.permissions;
+		return _.uniq(permissions);
 	});
 }
 
