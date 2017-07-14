@@ -17,7 +17,7 @@
 
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var middlewares = require('./middlewares');
+var middlewares = require('../middlewares/middlewares');
 
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
@@ -30,29 +30,29 @@ var User = require('../models/user');
 
 var stringToUUID = utils.stringToUUID;
 
-router.get('/issues/:uid.json', middlewares.hasReadAccessToIssue, findIssueById);
-router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToIssue, getThumbnail);
+router.get('/issues/:uid.json', middlewares.issue.canView, findIssueById);
+router.get('/issues/:uid/thumbnail.png', middlewares.issue.canView, getThumbnail);
 
-router.get('/issues.json', middlewares.hasReadAccessToIssue, listIssues);
-router.get('/issues.bcfzip', middlewares.hasReadAccessToIssue, getIssuesBCF);
-router.post('/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
+router.get('/issues.json', middlewares.issue.canView, listIssues);
+router.get('/issues.bcfzip', middlewares.issue.canView, getIssuesBCF);
+router.post('/issues.bcfzip', middlewares.issue.canCreate, importBCF);
 
-router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToIssue, getScreenshot);
-router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToIssue, getScreenshotSmall);
-router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToIssue, listIssues);
-router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToIssue, getIssuesBCF);
-router.post('/revision/:rid/issues.bcfzip', middlewares.hasWriteAccessToIssue, importBCF);
+router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.issue.canView, getScreenshot);
+router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.issue.canView, getScreenshotSmall);
+router.get('/revision/:rid/issues.json', middlewares.issue.canView, listIssues);
+router.get('/revision/:rid/issues.bcfzip', middlewares.issue.canView, getIssuesBCF);
+router.post('/revision/:rid/issues.bcfzip', middlewares.issue.canCreate, importBCF);
 
-//router.get('/issues/:sid.json', middlewares.hasReadAccessToIssue, listIssuesBySID);
-router.get("/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+//router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
+router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
-router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToIssue, renderIssuesHTML);
+router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
-router.post('/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.hasCommentAccessToIssue, updateIssue);
+router.post('/issues.json', middlewares.connectQueue, middlewares.issue.canCreate, storeIssue);
+router.put('/issues/:issueId.json', middlewares.connectQueue, middlewares.issue.canComment, updateIssue);
 
-router.post('/revision/:rid/issues.json', middlewares.connectQueue, middlewares.hasWriteAccessToIssue, storeIssue);
-router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.hasCommentAccessToIssue, updateIssue);
+router.post('/revision/:rid/issues.json', middlewares.connectQueue, middlewares.issue.canCreate, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.connectQueue, middlewares.issue.canComment, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
