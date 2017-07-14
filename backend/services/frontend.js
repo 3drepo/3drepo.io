@@ -161,6 +161,9 @@
 		});
 
 		app.use("/public", express.static(__dirname + "/../../public"));
+		app.get("/public/*", function (req, res) {
+			res.status(404).send('File not found');
+		});
 
 		let DEFAULT_PLUGIN_STRUCTURE = {
 			"plugin": "home",
