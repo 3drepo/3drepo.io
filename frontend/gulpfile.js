@@ -88,6 +88,7 @@ gulp.task('javascript-dev', function() {
         .pipe(order([
           'components/entry/js/entry.js',
           'components/viewer/js/unityUtil.js',
+          'components/viewer/js/unitySettings.js',
           'components/viewer/js/viewerUtil.js',
           'components/viewer/js/threed/mapTile.js',
           'components/viewer/js/threed/*.js',
