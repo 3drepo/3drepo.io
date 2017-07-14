@@ -11,51 +11,50 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
 
 #issuesContent(ng-switch="vm.toShow")
+
 	// Issues list
 	issues-list(
-	ng-switch-when="showIssues"
-	account="vm.account"
-	model="vm.model"
-	all-issues="vm.issues"
-	filter-text="vm.filterText"
-	send-event="vm.sendEvent(type, value)"
-	import-bcf="vm.importBcf(file)"
-	event="vm.event"
-	on-edit-issue="vm.editIssue(issue)"
-	on-select-issue="vm.selectIssue(issue)"
-	keys-down="vm.keysDown"
-	content-height="vm.setContentHeight(height)"
-	menu-option="vm.selectedMenuOption"
-	user-job="vm.modelUserJob"
-	tree-map="vm.treeMap"
-	selected-issue="vm.selectedIssue"
-	display-issue="vm.displayIssue"
-	issue-display="vm.issueDisplay"
-	available-jobs="vm.availableJobs"
-	)
+		ng-switch-when="showIssues"
+		account="vm.account"
+		model="vm.model"
+		all-issues="vm.issues"
+		filter-text="vm.filterText"
+		import-bcf="vm.importBcf(file)"
+		event="vm.event"
+		on-edit-issue="vm.editIssue(issue)"
+		on-select-issue="vm.selectIssue(issue)"
+		keys-down="vm.keysDown"
+		content-height="vm.setContentHeight(height)"
+		menu-option="vm.selectedMenuOption"
+		user-job="vm.modelUserJob"
+		tree-map="vm.treeMap"
+		selected-issue="vm.selectedIssue"
+		display-issue="vm.displayIssue"
+		issue-display="vm.issueDisplay"
+		available-jobs="vm.availableJobs")
 
 	// Issue
-	issue-comp(
-	ng-switch-when="showIssue"
-	account="vm.account"
-	model="vm.model"
-	data="vm.selectedIssue"
-	keys-down="vm.keysDown"
-	exit="vm.editIssueExit(issue)"
-	send-event="vm.sendEvent(type, value)"
-	model-settings="vm.modelSettings"
-	event="vm.event"
-	issue-created="vm.issueCreated(issue)"
-	content-height="vm.setContentHeight(height)"
-	selected-objects="vm.selectedObjects"
-	revision="vm.revision"
-	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
-	user-job="vm.modelUserJob"
-	available-jobs="vm.availableJobs")
+	issue(
+		ng-switch-when="showIssue"
+		account="vm.account"
+		model="vm.model"
+		data="vm.selectedIssue"
+		keys-down="vm.keysDown"
+		exit="vm.editIssueExit(issue)"
+		model-settings="vm.modelSettings"
+		event="vm.event"
+		issue-created="vm.issueCreated(issue)"
+		content-height="vm.setContentHeight(height)"
+		selected-objects="vm.selectedObjects"
+		revision="vm.revision"
+		selected-issue-loaded="vm.selectedIssueLoaded"
+		set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
+		user-job="vm.modelUserJob"
+		available-jobs="vm.availableJobs")
 
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue || !vm.modelLoaded")
 		md-icon.angular-material-icons add
 
 

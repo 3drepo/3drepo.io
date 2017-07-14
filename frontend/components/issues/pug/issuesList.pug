@@ -2,12 +2,13 @@
 	// List
 	div(ng-switch-when="list")
 		.issueListItem(
-		ng-repeat="issue in vm.issuesToShow"
-		layout="column"
-		ng-click="vm.select($event, issue)"
-		ng-mouseenter="vm.setFocus(issue, $index)"
-		ng-mouseleave="vm.removeFocus($event, issue)"
-		ng-class="{issueListItemFocus: issue.focus}")
+			ng-repeat="issue in vm.issuesToShow"
+			layout="column"
+			ng-click="vm.select($event, issue)"
+			ng-mouseenter="vm.setFocus(issue, $index)"
+			ng-mouseleave="vm.removeFocus($event, issue)"
+			ng-class="{issueListItemFocus: issue.focus}")
+
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
 			issues-list-item(data="issue", user-job="vm.userJob")
@@ -16,6 +17,7 @@
 
 			#issuesListItemEnter(ng-if="issue.selected", ng-click="vm.editIssue(issue)", layout="column", layout-align="center center")
 				md-icon.angular-material-icons arrow_forward
+
 
 	// Info
 	.cardInfo(ng-switch-when="info")

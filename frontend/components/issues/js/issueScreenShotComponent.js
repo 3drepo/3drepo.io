@@ -27,8 +27,6 @@
            		bindToController: true,
 				templateUrl: "issueScreenShot.html",
 				bindings: {
-					sendEvent: "&",
-					close: "&",
 					screenShotSave: "&",
 					screenShot: "="
 				}
@@ -39,7 +37,6 @@
 
 	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
 		var vm = this,
-			currentActionIndex = null,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
 			scribbleCanvas,
@@ -59,48 +56,58 @@
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
-		if (typeof vm.screenShot !== "undefined") {
-			vm.screenShotUse = vm.screenShot;
-		}
-		else {
-			$timeout(function () {
-				// Get scribble canvas
-				scribbleCanvas = document.getElementById("scribbleCanvas");
-				scribbleCanvasContext = scribbleCanvas.getContext("2d");
+		vm.$onInit = function() {
 
-				// Set the screen shot canvas to 80% screen size
-				scribbleCanvas.width = (innerWidth * 80) / 100;
-				scribbleCanvas.height = (innerHeight * 80) / 100;
+			if (typeof vm.screenShot !== "undefined") {
+				vm.screenShotUse = vm.screenShot;
+			}
+			else {
+				$element.ready(function() {
+                	
+					// Get scribble canvas
+					scribbleCanvas = document.getElementById("scribbleCanvas");
+					scribbleCanvasContext = scribbleCanvas.getContext("2d");
 
-				// Set up canvas
-				initCanvas(scribbleCanvas);
-				setupScribble();
+					// Set the screen shot canvas to 80% screen size
+					scribbleCanvas.width = (innerWidth * 80) / 100;
+					scribbleCanvas.height = (innerHeight * 80) / 100;
 
-				// Pen indicator
-				vm.showPenIndicator = false;
-				penIndicator = angular.element($element[0].querySelector("#issueScreenShotPenIndicator"));
-				penIndicator.css("font-size", penIndicatorSize + "px");
+					// Set up canvas
+					initCanvas(scribbleCanvas);
+					setupScribble();
 
-				vm.actionsPointerEvents = "auto";
+					// Pen indicator
+					vm.showPenIndicator = false;
+					penIndicator = angular.element($element[0].querySelector("#issueScreenShotPenIndicator"));
+					penIndicator.css("font-size", penIndicatorSize + "px");
 
-				// Get the screen shot
-				vm.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-				screenShotPromise.promise.then(function (screenShot) {
-					vm.screenShotUse = screenShot;
+					vm.actionsPointerEvents = "auto";
+
+					// Get the screen shot
+					EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: screenShotPromise});
+					
+					screenShotPromise.promise.then(function(screenShot) {
+						vm.screenShotUse = screenShot;
+					}).catch(function(error) {
+						console.error("Screenshot Error:", error);
+					});
+
+					// Set up action buttons
+					vm.actions = [
+						{icon: "border_color", action: "draw", label: "Draw", color: highlightBackground},
+						{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+					];
+
+					vm.currentActionIndex = 0;
 				});
 
-				// Set up action buttons
-				vm.actions = [
-					{icon: "border_color", action: "draw", label: "Draw", color: highlightBackground},
-					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
-				];
-				currentActionIndex = 0;
-			});
+			}
+			
+
 		}
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
-			vm.close();
 		};
 
 		/**
@@ -235,21 +242,21 @@
 
 
 		vm.doAction = function (index) {
-			if (currentActionIndex === null) {
-				currentActionIndex = index;
-				vm.actions[currentActionIndex].color = highlightBackground;
+			if (vm.currentActionIndex === null) {
+				vm.currentActionIndex = index;
+				vm.actions[vm.currentActionIndex].color = highlightBackground;
 			}
-			else if (currentActionIndex === index) {
-				vm.actions[currentActionIndex].color = "";
-				currentActionIndex = null;
+			else if (vm.currentActionIndex === index) {
+				vm.actions[vm.currentActionIndex].color = "";
+				vm.currentActionIndex = null;
 			}
 			else {
-				vm.actions[currentActionIndex].color = "";
-				currentActionIndex = index;
-				vm.actions[currentActionIndex].color = highlightBackground;
+				vm.actions[vm.currentActionIndex].color = "";
+				vm.currentActionIndex = index;
+				vm.actions[vm.currentActionIndex].color = highlightBackground;
 			}
 
-			switch (vm.actions[currentActionIndex].action) {
+			switch (vm.actions[vm.currentActionIndex].action) {
 				case "draw":
 					setupScribble();
 					break;
@@ -260,7 +267,7 @@
 			}
 		};
 
-		vm.save = function () {
+		vm.saveScreenshot = function () {
 			var	screenShotCanvas = document.getElementById("screenShotCanvas"),
 				screenShotCanvasContext = screenShotCanvas.getContext("2d"),
 				screenShotImage = new Image(),
@@ -273,9 +280,6 @@
 			screenShotCanvasContext.drawImage(scribbleCanvas, 0, 0);
 
 			screenShot = screenShotCanvas.toDataURL('image/png');
-			// Remove base64 header text
-			//screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
-			//console.log(screenShot);
 			vm.screenShotSave({screenShot: screenShot});
 
 			vm.closeDialog();

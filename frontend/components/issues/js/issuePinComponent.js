@@ -28,7 +28,6 @@
 				bindings: {
 					account: "<",
 					model: "<",
-					sendEvent: "&",
 					event: "<",
 					setPin: "&",
 					clearPin: "<"
@@ -65,10 +64,8 @@
 					(changes.event.currentValue.value.hasOwnProperty("id")) &&
 					pinDropMode) {
 
-					console.log("Changes to pin", changes.event.currentValue)
 
 					removePin();
-
 
 					var trans = changes.event.currentValue.value.trans;
 					position = changes.event.currentValue.value.position;
@@ -79,7 +76,6 @@
 						position = trans.inverse().multMatrixPnt(position);
 					}
 
-
 					data = {
 						id: newPinId,
 						account: vm.account,
@@ -87,10 +83,10 @@
 						selectedObjectId: changes.event.currentValue.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
-						colours: [[1.0, 0.7,  0]]
+						colours: [IssuesService.pinColours.yellow]
 
 					};
-					vm.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
+					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
 					vm.setPin({data: data});
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
@@ -115,7 +111,7 @@
 		};
 
 		function removePin () {
-			vm.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
+			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {id: newPinId});
 			vm.setPin({data: null});
 		}
 	}
