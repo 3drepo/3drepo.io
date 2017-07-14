@@ -134,7 +134,6 @@ var UnityUtil;
 
 	function toUnity(methodName, requireStatus, params)
 	{
-		console.log("toUnity", methodName, requireStatus, params);
 
 		if(requireStatus == LoadingState.MODEL_LOADED)
 		{
@@ -211,7 +210,6 @@ var UnityUtil;
 
 	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
 	{
-		console.log("nodeInfo: " + nodeInfo);
 		objectStatusPromise.resolve(JSON.parse(nodeInfo));
 		objectStatusPromise = null;
 		
@@ -347,11 +345,9 @@ var UnityUtil;
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision)
 	{
 		
-		console.log("UnityUtil, load model", loaded)
 		UnityUtil.reset();	
 		if(!loaded && loadedResolve)
 		{
-			console.log("Rejecting...")
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject();
 			loadingResolve.reject();
@@ -370,8 +366,6 @@ var UnityUtil;
 		
 		UnityUtil.onLoading();
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
-		
-		console.log("UnityUtil.onLoaded", UnityUtil.onLoaded());
 		
 		return UnityUtil.onLoaded();
 	

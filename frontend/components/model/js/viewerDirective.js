@@ -179,7 +179,7 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function(event) {
-			console.log("Viewer Event", event)
+
 			var validEvent = angular.isDefined(event) && angular.isDefined(event.type);
 			
 			if (validEvent) {
@@ -194,18 +194,15 @@
 						vm.initViewer();
 					} else {
 						// Load the model
-						console.log("Issues ready, loadviewermodel")
 						vm.loadViewerModel();	
 					}
 					
 				}
 
 				if (event.type === EventService.EVENT.VIEWER.UNITY_READY) {
-					console.log("Unity Ready!")
 					// When the viewer and unity are ready send a load model event 
 					// to load the model
 					if (!vm.currentModel) {
-						console.log("Load, loadviewermodel")
 						vm.loadViewerModel();	
 					}
 
@@ -213,7 +210,6 @@
 
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 
-					console.log("Start loading")
 					vm.initialisedPromise.resolve();
 					fetchModelProperties(vm.account, vm.model, vm.branch, vm.revision);	
 
@@ -357,18 +353,12 @@
 		});
 
 		vm.loadViewerModel = function(event) {
-			// vm.account = event.value.account;
-			// vm.model = event.value.model;
-			// vm.branch = event.value.branch;
-			// vm.revision = event.value.revision;
 
-			// console.log("Loading model...", vm.model)
-			// vm.viewer.loadModel(event.value.account, event.value.model, event.value.branch, event.value.revision);
-			console.log("loadViewerModel", vm.account, vm.model, vm.branch, vm.revision)
 			vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
 
 			// Set the current model in the viewer
 			vm.currentModel = vm.model;
+			
 		}
 
 		if (angular.isDefined(vm.vrMode))

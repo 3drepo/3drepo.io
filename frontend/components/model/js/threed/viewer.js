@@ -311,10 +311,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
 
-				console.log("Unity util on ready")
 				UnityUtil.onReady().then(function() {
 					self.initialized = true;
-					console.log("viewer.js - UnityUtil.onReady then")
 					callback(self.EVENT.UNITY_READY, {
 						name: self.name,
 						model: self.modelString
@@ -1221,10 +1219,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.branch = branch;
 			self.revision = revision;
 			
-			console.log("Load model from viewer.js", self.initialized)
 			UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
 			.then(function(bbox){
-				console.debug("Unity model loaded: ", bbox)
 				callback(self.EVENT.LOADED, bbox);
 			}).catch(function(error){
 				console.error("Unity error loading model: ", error)
