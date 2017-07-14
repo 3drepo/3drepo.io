@@ -95,23 +95,6 @@ var schema = Schema({
         type: String
 	},
 
-
-	// TO-DO: remove this after db migration => viewpoints[0]=viewpoint
-	viewpoint: {
-		up: [Number],
-		position: [Number],
-		look_at: [Number],
-		view_dir: [Number],
-		right: [Number],
-		unityHeight : Number,
-		fov : Number,
-		aspect_ratio: Number,
-		far : Number,
-		near : Number,
-		clippingPlanes : [Schema.Types.Mixed ],
-		guid: Object
-	},
-
 	viewpoints: [{
 		up: [Number],
 		position: [Number],
