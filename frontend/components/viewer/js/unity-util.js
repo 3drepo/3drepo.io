@@ -21,7 +21,7 @@ var UnityUtil;
 	"use strict";
 
     angular.module("3drepo")
-        .factory("UnityUtil", UnityUtil);
+        .service("UnityUtil", UnityUtil);
 
 	
 	UnityUtil = function() {};

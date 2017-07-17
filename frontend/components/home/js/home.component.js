@@ -208,6 +208,7 @@
         };
 
 		vm.home = function () {
+			console.log("GO HOME")
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
@@ -254,11 +255,15 @@
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
 					AuthService.init();
 				} else if (event.type === EventService.EVENT.GO_HOME) {
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
+					
+					// TODO: We need to do this properly 
+					
+					if (AuthService.loggedIn) {
 						$location.path(AuthService.username);
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
 					} else {
-						EventService.send(EventService.EVENT.SET_STATE, {});
+						$location.path("");
+						//EventService.send(EventService.EVENT.SET_STATE, {});
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {

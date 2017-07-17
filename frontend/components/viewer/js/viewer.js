@@ -202,6 +202,42 @@ var Viewer = {};
 			}*/
 		};
 
+		this.preInit = function() {
+
+			self.viewer = document.createElement("div");
+			self.viewer.className = "viewer";
+
+			self.loadingText = "Loading Viewer..."
+			self.loadingDiv = document.createElement("div");
+			self.loadingDivText = document.createElement("p");
+			self.loadingDiv.appendChild(self.loadingDivText);
+
+			self.loadingDivText.innerHTML = self.loadingText;
+			self.loadingDiv.className += "loadingViewer"
+			self.loadingDivText.className += "loadingViewerText"
+
+			var canvas = document.createElement("canvas");
+			canvas.className = "emscripten";
+			canvas.setAttribute("id", "canvas");
+			canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
+			canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+
+			canvas.onmousedown = function(){
+				return false;
+			};
+		
+			canvas.addEventListener("mouseup",  onMouseUp);
+			canvas.addEventListener("mousemove",  onMouseMove);
+
+			canvas.style["pointer-events"] = "all";
+			
+			self.element.appendChild(self.viewer);
+			self.viewer.appendChild(canvas);
+			self.viewer.appendChild(self.loadingDiv);
+			self.unityLoaderScript = document.createElement("script");
+			self.unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
+		}
+
 		this.init = function(options) {
 			return new Promise(function(resolve, reject) {
 
@@ -212,48 +248,10 @@ var Viewer = {};
 				// Set option param from viewerDirective
 				self.options = options;
 
-				
-				// TODO: This should probably just be a pug template?
-
-				self.viewer = document.createElement("div");
-
-				self.loadingText = "Loading Viewer..."
-				self.loadingDiv = document.createElement("div");
-				self.loadingDivText = document.createElement("p");
-				self.loadingDiv.appendChild(self.loadingDivText);
-
-				self.loadingDivText.innerHTML = self.loadingText;
 				document.body.style.cursor = "wait";
-				self.loadingDiv.className += "loadingViewer"
-				self.loadingDivText.className += "loadingViewerText"
+				// This kicks off the actual loading of Unity
+				self.viewer.appendChild(self.unityLoaderScript);
 
-				var canvas = document.createElement("canvas");
-				canvas.className = "emscripten";
-				canvas.setAttribute("id", "canvas");
-				canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
-				canvas.setAttribute("height", "600px");
-				canvas.setAttribute("width", "960px");
-				canvas.onmousedown = function(){
-					return false;
-				};
-			;
-				canvas.addEventListener("mouseup",  onMouseUp);
-				canvas.addEventListener("mousemove",  onMouseMove);
-
-				canvas.style["pointer-events"] = "all";
-				
-				var unityLoaderScript = document.createElement("script");
-				unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
-				unityLoaderScript.async = true;
-
-				self.viewer.appendChild(canvas);
-				self.viewer.appendChild(self.loadingDiv);
-				self.viewer.appendChild(unityLoaderScript);
-				self.viewer.className = "viewer";
-
-				self.element.appendChild(self.viewer);
-				
 				//Shouldn't need this, but for something it is not being recognised from unitySettings!
 				Module.errorhandler = UnityUtil.onError;
 
@@ -281,8 +279,6 @@ var Viewer = {};
 				self.setAmbientLight();
 
 				self.createViewpoint(self.name + "_default");
-
-
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
 				self.viewer.addEventListener("keypress", self.handleKeyPresses);
@@ -303,6 +299,7 @@ var Viewer = {};
 				self.setNavMode(self.defaultNavMode);
 
 				UnityUtil.onReady().then(function() {
+
 					self.initialized = true;
 					self.loadingDivText.innerHTML = "";
 					callback(self.EVENT.UNITY_READY, {
@@ -1204,16 +1201,20 @@ var Viewer = {};
 			self.revision = revision;
 			//self.loadingDivText.innerHTML = ""; //This could be set to Loading Model
 			document.body.style.cursor = "wait";
-			
-			callback(self.EVENT.START_LOADING);
-			UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
-			.then(function(bbox){
-				document.body.style.cursor = "initial";
-				self.loadingDivText.innerHTML = "";
-				callback(self.EVENT.LOADED, bbox);
-			}).catch(function(error){
-				console.error("Unity error loading model: ", error)
+			UnityUtil.onReady().then(function(){
+
+				callback(self.EVENT.START_LOADING);
+				UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
+				.then(function(bbox){
+					document.body.style.cursor = "initial";
+					self.loadingDivText.innerHTML = "";
+					callback(self.EVENT.LOADED, bbox);
+				}).catch(function(error){
+					console.error("Unity error loading model: ", error)
+				})
 			})
+			
+			
 			
 		};
 
