@@ -1,5 +1,5 @@
 doctype html
-html(lang="en" ng-app="3drepo")
+html(lang="en")
 	head
 		base(href="/")
 
@@ -11,33 +11,11 @@ html(lang="en" ng-app="3drepo")
 
 		script(type="text/javascript", src="/public/plugins/base/config.js")
 
-		// ReCapthca
-		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async, defer)
-
 		// All CSS minified
 		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-
-		if !development
-			if gaTrackId
-				script.
-					(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-					(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-					m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-					})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-			if gaTrackId && userId
-				script.
-					ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
-			else
-				script.
-					ga('create', '!{gaTrackId}', 'auto');
-		
-		else 
-			script(src="//localhost:35729/livereload.js", async, defer)
-
 
 		script.
 			_PUG_VARS = {
@@ -124,4 +102,38 @@ html(lang="en" ng-app="3drepo")
 		script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
 		noscript
 			div(style='display:inline;')
-				img(height='1', width='1', style='border-style:none;', alt='', src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
+				img(height='1'
+					width='1'
+					style='border-style:none;'
+					alt=''
+					src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
+
+
+	// Load Angular
+	script.
+		angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
+
+	// ReCapthca
+	script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
+
+	if !development
+		// If not in development load Google Analytics
+		if gaTrackId
+			script.
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		if gaTrackId && userId
+			script.
+				ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
+		else
+			script.
+				ga('create', '!{gaTrackId}', 'auto');
+	
+	else 
+		// Else load LiveReload
+		script(src="//localhost:35729/livereload.js", async)
+
+
