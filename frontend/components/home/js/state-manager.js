@@ -508,6 +508,7 @@
 					{
 						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
+							console.log("Setting state", key, event.value, event.value[key])
 							self.setStateVar(key, event.value[key]);
 						}
 					}
