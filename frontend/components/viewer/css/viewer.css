@@ -14,3 +14,9 @@ viewer .loadingViewerText {
     color: white;
     padding-top: 40vh;
 }
+
+canvas.emscripten {
+    position : absolute;
+    height : 100%;
+    width : 100%;
+}
