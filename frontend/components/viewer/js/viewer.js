@@ -204,7 +204,6 @@ var Viewer = {};
 
 		this.preInit = function() {
 
-			console.log("preInit")
 			self.viewer = document.createElement("div");
 			self.viewer.className = "viewer";
 
@@ -214,7 +213,6 @@ var Viewer = {};
 			self.loadingDiv.appendChild(self.loadingDivText);
 
 			self.loadingDivText.innerHTML = self.loadingText;
-			document.body.style.cursor = "wait";
 			self.loadingDiv.className += "loadingViewer"
 			self.loadingDivText.className += "loadingViewerText"
 
@@ -250,6 +248,7 @@ var Viewer = {};
 				// Set option param from viewerDirective
 				self.options = options;
 
+				document.body.style.cursor = "wait";
 				// This kicks off the actual loading of Unity
 				self.viewer.appendChild(self.unityLoaderScript);
 
@@ -300,7 +299,7 @@ var Viewer = {};
 				self.setNavMode(self.defaultNavMode);
 
 				UnityUtil.onReady().then(function() {
-					console.log("UnityUtil on ready in init")
+
 					self.initialized = true;
 					self.loadingDivText.innerHTML = "";
 					callback(self.EVENT.UNITY_READY, {
@@ -1202,10 +1201,8 @@ var Viewer = {};
 			self.revision = revision;
 			//self.loadingDivText.innerHTML = ""; //This could be set to Loading Model
 			document.body.style.cursor = "wait";
-
-			console.log("loadModel", model, UnityUtil.onReady());
 			UnityUtil.onReady().then(function(){
-				console.log("UnityUtil: Loading model ". model);
+
 				callback(self.EVENT.START_LOADING);
 				UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
 				.then(function(bbox){
