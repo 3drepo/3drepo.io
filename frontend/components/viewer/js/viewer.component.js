@@ -51,6 +51,15 @@
 			vm.initialisedViewer = false;
 			vm.currentModel = null;
 
+			vm.viewer = new Viewer(
+				vm.name, 
+				$element[0],
+				eventCallback, 
+				errCallback
+			);
+
+			vm.viewer.preInit();
+
 		}
 
 		function errCallback(errorType, errorValue) {
@@ -68,56 +77,12 @@
 		vm.initViewer = function() {
 
 			vm.initialisedPromise = $q.defer();
-
-			vm.viewer = new Viewer(vm.name, $element[0], eventCallback, errCallback);
-
-			// var options = {};
-			// var startLatLon = vm.at && vm.at.split(',');
-
-			// var view = vm.view && vm.view.split(',');
-
-			// view && view.forEach(function(val, i){
-			// 	view[i] = parseFloat(val);
-			// });
-
-			// options.view = view;
-
-			// var up = vm.up && vm.up.split(',');
-			// up && up.forEach(function(val, i){
-			// 	up[i] = parseFloat(val);
-			// });
-
-			// options.up = up;
-
 			var showAll = true;
-
-			// if(startLatLon){
-			// 	showAll = false;
-			// 	options.lat = parseFloat(startLatLon[0]),
-			// 	options.lon = parseFloat(startLatLon[1]),
-			// 	options.y = parseFloat(startLatLon[2])
-			// }
-
-			//vm.mapTile = new MapTile(vm.viewer, eventCallback, options);
 			vm.viewer.init({
 				showAll : showAll,
-				// plugins: {
-				// 	'mapTile': vm.mapTile
-				// }
 			})
 			.then(function(){
 		
-				// TODO: Move this so that the attachment is contained
-				// within the plugins themselves.
-				// Comes free with oculus support and gamepad support
-				//vm.oculus     = new Oculus(vm.viewer);
-				// vm.gamepad    = new Gamepad(vm.viewer);
-				// vm.gamepad.init();
-
-				// vm.measure    = new MeasureTool(vm.viewer);
-
-				// vm.collision  = new Collision(vm.viewer);
-
 			})
 			.catch(function(error){
 				console.error("Error creating Viewer Directive: ", error);
@@ -150,17 +115,6 @@
 			});
 
 		}
-
-		// vm.enterVR = function() {
-		// 	vm.loaded.promise.then(function() {
-		// 		vm.oculus.switchVR();
-		// 	});
-		// };
-
-		// $scope.$watch(vm.branch, function(blah)
-		// {
-		// 	console.log(JSON.stringify(blah));
-		// });
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 

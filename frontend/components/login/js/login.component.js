@@ -39,12 +39,6 @@
 		vm.$onInit = function() {
 			vm.version = serverConfig.apiVersion;
 
-			vm.unityLoaded = false;
-			vm.unityLoading = UnityUtil.onReady();
-			vm.unityLoading.then(function(resolved){
-				vm.unityLoaded = true;
-			})
-
 			AuthService.isLoggedIn().then(function(response){
 				StateManager.setStateVar("loggedIn", true);
 				EventService.send(EventService.EVENT.UPDATE_STATE);
