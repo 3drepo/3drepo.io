@@ -171,10 +171,10 @@
 				"login"
 			],
 			"functions": [
-				"registerRequest",
-				"registerVerify",
-				"passwordForgot",
-				"passwordChange",
+				"register-request",
+				"register-verify",
+				"password-forgot",
+				"password-change",
 				"pricing",
 				"signUp",
 				"contact",
@@ -207,13 +207,12 @@
 						"viewpoints",
 						"issues",
 						"clip",
-						"bottomButtons",
-						"qrCodeReader",
+						"bottom-buttons",
 						"docs",
 						"utils",
 						"groups",
 						"measure",
-						"rightPanel",
+						"right-panel",
 						"building",
 						"revisions"
 					]

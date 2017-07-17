@@ -32,6 +32,15 @@ const allJs = './components/**/**.js';
 const allPug = './components/**/**.pug';
 const icons = './icons/*.svg';
 const nodeRoot = path.join( __dirname, 'node_modules' )
+const jsOrder = [
+          'components/entry/js/entry.js',
+          'components/viewer/js/unity-util.js',
+          'components/viewer/js/unity-settings.js',
+          'components/viewer/js/viewer-util.js',
+          'components/viewer/js/threed/map-tile.js',
+          'components/viewer/js/threed/*.js',
+          'components/**/**.js'
+        ];
 
 gulp.task('css', function() {
 
@@ -85,15 +94,7 @@ gulp.task('javascript-dev', function() {
         .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
 
   const components = gulp.src(allJs)
-        .pipe(order([
-          'components/entry/js/entry.js',
-          'components/viewer/js/unityUtil.js',
-          'components/viewer/js/unitySettings.js',
-          'components/viewer/js/viewerUtil.js',
-          'components/viewer/js/threed/mapTile.js',
-          'components/viewer/js/threed/*.js',
-          'components/**/**.js'
-        ], { base: './' })) // Required for order to work correctly
+        .pipe(order(jsOrder, { base: './' })); // Required for order to work correctly
 
   return merge(dependencies, components)
           .pipe(concat("three_d_repo.min.js"))
@@ -114,13 +115,7 @@ gulp.task('javascript', function() {
         .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
 
   const components = gulp.src(allJs)
-        .pipe(order([
-          'components/entry/js/entry.js',
-          'components/model/js/threed/viewerutil.js',
-          'components/model/js/threed/mapTile.js',
-          'components/model/js/threed/*.js',
-          'components/**/**.js'
-        ], { base: './' })) // Required for order to work correctly
+        .pipe(order(jsOrder, { base: './' })); // Required for order to work correctly
 
   return merge(dependencies, components)
           .pipe(sourcemaps.init())
