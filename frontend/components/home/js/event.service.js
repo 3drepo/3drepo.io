@@ -61,7 +61,7 @@
 
 			// Specific to the javascript viewer
 			// populated by the viewer.js script
-			VIEWER: VIEWER_EVENTS,
+			VIEWER: Viewer.EVENT,
 
 			// Ready signals
 			MODEL_SETTINGS_READY: "EVENT_MODEL_SETTINGS_READY",

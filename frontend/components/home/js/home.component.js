@@ -255,15 +255,16 @@
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
 					AuthService.init();
 				} else if (event.type === EventService.EVENT.GO_HOME) {
-					
-					// TODO: We need to do this properly 
+
+					//EventService.send(EventService.EVENT.CLEAR_STATE);
+
+					// TODO: Do this properly using state manager
 					
 					if (AuthService.loggedIn) {
 						$location.path(AuthService.username);
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
 					} else {
 						$location.path("");
-						//EventService.send(EventService.EVENT.SET_STATE, {});
 					}
 				}
 				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {

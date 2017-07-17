@@ -128,12 +128,15 @@
 
 	
 		vm.convertCommentTopicType = function() {
-			vm.issueData && vm.issueData.comments.forEach(function(comment){
-				if(comment.action && comment.action.property === 'topic_type'){
-					IssuesService.convertActionCommentToText(comment, vm.topic_types);
-				}
-			});
+			if (vm.issueData && vm.issueData.comments) {
+				vm.issueData.comments.forEach(function(comment){
+					if(comment.action && comment.action.property === 'topic_type'){
+						IssuesService.convertActionCommentToText(comment, vm.topic_types);
+					}
+				});
+			}
 		}
+			
 
 		vm.setCanUpdateStatus = function(issueData) {
 

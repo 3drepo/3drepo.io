@@ -45,10 +45,8 @@ var ViewerUtilMyListeners = {};
 	};
 
 	// Definition of global functions
-	ViewerUtil.prototype.triggerEvent = function(name, event)
-	{
+	ViewerUtil.prototype.triggerEvent = function(name, event) {
 		var e = new CustomEvent(name, { detail: event });
-        //console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
@@ -106,114 +104,114 @@ var ViewerUtilMyListeners = {};
 		return function(event) { self.triggerEvent(name, event); };
 	};
 
-	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
-		up = ViewerUtil.normalize(up);
-		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
-		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+	// ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
+	// 	up = ViewerUtil.normalize(up);
+	// 	var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+	// 	var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
+	// 	var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
-		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup);
+	// 	var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup);
 
-		var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
-		q.setValue(viewMat);
+	// 	var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
+	// 	q.setValue(viewMat);
 
-		q = q.toAxisAngle();
+	// 	q = q.toAxisAngle();
 
-		return Array.prototype.concat(q[0].toGL(), q[1]);
-	};
+	// 	return Array.prototype.concat(q[0].toGL(), q[1]);
+	// };
 
-	ViewerUtil.prototype.quatLookAt = function (up, forward)
-	{
-		forward.normalize();
-		up.normalize();
+	// ViewerUtil.prototype.quatLookAt = function (up, forward)
+	// {
+	// 	forward.normalize();
+	// 	up.normalize();
 
-		var right = forward.cross(up);
-		up = right.cross(forward);
+	// 	var right = forward.cross(up);
+	// 	up = right.cross(forward);
 
-		var w = Math.sqrt(1 + right.x + up.y + forward.z) * 0.5;
-		var recip = 1 / (4 * w);
-		var x = (forward.y - up.z) * recip;
-		var y = (right.z - forward.y) * recip;
-		var z = (up.x - right.y) * recip;
+	// 	var w = Math.sqrt(1 + right.x + up.y + forward.z) * 0.5;
+	// 	var recip = 1 / (4 * w);
+	// 	var x = (forward.y - up.z) * recip;
+	// 	var y = (right.z - forward.y) * recip;
+	// 	var z = (up.x - right.y) * recip;
 
-		return new x3dom.fields.Quarternion(x,y,z,w);
-	};
+	// 	return new x3dom.fields.Quarternion(x,y,z,w);
+	// };
 
-	ViewerUtil.prototype.rotationBetween = function(prevUp, prevView, currUp, currView)
-	{
-		/*
-		prevView = this.normalize(prevView);
-		currView = this.normalize(currView);
+	// ViewerUtil.prototype.rotationBetween = function(prevUp, prevView, currUp, currView)
+	// {
+	// 	/*
+	// 	prevView = this.normalize(prevView);
+	// 	currView = this.normalize(currView);
 
-		var prevRight = this.normalize(this.crossProduct(prevUp, prevView));
-		var currRight = this.normalize(this.crossProduct(currUp, currView));
+	// 	var prevRight = this.normalize(this.crossProduct(prevUp, prevView));
+	// 	var currRight = this.normalize(this.crossProduct(currUp, currView));
 
-		prevUp = this.normalize(this.crossProduct(prevRight, prevView));
-		currUp = this.crossProduct(currRight, currView);
+	// 	prevUp = this.normalize(this.crossProduct(prevRight, prevView));
+	// 	currUp = this.crossProduct(currRight, currView);
 
-		var prevMat = new x3dom.fields.SFMatrix4f();
-		*/
+	// 	var prevMat = new x3dom.fields.SFMatrix4f();
+	// 	*/
 
-		var x3domPrevView = new x3dom.fields.SFVec3f(prevView[0], prevView[1], prevView[2]);
-		var x3domPrevUp   = new x3dom.fields.SFVec3f(prevUp[0], prevUp[1], prevUp[2]);
-		var x3domPrevFrom = new x3dom.fields.SFVec3f(0, 0, 0);
-		var x3domPrevAt   = x3domPrevFrom.add(x3domPrevView);
+	// 	var x3domPrevView = new x3dom.fields.SFVec3f(prevView[0], prevView[1], prevView[2]);
+	// 	var x3domPrevUp   = new x3dom.fields.SFVec3f(prevUp[0], prevUp[1], prevUp[2]);
+	// 	var x3domPrevFrom = new x3dom.fields.SFVec3f(0, 0, 0);
+	// 	var x3domPrevAt   = x3domPrevFrom.add(x3domPrevView);
 
-		var prevMat    = x3dom.fields.SFMatrix4f.lookAt(x3domPrevFrom, x3domPrevAt, x3domPrevUp);
-		/*
-		prevMat.setFromArray([
-				prevRight[0], prevUp[0], prevView[0], 0,
-				prevRight[1], prevUp[1], prevView[1], 0,
-				prevRight[2], prevUp[2], prevView[2], 0,
-				0, 0, 0, 1]);
+	// 	var prevMat    = x3dom.fields.SFMatrix4f.lookAt(x3domPrevFrom, x3domPrevAt, x3domPrevUp);
+	// 	/*
+	// 	prevMat.setFromArray([
+	// 			prevRight[0], prevUp[0], prevView[0], 0,
+	// 			prevRight[1], prevUp[1], prevView[1], 0,
+	// 			prevRight[2], prevUp[2], prevView[2], 0,
+	// 			0, 0, 0, 1]);
 
 
-		var currMat = new x3dom.fields.SFMatrix4f();
+	// 	var currMat = new x3dom.fields.SFMatrix4f();
 
-		currMat.setFromArray([
-				currRight[0], currUp[0], currView[0], 0,
-				currRight[1], currUp[1], currView[1], 0,
-				currRight[2], currUp[2], currView[2], 0,
-				0, 0, 0, 1]);
-		*/
+	// 	currMat.setFromArray([
+	// 			currRight[0], currUp[0], currView[0], 0,
+	// 			currRight[1], currUp[1], currView[1], 0,
+	// 			currRight[2], currUp[2], currView[2], 0,
+	// 			0, 0, 0, 1]);
+	// 	*/
 
-		var x3domCurrView = new x3dom.fields.SFVec3f(currView[0], currView[1], currView[2]);
-		var x3domCurrUp   = new x3dom.fields.SFVec3f(currUp[0], currUp[1], currUp[2]);
-		var x3domCurrFrom = new x3dom.fields.SFVec3f(0, 0, 0);
-		var x3domCurrAt   = x3domCurrFrom.add(x3domCurrView);
+	// 	var x3domCurrView = new x3dom.fields.SFVec3f(currView[0], currView[1], currView[2]);
+	// 	var x3domCurrUp   = new x3dom.fields.SFVec3f(currUp[0], currUp[1], currUp[2]);
+	// 	var x3domCurrFrom = new x3dom.fields.SFVec3f(0, 0, 0);
+	// 	var x3domCurrAt   = x3domCurrFrom.add(x3domCurrView);
 
-		var currMat    = x3dom.fields.SFMatrix4f.lookAt(x3domCurrFrom, x3domCurrAt, x3domCurrUp);
+	// 	var currMat    = x3dom.fields.SFMatrix4f.lookAt(x3domCurrFrom, x3domCurrAt, x3domCurrUp);
 
-		return currMat.mult(prevMat.inverse());
-	};
+	// 	return currMat.mult(prevMat.inverse());
+	// };
 
 	// TODO: Should move this to somewhere more general (utils ? )
-	ViewerUtil.prototype.axisAngleToMatrix = function(axis, angle) {
-		var mat = new x3dom.fields.SFMatrix4f();
+	// ViewerUtil.prototype.axisAngleToMatrix = function(axis, angle) {
+	// 	var mat = new x3dom.fields.SFMatrix4f();
 
-		var cosAngle = Math.cos(angle);
-		var sinAngle = Math.sin(angle);
-		var t = 1 - cosAngle;
+	// 	var cosAngle = Math.cos(angle);
+	// 	var sinAngle = Math.sin(angle);
+	// 	var t = 1 - cosAngle;
 
-		var v = axis.normalize();
+	// 	var v = axis.normalize();
 
-		// As always, should be right hand coordinate system
-		/*
-		mat.setFromArray( [
-			t * v.x * v.x + cosAngle, t * v.x * v.y - v.z * sinAngle, t * v.x * v.z + v.y * sinAngle, 0,
-			t * v.x * v.y + v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z - v.x * sinAngle, 0,
-			t * v.x * v.z - v.y * sinAngle, t * v.y * v.z + v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
-			0, 0, 0, 1]);
-		*/
+	// 	// As always, should be right hand coordinate system
+	// 	/*
+	// 	mat.setFromArray( [
+	// 		t * v.x * v.x + cosAngle, t * v.x * v.y - v.z * sinAngle, t * v.x * v.z + v.y * sinAngle, 0,
+	// 		t * v.x * v.y + v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z - v.x * sinAngle, 0,
+	// 		t * v.x * v.z - v.y * sinAngle, t * v.y * v.z + v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
+	// 		0, 0, 0, 1]);
+	// 	*/
 
-		mat.setFromArray([t * v.x * v.x + cosAngle, t * v.x * v.y + v.z * sinAngle, t * v.x * v.z - v.y * sinAngle, 0,
-			t * v.x * v.y - v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z + v.x * sinAngle, 0,
-			t * v.x * v.z + v.y * sinAngle, t * v.y * v.z - v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
-			0, 0, 0, 1
-		]);
+	// 	mat.setFromArray([t * v.x * v.x + cosAngle, t * v.x * v.y + v.z * sinAngle, t * v.x * v.z - v.y * sinAngle, 0,
+	// 		t * v.x * v.y - v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z + v.x * sinAngle, 0,
+	// 		t * v.x * v.z + v.y * sinAngle, t * v.y * v.z - v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
+	// 		0, 0, 0, 1
+	// 	]);
 
-		return mat;
-	};
+	// 	return mat;
+	// };
 
 	ViewerUtil.prototype.evDist = function(evt, posA) {
 		return Math.sqrt(Math.pow(posA[0] - evt.position.x, 2) +
@@ -227,30 +225,30 @@ var ViewerUtilMyListeners = {};
 			Math.pow(posA[2] - posB[2], 2));
 	};
 
-	ViewerUtil.prototype.rotToRotation = function(from, to) {
-		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
+	// ViewerUtil.prototype.rotToRotation = function(from, to) {
+	// 	var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+	// 	var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
-		var dot = vecFrom.dot(vecTo);
+	// 	var dot = vecFrom.dot(vecTo);
 
-		var crossVec = vecFrom.cross(vecTo);
+	// 	var crossVec = vecFrom.cross(vecTo);
 
-		return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
-	};
+	// 	return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
+	// };
 
-	ViewerUtil.prototype.rotAxisAngle = function(from, to) {
-		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
+	// ViewerUtil.prototype.rotAxisAngle = function(from, to) {
+	// 	var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+	// 	var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
-		var dot = vecFrom.dot(vecTo);
+	// 	var dot = vecFrom.dot(vecTo);
 
-		var crossVec = vecFrom.cross(vecTo);
-		var qt = new x3dom.fields.Quaternion(crossVec.x, crossVec.y, crossVec.z, 1);
+	// 	var crossVec = vecFrom.cross(vecTo);
+	// 	var qt = new x3dom.fields.Quaternion(crossVec.x, crossVec.y, crossVec.z, 1);
 
-		qt.w = vecFrom.length() * vecTo.length() + dot;
+	// 	qt.w = vecFrom.length() * vecTo.length() + dot;
 
-		return qt.normalize(qt).toAxisAngle();
-	};
+	// 	return qt.normalize(qt).toAxisAngle();
+	// };
 
 	// TODO: Shift these to some sort of Matrix/Vec library
 	ViewerUtil.prototype.scale = function(v, s) {
@@ -280,18 +278,6 @@ var ViewerUtilMyListeners = {};
 
 	ViewerUtil.prototype.vecSub = function(a, b) {
 		return this.vecAdd(a, this.scale(b, -1));
-	};
-
-	/**
-	 * Escape CSS characters in string
-	 *
-		* @param string
-		* @returns {*}
-		*/
-	ViewerUtil.prototype.escapeCSSCharacters = function(string)
-	{
-		// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
-		return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
 	};
 
 	ViewerUtil = new ViewerUtil();
