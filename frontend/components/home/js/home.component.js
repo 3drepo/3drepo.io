@@ -255,9 +255,8 @@
 					AuthService.init();
 				} else if (event.type === EventService.EVENT.GO_HOME) {
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
-
-					if (AuthService.loggedIn) {
-						EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
+						$location.path(AuthService.username);
+						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
 					} else {
 						EventService.send(EventService.EVENT.SET_STATE, {});
 					}
