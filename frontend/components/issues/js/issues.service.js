@@ -39,7 +39,7 @@
 		obj.pinColours = {
 			blue : [0, 69/255, 148/255],
 			yellow : [255/255, 255/255, 54/255]
-		}
+		};
 
 
 		obj.deselectPin = function(issue) {
@@ -52,10 +52,10 @@
 				};
 				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 			}
-		}
+		};
 
 		obj.showIssue = function(issue) {
-			var data
+			var data;
 				
 			// Highlight pin, move camera and setup clipping plane
 			data = {
@@ -81,7 +81,7 @@
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
-				model: issue.model,
+				model: issue.model
 			};
 			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, data);
 
@@ -104,10 +104,9 @@
 						ids[key].push(vm.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
-					for(var key in ids)
-					{
+					for(var key in ids) {
 
-						var vals = key.split('@');
+						var vals = key.split("@");
 						var account = vals[0];
 						var model = vals[1];
 
@@ -124,7 +123,7 @@
 					}
 				});
 			}
-		}
+		};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -389,7 +388,7 @@
 		obj.getJobs = function(account, model){
 
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + model + '/jobs.json');
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/jobs.json");
 
 			$http.get(url).then(
 				function(data) {
@@ -418,7 +417,7 @@
 			);
 
 			return deferred.promise;
-		}
+		};
 
 
 		obj.hexToRgb = function(hex) {
@@ -468,34 +467,34 @@
 			var statusIcon = {};
 
 			switch (issue.priority) {
-				case "none":
-					statusIcon.colour = "#7777777";
-					break;
-				case "low":
-					statusIcon.colour = "#4CAF50";
-					break;
-				case "medium":
-					statusIcon.colour = "#FF9800";
-					break;
-				case "high":
-					statusIcon.colour = "#F44336";
-					break;
+			case "none":
+				statusIcon.colour = "#7777777";
+				break;
+			case "low":
+				statusIcon.colour = "#4CAF50";
+				break;
+			case "medium":
+				statusIcon.colour = "#FF9800";
+				break;
+			case "high":
+				statusIcon.colour = "#F44336";
+				break;
 			}
 
 			switch (issue.status) {
-				case "open":
-					statusIcon.icon = "panorama_fish_eye";
-					break;
-				case "in progress":
-					statusIcon.icon = "lens";
-					break;
-				case "for approval":
-					statusIcon.icon = "adjust";
-					break;
-				case "closed":
-					statusIcon.icon = "check_circle";
-					statusIcon.colour = "#004594";
-					break;
+			case "open":
+				statusIcon.icon = "panorama_fish_eye";
+				break;
+			case "in progress":
+				statusIcon.icon = "lens";
+				break;
+			case "for approval":
+				statusIcon.icon = "adjust";
+				break;
+			case "closed":
+				statusIcon.icon = "check_circle";
+				statusIcon.colour = "#004594";
+				break;
 			}
 
 			return statusIcon;
@@ -516,7 +515,7 @@
 			var formData = new FormData();
 			formData.append("file", file);
 
-			UtilsService.doPost(formData, url, {'Content-Type': undefined}).then(function(res){
+			UtilsService.doPost(formData, url, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
@@ -538,59 +537,59 @@
 			var text = "";
 
 			switch (comment.action.property) {
-				case "priority":
+			case "priority":
 
-					comment.action.propertyText = 'Priority';
-					comment.action.from = convertActionValueToText(comment.action.from);
-					comment.action.to = convertActionValueToText(comment.action.to);
-					break;
+				comment.action.propertyText = "Priority";
+				comment.action.from = convertActionValueToText(comment.action.from);
+				comment.action.to = convertActionValueToText(comment.action.to);
+				break;
 
-				case "status":
+			case "status":
 
-					comment.action.propertyText = 'Status';
-					comment.action.from = convertActionValueToText(comment.action.from);
-					comment.action.to= convertActionValueToText(comment.action.to);
+				comment.action.propertyText = "Status";
+				comment.action.from = convertActionValueToText(comment.action.from);
+				comment.action.to= convertActionValueToText(comment.action.to);
 
-					break;
+				break;
 
-				case "assigned_roles":
+			case "assigned_roles":
 
-					comment.action.propertyText = 'Assigned';
-					comment.action.from = comment.action.from.toString();
-					comment.action.to= comment.action.to.toString();	
+				comment.action.propertyText = "Assigned";
+				comment.action.from = comment.action.from.toString();
+				comment.action.to= comment.action.to.toString();	
 							
-					break;
+				break;
 
-				case "topic_type":
+			case "topic_type":
 
-					comment.action.propertyText = 'Type';
-					if(topic_types){
+				comment.action.propertyText = "Type";
+				if(topic_types){
 
-						var from = topic_types.find(function(topic_type){
-							return topic_type.value === comment.action.from;
-						});
+					var from = topic_types.find(function(topic_type){
+						return topic_type.value === comment.action.from;
+					});
 
-						var to = topic_types.find(function(topic_type){
-							return topic_type.value === comment.action.to;
-						});
+					var to = topic_types.find(function(topic_type){
+						return topic_type.value === comment.action.to;
+					});
 
-						if(from && from.label){
-							comment.action.from = from.label
-						}
-
-						if(to && to.label){
-							comment.action.to = to.label
-						}
-
+					if(from && from.label){
+						comment.action.from = from.label;
 					}
 
-					break;
+					if(to && to.label){
+						comment.action.to = to.label;
+					}
 
-				case "desc":
+				}
 
-					comment.action.propertyText = 'Description';
+				break;
 
-					break;
+			case "desc":
+
+				comment.action.propertyText = "Description";
+
+				break;
 			}
 
 			return text;
@@ -625,7 +624,7 @@
 			}
 
 			return issue;
-		}
+		};
 
 		/**
 		 * Convert an action value to readable text
@@ -635,30 +634,30 @@
 			var text = "";
 
 			switch (value) {
-				case "none":
-					text = "None";
-					break;
-				case "low":
-					text = "Low";
-					break;
-				case "medium":
-					text = "Medium";
-					break;
-				case "high":
-					text = "High";
-					break;
-				case "open":
-					text = "Open";
-					break;
-				case "in progress":
-					text = "In progress";
-					break;
-				case "for approval":
-					text = "For approval";
-					break;
-				case "closed":
-					text = "Closed";
-					break;
+			case "none":
+				text = "None";
+				break;
+			case "low":
+				text = "Low";
+				break;
+			case "medium":
+				text = "Medium";
+				break;
+			case "high":
+				text = "High";
+				break;
+			case "open":
+				text = "Open";
+				break;
+			case "in progress":
+				text = "In progress";
+				break;
+			case "for approval":
+				text = "For approval";
+				break;
+			case "closed":
+				text = "Closed";
+				break;
 			}
 
 			return text;
@@ -668,7 +667,9 @@
 			obj,
 			"newPinId",
 			{
-				get: function () {return newPinId;}
+				get: function () {
+					return newPinId;
+				}
 			}
 		);
 
@@ -681,8 +682,7 @@
 					var tmpUpdatedIssue;
 					if (updatedIssue === null) {
 						return null;
-					}
-					else {
+					} else {
 						tmpUpdatedIssue = updatedIssue;
 						updatedIssue = null;
 						return tmpUpdatedIssue;

@@ -24,7 +24,7 @@
 			bindings: {},
 			templateUrl: "cookies.html",
 			controller: CookiesCtrl,
-			controllerAs: "vm",
+			controllerAs: "vm"
 		});
 
 	CookiesCtrl.$inject = ["EventService"];

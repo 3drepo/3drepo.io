@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountBilling", {
-			restrict: 'EA',
-			templateUrl: 'account-billing.html',
+			restrict: "EA",
+			templateUrl: "account-billing.html",
 			bindings: {
 				account: "=",
 				billingAddress: "=",
@@ -31,7 +31,7 @@
 				plans: "="
 			},
 			controller: AccountBillingCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm"
 		});
 
 
@@ -51,7 +51,7 @@
 			vm.usStates = serverConfig.usStates;
 			vm.showStates = false;
 			vm.newBillingAddress = {};
-		}
+		};
 		
 		/*
 		 * Watch for change in licenses
@@ -60,16 +60,13 @@
 			if (angular.isDefined(vm.numNewLicenses)) {
 				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {
 					vm.saveDisabled = true;
-				}
-				else if (vm.numLicenses === vm.numNewLicenses) {
+				} else if (vm.numLicenses === vm.numNewLicenses) {
 					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
-				}
-				else {
+				} else {
 					vm.saveDisabled = aRequiredAddressFieldIsEmpty();
 				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
-			}
-			else {
+			} else {
 				vm.saveDisabled = true;
 			}
 		});
@@ -95,7 +92,7 @@
 					// Company name required if VAT number exists
 					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
 				}
-				vm.showStates = (vm.newBillingAddress.countryCode === "US")
+				vm.showStates = (vm.newBillingAddress.countryCode === "US");
 			}
 		}, true);
 
@@ -125,9 +122,9 @@
 
 			if (angular.isDefined(vm.billings)) {
 				for (i = 0, length = vm.billings.length; i < length; i += 1) {
-					if(vm.billings[i].type === 'refund'){
-						vm.billings[i].status = 'Completed';
-						vm.billings[i].description = 'Refund';
+					if(vm.billings[i].type === "refund"){
+						vm.billings[i].status = "Completed";
+						vm.billings[i].description = "Refund";
 					} else {
 						vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Paid";
 						vm.billings[i].description = vm.billings[i].items[0].description;
@@ -157,8 +154,7 @@
 
 			if (vm.numLicenses === vm.numNewLicenses) {
 				vm.payPalInfo = "Updating billing information. Please do not refresh the page or close the tab.";
-			}
-			else {
+			} else {
 				vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
 			}
 			UtilsService.showDialog("paypal-dialog.html", $scope, null, true);
@@ -170,12 +166,10 @@
 						$timeout(function () {
 							UtilsService.closeDialog();
 						}, 2000);
-					}
-					else {
+					} else {
 						location.href = response.data.url;
 					}
-				}
-				else {
+				} else {
 					vm.closeDialogEnabled = true;
 					vm.changeHelpToShow = response.data.value;
 					vm.payPalError = "Unfortunately something went wrong contacting PayPal.";
@@ -192,7 +186,9 @@
 		 * Set up num licenses and price
 		 */
 		function setupLicensesInfo () {
-			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {
+				return sub.inCurrentAgreement;
+			}).length;
 			vm.numNewLicenses = vm.numLicenses;
 			vm.pricePerLicense = vm.plans[0].amount;
 		}

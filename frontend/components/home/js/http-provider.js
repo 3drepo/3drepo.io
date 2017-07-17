@@ -19,36 +19,37 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.factory("authInterceptor", ["EventService", "$q", function(EventService, $q) {
-		return {
-			responseError: function(res)
-			{
-				if (res.status === 401) {
-					EventService.send(EventService.EVENT.USER_NOT_AUTHORIZED);
-				}
+		.factory("authInterceptor", ["EventService", "$q", function(EventService, $q) {
+			return {
+				responseError: function(res) {
+					if (res.status === 401) {
+						EventService.send(EventService.EVENT.USER_NOT_AUTHORIZED);
+					}
 
-				return $q.reject(res);
-			}
-		};
-	}])
-	.config(["$httpProvider", function ($httpProvider) {
-		var checkAuthorization = ["$q", "$location", function($q, $location) {
-			var onSuccess = function (res) { return res;};
-			var onError = function(res) {
-				if (res.status === 401 || res.status === 400) {
-					return $q.reject(res);
-				} else {
 					return $q.reject(res);
 				}
 			};
+		}])
+		.config(["$httpProvider", function ($httpProvider) {
+			var checkAuthorization = ["$q", "$location", function($q, $location) {
+				var onSuccess = function (res) {
+					return res;
+				};
+				var onError = function(res) {
+					if (res.status === 401 || res.status === 400) {
+						return $q.reject(res);
+					} else {
+						return $q.reject(res);
+					}
+				};
 
-			return function (promise) {
-				return promise.then(onSuccess, onError);
-			};
-		}];
+				return function (promise) {
+					return promise.then(onSuccess, onError);
+				};
+			}];
 
-		$httpProvider.interceptors.push(checkAuthorization);
-		$httpProvider.defaults.withCredentials = true;
-		$httpProvider.interceptors.push("authInterceptor");
-	}]);
+			$httpProvider.interceptors.push(checkAuthorization);
+			$httpProvider.defaults.withCredentials = true;
+			$httpProvider.interceptors.push("authInterceptor");
+		}]);
 })();

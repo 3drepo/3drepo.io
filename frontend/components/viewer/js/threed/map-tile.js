@@ -28,11 +28,11 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		this.eventCallback = eventCallback;
 
 		// add new event name to viewer
-		this.viewer.EVENT.OS_BUILDING_CLICK = 'VIEWER_OS_BUILDING_CLICK';
-		this.viewer.EVENT.UPDATE_URL = 'VIEWER_UPDATE_URL';
+		this.viewer.EVENT.OS_BUILDING_CLICK = "VIEWER_OS_BUILDING_CLICK";
+		this.viewer.EVENT.UPDATE_URL = "VIEWER_UPDATE_URL";
 
 		ViewerUtil.onEvent("os_clickBuildingObject", this.os_clickBuildingObject.bind(this));
-	}
+	};
 
 	MapTile.prototype.initCallback = function(viewer){
 		var self = this;
@@ -65,7 +65,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			}, 3000);
 		}
 
-	}
+	};
 
 	MapTile.prototype.translateTo = function(options){
 
@@ -74,7 +74,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		}
 		
 		if(!this.originBNG){
-			return console.log('Translation aborted due to no origin lat,lon defined');
+			return console.log("Translation aborted due to no origin lat,lon defined");
 		}
 
 		var lat = options.lat;
@@ -97,8 +97,8 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var mapXY = this._getSlippyTileLayerPoints(lat, lon, mapImagePosInfo.zoomLevel);
 
 
-		var nx = mapXY.x - mapImagePosInfo.slippyPoints.x
-		var ny = mapXY.y - mapImagePosInfo.slippyPoints.y
+		var nx = mapXY.x - mapImagePosInfo.slippyPoints.x;
+		var ny = mapXY.y - mapImagePosInfo.slippyPoints.y;
 
 		//cal offset of the target point to the nearest map tile image
 		var osTargetPoint = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
@@ -114,10 +114,10 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var camY = this.getSumSize(ny) + mapImagePosInfo.offsetY + dy;
 
 		this.viewer.setCamera(
-			[ camX, height, camY ],
+			[camX, height, camY],
 			view,
 			up,
-			[ camX, 0, camY ]
+			[camX, 0, camY]
 		);
 
 		this.appendMapTileByViewPoint();
@@ -127,12 +127,12 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 	MapTile.prototype.getMapSizeByYCoor = function(yCoor){
 		return this.getMapSize(this.findMapTileNoByPos(yCoor));
-	}
+	};
 
 	MapTile.prototype.getMapSize = function(n){
 		var nextN = n < 0 ? n - 1 : n + 1;
 		return Math.abs(this.getSumSize(nextN) - this.getSumSize(n));
-	}
+	};
 
 	var scaleMapImages = false;
 
@@ -143,7 +143,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
 			var lat = this._tile2lat(mapImagePosInfo.slippyPoints.y + y, mapImagePosInfo.zoomLevel);
 			return mapPerPxZoomLevel * Math.cos(this._degToRad(lat)) * 256 * n * this.meterPerPixel;
-		}
+		};
 
 		MapTile.prototype.getSumSize = function(n){
 
@@ -174,7 +174,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 			}
 
-		}
+		};
 
 		MapTile.prototype.findMapTileNoByPos = function(pos){
 
@@ -203,7 +203,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			}
 
 			return n;
-		}
+		};
 
 	} else {
 
@@ -212,13 +212,13 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
 			var lat = this._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
 			return mapPerPxZoomLevel * Math.cos(this._degToRad(lat)) * 256 * n * this.meterPerPixel;
-		}
+		};
 
 
 
 		MapTile.prototype.findMapTileNoByPos = function(pos){
 			return Math.floor(pos / this.getSumSize(1));
-		}
+		};
 
 
 		MapTile.prototype.getSumSizeForXRow  = MapTile.prototype.getSumSize;
@@ -226,73 +226,73 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 
 
-		MapTile.prototype._clearMapImagePosInfo = function(){
-			this.mapPosInfo = null;
+	MapTile.prototype._clearMapImagePosInfo = function(){
+		this.mapPosInfo = null;
+	};
+
+	MapTile.prototype._getMapImagePosInfo = function(){
+
+		// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
+		// set the size of a 256 map image tile. 1px = 1m
+
+		if (!this.mapPosInfo){
+
+			var height = this.getLenFromCamToCentre(
+				this.getViewAreaOnZPlane(),
+				this.viewer.getCurrentViewpointInfo().position
+			);
+
+			var zoomLevel = this.getZoomLevel(height);
+
+			var mPerPxTable = {
+				0:	156543.03,
+				1:	78271.52,
+				2:	39135.76,
+				3:	19567.88,
+				4:	9783.94	,
+				5:	4891.97	,
+				6:	2445.98,
+				7:	1222.99	,
+				8:	611.50	,
+				9:	305.75	,
+				10:	152.87,
+				11:	76.437,
+				12:	38.219,
+				13:	19.109,
+				14:	9.5546,
+				15:	4.7773,
+				16:	2.3887,
+				17:	1.1943,
+				18:	0.5972
+			};
+
+			var slippyPoints = this._getSlippyTileLayerPoints(this.settings.mapTile.lat, this.settings.mapTile.lon, zoomLevel);
+
+			var x = slippyPoints.x;
+			var y = slippyPoints.y;
+
+			var mapImgsize = mPerPxTable[zoomLevel] * Math.cos(this._degToRad(this._tile2lat(y, zoomLevel))) * 256 * this.meterPerPixel;
+			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(this._tile2lat(y, zoomLevel), this._tile2long(x ,zoomLevel)));
+
+			//console.log('map images osgridref', osGridRef);
+			var offsetX = (osGridRef.easting - this.originBNG.easting) * this.meterPerPixel + mapImgsize / 2;
+			var offsetY = (this.originBNG.northing - osGridRef.northing) * this.meterPerPixel + mapImgsize / 2;
+
+			this.mapPosInfo = {
+				x: x,
+				y: y,
+				offsetX: offsetX,
+				offsetY: offsetY,
+				zoomLevel: zoomLevel,
+				slippyPoints: slippyPoints,
+				mPerPxTable: mPerPxTable
+			};
 		}
 
-		MapTile.prototype._getMapImagePosInfo = function(){
 
-			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
-			// set the size of a 256 map image tile. 1px = 1m
+		return this.mapPosInfo;
 
-			if (!this.mapPosInfo){
-
-				var height = this.getLenFromCamToCentre(
-					this.getViewAreaOnZPlane(),
-					this.viewer.getCurrentViewpointInfo().position
-				);
-
-				var zoomLevel = this.getZoomLevel(height);
-
-				var mPerPxTable = {
-					0:	156543.03,
-					1:	78271.52,
-					2:	39135.76,
-					3:	19567.88,
-					4:	9783.94	,
-					5:	4891.97	,
-					6:	2445.98,
-					7:	1222.99	,
-					8:	611.50	,
-					9:	305.75	,
-					10:	152.87,
-					11:	76.437,
-					12:	38.219,
-					13:	19.109,
-					14:	9.5546,
-					15:	4.7773,
-					16:	2.3887,
-					17:	1.1943,
-					18:	0.5972
-				};
-
-				var slippyPoints = this._getSlippyTileLayerPoints(this.settings.mapTile.lat, this.settings.mapTile.lon, zoomLevel);
-
-				var x = slippyPoints.x;
-				var y = slippyPoints.y;
-
-				var mapImgsize = mPerPxTable[zoomLevel] * Math.cos(this._degToRad(this._tile2lat(y, zoomLevel))) * 256 * this.meterPerPixel;
-				var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(this._tile2lat(y, zoomLevel), this._tile2long(x ,zoomLevel)));
-
-				//console.log('map images osgridref', osGridRef);
-				var offsetX = (osGridRef.easting - this.originBNG.easting) * this.meterPerPixel + mapImgsize / 2;
-				var offsetY = (this.originBNG.northing - osGridRef.northing) * this.meterPerPixel + mapImgsize / 2;
-
-				this.mapPosInfo = {
-					x: x,
-					y: y,
-					offsetX: offsetX,
-					offsetY: offsetY,
-					zoomLevel: zoomLevel,
-					slippyPoints: slippyPoints,
-					mPerPxTable: mPerPxTable
-				};
-			}
-
-
-			return this.mapPosInfo;
-
-		}
+	};
 
 	//secret little functions to help in-browser alignment
 
@@ -302,22 +302,22 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var self = this;
 
 		this._moveImagesListener = function(e){
-			if(e.code === 'ArrowUp'){
+			if(e.code === "ArrowUp"){
 				self._moveMapImages(0, -self._moveStep);
-			} else if(e.code === 'ArrowLeft'){
+			} else if(e.code === "ArrowLeft"){
 				self._moveMapImages(-self._moveStep, 0);
-			} else if(e.code === 'ArrowDown'){
+			} else if(e.code === "ArrowDown"){
 				self._moveMapImages(0, self._moveStep);
-			} else if(e.code === 'ArrowRight'){
+			} else if(e.code === "ArrowRight"){
 				self._moveMapImages(self._moveStep, 0);
 			}
 		};
 
-		document.addEventListener('keyup', this._moveImagesListener);
+		document.addEventListener("keyup", this._moveImagesListener);
 	};
 
 	MapTile.prototype._stopMoveImages = function(){
-		document.removeEventListener('keyup', this._moveImagesListener);
+		document.removeEventListener("keyup", this._moveImagesListener);
 	};
 
 
@@ -326,7 +326,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		this.sumD = this.sumD || [0, 0];
 		this.imagesDoms.forEach(function(dom){
 
-			var t = dom.getAttribute('translation').split(' ');
+			var t = dom.getAttribute("translation").split(" ");
 
 			t.forEach(function(number, i){
 				t[i] = parseFloat(number);
@@ -335,7 +335,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			t[0] += dx;
 			t[2] += dy;
 
-			dom.setAttribute('translation', t.join(' '));
+			dom.setAttribute("translation", t.join(" "));
 		});
 
 		this.sumD[0] += dx;
@@ -363,13 +363,13 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		);
 		this.mapPosInfo = null;
 		this.sumD = [0,0];
-	}
+	};
 
 	MapTile.prototype._moveMapImagesY = function (y){
 
 		this.viewer.imagesDoms.forEach(function(dom){
 
-			var t = dom.getAttribute('translation').split(' ');
+			var t = dom.getAttribute("translation").split(" ");
 
 			t.forEach(function(number, i){
 				t[i] = parseFloat(number);
@@ -377,9 +377,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 			t[1] = y;
 
-			dom.setAttribute('translation', t.join(' '));
+			dom.setAttribute("translation", t.join(" "));
 		});
-	}
+	};
 
 	MapTile.prototype._clearAllPlanes = function(){
 
@@ -391,17 +391,17 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		}
 
 		this._planes = [];
-	}
+	};
 
 	MapTile.prototype._appendPlane = function(p){
 		this._planes = this.planes || [];
 		this._planes.push(p);
 		this.viewer.getScene().appendChild(p);
-	}
+	};
 
 	MapTile.prototype._drawPlaneOnZ = function(coords, color){
 
-		var coordIndex = '';
+		var coordIndex = "";
 
 		var center = [0, 0, 0];
 		center[0] = (coords[0][0] + coords[1][0], + coords[2][0] + coords[3][0]) / 4;
@@ -435,10 +435,10 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		coords.sort(less);
 
 		for(var i=0; i < coords.length; i++){
-			coordIndex += ' ' + i;
+			coordIndex += " " + i;
 		}
 
-		coordIndex += ' -1';
+		coordIndex += " -1";
 
 		var coordsFlatten = [];
 
@@ -446,14 +446,14 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			coordsFlatten = coordsFlatten.concat(coord);
 		});
 
-		var containerNode = document.createElement('div');
+		var containerNode = document.createElement("div");
 		containerNode.innerHTML = "" +
 		"	<shape>" +
 		"		<appearance>" +
-		"			<material diffuseColor='" + color.join(' ') + "' transparency='0.7'></material>" +
+		"			<material diffuseColor='" + color.join(" ") + "' transparency='0.7'></material>" +
 		"		</appearance>" +
 		"		<IndexedFaceSet ccw='true' colorPerVertex='false' solid='false' coordIndex='" + coordIndex + "'>" +
-		"			<coordinate point='" +  coordsFlatten.join(' ') + "'></coordinate>" +
+		"			<coordinate point='" +  coordsFlatten.join(" ") + "'></coordinate>" +
 		"		</IndexedFaceSet>" +
 		"	</shape>";
 
@@ -481,7 +481,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			this.imagesDoms = [];
 		}
 
-		if(!this.addedMapImages[ox + ',' + oy]){
+		if(!this.addedMapImages[ox + "," + oy]){
 
 			// console.log('ox, oy', ox, oy);
 			// console.log('size', size);
@@ -496,7 +496,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 			this.imagesDoms.push(dom);
 			this.viewer.getScene().appendChild(dom);
-			this.addedMapImages[ox + ',' + oy] = 1;
+			this.addedMapImages[ox + "," + oy] = 1;
 
 			return true;
 		} else {
@@ -517,7 +517,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		this.imagesDoms = [];
 		this.addedMapImages = {};
 		this.mapSizes = [];
-	}
+	};
 
 
 	MapTile.prototype.getLenFromCamToCentre = function(viewAreaCoors, camera){
@@ -552,12 +552,12 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			{y: 1000, zoomLevel: 16},
 			{y: 500, zoomLevel: 17},
 			{y: 250, zoomLevel: 18},
-			{y: 0, zoomLevel: 18},
+			{y: 0, zoomLevel: 18}
 
 		];
 
 		yToZoomLevel.forEach(function(map){
-			map.y *= self.meterPerPixel
+			map.y *= self.meterPerPixel;
 		});
 
 		var zoomLevel;
@@ -590,15 +590,13 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var planeOffsetY = [1, 1, -1, -1];
 		var viewAreaCoors = [];
 
-		for(var i = 0; i < planeOffsetX.length; i++)
-		{
+		for(var i = 0; i < planeOffsetX.length; i++) {
 			var X = planeOffsetX[i];
 			var Y = planeOffsetY[i];
 
 			var rayDirection = [];
 
-			for (var c = 0; c < 3; c++)
-			{
+			for (var c = 0; c < 3; c++) {
 				rayDirection[c] = view_dir[c] + X * tanHalfFOV * right[c] + Y * (ratio / tanHalfFOV) * up[c];
 			}
 
@@ -608,14 +606,13 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 			viewAreaCoors[i] = [];
 
-			for (var c = 0; c < 3; c++)
-			{
+			for (var c = 0; c < 3; c++) {
 				viewAreaCoors[i][c] = camera[c] + gamma * rayDirection[c];
 			}
 		}
 
 		return viewAreaCoors;
-	}
+	};
 
 	MapTile.prototype.centreOfVecs = function(vectors){
 
@@ -636,7 +633,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		});
 
 		return centre;
-	}
+	};
 
 	MapTile.prototype.isLookingToInf = function(viewAreaCoors){
 
@@ -693,7 +690,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		));
 
 		return latlon;
-	}
+	};
 
 
 	MapTile.prototype.osCoorToSceneCoor = function(osCoor){
@@ -701,14 +698,14 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			osCoor.easting - this.originBNG.easting,
 			this.originBNG.northing - osCoor.northing
 		];
-	}
+	};
 	// trigger update URL event
 	MapTile.prototype.triggerUpdateURLEvent = function(lat, lon, height, view, up){
 
 		this.eventCallback(this.viewer.EVENT.UPDATE_URL ,{
-			'at': [lat, lon, height].join(','),
-			'view': view,
-			'up': up
+			"at": [lat, lon, height].join(","),
+			"view": view,
+			"up": up
 		});
 	};
 
@@ -745,7 +742,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		}
 
 		if(!this.originBNG){
-			console.log('originBNG not found');
+			console.log("originBNG not found");
 			return;
 		}
 
@@ -780,8 +777,8 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			viewAreaLatLon.lat,
 			viewAreaLatLon.lon,
 			camera[1],
-			view_dir.join(','),
-			up.join(',')
+			view_dir.join(","),
+			up.join(",")
 		);
 
 		// variables named according to this polygon and coordinate variables
@@ -923,7 +920,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var maxTileCount = 100;
 
 		var genStep = function(coor, vecLen){
-			var tileSize = 100 * self.meterPerPixel
+			var tileSize = 100 * self.meterPerPixel;
 			return tileSize / vecLen / 2;
 		};
 
@@ -966,38 +963,38 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	};
 
 	MapTile.prototype._hasSameSign = function(a, b){
-		return a <= 0 && b <= 0 || a >=0 && b >= 0
+		return a <= 0 && b <= 0 || a >=0 && b >= 0;
 	};
 
 	MapTile.prototype._roundUpToTen = function(n){
 		var roundUpPlace = 10;
 		return Math.ceil(n / roundUpPlace) * roundUpPlace;
-	}
+	};
 
 	// TO-DO: Move helper functions to somewhere else?
 	//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
 	MapTile.prototype._OSRefNo = function(osRef, length){
 
 		if (length < 1 || length > 5){
-			return console.log('length must be in range [1 - 5]');
+			return console.log("length must be in range [1 - 5]");
 		}
 
-		var osrefno = osRef.toString().split(' ');
+		var osrefno = osRef.toString().split(" ");
 		osrefno[1] = osrefno[1].substring(0, length);
 		osrefno[2] = osrefno[2].substring(0, length);
-		osrefno = osrefno.join('');
+		osrefno = osrefno.join("");
 
 		return osrefno;
 	};
 
 	MapTile.prototype._tile2long = function (x, z) {
 		return (x/Math.pow(2,z)*360-180);
-	}
+	};
 
 	MapTile.prototype._tile2lat = function (y, z) {
 		var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
 		return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
-	}
+	};
 
 	MapTile.prototype._degToRad = function(degrees) {
 		return degrees * Math.PI / 180;
@@ -1023,7 +1020,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				id : objEvent.partID
 			});
 		}
-	}
+	};
 
 	MapTile.prototype.appendMapTile = function(osGridRef){
 
@@ -1044,9 +1041,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		this.addedTileRefs.push(osGridRef);
 
-		var gltf = document.createElement('gltf');
-		gltf.setAttribute('onclick', 'os_clickBuildingObject(event)');
-		gltf.setAttribute('url', server_config.apiUrl(server_config.MAP_API, 'os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1'));
+		var gltf = document.createElement("gltf");
+		gltf.setAttribute("onclick", "os_clickBuildingObject(event)");
+		gltf.setAttribute("url", server_config.apiUrl(server_config.MAP_API, "os/buildings.gltf?method=osgrid&osgridref=" + osGridRef + "&draw=1"));
 
 		var translate = [0, 0, 0];
 		var osCoor = OsGridRef.parse(osGridRef);
@@ -1057,7 +1054,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var mapImagePosInfo = this._getMapImagePosInfo();
 
 		var tileLatLon = OsGridRef.osGridToLatLon(osCoor);
-		var correspondingMapTile = this._getSlippyTileLayerPoints(tileLatLon.lat, tileLatLon.lon, mapImagePosInfo.zoomLevel)
+		var correspondingMapTile = this._getSlippyTileLayerPoints(tileLatLon.lat, tileLatLon.lon, mapImagePosInfo.zoomLevel);
 
 		var y = correspondingMapTile.y - mapImagePosInfo.slippyPoints.y;
 		// var nextY = correspondingMapTile.y >= 0 ? y + 1 : y - 1;
@@ -1074,8 +1071,8 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var dx = osCoor.easting * this.meterPerPixel - (corMapTileBNG.easting  * this.meterPerPixel + mapSize / 2);
 		var dy = (corMapTileBNG.northing * this.meterPerPixel - mapSize / 2) - osCoor.northing * this.meterPerPixel;
 
-		translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX
-		translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY
+		translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX;
+		translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY;
 
 
 		// this._appendPlane(this._drawPlaneOnZ([
@@ -1091,13 +1088,13 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		// 	this.gltfDoms = [];
 		// }
 
-		var scale = document.createElement('Transform');
+		var scale = document.createElement("Transform");
 		var mPerPx = this.meterPerPixel;
-		scale.setAttribute('scale', [mPerPx, mPerPx, mPerPx].join(','));
+		scale.setAttribute("scale", [mPerPx, mPerPx, mPerPx].join(","));
 		scale.appendChild(gltf);
 
-		var transform = document.createElement('transform');
-		transform.setAttribute('translation', translate.join(' '));
+		var transform = document.createElement("transform");
+		transform.setAttribute("translation", translate.join(" "));
 
 
 		transform.appendChild(scale);
@@ -1112,14 +1109,14 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		var shape = document.createElement("Shape");
 
-		var app = document.createElement('Appearance');
+		var app = document.createElement("Appearance");
 
-		var it = document.createElement('ImageTexture');
+		var it = document.createElement("ImageTexture");
 
 		var mapImagePosInfo = this._getMapImagePosInfo();
 
 
-		var material = document.createElement('material');
+		var material = document.createElement("material");
 
 		// var color = [51 / 255, 165  / 255, 255  / 255];
 		// material.setAttribute('emissiveColor', color.join(' '));
@@ -1127,28 +1124,28 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		// app.appendChild(material);
 
 
-		it.setAttribute("url", server_config.apiUrl(server_config.MAP_API, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
+		it.setAttribute("url", server_config.apiUrl(server_config.MAP_API, "os/map-images/Outdoor/" + mapImagePosInfo.zoomLevel + "/" + x + "/" + y + ".png"));
 		it.setAttribute("crossOrigin", "use-credentials");
 
 		app.appendChild(it);
 
 		shape.appendChild(app);
 
-		var plane = document.createElement('Plane');
-		plane.setAttribute('center', '0, 0');
-		plane.setAttribute('size', [size, size].join(','));
-		plane.setAttribute('solid', false);
-		plane.setAttribute('lit', false);
+		var plane = document.createElement("Plane");
+		plane.setAttribute("center", "0, 0");
+		plane.setAttribute("size", [size, size].join(","));
+		plane.setAttribute("solid", false);
+		plane.setAttribute("lit", false);
 
 		shape.appendChild(plane);
 
-		var rotate = document.createElement('Transform');
+		var rotate = document.createElement("Transform");
 		// rotate 270Deg around x
-		rotate.setAttribute('rotation', '1,0,0,4.7124');
+		rotate.setAttribute("rotation", "1,0,0,4.7124");
 		rotate.appendChild(shape);
 
-		var translate = document.createElement('Transform');
-		translate.setAttribute('translation', t.join(' '));
+		var translate = document.createElement("Transform");
+		translate.setAttribute("translation", t.join(" "));
 		translate.appendChild(rotate);
 
 		return translate;
@@ -1160,7 +1157,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 			+ Math.pow(vec[1], 2)
 			+ Math.pow(vec[2], 2)
 		);
-	}
+	};
 
 
 }());

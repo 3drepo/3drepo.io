@@ -35,7 +35,7 @@
 				issueCreated: "&",
 				contentHeight: "&",
 				selectedObjects: "<",
-				modelSettings: '<',
+				modelSettings: "<",
 				setInitialSelectedObjects: "&",
 				userJob: "<",
 				availableJobs: "<"
@@ -55,7 +55,7 @@
 			textInputHasFocus = false,
 			savedDescription,
 			savedComment,
-			issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator')),
+			issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator")),
 			disableStatus;
 
 		/*
@@ -90,10 +90,10 @@
 					icon: "camera_alt", 
 					label: "Screen shot", 
 					disabled: function() { 
-						return vm.submitDisabled 
+						return vm.submitDisabled; 
 					}, 
 					visible: function(){ 
-						return true 
+						return true; 
 					},
 					selected: false
 				},
@@ -101,7 +101,7 @@
 					icon: "place", 
 					label: "Pin", 
 					disabled: function() { 
-						return (vm.submitDisabled || vm.canComment) 
+						return (vm.submitDisabled || vm.canComment); 
 					},
 					visible: function() {
 						return !vm.canComment;
@@ -112,30 +112,28 @@
 
 			vm.notificationStarted = false;
 
-		}
+		};
 
 		vm.getPlaceholderText = function() {
 			if (vm.canComment) {
-				return 'Write a new comment';
+				return "Write a new comment";
+			} else if (vm.issueData.status === "closed") {
+				return "You cannot comment on a closed issue";
+			} else {
+				return "You do not have permission to leave comments";
 			}
-			else if (vm.issueData.status === 'closed') {
-				return 'You cannot comment on a closed issue';
-			} 
-			else {
-				return 'You do not have permission to leave comments';
-			}
-		}
+		};
 
 	
 		vm.convertCommentTopicType = function() {
 			if (vm.issueData && vm.issueData.comments) {
 				vm.issueData.comments.forEach(function(comment){
-					if(comment.action && comment.action.property === 'topic_type'){
+					if(comment.action && comment.action.property === "topic_type"){
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 					}
 				});
 			}
-		}
+		};
 			
 
 		vm.setCanUpdateStatus = function(issueData) {
@@ -145,9 +143,9 @@
 			}
 
 			vm.canUpdateStatus = (AuthService.getUsername() === issueData.owner) ||
-								 issueData.assigned_roles.indexOf(vm.userJob._id) !== -1
+								 issueData.assigned_roles.indexOf(vm.userJob._id) !== -1;
 
-		}
+		};
 
 		/**
 		 * Monitor changes to parameters
@@ -157,7 +155,7 @@
 			var i, length,
 				leftArrow = 37;
 
-			if(changes.hasOwnProperty('modelSettings')){
+			if(changes.hasOwnProperty("modelSettings")){
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
 				vm.canComment = AuthService.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
 				//convert comment topic_types
@@ -209,8 +207,7 @@
 					// Role colour
 					if (vm.issueData.assigned_roles.length > 0) {
 						setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
-					}
-					else {
+					} else {
 						setRoleIndicatorColour(vm.issueData.creator_role);
 					}
 
@@ -220,14 +217,13 @@
 					vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
 					vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
-					if(vm.issueData.status === 'closed'){
+					if(vm.issueData.status === "closed"){
 						vm.canUpdate = false;
 						vm.canComment = false;
 					}
 				
 					vm.convertCommentTopicType();
-				}
-				else {
+				} else {
 					vm.issueData = {
 						priority: "none",
 						status: "open",
@@ -317,43 +313,43 @@
 				};
 
 				IssuesService.updateIssue(vm.issueData, data)
-				.then(function (response) {
+					.then(function (response) {
 
 					// Add info for new comment
-					comment = response.data.issue.comments[response.data.issue.comments.length - 1];
-					IssuesService.convertActionCommentToText(comment, vm.topic_types);
-					comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-					vm.issueData.comments.push(comment);
+						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						IssuesService.convertActionCommentToText(comment, vm.topic_types);
+						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+						vm.issueData.comments.push(comment);
 
-					// Update last but one comment in case it was "sealed"
-					if (vm.issueData.comments.length > 1) {
+						// Update last but one comment in case it was "sealed"
+						if (vm.issueData.comments.length > 1) {
 						// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
 						// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 						// if (comment.action) {
 						// 	IssuesService.convertActionCommentToText(comment, vm.topic_types);
 						// }
 						//vm.issueData.comments[vm.issueData.comments.length - 2] = comment;
-						vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
-					}
+							vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
+						}
 
-					// The status could have changed due to assigning role
-					vm.issueData.status = response.data.issue.status;
-					vm.issueData.assigned_roles = response.data.issue.assigned_roles;
-					IssuesService.updatedIssue = vm.issueData;
-					vm.setCanUpdateStatus(vm.issueData);
+						// The status could have changed due to assigning role
+						vm.issueData.status = response.data.issue.status;
+						vm.issueData.assigned_roles = response.data.issue.assigned_roles;
+						IssuesService.updatedIssue = vm.issueData;
+						vm.setCanUpdateStatus(vm.issueData);
 
-					commentAreaScrollToBottom();
-				});
+						commentAreaScrollToBottom();
+					});
 
 
-				if(vm.issueData.status === 'closed'){
+				if(vm.issueData.status === "closed"){
 					vm.canUpdate = false;
 					vm.canComment = false;
 				}
 
 				AnalyticService.sendEvent({
-					eventCategory: 'Issue',
-					eventAction: 'edit'
+					eventCategory: "Issue",
+					eventAction: "edit"
 				});
 			}
 		};
@@ -367,8 +363,7 @@
 
 			if (vm.data) {
 				saveComment();
-			}
-			else {
+			} else {
 				vm.saveIssue();
 			}
 		};
@@ -406,12 +401,14 @@
 		 */
 		vm.showScreenshotDialog = function(event) {
 			$mdDialog.show({
-				controller: function () { this.issueComponent = vm; },
-				controllerAs: 'vm',
+				controller: function () {
+					this.issueComponent = vm; 
+				},
+				controllerAs: "vm",
 				templateUrl: "issue-screen-shot-dialog.html",
 				targetEvent: event
 			});
-		}
+		};
 
 		/**
 		 * Do an action
@@ -424,23 +421,23 @@
 			var selected = vm.actions[action].selected;
 
 			switch(action){
-				case "pin":
+			case "pin":
 
-					if(selected){
-						EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
-					} else {
-						EventService.send(EventService.EVENT.PIN_DROP_MODE,false);
-					}
-					break;
+				if(selected){
+					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
+				} else {
+					EventService.send(EventService.EVENT.PIN_DROP_MODE,false);
+				}
+				break;
 
-				case "screen_shot":
+			case "screen_shot":
 
 					// There is no concept of selected in screenshot as there will be a popup once you click the button
-					vm.actions[action].selected = false;
+				vm.actions[action].selected = false;
 
-					delete vm.screenShot; // Remove any clicked on screen shot
-					vm.showScreenshotDialog(event);
-					break;
+				delete vm.screenShot; // Remove any clicked on screen shot
+				vm.showScreenshotDialog(event);
+				break;
 
 			}
 
@@ -458,8 +455,7 @@
 		 * Toggle showing of extra inputs
 		 */
 		vm.toggleShowAdditional = function () {
-			if(!textInputHasFocus)
-			{
+			if(!textInputHasFocus) {
 				//don't toggle if the user is trying to type
 				vm.showAdditional = !vm.showAdditional;
 				setContentHeight();
@@ -480,20 +476,19 @@
 						desc: vm.issueData.desc
 					};
 					IssuesService.updateIssue(vm.issueData, data)
-					.then(function (data) {
-						IssuesService.updatedIssue = vm.issueData;
-						savedDescription = vm.issueData.desc;
+						.then(function (data) {
+							IssuesService.updatedIssue = vm.issueData;
+							savedDescription = vm.issueData.desc;
 
-						// Add info for new comment
-						var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
-						IssuesService.convertActionCommentToText(comment, vm.topic_types);
-						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-						vm.issueData.comments.push(comment);
-					});
+							// Add info for new comment
+							var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
+							IssuesService.convertActionCommentToText(comment, vm.topic_types);
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							vm.issueData.comments.push(comment);
+						});
 				}
 
-			}
-			else {
+			} else {
 				vm.editingDescription = true;
 				savedDescription = vm.issueData.desc;
 			}
@@ -521,20 +516,16 @@
 		vm.saveIssue = function() {
 			var viewpointPromise = $q.defer(),
 				screenShotPromise = $q.defer(),
-				objectsPromise = $q.defer(),
-				data;
+				objectsPromise = $q.defer();
 
-			if(commentViewpoint)
-			{
+			if (commentViewpoint) {
 				viewpointPromise.resolve(commentViewpoint);
-			}
-			else
-			{
+			} else {
 				// Get the viewpoint
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
 					{promise: viewpointPromise, account: vm.account, model: vm.model
-				});
+					});
 			}
 
 			//Get selected objects
@@ -545,33 +536,31 @@
 
 			viewpointPromise.promise.then(function (viewpoint) {
 				objectsPromise.promise.then(function(objectInfo) {
-					handleObjects(objectInfo, screenShotPromise)
+					handleObjects(viewpoint, objectInfo, screenShotPromise);
 				}).catch(function(error){
 					console.error(error);
-				})
+				});
 			}).catch(function(error){
 				console.error(error);
 			});
-		}
+		};
 
-		function handleObjects (objectInfo, screenShotPromise) {
+		function handleObjects (viewpoint, objectInfo, screenShotPromise) {
 			if (savedScreenShot !== null) {
 				if (objectInfo.highlightedNodes.length > 0) {
-						// Create a group of selected objects
-					data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-					UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups")
-					.then(function (response) {
-						vm.doSaveIssue(viewpoint, savedScreenShot, response.data._id);
-					})
-					.catch(function(error) {
-						console.error("Error saving issue: ", error);
-					});
-				}
-				else {
+					// Create a group of selected objects
+					var sendData = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+					UtilsService.doPost(sendData, vm.account + "/" + vm.model + "/groups")
+						.then(function (response) {
+							vm.doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+						})
+						.catch(function(error) {
+							console.error("Error saving issue: ", error);
+						});
+				} else {
 					vm.doSaveIssue(viewpoint, savedScreenShot);
 				}
-			}
-			else {
+			} else {
 				// Get a screen shot if not already created
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_SCREENSHOT, 
@@ -585,8 +574,7 @@
 						UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups").then(function (response) {
 							vm.doSaveIssue(viewpoint, screenShot, response.data._id);
 						});
-					}
-					else {
+					} else {
 						vm.doSaveIssue(viewpoint, screenShot);
 					}
 				});
@@ -659,7 +647,7 @@
 					startNotification();
 					vm.saving = false;
 
-					$state.go('home.account.model.issue', 
+					$state.go("home.account.model.issue", 
 						{
 							account: vm.account, 
 							model: vm.model, 
@@ -669,13 +657,13 @@
 						}, 
 						{notify: false}
 					);
-			});
+				});
 
 			AnalyticService.sendEvent({
-				eventCategory: 'Issue',
-				eventAction: 'create'
+				eventCategory: "Issue",
+				eventAction: "create"
 			});
-		}
+		};
 
 		/**
 		 * Add comment to issue
@@ -690,8 +678,7 @@
 						vm.saving = false;
 						afterNewComment(response.data.issue);
 					});
-			}
-			else {
+			} else {
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
@@ -707,8 +694,8 @@
 			}
 
 			AnalyticService.sendEvent({
-				eventCategory: 'Issue',
-				eventAction: 'comment'
+				eventCategory: "Issue",
+				eventAction: "comment"
 			});
 		}
 
@@ -773,8 +760,8 @@
 					vm.issueData.comments.splice(index, 1);
 				});
 			AnalyticService.sendEvent({
-				eventCategory: 'Issue',
-				eventAction: 'deleteComment'
+				eventCategory: "Issue",
+				eventAction: "deleteComment"
 			});
 			setContentHeight();
 		};
@@ -797,12 +784,11 @@
 							savedComment = vm.issueData.comments[index].comment;
 						});
 					AnalyticService.sendEvent({
-						eventCategory: 'Issue',
-						eventAction: 'editComment'
+						eventCategory: "Issue",
+						eventAction: "editComment"
 					});
 				}
-			}
-			else {
+			} else {
 				editingCommentIndex = index;
 				vm.issueData.comments[index].editing = true;
 				savedComment = vm.issueData.comments[index].comment;
@@ -830,8 +816,7 @@
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
 				);
 
-			}
-			else {
+			} else {
 				// Description
 				vm.descriptionThumbnail = data.screenShot;
 				
@@ -846,7 +831,7 @@
 				commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 			}).catch(function(error){
 				console.error("Screenshot request failed: ", error);
-			})
+			});
 
 			setContentHeight();
 		};
@@ -861,8 +846,7 @@
 			if (roleColor !== null) {
 				issueRoleIndicator.css("background", IssuesService.getJobColor(role));
 				issueRoleIndicator.css("border", "none");
-			}
-			else {
+			} else {
 				issueRoleIndicator.css("background", "none");
 				issueRoleIndicator.css("border", "1px solid #DDDDDD");
 			}
@@ -935,8 +919,7 @@
 				}
 
 				
-			}
-			else {
+			} else {
 				height = newIssueHeight;
 				if (vm.showAdditional) {
 					height += additionalInfoHeight;
@@ -954,7 +937,7 @@
 		function commentAreaScrollToBottom(){
 
 			$timeout(function(){
-				var commentArea = document.getElementById('descriptionAndComments');
+				var commentArea = document.getElementById("descriptionAndComments");
 				if (commentArea) {
 					commentArea.scrollTop = commentArea.scrollHeight;
 				}
@@ -1010,7 +993,7 @@
 						}
 					});
 
-					vm.issueData.comments[deleteIndex].comment = 'This comment has been deleted.'
+					vm.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
 
 
 					$scope.$apply();

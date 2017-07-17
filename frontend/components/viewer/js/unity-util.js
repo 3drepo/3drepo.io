@@ -20,8 +20,8 @@ var UnityUtil;
 (function() {
 	"use strict";
 
-    angular.module("3drepo")
-        .service("UnityUtil", UnityUtil);
+	angular.module("3drepo")
+		.service("UnityUtil", UnityUtil);
 
 	
 	UnityUtil = function() {};
@@ -45,53 +45,46 @@ var UnityUtil;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
 	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;	
-	UnityUtil.prototype._SendMessage = function(gameObject, func, param)
-	{
+	UnityUtil.prototype._SendMessage = function(gameObject, func, param) {
     	if (param === undefined) {
 	      if (!SendMessage_vss)
-    	    SendMessage_vss = Module.cwrap('SendMessage', 'void', ['string', 'string']);
+    	    SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
 	      SendMessage_vss(gameObject, func);
     	} else if (typeof param === "string") {
 	      if (!SendMessage_vsss)
-    	    SendMessage_vsss = Module.cwrap('SendMessageString', 'void', ['string', 'string', 'string']);
+    	    SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
 	      SendMessage_vsss(gameObject, func, param);
 	    } else if (typeof param === "number") {
     	  if (!SendMessage_vssn)
-	        SendMessage_vssn = Module.cwrap('SendMessageFloat', 'void', ['string', 'string', 'number']);
+	        SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
     	 SendMessage_vssn(gameObject, func, param);
 	    } else
     	    throw "" + param + " is does not have a type which is supported by SendMessage.";
-	}
+	};
 
-	UnityUtil.prototype.onError = function(err, url, line)
-	{
+	UnityUtil.prototype.onError = function(err, url, line) {
 
 		var conf = "Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\n" + 
 					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results)," + 
 					"reduce your memory usage and try again." + 
 					"\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:" + 
 					"\n\n\"Error " + err + " occured at line " + line + 
-					"\"\n\n\nClick ok to refresh this page.\n"
+					"\"\n\n\nClick ok to refresh this page.\n";
 		
 
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
-			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1)
-		{
-			if(confirm(conf))
-			{
+			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
+			if(confirm(conf)) {
 				window.location.reload();
 			}
 		}
 
 		return true;
-	}
+	};
 
-	UnityUtil.prototype.onLoaded = function()	
-	{
-		if(!loadedPromise)
-		{
-		   loadedPromise = new Promise(function(resolve, reject)
-			{
+	UnityUtil.prototype.onLoaded = function() {
+		if(!loadedPromise) {
+		   loadedPromise = new Promise(function(resolve, reject) {
 				loadedResolve = {resolve: resolve, reject: reject};
 			}	
 			);
@@ -99,85 +92,70 @@ var UnityUtil;
 		}
 		return loadedPromise;
 		
-	}
+	};
 
-	UnityUtil.prototype.onLoading = function()	
-	{
-		if(!loadingPromise)
-		{
-		   loadingPromise	= new Promise( function(resolve, reject)
-			{
+	UnityUtil.prototype.onLoading = function() {
+		if(!loadingPromise) {
+		   loadingPromise	= new Promise( function(resolve, reject) {
 				loadingResolve = {resolve: resolve, reject: reject};
 			}
 			);
 		}
 		return loadingPromise;
 		
-	}
+	};
 
 
-	UnityUtil.prototype.onReady = function()	
-	{
+	UnityUtil.prototype.onReady = function() {
 	
-		if(!readyPromise)
-		{
-		   readyPromise	= new Promise(function(resolve, reject)
-			{
+		if(!readyPromise) {
+		   readyPromise	= new Promise(function(resolve, reject) {
 				readyResolve = {resolve: resolve, reject: reject};
 			}	
 			);
 		}
 		return readyPromise;
 		
-	}
+	};
 
 	function userAlert(message, reload) {
 		var prefix = "Something went wrong loading Unity, " + 
 					 "press okay to refresh! Error: ";
 		if(alert(prefix + message)){
 
-		}
-		else if (reload) {
+		} else if (reload) {
 			window.location.reload(); 
 		}
 	}
 
 
-	function toUnity(methodName, requireStatus, params)
-	{
+	function toUnity(methodName, requireStatus, params) {
 
-		if(requireStatus == LoadingState.MODEL_LOADED)
-		{
+		if(requireStatus == LoadingState.MODEL_LOADED) {
 			//Requires model to be loaded
-			UnityUtil.onLoaded().then(function()
-			{
+			UnityUtil.onLoaded().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
 				console.error("UnityUtil.onLoaded() failed: ", error);
 				userAlert(error, true);
-			})
-		}
-		else if(requireStatus == LoadingState.MODEL_LOADING)
-		{
+			});
+		} else if(requireStatus == LoadingState.MODEL_LOADING) {
 			//Requires model to be loading
 			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			}).catch(function(error){
 				userAlert(error, true);
 				console.error("UnityUtil.onLoading() failed: ", error);
-			})
-		}
-		else
-		{
-			UnityUtil.onReady().then(function()
-			{
+			});
+		} else {
+			UnityUtil.onReady().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
 				userAlert(error, true);
 				console.error("UnityUtil.onReady() failed: ", error);
-			})
+			});
 		}
 
 	}
@@ -187,87 +165,74 @@ var UnityUtil;
 	 * =============== FROM UNITY ====================
 	 */
 
-	UnityUtil.prototype.clipBroadcast = function(clipInfo)
-	{
-		if(UnityUtil.clipBroadcastCallback)
-		{
+	UnityUtil.prototype.clipBroadcast = function(clipInfo) {
+		if(UnityUtil.clipBroadcastCallback) {
 			UnityUtil.clipBroadcastCallback(JSON.parse(clipInfo));
 		}
-	}
+	};
 
-	UnityUtil.prototype.currentPointInfo = function(pointInfo)
-	{
+	UnityUtil.prototype.currentPointInfo = function(pointInfo) {
 		var point = JSON.parse(pointInfo);
 		if(UnityUtil.objectSelectedCallback)
 			UnityUtil.objectSelectedCallback(point);
-	}
+	};
 
-	UnityUtil.prototype.doubleClicked = function(meshInfo)
-	{
+	UnityUtil.prototype.doubleClicked = function(meshInfo) {
 		var point = JSON.parse(meshInfo);
 		UnityUtil.centreToPoint(point.model, point.meshID);	
-	}
+	};
 
-	UnityUtil.prototype.loaded = function(bboxStr)
-	{
+	UnityUtil.prototype.loaded = function(bboxStr) {
 		var res = {};
 		res.bbox = JSON.parse(bboxStr);
 		loadedResolve.resolve(res);
 		loaded = true;
-	}
+	};
 
-	UnityUtil.prototype.loading = function(bboxStr)
-	{
+	UnityUtil.prototype.loading = function(bboxStr) {
 
 		loadingResolve.resolve();
-	}
+	};
 
-	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo)
-	{
+	UnityUtil.prototype.objectStatusBroadcast = function(nodeInfo) {
 		objectStatusPromise.resolve(JSON.parse(nodeInfo));
 		objectStatusPromise = null;
 		
-	}
+	};
 
 
-	UnityUtil.prototype.pickPointAlert = function(pointInfo)
-	{
+	UnityUtil.prototype.pickPointAlert = function(pointInfo) {
 		var point = JSON.parse(pointInfo);
 		if(UnityUtil.pickPointCallback)
 			UnityUtil.pickPointCallback(point);
-	}
+	};
 
-	UnityUtil.prototype.ready = function()
-	{
+	UnityUtil.prototype.ready = function() {
 		//Overwrite the Send Message function to make it run quicker 
 		//This shouldn't need to be done in the future when the
 		//optimisation in added into unity.
 		SendMessage = UnityUtil._SendMessage;
 		readyResolve.resolve();
-	}
+	};
 	
-	UnityUtil.prototype.screenshotReady = function(screenshot)
-	{
+	UnityUtil.prototype.screenshotReady = function(screenshot) {
 		var ssJSON = JSON.parse(screenshot);
 
-		screenshotPromises.forEach(function(promise)
-				{
-					promise.resolve(ssJSON.ssBytes);
-				}
+		screenshotPromises.forEach(function(promise) {
+			promise.resolve(ssJSON.ssBytes);
+		}
 		);
 		screenshotPromises = [];
-	}
+	};
 
-	UnityUtil.prototype.viewpointReturned = function(vpInfo)	
-	{
-		if(vpPromise != null)
-		{
+	UnityUtil.prototype.viewpointReturned = function(vpInfo) {
+		if(vpPromise != null) {
 			var viewpoint = JSON.parse(vpInfo);
 			vpPromise.resolve(viewpoint);
 			vpPromise = null;
 		}
 
-	}
+	};
 
 
 
@@ -276,34 +241,29 @@ var UnityUtil;
 	 */
 
 
-	UnityUtil.prototype.centreToPoint = function(model, id)
-	{
+	UnityUtil.prototype.centreToPoint = function(model, id) {
 		var params = {};
 		params.model = model;
-		params.meshID = id
+		params.meshID = id;
 		toUnity("CentreToObject", LoadingState.MODEL_LOADING, JSON.stringify(params));
-	}
+	};
 
-	UnityUtil.prototype.changePinColour = function(id, colour)
-	{
+	UnityUtil.prototype.changePinColour = function(id, colour) {
 		var params =  {};	
 		params.color = colour;
 		params.pinName = id;
 		toUnity("ChangePinColor", LoadingState.MODEL_LOADING, JSON.stringify(params));
-	}
+	};
 
-	UnityUtil.prototype.clearHighlights = function()
-	{
+	UnityUtil.prototype.clearHighlights = function() {
 		toUnity("ClearHighlighting", LoadingState.MODEL_LOADED);
-	}
+	};
 	
-	UnityUtil.prototype.disableClippingPlanes = function()
-	{
+	UnityUtil.prototype.disableClippingPlanes = function() {
 		toUnity("DisableClip");
-	}
+	};
 
-	UnityUtil.prototype.dropPin = function(id, position, normal, colour)
-	{
+	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};
 		params.id = id;
 		params.position = position;
@@ -311,40 +271,33 @@ var UnityUtil;
 		params.color = colour;
 		toUnity("DropPin", LoadingState.MODEL_LOADING, JSON.stringify(params));
 
-	}
+	};
 
-	UnityUtil.prototype.getObjectsStatus = function(account, model, promise)
-	{
+	UnityUtil.prototype.getObjectsStatus = function(account, model, promise) {
 		var nameSpace = "";
-		if(account && model)
-		{
+		if(account && model) {
 			nameSpace = account + "."  + model;
 		}
-		if(objectStatusPromise)
-		{
+		if(objectStatusPromise) {
 			objectStatusPromise.then(function(blah){
-					_getObjectsStatus(nameSpace, promise);
-				}					
+				_getObjectsStatus(nameSpace, promise);
+			}					
 			);
-		}
-		else
-			_getObjectsStatus(nameSpace, promise)
+		} else
+			_getObjectsStatus(nameSpace, promise);
 
-	}
+	};
 
-	function _getObjectsStatus(nameSpace, promise)
-	{
+	function _getObjectsStatus(nameSpace, promise) {
 		objectStatusPromise = promise;
 		toUnity("GetObjectsStatus", LoadingState.MODEL_LOADED, nameSpace);
 	}
 
-	UnityUtil.prototype.getPointInfo = function()
-	{
+	UnityUtil.prototype.getPointInfo = function() {
 		toUnity("GetPointInfo", false, 0);
-	}
+	};
 
-	UnityUtil.prototype.highlightObjects = function(account, model, idArr, color, toggleMode)
-	{
+	UnityUtil.prototype.highlightObjects = function(account, model, idArr, color, toggleMode) {
 		var params = {};
 		params.database = account;
 		params.model = model;
@@ -354,14 +307,12 @@ var UnityUtil;
 			params.color = color;
 
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
-	}
+	};
 
-	UnityUtil.prototype.loadModel  = function(account, model, branch, revision)
-	{
+	UnityUtil.prototype.loadModel  = function(account, model, branch, revision) {
 		
 		UnityUtil.reset();	
-		if(!loaded && loadedResolve)
-		{
+		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject();
 			loadingResolve.reject();
@@ -383,69 +334,54 @@ var UnityUtil;
 		
 		return UnityUtil.onLoaded();
 	
-	}
+	};
 
-	UnityUtil.prototype.removePin = function(id)
-	{
+	UnityUtil.prototype.removePin = function(id) {
 		toUnity("RemovePin", LoadingState.MODEL_LOADING, id);
-	}
+	};
 	
-	UnityUtil.prototype.reset = function()
-	{
+	UnityUtil.prototype.reset = function() {
 		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
-	}
+	};
 
-	UnityUtil.prototype.resetCamera = function()
-	{
+	UnityUtil.prototype.resetCamera = function() {
 		toUnity("ResetCamera", LoadingState.VIEWER_READY);
-	}
+	};
 
-	UnityUtil.prototype.requestScreenShot = function(promise)
-	{
+	UnityUtil.prototype.requestScreenShot = function(promise) {
 		screenshotPromises.push(promise);
 		toUnity("RequestScreenShot", LoadingState.VIEWER_READY);
-	}
+	};
 
-	UnityUtil.prototype.requestViewpoint = function(account, model, promise)
-	{
-		if(vpPromise != null)
-		{
+	UnityUtil.prototype.requestViewpoint = function(account, model, promise) {
+		if(vpPromise != null) {
 			vpPromise.then(_requestViewpoint(account, model, promise));
-		}
-		else
-		{
+		} else {
 			_requestViewpoint(account, model, promise);
 		}
 
-	}
+	};
 
-	function _requestViewpoint(account, model, promise)
-
-	{
+	function _requestViewpoint(account, model, promise) {
 		var param = {};
-		if(account && model)
-		{
+		if(account && model) {
 			param.namespace = account + "."  + model;
 		}
 		vpPromise = promise;
 		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
-	UnityUtil.prototype.setAPIHost = function(hostname)
-	{
+	UnityUtil.prototype.setAPIHost = function(hostname) {
 		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
-	}
+	};
 
-	UnityUtil.prototype.setNavigation = function(navMode)
-	{
+	UnityUtil.prototype.setNavigation = function(navMode) {
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
-	}
+	};
 
-	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model)
-	{
+	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model) {
 		var param = {};
-		if(account && model)
-		{
+		if(account && model) {
 			param.nameSpace = account + "." + model;
 		}
 
@@ -455,19 +391,16 @@ var UnityUtil;
 		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 
 
-	}
+	};
 	
-	UnityUtil.prototype.toggleStats = function()
-	{
+	UnityUtil.prototype.toggleStats = function() {
 		toUnity("ShowStats", LoadingState.VIEWER_READY);
-	}
+	};
 
 
-	UnityUtil.prototype.toggleVisibility = function(account, model, ids, visibility)
-	{
+	UnityUtil.prototype.toggleVisibility = function(account, model, ids, visibility) {
 		var param = {};
-		if(account && model)
-		{
+		if(account && model) {
 			param.nameSpace = account + "." + model;
 		}
 
@@ -475,19 +408,17 @@ var UnityUtil;
 		param.visible = visibility;
 		toUnity("ToggleVisibility",LoadingState.MODEL_LOADED, JSON.stringify(param));
 
-	}
+	};
 
-	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, model)
-	{
-		var param = {}
+	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, model) {
+		var param = {};
 		param.clip = clipPlane;
-		if(account && model)
-		{
+		if(account && model) {
 			param.nameSpace = account + "." + model;
 		}
 		param.requiresBroadcast = requireBroadcast;
 		toUnity("UpdateClip", LoadingState.MODEL_LOADING, JSON.stringify(param));
-	}
+	};
 
 	UnityUtil = new UnityUtil();
 }());

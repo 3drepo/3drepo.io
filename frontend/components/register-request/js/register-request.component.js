@@ -16,33 +16,33 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("registerRequest", {
-            restrict: "E",
-            bindings: {
-                state: "="
-            },
-            templateUrl: "register-request.html",
-            controller: RegisterRequestCtrl,
-            controllerAs: "vm"
-        });
+	angular.module("3drepo")
+		.component("registerRequest", {
+			restrict: "E",
+			bindings: {
+				state: "="
+			},
+			templateUrl: "register-request.html",
+			controller: RegisterRequestCtrl,
+			controllerAs: "vm"
+		});
 
-    RegisterRequestCtrl.$inject = ["$scope", "$window"];
+	RegisterRequestCtrl.$inject = ["$scope", "$window"];
 
-    function RegisterRequestCtrl ($scope, $window) {
-        var vm = this;
+	function RegisterRequestCtrl ($scope, $window) {
+		var vm = this;
 
-        /*
+		/*
          * Watch state
          */
-        $scope.$watch("vm.state", function (newValue) {
-            //console.log(newValue);
-        });
+		$scope.$watch("vm.state", function (newValue) {
+			//console.log(newValue);
+		});
 
-        vm.goToLoginPage = function () {
-            $window.location.href = "/";
-        };
-    }
+		vm.goToLoginPage = function () {
+			$window.location.href = "/";
+		};
+	}
 }());

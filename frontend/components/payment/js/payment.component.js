@@ -24,7 +24,7 @@
 			bindings: {},
 			templateUrl: "payment.html",
 			controller: paymentCtrl,
-			controllerAs: "vm",
+			controllerAs: "vm"
 		});
 
 	paymentCtrl.$inject = ["EventService"];

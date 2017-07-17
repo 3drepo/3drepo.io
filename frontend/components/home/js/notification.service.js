@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.factory('NotificationService', NotificationService);
+angular.module("3drepo")
+	.factory("NotificationService", NotificationService);
 
 NotificationService.$inject = ["serverConfig", "$injector"];
 
@@ -24,35 +24,35 @@ function NotificationService(serverConfig, $injector){
 	"use strict";
 
 	if(!serverConfig.chatHost || !serverConfig.chatPath){
-		console.log('Chat server settings missing');
+		console.log("Chat server settings missing");
 	}
 
 	var socket = io(serverConfig.chatHost, {
 		path: serverConfig.chatPath, 
-		transports: ['websocket'],
+		transports: ["websocket"],
 		reconnectionAttempts: serverConfig.chatReconnectionAttempts
 	});
 	var joined = [];
 
 	function addSocketIdToHeader(socketId){
 		
-		var $httpProvider = $injector.get('$http');
+		var $httpProvider = $injector.get("$http");
 
 		$httpProvider.defaults.headers.post = $httpProvider.defaults.headers.post || {};
 		$httpProvider.defaults.headers.put = $httpProvider.defaults.headers.put || {};
 		$httpProvider.defaults.headers.delete = $httpProvider.defaults.headers.delete || {};
 
-		$httpProvider.defaults.headers.post['x-socket-id'] = socketId;
-		$httpProvider.defaults.headers.put['x-socket-id'] = socketId;
-		$httpProvider.defaults.headers.delete['x-socket-id'] = socketId;
+		$httpProvider.defaults.headers.post["x-socket-id"] = socketId;
+		$httpProvider.defaults.headers.put["x-socket-id"] = socketId;
+		$httpProvider.defaults.headers.delete["x-socket-id"] = socketId;
 	}
 
-	socket.on('connect', function(){
+	socket.on("connect", function(){
 		addSocketIdToHeader(socket.id);
 	});
 
-	socket.on('reconnect', function(){
-		console.log('Rejoining all rooms on reconnect');
+	socket.on("reconnect", function(){
+		console.log("Rejoining all rooms on reconnect");
 		addSocketIdToHeader(socket.id);
 
 		var lastJoined = joined.slice(0);
@@ -60,7 +60,7 @@ function NotificationService(serverConfig, $injector){
 
 		lastJoined.forEach(function(room){
 
-			room = room.split('::');
+			room = room.split("::");
 
 			var account = room[0];
 			var model = room[1];
@@ -71,117 +71,117 @@ function NotificationService(serverConfig, $injector){
 
 	function joinRoom(account, model){
 		
-		var modelNameSpace = '';
+		var modelNameSpace = "";
 		
 		if(model){
-			modelNameSpace = '::' + model;
+			modelNameSpace = "::" + model;
 		}
 
 		var room =  account + modelNameSpace;
 		if(joined.indexOf(room) === -1){
 
-			socket.emit('join', {account: account, model: model});
+			socket.emit("join", {account: account, model: model});
 			joined.push(room);
 		}
 	}
 
 	function getEventName(account, model, keys, event){
 
-		var modelNameSpace = '';
+		var modelNameSpace = "";
 		
 		if(model){
-			modelNameSpace = '::' + model;
+			modelNameSpace = "::" + model;
 		}
 		
 		keys = keys || [];
-		var keyString = '';
+		var keyString = "";
 		
 		if(keys.length){
-			keyString =  '::' + keys.join('::');
+			keyString =  "::" + keys.join("::");
 		}
 
-		return account + modelNameSpace +  keyString + '::' + event;
+		return account + modelNameSpace +  keyString + "::" + event;
 	}
 
 	function subscribe(account, model, keys, event, callback){
 
 		joinRoom(account, model);
-		console.log('sub', getEventName(account, model, keys, event));
+		console.log("sub", getEventName(account, model, keys, event));
 		socket.on(getEventName(account, model, keys, event), function(data){
-			console.log('msg rec', getEventName(account, model, keys, event));
+			console.log("msg rec", getEventName(account, model, keys, event));
 			callback(data);
 		});
 	}
 
 	function unsubscribe(account, model, keys, event){
-		console.log('unsub', getEventName(account, model, keys, event));
+		console.log("unsub", getEventName(account, model, keys, event));
 		socket.off(getEventName(account, model, keys, event));
 	}
 
 	function subscribeNewIssues(account, model, callback){
-		subscribe(account, model, [], 'newIssues', callback);
+		subscribe(account, model, [], "newIssues", callback);
 	}
 
 	function unsubscribeNewIssues(account, model){
-		unsubscribe(account, model, [], 'newIssues');
+		unsubscribe(account, model, [], "newIssues");
 	}
 
 	function subscribeNewComment(account, model, issueId, callback){
-		subscribe(account, model, [issueId], 'newComment', callback);
+		subscribe(account, model, [issueId], "newComment", callback);
 	}
 
 	function unsubscribeNewComment(account, model, issueId){
-		unsubscribe(account, model, [issueId], 'newComment');
+		unsubscribe(account, model, [issueId], "newComment");
 	}
 
 	function subscribeCommentChanged(account, model, issueId, callback){
-		subscribe(account, model, [issueId], 'commentChanged', callback);
+		subscribe(account, model, [issueId], "commentChanged", callback);
 	}
 
 	function unsubscribeCommentChanged(account, model, issueId){
-		unsubscribe(account, model, [issueId], 'commentChanged');
+		unsubscribe(account, model, [issueId], "commentChanged");
 	}
 
 	function subscribeCommentDeleted(account, model, issueId, callback){
-		subscribe(account, model, [issueId], 'commentDeleted', callback);
+		subscribe(account, model, [issueId], "commentDeleted", callback);
 	}
 
 	function unsubscribeCommentDeleted(account, model, issueId){
-		unsubscribe(account, model, [issueId], 'commentDeleted');
+		unsubscribe(account, model, [issueId], "commentDeleted");
 	}
 
 	function subscribeIssueChanged(account, model, issueId, callback){
 		if(arguments.length === 3){
 			callback = issueId;
-			subscribe(account, model, [], 'issueChanged', callback);
+			subscribe(account, model, [], "issueChanged", callback);
 		} else {
-			subscribe(account, model, [issueId], 'issueChanged', callback);
+			subscribe(account, model, [issueId], "issueChanged", callback);
 		}
 	}
 
 	function unsubscribeIssueChanged(account, model, issueId){
 		if(arguments.length === 2){
-			unsubscribe(account, model, [], 'issueChanged');
+			unsubscribe(account, model, [], "issueChanged");
 		} else {
-			unsubscribe(account, model, [issueId], 'issueChanged');
+			unsubscribe(account, model, [issueId], "issueChanged");
 		}
 		
 	}
 
 	function subscribeModelStatusChanged(account, model, callback){
-		subscribe(account, model, [], 'modelStatusChanged', callback);
+		subscribe(account, model, [], "modelStatusChanged", callback);
 	}
 
 	function unsubscribeModelStatusChanged(account, model){
-		unsubscribe(account, model, [], 'modelStatusChanged');
+		unsubscribe(account, model, [], "modelStatusChanged");
 	}
 
 	function subscribeNewModel(account, callback){
-		subscribe(account, null, [], 'newModel', callback);
+		subscribe(account, null, [], "newModel", callback);
 	}
 
 	function unsubscribeNewModel(account, model){
-		unsubscribe(account, null, [], 'newModel');
+		unsubscribe(account, null, [], "newModel");
 	}
 
 	return {
@@ -205,6 +205,6 @@ function NotificationService(serverConfig, $injector){
 			newModel: unsubscribeNewModel
 		}
 	};
-};
+}
 
 

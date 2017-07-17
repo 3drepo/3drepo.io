@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountTeamspaces", {
-			restrict: 'EA',
-			templateUrl: 'account-teamspaces.html',
+			restrict: "EA",
+			templateUrl: "account-teamspaces.html",
 			bindings: {
 				account: "=",
 				accounts: "=",
@@ -32,7 +32,7 @@
 				selectedIndex: "="
 			},
 			controller: AccountReposCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	AccountReposCtrl.$inject = [];

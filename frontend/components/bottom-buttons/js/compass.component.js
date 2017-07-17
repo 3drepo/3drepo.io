@@ -18,14 +18,12 @@
 (function () {
 	"use strict";
 
-	function compassLoaded(event)
-	{
+	function compassLoaded(event) {
 		// Zoom in on compass
 		document.getElementById("Axes").runtime.showAll();
 	}
 
-	function compassMove(event)
-	{
+	function compassMove(event) {
 		// Axes should rotate inversely to orientation
 		// of camera
 		event.orientation[1] = -event.orientation[1];
@@ -52,10 +50,8 @@
 
 	CompassCtrl.$inject = ["$scope", "EventService"];
 
-	function CompassCtrl ($scope, EventService)
-	{
-		$scope.$watch(EventService.currentEvent, function(event)
-		{
+	function CompassCtrl ($scope, EventService) {
+		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });

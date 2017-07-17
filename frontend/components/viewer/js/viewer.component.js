@@ -25,11 +25,11 @@
 				account: "<",
 				model: "<",
 				branch: "<",
-				revision: "<",
+				revision: "<"
 			},
 			link: function (scope, element) {
 				// Cleanup when destroyed
-				element.on('$destroy', function(){
+				element.on("$destroy", function(){
 					scope.vm.viewer.destroy(); // Remove events watch
 				});
 			},
@@ -39,8 +39,7 @@
 
 	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
-	{
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -60,7 +59,7 @@
 
 			vm.viewer.preInit();
 
-		}
+		};
 
 		function errCallback(errorType, errorValue) {
 			EventService.sendError(errorType, errorValue);
@@ -79,22 +78,21 @@
 			vm.initialisedPromise = $q.defer();
 			var showAll = true;
 			vm.viewer.init({
-				showAll : showAll,
+				showAll : showAll
 			})
-			.then(function(){
+				.then(function(){
 		
-			})
-			.catch(function(error){
-				console.error("Error creating Viewer Directive: ", error);
-			})
+				})
+				.catch(function(error){
+					console.error("Error creating Viewer Directive: ", error);
+				});
 			
 
 		};
 
 		function fetchModelProperties(account, model, branch, revision) {
 
-			if(!branch)
-			{
+			if(!branch) {
 				if(!revision)
 					branch = "master";
 				else
@@ -108,11 +106,11 @@
 			
 			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
-			.then(function(json, status) {
-				if(json.properties) {
-					vm.viewer.applyModelProperties(account, model, json.properties);
-				}
-			});
+				.then(function(json, status) {
+					if(json.properties) {
+						vm.viewer.applyModelProperties(account, model, json.properties);
+					}
+				});
 
 		}
 
@@ -166,13 +164,11 @@
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
 							vm.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
-							if (event.value.account === vm.account && event.value.model === vm.model)
-							{
+							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);
 								vm.mapTile && vm.mapTile.updateSettings(event.value.settings);
 							}
-						}
-						else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
+						} else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
 							vm.viewer.addPin(
 								event.value.account,
 								event.value.model,
@@ -271,7 +267,7 @@
 							vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 					
-							$location.path("/" + vm.account + '/' + vm.model).search({
+							$location.path("/" + vm.account + "/" + vm.model).search({
 								at: event.value.at,
 								view: event.value.view,
 								up: event.value.up
@@ -297,7 +293,7 @@
 			// Set the current model in the viewer
 			vm.currentModel = vm.model;
 
-		}
+		};
 
 		// if (angular.isDefined(vm.vrMode))
 		// {

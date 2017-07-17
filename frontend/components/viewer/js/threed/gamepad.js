@@ -39,8 +39,7 @@ var Gamepad = function(viewer) {
 	};
 
 	this.startPolling = function() {
-		if(!self.enabled)
-		{
+		if(!self.enabled) {
 			self.enabled = true;
 			self.tick();
 		}
@@ -54,7 +53,7 @@ var Gamepad = function(viewer) {
 
 		if(self.gamepad.timestamp &&
 			(self.gamepad.timestamp == self.timestamp))
-				return;
+			return;
 
 		self.timestamp = self.gamepad.timestamp;
 	};
@@ -70,8 +69,7 @@ var Gamepad = function(viewer) {
 	};
 
 	this.startPolling = function() {
-		if(!self.enabled)
-		{
+		if(!self.enabled) {
 			self.enabled = true;
 			self.tick();
 		}
@@ -85,50 +83,47 @@ var Gamepad = function(viewer) {
 
 		if(self.gamepad.timestamp &&
 			(self.gamepad.timestamp == self.timestamp))
-				return;
+			return;
 
 		self.timestamp = self.gamepad.timestamp;
 
 		var button_idx = 0;
 
 		/* Chrome Linux */
-		if ((self.platform === 'Linux') && (self.browser === 'Chrome'))
-		{
+		if ((self.platform === "Linux") && (self.browser === "Chrome")) {
 			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.axes[0],
 					yaxis: self.gamepad.axes[1],
-                    xoffset: 0.0,
-                    yoffset: 0.0,
+					xoffset: 0.0,
+					yoffset: 0.0,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);
 		}
 
 		/* Chrome Canary Windows */
-		else if ((self.platform === 'Win32') && (self.browser === 'Chrome'))
-		{
+		else if ((self.platform === "Win32") && (self.browser === "Chrome")) {
 			button_idx = 3;
 			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.buttons[15].value - self.gamepad.buttons[14].value,
 					yaxis: self.gamepad.buttons[13].value - self.gamepad.buttons[12].value,
-                    xoffset: 0.0,
-                    yoffset: 0.0,
+					xoffset: 0.0,
+					yoffset: 0.0,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);
 		}
 
 		/* Firefox Windows */
-		else if ((self.platform === 'Win32') && (self.browser === 'Firefox'))
-		{
+		else if ((self.platform === "Win32") && (self.browser === "Firefox")) {
 			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.axes[0],
 					yaxis: self.gamepad.axes[1],
-                    xoffset: 0.0,
-                    yoffset: 0.15,
+					xoffset: 0.0,
+					yoffset: 0.15,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);
@@ -137,7 +132,7 @@ var Gamepad = function(viewer) {
 		if (self.gamepad.buttons[button_idx].pressed)
 			if (!self.oldButton) {
 				viewer.reset();
-				viewer.setNavMode('NONE');
+				viewer.setNavMode("NONE");
 				viewer.setApp(null);
 				viewer.disableClicking();
 			}
@@ -160,11 +155,11 @@ var Gamepad = function(viewer) {
 		// stopPolling() before.
 		if (this.enabled) {
 		  if (window.requestAnimationFrame) {
-			window.requestAnimationFrame(self.tick);
+				window.requestAnimationFrame(self.tick);
 		  } else if (window.mozRequestAnimationFrame) {
-			window.mozRequestAnimationFrame(self.tick);
+				window.mozRequestAnimationFrame(self.tick);
 		  } else if (window.webkitRequestAnimationFrame) {
-			window.webkitRequestAnimationFrame(self.tick);
+				window.webkitRequestAnimationFrame(self.tick);
 		  }
 		  // Note lack of setTimeout since all the browsers that support
 		  // Gamepad API are already supporting requestAnimationFrame().
@@ -181,27 +176,26 @@ var Gamepad = function(viewer) {
 			!!navigator.webkitGamepads;
 
 		if (gamepadSupportAvailable) {
-			if (window.navigator.platform.indexOf('Linux') != -1)
-				self.platform = 'Linux';
-			else if (window.navigator.platform.indexOf('Win32') != -1 || window.navigator.platform.indexOf('Win64') != -1 )
-				self.platform = 'Win32';
+			if (window.navigator.platform.indexOf("Linux") != -1)
+				self.platform = "Linux";
+			else if (window.navigator.platform.indexOf("Win32") != -1 || window.navigator.platform.indexOf("Win64") != -1 )
+				self.platform = "Win32";
 			else
-				console.error('Platform ' + window.navigator.platform + ' is not supported.');
+				console.error("Platform " + window.navigator.platform + " is not supported.");
 
-			if (window.navigator.appVersion.indexOf('Chrome') != -1)
-				self.browser = 'Chrome';
-			else if (window.navigator.appVersion.indexOf('Firefox') != -1)
-				self.browser = 'Firefox';
-			else if (window.navigator.userAgent.indexOf('Firefox') != -1)
-				self.browser = 'Firefox';
+			if (window.navigator.appVersion.indexOf("Chrome") != -1)
+				self.browser = "Chrome";
+			else if (window.navigator.appVersion.indexOf("Firefox") != -1)
+				self.browser = "Firefox";
+			else if (window.navigator.userAgent.indexOf("Firefox") != -1)
+				self.browser = "Firefox";
 			else
-				console.error('Browser version ' + window.navigator.appVersion + ' is not supported.');
+				console.error("Browser version " + window.navigator.appVersion + " is not supported.");
 
-			if (self.browser && self.platform)
-			{
-				if ('ongamepadconnected' in window) {
-					window.addEventListener('gamepadconnected', self.connected, false);
-					window.addEventListener('gamepaddisconnected', self.disconnected, false);
+			if (self.browser && self.platform) {
+				if ("ongamepadconnected" in window) {
+					window.addEventListener("gamepadconnected", self.connected, false);
+					window.addEventListener("gamepaddisconnected", self.disconnected, false);
 				} else {
 					self.startPolling();
 				}

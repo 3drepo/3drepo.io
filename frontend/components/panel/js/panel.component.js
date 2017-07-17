@@ -16,13 +16,13 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("panel", {
-            restrict: "E",
-            templateUrl: "panel.html",
-            bindings: {
+	angular.module("3drepo")
+		.component("panel", {
+			restrict: "E",
+			templateUrl: "panel.html",
+			bindings: {
 				account:  "=",
 				model:  "=",
 				branch:   "=",
@@ -33,15 +33,15 @@
 				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
-            },
-            controller: PanelCtrl,
-            controllerAs: "vm"
-        });
+			},
+			controller: PanelCtrl,
+			controllerAs: "vm"
+		});
 
-    PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService"];
+	PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService"];
 
-    function PanelCtrl ($scope, $window, $timeout, EventService) {
-        var vm = this,
+	function PanelCtrl ($scope, $window, $timeout, EventService) {
+		var vm = this,
 			panelTopBottomGap = 55,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
 			itemGap = 20,
@@ -58,37 +58,35 @@
 			vm.window = $window;
 			vm.activate = true;
 		
-		}
+		};
 
 		/*
 		 * Watch for events
 		 */
 		
-        $scope.$watch(EventService.currentEvent, function (event) {
+		$scope.$watch(EventService.currentEvent, function (event) {
 
 			var i;
-            if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
+			if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
 				vm.contentItems = (event.value[vm.position]);
 				setupShownCards();
 				hideLastItemGap();
 				setupContentItemsWatch();
-			}
-            else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
-                vm.showPanel = !vm.showPanel;
-            } 
-            else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
+			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+				vm.showPanel = !vm.showPanel;
+			} else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
 
 
             	var item = vm.contentItems.find(function(item){
-            		return item.type === event.value.type
+            		return item.type === event.value.type;
             	});
 
             	if(item){
             		item.menu = item.menu.concat(event.value.menu);
             	}
             
-            }
-        });
+			}
+		});
 
 		/**
 		 * The last card should not have a gap so that scrolling in resized window works correctly
@@ -111,10 +109,9 @@
 		/*
 		 * Mouse down
 		 */
-		angular.element(document).bind('mousedown', function (event) {
+		angular.element(document).bind("mousedown", function (event) {
 			// If we have clicked on a canvas, we are probably moving the model around
-			if (event.target.tagName === "CANVAS")
-			{
+			if (event.target.tagName === "CANVAS") {
 				vm.activate = false;
 				$scope.$apply();
 			}
@@ -123,7 +120,7 @@
 		/*
 		 * Mouse up
 		 */
-		angular.element(document).bind('mouseup', function () {
+		angular.element(document).bind("mouseup", function () {
 			vm.activate = true;
 			$scope.$apply();
 		});
@@ -137,19 +134,18 @@
 			var i, j, length, contentItem;
 
 			// Get the content item
-            for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
-                if (contentType === vm.contentItems[i].type) {
+			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+				if (contentType === vm.contentItems[i].type) {
 					contentItem = vm.contentItems[i];
 
 					// Toggle panel show and update number of panels showing count
-                    vm.contentItems[i].show = !vm.contentItems[i].show;
+					vm.contentItems[i].show = !vm.contentItems[i].show;
 
 					// Resize any shown panel contents
 					if (vm.contentItems[i].show) {
 						contentItemsShown.push(vm.contentItems[i]);
 						calculateContentHeights();
-					}
-					else {
+					} else {
 						for (j = (contentItemsShown.length - 1); j >= 0; j -= 1) {
 							if (contentItemsShown[j].type === contentType) {
 								contentItemsShown.splice(j, 1);
@@ -159,11 +155,11 @@
 						calculateContentHeights();
 					}
 					break;
-                }
-            }
+				}
+			}
 
 			hideLastItemGap();
-        };
+		};
 
 		/**
 		 * A panel content is requesting a height change - change the heights of any shown panels
@@ -211,20 +207,17 @@
 					if (maxContentItemHeight < contentItem.minHeight) {
 						if (contentItem.requestedHeight < contentItem.minHeight) {
 							contentItem.height = contentItem.requestedHeight;
-						}
-						else {
+						} else {
 							contentItem.height = contentItem.minHeight;
 							availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
 							contentItems.splice(i, 1);
 							assignHeights(availableHeight, contentItems, prev);
 						}
-					}
-					else {
+					} else {
 						contentItem.height = maxContentItemHeight;
 					}
 				}
-			}
-			else {
+			} else {
 				// Let content have requested height if less than max available for each
 				prev = angular.copy(contentItems);
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {

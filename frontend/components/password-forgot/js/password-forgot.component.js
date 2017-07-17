@@ -16,77 +16,74 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("passwordForgot", {
-            restrict: "E",
-            bindings: {},
-            templateUrl: "password-forgot.html",
-            controller: PasswordForgotCtrl,
-            controllerAs: "vm"
-        });
+	angular.module("3drepo")
+		.component("passwordForgot", {
+			restrict: "E",
+			bindings: {},
+			templateUrl: "password-forgot.html",
+			controller: PasswordForgotCtrl,
+			controllerAs: "vm"
+		});
 
-    PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
+	PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
 
-    function PasswordForgotCtrl ($scope, UtilsService) {
-        var vm = this,
-            promise,
-            messageColour = "rgba(0, 0, 0, 0.7)",
-            messageErrorColour = "#F44336";
+	function PasswordForgotCtrl ($scope, UtilsService) {
+		var vm = this,
+			promise,
+			messageColour = "rgba(0, 0, 0, 0.7)",
+			messageErrorColour = "#F44336";
         
-        /*
+		/*
          * Init
          */
-        vm.$onInit = function() {
-            vm.showProgress = false;
-        }
+		vm.$onInit = function() {
+			vm.showProgress = false;
+		};
 
-        /*
+		/*
          * Watch inputs to clear any message
          */
-        $scope.$watchGroup(["vm.username", "vm.email"], function () {
-            vm.message = "";
-        });
+		$scope.$watchGroup(["vm.username", "vm.email"], function () {
+			vm.message = "";
+		});
 
-        /**
+		/**
          * Process forgotten password recovery
          */
-        vm.requestPasswordChange = function (event) {
-            var enterKey = 13,
-                requestChange = false;
+		vm.requestPasswordChange = function (event) {
+			var enterKey = 13,
+				requestChange = false;
 
-            if (angular.isDefined(event)) {
-                requestChange = (event.which === enterKey);
-            }
-            else {
-                requestChange = true;
-            }
+			if (angular.isDefined(event)) {
+				requestChange = (event.which === enterKey);
+			} else {
+				requestChange = true;
+			}
 
-            if (requestChange) {
-                if (vm.username && vm.email) {
-                    vm.messageColor = messageColour;
-                    vm.message = "Please wait...";
-                    vm.showProgress = true;
-                    promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
-                    promise.then(function (response) {
-                        vm.showProgress = false;
-                        if (response.status === 200) {
-                            vm.verified = true;
-                            vm.messageColor = messageColour;
-                            vm.message = "Thank you. You will receive an email shortly with a link to change your password";
-                        }
-                        else {
-                            vm.messageColor = messageErrorColour;
-                            vm.message = response.data.message;
-                        }
-                    });
-                }
-                else {
-                    vm.messageColor = messageErrorColour;
-                    vm.message = "Missing username or email";
-                }
-            }
-        };
-    }
+			if (requestChange) {
+				if (vm.username && vm.email) {
+					vm.messageColor = messageColour;
+					vm.message = "Please wait...";
+					vm.showProgress = true;
+					promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
+					promise.then(function (response) {
+						vm.showProgress = false;
+						if (response.status === 200) {
+							vm.verified = true;
+							vm.messageColor = messageColour;
+							vm.message = "Thank you. You will receive an email shortly with a link to change your password";
+						} else {
+							vm.messageColor = messageErrorColour;
+							vm.message = response.data.message;
+						}
+					});
+				} else {
+					vm.messageColor = messageErrorColour;
+					vm.message = "Missing username or email";
+				}
+			}
+		};
+	}
 }());

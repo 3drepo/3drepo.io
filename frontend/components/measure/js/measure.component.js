@@ -23,9 +23,9 @@
 			restrict: "EA",
 			templateUrl: "measure.html",
 			bindings: {
-				account: '=',
-				model: '=',
-				settings: '='
+				account: "=",
+				model: "=",
+				settings: "="
 			},
 			controller: MeasureCtrl,
 			controllerAs: "vm"
@@ -59,8 +59,7 @@
 				vm.screenPos = [event.layerX, event.layerY];
 
 				if (vm.allowMove) {
-					if (point)
-					{
+					if (point) {
 						// TODO: WE don't use X3DOM anymore
 						// coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
 						// coordVector = coords[0].subtract(coords[1]);
@@ -74,7 +73,7 @@
 						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
 
 						$scope.$apply();
-                        vm.show = true;
+						vm.show = true;
 					} else {
 						vm.show = false;
 					}
@@ -91,9 +90,8 @@
 						vm.show = true;
 						vm.allowMove = true;
 						coords[0] = currentPickPoint;
-					}
-					else if (vm.allowMove) {
-                        vm.show = true;
+					} else if (vm.allowMove) {
+						vm.show = true;
 						vm.allowMove = false;
 					} else {
 						coords[0] = currentPickPoint;

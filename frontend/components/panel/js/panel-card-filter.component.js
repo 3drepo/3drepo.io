@@ -20,14 +20,14 @@
 
 	angular.module("3drepo")
 		.component("panelCardFilter", {
-			restrict: 'E',
-			templateUrl: 'panel-card-filter.html',
+			restrict: "E",
+			templateUrl: "panel-card-filter.html",
 			bindings: {
 				showFilter: "=",
 				filterText: "="
 			},
 			controller: PanelCardFilterCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	PanelCardFilterCtrl.$inject = ["$scope", "$timeout", "$element"];

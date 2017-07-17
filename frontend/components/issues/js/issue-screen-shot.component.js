@@ -59,8 +59,7 @@
 
 			if (typeof vm.screenShot !== "undefined") {
 				vm.screenShotUse = vm.screenShot;
-			}
-			else {
+			} else {
 				$element.ready(function() {
                 	
 					// Get scribble canvas
@@ -103,7 +102,7 @@
 			}
 			
 
-		}
+		};
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
@@ -114,14 +113,14 @@
 		 * @param canvas
 		 */
 		function initCanvas (canvas) {
-			canvas.addEventListener('mousedown', function (evt) {
+			canvas.addEventListener("mousedown", function (evt) {
 				mouse_drag_x = evt.layerX;
 				mouse_drag_y = evt.layerY;
 				mouse_dragging = true;
 
 				updateImage(canvas);
 
-				window.status='DOWN: '+evt.layerX+", "+evt.layerY;
+				window.status="DOWN: "+evt.layerX+", "+evt.layerY;
 				evt.preventDefault();
 				evt.stopPropagation();
 				evt.returnValue = false;
@@ -130,7 +129,7 @@
 				vm.actionsPointerEvents = "none";
 			}, false);
 
-			canvas.addEventListener('mouseup', function (evt) {
+			canvas.addEventListener("mouseup", function (evt) {
 				mouse_button = 0;
 				mouse_dragging = false;
 				last_mouse_drag_x = -1;
@@ -146,7 +145,7 @@
 				vm.actionsPointerEvents = "auto";
 			}, false);
 
-			canvas.addEventListener('mouseout', function (evt) {
+			canvas.addEventListener("mouseout", function (evt) {
 				mouse_button = 0;
 				mouse_dragging = false;
 				last_mouse_drag_x = -1;
@@ -162,8 +161,8 @@
 				vm.actionsPointerEvents = "auto";
 			}, false);
 
-			canvas.addEventListener('mousemove', function (evt) {
-				window.status='MOVE: ' + evt.layerX + ", " + evt.layerY;
+			canvas.addEventListener("mousemove", function (evt) {
+				window.status="MOVE: " + evt.layerX + ", " + evt.layerY;
 				mouse_drag_x = evt.layerX;
 				mouse_drag_y = evt.layerY;
 
@@ -171,8 +170,7 @@
 					$timeout(function () {
 						vm.showPenIndicator = true;
 					});
-				}
-				else {
+				} else {
 					if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
 						hasDrawnOnCanvas = true;
 					}
@@ -198,8 +196,7 @@
 				return;
 			}
 
-			if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0)
-			{
+			if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0) {
 				last_mouse_drag_x = mouse_drag_x;
 				last_mouse_drag_y = mouse_drag_y;
 				return;
@@ -244,25 +241,23 @@
 			if (vm.currentActionIndex === null) {
 				vm.currentActionIndex = index;
 				vm.actions[vm.currentActionIndex].color = highlightBackground;
-			}
-			else if (vm.currentActionIndex === index) {
+			} else if (vm.currentActionIndex === index) {
 				vm.actions[vm.currentActionIndex].color = "";
 				vm.currentActionIndex = null;
-			}
-			else {
+			} else {
 				vm.actions[vm.currentActionIndex].color = "";
 				vm.currentActionIndex = index;
 				vm.actions[vm.currentActionIndex].color = highlightBackground;
 			}
 
 			switch (vm.actions[vm.currentActionIndex].action) {
-				case "draw":
-					setupScribble();
-					break;
+			case "draw":
+				setupScribble();
+				break;
 
-				case "erase":
-					setupErase();
-					break;
+			case "erase":
+				setupErase();
+				break;
 			}
 		};
 
@@ -278,7 +273,7 @@
 			screenShotCanvasContext.drawImage(screenShotImage, 0, 0, screenShotCanvas.width, screenShotCanvas.height);
 			screenShotCanvasContext.drawImage(scribbleCanvas, 0, 0);
 
-			screenShot = screenShotCanvas.toDataURL('image/png');
+			screenShot = screenShotCanvas.toDataURL("image/png");
 			vm.screenShotSave({screenShot: screenShot});
 
 			vm.closeDialog();

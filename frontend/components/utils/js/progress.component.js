@@ -26,7 +26,7 @@
 				info: "="
 			},
 			controller: TdrProgressCtrl,
-			controllerAs: "vm",
+			controllerAs: "vm"
 		});
 
 	TdrProgressCtrl.$inject = ["$scope"];

@@ -20,13 +20,13 @@
 
 	angular.module("3drepo")
 		.component("panelCardAdd", {
-			restrict: 'EA',
-			templateUrl: 'panel-card-add.html',
+			restrict: "EA",
+			templateUrl: "panel-card-add.html",
 			bindings: {
 				showAdd: "="
 			},
 			controller: PanelCardAddCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm"
 		});
 	
 

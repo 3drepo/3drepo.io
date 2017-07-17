@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.service('serverConfig', function() {
-	"use strict";
+angular.module("3drepo")
+	.service("serverConfig", function() {
+		"use strict";
 
-	for (var k in server_config)
-	{
-		this[k] = server_config[k];
-	}
-});
+		for (var k in server_config) {
+			this[k] = server_config[k];
+		}
+	});
 
 

@@ -28,7 +28,7 @@
 					data: "<",
 					userJob: "<"
 				},
-				controllerAs: 'vm'
+				controllerAs: "vm"
 			}
 		);
 
@@ -45,7 +45,7 @@
 		vm.$onInit = function () {
 			// Role indicator
 			$timeout(function () {
-				issueRoleIndicator = angular.element($element[0].querySelector('#issueRoleIndicator'));
+				issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
 				setRoleIndicatorColour();
 			});
 		};

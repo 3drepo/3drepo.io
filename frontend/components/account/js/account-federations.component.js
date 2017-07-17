@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountFederations", {
-			restrict: 'EA',
-			templateUrl: 'account-federations.html',
+			restrict: "EA",
+			templateUrl: "account-federations.html",
 			bindings: {
 				account: "=",
 				accounts: "=",
@@ -39,7 +39,7 @@
 				isSaving: "="
 			},
 			controller: AccountFederationsCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountDataService"];
@@ -59,12 +59,12 @@
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 			dialogCloseToId = "#" + vm.dialogCloseTo;
 
-		}
+		};
 
 		vm.getProjects = function(teamspace) {
 			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
 			return projects;
-		}
+		};
 
 
 		vm.showMenu = function(model, account){
@@ -74,7 +74,7 @@
 				   AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
 				   AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
 				   isUserAccount;
-		}
+		};
 
 		/*
 		 * Watch accounts input
@@ -104,7 +104,7 @@
 									if (model.federate) {
 										model.federationOptions = getFederationOptions(model, account.account);
 									}
-								})
+								});
 								
 							});
 						}
@@ -145,7 +145,7 @@
 				}
 			};
 			
-		};
+		}
 
 
 		/**
@@ -153,7 +153,7 @@
 		 */
 		vm.resetFederationData = function() {
 			vm.federationData = {};
-		}
+		};
 
 
 		/**
@@ -186,15 +186,14 @@
 
 			if (!model.hasOwnProperty("subModels")) {
 				setupEditFederation(event, model);
-			}
-			else {
+			} else {
 
 				$location.path("/" + account.name + "/" + model.model, "_self").search({});
 
 				AnalyticService.sendEvent({
-					eventCategory: 'Model',
-					eventAction: 'view',
-					eventLabel: 'federation'
+					eventCategory: "Model",
+					eventAction: "view",
+					eventLabel: "federation"
 				});
 
 			}
@@ -211,20 +210,20 @@
 		vm.doFederationOption = function (event, option, account, project, federation) {
 
 			switch (option) {
-				case "edit":
-					setupEditFederation(event, account, project, federation);
-					break;
+			case "edit":
+				setupEditFederation(event, account, project, federation);
+				break;
 
-				case "permissions":
-					goToPermissions(event, account, project, federation);
-					break;
+			case "permissions":
+				goToPermissions(event, account, project, federation);
+				break;
 
-				case "delete":
-					setupDelete(event, account, project, federation);
-					break;
+			case "delete":
+				setupDelete(event, account, project, federation);
+				break;
 
-				case "modelsetting":
-					setupSetting(event, account, project, federation);
+			case "modelsetting":
+				setupSetting(event, account, project, federation);
 			}
 		};
 
@@ -256,12 +255,11 @@
 					vm.closeDialog();
 					
 					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: 'delete',
-						eventLabel: 'federation'
+						eventCategory: "Model",
+						eventAction: "delete",
+						eventLabel: "federation"
 					});
-				}
-				else {
+				} else {
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
@@ -309,8 +307,8 @@
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
 			vm.modelToDelete = model;
 			vm.deleteName = model.name;
-			vm.projectToDeleteFrom = project
-			vm.currentAccount = account
+			vm.projectToDeleteFrom = project;
+			vm.currentAccount = account;
 			UtilsService.showDialog("delete-dialog.html", $scope, event, true, null, false, dialogCloseToId);
 		}
 
@@ -323,10 +321,10 @@
 		function goToPermissions (event, account, project, model) {
 
 			// Account is an object here
-			$location.search('account', account.account);
-			$location.search('project', project.name);
-			$location.search('model', model.model);
-			$location.search('page', "assign");
+			$location.search("account", account.account);
+			$location.search("project", project.name);
+			$location.search("model", model.model);
+			$location.search("page", "assign");
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}
 

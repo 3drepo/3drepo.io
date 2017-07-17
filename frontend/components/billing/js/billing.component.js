@@ -26,7 +26,7 @@
 			},
 			templateUrl: "billing.html",
 			controller: BillingCtrl,
-			controllerAs: "vm",
+			controllerAs: "vm"
 		});
 
 	BillingCtrl.$inject = ["EventService", "UtilsService", "serverConfig"];
@@ -76,7 +76,7 @@
 					}
 				});
 			}
-		}
+		};
 
 		vm.home = function () {
 			EventService.send(EventService.EVENT.GO_HOME);

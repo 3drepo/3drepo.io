@@ -26,7 +26,7 @@
 				password: "@"
 			},
 			controller: AutoLoginCtrl,
-			controllerAs: "al",	
+			controllerAs: "al"	
 		});
 
 	AutoLoginCtrl.$inject = ["AuthService"];

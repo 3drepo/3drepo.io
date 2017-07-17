@@ -47,7 +47,7 @@
 				localStorage.setItem("tdrLoggedIn", vm.account);
 			}
 
-		}
+		};
 
 
 		/*
@@ -98,8 +98,7 @@
 					// Check that there is a directive for that "page"
 					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
 						vm.itemToShow = vm.query.page;
-					}
-					else {
+					} else {
 						vm.itemToShow = "teamspaces";
 					}
 
@@ -114,8 +113,7 @@
 							$location.search("cancel", null);
 
 							initAccount();
-						}
-						else if ($location.search().hasOwnProperty("token")) {
+						} else if ($location.search().hasOwnProperty("token")) {
 							// Get initial user info, which may change if returning from PayPal
 							getUserInfo();
 
@@ -138,16 +136,13 @@
 									initAccount();
 								}, 2000);
 							});
-						}
-						else {
+						} else {
 							initAccount();
 						}
-					}
-					else {
+					} else {
 						initAccount();
 					}
-				}
-				else {
+				} else {
 					vm.itemToShow = "teamspaces";
 					initAccount();
 				}

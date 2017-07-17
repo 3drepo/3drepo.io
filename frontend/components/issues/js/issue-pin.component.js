@@ -44,7 +44,7 @@
 		// Init
 		vm.$onInit = function() {
 			vm.setPin({data: null});
-		}
+		};
 
 		/**
 		 * Monitor changes to parameters
@@ -70,8 +70,7 @@
 					position = changes.event.currentValue.value.position;
 					normal = changes.event.currentValue.value.normal;
 
-					if(trans)
-					{
+					if(trans) {
 						position = trans.inverse().multMatrixPnt(position);
 					}
 
@@ -87,12 +86,10 @@
 					};
 					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
 					vm.setPin({data: data});
-				}
-				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
+				} else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
 						pinDropMode) {
 					removePin();
-				}
-				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
+				} else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
 					pinDropMode = changes.event.currentValue.value;
 				}
 			}

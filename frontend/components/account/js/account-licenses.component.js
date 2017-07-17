@@ -20,14 +20,14 @@
 
 	angular.module("3drepo")
 		.component("accountLicenses", {
-			restrict: 'EA',
-			templateUrl: 'account-licenses.html',
+			restrict: "EA",
+			templateUrl: "account-licenses.html",
 			bindings: {
 				account: "=",
 				showPage: "&"
 			},
 			controller: AccountLicensesCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 	
 	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
@@ -65,8 +65,7 @@
 						job: vm.subscriptions[i].job,
 						showRemove: (vm.subscriptions[i].assignedUser !== vm.account)
 					});
-				}
-				else {
+				} else {
 					vm.unassigned.push(vm.subscriptions[i]._id);
 				}
 			}
@@ -86,7 +85,7 @@
 		// get list of jobs
 
 		UtilsService.doGet(vm.account + "/jobs").then(function(data){
-			vm.jobs = data.data
+			vm.jobs = data.data;
 		});
 
 		vm.assignJob = function(index){
@@ -115,7 +114,7 @@
 					vm.jobs.push(job);
 				}
 			});
-		}
+		};
 
 		vm.removeJob = function(index){
 
@@ -127,7 +126,7 @@
 					vm.jobs.splice(index, 1);
 				}
 			});
-		}
+		};
 
 		/**
 		 * Assign a license to the selected user
@@ -140,8 +139,7 @@
 				if (event.which === enterKey) {
 					doSave = true;
 				}
-			}
-			else {
+			} else {
 				doSave = true;
 			}
 
@@ -159,11 +157,9 @@
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 						vm.addDisabled = vm.allLicensesAssigned;
 						vm.newLicenseAssignee = "";
-					}
-					else if (response.status === 400) {
+					} else if (response.status === 400) {
 						vm.addMessage = "This user has already been assigned a license";
-					}
-					else if (response.status === 404) {
+					} else if (response.status === 404) {
 						vm.addMessage = "User not found";
 					}
 				});
@@ -184,15 +180,14 @@
 					vm.addDisabled = false;
 					vm.allLicensesAssigned = false;
 					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-				}
-				else if (response.status === 400) {
+				} else if (response.status === 400) {
 					var message = UtilsService.getErrorMessage(response.data);
-					if (response.data.value === UtilsService.getResponseCode('USER_IN_COLLABORATOR_LIST')) {
+					if (response.data.value === UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST")) {
 						vm.licenseAssigneeIndex = index;
 						vm.models = response.data.models;
 						vm.projects = response.data.projects;
 						if(response.data.teamspace){
-							vm.teamspacePerms = response.data.teamspace.permissions.join(', ');
+							vm.teamspacePerms = response.data.teamspace.permissions.join(", ");
 						}
 						
 						UtilsService.showDialog("remove-license-dialog.html", $scope);

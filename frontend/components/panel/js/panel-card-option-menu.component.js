@@ -20,14 +20,14 @@
 
 	angular.module("3drepo")
 		.component("panelCardOptionMenu", {
-			restrict: 'E',
-			templateUrl: 'panel-card-option-menu.html',
+			restrict: "E",
+			templateUrl: "panel-card-option-menu.html",
 			bindings: {
 				menu: "=",
 				selectedMenuOption: "="
 			},
 			controller: PanelCardOptionMenuCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm"
 		});
 
 	PanelCardOptionMenuCtrl.$inject = ["$timeout"];
@@ -46,8 +46,7 @@
 				if (vm.menu[index].toggle) {
 					vm.menu[index].selected = !vm.menu[index].selected;
 					vm.selectedMenuOption = vm.menu[index];
-				}
-				else {
+				} else {
 					if (index !== currentSortIndex) {
 						currentSortIndex = index;
 					}
@@ -55,8 +54,7 @@
 					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
 					vm.selectedMenuOption = vm.menu[currentSortIndex];
 				}
-			}
-			else {
+			} else {
 				vm.selectedMenuOption = vm.menu[index];
 			}
 

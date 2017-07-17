@@ -109,12 +109,10 @@ var Viewer = {};
 		this.units = "m";
 		this.convertToM = 1.0;
 
-		this.setUnits = function(units)
-		{
+		this.setUnits = function(units) {
 			this.units = units;
 
-			if (units === "mm")
-			{
+			if (units === "mm") {
 				this.convertToM = 0.001;
 			} else if (units === "ft") {
 				this.convertToM = 0.0032;
@@ -163,7 +161,7 @@ var Viewer = {};
 			self.viewer.appendChild(self.loadingDiv);
 			self.unityLoaderScript = document.createElement("script");
 			self.unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
-		}
+		};
 
 		this.init = function(options) {
 			return new Promise(function(resolve, reject) {
@@ -256,13 +254,11 @@ var Viewer = {};
 				var i = 0;
 				var attributeNames = [];
 
-				for(i = 0; i < self.light.attributes.length; i++)
-				{
+				for(i = 0; i < self.light.attributes.length; i++) {
 					attributeNames.push(self.light.attributes[i].name);
 				}
 
-				for(i = 0; i < attributeNames.length; i++)
-				{
+				for(i = 0; i < attributeNames.length; i++) {
 					self.light.removeAttribute(attributeNames[i]);
 				}
 			} else {
@@ -270,8 +266,7 @@ var Viewer = {};
 				self.scene.appendChild(self.light);
 			}
 
-			if (!lightDescription)
-			{
+			if (!lightDescription) {
 				//self.light.setAttribute("intensity", "0.5");
 				self.light.setAttribute("color", "0.714, 0.910, 0.953");
 				self.light.setAttribute("direction", "0, -0.9323, -0.362");
@@ -279,10 +274,8 @@ var Viewer = {};
 				self.light.setAttribute("ambientIntensity", "0.8");
 				self.light.setAttribute("shadowIntensity", 0.0);
 			} else {
-				for (var attr in lightDescription)
-				{
-					if (lightDescription.hasOwnProperty(attr))
-					{
+				for (var attr in lightDescription) {
+					if (lightDescription.hasOwnProperty(attr)) {
 						self.light.setAttribute(attr, lightDescription[attr]);
 					}
 				}
@@ -295,13 +288,11 @@ var Viewer = {};
 				var i = 0;
 				var attributeNames = [];
 
-				for(i = 0; i < self.bground.attributes.length; i++)
-				{
+				for(i = 0; i < self.bground.attributes.length; i++) {
 					attributeNames.push(self.bground.attributes[i].name);
 				}
 
-				for(i = 0; i < attributeNames.length; i++)
-				{
+				for(i = 0; i < attributeNames.length; i++) {
 					self.bground.removeAttribute(attributeNames[i]);
 				}
 			} else {
@@ -309,8 +300,7 @@ var Viewer = {};
 				self.scene.appendChild(self.bground);
 			}
 
-			if (!colourDescription)
-			{
+			if (!colourDescription) {
 				self.bground.setAttribute("DEF", self.name + "_bground");
 				self.bground.setAttribute("skyangle", "0.9 1.5 1.57");
 				self.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
@@ -321,10 +311,8 @@ var Viewer = {};
 			} else {
 				self.bground.setAttribute("DEF", self.name + "_bground");
 
-				for (var attr in colourDescription)
-				{
-					if (colourDescription.hasOwnProperty(attr))
-					{
+				for (var attr in colourDescription) {
+					if (colourDescription.hasOwnProperty(attr)) {
 						self.bground.setAttribute(attr, colourDescription[attr]);
 					}
 				}
@@ -358,38 +346,12 @@ var Viewer = {};
 			UnityUtil.requestScreenShot(promise);
 		};
 
-		// this.onMouseUp = function(functionToBind) {
-		// 	ViewerUtil.onEvent("onMouseUp", functionToBind);
-		// };
-
-		// this.offMouseUp = function(functionToBind) {
-		// 	ViewerUtil.offEvent("onMouseUp", functionToBind);
-		// };
-
-		// this.onMouseDown = function(functionToBind) {
-		// 	ViewerUtil.onEvent("onMouseDown", functionToBind);
-		// };
-
-		// this.offMouseDown = function(functionToBind) {
-		// 	ViewerUtil.offEvent("onMouseDown", functionToBind);
-		// };
-
-		// this.onMouseMove = function(functionToBind) {
-		// 	ViewerUtil.onEvent("onMouseMove", functionToBind);
-		// };
-
-		// this.offMouseMove = function(functionToBind) {
-		// 	ViewerUtil.offEvent("onMouseMove", functionToBind);
-		// };
-
-		this.pickPoint = function(x, y, fireEvent)
-		{
+		this.pickPoint = function(x, y, fireEvent) {
 			fireEvent = (typeof fireEvent === undefined) ? false : fireEvent;
 
 			self.getViewArea()._doc.ctx.pickValue(self.getViewArea(), x,y);
 
-			if (fireEvent)
-			{
+			if (fireEvent) {
 				// Simulate a mouse down pick point
 				self.mouseDownPickPoint({layerX: x, layerY: y});
 			}
@@ -408,19 +370,14 @@ var Viewer = {};
 		};
 
 		this.objectSelected = function(pointInfo) {
-			if(!self.selectionDisabled && !self.pinDropMode)
-			{
-				if(pointInfo.id)
-				{
-					if(pointInfo.pin)
-					{
+			if(!self.selectionDisabled && !self.pinDropMode) {
+				if(pointInfo.id) {
+					if(pointInfo.pin) {
 						//User clicked a pin
 						callback(Viewer.EVENT.CLICK_PIN,
 							{id: pointInfo.id});
 
-					}
-					else
-					{
+					} else {
 						callback(Viewer.EVENT.OBJECT_SELECTED, {
 							account: pointInfo.database,
 							model: pointInfo.model,
@@ -428,9 +385,7 @@ var Viewer = {};
 							source: "viewer"						
 						});
 					}
-				}				
-				else
-				{
+				} else {
 					//User clicked the background
 					callback(Viewer.EVENT.BACKGROUND_SELECTED);
 				}
@@ -455,9 +410,6 @@ var Viewer = {};
 				}
 			}
 		};
-
-		//this.switchedOldParts = [];
-		//this.switchedObjects = [];
 
 		this.switchObjectVisibility = function(account, model, ids, visibility) {
 			UnityUtil.toggleVisibility(account, model, ids, visibility);
@@ -578,14 +530,12 @@ var Viewer = {};
 					newViewPoint.setAttribute("orientation", q.join(","));
 				}
 
-				if(from)
-				{
+				if(from) {
 					newViewPoint.setAttribute("position", from.join(","));
 
 				}
 
-				if(from && at)
-				{
+				if(from && at) {
 					var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
 					newViewPoint.setAttribute("centerofrotation", centre.join(","));
 
@@ -599,8 +549,7 @@ var Viewer = {};
 				self.viewpoints[groupName.group][groupName.name] = name;
 				self.viewpointsNames[name] = newViewPoint;
 
-			} else
-			{
+			} else {
 
 				console.error("Tried to create viewpoint with duplicate name: " + name);
 			}
@@ -629,8 +578,7 @@ var Viewer = {};
 					self.setSpeed(self.settings.speed);
 				}
 
-				if (self.settings.hasOwnProperty("unit"))
-				{
+				if (self.settings.hasOwnProperty("unit")) {
 					self.setUnits(self.settings.unit);
 				}
 
@@ -669,12 +617,9 @@ var Viewer = {};
 			}
 		};
 
-		this.applyModelProperties = function(account, model, properties)
-		{
-			if (properties)
-			{
-				if (properties.hiddenNodes && properties.hiddenNodes.length > 0)
-				{
+		this.applyModelProperties = function(account, model, properties) {
+			if (properties) {
+				if (properties.hiddenNodes && properties.hiddenNodes.length > 0) {
 					self.switchObjectVisibility(
 						account,
 						model,
@@ -683,10 +628,8 @@ var Viewer = {};
 					);
 				}
 
-				if(properties.subModels)
-				{
-					for(var i = 0; i < properties.subModels.length; i++)
-					{
+				if(properties.subModels) {
+					for(var i = 0; i < properties.subModels.length; i++) {
 						var entry = properties.subModels[i];
 						this.applyModelProperties(entry.account, entry.model, entry.properties);
 					}
@@ -894,7 +837,7 @@ var Viewer = {};
 					});
 				} else if (self.viewer.webkitRequestFullscreen) {
 					self.viewer.webkitRequestFullscreen({
-						vrDisplay: vrDisplay,
+						vrDisplay: vrDisplay
 					});
 				}
 
@@ -953,18 +896,15 @@ var Viewer = {};
 		 * @param {model} model - (OPTIONAL) the model the clip plane came from
 		 */
 		this.updateClippingPlanes = function(clipPlanes, fromPanel, account, model) {
-			if(!clipPlanes || clipPlanes.length === 0)
-			{
+			if(!clipPlanes || clipPlanes.length === 0) {
 				UnityUtil.disableClippingPlanes();
 			}
 
-			if(clipPlanes && clipPlanes.length > 0 )
-			{
+			if(clipPlanes && clipPlanes.length > 0 ) {
 				UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
 			}
 
-			if(clipPlanes && clipPlanes.length > 1)
-			{
+			if(clipPlanes && clipPlanes.length > 1) {
 				console.log("More than 1 clipping planes requested!");
 			}
 
@@ -1015,8 +955,7 @@ var Viewer = {};
 			}
 		};
 
-		this.setPinVisibility = function(id, visibility)
-		{
+		this.setPinVisibility = function(id, visibility) {
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
 
@@ -1117,7 +1056,7 @@ var Viewer = {};
 		CHANGE_PIN_COLOUR: "VIEWER_CHANGE_PIN_COLOUR",
 		REMOVE_PIN: "VIEWER_REMOVE_PIN",
 		ADD_PIN: "VIEWER_ADD_PIN",
-		MOVE_PIN: "VIEWER_MOVE_PIN",
+		MOVE_PIN: "VIEWER_MOVE_PIN"
 
 	};
 

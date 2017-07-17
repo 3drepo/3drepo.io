@@ -61,7 +61,7 @@
 		};
 
 		vm.openUserManual = function(){
-			window.open('http://3drepo.org/models/3drepo-io-user-manual/', '_blank');
+			window.open("http://3drepo.org/models/3drepo-io-user-manual/", "_blank");
 		};
 	}
 }());

@@ -16,15 +16,15 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .factory("UtilsService", UtilsService);
+	angular.module("3drepo")
+		.factory("UtilsService", UtilsService);
 
-    UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
+	UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
 
-    function UtilsService($http, $q, $mdDialog, serverConfig) {
-        var obj = {};
+	function UtilsService($http, $q, $mdDialog, serverConfig) {
+		var obj = {};
 
 		/**
 		 * Convert blah_test to blahTest
@@ -33,13 +33,13 @@
          * @param separator
          * @returns {*|void|string|{REPLACE, REPLACE_NEGATIVE}|XML}
          */
-        obj.snake_case = function snake_case(name, separator) {
-            var SNAKE_CASE_REGEXP = /[A-Z]/g;
-            separator = separator || '_';
-            return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
-                return (pos ? separator : '') + letter.toLowerCase();
-            });
-        };
+		obj.snake_case = function snake_case(name, separator) {
+			var SNAKE_CASE_REGEXP = /[A-Z]/g;
+			separator = separator || "_";
+			return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
+				return (pos ? separator : "") + letter.toLowerCase();
+			});
+		};
 
 		/**
          * Capitalise the first letter of a string
@@ -48,112 +48,112 @@
          * @param string
          * @returns {string}
          */
-        obj.capitalizeFirstLetter = function (string) {
-            return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
-        };
+		obj.capitalizeFirstLetter = function (string) {
+			return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
+		};
 
-        /**
+		/**
          * Handle GET requests
          * 
          * @param url
          * @returns {*|promise}
          */
-        obj.doGet = function (url) {
-            var deferred = $q.defer(),
-                urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
+		obj.doGet = function (url) {
+			var deferred = $q.defer(),
+				urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
 
-            $http.get(urlUse).then(
-                function (response) {
-                    deferred.resolve(response);
-                },
-                function (response) {
-                    deferred.resolve(response);
-                });
-            return deferred.promise;
-        };
+			$http.get(urlUse).then(
+				function (response) {
+					deferred.resolve(response);
+				},
+				function (response) {
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		};
 
-        /**
+		/**
          * Handle POST requests
          * @param data
          * @param url
          * @param headers
          * @returns {*}
          */
-        obj.doPost = function (data, url, headers) {
-            var deferred = $q.defer(),
-                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
-                config = {withCredentials: true};
+		obj.doPost = function (data, url, headers) {
+			var deferred = $q.defer(),
+				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+				config = {withCredentials: true};
 
-            if (angular.isDefined(headers)) {
-                config.headers = headers;
-            }
+			if (angular.isDefined(headers)) {
+				config.headers = headers;
+			}
 
-            $http.post(urlUse, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        };
+			$http.post(urlUse, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		};
 
-        /**
+		/**
          * Handle PUT requests
          * @param data
          * @param url
          * @returns {*}
          */
-        obj.doPut = function (data, url) {
-            var deferred = $q.defer(),
-                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
-                config = {withCredentials: true};
+		obj.doPut = function (data, url) {
+			var deferred = $q.defer(),
+				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+				config = {withCredentials: true};
 
-            $http.put(urlUse, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        };
+			$http.put(urlUse, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		};
 
-        /**
+		/**
          * Handle DELETE requests
          * @param data
          * @param url
          * @returns {*}
          */
-        obj.doDelete = function (data, url) {
-            var deferred = $q.defer(),
-                config = {
-                    method: "DELETE",
-                    url: serverConfig.apiUrl(serverConfig.POST_API, url),
-                    data: data,
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                };
+		obj.doDelete = function (data, url) {
+			var deferred = $q.defer(),
+				config = {
+					method: "DELETE",
+					url: serverConfig.apiUrl(serverConfig.POST_API, url),
+					data: data,
+					withCredentials: true,
+					headers: {
+						"Content-Type": "application/json"
+					}
+				};
 
-            $http(config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        };
+			$http(config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		};
 
-        /**
+		/**
          * Show a dialog
          *
          * @param {String} dialogTemplate - required
@@ -164,75 +164,78 @@
          * @param {Boolean} fullscreen
          * @param {String} closeTo
          */
-        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
-            // Allow the dialog to have cancel ability
-            scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
+		obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
+			// Allow the dialog to have cancel ability
+			scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {
+				$mdDialog.cancel();
+			};
 
-            // Set up and show dialog
-            var data = {
-                controller: function () {},
-                templateUrl: dialogTemplate,
-                onRemoving: function () {$mdDialog.cancel();}
-            };
-            data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
-            data.scope = (angular.isDefined(scope)) ? scope : null;
-            data.preserveScope = (data.scope !== null);
-            data.targetEvent = (angular.isDefined(event)) ? event : null;
-            data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
-            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
-            data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
-            $mdDialog.show(data);
-        };
+			// Set up and show dialog
+			var data = {
+				controller: function () {},
+				templateUrl: dialogTemplate,
+				onRemoving: function () {
+					$mdDialog.cancel();
+				}
+			};
+			data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
+			data.scope = (angular.isDefined(scope)) ? scope : null;
+			data.preserveScope = (data.scope !== null);
+			data.targetEvent = (angular.isDefined(event)) ? event : null;
+			data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
+			data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
+			data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
+			$mdDialog.show(data);
+		};
 
-        /**
+		/**
          * close a dialog
          */
-        obj.closeDialog = function () {
-            $mdDialog.cancel();
-        };
+		obj.closeDialog = function () {
+			$mdDialog.cancel();
+		};
 
-        obj.getServerUrl = function (url) {
-            return serverConfig.apiUrl(serverConfig.GET_API, url);
-        };
+		obj.getServerUrl = function (url) {
+			return serverConfig.apiUrl(serverConfig.GET_API, url);
+		};
 
-        /**
+		/**
         * Convert error code to custom error message
         */
-        obj.getErrorMessage = function(resData){
+		obj.getErrorMessage = function(resData){
             
-            var messages = {
-                'FILE_FORMAT_NOT_SUPPORTED': 'Unsupported file format',
-                'SIZE_LIMIT_PAY': 'Insufficient quota for model',
-                'USER_NOT_VERIFIED': 'Please click on the link in the verify email sent to your account',
-                'ALREADY_VERIFIED': 'You have already verified your account successfully. You may now login to your account.',
-                'INVALID_CAPTCHA_RES': 'Prove you\'re not a robot',
-                'USER_EXISTS': 'User already exists'
-            };
+			var messages = {
+				"FILE_FORMAT_NOT_SUPPORTED": "Unsupported file format",
+				"SIZE_LIMIT_PAY": "Insufficient quota for model",
+				"USER_NOT_VERIFIED": "Please click on the link in the verify email sent to your account",
+				"ALREADY_VERIFIED": "You have already verified your account successfully. You may now login to your account.",
+				"INVALID_CAPTCHA_RES": "Prove you're not a robot",
+				"USER_EXISTS": "User already exists"
+			};
 
-            var message;
+			var message;
 
-            Object.keys(serverConfig.responseCodes).forEach(function(key){
-                if(serverConfig.responseCodes[key].value === resData.value){
-                    if(messages[key]){
-                        message = messages[key]; 
-                    } else {
-                        message = serverConfig.responseCodes[key].message;
-                    }
-                }
-            });
+			Object.keys(serverConfig.responseCodes).forEach(function(key){
+				if(serverConfig.responseCodes[key].value === resData.value){
+					if(messages[key]){
+						message = messages[key]; 
+					} else {
+						message = serverConfig.responseCodes[key].message;
+					}
+				}
+			});
 
-            return message;
+			return message;
 
-        };
+		};
 
-		obj.getResponseCode = function(errorToFind)
-		{
+		obj.getResponseCode = function(errorToFind) {
 
 			return Object.keys(serverConfig.responseCodes).indexOf(errorToFind);
 		};
 
 
 
-        return obj;
-    }
+		return obj;
+	}
 }());

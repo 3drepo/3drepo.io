@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("issuesList", {
 			controller: IssuesListCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			templateUrl: "issues-list.html",
 			bindings: {
 				account: "<",
@@ -66,7 +66,7 @@
 			vm.UtilsService = UtilsService;
 			vm.IssuesService = IssuesService;
 			vm.setFocus = setFocus;
-		}
+		};
 		
 		/**
 		 * Monitor changes to parameters
@@ -107,8 +107,7 @@
 					}
 					setupIssuesToShow();
 					showPins();
-				}
-				else {
+				} else {
 					vm.toShow = "info";
 					vm.info = "There are currently no open issues";
 					vm.contentHeight({height: infoHeight});
@@ -126,32 +125,27 @@
 				if (vm.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
 					vm.issueDisplay.sortOldestFirst = sortOldestFirst;
-				}
-				else if (vm.menuOption.value === "showClosed") {
+				} else if (vm.menuOption.value === "showClosed") {
 					showClosed = !showClosed;
 					vm.issueDisplay.showClosed = showClosed;
-				}
-				else if (vm.menuOption.value === "showSubModels") {
+				} else if (vm.menuOption.value === "showSubModels") {
 					showSubModelIssues = !showSubModelIssues;
 					vm.issueDisplay.showSubModelIssues = showSubModelIssues;
-				}
-				else if (vm.menuOption.value === "print") {
+				} else if (vm.menuOption.value === "print") {
 					var ids = [];
 					
 					vm.issuesToShow.forEach(function(issue){
 						ids.push(issue._id);
 					});
 
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(',')), "_blank");
-				}
-				else if (vm.menuOption.value === "exportBCF") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",")), "_blank");
+				} else if (vm.menuOption.value === "exportBCF") {
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.bcfzip"), "_blank");
-				}
-				else if (vm.menuOption.value === "importBCF") {
+				} else if (vm.menuOption.value === "importBCF") {
 
-					var file = document.createElement('input');
-					file.setAttribute('type', 'file');
-					file.setAttribute('accept', '.zip,.bcfzip');
+					var file = document.createElement("input");
+					file.setAttribute("type", "file");
+					file.setAttribute("accept", ".zip,.bcfzip");
 					file.click();
 
 					file.addEventListener("change", function () {
@@ -205,7 +199,7 @@
 				}
 			}
 
-			if(changes.hasOwnProperty('displayIssue') && vm.displayIssue){
+			if(changes.hasOwnProperty("displayIssue") && vm.displayIssue){
 				var that = this;
 
 				vm.editIssue(vm.displayIssue);
@@ -227,8 +221,7 @@
 				if ((selectedIssue === null) || (selectedIssue._id === issue._id)) {
 					resetViewerState(issue);
 					setViewerState(issue);
-				}
-				else {
+				} else {
 					setViewerState(issue);
 				}
 
@@ -309,8 +302,7 @@
 						selectedIssueIndex = i;
 					}
 				}
-			}
-			else {
+			} else {
 				selectedIssueIndex = null;
 			}
 		}
@@ -350,8 +342,7 @@
 							((vm.allIssues[i].created > vm.issuesToShow[j].created) && (!sortOldestFirst))) {
 							vm.issuesToShow.splice(j, 0, vm.allIssues[i]);
 							break;
-						}
-						else if (j === (vm.issuesToShow.length - 1)) {
+						} else if (j === (vm.issuesToShow.length - 1)) {
 							vm.issuesToShow.push(vm.allIssues[i]);
 						}
 					}
@@ -361,8 +352,7 @@
 				if (angular.isDefined(vm.filterText) && vm.filterText !== "") {
 
 					// Helper function for searching strings
-					var stringSearch = function(superString, subString)
-					{
+					var stringSearch = function(superString, subString) {
 						if(!superString){
 							return false;
 						}
@@ -370,7 +360,7 @@
 						return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 					};
 
-					vm.issuesToShow = ($filter('filter')(vm.issuesToShow, function(issue) {
+					vm.issuesToShow = ($filter("filter")(vm.issuesToShow, function(issue) {
 						// Required custom filter due to the fact that Angular
 						// does not allow compound OR filters
 						var i;
@@ -381,23 +371,19 @@
 						show = show || stringSearch(issue.owner, vm.filterText);
 
 						// Search the list of assigned issues
-						if (!show && issue.hasOwnProperty("assigned_roles"))
-						{
+						if (!show && issue.hasOwnProperty("assigned_roles")) {
 							i = 0;
-							while(!show && (i < issue.assigned_roles.length))
-							{
+							while(!show && (i < issue.assigned_roles.length)) {
 								show = show || stringSearch(issue.assigned_roles[i], vm.filterText);
 								i += 1;
 							}
 						}
 
 						// Search the comments
-						if (!show && issue.hasOwnProperty("comments"))
-						{
+						if (!show && issue.hasOwnProperty("comments")) {
 							i = 0;
 
-							while(!show && (i < issue.comments.length))
-							{
+							while(!show && (i < issue.comments.length)) {
 								show = show || stringSearch(issue.comments[i].comment, vm.filterText);
 								show = show || stringSearch(issue.comments[i].owner, vm.filterText);
 								i += 1;
@@ -439,8 +425,7 @@
 				var buttonSpace = 70;
 				var issuesHeight = vm.issuesToShow.length * issuesListItemHeight + buttonSpace;
 				vm.contentHeight({height: issuesHeight });
-			}
-			else {
+			} else {
 				vm.toShow = "info";
 				vm.info = "No issues to show";
 				vm.contentHeight({height: infoHeight});
@@ -463,27 +448,25 @@
 						// Existing pin
 						if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
 							pin[0].setAttribute("render", "true");
-						}
-						else {
+						} else {
 							pin[0].setAttribute("render", "false");
 						}
-					}
-					else {
-                        if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
-                            // Create new pin
-                            pinData = {
-                                id: vm.allIssues[i]._id,
-                                position: vm.allIssues[i].position,
-                                norm: vm.allIssues[i].norm,
-                                account: vm.allIssues[i].account,
-                                model: vm.allIssues[i].model
-                            };
-                            var pinColor = IssuesService.pinColours.blue;
-                            if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
-                                pinColor = IssuesService.pinColours.yellow;
-                            }
-                            IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
-                        }
+					} else {
+						if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
+							// Create new pin
+							pinData = {
+								id: vm.allIssues[i]._id,
+								position: vm.allIssues[i].position,
+								norm: vm.allIssues[i].norm,
+								account: vm.allIssues[i].account,
+								model: vm.allIssues[i].model
+							};
+							var pinColor = IssuesService.pinColours.blue;
+							if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
+								pinColor = IssuesService.pinColours.yellow;
+							}
+							IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
+						}
 					}
 				}
 			}

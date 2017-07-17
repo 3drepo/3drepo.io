@@ -50,7 +50,7 @@
 							data[dataType].data.push(json.data.meta[i]);
 
 							// Setup PDF url
-							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + '/' + json.data.meta[i]._id + ".pdf");
+							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/" + json.data.meta[i]._id + ".pdf");
 						}
 						deferred.resolve(data);
 					},

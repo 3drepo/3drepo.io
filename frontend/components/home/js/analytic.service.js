@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.factory('AnalyticService', AnalyticService);
+angular.module("3drepo")
+	.factory("AnalyticService", AnalyticService);
 
 AnalyticService.$inject = [];
 
@@ -25,7 +25,7 @@ function AnalyticService(){
 
 	
 	function isGoogleAnalyticEnabled(){
-		return typeof ga !== "undefined" && ga !== null
+		return typeof ga !== "undefined" && ga !== null;
 	}
 
 
@@ -42,7 +42,7 @@ function AnalyticService(){
 			return;
 		}
 
-		event.hitType = 'event';
+		event.hitType = "event";
 
 		ga("send", event);
 	}
@@ -59,5 +59,5 @@ function AnalyticService(){
 		sendPageView: sendPageView,
 		sendEvent: sendEvent,
 		setUserId: setUserId
-	}
+	};
 }

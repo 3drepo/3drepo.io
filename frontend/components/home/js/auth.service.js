@@ -19,175 +19,170 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.service("AuthService", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
-		function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
+		.service("AuthService", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
+			function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
 
-		var self = this;
+				var self = this;
 
-		self.authPromise = $q.defer();
-		self.loggedIn = null;
-		self.username = null;
+				self.authPromise = $q.defer();
+				self.loggedIn = null;
+				self.username = null;
 
-		this.loginSuccess = function(response) {
-			self.loggedIn = true;
-			self.username = response.data.username;
-			self.userRoles = response.data.roles;
+				this.loginSuccess = function(response) {
+					self.loggedIn = true;
+					self.username = response.data.username;
+					self.userRoles = response.data.roles;
 
-			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: response.data.username, initialiser: response.data.initialiser });
-			AnalyticService.setUserId(self.username);
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: response.data.username, initialiser: response.data.initialiser });
+					AnalyticService.setUserId(self.username);
 
-			self.authPromise.resolve(self.loggedIn);
-		};
+					self.authPromise.resolve(self.loggedIn);
+				};
 
-		this.loginFailure = function(response) {
-			console.log("412 : loginFailure", response)
-			self.loggedIn = false;
-			self.username = null;
-			self.userRoles = null;
+				this.loginFailure = function(response) {
+					console.log("412 : loginFailure", response);
+					self.loggedIn = false;
+					self.username = null;
+					self.userRoles = null;
 
-			var initialiser = response.initialiser;
-			response.initialiser = undefined;
+					var initialiser = response.initialiser;
+					response.initialiser = undefined;
 
-			EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
-				username: null, 
-				initialiser: initialiser, 
-				error: response.data 
-			});
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
+						username: null, 
+						initialiser: initialiser, 
+						error: response.data 
+					});
 
-			self.authPromise.resolve(response.data);
-		};
+					self.authPromise.resolve(response.data);
+				};
 
-		this.logoutSuccess = function()
-		{
-			self.loggedIn  = false;
-			self.username  = null;
-			self.userRoles = null;
+				this.logoutSuccess = function() {
+					self.loggedIn  = false;
+					self.username  = null;
+					self.userRoles = null;
 
-			EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-
-			self.authPromise.resolve(self.loggedIn);
-		};
-
-		this.logoutFailure = function(reason)
-		{
-			self.loggedIn  = false;
-			self.username  = null;
-			self.userRoles = null;
-			localStorage.setItem("tdrLoggedIn", "false");
-			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
-
-			self.authPromise.resolve(self.loggedIn);
-		};
-
-
-		this.init = function(interval) {
-			var initPromise = $q.defer();
-
-			interval = !!interval;
-
-			// If we are not logged in, check
-			// with the API server whether we
-			// are or not
-			if(self.loggedIn === null || interval) {
-				// Initialize
-				self.isLoggedIn()
-				.then(function(data) {
-					// If we are not logging in because of an interval
-					// then we are initializing the auth plugin
-					if (!interval)
-					{
-						data.initialiser = true;
-						self.loginSuccess(data);
-					} else if (!self.loggedIn) {
-						// If we are logging in using an interval,
-						// we only need to run login success if the self.loggedIn
-						// says we are not logged in.
-						self.loginSuccess(data);
-					}
-				})
-				.catch(function(reason) {
-					if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code)
-					{
-						self.loginSuccess(reason);
-					} else if (self.loggedIn === null || (interval && self.loggedIn)) {
-						reason.initialiser = true;
-						self.loginFailure(reason);
-					}
-				});
-
-				self.authPromise.promise.then(function() {
-					initPromise.resolve(self.loggedIn);
-				});
-			} else {
-				if (self.loggedIn) {
-					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: self.username });
-				} else {
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-				}
 
-				initPromise.resolve(self.loggedIn);
-			}
+					self.authPromise.resolve(self.loggedIn);
+				};
 
-			return initPromise.promise;
-		};
+				this.logoutFailure = function(reason) {
+					self.loggedIn  = false;
+					self.username  = null;
+					self.userRoles = null;
+					localStorage.setItem("tdrLoggedIn", "false");
+					EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
 
-		// Check for expired sessions
-		var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
+					self.authPromise.resolve(self.loggedIn);
+				};
 
-		this.intervalCaller = $interval(function() {
-			//console.log("running init in interval call")
-			self.init(true);
-		}, 1000 * checkExpiredSessionTime);
 
-		this.loadModelRoles = function(account, model)
-		{
-			var rolesPromise = $q.defer();
+				this.init = function(interval) {
+					var initPromise = $q.defer();
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/roles.json"))
-			.then(function(data) {
-				self.modelRoles = data;
-				rolesPromise.resolve();
-			}).catch(function() {
-				self.modelRoles = null;
-				rolesPromise.resolve();
-			});
+					interval = !!interval;
 
-			return rolesPromise.promise;
-		};
+					// If we are not logged in, check
+					// with the API server whether we
+					// are or not
+					if(self.loggedIn === null || interval) {
+						// Initialize
+						self.isLoggedIn()
+							.then(function(data) {
+								// If we are not logging in because of an interval
+								// then we are initializing the auth plugin
+								if (!interval) {
+									data.initialiser = true;
+									self.loginSuccess(data);
+								} else if (!self.loggedIn) {
+									// If we are logging in using an interval,
+									// we only need to run login success if the self.loggedIn
+									// says we are not logged in.
+									self.loginSuccess(data);
+								}
+							})
+							.catch(function(reason) {
+								if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code) {
+									self.loginSuccess(reason);
+								} else if (self.loggedIn === null || (interval && self.loggedIn)) {
+									reason.initialiser = true;
+									self.loginFailure(reason);
+								}
+							});
 
-		this.getUsername = function() { 
-			return self.username; 
-		};
+						self.authPromise.promise.then(function() {
+							initPromise.resolve(self.loggedIn);
+						});
+					} else {
+						if (self.loggedIn) {
+							EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: self.username });
+						} else {
+							EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+						}
 
-		this.isLoggedIn = function(username) {
-			return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
-		}
+						initPromise.resolve(self.loggedIn);
+					}
 
-		this.login = function(username, password) {
-			self.authPromise = $q.defer();
+					return initPromise.promise;
+				};
 
-			var postData = {username: username, password: password};
+				// Check for expired sessions
+				var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
 
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
-			.then(self.loginSuccess)
-			.catch(self.loginFailure);
+				this.intervalCaller = $interval(function() {
+					//console.log("running init in interval call")
+					self.init(true);
+				}, 1000 * checkExpiredSessionTime);
 
-			return self.authPromise.promise;
-		};
+				this.loadModelRoles = function(account, model) {
+					var rolesPromise = $q.defer();
 
-		this.logout = function() {
-			self.authPromise = $q.defer();
+					$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/roles.json"))
+						.then(function(data) {
+							self.modelRoles = data;
+							rolesPromise.resolve();
+						}).catch(function() {
+							self.modelRoles = null;
+							rolesPromise.resolve();
+						});
 
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout"))
-			.then(self.logoutSuccess)
-			.catch(self.logoutFailure);
+					return rolesPromise.promise;
+				};
 
-			return self.authPromise.promise;
-		};
+				this.getUsername = function() { 
+					return self.username; 
+				};
 
-		this.hasPermission = function(requiredPerm, permissions){
-			return permissions.indexOf(requiredPerm) !== -1;
-		};
+				this.isLoggedIn = function(username) {
+					return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
+				};
 
-	}]);
+				this.login = function(username, password) {
+					self.authPromise = $q.defer();
+
+					var postData = {username: username, password: password};
+
+					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
+						.then(self.loginSuccess)
+						.catch(self.loginFailure);
+
+					return self.authPromise.promise;
+				};
+
+				this.logout = function() {
+					self.authPromise = $q.defer();
+
+					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout"))
+						.then(self.logoutSuccess)
+						.catch(self.logoutFailure);
+
+					return self.authPromise.promise;
+				};
+
+				this.hasPermission = function(requiredPerm, permissions){
+					return permissions.indexOf(requiredPerm) !== -1;
+				};
+
+			}]);
 })();

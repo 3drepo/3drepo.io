@@ -18,8 +18,8 @@
 (function() {
 	"use strict";
 
-	angular.module('3drepo')
-		.factory('TreeService', TreeService);
+	angular.module("3drepo")
+		.factory("TreeService", TreeService);
 
 	TreeService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
@@ -43,15 +43,14 @@
 
 		var init = function(account, model, branch, revision, setting) {
 
-			console.log('tree init');
+			console.log("tree init");
 
 			ts.account  = account;
 			ts.model  = model;
 			ts.branch   = branch ? branch : "master";
 			//ts.revision = revision ? revision : "head";
 
-			if (!revision)
-			{
+			if (!revision) {
 				ts.baseURL = "/" + account + "/" + model + "/revision/master/head/";
 			} else {
 				ts.baseURL = "/" + account + "/" + model + "/revision/" + revision + "/";
@@ -68,7 +67,7 @@
 					//replace model id with model name in the tree if it is a federate model
 					if(setting.federate){
 						mainTree.nodes.children.forEach(function(child){
-							var name = child.name.split(':');
+							var name = child.name.split(":");
 							
 							var subModel = setting.subModels.find(function(m){
 								return m.model === name[1];
@@ -76,7 +75,7 @@
 
 							if(subModel){
 								name[1] = subModel.name;
-								child.name = name.join(':');
+								child.name = name.join(":");
 							}
 
 							if(subModel && child.children && child.children[0]){
@@ -104,11 +103,11 @@
 									var getSubTree = $http.get(serverConfig.apiUrl(serverConfig.GET_API, tree.url)).then(function(res){
 
 										if(res.status === 401){
-											tree.status = 'NO_ACCESS';
+											tree.status = "NO_ACCESS";
 										}
 
 										if(res.status === 404){
-											tree.status = 'NOT_FOUND';
+											tree.status = "NOT_FOUND";
 										}
 
 										if(tree.status){
@@ -193,7 +192,7 @@
 				sharedIdToUid: sharedIdToUid,
 				oIdToMetaId: oIdToMetaId
 			};
-		}
+		};
 
 
 		return {

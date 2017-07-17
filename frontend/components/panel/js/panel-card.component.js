@@ -16,38 +16,38 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("panelCard", {
-            restrict: "E",
-            templateUrl: "panel-card.html",
-            bindings: {
+	angular.module("3drepo")
+		.component("panelCard", {
+			restrict: "E",
+			templateUrl: "panel-card.html",
+			bindings: {
 				account: "=",
 				model: "=",
 				branch: "=",
 				revision: "=",
-                position: "=",
-                modelSettings: "=",
-                treeMap: "=",
-                contentData: "=",
+				position: "=",
+				modelSettings: "=",
+				treeMap: "=",
+				contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
 				keysDown: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			},
-            controller: PanelCardCtrl,
-            controllerAs: "vm"
+			controller: PanelCardCtrl,
+			controllerAs: "vm"
 		});
 
-    PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+	PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
 
-    function PanelCardCtrl($scope, $element, $compile, EventService) {
-        var vm = this,
-            filter = null,
+	function PanelCardCtrl($scope, $element, $compile, EventService) {
+		var vm = this,
+			filter = null,
 			contentHeight,
-			options = angular.element($element[0].querySelector('#options')),
+			options = angular.element($element[0].querySelector("#options")),
 			currentHighlightedOptionIndex = -1;
 
 		/*
@@ -62,7 +62,7 @@
 			vm.showAdd = false;
 			vm.hideMenuButton = false;
 			
-		}
+		};
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -115,15 +115,13 @@
 					vm.contentData.options[currentHighlightedOptionIndex].color = "";
 					currentHighlightedOptionIndex = -1;
 				}
-			}
-			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
+			} else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
 					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
 				// Only one card can be in modify mode at a time
 				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
 				}
-			}
-			else if ((event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) && (vm.contentData.type === "issues")) {
+			} else if ((event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) && (vm.contentData.type === "issues")) {
 				highlightOption(event.value);
 			}
 		});
@@ -169,7 +167,7 @@
 		 */
 		function createCardContent () {
 			var i, length,
-				content = angular.element($element[0].querySelector('#content')),
+				content = angular.element($element[0].querySelector("#content")),
 				contentItem,
 				element;
 
@@ -194,15 +192,15 @@
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
 					switch (vm.contentData.options[i].type) {
-						case "filter":
-							element += "filter-text='vm.filterText' ";
-							break;
-						case "visible":
-							element += "visible='vm.visible' ";
-							break;
-						case "menu":
-							element += "selected-menu-option='vm.selectedMenuOption' ";
-							break;
+					case "filter":
+						element += "filter-text='vm.filterText' ";
+						break;
+					case "visible":
+						element += "visible='vm.visible' ";
+						break;
+					case "menu":
+						element += "selected-menu-option='vm.selectedMenuOption' ";
+						break;
 					}
 				}
 			}
@@ -230,7 +228,7 @@
 					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
 					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
 
-					if(vm.contentData.options[i].type === 'menu'){
+					if(vm.contentData.options[i].type === "menu"){
 						optionElement += " ng-if='!vm.hideMenuButton'";
 					} else {
 						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
@@ -240,21 +238,21 @@
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
 					switch (vm.contentData.options[i].type) {
-						case "filter":
-							optionElement += " show-filter='vm.showFilter'";
-							break;
+					case "filter":
+						optionElement += " show-filter='vm.showFilter'";
+						break;
 
-						case "visible":
-							optionElement += " visible='vm.visible'";
-							break;
+					case "visible":
+						optionElement += " visible='vm.visible'";
+						break;
 
-						case "menu":
-							optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
-							break;
+					case "menu":
+						optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
+						break;
 
-						case "close":
-							optionElement += "show='vm.contentData.show'";
-							break;
+					case "close":
+						optionElement += "show='vm.contentData.show'";
+						break;
 					}
 
 					optionElement += "><panel-card-option-" + vm.contentData.options[i].type + ">";
@@ -286,7 +284,7 @@
 		 */
 		function createFilter () {
 			var i, length,
-				filterContainer = angular.element($element[0].querySelector('#filterContainer')),
+				filterContainer = angular.element($element[0].querySelector("#filterContainer")),
 				filter;
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
@@ -306,7 +304,7 @@
 		 * Create the add button
 		 */
 		function createAdd () {
-			var panelCardContainer = angular.element($element[0].querySelector('#panelCardContainer')),
+			var panelCardContainer = angular.element($element[0].querySelector("#panelCardContainer")),
 				add;
 			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
 				add = angular.element(
@@ -329,8 +327,7 @@
 					//showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
-			}
-			else {
+			} else {
 				if (vm.contentData.type === "issues") {
 					//showToolbarOptions(["pin", "scribble", "erase"], false);
 					showToolbarOptions(["filter", "menu"], true);
@@ -353,8 +350,7 @@
 							vm.contentData.options[currentHighlightedOptionIndex].color = "";
 							currentHighlightedOptionIndex = i;
 							vm.contentData.options[i].color = "#FF9800";
-						}
-						else {
+						} else {
 							currentHighlightedOptionIndex = i;
 							vm.contentData.options[i].color = "#FF9800";
 						}

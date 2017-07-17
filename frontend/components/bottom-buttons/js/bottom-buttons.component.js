@@ -20,11 +20,11 @@
 
 	angular.module("3drepo")
 		.component("bottomButtons", {
-			restrict: 'E',
-			templateUrl: 'bottom-buttons.html',
+			restrict: "E",
+			templateUrl: "bottom-buttons.html",
 			bindings: {},
 			controller: BottomButtonsCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	BottomButtonsCtrl.$inject = ["EventService"];
@@ -54,8 +54,7 @@
 				vm.rightButtons[0] = vm.viewingOptions[index];
 
 				vm.showViewingOptionButtons = false;
-			}
-			else {
+			} else {
 				vm.showViewingOptionButtons = !vm.showViewingOptionButtons;
 			}
 		};
@@ -79,13 +78,13 @@
 				vm.fullScreen = false;
 			}
 		};
-		document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
-		document.addEventListener('mozfullscreenchange', exitFullScreen, false);
-		document.addEventListener('fullscreenchange', exitFullScreen, false);
-		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
+		document.addEventListener("webkitfullscreenchange", exitFullScreen, false);
+		document.addEventListener("mozfullscreenchange", exitFullScreen, false);
+		document.addEventListener("fullscreenchange", exitFullScreen, false);
+		document.addEventListener("MSFullscreenChange", exitFullScreen, false);
 
 		// This is pretty horrible 
-		document.addEventListener('click', function(event) {
+		document.addEventListener("click", function(event) {
 			if (!event.target.classList.contains("ignoreClick")) {
 				vm.showViewingOptionButtons = false;
 			} 
@@ -104,7 +103,7 @@
 		};
 
 		vm.viewingOptions = [
-/*			{
+			/*			{
 				mode: VIEWER_NAV_MODES.WALK,
 				label: "Walk",
 				icon: "fa fa-child",

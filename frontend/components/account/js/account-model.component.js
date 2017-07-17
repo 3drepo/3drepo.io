@@ -21,8 +21,8 @@
 
 	angular.module("3drepo")
 		.component("accountModel", {
-			restrict: 'E',
-			templateUrl: 'account-model.html',
+			restrict: "E",
+			templateUrl: "account-model.html",
 			bindings: {
 				account: "=",
 				model: "=",
@@ -38,10 +38,10 @@
 				subscriptions: "="
 			},
 			controller: AccountModelCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			link: function (scope, element) {
 				// Cleanup when destroyed
-				element.on('$destroy', function(){
+				element.on("$destroy", function(){
 					scope.vm.uploadedFileWatch(); // Disable events watch
 					scope.vm.modelToUploadFileWatch();
 
@@ -54,8 +54,8 @@
 	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, AuthService, AnalyticService, AccountDataService, StateManager) {
 
 		var vm = this,
-		infoTimeout = 4000,
-		isUserAccount = (vm.account === vm.userAccount)
+			infoTimeout = 4000,
+			isUserAccount = (vm.account === vm.userAccount);
 		// Init
 
 		vm.$onInit = function() {
@@ -113,12 +113,12 @@
 			if (vm.model.status === "processing") {
 
 				vm.model.uploading = true;
-				vm.fileUploadInfo = 'Processing...';
+				vm.fileUploadInfo = "Processing...";
 
 			}
 			
 
-		}
+		};
 		
 		/*
 		 * Watch changes in upload file
@@ -135,16 +135,16 @@
 		vm.modelToUploadFileWatch = $scope.$watch("vm.modelToUpload", function () {
 			if(vm.modelToUpload){
 
-				var names = vm.modelToUpload.name.split('.');
+				var names = vm.modelToUpload.name.split(".");
 				
 				vm.uploadErrorMessage = null;
 				
 				if(names.length === 1){
-					vm.uploadErrorMessage = 'Filename must have extension';
+					vm.uploadErrorMessage = "Filename must have extension";
 					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
-					vm.uploadErrorMessage = 'File format not supported';
+					vm.uploadErrorMessage = "File format not supported";
 					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
 				} else {
@@ -166,16 +166,14 @@
 						vm.desc = null;
 						vm.modelToUpload = null;
 						UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+					} else {
+						console.warn("Incorrect permissions");
 					}
-					else {
-						console.warn("Incorrect permissions")
-					}
-				}
-				else {
+				} else {
 					$location.path("/" + vm.account + "/" + vm.model.model, "_self").search("page", null);
 					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: 'view'
+						eventCategory: "Model",
+						eventAction: "view"
 					});
 				}
 			}
@@ -189,52 +187,52 @@
 		 */
 		vm.doModelOption = function (event, option) {
 			switch (option) {
-				case "modelsetting":
+			case "modelsetting":
 
-					$location.search("modelName", vm.model.name);
-					$location.search("modelId", vm.model.model);
-					$location.search("targetAcct", vm.account);
-					vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
-					break;
+				$location.search("modelName", vm.model.name);
+				$location.search("modelId", vm.model.model);
+				$location.search("targetAcct", vm.account);
+				vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
+				break;
 
-				case "upload":
-					vm.uploadErrorMessage = null;
-					vm.modelToUpload = null;
-					vm.tag = null;
-					vm.desc = null;
-					UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
-					//vm.uploadFile();
-					break;
+			case "upload":
+				vm.uploadErrorMessage = null;
+				vm.modelToUpload = null;
+				vm.tag = null;
+				vm.desc = null;
+				UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				//vm.uploadFile();
+				break;
 
-				case "download":
-					window.open(
-						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
-						'_blank' 
-					);
+			case "download":
+				window.open(
+					serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
+					"_blank" 
+				);
 
-					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: 'download'
+				AnalyticService.sendEvent({
+					eventCategory: "Model",
+					eventAction: "download"
+				});
+
+				break;
+
+			case "permissions":
+				goToPermissions(event, vm.account, vm.project, vm.model);
+				break;
+
+			case "delete":
+				vm.onSetupDeleteModel({event: event, model: vm.model, account: vm.account, project: vm.project});
+				break;
+
+			case "revision":
+				if(!vm.revisions){
+					UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
+						vm.revisions = response.data;
 					});
-
-					break;
-
-				case "permissions":
-					goToPermissions(event, vm.account, vm.project, vm.model);
-					break;
-
-				case "delete":
-					vm.onSetupDeleteModel({event: event, model: vm.model, account: vm.account, project: vm.project});
-					break;
-
-				case "revision":
-					if(!vm.revisions){
-						UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
-							vm.revisions = response.data;
-						});
-					}
-					UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
-					break;
+				}
+				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				break;
 			}
 		};
 
@@ -268,14 +266,14 @@
 			vm.uploadErrorMessage = null;
 
 			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
-				vm.uploadErrorMessage = 'Invalid revision name';
+				vm.uploadErrorMessage = "Invalid revision name";
 			} else {
 				UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 					revisions = response.data;
 					if(vm.tag){
 						revisions.forEach(function(rev){
 							if(rev.tag === vm.tag){
-								vm.uploadErrorMessage = 'Revision name already exists';
+								vm.uploadErrorMessage = "Revision name already exists";
 							}
 						});
 					}
@@ -296,8 +294,8 @@
 		vm.goToRevision = function(revId){
 			$location.path("/" + vm.account + "/" + vm.model.model + "/" + revId , "_self");
 			AnalyticService.sendEvent({
-				eventCategory: 'Model',
-				eventAction: 'view'
+				eventCategory: "Model",
+				eventAction: "view"
 			});
 		};
 
@@ -331,21 +329,20 @@
 							vm.fileUploadInfo = "";
 						}, infoTimeout);
 					});
-				}
-				else {
+				} else {
 
 					formData = new FormData();
 					formData.append("file", file);
 
 					if(tag){
-						formData.append('tag', tag);
+						formData.append("tag", tag);
 					}
 
 					if(desc){
-						formData.append('desc', desc);
+						formData.append("desc", desc);
 					}
 
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {'Content-Type': undefined});
+					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {"Content-Type": undefined});
 
 					promise.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
@@ -356,12 +353,11 @@
 							$timeout(function () {
 								vm.fileUploadInfo = "";
 							}, infoTimeout);
-						}
-						else {
+						} else {
 							
 							AnalyticService.sendEvent({
-								eventCategory: 'Model',
-								eventAction: 'upload'
+								eventCategory: "Model",
+								eventAction: "upload"
 							});
 						}
 					});
@@ -378,8 +374,8 @@
 
 				if ((data.status === "ok") || (data.status === "failed")) {
 					if (data.status === "ok"
-						|| (data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_TEXTURES') 
-						|| data.errorReason.value === UtilsService.getResponseCode('FILE_IMPORT_MISSING_NODES'))) {
+						|| (data.errorReason.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES") 
+						|| data.errorReason.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_NODES"))) {
 						vm.model.timestamp = new Date();
 						vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 						vm.fileUploadInfo = "Model imported successfully";
@@ -401,20 +397,20 @@
 						vm.fileUploadInfo = "";
 					}, infoTimeout);
 					
-				} else if (data.status === 'uploading'){
+				} else if (data.status === "uploading"){
 
 					vm.model.uploading = true;
-					vm.fileUploadInfo = 'Uploading...';
+					vm.fileUploadInfo = "Uploading...";
 					$scope.$apply();
 
-				} else if (data.status === 'processing'){
+				} else if (data.status === "processing"){
 					vm.model.uploading = true;
-					vm.fileUploadInfo = 'Processing...';
+					vm.fileUploadInfo = "Processing...";
 					$scope.$apply();
 				}
 			});
 
-			$scope.$on('$destroy', function(){
+			$scope.$on("$destroy", function(){
 				NotificationService.unsubscribe.modelStatusChanged(vm.account, vm.model.model);
 			});
 		}
@@ -427,10 +423,10 @@
 		function goToPermissions(event, account, project, model) {
 			//vm.account, vm.project, vm.model
 
-			$location.search('account', account);
-			$location.search('project', project.name);
-			$location.search('model', model.model);
-			$location.search('page', "assign");
+			$location.search("account", account);
+			$location.search("project", project.name);
+			$location.search("model", model.model);
+			$location.search("page", "assign");
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 
 		}

@@ -33,8 +33,8 @@
 			uploadModel : uploadModel,
 			newModel : newModel,
 			updatePassword : updatePassword,
-			updateInfo : updateInfo,
-		}
+			updateInfo : updateInfo
+		};
 
 		return service;
 
@@ -102,7 +102,7 @@
 		 */
 		function updateInfo(username, info) {
 			return doPut(info, username);
-		};
+		}
 
 		/**
 		 * Update the user password
@@ -113,7 +113,7 @@
 		 */
 		function updatePassword(username, passwords) {
 			return doPut(passwords, username);
-		};
+		}
 
 		/**
 		 * Create a new model
@@ -130,7 +130,7 @@
 				code: modelData.code
 			};
 			return doPost(data, modelData.teamspace + "/" + encodeURIComponent(modelData.name));
-		};
+		}
 
 		/**
 		 * Upload file/model 
@@ -141,8 +141,8 @@
 		function uploadModel(modelData) {
 			var data = new FormData();
 			data.append("file", modelData.uploadFile);
-			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {'Content-Type': undefined});
-		};
+			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {"Content-Type": undefined});
+		}
 
 		/**
 		 * Get upload status
@@ -152,7 +152,7 @@
 		 */
 		function uploadStatus(modelData) {
 			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
-		};
+		}
 
 
 		/**
@@ -164,7 +164,7 @@
 		 */
 		function newSubscription(teamspace, data) {
 			return doPost(data, teamspace + "/subscriptions");
-		};
+		}
 
 		/**
 		 * Get user info
@@ -174,7 +174,7 @@
 		 */
 		function getUserInfo(username) {
 			return UtilsService.doGet(username + ".json");
-		};
+		}
 
 
 	}

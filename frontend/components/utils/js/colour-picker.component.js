@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("tdrColourPicker", {
-			restrict: 'EA',
-			templateUrl: 'colour-picker.html',
+			restrict: "EA",
+			templateUrl: "colour-picker.html",
 			bindings: {
 				title: "@",
 				colour: "=",
@@ -29,7 +29,7 @@
 				offset: "@"
 			},
 			controller: ColourPickerCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	ColourPickerCtrl.$inject = ["$scope"];
@@ -46,7 +46,7 @@
 			vm.green = 150;
 			vm.blue = 100;
 
-		}
+		};
 	
 		/*
 		 * Watch for slider changes

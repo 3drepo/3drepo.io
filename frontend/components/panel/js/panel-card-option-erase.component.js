@@ -16,24 +16,24 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("panelCardOptionErase", {
-            restrict: 'E',
-            templateUrl: 'panel-card-option-erase.html',
-            bindings: {},
-            controller: PanelCardOptionEraseCtrl,
-            controllerAs: 'vm'
-        });
+	angular.module("3drepo")
+		.component("panelCardOptionErase", {
+			restrict: "E",
+			templateUrl: "panel-card-option-erase.html",
+			bindings: {},
+			controller: PanelCardOptionEraseCtrl,
+			controllerAs: "vm"
+		});
 
-    PanelCardOptionEraseCtrl.$inject = ["EventService"];
+	PanelCardOptionEraseCtrl.$inject = ["EventService"];
 
-    function PanelCardOptionEraseCtrl (EventService) {
-        var vm = this;
+	function PanelCardOptionEraseCtrl (EventService) {
+		var vm = this;
 
-        vm.setupEraseMode = function() {
-            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "erase");
-        };
-    }
+		vm.setupEraseMode = function() {
+			EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "erase");
+		};
+	}
 }());

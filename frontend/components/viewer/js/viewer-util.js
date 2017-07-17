@@ -26,17 +26,15 @@ var ViewerUtilMyListeners = {};
 
 	var eventElement = document;
 
-	ViewerUtil.prototype.cloneObject = function(obj)
-	{
-    	if (!obj || typeof obj !== 'object') {
+	ViewerUtil.prototype.cloneObject = function(obj) {
+    	if (!obj || typeof obj !== "object") {
         	return obj;
     	}
 
 		var retObject = new obj.constructor();
 
 		for (var key in obj) {
-			if (obj.hasOwnProperty(key))
-			{
+			if (obj.hasOwnProperty(key)) {
 				retObject[key] = this.cloneObject(obj[key]);
 			}
 		}
@@ -51,10 +49,8 @@ var ViewerUtilMyListeners = {};
 	};
 
 
-	ViewerUtil.prototype.onEvent = function(name, callback)
-	{
-		if (!ViewerUtilListeners.hasOwnProperty(name))
-		{
+	ViewerUtil.prototype.onEvent = function(name, callback) {
+		if (!ViewerUtilListeners.hasOwnProperty(name)) {
 			ViewerUtilListeners[name] = [];
 			ViewerUtilMyListeners[name] = [];
 		}
@@ -70,8 +66,7 @@ var ViewerUtilMyListeners = {};
 		eventElement.addEventListener(name, myListener);
 	};
 
-	ViewerUtil.prototype.offEvent = function(name, callback)
-	{
+	ViewerUtil.prototype.offEvent = function(name, callback) {
 		var index = ViewerUtilListeners[name].indexOf(callback);
 		if (index === -1){
 			return;
@@ -84,12 +79,9 @@ var ViewerUtilMyListeners = {};
 
 	};
 
-	ViewerUtil.prototype.offEventAll = function()
-	{
-		for(var eventType in ViewerUtilMyListeners)
-		{
-			for(var i = 0; i < ViewerUtilMyListeners[eventType].length; i++)
-			{
+	ViewerUtil.prototype.offEventAll = function() {
+		for(var eventType in ViewerUtilMyListeners) {
+			for(var i = 0; i < ViewerUtilMyListeners[eventType].length; i++) {
 				eventElement.removeEventListener(eventType, ViewerUtilMyListeners[eventType][i]);
 			}
 		}
@@ -98,10 +90,11 @@ var ViewerUtilMyListeners = {};
 		ViewerUtilMyListeners = {};
 	};
 
-	ViewerUtil.prototype.eventFactory = function(name)
-	{
+	ViewerUtil.prototype.eventFactory = function(name) {
 		var self = this;
-		return function(event) { self.triggerEvent(name, event); };
+		return function(event) {
+			self.triggerEvent(name, event); 
+		};
 	};
 
 	// ViewerUtil.prototype.getAxisAngle = function(from, at, up) {

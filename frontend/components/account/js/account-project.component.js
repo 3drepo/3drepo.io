@@ -21,13 +21,13 @@
 
 	angular.module("3drepo")
 		.component("accountProject", {
-			restrict: 'E',
-			templateUrl: 'account-project.html',
+			restrict: "E",
+			templateUrl: "account-project.html",
 			bindings: {
 				projectData : "="
 			},
 			controller: AccountProjectCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 

@@ -20,13 +20,13 @@
 
 	angular.module("3drepo")
 		.component("panelCardOptionVisible", {
-			restrict: 'E',
-			templateUrl: 'panel-card-option-visible.html',
+			restrict: "E",
+			templateUrl: "panel-card-option-visible.html",
 			bindings: {
 				visible: "="
 			},
 			controller: PanelCardOptionVisibleCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	function PanelCardOptionVisibleCtrl() {

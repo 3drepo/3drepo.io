@@ -64,21 +64,21 @@
 		});
 
 		var isMacKey = function(keysDown) {
-			return isMac && keysDown.currentValue.indexOf(cmdKey) !== -1
-		}
+			return isMac && keysDown.currentValue.indexOf(cmdKey) !== -1;
+		};
 
 		var isNotMacKey = function(keysDown) {
-			return !isMac && keysDown.currentValue.indexOf(ctrlKey) !== -1
-		}
+			return !isMac && keysDown.currentValue.indexOf(ctrlKey) !== -1;
+		};
 
 		var isKeyDown = function(keysDown) {
 			return isMacKey(keysDown) || isNotMacKey(keysDown);
-		}
+		};
 
 		var isKeyDownNotCtrl = function(keysDown) {
 			return ((isMac && keysDown.currentValue.indexOf(cmdKey) === -1) 
-				   || (!isMac && keysDown.currentValue.indexOf(ctrlKey) === -1))
-		}
+				   || (!isMac && keysDown.currentValue.indexOf(ctrlKey) === -1));
+		};
 
 		/**
 		 * Handle component input changes
@@ -96,8 +96,7 @@
 					multiMode = true;
 					EventService.send(EventService.EVENT.MULTI_SELECT_MODE, true);
 
-				}
-				else if (multiMode === true && isKeyDownNotCtrl(changes.keysDown)) {
+				} else if (multiMode === true && isKeyDownNotCtrl(changes.keysDown)) {
 	
 					multiMode = false;
 					EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);

@@ -73,7 +73,7 @@
 			vm.visible   = {};
 			vm.invisible = {};
 
-		}
+		};
 
 		/**
 		 * Set the content height.
@@ -92,8 +92,7 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				if (nodesToShow[i].hasOwnProperty("name")) {
 					height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
-				}
-				else {
+				} else {
 					height += nodeMinHeight + lineHeight;
 				}
 			}
@@ -136,8 +135,7 @@
 			});
 		}
 
-		function getAccountModelKey(account, model)
-		{
+		function getAccountModelKey(account, model) {
 			return account + "@" + model;
 		}
 
@@ -148,8 +146,7 @@
 		 */
 		function traverseNodeAndPushId(node, nodes){
 			traverseNode(node, function(node){
-				if (!node.children && ((node.type || "mesh") === "mesh"))
-				{
+				if (!node.children && ((node.type || "mesh") === "mesh")) {
 					var key = getAccountModelKey(node.account, node.project);
 					if(!nodes[key]){
 						nodes[key] = [];
@@ -183,17 +180,13 @@
 		 * @param {Object} node Node to change the visibility for
 		 * @param {String} visibility Visibility to change to
 		 */
-		vm.setToggleState = function(node, visibility)
-		{
+		vm.setToggleState = function(node, visibility) {
 			var visible = getVisibleArray(node.account, node.project);
 			var invisible = getInvisibleArray(node.account, node.project);
 
-			if (!node.children && ((node.type || "mesh") === "mesh"))
-			{
-				if (visibility === "invisible")
-				{
-					if (invisible.has(node._id))
-					{
+			if (!node.children && ((node.type || "mesh") === "mesh")) {
+				if (visibility === "invisible") {
+					if (invisible.has(node._id)) {
 						invisible.delete(node._id);
 					} else {
 						invisible.add(node._id);
@@ -201,8 +194,7 @@
 
 					visible.delete(node._id);
 				} else {
-					if (visible.has(node._id))
-					{
+					if (visible.has(node._id)) {
 						visible.delete(node._id);
 					} else {
 						visible.add(node._id);
@@ -299,8 +291,7 @@
 
 								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
 
-							}
-							else {
+							} else {
 								// Normal tree node
 								vm.nodesToShow[index].children[i].expanded = false;
 
@@ -335,7 +326,7 @@
 								vm.showNodes = true;
 								// Resize virtual repeater
 								// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
-								$scope.$broadcast('$md-resize');
+								$scope.$broadcast("$md-resize");
 							});
 						}
 					}
@@ -388,15 +379,13 @@
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
 								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
-								if(!noHighlight)
-								{
+								if(!noHighlight) {
 									vm.selectNode(vm.nodesToShow[i].children[j]);
 								}
 								lastParentWithName = null;
 								selectedIndex = i + j + 1;
 
-							}
-							else if(!noHighlight){
+							} else if(!noHighlight){
 								// If the selected mesh doesn't have a name highlight the parent in the tree
 								// highlight the parent in the viewer
 
@@ -411,8 +400,7 @@
 							}
 
 							condLoop = false;
-						}
-						else {
+						} else {
 							// This will clear any previously selected node
 							vm.nodesToShow[i].children[j].selected = false;
 						}
@@ -443,7 +431,7 @@
 
 						vm.nodesToShow[i].children[j].level = level + 1;
 
-						if(vm.nodesToShow[i].hasChildren && vm.nodesToShow[i].children[j].hasOwnProperty('name')){
+						if(vm.nodesToShow[i].hasChildren && vm.nodesToShow[i].children[j].hasOwnProperty("name")){
 
 							vm.nodesToShow.splice(i + childWithNameCount + 1, 0, vm.nodesToShow[i].children[j]);
 							childWithNameCount++;
@@ -463,7 +451,7 @@
 					// Resize virtual repeater
 
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
-					$scope.$broadcast('$md-resize');
+					$scope.$broadcast("$md-resize");
 					//console.log('this selectedIndex', selectedIndex);
 					vm.topIndex = selectedIndex;
 				});
@@ -481,12 +469,10 @@
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
-				{
+				if ((event.value.source !== "tree") && highlightSelectedViewerObject) {
 					var objectID = event.value.id;
 
-					if (objectID)
-					{
+					if (objectID) {
 						var path;
 						if(vm.idToPath[objectID]){
 							path = vm.idToPath[objectID].split("__");
@@ -504,8 +490,7 @@
 
 					}
 				}
-			}
-			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				// Remove highlight from any selected node in the tree
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
@@ -515,16 +500,13 @@
 						vm.currentFilterItemSelected = null;
 					}
 				}
-			}
-			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
+			} else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
 					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 				highlightSelectedViewerObject = !event.value.on;
-			}
-			else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+			} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 				multiSelectMode = event.value;
-			}
-			else if (event.type === EventService.EVENT.TREE_READY){
+			} else if (event.type === EventService.EVENT.TREE_READY){
 				/*
 				 * Get all the tree nodes
 				 */
@@ -566,18 +548,15 @@
 			var stack = [node];
 			var head = null;
 
-			while (stack.length > 0)
-			{
+			while (stack.length > 0) {
 				var head = stack.pop();
 
 				if (node !== head) {
 					vm.setToggleState(head, nodeToggleState);
 				}
 
-				if (head.children)
-				{
-					for(var i = 0; i < head.children.length; i++)
-					{
+				if (head.children) {
+					for(var i = 0; i < head.children.length; i++) {
 						stack.push(head.children[i]);
 					}
 				}
@@ -621,9 +600,9 @@
 								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								vm.nodesToShow[j].toggleState = 'invisible';
+								vm.nodesToShow[j].toggleState = "invisible";
 							} else if ((numParentInvisible + numInvisible) > 0) {
-								vm.nodesToShow[j].toggleState = 'parentOfInvisible';
+								vm.nodesToShow[j].toggleState = "parentOfInvisible";
 							} else {
 								vm.setToggleState(vm.nodesToShow[j], "visible");
 							}
@@ -642,7 +621,7 @@
 			
 			for (var key in childNodes){
 
-				var vals = key.split('@');
+				var vals = key.split("@");
 				var account = vals[0];
 				var model = vals[1];
 
@@ -723,8 +702,7 @@
 							}
 							setupInfiniteItemsFilter();
 							setContentHeight(vm.nodes);
-						}
-						else {
+						} else {
 							vm.filterItemsFound = false;
 							vm.onContentHeightRequest({height: noFilterItemsFoundHeight});
 						}
@@ -744,13 +722,11 @@
 				currentSelectedNode.selected = false;
 				if (currentSelectedNode._id === node._id) {
 					currentSelectedNode = null;
-				}
-				else {
+				} else {
 					node.selected = true;
 					currentSelectedNode = node;
 				}
-			}
-			else {
+			} else {
 				node.selected = true;
 				currentSelectedNode = node;
 			}
@@ -758,8 +734,7 @@
 			// Remove highlight from the current selection in the viewer and highlight this object if not the same
 			if (currentSelectedNode === null) {
 				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
-			}
-			else {
+			} else {
 				var map = [];
 
 				traverseNodeAndPushId(node, map);
@@ -773,8 +748,7 @@
 					name: node.name,
 					noHighlight : true
 				});
-				for(var key in map)
-				{
+				for(var key in map) {
 					var vals = key.split("@");
 					var account = vals[0];
 					var model = vals[1];
@@ -854,8 +828,7 @@
 		function updateClickedHidden (node) {
 			if (node.toggleState === "invisible") {
 				clickedHidden[node._id] = node;
-			}
-			else {
+			} else {
 				delete clickedHidden[node._id];
 			}
 		}
@@ -868,8 +841,7 @@
 		function updateClickedShown (node) {
 			if (node.toggleState === "visible") {
 				clickedShown[node._id] = node;
-			}
-			else {
+			} else {
 				delete clickedShown[node._id];
 			}
 		}

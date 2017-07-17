@@ -19,9 +19,9 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.component("model", {
-            restrict: "E",
-            bindings: {
+		.component("model", {
+			restrict: "E",
+			bindings: {
 				account:  "=",
 				model:  "=",
 				branch:   "=",
@@ -31,9 +31,9 @@
 				keysDown: "="
 			},
 			templateUrl: "model.html",
-            controller: ModelCtrl,
+			controller: ModelCtrl,
 			controllerAs: "vm"
-        });
+		});
 
 	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService"];
 
@@ -59,7 +59,7 @@
 
 				e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
 				return confirmationMessage;              // Gecko, WebKit, Chrome <34
-			}
+			};
 
 			window.addEventListener("beforeunload", refreshHandler);
 
@@ -71,7 +71,7 @@
 			var popStateHandler = function () {
 				// the fake state has already been popped by user at this moment
 
-				if(confirm('It will go back to model listing page, are you sure?')){
+				if(confirm("It will go back to model listing page, are you sure?")){
 					// pop one more state if user actually wants to go back
 					UnityUtil.reset();
 					history.go(-1);
@@ -82,18 +82,18 @@
 			};
 
 			//listen for user clicking the back button
-			window.addEventListener('popstate', popStateHandler);
+			window.addEventListener("popstate", popStateHandler);
 
-			$scope.$on('$destroy', function(){
+			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
-				window.removeEventListener('popstate', popStateHandler);
+				window.removeEventListener("popstate", popStateHandler);
 			});
 
 			/*
 			* Get the model element
 			*/
 			$timeout(function () {
-				modelUI = angular.element($element[0].querySelector('#modelUI'));
+				modelUI = angular.element($element[0].querySelector("#modelUI"));
 			});
 
 			panelCard.left.push({
@@ -149,7 +149,7 @@
 						toggle: true,
 						selected: false,
 						firstSelected: false,
-						secondSelected: false,
+						secondSelected: false
 					},{
 						upperDivider: true,
 						label: "Created by: "
@@ -245,7 +245,7 @@
 				vm.setupModelInfo();
 			});
 
-		}
+		};
 
 		vm.setupModelInfo = function() {
 
@@ -256,7 +256,7 @@
 
 				if(!data.federate){
 					panelCard.left[issuesCardIndex].menu.find(function(item, i){
-						if(item.value === 'showSubModels'){
+						if(item.value === "showSubModels"){
 							index = i;
 						}
 
@@ -279,10 +279,9 @@
 				EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
 			});
 
-		}
+		};
 
-		$scope.$watchGroup(["vm.account","vm.model"], function()
-		{
+		$scope.$watchGroup(["vm.account","vm.model"], function() {
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
 				vm.setupModelInfo();
 			}
@@ -313,21 +312,18 @@
 					if (event.value.hasOwnProperty("issue")) {
 						vm.issueAreaIssue = event.value.issue;
 						issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
-					}
-					else if (event.value.hasOwnProperty("type")) {
+					} else if (event.value.hasOwnProperty("type")) {
 						vm.issueAreaType = event.value.type;
 						issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 					}
 					modelUI.prepend(issueArea);
 					$compile(issueArea)($scope);
-				}
-				else {
+				} else {
 					if (angular.isDefined(issueArea)) {
 						issueArea.remove();
 					}
 				}
-			}
-			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
@@ -336,8 +332,7 @@
 					angular.element($element[0].querySelector("#model")).append(element);
 					$compile(element)($scope);
 
-				}
-				else {
+				} else {
 					// Remove measure display
 					element = angular.element($element[0].querySelector("#tdrMeasure"));
 					element.remove();

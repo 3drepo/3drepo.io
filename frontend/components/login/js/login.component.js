@@ -43,7 +43,7 @@
 				StateManager.setStateVar("loggedIn", true);
 				EventService.send(EventService.EVENT.UPDATE_STATE);
 			});
-		}
+		};
 
 		/**
 		 * Attempt to login
@@ -55,8 +55,7 @@
 				if (event.which === enterKey) {
 					AuthService.login(vm.user.username, vm.user.password);
 				}
-			}
-			else {
+			} else {
 				if (vm.user && vm.user.username && vm.user.password) {
 					vm.errorMessage = "";
 					AuthService.login(vm.user.username, vm.user.password).then(function(response){
@@ -88,8 +87,7 @@
 				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
-					}
-					else {
+					} else {
 						vm.errorMessage = UtilsService.getErrorMessage(event.value.error);
 					}
 				}

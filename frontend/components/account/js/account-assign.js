@@ -20,14 +20,14 @@
 
 	angular.module("3drepo")
 		.component("accountAssign", {
-			restrict: 'EA',
-			templateUrl: 'account-assign.html',
+			restrict: "EA",
+			templateUrl: "account-assign.html",
 			bindings: {
-				account: "=",
+				account: "="
 			},
 			controller: accountAssignCtrl,
-			controllerAs: 'vm'
-		})
+			controllerAs: "vm"
+		});
 	
 
 	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$location", "UtilsService", "serverConfig"];
@@ -35,7 +35,7 @@
 	function accountAssignCtrl($scope, $window, $http,  $q, $location, UtilsService, serverConfig) {
 		var vm = this,
 			promise,
-			check
+			check;
 
 		/*
 		 * Init
@@ -79,56 +79,56 @@
 
 			vm.modelRoles = [];
 			
-		}
+		};
 
 		var getStateFromParams = function() {
 			
 			if (check) {
-				vm.fromURL = {}
+				vm.fromURL = {};
 				vm.fromURL.projectSelected = check.project;
 				vm.fromURL.modelSelected = check.model;
 
 				// Trigger the first watcher (teamspace)
 				vm.teamspaceSelected = check.account;
 			}
-		}
+		};
 
 		// GET TEAMSPACES
 		vm.getTeamspaces = function() {
 			
 			var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
 			$http.get(url)
-			.then(function(response) {
+				.then(function(response) {
 
-				vm.teamspaces = response.data.accounts.filter(function(teamspace){
-					return teamspace.isAdmin === true;
+					vm.teamspaces = response.data.accounts.filter(function(teamspace){
+						return teamspace.isAdmin === true;
+					});
+
+					vm.teamspaces.forEach(getUsers);
+					getStateFromParams();
+					vm.loading = false;
+
+				})
+				.catch(function (err) {
+					console.trace(err);
 				});
-
-				vm.teamspaces.forEach(getUsers);
-				getStateFromParams();
-				vm.loading = false;
-
-			})
-			.catch(function (err) {
-				console.trace(err);
-			});
-		}
+		};
 
 		// GET PROJECTS
 
 		vm.setProjects = function(account) {
 			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/projects");
 			return $http.get(url)
-						.then(
-							function(response) {
-								vm.projects = response.data;
-								vm.projectsLoading = false;
-							},
-							function (err) {
-								console.trace(err);
-							}
-						);
-		}
+				.then(
+					function(response) {
+						vm.projects = response.data;
+						vm.projectsLoading = false;
+					},
+					function (err) {
+						console.trace(err);
+					}
+				);
+		};
 	
 
 		vm.postPermissionChange = function(user, permission, addOrRemove) {
@@ -146,13 +146,13 @@
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			$http.put(url, {
 				permissions: user.permissions
-			})
-		}
+			});
+		};
 
 		vm.stateChange = function(user, permission) {
 			var addOrRemove = vm.userHasPermissions(user, permission) === true ? "remove" : "add";
-			vm.postPermissionChange(user, permission, addOrRemove)
-		}
+			vm.postPermissionChange(user, permission, addOrRemove);
+		};
 
 		vm.userHasPermissions = function(user, permission) {
 
@@ -164,7 +164,7 @@
 			});
 			
 			return hasPermissions;
-		}
+		};
 
 		vm.appendUserPermissions = function(teamspace) {
 
@@ -173,7 +173,7 @@
 				var permissionsUsers = response.data;
 				var found;
 				teamspace.assignUsers.forEach(function(user){
-					found = false
+					found = false;
 					permissionsUsers.forEach(function(permissionsUser) {
 						if (permissionsUser.user === user.assignedUser) {
 							user.permissions = permissionsUser.permissions;
@@ -183,10 +183,10 @@
 					if (!found) {
 						user.permissions = [];
 					}
-				})
+				});
 			});
 			
-		}
+		};
 
 		$scope.$watch("vm.teamspaceSelected", function(){
 
@@ -244,25 +244,25 @@
 				});
 			});
 
-		}
+		};
 
 		var getUsers = function(teamspace) {
 			var url = serverConfig.apiUrl(serverConfig.GET_API, teamspace.account + "/subscriptions" );
 			$http.get(url)
-			.then(function(response) {
-				teamspace.assignUsers = response.data;
-			})
-			.catch(function(response){
-				console.error("error", response);
-			});
-		}
+				.then(function(response) {
+					teamspace.assignUsers = response.data;
+				})
+				.catch(function(response){
+					console.error("error", response);
+				});
+		};
 
 		// PROJECTS
 
 		$scope.$watch("vm.projectSelected", function(){
 			// Find the matching project to the one selected
 			vm.selectedProject = vm.projects.find(function(project){
-				return project.name === vm.projectSelected
+				return project.name === vm.projectSelected;
 			});
 
 			if (vm.teamspaceSelected && vm.projectSelected) {
@@ -280,8 +280,8 @@
 
 		vm.projectStateChange = function(user, permission) {
 			var addOrRemove = vm.userHasProjectPermissions(user, permission) === true ? "remove" : "add";
-			vm.postProjectPermissionChange(user, permission, addOrRemove)
-		}
+			vm.postProjectPermissionChange(user, permission, addOrRemove);
+		};
 
 		vm.userHasProjectPermissions = function(user, permission) {
 			var hasPermission = false;
@@ -293,7 +293,7 @@
 				}
 			});
 			return hasPermission;
-		}
+		};
 
 		vm.postProjectPermissionChange = function(user, permission, addOrRemove) {
 
@@ -328,7 +328,7 @@
 				permissions: vm.selectedProject.permissions
 			});
 
-		}
+		};
 
 		// MODELS
 
@@ -342,21 +342,21 @@
 				
 				return $q(function(resolve, reject) {
 
-					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions"
+					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions";
 					var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 					$http.get(url).then(function(response){
 						var users = response.data;
 						vm.selectedModel.assignableUsers = users;
 						vm.selectedModel.assignableUsers.forEach(function(user) {
 							vm.selectedRole[user.user] = user.permission;
-						})
+						});
 						vm.modelReady = true;
 						resolve();
 					})
-					.catch(function(error){
-						console.error("Error", error)
-						reject(error);
-					});	
+						.catch(function(error){
+							console.error("Error", error);
+							reject(error);
+						});	
 					
 				});		
 			}
@@ -370,23 +370,23 @@
 			return Object.keys(vm.models).length && 
 				   vm.modelIds.length && 
 				   Object.keys(vm.models).length === vm.modelIds.length;
-		}
+		};
 
 		vm.appendModelObjects = function(modelId) {
 			var endpoint = vm.selectedTeamspace.account + "/" + modelId + ".json";
 			var modelUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
 			return $http.get(modelUrl)
-						.then(function(response){
-							vm.models[modelId] = response.data;
-							if (vm.fromURL.modelSelected && vm.fromURL.modelSelected === modelId) {
-								vm.modelSelected = vm.fromURL.modelSelected;
-								delete vm.fromURL.modelSelected;
-							}
-						})
-						.catch(function(response){
-							console.log("error", response);
-						});
-		}
+				.then(function(response){
+					vm.models[modelId] = response.data;
+					if (vm.fromURL.modelSelected && vm.fromURL.modelSelected === modelId) {
+						vm.modelSelected = vm.fromURL.modelSelected;
+						delete vm.fromURL.modelSelected;
+					}
+				})
+				.catch(function(response){
+					console.log("error", response);
+				});
+		};
 
 
 		vm.modelStateChange = function(user, role) {
@@ -400,8 +400,8 @@
 			});
 			
 			// Send the update to the server
-			vm.postModelRoleChange(user, role)
-		}
+			vm.postModelRoleChange(user, role);
+		};
 
 		vm.userIsInTeam = function(user) {
 			var isInTeam = false;
@@ -411,7 +411,7 @@
 				}
 			});
 			return isInTeam;
-		}
+		};
 
 		vm.postModelRoleChange = function(user, role) {
 
@@ -423,14 +423,14 @@
 			// We can use the assignable users object as its matches the required 
 			// data structure the API expects
 			$http.post(url, vm.selectedModel.assignableUsers)
-			.then(function(response){
-				console.log(response);
-			})
-			.catch(function(error) {
-				console.error("Error: ", error);
-			});
+				.then(function(response){
+					console.log(response);
+				})
+				.catch(function(error) {
+					console.error("Error: ", error);
+				});
 
-		}
+		};
 
 
 	}

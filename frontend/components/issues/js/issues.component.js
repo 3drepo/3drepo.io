@@ -23,7 +23,7 @@
 			restrict: "E",
 			templateUrl: "issues.html",
 			controller: IssuesCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			bindings: {
 				account: "=",
 				model: "=",
@@ -42,13 +42,13 @@
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			}
-		})
+		});
 
 	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
 	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
 		var vm = this,
-			issue
+			issue;
 
 
 		/*
@@ -81,60 +81,60 @@
 			* Get all the Issues
 			*/
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
-			.then(function (data) {
+				.then(function (data) {
 
-				vm.showProgress = false;
-				vm.toShow = "showIssues";
-				vm.issues = (data === "") ? [] : data;
-				vm.showAddButton = true;
+					vm.showProgress = false;
+					vm.toShow = "showIssues";
+					vm.issues = (data === "") ? [] : data;
+					vm.showAddButton = true;
 
 
-				// if issue id is in url then select the issue
-				var issue = vm.issues.find(function(issue){
-					return issue._id === vm.issueId;
+					// if issue id is in url then select the issue
+					var issue = vm.issues.find(function(issue){
+						return issue._id === vm.issueId;
+					});
+
+					if(issue){
+						vm.displayIssue = issue;
+					}
 				});
-
-				if(issue){
-					vm.displayIssue = issue;
-				}
-			});
 
 					
 			/*
 			* Get all the available roles for the model
 			*/
 			vm.getJobs = IssuesService.getJobs(vm.account, vm.model)
-			.then(function (data) {
+				.then(function (data) {
 
-				vm.availableJobs = data;
+					vm.availableJobs = data;
 
-				var menu = [];
-				data.forEach(function(role){
-					menu.push({
-						value: "filterRole",
-						role: role._id,
-						label: role._id,
-						keepCheckSpace: true,
-						toggle: true,
-						selected: true,
-						firstSelected: false,
-						secondSelected: false
+					var menu = [];
+					data.forEach(function(role){
+						menu.push({
+							value: "filterRole",
+							role: role._id,
+							label: role._id,
+							keepCheckSpace: true,
+							toggle: true,
+							selected: true,
+							firstSelected: false,
+							secondSelected: false
+						});
 					});
-				});
 
-				EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
-					type: 'issues',
-					menu: menu
-				});
+					EventService.send(EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
+						type: "issues",
+						menu: menu
+					});
 
-			});
+				});
 
 			$q.all([vm.getIssues, vm.getJobs]).then(function(){
 				setAllIssuesAssignedRolesColors();
 				EventService.send(EventService.EVENT.ISSUES_READY, true);
 			});
 
-		}
+		};
 
 
 		/**
@@ -237,7 +237,7 @@
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
 				vm.displayIssue = null;
-				$state.go('home.account.model', 
+				$state.go("home.account.model", 
 					{
 						account: vm.account, 
 						model: vm.model, 
@@ -274,7 +274,7 @@
 						subModel.database, 
 						subModel.model, 
 						function(issues){ 
-							newIssueListener(issues, submodel) 
+							newIssueListener(issues, submodel); 
 						}
 					);
 					NotificationService.subscribe.issueChanged(
@@ -343,7 +343,7 @@
 				if(oldIssue._id === issue._id){
 
 
-					if(issue.status === 'closed'){
+					if(issue.status === "closed"){
 						
 						vm.issues[i].justClosed = true;
 						
@@ -369,7 +369,7 @@
 		/*
 		* Unsubscribe notifcation on destroy
 		*/
-		$scope.$on('$destroy', function(){
+		$scope.$on("$destroy", function(){
 			NotificationService.unsubscribe.newIssues(vm.account, vm.model);
 			NotificationService.unsubscribe.issueChanged(vm.account, vm.model);
 
@@ -408,7 +408,7 @@
 				
 			});
 
-		}
+		};
 
 		/**
 		 * Set up editing issue
@@ -434,7 +434,7 @@
 					console.error(error);
 				});
 
-				$state.go('home.account.model.issue', 
+				$state.go("home.account.model.issue", 
 					{
 						account: vm.account, 
 						model: vm.model, 
@@ -446,8 +446,8 @@
 				);
 
 				AnalyticService.sendEvent({
-					eventCategory: 'Issue',
-					eventAction: 'view'
+					eventCategory: "Issue",
+					eventAction: "view"
 				});
 			} else {
 				vm.selectedIssue = issue;

@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountTeam", {
-			restrict: 'EA',
-			templateUrl: 'account-team.html',
+			restrict: "EA",
+			templateUrl: "account-team.html",
 			bindings: {
 				account: "=",
 				item: "=",
@@ -29,7 +29,7 @@
 				subscriptions: "="
 			},
 			controller: AccountTeamCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager"];
@@ -60,7 +60,7 @@
 					}
 				}
 			});
-		}
+		};
 
 		/*
 		 * Watch changes to the new member name
@@ -178,7 +178,9 @@
 				}
 			}
 
-			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {
+				return sub.inCurrentAgreement;
+			}).length;
 			vm.noLicensesAssigned =
 				(vm.numSubscriptions > 1) &&
 				((vm.collaborators.length + vm.members.length) === 0);

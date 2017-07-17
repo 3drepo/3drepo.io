@@ -20,14 +20,14 @@
 
 	angular.module("3drepo")
 		.component("panelCardOptionPrint", {
-			restrict: 'E',
-			templateUrl: 'panel-card-option-print.html',
+			restrict: "E",
+			templateUrl: "panel-card-option-print.html",
 			bindings: {
 				account: "=",
 				model: "="
 			},
 			controller: PanelCardOptionPrintCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	PanelCardOptionPrintCtrl.$inject = ["$window", "serverConfig"];

@@ -16,81 +16,76 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("home", {
-            restrict: "E",
-            templateUrl: "home.html",
+	angular.module("3drepo")
+		.component("home", {
+			restrict: "E",
+			templateUrl: "home.html",
 			bindings: {
 				account: "@",
 				password: "@",
 				loggedInUrl: "@",
 				loggedOutUrl: "@"
 			},
-            controller: HomeCtrl,
-            controllerAs: "vm",
-        })
-        .config(["$injector", function($injector)
-		{
-			if ($injector.has("$mdThemingProvider"))
-			{
+			controller: HomeCtrl,
+			controllerAs: "vm"
+		})
+		.config(["$injector", function($injector) {
+			if ($injector.has("$mdThemingProvider")) {
 				var mdThemingProvider = $injector.get("$mdThemingProvider");
 
-				mdThemingProvider.definePalette('three_d_repo_primary', {
-					'50': '004594',
-					'100': '004594',
-					'200': '004594',
-					'300': '004594',
-					'400': '004594',
-					'500': '004594',
-					'600': '004594',
-					'700': '004594',
-					'800': '004594',
-					'900': '004594',
-					'A100': '004594',
-					'A200': '004594',
-					'A400': '004594',
-					'A700': '004594',
-					'contrastDefaultColor': 'light',
-					'contrastDarkColors': ['50', '100', '200', '300', '400', 'A100'],
-					'contrastLightColors': undefined
+				mdThemingProvider.definePalette("three_d_repo_primary", {
+					"50": "004594",
+					"100": "004594",
+					"200": "004594",
+					"300": "004594",
+					"400": "004594",
+					"500": "004594",
+					"600": "004594",
+					"700": "004594",
+					"800": "004594",
+					"900": "004594",
+					"A100": "004594",
+					"A200": "004594",
+					"A400": "004594",
+					"A700": "004594",
+					"contrastDefaultColor": "light",
+					"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
+					"contrastLightColors": undefined
 				});
 
 				mdThemingProvider.theme("default")
-                .primaryPalette("three_d_repo_primary", {
-					"default": "500",
-					"hue-1": "400",
-					"hue-2": "200",
-					"hue-3": "50"
-				})
-                .accentPalette("green", {
-                    "default": "600"
-                })
-                .warnPalette("red");
+					.primaryPalette("three_d_repo_primary", {
+						"default": "500",
+						"hue-1": "400",
+						"hue-2": "200",
+						"hue-3": "50"
+					})
+					.accentPalette("green", {
+						"default": "600"
+					})
+					.warnPalette("red");
 			}
-        }]);
+		}]);
 
-    HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
+	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 
-    function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location) {
-        var vm = this,
+	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location) {
+		var vm = this,
 			homeLoggedOut,
 			element,
 			state, func, i,
 			elementRef, elementScope;
 
-		function clearDirective()
-		{
-			if (elementRef)
-			{
+		function clearDirective() {
+			if (elementRef) {
 				elementRef.remove();
 				elementScope.$destroy();
 			}
 		}
 
-		function insertDirective(markup)
-		{
+		function insertDirective(markup) {
 			var directiveElement = angular.element(markup);
 			homeLoggedOut.append(directiveElement);
 			elementScope = $scope.$new();
@@ -111,8 +106,7 @@
 			return null;
 		}
 
-		function insertFunctionDirective(func)
-		{
+		function insertFunctionDirective(func) {
 			//var snakeCaseDirectiveName = UtilsService.snake_case(func, "-");
 			// Create element related to function func
 			var directiveMarkup = "<" + func +
@@ -157,7 +151,7 @@
 
 			$timeout(function () {
 				var loginMarkup = "<login></login>";
-				homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
+				homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
 
 				/*
 				* Watch the state to handle moving to and from the login page
@@ -171,21 +165,18 @@
 						clearDirective();
 						var functionToInsert = getFunctionToInsert();
 
-						if (functionToInsert != null)
-						{
+						if (functionToInsert != null) {
 							insertFunctionDirective(functionToInsert);
 						} else {
 							// If you are not logged in
-							if (!AuthService.loggedIn)
-							{
+							if (!AuthService.loggedIn) {
 								insertDirective(loginMarkup);
 							} else {
 								// If you are logged in
 								var accessOwnAccount = (AuthService.username === vm.state.account);
 								var viewAModel    = angular.isDefined(vm.state.model);
 
-								if (!accessOwnAccount && !viewAModel)
-								{
+								if (!accessOwnAccount && !viewAModel) {
 									// Return to your own account page
 									EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
 								}
@@ -196,19 +187,18 @@
 
 			});
 
-			if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
-			{
+			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
 				AuthService.login(vm.account, vm.password);
 			}
 
-		}
+		};
 
-        vm.logout = function () {
-            AuthService.logout();
-        };
+		vm.logout = function () {
+			AuthService.logout();
+		};
 
 		vm.home = function () {
-			console.log("GO HOME")
+			console.log("GO HOME");
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
@@ -224,10 +214,8 @@
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
-				if (event.type === EventService.EVENT.USER_LOGGED_IN)
-				{
-					if (!event.value.error)
-					{
+				if (event.type === EventService.EVENT.USER_LOGGED_IN) {
+					if (!event.value.error) {
 						if(!event.value.initialiser) {
 							StateManager.setStateVar("loggedIn", true);
 							EventService.send(EventService.EVENT.UPDATE_STATE);
@@ -266,8 +254,7 @@
 					} else {
 						$location.path("");
 					}
-				}
-				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
@@ -291,8 +278,7 @@
 					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
 				}
-			}
-			else if (event.type === "keyup") {
+			} else if (event.type === "keyup") {
 				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
 				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
@@ -320,6 +306,6 @@
 		function removeDialog () {
 			$scope.closeDialog();
 		}
-    }
+	}
 }());
 

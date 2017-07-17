@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountModels", {
-			restrict: 'EA',
-			templateUrl: 'account-models.html',
+			restrict: "EA",
+			templateUrl: "account-models.html",
 			bindings: {
 				account: "=",	
 				accounts: "=",
@@ -30,7 +30,7 @@
 				subscriptions: "="
 			},
 			controller: AccountModelsCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm"
 			
 		});
 
@@ -51,7 +51,7 @@
 			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 			vm.units = serverConfig.units;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
-		}
+		};
 		
 		// SETUP FILE UPLOADERS
 		
@@ -85,7 +85,7 @@
 		 * Escape from the add model/federation/project menu
 		 */
 		vm.addEscape = function(event){
-			$element.bind('keydown keypress', function (event) {
+			$element.bind("keydown keypress", function (event) {
 				if(event.which === 27) { // 27 = esc key
 					vm.addButtons = false;
 					vm.addButtonType = "add";
@@ -93,7 +93,7 @@
 					event.preventDefault();
 				}
 			});
-		}
+		};
 
 
 		
@@ -106,7 +106,7 @@
 			project : false,
 			models : false,
 			feds : false
-		} 
+		}; 
 
 		/**
 		 * Get the show/hide state of a data object
@@ -118,7 +118,7 @@
 		var getState = function(node, prop) {
 			if (node[prop] === undefined) node[prop] = false;
 			return node[prop];
-		}
+		};
 
 		/**
 		 * Check if a data object should be shown or hidden
@@ -130,16 +130,16 @@
 		vm.shouldShow = function(items, type) {
 			switch (type) {
 				// Special cases for models and federations
-				case "models":
-					return getState(items, "modelsState");
-				case "federations":
-					return getState(items, "fedsState")
+			case "models":
+				return getState(items, "modelsState");
+			case "federations":
+				return getState(items, "fedsState");
 
 				// All other cases
-				default:
-					return getState(items, "state")
+			default:
+				return getState(items, "state");
 			}
-		}
+		};
 
 		/**
 		 * Invert the state of a teamspace (to show or hide)
@@ -147,7 +147,7 @@
 		 */
 		vm.toggleTeamspace = function(teamspace) {
 			teamspace.state = !teamspace.state;
-		}
+		};
 
 		/**
 		 * Invert the state of a part of the default/unassigned tree 
@@ -157,7 +157,7 @@
 		vm.toggleDefault = function(type) {
 			vm.showDefault[type] = !vm.showDefault[type];
 			return vm.showDefault[type];
-		}
+		};
 
 		/**
 		 * Invert the state of projects (to show or hide)
@@ -165,7 +165,7 @@
 		 */
 		vm.toggleProjects = function(projects) {
 			projects.state = !projects.state;
-		}
+		};
 
 		/**
 		 * Invert the state of a project and sub projects (to show or hide)
@@ -177,7 +177,7 @@
 				model.modelState = !!project.state;
 				model.fedState = !!project.state;
 			});
-		}
+		};
 
 		/**
 		 * Invert the models node
@@ -185,7 +185,7 @@
 		 */
 		vm.toggleModels = function(model) {
 			model.modelsState = !model.modelsState;
-		}
+		};
 
 		/**
 		 * Invert the federations node
@@ -193,26 +193,26 @@
 		 */
 		vm.toggleFederations = function(project) {
 			project.fedsState = !project.fedsState;
-		}
+		};
 
 
 		// Checks
 
 		vm.hasFederations = function(models) { 
-			return AccountDataService.hasFederations(models) 
+			return AccountDataService.hasFederations(models); 
 		};
 
 		vm.getFederations = function(models) { 
 			return AccountDataService.getFederations(models); 
-		}
+		};
 
 		vm.getIndividualModels = function(models) {
 			return AccountDataService.getIndividualModels(models); 
-		}
+		};
 
 		vm.getProjects = function(teamspace) { 
 			return AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace); 
-		}
+		};
 
 		// ADD PROJECTS/FEDERATIONS/MODELS
 
@@ -222,7 +222,7 @@
 		vm.addButtonsToggle = function() {
 			vm.addButtons = !vm.addButtons;
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
-		}
+		};
 
 		// FEDERATIONS
 
@@ -253,7 +253,7 @@
 					vm.isSaving = false;
 				} else {
 
-					vm.errorMessage = '';
+					vm.errorMessage = "";
 					vm.showInfo = false;
 					vm.federationData.teamspace = teamspaceName;
 					vm.federationData.project = projectName;
@@ -276,18 +276,18 @@
 					vm.closeDialog();
 					
 					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: (vm.federationData._isEdit) ? 'edit' : 'create',
-						eventLabel: 'federation'
+						eventCategory: "Model",
+						eventAction: (vm.federationData._isEdit) ? "edit" : "create",
+						eventLabel: "federation"
 					});
 				}
 
 			})
-			.catch(function(error){
-				vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
-				vm.isSaving = false;
+				.catch(function(error){
+					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
+					vm.isSaving = false;
 
-			});
+				});
 
 			$timeout(function () {
 				$scope.$apply();
@@ -304,7 +304,7 @@
 			var models;
 
 			// isDefault is a string for some reason?
-			if (typeof(isDefault) === "string") isDefault = (isDefault === "true")
+			if (typeof(isDefault) === "string") isDefault = (isDefault === "true");
 			
 			if (!isDefault) {
 
@@ -324,8 +324,8 @@
 				vm.federationData, 
 				models
 			);
-			return noneFederated
-		}
+			return noneFederated;
+		};
 
 
 		/**
@@ -384,7 +384,7 @@
 				type: "",
 				subModels: []
 			};
-			vm.errorMessage = '';
+			vm.errorMessage = "";
 			UtilsService.showDialog("federation-dialog.html", $scope, event, true, null, false, dialogCloseToId);
 		};
 
@@ -403,7 +403,7 @@
 		/*
 		 * Watch new model data
 		 */
-		$scope.$watch('{a : vm.newModelData, b: vm.newModelFileToUpload.name}', function (data){
+		$scope.$watch("{a : vm.newModelData, b: vm.newModelFileToUpload.name}", function (data){
 
 			var newValue = vm.newModelData;
 
@@ -426,20 +426,20 @@
 
 			if(vm.newModelFileToUpload){
 				vm.showNewModelErrorMessage = false;
-				vm.newModelErrorMessage = '';
+				vm.newModelErrorMessage = "";
 
-				var names = vm.newModelFileToUpload.name.split('.');
+				var names = vm.newModelFileToUpload.name.split(".");
 				var find = names[names.length - 1].toLowerCase();
-				var match = serverConfig.acceptedFormat.indexOf(find) === -1
+				var match = serverConfig.acceptedFormat.indexOf(find) === -1;
 
 				if(names.length === 1){
 					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = 'Filename must have extension';
+					vm.newModelErrorMessage = "Filename must have extension";
 					vm.newModelFileToUpload = null;
 				} else if(match) {
 					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = 'File format not supported';
-					vm.newModelFileToUpload = null
+					vm.newModelErrorMessage = "File format not supported";
+					vm.newModelFileToUpload = null;
 				}
 			}
 
@@ -494,7 +494,7 @@
 									projectToDeleteFrom, 
 									response.data.model
 								);
-								break
+								break;
 
 							} else {
 								// If default
@@ -512,11 +512,10 @@
 					vm.addButtons = false;
 					vm.addButtonType = "add";
 					AnalyticService.sendEvent({
-						eventCategory: 'Model',
-						eventAction: 'delete'
+						eventCategory: "Model",
+						eventAction: "delete"
 					});
-				}
-				else {
+				} else {
 					vm.deleteError = "Error deleting model";
 					if (response.data.message) {
 						vm.deleteError = "Error: " + response.data.message;
@@ -578,8 +577,7 @@
 				if (event.which === enterKey) {
 					doSave = true;
 				}
-			}
-			else {
+			} else {
 				doSave = true;
 			}
 
@@ -587,13 +585,13 @@
 
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
 					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = 'Invalid revision name';
+					vm.newModelErrorMessage = "Invalid revision name";
 					return;
 				}
 				
 				if(!vm.newModelData.name){
 					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = 'Invalid model name';
+					vm.newModelErrorMessage = "Invalid model name";
 					return;
 				}
 
@@ -602,8 +600,7 @@
 					if (response.data.status === 400) {
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = response.data.message;
-					}
-					else {
+					} else {
 						vm.modelsExist = true;
 						// Add model to list
 						model = {
@@ -625,8 +622,8 @@
 						vm.closeDialog();
 						
 						AnalyticService.sendEvent({
-							eventCategory: 'model',
-							eventAction: 'create'
+							eventCategory: "model",
+							eventAction: "create"
 						});
 					}
 				});
@@ -692,10 +689,10 @@
 					// Check if the project exists and it if so
 					accountToUpdate.projects.forEach(function(project){
 						if (project.name === projectName ) {
-							project.models.push(model)
+							project.models.push(model);
 							found = true;
 						} 
-					})
+					});
 					// If not just put it in default/unassigned models
 					if (!found) {
 						accountToUpdate.models.push(model);
@@ -707,7 +704,7 @@
 
 				accountToUpdate = {
 					name: account,
-					models: [model],
+					models: [model]
 				};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
@@ -742,14 +739,14 @@
 			projectOptions : {
 				edit: {
 					label: "Edit", 
-					icon: "edit", 
+					icon: "edit" 
 				},
 				delete: {
 					label: "Delete", 
-					icon: "delete", 
-				},
+					icon: "delete" 
+				}
 			}
-		} 
+		}; 
 
 
 		/**
@@ -761,18 +758,18 @@
 		 */
 		vm.doProjectOption = function(option, project, teamspace) {
 			switch (option) {
-				case "delete":
-					vm.projectData.deleteName = project.name;
-					vm.projectData.deleteTeamspace = teamspace.name;
-					vm.projectData.deleteWarning = "This will remove the project from your teamspace!";
-					UtilsService.showDialog("delete-project-dialog.html", $scope, event, true);	
-					break;
+			case "delete":
+				vm.projectData.deleteName = project.name;
+				vm.projectData.deleteTeamspace = teamspace.name;
+				vm.projectData.deleteWarning = "This will remove the project from your teamspace!";
+				UtilsService.showDialog("delete-project-dialog.html", $scope, event, true);	
+				break;
 
-				case "edit":
-					vm.editProject(project, teamspace);
-					break;
+			case "edit":
+				vm.editProject(project, teamspace);
+				break;
 			}
-		}
+		};
 
 
 		/**
@@ -782,9 +779,9 @@
 			vm.projectData.teamspaceName = "";
 			vm.projectData.newProjectName = "";
 			vm.projectData.oldProjectName = "";
-			vm.projectData.errorMessage = '';
+			vm.projectData.errorMessage = "";
 			UtilsService.showDialog("project-dialog.html", $scope, event, true);
-		}
+		};
 
 
 		/**
@@ -796,9 +793,9 @@
 			vm.projectData.oldProjectName = project.name;
 			vm.projectData.teamspaceName = teamspace.name;
 			vm.projectData.newProjectName = project.name;
-			vm.projectData.errorMessage = '';
+			vm.projectData.errorMessage = "";
 			UtilsService.showDialog("project-dialog.html", $scope, event, true);
-		}
+		};
 
 
 		/**
@@ -810,7 +807,7 @@
 			var url = teamspaceName + "/projects/";
 			var promise = UtilsService.doPost({"name": projectName}, url);
 			vm.handleProjectPromise(promise, teamspaceName, false);
-		}
+		};
 
 
 		/**
@@ -827,7 +824,7 @@
 				newProjectName: newProjectName, 
 				oldProjectName : oldProjectName
 			});
-		}
+		};
 
 
 		/**
@@ -842,7 +839,7 @@
 				projectName : projectName,
 				delete: true
 			});
-		}
+		};
 
 		
 		/**
@@ -881,7 +878,7 @@
 						);
 					}
 
-					vm.errorMessage = '';
+					vm.errorMessage = "";
 					delete vm.newProjectTeamspace;
 					delete vm.newProjectName;
 					vm.addButtons = false;
@@ -891,7 +888,7 @@
 
 			});
 
-		}
+		};
 
 
 		// ACCOUNTS

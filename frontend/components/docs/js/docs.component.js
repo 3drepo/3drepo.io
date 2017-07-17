@@ -20,15 +20,15 @@
 
 	angular.module("3drepo")
 		.component("docs", {
-			restrict: 'EA',
-			templateUrl: 'docs.html',
+			restrict: "EA",
+			templateUrl: "docs.html",
 			bindings: {
 				show: "=",
 				onContentHeightRequest: "&",
 				treeMap: "="
 			},
 			controller: DocsCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm"
 			
 		});
 
@@ -49,7 +49,7 @@
 		vm.$onInit = function() {
 			vm.showDocsGetProgress = false;
 			vm.onContentHeightRequest({height: 80});
-		}
+		};
 
 		/*
 		 * Set up event watching
@@ -105,15 +105,11 @@
 					vm.show = false;
 				}
 
-			}
-			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				vm.show = false;
-			}
-			else if (event.type === EventService.EVENT.AUTO_META_DATA) {
+			} else if (event.type === EventService.EVENT.AUTO_META_DATA) {
 				autoMetaData = event.value;
-			}
-			else if (event.type === EventService.EVENT.PIN_DROP_MODE)
-			{
+			} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
 				pinMode = event.value;
 			}
 		});

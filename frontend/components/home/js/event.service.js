@@ -95,8 +95,7 @@
 		var send = function (type, value) {
 			var stack = (new Error()).stack;
 			$timeout(function() {
-				if (angular.isUndefined(type))
-				{
+				if (angular.isUndefined(type)) {
 					console.trace("UNDEFINED EVENT TYPE" + type);
 					
 				} else {
@@ -107,8 +106,7 @@
 
 		var sendError = function(type, value) {
 			$timeout(function() {
-				if (angular.isUndefined(type))
-				{
+				if (angular.isUndefined(type)) {
 					console.trace("UNDEFINED ERROR TYPE");
 				} else {
 					//console.log(type + " : " + JSON.stringify(value));
@@ -120,8 +118,12 @@
 		return {
 			EVENT: EVENT,
 			ERROR: ERROR,
-			currentEvent: function() {return currentEvent;},
-			currentError: function() {return currentError;},
+			currentEvent: function() {
+				return currentEvent;
+			},
+			currentError: function() {
+				return currentError;
+			},
 			send: send,
 			sendError: sendError
 		};

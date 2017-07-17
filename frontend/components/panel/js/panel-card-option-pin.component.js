@@ -16,24 +16,24 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("panelCardOptionPin", {
-            restrict: 'E',
-            templateUrl: 'panel-card-option-pin.html',
-            bindings: {},
-            controller: PanelCardOptionPinCtrl,
-            controllerAs: 'vm'
-        });
+	angular.module("3drepo")
+		.component("panelCardOptionPin", {
+			restrict: "E",
+			templateUrl: "panel-card-option-pin.html",
+			bindings: {},
+			controller: PanelCardOptionPinCtrl,
+			controllerAs: "vm"
+		});
 
-    PanelCardOptionPinCtrl.$inject = ["EventService"];
+	PanelCardOptionPinCtrl.$inject = ["EventService"];
 
-    function PanelCardOptionPinCtrl (EventService) {
-        var vm = this;
+	function PanelCardOptionPinCtrl (EventService) {
+		var vm = this;
 
-        vm.setupPinMode = function() {
-            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "pin");
-        };
-    }
+		vm.setupPinMode = function() {
+			EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "pin");
+		};
+	}
 }());

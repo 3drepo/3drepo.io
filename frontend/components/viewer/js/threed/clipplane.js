@@ -18,7 +18,7 @@
 var ClipPlane = {};
 
 (function() {
-    "use strict";
+	"use strict";
     
 	/*
 	 * Clipping plane constructor and manipulator
@@ -182,24 +182,19 @@ var ClipPlane = {};
 		/**
 		 * Given a list of vertices, return its outline
 		 */
-		this.determineOutline = function(vertices)
-		{
+		this.determineOutline = function(vertices) {
 			var min = vertices[0].slice();
 			var max = vertices[0].slice();
 
-			for(var i = 1; i < vertices.length; ++i)
-			{
-				for(var j = 0; j < 3; ++j)
-				{
-					if(min[j] > vertices[i][j])
-					{
-						min[j] = vertices[i][j]
+			for(var i = 1; i < vertices.length; ++i) {
+				for(var j = 0; j < 3; ++j) {
+					if(min[j] > vertices[i][j]) {
+						min[j] = vertices[i][j];
 					}
 
 
-					if(max[j] < vertices[i][j])
-					{
-						max[j] = vertices[i][j]
+					if(max[j] < vertices[i][j]) {
+						max[j] = vertices[i][j];
 					}
 				}
 			}
@@ -214,28 +209,21 @@ var ClipPlane = {};
 
 
 			//There are only 4 vertices, taking first as base point, 2 would be perpendicular and 1 would not.
-			for(var i = 1; i < vertices.length; ++i)
-			{	
+			for(var i = 1; i < vertices.length; ++i) {	
 				var currentPnt = new x3dom.fields.SFVec3f(vertices[i][0], vertices[i][1], vertices[i][2]);
 				var curToCen = currentPnt.subtract(centrePnt);
 				var dotProd = Math.abs(baseToCen.normalize().dot(curToCen.normalize()));
-				if(Math.abs(dotProd - 1.0) < 0.01)
-				{
+				if(Math.abs(dotProd - 1.0) < 0.01) {
 
 					//not perpendicular, must be the opposite point
 					outline[2] = vertices[i];
 
-				}
-				else
-				{
+				} else {
 					//the vectors are perpendicular
 					//this must be 2 or 4
-					if(outline[1])
-					{
+					if(outline[1]) {
 						outline[3] = vertices[i];
-					}
-					else
-					{
+					} else {
 						outline[1] = vertices[i];
 					}
 				}
@@ -244,7 +232,7 @@ var ClipPlane = {};
 			outline.push(vertices[0]);
 
 			return outline;
-		}
+		};
 
 
 		/**
@@ -254,9 +242,9 @@ var ClipPlane = {};
 		this.movePlane = function(axis, distance) {
 			axis = axis.toUpperCase();
 			// When the axis is change the normal to the plane is changed
-			this.normal = [ (axis === "X") ? this.clipDirection : 0,
-					(axis === "Y") ? this.clipDirection : 0,
-					(axis === "Z") ? this.clipDirection : 0];
+			this.normal = [(axis === "X") ? this.clipDirection : 0,
+				(axis === "Y") ? this.clipDirection : 0,
+				(axis === "Z") ? this.clipDirection : 0];
 
 			// Update the transform containing the clipping plane
 			var axisIDX = "XYZ".indexOf(axis);
@@ -279,8 +267,7 @@ var ClipPlane = {};
 		 * Transform the clipping plane by the given matrix
 		 * @param {sfmatrix4f} matrix - transformation matrix to apply to clipping plane
 		 */
-		this.transformClipPlane = function(matrix, writeProperties)
-		{
+		this.transformClipPlane = function(matrix, writeProperties) {
 
 			var min = volume.min.toGL();
 			var max = volume.max.toGL();
@@ -290,8 +277,7 @@ var ClipPlane = {};
 			var planePnt = normal_x3d.multiply(-this.distance);
 			point = planePnt.toGL();
 			
-			if(matrix)
-			{
+			if(matrix) {
 				normal_x3d = matrix.multMatrixVec(normal_x3d);
 				normal_x3d.normalize();
 
@@ -300,15 +286,12 @@ var ClipPlane = {};
 			
 
 				var plane = new x3dom.fields.SFVec4f(normal_x3d.x, normal_x3d.y, normal_x3d.z, distance);
-			}
-			else
-			{
+			} else {
 				var plane = new x3dom.fields.SFVec4f(normal_x3d.x, normal_x3d.y, normal_x3d.z, this.distance);
 			}
 
 
-			if(writeProperties)
-			{				
+			if(writeProperties) {				
 
 				// Update the clipping element plane equation
 				clipPlaneElem.setAttribute("plane", plane.toGL().join(" "));
@@ -342,19 +325,17 @@ var ClipPlane = {};
 					[new x3dom.fields.SFVec3f(min.x, min.y, max.z), new x3dom.fields.SFVec3f(max.x, min.y, max.z)],
 					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(max.x, max.y, max.z)],
 					[new x3dom.fields.SFVec3f(min.x, max.y, max.z), new x3dom.fields.SFVec3f(min.x, min.y, max.z)],
-					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)],
-					];
+					[new x3dom.fields.SFVec3f(min.x, max.y, min.z), new x3dom.fields.SFVec3f(max.x, max.y, min.z)]
+				];
 
 				var outline = [];
 			
-				for(var i = 0; i < bboxOutline.length; ++i)
-				{
+				for(var i = 0; i < bboxOutline.length; ++i) {
 
 					var lineDir = bboxOutline[i][1].subtract(bboxOutline[i][0]);
 					lineDir = lineDir.normalize();
 					var dotProd =lineDir.dot(normal_x3d); 
-					if(Math.abs(dotProd) > 0.000001)
-					{
+					if(Math.abs(dotProd) > 0.000001) {
 						//dot product isn't zero -> has single point intersection
 						var d = (planePnt.subtract(bboxOutline[i][0])).dot(normal_x3d) / dotProd;
 						var intersectPnt = lineDir.multiply(d).add(bboxOutline[i][0]);
@@ -362,8 +343,7 @@ var ClipPlane = {};
 						//the intersection point must lie within the global bbox
 						if(intersectPnt.x >= min.x && intersectPnt.x <= max.x 
 								&& intersectPnt.y >= min.y && intersectPnt.y <= max.y 
-								&& intersectPnt.z >= min.z && intersectPnt.z <= max.z)
-						{
+								&& intersectPnt.z >= min.z && intersectPnt.z <= max.z) {
 							outline.push(intersectPnt.toGL());	
 						}	
 
@@ -374,21 +354,19 @@ var ClipPlane = {};
 				outline = this.determineOutline(outline);
 
 				outlineCoords.setAttribute("point",
-				outline.map(function(item) {
-					return item.join(" ");
-				}).join(","));
+					outline.map(function(item) {
+						return item.join(" ");
+					}).join(","));
 			}
 
 
 			return {normal: normal_x3d.toGL(), distance: distance};
-		}
+		};
 
-		this.getProperties = function(matrix)
-		{
+		this.getProperties = function(matrix) {
 
 			var res = JSON.parse(JSON.stringify(this));
-			if(matrix)
-			{
+			if(matrix) {
 				var newValues = this.transformClipPlane(matrix, false);	
 				res.normal  = newValues.normal;
 				res.distance = newValues.distance;
@@ -396,7 +374,7 @@ var ClipPlane = {};
 
 
 			return res;
-		}
+		};
 
 		/**
 		 * Destroy me and everything connected with me
@@ -413,8 +391,7 @@ var ClipPlane = {};
 
 		sceneBbox = viewer.runtime.getBBox(viewer.getScene());
 
-		if(normal || axis != "")
-		{
+		if(normal || axis != "") {
 
 			outlineMat.setAttribute("emissiveColor", colour.join(" "));
 			outlineLines.setAttribute("vertexCount", 5);
@@ -428,19 +405,15 @@ var ClipPlane = {};
 
 			// Attach to the root node of the viewer
 			viewer.getScene().appendChild(coordinateFrame);
-			if(parentNode)
-			{
+			if(parentNode) {
 				volume = viewer.runtime.getBBox(parentNode);
-			}
-			else
-			{
+			} else {
 				volume = sceneBbox;
 			
 			}
 
 			// Move the plane to finish construction
-			if(!normal)
-			{		
+			if(!normal) {		
 				this.movePlane(axis, distance);
 			}
 

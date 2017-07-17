@@ -20,13 +20,13 @@
 
 	angular.module("3drepo")
 		.component("panelCardOptionAdd", {
-			restrict: 'E',
-			templateUrl: 'panel-card-option-add.html',
+			restrict: "E",
+			templateUrl: "panel-card-option-add.html",
 			bindings: {
 				showAdd: "="
 			},
 			controller: PanelCardOptionAddCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	function PanelCardOptionAddCtrl() {

@@ -81,8 +81,7 @@ var Pin = {};
 		UnityUtil.changePinColour(self.id, colours[0]);
 	};
 
-	Pin.prototype.highlight = function()
-	{
+	Pin.prototype.highlight = function() {
 		var self = this;
 
 		self.highlighted = !self.highlighted;

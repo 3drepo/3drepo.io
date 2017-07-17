@@ -32,18 +32,15 @@
 					if (referenceValue > 1073741824) {
 						factor = bytesInGB;
 						units = " GB";
-					}
-					else {
+					} else {
 						factor = bytesInMB;
 						units = " MB";
 					}
-				}
-				else {
+				} else {
 					if (input > 1073741824) {
 						factor = bytesInGB;
 						units = " GB";
-					}
-					else {
+					} else {
 						factor = bytesInMB;
 						units = " MB";
 					}
@@ -95,7 +92,7 @@
 
 		.filter("revisionDate", function () {
 			return function(input) {
-				return new Date(Date.parse(input)).toLocaleString()
+				return new Date(Date.parse(input)).toLocaleString();
 			};
 		});
 

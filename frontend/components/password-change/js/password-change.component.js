@@ -16,99 +16,96 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("passwordChange", {
-            restrict: "E",
-            bindings: {
-                username: "=",
-                token: "="
-            },
-            templateUrl: "password-change.html",
-            controller: PasswordChangeCtrl,
-            controllerAs: "vm"
-        });
+	angular.module("3drepo")
+		.component("passwordChange", {
+			restrict: "E",
+			bindings: {
+				username: "=",
+				token: "="
+			},
+			templateUrl: "password-change.html",
+			controller: PasswordChangeCtrl,
+			controllerAs: "vm"
+		});
 
-    PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
+	PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
 
-    function PasswordChangeCtrl ($scope, UtilsService, EventService) {
-        var vm = this,
-            enterKey = 13,
-            promise,
-            messageColour = "rgba(0, 0, 0, 0.7)",
-            messageErrorColour = "#F44336";
+	function PasswordChangeCtrl ($scope, UtilsService, EventService) {
+		var vm = this,
+			enterKey = 13,
+			promise,
+			messageColour = "rgba(0, 0, 0, 0.7)",
+			messageErrorColour = "#F44336";
         
-        /*
+		/*
          * Init
          */
-        vm.$onInit = function() {
-            vm.passwordChanged = false;
-            vm.showProgress = false;
-        }
+		vm.$onInit = function() {
+			vm.passwordChanged = false;
+			vm.showProgress = false;
+		};
 
-        /*
+		/*
          * Watch inputs to clear any message
          */
-        $scope.$watch("vm.newPassword", function () {
-            vm.message = "";
-        });
+		$scope.$watch("vm.newPassword", function () {
+			vm.message = "";
+		});
 
-        /**
+		/**
          * Process forgotten password recovery
          */
-        vm.passwordChange = function (event) {
-            if (angular.isDefined(event)) {
-                if (event.which === enterKey) {
-                    doPasswordChange();
-                }
-            }
-            else {
-                doPasswordChange();
-            }
-        };
+		vm.passwordChange = function (event) {
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doPasswordChange();
+				}
+			} else {
+				doPasswordChange();
+			}
+		};
 
-        /**
+		/**
          * Take the user back to the login page
          */
-        vm.goToLoginPage = function () {
-            EventService.send(EventService.EVENT.GO_HOME);
-        };
+		vm.goToLoginPage = function () {
+			EventService.send(EventService.EVENT.GO_HOME);
+		};
 
-        /**
+		/**
          * Do password change
          */
-        function doPasswordChange() {
-            if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
-                    vm.messageColor = messageColour;
-                    vm.message = "Please wait...";
-                    vm.showProgress = true;
-                    promise = UtilsService.doPut(
-                        {
-                            token: vm.token,
-                            newPassword: vm.newPassword
-                        },
-                        vm.username + "/password"
-                    );
-                    promise.then(function (response) {
-                        vm.showProgress = false;
-                        if (response.status === 400) {
-                            vm.messageColor = messageErrorColour;
-                            vm.message = "Error changing password";
-                        }
-                        else {
-                            vm.passwordChanged = true;
-                            vm.messageColor = messageColour;
-                            vm.message = "Your password has been reset. Please go to the login page.";
-                        }
-                    });
-                }
-                else {
-                    vm.messageColor = messageErrorColour;
-                    vm.message = "A new password must be entered";
-                }
-            }
-        }
-    }
+		function doPasswordChange() {
+			if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
+				if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
+					vm.messageColor = messageColour;
+					vm.message = "Please wait...";
+					vm.showProgress = true;
+					promise = UtilsService.doPut(
+						{
+							token: vm.token,
+							newPassword: vm.newPassword
+						},
+						vm.username + "/password"
+					);
+					promise.then(function (response) {
+						vm.showProgress = false;
+						if (response.status === 400) {
+							vm.messageColor = messageErrorColour;
+							vm.message = "Error changing password";
+						} else {
+							vm.passwordChanged = true;
+							vm.messageColor = messageColour;
+							vm.message = "Your password has been reset. Please go to the login page.";
+						}
+					});
+				} else {
+					vm.messageColor = messageErrorColour;
+					vm.message = "A new password must be entered";
+				}
+			}
+		}
+	}
 }());

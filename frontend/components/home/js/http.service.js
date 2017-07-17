@@ -24,10 +24,8 @@
 	HttpService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
 	function HttpService($http, $q, EventService, serverConfig) {
-		var handlerFactory = function(httpReq)
-		{
-			return function (type, url, success, failure)
-			{
+		var handlerFactory = function(httpReq) {
+			return function (type, url, success, failure) {
 				var deferred = $q.defer();
 
 				// Determine full url
@@ -35,12 +33,13 @@
 
 				// If not success function is specified then
 				// provide a default one
-				var successFunc = success || function (response) { deferred.resolve(response.data); };
+				var successFunc = success || function (response) {
+					deferred.resolve(response.data); 
+				};
 
 				// If no failure function is specified then provide a default one
 				var failureFunc = failure || function (response) {
-					if (response.status === 404 || response.status === 401)
-					{
+					if (response.status === 404 || response.status === 401) {
 						// If there is a not found error or an unauthorized error
 						// then panic and clear the state. Don't worry everything will
 						// recover. :)

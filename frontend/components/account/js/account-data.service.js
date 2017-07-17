@@ -32,76 +32,86 @@
 		};
 
 		var getFederationsByProjectName = function(teamspaces, teamspaceName, projectName) { 
-			var project = getProject(teamspaces, teamspaceName, projectName)
-			return project.models.filter(function(model) { return model.subModels });
-		}
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			return project.models.filter(function(model) {
+				return model.subModels; 
+			});
+		};
 
 		var getIndividualModelsByProjectName = function(teamspaces, teamspaceName, projectName) {
-			var project = getProject(teamspaces, teamspaceName, projectName)
-			return project.models.filter(function(model) { return !model.subModels });
-		}
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			return project.models.filter(function(model) {
+				return !model.subModels; 
+			});
+		};
 
 		var getIndividualTeamspaceModels = function(teamspaces, teamspaceName) {
-			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
-			return teamspace.models.filter(function(model) { return !model.subModels });
-		}
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
+			return teamspace.models.filter(function(model) {
+				return !model.subModels; 
+			});
+		};
 
 		var hasFederations = function(models) {
 			return getFederations(models).length > 0;
 		};
 
 		var getFederations = function(models) { 
-			return models.filter(function(model) { return model.subModels });
-		}
+			return models.filter(function(model) {
+				return model.subModels; 
+			});
+		};
 
 		var getIndividualModels = function(models) {
-			return models.filter(function(model) { return !model.subModels });
-		}
+			return models.filter(function(model) {
+				return !model.subModels; 
+			});
+		};
 
 		var removeProjectInTeamspace = function(teamspaces, teamspaceName, projectName) {
-			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
 			teamspace.projects.forEach(function(project, i){
 				if (projectName === project.name) {
 					teamspace.projects.splice(i, 1);
 				}
 			});
-		}
+		};
 
 
 		var renameProjectInTeamspace = function(teamspaces, teamspaceName, newProjectName, oldProjectName) {
-			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
 			teamspace.projects.forEach(function(project){
 				if (project.name === oldProjectName) {
 					project.name = newProjectName;
 				}
 			});
-		}
+		};
 
 
 		var addProjectToTeamspace = function(teamspaces, teamspaceName, project) {
-			var teamspace = getTeamspaceByName(teamspaces, teamspaceName)
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
 			teamspace.projects.push(project);
-		}
+		};
 
 
-        var getProjectsByTeamspaceName = function(teamspaces, name) {
+		var getProjectsByTeamspaceName = function(teamspaces, name) {
 
 			var projects = [];
 			teamspaces.forEach(function(teamspace){
 				if (teamspace.name === name) {
-					projects = teamspace.projects
+					projects = teamspace.projects;
 				}
-			})
+			});
 			
-			return projects
+			return projects;
 	
-		}
+		};
 
-        var getTeamspaceByName = function(teamspaces, name) {
+		var getTeamspaceByName = function(teamspaces, name) {
 			return teamspaces.filter(function(teamspace){
-				return teamspace.name === name 
+				return teamspace.name === name; 
 			})[0];
-		}
+		};
 
 		var isSubModel = function(federation, model) {
 			var isSubModelOfFed = false;
@@ -111,13 +121,13 @@
 				}
 			});
 			return isSubModelOfFed;
-		}
+		};
 
 		var getNoneFederatedModels = function(federation, models) {
 			return models.filter(function(model){
-				return !isSubModel(federation, model)
+				return !isSubModel(federation, model);
 			});
-		}
+		};
 
 		var removeFromFederation = function (federation, modelId) {
 			
@@ -129,7 +139,7 @@
 			
 		};
 
-        var getProject = function(teamspaces, teamspaceName, projectName) {
+		var getProject = function(teamspaces, teamspaceName, projectName) {
 
 			// Return models that are not federated (federations)
 			var selectedTeamspace = teamspaces.filter(function(teamspace) {
@@ -142,12 +152,12 @@
 
 			return selectedProject;
 	
-		}
+		};
 
 
-        var getModels = function(teamspaces, teamspaceName, projectName) {
+		var getModels = function(teamspaces, teamspaceName, projectName) {
 			return getProject(teamspaces, teamspaceName, projectName).models;
-		}
+		};
 
 		var removeModelByProjectName = function(teamspaces, teamspaceName, projectName, modelName) {
 			var models = getModels(teamspaces, teamspaceName, projectName);
@@ -158,7 +168,7 @@
 					
 				}
 			});
-		}
+		};
 
 		var removeFromFederationByProjectName = function(teamspaces, teamspaceName, projectName, modelName) {		
 			var federations = getFederationsByProjectName(teamspaces, teamspaceName, projectName);
@@ -178,10 +188,10 @@
 			addProjectToTeamspace : addProjectToTeamspace,
 			isSubModel : isSubModel,
 			getNoneFederatedModels : getNoneFederatedModels,
-            getModels : getModels,
-            getProject : getProject,
-            getProjectsByTeamspaceName : getProjectsByTeamspaceName,
-            getTeamspaceByName : getTeamspaceByName,
+			getModels : getModels,
+			getProject : getProject,
+			getProjectsByTeamspaceName : getProjectsByTeamspaceName,
+			getTeamspaceByName : getTeamspaceByName,
 			getIndividualModels : getIndividualModels,
 			removeFromFederation: removeFromFederation,
 			hasFederations : hasFederations,
@@ -193,7 +203,7 @@
 			removeModelByProjectName : removeModelByProjectName,
 			getIndividualTeamspaceModels : getIndividualTeamspaceModels
 
-        };
+		};
 	
 		return accountDataService;
 

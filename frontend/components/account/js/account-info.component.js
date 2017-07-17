@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountInfo", {
-			restrict: 'E',
-			templateUrl: 'account-info.html',
+			restrict: "E",
+			templateUrl: "account-info.html",
 			bindings: {
 				username: "=",
 				firstName: "=",
@@ -32,7 +32,7 @@
 				loading: "="
 			},
 			controller: AccountInfoCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
@@ -51,7 +51,7 @@
 				licenses: {label: "Licenses"},
 				assign: {label: "Assign Permissons" }
 			};
-		}
+		};
 
 		/**
 		 * Show account "page"
@@ -65,7 +65,7 @@
 
 
 		function getAvatarUrl(){
-			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + '?' + new Date().valueOf();
+			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + "?" + new Date().valueOf();
 		}
 
 		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){
@@ -81,10 +81,10 @@
 
 		vm.upload = function(){
 
-			var file = document.createElement('input');
+			var file = document.createElement("input");
 
-			file.setAttribute('type', 'file');
-			file.setAttribute('accept', '.gif,.jpg,.jpeg,.png');
+			file.setAttribute("type", "file");
+			file.setAttribute("accept", ".gif,.jpg,.jpeg,.png");
 			file.click();
 
 			file.addEventListener("change", function () {
@@ -93,13 +93,13 @@
 				var formData = new FormData();
 				formData.append("file", file.files[0]);
 
-				UtilsService.doPost(formData, vm.username + "/avatar", {'Content-Type': undefined}).then(function(res){
+				UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined}).then(function(res){
 					vm.uploadingAvatar = false;
 					
 					if(res.status === 200){
 						vm.avatarUrl = getAvatarUrl();
 					} else {
-						console.error('Upload avatar error', res.data);
+						console.error("Upload avatar error", res.data);
 					}
 
 				});
@@ -107,7 +107,7 @@
 				$scope.$apply();
 
 			});
-		}
+		};
 
 
 	}

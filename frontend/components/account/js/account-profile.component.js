@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountProfile", {
-			restrict: 'EA',
-			templateUrl: 'account-profile.html',
+			restrict: "EA",
+			templateUrl: "account-profile.html",
 			bindings: {
 				username: "=",
 				firstName: "=",
@@ -29,7 +29,7 @@
 				email: "="
 			},
 			controller: AccountProfileCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	AccountProfileCtrl.$inject = ["AccountService"];
@@ -47,7 +47,7 @@
 			vm.firstNameNew = vm.firstName;
 			vm.lastNameNew = vm.lastName;
 			vm.emailNew = vm.email;
-		}
+		};
 
 		/**
 		 * Update the user info
@@ -101,6 +101,6 @@
 		 */
 		vm.toggleChangePassword = function () {
 			vm.showChangePassword = !vm.showChangePassword;
-		}
+		};
 	}
 }());

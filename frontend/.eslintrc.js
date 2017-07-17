@@ -15,6 +15,19 @@ module.exports = {
     "extends": "eslint:recommended",
     "rules": {
         "no-console": "off",
+        "brace-style" : [
+            "error", 
+            "1tbs"
+        ],
+        "array-bracket-spacing": [
+            "error", 
+            "never"
+        ],
+        "comma-style": ["error", "last"],
+        "comma-dangle": [
+            "error", 
+            "never"
+        ],
         "indent": [
             "error",
             "tab"

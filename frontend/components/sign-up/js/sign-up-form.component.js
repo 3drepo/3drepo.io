@@ -74,7 +74,7 @@
 			var gbIndex;
 			
 			vm.countries.find(function(country, i){
-				if(country.code === 'GB'){
+				if(country.code === "GB"){
 					gbIndex = i;
 				}
 			});
@@ -99,16 +99,13 @@
 						if (serverConfig.legal[legalItem].type === "agreeTo") {
 							if (agreeToText === "") {
 								agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
-							}
-							else {
+							} else {
 								agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
 							}
-						}
-						else if (serverConfig.legal[legalItem].type === "haveRead") {
+						} else if (serverConfig.legal[legalItem].type === "haveRead") {
 							if (haveReadText === "") {
 								haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
-							}
-							else {
+							} else {
 								haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
 							}
 						}
@@ -125,7 +122,7 @@
 				}
 			}
 
-		}
+		};
 
 		/*
 		 * Watch changes to register fields to clear warning message
@@ -146,8 +143,7 @@
 				if (event.which === enterKey) {
 					doRegister();
 				}
-			}
-			else {
+			} else {
 				doRegister();
 			}
 		};
@@ -190,8 +186,8 @@
 		 */
 		function doRegister() {
 			var data,
-			doRegister = true,
-			allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
+				doRegister = true,
+				allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
 			console.log(vm.newUser);
 
@@ -202,10 +198,10 @@
 				(angular.isDefined(vm.newUser.lastName)) &&
 				(angular.isDefined(vm.newUser.company)) &&
 				(angular.isDefined(vm.newUser.jobTitle)) &&
-				(vm.newUser.jobTitle !== 'Other' || angular.isDefined(vm.newUser.otherJobTitle)) &&
+				(vm.newUser.jobTitle !== "Other" || angular.isDefined(vm.newUser.otherJobTitle)) &&
 				(angular.isDefined(vm.newUser.country)) 
 
-				) {
+			) {
 				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.showLegalText) {
 						doRegister = vm.newUser.tcAgreed;
@@ -219,7 +215,7 @@
 							firstName: vm.newUser.firstName,
 							lastName: vm.newUser.lastName,
 							company: vm.newUser.company,
-							jobTitle: vm.newUser.jobTitle === 'Other' ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
+							jobTitle: vm.newUser.jobTitle === "Other" ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
 							countryCode: vm.newUser.country,
 							phoneNo: vm.newUser.phoneNo
 						};
@@ -240,16 +236,13 @@
 								grecaptcha.reset(); // reset reCaptcha
 							}
 						});
-					}
-					else {
+					} else {
 						vm.registerErrorMessage = "You must agree to the terms and conditions";
 					}
-				}
-				else {
+				} else {
 					vm.registerErrorMessage = "Username not allowed";
 				}
-			}
-			else {
+			} else {
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}

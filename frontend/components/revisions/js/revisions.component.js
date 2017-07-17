@@ -3,8 +3,8 @@
 
 	angular.module("3drepo")
 		.component("revisions", {
-			restrict: 'E',
-			templateUrl: 'revisions.html',
+			restrict: "E",
+			templateUrl: "revisions.html",
 			bindings: {
 				account: "=",
 				model: "=",
@@ -12,7 +12,7 @@
 				modelName: "="
 			},
 			controller: revisionsCtrl,
-			controllerAs: 'vm'
+			controllerAs: "vm"
 		});
 
 	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter", "EventService"];
@@ -30,7 +30,7 @@
 				}
 
 				if(!vm.revision){
-					vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+					vm.revName = vm.revisions[0].tag || $filter("revisionDate")(vm.revisions[0].timestamp);
 					vm.revisions[0].current = true;
 
 				} else {
@@ -39,7 +39,7 @@
 							vm.revName = vm.revision;
 							vm.revisions[i].current = true;
 						} else if(rev._id === vm.revision){
-							vm.revName = $filter('revisionDate')(rev.timestamp);
+							vm.revName = $filter("revisionDate")(rev.timestamp);
 							vm.revisions[i].current = true;
 
 						}
@@ -68,7 +68,7 @@
 			UtilsService.closeDialog();
 			$location.path("/" + vm.account + "/" + vm.model + "/" + revId , "_self");
 
-		}
+		};
 
 		vm.closeDialog = function() {
 			UtilsService.closeDialog();

@@ -16,24 +16,24 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .component("panelCardOptionScribble", {
-            restrict: 'E',
-            templateUrl: 'panel-card-option-scribble.html',
-            bindings: {},
-            controller: PanelCardOptionScribbleCtrl,
-            controllerAs: 'vm'
-        });
+	angular.module("3drepo")
+		.component("panelCardOptionScribble", {
+			restrict: "E",
+			templateUrl: "panel-card-option-scribble.html",
+			bindings: {},
+			controller: PanelCardOptionScribbleCtrl,
+			controllerAs: "vm"
+		});
 
-    PanelCardOptionScribbleCtrl.$inject = ["EventService"];
+	PanelCardOptionScribbleCtrl.$inject = ["EventService"];
 
-    function PanelCardOptionScribbleCtrl (EventService) {
-        var vm = this;
+	function PanelCardOptionScribbleCtrl (EventService) {
+		var vm = this;
 
-        vm.setupScribbleMode = function() {
-            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "scribble");
-        };
-    }
+		vm.setupScribbleMode = function() {
+			EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "scribble");
+		};
+	}
 }());

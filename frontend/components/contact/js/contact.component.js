@@ -24,7 +24,7 @@
 			bindings: {},
 			templateUrl: "contact.html",
 			controller: ContactCtrl,
-			controllerAs: "vm",
+			controllerAs: "vm"
 		});
 
 	ContactCtrl.$inject = ["$scope", "UtilsService"];
@@ -41,7 +41,7 @@
 			vm.sent = false;
 			vm.sending = false;
 			vm.emailRegex = /^[_a-z0-9-]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-		}
+		};
 
 		/*
 		 * Watch to enable send button
