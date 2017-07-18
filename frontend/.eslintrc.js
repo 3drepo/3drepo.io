@@ -14,6 +14,13 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "rules": {
+        "block-scoped-var" : [
+            "error"
+        ],
+        "curly" : [
+            "error",
+            "all"
+        ],
         "no-console": "off",
         "brace-style" : [
             "error", 

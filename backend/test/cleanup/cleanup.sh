@@ -1,7 +1,7 @@
 #/bin/bash
 
 chmod 755 ../scripts/gettestdb.js && \
-host=$(node ./scripts/gettestdb.js) && \
+host=$(node ../scripts/gettestdb.js) && \
 echo "Using host: $host" && \
 chmod 755 ./test/cleanup/prompt.sh && \    
 ./test/cleanup/prompt.sh && \ 

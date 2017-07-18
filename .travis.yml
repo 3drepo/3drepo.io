@@ -25,7 +25,8 @@ before_install:
     - sudo apt-get install -y mongodb-org
     - mongod --version
     - sudo service mongod start
-    - npm install -g grunt-cli
+    - npm install -g gulp
+    - npm link gulp
     - sleep 15
     - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
     - cd submodules/tests
@@ -38,7 +39,7 @@ install: npm install
 services:
   - rabbitmq
 script:
-    - npm test
+    - npm run test
     - npm run test-int
 notifications:
     email: 

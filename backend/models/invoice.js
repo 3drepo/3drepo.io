@@ -383,9 +383,9 @@
 
 				let useNonPublicPort = true;
 
-				let template = "./pug/invoice.pug";
+				let template = "../pug/invoice.pug";
 				if (this.type === "refund") {
-					template = "./pug/refund.pug";
+					template = "../pug/refund.pug";
 				}
 
 				pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
