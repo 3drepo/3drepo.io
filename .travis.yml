@@ -32,13 +32,14 @@ before_install:
     - git checkout $test_ver
     - cd backend
     - mongorestore
-    - cd ../../../
-install: cd ./backend && npm install
+    - cd ../../../backend
+
+install: npm install
 services:
   - rabbitmq
 script:
-    - cd ./backend && npm test
-    - npm ./backend && run test-int
+    - npm test
+    - npm run test-int
 notifications:
     email: 
         recipients:
