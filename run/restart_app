@@ -1,0 +1,2 @@
+forever stop 3drepo.js
+NODE_ENV=$1 NODE_CONFIG_DIR='./config' forever start "./backend/3drepo.js"

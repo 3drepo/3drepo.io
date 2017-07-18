@@ -1,6 +1,0 @@
-if [ -z "$1" ]
-  then
-    echo "No config argument supplied"
-else
-    NODE_ENV=$1 NODE_CONFIG_DIR='./config' forever start 3drepo.js
-fi

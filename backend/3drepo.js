@@ -24,10 +24,10 @@
 
 	const cluster = require("cluster");
 
-	const log_iface = require("./backend/logger.js");
+	const log_iface = require("./logger.js");
 	const systemLogger = log_iface.systemLogger;
 
-	const config = require("./backend/config.js");
+	const config = require("./config.js");
 
 	const https = require("https");
 	const http = require("http");
@@ -143,14 +143,14 @@
 							let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer();
 							server.listen(serverConfig.port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.port));
 
-							require("./backend/services/" + serverConfig.service + ".js").createApp(server, serverConfig);
+							require("./services/" + serverConfig.service + ".js").createApp(server, serverConfig);
 
-							// let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+							// let app = require("./services/" + serverConfig.service + ".js").createApp(serverConfig);
 							// let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer(app);
 							// server.listen(serverConfig.chat_port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.chat_port));
 
 						} else {
-							let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+							let app = require("./services/" + serverConfig.service + ".js").createApp(serverConfig);
 							subDomainApp.use(serverConfig.host_dir, app);
 						}
 

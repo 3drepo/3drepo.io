@@ -33,12 +33,12 @@ before_install:
     - cd backend
     - mongorestore
     - cd ../../../
-install: npm install
+install: cd ./backend && npm install
 services:
   - rabbitmq
 script:
-    - npm test
-    - npm run test-int
+    - cd ./backend && npm test
+    - npm ./backend && run test-int
 notifications:
     email: 
         recipients:
