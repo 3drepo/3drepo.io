@@ -166,7 +166,7 @@
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);
-								vm.mapTile && vm.mapTile.updateSettings(event.value.settings);
+								//vm.mapTile && vm.mapTile.updateSettings(event.value.settings);
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
 							vm.viewer.addPin(

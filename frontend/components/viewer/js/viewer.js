@@ -15,36 +15,11 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-// --------------------- Control Interface ---------------------
-
-// Global functions to be passed to X3DOM elements
-// var bgroundClick, clickObject, clickPin, onMouseOver,
-// 	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
-// 	onLoaded, onError, runtimeReady;
-
-//x3dom.runtime.ready = runtimeReady;
-
-// ----------------------------------------------------------
 var Viewer = {};
 // Constants and enums
 
-
-// var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
-
 (function() {
 	"use strict";
-
-	// bgroundClick      = ViewerUtil.eventFactory("bgroundClicked");
-	// clickObject       = ViewerUtil.eventFactory("clickObject");
-	// clickPin          = ViewerUtil.eventFactory("pinClick");
-	// onMouseOver       = ViewerUtil.eventFactory("onMouseOver");
-	// onMouseDown       = ViewerUtil.eventFactory("onMouseDown");
-	// onMouseUp         = ViewerUtil.eventFactory("onMouseUp");
-	// onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
-	// onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
-	// onLoaded          = ViewerUtil.eventFactory("onLoaded");
-	// onError           = ViewerUtil.eventFactory("onError");
-	// runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, callback, errCallback) {
 		// Properties
@@ -151,9 +126,6 @@ var Viewer = {};
 				return false;
 			};
 		
-			// canvas.addEventListener("mouseup",  onMouseUp);
-			// canvas.addEventListener("mousemove",  onMouseMove);
-
 			canvas.style["pointer-events"] = "all";
 			
 			self.element.appendChild(self.viewer);
@@ -203,13 +175,6 @@ var Viewer = {};
 
 				self.setAmbientLight();
 
-				self.createViewpoint(self.name + "_default");
-				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
-
-				self.viewer.addEventListener("keypress", self.handleKeyPresses);
-
-				//self.enableClicking();
-
 				if (self.options && self.options.plugins) {
 					self.plugins = self.options.plugins;
 					Object.keys(self.plugins).forEach(function(key){
@@ -224,7 +189,6 @@ var Viewer = {};
 				self.setNavMode(self.defaultNavMode);
 
 				UnityUtil.onReady().then(function() {
-
 					self.initialized = true;
 					self.loadingDivText.innerHTML = "";
 					callback(Viewer.EVENT.UNITY_READY, {
@@ -398,13 +362,16 @@ var Viewer = {};
 
 		this.lastMultipart = null;
 
-		this.highlightObjects = function(account, model, ids_in, zoom, colour, multiOverride) {
+		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
 			if (!this.pinDropMode) {
 				// TODO: We shouldn't use Set here
-				var ids = new Set(ids_in);
+				idsIn = idsIn || [];
+				var uniqueIds = idsIn.filter(function(value, index, self){
+					return self.indexOf(value) === index;
+				});
 
-				if(ids.size) {
-					UnityUtil.highlightObjects(account, model, Array.from(ids), colour, multiOverride || this.multiSelectMode);
+				if(uniqueIds.length) {
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride || this.multiSelectMode);
 				} else {
 					UnityUtil.clearHighlights();
 				}
@@ -415,151 +382,80 @@ var Viewer = {};
 			UnityUtil.toggleVisibility(account, model, ids, visibility);
 		};
 
-		ViewerUtil.onEvent("pinClick", function(clickInfo) {
-			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
-			callback(Viewer.EVENT.CLICK_PIN,{
-				id : pinID
-			});
-		});
+		// this.viewpoints = {};
+		// this.viewpointsNames = {};
 
-		ViewerUtil.onEvent("onMouseDown", function() {
-			return false;
-			//document.body.style["pointer-events"] = "none";
-		});
+		// this.selectedViewpointIdx = 0;
+		// this.selectedViewpoint = null;
 
-		ViewerUtil.onEvent("onMouseUp", function() {
-			document.body.style["pointer-events"] = "all";
-		});
+		// this.isFlyingThrough = false;
+		// this.flyThroughTime = 1000;
 
-		this.onClickObject = function(functionToBind) {
-			ViewerUtil.onEvent("clickObject", functionToBind);
-		};
+		// this.flyThrough = function() {
+		// 	if (!self.isFlyingThrough) {
+		// 		self.isFlyingThrough = true;
+		// 		setTimeout(self.flyThroughTick, self.flyThroughTime);
+		// 	} else {
+		// 		self.isFlyingThrough = false;
+		// 	}
+		// };
 
-		this.offClickObject = function(functionToBind) {
-			ViewerUtil.offEvent("clickObject", functionToBind);
-		};
+		// this.flyThroughTick = function() {
+		// 	var newViewpoint = self.selectedViewpointIdx + 1;
 
-		this.viewpoints = {};
-		this.viewpointsNames = {};
+		// 	if (newViewpoint === self.viewpoints.length) {
+		// 		newViewpoint = 0;
+		// 	}
 
-		this.selectedViewpointIdx = 0;
-		this.selectedViewpoint = null;
+		// 	self.setCurrentViewpoint(self.viewpoints[newViewpoint]);
 
-		this.isFlyingThrough = false;
-		this.flyThroughTime = 1000;
-
-		this.flyThrough = function() {
-			if (!self.isFlyingThrough) {
-				self.isFlyingThrough = true;
-				setTimeout(self.flyThroughTick, self.flyThroughTime);
-			} else {
-				self.isFlyingThrough = false;
-			}
-		};
-
-		this.flyThroughTick = function() {
-			var newViewpoint = self.selectedViewpointIdx + 1;
-
-			if (newViewpoint === self.viewpoints.length) {
-				newViewpoint = 0;
-			}
-
-			self.setCurrentViewpoint(self.viewpoints[newViewpoint]);
-
-			if (self.isFlyingThrough) {
-				setTimeout(self.flyThroughTick, self.flyThroughTime);
-			}
-		};
+		// 	if (self.isFlyingThrough) {
+		// 		setTimeout(self.flyThroughTick, self.flyThroughTime);
+		// 	}
+		// };
 
 		this.getObjectsStatus = function(account, model, promise) {
 			UnityUtil.getObjectsStatus(account, model, promise);
 		};
 
 
-		this.getViewpointGroupAndName = function(id) {
-			var splitID = id.trim().split("__");
-			var name, group;
+		// this.getViewpointGroupAndName = function(id) {
+		// 	var splitID = id.trim().split("__");
+		// 	var name, group;
 
-			if (splitID.length > 1) {
-				group = splitID[0].trim();
-				name = splitID[1].trim();
-			} else {
-				name = splitID[0].trim();
-				group = "uncategorized";
-			}
+		// 	if (splitID.length > 1) {
+		// 		group = splitID[0].trim();
+		// 		name = splitID[1].trim();
+		// 	} else {
+		// 		name = splitID[0].trim();
+		// 		group = "uncategorized";
+		// 	}
 
-			return {
-				group: group,
-				name: name
-			};
-		};
+		// 	return {
+		// 		group: group,
+		// 		name: name
+		// 	};
+		// };
 
-		this.loadViewpoints = function() {
-			var viewpointList = document.getElementsByTagName("Viewpoint");
+		// this.loadViewpoints = function() {
+		// 	var viewpointList = document.getElementsByTagName("Viewpoint");
 
-			for (var v = 0; v < viewpointList.length; v++) {
-				if (viewpointList[v].hasAttribute("id")) {
-					var id = viewpointList[v].id.trim();
-					viewpointList[v].DEF = id;
+		// 	for (var v = 0; v < viewpointList.length; v++) {
+		// 		if (viewpointList[v].hasAttribute("id")) {
+		// 			var id = viewpointList[v].id.trim();
+		// 			viewpointList[v].DEF = id;
 
-					var groupName = self.getViewpointGroupAndName(id);
+		// 			var groupName = self.getViewpointGroupAndName(id);
 
-					if (!self.viewpoints[groupName.group]) {
-						self.viewpoints[groupName.group] = {};
-					}
+		// 			if (!self.viewpoints[groupName.group]) {
+		// 				self.viewpoints[groupName.group] = {};
+		// 			}
 
-					self.viewpoints[groupName.group][groupName.name] = id;
-					self.viewpointsNames[id] = viewpointList[v];
-				}
-			}
-		};
-
-		this.loadViewpoint = null;
-
-		this.createViewpoint = function(name, from, at, up ) {
-			var groupName = self.getViewpointGroupAndName(name);
-			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
-				var newViewPoint = document.createElement("viewpoint");
-				newViewPoint.setAttribute("id", name);
-				newViewPoint.setAttribute("def", name);
-
-				self.scene.appendChild(newViewPoint);
-
-				if (from && at && up) {
-					var q = ViewerUtil.getAxisAngle(from, at, up);
-					newViewPoint.setAttribute("orientation", q.join(","));
-				}
-
-				if(from) {
-					newViewPoint.setAttribute("position", from.join(","));
-
-				}
-
-				if(from && at) {
-					var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
-					newViewPoint.setAttribute("centerofrotation", centre.join(","));
-
-				}
-
-
-				if (!self.viewpoints[groupName.group]) {
-					self.viewpoints[groupName.group] = {};
-				}
-
-				self.viewpoints[groupName.group][groupName.name] = name;
-				self.viewpointsNames[name] = newViewPoint;
-
-			} else {
-
-				console.error("Tried to create viewpoint with duplicate name: " + name);
-			}
-
-		};
-
-		this.setCurrentViewpointIdx = function(idx) {
-			var viewpointNames = Object.keys(self.viewpointsNames);
-			self.setCurrentViewpoint(viewpointNames[idx]);
-		};
+		// 			self.viewpoints[groupName.group][groupName.name] = id;
+		// 			self.viewpointsNames[id] = viewpointList[v];
+		// 		}
+		// 	}
+		// };
 
 		this.updateSettings = function(settings) {
 			if (settings) {
@@ -637,10 +533,6 @@ var Viewer = {};
 			}
 		};
 
-		this.lookAtObject = function(obj) {
-			self.runtime.fitObject(obj, true);
-		};
-
 		this.pickObject = {};
 
 		this.oneGrpNodes = [];
@@ -653,54 +545,14 @@ var Viewer = {};
 				self.currentNavMode = mode;
 				UnityUtil.setNavigation(mode);
 
-				if (mode === Viewer.NAV_MODES.WALK) {
-					self.disableClicking();
-				}
+				// if (mode === Viewer.NAV_MODES.WALK) {
+				// 	self.disableClicking();
+				// }
 				/*else if (mode == "HELICOPTER") {
 					self.disableSelecting();
 				} */
-				else {
-					//self.enableClicking();
-				}
 
 			}
-		};
-
-		this.startingPoint = [0.0, 0.0, 0.0];
-		this.setStartingPoint = function(x, y, z) {
-			self.startingPoint[0] = x;
-			self.startingPoint[1] = y;
-			self.startingPoint[2] = z;
-		};
-
-		this.defaultOrientation = [0.0, 0.0, 1.0];
-		this.setStartingOrientation = function(x, y, z) {
-			self.defaultOrientation[0] = x;
-			self.defaultOrientation[1] = y;
-			self.defaultOrientation[2] = z;
-		};
-
-		this.setCameraPosition = function(pos) {
-			var vpInfo = self.getCurrentViewpointInfo();
-
-			var viewDir = vpInfo.view_dir;
-			var up = vpInfo.up;
-
-			self.updateCamera(pos, up, viewDir);
-		};
-
-		this.moveCamera = function(dV) {
-			var currentPos = self.getCurrentViewpointInfo().position;
-			currentPos[0] += dV[0];
-			currentPos[1] += dV[1];
-			currentPos[2] += dV[2];
-
-			self.setCameraPosition(currentPos);
-		};
-
-		this.setCameraViewDir = function(viewDir, upDir, centerOfRotation) {
-			var currentPos = self.getCurrentViewpointInfo().position;
-			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
 		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
@@ -711,41 +563,6 @@ var Viewer = {};
 		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
 			UnityUtil.setViewpoint(pos, up, viewDir, account, model);
 		};
-
-		//this.linked = false;
-
-		this.linkMe = function() {
-			// Need to be attached to the viewer master
-			if (!self.manager) {
-				return;
-			}
-
-			//self.manager.linkMe(self.handle);
-			//self.onViewpointChanged(self.manager.viewpointLinkFunction);
-
-			//self.viewer.addEventListener("mousedown", self.managerSwitchMaster);
-
-			//self.linked = true;
-		};
-
-
-		// this.collDistance = 0.1;
-		// this.changeCollisionDistance = function(collDistance) {
-		// 	self.collDistance = collDistance;
-		// 	self.nav._x3domNode._vf.avatarSize[0] = collDistance;
-		// };
-
-		// this.avatarHeight = 1.83;
-		// this.changeAvatarHeight = function(height) {
-		// 	self.avatarHeight = height;
-		// 	self.nav._x3domNode._vf.avatarSize[1] = height;
-		// };
-
-		// this.stepHeight = 0.4;
-		// this.changeStepHeight = function(stepHeight) {
-		// 	self.stepHeight = stepHeight;
-		// 	self.nav._x3domNode._vf.avatarSize[2] = stepHeight;
-		// };
 
 		this.reset = function() {
 			UnityUtil.resetCamera();
@@ -770,12 +587,6 @@ var Viewer = {};
 				});
 		};
 
-			
-
-		this.getRoot = function() {
-			return self.inline;
-		};
-
 		this.getScene = function() {
 			return self.scene;
 		};
@@ -788,44 +599,20 @@ var Viewer = {};
 			UnityUtil.requestViewpoint(account, model, promise);
 		};
 
-		this.speed = 2.0;
-		this.setSpeed = function(speed) {
-			self.speed = speed;
-			self.nav.speed = speed;
-		};
+		// this.speed = 2.0;
+		// this.setSpeed = function(speed) {
+		// 	self.speed = speed;
+		// 	self.nav.speed = speed;
+		// };
 
-		this.bgroundClick = function() {
-			callback(Viewer.EVENT.BACKGROUND_SELECTED);
-		};
-
-		this.hiddenParts = [];
-
-		this.addHiddenPart = function(part) {
-			this.hiddenParts.push(part);
-		};
-
-		this.revealAll = function() {
-			for (var part in self.hiddenParts) {
-				if (self.hiddenParts.hasOwnProperty(part)) {
-					self.hiddenParts[part].setVisibility(true);
-				}
-			}
-
-			self.hiddenParts = [];
-		};
-
-		this.disableClicking = function() {
-			if (self.clickingEnabled) {
-				self.offBackgroundClicked(self.bgroundClick);
-				self.offClickObject(self.clickObject);
-				self.viewer.setAttribute("disableDoubleClick", true);
-				self.clickingEnabled = false;
-			}
-		};
-
-		this.disableSelecting = function() {
-			self.selectionDisabled = true;
-		};
+		// this.disableClicking = function() {
+		// 	if (self.clickingEnabled) {
+		// 		self.offBackgroundClicked(self.bgroundClick);
+		// 		self.offClickObject(self.clickObject);
+		// 		self.viewer.setAttribute("disableDoubleClick", true);
+		// 		self.clickingEnabled = false;
+		// 	}
+		// };
 
 		this.switchFullScreen = function(vrDisplay) {
 			vrDisplay = vrDisplay || {};
@@ -852,9 +639,6 @@ var Viewer = {};
 				self.fullscreen = false;
 			}
 		};
-
-		this.diffColorDeleted = [];
-		this.diffColorAdded = [];
 
 		/**
 		 * Multi select mode

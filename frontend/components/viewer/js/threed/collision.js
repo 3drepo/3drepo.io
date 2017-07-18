@@ -158,6 +158,6 @@ var Collision = {};
 			}
 		};
 
-		ViewerUtil.onEvent("gamepadMove", this.updateDirections);
+		//ViewerUtil.onEvent("gamepadMove", this.updateDirections);
 	};
 }());
