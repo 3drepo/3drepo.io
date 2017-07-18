@@ -6,6 +6,7 @@ right-panel {
 
 right-panel #rightPanelButtons .rightPanelButtonGroup {
     margin-bottom: 20px;
+    margin-top: 15px;
 }
 
 right-panel #rightPanelButtons .md-button {

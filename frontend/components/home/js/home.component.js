@@ -239,9 +239,9 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
 
-				} else if (event.type === EventService.EVENT.SHOW_MODELS) {
+				} else if (event.type === EventService.EVENT.SHOW_TEAMSPACES) {
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
-					AuthService.init();
+					$location.path(AuthService.username);
 				} else if (event.type === EventService.EVENT.GO_HOME) {
 
 					//EventService.send(EventService.EVENT.CLEAR_STATE);

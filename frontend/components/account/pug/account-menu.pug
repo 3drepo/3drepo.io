@@ -1,11 +1,11 @@
 md-menu#accountMenu(md-position-mode="target-right target")
-	md-button.md-icon-button(aria-label="Account Menu", ng-click="vm.openMenu($mdOpenMenu, $event)")
+	md-button.md-icon-button.accountMenuButton(aria-label="Account Menu", ng-click="vm.openMenu($mdOpenMenu, $event)")
 		md-icon.angular-material-icons(md-menu-origin) account_circle
 	md-menu-content#accountMenuContent(width="3")
 		md-menu-item
-			md-button(ng-click="vm.showModels()")
+			md-button(ng-click="vm.showTeamspaces()")
 				md-icon.angular-material-icons(md-menu-align-target) view_list
-				| Models
+				| Teamspaces
 		md-menu-item
 			md-button(ng-click="vm.openUserManual()")
 				md-icon.angular-material-icons(md-menu-align-target) description

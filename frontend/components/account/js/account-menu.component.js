@@ -48,8 +48,8 @@
 		/**
 		 * Show user models
 		 */
-		vm.showModels = function () {
-			EventService.send(EventService.EVENT.SHOW_models);
+		vm.showTeamspaces = function () {
+			EventService.send(EventService.EVENT.SHOW_TEAMSPACES);
 		};
 
 		/**
