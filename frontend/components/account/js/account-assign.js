@@ -138,7 +138,9 @@
 				user.permissions.push(permission); 
 			} else {
 				var index = user.permissions.indexOf(permission);
-				if (index > -1) user.permissions.splice(index, 1);
+				if (index > -1) {
+					user.permissions.splice(index, 1);
+				}
 			}
 
 			// Update the permissions user for the selected teamspace

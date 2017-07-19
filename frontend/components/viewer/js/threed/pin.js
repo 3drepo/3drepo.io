@@ -20,15 +20,6 @@ var Pin = {};
 (function() {
 	"use strict";
 
-	// Constants go here
-	var ORANGE_HIGHLIGHT = "1.0 0.7 0.0";
-	var GREY_PIN = [0.5, 0.5, 0.5];
-
-	var PIN_RADIUS = 0.25;
-	var PIN_HEIGHT = 1.0;
-	var GHOST_OPACITY = 0.4;
-	var OPAQUE_OPACITY = 1.0 - GHOST_OPACITY;
-
 	/*
 	 * Pin shape constructor and manipulator
 	 *

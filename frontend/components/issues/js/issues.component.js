@@ -427,7 +427,7 @@
 
 			if(issue) {
 
-				console.log("Issue")
+				console.log("Issue");
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
 					

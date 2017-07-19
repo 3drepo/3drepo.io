@@ -44,22 +44,27 @@ var UnityUtil;
 	var loaded = false;
 	var UNITY_GAME_OBJECT = "WebGLInterface";
 
-	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;	
+	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;
+	
 	UnityUtil.prototype._SendMessage = function(gameObject, func, param) {
     	if (param === undefined) {
-	      if (!SendMessage_vss)
-    	    SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
+	      if (!SendMessage_vss) {
+				SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
+			}
 	      SendMessage_vss(gameObject, func);
     	} else if (typeof param === "string") {
-	      if (!SendMessage_vsss)
-    	    SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
+	      if (!SendMessage_vsss) {
+				SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
+			}
 	      SendMessage_vsss(gameObject, func, param);
 	    } else if (typeof param === "number") {
-    	  if (!SendMessage_vssn)
-	        SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
+    	  if (!SendMessage_vssn) {
+				SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
+			}
     	 SendMessage_vssn(gameObject, func, param);
-	    } else
-    	    throw "" + param + " is does not have a type which is supported by SendMessage.";
+	    } else {
+			throw "" + param + " is does not have a type which is supported by SendMessage.";
+		}
 	};
 
 	UnityUtil.prototype.onError = function(err, url, line) {
@@ -176,8 +181,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.currentPointInfo = function(pointInfo) {
 		var point = JSON.parse(pointInfo);
-		if(UnityUtil.objectSelectedCallback)
+		if(UnityUtil.objectSelectedCallback) {
 			UnityUtil.objectSelectedCallback(point);
+		}
 	};
 
 	UnityUtil.prototype.doubleClicked = function(meshInfo) {
@@ -206,8 +212,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.pickPointAlert = function(pointInfo) {
 		var point = JSON.parse(pointInfo);
-		if(UnityUtil.pickPointCallback)
+		if(UnityUtil.pickPointCallback) {
 			UnityUtil.pickPointCallback(point);
+		}
 	};
 
 	UnityUtil.prototype.ready = function() {
@@ -282,12 +289,12 @@ var UnityUtil;
 			nameSpace = account + "."  + model;
 		}
 		if(objectStatusPromise) {
-			objectStatusPromise.then(function(blah){
+			objectStatusPromise.then(function(){
 				_getObjectsStatus(nameSpace, promise);
-			}					
-			);
-		} else
+			});
+		} else {
 			_getObjectsStatus(nameSpace, promise);
+		}
 
 	};
 
@@ -306,8 +313,9 @@ var UnityUtil;
 		params.model = model;
 		params.ids = idArr;
 		params.toggle = toggleMode;
-		if(color)
+		if(color) {
 			params.color = color;
+		}
 
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	};
@@ -342,7 +350,7 @@ var UnityUtil;
 		}
 				
 		
-		UnityUtil.onLoading()
+		UnityUtil.onLoading();
 		console.log("TO UNITY LOAD MODEL", params);
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
 		

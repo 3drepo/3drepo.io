@@ -104,9 +104,12 @@
 			vm.displayedAxis = axis;
 			if(slider != null) {
 				vm.sliderPosition = slider;
-				if(moveClip) updateClippingPlane();
-			} else
+				if(moveClip) {
+					updateClippingPlane();
+				}
+			} else {
 				updateDisplaySlider(false, moveClip);
+			}
 		}
 
 		/*
@@ -156,9 +159,9 @@
 		function getNormal() {
 
 			var normal = [-1, 0, 0]; //X axis by default
-			if(vm.normal)
+			if(vm.normal) {
 				normal = vm.normal;
-			else if(vm.displayedAxis) {
+			} else if(vm.displayedAxis) {
 				if(vm.displayedAxis == "Y") {
 					normal = [0, 0, -1]; //Unity has flipped Z axis
 				} else if(vm.displayedAxis == "Z") {
@@ -187,12 +190,14 @@
 			} else if(vm.displayedAxis === "Z") {
 				min = vm.bbox.min[1];
 				max = vm.bbox.max[1];
-			} else
-				return; //unknown axis, nothing would've been set. avoid infinity
+			} else {
+				return;
+			} //unknown axis, nothing would've been set. avoid infinity
 			
 			var percentage = 1 - vm.sliderPosition/100;
-			if(!updateSlider)
+			if(!updateSlider) {
 				vm.disableWatchDistance = true;
+			}
 			vm.displayDistance = min + (Math.abs(max - min) * percentage);
 			if(moveClip) {
 				updateClippingPlane();
@@ -215,16 +220,22 @@
 			} else if(vm.displayedAxis === "Z") {
 				min = vm.bbox.min[1];
 				max = vm.bbox.max[1];
-			} else
-				return; //unknown axis, nothing would've been set. avoid infinity
+			} else {
+				return;
+			} //unknown axis, nothing would've been set. avoid infinity
 			
 			var percentage = (vm.displayDistance - min) / Math.abs(max-min);
-			if(!updateDistance)
+			if(!updateDistance) {
 				vm.disableWatchSlider = true;
+			}
 
 			var value = (1.0 - percentage) * 100;
-			if(percentage > 100 || value < 0) value = 0;
-			if(percentage < 0 || value > 100) value = 100;
+			if(percentage > 100 || value < 0) {
+				value = 0;
+			}
+			if(percentage < 0 || value > 100) {
+				value = 100;
+			}
 			vm.sliderPosition = value;
 
 			if(moveClip) {
@@ -273,8 +284,9 @@
 				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
 				vm.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
-				if(event.value.isMainModel)
+				if(event.value.isMainModel) {
 					vm.offsetTrans = event.value.modelTrans;
+				}
 			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
 				vm.bbox = event.value.bbox;
 				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);

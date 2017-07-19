@@ -27,9 +27,9 @@ var ViewerUtil;
 	// var eventElement = document;
 
 	// ViewerUtil.prototype.cloneObject = function(obj) {
-    // 	if (!obj || typeof obj !== "object") {
-    //     	return obj;
-    // 	}
+	// 	if (!obj || typeof obj !== "object") {
+	//     	return obj;
+	// 	}
 
 	// 	var retObject = new obj.constructor();
 
@@ -39,7 +39,7 @@ var ViewerUtil;
 	// 		}
 	// 	}
 
-    // 	return retObject;
+	// 	return retObject;
 	// };
 
 	// // Definition of global functions

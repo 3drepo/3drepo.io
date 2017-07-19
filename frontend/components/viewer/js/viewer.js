@@ -154,11 +154,9 @@ var Viewer = {};
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				//self.scene.setAttribute("pickmode", "idbufid");
 				self.viewer.appendChild(self.scene);
 
-				//self.pinShader = new PinShader(self.scene);
-
+		
 				self.bground = null;
 				self.currentNavMode = null;
 
@@ -605,21 +603,6 @@ var Viewer = {};
 		this.getCurrentViewpointInfo = function(account, model, promise) {
 			UnityUtil.requestViewpoint(account, model, promise);
 		};
-
-		// this.speed = 2.0;
-		// this.setSpeed = function(speed) {
-		// 	self.speed = speed;
-		// 	self.nav.speed = speed;
-		// };
-
-		// this.disableClicking = function() {
-		// 	if (self.clickingEnabled) {
-		// 		self.offBackgroundClicked(self.bgroundClick);
-		// 		self.offClickObject(self.clickObject);
-		// 		self.viewer.setAttribute("disableDoubleClick", true);
-		// 		self.clickingEnabled = false;
-		// 	}
-		// };
 
 		this.switchFullScreen = function(vrDisplay) {
 			vrDisplay = vrDisplay || {};

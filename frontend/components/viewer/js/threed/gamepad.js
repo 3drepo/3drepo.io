@@ -48,12 +48,14 @@ var Gamepad = function(viewer) {
 	this.oldButton = false;
 
 	this.checkStatus = function() {
-		if(!self.gamepad)
+		if(!self.gamepad) {
 			return;
+		}
 
 		if(self.gamepad.timestamp &&
-			(self.gamepad.timestamp == self.timestamp))
+			(self.gamepad.timestamp == self.timestamp)) {
 			return;
+		}
 
 		self.timestamp = self.gamepad.timestamp;
 	};
@@ -78,12 +80,14 @@ var Gamepad = function(viewer) {
 	this.oldButton = false;
 
 	this.checkStatus = function() {
-		if(!self.gamepad)
+		if(!self.gamepad) {
 			return;
+		}
 
 		if(self.gamepad.timestamp &&
-			(self.gamepad.timestamp == self.timestamp))
+			(self.gamepad.timestamp == self.timestamp)) {
 			return;
+		}
 
 		self.timestamp = self.gamepad.timestamp;
 
@@ -129,23 +133,26 @@ var Gamepad = function(viewer) {
 			);
 		}
 
-		if (self.gamepad.buttons[button_idx].pressed)
+		if (self.gamepad.buttons[button_idx].pressed) {
 			if (!self.oldButton) {
 				viewer.reset();
 				viewer.setNavMode("NONE");
 				viewer.setApp(null);
 				viewer.disableClicking();
 			}
+		}
 
 		self.oldButton = self.gamepad.buttons[button_idx].pressed;
 	};
 
 	this.tick = function() {
-		if(navigator.getGamepads()[0])
+		if(navigator.getGamepads()[0]) {
 			self.gamepad = navigator.getGamepads()[0];
+		}
 
-		if(self.gamepad)
+		if(self.gamepad) {
 			self.checkStatus();
+		}
 
 		self.nextTick();
 	};
@@ -176,21 +183,23 @@ var Gamepad = function(viewer) {
 			!!navigator.webkitGamepads;
 
 		if (gamepadSupportAvailable) {
-			if (window.navigator.platform.indexOf("Linux") != -1)
+			if (window.navigator.platform.indexOf("Linux") != -1) {
 				self.platform = "Linux";
-			else if (window.navigator.platform.indexOf("Win32") != -1 || window.navigator.platform.indexOf("Win64") != -1 )
+			} else if (window.navigator.platform.indexOf("Win32") != -1 || window.navigator.platform.indexOf("Win64") != -1 ) {
 				self.platform = "Win32";
-			else
+			} else {
 				console.error("Platform " + window.navigator.platform + " is not supported.");
+			}
 
-			if (window.navigator.appVersion.indexOf("Chrome") != -1)
+			if (window.navigator.appVersion.indexOf("Chrome") != -1) {
 				self.browser = "Chrome";
-			else if (window.navigator.appVersion.indexOf("Firefox") != -1)
+			} else if (window.navigator.appVersion.indexOf("Firefox") != -1) {
 				self.browser = "Firefox";
-			else if (window.navigator.userAgent.indexOf("Firefox") != -1)
+			} else if (window.navigator.userAgent.indexOf("Firefox") != -1) {
 				self.browser = "Firefox";
-			else
+			} else {
 				console.error("Browser version " + window.navigator.appVersion + " is not supported.");
+			}
 
 			if (self.browser && self.platform) {
 				if ("ongamepadconnected" in window) {

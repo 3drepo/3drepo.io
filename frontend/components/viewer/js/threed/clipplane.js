@@ -420,8 +420,9 @@ var ClipPlane = {};
 			viewer.getScene().appendChild(clipPlaneElem);
 
 
-			if(normal)
+			if(normal) {
 				this.transformClipPlane(parentNode._x3domNode.getCurrentTransform(), true);
+			}
 			
 
 

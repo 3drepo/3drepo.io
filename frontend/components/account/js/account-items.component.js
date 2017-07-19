@@ -122,7 +122,9 @@
 		 * @returns {Boolean} The state of the property (to show or hide)
 		 */
 		var getState = function(node, prop) {
-			if (node[prop] === undefined) node[prop] = false;
+			if (node[prop] === undefined) {
+				node[prop] = false;
+			}
 			return node[prop];
 		};
 
@@ -311,7 +313,9 @@
 			var models;
 
 			// isDefault is a string for some reason?
-			if (typeof(isDefault) === "string") isDefault = (isDefault === "true");
+			if (typeof(isDefault) === "string") {
+				isDefault = (isDefault === "true");
+			}
 			
 			if (!isDefault) {
 

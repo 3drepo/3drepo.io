@@ -408,22 +408,27 @@ var MapTile = {};
 		center[2] = (coords[0][2] + coords[1][2], + coords[2][2] + coords[3][2]) / 4;
 
 		function less(a, b){
-		    if (a[0] - center[0] >= 0 && b[0] - center[0] < 0)
-		        return true;
-		    if (a[0] - center[0] < 0 && b[0] - center[0] >= 0)
-		        return false;
+		    if (a[0] - center[0] >= 0 && b[0] - center[0] < 0) {
+				return true;
+			}
+		    if (a[0] - center[0] < 0 && b[0] - center[0] >= 0) {
+				return false;
+			}
 		    if (a[0] - center[0] == 0 && b[0] - center[0] == 0) {
-		        if (a[2] - center[2] >= 0 || b[2] - center[2] >= 0)
-		            return a[2] > b[2];
+		        if (a[2] - center[2] >= 0 || b[2] - center[2] >= 0) {
+					return a[2] > b[2];
+				}
 		        return b[2] > a[2];
 		    }
 
 		    // compute the cross product of vectors (center -> a) x (center -> b)
 		    var det = (a[0] - center[0]) * (b[2] - center[2]) - (b[0] - center[0]) * (a[2] - center[2]);
-		    if (det < 0)
-		        return true;
-		    if (det > 0)
-		        return false;
+		    if (det < 0) {
+				return true;
+			}
+		    if (det > 0) {
+				return false;
+			}
 
 		    // points a and b are on the same line from the center
 		    // check which point is closer to the center
