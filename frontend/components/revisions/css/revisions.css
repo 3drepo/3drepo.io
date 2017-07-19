@@ -14,13 +14,17 @@ revisions {
     text-align: center;
 }
 
-.revisions-dropdown .angular-material-icons{
+.revisions-dropdown .angular-material-icons {
   color: white;
 }
 
-.revisions-dropdown{
+.revisions-dropdown {
     cursor:pointer;
     outline: none
+}
+
+revisionsDialog h3 {
+    font-weight: lighter;
 }
 
 /** Revisions Dialog *************************************************************************************************/

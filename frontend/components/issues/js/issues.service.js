@@ -101,7 +101,7 @@
 						if(!ids[key]){
 							ids[key] = [];
 						}	
-						ids[key].push(vm.treeMap.sharedIdToUid[obj.shared_id]);
+						//ids[key].push(vm.treeMap.sharedIdToUid[obj.shared_id]);
 					});
 
 					for(var key in ids) {
@@ -172,7 +172,6 @@
 
 		obj.getIssue = function(account, model, issueId){
 
-			var self = this;
 			var deferred = $q.defer();
 			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/issues/" + issueId + ".json");
 
@@ -464,6 +463,8 @@
 		 * Set the status icon style and colour
 		 */
 		obj.getStatusIcon = function (issue) {
+			console.log("status icon", issue);
+
 			var statusIcon = {};
 
 			switch (issue.priority) {

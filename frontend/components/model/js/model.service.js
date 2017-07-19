@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("ModelService", ModelService);
 
-	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "AuthService"];
+	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
 
-	function ModelService($http, $q, StateManager, serverConfig, HttpService, AuthService) {
+	function ModelService($http, $q, StateManager, serverConfig) {
 		var state = StateManager.state;
 
 		var getModelInfo = function (account, model) {
@@ -49,27 +49,6 @@
 			return deferred.promise;
 		};
 
-		// function doPost(data, urlEnd) {
-		// 	var deferred = $q.defer(),
-		// 		url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.model + "/" + urlEnd),
-		// 		config = {
-		// 			withCredentials: true
-		// 		};
-		// 	$http.post(url, data, config)
-		// 		.then(function (response) {
-		// 			deferred.resolve(response);
-		// 		})
-		// 		.catch(function(error){
-		// 			deferred.reject(error);
-		// 		});
-		// 	return deferred.promise;
-		// }
-
-		var createModelSummary = function (data) {
-			data.name = state.model;
-			return doPost(data, "info.json");
-		};
-
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.model + "/" + urlEnd);
@@ -90,7 +69,6 @@
 		};
 
 		return {
-			createmodelSummary: createModelSummary,
 			getModelSummary: getModelSummary,
 			getModelInfo: getModelInfo
 		};

@@ -162,9 +162,8 @@
 		};
 
 		function hasTrailingSlash() {
+			// Check if we have a trailing slash in our URL
 			var absUrl = $location.absUrl();
-			console.log("URL", absUrl);
-
 			var trailingCheck = absUrl.substr(-1);
 			if (trailingCheck === "/") {
 				return true;
@@ -173,6 +172,7 @@
 		}
 
 		function removeTrailingSlash() {
+			// Remove the trailing slash from the URL
 			var currentPath = $location.path();
 			var minusSlash = currentPath.slice(0, -1);
 			$location.path(minusSlash);
@@ -233,7 +233,6 @@
 		};
 
 		vm.home = function () {
-			console.log("GO HOME");
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
@@ -336,12 +335,6 @@
 			$mdDialog.cancel();
 		};
 
-		/**
-		 * Close the dialog by not clicking the close button
-		 */
-		function removeDialog () {
-			$scope.closeDialog();
-		}
 	}
 }());
 

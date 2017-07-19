@@ -86,7 +86,7 @@
 			if (angular.isDefined(vm.accounts)) {
 				// vm.showInfo = true;
 				if (vm.accounts.length > 0) {
-					accountsToUse = [];
+					//accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 						account = vm.accounts[i];
 

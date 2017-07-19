@@ -164,7 +164,6 @@
 		 * @return {Boolean} if a part of the default tree should show or hide
 		 */
 		vm.toggleDefault = function(project, type) {
-			console.log("toggleDefault", project, type, vm.defaults[project][type]);
 			vm.defaults[project][type] = !vm.defaults[project][type];
 			return vm.defaults[project][type];
 		};

@@ -172,6 +172,7 @@
 					vm.statuses[3].disabled = disableStatus;
 
 					vm.issueData = angular.copy(vm.data);
+				
 					vm.issueData.comments = vm.issueData.comments || [];
 					vm.issueData.name = IssuesService.generateTitle(vm.issueData); // Change name to title for display purposes
 					vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
@@ -219,6 +220,8 @@
 					}
 				
 					vm.convertCommentTopicType();
+					console.log("issueData", vm.issueData);
+					
 				} else {
 					vm.issueData = {
 						priority: "none",
@@ -229,6 +232,7 @@
 					};
 					vm.canUpdate = true;
 					vm.canUpdateStatus = true;
+					console.log("issueData constructed", vm.issueData);
 				}
 				vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 				setContentHeight();
@@ -620,6 +624,7 @@
 				.then(function (response) {
 					vm.data = response.data; // So that new changes are registered as updates
 					vm.issueData = response.data;
+					
 					vm.issueData.title = IssuesService.generateTitle(vm.issueData);
 					vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
 					vm.descriptionThumbnail = UtilsService.getServerUrl(vm.issueData.viewpoint.screenshotSmall);

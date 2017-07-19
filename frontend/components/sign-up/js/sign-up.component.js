@@ -183,8 +183,6 @@
 				doRegister = true,
 				allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
-			console.log(vm.newUser);
-
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password)) &&

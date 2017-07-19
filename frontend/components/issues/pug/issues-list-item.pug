@@ -9,7 +9,7 @@
 			#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
 				div(layout="row", layout-align="start start")
 					md-icon.angular-material-icons#issueListItemStatus(
-					style="color:{{vm.IssuesService.getStatusIcon(vm.data).colour}}") {{vm.IssuesService.getStatusIcon(vm.data).icon}}
+					ng-style="{'color': '{{ vm.getStatusColour(vm.data) }}' }") {{vm.getStatusIcon(vm.data)}}
 					label(flex) {{vm.data.owner}}
 				label {{vm.data.timeStamp}}
 			#issuesListItemDescription

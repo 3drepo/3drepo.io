@@ -74,6 +74,14 @@
 			}
 		};
 
+		vm.getStatusIcon = function(issueData) {
+			return IssuesService.getStatusIcon(issueData).icon;
+		};
+
+		vm.getStatusColour = function(issueData) {
+			return IssuesService.getStatusIcon(issueData).colour;
+		};
+
 		/**
 		 * Set role indicator colour
 		 */

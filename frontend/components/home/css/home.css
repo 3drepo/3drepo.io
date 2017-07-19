@@ -18,6 +18,10 @@ home {
     height: 100%;
 }
 
+home h3 {
+    font-weight: lighter;
+}
+
 home #homeBackground {
     position:absolute;
     width:100%;

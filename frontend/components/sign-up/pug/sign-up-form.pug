@@ -51,7 +51,7 @@ form
 		md-input-container(flex)
 			#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
 	
-	h4.registerError {{vm.registerErrorMessage}}
+	h3.registerError {{vm.registerErrorMessage}}
 
 	div(layout="row", layout-xs="column", layout-align="start center")
 		md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") 

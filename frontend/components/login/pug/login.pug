@@ -3,18 +3,12 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Log in
-				//h2(ng-if="vm.unityLoaded") Log in
-				//h2(ng-if="!vm.unityLoaded") Loading...
-		.userContent(layout="column")
 
+		.userContent(layout="column")
 			div.loginBox.loadingBox(layout="row")
 				h3.welcome Welcome to 3D Repo!
-				//div(ng-if="!vm.unityLoaded")
-					md-progress-circular
-					h4 Initialising Unity...
 
-			// Register or login#
-			//div.loginBox(layout="row", ng-if="vm.unityLoaded")
+			// Register or login
 			div.loginBox(layout="row")
 				// Login
 				div(layout="column", flex)
@@ -36,7 +30,7 @@
 						md-button.md-accent.md-raised(
 							ng-click="vm.login()"
 						) Log In
-					h4.loginError {{vm.errorMessage}}
+					h3.loginError {{vm.errorMessage}}
 					div(layout="row", layout-align="start center", flex="none")
 						a.loginLinks(href="passwordForgot") Forgot password?
 					div(layout="row", layout-align="start center", flex="none")
