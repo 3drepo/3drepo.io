@@ -37,9 +37,7 @@
 	AccountItemsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
 
 	function AccountItemsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
-		var vm = this,
-			existingModelFileUploader,
-			newModelFileUploader;
+		var vm = this;
 
 		/*
 		 * Init
@@ -51,23 +49,26 @@
 			vm.units = serverConfig.units;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
 			vm.defaults = {}; 
+			
+
+			// SETUP FILE UPLOADERS
+			
+			// TODO: Stop accessing query selectors in controllers (I did not write this)
+			vm.existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
+			vm.existingModelFileUploader.addEventListener("change", function () {
+				vm.modelToUpload = this.files[0];
+				$scope.$apply();
+			}, false);
+
+			vm.newModelFileUploader = $element[0].querySelector("#newModelFileUploader");
+			vm.newModelFileUploader.addEventListener("change", function () {
+				vm.newModelFileToUpload = this.files[0];
+				$scope.$apply();
+			}, false);
+
 		};
 		
-		// SETUP FILE UPLOADERS
-		
-		// TODO: Stop accessing query selectors in controllers (I did not write this)
-		existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
-		existingModelFileUploader.addEventListener("change", function () {
-			vm.modelToUpload = this.files[0];
-			$scope.$apply();
-		}, false);
-
-		newModelFileUploader = $element[0].querySelector("#newModelFileUploader");
-		newModelFileUploader.addEventListener("change", function () {
-			vm.newModelFileToUpload = this.files[0];
-			$scope.$apply();
-		}, false);
-
+	
 		// GENERIC FUNCTIONS
 
 		/**
@@ -81,7 +82,7 @@
 		/**
 		 * Escape from the add model/federation/project menu
 		 */
-		vm.addEscape = function(event){
+		vm.addEscape = function(){
 			$element.bind("keydown keypress", function (event) {
 				if(event.which === 27) { // 27 = esc key
 					vm.addButtons = false;
@@ -292,10 +293,9 @@
 				}
 
 			})
-				.catch(function(error){
+				.catch(function(){
 					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
 					vm.isSaving = false;
-
 				});
 
 			$timeout(function () {
@@ -648,9 +648,9 @@
 		 * @param {Object} model
 		 */
 		vm.uploadFile = function (model) {
-			existingModelFileUploader.value = "";
-			existingModelToUpload = model;
-			existingModelFileUploader.click();
+			vm.existingModelFileUploader.value = "";
+			vm.existingModelFileUploader.existingModelToUpload = model;
+			vm.existingModelFileUploader.click();
 		};
 
 
@@ -658,8 +658,8 @@
 		 * Upload a file
 		 */
 		vm.uploadFileForNewModel = function () {
-			newModelFileUploader.value = "";
-			newModelFileUploader.click();
+			vm.newModelFileUploader.value = "";
+			vm.newModelFileUploader.click();
 		};
 
 
