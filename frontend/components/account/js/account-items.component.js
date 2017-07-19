@@ -65,6 +65,7 @@
 				vm.newModelFileToUpload = this.files[0];
 				$scope.$apply();
 			}, false);
+			
 
 		};
 		
@@ -109,8 +110,7 @@
 			if (vm.defaults[project][type] === undefined) {
 				vm.defaults[project][type] = false;
 			} 
-			
-			console.log("showDefaults", vm.defaults[project][type]);
+
 			return vm.defaults[project][type];
 			
 		};

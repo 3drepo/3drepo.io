@@ -113,7 +113,6 @@
 		.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "AuthService", "$timeout", "AnalyticService",
 			function($location, $rootScope, $state, uiState, StateManager, AuthService, $timeout, AnalyticService) {
 				$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
-					console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
 					StateManager.state.changing = true;
 
@@ -134,7 +133,6 @@
 				});
 
 				$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
-					console.log("stateChangeSuccess: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
 
 					var stateChangeObject = {
 						toState    : toState,
@@ -146,12 +144,11 @@
 					StateManager.handleStateChange(stateChangeObject);
 				});
 
-				$rootScope.$on("$locationChangeStart", function(event, next, current) {
-					console.log("locationChange");
-				});
+				// $rootScope.$on("$locationChangeStart", function(event, next, current) {
+				// 	console.log("locationChange");
+				// });
 
 				$rootScope.$on("$locationChangeSuccess", function() {
-					console.log("locationChangeSucc");
 
 					AnalyticService.sendPageView(location);
 
@@ -457,7 +454,6 @@
 					if (event.type === EventService.EVENT.SET_STATE) {
 						for (var key in event.value) {
 							if (key !== "updateLocation" && event.value.hasOwnProperty(key)) {
-								console.log("Setting state", key, event.value, event.value[key]);
 								self.setStateVar(key, event.value[key]);
 							}
 						}

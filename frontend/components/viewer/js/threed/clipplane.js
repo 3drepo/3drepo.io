@@ -37,7 +37,9 @@ var ClipPlane = {};
 	 */
 	ClipPlane = function(id, viewer, axis, normal, colour, distance, percentage, clipDirection, parentNode) {
 		var self = this;
-		console.log("Clip plane created");
+
+		//console.log("Clip plane created");
+		
 		// Public properties
 
 		/**

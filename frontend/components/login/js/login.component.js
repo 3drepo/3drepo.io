@@ -93,11 +93,6 @@
 				}
 			}
 		});
-
-		$scope.$watch("vm.unityLoading", function(event) {
-
-			console.log(vm.unityLoading);
-
-		});
+		
 	}
 }());

@@ -351,7 +351,6 @@ var UnityUtil;
 				
 		
 		UnityUtil.onLoading();
-		console.log("TO UNITY LOAD MODEL", params);
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
 		
 		return UnityUtil.onLoaded();
