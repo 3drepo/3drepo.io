@@ -86,9 +86,11 @@
 
 			// TODO: this is a bit of a hack, it would be nice to 
 			// include this in the StateManager
-			if (hasTrailingSlash) {
+			if (hasTrailingSlash()) {
 				removeTrailingSlash();
 			}
+
+			//console.log($location.absUrl());
 	
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -160,10 +162,14 @@
 		};
 
 		function hasTrailingSlash() {
-			var trailingCheck = $location.url().substr(1);
+			var absUrl = $location.absUrl();
+			console.log("URL", absUrl);
+
+			var trailingCheck = absUrl.substr(-1);
 			if (trailingCheck === "/") {
 				return true;
 			}
+			return false;
 		}
 
 		function removeTrailingSlash() {
@@ -210,12 +216,14 @@
 
 		function insertFunctionDirective(func) {
 			//var snakeCaseDirectiveName = UtilsService.snake_case(func, "-");
+			//console.log(snakeCaseDirectiveName);
+
 			// Create element related to function func
 			var directiveMarkup = "<" + func +
 				" username='vm.query.username'" +
 				" token='vm.query.token'" +
 				" query='vm.query'>" +
-				"</" + func+ ">";
+				"</" + func + ">";
 
 			insertDirective(directiveMarkup);
 		}
@@ -258,9 +266,10 @@
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					
+					// TODO: Use state manager
 					// Only fire the Logout Event if we're on the home page
 					var currentPage = $location.path();
-					//console.log("currentPage", currentPage)
+
 					if (vm.doNotLogout.indexOf(currentPage) === -1) {
 						//EventService.send(EventService.EVENT.CLEAR_STATE);
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });

@@ -3,35 +3,35 @@ sign-up .registerLinks {
     margin: 10px 10px 10px 10px
 }
 
-sign-up-form {
+sign-up {
     width: 750px;
     padding: 0 30px;
     padding-top: 10px;
 }
 
-sign-up-form #tc {
+sign-up #tc {
     margin-top: 15px;
     margin-right: 15px;
 }
-sign-up-form #tc md-checkbox {
+sign-up #tc md-checkbox {
     margin : 0;
 }
-sign-up-form #tc md-checkbox ._md-icon {
+sign-up #tc md-checkbox ._md-icon {
     border-color: rgba(0, 0, 0, 0.4);
 }
-sign-up-form #tc a {
+sign-up #tc a {
     font-size: 12px;
 }
-sign-up-form #tc p {
+sign-up #tc p {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
     margin: -3px 0 20px 10px;
 }
-sign-up-form #tc a {
+sign-up #tc a {
     outline: none;
 }
 
-sign-up-form .sign-up-button {
+sign-up .sign-up-button {
     margin-left: 10%;
     margin-right: 10%;
     margin-top: 15px;
@@ -39,59 +39,59 @@ sign-up-form .sign-up-button {
     width: 80%;
 }
 
-sign-up-form .sign-up-button md-progress-circular {
+sign-up .sign-up-button md-progress-circular {
     display: inline-block;
     vertical-align: middle;
     margin-left: 0px !important;
 }
 
-sign-up-form #loginCaptcha > div {
+sign-up #loginCaptcha > div {
     margin-left: 20px;  
 }
 
-sign-up-form #registerWait {
+sign-up #registerWait {
     height: 30px;
 }
-sign-up-form #registerWait p {
+sign-up #registerWait p {
     margin: 0 10px 0 0;
     color: rgba(0, 0, 0, 0.7);
     font-size: 14px;
 }
-sign-up-form #loginPricing {
+sign-up #loginPricing {
     font-size: 14px;
     margin-left: 30px;
     outline: none;
 }
 
-sign-up-form .registerError {
+sign-up .registerError {
     color: #F44336;
     margin: 20px 20px 5px;
     font-weight: normal;
     text-align: center;
 }
 
-sign-up-form .rc-anchor-light {
+sign-up .rc-anchor-light {
     background: red;
 }
 
-sign-up-form form md-input-container {
+sign-up form md-input-container {
     margin: 10px;
     margin-bottom: 2px;
     margin-top: 2px;
 }
 
-sign-up-form #signUpFormHiddenInputs {
+sign-up #signUpFormHiddenInputs {
     position: absolute;
     top: 0;
     opacity: 0;
 }
 
-sign-up-form .bottom-links {
+sign-up .bottom-links {
     text-align: center;
 }
 
 @media (max-width: 600px) {
-    sign-up-form {
+    sign-up {
         padding-left: 10px;
         padding-right: 10px;
     }

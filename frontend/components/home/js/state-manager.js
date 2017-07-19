@@ -46,6 +46,15 @@
 					}
 				});
 
+				// Convert blah_test to blahTest
+				function camelCase(name) {
+					return name.replace(/-([a-z])/g, 
+						function (g) { 
+							return g[1].toUpperCase(); 
+						}
+					);
+				}
+
 				var stateStack       = [structure];
 				var stateNameStack   = ["home"];
 
@@ -59,22 +68,23 @@
 					// more specific than the
 					if (parentState.functions) {
 						for (var i = 0; i < parentState.functions.length; i++) {
-							var childFunction	  = parentState.functions[i];
-							var childFunctionName = parentStateName + "." + childFunction;
+							var childFunctionKebabCase = parentState.functions[i];
+							var childFunction	       = camelCase(childFunctionKebabCase);
+							var childFunctionName      = parentStateName + "." + childFunctionKebabCase;
 
-							(function(childFunction) {
+							(function(childFunction, childFunctionKebabCase, childFunctionName) {
 								$stateProvider.state(childFunctionName, {
 									name: childFunction,
 									url: childFunction,
 									resolve: {
 										init: ["StateManager", "$location", "$stateParams", function (StateManager, $location, $stateParams) {
-											$stateParams[childFunction] = true;
+											$stateParams[childFunctionKebabCase] = true;
 
 											StateManager.setState($stateParams);
 										}]
 									}
 								});
-							})(childFunction);
+							})(childFunction, childFunctionKebabCase, childFunctionName);
 						}
 					}
 
@@ -205,7 +215,7 @@
 				var functionName;
 
 				if (parentState.functions) {
-					for(i=0; i<parentState.functions.length; i++) {
+					for(var i=0; i<parentState.functions.length; i++) {
 						functionName = parentState.functions[i];
 
 						if (this.functions.indexOf(functionName) > -1) {

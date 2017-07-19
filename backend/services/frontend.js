@@ -176,7 +176,7 @@
 				"password-forgot",
 				"password-change",
 				"pricing",
-				"signUp",
+				"sign-up",
 				"contact",
 				"payment",
 				"billing"

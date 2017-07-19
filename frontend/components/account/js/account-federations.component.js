@@ -45,11 +45,11 @@
 	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountDataService"];
 
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountDataService) {
-		var vm = this,
-			federationToDeleteIndex,
-			userAccount, // For creating federations
-			accountsToUse, // For listing federations
-			dialogCloseToId;
+		var vm = this;
+		// federationToDeleteIndex,
+		// userAccount, // For creating federations
+		// accountsToUse, // For listing federations
+		// dialogCloseToId;
 
 
 		vm.$onInit = function() {
@@ -57,7 +57,7 @@
 			vm.modelRegExp = serverConfig.modelNameRegExp;
 			vm.units = server_config.units;
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
-			dialogCloseToId = "#" + vm.dialogCloseTo;
+			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 
 		};
 
@@ -309,7 +309,7 @@
 			vm.deleteName = model.name;
 			vm.projectToDeleteFrom = project;
 			vm.currentAccount = account;
-			UtilsService.showDialog("delete-dialog.html", $scope, event, true, null, false, dialogCloseToId);
+			UtilsService.showDialog("delete-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 		}
 
 		/**
