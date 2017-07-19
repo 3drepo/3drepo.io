@@ -19,9 +19,9 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.component("accountModels", {
+		.component("accountItems", {
 			restrict: "EA",
-			templateUrl: "account-models.html",
+			templateUrl: "account-items.html",
 			bindings: {
 				account: "=",	
 				accounts: "=",
@@ -29,16 +29,15 @@
 				quota: "=",
 				subscriptions: "="
 			},
-			controller: AccountModelsCtrl,
+			controller: AccountItemsCtrl,
 			controllerAs: "vm"
 			
 		});
 
-	AccountModelsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
+	AccountItemsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
 
-	function AccountModelsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
+	function AccountItemsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
 		var vm = this,
-			existingModelToUpload,
 			existingModelFileUploader,
 			newModelFileUploader;
 
@@ -51,10 +50,12 @@
 			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 			vm.units = serverConfig.units;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
+			vm.defaults = {}; 
 		};
 		
 		// SETUP FILE UPLOADERS
 		
+		// TODO: Stop accessing query selectors in controllers (I did not write this)
 		existingModelFileUploader = $element[0].querySelector("#existingModelFileUploader");
 		existingModelFileUploader.addEventListener("change", function () {
 			vm.modelToUpload = this.files[0];
@@ -62,14 +63,10 @@
 		}, false);
 
 		newModelFileUploader = $element[0].querySelector("#newModelFileUploader");
-		newModelFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.newModelFileToUpload = this.files[0];
-				$scope.$apply();
-			},
-			false
-		);
+		newModelFileUploader.addEventListener("change", function () {
+			vm.newModelFileToUpload = this.files[0];
+			$scope.$apply();
+		}, false);
 
 		// GENERIC FUNCTIONS
 
@@ -99,14 +96,23 @@
 		
 		// HIDE / SHOW STATE
 
-		/**
-		 * Holding object for default/unassigned tree node hiding/showing
-		 */
-		vm.showDefault = {
-			project : false,
-			models : false,
-			feds : false
-		}; 
+		vm.showDefaults = function(project, type) {
+
+			// If it doesn't exist it must be the first time it's loaded
+			// so set it to false
+			if (vm.defaults[project] === undefined) {
+				vm.defaults[project] = {};
+			} 
+
+			// Same again for the type
+			if (vm.defaults[project][type] === undefined) {
+				vm.defaults[project][type] = false;
+			} 
+			
+			console.log("showDefaults", vm.defaults[project][type]);
+			return vm.defaults[project][type];
+			
+		};
 
 		/**
 		 * Get the show/hide state of a data object
@@ -154,9 +160,10 @@
 		 * @param {String} type 
 		 * @return {Boolean} if a part of the default tree should show or hide
 		 */
-		vm.toggleDefault = function(type) {
-			vm.showDefault[type] = !vm.showDefault[type];
-			return vm.showDefault[type];
+		vm.toggleDefault = function(project, type) {
+			console.log("toggleDefault", project, type, vm.defaults[project][type]);
+			vm.defaults[project][type] = !vm.defaults[project][type];
+			return vm.defaults[project][type];
 		};
 
 		/**

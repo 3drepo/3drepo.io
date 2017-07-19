@@ -40,7 +40,6 @@
 				};
 
 				this.loginFailure = function(response) {
-					console.log("412 : loginFailure", response);
 					self.loggedIn = false;
 					self.username = null;
 					self.userRoles = null;
@@ -113,7 +112,10 @@
 
 						self.authPromise.promise.then(function() {
 							initPromise.resolve(self.loggedIn);
+						}).catch(function(error){
+							console.error("Authentication error:", error);
 						});
+
 					} else {
 						if (self.loggedIn) {
 							EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: self.username });
@@ -154,7 +156,7 @@
 					return self.username; 
 				};
 
-				this.isLoggedIn = function(username) {
+				this.isLoggedIn = function() {
 					return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
 				};
 

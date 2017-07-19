@@ -47,16 +47,15 @@
 	function IssueCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var vm = this,
 			savedScreenShot = null,
-			highlightBackground = "#FF9800",
-			currentAction = null,
 			editingCommentIndex = null,
 			commentViewpoint,
 			aboutToBeDestroyed = false,
 			textInputHasFocus = false,
 			savedDescription,
 			savedComment,
-			issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator")),
-			disableStatus;
+
+			// TODO: this is bad, just use ng directives
+			issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
 
 		/*
 		 * Init
@@ -92,7 +91,7 @@
 					disabled: function() { 
 						return vm.submitDisabled; 
 					}, 
-					visible: function(){ 
+					visible: function() { 
 						return true; 
 					},
 					selected: false
@@ -101,10 +100,10 @@
 					icon: "place", 
 					label: "Pin", 
 					disabled: function() { 
-						return (vm.submitDisabled || vm.canComment); 
+						return vm.submitDisabled || vm.pinData || vm.pinHidden;
 					},
-					visible: function() {
-						return !vm.canComment;
+					visible: function() { 
+						return !vm.data;
 					},
 					selected: false
 				}
@@ -152,8 +151,6 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var i, length,
-				leftArrow = 37;
 
 			if(changes.hasOwnProperty("modelSettings")){
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
@@ -163,7 +160,6 @@
 			}
 
 			// Data
-
 			if (changes.hasOwnProperty("data")) {
 				if (vm.data && vm.statuses && vm.statuses.length) {
 
@@ -323,12 +319,6 @@
 
 						// Update last but one comment in case it was "sealed"
 						if (vm.issueData.comments.length > 1) {
-						// comment = response.data.issue.comments[response.data.issue.comments.length - 2];
-						// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-						// if (comment.action) {
-						// 	IssuesService.convertActionCommentToText(comment, vm.topic_types);
-						// }
-						//vm.issueData.comments[vm.issueData.comments.length - 2] = comment;
 							vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
 						}
 
@@ -514,6 +504,7 @@
 		 * Save issue
 		 */
 		vm.saveIssue = function() {
+			
 			var viewpointPromise = $q.defer(),
 				screenShotPromise = $q.defer(),
 				objectsPromise = $q.defer();
@@ -524,8 +515,8 @@
 				// Get the viewpoint
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
-					{promise: viewpointPromise, account: vm.account, model: vm.model
-					});
+					{promise: viewpointPromise, account: vm.account, model: vm.model}
+				);
 			}
 
 			//Get selected objects
@@ -543,6 +534,7 @@
 			}).catch(function(error){
 				console.error(error);
 			});
+
 		};
 
 		function handleObjects (viewpoint, objectInfo, screenShotPromise) {
@@ -570,13 +562,15 @@
 				screenShotPromise.promise.then(function (screenShot) {
 					if (objectInfo.highlightedNodes.length > 0) {
 						// Create a group of selected objects
-						data = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-						UtilsService.doPost(data, vm.account + "/" + vm.model + "/groups").then(function (response) {
+						var groupData = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
+						UtilsService.doPost(groupData, vm.account + "/" + vm.model + "/groups").then(function (response) {
 							vm.doSaveIssue(viewpoint, screenShot, response.data._id);
 						});
 					} else {
 						vm.doSaveIssue(viewpoint, screenShot);
 					}
+				}).catch(function(error){
+					console.error(error);
 				});
 				
 			}
@@ -633,12 +627,13 @@
 
 					// Hide the description input if no description
 					vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
+					vm.pinHidden = true;
 
 					// Notify parent of new issue
 					vm.issueCreated({issue: vm.issueData});
 
 					// Hide some actions
-					vm.actions.pin.hidden = true;
+					//vm.actions.pin.visible = false;
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 
 					vm.submitDisabled = true;
@@ -867,15 +862,7 @@
 		 * @returns {boolean}
 		 */
 		function userHasAdminRole () {
-			var i, iLength, j, jLength,
-				hasAdminRole = false;
-
-			// for (i = 0, iLength = vm.userRoles.length; (i < iLength) && !hasAdminRole; i += 1) {
-			// 	for (j = 0, jLength = vm.availableRoles.length; (j < jLength) && !hasAdminRole; j += 1) {
-			// 		hasAdminRole = (vm.userRoles[i] === vm.availableRoles[j].role) && (AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.availableRoles[j].permissions));
-			// 	}
-			// }
-
+			var hasAdminRole = false;
 			return hasAdminRole;
 		}
 
@@ -894,6 +881,7 @@
 				height = issueMinHeight;
 
 			if (vm.data) {
+
 				// Additional info
 				if (vm.showAdditional) {
 					height += additionalInfoHeight;

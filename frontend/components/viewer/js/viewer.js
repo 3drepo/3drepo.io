@@ -107,12 +107,11 @@ var Viewer = {};
 			self.viewer = document.createElement("div");
 			self.viewer.className = "viewer";
 
-			self.loadingText = "Loading Viewer...";
 			self.loadingDiv = document.createElement("div");
 			self.loadingDivText = document.createElement("p");
 			self.loadingDiv.appendChild(self.loadingDivText);
 
-			self.loadingDivText.innerHTML = self.loadingText;
+			self.loadingDivText.innerHTML = "";
 			self.loadingDiv.className += "loadingViewer";
 			self.loadingDivText.className += "loadingViewerText";
 
@@ -145,6 +144,7 @@ var Viewer = {};
 				// Set option param from viewerDirective
 				self.options = options;
 
+				self.loadingDivText.innerHTML = "Loading Viewer...";
 				document.body.style.cursor = "wait";
 				// This kicks off the actual loading of Unity
 				self.viewer.appendChild(self.unityLoaderScript);
@@ -197,6 +197,7 @@ var Viewer = {};
 					});
 					resolve();
 				}).catch(function(error){
+					self.loadingDivText.innerHTML = "Loading Viewer Failed!";
 					console.error("UnityUtil.onReady failed: ", error);
 					reject(error);
 				});
@@ -568,6 +569,11 @@ var Viewer = {};
 			UnityUtil.resetCamera();
 		};
 
+		this.cancelLoadModel = function() {
+			document.body.style.cursor = "initial";
+			UnityUtil.cancelLoadModel();
+		};
+
 		this.loadModel = function(account, model, branch, revision) {
 			self.account = account;
 			self.model = model;
@@ -577,12 +583,13 @@ var Viewer = {};
 			document.body.style.cursor = "wait";
 
 			callback(Viewer.EVENT.START_LOADING);
-			UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
+			return UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
 				.then(function(bbox){
 					document.body.style.cursor = "initial";
 					self.loadingDivText.innerHTML = "";
 					callback(Viewer.EVENT.LOADED, bbox);
 				}).catch(function(error){
+					document.body.style.cursor = "initial";
 					console.error("Unity error loading model: ", error);
 				});
 		};

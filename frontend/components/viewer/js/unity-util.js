@@ -119,10 +119,13 @@ var UnityUtil;
 	};
 
 	function userAlert(message, reload) {
-		var prefix = "Something went wrong loading Unity, " + 
-					 "press okay to refresh! Error: ";
-		if(alert(prefix + message)){
+		var prefix = "" +
+		"Something went wrong loading Unity, " + 
+		"press okay to refresh! Error: ";
 
+		var fullMessage = prefix + message;
+		if(alert(fullMessage)){
+			console.error(fullMessage);
 		} else if (reload) {
 			window.location.reload(); 
 		}
@@ -309,6 +312,14 @@ var UnityUtil;
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	};
 
+	UnityUtil.prototype.cancelLoadModel = function() {
+		if(!loaded && loadedResolve) {
+			//If the previous model is being loaded but hasn't finished yet
+			loadedResolve.reject();
+			loadingResolve.reject();
+		}
+	};
+
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision) {
 		
 		UnityUtil.reset();	
@@ -326,10 +337,13 @@ var UnityUtil;
 		var params = {};
 		params.database = account;
 		params.model = model;
-		if(revision != "head")
-			params.revID = revision;	
+		if(revision != "head") {
+			params.revID = revision;
+		}
+				
 		
-		UnityUtil.onLoading();
+		UnityUtil.onLoading()
+		console.log("TO UNITY LOAD MODEL", params);
 		toUnity("LoadModel", LoadingState.VIEWER_READY, JSON.stringify(params));
 		
 		return UnityUtil.onLoaded();
@@ -389,7 +403,6 @@ var UnityUtil;
 		param.up = up;
 		param.forward = forward;
 		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
-
 
 	};
 	

@@ -186,7 +186,6 @@
 
 			vm.event = event;
 
-		
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					if (vm.issues[i]._id === event.value.id) {
@@ -194,7 +193,7 @@
 						break;
 					}
 				}
-			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
+			} else if(event.type === EventService.EVENT.VIEWER.UNITY_READY) {
 
 				vm.modelLoaded = true;
 			
@@ -416,18 +415,22 @@
 		 */
 		vm.editIssue = function (issue) {
 			
+			console.log("Edit Issue", issue);
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
+
 			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
 				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
-			if(issue){
+			if(issue) {
 
+				console.log("Issue")
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
+					
 					vm.selectedIssueLoaded = true;
 					vm.selectedIssue = issue;
 				}).catch(function(error) {
@@ -450,6 +453,7 @@
 					eventAction: "view"
 				});
 			} else {
+				vm.selectedIssueLoaded = true;
 				vm.selectedIssue = issue;
 			}
 

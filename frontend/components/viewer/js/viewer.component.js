@@ -49,6 +49,7 @@
 			vm.pointerEvents = "auto";
 			vm.initialisedViewer = false;
 			vm.currentModel = null;
+			vm.currentModelPromise = null;
 
 			vm.viewer = new Viewer(
 				vm.name, 
@@ -93,13 +94,9 @@
 		function fetchModelProperties(account, model, branch, revision) {
 
 			if(!branch) {
-				if(!revision)
-					branch = "master";
-				else
-					branch = "";
+				branch = (!revision) ? "master" : "";
 			}
 					
-
 			if(!revision) {
 				revision = "head";
 			}
@@ -124,9 +121,7 @@
 					
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
-			
 					if (!vm.currentModel) {
-						// Initialise the viewer
 						vm.initViewer();
 					} else {
 						// Load the model
@@ -243,16 +238,22 @@
 								event.value.visible
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
-							vm.viewer.setCamera(
-								event.value.position,
-								event.value.view_dir,
-								event.value.up,
-								event.value.look_at,
-								angular.isDefined(event.value.animate) ? event.value.animate : true,
-								event.value.rollerCoasterMode,
-								event.value.account,
-								event.value.model
-							);
+	
+							vm.currentModelPromise.then(function(){
+								vm.viewer.setCamera(
+									event.value.position,
+									event.value.view_dir,
+									event.value.up,
+									event.value.look_at,
+									angular.isDefined(event.value.animate) ? event.value.animate : true,
+									event.value.rollerCoasterMode,
+									event.value.account,
+									event.value.model
+								);
+							}).catch(function(error){
+								console.error("Setting the camera errored because model failed to load: ", error);
+							});
+							
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
 								vm.viewer.getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
@@ -286,18 +287,14 @@
 			}
 		});
 
-		vm.loadViewerModel = function(event) {
+		vm.loadViewerModel = function() {
 
-			vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
+			vm.currentModelPromise = vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
 
 			// Set the current model in the viewer
 			vm.currentModel = vm.model;
 
 		};
 
-		// if (angular.isDefined(vm.vrMode))
-		// {
-		// 	vm.enterVR();
-		// }
 	}
 }());

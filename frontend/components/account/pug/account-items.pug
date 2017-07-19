@@ -107,24 +107,24 @@
 
 						// Default - default space models and federations
 						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
-							div(ng-click="vm.toggleDefault('project')")
+							div(ng-click="vm.toggleDefault(account.account, 'project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
-										md-icon.angular-material-icons(ng-if="vm.showDefault['project']") folder_open
-										md-icon.angular-material-icons(ng-if="!vm.showDefault['project']") folder  
+										md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'project')") folder_open
+										md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'project')") folder  
 									p Default
 
 							// Unassigned Models and Federations
-							md-list.tree-branch(ng-if="vm.showDefault['project']")
+							md-list.tree-branch(ng-if="vm.showDefaults(account.account, 'project')")
 
-								div(ng-click="vm.toggleDefault('models')")
+								div(ng-click="vm.toggleDefault(account.account, 'models')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-if="vm.showDefault['models']") folder_open
-											md-icon.angular-material-icons(ng-if="!vm.showDefault['models']") folder 
+											md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'models')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'models')") folder 
 										p Models
 								
-								div(ng-if="vm.showDefault['models']")
+								div(ng-if="vm.showDefaults(account.account, 'models')")
 									div(ng-if="model.name"
 										ng-repeat="model in account.models")
 
@@ -145,14 +145,14 @@
 
 								p.no-federations(ng-if="account.models.length === 0") No default models
 
-								div(ng-click="vm.toggleDefault('feds')")
+								div(ng-click="vm.toggleDefault(account.account, 'feds')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-if="vm.showDefault['feds']") folder_open
-											md-icon.angular-material-icons(ng-if="!vm.showDefault['feds']") folder 
+											md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'feds')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'feds')") folder 
 										p Federations
 
-								div(ng-if="vm.showDefault['feds'] && federation.name"
+								div(ng-if="vm.showDefaults(account.account, 'feds') && federation.name"
 									ng-repeat="(federationIndex, federation) in account.fedModels")
 
 									account-federations(
@@ -166,7 +166,7 @@
 										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
 
-								p.no-federations(ng-if="account.fedModels.length === 0 && vm.showDefault['feds']") No default federations
+								p.no-federations(ng-if="account.fedModels.length === 0 && vm.showDefaults(account.account, 'feds')") No default federations
 			
 			md-divider
 

@@ -183,6 +183,9 @@
 
 			// Selected issue
 			if (changes.hasOwnProperty("selectedIssue") && vm.issuesToShow) {
+
+				console.log("Here selectedIssue");
+
 				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
 					// To clear any previously selected issue
 					vm.issuesToShow[i].selected = false;
@@ -202,6 +205,7 @@
 			if(changes.hasOwnProperty("displayIssue") && vm.displayIssue){
 				var that = this;
 
+				console.log("Here displayIssue");
 				vm.editIssue(vm.displayIssue);
 				$timeout(function(){
 					showIssue(that.displayIssue);

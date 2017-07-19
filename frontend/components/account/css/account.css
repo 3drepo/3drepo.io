@@ -37,71 +37,71 @@ account-dir .userContent .cardInfo {
 }
 
 /** Account Models **************************************************************************************************/
-account-models #accountList {
+account-items #accountList {
   overflow: auto;
 }
 
-account-models .no-federations {
+account-items .no-federations {
   padding-left: 43px;
   color: rgb(67, 160, 71);
 }
 
-account-models .md-list-item-text {
+account-items .md-list-item-text {
   color: rgb(67, 160, 71);
 }
 
-account-models md-list {
+account-items md-list {
   padding: 0;
 }
 
-account-models .model-indent {
+account-items .model-indent {
   padding-left: 10px;
 }
 
-account-models .account,
-account-models .model {
+account-items .account,
+account-items .model {
   outline: none;
   /*padding-left: 10px;*/
 }
 
-account-models .tree-node:hover{
+account-items .tree-node:hover{
   cursor: pointer;
   background: #EEE;
 }
 
-account-models .projectName {
+account-items .projectName {
   color: #4CAF50;
 }
 
-account-models md-list-item.tree-node > div {
+account-items md-list-item.tree-node > div {
     padding-left: 0px;
 }
 
-account-models .tree-branch {
+account-items .tree-branch {
   margin-left: 20px;
 }
 
-account-models .models .modelName,
-account-models .models md-icon {
+account-items .models .modelName,
+account-items .models md-icon {
   color: #4CAF50;
 }
-account-models .models md-icon {
+account-items .models md-icon {
   margin: 0 !important;
 }
-account-models .modelTimestamp {
+account-items .modelTimestamp {
   margin-left: 20px;
 }
 
-account-models .models .modelTimestamp {
+account-items .models .modelTimestamp {
   color: rgba(0, 0, 0, 0.3);
   margin-left: 20px;
 }
-account-models .models p {
+account-items .models p {
   margin: 0;
 }
 
-account-models #existingModelFileUploader,
-account-models #newModelFileUploader {
+account-items #existingModelFileUploader,
+account-items #newModelFileUploader {
   width: 0;
   height: 0;
   opacity: 0;
@@ -110,56 +110,56 @@ account-models #newModelFileUploader {
   z-index: -1;
 }
 
-account-models .accountRight,
-account-models .modelRight {
+account-items .accountRight,
+account-items .modelRight {
   /*margin-right: 10px !important;*/
 }
 
-account-models .md-whiteframe-1dp {
+account-items .md-whiteframe-1dp {
   border-radius: 4px;
   background: #FFF;
 }
-account-models md-toolbar {
+account-items md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   height: 40px;
   min-height: 40px;
 }
 
-account-models .cardInfo md-progress-circular {
+account-items .cardInfo md-progress-circular {
   margin-left: 5px;
 }
 
-account-models .modelUploadInfo {
+account-items .modelUploadInfo {
   margin-right: 20px;
 }
 
-account-models .modelUploadFilename {
+account-items .modelUploadFilename {
   color: rgba(0,0,0,0.5);
   margin: 0 !important;
 }
 
-account-models .modelUploadInfo {
+account-items .modelUploadInfo {
   color: rgba(0,0,0,0.7);
   margin: 0 0 0 10px !important;
 }
 
-account-models .modelUploadIcon {
+account-items .modelUploadIcon {
   width: 15px;
   height: 15px;
   margin-left: 10px;
 }
 
-account-models .modelRight .modelUploaded {
+account-items .modelRight .modelUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
 }
 
-account-models .userContent {
+account-items .userContent {
   padding: 0 !important;
 }
 
-account-models .accountModelsSharedIcon {
+account-items .accountModelsSharedIcon {
   margin: 0 0 0 20px;
   color: rgba(0, 0, 0, 0.3);
 }
@@ -493,32 +493,32 @@ account-team #accountTeamSubHeader {
 
 
 /** Account Model Setting ******************************************************************************************/
-account-modelsetting .collaboratorIcon {
+account-itemsetting .collaboratorIcon {
   margin: 0 10px !important;
 }
 
-account-modelsetting #model {
+account-itemsetting #model {
   margin: -10px 0 10px;
 }
-account-modelsetting #model md-icon {
+account-itemsetting #model md-icon {
   margin: 0 !important;
 }
 
-account-modelsetting #accountTeamAdd {
+account-itemsetting #accountTeamAdd {
   margin-top: 20px;
   margin-bottom: 30px;
 }
 
-account-modelsetting #accountTeamMemberRoleGroup {
+account-itemsetting #accountTeamMemberRoleGroup {
   margin: 20px 0 0 10px;
 }
 
-account-modelsetting #accountTeamMemberRole {
+account-itemsetting #accountTeamMemberRole {
   margin-left: 10px;
   color: rgba(0, 0, 0, 0.5);
 }
 
-account-modelsetting #accountTeamSubHeader {
+account-itemsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
 }
 

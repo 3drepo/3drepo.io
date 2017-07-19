@@ -189,36 +189,43 @@
 			var userInfoPromise;
 
 			userInfoPromise = AccountService.getUserInfo(vm.account);
-			userInfoPromise.then(function (response) {
+			userInfoPromise.then(function(response) {
+
 				var i, length;
-				vm.accounts = response.data.accounts;
-				vm.username = vm.account;
-				vm.firstName = response.data.firstName;
-				vm.lastName = response.data.lastName;
-				vm.email = response.data.email;
-				vm.hasAvatar = response.data.hasAvatar;
 
-				// Pre-populate billing name if it doesn't exist with profile name
-				vm.billingAddress = {};
-				if (response.data.hasOwnProperty("billingInfo")) {
-					vm.billingAddress = response.data.billingInfo;
-					if (!vm.billingAddress.hasOwnProperty("firstName")) {
-						vm.billingAddress.firstName = vm.firstName;
-						vm.billingAddress.lastName = vm.lastName;
-					}
-				}
+				if (response.data) {
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					vm.hasAvatar = response.data.hasAvatar;
 
-				// Get quota
-				if (angular.isDefined(vm.accounts)) {
-					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].account === vm.account) {
-							vm.quota = vm.accounts[i].quota;
-							break;
+					// Pre-populate billing name if it doesn't exist with profile name
+					vm.billingAddress = {};
+					if (response.data.hasOwnProperty("billingInfo")) {
+						vm.billingAddress = response.data.billingInfo;
+						if (!vm.billingAddress.hasOwnProperty("firstName")) {
+							vm.billingAddress.firstName = vm.firstName;
+							vm.billingAddress.lastName = vm.lastName;
 						}
 					}
-				}
 
-				vm.loadingAccount = false;
+					// Get quota
+					if (angular.isDefined(vm.accounts)) {
+						for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+							if (vm.accounts[i].account === vm.account) {
+								vm.quota = vm.accounts[i].quota;
+								break;
+							}
+						}
+					}
+
+					vm.loadingAccount = false;
+				} else {
+					console.debug("Reponse doesn't have data", response);
+				}
+				
 
 			});
 

@@ -34,9 +34,9 @@
 			}
 		);
 
-	IssuesPinCtrl.$inject = ["EventService"];
+	IssuesPinCtrl.$inject = ["EventService", "IssuesService"];
 
-	function IssuesPinCtrl (EventService) {
+	function IssuesPinCtrl (EventService, IssuesService) {
 		var vm = this,
 			newPinId = "newPinId",
 			pinDropMode = false;

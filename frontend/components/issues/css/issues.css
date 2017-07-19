@@ -258,7 +258,10 @@ issue #issueAll {
 
 issue .issueItemContainer {
   padding: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
+
 issue .issueItemContainer div {
   outline: none;
 }
