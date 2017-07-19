@@ -31,7 +31,9 @@
 			controller: HomeCtrl,
 			controllerAs: "vm"
 		})
-		.config(["$injector", function($injector) {
+		.config(["$injector",  function($injector) {
+
+
 			if ($injector.has("$mdThemingProvider")) {
 				var mdThemingProvider = $injector.get("$mdThemingProvider");
 
@@ -74,54 +76,20 @@
 	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location) {
 		var vm = this,
 			homeLoggedOut,
-			element,
-			state, func, i,
+			func, i,
 			elementRef, elementScope;
-
-		function clearDirective() {
-			if (elementRef) {
-				elementRef.remove();
-				elementScope.$destroy();
-			}
-		}
-
-		function insertDirective(markup) {
-			var directiveElement = angular.element(markup);
-			homeLoggedOut.append(directiveElement);
-			elementScope = $scope.$new();
-			elementRef = $compile(directiveElement)(elementScope);
-		}
-
-		function getFunctionToInsert() {
-			// Check for static(function) pages to see if we need
-			// render one of them
-			for (i = 0; i < vm.functions.length; i++) {
-				func = vm.functions[i];
-
-				if (vm.state[func]) {
-					return func;
-				}
-			}
-
-			return null;
-		}
-
-		function insertFunctionDirective(func) {
-			//var snakeCaseDirectiveName = UtilsService.snake_case(func, "-");
-			// Create element related to function func
-			var directiveMarkup = "<" + func +
-				" username='vm.query.username'" +
-				" token='vm.query.token'" +
-				" query='vm.query'>" +
-				"</" + func+ ">";
-
-			insertDirective(directiveMarkup);
-		}
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
+
+			// TODO: this is a bit of a hack, it would be nice to 
+			// include this in the StateManager
+			if (hasTrailingSlash) {
+				removeTrailingSlash();
+			}
+	
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
@@ -129,8 +97,6 @@
 			vm.goToAccount = false;
 			vm.goToUserPage = false;
 			vm.keysDown = [];
-
-			vm.AuthService = AuthService;
 
 			vm.legalDisplays = [];
 			if (angular.isDefined(serverConfig.legal)) {
@@ -192,6 +158,67 @@
 			}
 
 		};
+
+		function hasTrailingSlash() {
+			var trailingCheck = $location.url().substr(1);
+			if (trailingCheck === "/") {
+				return true;
+			}
+		}
+
+		function removeTrailingSlash() {
+			var currentPath = $location.path();
+			var minusSlash = currentPath.slice(0, -1);
+			$location.path(minusSlash);
+		}
+
+		vm.isLoggedIn = function(){
+			if (!AuthService) {
+				return false;
+			}
+			return AuthService.loggedIn;
+		};
+
+
+		function clearDirective() {
+			if (elementRef) {
+				elementRef.remove();
+				elementScope.$destroy();
+			}
+		}
+
+		function insertDirective(markup) {
+			var directiveElement = angular.element(markup);
+			homeLoggedOut.append(directiveElement);
+			elementScope = $scope.$new();
+			elementRef = $compile(directiveElement)(elementScope);
+		}
+
+		function getFunctionToInsert() {
+			// Check for static(function) pages to see if we need
+			// render one of them
+			for (i = 0; i < vm.functions.length; i++) {
+				func = vm.functions[i];
+
+				if (vm.state[func]) {
+					return func;
+				}
+			}
+
+			return null;
+		}
+
+		function insertFunctionDirective(func) {
+			//var snakeCaseDirectiveName = UtilsService.snake_case(func, "-");
+			// Create element related to function func
+			var directiveMarkup = "<" + func +
+				" username='vm.query.username'" +
+				" token='vm.query.token'" +
+				" query='vm.query'>" +
+				"</" + func+ ">";
+
+			insertDirective(directiveMarkup);
+		}
 
 		vm.logout = function () {
 			AuthService.logout();

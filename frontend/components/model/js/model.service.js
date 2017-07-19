@@ -30,33 +30,40 @@
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + ".json");
 
-			$http.get(url).then(function(res){
-				var data = res.data;
-				data.account = account;
-				data.model = model;
-				data.settings = data.properties;
-				
-				deferred.resolve(data, function(){
-					deferred.resolve();
+			$http.get(url)
+				.then(function(res){
+					var data = res.data;
+					data.account = account;
+					data.model = model;
+					data.settings = data.properties;
+					
+					deferred.resolve(data, function(){
+						deferred.resolve();
+					});
+				})
+				.catch(function(error){
+					deferred.reject(error);
 				});
-			});
 
 
 			return deferred.promise;
 		};
 
-		function doPost(data, urlEnd) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.model + "/" + urlEnd),
-				config = {
-					withCredentials: true
-				};
-			$http.post(url, data, config)
-				.then(function (response) {
-					deferred.resolve(response);
-				});
-			return deferred.promise;
-		}
+		// function doPost(data, urlEnd) {
+		// 	var deferred = $q.defer(),
+		// 		url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.model + "/" + urlEnd),
+		// 		config = {
+		// 			withCredentials: true
+		// 		};
+		// 	$http.post(url, data, config)
+		// 		.then(function (response) {
+		// 			deferred.resolve(response);
+		// 		})
+		// 		.catch(function(error){
+		// 			deferred.reject(error);
+		// 		});
+		// 	return deferred.promise;
+		// }
 
 		var createModelSummary = function (data) {
 			data.name = state.model;
@@ -66,13 +73,15 @@
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.model + "/" + urlEnd);
-			$http.get(url).then(
-				function (response) {
-					deferred.resolve(response);
-				},
-				function () {
-					deferred.resolve([]);
-				});
+			$http.get(url)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
 			return deferred.promise;
 		}
 

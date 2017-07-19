@@ -38,8 +38,7 @@
 		var vm = this;
 
 		vm.$onInit = function() {
-
-			var authUsername = AuthService.getUsername();
+			
 			vm.loadingAccount = true;
 			window.addEventListener("storage", loginStatusListener, false);
 			// Set the logged in status to the account name just once
@@ -124,7 +123,8 @@
 							UtilsService.showDialog("paypal-dialog.html", $scope);
 							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 							promise.then(function (response) {
-								if (response.status === 200) {
+								if (response.status !== 200) {
+									console.error("PayPal error", response);
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
 
@@ -135,7 +135,10 @@
 									UtilsService.closeDialog();
 									initAccount();
 								}, 2000);
+							}).catch(function(error){
+								console.error("PayPal error", error);
 							});
+
 						} else {
 							initAccount();
 						}

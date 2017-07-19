@@ -35,10 +35,10 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService"];
+	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService"];
 
-	function ModelCtrl($timeout, $scope, $element, $compile, EventService, ModelService, TreeService, RevisionsService) {
-		var vm = this, i, length,
+	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService) {
+		var vm = this,
 			panelCard = {
 				left: [],
 				right: []
@@ -51,13 +51,14 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
 			vm.pointerEvents = "inherit";
 			
 			// Warn when user click refresh
-			var refreshHandler = function (e){
+			var refreshHandler = function (event){
 				var confirmationMessage = "This will reload the whole model, are you sure?";
 
-				e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+				event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
 				return confirmationMessage;              // Gecko, WebKit, Chrome <34
 			};
 
@@ -242,38 +243,51 @@
 
 			$timeout(function () {
 				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
-				vm.setupModelInfo();
 			});
 
 		};
 
+		vm.handleModelError = function(){
+			var message = "The model was not found or failed to load correctly. " +
+			" You will now be redirected to the teamspace page.";
+			alert(message);
+			$location.path(AuthService.username);
+		};
+
 		vm.setupModelInfo = function() {
 
-			ModelService.getModelInfo(vm.account, vm.model).then(function (data) {
-				vm.settings = data;
+			console.log("SetupModelInfo");
 
-				var index = -1;
+			ModelService.getModelInfo(vm.account, vm.model)
+				.then(function (data) {
+					vm.settings = data;
 
-				if(!data.federate){
-					panelCard.left[issuesCardIndex].menu.find(function(item, i){
-						if(item.value === "showSubModels"){
-							index = i;
+					var index = -1;
+
+					if(!data.federate){
+						panelCard.left[issuesCardIndex].menu.find(function(item, i){
+							if(item.value === "showSubModels"){
+								index = i;
+							}
+
+						});
+
+						if(index !== -1){
+							panelCard.left[issuesCardIndex].menu.splice(index, 1);
 						}
-
-					});
-
-					if(index !== -1){
-						panelCard.left[issuesCardIndex].menu.splice(index, 1);
 					}
-				}
 
-				EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 
-				TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
-					vm.treeMap = TreeService.getMap(tree.nodes);
-					EventService.send(EventService.EVENT.TREE_READY, tree);
+					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
+						vm.treeMap = TreeService.getMap(tree.nodes);
+						EventService.send(EventService.EVENT.TREE_READY, tree);
+					});
+				})
+				.catch(function(error){
+					console.error(error);
+					vm.handleModelError();
 				});
-			});
 
 			RevisionsService.listAll(vm.account, vm.model).then(function(revisions) {
 				EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
