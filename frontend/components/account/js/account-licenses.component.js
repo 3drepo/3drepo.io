@@ -23,7 +23,7 @@
 			restrict: "EA",
 			templateUrl: "account-licenses.html",
 			bindings: {
-				account: "=",
+				account: "<",
 				showPage: "&"
 			},
 			controller: AccountLicensesCtrl,
@@ -33,13 +33,19 @@
 	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
 
 	function AccountLicensesCtrl($scope, UtilsService, StateManager) {
-		var vm = this,
-			i,
-			promise;
+		var vm = this;
 
-		UtilsService.doGet(vm.account + "/subscriptions").then(function(res){
-			vm.subscriptions = res.data;
-		});
+		vm.$onInit = function() {
+			vm.promise = null;
+			vm.jobs = [];
+			UtilsService.doGet(vm.account + "/subscriptions").then(function(res){
+				vm.subscriptions = res.data;
+			});
+			UtilsService.doGet(vm.account + "/jobs").then(function(data){
+				vm.jobs = data.data;
+			});
+
+		};
 
 		/*
 		 * Watch subscriptions
@@ -57,7 +63,7 @@
 			vm.numLicenses = vm.subscriptions.length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
-			for (i = 0; i < vm.numLicenses; i += 1) {
+			for (var i = 0; i < vm.numLicenses; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,
@@ -79,13 +85,6 @@
 		$scope.$watch("vm.newLicenseAssignee", function (newValue) {
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
-		});
-
-		vm.jobs = [];
-		// get list of jobs
-
-		UtilsService.doGet(vm.account + "/jobs").then(function(data){
-			vm.jobs = data.data;
 		});
 
 		vm.assignJob = function(index){
@@ -144,11 +143,10 @@
 			}
 
 			if (doSave) {
-				promise = UtilsService.doPost(
+				UtilsService.doPost(
 					{user: vm.newLicenseAssignee},
 					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
-				);
-				promise.then(function (response) {
+				).then(function (response) {
 					if (response.status === 200) {
 						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
@@ -172,45 +170,49 @@
 		 * @param index
 		 */
 		vm.removeLicense = function (index) {
-			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[index].id + "/assign");
-			promise.then(function (response) {
-				if (response.status === 200) {
-					vm.unassigned.push(vm.licenses[index].id);
-					vm.licenses.splice(index, 1);
-					vm.addDisabled = false;
-					vm.allLicensesAssigned = false;
-					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-				} else if (response.status === 400) {
-					var message = UtilsService.getErrorMessage(response.data);
-					if (response.data.value === UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST")) {
-						vm.licenseAssigneeIndex = index;
-						vm.models = response.data.models;
-						vm.projects = response.data.projects;
-						if(response.data.teamspace){
-							vm.teamspacePerms = response.data.teamspace.permissions.join(", ");
+			var removeUrl = vm.account + "/subscriptions/" + vm.licenses[index].id + "/assign";
+			UtilsService.doDelete({}, removeUrl)
+				.then(function (response) {
+					if (response.status === 200) {
+						vm.unassigned.push(vm.licenses[index].id);
+						vm.licenses.splice(index, 1);
+						vm.addDisabled = false;
+						vm.allLicensesAssigned = false;
+						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+					} else if (response.status === 400) {
+						//var message = UtilsService.getErrorMessage(response.data);
+						var responseCode = UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST");
+						if (response.data.value === responseCode) {
+							vm.licenseAssigneeIndex = index;
+							vm.models = response.data.models;
+							vm.projects = response.data.projects;
+							if(response.data.teamspace){
+								vm.teamspacePerms = response.data.teamspace.permissions.join(", ");
+							}
+							
+							UtilsService.showDialog("remove-license-dialog.html", $scope);
 						}
-						
-						UtilsService.showDialog("remove-license-dialog.html", $scope);
 					}
-				}
-			});
+				});
 		};
 
 		/**
 		 * Remove license from user who is a team member of a model
 		 */
 		vm.removeLicenseConfirmed = function () {
-			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[vm.licenseAssigneeIndex].id + "/assign?cascadeRemove=true");
-			promise.then(function (response) {
-				if (response.status === 200) {
-					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
-					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
-					vm.addDisabled = false;
-					vm.allLicensesAssigned = false;
-					vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-					UtilsService.closeDialog();
-				}
-			});
+			var license = vm.licenses[vm.licenseAssigneeIndex].id;
+			var removeLicenseUrl = vm.account + "/subscriptions/" + license + "/assign?cascadeRemove=true";
+			UtilsService.doDelete({}, removeLicenseUrl)
+				.then(function (response) {
+					if (response.status === 200) {
+						vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
+						vm.licenses.splice(vm.licenseAssigneeIndex, 1);
+						vm.addDisabled = false;
+						vm.allLicensesAssigned = false;
+						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+						UtilsService.closeDialog();
+					}
+				});
 		};
 
 		vm.goToBillingPage = function () {
