@@ -277,6 +277,7 @@
 						}
 					}
 
+					//console.log("Setting fire MODEL_SETTINGS_READY event");
 					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){

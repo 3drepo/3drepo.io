@@ -21,7 +21,10 @@ module.exports = {
             "error",
             "all"
         ],
-        "no-console": "off",
+        "no-console": [
+            "error",
+            { "allow": ["warn", "error"] }
+        ],
         "brace-style" : [
             "error", 
             "1tbs"
