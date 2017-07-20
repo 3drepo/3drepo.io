@@ -46,23 +46,21 @@
 
 	function IssueCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
 		var vm = this,
+
+			// TODO: These should all probably be in $onInit
 			savedScreenShot = null,
 			editingCommentIndex = null,
 			commentViewpoint,
 			aboutToBeDestroyed = false,
-			textInputHasFocus = false,
 			savedDescription,
-			savedComment,
-
-			// TODO: this is bad, just use ng directives
-			issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
+			savedComment;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() { 
 			vm.issueProgressInfo = "Loading Issue...";
-
+			vm.textInputHasFocusFlag = false;
 			vm.hideDescription = false;
 			vm.submitDisabled = true;
 			vm.pinDisabled = true;
@@ -70,6 +68,10 @@
 			vm.showAdditional = true;
 			vm.editingDescription = false;
 			vm.clearPin = false;
+
+			// TODO: this is bad, just use ng directives
+			var issueRole = $element[0].querySelector("#issueRoleIndicator");
+			vm.issueRoleIndicator = angular.element(issueRole);
 
 			vm.priorities = [
 				{value: "none", label: "None"},
@@ -111,6 +113,9 @@
 
 			vm.notificationStarted = false;
 
+			vm.setContentHeight();
+			vm.statusChange();
+	
 		};
 
 		vm.getPlaceholderText = function() {
@@ -141,8 +146,9 @@
 				return vm.canUpdateStatus = false;
 			}
 
-			vm.canUpdateStatus = (AuthService.getUsername() === issueData.owner) ||
-								 issueData.assigned_roles.indexOf(vm.userJob._id) !== -1;
+			var isOwner = (AuthService.getUsername() === issueData.owner);
+			var hasRole = issueData.assigned_roles.indexOf(vm.userJob._id) !== -1;
+			vm.canUpdateStatus = isOwner || hasRole;
 
 		};
 
@@ -232,8 +238,16 @@
 					vm.canUpdate = true;
 					vm.canUpdateStatus = true;
 				}
+			
 				vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-				setContentHeight();
+
+				// TODO: is $onChanges the right approach?
+				// onChanges fires before ngInit (of course) so we need to be
+				// fire setContent in ngInit
+				if (!changes.data.isFirstChange()) {
+					vm.setContentHeight();
+				}
+				
 			}
 
 			// Role
@@ -418,7 +432,6 @@
 				if(selected){
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
 				} else {
-					console.log("Disabling pin drop mode")
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 				}
 				break;
@@ -448,10 +461,11 @@
 		 * Toggle showing of extra inputs
 		 */
 		vm.toggleShowAdditional = function () {
-			if(!textInputHasFocus) {
+	
+			if(!vm.textInputHasFocusFlag) {
 				//don't toggle if the user is trying to type
 				vm.showAdditional = !vm.showAdditional;
-				setContentHeight();
+				vm.setContentHeight();
 			}
 		};
 
@@ -492,7 +506,7 @@
 		 * @param focus
 		 */
 		vm.textInputHasFocus = function (focus) {
-			textInputHasFocus = focus;
+			vm.textInputHasFocusFlag = focus;
 		};
 
 		/**
@@ -641,7 +655,7 @@
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 
 					vm.submitDisabled = true;
-					setContentHeight();
+					vm.setContentHeight();
 
 					startNotification();
 					vm.saving = false;
@@ -743,7 +757,7 @@
 			commentAreaScrollToBottom();
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!aboutToBeDestroyed) {
-				setContentHeight();
+				vm.setContentHeight();
 			}
 		}
 
@@ -762,7 +776,7 @@
 				eventCategory: "Issue",
 				eventAction: "deleteComment"
 			});
-			setContentHeight();
+			vm.setContentHeight();
 		};
 
 		/**
@@ -832,7 +846,7 @@
 				console.error("Screenshot request failed: ", error);
 			});
 
-			setContentHeight();
+			vm.setContentHeight();
 		};
 
 
@@ -843,11 +857,11 @@
 		function setRoleIndicatorColour (role) {
 			var roleColor = IssuesService.getJobColor(role);
 			if (roleColor !== null) {
-				issueRoleIndicator.css("background", IssuesService.getJobColor(role));
-				issueRoleIndicator.css("border", "none");
+				vm.issueRoleIndicator.css("background", IssuesService.getJobColor(role));
+				vm.issueRoleIndicator.css("border", "none");
 			} else {
-				issueRoleIndicator.css("background", "none");
-				issueRoleIndicator.css("border", "1px solid #DDDDDD");
+				vm.issueRoleIndicator.css("background", "none");
+				vm.issueRoleIndicator.css("border", "1px solid #DDDDDD");
 			}
 		}
 
@@ -873,19 +887,19 @@
 		/**
 		 * Set the content height
 		 */
-		function setContentHeight() {
+		vm.setContentHeight = function() {
 			var i, length,
-				newIssueHeight = 430,
+				newIssueHeight = 305,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
-				additionalInfoHeight = 140,
+				additionalInfoHeight = 160,
 				thumbnailHeight = 180,
 				issueMinHeight = 370,
 				height = issueMinHeight;
-
+			
 			if (vm.data) {
-
+				
 				// Additional info
 				if (vm.showAdditional) {
 					height += additionalInfoHeight;
@@ -922,9 +936,14 @@
 				}
 			}
 
-			vm.contentHeight({height: height});
+			if (height) {
+				vm.contentHeight({height: height});
+			} else {
+				console.error("Height was trying to be set to falsy value");
+			}
+			
 
-		}
+		};
 
 		function commentAreaScrollToBottom(){
 

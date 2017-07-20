@@ -258,6 +258,7 @@ issue #issueAll {
 
 issue .issueItemContainer {
   padding: 10px;
+  margin-top: 8px; 
   padding-top: 10px;
   padding-bottom: 10px;
 }
