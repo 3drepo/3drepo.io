@@ -333,6 +333,7 @@ var Viewer = {};
 		};
 
 		this.objectSelected = function(pointInfo) {
+
 			if(!self.selectionDisabled && !self.pinDropMode) {
 				if(pointInfo.id) {
 					if(pointInfo.pin) {
@@ -352,8 +353,10 @@ var Viewer = {};
 					callback(Viewer.EVENT.BACKGROUND_SELECTED);
 				}
 			} else {
-				callback(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
-			}
+				if (!pointInfo.id) {
+					callback(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
+				}
+			} 
 			
 		};
 
@@ -804,7 +807,7 @@ var Viewer = {};
 		REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 		OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 		BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
-		BACKGROUND_SELECTED_PIN_MODE: "VIEWER_BACKGROUND_SELECTED_PIN_MODE",
+		BACKGROUND_SELECTED_PIN_MODE: "BACKGROUND_SELECTED_PIN_MODE",
 		HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 		SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 		SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",

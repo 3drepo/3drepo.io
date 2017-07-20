@@ -19,66 +19,60 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.component(
-			"issuesPin",
-			{
-				controller: IssuesPinCtrl,
-				controllerAs: "vm",
-				bindings: {
-					account: "<",
-					model: "<",
-					event: "<",
-					setPin: "&",
-					clearPin: "<"
-				}
-			}
-		);
+		.component("issuesPin", {
+			controller: IssuesPinCtrl,
+			controllerAs: "vm",
+			bindings: {
+				account: "<",
+				model: "<",
+				event: "<",
+				setPin: "&",
+				clearPin: "<"
+			},
+			bindToController: true
+		});
 
-	IssuesPinCtrl.$inject = ["EventService", "IssuesService"];
+	IssuesPinCtrl.$inject = ["$scope", "EventService", "IssuesService"];
 
-	function IssuesPinCtrl (EventService, IssuesService) {
-		var vm = this,
-			newPinId = "newPinId",
-			pinDropMode = false;
+	function IssuesPinCtrl ($scope, EventService, IssuesService) {
+		var vm = this;
+			
 
 		// Init
 		vm.$onInit = function() {
+			vm.newPinId = "newPinId";
+			vm.pinDropMode = false;
 			vm.setPin({data: null});
 		};
 
-		/**
-		 * Monitor changes to parameters
-		 * @param {Object} changes
-		 */
-		vm.$onChanges = function (changes) {
+		$scope.$watch(EventService.currentEvent, function(event) {
+
 			var data,
 				position = [],
-				normal = [],
-				pickedPos = null,
-				pickedNorm = null;
+				normal = [];
 
+			if (event) {
 
-			if (changes.hasOwnProperty("event") && (changes.event.currentValue)) {
-				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
-					(changes.event.currentValue.value.hasOwnProperty("id")) &&
-					pinDropMode) {
+				if (event.type === EventService.EVENT.VIEWER.PICK_POINT &&
+					event.value.hasOwnProperty("id") &&
+					vm.pinDropMode
+				) {
 
+					vm.removePin();
 
-					removePin();
-
-					var trans = changes.event.currentValue.value.trans;
-					position = changes.event.currentValue.value.position;
-					normal = changes.event.currentValue.value.normal;
+					var trans = event.value.trans;
+					position = event.value.position;
+					normal = event.value.normal;
 
 					if(trans) {
 						position = trans.inverse().multMatrixPnt(position);
 					}
 
 					data = {
-						id: newPinId,
+						id: vm.newPinId,
 						account: vm.account,
 						model: vm.model,
-						selectedObjectId: changes.event.currentValue.value.id,
+						selectedObjectId: event.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
 						colours: [IssuesService.pinColours.yellow]
@@ -86,28 +80,41 @@
 					};
 					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
 					vm.setPin({data: data});
-				} else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
-						pinDropMode) {
-					removePin();
-				} else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
-					pinDropMode = changes.event.currentValue.value;
+
+				} else if (
+					event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE && 
+					vm.pinDropMode
+				) {
+
+					vm.removePin();
+
+				} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+
+					vm.pinDropMode = event.value;
+					if (vm.pinDropMode === false) {
+						vm.removePin();
+					}
+
 				}
 			}
 
-			if (changes.hasOwnProperty("clearPin") && changes.clearPin.currentValue) {
-				removePin();
-			}
-		};
+
+
+		});
+
 
 		/**
 		 * Remove pin when component is destroyed
 		 */
 		vm.$onDestroy = function () {
-			removePin();
+			vm.removePin();
 		};
 
-		function removePin () {
-			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {id: newPinId});
+		vm.removePin = function() {
+			EventService.send(
+				EventService.EVENT.VIEWER.REMOVE_PIN, 
+				{id: vm.newPinId}
+			);
 			vm.setPin({data: null});
 		}
 	}

@@ -230,12 +230,6 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							vm.viewer.highlightObjects();
-						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE) {
-							
-							//console.log("background selected!")
-							// Remove the Pin if we select the background
-							vm.viewer.removePin(event.value.id);
-
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
 							vm.viewer.switchObjectVisibility(
 								event.value.account,
