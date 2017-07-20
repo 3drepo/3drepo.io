@@ -100,7 +100,7 @@
 					icon: "place", 
 					label: "Pin", 
 					disabled: function() { 
-						return vm.submitDisabled || vm.pinData || vm.pinHidden;
+						return vm.submitDisabled || vm.pinHidden;
 					},
 					visible: function() { 
 						return !vm.data;
@@ -220,7 +220,6 @@
 					}
 				
 					vm.convertCommentTopicType();
-					console.log("issueData", vm.issueData);
 					
 				} else {
 					vm.issueData = {
@@ -232,7 +231,6 @@
 					};
 					vm.canUpdate = true;
 					vm.canUpdateStatus = true;
-					console.log("issueData constructed", vm.issueData);
 				}
 				vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 				setContentHeight();
@@ -420,7 +418,8 @@
 				if(selected){
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
 				} else {
-					EventService.send(EventService.EVENT.PIN_DROP_MODE,false);
+					console.log("Disabling pin drop mode")
+					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 				}
 				break;
 

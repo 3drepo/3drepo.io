@@ -414,8 +414,7 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-			
-			console.log("Edit Issue", issue);
+
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 

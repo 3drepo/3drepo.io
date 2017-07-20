@@ -463,7 +463,6 @@
 		 * Set the status icon style and colour
 		 */
 		obj.getStatusIcon = function (issue) {
-			console.log("status icon", issue);
 
 			var statusIcon = {};
 

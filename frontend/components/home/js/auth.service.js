@@ -33,7 +33,10 @@
 					self.username = response.data.username;
 					self.userRoles = response.data.roles;
 
-					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: response.data.username, initialiser: response.data.initialiser });
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
+						username: response.data.username, 
+						initialiser: response.data.initialiser 
+					});
 					AnalyticService.setUserId(self.username);
 
 					self.authPromise.resolve(self.loggedIn);
@@ -71,13 +74,17 @@
 					self.username  = null;
 					self.userRoles = null;
 					localStorage.setItem("tdrLoggedIn", "false");
-					EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
+					EventService.send(
+						EventService.EVENT.USER_LOGGED_OUT, 
+						{ error: reason }
+					);
 
 					self.authPromise.resolve(self.loggedIn);
 				};
 
 
 				this.init = function(interval) {
+
 					var initPromise = $q.defer();
 
 					interval = !!interval;
@@ -102,11 +109,16 @@
 								}
 							})
 							.catch(function(reason) {
-								if (interval && reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code) {
+								if (interval && 
+									reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code) {
+
 									self.loginSuccess(reason);
+
 								} else if (self.loggedIn === null || (interval && self.loggedIn)) {
+
 									reason.initialiser = true;
 									self.loginFailure(reason);
+
 								}
 							});
 
@@ -114,6 +126,7 @@
 							initPromise.resolve(self.loggedIn);
 						}).catch(function(error){
 							console.error("Authentication error:", error);
+							initPromise.reject(error);
 						});
 
 					} else {

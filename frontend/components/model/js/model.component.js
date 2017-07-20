@@ -256,8 +256,6 @@
 
 		vm.setupModelInfo = function() {
 
-			console.log("SetupModelInfo");
-
 			ModelService.getModelInfo(vm.account, vm.model)
 				.then(function (data) {
 					vm.settings = data;

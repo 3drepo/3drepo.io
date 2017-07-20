@@ -38,11 +38,6 @@
 		 */
 		vm.$onInit = function() {
 			vm.version = serverConfig.apiVersion;
-
-			AuthService.isLoggedIn().then(function(response){
-				StateManager.setStateVar("loggedIn", true);
-				EventService.send(EventService.EVENT.UPDATE_STATE);
-			});
 		};
 
 		/**
