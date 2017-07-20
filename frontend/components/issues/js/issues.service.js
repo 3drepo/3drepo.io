@@ -36,6 +36,12 @@
 			updatedIssue = null,
 			issueDisplay = {};
 
+		obj.initPromise = $q.defer();
+
+		obj.init = function() {
+			return obj.initPromise.promise;
+		};
+
 		obj.pinColours = {
 			blue : [0, 69/255, 148/255],
 			yellow : [255/255, 255/255, 54/255]
@@ -190,6 +196,13 @@
 		};
 
 		obj.getIssues = function(account, model, revision) {
+
+			// TODO: This is a bit hacky. We are 
+			// basically saying when getIssues is called
+			// we know the issues component is loaded...
+			console.log(obj.initPromise);
+			obj.initPromise.resolve();
+
 			var deferred = $q.defer();
 
 			if(revision){
@@ -208,33 +221,14 @@
 						if (data.data[i].thumbnail) {
 							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
 						}
-
-						// Comments
-						// issues api don't return comments anymore
-						// if (data.data[i].hasOwnProperty("comments")) {
-						// 	for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-						// 		// Timestamp
-						// 		if (data.data[i].comments[j].hasOwnProperty("created")) {
-						// 			data.data[i].comments[j].timeStamp = obj.getPrettyTime(data.data[i].comments[j].created);
-						// 		}
-						// 		// Screen shot path
-						// 		if (data.data[i].comments[j].viewpoint && data.data[i].comments[j].viewpoint.screenshot) {
-						// 			data.data[i].comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(data.data[i].comments[j].viewpoint.screenshot);
-						// 		}
-						// 		// Action comment text
-						// 		if (data.data[i].comments[j].action) {
-						// 			data.data[i].comments[j].comment = obj.convertActionCommentToText(data.data[i].comments[j]);
-						// 		}
-						// 	}
-						// }
-
-						//data.data[i].title = self.obj.generateTitle(data.data[i]);
 					}
 				},
 				function() {
 					deferred.resolve([]);
 				}
 			);
+
+			
 
 			return deferred.promise;
 		};

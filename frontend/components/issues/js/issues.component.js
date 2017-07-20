@@ -195,21 +195,17 @@
 					}
 				}
 			} else if(event.type === EventService.EVENT.VIEWER.UNITY_READY) {
-				console.log("Setting vm.modelLoaded true");
 				vm.modelLoaded = true;
 			
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
 				watchNotification();
-			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY){
+			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				vm.issuesReady.then(function(){
 					if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-						console.log("Setting vm.canAddIssue true");
 						vm.canAddIssue = true;
-					} else {
-						console.log("Setting vm.canAddIssue NOT set to true, Permissions failed");
-					}
+					} 
 				});
 				
 				vm.subModels = event.value.subModels || [];

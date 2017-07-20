@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService"];
+	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService"];
 
-	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService) {
+	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService) {
 		var vm = this,
 
 			// TODO: these should probably be in $onInit
@@ -277,7 +277,9 @@
 						}
 					}
 					
-					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+					IssuesService.init().then(function(){
+						EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+					});
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
 						vm.treeMap = TreeService.getMap(tree.nodes);
