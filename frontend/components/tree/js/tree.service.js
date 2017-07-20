@@ -141,6 +141,11 @@
 						deferred.resolve(mainTree);
 					});
 				
+				})
+				.catch(function(error){
+					
+					console.error(error);
+					
 				});
 
 			return deferred.promise;

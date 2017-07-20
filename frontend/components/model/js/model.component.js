@@ -39,6 +39,8 @@
 
 	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService) {
 		var vm = this,
+
+			// TODO: these should probably be in $onInit
 			panelCard = {
 				left: [],
 				right: []

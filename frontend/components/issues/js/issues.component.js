@@ -55,6 +55,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
 			vm.saveIssueDisabled = true;
 			vm.issues = [];
 			vm.issuesToShow = [];
@@ -129,7 +130,7 @@
 
 				});
 
-			$q.all([vm.getIssues, vm.getJobs]).then(function(){
+			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs]).then(function(){
 				setAllIssuesAssignedRolesColors();
 				EventService.send(EventService.EVENT.ISSUES_READY, true);
 			});
@@ -202,9 +203,12 @@
 				watchNotification();
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY){
 
-				if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-					vm.canAddIssue = true;
-				}
+				vm.issuesReady.then(function(){
+					if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+						vm.canAddIssue = true;
+					}
+				});
+				
 				vm.subModels = event.value.subModels || [];
 				watchNotification();
 			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
