@@ -25,6 +25,8 @@
 
 	function TreeService($http, $q, EventService, serverConfig) {
 		var ts = this;
+		var cachedTreeDefer = $q.defer();
+		var cachedTree = cachedTreeDefer.promise;
 
 		var genIdToObjRef = function(tree, map){
 			
@@ -42,8 +44,6 @@
 		};
 
 		var init = function(account, model, branch, revision, setting) {
-
-			console.log("tree init");
 
 			ts.account  = account;
 			ts.model  = model;
@@ -148,6 +148,7 @@
 					
 				});
 
+			cachedTreeDefer.resolve(deferred.promise);
 			return deferred.promise;
 
 		};
@@ -203,7 +204,8 @@
 		return {
 			init: init,
 			search: search,
-			getMap: getMap
+			getMap: getMap,
+			cachedTree: cachedTree
 		};
 	}
 }());

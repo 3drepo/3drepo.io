@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "$sanitize", "serverConfig", "EventService", "UtilsService"];
+	IssuesService.$inject = ["$http", "$q", "$sanitize", "serverConfig", "EventService", "UtilsService", "TreeService"];
 
-	function IssuesService($http, $q, $sanitize, serverConfig, EventService, UtilsService) {
+	function IssuesService($http, $q, $sanitize, serverConfig, EventService, UtilsService, TreeService) {
 		var url = "",
 			data = {},
 			config = {},
@@ -99,35 +99,62 @@
 
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
-				UtilsService.doGet(issue.account + "/" + issue.model + "/groups/" + issue.group_id).then(function (response) {
 
-					var ids = [];
-					response.data.objects.forEach(function(obj){
-						var key = obj.account + "@" +  obj.model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-						//ids[key].push(vm.treeMap.sharedIdToUid[obj.shared_id]);
-					});
+				obj.showMultiIds(issue);
+				
+			}
+		};
 
-					for(var key in ids) {
+		obj.showMultiIds = function(issue) {
+			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
 
-						var vals = key.split("@");
-						var account = vals[0];
-						var model = vals[1];
+			UtilsService.doGet(groupUrl)
+				.then(function (response) {
 
-						data = {
-							source: "tree",
-							account: account,
-							model: model,
-							ids: ids[key],
-							colour: response.data.colour,
-							multi: true
-						
-						};
-						EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
-					}
+					TreeService.cachedTree
+						.then(function(tree) {
+							obj.handleTree(response, tree);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting the tree: ", error);
+						});
+				
+				})
+				.catch(function(error){
+					console.error("There was a problem getting the highlights: ", error);
 				});
+		};
+
+		obj.handleTree = function(response, tree) {
+
+			var ids = [];
+			response.data.objects.forEach(function(obj){
+				var key = obj.account + "@" +  obj.model;
+				if(!ids[key]){
+					ids[key] = [];
+				}	
+
+				var treeMap = TreeService.getMap(tree.nodes);
+				ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+
+			});
+
+			for(var key in ids) {
+
+				var vals = key.split("@");
+				var account = vals[0];
+				var model = vals[1];
+
+				data = {
+					source: "tree",
+					account: account,
+					model: model,
+					ids: ids[key],
+					colour: response.data.colour,
+					multi: true
+				
+				};
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
 			}
 		};
 
@@ -200,7 +227,7 @@
 			// TODO: This is a bit hacky. We are 
 			// basically saying when getIssues is called
 			// we know the issues component is loaded...
-			console.log(obj.initPromise);
+			
 			obj.initPromise.resolve();
 
 			var deferred = $q.defer();
@@ -265,6 +292,7 @@
 		 * @returns {*}
 		 */
 		obj.updateIssue = function (issue, data) {
+			console.log("UPDATE ISSUE")
 			return doPut(issue, data);
 		};
 

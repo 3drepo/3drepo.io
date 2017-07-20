@@ -103,10 +103,16 @@
 			
 			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
 			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
-				.then(function(json, status) {
-					if(json.properties) {
-						vm.viewer.applyModelProperties(account, model, json.properties);
+				.then(function(response) {
+					if (response.data && response.data.properties) {
+						vm.viewer.applyModelProperties(account, model, response.data.properties);
+					} else {
+						var message = "No data properties returned. This was the response:";
+						console.error(message, response);
 					}
+				})
+				.catch(function(error){
+					console.error("Model properties failed to fetch", error);
 				});
 
 		}

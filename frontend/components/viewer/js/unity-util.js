@@ -114,14 +114,16 @@ var UnityUtil;
 	UnityUtil.prototype.onReady = function() {
 	
 		if(!readyPromise) {
-		   readyPromise	= new Promise(function(resolve, reject) {
+			readyPromise	= new Promise(function(resolve, reject) {
 				readyResolve = {resolve: resolve, reject: reject};
-			}	
-			);
+			});
 		}
+		
 		return readyPromise;
 		
 	};
+
+	var unityHasErrored = false;
 
 	function userAlert(message, reload) {
 		var prefix = "" +
@@ -129,11 +131,18 @@ var UnityUtil;
 		"press okay to refresh! Error: ";
 
 		var fullMessage = prefix + message;
-		if(alert(fullMessage)){
-			console.error(fullMessage);
-		} else if (reload) {
-			window.location.reload(); 
+
+
+		if (!unityHasErrored) {
+			// Unity can error multiple times, we don't want 
+			// to keep annoying the user
+			unityHasErrored = true;
+			alert(fullMessage);
+			if (reload) {
+				window.location.reload(); 
+			}
 		}
+		
 	}
 
 

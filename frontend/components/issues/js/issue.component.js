@@ -316,14 +316,15 @@
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
 
-			if (vm.data) {
+			if (vm.data && vm.issueData.account && vm.issueData.model) {
+
 				data = {
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
 					assigned_roles: vm.issueData.assigned_roles
 				};
-
+				
 				IssuesService.updateIssue(vm.issueData, data)
 					.then(function (response) {
 
@@ -380,13 +381,16 @@
 		 * @param viewpoint Can be undefined for action comments
 		 */
 		vm.showViewpoint = function (event, viewpoint) {
-		
+
 			//README: vm should also highlight selected objects within vm issue, but 
 			//will require a lot of rewriting for vm to work at present!
 			if (viewpoint && (event.type === "click")) {
 
-				var viewpointData = Object.assign(vm.issueData, {viewpoint : viewpoint});
-				IssuesService.showIssue(viewpointData);
+				// We clone the issueData so that we don't
+				// overwrite the original issue data itself
+				var newViewpointData = angular.copy(vm.issueData);
+				newViewpointData.viewpoint = viewpoint;
+				IssuesService.showIssue(newViewpointData);
 
 			}
 		};
@@ -558,6 +562,7 @@
 			if (savedScreenShot !== null) {
 				if (objectInfo.highlightedNodes.length > 0) {
 					// Create a group of selected objects
+
 					var sendData = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
 					UtilsService.doPost(sendData, vm.account + "/" + vm.model + "/groups")
 						.then(function (response) {
@@ -566,6 +571,7 @@
 						.catch(function(error) {
 							console.error("Error saving issue: ", error);
 						});
+
 				} else {
 					vm.doSaveIssue(viewpoint, savedScreenShot);
 				}

@@ -518,6 +518,7 @@ var Viewer = {};
 		};
 
 		this.applyModelProperties = function(account, model, properties) {
+			console.log("modelProps - applyModelProperties")
 			if (properties) {
 				if (properties.hiddenNodes && properties.hiddenNodes.length > 0) {
 					self.switchObjectVisibility(
