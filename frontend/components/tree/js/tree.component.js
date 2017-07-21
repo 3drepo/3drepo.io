@@ -468,11 +468,12 @@
 		}
 
 		$scope.$watch(EventService.currentEvent, function(event) {
+
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject) {
 					var objectID = event.value.id;
 
-					if (objectID) {
+					if (objectID && vm.idToPath) {
 						var path;
 						if(vm.idToPath[objectID]){
 							path = vm.idToPath[objectID].split("__");
@@ -500,8 +501,9 @@
 						vm.currentFilterItemSelected = null;
 					}
 				}
-			} else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
-					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
+			} else if  (event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
+						event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
+			) {
 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 				highlightSelectedViewerObject = !event.value.on;
 			} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
@@ -549,7 +551,7 @@
 			var head = null;
 
 			while (stack.length > 0) {
-				var head = stack.pop();
+				head = stack.pop();
 
 				if (node !== head) {
 					vm.setToggleState(head, nodeToggleState);

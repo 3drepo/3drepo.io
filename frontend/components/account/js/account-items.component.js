@@ -66,7 +66,19 @@
 				$scope.$apply();
 			}, false);
 			
-
+			/**
+			 * Escape from the add model/federation/project menu
+			 */
+			
+			$element.bind("keydown keypress", function (event) {
+				if(event.which === 27) { // 27 = esc key
+					vm.addButtons = false;
+					vm.addButtonType = "add";
+					$scope.$apply();
+					event.preventDefault();
+				}
+			});
+		
 		};
 		
 	
@@ -78,22 +90,6 @@
 		vm.closeDialog = function() {
 			UtilsService.closeDialog();
 		};
-
-
-		/**
-		 * Escape from the add model/federation/project menu
-		 */
-		vm.addEscape = function(){
-			$element.bind("keydown keypress", function (event) {
-				if(event.which === 27) { // 27 = esc key
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					$scope.$apply();
-					event.preventDefault();
-				}
-			});
-		};
-
 
 		
 		// HIDE / SHOW STATE

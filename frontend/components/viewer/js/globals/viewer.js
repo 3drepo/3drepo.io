@@ -518,7 +518,7 @@ var Viewer = {};
 		};
 
 		this.applyModelProperties = function(account, model, properties) {
-			console.log("modelProps - applyModelProperties")
+
 			if (properties) {
 				if (properties.hiddenNodes && properties.hiddenNodes.length > 0) {
 					self.switchObjectVisibility(
@@ -641,7 +641,7 @@ var Viewer = {};
 		 * @param on
 		 */
 		this.setMultiSelectMode = function (on) {
-			//var element = document.getElementById("x3dom-default-canvas");
+			
 			this.multiSelectMode = on;
 			//element.style.cursor =  on ? "copy" : "-webkit-grab";
 		};
@@ -651,7 +651,7 @@ var Viewer = {};
 		 * @param on
 		 */
 		this.setPinDropMode = function (on) {
-			//var element = document.getElementById("x3dom-default-canvas");
+
 			this.pinDropMode = on;
 			//element.style.cursor = on ? "crosshair" : "-webkit-grab";
 		};

@@ -20,8 +20,8 @@ var UnityUtil;
 (function() {
 	"use strict";
 
-	angular.module("3drepo")
-		.service("UnityUtil", UnityUtil);
+	// angular.module("3drepo")
+	// 	.service("UnityUtil", UnityUtil);
 
 	
 	UnityUtil = function() {};

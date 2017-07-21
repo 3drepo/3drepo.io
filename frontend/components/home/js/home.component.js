@@ -310,8 +310,10 @@
 					// Recreate list so that it changes are registered in components
 					tmp = vm.keysDown;
 					delete vm.keysDown;
+					
 					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
+
 				}
 			} else if (event.type === "keyup") {
 				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)

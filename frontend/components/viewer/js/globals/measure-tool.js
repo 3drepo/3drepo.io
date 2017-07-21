@@ -65,7 +65,7 @@ var MeasureTool = {};
 	MeasureTool.prototype.measureMode = function (on) {
 		var self = this;
 
-		var element = document.getElementById("x3dom-default-canvas");
+		var element = document.getElementsByClassName("emscripten")[0];
 		if (on) {
 			self.inMeasureMode   = true;
 			element.style.cursor = "crosshair";

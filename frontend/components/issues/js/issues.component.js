@@ -195,6 +195,7 @@
 					}
 				}
 			} else if(event.type === EventService.EVENT.VIEWER.UNITY_READY) {
+				console.log("Disabled - UNITY_READY setting vm.modelLoaded to true in issues.component.js");
 				vm.modelLoaded = true;
 			
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
@@ -202,9 +203,12 @@
 				watchNotification();
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
+				console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
 				vm.issuesReady.then(function(){
+					console.log("Disabled - canAddUse before permission check in issues.component.js");
 					if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 						vm.canAddIssue = true;
+						console.log("Disabled - canAddUse set to true in issues.component.js");
 					} 
 				});
 				

@@ -33,7 +33,7 @@
 				onEditIssue: "&",
 				onSelectIssue: "&",
 				nonListSelect: "<",
-				keysDown: "<",
+				keysDown: "=",
 				contentHeight: "&",
 				menuOption: "<",
 				importBcf: "&",
@@ -45,45 +45,35 @@
 			}
 		});
 
-	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
+	IssuesListCtrl.$inject = ["$scope", "$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
 
-	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
-		var vm = this,
-			selectedIssue = null,
-			selectedIssueIndex = null,
-			issuesListItemHeight = 141,
-			infoHeight = 81,
-			issuesToShowWithPinsIDs,
-			sortOldestFirst = false,
-			showClosed = false,
-			focusedIssueIndex = null,
-			rightArrowDown = false,
-			showSubModelIssues = false,
-			excludeRoles = [];
+	function IssuesListCtrl ($scope, $filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
+		var vm = this;
 
 		// Init
 		vm.$onInit = function() {
 			vm.UtilsService = UtilsService;
 			vm.IssuesService = IssuesService;
 			vm.setFocus = setFocus;
+			vm.focusedIssueIndex = null;
+			vm.excludeRoles = [];
+			vm.showSubModelIssues = false;
+			vm.showClosed = false;
+			vm.sortOldestFirst = false;
+			vm.issuesToShowWithPinsIDs = undefined;
+			vm.infoHeight = 81;
+			vm.issuesListItemHeight = 141;
+			vm.selectedIssueIndex = null;
+			vm.internalSelectedIssue = null;
 		};
-		
-		/**
-		 * Monitor changes to parameters
-		 * @param {Object} changes
-		 */
-		vm.$onChanges = function (changes) {
-			var i, length,
-				index,
-				upArrow = 38,
-				downArrow = 40,
-				rightArrow = 39,
-				keysDown,
-				event = {type: "click"},
-				updatedIssue = IssuesService.updatedIssue;
 
-			// All issues
-			if (changes.hasOwnProperty("allIssues") && vm.allIssues) {
+
+		// All issues
+		$scope.$watch("vm.allIssues", function(){
+			var index;
+			var updatedIssue = IssuesService.updatedIssue;
+
+			if (vm.allIssues) {
 				if (vm.allIssues.length > 0) {
 					vm.toShow = "list";
 
@@ -97,40 +87,48 @@
 
 					// Check for issue display
 					if (vm.issueDisplay.showClosed) {
-						showClosed = vm.issueDisplay.showClosed;
+						vm.showClosed = vm.issueDisplay.showClosed;
 					}
 					if (vm.issueDisplay.sortOldestFirst) {
-						sortOldestFirst = vm.issueDisplay.sortOldestFirst;
+						vm.sortOldestFirst = vm.issueDisplay.sortOldestFirst;
 					}
 					if (vm.issueDisplay.showSubModelIssues){
-						showSubModelIssues = vm.issueDisplay.showSubModelIssues;
+						vm.showSubModelIssues = vm.issueDisplay.showSubModelIssues;
 					}
 					setupIssuesToShow();
 					showPins();
 				} else {
 					vm.toShow = "info";
 					vm.info = "There are currently no open issues";
-					vm.contentHeight({height: infoHeight});
+					vm.contentHeight({height: vm.infoHeight});
 				}
 			}
 
+		});
+
+		$scope.$watch("vm.filterText", function() {
+
 			// Filter text
-			if (changes.hasOwnProperty("filterText") && (typeof vm.filterText !== "undefined")) {
+			if (vm.filterText && (typeof vm.filterText !== "undefined")) {
 				setupIssuesToShow();
 				showPins();
 			}
 
+		});
+
+		$scope.$watch("vm.menuOption", function(){
+
 			// Menu option
-			if (changes.hasOwnProperty("menuOption") && vm.menuOption) {
+			if (vm.menuOption) {
 				if (vm.menuOption.value === "sortByDate") {
-					sortOldestFirst = !sortOldestFirst;
-					vm.issueDisplay.sortOldestFirst = sortOldestFirst;
+					vm.sortOldestFirst = !vm.sortOldestFirst;
+					vm.issueDisplay.sortOldestFirst = vm.sortOldestFirst;
 				} else if (vm.menuOption.value === "showClosed") {
-					showClosed = !showClosed;
-					vm.issueDisplay.showClosed = showClosed;
+					vm.showClose = !vm.showClosed;
+					vm.issueDisplay.showClosed = vm.showClosed;
 				} else if (vm.menuOption.value === "showSubModels") {
-					showSubModelIssues = !showSubModelIssues;
-					vm.issueDisplay.showSubModelIssues = showSubModelIssues;
+					vm.showSubModelIssues = !vm.showSubModelIssues;
+					vm.issueDisplay.showSubModelIssues = vm.showSubModelIssues;
 				} else if (vm.menuOption.value === "print") {
 					var ids = [];
 					
@@ -153,15 +151,15 @@
 					});
 				} else if(vm.menuOption.value === "filterRole"){
 					
-					var index = excludeRoles.indexOf(vm.menuOption.role);
+					var roleIndex = vm.excludeRoles.indexOf(vm.menuOption.role);
 
 					if(vm.menuOption.selected){
-						if(index !== -1){
-							excludeRoles.splice(index, 1);
+						if(roleIndex !== -1){
+							vm.excludeRoles.splice(roleIndex, 1);
 						}
 					} else {
-						if(index === -1){
-							excludeRoles.push(vm.menuOption.role);
+						if(roleIndex === -1){
+							vm.excludeRoles.push(vm.menuOption.role);
 						}
 					}
 
@@ -171,9 +169,13 @@
 				showPins();
 			}
 
+		});
+
+		$scope.$watch(function(){
+
 			// Updated issue
-			if (changes.hasOwnProperty("updatedIssue") && vm.updatedIssue) {
-				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
+			if (vm.updatedIssue) {
+				for (var i = 0; i < vm.allIssues.length; i++) {
 					if (vm.updatedIssue._id === vm.allIssues[i]._id) {
 						vm.allIssues[i] = vm.updatedIssue;
 						break;
@@ -181,35 +183,46 @@
 				}
 			}
 
-			// Selected issue
-			if (changes.hasOwnProperty("selectedIssue") && vm.issuesToShow) {
+		});
 
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+		$scope.$watch(function(){
+
+			// Selected issue
+			if (vm.selectedIssue && vm.issuesToShow) {
+
+				for (var i = 0; i < vm.issuesToShow.length; i++) {
 					// To clear any previously selected issue
 					vm.issuesToShow[i].selected = false;
 					vm.issuesToShow[i].focus = false;
 
 					// Set up the current selected iss
 					if (vm.selectedIssue && vm.issuesToShow[i]._id === vm.selectedIssue._id) {
-						selectedIssue = vm.issuesToShow[i];
-						selectedIssue.selected = true;
-						selectedIssue.focus = true;
-						focusedIssueIndex = i;
-						selectedIssueIndex = i;
+						vm.internalSelectedIssue = vm.issuesToShow[i];
+						vm.internalSelectedIssue.selected = true;
+						vm.internalSelectedIssue.focus = true;
+						vm.focusedIssueIndex = i;
+						vm.selectedIssueIndex = i;
 					}
 				}
 			}
 
-			if(changes.hasOwnProperty("displayIssue") && vm.displayIssue){
-				var that = this;
+		});
+
+		$scope.$watch(function(){
+
+			// Selected issue
+			if(vm.displayIssue){
+				
 				vm.editIssue(vm.displayIssue);
 				$timeout(function(){
-					showIssue(that.displayIssue);
-				}, 1500);
+					showIssue(vm.displayIssue);
+				}.bind(this), 1500);
 
 			}
-		};
 
+		});
+
+		
 		/**
 		 * Select issue
 		 * @param event
@@ -218,35 +231,35 @@
 		vm.select = function (event, issue) {
 			if (event.type === "click") {
 
-				if ((selectedIssue === null) || (selectedIssue._id === issue._id)) {
+				if ((vm.internalSelectedIssue === null) || (vm.internalSelectedIssue._id === issue._id)) {
 					resetViewerState(issue);
 					setViewerState(issue);
 				} else {
 					setViewerState(issue);
 				}
 
-				vm.onSelectIssue({issue: selectedIssue});
+				vm.onSelectIssue({issue: vm.internalSelectedIssue});
 			}
 		};
 
 		function resetViewerState(issue) {
 
-			selectedIssue = issue;
-			selectedIssue.selected = false;
-			selectedIssue.focus = false;
+			vm.internalSelectedIssue = issue;
+			vm.internalSelectedIssue.selected = false;
+			vm.internalSelectedIssue.focus = false;
 
-			deselectPin(selectedIssue);
+			deselectPin(vm.internalSelectedIssue);
 
 		}
 
 		function setViewerState(issue) {
 
-			selectedIssue = issue;
-			selectedIssue.selected = true;
-			selectedIssue.focus = true;
+			vm.internalSelectedIssue = issue;
+			vm.internalSelectedIssue.selected = true;
+			vm.internalSelectedIssue.focus = true;
 
-			showIssue(selectedIssue);
-			setSelectedIssueIndex(selectedIssue);
+			showIssue(vm.internalSelectedIssue);
+			setSelectedIssueIndex(vm.internalSelectedIssue);
 
 		}
 
@@ -256,10 +269,10 @@
 		 * @param index
 		 */
 		function setFocus (issue, index) {
-			if (selectedIssue !== null) {
-				selectedIssue.focus = false;
+			if (vm.internalSelectedIssue !== null) {
+				vm.internalSelectedIssue.focus = false;
 			}
-			focusedIssueIndex = index;
+			vm.focusedIssueIndex = index;
 			issue.focus = true;
 		}
 
@@ -278,7 +291,7 @@
 		 * @param issue
 		 */
 		vm.removeFocus = function (event, issue) {
-			focusedIssueIndex = null;
+			vm.focusedIssueIndex = null;
 			issue.focus = false;
 		};
 
@@ -293,17 +306,17 @@
 		 * Set the selected issue index
 		 * @param selectedIssue
 		 */
-		function setSelectedIssueIndex(selectedIssue) {
+		function setSelectedIssueIndex(selectedIssueObj) {
 			var i, length;
 
-			if (selectedIssue !== null) {
+			if (selectedIssueObj !== null) {
 				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (vm.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
+					if (vm.issuesToShow[i]._id === selectedIssueObj._id) {
+						vm.selectedIssueIndex = i;
 					}
 				}
 			} else {
-				selectedIssueIndex = null;
+				vm.selectedIssueIndex = null;
 			}
 		}
 
@@ -331,15 +344,15 @@
 				sortedIssuesLength;
 
 			vm.issuesToShow = [];
-			issuesToShowWithPinsIDs = {};
+			vm.issuesToShowWithPinsIDs = {};
 
 			if (vm.allIssues.length > 0) {
 				// Sort
 				vm.issuesToShow = [vm.allIssues[0]];
 				for (i = 1, length = vm.allIssues.length; i < length; i += 1) {
 					for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((vm.allIssues[i].created < vm.issuesToShow[j].created) && (sortOldestFirst)) ||
-							((vm.allIssues[i].created > vm.issuesToShow[j].created) && (!sortOldestFirst))) {
+						if (((vm.allIssues[i].created < vm.issuesToShow[j].created) && (vm.sortOldestFirst)) ||
+							((vm.allIssues[i].created > vm.issuesToShow[j].created) && (!vm.sortOldestFirst))) {
 							vm.issuesToShow.splice(j, 0, vm.allIssues[i]);
 							break;
 						} else if (j === (vm.issuesToShow.length - 1)) {
@@ -396,26 +409,26 @@
 
 				// Closed
 				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-					if (!showClosed && (vm.issuesToShow[i].status === "closed")) {
+					if (!vm.showClosed && (vm.issuesToShow[i].status === "closed")) {
 						vm.issuesToShow.splice(i, 1);
 					}
 				}
 
 				// Sub models
 				vm.issuesToShow = vm.issuesToShow.filter(function (issue) {
-					return showSubModelIssues ? true : (issue.model === vm.model);
+					return vm.showSubModelIssues ? true : (issue.model === vm.model);
 				});
 
 				//Roles Filter
 				vm.issuesToShow = vm.issuesToShow.filter(function(issue){
-					return excludeRoles.indexOf(issue.creator_role) === -1;
+					return vm.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			}
 
 			// Create list of issues to show with pins
 			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
 				if (vm.issuesToShow[i].position.length > 0) {
-					issuesToShowWithPinsIDs[vm.issuesToShow[i]._id] = true;
+					vm.issuesToShowWithPinsIDs[vm.issuesToShow[i]._id] = true;
 				}
 			}
 
@@ -423,12 +436,12 @@
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "list";
 				var buttonSpace = 70;
-				var issuesHeight = vm.issuesToShow.length * issuesListItemHeight + buttonSpace;
+				var issuesHeight = vm.issuesToShow.length * vm.issuesListItemHeight + buttonSpace;
 				vm.contentHeight({height: issuesHeight });
 			} else {
 				vm.toShow = "info";
 				vm.info = "No issues to show";
-				vm.contentHeight({height: infoHeight});
+				vm.contentHeight({height: vm.infoHeight});
 			}
 		}
 
@@ -446,13 +459,13 @@
 					pin = angular.element(document.getElementById(vm.allIssues[i]._id));
 					if (pin.length > 0) {
 						// Existing pin
-						if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
+						if (vm.issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
 							pin[0].setAttribute("render", "true");
 						} else {
 							pin[0].setAttribute("render", "false");
 						}
 					} else {
-						if (issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
+						if (vm.issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
 							// Create new pin
 							pinData = {
 								id: vm.allIssues[i]._id,
@@ -471,5 +484,7 @@
 				}
 			}
 		}
+
+
 	}
 }());

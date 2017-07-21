@@ -28,31 +28,32 @@
 				revision: "=",
 				issueId: "=",
 				state:    "=",
-				keysDown: "="
+				keysDown: "<"
 			},
 			templateUrl: "model.html",
 			controller: ModelCtrl,
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService"];
+	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService"];
 
-	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService) {
+	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService) {
 		var vm = this,
-
-			// TODO: these should probably be in $onInit
-			panelCard = {
-				left: [],
-				right: []
-			},
-			modelUI,
-			issueArea,
-			issuesCardIndex = 0;
+		// TODO: these should probably be in $onInit
+		panelCard = {
+			left: [],
+			right: []
+		},
+		modelUI,
+		issueArea,
+		issuesCardIndex = 0;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
+			
+			vm.shownBackNotice = false;
 
 			vm.pointerEvents = "inherit";
 			
@@ -70,22 +71,37 @@
 			// create a fake state to prevent the back button
 			history.pushState(null, null, document.URL);
 
+			var message = "It will go back to model listing page, are you sure?";
 			// popup when user click back button
-			var popStateHandler = function () {
-				// the fake state has already been popped by user at this moment
+			var popStateHandler = function (event) {
 
-				if(confirm("It will go back to model listing page, are you sure?")){
-					// pop one more state if user actually wants to go back
-					UnityUtil.reset();
-					history.go(-1);
-				} else {
-					// recreate a fake state
-					history.pushState(null, null, document.URL);
+				// the fake state has already been popped by user at this moment
+				var goingToModels = false;
+				console.log("pop", event);
+				//alert("location: " + document.location.href + ", state: " + JSON.stringify(event.state));
+
+				if (event.currentTarget.location.pathname === "/" + vm.account) {
+					goingToModels = true;
 				}
+
+				if (goingToModels) {
+					if (!vm.shownBackNotice) {
+						var response = confirm(message);
+						vm.shownBackNotice = true;
+						if (response) {
+							history.back();
+						}
+					}
+				} else {
+					// pop one more state if user actually wants to go back
+					history.back();
+				}
+				
+	
 			};
 
 			//listen for user clicking the back button
-			window.addEventListener("popstate", popStateHandler);
+			//window.addEventListener("popstate", popStateHandler);
 
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
@@ -247,7 +263,20 @@
 				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 			});
 
+			
+
 		};
+
+		/**
+		 * Set up event watching
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			
+			if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+				MultiSelectService.pinDropMode = event.value;
+			}
+
+		});
 
 		vm.handleModelError = function(){
 			var message = "The model was not found or failed to load correctly. " +
@@ -303,6 +332,9 @@
 			}
 		});
 
+		$scope.$watch("vm.keysDown", function() {
+			MultiSelectService.handleKeysDown(vm.keysDown);
+		});
 
 		$scope.$watch("vm.issueId", function(){
 			if(vm.issueId){

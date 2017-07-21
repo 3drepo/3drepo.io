@@ -31,14 +31,13 @@ const allCss = [
 const allJs = './components/**/**.js';
 const allPug = './components/**/**.pug';
 const icons = './icons/*.svg';
-const nodeRoot = path.join( __dirname, 'node_modules' )
+
 const jsOrder = [
           'components/entry/js/entry.js',
-          'components/viewer/js/unity-util.js',
-          'components/viewer/js/unity-settings.js',
-          'components/viewer/js/viewer-util.js',
-          'components/viewer/js/threed/map-tile.js',
-          'components/viewer/js/threed/*.js',
+          'components/viewer/js/globals/unity-util.js',
+          'components/viewer/js/globals/unity-settings.js',
+          'components/viewer/js/globals/map-tile.js',
+          'components/viewer/js/globals/*.js',
           'components/**/**.js'
         ];
 

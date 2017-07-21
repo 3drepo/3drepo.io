@@ -90,11 +90,15 @@
 
 				} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
 
-					vm.pinDropMode = event.value;
-					if (vm.pinDropMode === false) {
-						vm.removePin();
+					if (event.value === "saveIssue") {
+						vm.pinDropMode = false;
+					} else {
+						vm.pinDropMode = event.value;
+						if (!vm.pinDropMode) {
+							vm.removePin();
+						}
 					}
-
+				
 				}
 			}
 
@@ -116,6 +120,6 @@
 				{id: vm.newPinId}
 			);
 			vm.setPin({data: null});
-		}
+		};
 	}
 }());

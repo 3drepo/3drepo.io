@@ -93,27 +93,35 @@
 
 		function fetchModelProperties(account, model, branch, revision) {
 
-			if(!branch) {
-				branch = (!revision) ? "master" : "";
-			}
-					
-			if(!revision) {
-				revision = "head";
+			if (account && model) {
+
+				if(!branch) {
+					branch = (!revision) ? "master" : "";
+				}
+						
+				if(!revision) {
+					revision = "head";
+				}
+
+				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+					.then(function(response) {
+						if (response.data && response.data.properties) {
+							vm.viewer.applyModelProperties(account, model, response.data.properties);
+						} else {
+							var message = "No data properties returned. This was the response:";
+							console.error(message, response);
+						}
+					})
+					.catch(function(error){
+						console.error("Model properties failed to fetch", error);
+					});
+
+			} else {
+				console.warn("Account and model were not set correctly " +
+				"for model property fetching: ", account, model);
 			}
 			
-			var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
-				.then(function(response) {
-					if (response.data && response.data.properties) {
-						vm.viewer.applyModelProperties(account, model, response.data.properties);
-					} else {
-						var message = "No data properties returned. This was the response:";
-						console.error(message, response);
-					}
-				})
-				.catch(function(error){
-					console.error("Model properties failed to fetch", error);
-				});
 
 		}
 

@@ -32,20 +32,19 @@
 			}
 		);
 
-	IssuesListItemCtrl.$inject = ["$element", "$timeout", "IssuesService"];
+	IssuesListItemCtrl.$inject = ["$scope", "$element", "$timeout", "IssuesService"];
 
-	function IssuesListItemCtrl ($element, $timeout, IssuesService) {
-		var vm = this,
-			issueRoleIndicator = null;
-
+	function IssuesListItemCtrl ($scope, $element, $timeout, IssuesService) {
+		var vm = this;
 
 		/**
 		 * Init
 		 */
 		vm.$onInit = function () {
 			// Role indicator
+			vm.issueRoleIndicator = null;
 			$timeout(function () {
-				issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
+				vm.issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
 				setRoleIndicatorColour();
 			});
 		};
@@ -54,9 +53,10 @@
 		 * Monitor changes to parameters
 		 * @param {Object} changes
 		 */
-		vm.$onChanges = function (changes) {
+		$scope.$watch("data", function () {
+
 			// Data
-			if (changes.hasOwnProperty("data") && vm.data) {
+			if (vm.data) {
 				setRoleIndicatorColour();
 
 				// Title
@@ -65,14 +65,19 @@
 				}
 			}
 
+		});
+
+		$scope.$watch("userJob", function () {
+			
 			// User roles
-			if (changes.hasOwnProperty("userJob") && vm.userJob) {
+			if (vm.userJob) {
 				// Title
 				if (vm.data) {
 					vm.assignedToAUserRole = issueIsAssignedToAUserRole();
 				}
 			}
-		};
+
+		});
 
 		vm.getStatusIcon = function(issueData) {
 			return IssuesService.getStatusIcon(issueData).icon;
@@ -88,11 +93,11 @@
 		function setRoleIndicatorColour () {
 			var assignedRoleColour;
 
-			if (vm.data && (vm.data.assigned_roles.length > 0) && issueRoleIndicator) {
+			if (vm.data && (vm.data.assigned_roles.length > 0) && vm.issueRoleIndicator) {
 				assignedRoleColour = IssuesService.getJobColor(vm.data.assigned_roles[0]);
 				if (assignedRoleColour !== null) {
-					issueRoleIndicator.css("border", "none");
-					issueRoleIndicator.css("background", assignedRoleColour);
+					vm.issueRoleIndicator.css("border", "none");
+					vm.issueRoleIndicator.css("background", assignedRoleColour);
 				}
 			}
 		}
@@ -103,5 +108,6 @@
 		function issueIsAssignedToAUserRole () {
 			return vm.data.assigned_roles.indexOf(vm.userJob._id) !==  -1;
 		}
+
 	}
 }());

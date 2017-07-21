@@ -28,21 +28,14 @@
 				onContentHeightRequest: "&"
 			},
 			controller: ClipCtrl,
-			controllerAs: "vm",
-			account: null,
-			model: null,
-			disableRedefinition: false
+			controllerAs: "vm"
 		});
 
 	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
 	function ClipCtrl($scope, $timeout, EventService) {
 		var vm = this;
-		/**
-		 * Bounding box scale avoids flickering at edges
-		 * @private
-		 * @type {number}
-		 */
+
 		/*
 		 * Init
 		 */
@@ -61,17 +54,18 @@
 
 		function updateClippingPlane() {
 			if(vm.bbox) {
-				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
-					{
-						clippingPlanes:[
-							{
-								normal: getNormal(),
-								distance: vm.displayDistance,
-								clipDirection: -1
-							}
-						],
-						fromClipPanel: true
-					});
+				var event = {
+					clippingPlanes:[{
+						normal: getNormal(),
+						distance: vm.displayDistance,
+						clipDirection: -1
+					}],
+					fromClipPanel: true
+				};
+				EventService.send(
+					event,
+					EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES
+				);
 			}
 		}
 
@@ -121,23 +115,6 @@
 			}
 		});
 
-		/**
-		 * Swap Y and Z axes
-		 *
-		 * @param {String} axis
-		 * @returns {String}
-		 */
-		function translateAxis(axis) {
-			if (axis === "Y") {
-				return "Z";
-			} else if (axis === "Z") {
-				return "Y";
-			} else if(axis === "X") {
-				return "X";
-			} else {
-				return "";
-			}
-		}
 
 		/*
 		 * Toggle the clipping plane
@@ -178,30 +155,36 @@
 		 * Update displayed Distance based on slider position and axis
 		 */
 		function updateDisplayedDistance(updateSlider, moveClip) {
-			var min = 0;
-			var max = 0;
 
-			if(vm.displayedAxis === "X") {
-				min = vm.bbox.min[0];
-				max = vm.bbox.max[0];
-			} else if(vm.displayedAxis === "Y") {
-				min = vm.bbox.min[2];
-				max = vm.bbox.max[2];
-			} else if(vm.displayedAxis === "Z") {
-				min = vm.bbox.min[1];
-				max = vm.bbox.max[1];
+			if (vm.bbox) {
+				var min = 0;
+				var max = 0;
+
+				if(vm.displayedAxis === "X") {
+					min = vm.bbox.min[0];
+					max = vm.bbox.max[0];
+				} else if(vm.displayedAxis === "Y") {
+					min = vm.bbox.min[2];
+					max = vm.bbox.max[2];
+				} else if(vm.displayedAxis === "Z") {
+					min = vm.bbox.min[1];
+					max = vm.bbox.max[1];
+				} else {
+					return;
+				} //unknown axis, nothing would've been set. avoid infinity
+				
+				var percentage = 1 - vm.sliderPosition/100;
+				if(!updateSlider) {
+					vm.disableWatchDistance = true;
+				}
+				vm.displayDistance = min + (Math.abs(max - min) * percentage);
+				if(moveClip) {
+					updateClippingPlane();
+				}
 			} else {
-				return;
-			} //unknown axis, nothing would've been set. avoid infinity
+				console.warn("Bounding Box was not defined", vm.bbox);
+			}
 			
-			var percentage = 1 - vm.sliderPosition/100;
-			if(!updateSlider) {
-				vm.disableWatchDistance = true;
-			}
-			vm.displayDistance = min + (Math.abs(max - min) * percentage);
-			if(moveClip) {
-				updateClippingPlane();
-			}
 
 		}
 
@@ -209,37 +192,44 @@
 		 * Update display slider based on current internal distance
 		 */
 		function updateDisplaySlider(updateDistance, moveClip) {
-			var min = 0;
-			var max = 0;
-			if(vm.displayedAxis === "X") {
-				min = vm.bbox.min[0];
-				max = vm.bbox.max[0];
-			} else if(vm.displayedAxis === "Y") {
-				min = vm.bbox.min[2];
-				max = vm.bbox.max[2];
-			} else if(vm.displayedAxis === "Z") {
-				min = vm.bbox.min[1];
-				max = vm.bbox.max[1];
+
+			if (vm.bbox) {
+
+				var min = 0;
+				var max = 0;
+				if(vm.displayedAxis === "X") {
+					min = vm.bbox.min[0];
+					max = vm.bbox.max[0];
+				} else if(vm.displayedAxis === "Y") {
+					min = vm.bbox.min[2];
+					max = vm.bbox.max[2];
+				} else if(vm.displayedAxis === "Z") {
+					min = vm.bbox.min[1];
+					max = vm.bbox.max[1];
+				} else {
+					return;
+				} //unknown axis, nothing would've been set. avoid infinity
+				
+				var percentage = (vm.displayDistance - min) / Math.abs(max-min);
+				if(!updateDistance) {
+					vm.disableWatchSlider = true;
+				}
+
+				var value = (1.0 - percentage) * 100;
+				if(percentage > 100 || value < 0) {
+					value = 0;
+				}
+				if(percentage < 0 || value > 100) {
+					value = 100;
+				}
+				vm.sliderPosition = value;
+
+				if(moveClip) {
+					updateClippingPlane();
+				}
+
 			} else {
-				return;
-			} //unknown axis, nothing would've been set. avoid infinity
-			
-			var percentage = (vm.displayDistance - min) / Math.abs(max-min);
-			if(!updateDistance) {
-				vm.disableWatchSlider = true;
-			}
-
-			var value = (1.0 - percentage) * 100;
-			if(percentage > 100 || value < 0) {
-				value = 0;
-			}
-			if(percentage < 0 || value > 100) {
-				value = 100;
-			}
-			vm.sliderPosition = value;
-
-			if(moveClip) {
-				updateClippingPlane();
+				console.warn("Bounding Box was not defined", vm.bbox);
 			}
 
 		}
@@ -247,7 +237,7 @@
 		/*
 		 * Change the clipping plane distance
 		 */
-		$scope.$watch("vm.displayDistance", function (newValue) {
+		$scope.$watch("vm.displayDistance", function () {
 			if(!vm.disableWatchDistance) {
 				updateDisplaySlider(false, vm.visible);
 			}
@@ -259,7 +249,7 @@
 		/*
 		 * Change the clipping plane axis
 		 */
-		$scope.$watch("vm.displayedAxis", function (newValue) {
+		$scope.$watch("vm.displayedAxis", function () {
 			if(!vm.disableWatchAxis) {
 				updateDisplayedDistance(false, vm.visible);
 			}
@@ -270,7 +260,7 @@
 		/*
 		 * Watch the slider position
 		 */
-		$scope.$watch("vm.sliderPosition", function (newValue) {
+		$scope.$watch("vm.sliderPosition", function () {
 			if(!vm.disableWatchSlider) {
 				updateDisplayedDistance(false, vm.visible);
 			}
@@ -288,6 +278,7 @@
 					vm.offsetTrans = event.value.modelTrans;
 				}
 			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
+				
 				vm.bbox = event.value.bbox;
 				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {

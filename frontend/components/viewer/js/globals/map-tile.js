@@ -16,8 +16,8 @@
  */
 
 var MapTile = {};
-// Global functions to be passed to X3DOM elements
-//var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
+
+//var os_clickBuildingObject = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 (function() {
 	"use strict";
