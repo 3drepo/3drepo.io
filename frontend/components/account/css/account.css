@@ -37,6 +37,10 @@ account-dir .userContent .cardInfo {
 }
 
 /** Account Models **************************************************************************************************/
+account-items .md-button {
+  z-index: 1 !important;
+}
+
 account-items #accountList {
   overflow: auto;
 }

@@ -117,8 +117,15 @@
 				"/registerVerify"
 			];
 
+			vm.loginRedirects = [
+				"sign-up",
+				"password-forgot",
+				"register-request",
+				"register-verify"
+			];
+
 			$timeout(function () {
-				var loginMarkup = "<login></login>";
+
 				homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
 
 				/*
@@ -129,28 +136,9 @@
 					var changedState = newState !== oldState;
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
-						
-						clearDirective();
-						var functionToInsert = getFunctionToInsert();
-
-						if (functionToInsert != null) {
-							insertFunctionDirective(functionToInsert);
-						} else {
-							// If you are not logged in
-							if (!AuthService.loggedIn) {
-								insertDirective(loginMarkup);
-							} else {
-								// If you are logged in
-								var accessOwnAccount = (AuthService.username === vm.state.account);
-								var viewAModel    = angular.isDefined(vm.state.model);
-
-								if (!accessOwnAccount && !viewAModel) {
-									// Return to your own account page
-									EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
-								}
-							}
-						}
+						handleStateChange();
 					}
+					
 				}, true);
 
 			});
@@ -160,6 +148,27 @@
 			}
 
 		};
+
+		function handleStateChange() {
+			var loginMarkup = "<login></login>";
+			clearDirective();
+			var functionToInsert = getFunctionToInsert();
+
+			if (functionToInsert != null) {
+				var needsRedirect = vm.loginRedirects.indexOf(functionToInsert) !== -1;
+				if (AuthService.loggedIn && needsRedirect) {
+					$location.path(AuthService.username);
+				} else {
+					insertFunctionDirective(functionToInsert);
+				}
+				
+			} else {
+				// If you are not logged in
+				if (!AuthService.loggedIn) {
+					insertDirective(loginMarkup);
+				} 
+			}
+		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL
