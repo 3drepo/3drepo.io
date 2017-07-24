@@ -33,23 +33,24 @@
 	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$location", "UtilsService", "serverConfig"];
 
 	function accountAssignCtrl($scope, $window, $http,  $q, $location, UtilsService, serverConfig) {
-		var vm = this,
-			promise,
-			check;
+		var vm = this;
+
+		// TODO: All of this probably needs simplifying and definitely needs abstracting
+		// to a service. I am not sure if the assign user logic is actually right
 
 		/*
 		 * Init
 		 */	
 		vm.$onInit = function() {
-			vm.loading = true;
+			vm.loadingTeamspaces = true;
 			vm.modelReady = false;
 			vm.teamspaces = [];
 			vm.projects = [];
 			vm.models = {};
 			vm.selectedRole = {};
 
-			check = $location.search();
-			vm.isFromUrl = check.account && check.project && check.model;
+			vm.check = $location.search();
+			vm.isFromUrl = vm.check.account && vm.check.project && vm.check.model;
 			if (vm.isFromUrl) {
 				vm.selectedIndex = 2;
 			}
@@ -81,15 +82,22 @@
 			
 		};
 
-		var getStateFromParams = function() {
+		vm.resetState = function() {
+			vm.fromURL = {};
+			$location.search("account", null);
+			$location.search("project", null);
+			$location.search("model", null);
+		};
+
+		vm.getStateFromParams = function() {
 			
-			if (check) {
+			if (vm.check) {
 				vm.fromURL = {};
-				vm.fromURL.projectSelected = check.project;
-				vm.fromURL.modelSelected = check.model;
+				vm.fromURL.projectSelected = vm.check.project;
+				vm.fromURL.modelSelected = vm.check.model;
 
 				// Trigger the first watcher (teamspace)
-				vm.teamspaceSelected = check.account;
+				vm.teamspaceSelected = vm.check.account;
 			}
 		};
 
@@ -104,30 +112,50 @@
 						return teamspace.isAdmin === true;
 					});
 
-					vm.teamspaces.forEach(getUsers);
-					getStateFromParams();
-					vm.loading = false;
+					// Append all the assignable users to a teamspace
+					var allTeamspacesPromises = [];
+					vm.teamspaces.forEach(function(teamspace) {
+						allTeamspacesPromises.push(
+							$q(function(resolve, reject) {
+								var endpoint = teamspace.account + "/subscriptions";
+								var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+								$http.get(url)
+									.then(function(response) {
+										teamspace.assignUsers = response.data;
+										resolve(teamspace.assignUsers);
+									})
+									.catch(function(response){
+										console.error("error", response);
+										reject(response);
+									});
+							})
+						);
+					});
+
+					// Wait for all the assignable users to be 
+					// defined before contining
+					var completed = $q.all(allTeamspacesPromises); 
+					completed.then(function(){
+						vm.getStateFromParams();
+						vm.loadingTeamspaces = false;
+					});
+					
 
 				})
 				.catch(function (err) {
-					console.trace(err);
+					console.error(err);
 				});
 		};
 
 		// GET PROJECTS
 
-		vm.setProjects = function(account) {
-			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/projects");
-			return $http.get(url)
-				.then(
-					function(response) {
-						vm.projects = response.data;
-						vm.projectsLoading = false;
-					},
-					function (err) {
-						console.trace(err);
-					}
-				);
+		vm.setProjects = function() {
+
+			vm.projects = {};
+			vm.selectedTeamspace.projects.forEach(function(project){
+				vm.projects[project.name] = project;
+			});
+
 		};
 	
 
@@ -148,6 +176,8 @@
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			$http.put(url, {
 				permissions: user.permissions
+			}).catch(function(error){
+				console.error(error);
 			});
 		};
 
@@ -192,12 +222,11 @@
 
 		$scope.$watch("vm.teamspaceSelected", function(){
 
-			vm.projectSelected = undefined;
-			vm.selectedProject = undefined;
-			vm.models = {};
-			vm.modelReady = false;
-			vm.projectReady = false;
-
+			// Teamspace has changed so we must reset all 
+			// associate model and project data 
+			vm.clearModelState();
+			vm.clearProjectState();
+		
 			if (vm.teamspaces.length) {
 
 				// Find the matching teamspace to the one selected
@@ -206,33 +235,34 @@
 				});
 
 				if (vm.selectedTeamspace) {
-					vm.setProjects(vm.teamspaceSelected).then(function(){
-						// The property is set async so it won't be there immediately
-						return $q(function(resolve, reject) {
-							if (vm.selectedTeamspace && vm.selectedTeamspace.assignUsers) {				
-								vm.appendUserPermissions(vm.selectedTeamspace).then(function(){
-									vm.setPermissionTemplates(vm.selectedTeamspace).then(function() {
-										if (vm.fromURL.projectSelected) {
-											vm.projectSelected = vm.fromURL.projectSelected;
-											delete vm.fromURL.projectSelected;
-										}
-										vm.projectReady = true;
-										resolve(vm.selectedTeamspace.assignUsers);
-									});
-								});
-							} else {
-								vm.projectReady = true;
-								resolve([]);
-							}
-						});		
-					});
+					vm.handleTeamspaceSelected();
 				}
-
-				
 
 			}
 		
 		});
+
+		vm.handleTeamspaceSelected = function() {
+			
+			vm.setProjects();
+
+			// The property is set async so it won't be there immediately
+			return $q(function(resolve, reject) {
+				vm.appendUserPermissions(vm.selectedTeamspace)
+					.then(function(){
+						vm.setPermissionTemplates(vm.selectedTeamspace)
+							.then(function() {
+								if (vm.fromURL.projectSelected) {
+									vm.projectSelected = vm.fromURL.projectSelected;
+									delete vm.fromURL.projectSelected;
+								}
+								resolve(vm.selectedTeamspace.assignUsers);
+							});
+					});
+
+			});		
+
+		};
 
 		vm.setPermissionTemplates = function(teamspace){
 
@@ -248,52 +278,80 @@
 
 		};
 
-		var getUsers = function(teamspace) {
-			var url = serverConfig.apiUrl(serverConfig.GET_API, teamspace.account + "/subscriptions" );
-			$http.get(url)
-				.then(function(response) {
-					teamspace.assignUsers = response.data;
-				})
-				.catch(function(response){
-					console.error("error", response);
-				});
-		};
-
 		// PROJECTS
+
+		vm.clearProjectState = function() {
+			vm.projectSelected = undefined;
+			vm.selectedProject = undefined;
+		};
 
 		$scope.$watch("vm.projectSelected", function(){
 			// Find the matching project to the one selected
-			vm.selectedProject = vm.projects.find(function(project){
-				return project.name === vm.projectSelected;
-			});
 
-			if (vm.teamspaceSelected && vm.projectSelected) {
-				return $q(function(resolve, reject) {
-					if (vm.selectedProject && vm.selectedProject.models) {
-						vm.modelIds = vm.selectedProject.models;
-						vm.modelIds.forEach(vm.appendModelObjects);
-						resolve(vm.models);
-					}
-				});
-			} 
+			if (vm.projectSelected) {
+				vm.selectedProject = vm.projects[vm.projectSelected];
+				console.log("vm.selectedProject", vm.selectedProject);
+
+
+				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.projectSelected;
+				var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+				
+				// We can use the current users object as its matches the required 
+				// data structure the API expects
+				$http.get(url)
+					.then(function(response){
+						
+						vm.selectedProject.userPermissions = response.data.permissions;
+
+						// Reset the models
+						vm.clearModelState();
+
+						if (vm.teamspaceSelected && vm.projectSelected) {
+
+							if (vm.selectedProject && vm.selectedProject.models) {
+
+								vm.models = vm.selectedProject.models;
+
+								if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
+									vm.modelSelected = vm.fromURL.modelSelected;
+									delete vm.fromURL.modelSelected;
+								}
+
+								
+							}
+							
+						} 
+
+					})
+					.catch(function(error) {
+						console.error("Error: ", error);
+					});
+		
+			}
 			
 		});
 
-
 		vm.projectStateChange = function(user, permission) {
-			var addOrRemove = vm.userHasProjectPermissions(user, permission) === true ? "remove" : "add";
+			var hasPermission = vm.userHasProjectPermissions(user, permission);
+			var addOrRemove = hasPermission === true ? "remove" : "add";
 			vm.postProjectPermissionChange(user, permission, addOrRemove);
 		};
 
 		vm.userHasProjectPermissions = function(user, permission) {
+			
 			var hasPermission = false;
-			vm.selectedProject.permissions.forEach(function(permissionUser){
-				if (permissionUser.user === user.assignedUser) {
-					if (permissionUser.permissions) {
-						hasPermission = permissionUser.permissions.indexOf(permission) !== -1;
+			if (vm.selectedProject && vm.selectedProject.userPermissions) {
+				// Loop through all the project users and see if they have 
+				// permissions. If so we can set the tick box to checked
+				vm.selectedProject.userPermissions.forEach(function(permissionUser){
+					if (permissionUser.user === user.assignedUser) {
+						if (permissionUser.permissions) {
+							hasPermission = permissionUser.permissions.indexOf(permission) !== -1;
+						}
 					}
-				}
-			});
+				});
+			}
+			
 			return hasPermission;
 		};
 
@@ -303,19 +361,19 @@
 
 			if (addOrRemove === "add") {
 
-				var targetUser = vm.selectedProject.permissions.find(function(projectUser){
+				var targetUser = vm.selectedProject.userPermissions.find(function(projectUser){
 					return projectUser.user === user.assignedUser;
 				});
 
-				// If the user is already in the list we can add the persmission
+				
 				if (targetUser) {
+					// If the user is already in the list we can add the persmission
 					if (targetUser.permissions.indexOf(permission) === -1) {
 						targetUser.permissions.push(permission);
 					}
-				} 
-				// Else we create a new object and add it in
-				else {
-					vm.selectedProject.permissions.push({
+				} else {
+					// Else we create a new object and add it in
+					vm.selectedProject.userPermissions.push({
 						user : user.assignedUser,
 						permissions: [permission]
 					});
@@ -327,34 +385,58 @@
 			var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			$http.put(url, {
-				permissions: vm.selectedProject.permissions
+				permissions: vm.selectedProject.userPermissions
 			});
 
 		};
 
 		// MODELS
 
+		vm.modelsLoaded = function() {
+			return vm.models && Object.keys(vm.models).length > 0;
+		};
+
+		vm.clearModelState = function() {
+			vm.resetSelectedModel();
+			vm.modelReady = false;
+			vm.modelSelected = undefined;
+		};
+
+		vm.resetSelectedModel = function() {
+			vm.selectedModel = undefined;
+			vm.selectedRole = {};
+		};
+
 		$scope.$watch("vm.modelSelected", function(){
 			// Find the matching project to the one selected
 
-			vm.modelReady = false;
+			vm.resetSelectedModel();
+
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
 
-				vm.selectedModel = vm.models[vm.modelSelected];
+				vm.selectedModel = vm.models.find(function(model){
+					return model.model ===  vm.modelSelected;
+				});
 				
 				return $q(function(resolve, reject) {
 
 					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions";
 					var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-					$http.get(url).then(function(response){
-						var users = response.data;
-						vm.selectedModel.assignableUsers = users;
-						vm.selectedModel.assignableUsers.forEach(function(user) {
-							vm.selectedRole[user.user] = user.permission;
-						});
-						vm.modelReady = true;
-						resolve();
-					})
+
+					$http.get(url)
+						.then(function(response){
+							var users = response.data;
+
+							// Set the list of assignable users for the model
+							vm.selectedModel.currentUsers = users;
+
+							// Set the radio button for the associated users
+							vm.selectedModel.currentUsers.forEach(function(user) {
+								vm.selectedRole[user.user] = user.permission;
+							});
+							vm.modelReady = true;
+							resolve();
+						})
 						.catch(function(error){
 							console.error("Error", error);
 							reject(error);
@@ -366,65 +448,37 @@
 
 		});
 
-		
-
-		vm.modelsAreLoaded = function() {
-			return Object.keys(vm.models).length && 
-				   vm.modelIds.length && 
-				   Object.keys(vm.models).length === vm.modelIds.length;
-		};
-
-		vm.appendModelObjects = function(modelId) {
-			var endpoint = vm.selectedTeamspace.account + "/" + modelId + ".json";
-			var modelUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
-			return $http.get(modelUrl)
-				.then(function(response){
-					vm.models[modelId] = response.data;
-					if (vm.fromURL.modelSelected && vm.fromURL.modelSelected === modelId) {
-						vm.modelSelected = vm.fromURL.modelSelected;
-						delete vm.fromURL.modelSelected;
-					}
-				})
-				.catch(function(response){
-					console.log("error", response);
-				});
-		};
-
 
 		vm.modelStateChange = function(user, role) {
 
+			var userHasPerviousPermissions = false;
 			// Loop through the list of available users and find the selected user
-			vm.selectedModel.assignableUsers.forEach(function(assignableUser) {
+			vm.selectedModel.currentUsers.forEach(function(assignableUser) {
 				if (user.assignedUser === assignableUser.user) {
 					// Change the users role to the newly selected permission
 					assignableUser.permission = role;
+					userHasPerviousPermissions = true;
 				}
 			});
+
+			// If the user isn't in the assignableUser list add them
+			if (!userHasPerviousPermissions) {
+				vm.selectedModel.currentUsers.push({
+					user: user.assignedUser,
+					permission: role
+				});
+			}
 			
 			// Send the update to the server
-			vm.postModelRoleChange(user, role);
-		};
 
-		vm.userIsInTeam = function(user) {
-			var isInTeam = false;
-			vm.selectedModel.assignableUsers.forEach(function(assignable){
-				if (assignable.user === user.assignedUser) {
-					isInTeam = true;
-				}
-			});
-			return isInTeam;
-		};
-
-		vm.postModelRoleChange = function(user, role) {
-
-			//Update the permissions user for the selected teamspace
+			// Update the permissions user for the selected teamspace
 			// POST /{accountName}/{modelID}/permissions
 			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			
-			// We can use the assignable users object as its matches the required 
+			// We can use the current users object as its matches the required 
 			// data structure the API expects
-			$http.post(url, vm.selectedModel.assignableUsers)
+			$http.post(url, vm.selectedModel.currentUsers)
 				.then(function(response){
 					console.log(response);
 				})
@@ -433,7 +487,6 @@
 				});
 
 		};
-
 
 	}
 }());
