@@ -60,3 +60,10 @@ tools/release/*.exe
 
 #legal
 pug/legal
+
+uploads/
+backend/uploads/
+backend/mongodb-prebuilt-*
+backend/3drepo.log
+npm-debug.log.*
+.vscode/

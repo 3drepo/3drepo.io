@@ -9,16 +9,8 @@ html(lang="en" ng-app="3drepo")
 
 		title 3D Repo
 
-		// CSS Files
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/font-awesome.min.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/ui.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/angular-material.min.css')
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/css/external/three-d-repo.css')
-
-
-
 		// All CSS minified
-		link(rel='stylesheet', type='text/css', href='#{baseURL}/public/dist/three_d_repo.min.css')
+		link(rel='stylesheet', type='text/css', href=baseURL + '/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
@@ -52,7 +44,7 @@ html(lang="en" ng-app="3drepo")
 							span.flex(flex)
 
 							div(layout="column", layout-align="end end", class="layout-align-end-end layout-column")
-								img#billingInvoiceLogo(src="#{baseURL}/public/images/logo.png" style="height:57.5px")
+								img#billingInvoiceLogo(src=baseURL+"/public/images/logo.png" style="height:57.5px")
 								p.md-display-1.ng-binding 
 														| Credit Note
 

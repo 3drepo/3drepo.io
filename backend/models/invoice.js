@@ -35,6 +35,7 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
+	const path  =require('path');
 
 
 	const SchemaTypes = mongoose.Schema.Types;
@@ -383,9 +384,9 @@
 
 				let useNonPublicPort = true;
 
-				let template = "../pug/invoice.pug";
+				let template = path.join(__dirname, "../../pug/invoice.pug");
 				if (this.type === "refund") {
-					template = "../pug/refund.pug";
+					template = path.join(__dirname, "../../pug/refund.pug");
 				}
 
 				pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
