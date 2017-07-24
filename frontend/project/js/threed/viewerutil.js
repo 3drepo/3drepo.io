@@ -102,8 +102,7 @@ var ViewerUtilMyListeners = {};
 
 	ViewerUtil.prototype.eventFactory = function(name)
 	{
-		var self = this;
-		return function(event) { self.triggerEvent(name, event); };
+		return (function(event) { this.triggerEvent(name, event); }).bind(this);
 	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {

@@ -124,16 +124,6 @@
 					'mapTile': v.mapTile
 				}
 			});
-			// TODO: Move this so that the attachment is contained
-			// within the plugins themselves.
-			// Comes free with oculus support and gamepad support
-			v.oculus     = new Oculus(v.viewer);
-			v.gamepad    = new Gamepad(v.viewer);
-			v.gamepad.init();
-
-			v.measure    = new MeasureTool(v.viewer);
-
-			v.collision  = new Collision(v.viewer);
 
 			$scope.reload();
 
@@ -145,6 +135,7 @@
 				v.gamepad    = new Gamepad(v.viewer);
 
 				v.gamepad.init();
+				v.measure    = new MeasureTool(v.viewer);
 
 				v.collision  = new Collision(v.viewer);
 
@@ -300,7 +291,9 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							v.measure.measureMode(event.value);
+							v.loaded.promise.then(function() {
+								v.measure.measureMode(event.value);
+							});
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
 							$location.path("/" + v.account + '/' + v.project).search({

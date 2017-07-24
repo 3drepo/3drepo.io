@@ -43,6 +43,8 @@
 
 	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
 
+	var count = 0;
+
 	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
 		var vm = this,
 			coords = [null, null],
@@ -53,7 +55,6 @@
 		vm.totalDistance = 0.0;
 
 		vm.show = false;
-		vm.distance = false;
 		vm.allowMove = false;
 		vm.units = server_config.units;
 
@@ -63,10 +64,11 @@
 		//console.log('measure scope', $scope);
 		vm.unit = vm.settings.unit;
 
-
 		function mouseMoveCallback(event) {
 			var point = event.hitPnt;
 			vm.screenPos = [event.layerX, event.layerY];
+
+			console.log("MOVETO: ", vm.screenPos, count);
 
 			if (vm.allowMove) {
 				if (point)
@@ -83,12 +85,15 @@
 					angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
 
 					$scope.$apply();
-                    vm.show = true;
+
+					vm.show = true;
 				} else {
 					vm.show = false;
 				}
 			}
 		}
+
+		count += 1;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: mouseMoveCallback

@@ -21,8 +21,6 @@ var MeasureTool = {};
     "use strict";
 
     MeasureTool = function(viewer){
-        var self = this;
-
         this.viewer = viewer;
 
         this.lineStarted       = false;
@@ -31,72 +29,81 @@ var MeasureTool = {};
         this.measureLine       = null;
         this.measureLineCoords = null;
 
-        this.measureMouseMove = function(event)
+        this.mouseDownFunction = this.measureMouseDown.bind(this);
+        this.mouseMoveFunction = this.measureMouseMove.bind(this);
+
+        this.viewArea     = this.viewer.getViewArea();
+        this.doc          = this.viewArea._doc;
+        this._pickingInfo = this.viewArea._pickingInfo;
+
+        this.element = document.getElementById("x3dom-default-canvas");
+    };
+
+
+    MeasureTool.prototype.measureMouseMove = function(event)
+    {
+        this.measureCoords[1] = this._pickingInfo.pickPos;
+        this.updateMeasureLine();
+
+        console.log("MOVE", this._pickingInfo.pickPos);
+    };
+
+    MeasureTool.prototype.measureMouseDown = function(event)
+    {
+        console.log("MEASURE DOWN", this.lineStarted);
+        
+        var pos = this._pickingInfo.pickPos;
+
+        if (pos !== null)
         {
-            var viewArea = self.viewer.getViewArea();
-            var pickingInfo = viewArea._pickingInfo;
+            if (!this.lineStarted)
+            {
+                this.createMeasureLine();
+                this.measureCoords[0] = pos;
 
-            self.measureCoords[1] = pickingInfo.pickPos;
-            self.updateMeasureLine();
-        };
+                this.viewer.onMouseMove(this.mouseMoveFunction);
+            } else {
+                this.measureCoords[1] = pos;
+                this.viewer.offMouseMove(this.mouseMoveFunction);
+            }
 
-        this.measureMouseDown = function(event)
-        {
-            var viewArea = self.viewer.getViewArea();
-            var pickingInfo = viewArea._pickingInfo;
-            var doc = viewArea._doc;
+            this.lineStarted = !this.lineStarted;
 
-                if (!self.lineStarted)
-                {
-                    self.measureCoords[0] = pickingInfo.pickPos;
-                    self.lineStarted      = true;
+            console.log("MC: ", this.measureCoords);
+        }
 
-                    self.createMeasureLine();
-                    
-                    doc.inMeasureMode = true;
-                    self.viewer.onMouseMove(self.measureMouseMove);
-                } else {
-                    self.measureCoords[1] = pickingInfo.pickPos;
-                    self.lineStarted      = false;
-                    
-                    doc.inMeasureMode = false;
-                    self.viewer.offMouseMove(self.measureMouseMove);
-                }
-        };
     };
 
     MeasureTool.prototype.measureMode = function (on) {
-        var self = this;
+        console.log("MEASURE MODE", on); //this.lineStarted)
+        
+        this.doc.inMeasureMode = ! this.doc.inMeasureMode;
 
-        var element = document.getElementById("x3dom-default-canvas");
         if (on) {
-            self.inMeasureMode   = true;
-            element.style.cursor = "crosshair";
-            self.viewer.onMouseDown(self.measureMouseDown);
-            self.viewer.onMouseMove(self.measureMouseMove);
+            this.element.style.cursor = "crosshair";
 
-            self.viewer.highlightObjects();
+            this.viewer.onMouseDown(this.mouseDownFunction);
+  
+            this.viewer.highlightObjects();
 
             // Switch off the pick point functionality
-            self.viewer.disableClicking();
+            this.viewer.disableClicking();
         } else {
-            self.inMeasureMode   = false;
-            self.deleteMeasureLine();
-            element.style.cursor = "-webkit-grab";
-            self.viewer.offMouseDown(self.measureMouseDown);
-            self.viewer.offMouseMove(self.measureMouseMove);
+            this.deleteMeasureLine();
+            this.element.style.cursor = "-webkit-grab";
 
+            this.viewer.offMouseDown(this.mouseDownFunction);
+            this.viewer.offMouseMove(this.mouseMoveFunction);
+  
             // Restore the previous functionality
-            self.viewer.enableClicking();
+            this.viewer.enableClicking();
         }
     };
 
     MeasureTool.prototype.createMeasureLine = function() {
-        var self = this;
-
-        if (self.measureLine !== null)
+        if (this.measureLine !== null)
         {
-            self.deleteMeasureLine();
+            this.deleteMeasureLine();
         }
 
         var lineDepth,
@@ -107,9 +114,9 @@ var MeasureTool = {};
         var line = document.createElement("LineSet");
         line.setAttribute("vertexCount", 8);
 
-        self.measureLineCoords = document.createElement("Coordinate");
-        self.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
-        line.appendChild(self.measureLineCoords);
+        this.measureLineCoords = document.createElement("Coordinate");
+        this.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
+        line.appendChild(this.measureLineCoords);
 
         var colors = document.createElement("Color");
         colors.setAttribute("color", "0 1 0,0 1 0,1 0 0,1 0 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
@@ -125,25 +132,23 @@ var MeasureTool = {};
         lineProperties.setAttribute("linewidthScaleFactor", 3.0);
         lineApp.appendChild(lineProperties);
 
-        self.measureLine = document.createElement("Shape");
-        self.measureLine.appendChild(lineApp);
-        self.measureLine.appendChild(line);
+        this.measureLine = document.createElement("Shape");
+        this.measureLine.appendChild(lineApp);
+        this.measureLine.appendChild(line);
 
-        self.viewer.scene.appendChild(self.measureLine);
+        this.viewer.scene.appendChild(this.measureLine);
     };
 
     MeasureTool.prototype.updateMeasureLine = function()
     {
-        var self = this;
-
-        if (self.lineStarted)
+        if (this.lineStarted)
         {
-        var coordString = "";
+            var coordString = "";
 
-            if (self.measureCoords[0] !== null && self.measureCoords[1] !== null)
+            if (this.measureCoords[0] !== null && this.measureCoords[1] !== null)
             {
-                var startCoordArray = self.measureCoords[0].toGL();
-                var endCoordArray   = self.measureCoords[1].toGL();
+                var startCoordArray = this.measureCoords[0].toGL();
+                var endCoordArray   = this.measureCoords[1].toGL();
 
                 coordString += startCoordArray.join(" ") + ",";
                 coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
@@ -154,18 +159,20 @@ var MeasureTool = {};
                 coordString += endCoordArray.join(" ") + ",";
                 coordString += startCoordArray.join(" ");
 
-                self.measureLineCoords.setAttribute("point", coordString);
+                this.measureLineCoords.setAttribute("point", coordString);
+                //console.log("COORD: " + coordString);
             }
         }
     };
 
     MeasureTool.prototype.deleteMeasureLine = function () {
-        var self = this;
+        if (this.measureLine !== null) {
+            this.measureLine.parentElement.removeChild(this.measureLine);
+            this.measureLine = null;
+            this.measureLineCoords = null;
+            this.measureCoords = [null, null];
 
-        if (self.measureLine !== null) {
-            self.measureLine.parentElement.removeChild(self.measureLine);
-            self.measureLine = null;
-            self.measureLineCoords = null;
+            this.lineStarted = false;
         }
     };
 })();
