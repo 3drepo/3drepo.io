@@ -29,12 +29,10 @@
 			config = {},
 			i, j = 0,
 			numIssues = 0,
-			numComments = 0,
 			availableJobs = [],
 			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null,
-			issueDisplay = {};
+			updatedIssue = null;
 
 		obj.initPromise = $q.defer();
 
@@ -42,19 +40,13 @@
 			return obj.initPromise.promise;
 		};
 
-		obj.pinColours = {
-			blue : [0, 69/255, 148/255],
-			yellow : [255/255, 255/255, 54/255]
-		};
-
-
 		obj.deselectPin = function(issue) {
 			var data;
 			// Issue with position means pin
 			if (issue.position.length > 0) {
 				data = {
 					id: issue._id,
-					colours: [obj.pinColours.blue]
+					colours: [Pin.pinColours.blue]
 				};
 				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 			}
@@ -66,7 +58,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: [obj.pinColours.yellow]
+				colours: [Pin.pinColours.yellow]
 			};
 			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
@@ -292,7 +284,6 @@
 		 * @returns {*}
 		 */
 		obj.updateIssue = function (issue, data) {
-			console.log("UPDATE ISSUE")
 			return doPut(issue, data);
 		};
 
@@ -397,7 +388,6 @@
 
 		obj.fixPin = function (pin, colours) {
 			obj.removePin();
-
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
 				pickedPos: pin.position,

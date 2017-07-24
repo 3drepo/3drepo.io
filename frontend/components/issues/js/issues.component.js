@@ -167,7 +167,8 @@
 				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 	
 				issue.assignedRolesColors.push(roleColour);
-				pinColours.push(IssuesService.hexToRgb(roleColour));
+				pinColours = IssuesService.hexToRgb(roleColour);
+				pinColours.push(pinColours);
 			}
 		}
 

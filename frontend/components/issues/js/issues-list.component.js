@@ -346,6 +346,7 @@
 			vm.issuesToShow = [];
 			vm.issuesToShowWithPinsIDs = {};
 
+			// TODO: This needs tidying up
 			if (vm.allIssues.length > 0) {
 				// Sort
 				vm.issuesToShow = [vm.allIssues[0]];
@@ -452,7 +453,9 @@
 			var i, length,
 				pin,
 				pinData;
-
+			
+			// TODO: This needs tidying up
+			
 			// Go through all issues with pins
 			for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
 				if (vm.allIssues[i].position.length > 0) {
@@ -474,9 +477,9 @@
 								account: vm.allIssues[i].account,
 								model: vm.allIssues[i].model
 							};
-							var pinColor = IssuesService.pinColours.blue;
+							var pinColor = Pin.pinColours.blue;
 							if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
-								pinColor = IssuesService.pinColours.yellow;
+								pinColor = Pin.pinColours.yellow;
 							}
 							IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
 						}

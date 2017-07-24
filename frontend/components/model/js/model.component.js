@@ -69,39 +69,39 @@
 
 
 			// create a fake state to prevent the back button
-			history.pushState(null, null, document.URL);
+			//history.pushState(null, null, document.URL);
 
-			var message = "It will go back to model listing page, are you sure?";
+			//var message = "It will go back to model listing page, are you sure?";
 			// popup when user click back button
 			var popStateHandler = function (event) {
+				// // the fake state has already been popped by user at this moment
+				// var goingToModels = false;
+				// console.log("pop", event);
+				// //alert("location: " + document.location.href + ", state: " + JSON.stringify(event.state));
 
-				// the fake state has already been popped by user at this moment
-				var goingToModels = false;
-				console.log("pop", event);
-				//alert("location: " + document.location.href + ", state: " + JSON.stringify(event.state));
+				// if (event.currentTarget.location.pathname === "/" + vm.account) {
+				// 	goingToModels = true;
+				// }
 
-				if (event.currentTarget.location.pathname === "/" + vm.account) {
-					goingToModels = true;
-				}
+				// if (goingToModels) {
+				// 	if (!vm.shownBackNotice) {
+				// 		var response = confirm(message);
+				// 		vm.shownBackNotice = true;
+				// 		if (response) {
+				// 			history.back();
+				// 		}
+				// 	}
+				// } else {
+				// pop one more state if user actually wants to go back
+				// EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
+				console.log("popStateHandler");
+				$location.path(vm.account);
 
-				if (goingToModels) {
-					if (!vm.shownBackNotice) {
-						var response = confirm(message);
-						vm.shownBackNotice = true;
-						if (response) {
-							history.back();
-						}
-					}
-				} else {
-					// pop one more state if user actually wants to go back
-					history.back();
-				}
-				
-	
 			};
+				
 
 			//listen for user clicking the back button
-			//window.addEventListener("popstate", popStateHandler);
+			window.addEventListener("popstate", popStateHandler);
 
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);

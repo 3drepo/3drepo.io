@@ -715,7 +715,7 @@ var Viewer = {};
 				// Replace with
 				callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 					id: id,
-					colours: [[1.0, 0.7, 0.0]]
+					colours: [Pin.pinColours.yellow]
 				});
 
 				callback(Viewer.EVENT.SET_CAMERA, {

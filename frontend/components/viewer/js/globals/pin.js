@@ -44,24 +44,11 @@ var Pin = {};
 		self.account = account;
 		self.model = model;
 
-		// Initialize the colours and numColours that
-		// are passed in
-		self.numColours = 0;
-
-		if (typeof colours === "undefined") {
-			self.numColours = 1;
-			colours = [1.0, 0.0, 0.0];
-		} else if (typeof colours[0] === "number") {
-			self.numColours = 1;
-		} else {
-			self.numColours = colours.length;
-		}
-
-		self.colours = colours;
-
-		UnityUtil.dropPin(id, position, norm, colours[0]);
-		colours = colours.join(" ");
+		UnityUtil.dropPin(id, position, norm, Pin.pinColours.blue);
+		
 	};
+
+
 
 	Pin.prototype.remove = function(id) {
 		UnityUtil.removePin(id);
@@ -88,5 +75,11 @@ var Pin = {};
 		self.pinHeadDepth.setAttribute("depthFunc", depthMode);
 		self.coneDepth.setAttribute("depthFunc", depthMode);
 	};
+
+	Pin.pinColours = {
+		blue : [0, 69/255, 148/255],
+		yellow : [255/255, 255/255, 54/255]
+	};
+
 
 }());
