@@ -58,7 +58,7 @@
 		app.set("view_engine", "pug");
 		app.locals.pretty = true;
 
-		app.use(favicon("public/images/favicon.ico"));
+		app.use(favicon("./public/images/favicon.ico"));
 
 		let objectToString = function(obj) {
 			let objString = "{";

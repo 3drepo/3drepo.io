@@ -93,8 +93,8 @@ module.exports = {
 		host: 'amqp://localhost:5672',
 		worker_queue: 'jobq',
 		callback_queue: 'callbackq',
-		upload_dir: 'uploads',
-		shared_storage: 'uploads',
+		upload_dir: '/tmp',
+		shared_storage: '/tmp',
 		event_exchange: 'eventExchange'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment

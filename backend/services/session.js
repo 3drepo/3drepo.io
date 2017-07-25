@@ -27,7 +27,7 @@
 	module.exports.session = function(config) {
 		var sessionConfig = expressSession({
 			secret: config.cookie.secret,
-			resave: true,
+			resave: false,
 			saveUninitialized: false,
 			cookie: {
 				domain: config.cookie.domain,

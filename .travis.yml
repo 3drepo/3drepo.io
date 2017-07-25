@@ -40,7 +40,6 @@ services:
   - rabbitmq
 script:
     - npm run test
-    - npm run test-int
 notifications:
     email: 
         recipients:

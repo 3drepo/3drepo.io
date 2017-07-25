@@ -13,7 +13,7 @@
     "test-int": "npm run create-ghost && gulp test:integrated",
     "test-clean-and-int": "npm run test-int-clean && npm run test-int",
     "create-ghost": "NODE_ENV=test NODE_CONFIG_DIR=../config node ../scripts/createGhost",
-    "dev": "nodemon 3drepo.js"
+    "test-all": "npm run test-int-clean && npm run test"
   },
   "dependencies": {
     "amqplib": "0.4.1",

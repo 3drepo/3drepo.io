@@ -365,10 +365,7 @@ function createFederatedModel(account, model, subModels){
 	//console.log(federatedJSON);
 	return Promise.all(addSubModels).then(() => {
 
-		return importQueue.createFederatedModel(account, federatedJSON).catch(err => {
-			_deleteFiles(files(err));
-			return;
-		});
+		return importQueue.createFederatedModel(account, federatedJSON);
 
 	}).then(data => {
 
@@ -1126,6 +1123,7 @@ function uploadFile(req){
 function _deleteFiles(files){
 	'use strict';
 
+	console.log('files', files)
 	files.forEach(file => {
 
 		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
