@@ -35,74 +35,36 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService"];
+	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
 
-	function ModelCtrl($timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService) {
-		var vm = this,
-		// TODO: these should probably be in $onInit
-		panelCard = {
-			left: [],
-			right: []
-		},
-		modelUI,
-		issueArea,
-		issuesCardIndex = 0;
+	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
+		var vm = this;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
-			
-			vm.shownBackNotice = false;
+			vm.modelUI;
+			vm.issueArea;
+			vm.issuesCardIndex = 0;
+			vm.panelCard = {
+				left: [],
+				right: []
+			};
 
 			vm.pointerEvents = "inherit";
 			
-			// Warn when user click refresh
+			history.pushState(null, null, document.URL);
+			var popStateHandler = function(event) {
+				StateManager.popStateHandler(event, vm.account, vm.model);
+			};
+
 			var refreshHandler = function (event){
-				var confirmationMessage = "This will reload the whole model, are you sure?";
-
-				event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
-				return confirmationMessage;              // Gecko, WebKit, Chrome <34
+				StateManager.refreshHandler(event); 
 			};
-
-			window.addEventListener("beforeunload", refreshHandler);
-
-
-			// create a fake state to prevent the back button
-			//history.pushState(null, null, document.URL);
-
-			//var message = "It will go back to model listing page, are you sure?";
-			// popup when user click back button
-			var popStateHandler = function (event) {
-				// // the fake state has already been popped by user at this moment
-				// var goingToModels = false;
-				// console.log("pop", event);
-				// //alert("location: " + document.location.href + ", state: " + JSON.stringify(event.state));
-
-				// if (event.currentTarget.location.pathname === "/" + vm.account) {
-				// 	goingToModels = true;
-				// }
-
-				// if (goingToModels) {
-				// 	if (!vm.shownBackNotice) {
-				// 		var response = confirm(message);
-				// 		vm.shownBackNotice = true;
-				// 		if (response) {
-				// 			history.back();
-				// 		}
-				// 	}
-				// } else {
-				// pop one more state if user actually wants to go back
-				// EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
-				console.log("popStateHandler");
-				$location.path(vm.account);
-
-			};
-				
 
 			//listen for user clicking the back button
 			window.addEventListener("popstate", popStateHandler);
-
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);
@@ -112,10 +74,10 @@
 			* Get the model element
 			*/
 			$timeout(function () {
-				modelUI = angular.element($element[0].querySelector("#modelUI"));
+				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
 			});
 
-			panelCard.left.push({
+			vm.panelCard.left.push({
 				type: "issues",
 				title: "Issues",
 				show: true,
@@ -186,7 +148,7 @@
 				add: true
 			});
 
-			panelCard.left.push({
+			vm.panelCard.left.push({
 				type: "tree",
 				title: "Tree",
 				show: false,
@@ -200,7 +162,7 @@
 			});
 
 			/*
-			panelCard.left.push({
+			vm.panelCard.left.push({
 				type: "groups",
 				title: "Groups",
 				show: true,
@@ -223,7 +185,7 @@
 			});
 			*/
 
-			panelCard.left.push({
+			vm.panelCard.left.push({
 				type: "clip",
 				title: "Clip",
 				show: false,
@@ -235,7 +197,7 @@
 				]
 			});
 
-			panelCard.right.push({
+			vm.panelCard.right.push({
 				type: "docs",
 				title: "Data",
 				show: false,
@@ -248,7 +210,7 @@
 				]
 			});
 
-			panelCard.right.push({
+			vm.panelCard.right.push({
 				type: "building",
 				title: "Building",
 				show: false,
@@ -260,10 +222,8 @@
 			});
 
 			$timeout(function () {
-				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
+				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
 			});
-
-			
 
 		};
 
@@ -294,7 +254,7 @@
 					var index = -1;
 
 					if(!data.federate){
-						panelCard.left[issuesCardIndex].menu.find(function(item, i){
+						vm.panelCard.left[vm.issuesCardIndex].menu.find(function(item, i){
 							if(item.value === "showSubModels"){
 								index = i;
 							}
@@ -302,7 +262,7 @@
 						});
 
 						if(index !== -1){
-							panelCard.left[issuesCardIndex].menu.splice(index, 1);
+							vm.panelCard.left[vm.issuesCardIndex].menu.splice(index, 1);
 						}
 					}
 					
@@ -356,19 +316,19 @@
 			
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
-					issueArea = angular.element("<issue-area></issue-area>");
+					vm.issueArea = angular.element("<issue-area></issue-area>");
 					if (event.value.hasOwnProperty("issue")) {
 						vm.issueAreaIssue = event.value.issue;
-						issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
+						vm.issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
 					} else if (event.value.hasOwnProperty("type")) {
 						vm.issueAreaType = event.value.type;
-						issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
+						vm.issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 					}
-					modelUI.prepend(issueArea);
-					$compile(issueArea)($scope);
+					vm.modelUI.prepend(vm.issueArea);
+					$compile(vm.issueArea)($scope);
 				} else {
-					if (angular.isDefined(issueArea)) {
-						issueArea.remove();
+					if (angular.isDefined(vm.issueArea)) {
+						vm.issueArea.remove();
 					}
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {

@@ -171,311 +171,344 @@
 					}
 				});
 			}])
-		.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", function($q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
-			var self = this;
+		.service("StateManager", 
+			["$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
+				function($location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
+							
+					var self = this;
 
-			$window.StateManager = this;
+					$window.StateManager = this;
 
-			// Stores the state, required as ui-router does not allow inherited
-			// stateParams, and we need to dynamically generate state diagram.
-			// One day this might change.
-			// https://github.com/angular-ui/ui-router/wiki/URL-Routing
-			this.state = {
-				changing: true
-			};
+					// Stores the state, required as ui-router does not allow inherited
+					// stateParams, and we need to dynamically generate state diagram.
+					// One day this might change.
+					// https://github.com/angular-ui/ui-router/wiki/URL-Routing
+					this.state = {
+						changing: true
+					};
 
-			this.changedState = {};
-			this.structure  = structure;
-			this.destroy = function()  {
-				delete this.state;
-				this.state = {};
+					this.changedState = {};
+					this.structure  = structure;
+					this.destroy = function()  {
+						delete this.state;
+						this.state = {};
 
-				delete this.ui;
-				this.ui = {};
+						delete this.ui;
+						this.ui = {};
 
-				delete this.Data;
-				this.Data = {};
-			};
+						delete this.Data;
+						this.Data = {};
+					};
 
-			// Has a state variable changed. Is this necessary ?
-			this.changed     = {};
+					// Has a state variable changed. Is this necessary ?
+					this.changed     = {};
 
-			this.state       = { loggedIn : false };
-			this.query       = {};
-			this.functions   = [];
+					this.state       = { loggedIn : false };
+					this.query       = {};
+					this.functions   = [];
 
-			var stateStack       = [structure];
+					var stateStack       = [structure];
 
-			// Populate list of functions
-			while (stateStack.length > 0) {
-				var stackLength      = stateStack.length;
-				var parentState      = stateStack[stackLength - 1];
+					// Populate list of functions
+					while (stateStack.length > 0) {
+						var stackLength      = stateStack.length;
+						var parentState      = stateStack[stackLength - 1];
 
-				var i = 0;
-				var functionName;
+						var i = 0;
+						var functionName;
 
-				if (parentState.functions) {
-					for(var i=0; i<parentState.functions.length; i++) {
-						functionName = parentState.functions[i];
+						if (parentState.functions) {
+							for(var i=0; i<parentState.functions.length; i++) {
+								functionName = parentState.functions[i];
 
-						if (this.functions.indexOf(functionName) > -1) {
-							console.error("Duplicate function name when loading in StateManager : " + functionName);
-						} else {
-							this.functions.push(functionName);
-						}
-					}
-				}
-
-				if (parentState.children) {
-					for (var i = 0; i < parentState.children.length; i++) {
-						stateStack.push(parentState.children[i]);
-					}
-				}
-
-				stateStack.splice(0,1);
-			}
-
-			this.clearChanged = function() {
-				for(var i in self.changed) {
-					if (self.changed.hasOwnProperty(i)) {
-						self.changed[i] = false;
-					}
-				}
-			};
-
-			self.clearChanged();
-
-			this.stateChangeQueue = [];
-
-			var compareStateChangeObjects = function(stateChangeA, stateChangeB) {
-				return	(stateChangeA.toState	 === stateChangeB.toState) &&
-					(stateChangeA.toParams	 === stateChangeB.toParams) &&
-					(stateChangeA.fromState  === stateChangeB.fromState) &&
-					(stateChangeA.fromParams === stateChangeB.fromParams);
-			};
-
-			this.startStateChange = function(stateChangeObject) {
-				self.stateChangeQueue.push(stateChangeObject);
-			};
-
-			this.handleStateChange = function(stateChangeObject) {
-				var param;
-				var fromParams = stateChangeObject.fromParams;
-				var toParams   = stateChangeObject.toParams;
-
-				// Switch off all parameters that we came from
-				// but are not the same as where we are going to
-				for (param in fromParams) {
-					if (fromParams.hasOwnProperty(param)) {
-						if (!toParams.hasOwnProperty(param)) {
-							self.setStateVar(param, null);
-						}
-					}
-				}
-
-				for (param in toParams) {
-					if (toParams.hasOwnProperty(param)) {
-						if (fromParams.hasOwnProperty(param)) {
-							if (fromParams[param] !== toParams[param]) {
-								self.setStateVar(param, toParams[param]);
-							}
-						} else {
-							self.setStateVar(param, toParams[param]);
-						}
-					}
-				}
-
-				// Loop through structure. If a parent is null, then we must clear
-				// it's children
-				var stateStack       = [structure];
-				var stateNameStack   = ["home"];
-				var clearBelow       = false;
-
-				while (stateStack.length > 0) {
-					var stackLength      = stateStack.length;
-					var parentState      = stateStack[stackLength - 1];
-					var parentStateName  = stateNameStack[stackLength - 1];
-
-					if (parentStateName !== "home" && !self.state[parentStateName]) {
-						clearBelow = true;
-					}
-
-					if (parentState.children) {
-						for (var i = 0; i < parentState.children.length; i++) {
-							var childStateName = parentState.children[i].plugin;
-
-							stateNameStack.push(childStateName);
-							stateStack.push(parentState.children[i]);
-
-							if (clearBelow) {
-								self.setStateVar(childStateName, null);
+								if (this.functions.indexOf(functionName) > -1) {
+									console.error("Duplicate function name when loading in StateManager : " + functionName);
+								} else {
+									this.functions.push(functionName);
+								}
 							}
 						}
-					}
 
-					stateStack.splice(0,1);
-					stateNameStack.splice(0,1);
-				}
-
-				if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0])) {
-					self.stateChangeQueue.pop();
-
-					var functionList = self.functionsUsed();
-
-					// If we are not trying to access a function
-					// and yet there is no account set. Then
-					// we need to go back to the account page if possible.
-					if ((functionList.length === 0) && AuthService.loggedIn && !self.state.account) {
-						self.setStateVar("account", AuthService.username);
-						self.updateState();
-					} else {
-						self.updateState(true);
-					}
-				} else {
-					self.stateChangeQueue.pop();
-					self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
-				}
-			};
-
-			this.stateVars   = {};
-
-			this.clearState = function(state) {
-				for (var state in self.state) {
-					if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state)) {
-						self.setStateVar(state, null);
-					}
-				}
-			};
-
-			this.clearQuery = function(state) {
-				for(var param in self.query) {
-					delete self.query[param];
-				}
-			};
-
-			this.functionsUsed = function () {
-				var functionList = [];
-
-				// First loop through the list of functions
-				// belonging to parent structure.
-				// Only deals with functions on home directory
-				if (self.structure.functions) {
-					for(i = 0; i < self.structure.functions.length; i++) {
-						functionName = self.structure.functions[i];
-
-						if (self.state[functionName]) {
-							functionList.push(functionName);
-							break;
+						if (parentState.children) {
+							for (var i = 0; i < parentState.children.length; i++) {
+								stateStack.push(parentState.children[i]);
+							}
 						}
+
+						stateStack.splice(0,1);
 					}
-				}
 
-				return functionList;
-			};
+					this.clearChanged = function() {
+						for(var i in self.changed) {
+							if (self.changed.hasOwnProperty(i)) {
+								self.changed[i] = false;
+							}
+						}
+					};
 
-			this.genStateName = function () {
-				var currentChildren = self.structure.children;
-				var childidx        = 0;
-				var stateName       = "home."; // Assume that the base state is there.
-				var i               = 0;
-				var functionList    = self.functionsUsed();
-				var usesFunction    = (functionList.length > 0);
+					self.clearChanged();
 
-				if (usesFunction) {
-					stateName += functionList.join(".") + ".";
-				} else {
-					while(childidx < currentChildren.length) {
-						var child  = currentChildren[childidx];
-						var plugin = child.plugin;
+					this.stateChangeQueue = [];
 
-						if (self.state.hasOwnProperty(plugin) && self.state[plugin]) {
-							stateName += plugin + ".";
+					var compareStateChangeObjects = function(stateChangeA, stateChangeB) {
+						return	(stateChangeA.toState	 === stateChangeB.toState) &&
+							(stateChangeA.toParams	 === stateChangeB.toParams) &&
+							(stateChangeA.fromState  === stateChangeB.fromState) &&
+							(stateChangeA.fromParams === stateChangeB.fromParams);
+					};
 
-							if (child.children) {
-								currentChildren = child.children;
+					this.startStateChange = function(stateChangeObject) {
+						self.stateChangeQueue.push(stateChangeObject);
+					};
+
+					this.handleStateChange = function(stateChangeObject) {
+						var param;
+						var fromParams = stateChangeObject.fromParams;
+						var toParams   = stateChangeObject.toParams;
+
+						// Switch off all parameters that we came from
+						// but are not the same as where we are going to
+						for (param in fromParams) {
+							if (fromParams.hasOwnProperty(param)) {
+								if (!toParams.hasOwnProperty(param)) {
+									self.setStateVar(param, null);
+								}
+							}
+						}
+
+						for (param in toParams) {
+							if (toParams.hasOwnProperty(param)) {
+								if (fromParams.hasOwnProperty(param)) {
+									if (fromParams[param] !== toParams[param]) {
+										self.setStateVar(param, toParams[param]);
+									}
+								} else {
+									self.setStateVar(param, toParams[param]);
+								}
+							}
+						}
+
+						// Loop through structure. If a parent is null, then we must clear
+						// it's children
+						var stateStack       = [structure];
+						var stateNameStack   = ["home"];
+						var clearBelow       = false;
+
+						while (stateStack.length > 0) {
+							var stackLength      = stateStack.length;
+							var parentState      = stateStack[stackLength - 1];
+							var parentStateName  = stateNameStack[stackLength - 1];
+
+							if (parentStateName !== "home" && !self.state[parentStateName]) {
+								clearBelow = true;
+							}
+
+							if (parentState.children) {
+								for (var i = 0; i < parentState.children.length; i++) {
+									var childStateName = parentState.children[i].plugin;
+
+									stateNameStack.push(childStateName);
+									stateStack.push(parentState.children[i]);
+
+									if (clearBelow) {
+										self.setStateVar(childStateName, null);
+									}
+								}
+							}
+
+							stateStack.splice(0,1);
+							stateNameStack.splice(0,1);
+						}
+
+						if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0])) {
+							self.stateChangeQueue.pop();
+
+							var functionList = self.functionsUsed();
+
+							// If we are not trying to access a function
+							// and yet there is no account set. Then
+							// we need to go back to the account page if possible.
+							if ((functionList.length === 0) && AuthService.loggedIn && !self.state.account) {
+								self.setStateVar("account", AuthService.username);
+								self.updateState();
 							} else {
-								currentChildren = [];
+								self.updateState(true);
 							}
-
-							childidx = -1;
+						} else {
+							self.stateChangeQueue.pop();
+							self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
 						}
+					};
 
-						childidx += 1;
-					}
-				}
+					this.stateVars   = {};
 
-				return stateName.substring(0, stateName.length - 1);
-			};
+					this.clearState = function(state) {
+						for (var state in self.state) {
+							if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state)) {
+								self.setStateVar(state, null);
+							}
+						}
+					};
 
-			this.setStateVar = function(varName, value) {
-				if (value === null) {
-					delete self.state[varName];
-				} else {
-					if (self.state[varName] !== value) {
-						self.state.changing = true;
-						self.changedState[varName] = value;
-					}
-				}
-				//console.log(varName, value);
-				self.state[varName] = value;
-			};
+					this.clearQuery = function(state) {
+						for(var param in self.query) {
+							delete self.query[param];
+						}
+					};
 
-			this.setState = function(stateParams) {
-			// Copy all state parameters and extra parameters
-			// to the state#
-			//console.log('stateParams', stateParams);
-				if(stateParams.noSet){
-					return;
-				}
+					this.functionsUsed = function () {
+						var functionList = [];
 
-				for (var state in stateParams) {
-					if (stateParams.hasOwnProperty(state)) {
-						self.setStateVar(state, stateParams[state]);
-					}
-				}
-			};
+						// First loop through the list of functions
+						// belonging to parent structure.
+						// Only deals with functions on home directory
+						if (self.structure.functions) {
+							for(i = 0; i < self.structure.functions.length; i++) {
+								functionName = self.structure.functions[i];
 
-			this.setQuery = function(queryParams) {
-				for(var param in queryParams) {
-					if (queryParams.hasOwnProperty(param)) {
-						self.query[param] = queryParams[param];
-					}
-				}
-			};
-
-			this.updateState = function(dontUpdateLocation) {
-				var newStateName = self.genStateName();
-
-				if (Object.keys(self.changedState).length) {
-					EventService.send(EventService.EVENT.STATE_CHANGED, self.changedState);
-					self.changedState = {};
-				}
-
-				var updateLocation = !dontUpdateLocation ? true: false; // In case of null
-				$state.transitionTo(newStateName, self.state, { location: updateLocation });
-
-				$timeout(function () {
-					self.state.changing = false;
-				});
-			};
-
-			$rootScope.$watch(EventService.currentEvent, function(event) {
-				if (angular.isDefined(event) && angular.isDefined(event.type)) {
-					if (event.type === EventService.EVENT.SET_STATE) {
-						for (var key in event.value) {
-							if (key !== "updateLocation" && event.value.hasOwnProperty(key)) {
-								self.setStateVar(key, event.value[key]);
+								if (self.state[functionName]) {
+									functionList.push(functionName);
+									break;
+								}
 							}
 						}
 
-						self.updateState();
-					} else if (event.type === EventService.EVENT.CLEAR_STATE) {
-						self.clearState();
-					} else if (event.type === EventService.EVENT.UPDATE_STATE){
-						self.updateState(true);
-					}
-				}
-			});
-		}]);
+						return functionList;
+					};
+
+					this.genStateName = function () {
+						var currentChildren = self.structure.children;
+						var childidx        = 0;
+						var stateName       = "home."; // Assume that the base state is there.
+						var i               = 0;
+						var functionList    = self.functionsUsed();
+						var usesFunction    = (functionList.length > 0);
+
+						if (usesFunction) {
+							stateName += functionList.join(".") + ".";
+						} else {
+							while(childidx < currentChildren.length) {
+								var child  = currentChildren[childidx];
+								var plugin = child.plugin;
+
+								if (self.state.hasOwnProperty(plugin) && self.state[plugin]) {
+									stateName += plugin + ".";
+
+									if (child.children) {
+										currentChildren = child.children;
+									} else {
+										currentChildren = [];
+									}
+
+									childidx = -1;
+								}
+
+								childidx += 1;
+							}
+						}
+
+						return stateName.substring(0, stateName.length - 1);
+					};
+
+					this.setStateVar = function(varName, value) {
+						if (value === null) {
+							delete self.state[varName];
+						} else {
+							if (self.state[varName] !== value) {
+								self.state.changing = true;
+								self.changedState[varName] = value;
+							}
+						}
+						//console.log(varName, value);
+						self.state[varName] = value;
+					};
+
+					this.setState = function(stateParams) {
+					// Copy all state parameters and extra parameters
+					// to the state#
+					//console.log('stateParams', stateParams);
+						if(stateParams.noSet){
+							return;
+						}
+
+						for (var state in stateParams) {
+							if (stateParams.hasOwnProperty(state)) {
+								self.setStateVar(state, stateParams[state]);
+							}
+						}
+					};
+
+					this.setQuery = function(queryParams) {
+						for(var param in queryParams) {
+							if (queryParams.hasOwnProperty(param)) {
+								self.query[param] = queryParams[param];
+							}
+						}
+					};
+
+					this.updateState = function(dontUpdateLocation) {
+						var newStateName = self.genStateName();
+
+						if (Object.keys(self.changedState).length) {
+							EventService.send(EventService.EVENT.STATE_CHANGED, self.changedState);
+							self.changedState = {};
+						}
+
+						var updateLocation = !dontUpdateLocation ? true: false; // In case of null
+						$state.transitionTo(newStateName, self.state, { location: updateLocation });
+
+						$timeout(function () {
+							self.state.changing = false;
+						});
+					};
+
+					this.refreshHandler = function (event){
+
+						console.log("refreshHandler", event);
+						var confirmationMessage = "This will reload the whole model, are you sure?";
+
+						event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+						return confirmationMessage;              // Gecko, WebKit, Chrome <34
+
+					};
+
+					this.popStateHandler = function (event, account, model) {
+
+						// the fake state has already been popped by user at this moment
+						var message = "This will go back to teamspaces page are you sure you want to continue?";
+						var path = $location.path();
+
+						console.log("popStateHandler", "/" + account + "/" + model);
+						console.log("popStateHandler", path);
+
+						if (path === "/" + account + "/" + model) {
+							var response = confirm(message);
+							console.log("popStateHandler response", response);
+							if (response) {
+								$location.path(account);
+								UnityUtil.reset();
+							}
+						}
+
+					};
+
+					$rootScope.$watch(EventService.currentEvent, function(event) {
+						if (angular.isDefined(event) && angular.isDefined(event.type)) {
+							if (event.type === EventService.EVENT.SET_STATE) {
+								for (var key in event.value) {
+									if (key !== "updateLocation" && event.value.hasOwnProperty(key)) {
+										self.setStateVar(key, event.value[key]);
+									}
+								}
+
+								self.updateState();
+							} else if (event.type === EventService.EVENT.CLEAR_STATE) {
+								self.clearState();
+							} else if (event.type === EventService.EVENT.UPDATE_STATE){
+								self.updateState(true);
+							}
+						}
+					});
+				}]);
 
 })();

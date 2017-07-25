@@ -75,7 +75,7 @@
 						selectedObjectId: event.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
-						colours: [Pin.pinColours.yellow]
+						colours: Pin.pinColours.yellow
 
 					};
 					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);

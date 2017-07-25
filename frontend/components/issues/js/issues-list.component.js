@@ -61,10 +61,11 @@
 			vm.showClosed = false;
 			vm.sortOldestFirst = false;
 			vm.issuesToShowWithPinsIDs = undefined;
-			vm.infoHeight = 81;
+			vm.infoHeight = 135;
 			vm.issuesListItemHeight = 141;
 			vm.selectedIssueIndex = null;
 			vm.internalSelectedIssue = null;
+			vm.modelLoaded = false;
 		};
 
 
@@ -96,6 +97,7 @@
 						vm.showSubModelIssues = vm.issueDisplay.showSubModelIssues;
 					}
 					setupIssuesToShow();
+
 					showPins();
 				} else {
 					vm.toShow = "info";
@@ -104,6 +106,15 @@
 				}
 			}
 
+		});
+
+		$scope.$watch(EventService.currentEvent, function(event) {
+			
+			if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
+				//console.log("Disabled - Heard event VIEWER.MODEL_LOADED in issues.component.js - model is:", event.value);
+				vm.modelLoaded = true;
+			} 
+			
 		});
 
 		$scope.$watch("vm.filterText", function() {
@@ -171,7 +182,7 @@
 
 		});
 
-		$scope.$watch(function(){
+		$scope.$watch("vm.updatedIssue", function(){
 
 			// Updated issue
 			if (vm.updatedIssue) {
@@ -185,7 +196,7 @@
 
 		});
 
-		$scope.$watch(function(){
+		$scope.$watch("vm.selectedIssue", function(){
 
 			// Selected issue
 			if (vm.selectedIssue && vm.issuesToShow) {
@@ -208,7 +219,7 @@
 
 		});
 
-		$scope.$watch(function(){
+		$scope.$watch("vm.displayIssue", function(){
 
 			// Selected issue
 			if(vm.displayIssue){
@@ -441,7 +452,7 @@
 				vm.contentHeight({height: issuesHeight });
 			} else {
 				vm.toShow = "info";
-				vm.info = "No issues to show";
+				vm.info = "There are currently no open issues";
 				vm.contentHeight({height: vm.infoHeight});
 			}
 		}
@@ -455,7 +466,7 @@
 				pinData;
 			
 			// TODO: This needs tidying up
-			
+
 			// Go through all issues with pins
 			for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
 				if (vm.allIssues[i].position.length > 0) {
@@ -478,10 +489,13 @@
 								model: vm.allIssues[i].model
 							};
 							var pinColor = Pin.pinColours.blue;
-							if (vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id) {
+							var isSelectedPin = vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id;
+
+							if (isSelectedPin) {
 								pinColor = Pin.pinColours.yellow;
 							}
-							IssuesService.addPin(pinData, [pinColor], vm.allIssues[i].viewpoint);
+
+							IssuesService.addPin(pinData, pinColor, vm.allIssues[i].viewpoint);
 						}
 					}
 				}

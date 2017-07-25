@@ -277,7 +277,7 @@
 				if(event.value.isMainModel) {
 					vm.offsetTrans = event.value.modelTrans;
 				}
-			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
+			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
 				
 				vm.bbox = event.value.bbox;
 				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);

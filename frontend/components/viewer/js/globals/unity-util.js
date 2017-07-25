@@ -339,12 +339,15 @@ var UnityUtil;
 
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision) {
 		
-		UnityUtil.reset();	
+		//console.log("pin - loadModel");
+
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject();
 			loadingResolve.reject();
 		}
+
+		UnityUtil.reset();	
 		
 		loadedPromise = null;
 		loadedResolve = null;

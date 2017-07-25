@@ -46,7 +46,7 @@
 			if (issue.position.length > 0) {
 				data = {
 					id: issue._id,
-					colours: [Pin.pinColours.blue]
+					colours: Pin.pinColours.blue
 				};
 				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 			}
@@ -58,7 +58,7 @@
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: [Pin.pinColours.yellow]
+				colours: Pin.pinColours.yellow
 			};
 			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);

@@ -44,7 +44,7 @@ var Pin = {};
 		self.account = account;
 		self.model = model;
 
-		UnityUtil.dropPin(id, position, norm, Pin.pinColours.blue);
+		UnityUtil.dropPin(id, position, norm, colours);
 		
 	};
 
@@ -56,7 +56,7 @@ var Pin = {};
 
 	Pin.prototype.changeColour = function(colours) {
 		var self = this;
-		UnityUtil.changePinColour(self.id, colours[0]);
+		UnityUtil.changePinColour(self.id, colours);
 	};
 
 	Pin.prototype.highlight = function() {

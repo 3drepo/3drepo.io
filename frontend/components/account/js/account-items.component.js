@@ -34,9 +34,9 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
+	AccountItemsCtrl.$inject = ["StateManager", "$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
 
-	function AccountItemsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
+	function AccountItemsCtrl(StateManager, $scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
 		var vm = this;
 
 		/*
@@ -49,7 +49,9 @@
 			vm.units = serverConfig.units;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
 			vm.defaults = {}; 
-			
+
+			//
+			StateManager.hasBeenBackToTeamspace = true;
 
 			// SETUP FILE UPLOADERS
 			
