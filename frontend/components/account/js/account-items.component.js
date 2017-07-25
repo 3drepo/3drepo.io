@@ -78,6 +78,14 @@
 					event.preventDefault();
 				}
 			});
+
+			vm.federationsSaving = {};
+
+			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
+			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
+
+			vm.addButtons = false;
+			vm.addButtonType = "add";
 		
 		};
 		
@@ -221,17 +229,12 @@
 
 		// ADD PROJECTS/FEDERATIONS/MODELS
 
-		vm.addButtons = false;
-		vm.addButtonType = "add";
-
 		vm.addButtonsToggle = function() {
 			vm.addButtons = !vm.addButtons;
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
 		};
 
 		// FEDERATIONS
-
-		vm.isSaving = false;
 
 		/**
 		 * Save a federationt to a project
@@ -242,8 +245,11 @@
 			var promise;
 			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
 			var isEdit = vm.federationData._isEdit;
-			vm.isSaving = true;
 
+			var currentFederation = vm.federationData.name;
+
+			vm.federationsSaving[currentFederation] = true;
+			
 			if (isEdit) {
 				delete vm.federationData._isEdit;
 				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
@@ -251,47 +257,50 @@
 				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.name);
 			}
 			
-			promise.then(function (response) {
-				
-				if(response.status !== 200 && response.status !== 201){
-					vm.errorMessage = response.data.message;
-					vm.isSaving = false;
-				} else {
-
-					vm.errorMessage = "";
-					vm.showInfo = false;
-					vm.federationData.teamspace = teamspaceName;
-					vm.federationData.project = projectName;
-					vm.federationData.federate = true;
-					vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
-					vm.federationData.model = response.data.model;
-					if (response.data.timestamp) {
-						vm.federationData.timestamp = response.data.timestamp;
-					}
-
-				
-					// TODO: This should exist - backend problem : ISSUE_371
-					if (!isEdit) {
-						project.models.push(vm.federationData);
-					}
-
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					vm.isSaving = false;
-					vm.closeDialog();
+			promise
+				.then(function (response) {
 					
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: (vm.federationData._isEdit) ? "edit" : "create",
-						eventLabel: "federation"
-					});
-				}
+					if(response.status !== 200 && response.status !== 201){
+						vm.errorMessage = response.data.message;
+					} else {
 
-			})
+						vm.errorMessage = "";
+						vm.showInfo = false;
+						vm.federationData.teamspace = teamspaceName;
+						vm.federationData.project = projectName;
+						vm.federationData.federate = true;
+						vm.federationData.permissions = response.data.permissions || vm.federationData.permissions;
+						vm.federationData.model = response.data.model;
+						if (response.data.timestamp) {
+							vm.federationData.timestamp = response.data.timestamp;
+						}
+
+					
+						// TODO: This should exist - backend problem : ISSUE_371
+						if (!isEdit) {
+							project.models.push(vm.federationData);
+						}
+
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: (vm.federationData._isEdit) ? "edit" : "create",
+							eventLabel: "federation"
+						});
+					}
+
+					vm.federationsSaving[currentFederation] = false;
+
+				})
 				.catch(function(){
 					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
-					vm.isSaving = false;
+					vm.federationsSaving[currentFederation] = false;
 				});
+
+			// Close the dialog
+			vm.closeDialog();
 
 			$timeout(function () {
 				$scope.$apply();
@@ -366,8 +375,6 @@
 
 		// FEDERATIONS
 
-		vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account;
-		var dialogCloseToId = "#" + vm.dialogCloseTo;
 
 		/*
 		 * Watch for change in edited federation
@@ -391,7 +398,7 @@
 				subModels: []
 			};
 			vm.errorMessage = "";
-			UtilsService.showDialog("federation-dialog.html", $scope, event, true, null, false, dialogCloseToId);
+			UtilsService.showDialog("federation-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 		};
 
 
