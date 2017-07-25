@@ -161,13 +161,27 @@ describe('Account permission::', function () {
 		});
 	});
 
-	it('should fail to assign permissions to a user twice', function(done){
-		agent.post(`/${username}/permissions`)
-		.send({ user: 'user3', permissions: ['create_project']})
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.DUP_ACCOUNT_PERM.value);
-			done(err);
-		});
+	it('should able to assign permissions to a user twice and the second time will just update the permissions', function(done){
+
+		async.series([
+			function(done){
+				agent.post(`/${username}/permissions`)
+				.send({ user: 'user3', permissions: ['teamspace_admin', 'create_project']})
+				.expect(200, function(err, res){
+					done(err);
+				});
+			},
+			function(done){
+				agent.get(`/${username}/permissions`)
+				.expect(200, function(err, res){
+					const permissions = res.body.filter(p => p.user === 'user3');
+					expect(permissions.length).to.equal(1);
+					expect(permissions[0].permissions).to.deep.equal(['teamspace_admin', 'create_project']);
+					done(err);
+				});
+			}
+		], done);
+
 	});
 
 	it('should fail to update permission for an non existing record', function(done){
