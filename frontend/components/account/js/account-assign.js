@@ -147,19 +147,7 @@
 				});
 		};
 
-		// GET PROJECTS
-
-		vm.setProjects = function() {
-
-			vm.projects = {};
-			vm.selectedTeamspace.projects.forEach(function(project){
-				vm.projects[project.name] = project;
-			});
-
-		};
-	
-
-		vm.postPermissionChange = function(user, permission, addOrRemove) {
+		vm.postTeamspacePermissionChange = function(user, permission, addOrRemove) {
 			
 			// Add or remove a permission
 			if (addOrRemove === "add") {
@@ -171,19 +159,22 @@
 				}
 			}
 
+			//console.log("permissions", user.permissions);
+
 			// Update the permissions user for the selected teamspace
-			var endpoint = vm.selectedTeamspace.account + "/permissions/" + user.assignedUser;
+			var endpoint = vm.selectedTeamspace.account + "/permissions/";
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-			$http.put(url, {
+			$http.post(url, {
+				user : user.assignedUser,
 				permissions: user.permissions
 			}).catch(function(error){
 				console.error(error);
 			});
 		};
 
-		vm.stateChange = function(user, permission) {
+		vm.teamspaceStateChange = function(user, permission) {
 			var addOrRemove = vm.userHasPermissions(user, permission) === true ? "remove" : "add";
-			vm.postPermissionChange(user, permission, addOrRemove);
+			vm.postTeamspacePermissionChange(user, permission, addOrRemove);
 		};
 
 		vm.userHasPermissions = function(user, permission) {
@@ -201,22 +192,26 @@
 		vm.appendUserPermissions = function(teamspace) {
 
 			var url = serverConfig.apiUrl(serverConfig.GET_API, teamspace.account + "/permissions" );
-			return $http.get(url).then(function(response) {
-				var permissionsUsers = response.data;
-				var found;
-				teamspace.assignUsers.forEach(function(user){
-					found = false;
-					permissionsUsers.forEach(function(permissionsUser) {
-						if (permissionsUser.user === user.assignedUser) {
-							user.permissions = permissionsUser.permissions;
-							found = true;
-						} 
+			return $http.get(url)
+				.then(function(response) {
+					var permissionsUsers = response.data;
+					var found;
+					teamspace.assignUsers.forEach(function(user){
+						found = false;
+						permissionsUsers.forEach(function(permissionsUser) {
+							if (permissionsUser.user === user.assignedUser) {
+								user.permissions = permissionsUser.permissions;
+								found = true;
+							} 
+						});
+						if (!found) {
+							user.permissions = [];
+						}
 					});
-					if (!found) {
-						user.permissions = [];
-					}
+				})
+				.catch(function(error){
+					console.error(error);
 				});
-			});
 			
 		};
 
@@ -258,6 +253,10 @@
 								}
 								resolve(vm.selectedTeamspace.assignUsers);
 							});
+					})
+					.catch(function(error){
+						console.error(error);
+						reject(error);
 					});
 
 			});		
@@ -280,6 +279,15 @@
 
 		// PROJECTS
 
+		vm.setProjects = function() {
+
+			vm.projects = {};
+			vm.selectedTeamspace.projects.forEach(function(project){
+				vm.projects[project.name] = project;
+			});
+
+		};
+
 		vm.clearProjectState = function() {
 			vm.projectSelected = undefined;
 			vm.selectedProject = undefined;
@@ -290,8 +298,6 @@
 
 			if (vm.projectSelected) {
 				vm.selectedProject = vm.projects[vm.projectSelected];
-				console.log("vm.selectedProject", vm.selectedProject);
-
 
 				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.projectSelected;
 				var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
@@ -345,48 +351,64 @@
 				// permissions. If so we can set the tick box to checked
 				vm.selectedProject.userPermissions.forEach(function(permissionUser){
 					if (permissionUser.user === user.assignedUser) {
-						if (permissionUser.permissions) {
-							hasPermission = permissionUser.permissions.indexOf(permission) !== -1;
+						var userPermissions = permissionUser.permissions;
+						if (userPermissions) {
+							hasPermission = userPermissions.indexOf(permission) !== -1;
 						}
 					}
 				});
 			}
 			
+			//console.log(user.assignedUser, permission, hasPermission)
 			return hasPermission;
 		};
 
 		vm.postProjectPermissionChange = function(user, permission, addOrRemove) {
 
 			//Add or remove a permission
-
-			if (addOrRemove === "add") {
+			if (addOrRemove === "add" || addOrRemove === "remove") {
 
 				var targetUser = vm.selectedProject.userPermissions.find(function(projectUser){
 					return projectUser.user === user.assignedUser;
 				});
 
-				
-				if (targetUser) {
-					// If the user is already in the list we can add the persmission
-					if (targetUser.permissions.indexOf(permission) === -1) {
-						targetUser.permissions.push(permission);
-					}
-				} else {
-					// Else we create a new object and add it in
-					vm.selectedProject.userPermissions.push({
-						user : user.assignedUser,
-						permissions: [permission]
-					});
-				}
-				
-			}
+				if (addOrRemove === "add") {
 
-			//Update the permissions user for the selected teamspace
-			var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
-			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-			$http.put(url, {
-				permissions: vm.selectedProject.userPermissions
-			});
+					if (targetUser) {
+						// If the user is already in the list we can add the persmission
+						if (targetUser.permissions.indexOf(permission) === -1) {
+							targetUser.permissions.push(permission);
+						}
+					} else {
+						// Else we create a new object and add it in
+						vm.selectedProject.userPermissions.push({
+							user : user.assignedUser,
+							permissions: [permission]
+						});
+					}
+					
+				} else if (addOrRemove === "remove") {
+
+					// If we are removing the permission
+					if (targetUser) {
+						
+						// If the user is already in the list we can add the persmission
+						var index = targetUser.permissions.indexOf(permission);
+						if (index !== -1) {
+							targetUser.permissions.splice(index, 1);
+						}
+					} 
+					
+				} 
+
+				//Update the permissions user for the selected teamspace
+				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
+				var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+				$http.put(url, {
+					permissions: vm.selectedProject.userPermissions
+				});
+
+			}
 
 		};
 

@@ -41,7 +41,7 @@
 										md-checkbox(
 											aria-label="Checkbox {{value}}"
 											layout-align="center center"
-											ng-click="vm.stateChange(user, permission)"
+											ng-click="vm.teamspaceStateChange(user, permission)"
 											ng-checked="vm.userHasPermissions(user, permission)")
 
 
@@ -98,6 +98,7 @@
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
 											ng-checked="vm.userHasProjectPermissions(user, permission)")
+
 
 
 			md-tab(label="Models & Federations", ng-click="vm.resetState()")
