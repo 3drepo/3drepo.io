@@ -1489,7 +1489,7 @@ Content-Type: image/png
     </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"project2"</span><span class="p">,</span><span class="w">
     </span><span class="s2">"permissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="p">{</span><span class="w">
-            </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"breakingbad"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"breakingbad"</span><span class="p">,</span><span class="w">
             </span><span class="s2">"permissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"create_model"</span><span class="p">]</span><span class="w">
         </span><span class="p">}</span><span class="w">
     </span><span class="p">]</span><span class="w">
@@ -1504,7 +1504,7 @@ Content-Type: image/png
     </span><span class="s2">"models"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
     </span><span class="s2">"permissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="p">{</span><span class="w">
-            </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"breakingbad"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"breakingbad"</span><span class="p">,</span><span class="w">
             </span><span class="s2">"permissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"create_model"</span><span class="p">]</span><span class="w">
         </span><span class="p">}</span><span class="w">
     </span><span class="p">]</span><span class="w">
@@ -2189,6 +2189,655 @@ have access to the <a href="#get-all-jobs">Get all jobs</a> for an account API.<
 
 <p><a href="#job-object">Job object</a></p>
 
+          <h1 id="issue">Issue</h1>
+
+<aside class="notice">
+Creating an issue or a comment via HTTP API will also triggers the server to broadcast a web socket message to all listeners. 
+To avoid getting back your own message via the websocket, please add a custom header named `x-socket-id` with your 
+web socket client id returned from connecting to the web socket server when making HTTP API requests.
+</aside>
+
+<h2 id="issue-object">Issue object</h2>
+
+<p>*Read only = Shown in response only. Ignore if persence in request body.</p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Read only</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>_id</td>
+<td>comment id</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>account</td>
+<td>the teamspace this issue belongs to</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>model</td>
+<td>the model this issue belongs to</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>viewpoint</td>
+<td><a href="#viewpoint-object">viewpoint object</a></td>
+<td></td>
+</tr>
+<tr>
+<td>creator_role</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>pickedPos</td>
+<td>array of three numbers</td>
+<td></td>
+</tr>
+<tr>
+<td>pickedNorm</td>
+<td>array of three numbers</td>
+<td></td>
+</tr>
+<tr>
+<td>scale</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>assigned_roles</td>
+<td>array of assigned roles</td>
+<td></td>
+</tr>
+<tr>
+<td>priority</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>topic_type</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>desc</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>position</td>
+<td>pin position</td>
+<td></td>
+</tr>
+<tr>
+<td>norm</td>
+<td>pin normal</td>
+<td></td>
+</tr>
+<tr>
+<td>group_id</td>
+<td>Group ref that contains all highlighted objects</td>
+<td></td>
+</tr>
+<tr>
+<td>comments</td>
+<td>list of <a href="#comment-object">comment objects</a>, only shown in get an issue API.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>rev_id</td>
+<td>the revision when the issue was created, only set if using the <a href="#post-accountname-modelid-revision-revid-issues-json">revision version API</a></td>
+<td></td>
+</tr>
+</tbody></table>
+
+<h3 id="viewpoint-object">Viewpoint object</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Format</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>array of three numbers</td>
+</tr>
+<tr>
+<td>up</td>
+<td>array of three numbers</td>
+</tr>
+<tr>
+<td>position</td>
+<td>array of three numbers</td>
+</tr>
+<tr>
+<td>look_at</td>
+<td>array of three numbers</td>
+</tr>
+<tr>
+<td>view_dir</td>
+<td>array of three numbers</td>
+</tr>
+<tr>
+<td>near</td>
+<td>numbers</td>
+</tr>
+<tr>
+<td>far</td>
+<td>numbers</td>
+</tr>
+<tr>
+<td>fov</td>
+<td>numbers</td>
+</tr>
+<tr>
+<td>aspect_ratio</td>
+<td>numbers</td>
+</tr>
+<tr>
+<td>clippingPlanes</td>
+<td>numbers</td>
+</tr>
+<tr>
+<td>screenshot</td>
+<td>string of base 64 encoded png in request body, an URL in response</td>
+</tr>
+</tbody></table>
+
+<h3 id="comment-object">Comment object</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Format</th>
+<th>Read only</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>action</td>
+<td><a href="#action-object">action object</a>, only presence in automated comment</td>
+<td></td>
+<td>Y</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>username who leaves the comment</td>
+<td>string</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>comment</td>
+<td>content of comment</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>created</td>
+<td>timestamp of the comment creation</td>
+<td>number</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>sealed</td>
+<td>is the comment editable</td>
+<td>Boolean</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>rev_id</td>
+<td>the revision when the comment was created, only set if using the <a href="#put-accountname-modelid-revision-revid-issues-issueid-json">revision version API</a></td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>guid</td>
+<td>id of the comment</td>
+<td>string</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>viewpoint</td>
+<td><a href="#viewpoint-object">viewpoint object</a></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+
+<h3 id="action-object">Action object</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>property</td>
+<td>issue status property name</td>
+</tr>
+<tr>
+<td>from</td>
+<td>old property value</td>
+</tr>
+<tr>
+<td>to</td>
+<td>new property value</td>
+</tr>
+</tbody></table>
+
+<h2 id="get-an-issue">Get an issue</h2>
+
+<h3 id="get-accountname-modelid-issues-issueid-json">GET /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<p>The response includes comments of the issue and all the screenshots are represented by an URL of the resources.</p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"d7090f40-5a78-11e7-b7f1-2968aca83c11"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"creator_role"</span><span class="p">:</span><span class="s2">"Architect"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"scale"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"priority"</span><span class="p">:</span><span class="s2">"none"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"desc"</span><span class="p">:</span><span class="s2">"Various models can be federated in 3D Repo"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"topic_type"</span><span class="p">:</span><span class="s2">"for_information"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"status"</span><span class="p">:</span><span class="s2">"open"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"owner"</span><span class="p">:</span><span class="s2">"repoman"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"created"</span><span class="p">:</span><span class="mi">1498486070843</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"Go to Sample_Federation for more"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"number"</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"rev_id"</span><span class="p">:</span><span class="s2">"cd561c86-de1a-482e-8f5d-89cfc49562e8"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"__v"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"assigned_roles"</span><span class="p">:[</span><span class="w">
+
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"viewCount"</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"commentCount"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"comments"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"owner"</span><span class="p">:</span><span class="s2">"repoman"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"comment"</span><span class="p">:</span><span class="s2">"All federations are shown in project's Federations folder"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"created"</span><span class="p">:</span><span class="mi">1498486126944</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"rev_id"</span><span class="p">:</span><span class="s2">"cd561c86-de1a-482e-8f5d-89cfc49562e8"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"guid"</span><span class="p">:</span><span class="s2">"9aed5b71-0768-46bf-ac7e-52abae384e6f"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"viewpoint"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"near"</span><span class="p">:</span><span class="mf">93.22692108154297</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"far"</span><span class="p">:</span><span class="mf">46613.4609375</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"fov"</span><span class="p">:</span><span class="mf">1.0471975803375244</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"aspect_ratio"</span><span class="p">:</span><span class="mf">1.4831358194351196</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"guid"</span><span class="p">:</span><span class="s2">"b4244782-a112-4a8a-a5f1-6a13c0ce5794"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"5951156e1a1e367c590de079"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"perspective"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"clippingPlanes"</span><span class="p">:[</span><span class="w">
+
+            </span><span class="p">],</span><span class="w">
+            </span><span class="s2">"right"</span><span class="p">:[</span><span class="w">
+               </span><span class="mf">-0.5469865798950195</span><span class="p">,</span><span class="w">
+               </span><span class="mi">0</span><span class="p">,</span><span class="w">
+               </span><span class="mf">0.8371413350105286</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="s2">"view_dir"</span><span class="p">:[</span><span class="w">
+               </span><span class="mf">0.6944281458854675</span><span class="p">,</span><span class="w">
+               </span><span class="mf">-0.5584722757339478</span><span class="p">,</span><span class="w">
+               </span><span class="mf">0.45373809337615967</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="s2">"look_at"</span><span class="p">:[</span><span class="w">
+               </span><span class="mf">8159.1533203125</span><span class="p">,</span><span class="w">
+               </span><span class="mf">3831.880859375</span><span class="p">,</span><span class="w">
+               </span><span class="mf">-9764.24609375</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="s2">"position"</span><span class="p">:[</span><span class="w">
+               </span><span class="mf">-14553.9365234375</span><span class="p">,</span><span class="w">
+               </span><span class="mf">22098.177734375</span><span class="p">,</span><span class="w">
+               </span><span class="mf">-24604.9375</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="s2">"up"</span><span class="p">:[</span><span class="w">
+               </span><span class="mf">0.46752026677131653</span><span class="p">,</span><span class="w">
+               </span><span class="mf">0.8295232057571411</span><span class="p">,</span><span class="w">
+               </span><span class="mf">0.3054768741130829</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"5951156e1a1e367c590de07a"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"thumbnail"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/thumbnail.png"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"norm"</span><span class="p">:[</span><span class="w">
+
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"position"</span><span class="p">:[</span><span class="w">
+
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"viewpoint"</span><span class="p">:{</span><span class="w">
+      </span><span class="s2">"near"</span><span class="p">:</span><span class="mf">93.22692108154297</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"far"</span><span class="p">:</span><span class="mf">46613.4609375</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"fov"</span><span class="p">:</span><span class="mf">1.0471975803375244</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"aspect_ratio"</span><span class="p">:</span><span class="mf">1.4831358194351196</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"guid"</span><span class="p">:</span><span class="s2">"ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"595115361a1e367c590de068"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"perspective"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"screenshot"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/viewpoints/ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0/screenshot.png"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"clippingPlanes"</span><span class="p">:[</span><span class="w">
+
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"right"</span><span class="p">:[</span><span class="w">
+         </span><span class="mf">-0.5469865798950195</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="p">,</span><span class="w">
+         </span><span class="mf">0.8371413350105286</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"view_dir"</span><span class="p">:[</span><span class="w">
+         </span><span class="mf">0.6944281458854675</span><span class="p">,</span><span class="w">
+         </span><span class="mf">-0.5584722757339478</span><span class="p">,</span><span class="w">
+         </span><span class="mf">0.45373809337615967</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"look_at"</span><span class="p">:[</span><span class="w">
+         </span><span class="mf">8159.1533203125</span><span class="p">,</span><span class="w">
+         </span><span class="mf">3831.880859375</span><span class="p">,</span><span class="w">
+         </span><span class="mf">-9764.24609375</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"position"</span><span class="p">:[</span><span class="w">
+         </span><span class="mf">-14553.9365234375</span><span class="p">,</span><span class="w">
+         </span><span class="mf">22098.177734375</span><span class="p">,</span><span class="w">
+         </span><span class="mf">-24604.9375</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"up"</span><span class="p">:[</span><span class="w">
+         </span><span class="mf">0.46752026677131653</span><span class="p">,</span><span class="w">
+         </span><span class="mf">0.8295232057571411</span><span class="p">,</span><span class="w">
+         </span><span class="mf">0.3054768741130829</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"screenshotSmall"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/viewpoints/ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0/screenshotSmall.png"</span><span class="w">
+   </span><span class="p">},</span><span class="w">
+   </span><span class="s2">"typePrefix"</span><span class="p">:</span><span class="s2">"Architectural"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"modelCode"</span><span class="p">:</span><span class="s2">"LEGO"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"repoman"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"68ddc470-9ebe-4520-9d91-a35da65cc610"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h2 id="get-issues">Get issues</h2>
+
+<h3 id="get-accountname-modelid-issues-json">GET /{accountName}/{modelId}/issues.json</h3>
+
+<h3 id="get-accountname-modelid-revision-revid-issues-json">GET /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
+
+<p>Similar to get an issue API but the issues in this response doesn&rsquo;t contains comments.</p>
+
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+       </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"d7090f40-5a78-11e7-b7f1-2968aca83c11"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"creator_role"</span><span class="p">:</span><span class="s2">"Architect"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"scale"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"priority"</span><span class="p">:</span><span class="s2">"none"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"desc"</span><span class="p">:</span><span class="s2">"Various models can be federated in 3D Repo"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"topic_type"</span><span class="p">:</span><span class="s2">"for_information"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"status"</span><span class="p">:</span><span class="s2">"open"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"owner"</span><span class="p">:</span><span class="s2">"repoman"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"created"</span><span class="p">:</span><span class="mi">1498486070843</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"Go to Sample_Federation for more"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"number"</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"rev_id"</span><span class="p">:</span><span class="s2">"cd561c86-de1a-482e-8f5d-89cfc49562e8"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"__v"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"assigned_roles"</span><span class="p">:[</span><span class="w">
+
+       </span><span class="p">],</span><span class="w">
+       </span><span class="s2">"viewCount"</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"commentCount"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"thumbnail"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/thumbnail.png"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"norm"</span><span class="p">:[</span><span class="w">
+
+       </span><span class="p">],</span><span class="w">
+       </span><span class="s2">"position"</span><span class="p">:[</span><span class="w">
+
+       </span><span class="p">],</span><span class="w">
+       </span><span class="s2">"viewpoint"</span><span class="p">:{</span><span class="w">
+          </span><span class="s2">"near"</span><span class="p">:</span><span class="mf">93.22692108154297</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"far"</span><span class="p">:</span><span class="mf">46613.4609375</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"fov"</span><span class="p">:</span><span class="mf">1.0471975803375244</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"aspect_ratio"</span><span class="p">:</span><span class="mf">1.4831358194351196</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"guid"</span><span class="p">:</span><span class="s2">"ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0"</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"595115361a1e367c590de068"</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"perspective"</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"screenshot"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/viewpoints/ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0/screenshot.png"</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"clippingPlanes"</span><span class="p">:[</span><span class="w">
+
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"right"</span><span class="p">:[</span><span class="w">
+             </span><span class="mf">-0.5469865798950195</span><span class="p">,</span><span class="w">
+             </span><span class="mi">0</span><span class="p">,</span><span class="w">
+             </span><span class="mf">0.8371413350105286</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"view_dir"</span><span class="p">:[</span><span class="w">
+             </span><span class="mf">0.6944281458854675</span><span class="p">,</span><span class="w">
+             </span><span class="mf">-0.5584722757339478</span><span class="p">,</span><span class="w">
+             </span><span class="mf">0.45373809337615967</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"look_at"</span><span class="p">:[</span><span class="w">
+             </span><span class="mf">8159.1533203125</span><span class="p">,</span><span class="w">
+             </span><span class="mf">3831.880859375</span><span class="p">,</span><span class="w">
+             </span><span class="mf">-9764.24609375</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"position"</span><span class="p">:[</span><span class="w">
+             </span><span class="mf">-14553.9365234375</span><span class="p">,</span><span class="w">
+             </span><span class="mf">22098.177734375</span><span class="p">,</span><span class="w">
+             </span><span class="mf">-24604.9375</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"up"</span><span class="p">:[</span><span class="w">
+             </span><span class="mf">0.46752026677131653</span><span class="p">,</span><span class="w">
+             </span><span class="mf">0.8295232057571411</span><span class="p">,</span><span class="w">
+             </span><span class="mf">0.3054768741130829</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="s2">"screenshotSmall"</span><span class="p">:</span><span class="s2">"repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1-2968aca83c11/viewpoints/ce12a2a9-6f0e-4a37-aa87-3ddd52307fe0/screenshotSmall.png"</span><span class="w">
+       </span><span class="p">},</span><span class="w">
+       </span><span class="s2">"typePrefix"</span><span class="p">:</span><span class="s2">"Architectural"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"modelCode"</span><span class="p">:</span><span class="s2">"LEGO"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"repoman"</span><span class="p">,</span><span class="w">
+       </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"68ddc470-9ebe-4520-9d91-a35da65cc610"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre>
+<h2 id="create-an-issue">Create an issue</h2>
+
+<h3 id="post-accountname-modelid-issues-json">POST /{accountName}/{modelId}/issues.json</h3>
+
+<h3 id="post-accountname-modelid-revision-revid-issues-json">POST /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
+
+<p>Request body</p>
+
+<p><a href="#issue-object">Issue object</a></p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">POST</span> <span class="nn">/repoman/611fc1ed-017b-4fc0-bdd5-ed40077756c3/issues.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Door problem"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"viewpoint"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"right"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">-0.9527981281280518</span><span class="p">,</span><span class="w">
+            </span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.3036045432090759</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"up"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.06726189702749252</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.9751502871513367</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.2110871523618698</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"position"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">-7.6559953689575195</span><span class="p">,</span><span class="w">
+            </span><span class="mf">11.788660049438477</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-27.145030975341797</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"look_at"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.9664306640625</span><span class="p">,</span><span class="w">
+            </span><span class="mf">5.336418628692627</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-0.08538341522216797</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"view_dir"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.2960600256919861</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-0.22154445946216583</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.9291213750839233</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"near"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.09187718480825424</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"far"</span><span class="p">:</span><span class="w"> </span><span class="mf">45.93859100341797</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"fov"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0471975803375244</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"aspect_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">3.2890071868896484</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"clippingPlanes"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+        </span><span class="s2">"screenshot"</span><span class="p">:</span><span class="w"> </span><span class="s2">"base 64 encoded png"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"creator_role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MEP Engineer"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"pickedPos"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="mf">-7.628292560577393</span><span class="p">,</span><span class="w">
+        </span><span class="mf">1.0100265741348267</span><span class="p">,</span><span class="w">
+        </span><span class="mf">-3.308213233947754</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"pickedNorm"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="mi">0</span><span class="p">,</span><span class="w">
+        </span><span class="mi">0</span><span class="p">,</span><span class="w">
+        </span><span class="mi">0</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"scale"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"assigned_roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"Structural Engineer"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"priority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"none"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"open"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"topic_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"for_information"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"desc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"XYZ"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"rev_id"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"position"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="mf">-7.628292560577393</span><span class="p">,</span><span class="w">
+        </span><span class="mf">1.0100265741348267</span><span class="p">,</span><span class="w">
+        </span><span class="mf">-3.308213233947754</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"norm"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="mi">0</span><span class="p">,</span><span class="w">
+        </span><span class="mi">0</span><span class="p">,</span><span class="w">
+        </span><span class="mi">0</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"group_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2229f920-68a8-11e7-84d9-5740a79c553d"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h2 id="update-an-issue-status">Update an issue status</h2>
+
+<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
+
+<p>On updating issue status, the system will create an automated comment stating what the user has changed.</p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">PUT</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000000/issues/00000000-0000-0000-0000-000000000000.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"priority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"for approval"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"topic_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"for_information"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"assigned_roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"Structural Engineer"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="s2">"desc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"new desc"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h2 id="create-a-comment">Create a comment</h2>
+
+<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
+
+<p>Create a comment in an issue</p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">PUT</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000000/issues/00000000-0000-0000-0000-000000000000.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"comment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"solved!"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"viewpoint"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"right"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">-0.9527981281280518</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-7.450580596923828e-9</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.3036045432090759</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"up"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.06726188957691193</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.9751502871513367</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.2110871523618698</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"position"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">-7.6559953689575195</span><span class="p">,</span><span class="w">
+            </span><span class="mf">11.788660049438477</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-27.145030975341797</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"look_at"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.9664306640625</span><span class="p">,</span><span class="w">
+            </span><span class="mf">5.336418628692627</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-0.08538341522216797</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"view_dir"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mf">0.2960600256919861</span><span class="p">,</span><span class="w">
+            </span><span class="mf">-0.22154445946216583</span><span class="p">,</span><span class="w">
+            </span><span class="mf">0.9291213750839233</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="s2">"near"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.09187718480825424</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"far"</span><span class="p">:</span><span class="w"> </span><span class="mf">45.93859100341797</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"fov"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0471975803375244</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"aspect_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">3.7934560775756836</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"clippingPlanes"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+        </span><span class="s2">"screenshot"</span><span class="p">:</span><span class="w"> </span><span class="s2">"base 64 encoded png"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h2 id="update-a-comment">Update a comment</h2>
+
+<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
+
+<p>Update a comment, commenIndex start from 0.</p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">PUT</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000000/issues/00000000-0000-0000-0000-000000000000.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"comment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"abcdefg"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"edit"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"commentIndex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h2 id="delete-a-comment">Delete a comment</h2>
+
+<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
+
+<p>Deleta a comment, commenIndex start from 0.</p>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">PUT</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000000/issues/00000000-0000-0000-0000-000000000000.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"comment"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"delete"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"commentIndex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
           <h1 id="permission">Permission</h1>
 
 <p>There are three levels of permissions</p>
@@ -2354,64 +3003,6 @@ have access to the <a href="#get-all-jobs">Get all jobs</a> for an account API.<
 <tr>
 <td>manage_model_permission</td>
 <td></td>
-</tr>
-</tbody></table>
-
-          <h1 id="errors">Errors</h1>
-
-<aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files&hellip;just save them to the `includes` folder and add them to the top of your `index.md`&lsquo;s frontmatter. Files are included in the order listed.</aside>
-
-<p>The Kittn API uses the following error codes:</p>
-
-<table><thead>
-<tr>
-<th>Error Code</th>
-<th>Meaning</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>400</td>
-<td>Bad Request &ndash; Your request sucks</td>
-</tr>
-<tr>
-<td>401</td>
-<td>Unauthorized &ndash; Your API key is wrong</td>
-</tr>
-<tr>
-<td>403</td>
-<td>Forbidden &ndash; The kitten requested is hidden for administrators only</td>
-</tr>
-<tr>
-<td>404</td>
-<td>Not Found &ndash; The specified kitten could not be found</td>
-</tr>
-<tr>
-<td>405</td>
-<td>Method Not Allowed &ndash; You tried to access a kitten with an invalid method</td>
-</tr>
-<tr>
-<td>406</td>
-<td>Not Acceptable &ndash; You requested a format that isn&rsquo;t json</td>
-</tr>
-<tr>
-<td>410</td>
-<td>Gone &ndash; The kitten requested has been removed from our servers</td>
-</tr>
-<tr>
-<td>418</td>
-<td>I&rsquo;m a teapot</td>
-</tr>
-<tr>
-<td>429</td>
-<td>Too Many Requests &ndash; You&rsquo;re requesting too many kittens! Slow down!</td>
-</tr>
-<tr>
-<td>500</td>
-<td>Internal Server Error &ndash; We had a problem with our server. Try again later.</td>
-</tr>
-<tr>
-<td>503</td>
-<td>Service Unavailable &ndash; We&rsquo;re temporarily offline for maintenance. Please try again later.</td>
 </tr>
 </tbody></table>
 
