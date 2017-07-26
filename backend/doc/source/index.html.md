@@ -14,8 +14,8 @@ includes:
   - job
   - project
   - model
+  - issue
   - permission
-  - errors
 
 search: true
 ---

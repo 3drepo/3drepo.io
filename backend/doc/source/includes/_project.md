@@ -112,17 +112,17 @@ POST /repoman/projects HTTP/1.1
 ```
 ```json
 {
-	"name": "project1"
+    "name": "project1"
 }
 ```
 > Example response
 
 ```json
 {
-	"_id": "5915b8f0053405116b20c75a"
-	"name": "project1",
-	"models": [],
-	"permissions": []
+    "_id": "5915b8f0053405116b20c75a"
+    "name": "project1",
+    "models": [],
+    "permissions": []
 }
 ```
 
@@ -144,28 +144,28 @@ PUT /repoman/projects/project1 HTTP/1.1
 ```
 ```json
 {
-	"name": "project2",
-	"permissions": [
-		{
-			"name": "breakingbad",
-			"permissions": ["create_model"]
-		}
-	]
+    "name": "project2",
+    "permissions": [
+        {
+            "user": "breakingbad",
+            "permissions": ["create_model"]
+        }
+    ]
 }
 ```
 > Example response
 
 ```json
 {
-	"_id": "5915b8f0053405116b20c75a",
-	"name": "project2",
-	"models": [],
-	"permissions": [
-		{
-			"name": "breakingbad",
-			"permissions": ["create_model"]
-		}
-	]
+    "_id": "5915b8f0053405116b20c75a",
+    "name": "project2",
+    "models": [],
+    "permissions": [
+        {
+            "user": "breakingbad",
+            "permissions": ["create_model"]
+        }
+    ]
 }
 ```
 
