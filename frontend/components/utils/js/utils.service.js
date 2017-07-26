@@ -24,7 +24,24 @@
 	UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
 
 	function UtilsService($http, $q, $mdDialog, serverConfig) {
-		var obj = {};
+		
+		var service = {
+			// snakeCase : snakeCase,
+			capitalizeFirstLetter: capitalizeFirstLetter,
+			doGet: doGet,
+			doPost: doPost,
+			doPut: doPut,
+			doDelete: doDelete,
+			showDialog: showDialog,
+			closeDialog: closeDialog,
+			getServerUrl: getServerUrl,
+			getErrorMessage: getErrorMessage,
+			getResponseCode: getResponseCode
+		};
+
+		return service;
+
+		/////////////////
 
 		/**
 		 * Convert blah_test to blahTest
@@ -33,13 +50,13 @@
          * @param separator
          * @returns {*|void|string|{REPLACE, REPLACE_NEGATIVE}|XML}
          */
-		obj.snake_case = function snake_case(name, separator) {
-			var SNAKE_CASE_REGEXP = /[A-Z]/g;
-			separator = separator || "_";
-			return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
-				return (pos ? separator : "") + letter.toLowerCase();
-			});
-		};
+		// function snakeCase(name, separator) {
+		// 	var SNAKE_CASE_REGEXP = /[A-Z]/g;
+		// 	separator = separator || "_";
+		// 	return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
+		// 		return (pos ? separator : "") + letter.toLowerCase();
+		// 	});
+		// }
 
 		/**
          * Capitalise the first letter of a string
@@ -48,9 +65,9 @@
          * @param string
          * @returns {string}
          */
-		obj.capitalizeFirstLetter = function (string) {
+		function capitalizeFirstLetter(string) {
 			return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
-		};
+		}
 
 		/**
          * Handle GET requests
@@ -58,7 +75,7 @@
          * @param url
          * @returns {*|promise}
          */
-		obj.doGet = function (url) {
+		function doGet(url) {
 			var deferred = $q.defer(),
 				urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
 
@@ -70,7 +87,7 @@
 					deferred.resolve(response);
 				});
 			return deferred.promise;
-		};
+		}
 
 		/**
          * Handle POST requests
@@ -79,7 +96,7 @@
          * @param headers
          * @returns {*}
          */
-		obj.doPost = function (data, url, headers) {
+		function doPost(data, url, headers) {
 			var deferred = $q.defer(),
 				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
 				config = {withCredentials: true};
@@ -98,7 +115,7 @@
 					}
 				);
 			return deferred.promise;
-		};
+		}
 
 		/**
          * Handle PUT requests
@@ -106,7 +123,7 @@
          * @param url
          * @returns {*}
          */
-		obj.doPut = function (data, url) {
+		function doPut(data, url) {
 			var deferred = $q.defer(),
 				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
 				config = {withCredentials: true};
@@ -121,7 +138,7 @@
 					}
 				);
 			return deferred.promise;
-		};
+		}
 
 		/**
          * Handle DELETE requests
@@ -129,7 +146,7 @@
          * @param url
          * @returns {*}
          */
-		obj.doDelete = function (data, url) {
+		function doDelete(data, url) {
 			var deferred = $q.defer(),
 				config = {
 					method: "DELETE",
@@ -151,7 +168,7 @@
 					}
 				);
 			return deferred.promise;
-		};
+		}
 
 		/**
          * Show a dialog
@@ -164,7 +181,7 @@
          * @param {Boolean} fullscreen
          * @param {String} closeTo
          */
-		obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
+		function showDialog(dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
 			// Allow the dialog to have cancel ability
 			scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {
 				$mdDialog.cancel();
@@ -186,23 +203,23 @@
 			data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
 			data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
 			$mdDialog.show(data);
-		};
+		}
 
 		/**
          * close a dialog
          */
-		obj.closeDialog = function () {
+		function closeDialog() {
 			$mdDialog.cancel();
-		};
+		}
 
-		obj.getServerUrl = function (url) {
+		function getServerUrl(url) {
 			return serverConfig.apiUrl(serverConfig.GET_API, url);
-		};
+		}
 
 		/**
         * Convert error code to custom error message
         */
-		obj.getErrorMessage = function(resData){
+		function getErrorMessage(resData){
             
 			var messages = {
 				"FILE_FORMAT_NOT_SUPPORTED": "Unsupported file format",
@@ -227,15 +244,11 @@
 
 			return message;
 
-		};
+		}
 
-		obj.getResponseCode = function(errorToFind) {
-
+		function getResponseCode(errorToFind) {
 			return Object.keys(serverConfig.responseCodes).indexOf(errorToFind);
-		};
+		}
 
-
-
-		return obj;
 	}
 }());

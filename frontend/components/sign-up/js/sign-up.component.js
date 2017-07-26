@@ -201,7 +201,7 @@
 		function doRegister() {
 			var data,
 				doRegister = true,
-				allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
+				allowedFormat = new RegExp(serverConfig.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
