@@ -63,7 +63,12 @@
 
 						div(flex="50", layout="column", ng-disabled="!vm.teamspaceSelected")
 							md-label Select Project
-							md-select.rowSelects(aria-label="Select Project" ng-model="vm.projectSelected", ng-required="true")
+							md-select.rowSelects(
+								aria-label="Select Project" 
+								ng-disabled="!vm.teamspaceSelected"
+								ng-model="vm.projectSelected", 
+								ng-required="true")
+
 								md-option(
 									aria-label="{{project.name}}" 
 									ng-repeat="project in vm.projects"
@@ -124,6 +129,7 @@
 							md-select.rowSelects(
 								aria-label="Selection for Project"
 								ng-model="vm.projectSelected"
+								ng-disabled="!vm.teamspaceSelected"
 								ng-required="true")
 								md-option(
 									aria-label="{{project.name}}" 
@@ -156,14 +162,14 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="vm.selectedTeamspace.account != user.assignedUser && user.assignedUser"
-									)
+									ng-init="vm.addUser(user.assignedUser)"
+									ng-if="vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
 
 									td.fixedWidth.userColumn.userInput()
 										p {{user.assignedUser}}
 
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
-										md-radio-group(
+										md-radio-group(	
 											ng-model="vm.selectedRole[user.assignedUser]"
 											layout-align="center center"
 											layout="row")

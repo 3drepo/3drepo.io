@@ -52,7 +52,7 @@
 		vm.$onInit = function() {
 			vm.isSaving = false;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
-			vm.units = server_config.units;
+			vm.units = serverConfig.units;
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 

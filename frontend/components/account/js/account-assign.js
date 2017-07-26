@@ -78,7 +78,7 @@
 
 			};
 
-			vm.modelRoles = [];
+			vm.modelRoles = ["unassigned"];
 			
 		};
 
@@ -118,15 +118,15 @@
 						allTeamspacesPromises.push(
 							$q(function(resolve, reject) {
 								var endpoint = teamspace.account + "/subscriptions";
-								var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
-								$http.get(url)
-									.then(function(response) {
-										teamspace.assignUsers = response.data;
+								var subscriptionsUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+								$http.get(subscriptionsUrl)
+									.then(function(subscriptionsResponse) {
+										teamspace.assignUsers = subscriptionsResponse.data;
 										resolve(teamspace.assignUsers);
 									})
-									.catch(function(response){
-										console.error("error", response);
-										reject(response);
+									.catch(function(subscriptionsResponse){
+										console.error("error", subscriptionsResponse);
+										reject(subscriptionsResponse);
 									});
 							})
 						);
@@ -237,6 +237,21 @@
 		
 		});
 
+		vm.setPermissionTemplates = function(teamspace){
+
+			var permission = teamspace.account + "/permission-templates";
+			var permissionUrl = serverConfig.apiUrl(serverConfig.GET_API, permission);
+			
+			return $http.get(permissionUrl).then(function(response) {
+				vm.modelRoles = ["unassigned"];
+
+				response.data.forEach(function(template){
+					vm.modelRoles.push(template._id);
+				});
+			});
+
+		};
+
 		vm.handleTeamspaceSelected = function() {
 			
 			vm.setProjects();
@@ -260,20 +275,6 @@
 					});
 
 			});		
-
-		};
-
-		vm.setPermissionTemplates = function(teamspace){
-
-			var permission = teamspace.account + "/permission-templates";
-			var permissionUrl = serverConfig.apiUrl(serverConfig.GET_API, permission);
-			
-			return $http.get(permissionUrl).then(function(response) {
-				vm.modelRoles = [];
-				response.data.forEach(function(template){
-					vm.modelRoles.push(template._id);
-				});
-			});
 
 		};
 
@@ -436,10 +437,17 @@
 
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
 
+				// Setup users
+				vm.selectedTeamspace.assignUsers.forEach(function(user){
+					if (vm.selectedRole[user.assignedUser] === undefined) {
+						vm.selectedRole[user.assignedUser] = "unassigned";
+					}
+				});
+
 				vm.selectedModel = vm.models.find(function(model){
 					return model.model ===  vm.modelSelected;
 				});
-				
+
 				return $q(function(resolve, reject) {
 
 					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions";
@@ -448,12 +456,7 @@
 					$http.get(url)
 						.then(function(response){
 							var users = response.data;
-
-							// Set the list of assignable users for the model
-							vm.selectedModel.currentUsers = users;
-
-							// Set the radio button for the associated users
-							vm.selectedModel.currentUsers.forEach(function(user) {
+							users.forEach(function(user){
 								vm.selectedRole[user.user] = user.permission;
 							});
 							vm.modelReady = true;
@@ -470,45 +473,36 @@
 
 		});
 
-
 		vm.modelStateChange = function(user, role) {
 
-			var userHasPerviousPermissions = false;
-			// Loop through the list of available users and find the selected user
-			vm.selectedModel.currentUsers.forEach(function(assignableUser) {
-				if (user.assignedUser === assignableUser.user) {
-					// Change the users role to the newly selected permission
-					assignableUser.permission = role;
-					userHasPerviousPermissions = true;
-				}
-			});
+			vm.selectedRole[user.assignedUser] = role;
+			var permissionsToSend = [];
 
-			// If the user isn't in the assignableUser list add them
-			if (!userHasPerviousPermissions) {
-				vm.selectedModel.currentUsers.push({
-					user: user.assignedUser,
-					permission: role
-				});
+			for (var roleUser in vm.selectedRole) {
+
+				var permission = vm.selectedRole[roleUser];
+				var notUnassigned = permission !== "unassigned";
+
+				if (notUnassigned) {
+
+					permissionsToSend.push({
+						user : roleUser,
+						permission : permission
+					});
+
+				}
 			}
-			
-			// Send the update to the server
 
 			// Update the permissions user for the selected teamspace
-			// POST /{accountName}/{modelID}/permissions
 			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
 			var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
-			
-			// We can use the current users object as its matches the required 
-			// data structure the API expects
-			$http.post(url, vm.selectedModel.currentUsers)
-				.then(function(response){
-					console.log(response);
-				})
+			$http.post(url, permissionsToSend)
 				.catch(function(error) {
 					console.error("Error: ", error);
 				});
 
 		};
+
 
 	}
 }());
