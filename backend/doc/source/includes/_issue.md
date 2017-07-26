@@ -52,7 +52,7 @@ screenshot      | string of base 64 encoded png in request body, an URL in respo
 
 Attribute       | Description                                                       | Format      | Read only
 ----------------|-------------------------------------------------------------------|-------------|---------------------
-action          | action schema object, only presence in automated comment          |             | Y
+action          | [action object](#action-object), only presence in automated comment          |             | Y
 owner           | username who leaves the comment                                   | string      | Y
 comment         | content of comment                                                | string      |
 created         | timestamp of the comment creation                                 | number      | Y
@@ -61,6 +61,13 @@ rev_id          | the revision when the comment was created, only set if using t
 guid            | id of the comment                                                 | string | Y
 viewpoint       | [viewpoint object](#viewpoint-object)
 
+
+### Action object
+Attribute       | Description                                                       
+----------------|-------------------------------------------------------------------
+property        | issue status property name
+from | old property value
+to | new property value
 
 ## Get an issue
 
