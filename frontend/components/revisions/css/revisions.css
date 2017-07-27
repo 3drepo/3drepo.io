@@ -20,7 +20,9 @@ revisions {
 
 .revisions-dropdown {
     cursor:pointer;
-    outline: none
+    outline: none;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.08);
 }
 
 revisionsDialog h3 {
