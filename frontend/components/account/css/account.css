@@ -248,21 +248,27 @@ account-info .accountInfoPage .md-button {
 account-menu {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -5px;
   z-index: 1;
-  padding-right: 10px;
 }
 account-menu md-icon {
   color: #FFFFFF;
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
-  font-size: 30px !important;
+  font-size: 45px !important;
+  width: 45px;
+  height: 45px;
   outline: none;
 }
 
-#accountMenuContent {
+account-menu button {
+    width: 65px !important;
+    height: 65px !important;
+}
+
+account-menu #accountMenuContent {
   border-radius: 4px;
 }
-#accountMenuContent md-menu-item > .md-button {
+account-menu #accountMenuContent md-menu-item > .md-button {
   display: block;
 }
 
@@ -713,7 +719,7 @@ account-assign .userColumn {
 }
 
 account-assign .rowSelects {
-    padding-right: 20px;
+  padding-right: 20px;
 }
 
 account-assign md-checkbox .md-container {
