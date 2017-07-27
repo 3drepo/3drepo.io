@@ -198,7 +198,7 @@ issues-list #issuesListItemEnter {
   right: 0;
   width: 32px;
   height: 100%;
-  background: rgb(0, 69, 148);
+  background: rgb(12, 47, 84);
   outline: none;
 }
 issues-list #issuesListItemEnter md-icon {
@@ -352,7 +352,7 @@ issue .issueCommentOwner label {
 }
 
 issue .issueCommentOwner .issueNotification {
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 
 issue .issueAutoComment label {

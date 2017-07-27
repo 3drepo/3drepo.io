@@ -20,7 +20,7 @@ account-dir #noAvatarIcon md-icon {
   font-size: 150px;
   width: 150px;
   height: 150px;
-  color: rgb(0,69,148);
+  color: rgb(12,47,84);
 }
 
 account-dir .dataContainer {
@@ -47,11 +47,11 @@ account-items #accountList {
 
 account-items .no-federations {
   padding-left: 43px;
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 
 account-items .md-list-item-text {
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 
 account-items md-list {
@@ -74,7 +74,7 @@ account-items .tree-node:hover{
 }
 
 account-items .projectName {
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 
 account-items md-list-item.tree-node > div {
@@ -87,7 +87,7 @@ account-items .tree-branch {
 
 account-items .models .modelName,
 account-items .models md-icon {
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 account-items .models md-icon {
   margin: 0 !important;
@@ -605,7 +605,7 @@ account-federations md-list {
 }
   
 account-federations .md-list-item-text {
-  color: rgb(0,150,105);
+  color: rgb(6, 86, 60);
 }
 
 account-federations .federationModelsList {
