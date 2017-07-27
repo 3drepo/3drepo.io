@@ -15,6 +15,7 @@ includes:
   - project
   - model
   - issue
+  - notification
   - permission
 
 search: true
