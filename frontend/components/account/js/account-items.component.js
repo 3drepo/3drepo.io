@@ -238,7 +238,17 @@
 
 		// FEDERATIONS
 
-		
+		vm.isDuplicateName = function() {
+			var teamspaceName = vm.federationData.teamspace;
+			var projectName = vm.federationData.project;
+			var fedName = vm.federationData.name;
+			var duplicate = AccountDataService.isDuplicateFederation(vm.accounts, teamspaceName, projectName, fedName);
+			if (duplicate) {
+				vm.errorMessage = "Federation already with this name!";
+			}
+			return duplicate;
+		};
+
 		/**
 		 * Save a federationt to a project
 		 * @param {String} teamspaceName The name of the teamspace to save to
@@ -264,7 +274,10 @@
 				.then(function (response) {
 					
 					if(response.status !== 200 && response.status !== 201){
+
 						vm.errorMessage = response.data.message;
+						alert(vm.errorMessage);
+
 					} else {
 
 						vm.errorMessage = "";

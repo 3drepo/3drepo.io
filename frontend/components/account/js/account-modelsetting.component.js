@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountModelsetting", {
 			restrict: "EA",
-			templateUrl: "account-model-setting.html",
+			templateUrl: "account-modelsetting.html",
 			bindings: {
 				account: "=",
 				model: "=",
@@ -43,6 +43,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
 			vm.units = serverConfig.units;
 			vm.mapTile = {};
 

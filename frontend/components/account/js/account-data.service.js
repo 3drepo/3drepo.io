@@ -45,13 +45,28 @@
 			getIndividualModelsByProjectName : getIndividualModelsByProjectName,
 			removeFromFederationByProjectName : removeFromFederationByProjectName,
 			removeModelByProjectName : removeModelByProjectName,
-			getIndividualTeamspaceModels : getIndividualTeamspaceModels
+			getIndividualTeamspaceModels : getIndividualTeamspaceModels,
+			isDuplicateFederation : isDuplicateFederation
 
 		};
 	
 		return accountDataService;
 	
 		///////////////
+
+		function isDuplicateFederation(teamspaces, teamspaceName, projectName, name) {
+
+			var duplicate = false;
+
+			var feds = getFederationsByProjectName(teamspaces, teamspaceName, projectName);
+			feds.forEach(function(fed){
+				if (fed.name === name) {
+					duplicate = true;
+				}
+			});
+
+			return duplicate;
+		}
 
 		function hasFederationsByProjectName(teamspaces, teamspaceName, projectName) {
 			return getFederations(teamspaces, teamspaceName, projectName).length > 0;

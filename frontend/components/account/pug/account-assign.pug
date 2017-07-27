@@ -22,8 +22,8 @@
 
 					md-card
 						table.scrollable.checkboxes(
-							ng-if="vm.teamspaceSelected"
-							layout="column", 
+							ng-if="vm.teamspaceSelected && vm.selectedTeamspace.assignUsers.length"
+							layout="column"
 							flex)
 							thead(layout="row")
 								tr: th.userColumn User
@@ -43,6 +43,8 @@
 											layout-align="center center"
 											ng-click="vm.teamspaceStateChange(user, permission)"
 											ng-checked="vm.userHasPermissions(user, permission)")
+
+						h3.noUsers(ng-if="vm.selectedTeamspace.assignUsers && vm.selectedTeamspace.assignUsers.length === 0") No available users to assign permissions
 
 
 			md-tab(label="Project", ng-click="vm.resetState()")
@@ -78,7 +80,7 @@
 
 					md-card
 						table.scrollable.checkboxes(
-							ng-if="vm.projectSelected"
+							ng-if="vm.projectSelected && vm.selectedTeamspace.assignUsers.length"
 							layout="column", 
 							flex)
 							thead(layout="column")
@@ -103,6 +105,8 @@
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
 											ng-checked="vm.userHasProjectPermissions(user, permission)")
+						
+						h3.noUsers(ng-if="vm.selectedTeamspace.assignUsers && vm.selectedTeamspace.assignUsers.length === 0") No available users to assign permissions
 
 
 
@@ -151,7 +155,7 @@
 
 					md-card
 						table.scrollable.radiobuttons(
-							ng-if="vm.modelSelected && vm.modelReady"
+							ng-if="vm.selectedTeamspace.assignUsers.length && vm.modelSelected"
 							layout="column", 
 							flex)
 							thead(layout="row")
@@ -179,3 +183,5 @@
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
 												ng-value="value")
+
+						h3.noUsers(ng-if="vm.selectedTeamspace.assignUsers && vm.selectedTeamspace.assignUsers.length === 0") No available users to assign permissions

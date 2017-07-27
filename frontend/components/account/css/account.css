@@ -605,7 +605,7 @@ account-federations md-list {
 }
   
 account-federations .md-list-item-text {
-  color: rgb(67, 160, 71);
+  color: rgb(0,150,105);
 }
 
 account-federations .federationModelsList {
@@ -668,6 +668,10 @@ account-teamspaces .loadingText md-progress-circular {
 /** Account Assign ***********************************************************************************************/
 account-assign .assignTabHolder {
   padding: 20px;
+}
+
+account-assign .assignTabHolder .noUsers {
+  text-align: center;
 }
 
 account-assign .loading {
