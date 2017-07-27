@@ -1,6 +1,12 @@
+#!/bin/bash
+
 if [ -z "$1" ]
   then
     echo "No config argument supplied"
 else
+    if [ "$EUID" -ne 0 ]
+        then echo "Please run as with sudo as Node requires root for ports over 1024"
+        exit
+    fi
     NODE_ENV=$1 NODE_CONFIG_DIR='./config' node $2 "./backend/3drepo.js"
 fi
