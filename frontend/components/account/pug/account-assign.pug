@@ -107,7 +107,7 @@
 
 
 			md-tab(label="Models & Federations", ng-click="vm.resetState()")
-				div.assignTabHolder.loadingHolder(layout="row", ng-if="(!vm.isFromUrl && vm.loadingTeamspaces && vm.projectsLoading) || (vm.isFromUrl && !vm.modelReady)")
+				div.assignTabHolder.loadingHolder(layout="row", ng-if="vm.loadingTeamspaces || vm.projectsLoading")
 					md-progress-circular.loading
 					h3 Loading Teamspace Data...
 

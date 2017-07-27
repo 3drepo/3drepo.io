@@ -478,12 +478,9 @@
 						var message = "This will go back to teamspaces page are you sure you want to continue?";
 						var path = $location.path();
 
-						console.log("popStateHandler", "/" + account + "/" + model);
-						console.log("popStateHandler", path);
 
 						if (path === "/" + account + "/" + model) {
 							var response = confirm(message);
-							console.log("popStateHandler response", response);
 							if (response) {
 								$location.path(account);
 								UnityUtil.reset();
