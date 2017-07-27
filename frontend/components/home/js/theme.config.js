@@ -36,25 +36,18 @@
 					"700": "004594",
 					"800": "004594",
 					"900": "004594",
-					"A100": "004594",
-					"A200": "004594",
-					"A400": "004594",
-					"A700": "004594",
+					"A100": "009669",
+					"A200": "009669",
+					"A400": "009669",
+					"A700": "009669",
 					"contrastDefaultColor": "light",
 					"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
 					"contrastLightColors": undefined
 				});
 
 				mdThemingProvider.theme("default")
-					.primaryPalette(paletteName, {
-						"default": "500",
-						"hue-1": "400",
-						"hue-2": "200",
-						"hue-3": "50"
-					})
-					.accentPalette("green", {
-						"default": "600"
-					})
+					.primaryPalette(paletteName)
+					.accentPalette(paletteName)
 					.warnPalette("red");
 			}
 		}]);

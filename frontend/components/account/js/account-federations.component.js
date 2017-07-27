@@ -114,7 +114,6 @@
 			}
 		});
 
-
 		function getFederationOptions(model, account){
 
 			//var isUserAccount = account.account === vm.account.account;

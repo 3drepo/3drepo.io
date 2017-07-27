@@ -352,7 +352,7 @@ issue .issueCommentOwner label {
 }
 
 issue .issueCommentOwner .issueNotification {
-  color: #43a047;
+  color: rgb(0,150,105);
 }
 
 issue .issueAutoComment label {
