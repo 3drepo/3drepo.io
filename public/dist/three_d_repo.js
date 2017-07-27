@@ -102,8 +102,7 @@ var ViewerUtilMyListeners = {};
 
 	ViewerUtil.prototype.eventFactory = function(name)
 	{
-		var self = this;
-		return function(event) { self.triggerEvent(name, event); };
+		return (function(event) { this.triggerEvent(name, event); }).bind(this);
 	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
@@ -2344,8 +2343,6 @@ var MeasureTool = {};
     "use strict";
 
     MeasureTool = function(viewer){
-        var self = this;
-
         this.viewer = viewer;
 
         this.lineStarted       = false;
@@ -2353,75 +2350,79 @@ var MeasureTool = {};
         this.measureCoords     = [null, null];
         this.measureLine       = null;
         this.measureLineCoords = null;
+        this.disableMouse      = true;
 
-        this.measureMouseMove = function(event)
+        this.mouseDownFunction = this.measureMouseDown.bind(this);
+        this.mouseMoveFunction = this.measureMouseMove.bind(this);
+
+        this.viewArea     = this.viewer.getViewArea();
+        this.doc          = this.viewArea._doc;
+        this._pickingInfo = this.viewArea._pickingInfo;
+
+        this.element = document.getElementById("x3dom-default-canvas");
+
+        this.viewer.onMouseDown(this.mouseDownFunction);
+        this.viewer.onMouseMove(this.mouseMoveFunction);
+        
+        this.createMeasureLine();
+    };
+
+    MeasureTool.prototype.measureMouseMove = function(event)
+    {
+        if(!this.disableMouse)
         {
-            var viewArea = self.viewer.getViewArea();
-            var pickingInfo = viewArea._pickingInfo;
+            this.measureCoords[1] = this._pickingInfo.pickPos;
+            this.updateMeasureLine();
+        }
+    };
 
-            self.measureCoords[1] = pickingInfo.pickPos;
-            self.updateMeasureLine();
-        };
-
-        this.measureMouseDown = function(event)
+    MeasureTool.prototype.measureMouseDown = function(event)
+    {   
+        if (this.doc.inMeasureMode)
         {
-            var viewArea = self.viewer.getViewArea();
-            var pickingInfo = viewArea._pickingInfo;
-            var doc = viewArea._doc;
+            var pos = this._pickingInfo.pickPos;
 
-                if (!self.lineStarted)
+            if (pos !== null)
+            {
+                if (!this.lineStarted)
                 {
-                    self.measureCoords[0] = pickingInfo.pickPos;
-                    self.lineStarted      = true;
+                    this.measureCoords[0] = pos;
+                    this.disableMouse = false;
 
-                    self.createMeasureLine();
-                    
-                    doc.inMeasureMode = true;
-                    self.viewer.onMouseMove(self.measureMouseMove);
                 } else {
-                    self.measureCoords[1] = pickingInfo.pickPos;
-                    self.lineStarted      = false;
-                    
-                    doc.inMeasureMode = false;
-                    self.viewer.offMouseMove(self.measureMouseMove);
+                    this.measureCoords[1] = pos;
+                    this.disableMouse = true;
                 }
-        };
+
+                this.lineStarted = !this.lineStarted;
+
+                this.updateMeasureLine();
+                this.measureLine.setAttribute("render", "true");
+            }
+        }
     };
 
     MeasureTool.prototype.measureMode = function (on) {
-        var self = this;
+        this.doc.inMeasureMode = on;
 
-        var element = document.getElementById("x3dom-default-canvas");
         if (on) {
-            self.inMeasureMode   = true;
-            element.style.cursor = "crosshair";
-            self.viewer.onMouseDown(self.measureMouseDown);
-            self.viewer.onMouseMove(self.measureMouseMove);
-
-            self.viewer.highlightObjects();
+            this.element.style.cursor = "crosshair";
+  
+            this.viewer.highlightObjects();
 
             // Switch off the pick point functionality
-            self.viewer.disableClicking();
+            this.viewer.disableClicking();
         } else {
-            self.inMeasureMode   = false;
-            self.deleteMeasureLine();
-            element.style.cursor = "-webkit-grab";
-            self.viewer.offMouseDown(self.measureMouseDown);
-            self.viewer.offMouseMove(self.measureMouseMove);
-
+            this.measureLine.setAttribute("render", "false");
+            this.element.style.cursor = "-webkit-grab";
+            this.measureCoords = [null, null];
+  
             // Restore the previous functionality
-            self.viewer.enableClicking();
+            this.viewer.enableClicking();
         }
     };
 
     MeasureTool.prototype.createMeasureLine = function() {
-        var self = this;
-
-        if (self.measureLine !== null)
-        {
-            self.deleteMeasureLine();
-        }
-
         var lineDepth,
             lineApp,
             line,
@@ -2430,9 +2431,9 @@ var MeasureTool = {};
         var line = document.createElement("LineSet");
         line.setAttribute("vertexCount", 8);
 
-        self.measureLineCoords = document.createElement("Coordinate");
-        self.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
-        line.appendChild(self.measureLineCoords);
+        this.measureLineCoords = document.createElement("Coordinate");
+        this.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
+        line.appendChild(this.measureLineCoords);
 
         var colors = document.createElement("Color");
         colors.setAttribute("color", "0 1 0,0 1 0,1 0 0,1 0 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
@@ -2448,25 +2449,23 @@ var MeasureTool = {};
         lineProperties.setAttribute("linewidthScaleFactor", 3.0);
         lineApp.appendChild(lineProperties);
 
-        self.measureLine = document.createElement("Shape");
-        self.measureLine.appendChild(lineApp);
-        self.measureLine.appendChild(line);
+        this.measureLine = document.createElement("Shape");
+        this.measureLine.appendChild(lineApp);
+        this.measureLine.appendChild(line);
 
-        self.viewer.scene.appendChild(self.measureLine);
+        this.viewer.scene.appendChild(this.measureLine);
     };
 
     MeasureTool.prototype.updateMeasureLine = function()
     {
-        var self = this;
-
-        if (self.lineStarted)
+        if (this.lineStarted)
         {
-        var coordString = "";
+            var coordString = "";
 
-            if (self.measureCoords[0] !== null && self.measureCoords[1] !== null)
+            if (this.measureCoords[0] !== null && this.measureCoords[1] !== null)
             {
-                var startCoordArray = self.measureCoords[0].toGL();
-                var endCoordArray   = self.measureCoords[1].toGL();
+                var startCoordArray = this.measureCoords[0].toGL();
+                var endCoordArray   = this.measureCoords[1].toGL();
 
                 coordString += startCoordArray.join(" ") + ",";
                 coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
@@ -2477,18 +2476,19 @@ var MeasureTool = {};
                 coordString += endCoordArray.join(" ") + ",";
                 coordString += startCoordArray.join(" ");
 
-                self.measureLineCoords.setAttribute("point", coordString);
+                this.measureLineCoords.setAttribute("point", coordString);
             }
         }
     };
 
     MeasureTool.prototype.deleteMeasureLine = function () {
-        var self = this;
+        if (this.measureLine !== null) {
+            this.measureLine.parentElement.removeChild(this.measureLine);
+            this.measureLine = null;
+            this.measureLineCoords = null;
+            this.measureCoords = [null, null];
 
-        if (self.measureLine !== null) {
-            self.measureLine.parentElement.removeChild(self.measureLine);
-            self.measureLine = null;
-            self.measureLineCoords = null;
+            this.lineStarted = false;
         }
     };
 })();
@@ -3702,8 +3702,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-                    //console.trace(event);
-
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
@@ -3712,7 +3710,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
-
+					callback(self.EVENT.PICK_POINT, {
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm,
+						trans: self.getParentTransformation(self.account, self.project)
+					});
+				}
+			} else {
+				if (pickingInfo.pickPos)
+				{
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
@@ -14458,7 +14464,9 @@ angular.module('3drepo')
 						colours: [[1.0, 0.7,  0]]
 
 					};
-					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
+					
+					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
+
 					this.setPin({data: data});
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
@@ -14467,6 +14475,10 @@ angular.module('3drepo')
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
 					pinDropMode = changes.event.currentValue.value;
+					if(!pinDropMode)
+					{
+						removePin();
+					}
 				}
 			}
 
@@ -14483,7 +14495,7 @@ angular.module('3drepo')
 		};
 
 		function removePin () {
-			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
+			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {id: newPinId});
 			self.setPin({data: null});
 		}
 	}
@@ -16779,28 +16791,28 @@ angular.module('3drepo')
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "$timeout", "EventService", "MeasureService", "serverConfig"];
 
-	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
+	var count = 0;
+
+	function MeasureCtrl ($scope, $element, $timeout, EventService, MeasureService, serverConfig) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
-			currentPickPoint;
+			currentPickPoint,
+			coordVector;
 
 		vm.axisDistance = [0.0, 0.0, 0.0];
 		vm.totalDistance = 0.0;
 
 		vm.show = false;
-		vm.distance = false;
 		vm.allowMove = false;
-		vm.units = server_config.units;
+		vm.units = serverConfig.units;
 
-		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
 
 		//console.log('measure scope', $scope);
-		vm.unit = vm.settings.unit;
-
+		vm.unit = vm.settings.properties.unit;
 
 		function mouseMoveCallback(event) {
 			var point = event.hitPnt;
@@ -16811,32 +16823,44 @@ angular.module('3drepo')
 				{
 					coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
 					coordVector = coords[0].subtract(coords[1]);
-					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
-					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
-					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
 
-					vm.totalDistance = coordVector.length().toFixed(3);
+					var numberOfDecimalPlaces = 3;
+
+					if (vm.unit === "mm")
+					{
+						numberOfDecimalPlaces = 0;
+					} else if (vm.unit === "m" ) {
+						numberOfDecimalPlaces = 3;
+					} else if (vm.unit === "ft") {
+						numberOfDecimalPlaces = 2;
+					}
+
+					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(numberOfDecimalPlaces);
+					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(numberOfDecimalPlaces);
+					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(numberOfDecimalPlaces);
+
+					vm.totalDistance = coordVector.length().toFixed(numberOfDecimalPlaces);
 
 					angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
 					angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
 
-					$scope.$apply();
-                    vm.show = true;
+					$timeout(function() {
+						$scope.$apply();
+					});
+
+					vm.show = true;
 				} else {
 					vm.show = false;
 				}
 			}
 		}
 
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
-			callback: mouseMoveCallback
-		});
+		count += 1;
 
+		MeasureService.registerCallback(mouseMoveCallback);
 
 		$scope.$on('$destroy', function(){
-			EventService.send(EventService.EVENT.VIEWER.UNREGISTER_MOUSE_MOVE_CALLBACK, {
-				callback: mouseMoveCallback
-			});
+			MeasureService.unregisterCallback();
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
@@ -16863,6 +16887,73 @@ angular.module('3drepo')
 	}
 }());
 
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.factory("MeasureService", MeasureService);
+
+	MeasureService.$inject = ["EventService", "$timeout", "$rootScope"];
+
+	function MeasureService (EventService, $timeout, $rootScope) {
+
+			var moveCallback = undefined;
+
+			var mouseMoveCallback = function(evt)
+			{
+				if (typeof moveCallback !== 'undefined')
+				{
+					moveCallback(evt);
+				}
+			};
+			
+			// Initialise when the service is created
+			EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
+				callback: mouseMoveCallback
+			});
+
+			// and when the viewer is reloaded.
+			$rootScope.$watch(EventService.currentEvent, function(event) {
+				if (event.type === EventService.EVENT.VIEWER.LOADED) {
+					EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
+						callback: mouseMoveCallback
+					});
+				}
+			});
+		
+			var registerCallback = function(callback)
+			{
+				moveCallback = callback;
+			};
+
+			var unregisterCallback = function(callback)
+			{
+				moveCallback = undefined;
+			};
+
+			return {
+				registerCallback: registerCallback,
+				unregisterCallback: unregisterCallback
+			};
+	}
+}());
 /**
  **  Copyright (C) 2014 3D Repo Ltd
  **
@@ -19560,8 +19651,7 @@ var Oculus = {};
 						issueArea.remove();
 					}
 				}
-			}
-			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
@@ -19842,14 +19932,14 @@ var Oculus = {};
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location", "$timeout"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location, $timeout)
 	{
 		var v = this;
 
-		v.initialised = $q.defer();
-		v.loaded      = $q.defer();
+		v.initialised   = $q.defer();
+		v.loaded        = $q.defer();
 
 		v.branch   = v.branch ? v.branch : "master";
 		v.revision = v.revision ? v.revision : "head";
@@ -19914,16 +20004,6 @@ var Oculus = {};
 					'mapTile': v.mapTile
 				}
 			});
-			// TODO: Move this so that the attachment is contained
-			// within the plugins themselves.
-			// Comes free with oculus support and gamepad support
-			v.oculus     = new Oculus(v.viewer);
-			v.gamepad    = new Gamepad(v.viewer);
-			v.gamepad.init();
-
-			v.measure    = new MeasureTool(v.viewer);
-
-			v.collision  = new Collision(v.viewer);
 
 			$scope.reload();
 
@@ -19935,6 +20015,7 @@ var Oculus = {};
 				v.gamepad    = new Gamepad(v.viewer);
 
 				v.gamepad.init();
+				v.measure    = new MeasureTool(v.viewer);
 
 				v.collision  = new Collision(v.viewer);
 
@@ -19947,16 +20028,6 @@ var Oculus = {};
 					v.viewer.applyModelProperties(v.account, v.project, json);
 				});
 			});
-
-			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
-			// 	function(json, status) {
-			// 		EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-			// 			account: v.account,
-			// 			project: v.project,
-			// 			settings: json.properties
-			// 	});
-			// });
-
 		};
 
 		$scope.enterVR = function() {
@@ -20090,7 +20161,9 @@ var Oculus = {};
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							v.measure.measureMode(event.value);
+							v.loaded.promise.then(function() {
+								v.measure.measureMode(event.value);
+							});
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
 							$location.path("/" + v.account + '/' + v.project).search({
