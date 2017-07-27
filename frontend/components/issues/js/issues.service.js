@@ -556,7 +556,7 @@
 				break;
 			case "closed":
 				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
+				statusIcon.colour = "#0C2F54";
 				break;
 			}
 
