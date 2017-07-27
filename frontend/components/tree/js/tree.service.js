@@ -28,7 +28,20 @@
 		var cachedTreeDefer = $q.defer();
 		var cachedTree = cachedTreeDefer.promise;
 
-		var genIdToObjRef = function(tree, map){
+
+		var service = {
+			init: init,
+			search: search,
+			getMap: getMap,
+			cachedTree: cachedTree
+		};
+
+
+		return service;
+
+		//////
+
+		function genIdToObjRef(tree, map){
 			
 			if(!map){
 				map = {};
@@ -41,9 +54,9 @@
 			});
 
 			return map;
-		};
+		}
 
-		var init = function(account, model, branch, revision, setting) {
+		function init(account, model, branch, revision, setting) {
 
 			ts.account  = account;
 			ts.model  = model;
@@ -117,6 +130,7 @@
 										tree.buf = res.data.mainTree;
 										var obj = tree.buf;
 
+										// TODO: obj doesn't exist? What is going on here?
 										var subTree = obj.nodes;
 										subTree.parent = idToObjRef[tree._id];
 										
@@ -151,9 +165,9 @@
 			cachedTreeDefer.resolve(deferred.promise);
 			return deferred.promise;
 
-		};
+		}
 
-		var search = function(searchString) {
+		function search(searchString) {
 			var deferred = $q.defer(),
 				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
 
@@ -163,10 +177,10 @@
 				});
 
 			return deferred.promise;
-		};
+		}
 
 
-		var getMap = function(treeItem){
+		function getMap(treeItem){
 
 			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
 
@@ -198,14 +212,9 @@
 				sharedIdToUid: sharedIdToUid,
 				oIdToMetaId: oIdToMetaId
 			};
-		};
+
+		}
 
 
-		return {
-			init: init,
-			search: search,
-			getMap: getMap,
-			cachedTree: cachedTree
-		};
 	}
 }());

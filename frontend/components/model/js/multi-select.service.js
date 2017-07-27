@@ -42,7 +42,8 @@
 			multiMode : multiMode,
 			handleKeysDown : handleKeysDown,
 			disableMultiSelect : disableMultiSelect
-		}
+		};
+		
 		return service;
 
 		//////////////

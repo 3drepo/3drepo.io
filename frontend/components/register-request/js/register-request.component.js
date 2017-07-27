@@ -29,17 +29,37 @@
 			controllerAs: "vm"
 		});
 
-	RegisterRequestCtrl.$inject = ["$scope", "$window"];
+	RegisterRequestCtrl.$inject = ["$scope", "$window", "AuthService"];
 
-	function RegisterRequestCtrl ($scope, $window) {
+	function RegisterRequestCtrl ($scope, $window, AuthService) {
 		var vm = this;
+
+		vm.$onInit = function() {
+
+			// TODO: this is a hack
+			AuthService.isLoggedIn().then(function(response){
+				if (response.data.username) {
+					vm.goToLoginPage();
+				}
+			});
+		};
+
+		$scope.$watch("AuthService.loggedIn", function (newValue) {
+			// TODO: this is a hack
+			if (newValue === true) {
+				vm.goToLoginPage();
+			}
+		});
 
 		/*
          * Watch state
          */
-		$scope.$watch("vm.state", function (newValue) {
-			//console.log(newValue);
-		});
+		// $scope.$watch("vm.state", function (newValue) {
+		// 	console.log("register-request : state", newValue);
+		// 	if (newValue) {
+			
+		// 	}
+		// });
 
 		vm.goToLoginPage = function () {
 			$window.location.href = "/";

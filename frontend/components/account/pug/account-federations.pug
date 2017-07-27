@@ -1,12 +1,25 @@
 div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 	div(flex, layout-fill)
-		md-list-item.model-indent(ng-click="vm.viewFederation($event, vm.account, vm.project, vm.federation)", flex)
+		md-list-item.model-indent(
+			ng-click="vm.viewFederation($event, vm.account, vm.project, vm.federation)"
+			ng-disabled="vm.federationsSaving[vm.federation.name]"
+			flex)
+
 			md-button.md-icon-button.federation(aria-label="Federation")
 				md-icon.angular-material-icons() border_all
 			p.modelName.md-list-item-text(flex="100") {{vm.federation.name}}
 
 	div.modelRight(layout-align="start-center" layout="row")
+		.modelUploadInfo(
+			layout="row"
+			layout-align="start center"
+			ng-if="vm.federationsSaving[vm.federation.name]")
+
+				p Processing...
+				md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15")
+
 		.modelRight(layout="row", layout-align="start center")
+			
 			p.modelTimestamp(ng-if="vm.federation.timestamp && vm.federation.subModels.length > 0") {{vm.federation.timestamp | prettyDate:true}}
 			md-menu(md-position-mode="target-right target", ng-if="vm.showMenu(vm.federation, vm.account)", id="{{vm.dialogCloseTo}}")
 				md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
@@ -21,9 +34,10 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 
 // Models list
 md-list-item.federationModelsList(ng-if="vm.federation.federate && vm.federation.subModels.length > 0")
-	span.modelSpacing(ng-repeat="subModel in vm.federation.subModels", ng-if="subModel.name")
-		| {{subModel.name }}
-		span(ng-if="!$last")
-			| , 
-			=" "
+	div
+		span.modelSpacing(ng-repeat="subModel in vm.federation.subModels", ng-if="subModel.name")
+			| {{subModel.name }}
+			span(ng-if="!$last")
+				| , 
+				=" "
 

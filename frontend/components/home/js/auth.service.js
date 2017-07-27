@@ -188,6 +188,8 @@
 				this.logout = function() {
 					self.authPromise = $q.defer();
 
+					UnityUtil.reset();
+					
 					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout"))
 						.then(self.logoutSuccess)
 						.catch(self.logoutFailure);

@@ -106,15 +106,15 @@ function NotificationService(serverConfig, $injector){
 	function subscribe(account, model, keys, event, callback){
 
 		joinRoom(account, model);
-		console.log("sub", getEventName(account, model, keys, event));
+		//console.log("sub", getEventName(account, model, keys, event));
 		socket.on(getEventName(account, model, keys, event), function(data){
-			console.log("msg rec", getEventName(account, model, keys, event));
+			//console.log("msg rec", getEventName(account, model, keys, event));
 			callback(data);
 		});
 	}
 
 	function unsubscribe(account, model, keys, event){
-		console.log("unsub", getEventName(account, model, keys, event));
+		//console.log("unsub", getEventName(account, model, keys, event));
 		socket.off(getEventName(account, model, keys, event));
 	}
 

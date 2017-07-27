@@ -34,6 +34,7 @@
 				subscriptions: "=",
 				isDefaultFederation: "@",
 				getPotentialFederationModels: "=",
+				federationsSaving: "=",
 				saveFederation: "=",
 				addToFederation: "=",
 				isSaving: "="
@@ -46,16 +47,12 @@
 
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountDataService) {
 		var vm = this;
-		// federationToDeleteIndex,
-		// userAccount, // For creating federations
-		// accountsToUse, // For listing federations
-		// dialogCloseToId;
 
 
 		vm.$onInit = function() {
 			vm.isSaving = false;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
-			vm.units = server_config.units;
+			vm.units = serverConfig.units;
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 
@@ -71,9 +68,9 @@
 			
 			var isUserAccount = account.account === vm.account.account;
 			return AuthService.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
-				   AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
-				   AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
-				   isUserAccount;
+					AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
+					AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
+					isUserAccount;
 		};
 
 		/*
@@ -120,18 +117,24 @@
 
 		function getFederationOptions(model, account){
 
-			var isUserAccount = account.account === vm.account.account;
+			//var isUserAccount = account.account === vm.account.account;
 			return {
 				edit: {
 					label: "Edit",
-					 icon: "edit", 
-					 hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions)
+					icon: "edit", 
+					hidden: !AuthService.hasPermission(
+						serverConfig.permissions.PERM_EDIT_FEDERATION, 
+						model.permissions
+					)
 				},
 				delete: {
 					label: "Delete", 
 					icon: "delete", 
 					color: "#F44336", 
-					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions)
+					hidden: !AuthService.hasPermission(
+						serverConfig.permissions.PERM_DELETE_MODEL, 
+						model.permissions
+					)
 				},
 				permissions: {
 					label: "Permissions", 
@@ -141,7 +144,10 @@
 				modelsetting: {
 					label: "Settings",
 					icon: "settings", 
-					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions)
+					hidden: !AuthService.hasPermission(
+						serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, 
+						model.permissions
+					)
 				}
 			};
 			
@@ -231,15 +237,21 @@
 		/**
 		 * Delete federation
 		 */
-		vm.deleteModel = function (federation) {
+		vm.deleteModel = function () {
 
 			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.modelToDelete.model);
 
 			promise.then(function (response) {
+
 				if (response.status === 200) {
 					var account = vm.currentAccount;
 					if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
-						AccountDataService.removeModelByProjectName(vm.accounts, account.name, vm.projectToDeleteFrom.name, response.data.model);
+						AccountDataService.removeModelByProjectName(
+							vm.accounts, 
+							account.name, 
+							vm.projectToDeleteFrom.name, 
+							response.data.model
+						);
 					} else {
 						
 						for (var j = 0; j < account.fedModels.length; j++) { 
@@ -259,13 +271,14 @@
 						eventAction: "delete",
 						eventLabel: "federation"
 					});
+
 				} else {
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
 					} 
-
 				}
+
 			});
 		};
 
@@ -301,7 +314,7 @@
 		 * @param {Object} event
 		 * @param {Object} index
 		 */
-		 function setupDelete (event, account, project, model) {
+		function setupDelete (event, account, project, model) {
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";

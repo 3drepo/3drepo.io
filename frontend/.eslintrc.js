@@ -17,6 +17,9 @@ module.exports = {
         "block-scoped-var" : [
             "error"
         ],
+        "no-shadow" : [
+            "error"
+        ],
         "curly" : [
             "error",
             "all"
