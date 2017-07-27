@@ -25,6 +25,7 @@
 			bindings: {
 				account: "=",
 				accounts: "=",
+				federations: "=",
 				federation: "=",
 				project: "=",
 				federationData: "=",
@@ -48,14 +49,12 @@
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountDataService) {
 		var vm = this;
 
-
 		vm.$onInit = function() {
 			vm.isSaving = false;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
 			vm.units = serverConfig.units;
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
-
 		};
 
 		vm.getProjects = function(teamspace) {
@@ -113,7 +112,6 @@
 				}
 			}
 		});
-
 
 		function getFederationOptions(model, account){
 
@@ -305,6 +303,7 @@
 		function setupSetting(event, teamspace, project, federation){
 			$location.search("proj", federation.name);
 			$location.search("targetAcct", teamspace.account);
+
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
 
@@ -337,6 +336,7 @@
 			$location.search("account", account.account);
 			$location.search("project", project.name);
 			$location.search("model", model.model);
+
 			$location.search("page", "assign");
 			vm.onShowPage({page: "assign", callingPage: "teamspaces"});
 		}

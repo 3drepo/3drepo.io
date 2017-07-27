@@ -108,9 +108,8 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 					// Save/Cancel
 					#federationSave(layout="row", layout-align="start center")
 						md-button.md-raised.md-accent(
-							ng-disabled="vm.isSaving", 
-							ng-click="vm.saveFederation(vm.federationData.teamspace, vm.federationData.project)"
-							) Save 
+							ng-disabled="vm.isDuplicateName()", 
+							ng-click="vm.saveFederation(vm.federationData.teamspace, vm.federationData.project)") Save 
 							md-progress-circular.isSavingProgress(ng-if="vm.isSaving")
 						md-button.md-accent(ng-click="vm.closeDialog()") Cancel
 

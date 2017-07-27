@@ -45,7 +45,7 @@ docs .metadataValue {
 docs .cardInfo {
   text-align: center;
   padding: 15px;
-  background: #E8EAF6;
+  background: rgba(239, 239, 239, 1);
   margin: 15px;
   border-radius: 4px;
 }

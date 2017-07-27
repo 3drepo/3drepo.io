@@ -192,6 +192,8 @@
 				$location.search("modelName", vm.model.name);
 				$location.search("modelId", vm.model.model);
 				$location.search("targetAcct", vm.account);
+				$location.search("page", "modelsetting");
+
 				vm.onShowPage({page: "modelsetting", callingPage: "permissionsspaces"});
 				break;
 
