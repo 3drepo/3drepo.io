@@ -84,7 +84,9 @@
 						colours: [[1.0, 0.7,  0]]
 
 					};
-					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
+					
+					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
+
 					this.setPin({data: data});
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED && 
@@ -93,6 +95,10 @@
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.PIN_DROP_MODE) {
 					pinDropMode = changes.event.currentValue.value;
+					if(!pinDropMode)
+					{
+						removePin();
+					}
 				}
 			}
 
@@ -109,7 +115,7 @@
 		};
 
 		function removePin () {
-			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
+			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {id: newPinId});
 			self.setPin({data: null});
 		}
 	}

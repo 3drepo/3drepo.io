@@ -52,14 +52,14 @@
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location", "$timeout"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location, $timeout)
 	{
 		var v = this;
 
-		v.initialised = $q.defer();
-		v.loaded      = $q.defer();
+		v.initialised   = $q.defer();
+		v.loaded        = $q.defer();
 
 		v.branch   = v.branch ? v.branch : "master";
 		v.revision = v.revision ? v.revision : "head";
@@ -148,16 +148,6 @@
 					v.viewer.applyModelProperties(v.account, v.project, json);
 				});
 			});
-
-			// $http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
-			// 	function(json, status) {
-			// 		EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-			// 			account: v.account,
-			// 			project: v.project,
-			// 			settings: json.properties
-			// 	});
-			// });
-
 		};
 
 		$scope.enterVR = function() {

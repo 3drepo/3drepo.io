@@ -28,6 +28,7 @@ var MeasureTool = {};
         this.measureCoords     = [null, null];
         this.measureLine       = null;
         this.measureLineCoords = null;
+        this.disableMouse      = true;
 
         this.mouseDownFunction = this.measureMouseDown.bind(this);
         this.mouseMoveFunction = this.measureMouseMove.bind(this);
@@ -37,63 +38,62 @@ var MeasureTool = {};
         this._pickingInfo = this.viewArea._pickingInfo;
 
         this.element = document.getElementById("x3dom-default-canvas");
-    };
 
+        this.viewer.onMouseDown(this.mouseDownFunction);
+        this.viewer.onMouseMove(this.mouseMoveFunction);
+        
+        this.createMeasureLine();
+    };
 
     MeasureTool.prototype.measureMouseMove = function(event)
     {
-        this.measureCoords[1] = this._pickingInfo.pickPos;
-        this.updateMeasureLine();
-
-        console.log("MOVE", this._pickingInfo.pickPos);
+        if(!this.disableMouse)
+        {
+            this.measureCoords[1] = this._pickingInfo.pickPos;
+            this.updateMeasureLine();
+        }
     };
 
     MeasureTool.prototype.measureMouseDown = function(event)
-    {
-        console.log("MEASURE DOWN", this.lineStarted);
-        
-        var pos = this._pickingInfo.pickPos;
-
-        if (pos !== null)
+    {   
+        if (this.doc.inMeasureMode)
         {
-            if (!this.lineStarted)
+            var pos = this._pickingInfo.pickPos;
+
+            if (pos !== null)
             {
-                this.createMeasureLine();
-                this.measureCoords[0] = pos;
+                if (!this.lineStarted)
+                {
+                    this.measureCoords[0] = pos;
+                    this.disableMouse = false;
 
-                this.viewer.onMouseMove(this.mouseMoveFunction);
-            } else {
-                this.measureCoords[1] = pos;
-                this.viewer.offMouseMove(this.mouseMoveFunction);
+                } else {
+                    this.measureCoords[1] = pos;
+                    this.disableMouse = true;
+                }
+
+                this.lineStarted = !this.lineStarted;
+
+                this.updateMeasureLine();
+                this.measureLine.setAttribute("render", "true");
             }
-
-            this.lineStarted = !this.lineStarted;
-
-            console.log("MC: ", this.measureCoords);
         }
-
     };
 
     MeasureTool.prototype.measureMode = function (on) {
-        console.log("MEASURE MODE", on); //this.lineStarted)
-        
-        this.doc.inMeasureMode = ! this.doc.inMeasureMode;
+        this.doc.inMeasureMode = on;
 
         if (on) {
             this.element.style.cursor = "crosshair";
-
-            this.viewer.onMouseDown(this.mouseDownFunction);
   
             this.viewer.highlightObjects();
 
             // Switch off the pick point functionality
             this.viewer.disableClicking();
         } else {
-            this.deleteMeasureLine();
+            this.measureLine.setAttribute("render", "false");
             this.element.style.cursor = "-webkit-grab";
-
-            this.viewer.offMouseDown(this.mouseDownFunction);
-            this.viewer.offMouseMove(this.mouseMoveFunction);
+            this.measureCoords = [null, null];
   
             // Restore the previous functionality
             this.viewer.enableClicking();
@@ -101,11 +101,6 @@ var MeasureTool = {};
     };
 
     MeasureTool.prototype.createMeasureLine = function() {
-        if (this.measureLine !== null)
-        {
-            this.deleteMeasureLine();
-        }
-
         var lineDepth,
             lineApp,
             line,
@@ -160,7 +155,6 @@ var MeasureTool = {};
                 coordString += startCoordArray.join(" ");
 
                 this.measureLineCoords.setAttribute("point", coordString);
-                //console.log("COORD: " + coordString);
             }
         }
     };

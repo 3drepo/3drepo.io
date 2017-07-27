@@ -670,8 +670,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					account = projectParts[0];
 					project = projectParts[1];
 
-                    //console.trace(event);
-
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
@@ -680,7 +678,15 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
-
+					callback(self.EVENT.PICK_POINT, {
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm,
+						trans: self.getParentTransformation(self.account, self.project)
+					});
+				}
+			} else {
+				if (pickingInfo.pickPos)
+				{
 					callback(self.EVENT.PICK_POINT, {
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,

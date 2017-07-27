@@ -41,50 +41,62 @@
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "$timeout", "EventService", "MeasureService", "serverConfig"];
 
 	var count = 0;
 
-	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
+	function MeasureCtrl ($scope, $element, $timeout, EventService, MeasureService, serverConfig) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
-			currentPickPoint;
+			currentPickPoint,
+			coordVector;
 
 		vm.axisDistance = [0.0, 0.0, 0.0];
 		vm.totalDistance = 0.0;
 
 		vm.show = false;
 		vm.allowMove = false;
-		vm.units = server_config.units;
+		vm.units = serverConfig.units;
 
-		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
 
 		//console.log('measure scope', $scope);
-		vm.unit = vm.settings.unit;
+		vm.unit = vm.settings.properties.unit;
 
 		function mouseMoveCallback(event) {
 			var point = event.hitPnt;
 			vm.screenPos = [event.layerX, event.layerY];
-
-			console.log("MOVETO: ", vm.screenPos, count);
 
 			if (vm.allowMove) {
 				if (point)
 				{
 					coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
 					coordVector = coords[0].subtract(coords[1]);
-					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
-					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
-					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
 
-					vm.totalDistance = coordVector.length().toFixed(3);
+					var numberOfDecimalPlaces = 3;
+
+					if (vm.unit === "mm")
+					{
+						numberOfDecimalPlaces = 0;
+					} else if (vm.unit === "m" ) {
+						numberOfDecimalPlaces = 3;
+					} else if (vm.unit === "ft") {
+						numberOfDecimalPlaces = 2;
+					}
+
+					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(numberOfDecimalPlaces);
+					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(numberOfDecimalPlaces);
+					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(numberOfDecimalPlaces);
+
+					vm.totalDistance = coordVector.length().toFixed(numberOfDecimalPlaces);
 
 					angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
 					angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
 
-					$scope.$apply();
+					$timeout(function() {
+						$scope.$apply();
+					});
 
 					vm.show = true;
 				} else {
@@ -95,15 +107,10 @@
 
 		count += 1;
 
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
-			callback: mouseMoveCallback
-		});
-
+		MeasureService.registerCallback(mouseMoveCallback);
 
 		$scope.$on('$destroy', function(){
-			EventService.send(EventService.EVENT.VIEWER.UNREGISTER_MOUSE_MOVE_CALLBACK, {
-				callback: mouseMoveCallback
-			});
+			MeasureService.unregisterCallback();
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
