@@ -3459,6 +3459,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			};
 
 			self.showAll = function() {
+				self.scene._x3domNode._graph.volume.invalidate();
 				self.runtime.fitAll();
 
 				// TODO: This is a hack to get around a bug in X3DOM
