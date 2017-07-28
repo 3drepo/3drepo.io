@@ -12,16 +12,32 @@ html(lang="en" ng-app="3drepo")
 		// All CSS minified
 		// TODO: Can we just not use Material Design on this page? Would make it more maintainable
 		// and less buggy with Phantom JS
-		link(rel='stylesheet', type='text/css', href=baseURL + '/public/dist/three_d_repo.min.css')
+		//link(rel='stylesheet', type='text/css', href=baseURL + '/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
 		style(type='text/css').
+
+			html, body {
+				font-family: Roboto, sans-serif;
+				width: 100%;
+				height: 100%;
+				padding: 0;
+				margin: 0;
+			}
+
+			div.container {
+				width: 90%;
+				padding: 5%;
+				position: absolute;
+			}
+
 			p {
 				margin-top: 0px;
 				margin-bottom: 0px;
 				padding: 0px;
+				font-weight: lighter;
 			}
 			table {
 				width: 100%;
@@ -32,121 +48,147 @@ html(lang="en" ng-app="3drepo")
 				text-align: left;
 				font-weight: normal;
 				padding: 0;
+				padding-top: 10px;
 				vertical-align: top;
 			}
 			.tableHead {
 				font-weight: bold;
-				padding-bottom: 10px;
+				padding-bottom: 1px;
+				margin-bottom: 9px;
+				border-bottom: 1px solid black; 
+				border-collapse: collapse;
 			}
 
 			.productCol {
 				width: 300px;
 			}
 
-	body
-		billing
-			div(layout-fill, layout="column", class="layout-fill layout-column")
-				md-content(
-					layout="row"
-					flex="none"
-					layout-align="center"
-					class="ng-scope _md layout-align-center-stretch layout-row flex-none")
+			.topBlocks {
+				width: 50%;
+				display: inline-block;
+				height: 300px;
+				vertical-align: top;
+			}
 
-					div(layout="column", class="layout-column", style="width:90%")
-						#billingCompanyAddress(
-							layout="row", 
-							layout-align="start start", 
-							class="layout-align-start-start layout-row")
+			#billingCompanyAddress {
+				text-align: left;
+			}
 
-							div(layout="column", class="layout-column flex-45", flex="45")
-								p.md-title 3D Repo
-								p 20 Eastbourne Terrace
-								p London
-								p W2 6LG
-								p United Kingdom
-								p VAT registration: GB 206 9090 15
-								p
-									| Email:
-									=" "
-									a(href="mailto:support@3drepo.org") support@3drepo.org
+			#billingInvoice {
+				text-align: right;
+			}
 
-							span.flex(flex)
-
-							div(layout="column"
-								layout-align="end end"
-								class="layout-align-end-end layout-column")
-
-								img#billingInvoiceLogo(src=baseURL+"/public/images/logo.png" style="height:57.5px")
-								p.md-display-1.ng-binding 
-														| #{billing.pending ? 'Order confirmation': 'Invoice'}
-
-								if !billing.pending
-									br
-									span PayPal transaction ID: #{billing.transactionId}
-
-						#billingGap
-
-						table.billingInfoTitle
-							tr
-								th.tableCell.tableHead To
-								th.tableCell.tableHead Date
-								th.tableCell.tableHead Invoice Number
-
-							md-divider(flex="none", class="flex-none")
-
-							tr.billingClientAddress
-							
-								td.tableCell 
-									div 
-										p #{billing.info.firstName} #{billing.info.lastName}
-										if billing.info.company
-											p #{billing.info.company}
-										p #{billing.info.line1}
+			.companyTitle {
+				font-weight: 500;
+				font-size: 1.2em;
+			}
 			
-										if billing.info.line2
-											p #{billing.info.line2}
-										p #{billing.info.city}
-										p #{billing.info.postalCode}
-										p #{billing.info.country}
-										if billing.info.vat
-											p VAT ID: #{billing.info.vat}
+			.invoice {
+				margin-top: 50px;
+				font-size: 40px;
+			}
 
-								td.tableCell #{billing.createdAt} GMT
-								td.tableCell #{billing.invoiceNo}
+			#billingPeriod {
+				font-size: 14px;
+				font-weight: 400;
+				color: #8a8a8a;
+			}
 
-						table.billingInfoTitle()
-							tr
-								th.tableCell.tableHead.productCol Product
-								th.tableCell.tableHead Quantity
-								th.tableCell.tableHead Unit Price
-								th.tableCell.tableHead Net
-								th.tableCell.tableHead VAT (%)
-								th.tableCell.tableHead VAT
-								th.tableCell.tableHead Total
+			#billingInvoiceLogo {
+				height: 57.5px;
+			}
 
-							md-divider(flex="none", class="flex-none")
+	body
 
-							tr
-								td.tableCell.productCol 
-									p 
-										| #{billing.items[0].description}
-										if billing.proRata
-											|   (pro-rata)
-									p#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
+		div.container
+			div
+				#billingCompanyAddress.topBlocks
 
-								td.tableCell #{billing.items.length}
-								td.tableCell £#{billing.unitPrice}
-								td.tableCell £#{billing.netAmount}
-								td.tableCell #{billing.taxPercentage}%
-								td.tableCell £#{billing.taxAmount}
-								td.tableCell £#{billing.amount}
+					div(layout="column", class="layout-column flex-45", flex="45")
+						p.companyTitle 3D Repo
+						p 20 Eastbourne Terrace
+						p London
+						p W2 6LG
+						p United Kingdom
+						p VAT registration: GB 206 9090 15
+						p
+							| Email:
+							=" "
+							a(href="mailto:support@3drepo.org") support@3drepo.org
 
-						md-divider(flex="none", class="flex-none")
+					span.flex(flex)
+
+				#billingInvoice.topBlocks
+					div
+						img#billingInvoiceLogo(src=baseURL+"/public/images/logo.png")
+					
+					div.invoice
+						p #{billing.pending ? 'Order confirmation': 'Invoice'}
+					
+					if !billing.pending
 						br
-						p You next regular monthly payment £#{billing.nextPaymentAmount} will be billed on #{billing.nextPaymentDate}
-						if billing.B2B_EU
-							#billingReverseCharge(flex)
-								p
-									| This invoice may be subject to the
-									=" "
-									a(target="_blank", href="http://ec.europa.eu/taxation_customs/taxation/vat/topics/invoicing_en.htm") Reverse Charge
+						span PayPal transaction ID: #{billing.transactionId}
+
+			table(cellspacing="0")
+				tr
+					th.tableCell.tableHead To
+					th.tableCell.tableHead Date
+					th.tableCell.tableHead Invoice Number
+
+
+				tr.billingClientAddress
+				
+					td.tableCell 
+						div 
+							p #{billing.info.firstName} #{billing.info.lastName}
+							if billing.info.company
+								p #{billing.info.company}
+							p #{billing.info.line1}
+
+							if billing.info.line2
+								p #{billing.info.line2}
+							p #{billing.info.city}
+							p #{billing.info.postalCode}
+							p #{billing.info.country}
+							if billing.info.vat
+								p VAT ID: #{billing.info.vat}
+
+					td.tableCell #{billing.createdAt} GMT
+					td.tableCell #{billing.invoiceNo}
+
+			table(cellspacing="0")
+				tr
+					th.tableCell.tableHead.productCol Product
+					th.tableCell.tableHead Quantity
+					th.tableCell.tableHead Unit Price
+					th.tableCell.tableHead Net
+					th.tableCell.tableHead VAT (%)
+					th.tableCell.tableHead VAT
+					th.tableCell.tableHead Total
+
+				
+
+				tr
+					td.tableCell.productCol 
+						p 
+							| #{billing.items[0].description}
+							if billing.proRata
+								|   (pro-rata)
+						p#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
+
+					td.tableCell #{billing.items.length}
+					td.tableCell £#{billing.unitPrice}
+					td.tableCell £#{billing.netAmount}
+					td.tableCell #{billing.taxPercentage}%
+					td.tableCell £#{billing.taxAmount}
+					td.tableCell £#{billing.amount}
+
+			
+			br
+			p You next regular monthly payment £#{billing.nextPaymentAmount} will be billed on #{billing.nextPaymentDate}
+			if billing.B2B_EU
+				div
+					p
+						| This invoice may be subject to the
+						=" "
+						a(target="_blank", href="http://ec.europa.eu/taxation_customs/taxation/vat/topics/invoicing_en.htm") Reverse Charge
