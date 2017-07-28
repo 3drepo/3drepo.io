@@ -26,6 +26,8 @@
 	function AccountService($http, $q, serverConfig, UtilsService) {
 		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
 
+		var accountPromise = $q.defer();
+
 		var service = {
 			getUserInfo : getUserInfo,
 			newSubscription : newSubscription,
@@ -33,7 +35,8 @@
 			uploadModel : uploadModel,
 			newModel : newModel,
 			updatePassword : updatePassword,
-			updateInfo : updateInfo
+			updateInfo : updateInfo,
+			accountPromise: accountPromise.promise
 		};
 
 		return service;
@@ -173,7 +176,9 @@
 		 * @returns {*|promise}
 		 */
 		function getUserInfo(username) {
-			return UtilsService.doGet(username + ".json");
+			var currentAccount = UtilsService.doGet(username + ".json");
+			accountPromise.resolve(currentAccount);
+			return currentAccount;
 		}
 
 

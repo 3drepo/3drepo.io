@@ -4,13 +4,23 @@
 			.md-toolbar-tools
 				h2 Billing
 
-		md-tabs(md-dynamic-height, md-border-bottom)
+		md-tabs(md-dynamic-height, md-border-bottom, ng-if="true") 
 			md-tab(label="Subscription")
-				.userContent#accountBillingSubscription
+
+				div.assignTabHolder.loadingHolder(
+					ng-if="!vm.billings || !vm.subscriptions"
+					layout="row")
+
+					md-progress-circular.loading
+					br
+					h3 Loading Billing Data
+
+				div.userContent#accountBillingSubscription(ng-if="vm.billings && vm.subscriptions")
+
 					div(layout="row")
 						md-input-container(flex)
 							label Licenses
-							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", tdr-focus="true", required)
+							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", required)
 						md-input-container(flex)
 							label Payment (£ / month) **
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")

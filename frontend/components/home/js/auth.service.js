@@ -38,7 +38,9 @@
 					getUsername: getUsername,
 					login: login,
 					logout: logout,
-					hasPermission: hasPermission
+					hasPermission: hasPermission,
+					sendLoginRequest: sendLoginRequest,
+					authPromise : authPromise.promise
 				};
 
 				return service;

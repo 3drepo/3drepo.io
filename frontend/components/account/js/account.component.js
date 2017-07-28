@@ -61,25 +61,36 @@
 			// TODO: This is also a mess
 			getUserInfo();
 
-			if (vm.username === AuthService.getUsername()) {
-		
-				billingsPromise = UtilsService.doGet(vm.account + "/invoices");
-				billingsPromise.then(function (response) {
-					vm.billings = response.data;
-				});
+			AuthService.authPromise.then(function(){
+				AccountService.accountPromise.then(function(){
+					
+					// If you go to a different URL teamspace you need to check 
+					// that you are actually the user in question!
 
-				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
-				subscriptionsPromise.then(function (response) {
-					vm.subscriptions = response.data;
-				});
+					// TODO: This shouldn't be necessary
 
-				plansPromise = UtilsService.doGet("plans");
-				plansPromise.then(function (response) {
-					if (response.status === 200) {
-						vm.plans = response.data;
-					}
+					if (vm.username === AuthService.getUsername()) {
+				
+						billingsPromise = UtilsService.doGet(vm.account + "/invoices");
+						billingsPromise.then(function (response) {
+							vm.billings = response.data;
+						});
+
+						subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+						subscriptionsPromise.then(function (response) {
+							vm.subscriptions = response.data;
+						});
+
+						plansPromise = UtilsService.doGet("plans");
+						plansPromise.then(function (response) {
+							if (response.status === 200) {
+								vm.plans = response.data;
+							}
+						});
+					} 
 				});
-			} 
+			});
+			
 			
 		}
 
@@ -135,6 +146,7 @@
 									UtilsService.closeDialog();
 									initAccount();
 								}, 2000);
+
 							}).catch(function(error){
 								console.error("PayPal error", error);
 							});
@@ -189,48 +201,48 @@
 		}
 
 		function getUserInfo () {
-			var userInfoPromise;
 
-			userInfoPromise = AccountService.getUserInfo(vm.account);
-			userInfoPromise.then(function(response) {
+			AccountService.getUserInfo(vm.account)
+				.then(function(response) {
 
-				var i, length;
+					if (response.data) {
+						vm.accounts = response.data.accounts;
+						vm.username = vm.account;
+						vm.firstName = response.data.firstName;
+						vm.lastName = response.data.lastName;
+						vm.email = response.data.email;
+						vm.hasAvatar = response.data.hasAvatar;
 
-				if (response.data) {
-					vm.accounts = response.data.accounts;
-					vm.username = vm.account;
-					vm.firstName = response.data.firstName;
-					vm.lastName = response.data.lastName;
-					vm.email = response.data.email;
-					vm.hasAvatar = response.data.hasAvatar;
-
-					// Pre-populate billing name if it doesn't exist with profile name
-					vm.billingAddress = {};
-					if (response.data.hasOwnProperty("billingInfo")) {
-						vm.billingAddress = response.data.billingInfo;
-						if (!vm.billingAddress.hasOwnProperty("firstName")) {
-							vm.billingAddress.firstName = vm.firstName;
-							vm.billingAddress.lastName = vm.lastName;
-						}
-					}
-
-					// Get quota
-					if (angular.isDefined(vm.accounts)) {
-						for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-							if (vm.accounts[i].account === vm.account) {
-								vm.quota = vm.accounts[i].quota;
-								break;
+						// Pre-populate billing name if it doesn't exist with profile name
+						vm.billingAddress = {};
+						if (response.data.hasOwnProperty("billingInfo")) {
+							vm.billingAddress = response.data.billingInfo;
+							if (!vm.billingAddress.hasOwnProperty("firstName")) {
+								vm.billingAddress.firstName = vm.firstName;
+								vm.billingAddress.lastName = vm.lastName;
 							}
 						}
+
+						// Get quota
+						if (angular.isDefined(vm.accounts)) {
+							for (var i = 0; i < vm.accounts.length; i++) {
+								if (vm.accounts[i].account === vm.account) {
+									vm.quota = vm.accounts[i].quota;
+									break;
+								}
+							}
+						}
+
+						vm.loadingAccount = false;
+					} else {
+						console.debug("Reponse doesn't have data", response);
 					}
+					
 
-					vm.loadingAccount = false;
-				} else {
-					console.debug("Reponse doesn't have data", response);
-				}
-				
-
-			});
+				})
+				.catch(function(error){
+					console.error("Error", error);
+				});
 
 		}
 	}
