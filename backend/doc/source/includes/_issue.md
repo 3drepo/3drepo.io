@@ -73,8 +73,6 @@ to | new property value
 
 ### GET /{accountName}/{modelId}/issues/{issueId}.json
 
-The response includes comments of the issue and all the screenshots are represented by an URL of the resources.
-
 > Example request
 
 ```http
@@ -200,12 +198,9 @@ GET /repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues/d7090f40-5a78-11e7-b7f1
 }
 ```
 
+The response includes comments of the issue and all the screenshots are represented by an URL of the resources.
+
 ## Get issues
-
-### GET /{accountName}/{modelId}/issues.json
-### GET /{accountName}/{modelId}/revision/{revId}/issues.json
-
-Similar to get an issue API but the issues in this response doesn't contains comments.
 
 > Example response
 
@@ -287,14 +282,14 @@ GET /repoman/68ddc470-9ebe-4520-9d91-a35da65cc610/issues.json HTTP/1.1
 ]
 ```
 
+### GET /{accountName}/{modelId}/issues.json
+### GET /{accountName}/{modelId}/revision/{revId}/issues.json
+
+Similar to get an issue API but the issues in this response doesn't contains comments.
+
+
+
 ## Create an issue
-
-### POST /{accountName}/{modelId}/issues.json
-### POST /{accountName}/{modelId}/revision/{revId}/issues.json
-
-Request body
-
-[Issue object](#issue-object)
 
 > Example request
 
@@ -371,12 +366,16 @@ POST /repoman/611fc1ed-017b-4fc0-bdd5-ed40077756c3/issues.json HTTP/1.1
 }
 ```
 
+### POST /{accountName}/{modelId}/issues.json
+### POST /{accountName}/{modelId}/revision/{revId}/issues.json
+
+Request body
+
+[Issue object](#issue-object)
+
+
+
 ## Update an issue status
-
-### PUT /{accountName}/{modelId}/issues/{issueId}.json
-### PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json
-
-On updating issue status, the system will create an automated comment stating what the user has changed.
 
 > Example request
 
@@ -395,13 +394,14 @@ PUT /repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-00
 }
 ```
 
-## Create a comment
-
 ### PUT /{accountName}/{modelId}/issues/{issueId}.json
 ### PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json
 
-Create a comment in an issue
+On updating issue status, the system will create an automated comment stating what the user has changed.
 
+
+
+## Create a comment
 
 > Example request
 
@@ -447,12 +447,13 @@ PUT /repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-00
 }
 ```
 
-## Update a comment
-
 ### PUT /{accountName}/{modelId}/issues/{issueId}.json
 ### PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json
 
-Update a comment, commenIndex start from 0.
+Create a comment in an issue
+
+
+## Update a comment
 
 > Example request
 
@@ -468,12 +469,14 @@ PUT /repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-00
 }
 ```
 
-## Delete a comment
-
 ### PUT /{accountName}/{modelId}/issues/{issueId}.json
 ### PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json
 
-Deleta a comment, commenIndex start from 0.
+Update a comment, commenIndex start from 0.
+
+
+
+## Delete a comment
 
 > Example request
 
@@ -488,3 +491,10 @@ PUT /repoman/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-00
 	"commentIndex": 1
 }
 ```
+
+### PUT /{accountName}/{modelId}/issues/{issueId}.json
+### PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json
+
+Deleta a comment, commenIndex start from 0.
+
+
