@@ -61,7 +61,7 @@
 			// TODO: This is also a mess
 			getUserInfo();
 
-			if (vm.username === AuthService.username) {
+			if (vm.username === AuthService.getUsername()) {
 		
 				billingsPromise = UtilsService.doGet(vm.account + "/invoices");
 				billingsPromise.then(function (response) {

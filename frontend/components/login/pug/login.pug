@@ -27,7 +27,7 @@
 							input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
 
 					div(layout="row", layout-align="start" flex="none")
-						md-button.md-accent.md-raised(
+						md-button.md-accent.md-raised.loginButton(
 							ng-click="vm.login()"
 						) Log In
 					h3.loginError {{vm.errorMessage}}

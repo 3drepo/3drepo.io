@@ -242,7 +242,7 @@
 			var message = "The model was not found or failed to load correctly. " +
 			" You will now be redirected to the teamspace page.";
 			alert(message);
-			$location.path(AuthService.username);
+			$location.path(AuthService.getUsername());
 		};
 
 		vm.setupModelInfo = function() {

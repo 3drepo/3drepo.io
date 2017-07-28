@@ -35,11 +35,15 @@
 
 							StateManager.state.changing = true;
 
-							AuthService.init().then(function (loggedIn) {
-								StateManager.state.authInitialized = true;
-
-								finishedAuth.resolve();
-							});
+							AuthService.init(false)
+								.then(function () {
+									StateManager.state.authInitialized = true;
+									finishedAuth.resolve();
+								})
+								.catch(function(error) {
+									console.error("Error initialising auth from state manager: ", error);
+									finishedAuth.reject();
+								});
 
 							return finishedAuth.promise;
 						}]
@@ -328,8 +332,8 @@
 							// If we are not trying to access a function
 							// and yet there is no account set. Then
 							// we need to go back to the account page if possible.
-							if ((functionList.length === 0) && AuthService.loggedIn && !self.state.account) {
-								self.setStateVar("account", AuthService.username);
+							if ((functionList.length === 0) && AuthService.isLoggedIn() && !self.state.account) {
+								self.setStateVar("account", AuthService.getUsername());
 								self.updateState();
 							} else {
 								self.updateState(true);

@@ -51,8 +51,6 @@
 				removeTrailingSlash();
 			}
 
-			//console.log($location.absUrl());
-	
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
@@ -117,15 +115,15 @@
 
 			if (functionToInsert != null) {
 				var needsRedirect = vm.loginRedirects.indexOf(functionToInsert) !== -1;
-				if (AuthService.loggedIn && needsRedirect) {
-					$location.path(AuthService.username);
+				if (AuthService.isLoggedIn() && needsRedirect) {
+					$location.path(AuthService.getUsername());
 				} else {
 					insertFunctionDirective(functionToInsert);
 				}
 				
 			} else {
 				// If you are not logged in
-				if (!AuthService.loggedIn) {
+				if (!AuthService.isLoggedIn()) {
 					insertDirective(loginMarkup);
 				} 
 			}
@@ -148,11 +146,11 @@
 			$location.path(minusSlash);
 		}
 
-		vm.isLoggedIn = function(){
+		vm.sendLoginRequest = function(){
 			if (!AuthService) {
 				return false;
 			}
-			return AuthService.loggedIn;
+			return AuthService.isLoggedIn();
 		};
 
 
@@ -223,7 +221,13 @@
 							EventService.send(EventService.EVENT.UPDATE_STATE);
 
 							if(!StateManager.state.account){
-								EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
+								var username = AuthService.getUsername();
+								if (!username) {
+									console.error("Username is not defined for statemanager!")
+								}
+								EventService.send(EventService.EVENT.SET_STATE, { 
+									account: username
+								});
 							}
 						}
 					} else {
@@ -244,16 +248,16 @@
 
 				} else if (event.type === EventService.EVENT.SHOW_TEAMSPACES) {
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
-					$location.path(AuthService.username);
+					$location.path(AuthService.getUsername());
 				} else if (event.type === EventService.EVENT.GO_HOME) {
 
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
 
 					// TODO: Do this properly using state manager
 					
-					if (AuthService.loggedIn) {
-						$location.path(AuthService.username);
-						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
+					if (AuthService.isLoggedIn()) {
+						$location.path(AuthService.getUsername());
+						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
 					} else {
 						$location.path("");
 					}

@@ -97,9 +97,11 @@
 			$timeout(function() {
 				if (angular.isUndefined(type)) {
 					console.trace("UNDEFINED EVENT TYPE" + type);
-					
 				} else {
 					currentEvent = {type: type, value: value, stack: stack};
+					if (window.DEBUG && window.DEBUG === true) {
+						console.log("EVENT: ", currentEvent.type + " => ", currentEvent);
+					}
 				}
 			});
 		};

@@ -22,30 +22,58 @@
 		.service("AuthService", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
 			function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
 
-				var self = this;
+				var authPromise = $q.defer();
 
-				self.authPromise = $q.defer();
-				self.loggedIn = null;
-				self.username = null;
+				// TODO: null means it's the first login, 
+				// should be a seperate var
+				var loggedIn = null;
+				var username;
 
-				this.loginSuccess = function(response) {
-					self.loggedIn = true;
-					self.username = response.data.username;
-					self.userRoles = response.data.roles;
+				initAutoLogout();
+
+				var service = {
+					username: username,
+					isLoggedIn: isLoggedIn,
+					init : init,
+					getUsername: getUsername,
+					login: login,
+					logout: logout,
+					hasPermission: hasPermission
+				};
+
+				return service;
+
+				////////
+
+				function isLoggedIn() {
+					return loggedIn;
+				}
+
+				function initAutoLogout() {
+					// Check for expired sessions
+					var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
+					$interval(function() {
+						init(true);
+					}, 1000 * checkExpiredSessionTime);
+				}
+				
+				function loginSuccess(response) {
+
+					loggedIn = true;
+					username = response.data.username;
 
 					EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
 						username: response.data.username, 
 						initialiser: response.data.initialiser 
 					});
-					AnalyticService.setUserId(self.username);
+					AnalyticService.setUserId(username);
 
-					self.authPromise.resolve(self.loggedIn);
-				};
+					authPromise.resolve(loggedIn);
+				}
 
-				this.loginFailure = function(response) {
-					self.loggedIn = false;
-					self.username = null;
-					self.userRoles = null;
+				function loginFailure(response) {
+					loggedIn = false;
+					username = null;
 
 					var initialiser = response.initialiser;
 					response.initialiser = undefined;
@@ -56,34 +84,32 @@
 						error: response.data 
 					});
 
-					self.authPromise.resolve(response.data);
-				};
+					authPromise.resolve(response.data);
+				}
 
-				this.logoutSuccess = function() {
-					self.loggedIn  = false;
-					self.username  = null;
-					self.userRoles = null;
+				function logoutSuccess() {
+					loggedIn  = false;
+					username  = null;
 
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
-					self.authPromise.resolve(self.loggedIn);
-				};
+					authPromise.resolve(loggedIn);
+				}
 
-				this.logoutFailure = function(reason) {
-					self.loggedIn  = false;
-					self.username  = null;
-					self.userRoles = null;
+				function logoutFailure(reason) {
+					loggedIn  = false;
+					username  = null;
+
 					localStorage.setItem("tdrLoggedIn", "false");
 					EventService.send(
 						EventService.EVENT.USER_LOGGED_OUT, 
 						{ error: reason }
 					);
 
-					self.authPromise.resolve(self.loggedIn);
-				};
+					authPromise.resolve(loggedIn);
+				}
 
-
-				this.init = function(interval) {
+				function init(interval) {
 
 					var initPromise = $q.defer();
 
@@ -92,114 +118,91 @@
 					// If we are not logged in, check
 					// with the API server whether we
 					// are or not
-					if(self.loggedIn === null || interval) {
+					if(loggedIn === null || interval) {
 						// Initialize
-						self.isLoggedIn()
+						sendLoginRequest()
 							.then(function(data) {
 								// If we are not logging in because of an interval
 								// then we are initializing the auth plugin
 								if (!interval) {
 									data.initialiser = true;
-									self.loginSuccess(data);
-								} else if (!self.loggedIn) {
+									loginSuccess(data);
+								} else if (!loggedIn) {
 									// If we are logging in using an interval,
-									// we only need to run login success if the self.loggedIn
+									// we only need to run login success if the loggedIn
 									// says we are not logged in.
-									self.loginSuccess(data);
+									loginSuccess(data);
 								}
 							})
 							.catch(function(reason) {
-								if (interval && 
-									reason.code == serverConfig.responseCodes.ALREADY_LOGGED_IN.code) {
+								var code = serverConfig.responseCodes.ALREADY_LOGGED_IN.code;
+								if (interval && reason.code == code) {
 
-									self.loginSuccess(reason);
+									loginSuccess(reason);
 
-								} else if (self.loggedIn === null || (interval && self.loggedIn)) {
+								} else if (loggedIn === null || (interval && loggedIn)) {
 
 									reason.initialiser = true;
-									self.loginFailure(reason);
+									loginFailure(reason);
 
 								}
 							});
 
-						self.authPromise.promise.then(function() {
-							initPromise.resolve(self.loggedIn);
+						authPromise.promise.then(function() {
+							initPromise.resolve(loggedIn);
 						}).catch(function(error){
 							console.error("Authentication error:", error);
 							initPromise.reject(error);
 						});
 
 					} else {
-						if (self.loggedIn) {
-							EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: self.username });
+						if (loggedIn) {
+							EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: username });
 						} else {
 							EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 						}
 
-						initPromise.resolve(self.loggedIn);
+						initPromise.resolve(loggedIn);
 					}
 
 					return initPromise.promise;
-				};
+				}
 
-				// Check for expired sessions
-				var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
+				function getUsername( ) { 
+					return username; 
+				}
 
-				this.intervalCaller = $interval(function() {
-					//console.log("running init in interval call")
-					self.init(true);
-				}, 1000 * checkExpiredSessionTime);
-
-				this.loadModelRoles = function(account, model) {
-					var rolesPromise = $q.defer();
-
-					$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/roles.json"))
-						.then(function(data) {
-							self.modelRoles = data;
-							rolesPromise.resolve();
-						}).catch(function() {
-							self.modelRoles = null;
-							rolesPromise.resolve();
-						});
-
-					return rolesPromise.promise;
-				};
-
-				this.getUsername = function() { 
-					return self.username; 
-				};
-
-				this.isLoggedIn = function() {
+				function sendLoginRequest() {
 					return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
-				};
+				}
 
-				this.login = function(username, password) {
-					self.authPromise = $q.defer();
+				function login(loginUsername, password) {
+					authPromise = $q.defer();
 
-					var postData = {username: username, password: password};
+					var postData = {username: loginUsername, password: password};
 
 					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
-						.then(self.loginSuccess)
-						.catch(self.loginFailure);
+						.then(loginSuccess)
+						.catch(loginFailure);
 
-					return self.authPromise.promise;
-				};
+					return authPromise.promise;
+				}
 
-				this.logout = function() {
-					self.authPromise = $q.defer();
+				function logout() {
+					authPromise = $q.defer();
 
 					UnityUtil.reset();
 					
 					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout"))
-						.then(self.logoutSuccess)
-						.catch(self.logoutFailure);
+						.then(logoutSuccess)
+						.catch(logoutFailure);
 
-					return self.authPromise.promise;
-				};
+					return authPromise.promise;
+				}
 
-				this.hasPermission = function(requiredPerm, permissions){
+				function hasPermission(requiredPerm, permissions){
 					return permissions.indexOf(requiredPerm) !== -1;
-				};
+				}
 
 			}]);
 })();
