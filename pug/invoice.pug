@@ -10,94 +10,139 @@ html(lang="en" ng-app="3drepo")
 		title 3D Repo
 
 		// All CSS minified
+		// TODO: Can we just not use Material Design on this page? Would make it more maintainable
+		// and less buggy with Phantom JS
 		link(rel='stylesheet', type='text/css', href=baseURL + '/public/dist/three_d_repo.min.css')
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
-	body
-		billing.ng-scope.ng-isolate-scope(username='vm.query.username', token='vm.query.token', query='vm.query')
-			div(layout-fill, layout="column", class="layout-fill layout-column")
+		style(type='text/css').
+			p {
+				margin-top: 0px;
+				margin-bottom: 0px;
+				padding: 0px;
+			}
+			table {
+				width: 100%;
+				table-layout : fixed;
+				padding-bottom: 15px;
+			}
+			.tableCell {
+				text-align: left;
+				font-weight: normal;
+				padding: 0;
+				vertical-align: top;
+			}
+			.tableHead {
+				font-weight: bold;
+				padding-bottom: 10px;
+			}
 
-				md-content(ng-if="showBilling", layout="row", flex="none", layout-align="center", class="ng-scope _md layout-align-center-stretch layout-row flex-none")
+			.productCol {
+				width: 300px;
+			}
+
+	body
+		billing
+			div(layout-fill, layout="column", class="layout-fill layout-column")
+				md-content(
+					layout="row"
+					flex="none"
+					layout-align="center"
+					class="ng-scope _md layout-align-center-stretch layout-row flex-none")
+
 					div(layout="column", class="layout-column", style="width:90%")
-						#billingCompanyAddress(layout="row", layout-align="start start", class="layout-align-start-start layout-row")
+						#billingCompanyAddress(
+							layout="row", 
+							layout-align="start start", 
+							class="layout-align-start-start layout-row")
+
 							div(layout="column", class="layout-column flex-45", flex="45")
-								label.md-title 3D Repo
-								label 20 Eastbourne Terrace
-								label London
-								label W2 6LG
-								label United Kingdom
-								label VAT registration: GB 206 9090 15
-								label
+								p.md-title 3D Repo
+								p 20 Eastbourne Terrace
+								p London
+								p W2 6LG
+								p United Kingdom
+								p VAT registration: GB 206 9090 15
+								p
 									| Email:
 									=" "
 									a(href="mailto:support@3drepo.org") support@3drepo.org
 
 							span.flex(flex)
 
-							div(layout="column", layout-align="end end", class="layout-align-end-end layout-column")
+							div(layout="column"
+								layout-align="end end"
+								class="layout-align-end-end layout-column")
+
 								img#billingInvoiceLogo(src=baseURL+"/public/images/logo.png" style="height:57.5px")
 								p.md-display-1.ng-binding 
 														| #{billing.pending ? 'Order confirmation': 'Invoice'}
 
 								if !billing.pending
+									br
 									span PayPal transaction ID: #{billing.transactionId}
 
-							//span(flex)
-							//md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
+						#billingGap
 
-						#billingGap1
+						table.billingInfoTitle
+							tr
+								th.tableCell.tableHead To
+								th.tableCell.tableHead Date
+								th.tableCell.tableHead Invoice Number
 
-						.billingInfoTitle(layout="row", flex="none", class="billingInfoTitle layout-row flex-none")
-							label(flex="30", class="flex-30") To
-							label(flex="30", class="flex-30") Date
-							label(flex="20", class="flex-20") Invoice Number
+							md-divider(flex="none", class="flex-none")
+
+							tr.billingClientAddress
+							
+								td.tableCell 
+									div 
+										p #{billing.info.firstName} #{billing.info.lastName}
+										if billing.info.company
+											p #{billing.info.company}
+										p #{billing.info.line1}
+			
+										if billing.info.line2
+											p #{billing.info.line2}
+										p #{billing.info.city}
+										p #{billing.info.postalCode}
+										p #{billing.info.country}
+										if billing.info.vat
+											p VAT ID: #{billing.info.vat}
+
+								td.tableCell #{billing.createdAt} GMT
+								td.tableCell #{billing.invoiceNo}
+
+						table.billingInfoTitle()
+							tr
+								th.tableCell.tableHead.productCol Product
+								th.tableCell.tableHead Quantity
+								th.tableCell.tableHead Unit Price
+								th.tableCell.tableHead Net
+								th.tableCell.tableHead VAT (%)
+								th.tableCell.tableHead VAT
+								th.tableCell.tableHead Total
+
+							md-divider(flex="none", class="flex-none")
+
+							tr
+								td.tableCell.productCol 
+									p 
+										| #{billing.items[0].description}
+										if billing.proRata
+											|   (pro-rata)
+									p#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
+
+								td.tableCell #{billing.items.length}
+								td.tableCell £#{billing.unitPrice}
+								td.tableCell £#{billing.netAmount}
+								td.tableCell #{billing.taxPercentage}%
+								td.tableCell £#{billing.taxAmount}
+								td.tableCell £#{billing.amount}
 
 						md-divider(flex="none", class="flex-none")
-
-						#billingClientAddress(layout="row", flex="none", class="layout-row flex-none")
-							div(layout="column", class="layout-column flex-30", flex="30")
-								label #{billing.info.firstName} #{billing.info.lastName}
-								if billing.info.company
-									label #{billing.info.company}
-								label #{billing.info.line1}
-								if billing.info.line2
-									label #{billing.info.line2}
-								label #{billing.info.city}
-								label #{billing.info.postalCode}
-								label #{billing.info.country}
-								if billing.info.vat
-									label VAT ID: #{billing.info.vat}
-							label(flex="30", class="ng-binding flex-30") #{billing.createdAt} GMT
-							label(flex="20", class="flex-20") #{billing.invoiceNo}
-
-						.billingInfoTitle.layout-row.flex-none(layout="row", flex="none", class="flex-none")
-							label(flex="30", class="flex-30") Product
-							label(flex="15", class="flex-15") Quantity
-							label(flex="15", class="flex-15") Unit Price
-							label(flex="10", class="flex-10") Net
-							label(flex="10", class="flex-10") VAT (%)
-							label(flex="10", class="flex-10") VAT
-							label Total
-
-						md-divider(flex="none", class="flex-none")
-
-						#billingProductInfo(layout="row", flex="none", class="layout-row flex-none")
-							div(flex="30", layout="column", class="layout-column flex-30", layout-align="start")
-								label 
-									| #{billing.items[0].description}
-									if billing.proRata
-										|   (pro-rata)
-								label#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
-							label(flex="15", class="ng-binding flex-15") #{billing.items.length}
-							label(flex="15", class="flex-15") £#{billing.unitPrice}
-							label(flex="10", class="ng-binding flex-10") £#{billing.netAmount}
-							label(flex="10", class="ng-binding flex-10") #{billing.taxPercentage}%
-							label(flex="10", class="ng-binding flex-10") £#{billing.taxAmount}
-							label#billingTotalValue(class="ng-binding") £#{billing.amount}
-
-						md-divider(flex="none", class="flex-none")
+						br
 						p You next regular monthly payment £#{billing.nextPaymentAmount} will be billed on #{billing.nextPaymentDate}
 						if billing.B2B_EU
 							#billingReverseCharge(flex)

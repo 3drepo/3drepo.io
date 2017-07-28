@@ -11,7 +11,7 @@ billing #billingMainContent {
     width: 90%
 }
 
-billing #billingGap1 {
+billing #billingGap {
     height: 100px;
 }
 
@@ -57,7 +57,8 @@ billing #billingPeriod {
 }
 
 billing #billingInvoiceLogo {
-    width: 200px
+    width: 200px;
+    padding-bottom: 20px;
 }
 
 billing #billingTotalValue {
