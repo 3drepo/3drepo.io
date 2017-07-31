@@ -16,8 +16,8 @@
 						md-label Select Teamspace
 						md-select(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 							md-option(
+								ng-repeat="teamspace in vm.adminstrableTeamspaces(vm.teamspaces)"
 								aria-label="{{teamspace.account}}" 
-								ng-repeat="teamspace in vm.teamspaces"
 								value="{{teamspace.account}}") {{teamspace.account}}
 
 					md-card
@@ -60,7 +60,7 @@
 							md-select.rowSelects(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 								md-option(
 									aria-label="{{teamspace.account}}" 
-									ng-repeat="teamspace in vm.teamspaces"
+									ng-repeat="teamspace in vm.adminstrableProjectTeamspaces(vm.teamspaces)"
 									value="{{teamspace.account}}") {{teamspace.account}}
 
 						div(flex="50", layout="column", ng-disabled="!vm.teamspaceSelected")
@@ -80,7 +80,7 @@
 
 					md-card
 						table.scrollable.checkboxes(
-							ng-if="vm.projectSelected && vm.selectedTeamspace.assignUsers.length"
+							ng-if="vm.projectSelected"
 							layout="column", 
 							flex)
 							thead(layout="column")
@@ -155,7 +155,7 @@
 
 					md-card
 						table.scrollable.radiobuttons(
-							ng-if="vm.selectedTeamspace.assignUsers.length && vm.modelSelected"
+							ng-if="vm.modelSelected"
 							layout="column", 
 							flex)
 							thead(layout="row")

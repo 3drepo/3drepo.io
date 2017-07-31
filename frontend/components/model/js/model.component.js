@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
+	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "$mdDialog", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
 
-	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
+	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, $mdDialog, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
 		var vm = this;
 
 		/*
@@ -241,7 +241,16 @@
 		vm.handleModelError = function(){
 			var message = "The model was not found or failed to load correctly. " +
 			" You will now be redirected to the teamspace page.";
-			alert(message);
+
+			$mdDialog.show(
+				$mdDialog.alert()
+					.clickOutsideToClose(true)
+					.title("Model Error")
+					.textContent(message)
+					.ariaLabel("Model Error")
+					.ok("OK")
+			);
+		
 			$location.path(AuthService.getUsername());
 		};
 
@@ -250,7 +259,6 @@
 			ModelService.getModelInfo(vm.account, vm.model)
 				.then(function (data) {
 					vm.settings = data;
-
 					var index = -1;
 
 					if(!data.federate){

@@ -45,7 +45,7 @@
 			vm.loadingTeamspaces = true;
 			vm.modelReady = false;
 			vm.teamspaces = [];
-			vm.projects = [];
+			vm.projects = {};
 			vm.models = {};
 			vm.selectedRole = {};
 
@@ -99,7 +99,42 @@
 				// Trigger the first watcher (teamspace)
 				vm.teamspaceSelected = vm.check.account;
 			}
+
 		};
+
+		vm.adminstrableTeamspaces = function(teamspaces) {
+			var permission = "teamspace_admin";
+			return teamspaces.filter(function(teamspace){
+				return teamspace.permissions.indexOf(permission) !== -1;
+			});
+		};
+
+		vm.adminstrableProjectTeamspaces = function(teamspaces) {
+			var permission = "admin_project";
+			return teamspaces.filter(function(teamspace){
+				var hasAdminstrableProject = false;
+				teamspace.projects.forEach(function(project){
+					if (project.permissions.indexOf(permission) !== -1) {
+						hasAdminstrableProject = true;
+					}
+				});	
+				return hasAdminstrableProject;
+			});
+		};
+
+		// vm.adminstrableProjects = function(projects) {
+
+		// 	var filteredProjects = {};
+		// 	var permission = "admin_project";
+		// 	for (var project in projects) {
+
+		// 		if (projects[project] && projects[project].permissions.indexOf(permission) !== -1) {
+		// 			filteredProjects[project]  = projects[project];
+		// 		}
+
+		// 	}
+		// 	return filteredProjects;
+		// };
 
 		// GET TEAMSPACES
 		vm.getTeamspaces = function() {
@@ -108,37 +143,46 @@
 			$http.get(url)
 				.then(function(response) {
 
-					vm.teamspaces = response.data.accounts.filter(function(teamspace){
-						return teamspace.isAdmin === true;
-					});
+					vm.teamspaces = response.data.accounts;
+
+					// .filter(function(teamspace){
+					// 	// isAdmin is deprecated
+					// 	return teamspace.permissions.indexOf("teamspace_admin") !== -1;
+					// });
 
 					// Append all the assignable users to a teamspace
-					var allTeamspacesPromises = [];
-					vm.teamspaces.forEach(function(teamspace) {
-						allTeamspacesPromises.push(
-							$q(function(resolve, reject) {
-								var endpoint = teamspace.account + "/subscriptions";
-								var subscriptionsUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
-								$http.get(subscriptionsUrl)
-									.then(function(subscriptionsResponse) {
-										teamspace.assignUsers = subscriptionsResponse.data;
-										resolve(teamspace.assignUsers);
-									})
-									.catch(function(subscriptionsResponse){
-										console.error("error", subscriptionsResponse);
-										reject(subscriptionsResponse);
-									});
-							})
-						);
-					});
+					// var allTeamspacesPromises = [];
+					// vm.teamspaces.forEach(function(teamspace) {
+
+					// 	if (teamspace.permissions.indexOf("teamspace_admin") !== -1) {
+					// 		allTeamspacesPromises.push(
+					// 			$q(function(resolve, reject) {
+					// 				var endpoint = teamspace.account + "/subscriptions";
+					// 				var subscriptionsUrl = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+					// 				$http.get(subscriptionsUrl)
+					// 					.then(function(subscriptionsResponse) {
+					// 						teamspace.assignUsers = subscriptionsResponse.data;
+					// 						resolve(teamspace.assignUsers);
+					// 					})
+					// 					.catch(function(subscriptionsResponse){
+					// 						console.error("error", subscriptionsResponse);
+					// 						reject(subscriptionsResponse);
+					// 					});
+					// 			})
+					// 		);
+					// 	}
+
+						
+					// });
 
 					// Wait for all the assignable users to be 
 					// defined before contining
-					var completed = $q.all(allTeamspacesPromises); 
-					completed.then(function(){
-						vm.getStateFromParams();
-						vm.loadingTeamspaces = false;
-					});
+					// var completed = $q.all(allTeamspacesPromises); 
+					// completed.then(function(){
+						
+					// });
+					vm.getStateFromParams();
+					vm.loadingTeamspaces = false;
 					
 
 				})
@@ -180,8 +224,8 @@
 		vm.userHasPermissions = function(user, permission) {
 
 			var hasPermissions = false;
-			vm.selectedTeamspace.assignUsers.forEach(function(iUser){
-				if (iUser.assignedUser === user.assignedUser) {
+			vm.selectedTeamspace.assignUsers.forEach(function(permissionUser){
+				if (permissionUser.user === user.assignedUser) {
 					hasPermissions = user.permissions.indexOf(permission) !== -1;
 				} 
 			});
@@ -195,22 +239,12 @@
 			return $http.get(url)
 				.then(function(response) {
 					var permissionsUsers = response.data;
-					var found;
-					teamspace.assignUsers.forEach(function(user){
-						found = false;
-						permissionsUsers.forEach(function(permissionsUser) {
-							if (permissionsUser.user === user.assignedUser) {
-								user.permissions = permissionsUser.permissions;
-								found = true;
-							} 
-						});
-						if (!found) {
-							user.permissions = [];
-						}
-					});
+					teamspace.assignUsers = permissionsUsers;
 				})
 				.catch(function(error){
-					console.error(error);
+					if (error.status !== 401) {
+						console.error(error);
+					}
 				});
 			
 		};
@@ -242,13 +276,21 @@
 			var permission = teamspace.account + "/permission-templates";
 			var permissionUrl = serverConfig.apiUrl(serverConfig.GET_API, permission);
 			
-			return $http.get(permissionUrl).then(function(response) {
-				vm.modelRoles = ["unassigned"];
+			return $http.get(permissionUrl)
+				.then(function(response) {
+					vm.modelRoles = ["unassigned"];
 
-				response.data.forEach(function(template){
-					vm.modelRoles.push(template._id);
+					response.data.forEach(function(template){
+						vm.modelRoles.push(template._id);
+					});
+				})
+				.catch(function(error){
+					// We can ignore unathorised permission template attempts
+					// TODO: Can't we just avoid sending the request
+					if (error.status !== 401) {
+						console.error(error);
+					}
 				});
-			});
 
 		};
 
@@ -438,9 +480,9 @@
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
 
 				// Setup users
-				vm.selectedTeamspace.assignUsers.forEach(function(user){
-					if (vm.selectedRole[user.assignedUser] === undefined) {
-						vm.selectedRole[user.assignedUser] = "unassigned";
+				vm.selectedTeamspace.assignUsers.forEach(function(permissionUser){
+					if (vm.selectedRole[permissionUser.user] === undefined) {
+						vm.selectedRole[permissionUser.user] = "unassigned";
 					}
 				});
 

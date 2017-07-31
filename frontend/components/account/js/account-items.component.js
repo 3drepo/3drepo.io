@@ -34,9 +34,9 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["StateManager", "$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
+	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
 
-	function AccountItemsCtrl(StateManager, $scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
+	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
 		var vm = this;
 
 		/*
@@ -276,7 +276,15 @@
 					if(response.status !== 200 && response.status !== 201){
 
 						vm.errorMessage = response.data.message;
-						alert(vm.errorMessage);
+
+						$mdDialog.show(
+							$mdDialog.alert()
+								.clickOutsideToClose(true)
+								.title("Federation Save Error")
+								.textContent(vm.errorMessage)
+								.ariaLabel("Federation Save Error")
+								.ok("OK")
+						);
 
 					} else {
 
