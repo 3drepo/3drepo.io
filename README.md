@@ -130,6 +130,8 @@ Within this file you must append to, or create, a line for the entry for example
 
 In the configuration file for the server, you then set hostname to `example.org` or whatever host you have redirected.
 
+You can find the API doc at https://3drepo.github.io/3drepo.io/
+
 Contact
 -------
 
