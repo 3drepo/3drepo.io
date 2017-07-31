@@ -233,7 +233,7 @@
 
 			const userFound = project.permissions.find(perm => perm.user === sub.assignedUser);
 
-			if(!userFound){
+			if(!userFound && sub.assignedUser){
 				project.permissions.push({
 					user: sub.assignedUser
 				});

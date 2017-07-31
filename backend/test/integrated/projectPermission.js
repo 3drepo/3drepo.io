@@ -231,6 +231,28 @@ describe('Project Permissions::', function () {
 		.expect(401, done);
 	});
 
+	it('get project permissions will show all subscription users', function(done){
+
+		agentTeamspaceAdmin
+		.get(`/${teamspace}/projects/project3`)
+		.expect(200, function(err, res){
+
+			expect(err).to.be.null;
+			expect(res.body.permissions).to.exists;
+
+			let permissions = res.body.permissions;
+
+			expect(permissions.find(p => p.user === userProjectAdmin.username)).to.deep.equal({ user: userProjectAdmin.username, permissions: ['admin_project']});
+			expect(permissions.find(p => p.user === 'projectuser')).to.deep.equal({ user: 'projectuser', permissions: []});
+			expect(permissions.find(p => p.user === 'projectuser2')).to.deep.equal({ user: 'projectuser2', permissions: []});
+			expect(permissions.find(p => p.user === 'projectuser4')).to.deep.equal({ user: 'projectuser4', permissions: []});
+			expect(permissions.find(p => p.user === 'projectuser5')).to.deep.equal({ user: 'projectuser5', permissions: []});
+
+			done();
+		});
+
+	});
+
 	it('non teamspace admin users will have permissions revoked on any models including the one created by themselves if parent project level permissions has been revoked', function(done){
 		
 		let permissions;

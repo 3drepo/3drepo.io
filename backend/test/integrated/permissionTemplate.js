@@ -219,7 +219,10 @@ describe('Permission templates', function () {
 				agent.get(`/${username}/model2/permissions`)
 				.expect(200, function(err, res){
 
-					expect(res.body).to.deep.equal(permissions);
+					res.body.forEach(p => {
+						expect(p.permission).to.not.exist;
+					});
+
 					callback(err);
 				})
 
