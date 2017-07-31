@@ -33,8 +33,29 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 				permissions: [],
 				models: orphanIds
 			});
+		} else {
+			myDb.getCollection('projects').update({ name: 'Default' }, { '$addToSet' : { models: { '$each' : orphanIds }}});
+
 		}
 	}
+
+});
+
+
+db.getSiblingDB('admin').getCollection('system.users').forEach(function(user){
+
+	print('Clean customData.models');
+	var models = db.getSiblingDB('admin').getCollection('system.users').findOne({ _id: user._id}, { 'customData.models': 1}).customData.models;
+
+	if(Array.isArray(models)){
+		for(var i=models.length - 1; i >=0; i--){
+			if (!isUUID(models[i].model)){
+				models.splice(i,1);
+			}
+		}
+	}
+
+	db.getSiblingDB('admin').getCollection('system.users').update({  _id: user._id}, {  '$set': {'customData.models': models}});
 
 });
 
