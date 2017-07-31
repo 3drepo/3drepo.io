@@ -182,6 +182,68 @@
 
 	};
 
+	schema.statics.findAndPopulateUsers = function(account, query){
+
+		const User = require('./user');
+
+		let subscriptions;
+
+		return User.findByUserName(account.account).then(user => {
+			
+			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			return Project.find(account, query);
+		
+		}).then(projects => {
+			
+			if(projects){
+				projects.forEach(p => Project.populateUsers(subscriptions, p));
+			}
+
+			return projects;
+
+		});
+	}
+
+
+	schema.statics.findOneAndPopulateUsers = function(account, query){
+
+		const User = require('./user');
+
+		let subscriptions;
+
+		return User.findByUserName(account.account).then(user => {
+			
+			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			return Project.findOne(account, query);
+		
+		}).then(project => {
+			
+			if(project){
+				return Project.populateUsers(subscriptions, project);
+			} else {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			}
+
+		});
+	}
+
+	schema.statics.populateUsers = function(subscriptions, project){
+
+		subscriptions && subscriptions.forEach(sub => {
+
+			const userFound = project.permissions.find(perm => perm.user === sub.assignedUser);
+
+			if(!userFound){
+				project.permissions.push({
+					user: sub.assignedUser
+				});
+			}
+		});
+
+		return project;
+	};
+
+
 	schema.methods.findPermsByUser = function(username){
 		return this.permissions.find(perm => perm.user === username);
 	};
