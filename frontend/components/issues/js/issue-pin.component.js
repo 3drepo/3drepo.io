@@ -32,9 +32,9 @@
 			bindToController: true
 		});
 
-	IssuesPinCtrl.$inject = ["$scope", "EventService", "IssuesService"];
+	IssuesPinCtrl.$inject = ["$scope", "EventService"];
 
-	function IssuesPinCtrl ($scope, EventService, IssuesService) {
+	function IssuesPinCtrl ($scope, EventService) {
 		var vm = this;
 			
 
@@ -75,7 +75,7 @@
 						selectedObjectId: event.value.id,
 						pickedPos: position,
 						pickedNorm: normal,
-						colours: [IssuesService.pinColours.yellow]
+						colours: Pin.pinColours.yellow
 
 					};
 					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);

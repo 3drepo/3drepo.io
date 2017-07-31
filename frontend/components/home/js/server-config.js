@@ -16,12 +16,6 @@
  */
 
 angular.module("3drepo")
-	.service("serverConfig", function() {
-		"use strict";
-
-		for (var k in server_config) {
-			this[k] = server_config[k];
-		}
-	});
+	.constant("serverConfig", server_config);
 
 

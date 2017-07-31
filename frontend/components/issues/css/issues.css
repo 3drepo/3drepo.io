@@ -66,6 +66,7 @@ issues #issuesAddButton {
   position: absolute;
   bottom: 0;
   right: 0;
+  margin-right: 12px;
 }
 
 issues #issuesContent {
@@ -153,7 +154,7 @@ issues-list .issueListItem *:hover {
 }
 
 issues-list .issueListItemFocus {
-  background: rgba(0,69,148,.1);
+  background: rgba(250,250,250,1);
 }
 
 issues-list .issueListItem div:first-child {
@@ -198,7 +199,7 @@ issues-list #issuesListItemEnter {
   right: 0;
   width: 32px;
   height: 100%;
-  background: rgb(0, 69, 148);
+  background: rgb(12, 47, 84);
   outline: none;
 }
 issues-list #issuesListItemEnter md-icon {
@@ -209,7 +210,7 @@ issues-list .issueListItemThumbnail {
   margin-right: 10px;
   height: 120px;
   width: 120px;
-  background: rgba(0, 69, 148, 0.2);
+  background: rgba(240,240,240,1)
 }
 
 issues-list #issuesListContainer {
@@ -234,7 +235,7 @@ issues-list .closedText{
 
 /** Issues List Item **************************************************************************************************/
 .userRoleIssueListItemTitle {
-  border: 1px solid rgba(0, 69, 148, 0.3);
+  border: 1px solid rgba(240,240,240,1);
   margin-left: -4px;
   padding-left: 4px;
 }
@@ -273,7 +274,7 @@ issue #issueeArea {
   outline: none;
 }
 issue .issueTitleArea:hover {
-  background: rgba(0,69,148,.1);
+  background: rgba(250,250,250,1);
   cursor: pointer;
 }
 issue .issueTitleArea #issueTitle {
@@ -352,7 +353,7 @@ issue .issueCommentOwner label {
 }
 
 issue .issueCommentOwner .issueNotification {
-  color: #43a047;
+  color: rgb(6, 86, 60);
 }
 
 issue .issueAutoComment label {
@@ -384,7 +385,7 @@ issue #issueDescription label {
 
 issue .issueComment:hover,
 issue #issueDescription:hover {
-  background: rgba(0,69,148,.1);
+  background: rgba(250,250,250,1);
   cursor: pointer;
 }
 issue .issueComment *:hover,

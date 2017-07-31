@@ -27,46 +27,76 @@
 		var url = "",
 			data = {},
 			config = {},
-			i, j = 0,
 			numIssues = 0,
-			numComments = 0,
 			availableJobs = [],
-			obj = {},
 			newPinId = "newPinId",
-			updatedIssue = null,
-			issueDisplay = {};
+			updatedIssue = null;
 
-		obj.initPromise = $q.defer();
 
-		obj.init = function() {
-			return obj.initPromise.promise;
+		var initPromise = $q.defer();
+
+		var service = {
+			init : init,
+			numIssues: numIssues,
+			updatedIssue: updatedIssue,
+			deselectPin: deselectPin,
+			showIssue: showIssue,
+			showMultiIds : showMultiIds,
+			handleTree: handleTree,
+			getPrettyTime: getPrettyTime,
+			generateTitle: generateTitle,
+			getIssue: getIssue,
+			getIssues: getIssues,
+			saveIssue: saveIssue,
+			updateIssue: updateIssue,
+			doPut : doPut,
+			toggleCloseIssue: toggleCloseIssue,
+			assignIssue: assignIssue,
+			saveComment: saveComment,
+			editComment: editComment,
+			deleteComment: deleteComment,
+			sealComment: sealComment,
+			addPin: addPin,
+			removePin: removePin,
+			fixPin: fixPin,
+			getJobs: getJobs,
+			getUserJobFormodel: getUserJobFormodel,
+			hexToRgb: hexToRgb,
+			getJobColor: getJobColor,
+			getStatusIcon: getStatusIcon,
+			importBcf: importBcf,
+			convertActionCommentToText: convertActionCommentToText,
+			cleanIssue: cleanIssue,
+			convertActionValueToText: convertActionValueToText
 		};
 
-		obj.pinColours = {
-			blue : [0, 69/255, 148/255],
-			yellow : [255/255, 255/255, 54/255]
-		};
+		return service;
 
+		/////////////
 
-		obj.deselectPin = function(issue) {
+		function init() {
+			return initPromise.promise;
+		}
+
+		function deselectPin(issue) {
 			var data;
 			// Issue with position means pin
 			if (issue.position.length > 0) {
 				data = {
 					id: issue._id,
-					colours: [obj.pinColours.blue]
+					colours: Pin.pinColours.blue
 				};
 				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
 			}
-		};
+		}
 
-		obj.showIssue = function(issue) {
+		function showIssue(issue) {
 			var data;
 				
 			// Highlight pin, move camera and setup clipping plane
 			data = {
 				id: issue._id,
-				colours: [obj.pinColours.yellow]
+				colours: Pin.pinColours.yellow
 			};
 			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
@@ -100,12 +130,12 @@
 			// Show multi objects
 			if (issue.hasOwnProperty("group_id")) {
 
-				obj.showMultiIds(issue);
+				showMultiIds(issue);
 				
 			}
-		};
+		}
 
-		obj.showMultiIds = function(issue) {
+		function showMultiIds(issue) {
 			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
 
 			UtilsService.doGet(groupUrl)
@@ -113,7 +143,7 @@
 
 					TreeService.cachedTree
 						.then(function(tree) {
-							obj.handleTree(response, tree);
+							handleTree(response, tree);
 						})
 						.catch(function(error){
 							console.error("There was a problem getting the tree: ", error);
@@ -123,9 +153,9 @@
 				.catch(function(error){
 					console.error("There was a problem getting the highlights: ", error);
 				});
-		};
+		}
 
-		obj.handleTree = function(response, tree) {
+		function handleTree(response, tree) {
 
 			var ids = [];
 			response.data.objects.forEach(function(obj){
@@ -156,16 +186,21 @@
 				};
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
 			}
-		};
+		}
 
 		// TODO: Internationalise and make globally accessible
-		obj.getPrettyTime = function(time) {
+		function getPrettyTime(time) {
 			var date = new Date(time),
 				currentDate = new Date(),
 				prettyTime,
 				postFix,
-				hours,
-				monthToText = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+				hours;
+			
+			var	monthToText = [
+				"Jan", "Feb", "Mar", "Apr", 
+				"May", "Jun", "Jul", "Aug", 
+				"Sep", "Oct", "Nov", "Dec"
+			];
 
 			if ((date.getFullYear() === currentDate.getFullYear()) &&
 				(date.getMonth() === currentDate.getMonth()) &&
@@ -191,9 +226,9 @@
 			}
 
 			return prettyTime;
-		};
+		}
 
-		obj.generateTitle = function(issue) {
+		function generateTitle(issue) {
 			if (issue.modelCode){
 				return issue.modelCode + "." + issue.number + " " + issue.name;
 			} else if (issue.typePrefix) {
@@ -201,16 +236,17 @@
 			} else {
 				return issue.number + " " + issue.name;
 			}
-		};
+		}
 
-		obj.getIssue = function(account, model, issueId){
+		function getIssue(account, model, issueId){
 
 			var deferred = $q.defer();
-			var url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/issues/" + issueId + ".json");
+			var endpoint = account + "/" + model + "/issues/" + issueId + ".json";
+			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
 
 			$http.get(url).then(function(res){
 
-				res.data = obj.cleanIssue(res.data);
+				res.data = cleanIssue(res.data);
 
 				deferred.resolve(res.data);
 
@@ -220,31 +256,31 @@
 
 			return deferred.promise;
 
-		};
+		}
 
-		obj.getIssues = function(account, model, revision) {
+		function getIssues(account, model, revision) {
 
 			// TODO: This is a bit hacky. We are 
 			// basically saying when getIssues is called
 			// we know the issues component is loaded...
-			
-			obj.initPromise.resolve();
+			initPromise.resolve();
 
 			var deferred = $q.defer();
-
+			var endpoint;
 			if(revision){
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/revision/" + revision + "/issues.json");
+				endpoint = account + "/" + model + "/revision/" + revision + "/issues.json";
 			} else {
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/issues.json");
+				endpoint = account + "/" + model + "/issues.json";
 			}
-			
+
+			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
 
 			$http.get(url).then(
 				function(data) {
 					deferred.resolve(data.data);
-					for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-						data.data[i].timeStamp = obj.getPrettyTime(data.data[i].created);
-						data.data[i].title = obj.generateTitle(data.data[i]);
+					for (var i = 0; i < data.data.length; i ++) {
+						data.data[i].timeStamp = getPrettyTime(data.data[i].created);
+						data.data[i].title = generateTitle(data.data[i]);
 						if (data.data[i].thumbnail) {
 							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
 						}
@@ -258,9 +294,9 @@
 			
 
 			return deferred.promise;
-		};
+		}
 
-		obj.saveIssue = function (issue) {
+		function saveIssue(issue) {
 			var deferred = $q.defer(),
 				url;
 
@@ -283,7 +319,7 @@
 				});
 
 			return deferred.promise;
-		};
+		}
 
 		/**
 		 * Update issue
@@ -291,10 +327,9 @@
 		 * @param data
 		 * @returns {*}
 		 */
-		obj.updateIssue = function (issue, data) {
-			console.log("UPDATE ISSUE")
+		function updateIssue(issue, data) {
 			return doPut(issue, data);
-		};
+		}
 
 		/**
 		 * Handle PUT requests
@@ -305,11 +340,14 @@
 		function doPut(issue, data) {
 			var deferred = $q.defer();
 			var url;
+			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+				endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
+				url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			} else {
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/issues/" + issue._id + ".json");
+				endpoint += "/issues/" + issue._id + ".json";
+				url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 			}
 				
 			var config = {withCredentials: true};
@@ -321,7 +359,7 @@
 			return deferred.promise;
 		}
 
-		obj.toggleCloseIssue = function(issue) {
+		function toggleCloseIssue(issue) {
 			var closed = true;
 			if (issue.hasOwnProperty("closed")) {
 				closed = !issue.closed;
@@ -330,9 +368,9 @@
 				closed: closed,
 				number: issue.number
 			});
-		};
+		}
 
-		obj.assignIssue = function(issue) {
+		function assignIssue(issue) {
 			return doPut(
 				issue,
 				{
@@ -340,25 +378,25 @@
 					number: 0 //issue.number
 				}
 			);
-		};
+		}
 
-		obj.saveComment = function(issue, comment, viewpoint) {
+		function saveComment(issue, comment, viewpoint) {
 			return doPut(issue, {
 				comment: comment,
 				viewpoint: viewpoint
 			});
-		};
+		}
 
-		obj.editComment = function(issue, comment, commentIndex) {
+		function editComment(issue, comment, commentIndex) {
 			return doPut(issue, {
 				comment: comment,
 				number: issue.number,
 				edit: true,
 				commentIndex: commentIndex
 			});
-		};
+		}
 
-		obj.deleteComment = function(issue, index) {
+		function deleteComment(issue, index) {
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
@@ -366,18 +404,18 @@
 				commentIndex: index
 				// commentCreated: issue.comments[index].created
 			});
-		};
+		}
 
-		obj.sealComment = function(issue, commentIndex) {
+		function sealComment(issue, commentIndex) {
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
 				sealed: true,
 				commentIndex: commentIndex
 			});
-		};
+		}
 
-		obj.addPin = function (pin, colours, viewpoint) {
+		function addPin(pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
 				account: pin.account,
@@ -387,26 +425,25 @@
 				colours: colours,
 				viewpoint: viewpoint
 			});
-		};
+		}
 
-		obj.removePin = function (id) {
+		function removePin(id) {
 			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
 				id: id
 			});
-		};
+		}
 
-		obj.fixPin = function (pin, colours) {
-			obj.removePin();
-
+		function fixPin(pin, colours) {
+			removePin();
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: newPinId,
 				pickedPos: pin.position,
 				pickedNorm: pin.norm,
 				colours: colours
 			});
-		};
+		}
 
-		obj.getJobs = function(account, model){
+		function getJobs(account, model){
 
 			var deferred = $q.defer();
 			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/jobs.json");
@@ -422,9 +459,9 @@
 			);
 
 			return deferred.promise;
-		};
+		}
 
-		obj.getUserJobFormodel = function(account, model){
+		function getUserJobFormodel(account, model){
 			var deferred = $q.defer();
 			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +model + "/userJobForModel.json");
 
@@ -438,10 +475,10 @@
 			);
 
 			return deferred.promise;
-		};
+		}
 
 
-		obj.hexToRgb = function(hex) {
+		function hexToRgb(hex) {
 			// If nothing comes end, then send nothing out.
 			if (!hex) {
 				return undefined;
@@ -465,10 +502,14 @@
 				hexColours = ["00", "00", "00"];
 			}
 
-			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
-		};
+			return [
+				(parseInt(hexColours[0], 16) / 255.0), 
+				(parseInt(hexColours[1], 16) / 255.0), 
+				(parseInt(hexColours[2], 16) / 255.0)
+			];
+		}
 
-		obj.getJobColor = function(id) {
+		function getJobColor(id) {
 			var i, length,
 				roleColor = null;
 
@@ -479,12 +520,12 @@
 				}
 			}
 			return roleColor;
-		};
+		}
 
 		/**
 		 * Set the status icon style and colour
 		 */
-		obj.getStatusIcon = function (issue) {
+		function getStatusIcon(issue) {
 
 			var statusIcon = {};
 
@@ -515,17 +556,17 @@
 				break;
 			case "closed":
 				statusIcon.icon = "check_circle";
-				statusIcon.colour = "#004594";
+				statusIcon.colour = "#0C2F54";
 				break;
 			}
 
 			return statusIcon;
-		};
+		}
 
 		/**
 		* Import bcf
 		*/
-		obj.importBcf = function(account, model, revision, file){
+		function importBcf(account, model, revision, file){
 
 			var deferred = $q.defer();
 
@@ -548,14 +589,14 @@
 			});
 
 			return deferred.promise;
-		};
+		}
 
 		/**
 		 * Convert an action comment to readable text
 		 * @param comment
 		 * @returns {string}
 		 */
-		obj.convertActionCommentToText = function (comment, topic_types) {
+		function convertActionCommentToText(comment, topic_types) {
 			var text = "";
 
 			switch (comment.action.property) {
@@ -615,28 +656,26 @@
 			}
 
 			return text;
-		};
+		}
 
 		/**
 		 * generate title, screenshot path and comment for an issue
 		 * @param issue
 		 * @returns issue
 		 */
-		obj.cleanIssue = function(issue){
+		function cleanIssue(issue){
 
-			var self = this;
-
-			issue.timeStamp = self.getPrettyTime(issue.created);
-			issue.title = self.generateTitle(issue);
+			issue.timeStamp = getPrettyTime(issue.created);
+			issue.title = generateTitle(issue);
 
 			if (issue.hasOwnProperty("comments")) {
 				for (var j = 0, numComments = issue.comments.length; j < numComments; j += 1) {
 					if (issue.comments[j].hasOwnProperty("created")) {
-						issue.comments[j].timeStamp = self.getPrettyTime(issue.comments[j].created);
+						issue.comments[j].timeStamp = getPrettyTime(issue.comments[j].created);
 					}
 					// Action comment text
 					if (issue.comments[j].action) {
-						issue.comments[j].comment = obj.convertActionCommentToText(issue.comments[j]);
+						issue.comments[j].comment = convertActionCommentToText(issue.comments[j]);
 					}
 					//screen shot path
 					if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
@@ -646,7 +685,7 @@
 			}
 
 			return issue;
-		};
+		}
 
 		/**
 		 * Convert an action value to readable text
@@ -685,38 +724,5 @@
 			return text;
 		}
 
-		Object.defineProperty(
-			obj,
-			"newPinId",
-			{
-				get: function () {
-					return newPinId;
-				}
-			}
-		);
-
-		// Getter setter for updatedIssue
-		Object.defineProperty(
-			obj,
-			"updatedIssue",
-			{
-				get: function () {
-					var tmpUpdatedIssue;
-					if (updatedIssue === null) {
-						return null;
-					} else {
-						tmpUpdatedIssue = updatedIssue;
-						updatedIssue = null;
-						return tmpUpdatedIssue;
-					}
-				},
-				set: function(issue) {
-					updatedIssue = issue;
-				}
-			}
-		);
-
-
-		return obj;
 	}
 }());

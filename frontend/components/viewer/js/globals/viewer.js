@@ -579,6 +579,7 @@ var Viewer = {};
 		};
 
 		this.loadModel = function(account, model, branch, revision) {
+
 			self.account = account;
 			self.model = model;
 			self.branch = branch;
@@ -591,7 +592,8 @@ var Viewer = {};
 				.then(function(bbox){
 					document.body.style.cursor = "initial";
 					self.loadingDivText.innerHTML = "";
-					callback(Viewer.EVENT.LOADED, bbox);
+					callback(Viewer.EVENT.MODEL_LOADED);
+					callback(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch(function(error){
 					document.body.style.cursor = "initial";
 					console.error("Unity error loading model: ", error);
@@ -700,11 +702,14 @@ var Viewer = {};
 		self.pins = {};
 
 		this.addPin = function(account, model, id, position, norm, colours, viewpoint) {
-			if (self.pins.hasOwnProperty(id)) {
-				errCallback(self.ERROR.PIN_ID_TAKEN);
-			} else {
-				self.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, model);
-			}
+			
+			// TODO: Commented this out because it was causing error with reloading models
+			// is it needed for anything?
+			// if (self.pins.hasOwnProperty(id)) {
+			// 	errCallback(self.ERROR.PIN_ID_TAKEN);
+			// } else {
+			self.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, model);
+			//}
 		};
 
 		this.clickPin = function(id) {
@@ -715,7 +720,7 @@ var Viewer = {};
 				// Replace with
 				callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 					id: id,
-					colours: [[1.0, 0.7, 0.0]]
+					colours: Pin.pinColours.yellow
 				});
 
 				callback(Viewer.EVENT.SET_CAMERA, {
@@ -796,6 +801,9 @@ var Viewer = {};
 		UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 		START_LOADING: "VIEWING_START_LOADING",
 		LOAD_MODEL: "VIEWER_LOAD_MODEL",
+		CHECK_MODEL_LOADED: "VIEWER_CHECK_MODEL_LOADED",
+		BBOX_READY: "BBOX_READY",
+		MODEL_LOADED: "VIEWER_MODEL_LOADED",
 		LOADED: "VIEWER_EVENT_LOADED",
 		RUNTIME_READY: "VIEWING_RUNTIME_READY",
 

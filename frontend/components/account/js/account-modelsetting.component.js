@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountModelsetting", {
 			restrict: "EA",
-			templateUrl: "account-model-setting.html",
+			templateUrl: "account-modelsetting.html",
 			bindings: {
 				account: "=",
 				model: "=",
@@ -33,9 +33,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, StateManager) {
+	function AccountModelsettingCtrl($scope, $location, UtilsService, serverConfig) {
 		
 		var vm = this;
 
@@ -43,7 +43,8 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.units = server_config.units;
+
+			vm.units = serverConfig.units;
 			vm.mapTile = {};
 
 			// TODO: We should use statemanager eventually

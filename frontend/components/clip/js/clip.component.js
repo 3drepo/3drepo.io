@@ -52,28 +52,28 @@
 			vm.units = "m";
 		};
 
-		function updateClippingPlane() {
+		vm.updateClippingPlane = function() {
 			if(vm.bbox) {
 				var event = {
 					clippingPlanes:[{
-						normal: getNormal(),
+						normal: vm.getNormal(),
 						distance: vm.displayDistance,
 						clipDirection: -1
 					}],
 					fromClipPanel: true
 				};
 				EventService.send(
-					event,
-					EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES
+					EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
+					event
 				);
 			}
-		}
+		};
 
 		/**
 		 * Determine axis based on normal provided
 		 * @param normal normal vector
 		 */
-		function determineAxis(normal) {
+		vm.determineAxis = function(normal) {
 			var res = "";
 			if(normal.length === 3) {
 				if(normal[1] === 0  && normal[2] === 0) {
@@ -86,54 +86,32 @@
 			}
 
 			return res;
-		}
+		};
 
 		/**
 		 * Initialise display values
 		 * This is called when we know the bounding box of our model
 		 */
-		function setDisplayValues(axis, distance, moveClip, slider) {
+		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
 			vm.displayDistance = distance;
 			vm.displayedAxis = axis;
 			if(slider != null) {
 				vm.sliderPosition = slider;
 				if(moveClip) {
-					updateClippingPlane();
+					vm.updateClippingPlane();
 				}
 			} else {
-				updateDisplaySlider(false, moveClip);
+				vm.updateDisplaySlider(false, moveClip);
 			}
-		}
+		};
 
-		/*
-		 * Watch for show/hide of card
-		 */
-		$scope.$watch("vm.show", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.visible = newValue;
-			}
-		});
-
-
-		/*
-		 * Toggle the clipping plane
-		 */
-		$scope.$watch("vm.visible", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue ) {
-					updateClippingPlane();
-				} else {
-					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
-				}
-			}
-		});
 
 		/**
 		 * Returns the normal value based on axis
 		 * @return {array} returns normal vector 
 		 */
-		function getNormal() {
+		vm.getNormal = function () {
 
 			var normal = [-1, 0, 0]; //X axis by default
 			if(vm.normal) {
@@ -149,12 +127,12 @@
 
 			return normal;
 
-		}
+		};
 
 		/**
 		 * Update displayed Distance based on slider position and axis
 		 */
-		function updateDisplayedDistance(updateSlider, moveClip) {
+		vm.updateDisplayedDistance = function(updateSlider, moveClip) {
 
 			if (vm.bbox) {
 				var min = 0;
@@ -179,19 +157,19 @@
 				}
 				vm.displayDistance = min + (Math.abs(max - min) * percentage);
 				if(moveClip) {
-					updateClippingPlane();
+					vm.updateClippingPlane();
 				}
 			} else {
-				console.warn("Bounding Box was not defined", vm.bbox);
+				console.warn("updateDisplayedDistance - Bounding Box was not defined", vm.bbox);
 			}
 			
 
-		}
+		};
 
 		/**
 		 * Update display slider based on current internal distance
 		 */
-		function updateDisplaySlider(updateDistance, moveClip) {
+		vm.updateDisplaySlider = function(updateDistance, moveClip) {
 
 			if (vm.bbox) {
 
@@ -225,21 +203,45 @@
 				vm.sliderPosition = value;
 
 				if(moveClip) {
-					updateClippingPlane();
+					vm.updateClippingPlane();
 				}
 
 			} else {
-				console.warn("Bounding Box was not defined", vm.bbox);
+				console.warn("updateDisplaySlider - Bounding Box was not defined", vm.bbox);
 			}
 
-		}
+		};
+
+
+		/*
+		 * Watch for show/hide of card
+		 */
+		$scope.$watch("vm.show", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.visible = newValue;
+			}
+		});
+
+
+		/*
+		 * Toggle the clipping plane
+		 */
+		$scope.$watch("vm.visible", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					vm.updateClippingPlane();
+				} else {
+					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+				}
+			}
+		});
 
 		/*
 		 * Change the clipping plane distance
 		 */
 		$scope.$watch("vm.displayDistance", function () {
 			if(!vm.disableWatchDistance) {
-				updateDisplaySlider(false, vm.visible);
+				vm.updateDisplaySlider(false, vm.visible);
 			}
 
 			vm.disableWatchDistance = false;
@@ -251,7 +253,7 @@
 		 */
 		$scope.$watch("vm.displayedAxis", function () {
 			if(!vm.disableWatchAxis) {
-				updateDisplayedDistance(false, vm.visible);
+				vm.updateDisplayedDistance(false, vm.visible);
 			}
 
 			vm.disableWatchAxis = false;
@@ -262,7 +264,7 @@
 		 */
 		$scope.$watch("vm.sliderPosition", function () {
 			if(!vm.disableWatchSlider) {
-				updateDisplayedDistance(false, vm.visible);
+				vm.updateDisplayedDistance(false, vm.visible);
 			}
 
 			vm.disableWatchSlider = false;
@@ -270,21 +272,31 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
+
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-				setDisplayValues(determineAxis(event.value.normal), event.value.distance, false);
+
+				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false);
+
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
+
 				vm.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
 				if(event.value.isMainModel) {
 					vm.offsetTrans = event.value.modelTrans;
 				}
-			} else if(event.type === EventService.EVENT.VIEWER.LOADED) {
+
+			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
 				
 				vm.bbox = event.value.bbox;
-				setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+
 				vm.units = event.value.settings.unit;
+
 			}
+			
 		});
+
 	}
 }());
 

@@ -32,9 +32,8 @@
 	AccountMenuCtrl.$inject = ["AuthService", "EventService"];
 
 	function AccountMenuCtrl (AuthService, EventService) {
-		var vm = this,
-			promise;
-
+		var vm = this;
+		
 		/**
 		 * Open menu
 		 *
@@ -49,6 +48,7 @@
 		 * Show user models
 		 */
 		vm.showTeamspaces = function () {
+			UnityUtil.reset();
 			EventService.send(EventService.EVENT.SHOW_TEAMSPACES);
 		};
 

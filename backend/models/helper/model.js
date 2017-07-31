@@ -226,7 +226,8 @@ function createAndAssignRole(modelName, account, username, data) {
 			account,
 			model:  model.toString(),
 			name: modelName,
-			permissions: C.MODEL_PERM_LIST
+			permissions: C.MODEL_PERM_LIST,
+			timestamp: setting.timestamp || undefined
 		};
 
 		ChatEvent.newModel(data.sessionId, account, modelData);
@@ -1213,7 +1214,9 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
-		modelSetting.timestamp = new Date();
+
+		//moved to bouncer
+		//modelSetting.timestamp = new Date();
 		modelSetting.markModified('errorReason');
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
@@ -1243,15 +1246,16 @@ function importModel(account, model, username, modelSetting, source, data){
 			username
 		});
 
-		const partialOKCodes = [
-			responseCodes.FILE_IMPORT_MISSING_TEXTURES.value,
-			responseCodes.FILE_IMPORT_MISSING_NODES.value,
-			responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES.value
-		];
+		//moved to bouncer
+		// const partialOKCodes = [
+		// 	responseCodes.FILE_IMPORT_MISSING_TEXTURES.value,
+		// 	responseCodes.FILE_IMPORT_MISSING_NODES.value,
+		// 	responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES.value
+		// ];
 
-		if(err && err.bouncerErrorCode && partialOKCodes.indexOf(err.value) !== -1){
-			modelSetting.timestamp = new Date();
-		}
+		// if(err && err.bouncerErrorCode && partialOKCodes.indexOf(err.value) !== -1){
+		// 	modelSetting.timestamp = new Date();
+		// }
 
 		modelSetting.status = 'failed';
 		modelSetting.errorReason = err;

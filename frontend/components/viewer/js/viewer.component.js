@@ -71,9 +71,9 @@
 			EventService.send(type, value);
 		}
 
-		vm.reload = function() {
-			vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
-		};
+		// vm.reload = function() {
+		// 	vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
+		// };
 
 		vm.initViewer = function() {
 
@@ -185,7 +185,8 @@
 								event.value.pickedPos,
 								event.value.pickedNorm,
 								event.value.colours,
-								event.value.viewpoint);
+								event.value.viewpoint
+							);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
 							vm.viewer.removePin(
 								event.value.id

@@ -30,46 +30,7 @@
 			},
 			controller: HomeCtrl,
 			controllerAs: "vm"
-		})
-		.config(["$injector",  function($injector) {
-
-
-			if ($injector.has("$mdThemingProvider")) {
-				var mdThemingProvider = $injector.get("$mdThemingProvider");
-
-				mdThemingProvider.definePalette("three_d_repo_primary", {
-					"50": "004594",
-					"100": "004594",
-					"200": "004594",
-					"300": "004594",
-					"400": "004594",
-					"500": "004594",
-					"600": "004594",
-					"700": "004594",
-					"800": "004594",
-					"900": "004594",
-					"A100": "004594",
-					"A200": "004594",
-					"A400": "004594",
-					"A700": "004594",
-					"contrastDefaultColor": "light",
-					"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
-					"contrastLightColors": undefined
-				});
-
-				mdThemingProvider.theme("default")
-					.primaryPalette("three_d_repo_primary", {
-						"default": "500",
-						"hue-1": "400",
-						"hue-2": "200",
-						"hue-3": "50"
-					})
-					.accentPalette("green", {
-						"default": "600"
-					})
-					.warnPalette("red");
-			}
-		}]);
+		});
 
 	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
 
@@ -117,8 +78,15 @@
 				"/registerVerify"
 			];
 
+			vm.loginRedirects = [
+				"sign-up",
+				"password-forgot",
+				"register-request",
+				"register-verify"
+			];
+
 			$timeout(function () {
-				var loginMarkup = "<login></login>";
+
 				homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
 
 				/*
@@ -129,28 +97,9 @@
 					var changedState = newState !== oldState;
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
-						
-						clearDirective();
-						var functionToInsert = getFunctionToInsert();
-
-						if (functionToInsert != null) {
-							insertFunctionDirective(functionToInsert);
-						} else {
-							// If you are not logged in
-							if (!AuthService.loggedIn) {
-								insertDirective(loginMarkup);
-							} else {
-								// If you are logged in
-								var accessOwnAccount = (AuthService.username === vm.state.account);
-								var viewAModel    = angular.isDefined(vm.state.model);
-
-								if (!accessOwnAccount && !viewAModel) {
-									// Return to your own account page
-									EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.username });
-								}
-							}
-						}
+						handleStateChange();
 					}
+					
 				}, true);
 
 			});
@@ -160,6 +109,27 @@
 			}
 
 		};
+
+		function handleStateChange() {
+			var loginMarkup = "<login></login>";
+			clearDirective();
+			var functionToInsert = getFunctionToInsert();
+
+			if (functionToInsert != null) {
+				var needsRedirect = vm.loginRedirects.indexOf(functionToInsert) !== -1;
+				if (AuthService.loggedIn && needsRedirect) {
+					$location.path(AuthService.username);
+				} else {
+					insertFunctionDirective(functionToInsert);
+				}
+				
+			} else {
+				// If you are not logged in
+				if (!AuthService.loggedIn) {
+					insertDirective(loginMarkup);
+				} 
+			}
+		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL
@@ -215,8 +185,6 @@
 		}
 
 		function insertFunctionDirective(func) {
-			//var snakeCaseDirectiveName = UtilsService.snake_case(func, "-");
-			//console.log(snakeCaseDirectiveName);
 
 			// Create element related to function func
 			var directiveMarkup = "<" + func +

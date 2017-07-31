@@ -47,9 +47,7 @@
 	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
 
 	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
-		var vm = this,
-			issue;
-
+		var vm = this;
 
 		/*
 		 * Init
@@ -69,8 +67,9 @@
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
 			vm.selectedIssueLoaded = false;
-			vm.modelLoaded = false;
 
+			vm.modelLoaded = false;
+			
 			/*
 			* Get the user roles for the model
 			*/
@@ -133,6 +132,8 @@
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs]).then(function(){
 				setAllIssuesAssignedRolesColors();
 				EventService.send(EventService.EVENT.ISSUES_READY, true);
+				// Check if the model has loaded
+				EventService.send(EventService.EVENT.VIEWER.CHECK_MODEL_LOADED);
 			});
 
 		};
@@ -167,7 +168,8 @@
 				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 	
 				issue.assignedRolesColors.push(roleColour);
-				pinColours.push(IssuesService.hexToRgb(roleColour));
+				pinColours = IssuesService.hexToRgb(roleColour);
+				pinColours.push(pinColours);
 			}
 		}
 
@@ -194,21 +196,21 @@
 						break;
 					}
 				}
-			} else if(event.type === EventService.EVENT.VIEWER.UNITY_READY) {
-				console.log("Disabled - UNITY_READY setting vm.modelLoaded to true in issues.component.js");
+			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
+
 				vm.modelLoaded = true;
-			
+				
 			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
 				watchNotification();
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
+				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
 				vm.issuesReady.then(function(){
-					console.log("Disabled - canAddUse before permission check in issues.component.js");
+					//console.log("Disabled - canAddUse before permission check in issues.component.js");
 					if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 						vm.canAddIssue = true;
-						console.log("Disabled - canAddUse set to true in issues.component.js");
+						//console.log("Disabled - canAddUse set to true in issues.component.js");
 					} 
 				});
 				

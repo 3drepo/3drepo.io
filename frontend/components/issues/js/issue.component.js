@@ -42,9 +42,9 @@
 			}
 		});
 
-	IssueCtrl.$inject = ["$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state"];
+	IssueCtrl.$inject = ["$location", "$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state", "StateManager"];
 
-	function IssueCtrl ($q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state) {
+	function IssueCtrl ($location, $q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state, StateManager) {
 		var vm = this;
 
 		/*
@@ -114,8 +114,23 @@
 			vm.notificationStarted = false;
 
 			vm.setContentHeight();
-			//vm.statusChange();
-	
+			history.pushState(null, null, document.URL);
+
+			var popStateHandler = function(event) {
+				StateManager.popStateHandler(event, vm.account, vm.model);
+			};
+
+			var refreshHandler = function (event){
+				StateManager.refreshHandler(event); 
+			};
+
+			//listen for user clicking the back button
+			window.addEventListener("popstate", popStateHandler);
+			$scope.$on("$destroy", function(){
+				window.removeEventListener("beforeunload", refreshHandler);
+				window.removeEventListener("popstate", popStateHandler);
+			});
+
 		};
 
 		vm.getPlaceholderText = function() {

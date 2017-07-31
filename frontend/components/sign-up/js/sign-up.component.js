@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService", "$timeout"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService", "AuthService", "$window"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, serverConfig, UtilsService, $timeout) {
+	function SignUpCtrl($scope, $mdDialog, $location, serverConfig, UtilsService, AuthService, $window) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -41,6 +41,13 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
+			AuthService.isLoggedIn().then(function(response){
+				if (response.data.username) {
+					vm.goToLoginPage();
+				}
+			});
+
 			vm.buttonLabel = "Sign Up!";
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 			vm.version = serverConfig.apiVersion;
@@ -118,6 +125,10 @@
 
 		};
 
+		vm.goToLoginPage = function () {
+			$window.location.href = "/";
+		};
+
 		/*
 		 * Watch changes to register fields to clear warning message
 		 */
@@ -126,6 +137,15 @@
 				vm.registerErrorMessage = "";
 			}
 		}, true);
+
+
+		$scope.$watch("AuthService.loggedIn", function (newValue) {
+			// TODO: this is a hack
+			if (newValue === true) {
+				vm.goToLoginPage();
+			}
+		});
+
 
 		/**
 		 * Attempt to register
@@ -181,7 +201,7 @@
 		function doRegister() {
 			var data,
 				doRegister = true,
-				allowedFormat = new RegExp(server_config.usernameRegExp); // English letters, numbers, underscore, not starting with number
+				allowedFormat = new RegExp(serverConfig.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&

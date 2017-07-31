@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("RevisionsService", RevisionsService);
 
-	RevisionsService.$inject = ["UtilsService"];
+	RevisionsService.$inject = ["UtilsService", "serverConfig"];
 
-	function RevisionsService(UtilsService) {
+	function RevisionsService(UtilsService, serverConfig) {
 
 		function listAll(account, model){
 			return UtilsService.doGet(account + "/" + model + "/revisions.json").then(function(response){
@@ -36,7 +36,7 @@
 		}
 
 		function isTagFormatInValid(tag){
-			return tag && !tag.match(server_config.tagRegExp);
+			return tag && !tag.match(serverConfig.tagRegExp);
 		}
 
 		return { 
