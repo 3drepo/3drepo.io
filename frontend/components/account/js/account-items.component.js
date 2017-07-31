@@ -811,9 +811,11 @@
 		vm.doProjectOption = function(option, project, teamspace) {
 			switch (option) {
 			case "delete":
+				var warn = "This will remove the project from your teamspace, " +
+							"deleting all the models inside of it!";
 				vm.projectData.deleteName = project.name;
 				vm.projectData.deleteTeamspace = teamspace.name;
-				vm.projectData.deleteWarning = "This will remove the project from your teamspace!";
+				vm.projectData.deleteWarning = warn;
 				UtilsService.showDialog("delete-project-dialog.html", $scope, event, true);	
 				break;
 
