@@ -1151,6 +1151,10 @@ Content-Type: image/png
 
 <p>Get a list of <a href="#template-object">permission templates</a> belongs to this account.</p>
 
+<h3 id="get-accountname-modelid-permission-templates">GET /{accountName}/{modelId}/permission-templates</h3>
+
+<p>Same as GET /{accountName}/permission-templates, this is get around the permission problem for user who has <code class="prettyprint">manage_model_permission</code> on a model but has no access to the teamspace itself.</p>
+
 <h2 id="create-a-template">Create a template</h2>
 
 <blockquote>
@@ -2901,17 +2905,59 @@ A room here represent a teamspace or a model.</p>
 
 <h2 id="newcomment">newComment</h2>
 
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when someone leaves a new comment.</p>
+
 <h2 id="commentchanged">commentChanged</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when someone edit a comment.</p>
 
 <h2 id="commentdeleted">commentDeleted</h2>
 
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when someone delete a comment.</p>
+
 <h2 id="modelstatuschanged">modelStatusChanged</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when the status of the model changed.</p>
 
 <h2 id="issuechanged">issueChanged</h2>
 
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when the status of the issue changed.</p>
+
 <h2 id="newmodel">newModel</h2>
 
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is broadcasted when someone create a new blank model.</p>
+
 <h2 id="credentialerror">credentialError</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+
+<p>This message is sent to the user who tried to join a room but has insufficient permissions.</p>
 
           <h1 id="permission">Permission</h1>
 
