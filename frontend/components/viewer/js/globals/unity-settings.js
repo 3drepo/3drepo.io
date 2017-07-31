@@ -1,5 +1,5 @@
 var Module = {
-	TOTAL_MEMORY: 2130706432,
+	TOTAL_MEMORY: 2130706432 / 5,
 	errorhandler: UnityUtil.onError,
 	compatibilitycheck: null,
 	backgroundColor: "#222C36",

@@ -31,12 +31,18 @@
 										md-icon.angular-material-icons(ng-if="!vm.shouldShow(project)") folder 
 									p.projectName {{project.name}}
 
-								md-menu(md-position-mode="target-right target")
-									md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+								md-menu(
+									md-position-mode="target-right target"
+									ng-if="vm.projectData.visible(project)")
+									md-button.md-icon-button(
+										aria-label="More"
+										ng-click="$mdOpenMenu($event)")
 										md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 									md-menu-content(width="3")
 										md-menu-item(ng-repeat="(key, value) in vm.projectData.projectOptions")
-											md-button(ng-click="vm.doProjectOption(key, project, account)")
+											md-button(
+												ng-if="value.visible(project)"
+												ng-click="vm.doProjectOption(key, project, account)")
 												div(layout="row", flex)
 													span(flex, style="color:{{value.color}}") {{value.label}}
 													md-icon.angular-material-icons(

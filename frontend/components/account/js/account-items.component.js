@@ -760,6 +760,15 @@
 		// PROJECT SPECIFIC CODE
 
 		vm.projectData = {
+			visible : function(project) {
+				if (
+					project.permissions.indexOf("edit_project") !== -1 ||
+					project.permissions.indexOf("delete_project") !== -1 
+				) {
+					return true;
+				} 
+				return false;
+			},
 			deleteName : "",
 			deleteTeamspace : "",
 			deleteWarning : "",
@@ -770,11 +779,23 @@
 			projectOptions : {
 				edit: {
 					label: "Edit", 
-					icon: "edit" 
+					icon: "edit",
+					visible: function(project){
+						if (project.permissions.indexOf("edit_project") !== -1) {
+							return true;
+						}
+						return false;	
+					}
 				},
 				delete: {
 					label: "Delete", 
-					icon: "delete" 
+					icon: "delete",
+					visible: function(project){
+						if (project.permissions.indexOf("delete_project") !== -1) {
+							return true;
+						} 
+						return false;
+					}
 				}
 			}
 		}; 
