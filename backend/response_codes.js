@@ -83,7 +83,7 @@
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Unknown error", status: 500 },
 		FILE_IMPORT_UNKNOWN_CMD: { message: "Unknown command", status: 500 },
 
-		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "Bouncer failed to start", status: 500 },
+		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "File processing failed to start", status: 500 },
 		FILE_IMPORT_LOAD_SCENE_FAIL: { message: "Failed to import file to scene", status: 500},
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },

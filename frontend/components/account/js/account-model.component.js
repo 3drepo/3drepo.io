@@ -49,16 +49,19 @@
 			}
 		});
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountDataService", "StateManager"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, AuthService, AnalyticService, AccountDataService, StateManager) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
 
-		var vm = this,
-			infoTimeout = 4000,
-			isUserAccount = (vm.account === vm.userAccount);
+		var vm = this;
+
+			
 		// Init
 
 		vm.$onInit = function() {
+			
+			vm.infoTimeout = 4000,
+			vm.isUserAccount = (vm.account === vm.userAccount);
 
 			vm.modelToUpload = null;
 			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
@@ -79,8 +82,8 @@
 				permissions: {
 					label: "Permissions", 
 					icon: "group", 
-					// !isUserAccount will be changed to AuthService.hasPermission... when someone can pay for other accounts other than their own
-					hidden: !isUserAccount
+					// !vm.isUserAccount will be changed to AuthService.hasPermission... when someone can pay for other accounts other than their own
+					hidden: !vm.isUserAccount
 				},
 				revision: {
 					label: "Revisions", 
@@ -110,40 +113,31 @@
 
 			watchModelStatus();
 
-			if (vm.model.status === "processing") {
-
-				vm.model.uploading = true;
+			if (vm.model.processing) {
 				vm.fileUploadInfo = "Processing...";
-
 			}
-			
+
+			if (vm.model.uploading) {
+				vm.fileUploadInfo = "Uploading...";
+			}
 
 		};
 		
-		/*
-		 * Watch changes in upload file
-		 */
-		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
-
-			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.model.name === vm.model.name) && (vm.uploadedFile.account === vm.account)) {
-
-				uploadFileToModel(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
-
-			}
-		});
-
 		vm.modelToUploadFileWatch = $scope.$watch("vm.modelToUpload", function () {
+			// Check that the file to be uploaded is valid!
 			if(vm.modelToUpload){
 
 				var names = vm.modelToUpload.name.split(".");
 				
 				vm.uploadErrorMessage = null;
-				
+				var extension = names[names.length - 1].toLowerCase()
+				var valid = serverConfig.acceptedFormat.indexOf(extension) === -1;
+
 				if(names.length === 1){
 					vm.uploadErrorMessage = "Filename must have extension";
 					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
-				} else if(serverConfig.acceptedFormat.indexOf(names[names.length - 1].toLowerCase()) === -1) {
+				} else if(valid) {
 					vm.uploadErrorMessage = "File format not supported";
 					vm.modelToUpload = null;
 					vm.uploadButtonDisabled = true;
@@ -263,31 +257,32 @@
 		/**
 		 * When users click upload after selecting
 		 */
-		vm.uploadFile = function () {
-			var revisions;
+		vm.uploadFile = function (model) {
+
+			console.log("vm.uploadFile", model);
+
 			vm.uploadErrorMessage = null;
+			var uploadFileData = {
+				model: vm.model, 
+				account: vm.account, 
+				file: vm.modelToUpload, 
+				tag: vm.tag, 
+				desc: vm.desc
+			};
 
-			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
-				vm.uploadErrorMessage = "Invalid revision name";
-			} else {
-				UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
-					revisions = response.data;
-					if(vm.tag){
-						revisions.forEach(function(rev){
-							if(rev.tag === vm.tag){
-								vm.uploadErrorMessage = "Revision name already exists";
-							}
-						});
-					}
-
-					if(!vm.uploadErrorMessage){
-						vm.uploadedFile = {model: vm.model, account: vm.account, file: vm.modelToUpload, tag: vm.tag, desc: vm.desc};
-						vm.addButtons = false;
-						vm.addButtonType = "add";
-						vm.closeDialog();
-					}
+		
+			AccountUploadService.uploadRevisionToModel(uploadFileData)
+				.then(function(){
+					vm.addButtons = false;
+					vm.addButtonType = "add";
+					vm.closeDialog();
+				})
+				.catch(function(errorMessage){
+					vm.uploadErrorMessage = errorMessage;
 				});
-			}
+
+				
+
 		};
 
 		/**
@@ -300,72 +295,6 @@
 				eventAction: "view"
 			});
 		};
-
-		/**
-		 * Upload file/model to model
-		 * @param file
-		 * @param tag
-		 * @param desc
-		 */
-		function uploadFileToModel(file, tag, desc) {
-			var promise,
-				formData;
-
-			// Check the quota
-			promise = UtilsService.doGet(vm.userAccount + ".json");
-
-			promise.then(function (response) {
-
-				var targetAccount = response.data.accounts.find(function(account){
-					return account.account === vm.account;
-				});
-
-				//var quota = targetAccount.quota;
-
-				// Check for file size limit
-				if (file.size > serverConfig.uploadSizeLimit) {
-					$timeout(function () {
-
-						vm.fileUploadInfo = "File exceeds size limit";
-						$timeout(function () {
-							vm.fileUploadInfo = "";
-						}, infoTimeout);
-					});
-				} else {
-
-					formData = new FormData();
-					formData.append("file", file);
-
-					if(tag){
-						formData.append("tag", tag);
-					}
-
-					if(desc){
-						formData.append("desc", desc);
-					}
-
-					promise = UtilsService.doPost(formData, vm.account + "/" + vm.model.model + "/upload", {"Content-Type": undefined});
-
-					promise.then(function (response) {
-						if ((response.status === 400) || (response.status === 404)) {
-							// Upload error
-							vm.model.uploading = false;
-							vm.fileUploadInfo = UtilsService.getErrorMessage(response.data);
-
-							$timeout(function () {
-								vm.fileUploadInfo = "";
-							}, infoTimeout);
-						} else {
-							
-							AnalyticService.sendEvent({
-								eventCategory: "Model",
-								eventAction: "upload"
-							});
-						}
-					});
-				}
-			});
-		}
 
 		/**
 		 * Watch file upload status
@@ -393,22 +322,27 @@
 					}
 
 					vm.model.uploading = false;
+					vm.model.processing = false;
 
 					$scope.$apply();
-					$timeout(function () {
-						vm.fileUploadInfo = "";
-					}, infoTimeout);
+					// $timeout(function () {
+					// 	vm.fileUploadInfo = "";
+					// }, vm.infoTimeout);
 					
 				} else if (data.status === "uploading"){
 
+					vm.model.processing = false;
 					vm.model.uploading = true;
 					vm.fileUploadInfo = "Uploading...";
 					$scope.$apply();
 
 				} else if (data.status === "processing"){
-					vm.model.uploading = true;
+
+					vm.model.uploading = false;
+					vm.model.processing = true;
 					vm.fileUploadInfo = "Processing...";
 					$scope.$apply();
+
 				}
 			});
 

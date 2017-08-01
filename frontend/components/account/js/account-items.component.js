@@ -34,9 +34,9 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountDataService"];
+	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
 
-	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountDataService) {
+	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountService) {
 		var vm = this;
 
 		/*
@@ -214,19 +214,19 @@
 		// Checks
 
 		vm.hasFederations = function(models) { 
-			return AccountDataService.hasFederations(models); 
+			return AccountService.hasFederations(models); 
 		};
 
 		vm.getFederations = function(models) { 
-			return AccountDataService.getFederations(models); 
+			return AccountService.getFederations(models); 
 		};
 
 		vm.getIndividualModels = function(models) {
-			return AccountDataService.getIndividualModels(models); 
+			return AccountService.getIndividualModels(models); 
 		};
 
 		vm.getProjects = function(teamspace) { 
-			return AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace); 
+			return AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace); 
 		};
 
 		// ADD PROJECTS/FEDERATIONS/MODELS
@@ -242,7 +242,7 @@
 			var teamspaceName = vm.federationData.teamspace;
 			var projectName = vm.federationData.project;
 			var fedName = vm.federationData.name;
-			var duplicate = AccountDataService.isDuplicateFederation(vm.accounts, teamspaceName, projectName, fedName);
+			var duplicate = AccountService.isDuplicateFederation(vm.accounts, teamspaceName, projectName, fedName);
 			if (duplicate) {
 				vm.errorMessage = "Federation already with this name!";
 			}
@@ -256,7 +256,7 @@
 		 */
 		vm.saveFederation = function (teamspaceName, projectName) {
 			var promise;
-			var project = AccountDataService.getProject(vm.accounts, teamspaceName, projectName);
+			var project = AccountService.getProject(vm.accounts, teamspaceName, projectName);
 			var isEdit = vm.federationData._isEdit;
 
 			var currentFederation = vm.federationData.name;
@@ -347,19 +347,19 @@
 			
 			if (!isDefault) {
 
-				models = AccountDataService.getIndividualModelsByProjectName(
+				models = AccountService.getIndividualModelsByProjectName(
 					vm.accounts, 
 					vm.federationData.teamspace, 
 					vm.federationData.project
 				);
 			} else {
-				models = AccountDataService.getIndividualTeamspaceModels(
+				models = AccountService.getIndividualTeamspaceModels(
 					vm.accounts, 
 					vm.federationData.teamspace
 				);
 			}
 			
-			var noneFederated = AccountDataService.getNoneFederatedModels(
+			var noneFederated = AccountService.getNoneFederatedModels(
 				vm.federationData, 
 				models
 			);
@@ -373,7 +373,7 @@
 		 * @param modelName
 		 */
 		vm.removeFromFederation = function (modelId) {
-			AccountDataService.removeFromFederation(vm.federationData, modelId);
+			AccountService.removeFromFederation(vm.federationData, modelId);
 		};
 
 
@@ -442,7 +442,7 @@
 		/*
 		 * Watch new model data
 		 */
-		$scope.$watch("{a : vm.newModelData, b: vm.newModelFileToUpload.name}", function (data){
+		$scope.$watchGroup(["vm.newModelData", "vm.newModelFileToUpload"], function () {
 
 			var newValue = vm.newModelData;
 
@@ -463,7 +463,8 @@
 			}
 
 
-			if(vm.newModelFileToUpload){
+			if(vm.newModelFileToUpload) {
+
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";
 
@@ -521,13 +522,13 @@
 							if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
 
 								var projectToDeleteFrom = vm.projectToDeleteFrom.name;
-								AccountDataService.removeModelByProjectName(
+								AccountService.removeModelByProjectName(
 									vm.accounts, 
 									account.name, 
 									projectToDeleteFrom, 
 									response.data.model
 								);
-								AccountDataService.removeFromFederationByProjectName(
+								AccountService.removeFromFederationByProjectName(
 									vm.accounts, 
 									account.name, 
 									projectToDeleteFrom, 
@@ -634,7 +635,7 @@
 					return;
 				}
 
-				promise = AccountService.newModel(vm.newModelData);
+				promise = AccountUploadService.newModel(vm.newModelData);
 				promise.then(function (response) {
 					if (response.data.status === 400) {
 						vm.showNewModelErrorMessage = true;
@@ -751,16 +752,21 @@
 
 			// Save model to model
 			if (vm.newModelFileToUpload !== null) {
-				$timeout(function () {
-					vm.uploadedFile = {
-						account: account, 
-						model: model, 
-						file: vm.newModelFileToUpload, 
-						tag: vm.tag, 
-						desc: vm.desc, 
-						newModel: true
-					};
+
+				AccountUploadService.uploadFileToModel({
+					account: account, 
+					model: model, 
+					file: vm.newModelFileToUpload, 
+					tag: vm.tag, 
+					desc: vm.desc, 
+					newModel: true
+				}).then(function(){
+					AnalyticService.sendEvent({
+						eventCategory: "Model",
+						eventAction: "upload"
+					});
 				});
+
 			}
 		}
 
@@ -920,20 +926,20 @@
 					var project = response.data;
 					
 					if (update.edit) {
-						AccountDataService.renameProjectInTeamspace(
+						AccountService.renameProjectInTeamspace(
 							vm.accounts, 
 							teamspaceName, 
 							update.newProjectName, 
 							update.oldProjectName
 						);
 					} else if (update.delete) {
-						AccountDataService.removeProjectInTeamspace(
+						AccountService.removeProjectInTeamspace(
 							vm.accounts, 
 							teamspaceName, 
 							update.projectName
 						);
 					} else {
-						AccountDataService.addProjectToTeamspace(
+						AccountService.addProjectToTeamspace(
 							vm.accounts, 
 							teamspaceName, 
 							project

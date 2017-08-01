@@ -5,7 +5,7 @@ div(layout="row", layout-align="start center", flex)
 		layout="row",
 		layout-align="start center",
 		layout-fill,
-		ng-disabled="vm.model.uploading")
+		ng-disabled="vm.model.uploading || vm.model.processing")
 			md-button.md-icon-button(aria-label="Dashboard")
 				md-icon.angular-material-icons dashboard
 			p.modelName.md-list-item-text(flex="100") {{vm.model.name}}
@@ -14,12 +14,12 @@ div(layout="row", layout-align="start center", flex)
 		.modelUploadInfo(layout="row", layout-align="start center")
 			p.modelUploadFilename {{vm.uploadFileName}}
 			p.modelUploadInfo() {{vm.fileUploadInfo}}
-			md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.model.uploading")
+			md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.model.uploading || vm.model.processing")
 
 		p.modelTimestamp {{vm.model.timestampPretty}}
 
 		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
-			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)", ng-disabled="vm.model.uploading")
+			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)", ng-disabled="vm.model.uploading || vm.model.processing")
 				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 			md-menu-content(width="3")
 				md-menu-item(ng-repeat="(key, value) in vm.modelOptions", ng-if="!value.hidden")
