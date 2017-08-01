@@ -239,6 +239,7 @@
 			return $http.get(url)
 				.then(function(response) {
 					var permissionsUsers = response.data;
+					console.log(permissionsUsers);
 					teamspace.assignUsers = permissionsUsers;
 				})
 				.catch(function(error){

@@ -33,10 +33,10 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
+									ng-if="user.permissions !== undefined && user.user && vm.selectedTeamspace.account != user.user ")
 
 									td.userColumn.userInput
-										p {{user.assignedUser}}
+										p {{user.user}}
 									td(ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
 											aria-label="Checkbox {{value}}"
@@ -93,12 +93,12 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
+									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.user && user.user")
 
 									//- p {{vm.selectedTeamspacel.account}}
 
 									td.userColumn.userInput
-										p {{user.assignedUser}}
+										p {{user.user}}
 									td(ng-repeat="(permission, value) in vm.projectPermissions") 
 										md-checkbox(
 											aria-label="Project Permission {{value}}"
@@ -166,15 +166,15 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.assignUsers"
-									ng-init="vm.addUser(user.assignedUser)"
-									ng-if="vm.selectedTeamspace.account != user.assignedUser && user.assignedUser")
+									ng-init="vm.addUser(user.user)"
+									ng-if="vm.selectedTeamspace.account != user.user && user.user")
 
 									td.fixedWidth.userColumn.userInput()
-										p {{user.assignedUser}}
+										p {{user.user}}
 
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 										md-radio-group(	
-											ng-model="vm.selectedRole[user.assignedUser]"
+											ng-model="vm.selectedRole[user.user]"
 											layout-align="center center"
 											layout="row")
 

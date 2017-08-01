@@ -950,9 +950,10 @@ schema.statics.findAccountsUserHasAccess = function(user){
 	return User.find( 
 		{account: 'admin'},
 		{ 'customData.permissions': { 
+			// TODO: Should be anybody with access 
 			$elemMatch: {
 				user: user, 
-				permissions: { '$in': [C.PERM_CREATE_PROJECT, C.PERM_TEAMSPACE_ADMIN, C.PERM_VIEW_PROJECTS] }
+				//permissions: { '$in': [C.PERM_CREATE_PROJECT, C.PERM_TEAMSPACE_ADMIN, C.PERM_VIEW_PROJECTS] }
 			}
 		}},
 		{ 'customData.permissions.$' : 1, 'user': 1, 'customData.billing': 1}
