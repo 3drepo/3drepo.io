@@ -66,7 +66,7 @@
 	}
 
 	function listProjects(req, res, next){
-		Project.find({ account: req.params.account }, {}).then(projects => {
+		Project.findAndPopulateUsers({ account: req.params.account }, {}).then(projects => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -74,12 +74,11 @@
 	}
 
 	function listProject(req, res, next){
-		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
-			if(!project){
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
-			}
+
+		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
+			
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

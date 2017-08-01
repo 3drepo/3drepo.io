@@ -70,9 +70,44 @@ This message is broadcasted when some created a new issue. The response will be 
 
 
 ## newComment
+
+> Example:
+
+This message is broadcasted when someone leaves a new comment.
+
 ## commentChanged
+
+> Example:
+
+This message is broadcasted when someone edit a comment.
+
 ## commentDeleted
+
+> Example:
+
+This message is broadcasted when someone delete a comment.
+
 ## modelStatusChanged
+
+
+> Example:
+
+This message is broadcasted when the status of the model changed.
+
 ## issueChanged
+
+> Example:
+
+This message is broadcasted when the status of the issue changed.
+
 ## newModel
+
+> Example:
+
+This message is broadcasted when someone create a new blank model.
+
 ## credentialError
+
+> Example:
+
+This message is sent to the user who tried to join a room but has insufficient permissions.

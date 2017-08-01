@@ -206,6 +206,29 @@ schema.methods.findPermissionByUser = function(username){
 	return this.permissions.find(perm => perm.user === username);
 };
 
+schema.statics.populateUsers = function(account, permissions){
+	'user strict';
+
+	const User = require('./user');
+
+	return User.findByUserName(account).then(user => {
+
+		const subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+
+		subscriptions.forEach(sub => {
+			const permissionFound = permissions && permissions.find(p => p.user === sub.assignedUser);
+
+			if(!permissionFound && sub.assignedUser){
+				permissions.push({ user: sub.assignedUser });
+			}
+		});
+
+		return permissions;
+
+	});
+
+};
+
 var ModelSetting = ModelFactory.createClass(
 	'ModelSetting',
 	schema,

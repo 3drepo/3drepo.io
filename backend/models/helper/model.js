@@ -226,7 +226,8 @@ function createAndAssignRole(modelName, account, username, data) {
 			account,
 			model:  model.toString(),
 			name: modelName,
-			permissions: C.MODEL_PERM_LIST
+			permissions: C.MODEL_PERM_LIST,
+			timestamp: setting.timestamp || undefined
 		};
 
 		ChatEvent.newModel(data.sessionId, account, modelData);

@@ -2440,8 +2440,6 @@ web socket client id returned from connecting to the web socket server when maki
 
 <h3 id="get-accountname-modelid-issues-issueid-json">GET /{accountName}/{modelId}/issues/{issueId}.json</h3>
 
-<p>The response includes comments of the issue and all the screenshots are represented by an URL of the resources.</p>
-
 <blockquote>
 <p>Example request</p>
 </blockquote>
@@ -2564,13 +2562,9 @@ web socket client id returned from connecting to the web socket server when maki
    </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"68ddc470-9ebe-4520-9d91-a35da65cc610"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
+<p>The response includes comments of the issue and all the screenshots are represented by an URL of the resources.</p>
+
 <h2 id="get-issues">Get issues</h2>
-
-<h3 id="get-accountname-modelid-issues-json">GET /{accountName}/{modelId}/issues.json</h3>
-
-<h3 id="get-accountname-modelid-revision-revid-issues-json">GET /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
-
-<p>Similar to get an issue API but the issues in this response doesn&rsquo;t contains comments.</p>
 
 <blockquote>
 <p>Example response</p>
@@ -2649,15 +2643,13 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="p">}</span><span class="w">
 </span><span class="p">]</span><span class="w">
 </span></code></pre>
+<h3 id="get-accountname-modelid-issues-json">GET /{accountName}/{modelId}/issues.json</h3>
+
+<h3 id="get-accountname-modelid-revision-revid-issues-json">GET /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
+
+<p>Similar to get an issue API but the issues in this response doesn&rsquo;t contains comments.</p>
+
 <h2 id="create-an-issue">Create an issue</h2>
-
-<h3 id="post-accountname-modelid-issues-json">POST /{accountName}/{modelId}/issues.json</h3>
-
-<h3 id="post-accountname-modelid-revision-revid-issues-json">POST /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
-
-<p>Request body</p>
-
-<p><a href="#issue-object">Issue object</a></p>
 
 <blockquote>
 <p>Example request</p>
@@ -2731,13 +2723,15 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="s2">"group_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2229f920-68a8-11e7-84d9-5740a79c553d"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
+<h3 id="post-accountname-modelid-issues-json">POST /{accountName}/{modelId}/issues.json</h3>
+
+<h3 id="post-accountname-modelid-revision-revid-issues-json">POST /{accountName}/{modelId}/revision/{revId}/issues.json</h3>
+
+<p>Request body</p>
+
+<p><a href="#issue-object">Issue object</a></p>
+
 <h2 id="update-an-issue-status">Update an issue status</h2>
-
-<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
-
-<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
-
-<p>On updating issue status, the system will create an automated comment stating what the user has changed.</p>
 
 <blockquote>
 <p>Example request</p>
@@ -2753,13 +2747,13 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="s2">"desc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"new desc"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
-<h2 id="create-a-comment">Create a comment</h2>
-
 <h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
 
 <h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
 
-<p>Create a comment in an issue</p>
+<p>On updating issue status, the system will create an automated comment stating what the user has changed.</p>
+
+<h2 id="create-a-comment">Create a comment</h2>
 
 <blockquote>
 <p>Example request</p>
@@ -2802,13 +2796,13 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
-<h2 id="update-a-comment">Update a comment</h2>
-
 <h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
 
 <h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
 
-<p>Update a comment, commenIndex start from 0.</p>
+<p>Create a comment in an issue</p>
+
+<h2 id="update-a-comment">Update a comment</h2>
 
 <blockquote>
 <p>Example request</p>
@@ -2820,13 +2814,13 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="s2">"commentIndex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
-<h2 id="delete-a-comment">Delete a comment</h2>
-
 <h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
 
 <h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
 
-<p>Deleta a comment, commenIndex start from 0.</p>
+<p>Update a comment, commenIndex start from 0.</p>
+
+<h2 id="delete-a-comment">Delete a comment</h2>
 
 <blockquote>
 <p>Example request</p>
@@ -2838,6 +2832,87 @@ web socket client id returned from connecting to the web socket server when maki
     </span><span class="s2">"commentIndex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
+<h3 id="put-accountname-modelid-issues-issueid-json">PUT /{accountName}/{modelId}/issues/{issueId}.json</h3>
+
+<h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
+
+<p>Deleta a comment, commenIndex start from 0.</p>
+
+          <h1 id="notification">Notification</h1>
+
+<p>When other users doing different actions like uploading a model or leaving a comment, they will trigger events
+and these events will be broadcasted via websockets to all listeners.</p>
+
+<p>The websocket server implemented using socket.io library and the following examples use only socket.io client to show you how to
+connect to it. It is also possible to use native APIs and other libraries to do it but is not mentioned in this document.</p>
+
+<h2 id="connecting-to-websocket-server">Connecting to websocket server</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code>    <span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">(</span><span class="s1">'https://example.org:3000'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">path</span><span class="p">:</span> <span class="s1">'/path'</span><span class="p">,</span> 
+        <span class="na">transports</span><span class="p">:</span> <span class="p">[</span><span class="s1">'websocket'</span><span class="p">]</span>
+    <span class="p">});</span>
+</code></pre>
+<p>The address is wss://<code class="prettyprint">hostname</code>:<code class="prettyprint">port</code>/chat/, it would be different if you changed the default config file.</p>
+
+<h2 id="joining-a-room">Joining a room</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code>    <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'join'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">'account'</span><span class="p">:</span> <span class="s1">'teamspaceA'</span><span class="p">,</span>
+        <span class="s1">'model'</span><span class="p">:</span> <span class="s1">'00000000-0000-0000-0000-000000000000'</span>
+    <span class="p">});</span>
+</code></pre>
+<p>The message will be broadcasted to different rooms, before you can listen on any messages, you need to join a room first.
+A room here represent a teamspace or a model.</p>
+
+<p>For example, if you want to listen messages on model with id 00000000-0000-0000-0000-000000000000 in teamspaceA, you need to join the room </p>
+
+<p><code class="prettyprint">{account: &#39;teamspaceA&#39;, &#39;model&#39;: &#39;00000000-0000-0000-0000-000000000000&#39;}</code> </p>
+
+<p>first.</p>
+
+<p>If you want to listen messages on all models in teamspaceA, you would want to join the room <code class="prettyprint">{account: &#39;teamspaceA&#39; }</code> instead.</p>
+
+<p>If you don&rsquo;t have permission to join a room, the server will send an event <code class="prettyprint">credentialError</code> to you.</p>
+
+<h2 id="newissues">newIssues</h2>
+
+<blockquote>
+<p>Example:</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code>
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'join'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">'account'</span><span class="p">:</span> <span class="s1">'teamspaceA'</span><span class="p">,</span>
+        <span class="s1">'model'</span><span class="p">:</span> <span class="s1">'00000000-0000-0000-0000-000000000000'</span>
+    <span class="p">});</span>
+
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'teamspaceA::00000000-0000-0000-0000-000000000000::newIssues'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">issue</span><span class="p">){</span>
+        <span class="c1">//...</span>
+    <span class="p">});</span>
+
+</code></pre>
+<p>This message is broadcasted when some created a new issue. The response will be list of an <a href="#issue-object">issue objects</a></p>
+
+<h2 id="newcomment">newComment</h2>
+
+<h2 id="commentchanged">commentChanged</h2>
+
+<h2 id="commentdeleted">commentDeleted</h2>
+
+<h2 id="modelstatuschanged">modelStatusChanged</h2>
+
+<h2 id="issuechanged">issueChanged</h2>
+
+<h2 id="newmodel">newModel</h2>
+
+<h2 id="credentialerror">credentialError</h2>
+
           <h1 id="permission">Permission</h1>
 
 <p>There are three levels of permissions</p>

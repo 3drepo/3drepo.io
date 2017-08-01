@@ -959,7 +959,7 @@ describe('Sharing/Unsharing a model', function () {
 			{ user: username_viewer, permission: 'viewer'}
 		];
 
-		it('should be ok and reduced to one by the backend', function(done){
+		it('should be ok and reduced to one by the backend and response body should show all subscription users', function(done){
 
 			async.series([
 				done => {
@@ -972,7 +972,9 @@ describe('Sharing/Unsharing a model', function () {
 				done => {
 					agent.get(`/${username}/${model}/permissions`)
 					.expect(200, function(err, res){
-						expect(res.body).to.deep.equal([{ user: username_viewer, permission: 'viewer'}]);
+						expect(res.body.find(p => p.user === username_viewer)).to.deep.equal({ user: username_viewer, permission: 'viewer'});
+						expect(res.body.find(p => p.user === username_editor)).to.deep.equal({ user: username_editor});
+						expect(res.body.find(p => p.user === username_commenter)).to.deep.equal({ user: username_commenter});
 						done(err);
 					});
 				}

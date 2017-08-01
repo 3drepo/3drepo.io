@@ -38,6 +38,10 @@ GET /repoman/permission-templates HTTP/1.1
 
 Get a list of [permission templates](#template-object) belongs to this account.
 
+### GET /{accountName}/{modelId}/permission-templates
+
+Same as GET /{accountName}/permission-templates, this is get around the permission problem for user who has `manage_model_permission` on a model but has no access to the teamspace itself.
+
 ## Create a template
 
 > Example request

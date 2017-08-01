@@ -27,6 +27,7 @@
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
+	router.get('/:model/permission-templates', middlewares.hasEditPermissionsAccessToModel, listTemplates);
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
 	function listTemplates(req, res, next){

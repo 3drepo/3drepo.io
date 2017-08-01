@@ -434,8 +434,13 @@ function getPermissions(req, res, next){
 		if(!setting){
 			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.permissions);
+			return ModelSetting.populateUsers(account, setting.permissions);
 		}
+
+	}).then(permissions => {
+		
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
+
 	}).catch(err => {
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
