@@ -26,7 +26,7 @@ before_install:
     - sudo apt-get install -y mongodb-org
     - mongod --version
     - sudo service mongod start
-    - yarn install -g gulp
+    - npm install -g gulp
     - yarn link gulp
     - sleep 15
     - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
