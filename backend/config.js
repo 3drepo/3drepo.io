@@ -262,13 +262,11 @@
 	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
 	//captcha
-	config.captcha = coalesce(config.captcha, {});
-	config.captcha.validateUrl = coalesce(config.captcha.validateUrl, "https://www.google.com/recaptcha/api/siteverify");
-	config.captcha.secretKey = coalesce(config.captcha.secretKey, "");
+	config.captcha = coalesce(config.captcha, null);
 
 	//default auth settings
 	config.auth = coalesce(config.auth, {});
-	config.auth.captcha = coalesce(config.auth.captcha, {});
+	config.auth.captcha = coalesce(config.auth.captcha, null);
 	config.auth.register = coalesce(config.auth.register, {});
 
 	//paypal
