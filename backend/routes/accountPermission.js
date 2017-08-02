@@ -36,7 +36,6 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-
 			// TODO: This is a hack
 			// Assign an empty array to permissionless users
 			var resData = user.toObject().customData;
@@ -51,6 +50,11 @@
 						})
 					}
 				}
+			});
+
+			// TODO: Why is this necessary? Remove undefined users
+			resData.permissions = _.remove(resData.permissions, function(u) {
+				return u.user !== undefined;
 			});
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resData.permissions);
