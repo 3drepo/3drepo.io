@@ -49,6 +49,7 @@
 			vm.units = serverConfig.units;
 			vm.modelRegExp = serverConfig.modelNameRegExp;
 			vm.defaults = {}; 
+			vm.newModelButtonDisabled = true;
 
 			//
 			StateManager.hasBeenBackToTeamspace = true;
@@ -430,38 +431,31 @@
 
 		// MODELS
 
-		/*
-		 * Watch the new model type
-		 */
-		$scope.$watch("vm.newModelData.type", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showModelTypeOtherInput = (newValue.toString() === "Other");
+		$scope.$watch("vm.newModelData", function(newValue) {
+			
+			if (newValue) {
+
+				var noOtherType = newValue.type === "Other" && !newValue.otherType;
+
+				if (!newValue.unit || !newValue.name || noOtherType) {
+					vm.newModelButtonDisabled = true;
+				} else {
+					vm.newModelButtonDisabled = false;
+				}
+
+				// Show other
+				if (newValue.type) {
+					vm.showModelTypeOtherInput = (newValue.type.toString() === "Other");
+				}
+
 			}
-		});
+
+		}, true);
 
 		/*
 		 * Watch new model data
 		 */
-		$scope.$watchGroup(["vm.newModelData", "vm.newModelFileToUpload"], function () {
-
-			var newValue = vm.newModelData;
-
-			if (angular.isDefined(newValue)) {
-				vm.newModelButtonDisabled =
-					(angular.isUndefined(newValue.name) || 
-					(angular.isDefined(newValue.name) && (newValue.name === "")));
-				
-				if (!vm.newModelButtonDisabled && (newValue.type === "Other")) {
-					vm.newModelButtonDisabled =
-						(angular.isUndefined(newValue.otherType) || 
-						(angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
-				}
-
-				if(!newValue.unit){
-					vm.newModelButtonDisabled = true;
-				}
-			}
-
+		$scope.$watch("vm.newModelData", function () {
 
 			if(vm.newModelFileToUpload) {
 
@@ -482,6 +476,7 @@
 					vm.newModelFileToUpload = null;
 				}
 			}
+
 
 		}, true);
 
@@ -636,37 +631,44 @@
 				}
 
 				promise = AccountUploadService.newModel(vm.newModelData);
-				promise.then(function (response) {
-					if (response.data.status === 400) {
-						vm.showNewModelErrorMessage = true;
-						vm.newModelErrorMessage = response.data.message;
-					} else {
-						vm.modelsExist = true;
-						// Add model to list
-						model = {
-							model: response.data.model,
-							name: response.data.name,
-							project : vm.newModelData.project,
-							permissions: response.data.permissions,
-							canUpload: true,
-							timestamp: null
-						};
+				promise
+					.then(function (response) {
 
-						updateAccountModels(
-							response.data.account,
-							model, 
-							vm.newModelData.project
-						);
-						vm.addButtons = false;
-						vm.addButtonType = "add";
-						vm.closeDialog();
-						
-						AnalyticService.sendEvent({
-							eventCategory: "model",
-							eventAction: "create"
-						});
-					}
-				});
+						if (response.data.status === 400) {
+							vm.showNewModelErrorMessage = true;
+							vm.newModelErrorMessage = response.data.message;
+						} else {
+							vm.modelsExist = true;
+							// Add model to list
+							model = {
+								model: response.data.model,
+								name: response.data.name,
+								project : vm.newModelData.project,
+								permissions: response.data.permissions,
+								canUpload: true,
+								timestamp: null
+							};
+
+							updateAccountModels(
+								response.data.account,
+								model, 
+								vm.newModelData.project
+							);
+							vm.addButtons = false;
+							vm.addButtonType = "add";
+							vm.closeDialog();
+							
+							AnalyticService.sendEvent({
+								eventCategory: "model",
+								eventAction: "create"
+							});
+						}
+					})
+					.catch(function(error){
+						console.log("Error ", error)
+						vm.showNewModelErrorMessage = true;
+						vm.newModelErrorMessage = error.data.message;
+					});
 			}
 		};
 

@@ -54,7 +54,8 @@
 				unit: modelData.unit,
 				code: modelData.code
 			};
-			return UtilsService.doPost(data, modelData.teamspace + "/" + encodeURIComponent(modelData.name));
+			var modelName = encodeURIComponent(modelData.name);
+			return UtilsService.doPost(data, modelData.teamspace + "/" + modelName);
 		}
 
 		/**
