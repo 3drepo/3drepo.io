@@ -17,7 +17,7 @@ addons:
 before_install:
     - mkdir -p submodules
     - cd submodules
-    - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+    - git clone --depth 1 https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
     - cd ..
     - sudo apt-get install graphicsmagick
     - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
