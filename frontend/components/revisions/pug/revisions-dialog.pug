@@ -5,6 +5,7 @@ md-dialog.revisionsDialog(aria-label="Revisions")
 			span(flex)
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
+
 	md-list
 
 		md-list-item(
@@ -23,8 +24,14 @@ md-dialog.revisionsDialog(aria-label="Revisions")
 				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
 					p {{rev.desc}}
 
-		div(ng-if="vm.revisions.length === 0" 
+		div(ng-if="vm.revisionsLoading" 
 			layout-align="center center")
-			h3 No Revisions Present
+			h3.revisions Revisions Loading
+
+			md-divider
+
+		div(ng-if="vm.revisionsLoading === false && vm.revisions.length === 0" 
+			layout-align="center center")
+			h3.revisions No Revisions Present
 
 			md-divider

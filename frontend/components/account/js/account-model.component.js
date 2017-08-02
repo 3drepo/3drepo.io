@@ -121,6 +121,8 @@
 				vm.fileUploadInfo = "Uploading...";
 			}
 
+			vm.revisionsLoading = true;
+
 		};
 		
 		vm.modelToUploadFileWatch = $scope.$watch("vm.modelToUpload", function () {
@@ -225,6 +227,7 @@
 				if(!vm.revisions){
 					UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
 						vm.revisions = response.data;
+						vm.revisionsLoading = false;
 					});
 				}
 				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
@@ -312,6 +315,7 @@
 						vm.fileUploadInfo = "Model imported successfully";
 						// clear revisions cache
 						vm.revisions = null;
+						vm.revisionsLoading = true;
 					}
 
 					//status=ok can have an error message too

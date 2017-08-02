@@ -69,7 +69,7 @@
 			vm.selectedIssueLoaded = false;
 
 			vm.modelLoaded = false;
-			
+
 			/*
 			* Get the user roles for the model
 			*/

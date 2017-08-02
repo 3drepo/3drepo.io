@@ -100,7 +100,8 @@
 			$location.search("modelId", null);
 			$location.search("modelName", null);
 			$location.search("targetAcct", null);
-
+			$location.search("page", null);
+			
 			vm.showPage({page: "teamspaces", data: vm.data});
 		};
 
