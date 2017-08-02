@@ -202,8 +202,6 @@
 
 		function getUserInfo () {
 
-			console.log(AccountService);
-
 			AccountService.getUserInfo(vm.account)
 				.then(function(response) {
 

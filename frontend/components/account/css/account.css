@@ -737,8 +737,8 @@ account-assign td, account-assign th {
   text-align: center;
 }
 
-account-assign .userColumn {
-  /*width: 130px;*/
+account-assign .adminColumn {
+  border-left: black solid 1px;
 }
 
 account-assign .rowSelects {
@@ -767,6 +767,11 @@ account-assign table td, account-assign table th {
     margin-right: 0px;
 }
 
+account-assign .checkboxes {
+  max-height: 350px;
+  overflow-x: hidden;
+}
+
 account-assign .checkboxes p {
   margin-top: 0px;
 }
@@ -776,4 +781,8 @@ account-assign .radiobuttons p {
   margin-bottom: 10px;
 }
 
+account-assign .sentenceCase {
+  text-transform: capitalize;
+  
+}
 
