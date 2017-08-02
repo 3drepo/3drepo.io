@@ -214,7 +214,7 @@ describe('Account permission::', function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-					expect(res.body.find(perm => perm.user === 'user3')).to.not.exist;
+					expect(res.body.find(perm => perm.user === 'user3').permissions.length).to.equal(0);
 					callback(err);
 				});
 			}
