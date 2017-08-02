@@ -60,11 +60,14 @@
 			};
 
 			var refreshHandler = function (event){
-				StateManager.refreshHandler(event); 
+				console.log("Refresh handler");
+				return StateManager.refreshHandler(event); 
 			};
 
 			//listen for user clicking the back button
 			window.addEventListener("popstate", popStateHandler);
+			window.addEventListener("beforeunload", refreshHandler);
+
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);

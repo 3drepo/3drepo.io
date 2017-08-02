@@ -176,8 +176,8 @@
 				});
 			}])
 		.service("StateManager", 
-			["$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
-				function($location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
+			["$mdDialog", "$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
+				function($mdDialog, $location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
 							
 					var self = this;
 
@@ -468,9 +468,7 @@
 
 					this.refreshHandler = function (event){
 
-						console.log("refreshHandler", event);
 						var confirmationMessage = "This will reload the whole model, are you sure?";
-
 						event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
 						return confirmationMessage;              // Gecko, WebKit, Chrome <34
 
@@ -484,11 +482,25 @@
 
 
 						if (path === "/" + account + "/" + model) {
-							var response = confirm(message);
-							if (response) {
+							
+							var title = "Go back to Teamspaces?";
+							$mdDialog.show(
+
+								$mdDialog.confirm()
+									.clickOutsideToClose(true)
+									.title(title)
+									.textContent(message)
+									.ariaLabel(title + " Dialog")
+									.cancel("Cancel")
+									.ok("Confirm")
+									
+
+							).then(function() {
 								$location.path(account);
 								UnityUtil.reset();
-							}
+							}, function() {
+								
+							});
 						}
 
 					};
