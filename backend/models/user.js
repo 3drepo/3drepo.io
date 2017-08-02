@@ -22,6 +22,7 @@ var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
+const Role = require('./role');
 
 var systemLogger = require("../logger.js").systemLogger;
 
@@ -406,10 +407,15 @@ schema.statics.verify = function(username, token, options){
 
 		if(!skipCreateBasicPlan){
 			//basic quota
-			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
+			user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
 		}
-
-		return Promise.resolve();
+		
+		Role.createTeamSpaceRole(username).then(role => {
+				return Role.grantTeamSpaceRoleToUser(username, username);
+			}
+		).catch(err => {
+			systemLogger.logError('Failed to create role for ', username);
+		});
 
 	});
 };
