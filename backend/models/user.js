@@ -87,18 +87,6 @@ var schema = mongoose.Schema({
 				return accountPermission.methods.init(this, permissions);
 			}
 		},
-		// fields to speed up listing all projects and models the user has access to
-		models: [{
-			_id: false,
-			account: String,
-			model: String
-		}],
-		// fields to speed up listing all projects and models the user has access to
-		projects: [{
-			_id: false,
-			account: String,
-			project: mongoose.Schema.Types.ObjectId
-		}]
 	},
 	roles: [{}]
 });
