@@ -157,13 +157,7 @@ schema.methods.changePermissions = function(permissions){
 						if(!user){
 							return Promise.reject(responseCodes.USER_NOT_FOUND);
 						} else {
-
-							user.customData.models.push({
-								account, 
-								model: this._id
-							});
-
-							return user.save();
+							return;
 						}
 					})
 				);
@@ -175,23 +169,9 @@ schema.methods.changePermissions = function(permissions){
 
 	}).then(() => {
 		
-		//delete user.customData.models first
-		const usersToRemove = _.difference(this.permissions.map(p => p.user), permissions.map(p => p.user));
-
 		this.permissions = permissions;
 
-		return this.save().then(() => usersToRemove);
-		
-	}).then(usersToRemove => {
-		
-		let removeUserPromises = [];
-
-		usersToRemove.forEach(user => {
-			removeUserPromises.push(User.removeModel(user, account, this._id));
-		});
-
-		return Promise.all(removeUserPromises);
-		
+		return this.save();		
 	}).then(
 		() => this.permissions
 	);

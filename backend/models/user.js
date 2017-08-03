@@ -735,6 +735,9 @@ function _createAccounts(roles, userName)
 					let account = {
 					account: user.user,
 					projects: [],
+					models: [],
+					fedModels: [],
+					isAdmin: isTeamspaceAdmin,
 					permissions: permission.permissions || []
 				};
 
@@ -1017,88 +1020,6 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 		return Promise.resolve(subscription);
 	});
 
-};
-
-// remove model record for models list
-schema.statics.removeModel = function(user, account, model){
-	'use strict';
-
-	return User.update( {account: 'admin'}, {user}, {
-		$pull: { 
-			'customData.models' : {
-				account: account,
-				model: model
-			} 
-		} 
-	});
-};
-
-schema.statics.removeModelFromAllUser = function(account, model){
-	'use strict';
-
-	return User.update( {account: 'admin'}, {
-		'customData.models':{
-			'$elemMatch':{
-				account: account,
-				model: model
-			}
-		}
-	}, {
-		$pull: { 
-			'customData.models' : {
-				account: account,
-				model: model
-			} 
-		} 
-	}, {'multi': true});
-};
-
-// remove project record for models list
-schema.statics.removeProject = function(user, account, project){
-	'use strict';
-
-	return User.update( {account: 'admin'}, {user}, {
-		$pull: { 
-			'customData.projects' : {
-				account: account,
-				project: project
-			} 
-		} 
-	});
-};
-
-schema.statics.addProject = function(user, account, project){
-	'use strict';
-
-	return User.update( {account: 'admin'}, {user}, {
-		$addToSet: { 
-			'customData.projects' : {
-				account: account,
-				project: project
-			} 
-		} 
-	});
-};
-
-
-schema.statics.removeProjectFromAllUser = function(account, project){
-	'use strict';
-
-	return User.update( {account: 'admin'}, {
-		'customData.projects':{
-			'$elemMatch':{
-				account: account,
-				project: project
-			}
-		}
-	}, {
-		$pull: { 
-			'customData.projects' : {
-				account: account,
-				project: project
-			} 
-		} 
-	}, {'multi': true});
 };
 
 var User = ModelFactory.createClass(
