@@ -483,7 +483,6 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';
 
-	//console.log('permissions', permissions)
 	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
 		permissions = C.MODEL_PERM_LIST.slice(0);
 	}
@@ -743,10 +742,8 @@ function _createAccounts(roles, userName)
 					permissions: permission.permissions || []
 				};
 
-				console.log(userName + " is an admin of " + user.user);
 				//show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
-				console.log("[teamspace]pushing account: " + account.account);
 				accounts.push(account);
 				if (isTeamspaceAdmin || canViewProjects){
 					//show all implied and inherted permissions
@@ -769,15 +766,12 @@ function _createAccounts(roles, userName)
 
 			return Promise.all(tsPromises).then(()=>{
 				//check project scope permissions
-				console.log("Checking project level permissions on " + user.user);	
 				let projPromises = [];
 				let account = null;
 				const projection = { 'permissions': { '$elemMatch': { user: userName }, 'name': 1, 'models': 1 }};
-				console.log("Searching for in : " + user.user + " query is: ", projection);
 				return Project.find({account: user.user},{}, projection).then(projects => {
 
 
-						console.log(projects.length + " projects found");
 						let myProj;
 						projPromises.push(
 							projects.forEach( _proj =>{
@@ -790,7 +784,6 @@ function _createAccounts(roles, userName)
 									if(!account)
 									{
 										account = _makeAccountObject(user.user);
-										console.log("[project]pushing account: " + account.account);
 										accounts.push(account);
 									}
 								}	
@@ -829,7 +822,6 @@ function _createAccounts(roles, userName)
 								let modelPromises = [];
 								let dbUserCache = {};
 								return ModelSetting.find({account: user.user},{}, projection).then(models => {
-									console.log(models.length + " models found");
 
 									models.forEach(model => {
 										if(model.permissions.length > 0){
@@ -837,17 +829,14 @@ function _createAccounts(roles, userName)
 												account = accounts.find(account => account.account === user.user);
 												if(!account){
 													account = _makeAccountObject(user.user);
-													console.log("[model]pushing account: " + account.account);
 													accounts.push(account);
 												}
 											}	
-											console.log("adding model: ",  model);
 											const existingModel = _findModel(model._id, account);
 											modelPromises.push(
 												_findModelDetails(dbUserCache, userName, { 
 													account: user.user, model: model._id
 												}).then(data => {
-													//console.log('data', JSON.stringify(data, null ,2))
 														return _fillInModelDetails(account.account, data.setting, data.permissions);
 			
 												}).then(_model => {
@@ -933,7 +922,7 @@ function _createAccounts(roles, userName)
 
 	});
 
-	return Promise.all(promises).then(() => { console.log("returning accounts"); return accounts;});
+	return Promise.all(promises).then(() => { return accounts;});
 
 }
 schema.methods.listAccounts = function(){
@@ -948,7 +937,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let billingAgreement;
 
 	plans = plans || [];
-	//console.log(this.customData);
 	
 	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress).then(_billingAgreement => {
 		
@@ -1020,12 +1008,9 @@ schema.methods.updateAssignDetail = function(id, data){
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
-	//console.log('create sub', plan, this.user, billingUser);
 	this.customData.billing.billingUser = billingUser;
-	//console.log(' this.customData.billing.subscriptions',  this.customData.billing.subscriptions);
 	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
 	//this.markModified('customData.billing');
-	//console.log(this.user, this.customData.billing.billingUser, subscription)
 	return this.save().then(() => {
 		return Promise.resolve(subscription);
 	});
