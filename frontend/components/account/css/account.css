@@ -731,12 +731,6 @@ account-assign md-checkbox span {
   font-size: 12px;
 }
 
-account-assign td, account-assign th {
-  min-width: 100px;
-  width: 100px;
-  text-align: center;
-}
-
 account-assign .adminColumn {
   border-left: black solid 1px;
 }
@@ -757,14 +751,14 @@ account-assign md-radio-button > div {
   margin-left: 50%;
 }
 
-account-assign .fixedWidth {
-  /*width: 50px;*/
-}
-
 account-assign table td, account-assign table th {
     width: 120px;
+    min-width: 120px;
+    height: 40px;
     margin-left: 0px;
     margin-right: 0px;
+    text-align: center;
+    padding: 0;
 }
 
 account-assign .checkboxes {

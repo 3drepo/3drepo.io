@@ -59,12 +59,12 @@
 			vm.teamspacePermissions = {
 
 				teamspace_admin : "Admin",
-				assign_licence	: "Assign Licence",
-				revoke_licence	: "Revoke Licence",
+				// assign_licence	: "Assign Licence",
+				// revoke_licence	: "Revoke Licence",
 				create_project	: "Create Project",
-				create_job	: "Create Job",
-				delete_job	: "Delete Job",
-				assign_job : "Assign Job"
+				// create_job	: "Create Job",
+				// delete_job	: "Delete Job",
+				// assign_job : "Assign Job"
 
 			};
 

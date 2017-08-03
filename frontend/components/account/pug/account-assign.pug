@@ -34,8 +34,8 @@
 								tr: th.userColumn User
 
 								tr(
-									ng-if="permission !== 'teamspace_admin'"
 									ng-repeat="(permission, value) in vm.teamspacePermissions"
+									ng-if="permission !== 'teamspace_admin'"
 									layout-align="center center"): th {{value}}
 
 								tr: th.adminColumn Admin
@@ -164,6 +164,7 @@
 								md-option(
 									aria-label="{{teamspace.account}}" 
 									ng-repeat="teamspace in vm.teamspaces"
+									ng-selected="teamspace.account === vm.account"
 									value="{{teamspace.account}}") {{teamspace.account}}
 
 						div(flex="33", layout="column")
@@ -199,7 +200,8 @@
 							flex)
 							thead(layout="row")
 								tr: th.fixedWidth.userColumn User
-								tr(ng-repeat="value in vm.modelRoles", layout-align="center center"): th.fixedWidth.sentenceCase {{value}}
+								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
+									th.fixedWidth.sentenceCase(ng-class="{'adminColumn' : value == 'admin'}") {{value}}
 
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(
