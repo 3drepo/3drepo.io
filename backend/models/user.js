@@ -734,11 +734,7 @@ function _createAccounts(roles, userName)
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 					let account = {
 					account: user.user,
-					models: [],
-					fedModels: [],
 					projects: [],
-					//deprecated, use permissions instead
-					isAdmin: isTeamspaceAdmin,
 					permissions: permission.permissions || []
 				};
 
@@ -772,50 +768,50 @@ function _createAccounts(roles, userName)
 				return Project.find({account: user.user},{}, projection).then(projects => {
 
 
-						let myProj;
-						projPromises.push(
-							projects.forEach( _proj =>{
-								if(!_proj || _proj.permissions.length === 0){
-									return;
-								}
-								if(!account){
+					let myProj;
+					projPromises.push(
+						projects.forEach( _proj =>{
+							if(!_proj || _proj.permissions.length === 0){
+								return;
+							}
+							if(!account){
 	
-									account = accounts.find(account => account.account === user.user);
-									if(!account)
-									{
-										account = _makeAccountObject(user.user);
-										accounts.push(account);
-									}
-								}	
-
-								myProj = account.projects.find(p => p.name === _proj.name);
-
-								if(!myProj){
-									myProj = _proj.toObject();
-									account.projects.push(myProj);
-									myProj.permissions = myProj.permissions[0].permissions;
-								} else {
-									myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
+								account = accounts.find(account => account.account === user.user);
+								if(!account)
+								{
+									account = _makeAccountObject(user.user);
+									accounts.push(account);
 								}
+							}	
+
+							myProj = account.projects.find(p => p.name === _proj.name);
+
+							if(!myProj){
+								myProj = _proj.toObject();
+								account.projects.push(myProj);
+								myProj.permissions = myProj.permissions[0].permissions;
+							} else {
+								myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
+							}
 
 
-								// show implied and inherited permissions
-								myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
-								myProj.permissions = _.uniq(_.flatten(myProj.permissions));
+							// show implied and inherited permissions
+							myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+							myProj.permissions = _.uniq(_.flatten(myProj.permissions));
 	
-								let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
-								inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
+							let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+							inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
-								const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
+							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 
-								if(newModelIds.length){
-									return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
-										myProj.models = models.models.concat(models.fedModels);
-									});
-								}
+							if(newModelIds.length){
+								return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+									myProj.models = models.models.concat(models.fedModels);
+								});
+							}
 
-							})
-						);						
+						})
+					);						
 					return Promise.all(projPromises).then(()=>
 							{
 								//model permissions
@@ -993,6 +989,8 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
 	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
+		//add this user to the role
+		Role.grantTeamSpaceRoleToUser(userData.user, this.user);
 		return this.save().then(() => subscription);
 	});
 };
