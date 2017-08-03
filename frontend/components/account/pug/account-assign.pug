@@ -19,6 +19,7 @@
 						md-label Select Teamspace
 						md-select(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 							md-option(
+								ng-selected="teamspace.account === vm.account"
 								ng-repeat="teamspace in vm.adminstrableTeamspaces(vm.teamspaces)"
 								aria-label="{{teamspace.account}}" 
 								value="{{teamspace.account}}") {{teamspace.account}}
@@ -49,7 +50,6 @@
 									td.userColumn.userInput
 										p {{user.user}} 
 
-									
 									td(ng-if="permission !== 'teamspace_admin'"
 										ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
@@ -81,8 +81,13 @@
 
 					div(layout="row")
 						div(flex="50", layout="column")
+
 							md-label Select Teamspace
-							md-select.rowSelects(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
+							md-select.rowSelects(
+								aria-label="Select Teamspace" 
+								ng-model="vm.teamspaceSelected"
+								ng-required="true")
+
 								md-option(
 									aria-label="{{teamspace.account}}" 
 									ng-repeat="teamspace in vm.adminstrableProjectTeamspaces(vm.teamspaces)"
@@ -144,6 +149,8 @@
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, 'admin_project')"
 											ng-checked="vm.userHasProjectPermissions(user, 'admin_project')")
+
+							
 						
 						h3.noUsers(ng-if="vm.projectsToAssign()") No available users to assign permissions
 
@@ -158,11 +165,13 @@
 				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
 					div(layout="row")
 						div(flex="33", layout="column")
+
 							md-label Select Teamspace
 							md-select.rowSelects(
 								aria-label="Selection for Teamspace"
 								ng-model="vm.teamspaceSelected"
 								ng-required="true")
+
 								md-option(
 									aria-label="{{teamspace.account}}" 
 									ng-repeat="teamspace in vm.teamspaces"
@@ -188,7 +197,7 @@
 								aria-label="Selection for Model"
 								ng-model="vm.modelSelected"
 								ng-required="true" 
-								ng-disabled="!vm.models || !vm.modelsLoaded()")
+								ng-disabled="!vm.modelsLoaded()")
 
 								md-option(
 									aria-label="{{model.name}}" 
@@ -198,8 +207,9 @@
 					md-card
 						table.scrollable.radiobuttons(
 							ng-if="vm.modelSelected"
-							layout="column", 
+							layout="column"
 							flex)
+
 							thead(layout="row")
 								tr: th.fixedWidth.userColumn User
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
@@ -227,5 +237,8 @@
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
 												ng-value="value")
+
+							//tbody(layout="column", ng-if="vm.modelSelected || !vm.modelReady")
+								h3.noUsers Preparing users...
 
 						h3.noUsers(ng-if="vm.modelUsersToAssign()") No available users to assign permissions
