@@ -978,8 +978,12 @@ schema.methods.executeBillingAgreement = function(){
 
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
-
+	var sub = this.customData.billing.subscriptions.findByID(id);
+	var username = sub ? sub.assignedUser : null ;
 	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
+		if(username){
+			Role.revokeTeamSpaceRoleFromUser(username, this.user);
+		}
 		return this.save().then(() => subscription);
 	});
 
