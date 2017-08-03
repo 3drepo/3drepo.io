@@ -105,10 +105,11 @@
 
 		// TEAMSPACES
 
-		vm.teamspaceAdmin = vm.teamspaceAdmin;
+		vm.teamspaceAdmin = "teamspace_admin";
 
 		vm.teamspacesToAssign = function() {
-			return vm.selectedTeamspace.teamspacePermissions && 
+			return vm.selectedTeamspace && 
+					vm.selectedTeamspace.teamspacePermissions && 
 					vm.selectedTeamspace.teamspacePermissions.length === 0;
 		};
 
@@ -309,7 +310,8 @@
 		// PROJECTS
 
 		vm.projectsToAssign = function() {
-			return vm.selectedProject.userPermissions && 
+			return vm.selectedProject && 
+					vm.selectedProject.userPermissions && 
 					vm.selectedProject.userPermissions.length === 0;
 		};
 
@@ -477,7 +479,7 @@
 		};
 
 		vm.modelsLoaded = function() {
-			return vm.models && Object.keys(vm.models).length > 0;
+			return vm.projectSelected && vm.models && Object.keys(vm.models).length > 0;
 		};
 
 		vm.clearModelState = function() {
@@ -493,7 +495,7 @@
 
 		$scope.$watch("vm.modelSelected", function(){
 			// Find the matching project to the one selected
-
+			vm.modelReady = false;
 			vm.resetSelectedModel();
 			
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
@@ -502,18 +504,6 @@
 					return model.model ===  vm.modelSelected;
 				});
 
-				console.log(vm.selectedModel);
-				
-				
-				// console.log(vm.selectedTeamspace.teamspacePermissions);
-
-				// // Setup users
-				// vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser){
-				// 	if (permissionUser.user && vm.selectedRole[permissionUser.user] === undefined) {
-				// 		vm.selectedRole[permissionUser.user] = "unassigned";
-				// 	}
-				// });
-
 				return $q(function(resolve, reject) {
 
 					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions";
@@ -521,13 +511,13 @@
 
 					$http.get(url)
 						.then(function(response){
-							console.log(response)
+
 							var users = response.data;
 							users.forEach(function(user){
 								vm.selectedRole[user.user] = user.permission || "unassigned";
 							});
 							vm.modelReady = true;
-							console.log(vm.modelReady, vm.selectedModel);
+
 							resolve();
 						})
 						.catch(function(error){
