@@ -44,7 +44,7 @@
 								tr(
 									layout-align="center center", 
 									ng-repeat="user in vm.selectedTeamspace.teamspacePermissions"
-									ng-if="user.permissions !== undefined && user.user && vm.selectedTeamspace.account !== user.user && vm.account !== user.user")
+									ng-if="user.permissions !== undefined && user.user")
 
 									td.userColumn.userInput
 										p {{user.user}} 
@@ -53,21 +53,22 @@
 									td(ng-if="permission !== 'teamspace_admin'"
 										ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
-											ng-disabled="permission !== 'teamspace_admin' && vm.userHasPermissions(user, 'teamspace_admin')"
+											ng-disabled="vm.teamspaceAdminDisabled(user, permission)"
 											aria-label="Checkbox {{value}}"
 											layout-align="center center"
 											ng-click="vm.teamspaceStateChange(user, permission)"
-											ng-checked="vm.userHasPermissions(user, 'teamspace_admin') || vm.userHasPermissions(user, permission)")
+											ng-checked="vm.teamspaceAdminChecked(user, permission)")
 									
 									td
 										md-checkbox(
 											aria-label="Checkbox Admin"
 											layout-align="center center"
+											ng-disabled="vm.selectedTeamspace.account == user.user || vm.account == user.user"
 											ng-click="vm.teamspaceStateChange(user, 'teamspace_admin')"
 											ng-checked="vm.userHasPermissions(user, 'teamspace_admin')")
 
 
-						h3.noUsers(ng-if="vm.selectedTeamspace.teamspacePermissions && vm.selectedTeamspace.teamspacePermissions.length === 0") No available users to assign permissions
+						h3.noUsers(ng-if="vm.teamspacesToAssign()") No available users to assign permissions
 
 			// PROJECT
 
@@ -120,8 +121,9 @@
 							tbody(layout="column")
 								tr(
 									layout-align="center center", 
-									ng-repeat="user in vm.selectedTeamspace.teamspacePermissions"
-									ng-if="user.permissions !== undefined && vm.selectedTeamspace.account != user.user && user.user && vm.account !== user.user")
+									ng-repeat="user in vm.selectedProject.userPermissions"
+									ng-disabled="vm.account !== user.user || vm.selectedTeamspace.account == user.user"
+									ng-if="user.permissions && user.user")
 
 									td.userColumn.userInput
 										p {{user.user}}
@@ -130,11 +132,11 @@
 										ng-repeat="(permission, value) in vm.projectPermissions") 
 
 										md-checkbox(
-											ng-disabled="permission !== 'admin_project' && vm.userHasProjectPermissions(user, 'admin_project')"
+											ng-disabled="vm.adminDisabled(user, permission)"
 											aria-label="Project Permission {{value}}"
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
-											ng-checked="vm.userHasProjectPermissions(user, permission) || vm.userHasProjectPermissions(user, 'admin_project')")
+											ng-checked="vm.adminChecked(user, permission)")
 
 									td
 										md-checkbox(
@@ -143,7 +145,7 @@
 											ng-click="vm.projectStateChange(user, 'admin_project')"
 											ng-checked="vm.userHasProjectPermissions(user, 'admin_project')")
 						
-						h3.noUsers(ng-if="vm.selectedTeamspace.teamspacePermissions && vm.selectedTeamspace.teamspacePermissions.length === 0") No available users to assign permissions
+						h3.noUsers(ng-if="vm.projectsToAssign()") No available users to assign permissions
 
 
 			// MODELS & FEDERATIONS
@@ -153,7 +155,7 @@
 					md-progress-circular.loading
 					h3 Loading Teamspace Data...
 
-				div.assignTabHolder(layout="column", ng-if="(!vm.isFromUrl && !vm.loadingTeamspaces && !vm.projectsLoading) || (vm.isFromUrl && vm.modelReady)", flex="100")
+				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
 					div(layout="row")
 						div(flex="33", layout="column")
 							md-label Select Teamspace
@@ -206,17 +208,17 @@
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(
 									layout-align="center center", 
-									ng-repeat="user in vm.selectedTeamspace.teamspacePermissions"
-									ng-init="vm.addUser(user.user)"
-									ng-if="vm.selectedTeamspace.account != user.user && user.user && vm.account !== user.user")
+									ng-repeat="(user, role) in vm.selectedRole"
+									ng-disabled="vm.modelUserValid(user)"
+									ng-if="user")
 
 									td.fixedWidth.userColumn.userInput()
-										p {{user.user}}
+										p {{user}}
 
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 
 										md-radio-group(	
-											ng-model="vm.selectedRole[user.user]"
+											ng-model="vm.selectedRole[user]"
 											layout-align="center center"
 											layout="row")
 
@@ -226,4 +228,4 @@
 												layout-align="center center"
 												ng-value="value")
 
-						h3.noUsers(ng-if="vm.selectedTeamspace.teamspacePermissions && vm.selectedTeamspace.teamspacePermissions.length === 0") No available users to assign permissions
+						h3.noUsers(ng-if="vm.modelUsersToAssign()") No available users to assign permissions

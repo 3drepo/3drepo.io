@@ -241,6 +241,7 @@
 
 				})
 				.catch(function(error){
+					//TODO ADD POPUP ERROR!
 					console.error("Error", error);
 				});
 

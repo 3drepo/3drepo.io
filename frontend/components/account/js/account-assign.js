@@ -102,8 +102,28 @@
 
 		};
 
+
+		// TEAMSPACES
+
+		vm.teamspaceAdmin = vm.teamspaceAdmin;
+
+		vm.teamspacesToAssign = function() {
+			return vm.selectedTeamspace.teamspacePermissions && 
+					vm.selectedTeamspace.teamspacePermissions.length === 0;
+		};
+
+		vm.teamspaceAdminDisabled = function(user, permission) {
+			return (permission !== vm.teamspaceAdmin && vm.userHasPermissions(user, vm.teamspaceAdmin)) || 
+					vm.selectedTeamspace.account == user.user;
+		};
+
+		vm.teamspaceAdminChecked = function(user, permission) {
+			return vm.userHasPermissions(user, vm.teamspaceAdmin) || 
+					vm.userHasPermissions(user, permission);
+		};
+
 		vm.adminstrableTeamspaces = function(teamspaces) {
-			var permission = "teamspace_admin";
+			var permission = vm.teamspaceAdmin;
 			return teamspaces.filter(function(teamspace){
 				return teamspace.permissions.indexOf(permission) !== -1;
 			});
@@ -122,7 +142,6 @@
 			});
 		};
 
-		// GET TEAMSPACES
 		vm.getTeamspaces = function() {
 			
 			var url = serverConfig.apiUrl(serverConfig.GET_API, vm.account + ".json" );
@@ -289,6 +308,20 @@
 
 		// PROJECTS
 
+		vm.projectsToAssign = function() {
+			return vm.selectedProject.userPermissions && 
+					vm.selectedProject.userPermissions.length === 0;
+		};
+
+		vm.adminChecked = function(user, permission) {
+			return vm.userHasProjectPermissions(user, permission) ||
+					vm.userHasProjectPermissions(user, "admin_project");
+		};
+
+		vm.adminDisabled = function(user, permission) {
+			return permission !== "admin_project" && vm.userHasProjectPermissions(user, "admin_project");
+		}
+
 		vm.setProjects = function() {
 
 			vm.projects = {};
@@ -340,6 +373,7 @@
 
 					})
 					.catch(function(error) {
+						console.error(error);
 						var title = "Issue Getting Project Permissions";
 						vm.showError(title, error);
 					});
@@ -429,6 +463,19 @@
 
 		// MODELS
 
+		vm.modelUsersToAssign = function() {
+			return vm.modelRoles && Object.keys(vm.modelRoles).length === 0;
+		};
+
+		vm.modelUserValid = function(user) {
+			return vm.selectedTeamspace.account == user || vm.account == user;
+		};
+
+		vm.modelDataReady = function() {
+			return (!vm.isFromUrl && !vm.loadingTeamspaces && !vm.projectsLoading) ||
+					(vm.isFromUrl && vm.modelReady);
+		};
+
 		vm.modelsLoaded = function() {
 			return vm.models && Object.keys(vm.models).length > 0;
 		};
@@ -448,19 +495,24 @@
 			// Find the matching project to the one selected
 
 			vm.resetSelectedModel();
-
+			
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
-
-				// Setup users
-				vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser){
-					if (permissionUser.user && vm.selectedRole[permissionUser.user] === undefined) {
-						vm.selectedRole[permissionUser.user] = "unassigned";
-					}
-				});
 
 				vm.selectedModel = vm.models.find(function(model){
 					return model.model ===  vm.modelSelected;
 				});
+
+				console.log(vm.selectedModel);
+				
+				
+				// console.log(vm.selectedTeamspace.teamspacePermissions);
+
+				// // Setup users
+				// vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser){
+				// 	if (permissionUser.user && vm.selectedRole[permissionUser.user] === undefined) {
+				// 		vm.selectedRole[permissionUser.user] = "unassigned";
+				// 	}
+				// });
 
 				return $q(function(resolve, reject) {
 
@@ -469,11 +521,13 @@
 
 					$http.get(url)
 						.then(function(response){
+							console.log(response)
 							var users = response.data;
 							users.forEach(function(user){
 								vm.selectedRole[user.user] = user.permission || "unassigned";
 							});
 							vm.modelReady = true;
+							console.log(vm.modelReady, vm.selectedModel);
 							resolve();
 						})
 						.catch(function(error){
@@ -484,6 +538,10 @@
 						});	
 					
 				});		
+
+				//}
+				
+				
 			}
 			
 

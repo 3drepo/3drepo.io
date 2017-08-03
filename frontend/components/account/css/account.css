@@ -237,7 +237,9 @@ account-info .accountInfoPage .md-button {
   background: #E8EAF6;
   margin: auto;
   margin-top: 20px;
+  margin-bottom: 20px;
   cursor: pointer;
+  border-radius: 6px;
 }
 
 .avatar-upload{
