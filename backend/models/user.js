@@ -543,7 +543,8 @@ function _getModels(accountName, ids, permissions){
 		settings.forEach(setting => {
 			promises.push(
 				_fillInModelDetails(accountName, setting, permissions).then(model => {
-					setting.federate ? fedModels.push(model) : models.push(model);
+					if(!(model.permissions.length == 1 && model.permissions[0] == null))
+						setting.federate ? fedModels.push(model) : models.push(model);
 				})
 			);
 		});
@@ -717,221 +718,229 @@ function _makeAccountObject(name){
 	return {account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false};
 }
 
-schema.methods.listAccounts = function(){
+function _createAccounts(roles, userName)
+{
 	'use strict';
 
 	let accounts = [];
+	let promises = [];
 
-	// team space level permission
-	return User.findAccountsUserHasAccess(this.user).then(dbUsers => {
+	roles.forEach( role => {
+		promises.push(User.findByUserName(role.db).then(user => {
+			let tsPromises = [];
+			const permission = user.customData.permissions.findByUser(userName);
+			if(permission){
+				//Check for admin Privileges first
+				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
+					let account = {
+					account: user.user,
+					models: [],
+					fedModels: [],
+					projects: [],
+					//deprecated, use permissions instead
+					isAdmin: isTeamspaceAdmin,
+					permissions: permission.permissions || []
+				};
 
-		let addAccountPromises = [];
-
-		dbUsers.forEach(user => {
-
-			const isTeamspaceAdmin = user.toObject().customData.permissions[0].permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-			const canViewProjects = user.toObject().customData.permissions[0].permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-
-			let account = {
-				account: user.user,
-				models: [],
-				fedModels: [],
-				projects: [],
-				//deprecated, use permissions instead
-				isAdmin: isTeamspaceAdmin,
-				permissions: user.toObject().customData.permissions[0].permissions || []
-			};
-
-			//show all implied and inherted permissions
-			account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
-
-			accounts.push(account);
-
-			if (isTeamspaceAdmin || canViewProjects){
-
+				console.log(userName + " is an admin of " + user.user);
 				//show all implied and inherted permissions
-				const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
-				
-				addAccountPromises.push(
-					// list all models under this account as they have full access
-					_getModels(account.account, null, inheritedModelPermissions).then(data => {
-						account.models = data.models;
-						account.fedModels = data.fedModels;
-
-						// add space usage stat info into account object
-						if (isTeamspaceAdmin){
-							return _calSpace(user).then(quota => account.quota = quota);
-						}
-					})
+				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
+				console.log("[teamspace]pushing account: " + account.account);
+				accounts.push(account);
+				if (isTeamspaceAdmin || canViewProjects){
+					//show all implied and inherted permissions
+					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
 					
-					.then(() => _addProjects(account, this.user))	
-				);
-			}
-		});
-
-		return Promise.all(addAccountPromises);
-
-	// project level permission
-	}).then(() => {
-		
-		let promises = [];
-		this.customData.projects.forEach(project => {
-			let account = accounts.find(account => account.account === project.account);
-			
-			if(!account){
-				account = _makeAccountObject(project.account);
-				accounts.push(account);
-			}
-
-			const projection = { 'permissions': { '$elemMatch': { user: this.user }, 'name': 1, 'models': 1 }};
-
-
-			let myProj;
-			promises.push(
-				Project.findOne({account: account.account}, { _id: project.project }, projection).then(_proj => {
-
-					if(_proj.permissions.length === 0){
-						return;
-					}
-
-					myProj = account.projects.find(p => p.name === _proj.name);
-
-					if(!myProj){
-						myProj = _proj.toObject();
-						account.projects.push(myProj);
-						myProj.permissions = myProj.permissions[0].permissions;
-					} else {
-						myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
-					}
-
-					// show implied and inherited permissions
-					myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
-					myProj.permissions = _.uniq(_.flatten(myProj.permissions));
-
-					let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
-					inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
-
-					const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
-
-					if(newModelIds.length){
-						return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
-							myProj.models = models.models.concat(models.fedModels);
-						});
-					}
-
-				})
-			);
-		});
-
-		return Promise.all(promises);
-
-	//model level
-	}).then(() => {
-
-		//find all models (and therefore its team space but with limited access) user has access to
-		let dbUserCache = {};
-		let addModelPromises = [];
-		// model level permission
-		this.customData.models.forEach(model => {
-
-			let account = accounts.find(account => account.account === model.account);
-			
-			if(!account){
-				account = _makeAccountObject(model.account);
-				accounts.push(account);
-			}
-
-			const existingModel = _findModel(model.model, account);
-
-			addModelPromises.push(
-				_findModelDetails(dbUserCache, this.user, { 
-					account: model.account, model: model.model 
-				}).then(data => {
-					//console.log('data', JSON.stringify(data, null ,2))
-					return _fillInModelDetails(account.account, data.setting, data.permissions);
-
-				}).then(_model => {
-
-					if(existingModel){
-						
-						existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
-						return;
-					}
-
-					//push result to account object
-					return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
-						if (projectObj){
-							
-							let project = account.projects.find(p => p.name === projectObj.name);
-							
-							if(!project){
-								project = {
-									_id: projectObj._id,
-									name: projectObj.name,
-									permissions: [],
-									models: []
-								};
-
-								account.projects.push(project);
+					tsPromises.push(
+						// list all models under this account as they have full access
+						_getModels(account.account, null, inheritedModelPermissions).then(data => {
+							account.models = data.models;
+							account.fedModels = data.fedModels;
+								// add space usage stat info into account object
+							if (isTeamspaceAdmin){
+								return _calSpace(user).then(quota => account.quota = quota);
 							}
+						}).then(() => _addProjects(account, userName))	
+					);
+				}
+				
+			}
 
-							project.models.push(_model);
+			return Promise.all(tsPromises).then(()=>{
+				//check project scope permissions
+				console.log("Checking project level permissions on " + user.user);	
+				let projPromises = [];
+				let account = null;
+				const projection = { 'permissions': { '$elemMatch': { user: userName }, 'name': 1, 'models': 1 }};
+				console.log("Searching for in : " + user.user + " query is: ", projection);
+				return Project.find({account: user.user},{}, projection).then(projects => {
 
-						} else {
-							_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
-						}
-					});
 
-				})
-			);
-
-
-			
-		});
-
-		return Promise.all(addModelPromises);
-
+						console.log(projects.length + " projects found");
+						let myProj;
+						projPromises.push(
+							projects.forEach( _proj =>{
+								if(!_proj || _proj.permissions.length === 0){
+									return;
+								}
+								if(!account){
 	
-	}).then(() => {
+									account = accounts.find(account => account.account === user.user);
+									if(!account)
+									{
+										account = _makeAccountObject(user.user);
+										console.log("[project]pushing account: " + account.account);
+										accounts.push(account);
+									}
+								}	
 
-		//fill in all subModels name
-		accounts.forEach(account => {
-			//all fed models
-			const allFedModels = account.fedModels.concat(
-				account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
-			);
+								myProj = account.projects.find(p => p.name === _proj.name);
 
-			//all models
-			const allModels = account.models.concat(
-				account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
-			);
+								if(!myProj){
+									myProj = _proj.toObject();
+									account.projects.push(myProj);
+									myProj.permissions = myProj.permissions[0].permissions;
+								} else {
+									myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
+								}
 
-			allFedModels.forEach(fed => {
-				fed.subModels.forEach(subModel => {
-					const foundModel = allModels.find(m => m.model === subModel.model);
-					subModel.name = foundModel && foundModel.name;
+
+								// show implied and inherited permissions
+								myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+								myProj.permissions = _.uniq(_.flatten(myProj.permissions));
+	
+								let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+								inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
+
+								const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
+
+								if(newModelIds.length){
+									return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+										myProj.models = models.models.concat(models.fedModels);
+									});
+								}
+
+							})
+						);						
+					return Promise.all(projPromises).then(()=>
+							{
+								//model permissions
+								let modelPromises = [];
+								let dbUserCache = {};
+								return ModelSetting.find({account: user.user},{}, projection).then(models => {
+									console.log(models.length + " models found");
+
+									models.forEach(model => {
+										if(model.permissions.length > 0){
+											if(!account){
+												account = accounts.find(account => account.account === user.user);
+												if(!account){
+													account = _makeAccountObject(user.user);
+													console.log("[model]pushing account: " + account.account);
+													accounts.push(account);
+												}
+											}	
+											console.log("adding model: ",  model);
+											const existingModel = _findModel(model._id, account);
+											modelPromises.push(
+												_findModelDetails(dbUserCache, userName, { 
+													account: user.user, model: model._id
+												}).then(data => {
+													//console.log('data', JSON.stringify(data, null ,2))
+														return _fillInModelDetails(account.account, data.setting, data.permissions);
+			
+												}).then(_model => {
+			
+													if(existingModel){
+								
+														existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
+															return;
+													}
+	
+													//push result to account object
+													return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
+														if (projectObj){
+									
+															let project = account.projects.find(p => p.name === projectObj.name);
+								
+															if(!project){
+																project = {
+																	_id: projectObj._id,
+																	name: projectObj.name,
+																	permissions: [],
+																	models: []
+																};
+																account.projects.push(project);
+															}
+															project.models.push(_model);
+
+														} else {
+															_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
+														}
+													});
+												})
+											);
+										}
+									});
+									
+
+
+									return Promise.all(modelPromises).then(() => {
+
+										//fill in all subModels name
+										accounts.forEach(account => {
+											//all fed models
+											const allFedModels = account.fedModels.concat(
+											account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+											);
+
+											//all models	
+											const allModels = account.models.concat(
+												account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+											);
+
+											allFedModels.forEach(fed => {
+												fed.subModels.forEach(subModel => {
+													const foundModel = allModels.find(m => m.model === subModel.model);
+													subModel.name = foundModel && foundModel.name;
+												});
+											});
+										});
+
+
+										//sorting models
+										_sortAccountsAndModels(accounts);
+
+										// own acconut always ranks top of the list
+										let myAccountIndex = accounts.findIndex(account => account.account === userName);
+										if(myAccountIndex > -1){
+											let myAccount = accounts[myAccountIndex];
+											accounts.splice(myAccountIndex, 1);
+											accounts.unshift(myAccount);
+										}
+
+
+										return accounts;
+
+									});			
+								});
+							});
 				});
+				
 			});
-		});
-
-
-		//sorting models
-		_sortAccountsAndModels(accounts);
-
-		// own acconut always ranks top of the list
-		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
-		if(myAccountIndex > -1){
-			let myAccount = accounts[myAccountIndex];
-			accounts.splice(myAccountIndex, 1);
-			accounts.unshift(myAccount);
-		}
-
-
-		return accounts;
+		}));
 
 	});
 
-};
+	return Promise.all(promises).then(() => { console.log("returning accounts"); return accounts;});
+
+}
+schema.methods.listAccounts = function(){
+	'use strict';
+
+	return _createAccounts(this.roles, this.user);	
+}
 
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
@@ -951,19 +960,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	});
 };
 
-schema.statics.findAccountsUserHasAccess = function(user){
-	//find all team spaces (accounts) user has access to
-	return User.find( 
-		{account: 'admin'},
-		{ 'customData.permissions': { 
-			$elemMatch: {
-				user: user, 
-				permissions: { '$in': [C.PERM_CREATE_PROJECT, C.PERM_TEAMSPACE_ADMIN, C.PERM_VIEW_PROJECTS] }
-			}
-		}},
-		{ 'customData.permissions.$' : 1, 'user': 1, 'customData.billing': 1}
-	);
-};
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	'use strict';
