@@ -51,6 +51,8 @@
 			return Promise.reject({ message: "Please define callback_queue in queue config" });
 		} else if (!options.worker_queue) {
 			return Promise.reject({ message: "Please define worker_queue in queue config" });
+		} else if (!options.model_queue) {
+			return Promise.reject({ message: "Please define model_queue in queue config" });
 		} else if (!options.event_exchange) {
 			return Promise.reject({ message: "Please define event_exchange in queue config" });
 		}
@@ -75,6 +77,7 @@
 				this.logger = options.logger;
 				this.callbackQName = options.callback_queue;
 				this.workerQName = options.worker_queue;
+				this.modelQName = options.model_queue;
 				this.deferedObjs = {};
 				this.eventExchange = options.event_exchange;
 
@@ -136,7 +139,7 @@
 			})
 			.then(() => {
 				let msg = `import -f ${jsonFilename}`;
-				return this._dispatchWork(corID, msg);
+				return this._dispatchWork(corID, msg, true);
 			})
 			.then(() => {
 				return new Promise((resolve, reject) => {
@@ -274,14 +277,16 @@
 	 *
 	 * @param {corID} corID - Correlation ID
 	 * @param {msg} orgFilePath - Path to where the file is currently
+	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
-	ImportQueue.prototype._dispatchWork = function (corID, msg) {
+	ImportQueue.prototype._dispatchWork = function (corID, msg, isModelImport) {
 		let info;
-		return this.channel.assertQueue(this.workerQName, { durable: true })
+		const queueName = isModelImport? this.modelQName : this.workerQName;
+		return this.channel.assertQueue(queueName, { durable: true })
 			.then(_info => {
 				info = _info;
 
-				return this.channel.sendToQueue(this.workerQName,
+				return this.channel.sendToQueue(queueName,
 					new Buffer(msg), {
 						correlationId: corID,
 						appId: this.uid,
@@ -292,7 +297,7 @@
 			})
 			.then(() => {
 				this.logger.logInfo(
-					"Sent work to queue[" + this.workerQName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
+					"Sent work to queue[" + queueName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
 						corID: corID.toString()
 					}
 				);

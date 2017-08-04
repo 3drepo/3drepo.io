@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.13.12";
+	const VERSION="1.13.13";
 
 	let config = require("app-config")
 		.config;
@@ -262,14 +262,12 @@
 	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
 	//captcha
-	config.captcha = coalesce(config.captcha, {});
-	config.captcha.validateUrl = coalesce(config.captcha.validateUrl, "https://www.google.com/recaptcha/api/siteverify");
-	config.captcha.secretKey = coalesce(config.captcha.secretKey, "");
+	config.captcha = coalesce(config.captcha, null);
 
 	//default auth settings
 	config.auth = coalesce(config.auth, {});
-	config.auth.captcha = coalesce(config.auth.captcha, {});
-	config.auth.register = coalesce(config.auth.register, {});
+	config.auth.captcha = coalesce(config.auth.captcha, false);
+	config.auth.register = coalesce(config.auth.register,true);
 
 	//paypal
 	config.paypal = coalesce(config.paypal, {});
