@@ -350,30 +350,7 @@
 				// We can use the current users object as its matches the required 
 				// data structure the API expects
 				$http.get(url)
-					.then(function(response){
-						
-						vm.selectedProject.userPermissions = response.data.permissions;
-
-						// Reset the models
-						vm.clearModelState();
-
-						if (vm.teamspaceSelected && vm.projectSelected) {
-
-							if (vm.selectedProject && vm.selectedProject.models) {
-
-								vm.models = vm.selectedProject.models;
-
-								if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
-									vm.modelSelected = vm.fromURL.modelSelected;
-									delete vm.fromURL.modelSelected;
-								}
-
-								
-							}
-							
-						} 
-
-					})
+					.then(vm.handleProjectSelected)
 					.catch(function(error) {
 						console.error(error);
 						var title = "Issue Getting Project Permissions";
@@ -383,6 +360,28 @@
 			}
 			
 		});
+
+		vm.handleProjectSelected = function(response){
+						
+			vm.selectedProject.userPermissions = response.data.permissions;
+
+			// Reset the models
+			vm.clearModelState();
+			var projectSelected = vm.teamspaceSelected && vm.projectSelected;
+			var projectReady = vm.selectedProject && vm.selectedProject.models;
+
+			if (projectSelected && projectReady) {
+
+				vm.models = vm.selectedProject.models;
+
+				if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
+					vm.modelSelected = vm.fromURL.modelSelected;
+					delete vm.fromURL.modelSelected;
+				}
+
+			} 
+
+		};
 
 		vm.projectStateChange = function(user, permission) {
 			var hasPermission = vm.userHasProjectPermissions(user, permission);
@@ -528,13 +527,9 @@
 						});	
 					
 				});		
-
-				//}
-				
 				
 			}
 			
-
 		});
 
 		vm.modelStateChange = function(user, role) {

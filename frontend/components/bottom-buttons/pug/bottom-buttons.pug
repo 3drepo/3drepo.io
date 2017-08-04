@@ -1,4 +1,8 @@
-div(layout="row", flex, layout-align="space-between")
+div(
+	layout="row"
+	flex
+	layout-align="space-between")
+
 	#leftButtons(ng-if="vm.showButtons", layout="row")
 		span(ng-repeat="button in vm.leftButtons", ng-click="button.click()" layout="column")
 			md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(aria-label="{{button.label}}")

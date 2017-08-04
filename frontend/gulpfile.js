@@ -76,6 +76,18 @@ gulp.task('unity', function() {
   return gulp.src("./unity/**").pipe(gulp.dest('./../public/unity/'));
 });
 
+gulp.task('manifest-file', function() {
+  return gulp.src("./manifest.json")
+    .pipe(gulp.dest('./../public/'));
+});
+
+gulp.task('manifest-icons', function() {
+  return gulp.src("./manifest-icons/**.png")
+    .pipe(gulp.dest('./../public/manifest-icons/'));
+});
+
+
+
 
 // JavaScript
 // We have one dev task and one production task because the time taken to do 
@@ -137,9 +149,11 @@ gulp.task('watch', function() {
   gulp.watch(allPug, ['pug']);
   gulp.watch(icons, ['icons']);
   gulp.watch(allImages, ['images']);
+  gulp.watch("./manifest.json", ['manifest-file']);
+  gulp.watch("./manifest-icons/**.png", ['manifest-icons']);
 });
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
-gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity']);
+gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file']);
 
