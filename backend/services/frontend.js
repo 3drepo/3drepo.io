@@ -43,6 +43,7 @@
 		const responseCodes = require("../response_codes.js");
 		const _ = require('lodash');
 		const C = require('../constants');
+		const path = require('path');
 
 		let app = express();
 
@@ -163,9 +164,19 @@
 			res.render("config.pug", params);
 		});
 
-		app.use("/public", express.static(__dirname + "/../../public"));
+		const publicDir = __dirname + "/../../public";
+		app.use("/public", express.static(publicDir));
 		app.get("/public/*", function (req, res) {
 			res.status(404).send('File not found');
+		});
+		
+		// TODO: This is a horrible hack, we should move to a static file server :/
+		app.get("/manifest.json", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/manifest.json"));
+		});
+
+		app.get("/precache.json", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
 		});
 
 		let DEFAULT_PLUGIN_STRUCTURE = {
