@@ -6,12 +6,14 @@
 
 	function SWService() {
 
+		var path = "/public/service-workers/";
+
 		var service = {
 			init : init
 		};
 
 		return service;
-
+		
 		//////////
 
 		function init() {
@@ -21,7 +23,7 @@
 					"precache"
 				];
 
-				var path = "/public/service-workers/";
+				
 				serviceWorkers.forEach(registerSW);
 
 			}		
