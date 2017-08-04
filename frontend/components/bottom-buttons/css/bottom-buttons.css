@@ -32,15 +32,23 @@ bottom-buttons #showButtonIcon {
   margin-top: -5px;
 }
 
+bottom-buttons .actionButton {
+  line-height: inherit !important;
+}
+
 bottom-buttons .actionButton md-icon {
   color: #FFFFFF !important;
-  font-size: 25px;;
+  font-size: 25px;
+}
+
+bottom-buttons label {
+  padding-top: 5px;
 }
 
 bottom-buttons .viewingOptionButtonHolder {
   position: absolute;
   height: 100%;
-  bottom: 40px;
+  bottom: 50px;
 }
 
 bottom-buttons label {

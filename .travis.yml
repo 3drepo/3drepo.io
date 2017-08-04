@@ -1,8 +1,9 @@
 language: node_js
 git:
   submodules: false
+  depth: 1
 node_js:
-    - "6.11"
+    - "6.11.2"
 env:
   - CXX=g++-4.8
 sudo: required
@@ -25,9 +26,7 @@ before_install:
     - sudo apt-get install -y mongodb-org
     - mongod --version
     - sudo service mongod start
-    - npm install -g gulp
-    - npm link gulp
-    - sleep 15
+    - until nc -z localhost 27017; do sleep 1; done
     - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
     - cd submodules/tests
     - git checkout $test_ver
@@ -35,11 +34,17 @@ before_install:
     - mongorestore
     - cd ../../../backend
 
-install: npm install
+install: yarn install
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
 services:
   - rabbitmq
 script:
-    - npm run test
+    - yarn run test
 notifications:
     email: 
         recipients:

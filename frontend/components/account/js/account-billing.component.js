@@ -38,8 +38,7 @@
 	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "serverConfig"];
 
 	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, serverConfig) {
-		var vm = this,
-			promise;
+		var vm = this;
 
 		/*
 		 * Init
@@ -57,6 +56,9 @@
 		 * Watch for change in licenses
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
+
+			console.log("vm.numNewLicenses", vm.numNewLicenses);
+
 			if (angular.isDefined(vm.numNewLicenses)) {
 				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {
 					vm.saveDisabled = true;
@@ -118,10 +120,9 @@
 		 * Watch for billings
 		 */
 		$scope.$watch("vm.billings", function () {
-			var i, length;
 
 			if (angular.isDefined(vm.billings)) {
-				for (i = 0, length = vm.billings.length; i < length; i += 1) {
+				for (var i = 0; i < vm.billings.length; i ++) {
 					if(vm.billings[i].type === "refund"){
 						vm.billings[i].status = "Completed";
 						vm.billings[i].description = "Refund";
@@ -130,7 +131,8 @@
 						vm.billings[i].description = vm.billings[i].items[0].description;
 					}
 				}
-			}
+			} 
+
 		});
 
 		/**
@@ -140,7 +142,9 @@
 		 */
 		vm.downloadBilling = function (index) {
 			//$window.open("/billing?user=" + vm.account + "&item=" + index);
-			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/invoices/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
+			var endpoint = vm.account + "/invoices/" + vm.billings[index].invoiceNo + ".pdf";
+			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+			$window.open(url, "_blank");
 		};
 
 		vm.changeSubscription = function () {
@@ -158,7 +162,8 @@
 				vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
 			}
 			UtilsService.showDialog("paypal-dialog.html", $scope, null, true);
-			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
+
+			var promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
 				if (response.status === 200) {
 					if (vm.numLicenses === vm.numNewLicenses) {

@@ -24,6 +24,7 @@
 	const middlewares = require('../middlewares/middlewares');
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const _ = require('lodash');
 
 	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
 	router.post("/permissions", middlewares.isAccountAdmin, createPermission);
@@ -35,7 +36,28 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.toObject().customData.permissions);
+			// TODO: This is a hack
+			// Assign an empty array to permissionless users
+			var resData = user.toObject().customData;
+			resData.billing.subscriptions.forEach(sub => {
+				if (sub.assignedUser) {
+					var match = {'user' : sub.assignedUser};
+					var exists = _.find(resData.permissions, match);
+					if (!exists) {
+						resData.permissions.push({
+							user:  sub.assignedUser,
+							permissions: []
+						})
+					}
+				}
+			});
+
+			// TODO: Why is this necessary? Remove undefined users
+			resData.permissions = _.remove(resData.permissions, function(u) {
+				return u.user !== undefined;
+			});
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resData.permissions);
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

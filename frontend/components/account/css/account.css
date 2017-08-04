@@ -237,7 +237,9 @@ account-info .accountInfoPage .md-button {
   background: #E8EAF6;
   margin: auto;
   margin-top: 20px;
+  margin-bottom: 20px;
   cursor: pointer;
+  border-radius: 6px;
 }
 
 .avatar-upload{
@@ -323,6 +325,7 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 .deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
+  margin-top: 5px;
 }
 
 /** Account Billing ***************************************************************************************************/
@@ -332,6 +335,24 @@ account-billing md-input-container {
 
 account-billing .accountBillingSave button {
   margin-left: 0px;
+}
+
+account-billing .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-billing .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+}
+
+
+account-billing .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
 }
 
 account-billing .userContent {
@@ -712,14 +733,8 @@ account-assign md-checkbox span {
   font-size: 12px;
 }
 
-account-assign td, account-assign th {
-  min-width: 100px;
-  width: 100px;
-  text-align: center;
-}
-
-account-assign .userColumn {
-  /*width: 130px;*/
+account-assign .adminColumn {
+  border-left: black solid 1px;
 }
 
 account-assign .rowSelects {
@@ -738,14 +753,19 @@ account-assign md-radio-button > div {
   margin-left: 50%;
 }
 
-account-assign .fixedWidth {
-  /*width: 50px;*/
-}
-
 account-assign table td, account-assign table th {
     width: 120px;
+    min-width: 120px;
+    height: 40px;
     margin-left: 0px;
     margin-right: 0px;
+    text-align: center;
+    padding: 0;
+}
+
+account-assign .checkboxes {
+  max-height: 350px;
+  overflow-x: hidden;
 }
 
 account-assign .checkboxes p {
@@ -757,4 +777,8 @@ account-assign .radiobuttons p {
   margin-bottom: 10px;
 }
 
+account-assign .sentenceCase {
+  text-transform: capitalize;
+  
+}
 

@@ -69,7 +69,7 @@
 			vm.selectedIssueLoaded = false;
 
 			vm.modelLoaded = false;
-			
+
 			/*
 			* Get the user roles for the model
 			*/
@@ -160,7 +160,7 @@
 		 */
 		function setIssueAssignedRolesColors (issue) {
 			var i, length, roleColour, pinColours = [];
-
+			var rgbColour;
 			issue.assignedRolesColors = [];
 
 			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
@@ -168,8 +168,8 @@
 				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
 	
 				issue.assignedRolesColors.push(roleColour);
-				pinColours = IssuesService.hexToRgb(roleColour);
-				pinColours.push(pinColours);
+				rgbColour = IssuesService.hexToRgb(roleColour);
+				pinColours.push(rgbColour);
 			}
 		}
 

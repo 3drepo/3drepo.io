@@ -44,9 +44,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountDataService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountService"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountDataService) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -58,7 +58,7 @@
 		};
 
 		vm.getProjects = function(teamspace) {
-			var projects = AccountDataService.getProjectsByTeamspaceName(vm.accounts, teamspace);
+			var projects = AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace);
 			return projects;
 		};
 
@@ -164,7 +164,7 @@
 		 * Remove a model from a federation
 		 */
 		vm.removeFromFederation = function (modelName) {
-			AccountDataService.removeFromFederation(vm.federationData, modelName);
+			AccountService.removeFromFederation(vm.federationData, modelName);
 		};
 
 
@@ -244,7 +244,7 @@
 				if (response.status === 200) {
 					var account = vm.currentAccount;
 					if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
-						AccountDataService.removeModelByProjectName(
+						AccountService.removeModelByProjectName(
 							vm.accounts, 
 							account.name, 
 							vm.projectToDeleteFrom.name, 

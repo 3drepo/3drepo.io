@@ -89,17 +89,23 @@
 	schema.statics.delete = function(account, name){
 
 		const User = require('./user');
+		const ModelHelper = require('./helper/model');
+
 		let project;
 
 		return Project.findOneAndRemove({account}, {name}).then(_project => {
 
 			project = _project;
 
+			//remove all models as well
+
 			if(!project){
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
 				return Promise.resolve();
 			}
+		}).then(() => {
+			return Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
 		}).then(() => project);
 	};
 

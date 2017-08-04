@@ -7,14 +7,30 @@ md-dialog.deleteDialog(aria-label="Delete")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-content(layout-margin)
 		div(layout="column", layout-align="start")
-			div
+			div(ng-if="!vm.deleteError")
 				p
 					| Do you really want to delete
 					=" "
 					span#deleteName {{vm.deleteName}}?
 				br
 				p#deleteWarning {{vm.deleteWarning}}
-			md-input-container
-				md-button.md-raised.md-accent(ng-click="vm.closeDialog()") No
-				md-button.md-accent(ng-click="vm.deleteModel()") Yes
+			
+			div(ng-if="vm.deleteError")
+				p 
+					| There was an issue deleting 
+					= " "
+					span#deleteName {{vm.deleteName}}
+
+			md-input-container(ng-if="!vm.deleteError")
+				md-button.md-raised.md-accent(
+					ng-disabled="vm.deleteError"
+					ng-click="vm.closeDialog()") No
+				md-button.md-accent(
+					ng-disabled="vm.deleteError"
+					ng-click="vm.deleteModel()") Yes
+
 			p#deleteError(ng-if="vm.deleteError") {{vm.deleteError}}
+			
+			md-input-container(ng-if="vm.deleteError")
+				md-button.md-raised.md-accent(
+					ng-click="vm.closeDialog()") OK

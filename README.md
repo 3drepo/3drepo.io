@@ -26,9 +26,9 @@ Your pull requests should:
 Dependencies
 ------------
 
-* Python v2
-* Node.js
-* npm 
+* Python (v 2.7)
+* Node.js (v 6.11.2)
+* npm + [yarn](https://yarnpkg.com/lang/en/docs/install/)
 * MongoDB
 * RabbitMQ 
 * graphicsmagick
@@ -44,9 +44,9 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 3. Check out latest release: `git checkout tags/latest`
 4. Update submodules: `git submodule update --init --progress` (You may want to used `--depth 1` to reduce transfer size)
 5. Setup the configuration file for running the 3D Repo web app as per the `Configuration` section below.
-6. Install the required backend dependencies: `npm install`
-7. Install the required frontend dependencies: `cd frontend && npm install`
-8. Compile the frontend: `cd frontend && gulp frontend` (for file watching/live reloading, see `Running the application` below)
+6. Install the required backend dependencies: `cd backend && yarn install`
+7. Install the required frontend dependencies: `cd frontend && yarn install`
+8. Compile the frontend: `cd frontend && yarn run gulp build` (for file watching/live reloading, see `Running the application` below)
 
 Database and Queue Setup 
 ------------
@@ -104,7 +104,7 @@ Although, this depends on the type of server/application you are running.
 
 ### File Watching & Live Reloading
 
-For development purposes a file watching and livereloading command is provided. You need to include `development: true` in your configuration file and then you can run `gulp watch` from the frontend directory. This will watch the folder for changes and reload the page (or not for CSS!). If you encounter an ENOSPC error, on Linux you can run `fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p` fix.
+For development purposes a file watching and livereloading command is provided. You need to include `development: true` in your configuration file and then you can run `yarn run gulp watch` from the frontend directory. This will watch the folder for changes and reload the page (or not for CSS!). If you encounter an ENOSPC error, on Linux you can run `fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p` fix.
 
 Locally running the application
 -------------------------------

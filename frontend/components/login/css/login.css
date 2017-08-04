@@ -6,6 +6,10 @@ login {
   background-size: contain;
 }
 
+login .loginButton {
+  width: 100% !important;
+}
+
 login .homeUserContent md-toolbar {
   height: 40px;
   min-height: 40px;
@@ -40,6 +44,10 @@ login #loginHiddenInputs {
   position: absolute;
   top: 0;
   opacity: 0;
+}
+
+login .loginLinks {
+  color: #2945b5;
 }
 
 /*login md-progress-circular {

@@ -35,11 +35,15 @@
 
 							StateManager.state.changing = true;
 
-							AuthService.init().then(function (loggedIn) {
-								StateManager.state.authInitialized = true;
-
-								finishedAuth.resolve();
-							});
+							AuthService.init(false)
+								.then(function () {
+									StateManager.state.authInitialized = true;
+									finishedAuth.resolve();
+								})
+								.catch(function(error) {
+									console.error("Error initialising auth from state manager: ", error);
+									finishedAuth.reject();
+								});
 
 							return finishedAuth.promise;
 						}]
@@ -172,8 +176,8 @@
 				});
 			}])
 		.service("StateManager", 
-			["$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
-				function($location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
+			["$mdDialog", "$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
+				function($mdDialog, $location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
 							
 					var self = this;
 
@@ -328,8 +332,8 @@
 							// If we are not trying to access a function
 							// and yet there is no account set. Then
 							// we need to go back to the account page if possible.
-							if ((functionList.length === 0) && AuthService.loggedIn && !self.state.account) {
-								self.setStateVar("account", AuthService.username);
+							if ((functionList.length === 0) && AuthService.isLoggedIn() && !self.state.account) {
+								self.setStateVar("account", AuthService.getUsername());
 								self.updateState();
 							} else {
 								self.updateState(true);
@@ -464,9 +468,7 @@
 
 					this.refreshHandler = function (event){
 
-						console.log("refreshHandler", event);
 						var confirmationMessage = "This will reload the whole model, are you sure?";
-
 						event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
 						return confirmationMessage;              // Gecko, WebKit, Chrome <34
 
@@ -480,11 +482,25 @@
 
 
 						if (path === "/" + account + "/" + model) {
-							var response = confirm(message);
-							if (response) {
+							
+							var title = "Go back to Teamspaces?";
+							$mdDialog.show(
+
+								$mdDialog.confirm()
+									.clickOutsideToClose(true)
+									.title(title)
+									.textContent(message)
+									.ariaLabel(title + " Dialog")
+									.cancel("Cancel")
+									.ok("Confirm")
+									
+
+							).then(function() {
 								$location.path(account);
 								UnityUtil.reset();
-							}
+							}, function() {
+								
+							});
 						}
 
 					};

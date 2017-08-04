@@ -37,14 +37,14 @@
 		vm.$onInit = function() {
 
 			// TODO: this is a hack
-			AuthService.isLoggedIn().then(function(response){
+			AuthService.sendLoginRequest().then(function(response){
 				if (response.data.username) {
 					vm.goToLoginPage();
 				}
 			});
 		};
 
-		$scope.$watch("AuthService.loggedIn", function (newValue) {
+		$scope.$watch("AuthService.isLoggedIn()", function (newValue) {
 			// TODO: this is a hack
 			if (newValue === true) {
 				vm.goToLoginPage();

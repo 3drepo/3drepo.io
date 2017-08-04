@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,78 +19,211 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("AccountService", AccountService);
+		.service("AccountService", AccountService);
 
-	AccountService.$inject = ["$http", "$q", "serverConfig", "UtilsService"];
+	AccountService.$inject = ["UtilsService", "$q"];
 
-	function AccountService($http, $q, serverConfig, UtilsService) {
-		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
+	function AccountService(UtilsService, $q) {
+
+		var accountPromise = $q.defer();
 
 		var service = {
-			getUserInfo : getUserInfo,
+
+			removeProjectInTeamspace : removeProjectInTeamspace,
+			renameProjectInTeamspace : renameProjectInTeamspace,
+			addProjectToTeamspace : addProjectToTeamspace,
+			isSubModel : isSubModel,
+			getNoneFederatedModels : getNoneFederatedModels,
+			getModels : getModels,
+			getProject : getProject,
+			getProjectsByTeamspaceName : getProjectsByTeamspaceName,
+			getTeamspaceByName : getTeamspaceByName,
+			getIndividualModels : getIndividualModels,
+			removeFromFederation: removeFromFederation,
+			hasFederations : hasFederations,
+			getFederations : getFederations,
+			hasFederationsByProjectName : hasFederationsByProjectName,
+			getFederationsByProjectName : getFederationsByProjectName,
+			getIndividualModelsByProjectName : getIndividualModelsByProjectName,
+			removeFromFederationByProjectName : removeFromFederationByProjectName,
+			removeModelByProjectName : removeModelByProjectName,
+			getIndividualTeamspaceModels : getIndividualTeamspaceModels,
+			isDuplicateFederation : isDuplicateFederation,
 			newSubscription : newSubscription,
-			uploadStatus : uploadStatus,
-			uploadModel : uploadModel,
-			newModel : newModel,
 			updatePassword : updatePassword,
-			updateInfo : updateInfo
+			updateInfo : updateInfo,
+			getUserInfo : getUserInfo,
+			accountPromise: accountPromise.promise
+
 		};
-
+	
 		return service;
+	
+		///////////////
 
+		function isDuplicateFederation(teamspaces, teamspaceName, projectName, name) {
 
-		///////////
+			var duplicate = false;
 
-		/**
-		 * Do POST
-		 *
-		 * @param data
-		 * @param urlEnd
-		 * @param headers
-		 * @returns {*|promise}
-		 */
-		function doPost(data, urlEnd, headers) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-				config = {withCredentials: true};
+			var feds = getFederationsByProjectName(teamspaces, teamspaceName, projectName);
+			feds.forEach(function(fed){
+				if (fed.name === name) {
+					duplicate = true;
+				}
+			});
 
-			if (angular.isDefined(headers)) {
-				config.headers = headers;
-			}
-
-			$http.post(url, data, config)
-				.then(
-					function (response) {
-						deferred.resolve(response);
-					},
-					function (error) {
-						deferred.resolve(error);
-					}
-				);
-			return deferred.promise;
+			return duplicate;
 		}
 
-		/**
-		 * Handle PUT requests
-		 * @param data
-		 * @param urlEnd
-		 * @returns {*}
-		 */
-		function doPut(data, urlEnd) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-				config = {withCredentials: true};
+		function hasFederationsByProjectName(teamspaces, teamspaceName, projectName) {
+			return getFederations(teamspaces, teamspaceName, projectName).length > 0;
+		}
 
-			$http.put(url, data, config)
-				.then(
-					function (response) {
-						deferred.resolve(response);
-					},
-					function (error) {
-						deferred.resolve(error);
-					}
-				);
-			return deferred.promise;
+		function getFederationsByProjectName(teamspaces, teamspaceName, projectName) { 
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			return project.models.filter(function(model) {
+				return model.subModels; 
+			});
+		}
+
+		function getIndividualModelsByProjectName(teamspaces, teamspaceName, projectName) {
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			return project.models.filter(function(model) {
+				return !model.subModels; 
+			});
+		}
+
+		function getIndividualTeamspaceModels(teamspaces, teamspaceName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
+			return teamspace.models.filter(function(model) {
+				return !model.subModels; 
+			});
+		}
+
+		function hasFederations(models) {
+			return getFederations(models).length > 0;
+		}
+
+		function getFederations(models) { 
+			return models.filter(function(model) {
+				return model.subModels; 
+			});
+		}
+
+		function getIndividualModels(models) {
+			return models.filter(function(model) {
+				return !model.subModels; 
+			});
+		}
+
+		function removeProjectInTeamspace(teamspaces, teamspaceName, projectName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
+			teamspace.projects.forEach(function(project, i){
+				if (projectName === project.name) {
+					teamspace.projects.splice(i, 1);
+				}
+			});
+		}
+
+		function renameProjectInTeamspace(teamspaces, teamspaceName, newProjectName, oldProjectName) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
+			teamspace.projects.forEach(function(project){
+				if (project.name === oldProjectName) {
+					project.name = newProjectName;
+				}
+			});
+		}
+
+
+		function addProjectToTeamspace(teamspaces, teamspaceName, project) {
+			var teamspace = getTeamspaceByName(teamspaces, teamspaceName);
+			teamspace.projects.push(project);
+		}
+
+
+		function getProjectsByTeamspaceName(teamspaces, name) {
+
+			var projects = [];
+			teamspaces.forEach(function(teamspace){
+				if (teamspace.name === name) {
+					projects = teamspace.projects;
+				}
+			});
+			
+			return projects;
+	
+		}
+
+		function getTeamspaceByName(teamspaces, name) {
+			return teamspaces.filter(function(teamspace){
+				return teamspace.name === name; 
+			})[0];
+		}
+
+		function isSubModel(federation, model) {
+			var isSubModelOfFed = false;
+			federation.subModels.forEach(function(submodel) {
+				if (submodel.model === model.model) {
+					isSubModelOfFed = true;
+				}
+			});
+			return isSubModelOfFed;
+		}
+
+		function getNoneFederatedModels(federation, models) {
+			return models.filter(function(model){
+				return !isSubModel(federation, model);
+			});
+		}
+
+		function removeFromFederation(federation, modelId) {
+			
+			federation.subModels.forEach(function(submodel, i) {
+				if (submodel.model === modelId) {
+					federation.subModels.splice(i, 1);
+				}
+			});
+			
+		}
+
+		function getProject(teamspaces, teamspaceName, projectName) {
+
+			// Return models that are not federated (federations)
+			var selectedTeamspace = teamspaces.filter(function(teamspace) {
+				return teamspace.name === teamspaceName;
+			})[0];
+
+			var selectedProject = selectedTeamspace.projects.filter(function(project) {
+				return project.name === projectName;
+			})[0];
+
+			return selectedProject;
+	
+		}
+
+
+		function getModels(teamspaces, teamspaceName, projectName) {
+			return getProject(teamspaces, teamspaceName, projectName).models;
+		}
+
+		function removeModelByProjectName(teamspaces, teamspaceName, projectName, modelName) {
+			var models = getModels(teamspaces, teamspaceName, projectName);
+			var project = getProject(teamspaces, teamspaceName, projectName);
+			models.forEach(function(model, i) {
+				if (model.model === modelName) {
+					project.models.splice(i, 1);
+					
+				}
+			});
+		}
+
+		function removeFromFederationByProjectName(teamspaces, teamspaceName, projectName, modelName) {		
+			var federations = getFederationsByProjectName(teamspaces, teamspaceName, projectName);
+			federations.forEach(function(model, i) {
+				if (model.model === modelName) {
+					model.subModels.splice(i, 1);
+				}
+			});
 		}
 
 		/**
@@ -101,7 +234,7 @@
 		 * @returns {*}
 		 */
 		function updateInfo(username, info) {
-			return doPut(info, username);
+			return UtilsService.doPut(info, username);
 		}
 
 		/**
@@ -112,48 +245,8 @@
 		 * @returns {*}
 		 */
 		function updatePassword(username, passwords) {
-			return doPut(passwords, username);
+			return UtilsService.doPut(passwords, username);
 		}
-
-		/**
-		 * Create a new model
-		 *
-		 * @param modelData
-		 * @returns {*|promise}
-		 */
-		function newModel(modelData) {
-			var data = {
-				desc: "",
-				project : modelData.project,
-				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
-				unit: modelData.unit,
-				code: modelData.code
-			};
-			return doPost(data, modelData.teamspace + "/" + encodeURIComponent(modelData.name));
-		}
-
-		/**
-		 * Upload file/model 
-		 *
-		 * @param modelData
-		 * @returns {*|promise}
-		 */
-		function uploadModel(modelData) {
-			var data = new FormData();
-			data.append("file", modelData.uploadFile);
-			return doPost(data, modelData.teamspace + "/" + modelData.model + "/upload", {"Content-Type": undefined});
-		}
-
-		/**
-		 * Get upload status
-		 *
-		 * @param modelData
-		 * @returns {*|promise}
-		 */
-		function uploadStatus(modelData) {
-			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
-		}
-
 
 		/**
 		 * Create a new subscription
@@ -163,8 +256,9 @@
 		 * @returns {*|promise}
 		 */
 		function newSubscription(teamspace, data) {
-			return doPost(data, teamspace + "/subscriptions");
+			return UtilsService.doPost(data, teamspace + "/subscriptions");
 		}
+
 
 		/**
 		 * Get user info
@@ -173,9 +267,10 @@
 		 * @returns {*|promise}
 		 */
 		function getUserInfo(username) {
-			return UtilsService.doGet(username + ".json");
+			var currentAccount = UtilsService.doGet(username + ".json");
+			accountPromise.resolve(currentAccount);
+			return currentAccount;
 		}
-
 
 	}
 }());

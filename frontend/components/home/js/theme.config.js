@@ -38,8 +38,8 @@
 					"900": "0C2F54",
 					"A100": "06563C",
 					"A200": "06563C",
-					"A400": "06563C",
-					"A700": "06563C",
+					"A400": "087251",
+					"A700": "087251",
 					"contrastDefaultColor": "light",
 					"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
 					"contrastLightColors": undefined

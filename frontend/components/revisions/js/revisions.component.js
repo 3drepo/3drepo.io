@@ -21,10 +21,15 @@
 		var vm = this;
 
 
+		vm.$onInit = function(){
+			vm.revisionsLoading = true;
+		};
+
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if(event.type === EventService.EVENT.REVISIONS_LIST_READY){
 				vm.revisions = event.value;
+				vm.revisionsLoading = false;
 				if(!vm.revisions || !vm.revisions[0]){
 					return;
 				}
@@ -53,6 +58,7 @@
 
 			if(!vm.revisions){
 				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
+					vm.revisionsLoading = false;
 					vm.revisions = revisions;
 				});
 			}

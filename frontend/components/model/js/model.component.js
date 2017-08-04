@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
+	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "$mdDialog", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
 
-	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
+	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, $mdDialog, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
 		var vm = this;
 
 		/*
@@ -60,11 +60,14 @@
 			};
 
 			var refreshHandler = function (event){
-				StateManager.refreshHandler(event); 
+				console.log("Refresh handler");
+				return StateManager.refreshHandler(event); 
 			};
 
 			//listen for user clicking the back button
 			window.addEventListener("popstate", popStateHandler);
+			window.addEventListener("beforeunload", refreshHandler);
+
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);
@@ -241,8 +244,17 @@
 		vm.handleModelError = function(){
 			var message = "The model was not found or failed to load correctly. " +
 			" You will now be redirected to the teamspace page.";
-			alert(message);
-			$location.path(AuthService.username);
+
+			$mdDialog.show(
+				$mdDialog.alert()
+					.clickOutsideToClose(true)
+					.title("Model Error")
+					.textContent(message)
+					.ariaLabel("Model Error")
+					.ok("OK")
+			);
+		
+			$location.path(AuthService.getUsername());
 		};
 
 		vm.setupModelInfo = function() {
@@ -250,7 +262,6 @@
 			ModelService.getModelInfo(vm.account, vm.model)
 				.then(function (data) {
 					vm.settings = data;
-
 					var index = -1;
 
 					if(!data.federate){

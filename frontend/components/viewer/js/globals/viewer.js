@@ -183,6 +183,8 @@ var Viewer = {};
 				UnityUtil.pickPointCallback = self.pickPointEvent;
 				UnityUtil.objectSelectedCallback = self.objectSelected;
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
+				UnityUtil.errorCallback = self.handleError;
+
 				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
 				self.setNavMode(self.defaultNavMode);
 
@@ -202,6 +204,10 @@ var Viewer = {};
 				
 			});
 			
+		};
+
+		this.handleError = function(message) {
+			callback(Viewer.EVENT.UNITY_ERROR, message);
 		};
 
 		this.destroy = function() {
@@ -799,6 +805,7 @@ var Viewer = {};
 		// States of the viewer
 		INITIALISE: "VIEWER_EVENT_INITIALISE",
 		UNITY_READY: "VIEWER_EVENT_UNITY_READY",
+		UNITY_ERROR: "VIEWER_EVENT_UNITY_ERROR",
 		START_LOADING: "VIEWING_START_LOADING",
 		LOAD_MODEL: "VIEWER_LOAD_MODEL",
 		CHECK_MODEL_LOADED: "VIEWER_CHECK_MODEL_LOADED",

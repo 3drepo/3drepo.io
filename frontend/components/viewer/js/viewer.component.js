@@ -37,9 +37,9 @@
 			controllerAs: "vm"
 		});
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location", "$mdDialog"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location) {
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location, $mdDialog) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -151,6 +151,23 @@
 						vm.loadViewerModel();	
 					}
 
+				}
+
+				if (event.type === EventService.EVENT.VIEWER.UNITY_ERROR) {
+					$mdDialog.show(
+						$mdDialog.alert()
+							.clickOutsideToClose(true)
+							.title("Unity Error")
+							.htmlContent(event.value.message)
+							.ariaLabel("Unity Error")
+							.ok("OK")
+					).then(function() {
+						if (event.value.reload) {
+							location.reload();
+						}
+					}, function() {
+						console.warn("Unity errorered and user cancelled reload");
+					});
 				}
 
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
@@ -292,7 +309,7 @@
 							vm.viewer.setMultiSelectMode(event.value);
 						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
 							vm.viewer.setPinDropMode(event.value);
-						}
+						} 
 
 					});
 

@@ -23,6 +23,16 @@ AnalyticService.$inject = [];
 function AnalyticService(){
 	"use strict";
 
+	var service = {
+		sendPageView: sendPageView,
+		sendEvent: sendEvent,
+		setUserId: setUserId
+	};
+
+	return service;
+
+	////////////
+
 	
 	function isGoogleAnalyticEnabled(){
 		return typeof ga !== "undefined" && ga !== null;
@@ -55,9 +65,5 @@ function AnalyticService(){
 		ga("set", "userId", userId);
 	}
 
-	return {
-		sendPageView: sendPageView,
-		sendEvent: sendEvent,
-		setUserId: setUserId
-	};
+	
 }

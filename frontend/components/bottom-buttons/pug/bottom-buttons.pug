@@ -1,7 +1,7 @@
 div(layout="row", flex, layout-align="space-between")
 	#leftButtons(ng-if="vm.showButtons", layout="row")
 		span(ng-repeat="button in vm.leftButtons", ng-click="button.click()" layout="column")
-			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
+			md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(aria-label="{{button.label}}")
 				md-icon(md-font-icon="{{button.icon}}", ng-class="{{button.iconClass}}")
 			label {{button.label}}
 
@@ -9,7 +9,7 @@ div(layout="row", flex, layout-align="space-between")
 		.viewingOptionButtonHolder
 			.viewingOptionButtons(
 				layout="row", ng-if="vm.showViewingOptionButtons", layout-align="center center")
-				md-button.md-icon-button.actionButton(
+				md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 						ng-repeat="option in vm.viewingOptions"
 						ng-click="vm.viewingOptions[$index].click($index)" 
 						ng-if="vm.viewingOptions[$index].label !== vm.rightButtons[0].label"
@@ -22,7 +22,7 @@ div(layout="row", flex, layout-align="space-between")
 			layout="column"
 			layout-align="start center")
 			
-			md-button.ignoreClick.md-icon-button.actionButton(aria-label="{{button.label}}")
+			md-button.md-fab.md-mini.ignoreClick.md-icon-button.md-ink-ripple.actionButton.md-accent(aria-label="{{button.label}}")
 				img.ignoreClick(ng-src="{{button.icon}}", ng-class="button.iconClass")
 				//md-icon.ignoreClick(md-font-icon="{{button.icon}}", ng-class="{{button.iconClass}}")
 			label.ignoreClick {{button.label}}

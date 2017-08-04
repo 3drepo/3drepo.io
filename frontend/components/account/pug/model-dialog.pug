@@ -70,15 +70,20 @@ md-dialog.newModelDialog(aria-label="New model")
 				placeholder="Revision description (optional)", ng-model="vm.desc")
 
 			p#modelRequiredHint(ng-if="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected") Please check input
+			
+			div
+				p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				md-button.md-accent(
 					ng-if="vm.teamspaceAndProjectSelected",
 					ng-click="vm.uploadFileForNewModel()") Upload File
 				md-button.md-raised.md-accent(ng-disabled="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected", ng-click="vm.saveNewModel()") Save
+			
+
+
 			#modelDialogFilenameContainer(layout="row", ng-if="vm.newModelFileToUpload")
 				p#modelDialogFilenameIntro Selected file
 				p#modelDialogFilename {{vm.newModelFileToUpload.name}}
-				p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
-
+				
 

@@ -68,21 +68,20 @@ var UnityUtil;
 	};
 
 	UnityUtil.prototype.onError = function(err, url, line) {
+		var conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " + 
+					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " + 
+					"reduce your memory usage and try again. " + 
+					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " + 
+					"<br><br> <code>Error " + err + " occured at line " + line + 
+					"</code> <br><br> Click ok to refresh this page. <md-container>";
 
-		var conf = "Your browser has failed to load 3D Repo. \nThis may due to insufficient memory.\n" + 
-					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results)," + 
-					"reduce your memory usage and try again." + 
-					"\n\nIf you are unable to resolve this problem, please contact support@3drepo.org referencing the following:" + 
-					"\n\n\"Error " + err + " occured at line " + line + 
-					"\"\n\n\nClick ok to refresh this page.\n";
-		
-
+		var reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
-			if(confirm(conf)) {
-				window.location.reload();
-			}
+			reload = true;
 		}
+		
+		UnityUtil.userAlert(conf, reload);
 
 		return true;
 	};
@@ -125,25 +124,25 @@ var UnityUtil;
 
 	var unityHasErrored = false;
 
-	function userAlert(message, reload) {
+	UnityUtil.prototype.userAlert = function(message, reload) {
+		
 		var prefix = "" +
-		"Something went wrong loading Unity, " + 
-		"press okay to refresh! Error: ";
+		"Unity Error: ";
 
 		var fullMessage = prefix + message;
 
-
 		if (!unityHasErrored) {
+			console.log("sending error");
 			// Unity can error multiple times, we don't want 
 			// to keep annoying the user
 			unityHasErrored = true;
-			alert(fullMessage);
-			if (reload) {
-				window.location.reload(); 
-			}
+			UnityUtil.errorCallback({ 
+				message : fullMessage, 
+				reload : reload 
+			});
 		}
 		
-	}
+	};
 
 
 	function toUnity(methodName, requireStatus, params) {
@@ -155,14 +154,14 @@ var UnityUtil;
 			
 			}).catch(function(error){
 				console.error("UnityUtil.onLoaded() failed: ", error);
-				userAlert(error, true);
+				UnityUtil.userAlert(error, true);
 			});
 		} else if(requireStatus == LoadingState.MODEL_LOADING) {
 			//Requires model to be loading
 			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			}).catch(function(error){
-				userAlert(error, true);
+				UnityUtil.userAlert(error, true);
 				console.error("UnityUtil.onLoading() failed: ", error);
 			});
 		} else {
@@ -170,7 +169,7 @@ var UnityUtil;
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
-				userAlert(error, true);
+				UnityUtil.userAlert(error, true);
 				console.error("UnityUtil.onReady() failed: ", error);
 			});
 		}
