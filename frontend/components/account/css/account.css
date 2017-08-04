@@ -271,7 +271,8 @@ account-info .accountInfoPage .md-button {
 
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
-  height:150px;
+  max-width: 300px;
+  max-height: 150px;
   background: #E8EAF6;
   margin: auto;
   margin-top: 20px;

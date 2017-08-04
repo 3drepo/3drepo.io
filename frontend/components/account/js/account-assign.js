@@ -503,9 +503,11 @@
 					return model.model ===  vm.modelSelected;
 				});
 
+			
+
 				return $q(function(resolve, reject) {
 
-					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/" + "permissions";
+					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/permissions";
 					var url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
 
 					$http.get(url)
@@ -533,17 +535,20 @@
 		});
 
 		vm.modelStateChange = function(user, role) {
-
-			vm.selectedRole[user.user] = role;
+			
 			var permissionsToSend = [];
 
+			var validInput = user && user.user && role;
+			if (validInput) {
+				vm.selectedRole[user.user] = role;
+			}
+			
 			for (var roleUser in vm.selectedRole) {
-				if (roleUser) {
+				if (roleUser && vm.selectedRole.hasOwnProperty(roleUser)) {
 					var permission = vm.selectedRole[roleUser];
 					var notUnassigned = permission !== "unassigned";
 
 					if (notUnassigned) {
-
 						permissionsToSend.push({
 							user : roleUser,
 							permission : permission
@@ -565,21 +570,27 @@
 		};
 
 		vm.showError = function(title, error) {
-			// Error for developer
-			console.error("Error", error);
 
-			// Error for user
-			var conf = "Something went wrong: " + 
-			"<br><br> <code>Error - " + error.data.message + " (Status Code: " + error.status + ")" + 
-			"</code> <br><br> <md-container>";
-			$mdDialog.show(
-				$mdDialog.alert()
-					.clickOutsideToClose(true)
-					.title(title)
-					.htmlContent(conf)
-					.ariaLabel(title)
-					.ok("OK")
-			);
+			if (error && error.data) {
+				// Error for developer
+				console.error("Error", error);
+
+				// Error for user
+				var conf = "Something went wrong: " + 
+				"<br><br> <code>Error - " + error.data.message + " (Status Code: " + error.status + ")" + 
+				"</code> <br><br> <md-container>";
+				$mdDialog.show(
+					$mdDialog.alert()
+						.clickOutsideToClose(true)
+						.title(title)
+						.htmlContent(conf)
+						.ariaLabel(title)
+						.ok("OK")
+				);
+			} else {
+				console.error("Error, but no error response: ", error);
+			}
+			
 		};
 
 
