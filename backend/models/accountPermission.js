@@ -66,7 +66,7 @@
 					//return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
 					return this.update(permission.user, permission)
 				}
-				if(permissions.length === 0)
+				if(permission.permissions.length === 0)
 				{
 					//Adding a user with empty permissions is not allowed
 					return Promise.reject(responseCodes.ACCOUNT_PERM_EMPTY);
