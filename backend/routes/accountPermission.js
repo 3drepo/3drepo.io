@@ -88,10 +88,10 @@
 			return user.customData.permissions.update(req.params.user, req.body);
 
 		}).then(permission => {
-
+			console.log("permissions", permission);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 		}).catch(err => {
-
+			console.log("Error", err);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

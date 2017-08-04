@@ -94,11 +94,11 @@
 					if(currPermission){
 						console.log("valid permissions, overwriting");
 						currPermission.permissions = permission.permissions;
+						return this.user.save().then(() => permission);
 					} else {
 						console.log("currPermission is null...", currPermission);
 						return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
 					}
-					return this.user.save().then(() => permission);
 				}
 
 			});
