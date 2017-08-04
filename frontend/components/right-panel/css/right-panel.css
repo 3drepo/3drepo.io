@@ -1,7 +1,7 @@
 right-panel {
     position: absolute;
     top: 70px;
-    right: 5px;
+    right: 10px;
 }
 
 right-panel #rightPanelButtons .rightPanelButtonGroup {
