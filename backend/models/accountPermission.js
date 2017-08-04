@@ -88,7 +88,7 @@
 				}
 				else
 				{
-
+					console.log(this.user.customData);
 					const currPermission = this.findByUser(user);
 
 					if(currPermission){
