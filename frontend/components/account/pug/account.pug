@@ -1,8 +1,22 @@
 account-menu
-div(ng-if="!vm.state.model")
-	#account(layout="row")
+div#accountHolder(
+	layout="row"
+	flex="100"
+	ng-if="!vm.state.model")
+
+	#account(
+		flex="100"
+		layout="row"
+		layout-xs="column"
+		layout-sm="column")
 
 		account-info(
+			flex-xs="85"
+			flex-sm="85"
+			flex-md="45"
+			flex-lg="30"
+			flex-xl="25"
+
 			loading="vm.loadingAccount"
 			username="vm.username"
 			first-name="vm.firstName"
@@ -11,7 +25,10 @@ div(ng-if="!vm.state.model")
 			has-avatar="vm.hasAvatar"
 			item-to-show="vm.itemToShow")
 
-		#accountItem(ng-switch="vm.itemToShow")
+		#accountItem(
+			flex="100"
+			ng-switch="vm.itemToShow")
+
 			account-teamspaces(
 				loading="vm.loadingAccount"
 				ng-switch-when="teamspaces"

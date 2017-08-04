@@ -1,26 +1,38 @@
-div(ng-keydown="vm.keyAction($event)", ng-keyup="vm.keyAction($event)")
-	img#homeBackground(src="/public/images/viewer_background.png")
+div.homeContainer(
+	layout="column"
+	flex="100"
+	ng-keydown="vm.keyAction($event)"
+	ng-keyup="vm.keyAction($event)")
+
+	#homeLoggedOut(ng-show="!vm.state.changing")
+		
 	viewer(
+		hide-xs
+		hide-sm
 		node="node"
 		account="vm.state.account"
 		model="vm.state.model"
 		branch="vm.state.revision"
 		revision = "vm.state.revision"
 		style="pointer-events:none")
-		
-	#legalLinks(layout="row")
+
+	div.homeHolder(
+		layout="column"
+		layout-fill
+		ng-if="!vm.state.changing && !vm.goToUserPage")
+
+		div.homeTopBar
+		#homeLogo(style="pointer-events:{{vm.pointerEvents}}")
+			img(src="/public/images/3drepo-logo-white.png", ng-click="vm.home()")
+
+		account-dir(
+			flex="100"
+			layout="column"
+			account='vm.state.account'
+			state='vm.state'
+			query='vm.query'
+			ng-if="vm.sendLoginRequest()"
+			keys-down="vm.keysDown")
+
+	#legalLinks()
 		a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{display.page}}") {{display.title}}
-
-	#homeLogo(style="pointer-events:{{vm.pointerEvents}}")
-		img(src="/public/images/3drepo-logo-white.png", ng-click="vm.home()")
-
-	#homeLoggedOut(ng-show="!vm.state.changing")
-
-	div(ng-if="!vm.state.changing")
-		div(ng-if="!vm.goToUserPage")
-			account-dir(
-				account='vm.state.account'
-				state='vm.state'
-				query='vm.query'
-				ng-if="vm.sendLoginRequest()"
-				keys-down="vm.keysDown")

@@ -65,7 +65,7 @@
 								
 										account-model(
 											account="account.name"
-											is-account-admin="account.isAdmin"
+											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
 											model="model"
 											user-account="vm.account"
@@ -137,7 +137,7 @@
 
 										account-model(
 											account="account.name"
-											is-account-admin="account.isAdmin"
+											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
 											model="model"
 											user-account="vm.account"
