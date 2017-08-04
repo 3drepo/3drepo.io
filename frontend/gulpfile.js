@@ -93,8 +93,15 @@ gulp.task('service-workers', function(callback) {
   var serviceWorkerName = "precache";
 
   swPrecache.write(`${rootDir}/service-workers/${serviceWorkerName}.js`, {
-    staticFileGlobs: [rootDir + '/**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}'],
-    stripPrefix: rootDir
+    staticFileGlobs: [
+      rootDir + 'dist/**/*.{js,css}',
+      rootDir + 'fonts/**/*.{svg,eot,ttf,woff,woff2}',
+      rootDir + 'icons/**/*.{svg}',
+      rootDir + 'images/**/*.{png,jpg}',
+      rootDir + 'unity/**/*.{js,html,data,mem,css,png,jpg}',
+    ],
+    stripPrexi: rootDir,
+    replacePrefix: "/public/"
   }, callback);
 
 });
