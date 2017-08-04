@@ -86,8 +86,18 @@ gulp.task('manifest-icons', function() {
     .pipe(gulp.dest('./../public/manifest-icons/'));
 });
 
+gulp.task('service-workers', function(callback) {
 
+  var swPrecache = require('sw-precache');
+  var rootDir = '../public/';
+  var serviceWorkerName = "precache";
 
+  swPrecache.write(`${rootDir}/service-workers/${serviceWorkerName}.js`, {
+    staticFileGlobs: [rootDir + '/**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}'],
+    stripPrefix: rootDir
+  }, callback);
+
+});
 
 // JavaScript
 // We have one dev task and one production task because the time taken to do 
@@ -151,9 +161,12 @@ gulp.task('watch', function() {
   gulp.watch(allImages, ['images']);
   gulp.watch("./manifest.json", ['manifest-file']);
   gulp.watch("./manifest-icons/**.png", ['manifest-icons']);
+  gulp.watch("./service-workers/**.js", ['service-workers'])
 });
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
-gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file']);
+gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file'], function () {
+  gulp.start('service-workers');
+});
 

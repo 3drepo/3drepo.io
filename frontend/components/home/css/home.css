@@ -132,7 +132,7 @@ home #legalLinks {
     user-select: none;
     z-index: 2;
     color: white;
-    background: rgba(203, 202, 200, 0.05);
+    background: rgba(203, 202, 200, 0.09);
     border-top-left-radius: 4px;
     padding-bottom: 2px;
 }
@@ -146,7 +146,7 @@ home #legalLinks {
 }
     
 home #legalLinks a {
-    font-size: 13px;
+    font-size: 14px;
     color: white;
     margin: 10px 10px 5px;
     opacity: 1;

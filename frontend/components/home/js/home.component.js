@@ -32,9 +32,9 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location"];
+	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location", "SWService"];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location) {
+	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location, SWService) {
 		var vm = this,
 			homeLoggedOut,
 			func, i,
@@ -51,6 +51,8 @@
 				removeTrailingSlash();
 			}
 
+			SWService.init();
+			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
