@@ -33,7 +33,10 @@
 		
 			console.log("ServiceWorker in navigator");
 			window.addEventListener("load", function() {
-				var swPath = path + sw;
+
+				var swPath = path + sw + ".js";
+				console.log("ServiceWorker path: ", swPath);
+
 				navigator.serviceWorker.register(swPath).then(function(registration) {
 					// Registration was successful
 					console.log("ServiceWorker (" + sw + ") registration successful with scope: ", registration.scope);
