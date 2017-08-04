@@ -90,6 +90,7 @@
 				{
 					console.log(this.user.customData);
 					const currPermission = this.findByUser(user);
+					console.log(currPermission);
 
 					if(currPermission){
 						currPermission.permissions = permission.permissions;
