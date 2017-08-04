@@ -5,8 +5,8 @@
   "background_color": "#0c2f54",
   "display": "fullscreen",
   "orientation": "portrait",
-  "Scope": "/",
-  "start_url": "/",
+  "Scope": "../",
+  "start_url": "../",
   "icons": [
     {
       "src": "manifest-icons/icon-72x72.png",
