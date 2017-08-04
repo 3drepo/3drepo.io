@@ -88,13 +88,14 @@
 				}
 				else
 				{
-					console.log(this.user.customData);
 					const currPermission = this.findByUser(user);
 					console.log(currPermission);
 
 					if(currPermission){
+						console.log("valid permissions, overwriting");
 						currPermission.permissions = permission.permissions;
 					} else {
+						console.log("currPermission is null...", currPermission);
 						return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
 					}
 					return this.user.save().then(() => permission);
