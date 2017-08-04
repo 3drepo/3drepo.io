@@ -172,7 +172,7 @@
 			res.sendFile(path.resolve(publicDir + "/manifest.json"));
 		});
 
-		app.get("/precache.json", function (req, res) {
+		app.get("/precache.js", function (req, res) {
 			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
 		});
 
