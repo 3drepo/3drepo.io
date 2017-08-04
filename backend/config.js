@@ -266,8 +266,8 @@
 
 	//default auth settings
 	config.auth = coalesce(config.auth, {});
-	config.auth.captcha = coalesce(config.auth.captcha, null);
-	config.auth.register = coalesce(config.auth.register, {});
+	config.auth.captcha = coalesce(config.auth.captcha, false);
+	config.auth.register = coalesce(config.auth.register,true);
 
 	//paypal
 	config.paypal = coalesce(config.paypal, {});
