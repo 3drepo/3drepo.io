@@ -125,7 +125,10 @@
 			params.config_js += "\nserver_config.return_path = '/';";
 			params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
 			params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
-			params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
+			if(config.captcha)
+			{
+				params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
+			}
 			params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
 			params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
 			params.config_js += "\n\nserver_config.euCountriesCode = " + JSON.stringify(addressMeta.euCountriesCode) + ";";
