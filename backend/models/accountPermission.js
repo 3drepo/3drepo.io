@@ -81,7 +81,7 @@
 		update(user, permission){
 			console.log("update function");
 			return this._check(user, permission).then(() => {
-				console.log("checked.", permissions.permissions);
+				console.log("checked.", permission.permissions);
 				if(permission && permission.permissions.length === 0)
 				{
 					//this is actually a remove
