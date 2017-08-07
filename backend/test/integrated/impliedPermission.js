@@ -358,8 +358,12 @@ describe('Implied permission::', function () {
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
-				expect(err).to.not.exist;
+				console.log("res" , res);
+				console.log("err" , err);
 
+				expect(err).to.not.exist;
+				
+				console.log("expect ts: ", sharedTeamspace, "expect project: " , project2, "expect model: " , modelId);
 				const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
 				expect(teamspace).to.exist;
 				expect(teamspace.permissions).to.deep.equal([]);
