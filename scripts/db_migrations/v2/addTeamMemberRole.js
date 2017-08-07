@@ -25,7 +25,8 @@ adminDB.adminCommand({listDatabases:1}).databases.forEach(function(database){
 				if(sub.assignedUser && sub.assignedUser != user.user)
 				{					
 					print("\t"+ sub.assignedUser);
-					adminDB.grantRolesToUser(sub.assignedUser, [{role:"team_member", db: database.name}]);
+					if(adminDB.getCollection('system.users').findOne({user: sub.assignedUser}) != null)
+						adminDB.grantRolesToUser(sub.assignedUser, [{role:"team_member", db: database.name}]);
 				}
 			});
 		});
