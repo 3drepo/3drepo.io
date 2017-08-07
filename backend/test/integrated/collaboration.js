@@ -167,6 +167,7 @@ describe('Sharing/Unsharing a model', function () {
 					agent.get(`/${username_viewer}.json`)
 					.expect(200, function(err, res){
 						console.log(res.body);
+						console.log("on account: ", username, " there should be a shared model ", model);
 						console.log("expecting " + model + " in outmost level");
 						expect(res.body).to.have.property('accounts').that.is.an('array');
 						const account = res.body.accounts.find( a => a.account === username);
