@@ -79,7 +79,7 @@
 		},
 
 		update(user, permission){
-
+			console.log("update function");
 			return this._check(user, permission).then(() => {
 				if(permission.permissions.length === 0)
 				{
