@@ -107,7 +107,8 @@
 		},
 
 		remove(user){
-
+			console.log("removing user", perm);
+			console.log(permissions);
 			let index = -1;
 			
 			this.permissions.find((perm, i) => {
