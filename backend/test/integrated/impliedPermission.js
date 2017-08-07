@@ -358,7 +358,10 @@ describe('Implied permission::', function () {
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
-				console.log("res" , res);
+				res.body.accounts.forEach(function(account) {
+					console.log(account);
+				});
+
 				console.log("err" , err);
 
 				expect(err).to.not.exist;
