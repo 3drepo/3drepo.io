@@ -85,6 +85,7 @@
 				if(permission && permission.permissions.length === 0)
 				{
 					//this is actually a remove
+					console.log("permissions length is 0");
 					return this.remove(permission.user);
 				}
 				else

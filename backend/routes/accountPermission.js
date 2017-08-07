@@ -86,6 +86,7 @@
 		User.findByUserName(req.params.account).then(user => {
 			console.log("Going through username");
 			console.log(user);
+			console.log(req.body);
 			return user.customData.permissions.update(req.params.user, req.body);
 
 		}).then(permission => {
