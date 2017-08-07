@@ -7,6 +7,12 @@ login {
   margin-top: 120px;
 }
 
+@media (max-width: 960px) {
+  login {
+    margin-top: 10vh;
+  }
+}
+
 login .loginButton {
   width: 100% !important;
 }

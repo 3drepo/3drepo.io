@@ -47,6 +47,7 @@ account-dir #account #accountItem userContent {
   account-dir #account #accountItem {
     margin-left: 5%;
     margin-bottom: 100px;
+    margin-top: 200px;
   }
 }
 

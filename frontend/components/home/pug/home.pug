@@ -7,6 +7,7 @@ div.homeContainer(
 	#homeLoggedOut(ng-show="!vm.state.changing")
 		
 	viewer(
+		ng-if="!vm.isMobileDevice"
 		hide-xs
 		hide-sm
 		node="node"
@@ -34,5 +35,8 @@ div.homeContainer(
 			ng-if="vm.sendLoginRequest()"
 			keys-down="vm.keysDown")
 
-	#legalLinks()
-		a(ng-repeat="display in vm.legalDisplays", target="_blank", href="{{display.page}}") {{display.title}}
+	#legalLinks
+		a(
+			ng-repeat="display in vm.legalDisplays"
+			target="_blank"
+			href="{{display.page}}") {{display.title}}

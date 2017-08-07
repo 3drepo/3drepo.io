@@ -32,9 +32,9 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location", "SWService"];
+	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location", "SWService", "AnalyticService"];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location, SWService) {
+	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location, SWService, AnalyticService) {
 		var vm = this,
 			homeLoggedOut,
 			func, i,
@@ -51,6 +51,7 @@
 				removeTrailingSlash();
 			}
 
+			AnalyticService.init();
 			SWService.init();
 			
 			vm.state = StateManager.state;
@@ -60,6 +61,8 @@
 			vm.goToAccount = false;
 			vm.goToUserPage = false;
 			vm.keysDown = [];
+
+			vm.isMobileFlag = true;
 
 			vm.legalDisplays = [];
 			if (angular.isDefined(serverConfig.legal)) {
@@ -102,11 +105,48 @@
 					
 				}, true);
 
+
+				console.log("Checking is mobile...")
+				vm.isMobileFlag = vm.isMobile();
+
+
 			});
 
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
 				AuthService.login(vm.account, vm.password);
 			}
+
+		};
+
+		vm.isMobile = function() {
+
+			var mobile = screen.width <= 768;
+
+			if (mobile) {
+				vm.handleMobile();
+			}
+
+			console.log("Is mobile? ", mobile);
+			return mobile;
+
+		};
+
+		vm.handleMobile = function() {
+
+			var message = "We have detected you are on a " +
+			"mobile device and will show the 3D Repo lite experience for " +
+			"smoother performance.";
+
+			$mdDialog.show(
+
+				$mdDialog.confirm()
+					.clickOutsideToClose(true)
+					.title("3D Repo Lite")
+					.textContent(message)
+					.ariaLabel("3D Repo Lite Dialog")
+					.ok("OK")
+					
+			);
 
 		};
 

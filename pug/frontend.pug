@@ -21,13 +21,23 @@ html(lang="en")
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
+		// Setup Sever variables for use in the client
 		script.
+
 			SERVER_VARS = {
 				structure: !{structure},
 				parentStateJSON: !{parentStateJSON},
-				uiState: !{uistate}
+				uiState: !{uistate},
 			}
 
+		if (userId)
+			script.
+				SERVER_VARS.userId = userId
+
+		if (gaTrackId) 
+			script.
+				SERVER_VARS.userId = userId
+	
 		// Load NPM dependencies and 3D Repo JavaScript
 		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
 
@@ -120,23 +130,7 @@ html(lang="en")
 	// ReCapthca
 	script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
 
-	if !development
-		// If not in development load Google Analytics
-		if gaTrackId
-			script.
-				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-		if gaTrackId && userId
-			script.
-				ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
-		else
-			script.
-				ga('create', '!{gaTrackId}', 'auto');
-	
-	else 
+	if development
 		// Else load LiveReload
 		script(src="//localhost:35729/livereload.js", async)
 

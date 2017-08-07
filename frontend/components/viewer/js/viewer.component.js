@@ -58,7 +58,7 @@
 				eventCallback, 
 				errCallback
 			);
-
+			
 			vm.viewer.preInit();
 
 		};
@@ -87,8 +87,7 @@
 				.catch(function(error){
 					console.error("Error creating Viewer Directive: ", error);
 				});
-			
-
+		
 		};
 
 		function fetchModelProperties(account, model, branch, revision) {

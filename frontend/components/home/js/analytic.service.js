@@ -16,7 +16,7 @@
  */
 
 angular.module("3drepo")
-	.factory("AnalyticService", AnalyticService);
+	.service("AnalyticService", AnalyticService);
 
 AnalyticService.$inject = [];
 
@@ -24,6 +24,7 @@ function AnalyticService(){
 	"use strict";
 
 	var service = {
+		init : init,
 		sendPageView: sendPageView,
 		sendEvent: sendEvent,
 		setUserId: setUserId
@@ -33,6 +34,28 @@ function AnalyticService(){
 
 	////////////
 
+	// If not in development load Google Analytics
+
+	function init() {
+
+		if (SERVER_VARS && SERVER_VARS.gaTrackId) {
+
+			console.log("Initialising GA...");
+
+			(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
+
+			if (SERVER_VARS.userId) {
+				ga("create", SERVER_VARS.gaTrackId, "auto", { userId: SERVER_VARS.userId });
+			} else {
+				ga("create", SERVER_VARS.gaTrackId, "auto");
+			}
+
+		}
+
+	}
 	
 	function isGoogleAnalyticEnabled(){
 		return typeof ga !== "undefined" && ga !== null;

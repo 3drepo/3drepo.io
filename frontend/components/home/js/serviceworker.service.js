@@ -21,6 +21,7 @@
 
 				var serviceWorkers = [
 					"precache"
+					//"google-analytics"
 				];
 
 				
