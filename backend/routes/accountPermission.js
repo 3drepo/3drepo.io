@@ -84,7 +84,8 @@
 	function updatePermission(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-
+			console.log("Going through username");
+			console.log(user);
 			return user.customData.permissions.update(req.params.user, req.body);
 
 		}).then(permission => {
