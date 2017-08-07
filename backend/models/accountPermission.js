@@ -86,7 +86,7 @@
 				{
 					//this is actually a remove
 					console.log("permissions length is 0");
-					return this.remove(permission.user);
+					return this.remove(user);
 				}
 				else
 				{
@@ -107,7 +107,7 @@
 		},
 
 		remove(user){
-			console.log("removing user");
+			console.log("removing user", user);
 			console.log(this.permissions);
 			let index = -1;
 			
