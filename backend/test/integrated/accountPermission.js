@@ -172,6 +172,8 @@ describe('Account permission::', function () {
 					callback(err);
 				});
 			}
+		], (err, res) => done(err));
+
 	});
 
 

@@ -79,26 +79,20 @@
 		},
 
 		update(user, permission){
-			console.log("update function");
 			return this._check(user, permission).then(() => {
-				console.log("checked.", permission.permissions);
 				if(permission && permission.permissions.length === 0)
 				{
 					//this is actually a remove
-					console.log("permissions length is 0");
 					return this.remove(user);
 				}
 				else
 				{
 					const currPermission = this.findByUser(user);
-					console.log(currPermission);
 
 					if(currPermission){
-						console.log("valid permissions, overwriting");
 						currPermission.permissions = permission.permissions;
 						return this.user.save().then(() => permission);
 					} else {
-						console.log("currPermission is null...", currPermission);
 						return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
 					}
 				}
@@ -107,8 +101,6 @@
 		},
 
 		remove(user){
-			console.log("removing user", user);
-			console.log(this.permissions);
 			let index = -1;
 			
 			this.permissions.find((perm, i) => {

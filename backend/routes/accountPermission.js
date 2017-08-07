@@ -84,16 +84,11 @@
 	function updatePermission(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-			console.log("Going through username");
-			console.log(user);
-			console.log(req.params.user, req.body);
 			return user.customData.permissions.update(req.params.user, req.body);
 
 		}).then(permission => {
-			console.log("permissions", permission, " Responding ok");
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 		}).catch(err => {
-			console.log("Error", err);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
