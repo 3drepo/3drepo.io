@@ -107,7 +107,7 @@
 		},
 
 		remove(user){
-			console.log("removing user", perm);
+			console.log("removing user");
 			console.log(permissions);
 			let index = -1;
 			
