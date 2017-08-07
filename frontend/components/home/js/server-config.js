@@ -15,7 +15,63 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module("3drepo")
-	.constant("serverConfig", server_config);
+(function () {
+	"use strict";
 
 
+	angular.module("3drepo")
+		.service("serverConfig", serverConfig);
+
+
+	function serverConfig() {
+
+		server_config = server_config || {};
+
+		server_config.api_algorithm = createRoundRobinAlgorithm();
+		server_config.apiUrls = server_config.api_algorithm.apiUrls;
+		server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm);
+
+		var C = server_config.C;
+
+		server_config.GET_API = C.GET_API;
+		server_config.POST_API = (server_config.apiUrls[C.POST_API]) ? C.POST_API : server_config.GET_API;
+		server_config.MAP_API = (server_config.apiUrls[C.MAP_API]) ? C.MAP_API : server_config.GET_API;
+
+
+		return server_config;
+
+		/*******************************************************************************
+		 * Round robin API configuration
+		 * @param {Object} variable - variable to coalesce
+		 * @param {Object} value - value to return if object is null or undefined
+		 *******************************************************************************/
+		function createRoundRobinAlgorithm() {
+
+			var roundRobin = {
+				apiUrls : server_config.apiUrls,
+				apiUrlCounter: {}
+			};
+
+			for (var k in server_config.apiUrls) {
+				if(server_config.apiUrls.hasOwnProperty(k)){
+					roundRobin.apiUrlCounter[k] = 0;
+				}
+			}
+			
+			// self variable will be filled in by frontend
+			roundRobin.apiUrl = function(type, path) {
+				var typeFunctions = this.apiUrls[type];
+				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+
+				this.apiUrlCounter[type] += 1;
+
+				return this.apiUrls[type][functionIndex](path);
+			};
+
+			return roundRobin;
+
+		}
+
+	}
+
+})();

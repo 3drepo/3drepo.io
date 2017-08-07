@@ -38,54 +38,36 @@
 		}
 	};
 
-	/*******************************************************************************
-	 * Round robin API configuration
-	 * @param {Object} variable - variable to coalesce
-	 * @param {Object} value - value to return if object is null or undefined
-	 *******************************************************************************/
-	let createRoundRobinAlgorithm = function()
-	{
-			let roundRobin = {
-				apiUrls : config.apiUrls,
-				apiUrlCounter: {}
-			};
+	// /*******************************************************************************
+	//  * Round robin API configuration
+	//  * @param {Object} variable - variable to coalesce
+	//  * @param {Object} value - value to return if object is null or undefined
+	//  *******************************************************************************/
+	// let createRoundRobinAlgorithm = function()
+	// {
+	// 		let roundRobin = {
+	// 			apiUrls : config.apiUrls,
+	// 			apiUrlCounter: {}
+	// 		};
 
-			/*
-			params.config_js += "server_config.apiUrls = {";
+	// 		for (let k in config.apiUrls) {
+	// 			if(config.apiUrls.hasOwnProperty(k)){
+	// 				roundRobin.apiUrlCounter[k] = 0;
+	// 			}
+	// 		}
+			
+	// 		// self variable will be filled in by frontend
+	// 		roundRobin.apiUrl = function(type, path) {
+	// 			var typeFunctions = this.apiUrls[type];
+	// 			var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
-			for (let k in config.apiUrls) {
-				if (config.apiUrls.hasOwnProperty(k)) {
-					params.config_js += "\"" + k + "\" : [";
-					params.config_js += config.apiUrls[k].join(",");
-					params.config_js += "],";
-				}
-			}
+	// 			this.apiUrlCounter[type] += 1;
 
-			params.config_js += "};\n";
+	// 			return this.apiUrls[type][functionIndex](path);
+	// 		};
 
-			params.config_js += "server_config.apiUrlCounter = {";
-			*/
-
-			for (let k in config.apiUrls) {
-				if(config.apiUrls.hasOwnProperty(k)){
-					roundRobin.apiUrlCounter[k] = 0;
-				}
-			}
-
-			//params.config_js += "};\n";
-
-			// self variable will be filled in by frontend
-			roundRobin.apiUrl = function(type, path) {
-				var typeFunctions = this.apiUrls[type];
-				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-				this.apiUrlCounter[type] += 1;
-
-				return this.apiUrls[type][functionIndex](path);
-			};
-
-			return roundRobin;
-	};
+	// 		return roundRobin;
+	// };
 
 	/*******************************************************************************
 	 * Fill in the details of a server
@@ -210,7 +192,7 @@
 	}
 
 	// Change the algorithm for choosing an API server
-	config.apiAlgorithm = createRoundRobinAlgorithm();
+	//config.apiAlgorithm = createRoundRobinAlgorithm();
 
 	config.disableCache = coalesce(config.disableCache, false);
 

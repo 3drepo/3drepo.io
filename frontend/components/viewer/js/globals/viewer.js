@@ -135,6 +135,9 @@ var Viewer = {};
 		};
 
 		this.init = function(options) {
+
+			
+
 			return new Promise(function(resolve, reject) {
 
 				if (self.initialized) {
@@ -185,7 +188,8 @@ var Viewer = {};
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				UnityUtil.errorCallback = self.handleError;
 
-				UnityUtil.setAPIHost(server_config.apiUrl(server_config.GET_API, "")); 
+				//server_config.apiUrl(server_config.GET_API, "")
+				UnityUtil.setAPIHost(options.getAPI); 
 				self.setNavMode(self.defaultNavMode);
 
 				UnityUtil.onReady().then(function() {

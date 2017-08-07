@@ -118,6 +118,7 @@
 
 		};
 
+
 		vm.isMobile = function() {
 
 			var mobile = screen.width <= 768;

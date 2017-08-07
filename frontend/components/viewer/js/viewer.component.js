@@ -79,7 +79,8 @@
 
 			var showAll = true;
 			vm.viewer.init({
-				showAll : showAll
+				showAll : showAll,
+				getAPI: serverConfig.apiUrl(serverConfig.GET_API, "")
 			})
 				.then(function(){
 		

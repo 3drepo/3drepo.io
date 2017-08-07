@@ -44,6 +44,10 @@
 		const _ = require('lodash');
 		const C = require('../constants');
 		const path = require('path');
+		const DEFAULT_PLUGIN_STRUCTURE = require('../plugin/plugin-structure.js').DEFAULT_PLUGIN_STRUCTURE;
+		const serialize = require('serialize-javascript');
+
+		console.log(DEFAULT_PLUGIN_STRUCTURE)
 
 		let app = express();
 
@@ -86,157 +90,6 @@
 
 			return objString;
 		};
-
-		app.get("/public/plugins/base/config.js", function (req, res) {
-			let params = {};
-
-			params.config_js = "var server_config = {};\n";
-
-			params.config_js += "server_config.api_algorithm = (function () {'use strict'; var self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
-
-			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
-			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm);\n";
-
-			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\";\n";
-			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
-			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
-
-			if ("wayfinder" in config) {
-				// TODO: Make a public section in config for vars to be revealed
-				params.config_js += "\nserver_config.democompany = '" + config.wayfinder.democompany + "';";
-				params.config_js += "\nserver_config.demoproject = '" + config.wayfinder.demoproject + "';";
-			}
-
-			if (config.chat_server) {
-				params.config_js += "\nserver_config.chatHost	= '" + config.chat_server.chat_host + "';";
-				params.config_js += "\nserver_config.chatPath	= '" + '/' + config.chat_server.subdirectory + "';";
-			}
-
-			params.config_js += "\nserver_config.chatReconnectionAttempts = " + config.chat_reconnection_attempts + ";";
-
-			params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
-
-			if (serverConfig.backgroundImage) {
-				params.config_js += "\nserver_config.backgroundImage = '" + serverConfig.backgroundImage + "'";
-			}
-
-			params.config_js += "\nwindow.hostAlias = {};\n";
-			params.config_js += "\nwindow.hostAlias[\"3drepo_api\"] = function(path) { return server_config.apiUrl(server_config.GET_API, path); }\n";
-
-			params.config_js += "\nserver_config.return_path = '/';";
-			params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
-			params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
-			params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
-			params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
-			params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
-			params.config_js += "\n\nserver_config.euCountriesCode = " + JSON.stringify(addressMeta.euCountriesCode) + ";";
-			params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
-			params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
-			params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";
-			params.config_js += "\n\nserver_config.tagRegExp = " + History.tagRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.modelNameRegExp = " + ModelHelper.modelNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.fileNameRegExp = " + ModelHelper.fileNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ModelHelper.acceptedFormat) + ";";
-			params.config_js += "\n\nserver_config.login_check_interval = " + config.login_check_interval + ";";
-
-			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
-			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({
-				'PERM_DELETE_MODEL': C.PERM_DELETE_MODEL,
-				'PERM_CHANGE_MODEL_SETTINGS': C.PERM_CHANGE_MODEL_SETTINGS,
-				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
-				'PERM_UPLOAD_FILES': C.PERM_UPLOAD_FILES,
-				'PERM_CREATE_ISSUE': C.PERM_CREATE_ISSUE,
-				'PERM_COMMENT_ISSUE': C.PERM_COMMENT_ISSUE,
-				'PERM_VIEW_ISSUE': C.PERM_VIEW_ISSUE,
-				'PERM_DOWNLOAD_MODEL': C.PERM_DOWNLOAD_MODEL,
-				'PERM_VIEW_MODEL': C.PERM_VIEW_MODEL,
-				'PERM_CREATE_MODEL': C.PERM_CREATE_MODEL,
-				'PERM_EDIT_FEDERATION': C.PERM_EDIT_FEDERATION
-			}) + ";";
-
-			params.config_js += '\n\nserver_config.impliedPermission = ' + JSON.stringify(C.IMPLIED_PERM) + ';';
-
-			res.header("Content-Type", "text/javascript");
-			res.render("config.pug", params);
-		});
-
-		const publicDir = __dirname + "/../../public";
-		app.use("/public", express.static(publicDir));
-		app.get("/public/*", function (req, res) {
-			res.status(404).send('File not found');
-		});
-		
-		// TODO: This is a horrible hack, we should move to a static file server :/
-		app.get("/manifest.json", function (req, res) {
-			res.sendFile(path.resolve(publicDir + "/manifest.json"));
-		});
-
-		app.get("/precache.js", function (req, res) {
-			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
-		});
-
-		let DEFAULT_PLUGIN_STRUCTURE = {
-			"plugin": "home",
-			"friends": [
-				"login"
-			],
-			"functions": [
-				"register-request",
-				"register-verify",
-				"password-forgot",
-				"password-change",
-				"pricing",
-				"sign-up",
-				"contact",
-				"payment",
-				"billing"
-			],
-			"children": [{
-				"plugin": "account",
-				"url": ":account",
-				"children": [{
-					"plugin": "model",
-					"url": "/:model/:revision",
-					"params": {
-						"revision": {
-							value: null,
-							squash: true
-						},
-						"noSet":{
-							value: false
-						}
-					},
-					"children":[{
-						"plugin": "issue",
-						"url": "/issues/:issue"
-					}],
-					"friends": [
-						"panel",
-						"filter",
-						"tree",
-						"viewpoints",
-						"issues",
-						"clip",
-						"bottom-buttons",
-						"docs",
-						"utils",
-						"groups",
-						"measure",
-						"right-panel",
-						"building",
-						"revisions"
-					]
-				}]
-			}]
-		};
-
-		// Set up the legal plugins
-		if (config.hasOwnProperty("legal")) {
-			for (let i = 0; i < config.legal.length; i += 1) {
-				DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
-			}
-		}
 
 		// TODO: Replace with user based plugin selection
 		let pluginStructure = {};
@@ -333,37 +186,147 @@
 			setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 		}
 
-		app.get("*", function (req, res) {
-			// Generate the list of files to load for the plugins
-			
-			let params = {
-				"pluginLoaded": [],
-				"pluginPug": [],
-				"pluginJS": [],
-				"pluginAngular": {},
-				"parentStateJSON": {},
-				"ui": {},
-				"uistate": {},
-				"pluginCSS": [],
-				"renderMe": pug.renderFile,
-				"structure": JSON.stringify(pluginStructure),
-				"frontendPug": [],
-				"gaTrackId": config.gaTrackId,
-				"development" : config.development,
-				"googleConversionId": config.googleConversionId,
-				"userId": _.get(req, 'session.user.username')
-			};
+		app.get("/config.js", function (req, res) {
+			let params = {};
 
-			params.parentStateJSON = JSON.stringify(params.parentStateJSON);
-			params.uistate = JSON.stringify(params.uistate);
+			var server_config = {};
 
-			// Set up the legal plugins
-			params.legalTemplates = [];
-			if (config.hasOwnProperty("legal")) {
-				params.legalTemplates = config.legal;
+			//server_config.api_algorithm = config.apiAlgorithm;
+			//server_config.apiUrls = server_config.api_algorithm.apiUrls;
+			//server_config.apiUrl = server_config.api_algorithm.apiUrl; //.bind(server_config.api_algorithm);
+
+			server_config.apiUrls = config.apiUrls;
+
+			server_config.C = {
+				GET_API : C.GET_API,
+				POST_API : C.POST_API,
+				MAP_API : C.MAP_API
 			}
 
-			setupPug(params);
+			// server_config.GET_API = C.GET_API;
+			// server_config.POST_API = (C.POST_API in server_config.apiUrls) ? C.POST_API : server_config.GET_API;
+			// server_config.MAP_API = (C.MAP_API  in server_config.apiUrls) ? C.MAP_API : server_config.GET_API;
+
+			if ("wayfinder" in config) {
+				// TODO: Make a public section in config for vars to be revealed
+				server_config.democompany = config.wayfinder.democompany;
+				server_config.demoproject = config.wayfinder.demoproject;
+			}
+
+			if (config.chat_server) {
+				server_config.chatHost	= config.chat_server.chat_host;
+				server_config.chatPath	= config.chat_server.subdirectory;
+			}
+
+			server_config.chatReconnectionAttempts = config.chat_reconnection_attempts;
+
+			server_config.apiVersion = config.version;
+
+			if (serverConfig.backgroundImage) {
+				server_config.backgroundImage = serverConfig.backgroundImage;
+			}
+
+			server_config.return_path = '/';
+
+			server_config.auth =  config.auth;
+			server_config.captcha_client_key = config.captcha.clientKey;
+
+			server_config.uploadSizeLimit = config.uploadSizeLimit;
+			server_config.countries = addressMeta.countries;
+			server_config.euCountriesCode = addressMeta.euCountriesCode;
+			server_config.usStates = addressMeta.usStates;
+			server_config.units = units;
+			server_config.legal = config.legal;
+			server_config.tagRegExp = History.tagRegExp.toString();
+			server_config.modelNameRegExp = ModelHelper.modelNameRegExp.toString();
+			server_config.fileNameRegExp = ModelHelper.fileNameRegExp.toString();
+			server_config.usernameRegExp = User.usernameRegExp.toString();
+			server_config.acceptedFormat = ModelHelper.acceptedFormat;
+			server_config.login_check_interval = config.login_check_interval;
+
+			server_config.responseCodes = _.each(responseCodes.codesMap);
+
+			server_config.permissions = {
+				'PERM_DELETE_MODEL': C.PERM_DELETE_MODEL,
+				'PERM_CHANGE_MODEL_SETTINGS': C.PERM_CHANGE_MODEL_SETTINGS,
+				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
+				'PERM_UPLOAD_FILES': C.PERM_UPLOAD_FILES,
+				'PERM_CREATE_ISSUE': C.PERM_CREATE_ISSUE,
+				'PERM_COMMENT_ISSUE': C.PERM_COMMENT_ISSUE,
+				'PERM_VIEW_ISSUE': C.PERM_VIEW_ISSUE,
+				'PERM_DOWNLOAD_MODEL': C.PERM_DOWNLOAD_MODEL,
+				'PERM_VIEW_MODEL': C.PERM_VIEW_MODEL,
+				'PERM_CREATE_MODEL': C.PERM_CREATE_MODEL,
+				'PERM_EDIT_FEDERATION': C.PERM_EDIT_FEDERATION
+			};
+
+			server_config.impliedPermission = C.IMPLIED_PERM;
+
+			// TODO: This used to be a long string concat, 
+			// this is marginally better but still a complete hack. 
+			// There is definitely a better way to do this
+			const serializedConfig = serialize(server_config); 
+
+			res.header("Content-Type", "text/javascript");
+			res.render("config.pug", {config: serializedConfig });
+		});
+
+
+
+		// Set up the legal plugins
+		if (config.hasOwnProperty("legal")) {
+			for (let i = 0; i < config.legal.length; i += 1) {
+				DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
+			}
+		}
+
+		const publicDir = __dirname + "/../../public";
+		app.use("/public", express.static(publicDir));
+		app.get("/public/*", function (req, res) {
+			res.status(404).send('File not found');
+		});
+		
+		// TODO: This is a horrible hack, we should move to a static file server :/
+		app.get("/manifest.json", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/manifest.json"));
+		});
+
+		app.get("/precache.js", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
+		});
+
+
+		let params = {
+			"pluginLoaded": [],
+			"pluginPug": [],
+			"pluginJS": [],
+			"pluginAngular": {},
+			"parentStateJSON": {},
+			"ui": {},
+			"uistate": {},
+			"pluginCSS": [],
+			"renderMe": pug.renderFile,
+			"structure": JSON.stringify(pluginStructure),
+			"frontendPug": [],
+			"gaTrackId": config.gaTrackId,
+			"development" : config.development,
+			"googleConversionId": config.googleConversionId
+		};
+
+		params.parentStateJSON = JSON.stringify(params.parentStateJSON);
+		params.uistate = JSON.stringify(params.uistate);
+
+		// Set up the legal plugins
+		params.legalTemplates = [];
+		if (config.hasOwnProperty("legal")) {
+			params.legalTemplates = config.legal;
+		}
+
+		setupPug(params);
+
+		app.get("*", function (req, res) {
+			// Generate the list of files to load for the plugins
+			params.userId = _.get(req, 'session.user.username');
 			res.render(serverConfig.template, params);
 		});
 

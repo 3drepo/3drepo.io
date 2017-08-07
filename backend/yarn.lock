@@ -3334,6 +3334,10 @@ node-static@0.7.7:
     mime ">=1.2.9"
     optimist ">=0.3.4"
 
+node-stringify@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/node-stringify/-/node-stringify-0.2.0.tgz#de09e3cec49864c18e20b6a12c92e44d352904d2"
+
 node-uuid@1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/node-uuid/-/node-uuid-1.4.7.tgz#6da5a17668c4b3dd59623bda11cf7fa4c1f60a6f"
@@ -4219,6 +4223,10 @@ send@0.13.2:
 sequencify@~0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/sequencify/-/sequencify-0.0.7.tgz#90cff19d02e07027fd767f5ead3e7b95d1e7380c"
+
+serialize-javascript@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-1.4.0.tgz#7c958514db6ac2443a8abc062dc9f7886a7f6005"
 
 serve-favicon@2.3.0:
   version "2.3.0"
