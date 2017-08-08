@@ -1,10 +1,16 @@
 /** Account ***********************************************************************************************************/
+account-dir {
+  overflow-y: auto;
+  padding-top: 30px;
+}
+
 account-dir #account {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
   background-size: contain;
+}
+
+account-dir #accountHolder {
+  width: 100%;
+  position: relative;
 }
 
 account-dir #logo {
@@ -29,7 +35,19 @@ account-dir .dataContainer {
 }
 
 account-dir #account #accountItem {
-  width: 47%;
+   margin-right: 5%;
+}
+
+account-dir #account #accountItem userContent {
+  max-height: 660px;
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  account-dir #account #accountItem {
+    margin-left: 5%;
+    margin-bottom: 100px;
+  }
 }
 
 account-dir .userContent .cardInfo {
@@ -37,6 +55,7 @@ account-dir .userContent .cardInfo {
 }
 
 /** Account Models **************************************************************************************************/
+
 account-items .md-button {
   z-index: 1 !important;
 }
@@ -161,6 +180,8 @@ account-items .modelRight .modelUploaded {
 
 account-items .userContent {
   padding: 0 !important;
+  max-height: 585px;
+  overflow: auto;
 }
 
 account-items .accountModelsSharedIcon {
@@ -187,16 +208,33 @@ account-profile md-divider {
 
 /** Account Info ******************************************************************************************************/
 account-info {
-  margin-left: 70px;
-  width: 400px;
-  margin-right: 60px;
+   margin-left: 5%; 
+   /* min-width: 100%;  */
+   margin-right: 5%; 
+}
+
+@media (max-width: 960px) {
+  
+  account-info #account #accountItem {
+    min-height: 700px;
+  }
+
+  account-info #accountInfoContent {
+     max-height: 100% !important;
+  }
+
+  account-info {
+    margin-bottom: 100px;
+  }
+  
 }
 
 account-info #accountInfoContent {
   max-height: calc(100vh - 190px);
 }
+
 account-info #accountInfoContent md-list {
-  overflow-y: auto;
+  overflow-y: auto !important;
 }
 
 account-info .dataContainer {
@@ -233,7 +271,8 @@ account-info .accountInfoPage .md-button {
 
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
-  height:150px;
+  max-width: 300px;
+  max-height: 150px;
   background: #E8EAF6;
   margin: auto;
   margin-top: 20px;
@@ -248,10 +287,10 @@ account-info .accountInfoPage .md-button {
 
 /** Account Menu ******************************************************************************************************/
 account-menu {
+  z-index: 1;
   position: absolute;
   top: 0;
-  right: -5px;
-  z-index: 1;
+  right: 0;
 }
 account-menu md-icon {
   color: #FFFFFF;
@@ -331,6 +370,10 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 /** Account Billing ***************************************************************************************************/
 account-billing md-input-container {
   margin-right: 10px;
+}
+
+account-billing md-tabs md-tab-content {
+  max-height: 574px;
 }
 
 account-billing .accountBillingSave button {
@@ -457,7 +500,6 @@ account-licenses #accountLicenseMessage {
 }
 
 account-licenses #accountLicensesList {
-  max-height: 350px;
   overflow-y: auto;
 }
 
@@ -691,6 +733,10 @@ account-assign .assignTabHolder {
   padding: 20px;
 }
 
+account-assign md-tabs md-tab-content {
+  max-height: 574px;
+}
+
 account-assign .assignTabHolder .noUsers {
   text-align: center;
 }
@@ -763,8 +809,7 @@ account-assign table td, account-assign table th {
     padding: 0;
 }
 
-account-assign .checkboxes {
-  max-height: 350px;
+account-assign .checkboxes { 
   overflow-x: hidden;
 }
 

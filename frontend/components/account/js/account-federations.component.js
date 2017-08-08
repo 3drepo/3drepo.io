@@ -87,11 +87,11 @@
 						account = vm.accounts[i];
 
 						// Default / Unassigned
-						if(account.fedModels){
-							account.fedModels.forEach(function(fedModel){
-								fedModel.federationOptions = getFederationOptions(fedModel, account.account);
-							});
-						}
+						// if(account.fedModels){
+						// 	account.fedModels.forEach(function(fedModel){
+						// 		fedModel.federationOptions = getFederationOptions(fedModel, account.account);
+						// 	});
+						// }
 
 						// Assigned models to projects
 						if (account.projects) {
@@ -250,15 +250,16 @@
 							vm.projectToDeleteFrom.name, 
 							response.data.model
 						);
-					} else {
+					} 
+					// else {
 						
-						for (var j = 0; j < account.fedModels.length; j++) { 
-							if (account.fedModels[j].model === response.data.model) {
-								account.fedModels.splice(j, 1);
-								break;
-							}
-						}
-					}
+					// 	for (var j = 0; j < account.fedModels.length; j++) { 
+					// 		if (account.fedModels[j].model === response.data.model) {
+					// 			account.fedModels.splice(j, 1);
+					// 			break;
+					// 		}
+					// 	}
+					// }
 					
 					vm.addButtons = false;
 					vm.addButtonType = "add";

@@ -30,6 +30,33 @@ panel #items {
   pointer-events: inherit;
 }
 
+@media (max-width: 960px) {
+    panel #items {
+       width: 90vw !important;
+       margin-left: 5vw;
+       margin-right: 5vw;
+       left: 0;
+    }
+
+    panel {
+      width: 100%;
+    }
+
+    panel panel-card {
+      margin-top: 15vh;
+    }
+
+    panel #content {
+      height: 100% !important;
+    }
+
+    panel #panelCardContainer {
+      height: 60vh;
+    }
+
+}
+ 
+
 panel #buttons {
   position: absolute;
   top: 50px;

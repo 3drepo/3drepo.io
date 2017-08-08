@@ -52,7 +52,6 @@
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 			vm.version = serverConfig.apiVersion;
 			vm.logo = "/public/images/3drepo-logo-white.png";
-			vm.captchaKey = serverConfig.captcha_client_key;
 			vm.tcAgreed = false;
 			vm.useReCapthca = false;
 			vm.registering = false;
@@ -88,6 +87,7 @@
 			if (serverConfig.hasOwnProperty("auth")) {
 				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
 					vm.useReCapthca = true;
+					vm.captchaKey = serverConfig.captcha_client_key;
 				}
 			}
 

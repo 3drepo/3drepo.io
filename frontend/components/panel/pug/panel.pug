@@ -1,23 +1,30 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
 		div(ng-repeat="contentItem in vm.contentItems")
+
 			panel-card(
-			account="vm.account"
-			model="vm.model"
-			branch="vm.branch"
-			revision="vm.revision"
-			position="vm.position"
-			model-settings="vm.modelSettings"
-			tree-map="vm.treeMap"
-			content-data='contentItem'
-			ng-show='contentItem.show'
-			on-height-request="vm.heightRequest(contentItem, height)"
-			keys-down="vm.keysDown"
-			selected-objects="vm.selectedObjects"
-			set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
+				account="vm.account"
+				model="vm.model"
+				branch="vm.branch"
+				revision="vm.revision"
+				position="vm.position"
+				model-settings="vm.modelSettings"
+				tree-map="vm.treeMap"
+				content-data='contentItem'
+				ng-show='contentItem.show'
+				on-height-request="vm.heightRequest(contentItem, height)"
+				keys-down="vm.keysDown"
+				selected-objects="vm.selectedObjects"
+				set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 			div(ng-if="contentItem.showGap", style="display:block; height:20px;")
-	div#buttons(ng-class="{ active : vm.activate }", ng-if="vm.position==='left'")
+
+	div#buttons(
+		hide-xs
+		hide-sm
+		ng-class="{ active : vm.activate }"
+		ng-if="vm.position==='left'")
+
 		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems", layout="column", layout-align="start center")
 			md-button.md-fab.md-primary.md-mini(ng-click="vm.buttonClick(contentItem.type)", aria-label="{{contentItem.title}}")
 				md-tooltip(ng-if="contentItem.show" md-direction="right") Close

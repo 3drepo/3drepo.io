@@ -26,7 +26,8 @@
     "angular-ui-router": "0.4.2",
     "font-awesome": "^4.7.0",
     "material-design-icons": "^3.0.1",
-    "socket.io-client": "^2.0.3"
+    "socket.io-client": "^2.0.3",
+    "sw-precache": "^5.2.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

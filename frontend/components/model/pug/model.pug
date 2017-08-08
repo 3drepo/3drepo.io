@@ -32,8 +32,14 @@
 			position="right"
 			style="pointer-events:{{vm.pointerEvents}}")
 
-		right-panel(style="pointer-events:{{vm.pointerEvents}}")
-		bottom-buttons(style="pointer-events:{{vm.pointerEvents}}")
+		right-panel(
+			hide-xs
+			hide-sm
+			style="pointer-events:{{vm.pointerEvents}}")
+		bottom-buttons(
+			hide-xs
+			hide-sm
+			style="pointer-events:{{vm.pointerEvents}}")
 
 error-dialog(
 	error-message="vm.errorMessage"
