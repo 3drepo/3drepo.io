@@ -238,7 +238,10 @@
 			clientConfig.return_path = '/';
 
 			clientConfig.auth =  config.auth;
-			clientConfig.captcha_client_key = config.captcha.clientKey;
+
+			if(config.captcha && config.captcha.clientKey) {
+				clientConfig.captcha_client_key = config.captcha.clientKey;
+			}
 
 			clientConfig.uploadSizeLimit = config.uploadSizeLimit;
 			clientConfig.countries = addressMeta.countries;
