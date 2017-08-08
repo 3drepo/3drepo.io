@@ -1,6 +1,5 @@
 node_modules
 
-*.bak
 *.swp
 /*.log
 config/*
