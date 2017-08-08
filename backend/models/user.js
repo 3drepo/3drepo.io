@@ -728,6 +728,7 @@ function _createAccounts(roles, userName)
 					isAdmin: isTeamspaceAdmin,
 					permissions: permission.permissions || []
 				};
+					console.log(userName + " is admin of " + user.user);
 
 				//show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
@@ -765,6 +766,7 @@ function _createAccounts(roles, userName)
 							if(!_proj || _proj.permissions.length === 0){
 								return;
 							}
+							console.log(userName + " is project admin of " + user.user, _proj.permissions);
 							if(!account){
 	
 								account = accounts.find(account => account.account === user.user);
