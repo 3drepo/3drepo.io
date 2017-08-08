@@ -10,8 +10,6 @@ html(lang="en")
 		
 		title 3D Repo | Online BIM collaboration platform
 
-		script(type="text/javascript", src="/config.js")
-		
 		// Manifest file (PWA)
 		link(rel="manifest" href="/manifest.json")
 
@@ -20,43 +18,22 @@ html(lang="en")
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-
-		// Setup Sever variables for use in the client
-		script.
-
-			SERVER_VARS = {
-				structure: !{structure},
-				parentStateJSON: !{parentStateJSON},
-				uiState: !{uistate},
-			}
-
-		if (userId)
-			script.
-				SERVER_VARS.userId = userId
-
-		if (gaTrackId) 
-			script.
-				SERVER_VARS.userId = userId
 	
-		// Load NPM dependencies and 3D Repo JavaScript
+		// Load config from server and dependencies + 3D Repo JavaScript
+		script(type="text/javascript", src="/config.js")
 		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-
+		
 	body
-		style.
-			#notSupported {
-				position: fixed;
-				background-color: lightgoldenrodyellow;
-				padding: 100px 50px;
-				left: 0;
-				right: 0;
-				margin: auto;
-				width: 50%;
-				text-align: center;
-				z-index: 10;
-				top: 20%;
-				font-size: 20px;
-				height: 70px;
-			}
+
+		// Frontend plugin Pug files
+		each j in frontendPug
+			script(type="text/ng-template", id=j.id)
+				!= renderMe(j.path, locals)
+
+		// Legal pages
+		each j in legalTemplates
+			script(type="text/ng-template", id=j.page+".html")
+				!= renderMe(j.path, locals)
 
 		#notSupported(style='visibility:hidden')
 			| Your browser is not supported.
@@ -71,67 +48,62 @@ html(lang="en")
 			br
 			input(id='notSupportedButton' type='button', value='OK', style='padding:10px 60px; font-size:14px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
-		// Frontend plugin Pug files
-		each j in frontendPug
-			script(type="text/ng-template", id=j.id)
-				!= renderMe(j.path, locals)
+		|<!-- For IE <= 9-->
+		|<!--[if (IE)]>
+		|	<script type="text/javascript">
+		|		document.getElementById('notSupported').style.visibility='visible';
+		|		document.getElementById('notSupportedButton').style.display = 'none';
+		|	</script>
+		|	
+		|<![endif]-->
 
-		// Legal pages
-		each j in legalTemplates
-			script(type="text/ng-template", id=j.page+".html")
-				!= renderMe(j.path, locals)
 
+		// Entry point for all components
 		home
 
-	|<!-- For IE <= 9-->
-	|<!--[if (IE)]>
-	|	<script type="text/javascript">
-	|		document.getElementById('notSupported').style.visibility='visible';
-	|		document.getElementById('notSupportedButton').style.display = 'none';
-	|	</script>
-	|	
-	|<![endif]-->
+		// Check for support, if okay bootstrap AngularJS app
+		script.
 
-	script.
-		if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
-			document.getElementById('notSupported').style.visibility='visible';
-			if (BrowserDetect.version <= 10){
-				document.getElementById('notSupportedButton').style.display = 'none';
+			if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
+				document.getElementById('notSupported').style.visibility='visible';
+				if (BrowserDetect.version <= 10){
+					document.getElementById('notSupportedButton').style.display = 'none';
+				}
+			} else {
+				angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
 			}
-		}
 
-	if googleConversionId
+
+		// ReCapthca
+		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
+
 
 		// Google Code for Remarketing Tag
 		//
 			------------------------------------------------
-			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
+			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. 
+			See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
 			-------------------------------------------------
-		script(type='text/javascript').
-			/* <![CDATA[ */
-			var google_conversion_id = !{googleConversionId};
-			var google_custom_params = window.google_tag_params;
-			var google_remarketing_only = true;
-			/* ]]> */
-		script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
-		noscript
-			div(style='display:inline;')
-				img(height='1'
-					width='1'
-					style='border-style:none;'
-					alt=''
-					src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
+		if googleConversionId
 
+			script(type='text/javascript').
+				/* <![CDATA[ */
+				var google_conversion_id = !{googleConversionId};
+				var google_custom_params = window.google_tag_params;
+				var google_remarketing_only = true;
+				/* ]]> */
+			script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
 
-	// Load Angular
-	script.
-		angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
+			noscript
+				div(style='display:inline;')
+					img(height='1'
+						width='1'
+						style='border-style:none;'
+						alt=''
+						src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
 
-	// ReCapthca
-	script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
-
-	if development
-		// Else load LiveReload
-		script(src="//localhost:35729/livereload.js", async)
+		if development
+			// Else load LiveReload
+			script(src="//localhost:35729/livereload.js", async)
 
 

@@ -18,9 +18,9 @@
 angular.module("3drepo")
 	.service("AnalyticService", AnalyticService);
 
-AnalyticService.$inject = [];
+AnalyticService.$inject = ["ClientConfigService"];
 
-function AnalyticService(){
+function AnalyticService(ClientConfigService){
 	"use strict";
 
 	var service = {
@@ -38,7 +38,7 @@ function AnalyticService(){
 
 	function init() {
 
-		if (SERVER_VARS && SERVER_VARS.gaTrackId) {
+		if (ClientConfigService && ClientConfigService.gaTrackId) {
 
 			console.log("Initialising GA...");
 
@@ -47,10 +47,10 @@ function AnalyticService(){
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
 
-			if (SERVER_VARS.userId) {
-				ga("create", SERVER_VARS.gaTrackId, "auto", { userId: SERVER_VARS.userId });
+			if (ClientConfigService.userId) {
+				ga("create", ClientConfigService.gaTrackId, "auto", { userId: ClientConfigService.userId });
 			} else {
-				ga("create", SERVER_VARS.gaTrackId, "auto");
+				ga("create", ClientConfigService.gaTrackId, "auto");
 			}
 
 		}

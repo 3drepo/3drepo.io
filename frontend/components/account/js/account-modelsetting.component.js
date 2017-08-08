@@ -33,9 +33,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService"];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, serverConfig) {
+	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService) {
 		
 		var vm = this;
 
@@ -44,7 +44,7 @@
 		 */
 		vm.$onInit = function() {
 
-			vm.units = serverConfig.units;
+			vm.units = ClientConfigService.units;
 			vm.mapTile = {};
 
 			// TODO: We should use statemanager eventually

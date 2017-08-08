@@ -31,9 +31,9 @@
 			controllerAs: "vm"
 		});
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService", "serverConfig"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService", "ClientConfigService"];
 
-	function MeasureCtrl ($scope, $element, EventService, ModelService, serverConfig) {
+	function MeasureCtrl ($scope, $element, EventService, ModelService, ClientConfigService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
@@ -45,7 +45,7 @@
 		vm.show = false;
 		vm.distance = false;
 		vm.allowMove = false;
-		vm.units = serverConfig.units;
+		vm.units = ClientConfigService.units;
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];

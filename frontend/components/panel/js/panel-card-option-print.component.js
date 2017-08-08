@@ -30,14 +30,14 @@
 			controllerAs: "vm"
 		});
 
-	PanelCardOptionPrintCtrl.$inject = ["$window", "serverConfig"];
+	PanelCardOptionPrintCtrl.$inject = ["$window", "ClientConfigService"];
 
-	function PanelCardOptionPrintCtrl ($window, serverConfig) {
+	function PanelCardOptionPrintCtrl ($window, ClientConfigService) {
 		var vm = this;
 
 		vm.doPrint = function(event) {
 			event.stopPropagation();
-			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html"), "_blank");
+			$window.open(ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model + "/issues.html"), "_blank");
 		};
 	}
 }());

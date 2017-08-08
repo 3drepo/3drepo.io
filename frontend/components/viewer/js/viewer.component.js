@@ -37,9 +37,9 @@
 			controllerAs: "vm"
 		});
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location", "$mdDialog"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "ClientConfigService", "EventService", "$location", "$mdDialog"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location, $mdDialog) {
+	function ViewerCtrl ($scope, $q, $http, $element, ClientConfigService, EventService, $location, $mdDialog) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -80,7 +80,7 @@
 			var showAll = true;
 			vm.viewer.init({
 				showAll : showAll,
-				getAPI: serverConfig.apiUrl(serverConfig.GET_API, "")
+				getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
 			})
 				.then(function(){
 		
@@ -104,7 +104,7 @@
 				}
 
 				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {
 						if (response.data && response.data.properties) {
 							vm.viewer.applyModelProperties(account, model, response.data.properties);

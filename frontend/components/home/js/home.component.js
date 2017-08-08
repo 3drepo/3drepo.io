@@ -32,9 +32,9 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location", "SWService", "AnalyticService"];
+	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "ClientConfigService", "$location", "SWService", "AnalyticService"];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location, SWService, AnalyticService) {
+	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, ClientConfigService, $location, SWService, AnalyticService) {
 		var vm = this,
 			homeLoggedOut,
 			func, i,
@@ -65,8 +65,8 @@
 			vm.isMobileFlag = true;
 
 			vm.legalDisplays = [];
-			if (angular.isDefined(serverConfig.legal)) {
-				vm.legalDisplays = serverConfig.legal;
+			if (angular.isDefined(ClientConfigService.legal)) {
+				vm.legalDisplays = ClientConfigService.legal;
 			}
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});

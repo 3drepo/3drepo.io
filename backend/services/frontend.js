@@ -65,32 +65,6 @@
 
 		app.use(favicon("./public/images/favicon.ico"));
 
-		let objectToString = function(obj) {
-			let objString = "{";
-
-			for(let prop in obj)
-			{
-				// to avoid jshint to complain
-				if(obj.hasOwnProperty(prop)){
-					let aProperty       = obj[prop];
-					
-					objString += "\"" + prop + "\":"; 
-					if (typeof aProperty === "object")
-					{
-						objString += objectToString(aProperty);
-					} else {
-						objString += "" + aProperty; 
-					} 
-
-					objString += ",";
-				}
-			}
-
-			objString += "}";
-
-			return objString;
-		};
-
 		// TODO: Replace with user based plugin selection
 		let pluginStructure = {};
 
@@ -99,6 +73,7 @@
 		} else {
 			pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
 		}
+
 
 		/**
 		 * Get the pug files for the required state or plugin
@@ -169,6 +144,7 @@
 						setupRequiredPug(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
 					}
 				}
+
 			}
 		}
 
@@ -186,67 +162,100 @@
 			setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 		}
 
-		app.get("/config.js", function (req, res) {
-			let params = {};
+		function createClientConfig(req) {
 
-			var server_config = {};
+			let clientConfig = {
+				"pluginLoaded": [],
+				"pluginPug": [],
+				"pluginJS": [],
+				"pluginAngular": {},
+				"parentStateJSON": {},
+				"ui": {},
+				"uistate": {},
+				"pluginCSS": [],
+				"renderMe": pug.renderFile,
+				"structure": pluginStructure,
+				"frontendPug": [],
+				"gaTrackId": config.gaTrackId,
+				"development" : config.development,
+				"googleConversionId": config.googleConversionId
+			};
 
-			//server_config.api_algorithm = config.apiAlgorithm;
-			//server_config.apiUrls = server_config.api_algorithm.apiUrls;
-			//server_config.apiUrl = server_config.api_algorithm.apiUrl; //.bind(server_config.api_algorithm);
+			if (req) {
+				clientConfig.userId = _.get(req, 'session.user.username');
+			}
 
-			server_config.apiUrls = config.apiUrls;
+			// Set up the legal plugins
+			clientConfig.legalTemplates = [];
+			if (config.hasOwnProperty("legal")) {
+				clientConfig.legalTemplates = config.legal;
+			}
 
-			server_config.C = {
+
+			// Set up the legal plugins
+			// if (config.hasOwnProperty("legal")) {
+			// 	for (let i = 0; i < config.legal.length; i += 1) {
+			// 		DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
+			// 	}
+			// }
+
+
+			//clientConfig.api_algorithm = config.apiAlgorithm;
+			//clientConfig.apiUrls = clientConfig.api_algorithm.apiUrls;
+			//clientConfig.apiUrl = clientConfig.api_algorithm.apiUrl; //.bind(clientConfig.api_algorithm);
+
+			clientConfig.apiUrls = config.apiUrls;
+
+			clientConfig.C = {
 				GET_API : C.GET_API,
 				POST_API : C.POST_API,
 				MAP_API : C.MAP_API
 			}
 
-			// server_config.GET_API = C.GET_API;
-			// server_config.POST_API = (C.POST_API in server_config.apiUrls) ? C.POST_API : server_config.GET_API;
-			// server_config.MAP_API = (C.MAP_API  in server_config.apiUrls) ? C.MAP_API : server_config.GET_API;
+			// clientConfig.GET_API = C.GET_API;
+			// clientConfig.POST_API = (C.POST_API in clientConfig.apiUrls) ? C.POST_API : clientConfig.GET_API;
+			// clientConfig.MAP_API = (C.MAP_API  in clientConfig.apiUrls) ? C.MAP_API : clientConfig.GET_API;
 
 			if ("wayfinder" in config) {
 				// TODO: Make a public section in config for vars to be revealed
-				server_config.democompany = config.wayfinder.democompany;
-				server_config.demoproject = config.wayfinder.demoproject;
+				clientConfig.democompany = config.wayfinder.democompany;
+				clientConfig.demoproject = config.wayfinder.demoproject;
 			}
 
 			if (config.chat_server) {
-				server_config.chatHost	= config.chat_server.chat_host;
-				server_config.chatPath	= config.chat_server.subdirectory;
+				clientConfig.chatHost	= config.chat_server.chat_host;
+				clientConfig.chatPath	= config.chat_server.subdirectory;
 			}
 
-			server_config.chatReconnectionAttempts = config.chat_reconnection_attempts;
+			clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
 
-			server_config.apiVersion = config.version;
+			clientConfig.apiVersion = config.version;
 
 			if (serverConfig.backgroundImage) {
-				server_config.backgroundImage = serverConfig.backgroundImage;
+				clientConfig.backgroundImage = serverConfig.backgroundImage;
 			}
 
-			server_config.return_path = '/';
+			clientConfig.return_path = '/';
 
-			server_config.auth =  config.auth;
-			server_config.captcha_client_key = config.captcha.clientKey;
+			clientConfig.auth =  config.auth;
+			clientConfig.captcha_client_key = config.captcha.clientKey;
 
-			server_config.uploadSizeLimit = config.uploadSizeLimit;
-			server_config.countries = addressMeta.countries;
-			server_config.euCountriesCode = addressMeta.euCountriesCode;
-			server_config.usStates = addressMeta.usStates;
-			server_config.units = units;
-			server_config.legal = config.legal;
-			server_config.tagRegExp = History.tagRegExp.toString();
-			server_config.modelNameRegExp = ModelHelper.modelNameRegExp.toString();
-			server_config.fileNameRegExp = ModelHelper.fileNameRegExp.toString();
-			server_config.usernameRegExp = User.usernameRegExp.toString();
-			server_config.acceptedFormat = ModelHelper.acceptedFormat;
-			server_config.login_check_interval = config.login_check_interval;
+			clientConfig.uploadSizeLimit = config.uploadSizeLimit;
+			clientConfig.countries = addressMeta.countries;
+			clientConfig.euCountriesCode = addressMeta.euCountriesCode;
+			clientConfig.usStates = addressMeta.usStates;
+			clientConfig.units = units;
+			clientConfig.legal = config.legal;
+			clientConfig.tagRegExp = History.tagRegExp.toString();
+			clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp.toString();
+			clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp.toString();
+			clientConfig.usernameRegExp = User.usernameRegExp.toString();
+			clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
+			clientConfig.login_check_interval = config.login_check_interval;
 
-			server_config.responseCodes = _.each(responseCodes.codesMap);
+			clientConfig.responseCodes = _.each(responseCodes.codesMap);
 
-			server_config.permissions = {
+			clientConfig.permissions = {
 				'PERM_DELETE_MODEL': C.PERM_DELETE_MODEL,
 				'PERM_CHANGE_MODEL_SETTINGS': C.PERM_CHANGE_MODEL_SETTINGS,
 				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
@@ -260,25 +269,28 @@
 				'PERM_EDIT_FEDERATION': C.PERM_EDIT_FEDERATION
 			};
 
-			server_config.impliedPermission = C.IMPLIED_PERM;
+			clientConfig.impliedPermission = C.IMPLIED_PERM;
+
+			setupPug(clientConfig);
+			
+			return clientConfig
+		}
+
+
+		
+
+		app.get("/config.js", function (req, res) {
+
+			const clientConfig = createClientConfig(req);
 
 			// TODO: This used to be a long string concat, 
 			// this is marginally better but still a complete hack. 
 			// There is definitely a better way to do this
-			const serializedConfig = serialize(server_config); 
+			const serializedConfig = serialize(clientConfig); 
 
 			res.header("Content-Type", "text/javascript");
 			res.render("config.pug", {config: serializedConfig });
 		});
-
-
-
-		// Set up the legal plugins
-		if (config.hasOwnProperty("legal")) {
-			for (let i = 0; i < config.legal.length; i += 1) {
-				DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
-			}
-		}
 
 		const publicDir = __dirname + "/../../public";
 		app.use("/public", express.static(publicDir));
@@ -295,39 +307,10 @@
 			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
 		});
 
-
-		let params = {
-			"pluginLoaded": [],
-			"pluginPug": [],
-			"pluginJS": [],
-			"pluginAngular": {},
-			"parentStateJSON": {},
-			"ui": {},
-			"uistate": {},
-			"pluginCSS": [],
-			"renderMe": pug.renderFile,
-			"structure": JSON.stringify(pluginStructure),
-			"frontendPug": [],
-			"gaTrackId": config.gaTrackId,
-			"development" : config.development,
-			"googleConversionId": config.googleConversionId
-		};
-
-		params.parentStateJSON = JSON.stringify(params.parentStateJSON);
-		params.uistate = JSON.stringify(params.uistate);
-
-		// Set up the legal plugins
-		params.legalTemplates = [];
-		if (config.hasOwnProperty("legal")) {
-			params.legalTemplates = config.legal;
-		}
-
-		setupPug(params);
-
 		app.get("*", function (req, res) {
 			// Generate the list of files to load for the plugins
-			params.userId = _.get(req, 'session.user.username');
-			res.render(serverConfig.template, params);
+			const clientConfig = createClientConfig(req);
+			res.render(serverConfig.template, clientConfig);
 		});
 
 		return app;

@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "serverConfig", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "UtilsService"];
 
-	function LoginCtrl($scope, $location, AuthService, EventService, serverConfig, UtilsService) {
+	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, UtilsService) {
 		var vm = this,
 			enterKey = 13;
 
@@ -37,7 +37,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.version = serverConfig.apiVersion;
+			vm.version = ClientConfigService.apiVersion;
 		};
 
 		/**

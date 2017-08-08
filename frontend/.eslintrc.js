@@ -10,7 +10,7 @@ module.exports = {
         "Module" : true,
         "Pin" : true,
         "Promise" : true,
-        "server_config" : true
+        "ClientConfig" : true
     },
     "extends": "eslint:recommended",
     "rules": {

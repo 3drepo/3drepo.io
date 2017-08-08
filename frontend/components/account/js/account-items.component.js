@@ -34,9 +34,9 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
+	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
 
-	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountService) {
+	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, AnalyticService, NotificationService, AuthService, AccountService) {
 		var vm = this;
 
 		/*
@@ -46,8 +46,8 @@
 			vm.info = "Retrieving models...";
 			vm.showProgress = true;
 			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-			vm.units = serverConfig.units;
-			vm.modelRegExp = serverConfig.modelNameRegExp;
+			vm.units = ClientConfigService.units;
+			vm.modelRegExp = ClientConfigService.modelNameRegExp;
 			vm.defaults = {}; 
 			vm.newModelButtonDisabled = true;
 
@@ -464,7 +464,7 @@
 
 				var names = vm.newModelFileToUpload.name.split(".");
 				var find = names[names.length - 1].toLowerCase();
-				var match = serverConfig.acceptedFormat.indexOf(find) === -1;
+				var match = ClientConfigService.acceptedFormat.indexOf(find) === -1;
 
 				if(names.length === 1){
 					vm.showNewModelErrorMessage = true;

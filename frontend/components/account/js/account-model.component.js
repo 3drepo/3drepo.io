@@ -49,9 +49,9 @@
 			}
 		});
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
+	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "ClientConfigService", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
+	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, ClientConfigService, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
 
 		var vm = this;
 
@@ -77,7 +77,7 @@
 				upload: {
 					label: "Upload file", 
 					icon: "cloud_upload", 
-					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
+					hidden: !AuthService.hasPermission(ClientConfigService.permissions.PERM_UPLOAD_FILES, vm.model.permissions)
 				},
 				permissions: {
 					label: "Permissions", 
@@ -93,21 +93,21 @@
 				modelsetting: {
 					label: "Settings",
 					icon: "settings", 
-					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
+					hidden: !AuthService.hasPermission(ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS, vm.model.permissions)
 				}
 			};
 			if(vm.model.timestamp && !vm.model.federate){
 				vm.modelOptions.download = {
 					label: "Download", 
 					icon: "cloud_download", 
-					hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
+					hidden: !AuthService.hasPermission(ClientConfigService.permissions.PERM_DOWNLOAD_MODEL, vm.model.permissions)
 				};
 			}
 			vm.uploadButtonDisabled = true;
 			vm.modelOptions.delete = {
 				label: "Delete", 
 				icon: "delete", 
-				hidden: !AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
+				hidden: !AuthService.hasPermission(ClientConfigService.permissions.PERM_DELETE_MODEL, vm.model.permissions), 
 				color: "#F44336"
 			};
 
@@ -133,7 +133,7 @@
 				
 				vm.uploadErrorMessage = null;
 				var extension = names[names.length - 1].toLowerCase()
-				var valid = serverConfig.acceptedFormat.indexOf(extension) === -1;
+				var valid = ClientConfigService.acceptedFormat.indexOf(extension) === -1;
 
 				if(names.length === 1){
 					vm.uploadErrorMessage = "Filename must have extension";
@@ -157,7 +157,7 @@
 			if (!vm.model.uploading) {
 				if (vm.model.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					if(AuthService.hasPermission(serverConfig.permissions.PERM_UPLOAD_FILES, vm.model.permissions)){
+					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_UPLOAD_FILES, vm.model.permissions)){
 						vm.tag = null;
 						vm.desc = null;
 						vm.modelToUpload = null;
@@ -204,7 +204,7 @@
 
 			case "download":
 				window.open(
-					serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
+					ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model.model + "/download/latest"),
 					"_blank" 
 				);
 

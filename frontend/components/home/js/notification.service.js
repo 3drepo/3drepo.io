@@ -18,19 +18,19 @@
 angular.module("3drepo")
 	.factory("NotificationService", NotificationService);
 
-NotificationService.$inject = ["serverConfig", "$injector"];
+NotificationService.$inject = ["ClientConfigService", "$injector"];
 
-function NotificationService(serverConfig, $injector){
+function NotificationService(ClientConfigService, $injector){
 	"use strict";
 
-	if(!serverConfig.chatHost || !serverConfig.chatPath){
+	if(!ClientConfigService.chatHost || !ClientConfigService.chatPath){
 		console.log("Chat server settings missing");
 	}
 
-	var socket = io(serverConfig.chatHost, {
-		path: serverConfig.chatPath, 
+	var socket = io(ClientConfigService.chatHost, {
+		path: ClientConfigService.chatPath, 
 		transports: ["websocket"],
-		reconnectionAttempts: serverConfig.chatReconnectionAttempts
+		reconnectionAttempts: ClientConfigService.chatReconnectionAttempts
 	});
 	var joined = [];
 

@@ -188,7 +188,6 @@ var Viewer = {};
 				UnityUtil.clipBroadcastCallback = self.broadcastClippingPlane;
 				UnityUtil.errorCallback = self.handleError;
 
-				//server_config.apiUrl(server_config.GET_API, "")
 				UnityUtil.setAPIHost(options.getAPI); 
 				self.setNavMode(self.defaultNavMode);
 

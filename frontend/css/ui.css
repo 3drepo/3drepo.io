@@ -54,3 +54,17 @@
 	font-feature-settings: 'liga';
 }
 
+body #notSupported {
+	position: fixed;
+	background-color: lightgoldenrodyellow;
+	padding: 100px 50px;
+	left: 0;
+	right: 0;
+	margin: auto;
+	width: 50%;
+	text-align: center;
+	z-index: 10;
+	top: 20%;
+	font-size: 20px;
+	height: 70px;
+}

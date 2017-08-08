@@ -45,9 +45,9 @@
 			}
 		});
 
-	IssuesListCtrl.$inject = ["$scope", "$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig", "$timeout"];
+	IssuesListCtrl.$inject = ["$scope", "$filter", "$window", "UtilsService", "IssuesService", "EventService", "ClientConfigService", "$timeout"];
 
-	function IssuesListCtrl ($scope, $filter, $window, UtilsService, IssuesService, EventService, serverConfig, $timeout) {
+	function IssuesListCtrl ($scope, $filter, $window, UtilsService, IssuesService, EventService, ClientConfigService, $timeout) {
 		var vm = this;
 
 		// Init
@@ -147,9 +147,9 @@
 						ids.push(issue._id);
 					});
 
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",")), "_blank");
+					$window.open(ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",")), "_blank");
 				} else if (vm.menuOption.value === "exportBCF") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.model + "/issues.bcfzip"), "_blank");
+					$window.open(ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model + "/issues.bcfzip"), "_blank");
 				} else if (vm.menuOption.value === "importBCF") {
 
 					var file = document.createElement("input");

@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "$sanitize", "serverConfig", "EventService", "UtilsService", "TreeService"];
+	IssuesService.$inject = ["$http", "$q", "$sanitize", "ClientConfigService", "EventService", "UtilsService", "TreeService"];
 
-	function IssuesService($http, $q, $sanitize, serverConfig, EventService, UtilsService, TreeService) {
+	function IssuesService($http, $q, $sanitize, ClientConfigService, EventService, UtilsService, TreeService) {
 		var url = "",
 			data = {},
 			config = {},
@@ -242,7 +242,7 @@
 
 			var deferred = $q.defer();
 			var endpoint = account + "/" + model + "/issues/" + issueId + ".json";
-			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 
 			$http.get(url).then(function(res){
 
@@ -273,7 +273,7 @@
 				endpoint = account + "/" + model + "/issues.json";
 			}
 
-			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 
 			$http.get(url).then(
 				function(data) {
@@ -301,9 +301,9 @@
 				url;
 
 			if (issue.rev_id){
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues.json");
+				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.model + "/issues.json");
+				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, issue.account + "/" + issue.model + "/issues.json");
 			}
 
 			config = {withCredentials: true};
@@ -344,10 +344,10 @@
 
 			if(issue.rev_id){
 				endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
-				url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			} else {
 				endpoint += "/issues/" + issue._id + ".json";
-				url = serverConfig.apiUrl(serverConfig.POST_API, endpoint);
+				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			}
 				
 			var config = {withCredentials: true};
@@ -446,7 +446,7 @@
 		function getJobs(account, model){
 
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/jobs.json");
+			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/jobs.json");
 
 			$http.get(url).then(
 				function(data) {
@@ -463,7 +463,7 @@
 
 		function getUserJobFormodel(account, model){
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +model + "/userJobForModel.json");
+			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" +model + "/userJobForModel.json");
 
 			$http.get(url).then(
 				function(data) {
