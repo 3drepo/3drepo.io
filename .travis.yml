@@ -18,8 +18,6 @@ before_install:
     - mkdir -p submodules
     - cd submodules
     - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
-    - cd tests && git status && cd ..
-    - cd ..
     - sudo apt-get install graphicsmagick
     - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
     - echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
@@ -31,6 +29,7 @@ before_install:
     - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
     - cd submodules/tests
     - git checkout $test_ver
+    - git status
     - cd backend
     - mongorestore
     - cd ../../../backend
