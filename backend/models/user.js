@@ -713,7 +713,6 @@ function _createAccounts(roles, userName)
 	let promises = [];
 
 	roles.forEach( role => {
-		console.log("=============== "+role.db+" ===============");
 		promises.push(User.findByUserName(role.db).then(user => {
 			let tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
@@ -761,8 +760,8 @@ function _createAccounts(roles, userName)
 
 
 					projects.forEach( _proj =>{
-						let myProj;
 						projPromises.push(new Promise(function(resolve, reject){
+							let myProj;
 							if(!_proj || _proj.permissions.length === 0){
 								resolve();
 								return;
@@ -778,9 +777,6 @@ function _createAccounts(roles, userName)
 							}	
 
 							myProj = account.projects.find(p => p.name === _proj.name);
-							const debug = "imsharedTeamspace" == role.db && "project2" == _proj.name;
-							if(debug)
-								console.log(userName + " is project admin of " + user.user + "." + _proj.name, _proj.permissions);
 
 							if(!myProj){
 								myProj = _proj.toObject();
@@ -799,20 +795,9 @@ function _createAccounts(roles, userName)
 							inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
-							if(debug){
-								console.log("["+_proj.name+"]new model IDS:" , newModelIds);
-								console.log(myProj);
-							}
 							if(newModelIds.length){
 								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
-//									 if(debug)
-//										console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
-									if(debug)
-								 	{
-										console.log("project: ", myProj);
-								 		console.log("name of _myProj" + _proj);
-									}
 									resolve();
 								});
 							}
