@@ -51,7 +51,6 @@
 			vm.defaults = {}; 
 			vm.newModelButtonDisabled = true;
 
-			//
 			StateManager.hasBeenBackToTeamspace = true;
 
 			// SETUP FILE UPLOADERS
@@ -432,7 +431,7 @@
 		// MODELS
 
 		$scope.$watch("vm.newModelData", function(newValue) {
-			
+
 			if (newValue) {
 
 				var noOtherType = newValue.type === "Other" && !newValue.otherType;
@@ -591,6 +590,7 @@
 			vm.showNewModelErrorMessage = false;
 			vm.newModelFileToUpload = null;
 			vm.newModelData = {
+				name: "",
 				account: accountForModel,
 				type: vm.modelTypes[0]
 			};

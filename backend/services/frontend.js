@@ -47,8 +47,6 @@
 		const DEFAULT_PLUGIN_STRUCTURE = require('../plugin/plugin-structure.js').DEFAULT_PLUGIN_STRUCTURE;
 		const serialize = require('serialize-javascript');
 
-		console.log(DEFAULT_PLUGIN_STRUCTURE)
-
 		let app = express();
 
 		//app.use(sharedSession);
@@ -178,7 +176,8 @@
 				"frontendPug": [],
 				"gaTrackId": config.gaTrackId,
 				"development" : config.development,
-				"googleConversionId": config.googleConversionId
+				"googleConversionId": config.googleConversionId,
+				"userNotice" : config.userNotice
 			};
 
 			if (req) {
@@ -191,35 +190,12 @@
 				clientConfig.legalTemplates = config.legal;
 			}
 
-
-			// Set up the legal plugins
-			// if (config.hasOwnProperty("legal")) {
-			// 	for (let i = 0; i < config.legal.length; i += 1) {
-			// 		DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
-			// 	}
-			// }
-
-
-			//clientConfig.api_algorithm = config.apiAlgorithm;
-			//clientConfig.apiUrls = clientConfig.api_algorithm.apiUrls;
-			//clientConfig.apiUrl = clientConfig.api_algorithm.apiUrl; //.bind(clientConfig.api_algorithm);
-
 			clientConfig.apiUrls = config.apiUrls;
 
 			clientConfig.C = {
 				GET_API : C.GET_API,
 				POST_API : C.POST_API,
 				MAP_API : C.MAP_API
-			}
-
-			// clientConfig.GET_API = C.GET_API;
-			// clientConfig.POST_API = (C.POST_API in clientConfig.apiUrls) ? C.POST_API : clientConfig.GET_API;
-			// clientConfig.MAP_API = (C.MAP_API  in clientConfig.apiUrls) ? C.MAP_API : clientConfig.GET_API;
-
-			if ("wayfinder" in config) {
-				// TODO: Make a public section in config for vars to be revealed
-				clientConfig.democompany = config.wayfinder.democompany;
-				clientConfig.demoproject = config.wayfinder.demoproject;
 			}
 
 			if (config.chat_server) {
@@ -249,10 +225,10 @@
 			clientConfig.usStates = addressMeta.usStates;
 			clientConfig.units = units;
 			clientConfig.legal = config.legal;
-			clientConfig.tagRegExp = History.tagRegExp.toString();
-			clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp.toString();
-			clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp.toString();
-			clientConfig.usernameRegExp = User.usernameRegExp.toString();
+			clientConfig.tagRegExp = History.tagRegExp;
+			clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
+			clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp;
+			clientConfig.usernameRegExp = User.usernameRegExp;
 			clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
 			clientConfig.login_check_interval = config.login_check_interval;
 
@@ -278,9 +254,6 @@
 			
 			return clientConfig
 		}
-
-
-		
 
 		app.get("/config.js", function (req, res) {
 

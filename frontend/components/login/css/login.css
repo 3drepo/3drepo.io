@@ -5,6 +5,7 @@ login {
   height: 100%;
   background-size: contain;
   margin-top: 120px;
+  z-index: 2;
 }
 
 @media (max-width: 960px) {
@@ -37,9 +38,10 @@ login #loginVersion{
 }
 
 login .loginError {
-  color: #F44336;
+  color: #e44539 !important;
   margin: 5px 0 5px;
   font-weight: normal;
+  margin-bottom: 16px;
 }
 
 login .loginLinks {
