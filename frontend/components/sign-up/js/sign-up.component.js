@@ -53,6 +53,7 @@
 			vm.version = ClientConfigService.apiVersion;
 			vm.logo = "/public/images/3drepo-logo-white.png";
 			vm.captchaKey = ClientConfigService.captcha_client_key;
+
 			vm.tcAgreed = false;
 			vm.useReCapthca = false;
 			vm.registering = false;
@@ -88,6 +89,7 @@
 			if (ClientConfigService.hasOwnProperty("auth")) {
 				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
 					vm.useReCapthca = true;
+					vm.captchaKey = serverConfig.captcha_client_key;
 				}
 			}
 

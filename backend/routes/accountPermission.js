@@ -84,14 +84,11 @@
 	function updatePermission(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-
 			return user.customData.permissions.update(req.params.user, req.body);
 
 		}).then(permission => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

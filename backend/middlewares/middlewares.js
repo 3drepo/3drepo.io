@@ -109,6 +109,7 @@
 			logger: systemLogger,
 			callback_queue: config.cn_queue.callback_queue,
 			worker_queue: config.cn_queue.worker_queue,
+			model_queue: config.cn_queue.model_queue,
 			event_exchange: config.cn_queue.event_exchange
 
 		}).then(() => importQueue);

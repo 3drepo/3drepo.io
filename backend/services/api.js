@@ -58,13 +58,13 @@
 			function myNext(err){
 				if(err){
 					// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-					res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+					//res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 					
 					req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
 					req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
 					req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
 
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
+					//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
 
 				} else {
 					next();
