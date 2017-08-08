@@ -761,10 +761,10 @@ function _createAccounts(roles, userName)
 
 
 					let myProj;
-					projPromises.push(
-						projects.forEach( _proj =>{
+					projects.forEach( _proj =>{
+						projPromises.push(new Promise(function(resolve, reject){
 							if(!_proj || _proj.permissions.length === 0){
-								return;
+								resolve();
 							}
 							console.log(userName + " is project admin of " + user.user, _proj.permissions);
 							if(!account){
@@ -800,11 +800,16 @@ function _createAccounts(roles, userName)
 							if(newModelIds.length){
 								return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 									myProj.models = models.models.concat(models.fedModels);
+									resolve();
 								});
 							}
+							else
+							{
+								resolve();
+							}
+						}));						
 
-						})
-					);						
+					})
 					return Promise.all(projPromises).then(()=>
 							{
 								//model permissions
