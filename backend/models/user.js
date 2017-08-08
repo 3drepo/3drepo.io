@@ -729,7 +729,6 @@ function _createAccounts(roles, userName)
 					isAdmin: isTeamspaceAdmin,
 					permissions: permission.permissions || []
 				};
-					console.log(userName + " is admin of " + user.user);
 
 				//show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
@@ -766,8 +765,8 @@ function _createAccounts(roles, userName)
 						projPromises.push(new Promise(function(resolve, reject){
 							if(!_proj || _proj.permissions.length === 0){
 								resolve();
+								return;
 							}
-							console.log(userName + " is project admin of " + user.user, _proj.permissions);
 							if(!account){
 	
 								account = accounts.find(account => account.account === user.user);
@@ -779,6 +778,9 @@ function _createAccounts(roles, userName)
 							}	
 
 							myProj = account.projects.find(p => p.name === _proj.name);
+							const debug = "imsharedTeamspace" == role.db && "project2" == _proj.name;
+							if(debug)
+								console.log(userName + " is project admin of " + user.user + "." + _proj.name, _proj.permissions);
 
 							if(!myProj){
 								myProj = _proj.toObject();
@@ -797,14 +799,17 @@ function _createAccounts(roles, userName)
 							inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
-							console.log("new model IDS:" , newModelIds);
+							if(debug){
+								console.log("["+_proj.name+"]new model IDS:" , newModelIds);
 							console.log(myProj);
+							}
 							if(newModelIds.length){
 								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
-									console.log("returned models:" , models);
+//									 if(debug)
+//										console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
-									myProj.models = models.models.concat(models.models);
-									console.log(myProj);
+									if(debug)
+										console.log("project: ", myProj);
 									resolve();
 								});
 							}
