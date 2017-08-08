@@ -30,6 +30,7 @@ before_install:
     - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
     - cd submodules/tests
     - git checkout $test_ver
+    - git status
     - cd backend
     - mongorestore
     - cd ../../../backend
