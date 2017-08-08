@@ -37,10 +37,7 @@
 		 */
 		vm.$onInit = function() {
 			vm.version = ClientConfigService.apiVersion;
-			vm.notice = ClientConfigService.userNotice;
-
-			console.log("vm.notice", vm.notice);
-
+			vm.userNotice = ClientConfigService.userNotice;
 		};
 
 		/**
