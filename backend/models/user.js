@@ -760,8 +760,8 @@ function _createAccounts(roles, userName)
 				return Project.find({account: user.user},{}, projection).then(projects => {
 
 
-					let myProj;
 					projects.forEach( _proj =>{
+						let myProj;
 						projPromises.push(new Promise(function(resolve, reject){
 							if(!_proj || _proj.permissions.length === 0){
 								resolve();
@@ -801,7 +801,7 @@ function _createAccounts(roles, userName)
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 							if(debug){
 								console.log("["+_proj.name+"]new model IDS:" , newModelIds);
-							console.log(myProj);
+								console.log(myProj);
 							}
 							if(newModelIds.length){
 								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
@@ -809,7 +809,10 @@ function _createAccounts(roles, userName)
 //										console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
 									if(debug)
+								 	{
 										console.log("project: ", myProj);
+								 		console.log("name of _myProj" + _proj);
+									}
 									resolve();
 								});
 							}
