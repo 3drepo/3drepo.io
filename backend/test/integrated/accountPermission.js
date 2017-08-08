@@ -128,37 +128,12 @@ describe('Account permission::', function () {
 	});
 
 
-	it('should not be able to update user\'s permissions after it has been removed', function(done){
+	it('should able to update user\'s permissions', function(done){
 
 		async.series([
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
 				.send({ permissions: ['create_project']})
-				.expect(404, function(err, res){
-					callback(err);
-				});
-			},
-
-			callback => {
-				agent.get(`/${username}/permissions`)
-				.expect(200, function(err, res){
-					expect(res.body.find(perm => perm.user === 'user2')).to.deep.equal({user: 'user2', permissions:[]});
-					callback(err);
-				});
-			}
-
-		], (err, res) => done(err));
-
-	});
-
-	it('should be able to add user\'s permissions after it has been removed', function(done){
-
-		const permission = { user: 'user2', permissions: ['create_project']};
-
-		async.series([
-			callback => {
-				agent.post(`/${username}/permissions`)
-				.send(permission)
 				.expect(200, function(err, res){
 					callback(err);
 				});
@@ -167,15 +142,14 @@ describe('Account permission::', function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 				.expect(200, function(err, res){
-
-					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+					expect(res.body.find(perm => perm.user === 'user2')).to.deep.equal({user: 'user2', permissions:['create_project']});
 					callback(err);
 				});
 			}
+
 		], (err, res) => done(err));
 
 	});
-
 
 
 	it('should fail to update non team space permissions', function(done){

@@ -40,8 +40,6 @@
 	define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
 	define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
 
-	define("DEFAULT_MEMBER_ROLE", "team_member");
-
 	// Main collections (tables) in 3D Repo
 	define("REPO_COLLECTION_SCENE", "scene");
 	define("REPO_COLLECTION_HISTORY", "history");

@@ -53,7 +53,29 @@ describe('Sharing/Unsharing a model', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			let actions = [];
+			let actions = [
+				function createViewer(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_viewer, password: password_viewer, email: email('viewer'),
+						done
+					});
+				},
+				function createEditor(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_editor, password: password_editor, email: email('editor'),
+						done
+					});
+				},
+				function createCommenter(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_commenter, password: password_commenter, email: email('commenter'),
+						done
+					});
+				}
+			];
 
 			[1,2,3,4,5].forEach(n => {
 
@@ -144,6 +166,7 @@ describe('Sharing/Unsharing a model', function () {
 
 					agent.get(`/${username_viewer}.json`)
 					.expect(200, function(err, res){
+
 						expect(res.body).to.have.property('accounts').that.is.an('array');
 						const account = res.body.accounts.find( a => a.account === username);
 						expect(account).to.have.property('models').that.is.an('array');
