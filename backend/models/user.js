@@ -801,6 +801,7 @@ function _createAccounts(roles, userName)
 								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 									console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
+									myProj.models = models.models.concat(models.models);
 									resolve();
 								});
 							}
