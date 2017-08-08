@@ -796,9 +796,10 @@ function _createAccounts(roles, userName)
 							inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
-
+							console.log("new model IDS:" , newModelIds);
 							if(newModelIds.length){
-								return _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+									console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
 									resolve();
 								});
