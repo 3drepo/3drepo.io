@@ -713,6 +713,7 @@ function _createAccounts(roles, userName)
 	let promises = [];
 
 	roles.forEach( role => {
+		console.log("=============== "+role.db+" ===============");
 		promises.push(User.findByUserName(role.db).then(user => {
 			let tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
@@ -797,11 +798,13 @@ function _createAccounts(roles, userName)
 
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 							console.log("new model IDS:" , newModelIds);
+							console.log(myProj);
 							if(newModelIds.length){
 								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 									console.log("returned models:" , models);
 									myProj.models = models.models.concat(models.fedModels);
 									myProj.models = models.models.concat(models.models);
+									console.log(myProj);
 									resolve();
 								});
 							}
