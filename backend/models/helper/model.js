@@ -1214,8 +1214,10 @@ function importModel(account, model, username, modelSetting, source, data){
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
 
-		//moved to bouncer
-		//modelSetting.timestamp = new Date();
+		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
+		if(source.type === 'toy'){
+			modelSetting.timestamp = new Date();
+		}
 		modelSetting.markModified('errorReason');
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
