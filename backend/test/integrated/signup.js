@@ -46,6 +46,7 @@ describe('Sign up', function(){
 	});
 
 	let username = 'signup_helloworld';
+	let uppercase_username = 'Signup_helloworld';
 	let password = 'password';
 	let email = 'test3drepo_signup@mailinator.com';
 	let firstName = 'Hello';
@@ -80,6 +81,27 @@ describe('Sign up', function(){
 
 	});
 
+	it('with same username but different case should fail', function(done){
+
+		request(server)
+		.post(`/${uppercase_username}`)
+		.send({
+
+			"email": 'test3drepo2_signup@mailinator.com',
+			"password": password,
+			"firstName": firstName,
+			"lastName": lastName,
+			"phoneNo": phoneNo,
+			"countryCode": countryCode,
+			"jobTitle": jobTitle,
+			"company": company
+
+		}).expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
+			done(err);
+		});
+
+	});
 
 	it('should have user created in database after sign up', function(){
 		// use return for promise function
@@ -101,10 +123,11 @@ describe('Sign up', function(){
 		.post(`/${username}`)
 		.send({
 
-			"email": email,
+			"email": 'test3drepo3_signup@mailinator.com',
 			"password": password
 
 		}).expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
 			done(err);
 		});
 
