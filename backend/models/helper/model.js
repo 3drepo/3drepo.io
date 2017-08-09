@@ -1124,7 +1124,6 @@ function uploadFile(req){
 function _deleteFiles(files){
 	'use strict';
 
-	console.log('files', files)
 	files.forEach(file => {
 
 		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);

@@ -111,7 +111,7 @@
 				color: "#F44336"
 			};
 
-			watchModelStatus();
+			vm.watchModelStatus();
 
 			if (vm.model.processing) {
 				vm.fileUploadInfo = "Processing...";
@@ -260,9 +260,11 @@
 		/**
 		 * When users click upload after selecting
 		 */
-		vm.uploadFile = function (model) {
-
-			console.log("vm.uploadFile", model);
+		vm.uploadFile = function () {
+			
+			if (!vm.model) {
+				console.error("No file defined: ", vm.model);
+			}
 
 			vm.uploadErrorMessage = null;
 			var uploadFileData = {
@@ -272,6 +274,8 @@
 				tag: vm.tag, 
 				desc: vm.desc
 			};
+
+			console.log("uploadFileData", uploadFileData);
 
 		
 			AccountUploadService.uploadRevisionToModel(uploadFileData)
@@ -283,8 +287,6 @@
 				.catch(function(errorMessage){
 					vm.uploadErrorMessage = errorMessage;
 				});
-
-				
 
 		};
 
@@ -302,7 +304,7 @@
 		/**
 		 * Watch file upload status
 		 */
-		function watchModelStatus(){
+		vm.watchModelStatus = function(){
 
 			NotificationService.subscribe.modelStatusChanged(vm.account, vm.model.model, function(data){
 
@@ -353,7 +355,8 @@
 			$scope.$on("$destroy", function(){
 				NotificationService.unsubscribe.modelStatusChanged(vm.account, vm.model.model);
 			});
-		}
+
+		};
 
 		/**
 		 * Set up permissions of model

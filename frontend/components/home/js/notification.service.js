@@ -16,7 +16,7 @@
  */
 
 angular.module("3drepo")
-	.factory("NotificationService", NotificationService);
+	.service("NotificationService", NotificationService);
 
 NotificationService.$inject = ["ClientConfigService", "$injector"];
 
@@ -24,14 +24,15 @@ function NotificationService(ClientConfigService, $injector){
 	"use strict";
 
 	if(!ClientConfigService.chatHost || !ClientConfigService.chatPath){
-		console.log("Chat server settings missing");
+		console.error("Chat server settings missing");
 	}
 
 	var socket = io(ClientConfigService.chatHost, {
 		path: ClientConfigService.chatPath, 
 		transports: ["websocket"],
-		reconnectionAttempts: ClientConfigService.chatReconnectionAttempts
+		reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || 5
 	});
+
 	var joined = [];
 
 	function addSocketIdToHeader(socketId){
@@ -106,8 +107,9 @@ function NotificationService(ClientConfigService, $injector){
 	function subscribe(account, model, keys, event, callback){
 
 		joinRoom(account, model);
-		//console.log("sub", getEventName(account, model, keys, event));
-		socket.on(getEventName(account, model, keys, event), function(data){
+
+		var eventName = getEventName(account, model, keys, event);
+		socket.on(eventName, function(data){
 			//console.log("msg rec", getEventName(account, model, keys, event));
 			callback(data);
 		});

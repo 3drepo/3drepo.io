@@ -665,7 +665,6 @@
 						}
 					})
 					.catch(function(error){
-						console.log("Error ", error)
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = error.data.message;
 					});

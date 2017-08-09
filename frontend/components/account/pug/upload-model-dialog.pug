@@ -16,8 +16,12 @@ md-dialog.newModelDialog(aria-label="New model")
 				textarea(placeholder="Revision description (optional)", ng-model="vm.desc")
 
 			md-input-container
-				md-button.md-accent(ng-click="vm.selectFile()") Select File
-				md-button.md-raised.md-accent(ng-disabled="vm.uploadButtonDisabled", ng-click="vm.uploadFile()") Upload
+				md-button.md-accent(
+					ng-click="vm.selectFile()") Select File
+
+				md-button.md-raised.md-accent(
+					ng-disabled="vm.uploadButtonDisabled", 
+					ng-click="vm.uploadFile()") Upload
 
 			#modelDialogFilenameContainer(layout="row", ng-if="vm.modelToUpload")
 				p#modelDialogFilenameIntro Selected file

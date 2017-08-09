@@ -160,8 +160,8 @@
         };
 
         if (config.chat_server) {
-            clientConfig.chatHost	= config.chat_server.chat_host;
-            clientConfig.chatPath	= config.chat_server.subdirectory;
+            clientConfig.chatHost = config.chat_server.chat_host;
+            clientConfig.chatPath = "/" + config.chat_server.subdirectory;
         }
 
         clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
