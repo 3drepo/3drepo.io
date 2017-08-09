@@ -146,6 +146,13 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+//case insenstive
+schema.statics.isUserNameTaken = function(username){
+	return this.count({account: 'admin'}, {
+		user: new RegExp(`^${username}$`, 'i')
+	});
+};
+
 schema.statics.findByEmail = function(email){
 	return this.findOne({account: 'admin'}, { 'customData.email': email });
 };
@@ -313,14 +320,20 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		};
 	}
 
+	return this.isUserNameTaken(username).then(count => {
 
-	let checkEmail = Promise.resolve(0);
+		if(count !== 0){
+			return Promise.reject(responseCodes.USER_EXISTS);
+		}
 
-	if(!skipCheckEmail){
-		checkEmail = this.isEmailTaken(customData.email);
-	}
+		let checkEmail = Promise.resolve(0);
 
-	return checkEmail.then(count => {
+		if(!skipCheckEmail){
+			checkEmail = this.isEmailTaken(customData.email);
+		}
+
+		return checkEmail;
+	}).then(count => {
 
 		if(count === 0){
 
