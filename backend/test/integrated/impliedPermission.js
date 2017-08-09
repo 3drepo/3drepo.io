@@ -96,7 +96,7 @@ describe('Implied permission::', function () {
 		})
 
 		//list teamspaces api show implied permissions
-		it('list teamspaces api show correct inherited and implied permissions', function(done){
+		it('list teamspaces api show correct inherited and implied permissions (1)', function(done){
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
@@ -360,16 +360,15 @@ describe('Implied permission::', function () {
 		});
 
 		//list teamspaces api show implied permissions
-		it('list teamspaces api show correct inherited and implied permissions', function(done){
+		it('list teamspaces api show correct inherited and implied permissions(2)', function(done){
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
 				expect(err).to.not.exist;
-
 				const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
 				expect(teamspace).to.exist;
 				expect(teamspace.permissions).to.deep.equal([]);
-
+				
 				const project = teamspace.projects.find(p => p.name === project2);
 				expect(project).to.exist;
 				expect(project.permissions).to.deep.equal(C.PROJECT_PERM_LIST);
@@ -724,7 +723,7 @@ describe('Implied permission::', function () {
 		})
 
 		//list teamspaces api show implied permissions
-		it('list teamspaces api show correct inherited and implied permissions', function(done){
+		it('list teamspaces api show correct inherited and implied permissions (3)', function(done){
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
@@ -1016,7 +1015,7 @@ describe('Implied permission::', function () {
 			return q.channel.purgeQueue(q.workerQName);
 		});
 
-		it('list teamspaces api show correct inherited and implied permissions', function(done){
+		it('list teamspaces api show correct inherited and implied permissions (4)', function(done){
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){
@@ -1308,7 +1307,7 @@ describe('Implied permission::', function () {
 			return q.channel.purgeQueue(q.workerQName);
 		});
 
-		it('list teamspaces api show correct inherited and implied permissions', function(done){
+		it('list teamspaces api show correct inherited and implied permissions (5)', function(done){
 			agent
 			.get(`/${username}.json`)
 			.expect(200, function(err, res){

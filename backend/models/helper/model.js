@@ -1323,10 +1323,6 @@ function removeModel(account, model, forceRemove){
 
 		//remove model from all project
 		return Project.removeModel(account, model);
-	}).then(() => {
-
-		//remove model from collaborator.customData.models
-		return User.removeModelFromAllUser(account, model);
 	});
 
 }
