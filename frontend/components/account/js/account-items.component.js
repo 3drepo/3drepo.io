@@ -913,50 +913,63 @@
 
 		
 		/**
-		 * Delete a project in a teamspace
+		 * Handle the promise project 
 		 * @param {Promise} promise The promise to handle
 		 * @param {String} teamspaceName The project name to delete 
 		 * @param {Object} update Object that holds flags to signal whether to update or delete
 		 */
 		vm.handleProjectPromise = function(promise, teamspaceName, update) {
-			promise.then(function (response) {
-				
-				if(response.status !== 200 && response.status !== 201){
-					vm.projectData.errorMessage = response.data.message;
-				} else {
-
-					var project = response.data;
+			promise
+				.then(function (response) {
 					
-					if (update.edit) {
-						AccountService.renameProjectInTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							update.newProjectName, 
-							update.oldProjectName
-						);
-					} else if (update.delete) {
-						AccountService.removeProjectInTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							update.projectName
-						);
+					if(response.status !== 200 && response.status !== 201){
+						vm.projectData.errorMessage = response.data.message;
 					} else {
-						AccountService.addProjectToTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							project
-						);
+
+						var project = response.data;
+
+						//TODO: This is a hack, why does the API not return the correct permissions?
+						if (project.permissions.indexOf("edit_project") === -1)  {
+							project.permissions.push("edit_project");
+						}
+
+						if (project.permissions.indexOf("delete_project") === -1) {
+							project.permissions.push("delete_project");
+						}
+						
+						if (update.edit) {
+							AccountService.renameProjectInTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								update.newProjectName, 
+								update.oldProjectName
+							);
+						} else if (update.delete) {
+							AccountService.removeProjectInTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								update.projectName
+							);
+						} else {
+							AccountService.addProjectToTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								project
+							);
+						}
+
+						vm.errorMessage = "";
+						delete vm.newProjectTeamspace;
+						delete vm.newProjectName;
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						vm.closeDialog();
 					}
 
-					vm.errorMessage = "";
-					delete vm.newProjectTeamspace;
-					delete vm.newProjectName;
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					vm.closeDialog();
-				}
-
-			});
+				})
+				.catch(function(error){
+					vm.projectData.errorMessage = error.message;
+				});
 
 		};
 

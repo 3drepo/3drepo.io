@@ -4,8 +4,6 @@ div.homeContainer(
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
 
-	#homeLoggedOut(ng-show="!vm.state.changing")
-		
 	viewer(
 		ng-if="!vm.isMobileDevice"
 		hide-xs
@@ -19,8 +17,8 @@ div.homeContainer(
 
 	div.homeHolder(
 		layout="column"
-		layout-fill
-		ng-if="!vm.state.changing && !vm.goToUserPage")
+		flex="100"
+		ng-if="!vm.state.changing")
 
 		div.homeTopBar
 		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
@@ -34,6 +32,8 @@ div.homeContainer(
 			query='vm.query'
 			ng-if="vm.sendLoginRequest()"
 			keys-down="vm.keysDown")
+
+	#homeLoggedOut(ng-show="!vm.state.changing && !vm.loggedIn")
 
 	#legalLinks
 		a(

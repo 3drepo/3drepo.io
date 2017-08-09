@@ -707,6 +707,10 @@ account-teamspaces label, account-teamspaces p {
   font-size: 14px;
 }
 
+account-teamspaces md-content {
+  margin-bottom: 30px;
+}
+
 account-teamspaces .loadingText {
   padding-top: 100px;
   min-height: 200px;

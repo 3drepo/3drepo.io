@@ -35,11 +35,8 @@
 	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "ClientConfigService", "$location", "SWService", "AnalyticService"];
 
 	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, ClientConfigService, $location, SWService, AnalyticService) {
-		var vm = this,
-			homeLoggedOut,
-			func, i,
-			elementRef, elementScope;
-
+		var vm = this;
+		
 		/*
 		 * Init
 		 */
@@ -53,6 +50,8 @@
 
 			AnalyticService.init();
 			SWService.init();
+
+			vm.loggedIn = false;
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -90,13 +89,15 @@
 
 			$timeout(function () {
 
-				homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
+				vm.homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
 
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/
 				$scope.$watch("vm.state", function (newState, oldState) {
-					
+
+					vm.loggedIn = AuthService.isLoggedIn();
+
 					var changedState = newState !== oldState;
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
@@ -105,9 +106,9 @@
 					
 				}, true);
 
-				vm.isMobileFlag = vm.isMobile();
-
 			});
+
+			vm.isMobileFlag = vm.isMobile();
 
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
 				AuthService.login(vm.account, vm.password);
@@ -195,23 +196,24 @@
 
 
 		function clearDirective() {
-			if (elementRef) {
-				elementRef.remove();
-				elementScope.$destroy();
+			if (vm.elementRef) {
+				vm.elementRef.remove();
+				vm.elementScope.$destroy();
 			}
 		}
 
 		function insertDirective(markup) {
 			var directiveElement = angular.element(markup);
-			homeLoggedOut.append(directiveElement);
-			elementScope = $scope.$new();
-			elementRef = $compile(directiveElement)(elementScope);
+			vm.homeLoggedOut.append(directiveElement);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
 		}
 
 		function getFunctionToInsert() {
 			// Check for static(function) pages to see if we need
 			// render one of them
-			for (i = 0; i < vm.functions.length; i++) {
+			var func;
+			for (var i = 0; i < vm.functions.length; i++) {
 				func = vm.functions[i];
 
 				if (vm.state[func]) {
@@ -222,14 +224,14 @@
 			return null;
 		}
 
-		function insertFunctionDirective(func) {
+		function insertFunctionDirective(insertFunc) {
 
 			// Create element related to function func
-			var directiveMarkup = "<" + func +
+			var directiveMarkup = "<" + insertFunc +
 				" username='vm.query.username'" +
 				" token='vm.query.token'" +
 				" query='vm.query'>" +
-				"</" + func + ">";
+				"</" + insertFunc + ">";
 
 			insertDirective(directiveMarkup);
 		}
