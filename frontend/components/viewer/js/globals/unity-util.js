@@ -420,6 +420,10 @@ var UnityUtil;
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
 	};
 
+	UnityUtil.prototype.setUnits = function(units) {
+		toUnity("SetUnits",LoadingState.MODEL_LOADING, units);
+	};
+
 	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model) {
 		var param = {};
 		if(account && model) {
