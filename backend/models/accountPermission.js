@@ -113,7 +113,9 @@
 			if (index === -1) {
 				return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
 			} else {
+				console.log("permissions before:" + permissions);
 				this.permissions.splice(index, 1);
+				console.log("permissions after:" + permissions);
 				return this.user.save().then(() => {
 					// remove all project permissions in this project as well, if any
 					return Project.find({ account: this.user.user },{ 'permissions.user': user} );

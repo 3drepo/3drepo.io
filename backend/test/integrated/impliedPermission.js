@@ -86,7 +86,18 @@ describe('Implied permission::', function () {
 		});
 
 		after(function(){
-			return q.channel.purgeQueue(q.workerQName);
+			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
+				return q.channel.purgeQueue(q.workerQName);
+			}).then(() => {
+				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
+					return q.channel.purgeQueue(q.modelQName);
+				}).then(() => {
+					server.close(function(){
+						console.log('API test server is closed');
+						done();
+					});
+				});
+			});
 		})
 
 		//list teamspaces api show implied permissions

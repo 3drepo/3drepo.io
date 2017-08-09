@@ -23,6 +23,13 @@ if(config.cn_queue){
 	}).then(() => {
 
 		return q.channel.purgeQueue(q.workerQName);
+	}).then(() => {
+
+		return q.channel.assertQueue(q.modelQName, { durable: true });
+
+	}).then(() => {
+
+		return q.channel.purgeQueue(q.modelQName);
 
 	}).then(() => {
 
