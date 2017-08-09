@@ -76,7 +76,7 @@ describe('Uploading a model', function () {
 	after(function(done){
 
 		let q = require('../../services/queue');
-		q.channel.purgeQueue(q.workerQName).then(() => {
+		q.channel.purgeQueue(q.modelQName).then(() => {
 			server.close(function(){
 				console.log('API test server is closed');
 				done();
