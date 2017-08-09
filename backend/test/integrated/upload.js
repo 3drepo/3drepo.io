@@ -147,7 +147,7 @@ describe('Uploading a model', function () {
 			// upload api return before insert item to queue so introduce some time lag here
 			setTimeout(function(){
 
-				q.channel.assertQueue(q.workerQName, { durable: true }).then( info => {
+				q.channel.assertQueue(q.modelQName, { durable: true }).then( info => {
 
 					//expect 1 message in the worker queue
 					expect(info.messageCount).to.equal(1);
