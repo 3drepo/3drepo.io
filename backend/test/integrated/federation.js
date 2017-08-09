@@ -70,9 +70,13 @@ describe('Federated Model', function () {
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {
-			server.close(function(){
-				console.log('API test server is closed');
-				done();
+			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
+				return q.channel.purgeQueue(q.modelQName);
+			}).then(() => {
+				server.close(function(){
+					console.log('API test server is closed');
+					done();
+				});
 			});
 		});
 	});
