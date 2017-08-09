@@ -280,6 +280,10 @@ var UnityUtil;
 	UnityUtil.prototype.disableClippingPlanes = function() {
 		toUnity("DisableClip");
 	};
+	
+	UnityUtil.prototype.disableMeasuringTool = function(){
+		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
+	}
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};
@@ -290,6 +294,11 @@ var UnityUtil;
 		toUnity("DropPin", LoadingState.MODEL_LOADING, JSON.stringify(params));
 
 	};
+
+	UnityUtil.prototype.enableMeasuringTool = function(){
+		toUnity("StartMeasuringTool", LoadingState.MODEL_LOADING);
+	}
+
 
 	UnityUtil.prototype.getObjectsStatus = function(account, model, promise) {
 		var nameSpace = "";
