@@ -8,6 +8,9 @@ html(lang="en")
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 		meta(name="viewport" content="width=device-width, initial-scale=1")
 		
+		// Theme colour (PWA)
+		meta(name="theme-color" content="#0c2f54")
+
 		title 3D Repo | Online BIM collaboration platform
 
 		// Manifest file (PWA)
@@ -25,7 +28,18 @@ html(lang="en")
 			script(type="text/ng-template", id=j.page+".html")
 				!= renderMe(j.path, locals)
 
-		#notSupported(style='visibility:hidden')
+		noscript
+			#notSupported(aria-label="Not Supported")
+				div(style='margin:0px; text-align: center;')
+					img(style="margin: 10vh;" src="public/images/3drepo-logo-white.png")
+				| JavaScript is currently disabled, this site requires JavaScript to run!
+
+
+		#notSupported(style='visibility:hidden', aria-label="Not Supported")
+
+			div(style='margin:0px; text-align: center;')
+					img(style="margin: 10vh;" src="public/images/3drepo-logo-white.png")
+
 			| Your browser is not supported.
 			| Please upgrade to the latest version of 
 			a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
@@ -44,7 +58,7 @@ html(lang="en")
 				onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
 		// Fallback for IE 
-		|<!-- For IE <= 9-->
+
 		|<!--[if (IE)]>
 		|	<script type="text/javascript">
 		|		document.getElementById('notSupported').style.visibility='visible';
@@ -66,20 +80,7 @@ html(lang="en")
 	
 		// Load config from server and dependencies + 3D Repo JavaScript
 		script(type="text/javascript", src="/config.js")
-		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-
-		// Check for support, if okay bootstrap AngularJS app
-		script.
-
-			if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
-				document.getElementById('notSupported').style.visibility='visible';
-				if (BrowserDetect.version <= 10){
-					document.getElementById('notSupportedButton').style.display = 'none';
-				}
-			} else {
-				angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
-			}
-
+		script(type="text/javascript", src='/public/dist/three_d_repo.min.js', async)
 
 		// ReCapthca
 		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
@@ -90,6 +91,7 @@ html(lang="en")
 			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. 
 			See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
 			-------------------------------------------------
+			
 		if googleConversionId
 
 			script(type='text/javascript').

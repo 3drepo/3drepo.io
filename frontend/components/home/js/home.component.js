@@ -105,10 +105,7 @@
 					
 				}, true);
 
-
-				console.log("Checking is mobile...")
 				vm.isMobileFlag = vm.isMobile();
-
 
 			});
 
