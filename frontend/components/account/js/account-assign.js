@@ -503,8 +503,6 @@
 					return model.model ===  vm.modelSelected;
 				});
 
-			
-
 				return $q(function(resolve, reject) {
 
 					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/permissions";
@@ -518,6 +516,10 @@
 								vm.selectedRole[user.user] = user.permission || "unassigned";
 							});
 							vm.modelReady = true;
+
+							if (vm.teamspaceSelected === vm.account) {
+								vm.selectedRole[vm.account] = "admin";
+							}
 
 							resolve();
 						})
