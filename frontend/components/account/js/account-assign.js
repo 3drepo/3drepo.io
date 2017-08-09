@@ -513,14 +513,19 @@
 
 							var users = response.data;
 							users.forEach(function(user){
-								vm.selectedRole[user.user] = user.permission || "unassigned";
+
+								// If its the teamspace then we can disable 
+								// and assign admin role
+								if (user.user === vm.account) {
+									vm.selectedRole[user.user] = "admin";
+								} else {
+									vm.selectedRole[user.user] = user.permission || "unassigned";
+								}
+								
 							});
 							vm.modelReady = true;
 
-							if (vm.teamspaceSelected === vm.account) {
-								vm.selectedRole[vm.account] = "admin";
-							}
-
+	
 							resolve();
 						})
 						.catch(function(error){

@@ -130,14 +130,14 @@ var Viewer = {};
 			self.element.appendChild(self.viewer);
 			self.viewer.appendChild(canvas);
 			self.viewer.appendChild(self.loadingDiv);
+
 			self.unityLoaderScript = document.createElement("script");
 			self.unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
 		};
 
 		this.init = function(options) {
 
-			
-
+	
 			return new Promise(function(resolve, reject) {
 
 				if (self.initialized) {
