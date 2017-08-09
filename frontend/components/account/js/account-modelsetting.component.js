@@ -53,8 +53,7 @@
 			vm.modelName = vm.urlData["modelName"];
 			vm.targetAcct = vm.urlData["targetAcct"];
 
-
-			UtilsService.doGet(vm.account + "/" + vm.modelId + ".json")
+			UtilsService.doGet(vm.targetAcct + "/" + vm.modelId + ".json")
 				.then(function (response) {
 
 					if (response.status === 200 && response.data && response.data.properties) {
