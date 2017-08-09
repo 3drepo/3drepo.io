@@ -326,14 +326,14 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			return Promise.reject(responseCodes.USER_EXISTS);
 		}
 
-		return this.isEmailTaken(customData.email);
+		let checkEmail = Promise.resolve(0);
 
-	let checkEmail = Promise.resolve(0);
+		if(!skipCheckEmail){
+			checkEmail = this.isEmailTaken(customData.email);
+		}
 
-	if(!skipCheckEmail){
-		checkEmail = this.isEmailTaken(customData.email);
-	}
-	return checkEmail.then(count => {
+		return checkEmail;
+	}).then(count => {
 
 		if(count === 0){
 
