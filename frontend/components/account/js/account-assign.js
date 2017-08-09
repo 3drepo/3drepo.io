@@ -212,7 +212,8 @@
 
 		vm.appendTeamspacePermissions = function(teamspace) {
 
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, teamspace.account + "/permissions" );
+			var endpoint = teamspace.account + "/permissions";
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 			return $http.get(url)
 				.then(function(response) {
 					var permissionsUsers = response.data;
@@ -545,13 +546,14 @@
 			
 			var permissionsToSend = [];
 
-			var validInput = user && user.user && role;
+			var validInput = user && role;
 			if (validInput) {
-				vm.selectedRole[user.user] = role;
+				vm.selectedRole[user] = role;
 			}
-			
+
 			for (var roleUser in vm.selectedRole) {
 				if (roleUser && vm.selectedRole.hasOwnProperty(roleUser)) {
+
 					var permission = vm.selectedRole[roleUser];
 					var notUnassigned = permission !== "unassigned";
 
@@ -562,12 +564,14 @@
 						});
 
 					}
+
 				}
 			}
 
 			// Update the permissions user for the selected teamspace
 			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
 			var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
+
 			$http.post(url, permissionsToSend)
 				.catch(function(error) {
 					var title = "Model Permission Assignment Error";
