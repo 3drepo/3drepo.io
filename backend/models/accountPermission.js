@@ -66,6 +66,11 @@
 					//return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
 					return this.update(permission.user, permission)
 				}
+				if(permission.permissions.length === 0)
+				{
+					//Adding a user with empty permissions is not allowed
+					return Promise.reject(responseCodes.ACCOUNT_PERM_EMPTY);
+				}
 
 				this.permissions.push(permission);
 				return this.user.save().then(() => permission);
@@ -74,23 +79,28 @@
 		},
 
 		update(user, permission){
-
 			return this._check(user, permission).then(() => {
+				if(permission && permission.permissions.length === 0)
+				{
+					//this is actually a remove
+					return this.remove(user);
+				}
+				else
+				{
+					const currPermission = this.findByUser(user);
 
-				const currPermission = this.findByUser(user);
-
-				if(currPermission){
-					currPermission.permissions = permission.permissions;
-				} else {
-					return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
+					if(currPermission){
+						currPermission.permissions = permission.permissions;
+						return this.user.save().then(() => permission);
+					} else {
+						return Promise.reject(responseCodes.ACCOUNT_PERM_NOT_FOUND);
+					}
 				}
 
-				return this.user.save().then(() => permission);
 			});
 		},
 
 		remove(user){
-
 			let index = -1;
 			
 			this.permissions.find((perm, i) => {
