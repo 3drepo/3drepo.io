@@ -490,9 +490,6 @@
 
 	};
 
-	Subscriptions.prototype.findByID = function(id){
-		return this.subscriptions.find(sub => sub.id === id);
-	};
 
 	Subscriptions.prototype.findByJob = function(job){
 		return this.subscriptions.filter(sub => sub.job === job);
