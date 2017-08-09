@@ -334,7 +334,6 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		checkEmail = this.isEmailTaken(customData.email);
 	}
 	return checkEmail.then(count => {
-	}).then(count => {
 
 		if(count === 0){
 
