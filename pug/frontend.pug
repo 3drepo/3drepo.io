@@ -13,16 +13,6 @@ html(lang="en")
 		// Manifest file (PWA)
 		link(rel="manifest" href="/manifest.json")
 
-		// All CSS minified
-		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
-
-		// Styling used in the Angular Material demos
-		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-	
-		// Load config from server and dependencies + 3D Repo JavaScript
-		script(type="text/javascript", src="/config.js")
-		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-		
 	body
 
 		// Frontend plugin Pug files
@@ -46,8 +36,14 @@ html(lang="en")
 			br
 			br
 			br
-			input(id='notSupportedButton' type='button', value='OK', style='padding:10px 60px; font-size:14px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
+			input(
+				id='notSupportedButton' 
+				type='button'
+				value='OK'
+				style='padding:10px 60px; font-size:14px;' 
+				onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
+		// Fallback for IE 
 		|<!-- For IE <= 9-->
 		|<!--[if (IE)]>
 		|	<script type="text/javascript">
@@ -57,9 +53,20 @@ html(lang="en")
 		|	
 		|<![endif]-->
 
-
 		// Entry point for all components
 		home
+
+		// CSS AND JAVASCRIPT -----------------------------------------------------------------------------------------
+
+		// All CSS minified
+		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
+
+		// Styling used in the Angular Material demos
+		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+	
+		// Load config from server and dependencies + 3D Repo JavaScript
+		script(type="text/javascript", src="/config.js")
+		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
 
 		// Check for support, if okay bootstrap AngularJS app
 		script.
@@ -77,7 +84,6 @@ html(lang="en")
 		// ReCapthca
 		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
 
-
 		// Google Code for Remarketing Tag
 		//
 			------------------------------------------------
@@ -92,7 +98,7 @@ html(lang="en")
 				var google_custom_params = window.google_tag_params;
 				var google_remarketing_only = true;
 				/* ]]> */
-			script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
+			script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js', async)
 
 			noscript
 				div(style='display:inline;')

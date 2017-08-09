@@ -23,8 +23,8 @@ div.homeContainer(
 		ng-if="!vm.state.changing && !vm.goToUserPage")
 
 		div.homeTopBar
-		#homeLogo(style="pointer-events:{{vm.pointerEvents}}")
-			img(src="/public/images/3drepo-logo-white.png", ng-click="vm.home()")
+		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
+			img(src="/public/images/3drepo-logo-white.png", alt="3D Repo Logo (White)" ng-click="vm.home()")
 
 		account-dir(
 			flex="100"
