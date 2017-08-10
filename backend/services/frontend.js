@@ -101,13 +101,13 @@
 			res.render("config.pug", {config: serializedConfig});
 		});
 
-		app.get('/*.html', function(req, res){
-			res.status(404).send("File not found");
-		});
+		// app.get('/*.html', function(req, res){
+		// 	res.status(404).send("File not found");
+		// });
 
-		app.get('/*.js', function(req, res){
-			res.status(404).send("File not found");
-		});
+		// app.get('/*.js', function(req, res){
+		// 	res.status(404).send("File not found");
+		// });
 		
 		app.get('*', function(req,res){
 			res.sendFile(path.resolve(publicDir + "/index.html"));
