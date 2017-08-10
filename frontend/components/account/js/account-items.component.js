@@ -34,9 +34,9 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "serverConfig", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
+	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
 
-	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, serverConfig, AnalyticService, NotificationService, AuthService, AccountService) {
+	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, AnalyticService, NotificationService, AuthService, AccountService) {
 		var vm = this;
 
 		/*
@@ -46,12 +46,11 @@
 			vm.info = "Retrieving models...";
 			vm.showProgress = true;
 			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-			vm.units = serverConfig.units;
-			vm.modelRegExp = serverConfig.modelNameRegExp;
+			vm.units = ClientConfigService.units;
+			vm.modelRegExp = ClientConfigService.modelNameRegExp;
 			vm.defaults = {}; 
 			vm.newModelButtonDisabled = true;
 
-			//
 			StateManager.hasBeenBackToTeamspace = true;
 
 			// SETUP FILE UPLOADERS
@@ -432,7 +431,7 @@
 		// MODELS
 
 		$scope.$watch("vm.newModelData", function(newValue) {
-			
+
 			if (newValue) {
 
 				var noOtherType = newValue.type === "Other" && !newValue.otherType;
@@ -464,7 +463,7 @@
 
 				var names = vm.newModelFileToUpload.name.split(".");
 				var find = names[names.length - 1].toLowerCase();
-				var match = serverConfig.acceptedFormat.indexOf(find) === -1;
+				var match = ClientConfigService.acceptedFormat.indexOf(find) === -1;
 
 				if(names.length === 1){
 					vm.showNewModelErrorMessage = true;
@@ -591,6 +590,7 @@
 			vm.showNewModelErrorMessage = false;
 			vm.newModelFileToUpload = null;
 			vm.newModelData = {
+				name: "",
 				account: accountForModel,
 				type: vm.modelTypes[0]
 			};
@@ -665,7 +665,6 @@
 						}
 					})
 					.catch(function(error){
-						console.log("Error ", error)
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = error.data.message;
 					});
@@ -913,50 +912,63 @@
 
 		
 		/**
-		 * Delete a project in a teamspace
+		 * Handle the promise project 
 		 * @param {Promise} promise The promise to handle
 		 * @param {String} teamspaceName The project name to delete 
 		 * @param {Object} update Object that holds flags to signal whether to update or delete
 		 */
 		vm.handleProjectPromise = function(promise, teamspaceName, update) {
-			promise.then(function (response) {
-				
-				if(response.status !== 200 && response.status !== 201){
-					vm.projectData.errorMessage = response.data.message;
-				} else {
-
-					var project = response.data;
+			promise
+				.then(function (response) {
 					
-					if (update.edit) {
-						AccountService.renameProjectInTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							update.newProjectName, 
-							update.oldProjectName
-						);
-					} else if (update.delete) {
-						AccountService.removeProjectInTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							update.projectName
-						);
+					if(response.status !== 200 && response.status !== 201){
+						vm.projectData.errorMessage = response.data.message;
 					} else {
-						AccountService.addProjectToTeamspace(
-							vm.accounts, 
-							teamspaceName, 
-							project
-						);
+
+						var project = response.data;
+
+						//TODO: This is a hack, why does the API not return the correct permissions?
+						if (project.permissions.indexOf("edit_project") === -1)  {
+							project.permissions.push("edit_project");
+						}
+
+						if (project.permissions.indexOf("delete_project") === -1) {
+							project.permissions.push("delete_project");
+						}
+						
+						if (update.edit) {
+							AccountService.renameProjectInTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								update.newProjectName, 
+								update.oldProjectName
+							);
+						} else if (update.delete) {
+							AccountService.removeProjectInTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								update.projectName
+							);
+						} else {
+							AccountService.addProjectToTeamspace(
+								vm.accounts, 
+								teamspaceName, 
+								project
+							);
+						}
+
+						vm.errorMessage = "";
+						delete vm.newProjectTeamspace;
+						delete vm.newProjectName;
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						vm.closeDialog();
 					}
 
-					vm.errorMessage = "";
-					delete vm.newProjectTeamspace;
-					delete vm.newProjectName;
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					vm.closeDialog();
-				}
-
-			});
+				})
+				.catch(function(error){
+					vm.projectData.errorMessage = error.message;
+				});
 
 		};
 

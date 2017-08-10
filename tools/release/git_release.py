@@ -38,19 +38,25 @@ if production:
 
 code = 0
 
-if production:
-    code |= os.system("git add -f ./public/css/external/three-d-repo.css")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.woff")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.eot")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.ttf")
-    code |= os.system("git add -f ./public/dist")
+# if production:
+#     code |= os.system("git add -f ./public/css/external/three-d-repo.css")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.woff")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.eot")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.ttf")
+#     code |= os.system("git add -f ./public/dist")
 
 if code:
     fatalError("git force add failed")
 
 os.system("git commit -m \"Version " + version + "\"")
 
-os.system("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + version + "\"/' backend/config.js")
+VERSION_FILE = 'backend/VERSION.json'
+with open(VERSION_FILE, 'r+') as f:
+    text = f.read()
+    text = '{ "VERSION" : "' + version + '" }'
+    f.seek(0)
+    f.write(text)
+    f.truncate()
 
 os.system("git add backend")
 os.system("git clean -f -d")

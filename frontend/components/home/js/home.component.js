@@ -32,14 +32,11 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "serverConfig", "$location", "SWService"];
+	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "ClientConfigService", "$location", "SWService", "AnalyticService"];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, serverConfig, $location, SWService) {
-		var vm = this,
-			homeLoggedOut,
-			func, i,
-			elementRef, elementScope;
-
+	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, ClientConfigService, $location, SWService, AnalyticService) {
+		var vm = this;
+		
 		/*
 		 * Init
 		 */
@@ -51,7 +48,10 @@
 				removeTrailingSlash();
 			}
 
+			AnalyticService.init();
 			SWService.init();
+
+			vm.loggedIn = false;
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -61,9 +61,11 @@
 			vm.goToUserPage = false;
 			vm.keysDown = [];
 
+			vm.isMobileFlag = true;
+
 			vm.legalDisplays = [];
-			if (angular.isDefined(serverConfig.legal)) {
-				vm.legalDisplays = serverConfig.legal;
+			if (angular.isDefined(ClientConfigService.legal)) {
+				vm.legalDisplays = ClientConfigService.legal;
 			}
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
@@ -87,13 +89,15 @@
 
 			$timeout(function () {
 
-				homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
+				vm.homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
 
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/
 				$scope.$watch("vm.state", function (newState, oldState) {
-					
+
+					vm.loggedIn = AuthService.isLoggedIn();
+
 					var changedState = newState !== oldState;
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
@@ -104,9 +108,44 @@
 
 			});
 
+			vm.isMobileFlag = vm.isMobile();
+
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
 				AuthService.login(vm.account, vm.password);
 			}
+
+		};
+
+
+		vm.isMobile = function() {
+
+			var mobile = screen.width <= 768;
+
+			if (mobile) {
+				vm.handleMobile();
+			}
+
+			console.log("Is mobile? ", mobile);
+			return mobile;
+
+		};
+
+		vm.handleMobile = function() {
+
+			var message = "We have detected you are on a " +
+			"mobile device and will show the 3D Repo lite experience for " +
+			"smoother performance.";
+
+			$mdDialog.show(
+
+				$mdDialog.confirm()
+					.clickOutsideToClose(true)
+					.title("3D Repo Lite")
+					.textContent(message)
+					.ariaLabel("3D Repo Lite Dialog")
+					.ok("OK")
+					
+			);
 
 		};
 
@@ -157,23 +196,24 @@
 
 
 		function clearDirective() {
-			if (elementRef) {
-				elementRef.remove();
-				elementScope.$destroy();
+			if (vm.elementRef) {
+				vm.elementRef.remove();
+				vm.elementScope.$destroy();
 			}
 		}
 
 		function insertDirective(markup) {
 			var directiveElement = angular.element(markup);
-			homeLoggedOut.append(directiveElement);
-			elementScope = $scope.$new();
-			elementRef = $compile(directiveElement)(elementScope);
+			vm.homeLoggedOut.append(directiveElement);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
 		}
 
 		function getFunctionToInsert() {
 			// Check for static(function) pages to see if we need
 			// render one of them
-			for (i = 0; i < vm.functions.length; i++) {
+			var func;
+			for (var i = 0; i < vm.functions.length; i++) {
 				func = vm.functions[i];
 
 				if (vm.state[func]) {
@@ -184,14 +224,14 @@
 			return null;
 		}
 
-		function insertFunctionDirective(func) {
+		function insertFunctionDirective(insertFunc) {
 
 			// Create element related to function func
-			var directiveMarkup = "<" + func +
+			var directiveMarkup = "<" + insertFunc +
 				" username='vm.query.username'" +
 				" token='vm.query.token'" +
 				" query='vm.query'>" +
-				"</" + func + ">";
+				"</" + insertFunc + ">";
 
 			insertDirective(directiveMarkup);
 		}

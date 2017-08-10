@@ -35,9 +35,9 @@
 		});
 
 
-	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "ClientConfigService"];
 
-	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, ClientConfigService) {
 		var vm = this;
 
 		/*
@@ -46,8 +46,8 @@
 		vm.$onInit = function() {
 			vm.showInfo = true;
 			vm.saveDisabled = true;
-			vm.countries = serverConfig.countries;
-			vm.usStates = serverConfig.usStates;
+			vm.countries = ClientConfigService.countries;
+			vm.usStates = ClientConfigService.usStates;
 			vm.showStates = false;
 			vm.newBillingAddress = {};
 		};
@@ -143,7 +143,7 @@
 		vm.downloadBilling = function (index) {
 			//$window.open("/billing?user=" + vm.account + "&item=" + index);
 			var endpoint = vm.account + "/invoices/" + vm.billings[index].invoiceNo + ".pdf";
-			var url = serverConfig.apiUrl(serverConfig.GET_API, endpoint);
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 			$window.open(url, "_blank");
 		};
 

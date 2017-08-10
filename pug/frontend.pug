@@ -8,58 +8,15 @@ html(lang="en")
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 		meta(name="viewport" content="width=device-width, initial-scale=1")
 		
+		// Theme colour (PWA)
+		meta(name="theme-color" content="#0c2f54")
+
 		title 3D Repo | Online BIM collaboration platform
 
-		script(type="text/javascript", src="/public/plugins/base/config.js")
-		
 		// Manifest file (PWA)
 		link(rel="manifest" href="/manifest.json")
 
-		// All CSS minified
-		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
-
-		// Styling used in the Angular Material demos
-		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
-
-		script.
-			SERVER_VARS = {
-				structure: !{structure},
-				parentStateJSON: !{parentStateJSON},
-				uiState: !{uistate}
-			}
-
-		// Load NPM dependencies and 3D Repo JavaScript
-		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
-
 	body
-		style.
-			#notSupported {
-				position: fixed;
-				background-color: lightgoldenrodyellow;
-				padding: 100px 50px;
-				left: 0;
-				right: 0;
-				margin: auto;
-				width: 50%;
-				text-align: center;
-				z-index: 10;
-				top: 20%;
-				font-size: 20px;
-				height: 70px;
-			}
-
-		#notSupported(style='visibility:hidden')
-			| Your browser is not supported.
-			| Please upgrade to the latest version of 
-			a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
-			| , 
-			a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
-			|  or 
-			a(target='_blank', href='https://www.microsoft.com/en-gb/windows/microsoft-edge') Edge
-			br
-			br
-			br
-			input(id='notSupportedButton' type='button', value='OK', style='padding:10px 60px; font-size:14px;' onclick='document.getElementById("notSupported").style.visibility="hidden"')
 
 		// Frontend plugin Pug files
 		each j in frontendPug
@@ -71,73 +28,123 @@ html(lang="en")
 			script(type="text/ng-template", id=j.page+".html")
 				!= renderMe(j.path, locals)
 
-		home
-
-	|<!-- For IE <= 9-->
-	|<!--[if (IE)]>
-	|	<script type="text/javascript">
-	|		document.getElementById('notSupported').style.visibility='visible';
-	|		document.getElementById('notSupportedButton').style.display = 'none';
-	|	</script>
-	|	
-	|<![endif]-->
-
-	script.
-		if(window && window.BrowserDetect && BrowserDetect.browser === 'Explorer'){
-			document.getElementById('notSupported').style.visibility='visible';
-			if (BrowserDetect.version <= 10){
-				document.getElementById('notSupportedButton').style.display = 'none';
+		// Inline CSS if CSS fails, also faster
+		style.
+			body #notSupported {
+				max-width: 100%;
+				max-height: 100%;
+				overflow: hidden;
+				position: absolute;
+				background: #0c2f54;
+				color: white;
+				left: 0;
+				right: 0;
+				width: 100%;
+				height: 100%;
+				text-align: center;
+				z-index: 10;
+				font-size: 20px;
 			}
-		}
 
-	if googleConversionId
+			body #notSupported a {
+				color: #289874;
+			}
+
+			body #notSupported img {
+				margin: 4%;
+				width: 90%;
+				max-width: 500px;
+			}
+
+			body #notSupported div {
+				margin: 4%; 
+				text-align: center;
+			}
+
+		noscript
+			#notSupported(aria-label="Not Supported")
+				div
+					img(src="public/images/3drepo-logo-white.png")
+				div
+					| JavaScript is currently disabled, this site requires JavaScript to run!
+
+
+		#notSupported(style='visibility:hidden', aria-label="Not Supported")
+			div
+					img(src="public/images/3drepo-logo-white.png")
+			div
+				| Your browser is not supported.
+				| Please upgrade to the latest version of 
+				a(href='https://www.google.co.uk/chrome', target='_blank') Chrome
+				| , 
+				a(href='https://www.mozilla.org/firefox', target='_blank') FireFox
+				|  or 
+				a(target='_blank', href='https://www.microsoft.com/en-gb/windows/microsoft-edge') Edge
+				br
+				br
+				br
+				input(
+					id='notSupportedButton' 
+					type='button'
+					value='OK'
+					style='padding:10px 60px; font-size:14px;' 
+					onclick='document.getElementById("notSupported").style.visibility="hidden"')
+
+		// Fallback for IE 
+
+		|<!--[if (IE)]>
+		|	<script type="text/javascript">
+		|		document.getElementById('notSupported').style.visibility='visible';
+		|		document.getElementById('notSupportedButton').style.display = 'none';
+		|	</script>
+		|	
+		|<![endif]-->
+
+		// Entry point for all components
+		home(flex, layout="column")
+
+		// CSS AND JAVASCRIPT -----------------------------------------------------------------------------------------
+
+		// All CSS minified
+		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
+
+		// Styling used in the Angular Material demos
+		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+	
+		// Load config from server and dependencies + 3D Repo JavaScript
+		script(type="text/javascript", src="/config.js")
+		script(type="text/javascript", src='/public/dist/three_d_repo.min.js', async)
+
+		// ReCapthca
+		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
 
 		// Google Code for Remarketing Tag
 		//
 			------------------------------------------------
-			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
+			Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. 
+			See more information and instructions on how to setup the tag on: http://google.com/ads/remarketingsetup
 			-------------------------------------------------
-		script(type='text/javascript').
-			/* <![CDATA[ */
-			var google_conversion_id = !{googleConversionId};
-			var google_custom_params = window.google_tag_params;
-			var google_remarketing_only = true;
-			/* ]]> */
-		script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js')
-		noscript
-			div(style='display:inline;')
-				img(height='1'
-					width='1'
-					style='border-style:none;'
-					alt=''
-					src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
+			
+		if googleConversionId
 
+			script(type='text/javascript').
+				/* <![CDATA[ */
+				var google_conversion_id = !{googleConversionId};
+				var google_custom_params = window.google_tag_params;
+				var google_remarketing_only = true;
+				/* ]]> */
+			script(type='text/javascript', src='//www.googleadservices.com/pagead/conversion.js', async)
 
-	// Load Angular
-	script.
-		angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
+			noscript
+				div(style='display:inline;')
+					img(height='1'
+						width='1'
+						style='border-style:none;'
+						alt=''
+						src='//googleads.g.doubleclick.net/pagead/viewthroughconversion/#{googleConversionId}/?guid=ON&script=0')
 
-	// ReCapthca
-	script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async)
-
-	if !development
-		// If not in development load Google Analytics
-		if gaTrackId
-			script.
-				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-		if gaTrackId && userId
-			script.
-				ga('create', '!{gaTrackId}', 'auto', { userId: '!{userId}' });
-		else
-			script.
-				ga('create', '!{gaTrackId}', 'auto');
-	
-	else 
-		// Else load LiveReload
-		script(src="//localhost:35729/livereload.js", async)
+		if development
+			// Else load LiveReload
+			script(src="//localhost:35729/livereload.js", async)
 
 

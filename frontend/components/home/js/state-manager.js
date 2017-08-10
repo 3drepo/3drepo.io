@@ -19,9 +19,9 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "structure",
-			function($stateProvider, $urlRouterProvider, $locationProvider, structure) {
-
+		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider",
+			function($stateProvider, $urlRouterProvider, $locationProvider) {
+				
 				$locationProvider.html5Mode(true);
 
 				$stateProvider.state("home", {
@@ -59,7 +59,8 @@
 					);
 				}
 
-				var stateStack       = [structure];
+				// TODO: We need to find a way to make ClientConfig come from the service
+				var stateStack       = [ClientConfig.structure];
 				var stateNameStack   = ["home"];
 
 				//console.log("stateStack", stateStack);
@@ -124,8 +125,8 @@
 
 				$urlRouterProvider.otherwise("");
 			}])
-		.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "AuthService", "$timeout", "AnalyticService",
-			function($location, $rootScope, $state, uiState, StateManager, AuthService, $timeout, AnalyticService) {
+		.run(["$location", "$rootScope", "$state", "StateManager", "AuthService", "$timeout", "AnalyticService",
+			function($location, $rootScope, $state, StateManager, AuthService, $timeout, AnalyticService) {
 				$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 
 					StateManager.state.changing = true;
@@ -176,8 +177,8 @@
 				});
 			}])
 		.service("StateManager", 
-			["$mdDialog", "$location", "$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "AuthService", 
-				function($mdDialog, $location, $q, $state, $rootScope, $timeout, structure, EventService, $window, AuthService) {
+			["$mdDialog", "$location", "$q", "$state", "$rootScope", "$timeout", "EventService", "$window", "AuthService", "ClientConfigService", 
+				function($mdDialog, $location, $q, $state, $rootScope, $timeout, EventService, $window, AuthService, ClientConfigService) {
 							
 					var self = this;
 
@@ -192,7 +193,7 @@
 					};
 
 					this.changedState = {};
-					this.structure  = structure;
+					this.structure  = ClientConfigService.structure;
 					this.destroy = function()  {
 						delete this.state;
 						this.state = {};
@@ -211,14 +212,13 @@
 					this.query       = {};
 					this.functions   = [];
 
-					var stateStack       = [structure];
+					var stateStack       = [ClientConfigService.structure];
 
 					// Populate list of functions
 					while (stateStack.length > 0) {
 						var stackLength      = stateStack.length;
 						var parentState      = stateStack[stackLength - 1];
 
-						var i = 0;
 						var functionName;
 
 						if (parentState.functions) {
@@ -234,8 +234,8 @@
 						}
 
 						if (parentState.children) {
-							for (var i = 0; i < parentState.children.length; i++) {
-								stateStack.push(parentState.children[i]);
+							for (var j = 0; j < parentState.children.length; j++) {
+								stateStack.push(parentState.children[j]);
 							}
 						}
 
@@ -243,9 +243,9 @@
 					}
 
 					this.clearChanged = function() {
-						for(var i in self.changed) {
-							if (self.changed.hasOwnProperty(i)) {
-								self.changed[i] = false;
+						for(var c in self.changed) {
+							if (self.changed.hasOwnProperty(c)) {
+								self.changed[c] = false;
 							}
 						}
 					};
@@ -294,7 +294,7 @@
 
 						// Loop through structure. If a parent is null, then we must clear
 						// it's children
-						var stateStack       = [structure];
+						var stateStack       = [ClientConfigService.structure];
 						var stateNameStack   = ["home"];
 						var clearBelow       = false;
 

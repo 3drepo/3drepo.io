@@ -19,38 +19,48 @@
 (function () {
 	"use strict";
 		
-	angular.module("3drepo")
-		.config(["$injector",  function($injector) {
-			if ($injector.has("$mdThemingProvider")) {
-				var mdThemingProvider = $injector.get("$mdThemingProvider");
+	angular
+		.module("3drepo")
+		.config(themeConfig);
 
-				var paletteName = "three_d_repo_primary";
-				mdThemingProvider.definePalette(paletteName, {
-					"50": "0C2F54",
-					"100": "0C2F54",
-					"200": "0C2F54",
-					"300": "0C2F54",
-					"400": "0C2F54",
-					"500": "0C2F54",
-					"600": "0C2F54",
-					"700": "0C2F54",
-					"800": "0C2F54",
-					"900": "0C2F54",
-					"A100": "06563C",
-					"A200": "06563C",
-					"A400": "087251",
-					"A700": "087251",
-					"contrastDefaultColor": "light",
-					"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
-					"contrastLightColors": undefined
-				});
+	themeConfig.$inject = ["$mdThemingProvider"];
 
-				mdThemingProvider.theme("default")
-					.primaryPalette(paletteName)
-					.accentPalette(paletteName)
-					.warnPalette("red");
-			}
-		}]);
+	function themeConfig($mdThemingProvider) {
+
+		//$mdThemingProvider.generateThemesOnDemand(true);
+
+		var paletteName = "three_d_repo_primary";
+		$mdThemingProvider.definePalette(paletteName, {
+			"50": "0C2F54",
+			"100": "0C2F54",
+			"200": "0C2F54",
+			"300": "0C2F54",
+			"400": "0C2F54",
+			"500": "0C2F54",
+			"600": "0C2F54",
+			"700": "0C2F54",
+			"800": "0C2F54",
+			"900": "0C2F54",
+			"A100": "06563C",
+			"A200": "06563C",
+			"A400": "087251",
+			"A700": "087251",
+			"contrastDefaultColor": "light",
+			"contrastDarkColors": ["50", "100", "200", "300", "400", "A100"],
+			"contrastLightColors": undefined
+		});
+
+		$mdThemingProvider.theme("default")
+			.primaryPalette(paletteName)
+			.accentPalette(paletteName)
+			.warnPalette("red");
+
+		$mdThemingProvider.setDefaultTheme("default");
+		//$mdTheming.generateTheme('altTheme');
+		//mdThemingProvider.reload('default'); 
+
+
+	}
 
 
 })();

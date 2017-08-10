@@ -18,11 +18,10 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.13.22";
+	const VERSION = require("./VERSION.json").VERSION;
 
-	let config = require("app-config")
-		.config;
-	//const frontend_scripts = require("../common_public_files.js");
+	const config = require("app-config").config;
+
 	const sessionFactory = require("./services/session.js");
 
 	/*******************************************************************************
@@ -36,55 +35,6 @@
 		} else {
 			return variable;
 		}
-	};
-
-	/*******************************************************************************
-	 * Round robin API configuration
-	 * @param {Object} variable - variable to coalesce
-	 * @param {Object} value - value to return if object is null or undefined
-	 *******************************************************************************/
-	let createRoundRobinAlgorithm = function()
-	{
-			let roundRobin = {
-				apiUrls : config.apiUrls,
-				apiUrlCounter: {}
-			};
-
-			/*
-			params.config_js += "server_config.apiUrls = {";
-
-			for (let k in config.apiUrls) {
-				if (config.apiUrls.hasOwnProperty(k)) {
-					params.config_js += "\"" + k + "\" : [";
-					params.config_js += config.apiUrls[k].join(",");
-					params.config_js += "],";
-				}
-			}
-
-			params.config_js += "};\n";
-
-			params.config_js += "server_config.apiUrlCounter = {";
-			*/
-
-			for (let k in config.apiUrls) {
-				if(config.apiUrls.hasOwnProperty(k)){
-					roundRobin.apiUrlCounter[k] = 0;
-				}
-			}
-
-			//params.config_js += "};\n";
-
-			// self variable will be filled in by frontend
-			roundRobin.apiUrl = function(type, path) {
-				var typeFunctions = this.apiUrls[type];
-				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-				this.apiUrlCounter[type] += 1;
-
-				return this.apiUrls[type][functionIndex](path);
-			};
-
-			return roundRobin;
 	};
 
 	/*******************************************************************************
@@ -210,7 +160,7 @@
 	}
 
 	// Change the algorithm for choosing an API server
-	config.apiAlgorithm = createRoundRobinAlgorithm();
+	//config.apiAlgorithm = createRoundRobinAlgorithm();
 
 	config.disableCache = coalesce(config.disableCache, false);
 
@@ -276,6 +226,7 @@
 	//upload size limit
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
+	config.userNotice = coalesce(config.userNotice, "");
 
 	//default vat validation url
 	config.vat = coalesce(config.vat, {});

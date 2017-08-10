@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "ClientConfigService", "UtilsService"];
 
-	function AccountInfoCtrl ($location, $scope, serverConfig, UtilsService) {
+	function AccountInfoCtrl ($location, $scope, ClientConfigService, UtilsService) {
 		var vm = this;
 		
 		/*
@@ -65,7 +65,7 @@
 
 
 		function getAvatarUrl(){
-			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + "?" + new Date().valueOf();
+			return ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.username + "/avatar") + "?" + new Date().valueOf();
 		}
 
 		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){

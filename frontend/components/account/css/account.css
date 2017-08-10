@@ -47,6 +47,7 @@ account-dir #account #accountItem userContent {
   account-dir #account #accountItem {
     margin-left: 5%;
     margin-bottom: 100px;
+    margin-top: 200px;
   }
 }
 
@@ -704,6 +705,10 @@ account-federations #federationInfoRight p:only-child {
 
 account-teamspaces label, account-teamspaces p {
   font-size: 14px;
+}
+
+account-teamspaces md-content {
+  margin-bottom: 30px;
 }
 
 account-teamspaces .loadingText {

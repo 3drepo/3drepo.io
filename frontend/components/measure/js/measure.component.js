@@ -31,19 +31,12 @@
 			controllerAs: "vm"
 		});
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService", "serverConfig"];
-
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService", "ClientConfigService"];
 
 	function MeasureCtrl ($scope, $element, EventService, ModelService, ClientConfigService) {
 		var vm = this;
 
 		vm.$onInit = function() {
-
-			vm.show = false;
-			vm.distance = false;
-			vm.allowMove = false;
-			vm.units = serverConfig.units;
-
 
 			vm.axisDistance = [0.0, 0.0, 0.0];
 			vm.totalDistance = 0.0;
@@ -102,6 +95,7 @@
 						} else {
 							vm.show = false;
 						}
+
 					}
 				}
 			});

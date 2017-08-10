@@ -44,9 +44,9 @@
 			}
 		});
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "serverConfig", "AnalyticService", "$state", "$q"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", "AnalyticService", "$state", "$q"];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, serverConfig, AnalyticService, $state, $q) {
+	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, ClientConfigService, AnalyticService, $state, $q) {
 		var vm = this;
 
 		/*
@@ -208,7 +208,7 @@
 				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
 				vm.issuesReady.then(function(){
 					//console.log("Disabled - canAddUse before permission check in issues.component.js");
-					if(AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
 						vm.canAddIssue = true;
 						//console.log("Disabled - canAddUse set to true in issues.component.js");
 					} 

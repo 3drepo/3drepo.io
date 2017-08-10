@@ -19,8 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.service("AuthService", ["$injector", "$q", "$http", "$interval", "serverConfig", "EventService", "AnalyticService", 
-			function($injector, $q, $http, $interval, serverConfig, EventService, AnalyticService) {
+		.service("AuthService", ["$injector", "$q", "$http", "$interval", "ClientConfigService", "EventService", "AnalyticService", 
+			function($injector, $q, $http, $interval, ClientConfigService, EventService, AnalyticService) {
 
 				var authPromise = $q.defer();
 
@@ -53,7 +53,7 @@
 
 				function initAutoLogout() {
 					// Check for expired sessions
-					var checkExpiredSessionTime = serverConfig.login_check_interval || 8; // Seconds
+					var checkExpiredSessionTime = ClientConfigService.login_check_interval || 8; // Seconds
 					$interval(function() {
 						init(true);
 					}, 1000 * checkExpiredSessionTime);
@@ -137,7 +137,7 @@
 								}
 							})
 							.catch(function(reason) {
-								var code = serverConfig.responseCodes.ALREADY_LOGGED_IN.code;
+								var code = ClientConfigService.responseCodes.ALREADY_LOGGED_IN.code;
 								if (interval && reason.code == code) {
 
 									loginSuccess(reason);
@@ -175,7 +175,7 @@
 				}
 
 				function sendLoginRequest() {
-					return $http.get(serverConfig.apiUrl(serverConfig.GET_API, "login"));
+					return $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, "login"));
 				}
 
 				function login(loginUsername, password) {
@@ -183,7 +183,7 @@
 
 					var postData = {username: loginUsername, password: password};
 
-					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData)
+					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "login"), postData)
 						.then(loginSuccess)
 						.catch(loginFailure);
 
@@ -195,7 +195,7 @@
 
 					UnityUtil.reset();
 					
-					$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout"))
+					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "logout"))
 						.then(logoutSuccess)
 						.catch(logoutFailure);
 

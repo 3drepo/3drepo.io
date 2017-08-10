@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z "$1" ]
+  then
+    echo "No config argument supplied"
+else
+    if [ "$EUID" -ne 0 ]
+        then echo "If running locally then you may require sudo due to port issues \n \n"
+    fi
+    command -v nodemon >/dev/null 2>&1 || { echo >&2 "Script requires nodemon but it's not installed.  Aborting."; exit 1; }
+    NODE_ENV=$1 NODE_CONFIG_DIR='./config' nodemon  -e js,pug "./backend/3drepo.js" 
+fi

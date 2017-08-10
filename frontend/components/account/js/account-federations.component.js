@@ -44,15 +44,15 @@
 			controllerAs: "vm"
 		});
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig", "AuthService", "AnalyticService", "AccountService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "ClientConfigService", "AuthService", "AnalyticService", "AccountService"];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, serverConfig, AuthService, AnalyticService, AccountService) {
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, ClientConfigService, AuthService, AnalyticService, AccountService) {
 		var vm = this;
 
 		vm.$onInit = function() {
 			vm.isSaving = false;
-			vm.modelRegExp = serverConfig.modelNameRegExp;
-			vm.units = serverConfig.units;
+			vm.modelRegExp = ClientConfigService.modelNameRegExp;
+			vm.units = ClientConfigService.units;
 			vm.dialogCloseTo = "accountFederationsOptionsMenu_" + vm.account.account;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 		};
@@ -66,9 +66,9 @@
 		vm.showMenu = function(model, account){
 			
 			var isUserAccount = account.account === vm.account.account;
-			return AuthService.hasPermission(serverConfig.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
-					AuthService.hasPermission(serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
-					AuthService.hasPermission(serverConfig.permissions.PERM_DELETE_MODEL, model.permissions) ||
+			return AuthService.hasPermission(ClientConfigService.permissions.PERM_EDIT_FEDERATION, model.permissions) ||
+					AuthService.hasPermission(ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS, model.permissions) ||
+					AuthService.hasPermission(ClientConfigService.permissions.PERM_DELETE_MODEL, model.permissions) ||
 					isUserAccount;
 		};
 
@@ -121,7 +121,7 @@
 					label: "Edit",
 					icon: "edit", 
 					hidden: !AuthService.hasPermission(
-						serverConfig.permissions.PERM_EDIT_FEDERATION, 
+						ClientConfigService.permissions.PERM_EDIT_FEDERATION, 
 						model.permissions
 					)
 				},
@@ -130,7 +130,7 @@
 					icon: "delete", 
 					color: "#F44336", 
 					hidden: !AuthService.hasPermission(
-						serverConfig.permissions.PERM_DELETE_MODEL, 
+						ClientConfigService.permissions.PERM_DELETE_MODEL, 
 						model.permissions
 					)
 				},
@@ -143,7 +143,7 @@
 					label: "Settings",
 					icon: "settings", 
 					hidden: !AuthService.hasPermission(
-						serverConfig.permissions.PERM_CHANGE_MODEL_SETTINGS, 
+						ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS, 
 						model.permissions
 					)
 				}

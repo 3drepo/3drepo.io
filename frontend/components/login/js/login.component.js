@@ -27,17 +27,17 @@
 			controllerAs: "vm"
 		});
 
-	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "serverConfig", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "UtilsService"];
 
-	function LoginCtrl($scope, $location, AuthService, EventService, serverConfig, UtilsService) {
-		var vm = this,
-			enterKey = 13;
+	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, UtilsService) {
+		var vm = this;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.version = serverConfig.apiVersion;
+			vm.version = ClientConfigService.VERSION;
+			vm.userNotice = ClientConfigService.userNotice;
 		};
 
 		/**
@@ -46,6 +46,8 @@
 		 * @param {Object} event
 		 */
 		vm.login = function(event) {
+			var enterKey = 13;
+
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
 					AuthService.login(vm.user.username, vm.user.password);

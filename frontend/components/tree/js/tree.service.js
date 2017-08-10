@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("TreeService", TreeService);
 
-	TreeService.$inject = ["$http", "$q", "EventService", "serverConfig"];
+	TreeService.$inject = ["$http", "$q", "EventService", "ClientConfigService"];
 
-	function TreeService($http, $q, EventService, serverConfig) {
+	function TreeService($http, $q, EventService, ClientConfigService) {
 		var ts = this;
 		var cachedTreeDefer = $q.defer();
 		var cachedTree = cachedTreeDefer.promise;
@@ -72,7 +72,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "fulltree.json";
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 				.then(function(json) {
 					//var mainTree = JSON.parse(json.data.mainTree);
 					var mainTree = json.data.mainTree;
@@ -113,7 +113,7 @@
 
 								if(tree.url){
 									//var obj = JSON.parse(tree.buf);
-									var getSubTree = $http.get(serverConfig.apiUrl(serverConfig.GET_API, tree.url)).then(function(res){
+									var getSubTree = $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, tree.url)).then(function(res){
 
 										if(res.status === 401){
 											tree.status = "NO_ACCESS";
@@ -171,7 +171,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 				.then(function(json) {
 					deferred.resolve(json);
 				});
