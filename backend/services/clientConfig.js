@@ -166,7 +166,7 @@
 
         clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
 
-        clientConfig.apiVersion = config.version;
+        clientConfig.VERSION = config.version;
 
         if (serverConfig.backgroundImage) {
             clientConfig.backgroundImage = serverConfig.backgroundImage;

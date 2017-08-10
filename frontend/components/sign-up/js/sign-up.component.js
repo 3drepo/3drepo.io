@@ -50,7 +50,7 @@
 
 			vm.buttonLabel = "Sign Up!";
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
-			vm.version = ClientConfigService.apiVersion;
+			vm.version = ClientConfigService.VERSION;
 			vm.logo = "/public/images/3drepo-logo-white.png";
 			vm.captchaKey = ClientConfigService.captcha_client_key;
 

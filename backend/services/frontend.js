@@ -68,6 +68,10 @@
 
 		const clientConfig = createClientConfig(serverConfig);
 
+		app.get("/version.json", function (req, res) {
+			return res.json({"VERSION": clientConfig.VERSION });
+		});
+
 		app.get("/config.js", function (req, res) {
 
 			// Only need to set the userId the rest is static

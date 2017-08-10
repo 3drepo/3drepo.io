@@ -36,7 +36,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.version = ClientConfigService.apiVersion;
+			vm.version = ClientConfigService.VERSION;
 			vm.userNotice = ClientConfigService.userNotice;
 		};
 

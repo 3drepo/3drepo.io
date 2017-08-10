@@ -18,11 +18,10 @@
 (() => {
 	"use strict";
 
-	const VERSION="1.13.22";
+	const VERSION = require("./VERSION.json").VERSION;
 
-	let config = require("app-config")
-		.config;
-	//const frontend_scripts = require("../common_public_files.js");
+	const config = require("app-config").config;
+
 	const sessionFactory = require("./services/session.js");
 
 	/*******************************************************************************
