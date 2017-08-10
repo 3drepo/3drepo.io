@@ -19,6 +19,8 @@
 		function init() {
 			if ("serviceWorker" in navigator) {
 
+				console.log("ServiceWorker in navigator");
+
 				var serviceWorkers = [
 					"precache"
 					//"google-analytics"
@@ -32,8 +34,6 @@
 
 		function registerSW(sw)  {
 		
-			console.log("ServiceWorker in navigator");
-
 			var swPath = path + sw + ".js";
 			console.log("ServiceWorker path: ", swPath);
 
