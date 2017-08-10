@@ -58,7 +58,7 @@
 				eventCallback, 
 				errCallback
 			);
-			
+
 			vm.viewer.preInit();
 
 		};
@@ -187,8 +187,6 @@
 							vm.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							vm.viewer.onViewpointChanged(event.value.callback);
-						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
-							vm.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);

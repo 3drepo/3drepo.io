@@ -2,7 +2,13 @@
 // tabindex is required for ng-keydown to work on a div/directive
 #model()
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
-		
+	
+	measure(
+		id='measure-tool'
+	 	account='vm.account' 
+		model='vm.model' 
+		settings='vm.settings')
+
 	#modelUI
 		revisions(
 			account="vm.account"
