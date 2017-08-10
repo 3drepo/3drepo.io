@@ -22,7 +22,7 @@
 		.component("rightPanel", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "right-panel.html",
+			templateUrl: "templates/right-panel.html",
 			controller: RightPanelCtrl,
 			controllerAs: "vm"
 		});

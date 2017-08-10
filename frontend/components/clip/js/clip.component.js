@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("clip", {
 			restrict: "EA",
-			templateUrl: "clip.html",
+			templateUrl: "templates/clip.html",
 			bindings: {
 				show: "=",
 				visible: "=",

@@ -22,7 +22,7 @@
 		.component("registerVerify", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "register-verify.html",
+			templateUrl: "templates/register-verify.html",
 			controller: RegisterVerifyCtrl,
 			controllerAs: "vm"
 		});

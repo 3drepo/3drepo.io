@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionClose", {
 			restrict: "E",
-			templateUrl: "panel-card-option-close.html",
+			templateUrl: "templates/panel-card-option-close.html",
 			bindings: {
 				show: "="
 			},

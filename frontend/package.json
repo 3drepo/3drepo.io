@@ -25,6 +25,7 @@
     "angular-sanitize": "1.6.5",
     "angular-ui-router": "0.4.2",
     "font-awesome": "^4.7.0",
+    "gulp-pug": "^3.3.0",
     "material-design-icons": "^3.0.1",
     "socket.io-client": "^2.0.3",
     "sw-precache": "^5.2.0"
@@ -36,6 +37,7 @@
     "gulp-livereload": "^3.8.1",
     "gulp-order": "^1.1.1",
     "gulp-print": "^2.0.1",
+    "gulp-rename": "^1.2.2",
     "gulp-size": "^2.1.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",

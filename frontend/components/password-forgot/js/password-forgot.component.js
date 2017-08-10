@@ -22,7 +22,7 @@
 		.component("passwordForgot", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "password-forgot.html",
+			templateUrl: "templates/password-forgot.html",
 			controller: PasswordForgotCtrl,
 			controllerAs: "vm"
 		});

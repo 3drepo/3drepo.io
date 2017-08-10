@@ -49,14 +49,29 @@
 
 		app.use(favicon("./public/images/favicon.ico"));
 
+		// TODO: This is better than before
+		// but still not great, we could just use nginx or 
+		// a static file server for all of this stuff and 
+		// use Node for the API
+
 		// Static file serving
 		const publicDir = __dirname + "/../../public";
-		app.use("/public", express.static(publicDir));
-		app.get("/public/*", function (req, res) {
-			res.status(404).send("File not found");
+		const statics = [
+			"/images",
+			"/dist",
+			"/icons",
+			"/fonts",
+			"/manifest-icons",
+			"/templates",
+			"/unity"
+		];
+
+		statics.forEach((folder) => {
+			const staticPath = path.resolve(publicDir + folder);
+			app.use(folder, express.static(staticPath));
 		});
-		
-		// TODO: This is a horrible hack, we should move to a static file server :/
+
+
 		app.get("/manifest.json", function (req, res) {
 			res.sendFile(path.resolve(publicDir + "/manifest.json"));
 		});
@@ -86,13 +101,17 @@
 			res.render("config.pug", {config: serializedConfig});
 		});
 
-
-		app.get("*", function (req, res) {
-			// Only need to set the userId the rest is static
-			clientConfig.userId = _.get(req, "session.user.username");
-			res.render(serverConfig.template, clientConfig);
+		app.get('/*.html', function(req, res){
+			res.status(404).send("File not found");
 		});
 
+		app.get('/*.js', function(req, res){
+			res.status(404).send("File not found");
+		});
+		
+		app.get('*', function(req,res){
+			res.sendFile(path.resolve(publicDir + "/index.html"));
+		});
 
 		return app;
 	};

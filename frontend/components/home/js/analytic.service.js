@@ -38,23 +38,58 @@ function AnalyticService(ClientConfigService){
 
 	function init() {
 
-		if (ClientConfigService && ClientConfigService.gaTrackId) {
-
-			console.log("Initialising GA...");
-
-			(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
-
-			if (ClientConfigService.userId) {
-				ga("create", ClientConfigService.gaTrackId, "auto", { userId: ClientConfigService.userId });
-			} else {
-				ga("create", ClientConfigService.gaTrackId, "auto");
-			}
-
+		if (ClientConfigService && 
+			!ClientConfigService.development && 
+			ClientConfigService.gaTrackId
+		) {
+			insertGA();
+			insertRemarketing();
 		}
 
+	}
+
+	function addScriptBySrc(src) {
+		var script = document.createElement("script");
+		script.setAttribute("src", src);
+		script.setAttribute("async", true);
+		document.head.appendChild(script);
+	}
+
+	function addScriptByText(js) {
+		var script = document.createElement("script");
+		script.setAttribute("text", js);
+		document.head.appendChild(script);
+	}
+
+	function insertRemarketing() {
+
+		var script = "" + 
+			"/* <![CDATA[ */" +
+			" var google_conversion_id = !{googleConversionId}; " +
+			" var google_custom_params = window.google_tag_params; " + 
+			" var google_remarketing_only = true; " +
+			"/* ]]> */";
+
+		var src = "//www.googleadservices.com/pagead/conversion.js";
+
+		addScriptByText(script);
+		addScriptBySrc(src);
+	
+	}
+
+	function insertGA() {
+		console.log("Initialising GA...");
+
+		(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
+
+		if (ClientConfigService.userId) {
+			ga("create", ClientConfigService.gaTrackId, "auto", { userId: ClientConfigService.userId });
+		} else {
+			ga("create", ClientConfigService.gaTrackId, "auto");
+		}
 	}
 	
 	function isGoogleAnalyticEnabled(){

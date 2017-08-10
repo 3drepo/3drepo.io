@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("issues", {
 			restrict: "E",
-			templateUrl: "issues.html",
+			templateUrl: "templates/issues.html",
 			controller: IssuesCtrl,
 			controllerAs: "vm",
 			bindings: {

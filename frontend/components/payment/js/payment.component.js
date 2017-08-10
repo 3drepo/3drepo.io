@@ -22,7 +22,7 @@
 		.component("payment", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "payment.html",
+			templateUrl: "templates/payment.html",
 			controller: paymentCtrl,
 			controllerAs: "vm"
 		});

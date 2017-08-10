@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("tdrProgress", {
 			restrict: "EA",
-			templateUrl: "tdr-progress.html",
+			templateUrl: "templates/tdr-progress.html",
 			bindings: {
 				info: "="
 			},

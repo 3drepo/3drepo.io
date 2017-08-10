@@ -132,7 +132,7 @@ var Viewer = {};
 			self.viewer.appendChild(self.loadingDiv);
 
 			self.unityLoaderScript = document.createElement("script");
-			self.unityLoaderScript.setAttribute("src", "public/unity/Release/UnityLoader.js");
+			self.unityLoaderScript.setAttribute("src", "unity/Release/UnityLoader.js");
 		};
 
 		this.init = function(options) {

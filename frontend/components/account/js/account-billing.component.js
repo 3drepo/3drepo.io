@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountBilling", {
 			restrict: "EA",
-			templateUrl: "account-billing.html",
+			templateUrl: "templates/account-billing.html",
 			bindings: {
 				account: "=",
 				billingAddress: "=",

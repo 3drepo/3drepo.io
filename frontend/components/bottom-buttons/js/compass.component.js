@@ -41,7 +41,7 @@
 	function compass () {
 		return {
 			restrict: "E",
-			templateUrl: "compass.html",
+			templateUrl: "templates/compass.html",
 			bindings: {},
 			controller: CompassCtrl,
 			controllerAs: "cc"		

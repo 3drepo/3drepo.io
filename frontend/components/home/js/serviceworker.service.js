@@ -6,7 +6,7 @@
 
 	function SWService() {
 
-		var path = "/"; //"/public/service-workers/";
+		var path = "/"; //"/service-workers/";
 
 		var service = {
 			init : init

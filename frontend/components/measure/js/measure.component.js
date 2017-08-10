@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("tdrMeasure", {
 			restrict: "EA",
-			templateUrl: "measure.html",
+			templateUrl: "templates/measure.html",
 			bindings: {
 				account: "=",
 				model: "=",

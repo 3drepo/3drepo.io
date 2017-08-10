@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardAdd", {
 			restrict: "EA",
-			templateUrl: "panel-card-add.html",
+			templateUrl: "templates/panel-card-add.html",
 			bindings: {
 				showAdd: "="
 			},

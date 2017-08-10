@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountInfo", {
 			restrict: "E",
-			templateUrl: "account-info.html",
+			templateUrl: "templates/account-info.html",
 			bindings: {
 				username: "=",
 				firstName: "=",

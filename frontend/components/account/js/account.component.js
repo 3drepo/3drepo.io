@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountDir", {
 			restrict: "EA",
-			templateUrl: "account.html",
+			templateUrl: "templates/account.html",
 			bindings: {
 				state: "=",
 				query: "=",

@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionScribble", {
 			restrict: "E",
-			templateUrl: "panel-card-option-scribble.html",
+			templateUrl: "templates/panel-card-option-scribble.html",
 			bindings: {},
 			controller: PanelCardOptionScribbleCtrl,
 			controllerAs: "vm"

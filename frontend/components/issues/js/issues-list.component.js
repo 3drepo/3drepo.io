@@ -22,7 +22,7 @@
 		.component("issuesList", {
 			controller: IssuesListCtrl,
 			controllerAs: "vm",
-			templateUrl: "issues-list.html",
+			templateUrl: "templates/issues-list.html",
 			bindings: {
 				account: "<",
 				model: "<",

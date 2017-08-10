@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountLicenses", {
 			restrict: "EA",
-			templateUrl: "account-licenses.html",
+			templateUrl: "templates/account-licenses.html",
 			bindings: {
 				account: "<",
 				showPage: "&"

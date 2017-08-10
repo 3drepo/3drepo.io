@@ -24,7 +24,7 @@
 			{
 				controller: IssuesScreenShotCtrl,
 				controllerAs: "vm",
-				templateUrl: "issue-screen-shot.html",
+				templateUrl: "templates/issue-screen-shot.html",
 				bindings: {
 					screenShotSave: "&",
 					screenShot: "="

@@ -12,7 +12,8 @@ const path = require('path');
 const sourcemaps = require('gulp-sourcemaps');
 const merge = require('merge-stream');
 const size = require('gulp-size');
-
+const pug = require('gulp-pug');
+const rename = require('gulp-rename');
 
 const allImages = [
   './images/**'
@@ -42,6 +43,22 @@ const jsOrder = [
           'bootstrap.js'
         ];
 
+gulp.task('index', function(){
+    return gulp.src('./index.html')
+          .pipe(gulp.dest('./../public/'))
+          .pipe(livereload())
+})
+
+gulp.task('pug', function(){
+
+  return gulp.src('./components/**/*.pug')
+        // .pipe(print())
+        .pipe(rename({dirname: ''}))
+        .pipe(pug({ verbose : false }))
+        .pipe(gulp.dest("./../public/templates/"))
+  
+});
+
 gulp.task('css', function() {
 
   return gulp.src(allCss)
@@ -52,11 +69,6 @@ gulp.task('css', function() {
          .pipe(livereload())
 
 });
-
-gulp.task('pug', function(){
-  // Eventually this should also compile pug :)
-  gulp.src(allPug).pipe(livereload());
-})
 
 gulp.task('icons', function () {
   return gulp.src('./icons/*.svg')
@@ -95,6 +107,8 @@ gulp.task('service-workers', function(callback) {
 
   swPrecache.write(`${rootDir}/service-workers/${serviceWorkerName}.js`, {
     staticFileGlobs: [
+      rootDir + 'index.html',
+      rootDir + 'templates/.{html}',
       rootDir + 'dist/**/*.{js,css}',
       rootDir + 'fonts/**/*.{svg,eot,ttf,woff,woff2}',
       rootDir + 'icons/**/*.{svg}',
@@ -161,6 +175,8 @@ gulp.task('javascript', function() {
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
   livereload.listen({host: 'localhost', port: '35729', start: true })
+  gulp.watch("./index.html", ['index']);
+  gulp.watch("./components/**/*.pug", ['pug']);
   gulp.watch("./entry.js", ['javascript-dev']);
   gulp.watch(allJs, ['javascript-dev']);
   gulp.watch(allCss, ['css']);
@@ -169,12 +185,11 @@ gulp.task('watch', function() {
   gulp.watch(allImages, ['images']);
   gulp.watch("./manifest.json", ['manifest-file']);
   gulp.watch("./manifest-icons/**.png", ['manifest-icons']);
-  gulp.watch("./service-workers/**.js", ['service-workers'])
 });
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
-gulp.task('build', ['javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file'], function () {
+gulp.task('build', ['index', 'pug', 'javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file'], function () {
   gulp.start('service-workers');
 });
 

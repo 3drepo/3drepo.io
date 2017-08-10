@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("home", {
 			restrict: "E",
-			templateUrl: "home.html",
+			templateUrl: "templates/home.html",
 			bindings: {
 				account: "@",
 				password: "@",

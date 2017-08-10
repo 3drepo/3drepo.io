@@ -190,7 +190,7 @@
 			// Set up and show dialog
 			var data = {
 				controller: function () {},
-				templateUrl: dialogTemplate,
+				templateUrl: "/templates/" + dialogTemplate,
 				onRemoving: function () {
 					$mdDialog.cancel();
 				}
