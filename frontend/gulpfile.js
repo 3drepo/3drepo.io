@@ -116,7 +116,7 @@ gulp.task('service-workers', function(callback) {
       rootDir + 'unity/**/*.{js,html,data,mem,css,png,jpg}',
     ],
     stripPrexi: rootDir,
-    replacePrefix: "/public/"
+    replacePrefix: "/"
   }, callback);
 
 });
