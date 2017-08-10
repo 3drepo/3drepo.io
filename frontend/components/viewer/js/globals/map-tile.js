@@ -1048,7 +1048,7 @@ var MapTile = {};
 
 		var gltf = document.createElement("gltf");
 		gltf.setAttribute("onclick", "os_clickBuildingObject(event)");
-		gltf.setAttribute("url", server_config.apiUrl(server_config.MAP_API, "os/buildings.gltf?method=osgrid&osgridref=" + osGridRef + "&draw=1"));
+		gltf.setAttribute("url", ClientConfig.apiUrl(ClientConfig.MAP_API, "os/buildings.gltf?method=osgrid&osgridref=" + osGridRef + "&draw=1"));
 
 		var translate = [0, 0, 0];
 		var osCoor = OsGridRef.parse(osGridRef);
@@ -1129,7 +1129,7 @@ var MapTile = {};
 		// app.appendChild(material);
 
 
-		it.setAttribute("url", server_config.apiUrl(server_config.MAP_API, "os/map-images/Outdoor/" + mapImagePosInfo.zoomLevel + "/" + x + "/" + y + ".png"));
+		it.setAttribute("url", ClientConfig.apiUrl(ClientConfig.MAP_API, "os/map-images/Outdoor/" + mapImagePosInfo.zoomLevel + "/" + x + "/" + y + ".png"));
 		it.setAttribute("crossOrigin", "use-credentials");
 
 		app.appendChild(it);

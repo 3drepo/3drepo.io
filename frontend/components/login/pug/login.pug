@@ -1,4 +1,8 @@
-.homeUserContent(layout="row", layout-align="center", flex)
+.homeUserContent(
+	layout="row"
+	layout-align="center"
+	flex)
+	
 	md-content.md-whiteframe(
 		aria-label="Registered"
 		flex-xl="15"
@@ -15,6 +19,12 @@
 			div.loginBox.loadingBox(layout="row")
 				h3.welcome Welcome to 3D Repo!
 
+			// Behaviour if we provide a notice to the user
+			span(ng-if="vm.userNotice") 
+				strong Notice 
+				span : {{vm.userNotice}}
+			br(ng-if="vm.userNotice")
+			
 			// Register or login
 			div.loginBox(layout="row")
 				// Login

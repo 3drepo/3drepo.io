@@ -21,15 +21,15 @@
 	angular.module("3drepo")
 		.factory("DocsService", DocsService);
 
-	DocsService.$inject = ["$http", "$q", "serverConfig"];
+	DocsService.$inject = ["$http", "$q", "ClientConfigService"];
 
-	function DocsService($http, $q, serverConfig) {
+	function DocsService($http, $q, ClientConfigService) {
 		var getDocs = function (account, model, metadataId) {
 			var i,
 				length,
 				data = {},
 				deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/meta/" + metadataId + ".json");
+				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/meta/" + metadataId + ".json");
 
 			$http.get(url)
 				.then(
@@ -50,7 +50,7 @@
 							data[dataType].data.push(json.data.meta[i]);
 
 							// Setup PDF url
-							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + "/" + json.data.meta[i]._id + ".pdf");
+							json.data.meta[i].url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/" + json.data.meta[i]._id + ".pdf");
 						}
 						deferred.resolve(data);
 					},

@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService", "AuthService", "$window"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, serverConfig, UtilsService, AuthService, $window) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -50,8 +50,10 @@
 
 			vm.buttonLabel = "Sign Up!";
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
-			vm.version = serverConfig.apiVersion;
+			vm.version = ClientConfigService.VERSION;
 			vm.logo = "/public/images/3drepo-logo-white.png";
+			vm.captchaKey = ClientConfigService.captcha_client_key;
+
 			vm.tcAgreed = false;
 			vm.useReCapthca = false;
 			vm.registering = false;
@@ -70,7 +72,7 @@
 				"Other"
 			];
 
-			vm.countries = serverConfig.countries.concat();
+			vm.countries = ClientConfigService.countries.concat();
 			var gbIndex;
 			
 			vm.countries.find(function(country, i){
@@ -84,30 +86,30 @@
 			/*
 			* AuthService stuff
 			*/
-			if (serverConfig.hasOwnProperty("auth")) {
-				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+			if (ClientConfigService.hasOwnProperty("auth")) {
+				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
 					vm.useReCapthca = true;
 					vm.captchaKey = serverConfig.captcha_client_key;
 				}
 			}
 
 			// Legal text
-			if (angular.isDefined(serverConfig.legal)) {
+			if (angular.isDefined(ClientConfigService.legal)) {
 				vm.showLegalText = true;
 				vm.legalText = "";
-				for (legalItem in serverConfig.legal) {
-					if (serverConfig.legal.hasOwnProperty(legalItem)) {
-						if (serverConfig.legal[legalItem].type === "agreeTo") {
+				for (legalItem in ClientConfigService.legal) {
+					if (ClientConfigService.legal.hasOwnProperty(legalItem)) {
+						if (ClientConfigService.legal[legalItem].type === "agreeTo") {
 							if (agreeToText === "") {
-								agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+								agreeToText = "I agree to the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]);
 							} else {
-								agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+								agreeToText += " and the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]);
 							}
-						} else if (serverConfig.legal[legalItem].type === "haveRead") {
+						} else if (ClientConfigService.legal[legalItem].type === "haveRead") {
 							if (haveReadText === "") {
-								haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+								haveReadText = "I have read the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]) + " policy";
 							} else {
-								haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+								haveReadText += " and the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]) + " policy";
 							}
 						}
 					}
@@ -201,7 +203,7 @@
 		function doRegister() {
 			var data,
 				doRegister = true,
-				allowedFormat = new RegExp(serverConfig.usernameRegExp); // English letters, numbers, underscore, not starting with number
+				allowedFormat = new RegExp(ClientConfigService.usernameRegExp); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&

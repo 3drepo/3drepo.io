@@ -21,14 +21,14 @@
 	angular.module("3drepo")
 		.factory("ModelService", ModelService);
 
-	ModelService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	ModelService.$inject = ["$http", "$q", "StateManager", "ClientConfigService"];
 
-	function ModelService($http, $q, StateManager, serverConfig) {
+	function ModelService($http, $q, StateManager, ClientConfigService) {
 		var state = StateManager.state;
 
 		var getModelInfo = function (account, model) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + model + ".json");
+				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + ".json");
 
 			$http.get(url)
 				.then(function(res){
@@ -51,7 +51,7 @@
 
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.model + "/" + urlEnd);
+				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, state.account + "/" + state.model + "/" + urlEnd);
 			$http.get(url)
 				.then(
 					function (response) {

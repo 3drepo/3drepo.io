@@ -228,6 +228,7 @@
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 
 										md-radio-group(	
+											ng-disabled="vm.account === user"
 											ng-model="vm.selectedRole[user]"
 											layout-align="center center"
 											layout="row")

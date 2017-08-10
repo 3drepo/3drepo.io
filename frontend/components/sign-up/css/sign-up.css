@@ -64,7 +64,7 @@ sign-up #loginPricing {
 }
 
 sign-up .registerError {
-    color: #F44336;
+    color: #e44539 !important;
     margin: 20px 20px 5px;
     font-weight: normal;
     text-align: center;

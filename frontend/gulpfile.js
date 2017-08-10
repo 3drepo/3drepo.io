@@ -28,7 +28,7 @@ const allCss = [
     './node_modules/font-awesome/css/font-awesome.css',
     './components/**/**.css'
 ]
-const allJs = './components/**/**.js';
+const allJs = ['./components/**/**.js', './bootstrap.js'];
 const allPug = './components/**/**.pug';
 const icons = './icons/*.svg';
 
@@ -38,7 +38,8 @@ const jsOrder = [
           'components/viewer/js/globals/unity-settings.js',
           'components/viewer/js/globals/map-tile.js',
           'components/viewer/js/globals/*.js',
-          'components/**/**.js'
+          'components/**/**.js',
+          'bootstrap.js'
         ];
 
 gulp.task('css', function() {

@@ -31,7 +31,7 @@
 			};
 		}])
 		.config(["$httpProvider", function ($httpProvider) {
-			var checkAuthorization = ["$q", "$location", function($q, $location) {
+			var checkAuthorization = ["$q", function($q) {
 				var onSuccess = function (res) {
 					return res;
 				};

@@ -42,9 +42,9 @@
 			}
 		});
 
-	IssueCtrl.$inject = ["$location", "$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "serverConfig", "AnalyticService", "$state", "StateManager"];
+	IssueCtrl.$inject = ["$location", "$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "ClientConfigService", "AnalyticService", "$state", "StateManager"];
 
-	function IssueCtrl ($location, $q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, serverConfig, AnalyticService, $state, StateManager) {
+	function IssueCtrl ($location, $q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, ClientConfigService, AnalyticService, $state, StateManager) {
 		var vm = this;
 
 		/*
@@ -159,7 +159,7 @@
 
 		vm.setCanUpdateStatus = function(issueData) {
 
-			if(!AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
+			if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
 				return vm.canUpdateStatus = false;
 			}
 
@@ -172,7 +172,7 @@
 		$scope.$watch("vm.modelSettings", function() {
 			if(vm.modelSettings){
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
-				vm.canComment = AuthService.hasPermission(serverConfig.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
+				vm.canComment = AuthService.hasPermission(ClientConfigService.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
 				//convert comment topic_types
 				vm.convertCommentTopicType();
 			}
@@ -228,7 +228,7 @@
 					vm.canUpdate = vm.userJob._id && vm.issueData.creator_role && (vm.userJob._id === vm.issueData.creator_role);
 				}
 
-				if(!AuthService.hasPermission(serverConfig.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
+				if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
 					vm.canUpdate = false;
 				}
 

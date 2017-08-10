@@ -12,6 +12,8 @@
     "it": false,
     "process": false
   },
+  "plugins": ["node"],
+  "extends": ["eslint:recommended", "plugin:node/recommended"],
   "rules": {
     "no-bitwise": 2,
     "curly": 2,
@@ -20,11 +22,24 @@
     "no-extend-native": 2,
     "no-var": 2,
     "strict": 0,
-    "no-unused-vars": 2,
-    "quotes": [
-      2,
-      "single"
+    "no-undef": 2,
+    "no-shadow" : [
+        "error"
     ],
-    "no-undef": 2
+    "semi": [
+        "error",
+        "always"
+    ],
+    "linebreak-style": [
+        "error",
+        "unix"
+    ],
+    "block-scoped-var" : [
+       "error"
+    ],
+    "quotes": [
+      "error",
+      "double"
+    ]
   }
 }

@@ -37,9 +37,9 @@
 			controllerAs: "vm"
 		});
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location", "$mdDialog"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "ClientConfigService", "EventService", "$location", "$mdDialog"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location, $mdDialog) {
+	function ViewerCtrl ($scope, $q, $http, $element, ClientConfigService, EventService, $location, $mdDialog) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -79,7 +79,8 @@
 
 			var showAll = true;
 			vm.viewer.init({
-				showAll : showAll
+				showAll : showAll,
+				getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
 			})
 				.then(function(){
 		
@@ -87,8 +88,7 @@
 				.catch(function(error){
 					console.error("Error creating Viewer Directive: ", error);
 				});
-			
-
+		
 		};
 
 		function fetchModelProperties(account, model, branch, revision) {
@@ -104,7 +104,7 @@
 				}
 
 				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
-				$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
+				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {
 						if (response.data && response.data.properties) {
 							vm.viewer.applyModelProperties(account, model, response.data.properties);
@@ -187,8 +187,6 @@
 							vm.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							vm.viewer.onViewpointChanged(event.value.callback);
-						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
-							vm.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);
@@ -297,7 +295,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							vm.measure.measureMode(event.value);
+							//vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 					
 							$location.path("/" + vm.account + "/" + vm.model).search({

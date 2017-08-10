@@ -7,6 +7,8 @@
 		label {{value.label}}
 
 	.rightPanelButtonGroup(layout="column", layout-align="start center")
+
+		// META DATA TOOL
 		md-button.md-accent.md-fab.md-mini(
 			aria-label="Meta", 
 			ng-click="vm.toggleAutoMetaData()", 
@@ -16,7 +18,13 @@
 			md-tooltip(ng-if="!vm.metaData" md-direction="left") Enable
 			md-icon.angular-material-icons content_copy
 		label Meta
-//		md-button.md-accent.md-fab.md-mini(aria-label="Measure", ng-click="vm.toggleMeasure()", style="background:{{vm.measureBackground}}")
-//			md-tooltip(md-direction="left") Measure
-//			md-icon.angular-material-icons straighten
-//		label Measure
+		
+		// MEASURE TOOL
+		md-button.md-accent.md-fab.md-mini(
+			aria-label="Measure"
+			ng-click="vm.toggleMeasure()"
+			style="background:{{vm.measureBackground}}")
+			
+			md-tooltip(md-direction="left") Measure
+			md-icon.angular-material-icons straighten
+		label Measure

@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("AccountUploadService", AccountUploadService);
 
-	AccountUploadService.$inject = ["$http", "$q", "serverConfig", "UtilsService", "RevisionsService"];
+	AccountUploadService.$inject = ["$http", "$q", "ClientConfigService", "UtilsService", "RevisionsService"];
 
-	function AccountUploadService($http, $q, serverConfig, UtilsService, RevisionsService) {
+	function AccountUploadService($http, $q, ClientConfigService, UtilsService, RevisionsService) {
 		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
 
 		var service = {
@@ -124,7 +124,7 @@
 				.then(function () {
 
 					// Check for file size limit
-					if (uploadFileData.file.size > serverConfig.uploadSizeLimit) {
+					if (uploadFileData.file.size > ClientConfigService.uploadSizeLimit) {
 
 						uploadPromise.reject("File exceeds size limit");
 

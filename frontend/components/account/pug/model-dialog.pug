@@ -9,13 +9,25 @@ md-dialog.newModelDialog(aria-label="New model")
 
 		form( name="modelForm" layout="column")
 			md-input-container
-				md-select(placeholder="Teamspace", tdr-focus="true", ng-model="vm.newModelData.teamspace", ng-keypress="vm.saveNewModel($event)")
+
+				md-select(
+					placeholder="Teamspace"
+					tdr-focus="true"
+					ng-model="vm.newModelData.teamspace"
+					ng-keypress="vm.saveNewModel($event)")
+
 					md-option(
 						ng-repeat="teamspace in vm.accounts",
 						value="{{teamspace.name}}") {{teamspace.name}}
 
 			md-input-container(ng-if="vm.newModelData.teamspace !== undefined")
-				md-select(placeholder="Project", tdr-focus="true", ng-model="vm.newModelData.project", ng-keypress="vm.saveNewModel($event)")
+
+				md-select(
+					placeholder="Project"
+					tdr-focus="true"
+					ng-model="vm.newModelData.project" 
+					ng-keypress="vm.saveNewModel($event)")
+
 					md-option(
 						ng-repeat="project in vm.getProjects(vm.newModelData.teamspace)",
 						value="{{project.name}}") {{project.name}}
@@ -26,7 +38,8 @@ md-dialog.newModelDialog(aria-label="New model")
 				ng-model="vm.newModelData.name", 
 				ng-required="required"
 				ng-keypress="vm.saveNewModel($event)", 
-				ng-pattern="vm.modelRegExp" maxlength=20)
+				ng-pattern="vm.modelRegExp" 
+				maxlength=20)
 				.inputHint Letters, numbers, hyphen and underscore only
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")

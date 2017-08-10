@@ -1,6 +1,6 @@
 doctype html
 html(lang="en" ng-app="3drepo").ng-scope
-	script(type="text/javascript", src="/public/plugins/base/config.js")
+	script(type="text/javascript", src="/config.js")
 	head
 		each issueTypeIssues, issueType in issues
 			if issueType === "open" && issueTypeIssues.length > 0

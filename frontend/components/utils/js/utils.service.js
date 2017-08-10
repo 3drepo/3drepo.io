@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("UtilsService", UtilsService);
 
-	UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
+	UtilsService.$inject = ["$http", "$q", "$mdDialog", "ClientConfigService"];
 
-	function UtilsService($http, $q, $mdDialog, serverConfig) {
+	function UtilsService($http, $q, $mdDialog, ClientConfigService) {
 		
 		var service = {
 			// snakeCase : snakeCase,
@@ -77,7 +77,7 @@
          */
 		function doGet(url) {
 			var deferred = $q.defer(),
-				urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
+				urlUse = ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
 
 			$http.get(urlUse).then(
 				function (response) {
@@ -98,7 +98,7 @@
          */
 		function doPost(data, url, headers) {
 			var deferred = $q.defer(),
-				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+				urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
 				config = {withCredentials: true};
 
 			if (angular.isDefined(headers)) {
@@ -125,7 +125,7 @@
          */
 		function doPut(data, url) {
 			var deferred = $q.defer(),
-				urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+				urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
 				config = {withCredentials: true};
 
 			$http.put(urlUse, data, config)
@@ -150,7 +150,7 @@
 			var deferred = $q.defer(),
 				config = {
 					method: "DELETE",
-					url: serverConfig.apiUrl(serverConfig.POST_API, url),
+					url: ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
 					data: data,
 					withCredentials: true,
 					headers: {
@@ -213,7 +213,7 @@
 		}
 
 		function getServerUrl(url) {
-			return serverConfig.apiUrl(serverConfig.GET_API, url);
+			return ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
 		}
 
 		/**
@@ -232,12 +232,12 @@
 
 			var message;
 
-			Object.keys(serverConfig.responseCodes).forEach(function(key){
-				if(serverConfig.responseCodes[key].value === resData.value){
+			Object.keys(ClientConfigService.responseCodes).forEach(function(key){
+				if(ClientConfigService.responseCodes[key].value === resData.value){
 					if(messages[key]){
 						message = messages[key]; 
 					} else {
-						message = serverConfig.responseCodes[key].message;
+						message = ClientConfigService.responseCodes[key].message;
 					}
 				}
 			});
@@ -247,7 +247,7 @@
 		}
 
 		function getResponseCode(errorToFind) {
-			return Object.keys(serverConfig.responseCodes).indexOf(errorToFind);
+			return Object.keys(ClientConfigService.responseCodes).indexOf(errorToFind);
 		}
 
 	}
