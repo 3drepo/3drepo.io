@@ -297,7 +297,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							vm.measure.measureMode(event.value);
+							//vm.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 					
 							$location.path("/" + vm.account + "/" + vm.model).search({

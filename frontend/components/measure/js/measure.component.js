@@ -33,73 +33,117 @@
 
 	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ModelService", "serverConfig"];
 
-	function MeasureCtrl ($scope, $element, EventService, ModelService, serverConfig) {
-		var vm = this,
-			coords = [null, null],
-			screenPos,
-			currentPickPoint;
 
-		vm.axisDistance = [0.0, 0.0, 0.0];
-		vm.totalDistance = 0.0;
+	function MeasureCtrl ($scope, $element, EventService, ModelService, ClientConfigService) {
+		var vm = this;
 
-		vm.show = false;
-		vm.distance = false;
-		vm.allowMove = false;
-		vm.units = serverConfig.units;
+		vm.$onInit = function() {
 
-		var coordVector = null, vectorLength = 0.0;
-		vm.screenPos = [0.0, 0.0];
+			vm.show = false;
+			vm.distance = false;
+			vm.allowMove = false;
+			vm.units = serverConfig.units;
 
-		//console.log('measure scope', $scope);
-		vm.unit = vm.settings.unit;
 
-		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
-			callback: function(event) {
-				var point = event.hitPnt;
-				vm.screenPos = [event.layerX, event.layerY];
+			vm.axisDistance = [0.0, 0.0, 0.0];
+			vm.totalDistance = 0.0;
 
-				if (vm.allowMove) {
-					if (point) {
-						// TODO: WE don't use X3DOM anymore
-						// coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
-						// coordVector = coords[0].subtract(coords[1]);
-						// vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
-						// vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
-						// vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
+			vm.show = false;
+			vm.distance = false;
+			vm.allowMove = false;
+			vm.units = ClientConfigService.units;
 
-						// vm.totalDistance = coordVector.length().toFixed(3);
+			vm.coordVector = null;
+			vm.vectorLength = 0.0;
+			vm.screenPos = [0.0, 0.0];
+			
+			// Set the units in unity
+			vm.unit = vm.settings.unit;
+			UnityUtil.setUnits(vm.units);
 
-						angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
-						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
+			vm.measureMode = false;
 
-						$scope.$apply();
-						vm.show = true;
-					} else {
-						vm.show = false;
+			// UnityUtil.prototype.disableMeasuringTool = function(){
+			// 	toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
+			// }
+
+			// UnityUtil.prototype.enableMeasuringTool = function(){
+			// 	toUnity("StartMeasuringTool", LoadingState.MODEL_LOADING);
+			// }
+
+			// UnityUtil.prototype.setUnits = function(units) {
+			// 	toUnity("SetUnits",LoadingState.MODEL_LOADING, units);
+			// };
+		};
+
+		vm.register = function() {
+
+			EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
+				callback: function(event) {
+					var point = event.hitPnt;
+					vm.screenPos = [event.layerX, event.layerY];
+
+					if (vm.allowMove) {
+						if (point) {
+							// TODO: WE don't use X3DOM anymore
+							// vm.coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+							// vm.coordVector = vm.coords[0].subtract(vm.coords[1]);
+							// vm.axisDistance[0] = Math.abs(vm.coordVector.x).toFixed(3);
+							// vm.axisDistance[1] = Math.abs(vm.coordVector.y).toFixed(3);
+							// vm.axisDistance[2] = Math.abs(vm.coordVector.z).toFixed(3);
+
+							// vm.totalDistance = vm.coordVector.length().toFixed(3);
+
+							angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
+							angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
+
+							$scope.$apply();
+							vm.show = true;
+						} else {
+							vm.show = false;
+						}
 					}
 				}
-			}
-		});
+			});
 
+		};
+		
 		$scope.$watch(EventService.currentEvent, function (event) {
+
 			if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
-				if (event.value.hasOwnProperty("position")) {
+				console.log("Measure - pick point event called");
+
+				if (event.value.hasOwnProperty("position") && vm.measureMode) {
+
+					
 					// First click, if a point has not been clicked before
-					currentPickPoint = event.value.position;
-					if (coords[1] === null || coords[0] === null) {
+					vm.currentPickPoint = event.value.position;
+					if (vm.coords[1] === null || vm.coords[0] === null) {
 						vm.show = true;
 						vm.allowMove = true;
-						coords[0] = currentPickPoint;
+						vm.coords[0] = vm.currentPickPoint;
 					} else if (vm.allowMove) {
 						vm.show = true;
 						vm.allowMove = false;
 					} else {
-						coords[0] = currentPickPoint;
-						coords[1] = null;
+						vm.coords[0] = vm.currentPickPoint;
+						vm.coords[1] = null;
 						vm.allowMove = true;
 					}
 				}
 			}
+
+			if (event.type === EventService.EVENT.MEASURE_MODE) {
+				vm.measureMode = event.value;
+
+				if (vm.measureMode) {
+					UnityUtil.enableMeasuringTool();
+				} else {
+					UnityUtil.disableMeasuringTool();
+				}
+
+			}
+
 		});
 	}
 }());
