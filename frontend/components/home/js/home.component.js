@@ -96,8 +96,6 @@
 				*/
 				$scope.$watch("vm.state", function (newState, oldState) {
 
-					vm.loggedIn = AuthService.isLoggedIn();
-
 					var changedState = newState !== oldState;
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
@@ -105,6 +103,10 @@
 					}
 					
 				}, true);
+
+				$scope.$watch("AuthService.loggedIn", function(){
+					vm.loggedIn = AuthService.isLoggedIn();
+				}, true)
 
 			});
 

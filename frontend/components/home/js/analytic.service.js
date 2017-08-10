@@ -38,6 +38,10 @@ function AnalyticService(ClientConfigService){
 
 	function init() {
 
+		if (ClientConfigService.development) {
+			console.log("Development: Not loading Google Analyitics or remarketing")
+		}
+
 		if (ClientConfigService && 
 			!ClientConfigService.development && 
 			ClientConfigService.gaTrackId
