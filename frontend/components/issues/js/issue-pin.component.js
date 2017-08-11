@@ -94,9 +94,6 @@
 						vm.pinDropMode = false;
 					} else {
 						vm.pinDropMode = event.value;
-						if (!vm.pinDropMode) {
-							vm.removePin();
-						}
 					}
 				
 				}

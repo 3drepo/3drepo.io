@@ -51,6 +51,7 @@
 			vm.currentModel = null;
 			vm.currentModelPromise = null;
 			vm.initialisedPromise = $q.defer();
+			vm.measureMode = false;
 
 			vm.viewer = new Viewer(
 				vm.name, 
@@ -58,7 +59,7 @@
 				eventCallback, 
 				errCallback
 			);
-			
+
 			vm.viewer.preInit();
 
 		};
@@ -187,8 +188,6 @@
 							vm.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							vm.viewer.onViewpointChanged(event.value.callback);
-						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
-							vm.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);
@@ -297,9 +296,8 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							vm.measure.measureMode(event.value);
+							vm.viewer.setMeasureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-					
 							$location.path("/" + vm.account + "/" + vm.model).search({
 								at: event.value.at,
 								view: event.value.view,

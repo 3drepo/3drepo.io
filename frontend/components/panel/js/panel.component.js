@@ -66,7 +66,6 @@
 		
 		$scope.$watch(EventService.currentEvent, function (event) {
 
-			var i;
 			if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
 				vm.contentItems = (event.value[vm.position]);
 				setupShownCards();
@@ -76,15 +75,14 @@
 				vm.showPanel = !vm.showPanel;
 			} else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
 
+				var item = vm.contentItems.find(function(content){
+					return content.type === event.value.type;
+				});
 
-            	var item = vm.contentItems.find(function(item){
-            		return item.type === event.value.type;
-            	});
-
-            	if(item){
-            		item.menu = item.menu.concat(event.value.menu);
-            	}
-            
+				if(item){
+					item.menu = item.menu.concat(event.value.menu);
+				}
+			
 			}
 		});
 
@@ -131,13 +129,11 @@
 		 * @param contentType
 		 */
 		vm.buttonClick = function (contentType) {
-			var i, j, length, contentItem;
 
 			// Get the content item
-			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+			for (var i = 0; i < vm.contentItems.length; i += 1) {
 				if (contentType === vm.contentItems[i].type) {
-					contentItem = vm.contentItems[i];
-
+					
 					// Toggle panel show and update number of panels showing count
 					vm.contentItems[i].show = !vm.contentItems[i].show;
 
@@ -146,7 +142,7 @@
 						contentItemsShown.push(vm.contentItems[i]);
 						calculateContentHeights();
 					} else {
-						for (j = (contentItemsShown.length - 1); j >= 0; j -= 1) {
+						for (var j = (contentItemsShown.length - 1); j >= 0; j -= 1) {
 							if (contentItemsShown[j].type === contentType) {
 								contentItemsShown.splice(j, 1);
 							}

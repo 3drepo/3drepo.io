@@ -32,9 +32,12 @@
 			
 		});
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService", "UtilsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService"];
 
-	function DocsCtrl($scope, $mdDialog, $timeout, $filter, EventService, DocsService, UtilsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, $filter, EventService, DocsService) {	
+
+		// TODO: What does this component even do? I am confused
+
 		var vm = this,
 			promise,
 			docTypeHeight = 50,
@@ -51,25 +54,24 @@
 			vm.onContentHeightRequest({height: 80});
 		};
 
-		/*
-		 * Set up event watching
-		 */
-		$scope.$watch(EventService.currentEvent, function (event) {
-			var item, i, length;
-			if (autoMetaData && !pinMode && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-				// Get any documents associated with an object
-				var object = event.value;
+		vm.handleObjectSelected = function(event) {
+			// Get any documents associated with an object
+			var object = event.value;
 
-				var metadataIds = vm.treeMap.oIdToMetaId[object.id];
-				if(metadataIds && metadataIds.length){
-					DocsService.getDocs(object.account, object.model, metadataIds[0]).then(function(data){
+			var metadataIds = vm.treeMap.oIdToMetaId[object.id];
+			if(metadataIds && metadataIds.length){
+				DocsService.getDocs(object.account, object.model, metadataIds[0])
+					.then(function(data){
 
 						if(!data){
 							return;
 						}
 						
 						vm.show = true;
-						$timeout(function () {
+						
+						$timeout(function(){
+							//TODO: Do we need to do this for all docs
+							// if  we don't support PDFs anymore?
 							vm.docs = data;
 							allDocTypesHeight = 0;
 							// Open all doc types initially
@@ -77,42 +79,69 @@
 								if (vm.docs.hasOwnProperty(docType)) {
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
-
-									/*
-									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
-									if (docType === "Meta Data") {
-										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
-											for (item in vm.docs["Meta Data"].data[i].metadata) {
-												if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
-													if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
-														(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
-														(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
-														vm.docs["Meta Data"].data[i].metadata[item] =
-															$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
-													}
-												}
-											}
-										}
-									}
-									 */
 								}
 							}
 							setContentHeight();
 						});
+					
 					});
 
-				} else {
-					vm.show = false;
-				}
+			} else {
+				vm.show = false;
+			}
+		};
+
+		/*
+		 * Set up event watching
+		 */
+		$scope.$watch(EventService.currentEvent, function (event) {
+
+			var valid = autoMetaData && !pinMode;
+			if (
+				valid && 
+				event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED
+			) {
+
+				vm.handleObjectSelected(event);
 
 			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+
 				vm.show = false;
+
 			} else if (event.type === EventService.EVENT.AUTO_META_DATA) {
+
 				autoMetaData = event.value;
+
+				// Hide or show depending if it's closed or open
+				vm.show = false;
+
+
 			} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
+
 				pinMode = event.value;
+
 			}
 		});
+
+		// vm.prettyDates = function(docType) {
+			
+		// 	// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
+		// 	if (docType === "Meta Data") {
+		// 		for (var i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
+		// 			for (var item in vm.docs["Meta Data"].data[i].metadata) {
+		// 				if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
+		// 					if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+		// 						(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
+		// 						(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
+		// 						vm.docs["Meta Data"].data[i].metadata[item] =
+		// 							$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+
+		// };
 
 		/**
 		 * Show a document in a dialog

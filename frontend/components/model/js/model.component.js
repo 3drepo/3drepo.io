@@ -202,7 +202,7 @@
 
 			vm.panelCard.right.push({
 				type: "docs",
-				title: "Data",
+				title: "Meta Data",
 				show: false,
 				help: "Documents",
 				icon: "content_copy",
@@ -347,9 +347,9 @@
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' model='vm.model' settings='vm.settings' ></tdr-measure>");
-					angular.element($element[0].querySelector("#model")).append(element);
-					$compile(element)($scope);
+					//element = angular.element("");
+					//angular.element($element[0].querySelector("#model")).append(element);
+					//$compile(element)($scope);
 
 				} else {
 					// Remove measure display

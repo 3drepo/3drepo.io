@@ -280,6 +280,10 @@ var UnityUtil;
 	UnityUtil.prototype.disableClippingPlanes = function() {
 		toUnity("DisableClip");
 	};
+	
+	UnityUtil.prototype.disableMeasuringTool = function(){
+		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
+	}
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};
@@ -290,6 +294,11 @@ var UnityUtil;
 		toUnity("DropPin", LoadingState.MODEL_LOADING, JSON.stringify(params));
 
 	};
+
+	UnityUtil.prototype.enableMeasuringTool = function(){
+		toUnity("StartMeasuringTool", LoadingState.MODEL_LOADING);
+	}
+
 
 	UnityUtil.prototype.getObjectsStatus = function(account, model, promise) {
 		var nameSpace = "";
@@ -409,6 +418,10 @@ var UnityUtil;
 
 	UnityUtil.prototype.setNavigation = function(navMode) {
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
+	};
+
+	UnityUtil.prototype.setUnits = function(units) {
+		toUnity("SetUnits",LoadingState.MODEL_LOADING, units);
 	};
 
 	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model) {

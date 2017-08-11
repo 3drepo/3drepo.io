@@ -11,6 +11,7 @@ right-panel #rightPanelButtons .rightPanelButtonGroup {
 
 right-panel #rightPanelButtons .md-button {
     margin-bottom: 2px;
+    margin-top: 14px;
 }
 
 right-panel #rightPanelButtons .fa {
