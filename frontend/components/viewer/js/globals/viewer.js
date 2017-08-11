@@ -48,7 +48,7 @@ var Viewer = {};
 		this.fullscreen = false;
 		this.multiSelectMode = false;
 		this.pinDropMode = false;
-
+		this.measureMode = false;
 		this.clickingEnabled = false;
 
 		this.avatarRadius = 0.5;
@@ -348,7 +348,7 @@ var Viewer = {};
 
 		this.objectSelected = function(pointInfo) {
 
-			if(!self.selectionDisabled && !self.pinDropMode) {
+			if(!self.selectionDisabled && !self.pinDropMode && !self.measureMode) {
 				if(pointInfo.id) {
 					if(pointInfo.pin) {
 						//User clicked a pin
@@ -381,7 +381,7 @@ var Viewer = {};
 		this.lastMultipart = null;
 
 		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
-			if (!this.pinDropMode) {
+			if (!this.pinDropMode && !this.measureMode) {
 				// TODO: We shouldn't use Set here
 				idsIn = idsIn || [];
 				var uniqueIds = idsIn.filter(function(value, index, self){
@@ -667,9 +667,15 @@ var Viewer = {};
 		 * @param on
 		 */
 		this.setPinDropMode = function (on) {
-
 			this.pinDropMode = on;
-			//element.style.cursor = on ? "crosshair" : "-webkit-grab";
+		};
+
+		/**
+		 * Measure mode
+		 * @param {boolean} on
+		 */
+		this.setMeasureMode = function (on) {
+			this.measureMode = on;
 		};
 
 		/****************************************************************************

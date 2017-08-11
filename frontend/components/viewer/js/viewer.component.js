@@ -51,6 +51,7 @@
 			vm.currentModel = null;
 			vm.currentModelPromise = null;
 			vm.initialisedPromise = $q.defer();
+			vm.measureMode = false;
 
 			vm.viewer = new Viewer(
 				vm.name, 
@@ -295,9 +296,8 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							//vm.measure.measureMode(event.value);
+							vm.viewer.setMeasureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-					
 							$location.path("/" + vm.account + "/" + vm.model).search({
 								at: event.value.at,
 								view: event.value.view,

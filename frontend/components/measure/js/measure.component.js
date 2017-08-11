@@ -47,10 +47,10 @@
 				vm.unityReady.promise, 
 				vm.modelSettingsReady.promise
 			])
-				.then(function(promises){
+				.then(function(){
 					UnityUtil.setUnits(vm.units);
 				});
-		}
+		};
 
 		vm.initialiseWatchers = function() {
 			$scope.$watch(EventService.currentEvent, function (event) {
@@ -62,7 +62,6 @@
 				
 				if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-					console.log("measure - model settings", event.value.settings)
 					vm.units = event.value.settings.unit;
 					vm.modelSettingsReady.resolve();
 

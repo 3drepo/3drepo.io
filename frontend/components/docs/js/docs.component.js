@@ -69,19 +69,21 @@
 						
 						vm.show = true;
 						
-						//TODO: Do we need to do this for all docs
-						// if  we don't support PDFs anymore?
-						vm.docs = data;
-						allDocTypesHeight = 0;
-						// Open all doc types initially
-						for (var docType in vm.docs) {
-							if (vm.docs.hasOwnProperty(docType)) {
-								vm.docs[docType].show = true;
-								allDocTypesHeight += docTypeHeight;
+						$timeout(function(){
+							//TODO: Do we need to do this for all docs
+							// if  we don't support PDFs anymore?
+							vm.docs = data;
+							allDocTypesHeight = 0;
+							// Open all doc types initially
+							for (var docType in vm.docs) {
+								if (vm.docs.hasOwnProperty(docType)) {
+									vm.docs[docType].show = true;
+									allDocTypesHeight += docTypeHeight;
+								}
 							}
-						}
-						setContentHeight();
-		
+							setContentHeight();
+						});
+					
 					});
 
 			} else {
