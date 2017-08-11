@@ -42,9 +42,19 @@
 			}
 		});
 
-	IssueCtrl.$inject = ["$location", "$q", "$mdDialog", "$element", "EventService", "IssuesService", "UtilsService", "NotificationService", "AuthService", "$timeout", "$scope", "ClientConfigService", "AnalyticService", "$state", "StateManager"];
+	IssueCtrl.$inject = [
+		"$location", "$q", "$mdDialog", "$element", "EventService", 
+		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
+		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
+		"$state", "StateManager"
+	];
 
-	function IssueCtrl ($location, $q, $mdDialog, $element, EventService, IssuesService, UtilsService, NotificationService, AuthService, $timeout, $scope, ClientConfigService, AnalyticService, $state, StateManager) {
+	function IssueCtrl (
+		$location, $q, $mdDialog, $element, EventService, IssuesService,
+		UtilsService, NotificationService, AuthService, $timeout,
+		$scope, ClientConfigService, AnalyticService, $state, StateManager
+	) {
+		
 		var vm = this;
 
 		/*
