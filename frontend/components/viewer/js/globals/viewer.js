@@ -93,6 +93,11 @@ var Viewer = {};
 				this.convertToM = 0.0032;
 			}
 
+			// Set the units in unity for the measure tool
+			if (this.units) {
+				UnityUtil.setUnits(this.units);
+			}
+			
 		};
 
 		this.setHandle = function(handle) {

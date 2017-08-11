@@ -202,7 +202,7 @@
 
 			vm.panelCard.right.push({
 				type: "docs",
-				title: "Data",
+				title: "Meta Data",
 				show: false,
 				help: "Documents",
 				icon: "content_copy",

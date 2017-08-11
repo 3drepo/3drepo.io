@@ -26,46 +26,66 @@
 			controllerAs: "vm"
 		});
 
-	MeasureCtrl.$inject = ["$scope", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$q", "EventService"];
 
-	function MeasureCtrl ($scope, EventService) {
+	function MeasureCtrl ($scope, $q, EventService) {
 		var vm = this;
 
 		vm.$onInit = function() {
 
 			// Set the units in unity
 			vm.measureMode = false;
-
+			vm.readyCallback = null;
+			vm.unityReady = $q.defer();
+			vm.modelSettingsReady = $q.defer();
+			vm.handleMeasureReady();
+			vm.initialiseWatchers();
 		};
 
-		$scope.$watch(EventService.currentEvent, function (event) {
-			
-			if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+		vm.handleMeasureReady = function() {
+			$q.all([
+				vm.unityReady.promise, 
+				vm.modelSettingsReady.promise
+			])
+				.then(function(promises){
+					UnityUtil.setUnits(vm.units);
+				});
+		}
 
-				vm.units = event.value.settings.unit;
-				//console.log("measure - vm.units", vm.units);
-				UnityUtil.setUnits(vm.units);
+		vm.initialiseWatchers = function() {
+			$scope.$watch(EventService.currentEvent, function (event) {
 
-			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-				vm.measureMode = event.value;
 
-				if (vm.measureMode) {
+				if(event.type === EventService.EVENT.VIEWER.START_LOADING) {
+					vm.unityReady.resolve();
+				}
+				
+				if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-					vm.show = true;
-					//console.log("measure - Enabling measuring tool in unity")
-					UnityUtil.enableMeasuringTool();
+					console.log("measure - model settings", event.value.settings)
+					vm.units = event.value.settings.unit;
+					vm.modelSettingsReady.resolve();
 
-				} else {
+				} else if (event.type === EventService.EVENT.MEASURE_MODE) {
+					vm.measureMode = event.value;
 
-					vm.show = false;
-					//console.log("measure - Disabling measuring tool in unity")
-					UnityUtil.disableMeasuringTool();
+					if (vm.measureMode) {
+
+						vm.show = true;
+						UnityUtil.enableMeasuringTool();
+
+					} else {
+
+						vm.show = false;
+						UnityUtil.disableMeasuringTool();
+
+					}
 
 				}
 
-			}
+			});
+		}
 
-		});
 			
 	}
 }());

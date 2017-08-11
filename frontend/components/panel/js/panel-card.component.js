@@ -44,6 +44,8 @@
 	PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
 
 	function PanelCardCtrl($scope, $element, $compile, EventService) {
+
+		// TODO: Should all be encapsulated as vm.property
 		var vm = this,
 			filter = null,
 			contentHeight,
@@ -100,7 +102,13 @@
 		 */
 		$scope.$watch("vm.showEdit", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				EventService.send(EventService.EVENT.PANEL_CARD_EDIT_MODE, {on: newValue, type: vm.contentData.type});
+				EventService.send(
+					EventService.EVENT.PANEL_CARD_EDIT_MODE, 
+					{
+						on: newValue, 
+						type: vm.contentData.type
+					}
+				);
 			}
 		});
 
@@ -108,15 +116,20 @@
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (vm.contentData.type === "issues")) {
+			if (
+				event.type === EventService.EVENT.TOGGLE_ISSUE_ADD &&
+				vm.contentData.type === "issues"
+			) {
 				toggleAdd(event.value.on);
 				// Reset option highlight if the issue add is cancelled
 				if (!event.value.on) {
 					vm.contentData.options[currentHighlightedOptionIndex].color = "";
 					currentHighlightedOptionIndex = -1;
 				}
-			} else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
-					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
+			} else if (
+				event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
+				event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
+			) {
 				// Only one card can be in modify mode at a time
 				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
@@ -171,6 +184,9 @@
 				contentItem,
 				element;
 
+			// TODO: We shouldn't use string concat and angular.element
+			// definite antipattern
+
 			element =
 				"<" + vm.contentData.type + " " +
 				"show='vm.contentData.show' " +
@@ -219,6 +235,10 @@
 		 * Create the tool bar options
 		 */
 		function createToolbarOptions () {
+
+			// TODO: We shouldn't use string concat and angular.element
+			// definite antipattern
+
 			var i, length,
 				option, optionElement;
 
@@ -283,6 +303,10 @@
 		 * Create the filter element
 		 */
 		function createFilter () {
+
+			// TODO: We shouldn't use string concat and angular.element
+			// definite antipattern
+
 			var i, length,
 				filterContainer = angular.element($element[0].querySelector("#filterContainer")),
 				filter;
@@ -304,6 +328,10 @@
 		 * Create the add button
 		 */
 		function createAdd () {
+			// TODO: We shouldn't use string concat and angular.element
+			// definite antipattern
+
+
 			var panelCardContainer = angular.element($element[0].querySelector("#panelCardContainer")),
 				add;
 			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
@@ -319,7 +347,7 @@
 		 * Handle adding content
 		 *
 		 * @param {Boolean} on
-         */
+		 */
 		function toggleAdd (on) {
 			if (on) {
 				if (vm.contentData.type === "issues") {
