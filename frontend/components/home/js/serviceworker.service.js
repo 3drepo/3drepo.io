@@ -34,7 +34,7 @@
 
 		function registerSW(sw)  {
 		
-			var swPath = path + sw + ".js";
+			var swPath = "/" + path + sw + ".js";
 			console.debug("ServiceWorker path: ", swPath);
 
 			navigator.serviceWorker.register(swPath).then(function(registration) {
