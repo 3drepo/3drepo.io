@@ -30,7 +30,7 @@ const allCss = [
     './components/**/**.css'
 ]
 const allJs = ['./components/**/**.js', './bootstrap.js'];
-const allPug = './components/**/**.pug';
+const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
 const icons = './icons/*.svg';
 
 const jsOrder = [
@@ -51,11 +51,12 @@ gulp.task('index', function(){
 
 gulp.task('pug', function(){
 
-  return gulp.src('./components/**/*.pug')
+  return gulp.src(allPug)
         // .pipe(print())
         .pipe(rename({dirname: ''}))
         .pipe(pug({ verbose : false }))
         .pipe(gulp.dest("./../public/templates/"))
+        .pipe(livereload())
   
 });
 
@@ -78,11 +79,15 @@ gulp.task('icons', function () {
 });
 
 gulp.task('images', function() {
-  return gulp.src(allImages).pipe(gulp.dest('./../public/images/'));
+  return gulp.src(allImages)
+        .pipe(gulp.dest('./../public/images/'))
+        .pipe(livereload())
 });
 
 gulp.task('fonts', function() {
-  return gulp.src(allFonts).pipe(gulp.dest('./../public/fonts/'));
+  return gulp.src(allFonts)
+        .pipe(gulp.dest('./../public/fonts/'))
+        .pipe(livereload())
 });
 
 gulp.task('unity', function() {

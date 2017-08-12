@@ -72,6 +72,10 @@ home #homeLogo img {
     }
     
 }
+
+home .homeUserContent {
+    margin-top: 100px;
+}
  
 home .homeUserContent .md-whiteframe-1dp,
 home .homeUserContent .md-whiteframe-8dp {
@@ -131,7 +135,7 @@ home #legalLinks {
     bottom: 0;
     right: 0;
     user-select: none;
-    z-index: 2;
+    z-index: 3;
     color: #fff;
     background: #0c2f54;
     border-top-left-radius: 4px;
@@ -152,6 +156,14 @@ home #legalLinks {
     margin: 5px 5px 5px !important;
   }
 
+}
+
+home #homeLegalContainer {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 home #homeLoggedOut {
@@ -216,7 +228,7 @@ md-dialog md-toolbar {
 /** Legal *************************************************************************************************************/
 #legal {
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
 }

@@ -4,6 +4,10 @@ account-dir {
   padding-top: 30px;
 }
 
+account-dir #account .userContentNoMargin {
+  margin-top: 0px !important;
+}
+
 account-dir #account {
   background-size: contain;
 }
@@ -273,7 +277,9 @@ account-info .accountInfoPage .md-button {
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
   max-width: 300px;
+  min-width: 100px;
   max-height: 150px;
+  min-height: 100px;
   background: #E8EAF6;
   margin: auto;
   margin-top: 20px;
@@ -709,6 +715,7 @@ account-teamspaces label, account-teamspaces p {
 
 account-teamspaces md-content {
   margin-bottom: 30px;
+  min-height: 300px;
 }
 
 account-teamspaces .loadingText {

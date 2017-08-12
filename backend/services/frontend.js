@@ -68,9 +68,11 @@
 
 		statics.forEach((folder) => {
 			const staticPath = path.resolve(publicDir + folder);
-			app.use(folder, express.static(staticPath));
+			app.use(folder, express.static(staticPath, {fallthrough: true}));
+			app.use(folder, function(req, res) {
+				res.status(404).send('404 - File Not Found');
+			});
 		});
-
 
 		app.get("/manifest.json", function (req, res) {
 			res.sendFile(path.resolve(publicDir + "/manifest.json"));

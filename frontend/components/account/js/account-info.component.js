@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountInfoCtrl.$inject = ["$location", "$scope", "ClientConfigService", "UtilsService"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "$element", "ClientConfigService", "UtilsService"];
 
-	function AccountInfoCtrl ($location, $scope, ClientConfigService, UtilsService) {
+	function AccountInfoCtrl ($location, $scope, $element, ClientConfigService, UtilsService) {
 		var vm = this;
 		
 		/*
@@ -51,6 +51,8 @@
 				licenses: {label: "Licenses"},
 				assign: {label: "Assign Permissons" }
 			};
+			vm.imageLoaded = false;
+			vm.registerUrlCallback();
 		};
 
 		/**
@@ -65,7 +67,10 @@
 
 
 		function getAvatarUrl(){
-			return ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.username + "/avatar") + "?" + new Date().valueOf();
+			//var date = "?" + new Date().valueOf();
+			var endpoint = vm.username + "/avatar";
+			return ClientConfigService
+				.apiUrl(ClientConfigService.GET_API, endpoint);
 		}
 
 		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){
@@ -76,8 +81,14 @@
 
 		});
 
-
-		
+		vm.registerUrlCallback = function() {
+			var avatar = $element[0].getElementsByClassName("account-avatar-image");
+			if (avatar[0]) {
+				avatar[0].addEventListener("load", function(){
+					vm.imageLoaded = true;
+				});
+			}	
+		};
 
 		vm.upload = function(){
 
@@ -91,20 +102,29 @@
 
 				vm.uploadingAvatar = true;
 				var formData = new FormData();
-				formData.append("file", file.files[0]);
+		
+				var size = file.files[0].size;
+				var maxSize = 1024 * 100;
+				if (size < maxSize) {
+					formData.append("file", file.files[0]);
 
-				UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined}).then(function(res){
-					vm.uploadingAvatar = false;
-					
-					if(res.status === 200){
-						vm.avatarUrl = getAvatarUrl();
-					} else {
-						console.error("Upload avatar error", res.data);
-					}
+					UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined}).then(function(res){
+						vm.uploadingAvatar = false;
+						
+						if(res.status === 200){
+							vm.avatarUrl = getAvatarUrl();
+						} else {
+							console.error("Upload avatar error", res.data);
+						}
 
-				});
+					});
 
-				$scope.$apply();
+					$scope.$apply();
+
+				} else {
+					console.error("Upload avatar error: File is too big!");
+				}
+				
 
 			});
 		};

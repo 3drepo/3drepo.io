@@ -32,9 +32,20 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "ClientConfigService", "$location", "SWService", "AnalyticService"];
+	HomeCtrl.$inject = [
+		"$scope", "$http", "$templateCache", "$element", "$interval", 
+		"$timeout", "$compile", "$mdDialog", "$window",
+		"AuthService", "StateManager", "EventService", "UtilsService", 
+		"ClientConfigService", "$location", "SWService", "AnalyticService"
+	];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, ClientConfigService, $location, SWService, AnalyticService) {
+	function HomeCtrl(
+		$scope, $http, $templateCache, $element, $interval, $timeout, 
+		$compile, $mdDialog, $window, AuthService, StateManager,
+		EventService, UtilsService, ClientConfigService, $location,
+		SWService, AnalyticService
+	) {
+
 		var vm = this;
 		
 		/*
@@ -51,7 +62,11 @@
 			AnalyticService.init();
 			SWService.init();
 
+			vm.precacheTeamspaceTemplate();
+
 			vm.loggedIn = false;
+			vm.loginPage = true;
+			vm.loggedOutPage = false;
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -80,6 +95,13 @@
 				"/registerVerify"
 			];
 
+
+			vm.legal = [
+				"legal", 
+				"privacy",
+				"cookies"
+			];
+
 			vm.loginRedirects = [
 				"sign-up",
 				"password-forgot",
@@ -89,24 +111,41 @@
 
 			$timeout(function () {
 
-				vm.homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
-
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/
-				$scope.$watch("vm.state", function (newState, oldState) {
+				$scope.$watch("vm.state", function (oldState, newState) {
 
 					var changedState = newState !== oldState;
+					
+
+					// Determine whether to show the Login directive or 
+					// logged in content directives
+					if (newState && newState.loggedIn !== undefined) {
+						vm.loggedIn = newState.loggedIn;
+					}
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
-						handleStateChange();
+
+						// If it's a legal page
+						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
+							vm.isLegalPage = true;
+							vm.loggedOutPage = false;
+						}
+
+						// If its a logged out page which isnt login
+						if (
+							newState["password-forgot"] || newState["register-request"] || 
+							newState["sign-up"] || newState["register-verify"]
+						) {
+							vm.isLegalPage = false;
+							vm.loggedOutPage = true;
+						}
+
+						handleStateChange(newState);
 					}
 					
 				}, true);
-
-				$scope.$watch("AuthService.loggedIn", function(){
-					vm.loggedIn = AuthService.isLoggedIn();
-				}, true)
 
 			});
 
@@ -118,6 +157,16 @@
 
 		};
 
+		vm.precacheTeamspaceTemplate = function() {
+
+			// The account teamspace template is hefty. If we cache it ASAP
+			// we can improve the percieved performance for the user
+			var templatePath = "templates/account-teamspaces.html";
+			$http.get(templatePath).then(function(response) {
+				$templateCache.put(templatePath, response.data);
+			});
+
+		};
 
 		vm.isMobile = function() {
 
@@ -127,7 +176,7 @@
 				vm.handleMobile();
 			}
 
-			console.log("Is mobile? ", mobile);
+			console.debug("Is mobile? ", mobile);
 			return mobile;
 
 		};
@@ -151,25 +200,16 @@
 
 		};
 
-		function handleStateChange() {
-			var loginMarkup = "<login></login>";
+		function handleStateChange(state) {
+
+			// TODO: Inserting DOM like this is an anti pattern
+
 			clearDirective();
 			var functionToInsert = getFunctionToInsert();
 
 			if (functionToInsert != null) {
-				var needsRedirect = vm.loginRedirects.indexOf(functionToInsert) !== -1;
-				if (AuthService.isLoggedIn() && needsRedirect) {
-					$location.path(AuthService.getUsername());
-				} else {
-					insertFunctionDirective(functionToInsert);
-				}
-				
-			} else {
-				// If you are not logged in
-				if (!AuthService.isLoggedIn()) {
-					insertDirective(loginMarkup);
-				} 
-			}
+				insertFunctionDirective(functionToInsert);
+			} 
 		}
 
 		function hasTrailingSlash() {
@@ -189,26 +229,11 @@
 			$location.path(minusSlash);
 		}
 
-		vm.sendLoginRequest = function(){
-			if (!AuthService) {
-				return false;
-			}
-			return AuthService.isLoggedIn();
-		};
-
-
 		function clearDirective() {
 			if (vm.elementRef) {
 				vm.elementRef.remove();
 				vm.elementScope.$destroy();
 			}
-		}
-
-		function insertDirective(markup) {
-			var directiveElement = angular.element(markup);
-			vm.homeLoggedOut.append(directiveElement);
-			vm.elementScope = $scope.$new();
-			vm.elementRef = $compile(directiveElement)(vm.elementScope);
 		}
 
 		function getFunctionToInsert() {
@@ -235,7 +260,44 @@
 				" query='vm.query'>" +
 				"</" + insertFunc + ">";
 
-			insertDirective(directiveMarkup);
+			// Waits for the DOM to be rendered (AngularJS: ???)
+			$timeout(function(){
+
+				if (vm.isLegalPage) {
+					insertLegalDirective(directiveMarkup);
+				} else {
+					insertLoggedOutDirective(directiveMarkup);
+				}
+
+			});
+			
+		}
+
+		function insertLegalDirective(markup) {
+
+			// TODO: this all needs cleaning up, confusing 
+			// as to what is being insert where and why
+			var legalEl = $element[0].querySelector("#homeLegalContainer");
+			vm.homeLegalContainer = angular.element(legalEl);
+
+			var directiveElement = angular.element(markup);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
+			vm.homeLegalContainer.append(directiveElement);
+			
+			vm.homeLegalContainer[0].style.zIndex = 2;
+			
+		}
+
+		function insertLoggedOutDirective(markup) {
+			var loggedOutEl = $element[0].querySelector("#homeLoggedOut");
+			vm.homeLoggedOut = angular.element(loggedOutEl);
+
+			var directiveElement = angular.element(markup);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
+			vm.homeLoggedOut.append(directiveElement);
+			vm.homeLoggedOut[0].style.zIndex = 2;
 		}
 
 		vm.logout = function () {
