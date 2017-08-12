@@ -38,11 +38,20 @@ div.homeContainer(
 		layout="column"
 		ng-if="vm.isLegalPage")
 
+		privacy(ng-if="vm.page === 'privacy'")
+		terms(ng-if="vm.page === 'terms'")
+		cookies(ng-if="vm.page === 'cookies'")
+		
+
 	#homeLoggedOut(
 		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
 		
-		login(
-			ng-if="!vm.loggedIn && !vm.loggedOutPage")
+		login(ng-if="!vm.loggedIn && !vm.loggedOutPage")
+		
+		sign-up(ng-if="vm.page === 'sign-up'")
+		password-forgot(ng-if="vm.page === 'password-forgot'")
+		register-request(ng-if="vm.page === 'register-request'")
+		register-verify(ng-if="vm.page === 'register-verify'")
 
 	#legalLinks
 		a(
