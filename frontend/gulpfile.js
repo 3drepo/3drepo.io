@@ -120,6 +120,7 @@ gulp.task('service-workers', function(callback) {
       rootDir + 'images/**/*.{png,jpg}',
       rootDir + 'unity/**/*.{js,html,data,mem,css,png,jpg}',
     ],
+    navigateFallback: '/index.html',
     stripPrexix: rootDir,
     replacePrefix: "/"
   }, callback);
