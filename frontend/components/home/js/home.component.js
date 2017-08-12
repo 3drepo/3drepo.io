@@ -116,40 +116,37 @@
 				*/
 				$scope.$watch("vm.state", function (oldState, newState) {
 
-					var changedState = newState !== oldState;
-					
+					var change = JSON.stringify(oldState) === JSON.stringify(newState);
 
-					// Determine whether to show the Login directive or 
-					// logged in content directives
-					if (newState && newState.loggedIn !== undefined) {
-						vm.loggedIn = newState.loggedIn;
-					}
+					if (newState && change) {
 
-					// Determine whether to show the Login directive or 
-					// logged in content directives
-					if (newState && newState.loggedIn !== undefined) {
-						vm.loggedIn = newState.loggedIn;
-					}
+						// Determine whether to show the Login directive or 
+						// logged in content directives
+						if (newState.loggedIn !== undefined) {
+							vm.loggedIn = newState.loggedIn;
+						}
 
-					if (newState) {
+						// Determine whether to show the Login directive or 
+						// logged in content directives
+						if (newState.loggedIn !== undefined) {
+							vm.loggedIn = newState.loggedIn;
+						}
+
 						// If it's a legal page
 						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
 							vm.isLegalPage = true;
 							vm.loggedOutPage = false;
-						}
-
-						// If its a logged out page which isnt login
-						if (
+						} else if (
+							// If its a logged out page which isnt login
 							newState["password-forgot"] || newState["register-request"] || 
 							newState["sign-up"] || newState["register-verify"]
 						) {
 							vm.isLegalPage = false;
 							vm.loggedOutPage = true;
 						}
-					}
 
-					if (changedState && !vm.state.changing && vm.state.authInitialized) {
 						handleStateChange();
+					
 					}
 					
 				}, true);
@@ -280,6 +277,8 @@
 			
 		}
 
+		//TODO: DRY this up
+
 		function insertLegalDirective(markup) {
 
 			// TODO: this all needs cleaning up, confusing 
@@ -297,6 +296,7 @@
 		}
 
 		function insertLoggedOutDirective(markup) {
+
 			var loggedOutEl = $element[0].querySelector("#homeLoggedOut");
 			vm.homeLoggedOut = angular.element(loggedOutEl);
 
