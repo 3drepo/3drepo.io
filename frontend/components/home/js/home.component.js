@@ -66,7 +66,7 @@
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
-			vm.loggedOutPage = false;
+			vm.isLoggedOutPage = false;
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -96,13 +96,13 @@
 			];
 
 
-			vm.legal = [
-				"legal", 
+			vm.legalPages = [
+				"terms", 
 				"privacy",
 				"cookies"
 			];
 
-			vm.loginRedirects = [
+			vm.loggedOutPages = [
 				"sign-up",
 				"password-forgot",
 				"register-request",
@@ -126,24 +126,32 @@
 
 					if (newState && change) {
 						// If it's a legal page
-						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
+						var legal = vm.pageCheck(newState, vm.legalPages);
+						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+
+						if (legal) {
+
 							vm.isLegalPage = true;
-							vm.loggedOutPage = false;
-						} else if (
+							vm.isLoggedOutPage = false;
+
+							vm.legalPages.forEach(function(page){
+								vm.setPage(newState, page);
+							});
+
+						} else if (loggedOut) {
+
 							// If its a logged out page which isnt login
-							newState["password-forgot"] || newState["register-request"] || 
-							newState["sign-up"] || newState["register-verify"]
-						) {
+
 							vm.isLegalPage = false;
-							vm.loggedOutPage = true;
+							vm.isLoggedOutPage = true;
+
+							vm.loggedOutPages.forEach(function(page){
+								vm.setPage(newState, page);
+							});
+
 						}
-
-						handleStateChange();
-					
-					}
-					
+					}			
 				}, true);
-
 			});
 
 			vm.isMobileFlag = vm.isMobile();
@@ -154,13 +162,33 @@
 
 		};
 
+		vm.pageCheck = function(state, pages) {
+			return pages.filter(function(page) { 
+				return state[page] === true;
+			}).length;
+		}
+
+		vm.setPage = function(state, page) {
+			if(state[page] === true) {
+				vm.page = page;
+			}
+		};
+
 		vm.precacheTeamspaceTemplate = function() {
 
 			// The account teamspace template is hefty. If we cache it ASAP
 			// we can improve the percieved performance for the user
-			var templatePath = "templates/account-teamspaces.html";
-			$http.get(templatePath).then(function(response) {
-				$templateCache.put(templatePath, response.data);
+
+			var preCacheTemplates = [
+				"templates/account-teamspaces.html",
+				"templates/account-info.html",
+				"templates/sign-up.html"
+			];
+
+			preCacheTemplates.forEach(function(templatePath){
+				$http.get(templatePath).then(function(response) {
+					$templateCache.put(templatePath, response.data);
+				});
 			});
 
 		};
@@ -197,17 +225,6 @@
 
 		};
 
-		function handleStateChange() {
-
-			// TODO: Inserting DOM like this is an anti pattern
-
-			clearDirective();
-			var functionToInsert = getFunctionToInsert();
-
-			if (functionToInsert != null) {
-				insertFunctionDirective(functionToInsert);
-			} 
-		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL
@@ -224,83 +241,6 @@
 			var currentPath = $location.path();
 			var minusSlash = currentPath.slice(0, -1);
 			$location.path(minusSlash);
-		}
-
-		function clearDirective() {
-			if (vm.elementRef) {
-				vm.elementRef.remove();
-				vm.elementScope.$destroy();
-			}
-		}
-
-		function getFunctionToInsert() {
-			// Check for static(function) pages to see if we need
-			// render one of them
-			var func;
-			for (var i = 0; i < vm.functions.length; i++) {
-				func = vm.functions[i];
-
-				if (vm.state[func]) {
-					return func;
-				}
-			}
-
-			return null;
-		}
-
-		function insertFunctionDirective(insertFunc) {
-
-			// Create element related to function func
-			var directiveMarkup = "<" + insertFunc +
-				" username='vm.query.username'" +
-				" token='vm.query.token'" +
-				" query='vm.query'>" +
-				"</" + insertFunc + ">";
-
-			// Waits for the DOM to be rendered (AngularJS: ???)
-			$timeout(function(){
-
-				angular.element(function(){
-					if (vm.isLegalPage) {
-						insertLegalDirective(directiveMarkup);
-					} else {
-						insertLoggedOutDirective(directiveMarkup);
-					}
-				});
-				
-			});
-			
-		}
-
-		//TODO: DRY this up
-
-		function insertLegalDirective(markup) {
-
-			// TODO: this all needs cleaning up, confusing 
-			// as to what is being insert where and why
-
-			var legalEl = $element[0].querySelector("#homeLegalContainer");
-			vm.homeLegalContainer = angular.element(legalEl);
-
-			var directiveElement = angular.element(markup);
-			vm.elementScope = $scope.$new();
-			vm.elementRef = $compile(directiveElement)(vm.elementScope);
-			vm.homeLegalContainer.append(directiveElement);
-			
-			vm.homeLegalContainer[0].style.zIndex = 2;
-			
-		}
-
-		function insertLoggedOutDirective(markup) {
-
-			var loggedOutEl = $element[0].querySelector("#homeLoggedOut");
-			vm.homeLoggedOut = angular.element(loggedOutEl);
-
-			var directiveElement = angular.element(markup);
-			vm.elementScope = $scope.$new();
-			vm.elementRef = $compile(directiveElement)(vm.elementScope);
-			vm.homeLoggedOut.append(directiveElement);
-			vm.homeLoggedOut[0].style.zIndex = 2;
 		}
 
 		vm.logout = function () {
