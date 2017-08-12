@@ -267,12 +267,14 @@
 			// Waits for the DOM to be rendered (AngularJS: ???)
 			$timeout(function(){
 
-				if (vm.isLegalPage) {
-					insertLegalDirective(directiveMarkup);
-				} else {
-					insertLoggedOutDirective(directiveMarkup);
-				}
-
+				angular.element(function(){
+					if (vm.isLegalPage) {
+						insertLegalDirective(directiveMarkup);
+					} else {
+						insertLoggedOutDirective(directiveMarkup);
+					}
+				});
+				
 			});
 			
 		}
@@ -283,6 +285,7 @@
 
 			// TODO: this all needs cleaning up, confusing 
 			// as to what is being insert where and why
+
 			var legalEl = $element[0].querySelector("#homeLegalContainer");
 			vm.homeLegalContainer = angular.element(legalEl);
 
