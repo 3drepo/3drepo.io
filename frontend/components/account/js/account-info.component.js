@@ -82,10 +82,12 @@
 		});
 
 		vm.registerUrlCallback = function() {
-			$element[0].getElementsByClassName("account-avatar-image")[0]
-				.addEventListener("load", function(){
+			var avatar = $element[0].getElementsByClassName("account-avatar-image");
+			if (avatar[0]) {
+				avatar[0].addEventListener("load", function(){
 					vm.imageLoaded = true;
 				});
+			}	
 		};
 
 		vm.upload = function(){

@@ -5,7 +5,7 @@ div.homeContainer(
 	ng-keyup="vm.keyAction($event)")
 
 	viewer(
-		ng-if="!vm.isMobileDevice"
+		ng-if="!vm.isMobileDevice && !vm.isLegalPage"
 		hide-xs
 		hide-sm
 		node="node"
@@ -18,7 +18,7 @@ div.homeContainer(
 	div.homeHolder(
 		layout="column"
 		flex="100"
-		ng-if="!vm.state.changing")
+		ng-if="!vm.state.changing && !vm.isLegalPage")
 
 		div.homeTopBar
 		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
@@ -33,10 +33,11 @@ div.homeContainer(
 			ng-if="vm.loggedIn"
 			keys-down="vm.keysDown")
 
-	#homeLegalContainer
+	#homeLegalContainer(
+		ng-if="vm.isLegalPage")
 
-	#homeLoggedOut(ng-if="!vm.state.changing && !vm.loggedIn")
-		login(ng-if="!vm.loggedIn")
+	#homeLoggedOut(ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
+		login(ng-if="!vm.loggedIn && !vm.loggedOutPage")
 
 	#legalLinks
 		a(

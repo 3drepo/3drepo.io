@@ -66,6 +66,10 @@
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
+<<<<<<< HEAD
+=======
+			vm.loggedOutPage = false;
+>>>>>>> ISSUE_394
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -94,6 +98,13 @@
 				"/registerVerify"
 			];
 
+
+			vm.legal = [
+				"legal", 
+				"privacy",
+				"cookies"
+			];
+
 			vm.loginRedirects = [
 				"sign-up",
 				"password-forgot",
@@ -103,14 +114,19 @@
 
 			$timeout(function () {
 
-				vm.homeLegalContainer = angular.element($element[0].querySelector("#homeLegalContainer"));
-
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/
 				$scope.$watch("vm.state", function (oldState, newState) {
 
 					var changedState = newState !== oldState;
+					
+
+					// Determine whether to show the Login directive or 
+					// logged in content directives
+					if (newState && newState.loggedIn !== undefined) {
+						vm.loggedIn = newState.loggedIn;
+					}
 
 					// Determine whether to show the Login directive or 
 					// logged in content directives
@@ -119,6 +135,22 @@
 					}
 
 					if (changedState && !vm.state.changing && vm.state.authInitialized) {
+
+						// If it's a legal page
+						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
+							vm.isLegalPage = true;
+							vm.loggedOutPage = false;
+						}
+
+						// If its a logged out page which isnt login
+						if (
+							newState["password-forgot"] || newState["register-request"] || 
+							newState["sign-up"] || newState["register-verify"]
+						) {
+							vm.isLegalPage = false;
+							vm.loggedOutPage = true;
+						}
+
 						handleStateChange(newState);
 					}
 					
@@ -185,9 +217,7 @@
 			var functionToInsert = getFunctionToInsert();
 
 			if (functionToInsert != null) {
-
 				insertFunctionDirective(functionToInsert);
-				
 			} 
 		}
 
@@ -239,7 +269,44 @@
 				" query='vm.query'>" +
 				"</" + insertFunc + ">";
 
-			insertDirective(directiveMarkup);
+			// Waits for the DOM to be rendered (AngularJS: ???)
+			$timeout(function(){
+
+				if (vm.isLegalPage) {
+					insertLegalDirective(directiveMarkup);
+				} else {
+					insertLoggedOutDirective(directiveMarkup);
+				}
+
+			});
+			
+		}
+
+		function insertLegalDirective(markup) {
+
+			// TODO: this all needs cleaning up, confusing 
+			// as to what is being insert where and why
+			var legalEl = $element[0].querySelector("#homeLegalContainer");
+			vm.homeLegalContainer = angular.element(legalEl);
+
+			var directiveElement = angular.element(markup);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
+			vm.homeLegalContainer.append(directiveElement);
+			
+			vm.homeLegalContainer[0].style.zIndex = 2;
+			
+		}
+
+		function insertLoggedOutDirective(markup) {
+			var loggedOutEl = $element[0].querySelector("#homeLoggedOut");
+			vm.homeLoggedOut = angular.element(loggedOutEl);
+
+			var directiveElement = angular.element(markup);
+			vm.elementScope = $scope.$new();
+			vm.elementRef = $compile(directiveElement)(vm.elementScope);
+			vm.homeLoggedOut.append(directiveElement);
+			vm.homeLoggedOut[0].style.zIndex = 2;
 		}
 
 		function insertDirective(markup) {
