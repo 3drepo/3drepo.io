@@ -89,7 +89,7 @@
 			if (ClientConfigService.hasOwnProperty("auth")) {
 				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
 					vm.useReCapthca = true;
-					vm.captchaKey = serverConfig.captcha_client_key;
+					vm.captchaKey = ClientConfigService.captcha_client_key;
 				}
 			}
 
