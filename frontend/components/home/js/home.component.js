@@ -148,7 +148,7 @@
 							vm.loggedOutPage = true;
 						}
 
-						handleStateChange(newState);
+						handleStateChange();
 					}
 					
 				}, true);
@@ -206,7 +206,7 @@
 
 		};
 
-		function handleStateChange(state) {
+		function handleStateChange() {
 
 			// TODO: Inserting DOM like this is an anti pattern
 
@@ -304,18 +304,6 @@
 			vm.elementRef = $compile(directiveElement)(vm.elementScope);
 			vm.homeLoggedOut.append(directiveElement);
 			vm.homeLoggedOut[0].style.zIndex = 2;
-		}
-
-		function insertDirective(markup) {
-
-			// TODO: this all needs cleaning up, confusing 
-			// as to what is being insert where and why
-
-			var directiveElement = angular.element(markup);
-			vm.elementScope = $scope.$new();
-			vm.elementRef = $compile(directiveElement)(vm.elementScope);
-			vm.homeLegalContainer.append(directiveElement);
-			vm.homeLegalContainer[0].style.zIndex = 100;
 		}
 
 		vm.logout = function () {
