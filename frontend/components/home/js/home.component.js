@@ -117,20 +117,18 @@
 				$scope.$watch("vm.state", function (oldState, newState) {
 
 					var change = JSON.stringify(oldState) === JSON.stringify(newState);
+					console.log(oldState, newState);
+
+					// Determine whether to show the Login directive or 
+					// logged in content directives
+					if (newState.loggedIn !== undefined) {
+						vm.loggedIn = newState.loggedIn;
+					}
+
 
 					if (newState && change) {
 
-						// Determine whether to show the Login directive or 
-						// logged in content directives
-						if (newState.loggedIn !== undefined) {
-							vm.loggedIn = newState.loggedIn;
-						}
-
-						// Determine whether to show the Login directive or 
-						// logged in content directives
-						if (newState.loggedIn !== undefined) {
-							vm.loggedIn = newState.loggedIn;
-						}
+						console.log("inside newstate and change")
 
 						// If it's a legal page
 						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
