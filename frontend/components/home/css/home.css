@@ -72,6 +72,10 @@ home #homeLogo img {
     }
     
 }
+
+home .homeUserContent {
+    margin-top: 100px;
+}
  
 home .homeUserContent .md-whiteframe-1dp,
 home .homeUserContent .md-whiteframe-8dp {
@@ -152,6 +156,15 @@ home #legalLinks {
     margin: 5px 5px 5px !important;
   }
 
+}
+
+home #homeLegalContainer {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
 }
 
 home #homeLoggedOut {

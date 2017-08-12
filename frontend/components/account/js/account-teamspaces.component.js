@@ -29,7 +29,8 @@
 				quota: "=",
 				subscriptions: "=",
 				loading: "=",
-				selectedIndex: "="
+				selectedIndex: "=",
+				itemToShow: "="
 			},
 			controller: AccountReposCtrl,
 			controllerAs: "vm"

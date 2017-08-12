@@ -30,10 +30,13 @@ div.homeContainer(
 			account='vm.state.account'
 			state='vm.state'
 			query='vm.query'
-			ng-if="vm.sendLoginRequest()"
+			ng-if="vm.loggedIn"
 			keys-down="vm.keysDown")
 
-	#homeLoggedOut(ng-show="!vm.state.changing && !vm.loggedIn")
+	#homeLegalContainer
+
+	#homeLoggedOut(ng-if="!vm.state.changing && !vm.loggedIn")
+		login(ng-if="!vm.loggedIn")
 
 	#legalLinks
 		a(

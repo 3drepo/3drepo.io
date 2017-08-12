@@ -57,8 +57,6 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 
-			console.log("vm.numNewLicenses", vm.numNewLicenses);
-
 			if (angular.isDefined(vm.numNewLicenses)) {
 				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {
 					vm.saveDisabled = true;
