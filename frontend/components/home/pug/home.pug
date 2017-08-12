@@ -34,10 +34,15 @@ div.homeContainer(
 			keys-down="vm.keysDown")
 
 	#homeLegalContainer(
+		flex="100"
+		layout="column"
 		ng-if="vm.isLegalPage")
 
-	#homeLoggedOut(ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
-		login(ng-if="!vm.loggedIn && !vm.loggedOutPage")
+	#homeLoggedOut(
+		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
+		
+		login(
+			ng-if="!vm.loggedIn && !vm.loggedOutPage")
 
 	#legalLinks
 		a(

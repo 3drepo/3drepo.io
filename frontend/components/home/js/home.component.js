@@ -131,8 +131,7 @@
 						vm.loggedIn = newState.loggedIn;
 					}
 
-					if (changedState && !vm.state.changing && vm.state.authInitialized) {
-
+					if (newState) {
 						// If it's a legal page
 						if (newState["terms"] || newState["privacy"] || newState["cookies"]) {
 							vm.isLegalPage = true;
@@ -147,7 +146,9 @@
 							vm.isLegalPage = false;
 							vm.loggedOutPage = true;
 						}
+					}
 
+					if (changedState && !vm.state.changing && vm.state.authInitialized) {
 						handleStateChange();
 					}
 					
