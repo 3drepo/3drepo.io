@@ -66,10 +66,7 @@
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
-<<<<<<< HEAD
-=======
 			vm.loggedOutPage = false;
->>>>>>> ISSUE_394
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
