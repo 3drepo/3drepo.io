@@ -74,6 +74,11 @@
 			});
 		});
 
+
+		app.get("/index.html", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/index.html"));
+		});
+
 		app.get("/manifest.json", function (req, res) {
 			res.sendFile(path.resolve(publicDir + "/manifest.json"));
 		});
