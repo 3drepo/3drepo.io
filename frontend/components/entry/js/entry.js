@@ -1,6 +1,30 @@
-// Eventually we won't need this as we will get the config/plugin structure statically rather than dynamically through pug
-if (!ClientConfig) {
-	console.error("ClientConfig is generated in the pug/frontend.pug file. It should be defined.");
-}
+
+if (!window.ClientConfig) {
+	console.error("ClientConfig has not been provided...");
+} 
+
+// Add some offline UX
+window.addEventListener("load", function() {
+
+	var offlineDiv = document.createElement("div");
+	offlineDiv.className = "connection";
+	document.body.appendChild(offlineDiv);
+
+	function updateOnlineStatus() {
+		var condition = navigator.onLine ? "Online" : "Offline";
+		document.querySelector(".connection").innerHTML = condition;
+		if (condition === "Online") {
+			offlineDiv.className = "connection online";
+			setTimeout(function(){
+				document.querySelector(".connection").innerHTML = "";
+			}, 1000 * 10000);
+		} else {
+			offlineDiv.className = "connection offline";
+		}
+	}
+
+	window.addEventListener("online",  updateOnlineStatus);
+	window.addEventListener("offline", updateOnlineStatus);
+});
 
 angular.module("3drepo", ["ui.router", "ngMaterial", "ngAnimate", "ngSanitize", "vcRecaptcha"]);
