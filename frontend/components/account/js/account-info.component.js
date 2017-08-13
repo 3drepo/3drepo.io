@@ -108,16 +108,16 @@
 				if (size < maxSize) {
 					formData.append("file", file.files[0]);
 
-					UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined}).then(function(res){
-						vm.uploadingAvatar = false;
-						
-						if(res.status === 200){
-							vm.avatarUrl = getAvatarUrl();
-						} else {
-							console.error("Upload avatar error", res.data);
-						}
-
-					});
+					UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined})
+						.then(function(res){
+							vm.uploadingAvatar = false;
+							
+							if(res.status === 200){
+								vm.avatarUrl = getAvatarUrl();
+							} else {
+								console.error("Upload avatar error", res.data);
+							}
+						});
 
 					$scope.$apply();
 
