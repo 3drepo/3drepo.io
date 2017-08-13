@@ -98,16 +98,16 @@
    
     <!-- Load LiveReload if on Dev-->
     <script async>
-
+      if (window) {
         if (window.ClientConfig && window.ClientConfig.development === true) {
-            console.debug("Development - Loading livereload.js")
-            var src="//localhost:35729/livereload.js" ;
+            console.debug("Development - Loading livereload.js");
+            var src = "//localhost:35729/livereload.js";
             var script = document.createElement("script");
             script.setAttribute("src", src);
             script.setAttribute("async", true);
             document.head.appendChild(script);
         }
-        
+      }
     </script>
   </body>
 </html>
