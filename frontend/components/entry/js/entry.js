@@ -1,6 +1,7 @@
 
 if (!window.ClientConfig) {
-	console.error("ClientConfig has not been provided...");
+	console.error("ClientConfig has not been provided, using empty object...");
+	window.ClientConfig = {};
 } 
 
 // Add some offline UX
