@@ -17,7 +17,7 @@ window.addEventListener("load", function() {
 			offlineDiv.className = "connection online";
 			setTimeout(function(){
 				document.querySelector(".connection").innerHTML = "";
-			}, 1000 * 10000);
+			}, 1000 * 20); // Show it for twenty seconds
 		} else {
 			offlineDiv.className = "connection offline";
 		}
