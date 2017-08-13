@@ -93,7 +93,7 @@
     <!-- Load LiveReload if on Dev-->
     <script async>
 
-        if (ClientConfig && ClientConfig.development === true) {
+        if (window.ClientConfig && window.ClientConfig.development === true) {
             console.debug("Development - Loading livereload.js")
             var src="//localhost:35729/livereload.js" ;
             var script = document.createElement("script");
