@@ -3,7 +3,13 @@ angular.module("3drepo")
 
 function ClientConfigService() {
 
-	var Config = window.ClientConfig || {};
+	var Config;
+	
+	if (window) {
+		Config = window.ClientConfig || {};
+	} else {
+		Config = {};
+	}
 
 	Config.api_algorithm = createRoundRobinAlgorithm();
 	Config.apiUrls = Config.api_algorithm.apiUrls;
