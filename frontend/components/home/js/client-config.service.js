@@ -1,22 +1,22 @@
 angular.module("3drepo")
-	.service("ClientConfigService", ClientConfigService);
+	.service("configService", configService);
 
-function ClientConfigService() {
+function configService() {
 
-	var ClientConfig = window.ClientConfig || {};
+	var config = window.ClientConfig || {};
 
-	ClientConfig.api_algorithm = createRoundRobinAlgorithm();
-	ClientConfig.apiUrls = ClientConfig.api_algorithm.apiUrls;
-	ClientConfig.apiUrl = ClientConfig.api_algorithm.apiUrl.bind(ClientConfig.api_algorithm);
+	config.api_algorithm = createRoundRobinAlgorithm();
+	config.apiUrls = config.api_algorithm.apiUrls;
+	config.apiUrl = config.api_algorithm.apiUrl.bind(config.api_algorithm);
 
-	var C = ClientConfig.C;
+	var C = config.C;
 
-	ClientConfig.GET_API = C.GET_API;
-	ClientConfig.POST_API = (ClientConfig.apiUrls[C.POST_API]) ? C.POST_API : ClientConfig.GET_API;
-	ClientConfig.MAP_API = (ClientConfig.apiUrls[C.MAP_API]) ? C.MAP_API : ClientConfig.GET_API;
+	config.GET_API = C.GET_API;
+	config.POST_API = (config.apiUrls[C.POST_API]) ? C.POST_API : config.GET_API;
+	config.MAP_API = (config.apiUrls[C.MAP_API]) ? C.MAP_API : config.GET_API;
 
 
-	return ClientConfig;
+	return config;
 
 	/*******************************************************************************
 	 * Round robin API configuration
@@ -26,12 +26,12 @@ function ClientConfigService() {
 	function createRoundRobinAlgorithm() {
 
 		var roundRobin = {
-			apiUrls : ClientConfig.apiUrls,
+			apiUrls : config.apiUrls,
 			apiUrlCounter: {}
 		};
 
-		for (var k in ClientConfig.apiUrls) {
-			if(ClientConfig.apiUrls.hasOwnProperty(k)){
+		for (var k in config.apiUrls) {
+			if(config.apiUrls.hasOwnProperty(k)){
 				roundRobin.apiUrlCounter[k] = 0;
 			}
 		}
