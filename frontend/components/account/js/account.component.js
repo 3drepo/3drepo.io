@@ -80,10 +80,12 @@
 			// that you are actually the user in question!
 
 			// TODO: This shouldn't be necessary
-
+			console.log("directive", vm.username)
 			if (vm.username === AuthService.getUsername()) {
 
 				if (directive === "billing") {
+					console.log("billing")
+					vm.initSubscriptions()
 					vm.initBillings();
 					vm.initPlans();
 				}
@@ -103,28 +105,26 @@
 		};
 
 		vm.initPlans = function() {
-			return UtilsService.doGet("plans").then(function (response) {
-				if (response.status === 200) {
-					vm.plans = response.data;
-				}
-			});
+			return UtilsService.doGet("plans")
+				.then(function (response) {
+					if (response.status === 200) {
+						vm.plans = response.data;
+					}
+				});
 		};
 
 		vm.initSubscriptions = function() {
-			return UtilsService.doGet(vm.account + "/subscriptions").then(function (response) {
-				vm.subscriptions = response.data;
-			});
-		};
-
-		vm.initSubscriptions = function() {
-			return UtilsService.doGet(vm.account + "/subscriptions").then(function (response) {
-				vm.subscriptions = response.data;
-			});
+			return UtilsService.doGet(vm.account + "/subscriptions")
+				.then(function (response) {
+					vm.subscriptions = response.data;
+				});
 		};
 
 		vm.handleStateChange = function(type, oldValue, newValue) {
 
 			// TODO: This is total mess... needs refactor!
+			// semes like page and vm.itemToShow do similar things?
+
 			if (vm.account || vm.query.page) {
 				// Go to the correct "page"
 				if (vm.query.hasOwnProperty("page")) {
@@ -137,10 +137,6 @@
 						vm.itemToShow = "teamspaces";
 					}
 
-					if (type === "page" && oldValue == newValue) {
-						return;
-					}
-
 					// Handle Billing Page
 					if (vm.itemToShow === "billing") {
 						// Handle return back from PayPal
@@ -151,7 +147,7 @@
 							$location.search("token", null);
 							$location.search("cancel", null);
 
-							//initDirectiveData();
+					
 						} else if ($location.search().hasOwnProperty("token")) {
 							// Get initial user info, which may change if returning from PayPal
 
@@ -186,7 +182,6 @@
 					// Initialise the account data if its
 					// an account change, and directive data for 
 					// correct page
-
 					if (type === "page" && newValue) {
 						vm.initDirectiveData(newValue);
 					} else if (type === "account" && newValue) {

@@ -380,7 +380,7 @@ account-billing md-input-container {
 }
 
 account-billing md-tabs md-tab-content {
-  max-height: 574px;
+  /* max-height: 574px; */
 }
 
 account-billing .accountBillingSave button {
@@ -406,7 +406,7 @@ account-billing .loading {
 }
 
 account-billing .userContent {
-  max-height: calc(100vh - 270px) !important;
+  max-height: calc(100vh - 393px) !important;
 }
 
 account-billing .md-button {
@@ -746,7 +746,7 @@ account-assign .assignTabHolder {
 }
 
 account-assign md-tabs md-tab-content {
-  max-height: 574px;
+  /* max-height: 574px; */
 }
 
 account-assign .assignTabHolder .noUsers {
