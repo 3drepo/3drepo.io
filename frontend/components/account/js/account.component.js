@@ -71,6 +71,8 @@
 						});
 					});
 				});
+			} else {
+				vm.handleDirectiveInit(directive);
 			}
 			
 		};
@@ -80,12 +82,11 @@
 			// that you are actually the user in question!
 
 			// TODO: This shouldn't be necessary
-			console.log("directive", vm.username)
+
 			if (vm.username === AuthService.getUsername()) {
 
 				if (directive === "billing") {
-					console.log("billing")
-					vm.initSubscriptions()
+					vm.initSubscriptions();
 					vm.initBillings();
 					vm.initPlans();
 				}
@@ -182,8 +183,9 @@
 					// Initialise the account data if its
 					// an account change, and directive data for 
 					// correct page
-					if (type === "page" && newValue) {
-						vm.initDirectiveData(newValue);
+
+					if (type === "page" && vm.itemToShow) {
+						vm.initDirectiveData(vm.itemToShow);
 					} else if (type === "account" && newValue) {
 						vm.initUserData();
 					}
