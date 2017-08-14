@@ -57,3 +57,24 @@
 html, body {
 	background: #cfcdcc;
 }
+
+.connection {
+	position: absolute;
+    left: 0px;
+    bottom: 0px;
+    background: #848484;
+    color: white;
+	padding: 4px;
+	display: none;
+    border-top-right-radius: 4px;
+}
+
+.offline {
+	display: block;
+	background-color: #d34a4a;
+}
+
+.online {
+	display: block;
+	background-color: #4AD36B;
+}

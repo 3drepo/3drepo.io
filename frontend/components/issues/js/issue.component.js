@@ -22,7 +22,7 @@
 		.component("issue", {
 			controller: IssueCtrl,
 			controllerAs: "vm",
-			templateUrl: "issue.html",
+			templateUrl: "templates/issue.html",
 			bindings: {
 				account: "<",
 				model: "<",
@@ -439,7 +439,7 @@
 					this.issueComponent = vm; 
 				},
 				controllerAs: "vm",
-				templateUrl: "issue-screen-shot-dialog.html",
+				templateUrl: "templates/issue-screen-shot-dialog.html",
 				targetEvent: event
 			});
 		};

@@ -1,4 +1,4 @@
-.homeUserContent#accountBillingPage
+#accountBillingPage.homeUserContent.userContentNoMargin
 	md-content.md-whiteframe-1dp(aria-label="Billing", flex)
 		md-toolbar
 			.md-toolbar-tools
@@ -77,7 +77,7 @@
 					.accountBillingSave
 						div(layout="row", layout-align="start")
 							md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save") Confirm
-							img(src="/public/images/paypal.png")
+							img(src="/images/paypal.png")
 
 					p.accountBillingAddressInfo Changing your billing information could affect your applicable tax rate
 					p.accountBillingAddressInfo * Required field

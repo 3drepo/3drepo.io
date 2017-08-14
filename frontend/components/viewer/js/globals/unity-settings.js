@@ -4,8 +4,8 @@ var Module = {
 	compatibilitycheck: null,
 	backgroundColor: "#222C36",
 	splashStyle: "Light",
-	dataUrl: "public/unity/Release/unity.data",
-	codeUrl: "public/unity/Release/unity.js",
-	asmUrl: "public/unity/Release/unity.asm.js",
-	memUrl: "public/unity/Release/unity.mem"
+	dataUrl: "unity/Release/unity.data",
+	codeUrl: "unity/Release/unity.js",
+	asmUrl: "unity/Release/unity.asm.js",
+	memUrl: "unity/Release/unity.mem"
 };

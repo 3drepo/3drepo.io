@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountMenu", {
 			restrict: "EA",
-			templateUrl: "account-menu.html",
+			templateUrl: "templates/account-menu.html",
 			bindings: {
 				account: "="
 			},

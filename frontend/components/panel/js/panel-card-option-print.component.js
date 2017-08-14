@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionPrint", {
 			restrict: "E",
-			templateUrl: "panel-card-option-print.html",
+			templateUrl: "templates/panel-card-option-print.html",
 			bindings: {
 				account: "=",
 				model: "="

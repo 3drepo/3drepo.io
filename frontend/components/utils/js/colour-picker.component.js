@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("tdrColourPicker", {
 			restrict: "EA",
-			templateUrl: "colour-picker.html",
+			templateUrl: "templates/colour-picker.html",
 			bindings: {
 				title: "@",
 				colour: "=",

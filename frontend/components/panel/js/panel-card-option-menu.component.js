@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionMenu", {
 			restrict: "E",
-			templateUrl: "panel-card-option-menu.html",
+			templateUrl: "templates/panel-card-option-menu.html",
 			bindings: {
 				menu: "=",
 				selectedMenuOption: "="

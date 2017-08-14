@@ -1,4 +1,4 @@
-.homeUserContent
+.homeUserContent.userContentNoMargin
 
 	md-content.md-whiteframe-1dp(aria-label="Models", flex)
 		md-toolbar
@@ -8,11 +8,24 @@
 		#accountInfoContent(layout="column")
 
 			div(layout="row", flex="none")
-				img.account-avatar-image(ng-if="vm.avatarUrl && !vm.uploadingAvatar", src='{{vm.avatarUrl}}', ng-click="vm.upload()")
-				md-progress-circular.avatarUploadIcon(md-mode="indeterminate", md-diameter="55", ng-if="vm.uploadingAvatar")
-				#noAvatarIcon(ng-if="!vm.avatarUrl && !vm.uploadingAvatar", flex, layout="row")
-					//md-icon(class="fa fa-user", ng-click="vm.upload()")
-					md-icon.angular-material-icons.avatar-upload(ng-if="!vm.hasAvatar", ng-click="vm.upload()") person
+				img.account-avatar-image(
+					ng-show="!vm.uploadingAvatar && vm.avatarUrl && vm.imageLoaded"
+					ng-src='{{vm.avatarUrl}}'
+					ng-click="vm.upload()")
+
+				md-progress-circular.avatarUploadIcon(
+					md-mode="indeterminate"
+					md-diameter="55"
+					ng-if="vm.uploadingAvatar")
+
+				#noAvatarIcon(
+					ng-if="!vm.uploadingAvatar && (!vm.avatarUrl || !vm.imageLoaded)"
+					flex
+					layout="row")
+				
+					md-icon.angular-material-icons.avatar-upload(
+						ng-if="!vm.hasAvatar || !vm.imageLoaded"
+						ng-click="vm.upload()") person
 			
 			md-list
 

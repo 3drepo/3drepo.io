@@ -22,7 +22,7 @@
 	angular.module("3drepo")
 		.component("accountProject", {
 			restrict: "E",
-			templateUrl: "account-project.html",
+			templateUrl: "templates/account-project.html",
 			bindings: {
 				projectData : "="
 			},

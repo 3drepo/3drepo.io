@@ -22,7 +22,7 @@
 		.component("cookies", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "cookies.html",
+			templateUrl: "templates/cookies.html",
 			controller: CookiesCtrl,
 			controllerAs: "vm"
 		});

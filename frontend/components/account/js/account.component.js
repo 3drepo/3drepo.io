@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountDir", {
 			restrict: "EA",
-			templateUrl: "account.html",
+			templateUrl: "templates/account.html",
 			bindings: {
 				state: "=",
 				query: "=",
@@ -38,8 +38,12 @@
 		var vm = this;
 
 		vm.$onInit = function() {
-			
+			vm.accountInitialised = false;
+			vm.userInfoPromise = null;
 			vm.loadingAccount = true;
+
+			vm.initUserData();
+
 			window.addEventListener("storage", loginStatusListener, false);
 			// Set the logged in status to the account name just once
 			if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
@@ -49,64 +53,86 @@
 		};
 
 
+		vm.initUserData = function() {
+			return vm.getUserInfo();
+		};
+
 		/*
 		 * Init
 		 */
-		function initAccount () {
-			var billingsPromise,
-				subscriptionsPromise,
-				plansPromise;
-			
+		vm.initDirectiveData = function(directive) {
 
-			// TODO: This is also a mess
-			getUserInfo();
-
-			AuthService.authPromise.then(function(){
-				AccountService.accountPromise.then(function(){
-					
-					// If you go to a different URL teamspace you need to check 
-					// that you are actually the user in question!
-
-					// TODO: This shouldn't be necessary
-
-					if (vm.username === AuthService.getUsername()) {
-				
-						billingsPromise = UtilsService.doGet(vm.account + "/invoices");
-						billingsPromise.then(function (response) {
-							vm.billings = response.data;
+			if (!vm.accountInitialised) {
+				// TODO: This is also a mess
+				vm.getUserInfo().then(function(){
+					AuthService.authPromise.then(function(){
+						AccountService.accountPromise.then(function(){
+							vm.handleDirectiveInit(directive);
 						});
-
-						subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
-						subscriptionsPromise.then(function (response) {
-							vm.subscriptions = response.data;
-						});
-
-						plansPromise = UtilsService.doGet("plans");
-						plansPromise.then(function (response) {
-							if (response.status === 200) {
-								vm.plans = response.data;
-							}
-						});
-					} 
+					});
 				});
-			});
+			} else {
+				vm.handleDirectiveInit(directive);
+			}
 			
-			
-		}
+		};
 
-		/*
-		 * Get the account data
-		 */
-		$scope.$watchGroup(["vm.account", "vm.query.page"], function() {
-			var promise;
+		vm.handleDirectiveInit = function(directive) {
+			// If you go to a different URL teamspace you need to check 
+			// that you are actually the user in question!
+
+			// TODO: This shouldn't be necessary
+
+			if (vm.username === AuthService.getUsername()) {
+
+				if (directive === "billing") {
+					vm.initSubscriptions();
+					vm.initBillings();
+					vm.initPlans();
+				}
+				
+				if (directive === "licenses") {
+					vm.initSubscriptions();
+				}
+
+			} 
+		};
+
+		vm.initBillings = function() {
+			return UtilsService.doGet(vm.account + "/invoices")
+				.then(function (response) {
+					vm.billings = response.data;
+				});
+		};
+
+		vm.initPlans = function() {
+			return UtilsService.doGet("plans")
+				.then(function (response) {
+					if (response.status === 200) {
+						vm.plans = response.data;
+					}
+				});
+		};
+
+		vm.initSubscriptions = function() {
+			return UtilsService.doGet(vm.account + "/subscriptions")
+				.then(function (response) {
+					vm.subscriptions = response.data;
+				});
+		};
+
+		vm.handleStateChange = function(type, oldValue, newValue) {
 
 			// TODO: This is total mess... needs refactor!
+			// semes like page and vm.itemToShow do similar things?
 
 			if (vm.account || vm.query.page) {
 				// Go to the correct "page"
 				if (vm.query.hasOwnProperty("page")) {
 					// Check that there is a directive for that "page"
-					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+					var page = UtilsService.capitalizeFirstLetter(vm.query.page);
+					var directiveExists = "account" + page + "Directive";
+					if ($injector.has(directiveExists)) {
 						vm.itemToShow = vm.query.page;
 					} else {
 						vm.itemToShow = "teamspaces";
@@ -122,44 +148,50 @@
 							$location.search("token", null);
 							$location.search("cancel", null);
 
-							initAccount();
+					
 						} else if ($location.search().hasOwnProperty("token")) {
 							// Get initial user info, which may change if returning from PayPal
-							getUserInfo();
 
 							// Made a payment
 							
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
 							UtilsService.showDialog("paypal-dialog.html", $scope);
-							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
-							promise.then(function (response) {
-								if (response.status !== 200) {
-									console.error("PayPal error", response);
-								}
-								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+							UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute")
+								.then(function (response) {
+									if (response.status !== 200) {
+										console.error("PayPal error", response);
+									}
+									vm.payPalInfo = "PayPal has finished processing. Thank you.";
 
-								// Clear token URL parameter
-								$location.search("token", null);
+									// Clear token URL parameter
+									$location.search("token", null);
 
-								$timeout(function () {
-									UtilsService.closeDialog();
-									initAccount();
-								}, 2000);
+									$timeout(function () {
+										UtilsService.closeDialog();
+										//initDirectiveData();
+									}, 2000);
 
-							}).catch(function(error){
-								console.error("PayPal error", error);
-							});
+								}).catch(function(error){
+									console.error("PayPal error", error);
+								});
 
-						} else {
-							initAccount();
-						}
-					} else {
-						initAccount();
+						} 
+
 					}
+					
+					// Initialise the account data if its
+					// an account change, and directive data for 
+					// correct page
+
+					if (type === "page" && vm.itemToShow) {
+						vm.initDirectiveData(vm.itemToShow);
+					} else if (type === "account" && newValue) {
+						vm.initUserData();
+					}
+					
 				} else {
 					vm.itemToShow = "teamspaces";
-					initAccount();
 				}
 
 			} else {
@@ -170,7 +202,19 @@
 				vm.modelsGrouped = null;
 				vm.avatarUrl = null;
 			}
-		});
+			
+		};
+
+		/*
+		 * Get the account data
+		 */
+		$scope.$watch("vm.account", function(oldValue, newValue) {
+			vm.handleStateChange("account", oldValue, newValue);
+		}, true);
+
+		$scope.$watch("vm.query.page", function(oldValue, newValue) {
+			vm.handleStateChange("page", oldValue, newValue);
+		}, true);
 
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
@@ -200,51 +244,58 @@
 			}
 		}
 
-		function getUserInfo () {
+		vm.getUserInfo = function() {
 
-			AccountService.getUserInfo(vm.account)
-				.then(function(response) {
+			if (vm.userInfoPromise) {
+				return vm.userInfoPromise;
+			} else {
 
-					if (response.data) {
-						vm.accounts = response.data.accounts;
-						vm.username = vm.account;
-						vm.firstName = response.data.firstName;
-						vm.lastName = response.data.lastName;
-						vm.email = response.data.email;
-						vm.hasAvatar = response.data.hasAvatar;
+				vm.userInfoPromise = AccountService.getUserInfo(vm.account)
+					.then(function(response) {
 
-						// Pre-populate billing name if it doesn't exist with profile name
-						vm.billingAddress = {};
-						if (response.data.hasOwnProperty("billingInfo")) {
-							vm.billingAddress = response.data.billingInfo;
-							if (!vm.billingAddress.hasOwnProperty("firstName")) {
-								vm.billingAddress.firstName = vm.firstName;
-								vm.billingAddress.lastName = vm.lastName;
-							}
-						}
+						if (response.data) {
+							vm.accounts = response.data.accounts;
+							vm.username = vm.account;
+							vm.firstName = response.data.firstName;
+							vm.lastName = response.data.lastName;
+							vm.email = response.data.email;
+							vm.hasAvatar = response.data.hasAvatar;
 
-						// Get quota
-						if (angular.isDefined(vm.accounts)) {
-							for (var i = 0; i < vm.accounts.length; i++) {
-								if (vm.accounts[i].account === vm.account) {
-									vm.quota = vm.accounts[i].quota;
-									break;
+							// Pre-populate billing name if it doesn't exist with profile name
+							vm.billingAddress = {};
+							if (response.data.hasOwnProperty("billingInfo")) {
+								vm.billingAddress = response.data.billingInfo;
+								if (!vm.billingAddress.hasOwnProperty("firstName")) {
+									vm.billingAddress.firstName = vm.firstName;
+									vm.billingAddress.lastName = vm.lastName;
 								}
 							}
+
+							// Get quota
+							if (angular.isDefined(vm.accounts)) {
+								for (var i = 0; i < vm.accounts.length; i++) {
+									if (vm.accounts[i].account === vm.account) {
+										vm.quota = vm.accounts[i].quota;
+										break;
+									}
+								}
+							}
+
+							vm.loadingAccount = false;
+						} else {
+							console.debug("Reponse doesn't have data", response);
 						}
+						
 
-						vm.loadingAccount = false;
-					} else {
-						console.debug("Reponse doesn't have data", response);
-					}
-					
+					})
+					.catch(function(error){
+						//TODO ADD POPUP ERROR!
+						console.error("Error", error);
+					});
+				
+				return vm.userInfoPromise;
+			}
 
-				})
-				.catch(function(error){
-					//TODO ADD POPUP ERROR!
-					console.error("Error", error);
-				});
-
-		}
+		};
 	}
 }());

@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountTeamspaces", {
 			restrict: "EA",
-			templateUrl: "account-teamspaces.html",
+			templateUrl: "templates/account-teamspaces.html",
 			bindings: {
 				account: "=",
 				accounts: "=",
@@ -29,7 +29,8 @@
 				quota: "=",
 				subscriptions: "=",
 				loading: "=",
-				selectedIndex: "="
+				selectedIndex: "=",
+				itemToShow: "="
 			},
 			controller: AccountReposCtrl,
 			controllerAs: "vm"

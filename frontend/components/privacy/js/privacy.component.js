@@ -22,7 +22,7 @@
 		.component("privacy", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "privacy.html",
+			templateUrl: "templates/privacy.html",
 			controller: PrivacyCtrl,
 			controllerAs: "vm"
 		});

@@ -23,7 +23,7 @@
 			"issuesListItem",
 			{
 				controller: IssuesListItemCtrl,
-				templateUrl: "issues-list-item.html",
+				templateUrl: "templates/issues-list-item.html",
 				bindings: {
 					data: "<",
 					userJob: "<"

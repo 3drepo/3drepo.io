@@ -4,7 +4,7 @@
 	angular.module("3drepo")
 		.component("revisions", {
 			restrict: "E",
-			templateUrl: "revisions.html",
+			templateUrl: "templates/revisions.html",
 			bindings: {
 				account: "=",
 				model: "=",

@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("bottomButtons", {
 			restrict: "E",
-			templateUrl: "bottom-buttons.html",
+			templateUrl: "templates/bottom-buttons.html",
 			bindings: {},
 			controller: BottomButtonsCtrl,
 			controllerAs: "vm"
@@ -113,14 +113,14 @@
 			{
 				mode: Viewer.NAV_MODES.HELICOPTER,
 				label: "Helicopter",
-				icon: "../public/icons/helicopter.svg",
+				icon: "../icons/helicopter.svg",
 				click: setViewingOption,
 				iconClass: "bottomButtonIconHelicopter"
 			},
 			{
 				mode: Viewer.NAV_MODES.TURNTABLE,
 				label: "Turntable",
-				icon: "../public/icons/turntable.svg",
+				icon: "../icons/turntable.svg",
 				click: setViewingOption
 			}
 		];

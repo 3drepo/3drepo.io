@@ -3,35 +3,41 @@ angular.module("3drepo")
 
 function ClientConfigService() {
 
-	ClientConfig = ClientConfig || {};
+	var Config;
+	
+	if (window) {
+		Config = window.ClientConfig || {};
+	} else {
+		Config = {};
+	}
 
-	ClientConfig.api_algorithm = createRoundRobinAlgorithm();
-	ClientConfig.apiUrls = ClientConfig.api_algorithm.apiUrls;
-	ClientConfig.apiUrl = ClientConfig.api_algorithm.apiUrl.bind(ClientConfig.api_algorithm);
+	Config.api_algorithm = createRoundRobinAlgorithm();
+	Config.apiUrls = Config.api_algorithm.apiUrls;
+	Config.apiUrl = Config.api_algorithm.apiUrl.bind(Config.api_algorithm);
 
-	var C = ClientConfig.C;
+	var C = Config.C;
 
-	ClientConfig.GET_API = C.GET_API;
-	ClientConfig.POST_API = (ClientConfig.apiUrls[C.POST_API]) ? C.POST_API : ClientConfig.GET_API;
-	ClientConfig.MAP_API = (ClientConfig.apiUrls[C.MAP_API]) ? C.MAP_API : ClientConfig.GET_API;
+	Config.GET_API = C.GET_API;
+	Config.POST_API = (Config.apiUrls[C.POST_API]) ? C.POST_API : Config.GET_API;
+	Config.MAP_API = (Config.apiUrls[C.MAP_API]) ? C.MAP_API : Config.GET_API;
 
 
 	return ClientConfig;
 
 	/*******************************************************************************
-	 * Round robin API configuration
+	 * Round robin API ClientConfiguration
 	 * @param {Object} variable - variable to coalesce
 	 * @param {Object} value - value to return if object is null or undefined
 	 *******************************************************************************/
 	function createRoundRobinAlgorithm() {
 
 		var roundRobin = {
-			apiUrls : ClientConfig.apiUrls,
+			apiUrls : Config.apiUrls,
 			apiUrlCounter: {}
 		};
 
-		for (var k in ClientConfig.apiUrls) {
-			if(ClientConfig.apiUrls.hasOwnProperty(k)){
+		for (var k in Config.apiUrls) {
+			if(Config.apiUrls.hasOwnProperty(k)){
 				roundRobin.apiUrlCounter[k] = 0;
 			}
 		}

@@ -25,16 +25,16 @@ code = os.system("git checkout " + branch)
 if code:
     fatalError("git checkout failed")
 
-if production:
-    code = os.system("grunt webfont --force")
+# if production:
+#     code = os.system("grunt webfont --force")
 
-    if code:
-        fatalError("Webfont compilation failed")
+#     if code:
+#         fatalError("Webfont compilation failed")
 
-    code = os.system("grunt frontend")
+#     code = os.system("grunt frontend")
 
-    if code:
-        fatalError("Frontend compilation failed")
+#     if code:
+#         fatalError("Frontend compilation failed")
 
 code = 0
 
@@ -48,8 +48,6 @@ code = 0
 if code:
     fatalError("git force add failed")
 
-os.system("git commit -m \"Version " + version + "\"")
-
 VERSION_FILE = 'backend/VERSION.json'
 with open(VERSION_FILE, 'r+') as f:
     text = f.read()
@@ -61,7 +59,7 @@ with open(VERSION_FILE, 'r+') as f:
 os.system("git add backend")
 os.system("git clean -f -d")
 
-os.system("git commit -m \"Version string update\"")
+os.system("git commit -m \"Version " + version + "\"")
 
 os.system("git push origin :refs/tags/" + version)
 os.system("git tag -fa " + version + " -m \" Version " + version + " \"")

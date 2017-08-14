@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionPin", {
 			restrict: "E",
-			templateUrl: "panel-card-option-pin.html",
+			templateUrl: "templates/panel-card-option-pin.html",
 			bindings: {},
 			controller: PanelCardOptionPinCtrl,
 			controllerAs: "vm"

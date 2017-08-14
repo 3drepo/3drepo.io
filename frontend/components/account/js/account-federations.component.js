@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountFederations", {
 			restrict: "EA",
-			templateUrl: "account-federations.html",
+			templateUrl: "templates/account-federations.html",
 			bindings: {
 				account: "=",
 				accounts: "=",
