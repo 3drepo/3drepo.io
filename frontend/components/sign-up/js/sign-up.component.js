@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("signUp", {
 			restrict: "E",
-			templateUrl: "sign-up.html",
+			templateUrl: "templates/sign-up.html",
 			bindings: {},
 			controller: SignUpCtrl,
 			controllerAs: "vm"
@@ -51,7 +51,7 @@
 			vm.buttonLabel = "Sign Up!";
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 			vm.version = ClientConfigService.VERSION;
-			vm.logo = "/public/images/3drepo-logo-white.png";
+			vm.logo = "/images/3drepo-logo-white.png";
 			vm.captchaKey = ClientConfigService.captcha_client_key;
 
 			vm.tcAgreed = false;
@@ -89,7 +89,7 @@
 			if (ClientConfigService.hasOwnProperty("auth")) {
 				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
 					vm.useReCapthca = true;
-					vm.captchaKey = serverConfig.captcha_client_key;
+					vm.captchaKey = ClientConfigService.captcha_client_key;
 				}
 			}
 
@@ -168,7 +168,7 @@
 			vm.legalTitle = "Terms and Conditions";
 			vm.legalText = "termsAndConditions";
 			$mdDialog.show({
-				templateUrl: "legal-dialog.html",
+				templateUrl: "templates/legal-dialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,

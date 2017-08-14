@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("tree", {
 			restrict: "EA",
-			templateUrl: "tree.html",
+			templateUrl: "templates/tree.html",
 			bindings: {
 				account:  "=",
 				model:  "=",

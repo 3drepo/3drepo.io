@@ -20,8 +20,8 @@
 
 	angular.module("3drepo")
 		.component("accountProfile", {
-			restrict: "EA",
-			templateUrl: "account-profile.html",
+			restrict: "E",
+			templateUrl: "templates/account-profile.html",
 			bindings: {
 				username: "=",
 				firstName: "=",
@@ -47,6 +47,7 @@
 			vm.firstNameNew = vm.firstName;
 			vm.lastNameNew = vm.lastName;
 			vm.emailNew = vm.email;
+
 		};
 
 		/**

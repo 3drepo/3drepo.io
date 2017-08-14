@@ -25,7 +25,7 @@
 				username: "=",
 				token: "="
 			},
-			templateUrl: "password-change.html",
+			templateUrl: "templates/password-change.html",
 			controller: PasswordChangeCtrl,
 			controllerAs: "vm"
 		});

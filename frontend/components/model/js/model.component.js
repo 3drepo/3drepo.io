@@ -30,7 +30,7 @@
 				state:    "=",
 				keysDown: "<"
 			},
-			templateUrl: "model.html",
+			templateUrl: "templates/model.html",
 			controller: ModelCtrl,
 			controllerAs: "vm"
 		});

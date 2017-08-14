@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("home", {
 			restrict: "E",
-			templateUrl: "home.html",
+			templateUrl: "templates/home.html",
 			bindings: {
 				account: "@",
 				password: "@",
@@ -32,9 +32,20 @@
 			controllerAs: "vm"
 		});
 
-	HomeCtrl.$inject = ["$scope", "$element", "$interval", "$timeout", "$compile", "$mdDialog", "$window", "AuthService", "StateManager", "EventService", "UtilsService", "ClientConfigService", "$location", "SWService", "AnalyticService"];
+	HomeCtrl.$inject = [
+		"$scope", "$http", "$templateCache", "$element", "$interval", 
+		"$timeout", "$compile", "$mdDialog", "$window",
+		"AuthService", "StateManager", "EventService", "UtilsService", 
+		"ClientConfigService", "$location", "SWService", "AnalyticService"
+	];
 
-	function HomeCtrl($scope, $element, $interval, $timeout, $compile, $mdDialog, $window, AuthService, StateManager, EventService, UtilsService, ClientConfigService, $location, SWService, AnalyticService) {
+	function HomeCtrl(
+		$scope, $http, $templateCache, $element, $interval, $timeout, 
+		$compile, $mdDialog, $window, AuthService, StateManager,
+		EventService, UtilsService, ClientConfigService, $location,
+		SWService, AnalyticService
+	) {
+
 		var vm = this;
 		
 		/*
@@ -51,7 +62,11 @@
 			AnalyticService.init();
 			SWService.init();
 
+			vm.precacheTeamspaceTemplate();
+
 			vm.loggedIn = false;
+			vm.loginPage = true;
+			vm.isLoggedOutPage = false;
 			
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
@@ -80,7 +95,14 @@
 				"/registerVerify"
 			];
 
-			vm.loginRedirects = [
+
+			vm.legalPages = [
+				"terms", 
+				"privacy",
+				"cookies"
+			];
+
+			vm.loggedOutPages = [
 				"sign-up",
 				"password-forgot",
 				"register-request",
@@ -89,23 +111,47 @@
 
 			$timeout(function () {
 
-				vm.homeLoggedOut = angular.element($element[0].querySelector("#homeLoggedOut"));
-
 				/*
 				* Watch the state to handle moving to and from the login page
 				*/
-				$scope.$watch("vm.state", function (newState, oldState) {
+				$scope.$watch("vm.state", function (oldState, newState) {
 
-					vm.loggedIn = AuthService.isLoggedIn();
+					var change = JSON.stringify(oldState) === JSON.stringify(newState);
 
-					var changedState = newState !== oldState;
-
-					if (changedState && !vm.state.changing && vm.state.authInitialized) {
-						handleStateChange();
+					// Determine whether to show the Login directive or 
+					// logged in content directives
+					if (newState.loggedIn !== undefined) {
+						vm.loggedIn = newState.loggedIn;
 					}
-					
-				}, true);
 
+					if (newState && change) {
+						// If it's a legal page
+						var legal = vm.pageCheck(newState, vm.legalPages);
+						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+
+						if (legal) {
+
+							vm.isLegalPage = true;
+							vm.isLoggedOutPage = false;
+
+							vm.legalPages.forEach(function(page){
+								vm.setPage(newState, page);
+							});
+
+						} else if (loggedOut) {
+
+							// If its a logged out page which isnt login
+
+							vm.isLegalPage = false;
+							vm.isLoggedOutPage = true;
+
+							vm.loggedOutPages.forEach(function(page){
+								vm.setPage(newState, page);
+							});
+
+						}
+					}			
+				}, true);
 			});
 
 			vm.isMobileFlag = vm.isMobile();
@@ -116,6 +162,36 @@
 
 		};
 
+		vm.pageCheck = function(state, pages) {
+			return pages.filter(function(page) { 
+				return state[page] === true;
+			}).length;
+		}
+
+		vm.setPage = function(state, page) {
+			if(state[page] === true) {
+				vm.page = page;
+			}
+		};
+
+		vm.precacheTeamspaceTemplate = function() {
+
+			// The account teamspace template is hefty. If we cache it ASAP
+			// we can improve the percieved performance for the user
+
+			var preCacheTemplates = [
+				"templates/account-teamspaces.html",
+				"templates/account-info.html",
+				"templates/sign-up.html"
+			];
+
+			preCacheTemplates.forEach(function(templatePath){
+				$http.get(templatePath).then(function(response) {
+					$templateCache.put(templatePath, response.data);
+				});
+			});
+
+		};
 
 		vm.isMobile = function() {
 
@@ -125,7 +201,7 @@
 				vm.handleMobile();
 			}
 
-			console.log("Is mobile? ", mobile);
+			console.debug("Is mobile? ", mobile);
 			return mobile;
 
 		};
@@ -149,26 +225,6 @@
 
 		};
 
-		function handleStateChange() {
-			var loginMarkup = "<login></login>";
-			clearDirective();
-			var functionToInsert = getFunctionToInsert();
-
-			if (functionToInsert != null) {
-				var needsRedirect = vm.loginRedirects.indexOf(functionToInsert) !== -1;
-				if (AuthService.isLoggedIn() && needsRedirect) {
-					$location.path(AuthService.getUsername());
-				} else {
-					insertFunctionDirective(functionToInsert);
-				}
-				
-			} else {
-				// If you are not logged in
-				if (!AuthService.isLoggedIn()) {
-					insertDirective(loginMarkup);
-				} 
-			}
-		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL
@@ -185,55 +241,6 @@
 			var currentPath = $location.path();
 			var minusSlash = currentPath.slice(0, -1);
 			$location.path(minusSlash);
-		}
-
-		vm.sendLoginRequest = function(){
-			if (!AuthService) {
-				return false;
-			}
-			return AuthService.isLoggedIn();
-		};
-
-
-		function clearDirective() {
-			if (vm.elementRef) {
-				vm.elementRef.remove();
-				vm.elementScope.$destroy();
-			}
-		}
-
-		function insertDirective(markup) {
-			var directiveElement = angular.element(markup);
-			vm.homeLoggedOut.append(directiveElement);
-			vm.elementScope = $scope.$new();
-			vm.elementRef = $compile(directiveElement)(vm.elementScope);
-		}
-
-		function getFunctionToInsert() {
-			// Check for static(function) pages to see if we need
-			// render one of them
-			var func;
-			for (var i = 0; i < vm.functions.length; i++) {
-				func = vm.functions[i];
-
-				if (vm.state[func]) {
-					return func;
-				}
-			}
-
-			return null;
-		}
-
-		function insertFunctionDirective(insertFunc) {
-
-			// Create element related to function func
-			var directiveMarkup = "<" + insertFunc +
-				" username='vm.query.username'" +
-				" token='vm.query.token'" +
-				" query='vm.query'>" +
-				"</" + insertFunc + ">";
-
-			insertDirective(directiveMarkup);
 		}
 
 		vm.logout = function () {

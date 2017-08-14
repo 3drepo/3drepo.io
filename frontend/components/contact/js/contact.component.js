@@ -22,7 +22,7 @@
 		.component("contact", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "contact.html",
+			templateUrl: "templates/contact.html",
 			controller: ContactCtrl,
 			controllerAs: "vm"
 		});

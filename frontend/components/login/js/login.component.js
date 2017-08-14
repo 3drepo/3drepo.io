@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("login", {
 			restrict: "EA",
-			templateUrl: "login.html",
+			templateUrl: "templates/login.html",
 			bindings: {},
 			controller: LoginCtrl,
 			controllerAs: "vm"

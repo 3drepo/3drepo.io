@@ -25,13 +25,11 @@ div#accountHolder(
 			has-avatar="vm.hasAvatar"
 			item-to-show="vm.itemToShow")
 
-		#accountItem(
-			flex="100"
-			ng-switch="vm.itemToShow")
+		#accountItem(flex="100")
 
 			account-teamspaces(
 				loading="vm.loadingAccount"
-				ng-switch-when="teamspaces"
+				ng-show="vm.itemToShow === 'teamspaces'"
 				account="vm.account"
 				accounts="vm.accounts"
 				on-show-page="vm.showPage(page, callingPage, data)"
@@ -40,14 +38,14 @@ div#accountHolder(
 				subscriptions="vm.subscriptions")
 
 			account-profile(
-				ng-switch-when="profile"
+				ng-if="vm.username && vm.itemToShow === 'profile'"
 				username="vm.username"
 				first-name="vm.firstName"
 				last-name="vm.lastName"
 				email="vm.email")
 
 			account-billing(
-				ng-switch-when="billing"
+				ng-if="vm.username && vm.itemToShow === 'billing'"
 				account="vm.account"
 				billing-address="vm.billingAddress"
 				quota="vm.quota"
@@ -58,19 +56,13 @@ div#accountHolder(
 				last-name="vm.lastName")
 
 			account-licenses(
-				ng-switch-when="licenses"
-				account="vm.account"
-				show-page="vm.showPage(page, callingPage)"
-				subscriptions="vm.subscriptions")
-
-			account-team(
-				ng-switch-when="team"
+				ng-if="vm.username && vm.itemToShow === 'licenses'"
 				account="vm.account"
 				show-page="vm.showPage(page, callingPage)"
 				subscriptions="vm.subscriptions")
 
 			account-modelsetting(
-				ng-switch-when="modelsetting"
+				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
 				account="vm.account"
 				model="vm.model"
 				data="vm.data"
@@ -78,7 +70,7 @@ div#accountHolder(
 				subscriptions="vm.subscriptions")
 
 			account-assign(
-				ng-switch-when="assign"
+				ng-if="vm.username && vm.itemToShow === 'assign'"
 				account="vm.account"
 				model="vm.model"
 				data="vm.data"

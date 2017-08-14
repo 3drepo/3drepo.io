@@ -60,7 +60,7 @@
 				}
 
 				// TODO: We need to find a way to make ClientConfig come from the service
-				var stateStack       = [ClientConfig.structure];
+				var stateStack       = [window.ClientConfig.structure];
 				var stateNameStack   = ["home"];
 
 				//console.log("stateStack", stateStack);

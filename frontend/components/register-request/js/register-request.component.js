@@ -24,7 +24,7 @@
 			bindings: {
 				state: "="
 			},
-			templateUrl: "register-request.html",
+			templateUrl: "templates/register-request.html",
 			controller: RegisterRequestCtrl,
 			controllerAs: "vm"
 		});

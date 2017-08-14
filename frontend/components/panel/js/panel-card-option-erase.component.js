@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardOptionErase", {
 			restrict: "E",
-			templateUrl: "panel-card-option-erase.html",
+			templateUrl: "templates/panel-card-option-erase.html",
 			bindings: {},
 			controller: PanelCardOptionEraseCtrl,
 			controllerAs: "vm"

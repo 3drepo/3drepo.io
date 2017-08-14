@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("docs", {
 			restrict: "EA",
-			templateUrl: "docs.html",
+			templateUrl: "templates/docs.html",
 			bindings: {
 				show: "=",
 				onContentHeightRequest: "&",
@@ -154,7 +154,7 @@
 			vm.showDocLoadProgress = true;
 			$mdDialog.show({
 				controller: docsDialogController,
-				templateUrl: "docs-dialog.html",
+				templateUrl: "templates/docs-dialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,

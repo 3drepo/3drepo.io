@@ -22,7 +22,7 @@
 		.component("terms", {
 			restrict: "E",
 			bindings: {},
-			templateUrl: "terms.html",
+			templateUrl: "templates/terms.html",
 			controller: TermsCtrl,
 			controllerAs: "vm"
 		});

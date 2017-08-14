@@ -6,7 +6,7 @@
 
 	function SWService() {
 
-		var path = "/"; //"/public/service-workers/";
+		var path = "/"; //"/service-workers/";
 
 		var service = {
 			init : init
@@ -18,6 +18,8 @@
 
 		function init() {
 			if ("serviceWorker" in navigator) {
+
+				console.debug("ServiceWorker in navigator");
 
 				var serviceWorkers = [
 					"precache"
@@ -32,21 +34,17 @@
 
 		function registerSW(sw)  {
 		
-			console.log("ServiceWorker in navigator");
-			window.addEventListener("load", function() {
+			var swPath = path + sw + ".js";
+			console.debug("ServiceWorker path: ", swPath);
 
-				var swPath = path + sw + ".js";
-				console.log("ServiceWorker path: ", swPath);
-
-				navigator.serviceWorker.register(swPath).then(function(registration) {
-					// Registration was successful
-					console.log("ServiceWorker (" + sw + ") registration successful with scope: ", registration.scope);
-				}, function(err) {
-					// registration failed :(
-					console.log("ServiceWorker (" + sw + ") registration failed: ", err);
-				});
+			navigator.serviceWorker.register(swPath).then(function(registration) {
+				// Registration was successful
+				console.debug("ServiceWorker (" + sw + ") registration successful with scope: ", registration.scope);
+			}, function(err) {
+				// registration failed :(
+				console.debug("ServiceWorker (" + sw + ") registration failed: ", err);
 			});
-	
+
 		}
 		
 

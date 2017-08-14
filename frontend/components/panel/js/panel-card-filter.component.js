@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCardFilter", {
 			restrict: "E",
-			templateUrl: "panel-card-filter.html",
+			templateUrl: "templates/panel-card-filter.html",
 			bindings: {
 				showFilter: "=",
 				filterText: "="

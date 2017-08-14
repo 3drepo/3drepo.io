@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("accountBilling", {
 			restrict: "EA",
-			templateUrl: "account-billing.html",
+			templateUrl: "templates/account-billing.html",
 			bindings: {
 				account: "=",
 				billingAddress: "=",
@@ -56,8 +56,6 @@
 		 * Watch for change in licenses
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
-
-			console.log("vm.numNewLicenses", vm.numNewLicenses);
 
 			if (angular.isDefined(vm.numNewLicenses)) {
 				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {

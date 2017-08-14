@@ -33,6 +33,7 @@
 
 				var service = {
 					username: username,
+					loggedIn : loggedIn,
 					isLoggedIn: isLoggedIn,
 					init : init,
 					getUsername: getUsername,

@@ -1,8 +1,19 @@
-.homeUserContent(layout="row", layout-align="center")
-	md-content.md-whiteframe-1dp(aria-label="Register")
+.homeUserContent(
+	layout="column"
+	flex
+	layout-align="center center")
+	
+	md-content.md-whiteframe-1dp(
+		flex-xs="90"
+		flex-sm="85"
+		flex-md="80"
+		flex-lg="70"
+		flex-xl="50"
+		aria-label="Register")
 		md-toolbar
 			.md-toolbar-tools
 				h2 Sign Up
+
 		.userContent(layout="column", layout-align="start center")
 			div.sign-up-padding
 				form
@@ -60,7 +71,12 @@
 					h3.registerError {{vm.registerErrorMessage}}
 
 					div(layout="row", layout-xs="column", layout-align="start center")
-						md-button.md-accent.md-raised.sign-up-button(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") 
+						md-button.md-accent.md-raised.sign-up-button(
+							ng-click="vm.register()" 
+							ng-disabled="vm.registering"
+							aria-label="Register Button"
+							flex="none") 
+
 							span(ng-if="!vm.registering") {{vm.buttonLabel}} 
 							md-progress-circular(ng-if="vm.registering" md-mode="indeterminate", md-diameter="20")
 

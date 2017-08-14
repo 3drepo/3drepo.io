@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.component("panelCard", {
 			restrict: "E",
-			templateUrl: "panel-card.html",
+			templateUrl: "templates/panel-card.html",
 			bindings: {
 				account: "=",
 				model: "=",
