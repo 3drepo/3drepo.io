@@ -727,6 +727,7 @@ function _createAccounts(roles, userName)
 
 	roles.forEach( role => {
 		promises.push(User.findByUserName(role.db).then(user => {
+			if(!user) return;
 			let tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
 			if(permission){
