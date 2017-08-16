@@ -44,6 +44,7 @@
 			vm.sliderMax = 100;
 			vm.sliderStep = 0.1;
 			vm.displayDistance = 0;
+			vm.precision = 3;
 			vm.sliderPosition = vm.sliderMin;
 			vm.axes = ["X", "Y", "Z"];
 			vm.visible = false;
@@ -94,7 +95,7 @@
 		 */
 		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-			vm.displayDistance = distance;
+			vm.displayDistance = distance.toFixed(vm.precision);
 			vm.displayedAxis = axis;
 			if(slider != null) {
 				vm.sliderPosition = slider;
@@ -155,7 +156,7 @@
 				if(!updateSlider) {
 					vm.disableWatchDistance = true;
 				}
-				vm.displayDistance = min + (Math.abs(max - min) * percentage);
+				vm.displayDistance = (min + (Math.abs(max - min) * percentage)).toFixed(vm.precision);
 				if(moveClip) {
 					vm.updateClippingPlane();
 				}
@@ -292,6 +293,13 @@
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				vm.units = event.value.settings.unit;
+				if(vm.units === "mm")
+				{
+					vm.precision = 0;
+				}
+				else{
+					vm.precison = 3;
+				}
 
 			}
 			
