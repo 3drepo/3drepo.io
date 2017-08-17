@@ -46,7 +46,7 @@ div.homeContainer(
 	#homeLoggedOut(
 		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
 		
-		login(ng-if="!vm.loggedIn && !vm.loggedOutPage")
+		login(ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
 		
 		sign-up(ng-if="vm.page === 'sign-up'")
 		password-forgot(ng-if="vm.page === 'password-forgot'")
