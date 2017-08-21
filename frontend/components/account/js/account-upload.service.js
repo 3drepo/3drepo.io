@@ -69,43 +69,7 @@
 		}
 
 		function uploadRevisionToModel(uploadFileData) {
-
-			var uploadPromise = $q.defer();
-
-			var validTag = RevisionsService.isTagFormatInValid(uploadFileData.tag);
-
-			if(uploadFileData.tag && validTag){
-				uploadPromise.reject("Invalid revision name");
-			} else {
-				var endpoint = uploadFileData.account + "/" + uploadFileData.model + "/revisions.json";
-				UtilsService.doGet(endpoint)
-					.then(function(response){
-						var revisions = response.data;
-						if(uploadFileData.tag){
-							revisions.forEach(function(rev){
-								if(rev.tag === uploadFileData.tag){
-									uploadPromise.reject("Revision name already exists");
-								}
-							});
-						}
-
-						// Run upload file as normal as revision tags are OK
-						uploadFileToModel(uploadFileData)
-							.then(function(){
-								uploadPromise.resolve();
-							})
-							.catch(function(errorMessage){
-								uploadPromise.reject(errorMessage);
-							});
-						
-					})
-					.catch(function(error){
-						console.error(error);
-						uploadPromise.reject("Error uploading!");
-					});
-			}
-
-			return uploadPromise.promise;
+			return uploadFileToModel(uploadFileData);
 		}
 
 		/**
@@ -116,47 +80,52 @@
 		 */
 		function uploadFileToModel(uploadFileData) {
 
-			var formData;
 			var uploadPromise = $q.defer();
+			var validTag = RevisionsService.isTagFormatInValid(uploadFileData.tag);
 
-			// Check the quota
-			UtilsService.doGet(uploadFileData.account + ".json")
-				.then(function () {
+			if(uploadFileData.tag && validTag){
 
-					// Check for file size limit
-					if (uploadFileData.file.size > ClientConfigService.uploadSizeLimit) {
+				// Check it's a valid tag
+				uploadPromise.reject("Invalid revision name");
 
-						uploadPromise.reject("File exceeds size limit");
+			} else if (uploadFileData.file.size > ClientConfigService.uploadSizeLimit) {
 
-					} else {
+				// Check for file size limit
+				uploadPromise.reject("File exceeds size limit");
 
-						formData = new FormData();
-						formData.append("file", uploadFileData.file);
+			} else {
 
-						if(uploadFileData.tag){
-							formData.append("tag", uploadFileData.tag);
+				var formData = new FormData();
+				formData.append("file", uploadFileData.file);
+
+				if(uploadFileData.tag){
+					formData.append("tag", uploadFileData.tag);
+				}
+
+				if(uploadFileData.desc){
+					formData.append("desc", uploadFileData.desc);
+				}
+				
+				var endpoint = uploadFileData.account + "/" + uploadFileData.model.model + "/upload";
+				var postData =  {"Content-Type": undefined};
+
+				UtilsService.doPost(formData, endpoint, postData)
+					.then(function (response) {
+						if ((response.status === 400) || (response.status === 404)) {
+							// Upload error
+							uploadPromise.reject(UtilsService.getErrorMessage(response.data));
+						} else {
+							uploadPromise.resolve();
 						}
+					})
+					.catch(function(error){
+						uploadPromise.reject(error);
+					});
 
-						if(uploadFileData.desc){
-							formData.append("desc", uploadFileData.desc);
-						}
-						
-						var endpoint = uploadFileData.account + "/" + uploadFileData.model.model + "/upload";
-						var postData =  {"Content-Type": undefined};
+			}
 
-						return UtilsService.doPost(formData, endpoint, postData)
-							.then(function (response) {
-								if ((response.status === 400) || (response.status === 404)) {
-									// Upload error
-									uploadPromise.reject(UtilsService.getErrorMessage(response.data));
-								} else {
-									uploadPromise.resolve();
-								}
-							});
-					}
-				});
-		
 			return uploadPromise.promise;
+
 		}
 
 	}
