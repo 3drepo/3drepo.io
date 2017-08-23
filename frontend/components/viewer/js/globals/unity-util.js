@@ -280,6 +280,13 @@ var UnityUtil;
 	UnityUtil.prototype.disableClippingPlanes = function() {
 		toUnity("DisableClip");
 	};
+	UnityUtil.prototype.enableDiff = function() {
+		toUnity("EnableDiff");
+	}
+
+	UnityUtil.prototype.disableDiff = function() {
+		toUnity("DisableDiff");
+	}
 	
 	UnityUtil.prototype.disableMeasuringTool = function(){
 		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
@@ -344,6 +351,16 @@ var UnityUtil;
 			loadingResolve.reject();
 		}
 	};
+
+	UnityUtil.prototype.loadDiffModel = function(account, model, branch, revision) {
+		var params = {};
+		params.database = account;
+		params.model = model;
+		if(revision != "head") {
+			params.revID = revision;
+		}
+		toUnity("LoadDiffModel", LoadingState.Model_LOADING, JSON.stringify(params));
+	}
 
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision) {
 		
@@ -415,6 +432,14 @@ var UnityUtil;
 	UnityUtil.prototype.setAPIHost = function(hostname) {
 		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
 	};
+
+	UnityUtil.prototype.setClashDetectionMode = function() {
+		toUnity("ClashDetectionMode", LoadingState.MODEL_LOADING);
+	};
+	
+	UnityUtil.prototype.setDiffMode = function() {
+		toUnity("DiffMode", LoadingState.MODEL_LOADING);
+	}
 
 	UnityUtil.prototype.setNavigation = function(navMode) {
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
