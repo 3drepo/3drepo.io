@@ -72,9 +72,10 @@ md-dialog.newModelDialog(aria-label="New model")
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				input(
-				ng-if="vm.teamspaceAndProjectSelected",
-				placeholder="Revision name (optional)", 
-				ng-model="vm.tag")
+					ng-if="vm.teamspaceAndProjectSelected"
+					placeholder="Revision name (optional)"
+					maxlength=20
+					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")

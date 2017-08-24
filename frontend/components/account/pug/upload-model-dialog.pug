@@ -9,7 +9,10 @@ md-dialog.newModelDialog(aria-label="New model")
 		div(layout="column")
 
 			md-input-container
-				input(placeholder="Revision name (optional)", ng-model="vm.tag")
+				input(
+					placeholder="Revision name (optional)"
+					maxlength=20
+					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
 			md-input-container

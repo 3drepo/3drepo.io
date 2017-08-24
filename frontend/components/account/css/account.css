@@ -353,6 +353,7 @@ account-menu #accountMenuContent md-menu-item > .md-button {
   margin: 0;
   text-align: center;
   color: #F44336;
+  max-width: 300px;
 }
 
 /** Delete Dialog *********************************************************************************************/

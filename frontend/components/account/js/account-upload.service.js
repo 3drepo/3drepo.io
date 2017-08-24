@@ -86,7 +86,7 @@
 			if(uploadFileData.tag && validTag){
 
 				// Check it's a valid tag
-				uploadPromise.reject("Invalid revision name");
+				uploadPromise.reject("Invalid revision name; check length is between 1 and 20 and uses alphanumeric characters");
 
 			} else if (uploadFileData.file.size > ClientConfigService.uploadSizeLimit) {
 
