@@ -351,6 +351,7 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 
 .newModelDialog #modelDialogError {
   margin: 0;
+  text-align: center;
   color: #F44336;
 }
 

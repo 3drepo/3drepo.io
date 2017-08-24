@@ -476,6 +476,29 @@
 				}
 			}
 
+		
+
+			if (vm.newModelData && vm.newModelData.name) {
+				console.log(vm.newModelData.name);	
+	
+				if (vm.newModelData.name.length < 4) {
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = "Name is less than 4 characters";
+				} else if (vm.newModelData.name.length > 20) {
+					vm.showNewModelErrorMessage = true;
+					vm.newModelErrorMessage = "Name must be less than 20 characters";
+				} else {
+					vm.showNewModelErrorMessage = false;
+				}
+			} else if (vm.newModelData && vm.teamspaceAndProjectSelected && !vm.newModelData.name) {
+				vm.showNewModelErrorMessage = true;
+				vm.newModelErrorMessage = "Model name is empty";
+			} else {
+				vm.showNewModelErrorMessage = false;
+				vm.newModelErrorMessage = "";
+			}
+
+
 
 		}, true);
 

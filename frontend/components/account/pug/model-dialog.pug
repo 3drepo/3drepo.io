@@ -34,13 +34,14 @@ md-dialog.newModelDialog(aria-label="New model")
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				input(
-				placeholder="Model name (required)", tdr-focus="true", 
-				ng-model="vm.newModelData.name", 
-				ng-required="required"
-				ng-keypress="vm.saveNewModel($event)", 
-				ng-pattern="vm.modelRegExp" 
-				maxlength=20)
-				.inputHint Letters, numbers, hyphen and underscore only
+					placeholder="Model name (required)"
+					tdr-focus="true"
+					ng-model="vm.newModelData.name"
+					ng-required="required"
+					ng-keypress="vm.saveNewModel($event)"
+					ng-pattern="vm.modelRegExp" 
+					maxlength=20)
+				.inputHint Letters, numbers, hyphen and underscore only.
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				input(
@@ -69,7 +70,6 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-model="vm.newModelData.unit")
 					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 
-
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				input(
 				ng-if="vm.teamspaceAndProjectSelected",
@@ -82,8 +82,10 @@ md-dialog.newModelDialog(aria-label="New model")
 				ng-if="vm.teamspaceAndProjectSelected",
 				placeholder="Revision description (optional)", ng-model="vm.desc")
 
-			p#modelRequiredHint(ng-if="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected") Please check input
-			
+			//p#modelRequiredHint(
+				ng-if="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected") 
+				span Please check form inputs 
+				
 			div
 				p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
 
