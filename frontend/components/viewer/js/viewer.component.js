@@ -52,6 +52,8 @@
 			vm.currentModelPromise = null;
 			vm.initialisedPromise = $q.defer();
 			vm.measureMode = false;
+			
+			console.log("Branch: ", vm.branch);
 
 			vm.viewer = new Viewer(
 				vm.name, 
@@ -83,9 +85,6 @@
 				showAll : showAll,
 				getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
 			})
-				.then(function(){
-		
-				})
 				.catch(function(error){
 					console.error("Error creating Viewer Directive: ", error);
 				});
@@ -97,14 +96,16 @@
 			if (account && model) {
 
 				if(!branch) {
-					branch = (!revision) ? "master" : "";
+					branch = !revision ? "master" : "";
 				}
 						
 				if(!revision) {
 					revision = "head";
 				}
 
-				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
+				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
+				console.log("URL", url);
+
 				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {
 						if (response.data && response.data.properties) {
