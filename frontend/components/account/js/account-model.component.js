@@ -266,9 +266,6 @@
 				desc: vm.desc
 			};
 
-			console.log("uploadFileData", uploadFileData);
-
-		
 			AccountUploadService.uploadRevisionToModel(uploadFileData)
 				.then(function(){
 					vm.addButtons = false;

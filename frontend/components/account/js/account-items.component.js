@@ -245,6 +245,8 @@
 			var duplicate = AccountService.isDuplicateFederation(vm.accounts, teamspaceName, projectName, fedName);
 			if (duplicate) {
 				vm.errorMessage = "Federation already with this name!";
+			} else {
+				vm.errorMessage = "";
 			}
 			return duplicate;
 		};
@@ -479,20 +481,20 @@
 		
 
 			if (vm.newModelData && vm.newModelData.name) {
-				console.log(vm.newModelData.name);	
-	
-				if (vm.newModelData.name.length < 4) {
+
+				if (vm.newModelData.name.length < 3) {
 					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = "Name is less than 4 characters";
+					vm.newModelErrorMessage = "Name is less than 3 characters";
 				} else if (vm.newModelData.name.length > 20) {
 					vm.showNewModelErrorMessage = true;
 					vm.newModelErrorMessage = "Name must be less than 20 characters";
 				} else {
 					vm.showNewModelErrorMessage = false;
 				}
+				
 			} else if (vm.newModelData && vm.teamspaceAndProjectSelected && !vm.newModelData.name) {
 				vm.showNewModelErrorMessage = true;
-				vm.newModelErrorMessage = "Model name is empty";
+				vm.newModelErrorMessage = "Model name is empty or less than 3 characters";
 			} else {
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";

@@ -64,7 +64,7 @@ md-dialog.newModelDialog(aria-label="New model")
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
 				label Unit
 				md-select(
-					ng-init="vm.newModelData.unit = vm.units[0].value"
+					ng-init="vm.newModelData.unit = vm.units[3].value"
 					ng-required="required"
 					ng-if="vm.teamspaceAndProjectSelected",
 					ng-model="vm.newModelData.unit")
