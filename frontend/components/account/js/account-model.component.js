@@ -112,14 +112,6 @@
 
 			vm.watchModelStatus();
 
-			if (vm.model.processing) {
-				vm.fileUploadInfo = "Processing...";
-			}
-
-			if (vm.model.uploading) {
-				vm.fileUploadInfo = "Uploading...";
-			}
-
 			vm.revisionsLoading = true;
 
 		};
@@ -305,55 +297,64 @@
 		 */
 		vm.watchModelStatus = function(){
 
-			NotificationService.subscribe.modelStatusChanged(vm.account, vm.model.model, function(data){
+			// If we're refreshing the page, handle the data recieved
+			vm.handleModelStatus(vm.model, false);
 
-				if ((data.status === "ok") || (data.status === "failed")) {
-					if (data.status === "ok"
-						|| (data.errorReason.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES") 
-						|| data.errorReason.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_NODES"))) {
-						vm.model.timestamp = new Date();
-						vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
-						vm.fileUploadInfo = "Model imported successfully";
-						// clear revisions cache
-						vm.revisions = null;
-						vm.revisionsLoading = true;
-					}
+			// Else if there's dynamic updates to the model listen for them
+			NotificationService.subscribe.modelStatusChanged(vm.account, vm.model.model, vm.handleModelStatus);
 
-					//status=ok can have an error message too
-					if (data.hasOwnProperty("errorReason") && data.errorReason.message) {
-						vm.fileUploadInfo = data.errorReason.message;
-					} else if (data.status === "failed") {
-						vm.fileUploadInfo = "Failed to import model";
-					}
-
-					vm.model.uploading = false;
-					vm.model.processing = false;
-
-					$scope.$apply();
-					// $timeout(function () {
-					// 	vm.fileUploadInfo = "";
-					// }, vm.infoTimeout);
-					
-				} else if (data.status === "uploading"){
-
-					vm.model.processing = false;
-					vm.model.uploading = true;
-					vm.fileUploadInfo = "Uploading...";
-					$scope.$apply();
-
-				} else if (data.status === "processing"){
-
-					vm.model.uploading = false;
-					vm.model.processing = true;
-					vm.fileUploadInfo = "Processing...";
-					$scope.$apply();
-
-				}
-			});
-
+			// Unsubscribe for notifications
 			$scope.$on("$destroy", function(){
 				NotificationService.unsubscribe.modelStatusChanged(vm.account, vm.model.model);
 			});
+
+		};
+
+		vm.handleModelStatus = function(modelData, freshModel) {
+
+			//console.log("notification", modelData);
+
+			if ((modelData.status === "ok") || (modelData.status === "failed")) {
+
+				// Check if the model has been successfully uploaded or 
+				// that the errors are acceptable
+				var error = modelData.errorReason;
+				var valid = modelData.status === "ok" || 
+					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) || 
+					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
+
+				// We don't want to show the import successful message
+				// for models that were there before, so we use the isFreshModel flag
+				var isFreshModel = freshModel === undefined;
+				if (valid && isFreshModel) {
+					vm.model.timestamp = new Date();
+					vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
+					vm.fileUploadInfo = "Model imported successfully";
+					// clear revisions cache
+					vm.revisions = null;
+					vm.revisionsLoading = true;
+				}
+
+				//status=ok can have an error message too
+				if (modelData.hasOwnProperty("errorReason") && modelData.errorReason.message) {
+					vm.fileUploadInfo = modelData.errorReason.message;
+				} else if (modelData.status === "failed") {
+					vm.fileUploadInfo = "Failed to import model";
+				}
+
+				// $timeout(function () {
+				// 	vm.fileUploadInfo = "";
+				// }, vm.infoTimeout);
+				
+			} else if (modelData.status === "uploading"){
+
+				vm.fileUploadInfo = "Uploading...";
+				
+			} else if (modelData.status === "processing"){
+
+				vm.fileUploadInfo = "Processing...";
+
+			}
 
 		};
 
