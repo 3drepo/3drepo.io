@@ -66,6 +66,7 @@
 			vm.selectedIssueIndex = null;
 			vm.internalSelectedIssue = null;
 			vm.modelLoaded = false;
+			console.log("issues-list.component.js initialised")
 		};
 
 
