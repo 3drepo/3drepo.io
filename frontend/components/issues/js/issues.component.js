@@ -484,7 +484,7 @@
 		 * Exit issue editing
 		 * @param issue
 		 */
-		vm.editIssueExit = function (issue) {
+		vm.editIssueExit = function () {
 			vm.hideItem = true;
 		};
 

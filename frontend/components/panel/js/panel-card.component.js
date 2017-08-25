@@ -170,6 +170,7 @@
 		 * Content wants to show it's main content
 		 */
 		vm.hideItem = function () {
+
 			vm.statusIcon = vm.contentData.icon;
 			vm.hideMenuButton = false;
 			vm.hideSelectedItem = true;

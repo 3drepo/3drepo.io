@@ -303,6 +303,7 @@
 			// Get out of pin drop mode
 
 			EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+			EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "enable");
 			vm.clearPin = true;
 			
 
@@ -459,8 +460,10 @@
 
 				if(selected){
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
+					EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "disable");
 				} else {
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+					EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "enable");
 				}
 				break;
 

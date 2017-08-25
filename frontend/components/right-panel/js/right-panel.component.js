@@ -38,7 +38,7 @@
 		vm.$onInit = function() {
 
 			vm.highlightBackground = "#FF9800";
-			
+			vm.measureDisabled = false;
 			vm.addIssueMode = null;
 			vm.measureMode = false;
 			vm.metaData = false;
@@ -107,6 +107,13 @@
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
+			} else if (event.type === EventService.EVENT.MEASURE_MODE_BUTTON) {
+				if (event.value === "disable") {
+					vm.measureModeOff();	
+					vm.measureDisabled = true;				
+				} else if (event.value === "enable") {
+					vm.measureDisabled = false;
+				}
 			}
 		});
 
@@ -135,7 +142,15 @@
 				vm.addIssueMode = buttonType;
 				vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
 				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
-			}
+			} 
+		};
+
+		
+
+		vm.measureModeOff = function() {
+			vm.measureMode = false;
+			vm.measureBackground = vm.measureMode ? vm.highlightBackground : "";
+			EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
 		};
 
 		/**
@@ -143,6 +158,7 @@
          */
 		vm.toggleMeasure = function () {
 
+			// If not measure mode and metadata enabled
 			if (!vm.measureMode && vm.metaData) {
 				vm.toggleAutoMetaData();
 			}
