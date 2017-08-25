@@ -44,6 +44,8 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
+			console.log("model.component.js init")
 			vm.modelUI;
 			vm.issueArea;
 			vm.issuesCardIndex = 0;
@@ -71,6 +73,18 @@
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);
 			});
+
+			vm.setupPanelCards();
+
+			$timeout(function () {
+				// Get the model element
+				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
+				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
+			});
+
+		};
+
+		vm.setupPanelCards = function() {
 
 			vm.panelCard.left.push({
 				type: "issues",
@@ -183,12 +197,6 @@
 				fixedHeight: true,
 				options: [
 				]
-			});
-
-			$timeout(function () {
-				// Get the model element
-				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
-				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
 			});
 
 		};
