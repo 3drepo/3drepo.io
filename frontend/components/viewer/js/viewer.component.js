@@ -43,7 +43,7 @@
 		var vm = this;
 
 		vm.$onInit = function() {
-
+			console.log("Viewer component initialised");
 			vm.branch   = vm.branch ? vm.branch : "master";
 			vm.revision = vm.revision ? vm.revision : "head";
 			vm.pointerEvents = "auto";
@@ -77,6 +77,7 @@
 		// };
 
 		vm.initViewer = function() {
+			console.log("initViewer called in viewer.component.js");
 			vm.viewer.insertUnityLoader()
 				.then(function(){
 					var showAll = true;
@@ -92,7 +93,7 @@
 		};
 
 		function fetchModelProperties(account, model, branch, revision) {
-
+			console.log("fetchModelProperties called inside viewer.component.js")
 			if (account && model) {
 
 				if(!branch) {
@@ -119,7 +120,7 @@
 					});
 
 			} else {
-				console.warn("Account and model were not set correctly " +
+				console.error("Account and model were not set correctly " +
 				"for model property fetching: ", account, model);
 			}
 			
@@ -134,12 +135,11 @@
 
 				if (event.type === EventService.EVENT.ISSUES_READY) {
 					
+					console.log("ISSUES_READY caught in viewer.component.js")
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
 					if (!vm.currentModel) {
-						
 						vm.initViewer();
-
 					} else {
 						// Load the model
 						vm.loadViewerModel();	
@@ -174,7 +174,9 @@
 				}
 
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
-
+					
+					console.log("START_LOADING event caught in viewer.component.js");
+					
 					vm.initialisedPromise.resolve();
 					fetchModelProperties(vm.account, vm.model, vm.branch, vm.revision);	
 
@@ -307,7 +309,12 @@
 
 		vm.loadViewerModel = function() {
 
-			vm.currentModelPromise = vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
+			vm.currentModelPromise = vm.viewer.loadModel(
+				vm.account, 
+				vm.model, 
+				vm.branch, 
+				vm.revision
+			);
 
 			// Set the current model in the viewer
 			vm.currentModel = vm.model;
