@@ -37,9 +37,9 @@
 			controllerAs: "vm"
 		});
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "ClientConfigService", "EventService", "$location", "$mdDialog"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "$timeout", "ClientConfigService", "EventService", "$location", "$mdDialog"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, ClientConfigService, EventService, $location, $mdDialog) {
+	function ViewerCtrl ($scope, $q, $http, $element, $timeout, ClientConfigService, EventService, $location, $mdDialog) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -59,9 +59,10 @@
 				eventCallback, 
 				errCallback
 			);
-
-			vm.viewer.preInit();
-
+	
+			vm.preInitPromise = vm.viewer.preInit();
+			
+			
 		};
 
 		function errCallback(errorType, errorValue) {
@@ -136,7 +137,10 @@
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
 					if (!vm.currentModel) {
-						vm.initViewer();
+						vm.preInitPromise.then(function(){
+							vm.initViewer();
+						});
+						
 					} else {
 						// Load the model
 						vm.loadViewerModel();	

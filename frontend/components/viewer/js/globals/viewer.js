@@ -108,36 +108,45 @@ var Viewer = {};
 
 
 		this.preInit = function() {
+			return new Promise(function(resolve, reject) {
 
-			self.viewer = document.createElement("div");
-			self.viewer.className = "viewer";
+				self.viewer = document.createElement("div");
+				self.viewer.className = "viewer";
 
-			self.loadingDiv = document.createElement("div");
-			self.loadingDivText = document.createElement("p");
-			self.loadingDiv.appendChild(self.loadingDivText);
+				self.loadingDiv = document.createElement("div");
+				self.loadingDivText = document.createElement("p");
+				self.loadingDiv.appendChild(self.loadingDivText);
 
-			self.loadingDivText.innerHTML = "";
-			self.loadingDiv.className += "loadingViewer";
-			self.loadingDivText.className += "loadingViewerText";
+				self.loadingDivText.innerHTML = "";
+				self.loadingDiv.className += "loadingViewer";
+				self.loadingDivText.className += "loadingViewerText";
 
-			var canvas = document.createElement("canvas");
-			canvas.className = "emscripten";
-			canvas.setAttribute("id", "canvas");
-			canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-			canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+				var canvas = document.createElement("canvas");
+				canvas.className = "emscripten";
+				canvas.setAttribute("id", "canvas");
+				canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
+				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
 
-			canvas.onmousedown = function(){
-				return false;
-			};
-		
-			canvas.style["pointer-events"] = "all";
+				canvas.onmousedown = function(){
+					return false;
+				};
 			
-			self.element.appendChild(self.viewer);
-			self.viewer.appendChild(canvas);
-			self.viewer.appendChild(self.loadingDiv);
+				canvas.style["pointer-events"] = "all";
+				
+				self.element.appendChild(self.viewer);
+				self.viewer.appendChild(canvas);
+				self.viewer.appendChild(self.loadingDiv);
 
-			self.unityLoaderScript = document.createElement("script");
-			self.unityLoaderScript.setAttribute("src", "unity/Release/UnityLoader.js");
+				self.unityLoaderScript = document.createElement("script");
+				self.unityLoaderScript.setAttribute("src", "unity/Release/UnityLoader.js");
+				self.unityLoaderScript.onload = function() {
+					resolve();
+				};
+				self.unityLoaderScript.onerror = function(error) {
+					reject(error);
+				};
+
+			});
 		};
 
 		this.init = function(options) {
