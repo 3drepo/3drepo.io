@@ -60,8 +60,7 @@
 				errCallback
 			);
 	
-			vm.preInitPromise = vm.viewer.preInit();
-			
+			vm.viewer.prepareViewer();
 			
 		};
 
@@ -78,14 +77,16 @@
 		// };
 
 		vm.initViewer = function() {
-
-			var showAll = true;
-			vm.viewer.init({
-				showAll : showAll,
-				getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
-			})
-				.catch(function(error){
-					console.error("Error creating Viewer Directive: ", error);
+			vm.viewer.insertUnityLoader()
+				.then(function(){
+					var showAll = true;
+					vm.viewer.init({
+						showAll : showAll,
+						getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
+					})
+						.catch(function(error){
+							console.error("Error creating Viewer Directive: ", error);
+						});
 				});
 		
 		};
@@ -103,7 +104,6 @@
 				}
 
 				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
-				console.log("URL", url);
 
 				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {
@@ -137,10 +137,9 @@
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
 					if (!vm.currentModel) {
-						vm.preInitPromise.then(function(){
-							vm.initViewer();
-						});
 						
+						vm.initViewer();
+
 					} else {
 						// Load the model
 						vm.loadViewerModel();	

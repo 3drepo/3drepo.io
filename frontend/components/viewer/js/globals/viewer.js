@@ -107,51 +107,65 @@ var Viewer = {};
 		this.logos    = [];
 
 
-		this.preInit = function() {
-			return new Promise(function(resolve, reject) {
-
-				self.viewer = document.createElement("div");
-				self.viewer.className = "viewer";
-
-				self.loadingDiv = document.createElement("div");
-				self.loadingDivText = document.createElement("p");
-				self.loadingDiv.appendChild(self.loadingDivText);
-
-				self.loadingDivText.innerHTML = "";
-				self.loadingDiv.className += "loadingViewer";
-				self.loadingDivText.className += "loadingViewerText";
-
-				var canvas = document.createElement("canvas");
-				canvas.className = "emscripten";
-				canvas.setAttribute("id", "canvas");
-				canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-				canvas.setAttribute("oncontextmenu", "event.preventDefault()");
-
-				canvas.onmousedown = function(){
-					return false;
-				};
+		this.prepareViewer = function() {
 			
-				canvas.style["pointer-events"] = "all";
-				
-				self.element.appendChild(self.viewer);
-				self.viewer.appendChild(canvas);
-				self.viewer.appendChild(self.loadingDiv);
+			self.unityLoaderReady = false;
 
-				self.unityLoaderScript = document.createElement("script");
-				self.unityLoaderScript.setAttribute("src", "unity/Release/UnityLoader.js");
-				self.unityLoaderScript.onload = function() {
+			self.viewer = document.createElement("div");
+			self.viewer.className = "viewer";
+
+			self.loadingDiv = document.createElement("div");
+			self.loadingDivText = document.createElement("p");
+			self.loadingDiv.appendChild(self.loadingDivText);
+
+			self.loadingDivText.innerHTML = "";
+			self.loadingDiv.className += "loadingViewer";
+			self.loadingDivText.className += "loadingViewerText";
+
+			var canvas = document.createElement("canvas");
+			canvas.className = "emscripten";
+			canvas.setAttribute("id", "canvas");
+			canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
+			canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+
+			canvas.onmousedown = function(){
+				return false;
+			};
+		
+			canvas.style["pointer-events"] = "all";
+			
+			self.element.appendChild(self.viewer);
+			self.viewer.appendChild(canvas);
+			self.viewer.appendChild(self.loadingDiv);
+
+			self.unityLoaderScript = document.createElement("script");
+			
+		};
+
+		this.unityLoaderPath = "unity/Release/UnityLoader.js";
+
+		this.insertUnityLoader = function() {
+			return new Promise(function(resolve, reject) {
+				self.unityLoaderScript.async = true;
+				self.unityLoaderScript.addEventListener ("load", function() {
+					console.debug("Loaded UnityLoader.js succesfully");
 					resolve();
-				};
-				self.unityLoaderScript.onerror = function(error) {
-					reject(error);
-				};
+				}, false);
+				self.unityLoaderScript.addEventListener ("error", function(error) {
+					console.error("Error loading UnityLoader.js", error);
+					reject();
+				}, false);
 
+				// Event handlers MUST come first before setting src
+				self.unityLoaderScript.src = self.unityLoaderPath;
+
+				// This kicks off the actual loading of Unity
+				self.viewer.appendChild(self.unityLoaderScript);
 			});
 		};
 
 		this.init = function(options) {
 
-	
 			return new Promise(function(resolve, reject) {
 
 				if (self.initialized) {
@@ -163,8 +177,6 @@ var Viewer = {};
 
 				self.loadingDivText.innerHTML = "Loading Viewer...";
 				document.body.style.cursor = "wait";
-				// This kicks off the actual loading of Unity
-				self.viewer.appendChild(self.unityLoaderScript);
 
 				//Shouldn't need this, but for something it is not being recognised from unitySettings!
 				Module.errorhandler = UnityUtil.onError;
