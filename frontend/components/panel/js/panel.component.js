@@ -122,8 +122,8 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-				console.log("PANEL_CONTENT_SETUP");
-				vm.contentItems = (event.value[vm.position]);
+				console.log("PANEL_CONTENT_SETUP", event.value, vm.position );
+				vm.contentItems = event.value[vm.position];
 				vm.setupShownCards();
 				vm.hideLastItemGap();
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
