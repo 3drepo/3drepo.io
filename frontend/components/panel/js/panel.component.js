@@ -65,6 +65,22 @@
 			
 		};
 
+		$scope.$watch("vm.contentItems", function (newValue, oldValue) {
+
+			if (oldValue.length && newValue.length) {
+				for (var i = 0; i < newValue.length; i ++) {
+
+					if (newValue[i].show !== oldValue[i].show) {
+						vm.setupShownCards();
+						vm.getContentItemShownFromType();
+						break;
+					}
+
+				}
+			}
+
+		}, true);
+
 		vm.bindEvents = function() {
 			/*
 			* Mouse down
@@ -106,10 +122,10 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
+				console.log("PANEL_CONTENT_SETUP");
 				vm.contentItems = (event.value[vm.position]);
-				setupShownCards();
-				hideLastItemGap();
-				vm.setupContentItemsWatch();
+				vm.setupShownCards();
+				vm.hideLastItemGap();
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
 			} else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
@@ -128,7 +144,7 @@
 		/**
 		 * The last card should not have a gap so that scrolling in resized window works correctly
 		 */
-		function hideLastItemGap () {
+		vm.hideLastItemGap = function() {
 			var i, lastFound = false;
 
 			for (i = (vm.contentItems.length - 1); i >= 0; i -= 1) {
@@ -141,7 +157,7 @@
 					}
 				}
 			}
-		}
+		};
 
 
 		/**
@@ -175,7 +191,7 @@
 				}
 			}
 
-			hideLastItemGap();
+			vm.hideLastItemGap();
 		};
 
 		/**
@@ -218,7 +234,7 @@
 			if (Array.isArray(previousContentItems) && (previousContentItems.length === contentItems.length)) {
 				// End the recurse by dividing out the remaining space to remaining content
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
-					contentItem = getContentItemShownFromType(contentItems[i].type);
+					contentItem = vm.getContentItemShownFromType(contentItems[i].type);
 					// Flexible content shouldn't have a size smaller than its minHeight
 					// or a requested height that is less than the minHeight
 					if (maxContentItemHeight < contentItem.minHeight) {
@@ -240,7 +256,7 @@
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
 					if ((contentItems[i].requestedHeight < maxContentItemHeight) ||
 						(contentItems[i].fixedHeight)) {
-						contentItem = getContentItemShownFromType(contentItems[i].type);
+						contentItem = vm.getContentItemShownFromType(contentItems[i].type);
 						contentItem.height = contentItems[i].requestedHeight;
 						availableHeight -= contentItem.height + vm.panelToolbarHeight + vm.itemGap;
 						contentItems.splice(i, 1);
@@ -259,19 +275,19 @@
 		 * @param type
 		 * @returns {Object}
 		 */
-		function getContentItemShownFromType (type) {
+		vm.getContentItemShownFromType = function(type) {
 			var i, length;
 			for (i = 0, length = vm.contentItemsShown.length; i < length; i += 1) {
 				if (vm.contentItemsShown[i].type === type) {
 					return vm.contentItemsShown[i];
 				}
 			}
-		}
+		};
 
 		/**
 		 * Setup the cards to show
 		 */
-		function setupShownCards () {
+		vm.setupShownCards = function() {
 			var i, length;
 
 			vm.contentItemsShown = [];
@@ -280,24 +296,6 @@
 					vm.contentItemsShown.push(vm.contentItems[i]);
 				}
 			}
-		}
-
-		/*
-		 * Watch vm.contentItems for any cards shown or hidden
-		 */
-		vm.setupContentItemsWatch = function() {
-			var i, length;
-
-			$scope.$watch("vm.contentItems", function (newValue, oldValue) {
-				for (i = 0, length = newValue.length; i < length; i += 1) {
-					if (newValue[i].show !== oldValue[i].show) {
-						setupShownCards();
-						hideLastItemGap();
-						break;
-					}
-				}
-			}, true);
-
 		};
 
 	}
