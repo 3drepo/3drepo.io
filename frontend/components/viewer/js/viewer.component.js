@@ -230,19 +230,8 @@
 								event.value.model,
 								event.value.promise
 							);
-						/*} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-							if(!event.value.noHighlight)
-							{
-
-								vm.viewer.highlightObjects(
-									event.value.account,
-									event.value.model,
-									event.value.id ? [event.value.id] : event.value.ids,
-									event.value.zoom,
-									event.value.colour
-								);
-							}*/
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
+
 							vm.viewer.highlightObjects(
 								event.value.account,
 								event.value.model,
@@ -251,24 +240,21 @@
 								event.value.colour,
 								event.value.multi
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
-							vm.viewer.highlightAndUnhighlightObjects(
-								event.value.account,
-								event.value.model,
-								event.value.highlight_ids,
-								event.value.unhighlight_ids,
-								event.value.zoom,
-								event.value.colour
-							);
+
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-							vm.viewer.highlightObjects();
+
+
+							vm.viewer.clearHighlights();
+
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
+
 							vm.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.model,
 								event.value.ids,
 								event.value.visible
 							);
+
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 	
 							vm.currentModelPromise.then(function(){

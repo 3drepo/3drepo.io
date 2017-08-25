@@ -34,7 +34,7 @@
 			controllerAs: "vm"
 		});
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService", "MultiSelectService"];
 
 	/**
 	 *
@@ -44,17 +44,14 @@
 	 * @param EventService
 	 * @constructor
 	 */
-	function TreeCtrl($scope, $timeout, TreeService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, EventService, MultiSelectService) {
 		var vm = this,
 			promise = null,
-			i = 0,
-			length = 0,
 			currentSelectedNode = null,
-			currentScrolledToNode = null,
+			//currentScrolledToNode = null,
 			highlightSelectedViewerObject = true,
 			clickedHidden = {}, // Nodes that have actually been clicked to hide
-			clickedShown = {}, // Nodes that have actually been clicked to show
-			multiSelectMode = false;
+			clickedShown = {}; // Nodes that have actually been clicked to show
 
 		/*
 		 * Init
@@ -72,6 +69,7 @@
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.visible   = {};
 			vm.invisible = {};
+			vm.multiSelectMode = false;
 
 		};
 
@@ -507,7 +505,7 @@
 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 				highlightSelectedViewerObject = !event.value.on;
 			} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
-				multiSelectMode = event.value;
+				vm.multiSelectMode = event.value;
 			} else if (event.type === EventService.EVENT.TREE_READY){
 				/*
 				 * Get all the tree nodes
@@ -734,7 +732,8 @@
 			}
 
 			// Remove highlight from the current selection in the viewer and highlight this object if not the same
-			if (currentSelectedNode === null) {
+
+			if (currentSelectedNode === null && !MultiSelectService.isMultiMode()) {
 				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
 			} else {
 				var map = [];
@@ -848,34 +847,5 @@
 			}
 		}
 
-		/**
-		 * Check if a relative in the path was clicked to show
-		 *
-		 * @param {Object} node
-		 */
-		function pathRelativeWasClickShown (node) {
-			var i, length,
-				relativeWasClickShown = false,
-				path = node.path.split("__");
-
-			path.pop(); // Remove _id of node from path
-			for (i = 0, length = path.length; i < length; i += 1) {
-				if (clickedShown.hasOwnProperty(path[i])) {
-					relativeWasClickShown = true;
-					break;
-				}
-			}
-
-			return relativeWasClickShown;
-		}
-
-		/**
-		 * Check if a node was clicked to hide
-		 *
-		 * @param {Object} node
-		 */
-		function wasClickedHidden (node) {
-			return clickedHidden.hasOwnProperty(node._id);
-		}
 	}
 }());

@@ -380,20 +380,31 @@ var Viewer = {};
 
 		this.lastMultipart = null;
 
-		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
-			if (!this.pinDropMode && !this.measureMode) {
-				// TODO: We shouldn't use Set here
-				idsIn = idsIn || [];
-				var uniqueIds = idsIn.filter(function(value, index, self){
-					return self.indexOf(value) === index;
-				});
+		this.clearHighlights = function() {
+			UnityUtil.clearHighlights();
+		};
 
+		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
+		
+			var canHighlight = !this.pinDropMode && !this.measureMode;
+
+			if (canHighlight) {
+				
+
+				idsIn = idsIn || [];
+				var uniqueIds = idsIn.filter(function(value, index){
+					return idsIn.indexOf(value) === index;
+				});
+				
 				if(uniqueIds.length) {
-					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride || this.multiSelectMode);
+					var multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
 				} else {
 					UnityUtil.clearHighlights();
 				}
+
 			}
+
 		};
 
 		this.switchObjectVisibility = function(account, model, ids, visibility) {

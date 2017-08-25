@@ -39,7 +39,7 @@
 
 		var service = {
 			pinDropMode : pinDropMode,
-			multiMode : multiMode,
+			isMultiMode : isMultiMode,
 			handleKeysDown : handleKeysDown,
 			disableMultiSelect : disableMultiSelect
 		};
@@ -47,25 +47,6 @@
 		return service;
 
 		//////////////
-
-		function isMacKey(keysDown) {
-			return isMac && keysDown.indexOf(keys.cmdKey) !== -1;
-		}
-
-		function isNotMacKey(keysDown) {
-			return !isMac && keysDown.indexOf(keys.ctrlKey) !== -1;
-		}
-
-		function isKeyDown(keysDown) {
-			return isMacKey(keysDown) || isNotMacKey(keysDown);
-		}
-
-		function isKeyDownNotCtrl(keysDown) {
-			var macOtherKey = isMac && keysDown.indexOf(keys.cmdKey) === -1;
-			var otherKey = !isMac && keysDown.indexOf(keys.ctrlKey) === -1;
-			return macOtherKey || otherKey;
-		}
-
 
 		/**
 		 * Handle component input changes
@@ -76,29 +57,66 @@
 				return;
 			}
 
-			// TODO: This is convoluted
-			if (isKeyDown(keysDown)) {
+			if (isMutliselectDown(keysDown)) {
 
-				multiMode = true;
-				EventService.send(EventService.EVENT.MULTI_SELECT_MODE, true);
+				multiSelectEnabled();
 
-			} else if (multiMode === true && isKeyDownNotCtrl(keysDown)) {
+			} else if (multiMode === true && isOtherKey(keysDown)) {
 
-				multiMode = false;
-				EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
+				multiSelectDisabled();
 
-			} else if (keysDown.indexOf(keys.escKey) !== -1) {
+			} else if (isEscapeKey(keysDown)) {
 
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+				unhighlightAll();
 
 			}
 				
 		}
 
+		function isMultiMode() {
+			return multiMode;
+		}
+
+		function multiSelectEnabled() {
+			multiMode = true;
+			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, true);
+		}
+
+		function multiSelectDisabled() {
+			multiMode = false;
+			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
+		}
+
+		function unhighlightAll() {
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);			
+		}
 
 		function disableMultiSelect() {
 			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
 		}
+
+		function isCmd(keysDown) {
+			return isMac && keysDown.indexOf(keys.cmdKey) !== -1;
+		}
+
+		function isCtrlKey(keysDown) {
+			return !isMac && keysDown.indexOf(keys.ctrlKey) !== -1;
+		}
+
+		function isMutliselectDown(keysDown) {
+			return isCmd(keysDown) || isCtrlKey(keysDown);
+		}
+
+		function isOtherKey(keysDown) {
+			var macOtherKey = isMac && keysDown.indexOf(keys.cmdKey) === -1;
+			var otherKey = !isMac && keysDown.indexOf(keys.ctrlKey) === -1;
+			return macOtherKey || otherKey;
+		}
+
+		function isEscapeKey(keysDown) {
+			keysDown.indexOf(keys.escKey) !== -1;
+		}
+
 		
 	}
 }());
