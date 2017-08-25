@@ -53,8 +53,6 @@
 			vm.initialisedPromise = $q.defer();
 			vm.measureMode = false;
 			
-			console.log("Branch: ", vm.branch);
-
 			vm.viewer = new Viewer(
 				vm.name, 
 				$element[0],

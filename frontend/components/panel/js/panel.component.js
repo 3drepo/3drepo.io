@@ -58,8 +58,9 @@
 			vm.panelToolbarHeight = 40,
 			vm.contentItemsShown = [];
 			
+			vm.resize(); // We need to set the correct height for the issues
 			vm.bindEvents();
-
+			
 		};
 
 		vm.bindEvents = function() {
@@ -86,9 +87,14 @@
 			* Watch for screen resize
 			*/
 			angular.element($window).bind("resize", function() {
-				vm.maxHeightAvailable = $window.innerHeight - vm.panelTopBottomGap;
-				calculateContentHeights();
+				vm.resize();
 			});
+
+		};
+
+		vm.resize = function() {
+			vm.maxHeightAvailable = $window.innerHeight - vm.panelTopBottomGap;
+			vm.calculateContentHeights();
 		};
 
 		/*
@@ -101,7 +107,7 @@
 				vm.contentItems = (event.value[vm.position]);
 				setupShownCards();
 				hideLastItemGap();
-				setupContentItemsWatch();
+				vm.setupContentItemsWatch();
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
 			} else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
@@ -153,7 +159,7 @@
 					// Resize any shown panel contents
 					if (vm.contentItems[i].show) {
 						vm.contentItemsShown.push(vm.contentItems[i]);
-						calculateContentHeights();
+						vm.calculateContentHeights();
 					} else {
 						for (var j = (vm.contentItemsShown.length - 1); j >= 0; j -= 1) {
 							if (vm.contentItemsShown[j].type === contentType) {
@@ -161,7 +167,7 @@
 							}
 						}
 						vm.contentItems[i].showGap = false;
-						calculateContentHeights();
+						vm.calculateContentHeights();
 					}
 					break;
 				}
@@ -179,19 +185,19 @@
 		vm.heightRequest = function (contentItem, height) {
 			contentItem.requestedHeight = height; // Keep a note of the requested height
 			contentItem.height = height; // Initially set the height to the requested height
-			calculateContentHeights();
+			vm.calculateContentHeights();
 		};
 
 		/**
 		 * Start the recursive calculation of the content heghts
 		 */
-		function calculateContentHeights() {
+		vm.calculateContentHeights = function() {
 			var tempContentItemsShown = angular.copy(vm.contentItemsShown);
 			assignHeights(vm.maxHeightAvailable, tempContentItemsShown, null);
 			$timeout(function () {
 				$scope.$apply();
 			});
-		}
+		};
 
 		/**
 		 * Recursively calculate the heights for each content item
@@ -277,7 +283,7 @@
 		/*
 		 * Watch vm.contentItems for any cards shown or hidden
 		 */
-		function setupContentItemsWatch() {
+		vm.setupContentItemsWatch = function() {
 			var i, length;
 
 			$scope.$watch("vm.contentItems", function (newValue, oldValue) {
@@ -289,7 +295,8 @@
 					}
 				}
 			}, true);
-		}
+
+		};
 
 	}
 }());
