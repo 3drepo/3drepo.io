@@ -59,8 +59,7 @@
 				StateManager.popStateHandler(event, vm.account, vm.model);
 			};
 
-			var refreshHandler = function (event){
-				console.log("Refresh handler");
+			var refreshHandler = function (event) {
 				return StateManager.refreshHandler(event); 
 			};
 
@@ -68,16 +67,9 @@
 			window.addEventListener("popstate", popStateHandler);
 			window.addEventListener("beforeunload", refreshHandler);
 
-			$scope.$on("$destroy", function(){
+			$scope.$on("$destroy", function() {
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);
-			});
-
-			/*
-			* Get the model element
-			*/
-			$timeout(function () {
-				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
 			});
 
 			vm.panelCard.left.push({
@@ -94,13 +86,6 @@
 						noToggle: true,
 						icon: "fa-print"
 					},
-					// {
-					// 	value: "importBCF",
-					// 	label: "Import BCF",
-					// 	selected: false,
-					// 	noToggle: true,
-					// 	icon: "fa-cloud-upload"
-					// },
 					{
 						value: "exportBCF",
 						label: "Export BCF",
@@ -164,30 +149,6 @@
 				]
 			});
 
-			/*
-			vm.panelCard.left.push({
-				type: "groups",
-				title: "Groups",
-				show: true,
-				help: "groups of objects",
-				icon: "view_comfy",
-				minHeight: 80,
-				fixedHeight: false,
-				options: [
-					{type: "menu", visible: true}
-				],
-				menu: [
-					{
-						value: "hideAll",
-						label: "Hide Groups",
-						selected: false,
-						toggle: true
-					}
-				],
-				add: true
-			});
-			*/
-
 			vm.panelCard.left.push({
 				type: "clip",
 				title: "Clip",
@@ -225,6 +186,8 @@
 			});
 
 			$timeout(function () {
+				// Get the model element
+				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
 				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
 			});
 
