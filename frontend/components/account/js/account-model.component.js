@@ -82,8 +82,7 @@
 				permissions: {
 					label: "Permissions", 
 					icon: "group", 
-					// !vm.isUserAccount will be changed to AuthService.hasPermission... when someone can pay for other accounts other than their own
-					hidden: !vm.isUserAccount
+					hidden: !AuthService.hasPermission("manage_model_permission", vm.model.permissions)
 				},
 				revision: {
 					label: "Revisions", 
