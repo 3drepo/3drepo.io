@@ -46,14 +46,8 @@
 		vm.$onInit = function() {
 
 			console.log("model.component.js init")
-			vm.modelUI;
-			vm.issueArea;
-			vm.issuesCardIndex = 0;
-			vm.panelCard = {
-				left: [],
-				right: []
-			};
 
+			vm.issuesCardIndex = 0;
 			vm.pointerEvents = "inherit";
 			
 			history.pushState(null, null, document.URL);
@@ -74,17 +68,19 @@
 				window.removeEventListener("popstate", popStateHandler);
 			});
 
-			vm.setupPanelCards();
-
 			$timeout(function () {
 				// Get the model element
 				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
-				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
 			});
 
 		};
 
 		vm.setupPanelCards = function() {
+
+			vm.panelCard = {
+				left: [],
+				right: []
+			};
 
 			vm.panelCard.left.push({
 				type: "issues",
@@ -199,6 +195,8 @@
 				]
 			});
 
+			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
+
 		};
 
 		/**
@@ -270,7 +268,9 @@
 
 		$scope.$watchGroup(["vm.account","vm.model"], function() {
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
+				vm.setupPanelCards();
 				vm.setupModelInfo();
+				
 			}
 		});
 
