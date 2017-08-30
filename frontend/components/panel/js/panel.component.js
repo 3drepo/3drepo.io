@@ -47,7 +47,6 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			console.log("Panel component initialised");
 
 			vm.maxHeightAvailable = $window.innerHeight - vm.panelTopBottomGap;
 			vm.contentItems = [];

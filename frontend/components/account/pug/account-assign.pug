@@ -137,7 +137,7 @@
 										ng-repeat="(permission, value) in vm.projectPermissions") 
 
 										md-checkbox(
-											ng-disabled="vm.adminDisabled(user, permission)"
+											ng-disabled="vm.isTeamspaceAdmin(user)"
 											aria-label="Project Permission {{value}}"
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
@@ -148,7 +148,8 @@
 											aria-label="Checkbox Admin"
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, 'admin_project')"
-											ng-checked="vm.userHasProjectPermissions(user, 'admin_project')")
+											ng-disabled="vm.isTeamspaceAdmin(user)"
+											ng-checked="vm.userHasProjectPermissions(user, 'admin_project') || vm.isTeamspaceAdmin(user)")
 
 							
 						
@@ -228,12 +229,13 @@
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 
 										md-radio-group(	
-											ng-disabled="vm.account === user"
+											ng-disabled="vm.account === user || vm.isTeamspaceAdmin(user)"
 											ng-model="vm.selectedRole[user]"
 											layout-align="center center"
 											layout="row")
 
 											md-radio-button(
+												ng-disabled="vm.account === user || vm.isTeamspaceAdmin(user)"
 												aria-label="{{value}}"
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
