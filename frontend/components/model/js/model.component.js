@@ -196,8 +196,10 @@
 			});
 
 			$timeout(function(){
-				console.log("Sending PANEL_CONTENT_SETUP");
-				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
+				angular.element(function(){
+					console.log("Sending PANEL_CONTENT_SETUP");
+					EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
+				});
 			});
 			
 		};
@@ -271,9 +273,10 @@
 
 		$scope.$watchGroup(["vm.account","vm.model"], function() {
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
-				vm.setupPanelCards();
-				vm.setupModelInfo();
-				
+				angular.element(function(){
+					vm.setupPanelCards();
+					vm.setupModelInfo();
+				});
 			}
 		});
 
