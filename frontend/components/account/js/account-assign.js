@@ -28,7 +28,6 @@
 			controller: accountAssignCtrl,
 			controllerAs: "vm"
 		});
-	
 
 	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$mdDialog", "$location", "UtilsService", "ClientConfigService"];
 
@@ -69,13 +68,11 @@
 			};
 
 			vm.projectPermissions = {
-
 				create_model : "Create Model",
 				create_federation : "Create Federation",
-				admin_project : "Admin Project",
+				delete_project : "Delete Project",
 				edit_project :  "Edit Project",
-				delete_project : "Delete Federation"
-
+				admin_project : "Admin Project"
 			};
 
 			vm.modelRoles = ["unassigned"];
@@ -87,6 +84,7 @@
 			$location.search("account", null);
 			$location.search("project", null);
 			$location.search("model", null);
+			vm.checkIfAdminChanged();
 		};
 
 		vm.getStateFromParams = function() {
@@ -203,7 +201,7 @@
 			var hasPermissions = false;
 			vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
 				if (permissionUser.user === user.user) {
-					hasPermissions = user.permissions.indexOf(permission) !== -1;
+					hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
 				} 
 			});
 			
@@ -318,12 +316,14 @@
 
 		vm.adminChecked = function(user, permission) {
 			return vm.userHasProjectPermissions(user, permission) ||
-					vm.userHasProjectPermissions(user, "admin_project");
+					vm.userHasProjectPermissions(user, "admin_project") ||
+					vm.userHasPermissions(user, "teamspace_admin");
 		};
 
 		vm.adminDisabled = function(user, permission) {
-			return permission !== "admin_project" && vm.userHasProjectPermissions(user, "admin_project");
-		}
+			return permission !== "admin_project" && vm.userHasProjectPermissions(user, "admin_project") || 
+				vm.userHasPermissions(user, "teamspace_admin");
+		};
 
 		vm.setProjects = function() {
 
@@ -445,6 +445,13 @@
 						if (index !== -1) {
 							targetUser.permissions.splice(index, 1);
 						}
+
+						// Move them to viewer role if we remove there admin privilidges
+						if (permission === "admin_project" && vm.modelRoles && vm.modelRoles.length > 1) {
+							// Give them the most basic role that is not unassigned
+							vm.selectedRole[user.user] = vm.modelRoles[1];
+						}
+
 					} 
 					
 				} 
@@ -459,11 +466,42 @@
 					vm.showError(title, error);
 				});
 
+				// Check if we removed or added an admins
+				vm.checkIfAdminChanged();
+
 			}
 
 		};
 
 		// MODELS
+		
+		vm.isProjectAdmin = function(user) {
+
+			var userObj;
+			if (typeof(user) === "string") {
+				userObj = {user: user};
+			} else {
+				userObj = user;
+			}
+
+			return vm.userHasProjectPermissions(userObj, "admin_project");
+
+		};
+
+		vm.isTeamspaceAdmin = function(user) {
+
+			var userObj;
+			if (typeof(user) === "string") {
+				userObj = {user: user};
+			} else {
+				userObj = user;
+			}
+
+			return vm.userHasPermissions(userObj, "teamspace_admin");
+					
+
+		};
+
 
 		vm.modelUsersToAssign = function() {
 			return vm.modelRoles && Object.keys(vm.modelRoles).length === 0;
@@ -493,6 +531,16 @@
 			vm.selectedRole = {};
 		};
 
+		vm.checkIfAdminChanged = function() {
+			if (vm.selectedRole) {
+				Object.keys(vm.selectedRole).forEach(function(user){
+					if (user && (vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
+						vm.selectedRole[user] = "admin";
+					}
+				});
+			}
+		};
+
 		$scope.$watch("vm.modelSelected", function(){
 			// Find the matching project to the one selected
 			vm.modelReady = false;
@@ -517,7 +565,7 @@
 
 								// If its the teamspace then we can disable 
 								// and assign admin role
-								if (user.user === vm.account) {
+								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
 									vm.selectedRole[user.user] = "admin";
 								} else {
 									vm.selectedRole[user.user] = user.permission || "unassigned";
@@ -544,6 +592,10 @@
 
 		vm.modelStateChange = function(user, role) {
 			
+			if (vm.isTeamspaceAdmin(user)) {
+				return;
+			}
+
 			var permissionsToSend = [];
 
 			var validInput = user && role;

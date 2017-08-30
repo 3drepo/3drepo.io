@@ -66,8 +66,6 @@
 			vm.modelToUpload = null;
 			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
-			console.log(vm.model);
-
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 			if (vm.model.timestamp !== null) {
 				vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
@@ -359,12 +357,10 @@
 			
 			} else if (modelData.status === "uploading"){
 
-
 				vm.fileUploadInfo = "Uploading...";
 				
 			} else if (modelData.status === "processing"){
 
-				console.log(modelData);
 				vm.fileUploadInfo = "Processing...";
 
 			}

@@ -45,8 +45,6 @@
 		 */
 		vm.$onInit = function() {
 
-			console.log("model.component.js init")
-
 			vm.issuesCardIndex = 0;
 			vm.pointerEvents = "inherit";
 			

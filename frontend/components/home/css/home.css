@@ -23,7 +23,6 @@ home .homeContainer {
     height: 100%;
     overflow: hidden; 
     position: relative;
-    overflow-y: auto;
 }
 
 home h3 {
