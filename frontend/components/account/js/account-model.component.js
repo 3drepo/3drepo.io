@@ -60,11 +60,13 @@
 
 		vm.$onInit = function() {
 			
-			vm.infoTimeout = 4000,
+			vm.infoTimeout = 10000;
 			vm.isUserAccount = (vm.account === vm.userAccount);
 
 			vm.modelToUpload = null;
 			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
+
+			console.log(vm.model);
 
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
 			if (vm.model.timestamp !== null) {
@@ -123,7 +125,7 @@
 				var names = vm.modelToUpload.name.split(".");
 				
 				vm.uploadErrorMessage = null;
-				var extension = names[names.length - 1].toLowerCase()
+				var extension = names[names.length - 1].toLowerCase();
 				var valid = ClientConfigService.acceptedFormat.indexOf(extension) === -1;
 
 				if(names.length === 1){
@@ -307,9 +309,16 @@
 
 		};
 
+		vm.isProcessing = function() {
+			return vm.model.status === "uploading" ||
+					vm.model.status === "processing";
+		};
+
 		vm.handleModelStatus = function(modelData, freshModel) {
 
-			//console.log("notification", modelData);
+			if (modelData.status) {
+				vm.model.status = modelData.status;
+			}
 
 			if ((modelData.status === "ok") || (modelData.status === "failed")) {
 
@@ -330,25 +339,32 @@
 					// clear revisions cache
 					vm.revisions = null;
 					vm.revisionsLoading = true;
+
 				}
 
 				//status=ok can have an error message too
-				if (modelData.hasOwnProperty("errorReason") && modelData.errorReason.message) {
+				var errorReason = modelData.hasOwnProperty("errorReason") && 
+									modelData.errorReason.message;
+				var errorStatus = modelData.status === "failed";
+
+				if (errorReason) {
 					vm.fileUploadInfo = modelData.errorReason.message;
-				} else if (modelData.status === "failed") {
+				} else if (errorStatus) {
 					vm.fileUploadInfo = "Failed to import model";
 				}
 
 				// $timeout(function () {
 				// 	vm.fileUploadInfo = "";
 				// }, vm.infoTimeout);
-				
+			
 			} else if (modelData.status === "uploading"){
+
 
 				vm.fileUploadInfo = "Uploading...";
 				
 			} else if (modelData.status === "processing"){
 
+				console.log(modelData);
 				vm.fileUploadInfo = "Processing...";
 
 			}
