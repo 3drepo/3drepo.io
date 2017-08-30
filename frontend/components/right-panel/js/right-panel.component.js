@@ -94,12 +94,13 @@
          * Setup event watch
          */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
-				if (vm.addIssueMode !== null) {
-					vm.issueButtons[vm.addIssueMode].background = "";
-					vm.addIssueMode = null;
-				}
-			} else if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
+			// if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
+			// 	if (vm.addIssueMode !== null) {
+			// 		vm.issueButtons[vm.addIssueMode].background = "";
+			// 		vm.addIssueMode = null;
+			// 	}
+			// } else 
+			if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
 				if (vm.addIssueMode !== event.value) {
 					vm.issueButtons[vm.addIssueMode].background = "";
 					vm.addIssueMode = event.value;

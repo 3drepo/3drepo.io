@@ -38,9 +38,9 @@
 			controllerAs: "vm"
 		});
 
-	PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService"];
+	PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService", "PanelService"];
 
-	function PanelCtrl ($scope, $window, $timeout, EventService) {
+	function PanelCtrl ($scope, $window, $timeout, EventService, PanelService) {
 		var vm = this;
 
 		/*
@@ -62,6 +62,10 @@
 			
 			vm.resize(); // We need to set the correct height for the issues
 			vm.bindEvents();
+
+			vm.contentItems = PanelService.issuesPanelCard[vm.position];
+			vm.setupShownCards();
+			vm.hideLastItemGap();
 			
 		};
 
@@ -121,12 +125,7 @@
 		
 		$scope.$watch(EventService.currentEvent, function (event) {
 
-			if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-				console.log("PANEL_CONTENT_SETUP", event.value, vm.position );
-				vm.contentItems = event.value[vm.position];
-				vm.setupShownCards();
-				vm.hideLastItemGap();
-			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+			if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
 			} else if (event.type === EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
 

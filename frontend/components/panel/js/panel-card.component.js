@@ -45,12 +45,7 @@
 
 	function PanelCardCtrl($scope, $element, $compile, EventService) {
 
-		// TODO: Should all be encapsulated as vm.property
-		var vm = this,
-			filter = null,
-			contentHeight,
-			options = angular.element($element[0].querySelector("#options")),
-			currentHighlightedOptionIndex = -1;
+		var vm = this;
 
 		/*
 		 * Init
@@ -63,6 +58,11 @@
 			vm.showClearFilterButton = false;
 			vm.showAdd = false;
 			vm.hideMenuButton = false;
+			vm.currentHighlightedOptionIndex = -1;
+
+			angular.element(function(){
+				vm.options = angular.element($element[0].querySelector("#options"));
+			});
 			
 		};
 
@@ -71,11 +71,13 @@
 		 */
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				createCardContent();
-				createToolbarOptions();
-				createFilter();
-				//createAdd();
-				vm.statusIcon = vm.contentData.icon;
+				angular.element(function(){
+					createCardContent();
+					createToolbarOptions();
+					createFilter();
+					//createAdd();
+					vm.statusIcon = vm.contentData.icon;
+				});
 			}
 		});
 
@@ -123,8 +125,8 @@
 				toggleAdd(event.value.on);
 				// Reset option highlight if the issue add is cancelled
 				if (!event.value.on) {
-					vm.contentData.options[currentHighlightedOptionIndex].color = "";
-					currentHighlightedOptionIndex = -1;
+					vm.contentData.options[vm.currentHighlightedOptionIndex].color = "";
+					vm.currentHighlightedOptionIndex = -1;
 				}
 			} else if (
 				event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
@@ -153,8 +155,8 @@
 		 * @param height
 		 */
 		vm.onContentHeightRequest = function (height) {
-			contentHeight = height;
-			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
+			vm.contentHeight = height;
+			vm.onHeightRequest({contentItem: vm.contentData, height: vm.contentHeight});
 		};
 
 		/**
@@ -281,7 +283,7 @@
 
 					// Create the element
 					if (option !== null) {
-						options.prepend(option);
+						vm.options.prepend(option);
 						$compile(option)($scope);
 					}
 				}
@@ -328,21 +330,21 @@
 		/**
 		 * Create the add button
 		 */
-		function createAdd () {
-			// TODO: We shouldn't use string concat and angular.element
-			// definite antipattern
+		// function createAdd () {
+		// 	// TODO: We shouldn't use string concat and angular.element
+		// 	// definite antipattern
 
 
-			var panelCardContainer = angular.element($element[0].querySelector("#panelCardContainer")),
-				add;
-			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
-				add = angular.element(
-					"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
-				);
-				panelCardContainer.append(add);
-				$compile(add)($scope);
-			}
-		}
+		// 	var panelCardContainer = angular.element($element[0].querySelector("#panelCardContainer")),
+		// 		add;
+		// 	if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
+		// 		add = angular.element(
+		// 			"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
+		// 		);
+		// 		panelCardContainer.append(add);
+		// 		$compile(add)($scope);
+		// 	}
+		// }
 
 		/**
 		 * Handle adding content
@@ -375,12 +377,12 @@
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
 					if (vm.contentData.options[i].type === option) {
-						if ((currentHighlightedOptionIndex !== -1) && (currentHighlightedOptionIndex !== i)) {
-							vm.contentData.options[currentHighlightedOptionIndex].color = "";
-							currentHighlightedOptionIndex = i;
+						if ((vm.currentHighlightedOptionIndex !== -1) && (vm.currentHighlightedOptionIndex !== i)) {
+							vm.contentData.options[vm.currentHighlightedOptionIndex].color = "";
+							vm.currentHighlightedOptionIndex = i;
 							vm.contentData.options[i].color = "#FF9800";
 						} else {
-							currentHighlightedOptionIndex = i;
+							vm.currentHighlightedOptionIndex = i;
 							vm.contentData.options[i].color = "#FF9800";
 						}
 						break;

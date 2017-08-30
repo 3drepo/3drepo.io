@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "$mdDialog", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager"];
+	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "$mdDialog", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager", "PanelService"];
 
-	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, $mdDialog, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager) {
+	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, $mdDialog, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager, PanelService) {
 		var vm = this;
 
 		/*
@@ -73,134 +73,10 @@
 				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
 			});
 
-		};
 
-		vm.setupPanelCards = function() {
-
-			vm.panelCard = {
-				left: [],
-				right: []
-			};
-
-			vm.panelCard.left.push({
-				type: "issues",
-				title: "Issues",
-				show: true,
-				help: "List current issues",
-				icon: "place",
-				menu: [
-					{
-						value: "print",
-						label: "Print",
-						selected: false,
-						noToggle: true,
-						icon: "fa-print"
-					},
-					{
-						value: "exportBCF",
-						label: "Export BCF",
-						selected: false,
-						noToggle: true,
-						icon: "fa-cloud-download",
-						divider: true
-					},
-					{
-						value: "sortByDate",
-						label: "Sort by Date",
-						firstSelectedIcon: "fa-sort-amount-desc",
-						secondSelectedIcon: "fa-sort-amount-asc",
-						toggle: false,
-						selected: true,
-						firstSelected: true,
-						secondSelected: false
-					},
-					{
-						value: "showClosed",
-						label: "Show resolved issues",
-						toggle: true,
-						selected: false,
-						firstSelected: false,
-						secondSelected: false
-					},
-					{
-						value: "showSubModels",
-						label: "Show sub model issues",
-						toggle: true,
-						selected: false,
-						firstSelected: false,
-						secondSelected: false
-					},{
-						upperDivider: true,
-						label: "Created by: "
-					}
-				],
-				minHeight: 260,
-				fixedHeight: false,
-				options: [
-					{type: "menu", visible: true},
-					{type: "filter", visible: true},
-					{type: "pin", visible: false},
-					{type: "erase", visible: false},
-					{type: "scribble", visible: false}
-				],
-				add: true
-			});
-
-			vm.panelCard.left.push({
-				type: "tree",
-				title: "Tree",
-				show: false,
-				help: "Model elements shown in a tree structure",
-				icon: "device_hub",
-				minHeight: 80,
-				fixedHeight: false,
-				options: [
-					{type: "filter", visible: true}
-				]
-			});
-
-			vm.panelCard.left.push({
-				type: "clip",
-				title: "Clip",
-				show: false,
-				help: "Clipping plane",
-				icon: "crop_original",
-				fixedHeight: true,
-				options: [
-					{type: "visible", visible: true}
-				]
-			});
-
-			vm.panelCard.right.push({
-				type: "docs",
-				title: "Meta Data",
-				show: false,
-				help: "Documents",
-				icon: "content_copy",
-				minHeight: 80,
-				fixedHeight: false,
-				options: [
-					{type: "close", visible: true}
-				]
-			});
-
-			vm.panelCard.right.push({
-				type: "building",
-				title: "Building",
-				show: false,
-				help: "Building",
-				icon: "fa-cubes",
-				fixedHeight: true,
-				options: [
-				]
-			});
-
-			$timeout(function(){
-				angular.element(function(){
-					console.log("Sending PANEL_CONTENT_SETUP");
-					EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
-				});
-			});
+			// vm.issueArea = angular.element("<issue-area></issue-area>");
+			// vm.issueAreaElIssue = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
+			// vm.issueAreaElType = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 			
 		};
 
@@ -233,13 +109,15 @@
 
 		vm.setupModelInfo = function() {
 
+			var left = PanelService.issuesPanelCard.left[vm.issuesCardIndex];
+
 			ModelService.getModelInfo(vm.account, vm.model)
 				.then(function (data) {
 					vm.settings = data;
 					var index = -1;
 
 					if(!data.federate){
-						vm.panelCard.left[vm.issuesCardIndex].menu.find(function(item, i){
+						left.menu.find(function(item, i){
 							if(item.value === "showSubModels"){
 								index = i;
 							}
@@ -247,7 +125,7 @@
 						});
 
 						if(index !== -1){
-							vm.panelCard.left[vm.issuesCardIndex].menu.splice(index, 1);
+							left.menu.splice(index, 1);
 						}
 					}
 					
@@ -274,7 +152,6 @@
 		$scope.$watchGroup(["vm.account","vm.model"], function() {
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
 				angular.element(function(){
-					vm.setupPanelCards();
 					vm.setupModelInfo();
 				});
 			}
@@ -302,24 +179,28 @@
 
 			vm.event = event;
 			
-			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
-				if (event.value.on) {
-					vm.issueArea = angular.element("<issue-area></issue-area>");
-					if (event.value.hasOwnProperty("issue")) {
-						vm.issueAreaIssue = event.value.issue;
-						vm.issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
-					} else if (event.value.hasOwnProperty("type")) {
-						vm.issueAreaType = event.value.type;
-						vm.issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
-					}
-					vm.modelUI.prepend(vm.issueArea);
-					$compile(vm.issueArea)($scope);
-				} else {
-					if (angular.isDefined(vm.issueArea)) {
-						vm.issueArea.remove();
-					}
-				}
-			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+			//if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
+			// if (event.value.on) {
+				
+			// 	if (event.value.hasOwnProperty("issue")) {
+			// 		vm.issueAreaIssue = event.value.issue;
+			// 		vm.issueArea = vm.issueAreaElIssue;
+			// 	} else if (event.value.hasOwnProperty("type")) {
+			// 		vm.issueAreaType = event.value.type;
+			// 		vm.issueArea = vm.issueAreaElType;
+			// 	}
+
+			// 	vm.modelUI.prepend(vm.issueArea);
+			// 	$compile(vm.issueArea)($scope);
+
+			// } else {
+
+			// 	if (angular.isDefined(vm.issueArea)) {
+			// 		vm.issueArea.remove();
+			// 	}
+			// }
+			//} else 
+			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
