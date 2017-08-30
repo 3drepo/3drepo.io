@@ -195,8 +195,11 @@
 				]
 			});
 
-			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
-
+			$timeout(function(){
+				console.log("Sending PANEL_CONTENT_SETUP");
+				EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, vm.panelCard);
+			});
+			
 		};
 
 		/**
