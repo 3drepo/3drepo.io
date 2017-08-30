@@ -68,13 +68,11 @@
 			};
 
 			vm.projectPermissions = {
-
 				create_model : "Create Model",
 				create_federation : "Create Federation",
-				admin_project : "Admin Project",
+				delete_project : "Delete Project",
 				edit_project :  "Edit Project",
-				delete_project : "Delete Federation"
-
+				admin_project : "Admin Project"
 			};
 
 			vm.modelRoles = ["unassigned"];

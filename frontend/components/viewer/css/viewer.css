@@ -17,6 +17,11 @@ viewer .loadingViewerText {
 
 canvas.emscripten {
     position : absolute;
-    height : 100%;
-    width : 100%;
+    width: 100% !important;
+}
+
+canvas.emscripten {
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden;
 }

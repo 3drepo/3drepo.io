@@ -67,17 +67,16 @@ div.heightFix(
 					md-select(ng-model="vm.issueData.topic_type", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
-		.issueItemContainer(layout="column", layout-align="start", flex)
-			label.issuesLabel Description
+		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
 			div(layout="column", layout-align="start", flex)
 				div(ng-if="!vm.data", flex, layout="column")
 					md-input-container(flex, ng-if="!vm.hideDescription")
 						label Description
 						textarea(
-						ng-model="vm.issueData.desc"
-						ng-disabled="vm.data"
-						ng-focus="vm.textInputHasFocus(true)"
-						ng-blur="vm.textInputHasFocus(false)")
+							ng-model="vm.issueData.desc"
+							ng-disabled="vm.data"
+							ng-focus="vm.textInputHasFocus(true)"
+							ng-blur="vm.textInputHasFocus(false)")
 				#issueDescription(ng-if="vm.data", layout="column", ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
 					div(layout='row', layout-align="space-between", flex)
 						label(ng-if="!vm.editingDescription", ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}

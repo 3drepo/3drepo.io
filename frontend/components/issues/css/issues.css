@@ -69,8 +69,12 @@ issues #issuesAddButton {
   margin-right: 12px;
 }
 
+issues #issueDescriptionContainer {
+  margin-top: 0px;
+}
+
 issues #issuesContent {
-  height: 100%;
+  height: calc(100% - 75px);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -255,6 +259,13 @@ issues-list-item #issueListItemStatus {
 issue #issueAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+issue #issueFooterButtons {
+  position: absolute;
+  bottom: 0;
+  background: white;
+  width: 100%;
 }
 
 issue .issueItemContainer {
