@@ -60,7 +60,7 @@
 				teamspace_admin : "Admin",
 				// assign_licence	: "Assign Licence",
 				// revoke_licence	: "Revoke Licence",
-				create_project	: "Create Project",
+				// create_project	: "Create Project",
 				// create_job	: "Create Job",
 				// delete_job	: "Delete Job",
 				// assign_job : "Assign Job"
@@ -68,10 +68,10 @@
 			};
 
 			vm.projectPermissions = {
-				create_model : "Create Model",
-				create_federation : "Create Federation",
-				delete_project : "Delete Project",
-				edit_project :  "Edit Project",
+				// create_model : "Create Model",
+				// create_federation : "Create Federation",
+				// delete_project : "Delete Project",
+				// edit_project :  "Edit Project",
 				admin_project : "Admin Project"
 			};
 
@@ -446,10 +446,9 @@
 							targetUser.permissions.splice(index, 1);
 						}
 
-						// Move them to viewer role if we remove there admin privilidges
+						// Move them to unassigned role if we remove there admin privilidges
 						if (permission === "admin_project" && vm.modelRoles && vm.modelRoles.length > 1) {
-							// Give them the most basic role that is not unassigned
-							vm.selectedRole[user.user] = vm.modelRoles[1];
+							vm.selectedRole[user.user] = "unassigned";
 						}
 
 					} 
@@ -592,7 +591,10 @@
 
 		vm.modelStateChange = function(user, role) {
 			
-			if (vm.isTeamspaceAdmin(user)) {
+			// We don't want people to be able to set admins
+			// as it should come from a higher stage))
+			var upperAdmin = vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user);
+			if (role === "admin" || upperAdmin) {
 				return;
 			}
 

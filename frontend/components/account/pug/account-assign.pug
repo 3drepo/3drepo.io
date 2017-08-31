@@ -229,13 +229,13 @@
 									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
 
 										md-radio-group(	
-											ng-disabled="vm.account === user || vm.isTeamspaceAdmin(user)"
+											ng-disabled="value === 'admin'"
 											ng-model="vm.selectedRole[user]"
 											layout-align="center center"
 											layout="row")
 
 											md-radio-button(
-												ng-disabled="vm.account === user || vm.isTeamspaceAdmin(user)"
+												ng-disabled="value === 'admin'"
 												aria-label="{{value}}"
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
