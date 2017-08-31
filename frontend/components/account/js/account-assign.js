@@ -592,7 +592,7 @@
 		vm.modelStateChange = function(user, role) {
 			
 			// We don't want people to be able to set admins
-			// as it should come from a higher stage))
+			// as it should come from a higher priority
 			var upperAdmin = vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user);
 			if (role === "admin" || upperAdmin) {
 				return;

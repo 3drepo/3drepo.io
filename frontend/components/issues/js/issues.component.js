@@ -136,8 +136,6 @@
 				EventService.send(EventService.EVENT.VIEWER.CHECK_MODEL_LOADED);
 			});
 
-			console.log("issues.component.js initialised")
-
 		};
 
 

@@ -382,6 +382,8 @@ var UnityUtil;
 	};
 	
 	UnityUtil.prototype.reset = function() {
+		this.disableMeasuringTool();
+		this.disableClippingPlanes();
 		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
 	};
 

@@ -248,6 +248,7 @@
 		};
 
 		vm.home = function () {
+			UnityUtil.reset();
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
