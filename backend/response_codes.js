@@ -21,7 +21,7 @@
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
-	const utils = require('./utils');
+	const utils = require("./utils");
 
 	/**
 	 * List of response and error codes
@@ -218,18 +218,18 @@
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
 
-		JOB_NOT_FOUND:{ message: 'Job not found', status: 404},
-		DUP_JOB: {message: 'Duplicate job id', status: 400},
-		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
-		JOB_ID_VALID: { message: 'Invalid job ID', status: 400},
-		DUP_PERM_TEMPLATE: {message: 'Duplicate template ID', status: 400},
-		PERM_NOT_FOUND: {message: 'Permission template not found', status: 404},
-		INVALID_PERM: {message: 'Invalid permission', status: 400},
+		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
+		DUP_JOB: {message: "Duplicate job id", status: 400},
+		JOB_ASSIGNED: {message: "Cannot remove assigned job", status: 400},
+		JOB_ID_VALID: { message: "Invalid job ID", status: 400},
+		DUP_PERM_TEMPLATE: {message: "Duplicate template ID", status: 400},
+		PERM_NOT_FOUND: {message: "Permission template not found", status: 404},
+		INVALID_PERM: {message: "Invalid permission", status: 400},
 		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
-		DUP_ACCOUNT_PERM: { message: 'Duplicate account permission', status: 400},
-		ACCOUNT_PERM_NOT_FOUND: { message: 'Account permission not found', status: 404},
-		ACCOUNT_PERM_EMPTY: { message: 'Cannot add empty permissions', status: 404},
-		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: 'Admin permission template cannot be changed or deleted', status: 400}
+		DUP_ACCOUNT_PERM: { message: "Duplicate account permission", status: 400},
+		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404},
+		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
+		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400}
 
 	};
 
@@ -324,6 +324,7 @@
 			return {
 				value: 4000,
 				message: "Internal Error",
+				system_message: message,
 				status: 500
 			};
 		}
@@ -427,12 +428,12 @@
 		let length = 0;
 
 		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
-		readStream.on('end', () => {
+		readStream.on("end", () => {
 			res.end();
 			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { httpCode: responseCodes.OK.status, contentLength: length });
 		});
 
-		readStream.on('data', data => {
+		readStream.on("data", data => {
 			res.write(data);
 			length += data.length;
 		});

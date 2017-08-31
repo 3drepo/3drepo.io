@@ -578,6 +578,7 @@
 					vm.deleteError = "Error deleting model";
 					if (response.data.message) {
 						vm.deleteError = "Error: " + response.data.message;
+						console.error("Deleting model error: ", response);
 					} 
 				}
 			});
