@@ -29,6 +29,11 @@ gulp.task("test:integrated", function(){
 
 gulp.task("test:unit", function(){
 
+    env.set({
+        NODE_ENV: "test",
+        NODE_CONFIG_DIR: "../config/"
+    });
+
     gulp.src("./test/unit/**/*.js")
         .pipe(mocha({reporter: "spec"}))
         .once("error", () => {
@@ -41,7 +46,7 @@ gulp.task("test:unit", function(){
 });
 
 gulp.task("test:lint", function(){
-    return gulp.src(["./**/*.js","!node_modules/**", "!gulpfile.js", "doc/**" ])
+    return gulp.src(["./**/*.js","!node_modules/**", "!gulpfile.js", "!doc/**" ])
         // eslint() attaches the lint output to the "eslint" property 
         // of the file object so it can be used by other modules. 
         .pipe(eslint())
