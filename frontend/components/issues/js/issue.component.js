@@ -69,6 +69,15 @@
 			vm.savedDescription;
 			vm.savedComment;
 
+			vm.reasonCommentText = "Comment requires text";
+			vm.reasonTitleText = "Issue requires name";
+
+			if (vm.data) {
+				vm.disabledReason = vm.reasonCommentText;
+			} else {
+				vm.reasonTitleText = "Issue requires name";
+			}
+			
 			vm.issueProgressInfo = "Loading Issue...";
 			vm.textInputHasFocusFlag = false;
 			vm.hideDescription = false;
@@ -101,7 +110,11 @@
 					icon: "camera_alt", 
 					label: "Screen shot", 
 					disabled: function() { 
-						return vm.submitDisabled; 
+						if (!vm.data) {
+							return vm.submitDisabled;
+						} else {
+							return false;
+						}
 					}, 
 					visible: function() { 
 						return true; 
@@ -321,7 +334,11 @@
 		 * Disable the save button for a new issue if there is no name
 		 */
 		vm.nameChange = function () {
+			
 			vm.submitDisabled = !vm.issueData.name;
+			if (!vm.submitDisabled) {
+				vm.disabledReason = vm.reasonTitleText;
+			}
 		};
 
 		/**
@@ -329,6 +346,9 @@
 		 */
 		vm.commentChange = function () {
 			vm.submitDisabled = (vm.data && !vm.comment);
+			if (!vm.submitDisabled) {
+				vm.disabledReason = vm.reasonCommentText;
+			}
 		};
 
 		/**

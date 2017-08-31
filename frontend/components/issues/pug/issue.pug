@@ -209,6 +209,8 @@ div.heightFix(
 
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
+		
+		span(ng-if="vm.submitDisabled" style="color: #9e9e9e;") {{ vm.disabledReason }}
 
 		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
 			md-tooltip(md-direction="bottom") Submit
