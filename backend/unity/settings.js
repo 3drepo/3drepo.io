@@ -1,6 +1,5 @@
-var Module = {
+module.exports.UNITY_SETTINGS = {
 	TOTAL_MEMORY: 2130706432,
-	errorhandler: UnityUtil.onError,
 	compatibilitycheck: null,
 	backgroundColor: "#222C36",
 	splashStyle: "Light",
