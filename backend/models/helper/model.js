@@ -974,7 +974,6 @@ function listSubModels(account, model, branch){
 
 	return History.findByBranch({ account, model }, branch).then(history => {
 
-
 		if(history){
 			let filter = {
 				type: "ref",
@@ -986,18 +985,20 @@ function listSubModels(account, model, branch){
 			return [];
 		}
 
-
 	}).then(refs => {
-
 
 		const proms = refs.map(ref => 
 
-			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(model => {
-				subModels.push({
-					database: ref.owner,
-					model: ref.project,
-					name: model.name
-				});
+			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
+				// TODO: Why would this return null?
+				if (subModel) {
+					subModels.push({
+						database: ref.owner,
+						model: ref.project,
+						name: subModel.name
+					});
+				}
+				
 			})
 
 		);
@@ -1291,7 +1292,7 @@ function removeModel(account, model, forceRemove){
 
 		settings.forEach(modelSetting => {
 			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				if(subModels.find(subModel => subModel.model === model)){
+				if(subModels.find(subModel => subModel.model === model)) {
 					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
 				}
 			}));

@@ -179,7 +179,6 @@
 				} else if (vm.initialisedPromise)  {
 
 					vm.initialisedPromise.promise.then(function() {
-						console.log("select - vm.initialisedPromise", event);
 
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
 							vm.viewer.showAll();
