@@ -514,12 +514,12 @@
 						desc: vm.issueData.desc
 					};
 					IssuesService.updateIssue(vm.issueData, data)
-						.then(function (data) {
+						.then(function (issueData) {
 							IssuesService.updatedIssue = vm.issueData;
 							vm.savedDescription = vm.issueData.desc;
 
 							// Add info for new comment
-							var comment = data.data.issue.comments[data.data.issue.comments.length - 1];
+							var comment = data.data.issue.comments[issueData.data.issue.comments.length - 1];
 							IssuesService.convertActionCommentToText(comment, vm.topic_types);
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 							vm.issueData.comments.push(comment);
@@ -594,16 +594,7 @@
 
 				if (objectInfo.highlightedNodes.length > 0) {
 					// Create a group of selected objects
-
-					var sendData = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-					UtilsService.doPost(sendData, vm.account + "/" + vm.model + "/groups")
-						.then(function (response) {
-							vm.doSaveIssue(viewpoint, vm.savedScreenShot, response.data._id);
-						})
-						.catch(function(error) {
-							console.error("Error saving issue: ", error);
-						});
-
+					vm.createGroup(viewpoint, vm.savedScreenShot, objectInfo);
 				} else {
 					vm.doSaveIssue(viewpoint, vm.savedScreenShot);
 				}
@@ -617,13 +608,7 @@
 
 				screenShotPromise.promise.then(function (screenShot) {
 					if (objectInfo.highlightedNodes.length > 0) {
-						// Create a group of selected objects
-						var groupData = {name: vm.issueData.name, color: [255, 0, 0], objects: objectInfo.highlightedNodes};
-						UtilsService.doPost(groupData, vm.account + "/" + vm.model + "/groups").then(function (response) {
-							vm.doSaveIssue(viewpoint, screenShot, response.data._id);
-						}).catch(function(error){
-							console.error(error);
-						})
+						vm.createGroup(viewpoint, screenShot, objectInfo);
 					} else {
 						vm.doSaveIssue(viewpoint, screenShot);
 					}
@@ -634,6 +619,23 @@
 			}
 		}
 
+		vm.createGroup = function(viewpoint, screenShot, objectInfo) {
+			// Create a group of selected objects
+			var groupData = {
+				name: vm.issueData.name, 
+				color: [255, 0, 0], 
+				objects: objectInfo.highlightedNodes
+			};
+
+			UtilsService.doPost(groupData, vm.account + "/" + vm.model + "/groups")
+				.then(function (response) {
+					vm.doSaveIssue(viewpoint, screenShot, response.data._id);
+				}).catch(function(error){
+					console.error(error);
+				});
+		};
+
+
 		/**
 		 * Send new issue data to server
 		 * @param viewpoint
@@ -641,14 +643,13 @@
 		 * @param groupId
 		 */
 		vm.doSaveIssue = function(viewpoint, screenShot, groupId) {
-			var	issue;
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
 			viewpoint.screenshot = screenShot;
 
 			// Save issue
-			issue = {
+			var issue = {
 				account: vm.account,
 				model: vm.model,
 				objectId: null,
@@ -693,7 +694,7 @@
 					vm.issueCreated({issue: vm.issueData});
 
 					// Hide some actions
-					EventService.send(EventService.EVENT.PIN_DROP_MODE, "saveIssue");
+					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
 
 					vm.submitDisabled = true;
 					vm.setContentHeight();
@@ -766,8 +767,8 @@
 		function afterNewComment(comment, noDeleteInput) {
 
 			// mark all other comments sealed
-			vm.issueData.comments.forEach(function(comment){
-				comment.sealed = true;
+			vm.issueData.comments.forEach(function(otherComment){
+				otherComment.sealed = true;
 			});
 
 			if(comment.owner !== AuthService.getUsername()){
@@ -816,7 +817,7 @@
 		vm.deleteComment = function(event, index) {
 			event.stopPropagation();
 			IssuesService.deleteComment(vm.issueData, index)
-				.then(function(response) {
+				.then(function() {
 					vm.issueData.comments.splice(index, 1);
 				});
 			AnalyticService.sendEvent({
@@ -1029,8 +1030,8 @@
 				*/
 				NotificationService.subscribe.commentChanged(vm.data.account, vm.data.model, vm.data._id, function(newComment){
 
-					var comment = vm.issueData.comments.find(function(comment){
-						return comment.guid === newComment.guid;
+					var comment = vm.issueData.comments.find(function(oldComment){
+						return oldComment.guid === newComment.guid;
 					});
 
 					comment.comment = newComment.comment;

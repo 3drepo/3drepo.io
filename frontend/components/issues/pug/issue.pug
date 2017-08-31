@@ -70,7 +70,7 @@ div.heightFix(
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
 			div(layout="column", layout-align="start", flex)
 				div(ng-if="!vm.data", flex, layout="column")
-					md-input-container(flex, ng-if="!vm.hideDescription")
+					md-input-container#descriptionText(ng-if="!vm.hideDescription")
 						label Description
 						textarea(
 							ng-model="vm.issueData.desc"
