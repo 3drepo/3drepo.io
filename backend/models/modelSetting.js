@@ -15,20 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var responseCodes = require('../response_codes.js');
-var _ = require('lodash');
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const responseCodes = require("../response_codes.js");
+const _ = require("lodash");
 
-var schema = mongoose.Schema({
+const schema = mongoose.Schema({
 	_id : String,
 	name: String, // model name
 	owner: String,
 	users: [String],
 	desc: String,
 	type: String,
-	status: {type: String, default: 'ok'},
+	status: {type: String, default: "ok"},
 	errorReason: Object,
 	federate: Boolean,
 	permissions: [{
@@ -72,25 +73,28 @@ schema.statics.defaultTopicTypes = [
 	{value: "vr", label: "VR"}
 ];
 
-schema.path('properties.topicTypes').get(function(v) {
+schema.path("properties.topicTypes").get(function(v) {
+	// TODO: Why would this be undefined?
+	if (!v) {
+		v = [];
+	}
 	return v.length === 0 ? schema.statics.defaultTopicTypes : v;
 });
 
-schema.set('toObject', { getters: true });
+schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 
 schema.methods.updateProperties = function(updateObj){
-	'use strict';
 
 	Object.keys(updateObj).forEach(key => {
 
-		if(key === 'code' && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
+		if(key === "code" && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
 			throw responseCodes.INVALID_MODEL_CODE;
 		}
 
-		if(key === 'topicTypes'){
+		if(key === "topicTypes"){
 			
 			let topicTypes = {};
 			updateObj[key].forEach(type => {
@@ -100,7 +104,7 @@ schema.methods.updateProperties = function(updateObj){
 				}
 				
 				//generate value from label
-				let value = type.trim().toLowerCase().replace(/ /g, '_');
+				let value = type.trim().toLowerCase().replace(/ /g, "_");
 				
 				if(topicTypes[value]){
 					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
@@ -122,13 +126,12 @@ schema.methods.updateProperties = function(updateObj){
 };
 
 schema.methods.changePermissions = function(permissions){
-	'use strict';
 
-	const User = require('./user');
+	const User = require("./user");
 	const account = this._dbcolOptions.account;
 
 	//get list of valid permission name
-	permissions = _.uniq(permissions, 'user');
+	permissions = _.uniq(permissions, "user");
 	
 	return User.findByUserName(account).then(dbUser => {
 
@@ -187,9 +190,8 @@ schema.methods.findPermissionByUser = function(username){
 };
 
 schema.statics.populateUsers = function(account, permissions){
-	'user strict';
 
-	const User = require('./user');
+	const User = require("./user");
 
 	return User.findByUserName(account).then(user => {
 
@@ -209,11 +211,11 @@ schema.statics.populateUsers = function(account, permissions){
 
 };
 
-var ModelSetting = ModelFactory.createClass(
-	'ModelSetting',
+const ModelSetting = ModelFactory.createClass(
+	"ModelSetting",
 	schema,
 	() => {
-		return 'settings';
+		return "settings";
 	}
 );
 

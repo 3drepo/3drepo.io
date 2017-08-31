@@ -1,6 +1,8 @@
 {
   "env": {
-    "browser": true
+    "browser": false,
+    "node" : true,
+    "es6" : true
   },
   "globals": {
     "console": false,
@@ -15,6 +17,7 @@
   "plugins": ["node"],
   "extends": ["eslint:recommended", "plugin:node/recommended"],
   "rules": {
+    "eslint strict": ["error", "global"],
     "no-bitwise": 2,
     "curly": 2,
     "eqeqeq": 2,
