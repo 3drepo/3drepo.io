@@ -75,7 +75,7 @@
 			if (vm.data) {
 				vm.disabledReason = vm.reasonCommentText;
 			} else {
-				vm.reasonTitleText = "Issue requires name";
+				vm.disabledReason = vm.reasonTitleText;
 			}
 			
 			vm.issueProgressInfo = "Loading Issue...";
@@ -729,7 +729,9 @@
 						issue: vm.data._id,
 						noSet: true
 					};
-
+					
+					vm.disabledReason = vm.reasonCommentText;
+					
 					$state.go(
 						"home.account.model.issue",
 						issueState , 

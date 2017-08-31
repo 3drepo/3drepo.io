@@ -97,12 +97,12 @@ div.heightFix(
 					ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
 					img.issueThumbnailImage(ng-src="{{vm.descriptionThumbnail}}")
 
-	md-divider
-
-	#descriptionAndComments(flex)
+	
+	#descriptionAndComments(flex, , ng-if="vm.issueData.comments.length > 0")
+		md-divider
 
 		// Comments
-		.issueItemContainer(layout="column", layout-align="start", flex, ng-if="vm.issueData.comments.length>0")
+		.issueItemContainer(layout="column", layout-align="start", flex)
 			label.issuesLabel Comments
 			div(ng-repeat="comment in vm.issueData.comments", layout="column", layout-align="start", flex)
 				div(ng-click="vm.showViewpoint($event, comment.viewpoint)"
