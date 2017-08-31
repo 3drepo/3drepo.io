@@ -90,12 +90,8 @@
 
 				} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
 
-					if (event.value === "saveIssue") {
-						vm.pinDropMode = false;
-					} else {
-						vm.pinDropMode = event.value;
-					}
-				
+					vm.pinDropMode = event.value;
+					
 				}
 			}
 

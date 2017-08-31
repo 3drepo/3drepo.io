@@ -1,5 +1,16 @@
 (() => {
     "use strict";
+
+    const defaultUnitySettings = {
+        TOTAL_MEMORY: 2130706432,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    };
     
     const _ = require("lodash");
     const fs = require("fs");
@@ -14,7 +25,7 @@
     const config = require("../config.js");
     const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
     const C = require("../constants");
-
+    const UNITY_SETTINGS = require("../unity/settings.js").UNITY_SETTINGS || defaultUnitySettings;
 
     /**
      * Get the pug files for the required state or plugin
@@ -121,8 +132,8 @@
 			for (let i = 0; i < config.legal.length; i += 1) {
 				pluginStructure.functions.push(config.legal[i].page);
 			}
-		}
-
+        }
+        
         let clientConfig = {
             "pluginLoaded": [],
             "pluginPug": [],
@@ -138,7 +149,8 @@
             "gaTrackId": config.gaTrackId,
             "development" : config.development,
             "googleConversionId": config.googleConversionId,
-            "userNotice" : config.userNotice
+            "userNotice" : config.userNotice,
+            "unitySettings" : UNITY_SETTINGS
         };
 
         if (req) {
