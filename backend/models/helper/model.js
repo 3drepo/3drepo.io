@@ -14,29 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var ModelFactory = require('../factory/modelFactory');
-var ModelSetting = require('../modelSetting');
-var User = require('../user');
-var responseCodes = require('../../response_codes');
-var importQueue = require('../../services/queue');
-var C = require('../../constants');
-var Mailer = require('../../mailer/mailer');
-var systemLogger = require("../../logger.js").systemLogger;
-var config = require('../../config');
-var History = require('../history');
-var Scene = require('../scene');
-var Ref = require('../ref');
-var utils = require("../../utils");
-var stash = require('./stash');
-var Ref = require('../ref');
-var middlewares = require('../../middlewares/middlewares');
-var C = require("../../constants");
-var multer = require("multer");
-var fs = require('fs');
-var ChatEvent = require('../chatEvent');
-var Project = require('../project');
+
+"use strict";
+
+const ModelFactory = require('../factory/modelFactory');
+const ModelSetting = require('../modelSetting');
+const User = require('../user');
+const responseCodes = require('../../response_codes');
+const importQueue = require('../../services/queue');
+const C = require('../../constants');
+const Mailer = require('../../mailer/mailer');
+const systemLogger = require("../../logger.js").systemLogger;
+const config = require('../../config');
+const History = require('../history');
+const Scene = require('../scene');
+const Ref = require('../ref');
+const utils = require("../../utils");
+const stash = require('./stash');
+const middlewares = require('../../middlewares/middlewares');
+const multer = require("multer");
+const fs = require('fs');
+const ChatEvent = require('../chatEvent');
+const Project = require('../project');
 const stream = require('stream');
-var _ = require('lodash');
+const _ = require('lodash');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -44,39 +45,39 @@ var _ = require('lodash');
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
 
-    var errObj;
+	let errObj;
 
-    switch (bouncerErrorCode) {
-        case 0:
-            errObj = responseCodes.OK;
-            break;
-        case 1:
-            errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
-            break;
-        case 2:
-            errObj = responseCodes.NOT_AUTHORIZED;
-            break;
-        case 3:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-            break;
-        case 4:
-        	errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-        	break;
-        case 5:
-            errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
+	switch (bouncerErrorCode) {
+		case 0:
+			errObj = responseCodes.OK;
 			break;
-        case 6:
-            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+		case 1:
+			errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
 			break;
-        case 7:
-            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-            break;
-        case 8:
-        	errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-        	break;
-        case 9:
-        	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
-        	break;
+		case 2:
+			errObj = responseCodes.NOT_AUTHORIZED;
+			break;
+		case 3:
+			errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+			break;
+		case 4:
+			errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			break;
+		case 5:
+			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
+			break;
+		case 6:
+			errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+		case 7:
+			errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
+			break;
+		case 8:
+			errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+			break;
+		case 9:
+			errObj = responseCodes.REPOERR_FED_GEN_FAIL;
+			break;
 		case 10:
 			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
 			break;
@@ -96,17 +97,17 @@ function convertToErrorCode(bouncerErrorCode){
 			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
 			break;
 		default:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-            break;
+			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			break;
 
-    }
-    
-    return Object.assign({bouncerErrorCode}, errObj);
+	}
+	
+	return Object.assign({bouncerErrorCode}, errObj);
 }
 
 
 function createAndAssignRole(modelName, account, username, data) {
-	'use strict';
+	
 
 	let project;
 	//generate model id
@@ -243,7 +244,7 @@ function createAndAssignRole(modelName, account, username, data) {
 }
 
 function importToyProject(account, username){
-	'use strict';
+	
 	// create a project named Sample_Project
 	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
@@ -272,17 +273,17 @@ function importToyProject(account, username){
 	}).catch(err => {
 
 		Mailer.sendImportError({
- 			account,
- 			username,
- 			err: err.message
- 		});
+			account,
+			username,
+			err: err.message
+		});
 
 		return Promise.reject(err);
 	});
 }
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip){
-	'use strict';
+	
 
 	let model;
 	let desc = '';
@@ -303,20 +304,20 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	}).catch(err => {
 
 		Mailer.sendImportError({
- 			account,
- 			model,
- 			username,
- 			err: err.message,
- 			corID: err.corID,
- 			appId: err.appId
- 		});
+			account,
+			model,
+			username,
+			err: err.message,
+			corID: err.corID,
+			appId: err.appId
+		});
 
 		return Promise.reject(err);
 	});
 }
 
 function createFederatedModel(account, model, subModels){
-	'use strict';
+	
 
 	let federatedJSON = {
 		database: account,
@@ -387,7 +388,7 @@ function createFederatedModel(account, model, subModels){
 }
 
 function getModelProperties(account, model, branch, rev, username){
-	'use strict';
+	
 
 	let subProperties;
 	let revId, modelPropertiesFileName;
@@ -488,7 +489,7 @@ function getModelProperties(account, model, branch, rev, username){
 }
 
 function getUnityAssets(account, model, branch, rev, username){
-	'use strict';
+	
 
 	let subAssets;
 	let revId, assetsFileName;
@@ -581,7 +582,7 @@ function getUnityAssets(account, model, branch, rev, username){
 }
 
 function getUnityBundle(account, model, uid){
-	'use strict';
+	
 
 	let bundleFileName;
 
@@ -602,7 +603,7 @@ function getUnityBundle(account, model, uid){
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
 function getFullTree_noSubTree(account, model, branch, rev){
-	'use strict';
+	
 
 	let getHistory;
 	let history;
@@ -727,159 +728,8 @@ function getFullTree_noSubTree(account, model, branch, rev){
 	return {readStreamPromise, outputingPromise};
 }
 
-// more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
-// function getFullTree(account, model, branch, rev, username, out){
-// 	'use strict';
-
-// 	let getHistory;
-// 	let history;
-// 	//let trees = {};
-// 	out.write("{");
-
-// 	if(rev && utils.isUUID(rev)){
-
-// 		getHistory = History.findByUID({ account, model }, rev);
-
-// 	} else if (rev && !utils.isUUID(rev)) {
-
-// 		getHistory = History.findByTag({ account, model }, rev);
-
-// 	} else if (branch) {
-
-// 		getHistory = History.findByBranch({ account, model }, branch);
-// 	}
-
-// 	return getHistory.then(_history => {
-
-// 		history = _history;
-
-// 		if(!history){
-// 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-// 		}
-
-// 		let revId = utils.uuidToString(history._id);
-// 		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
-
-// 		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-// 		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
-
-// 	}).then(rs => {
-
-// 		//trees.mainTree = buf.toString();
-
-// 		return new Promise(function(resolve, reject){
-
-// 			out.write('"mainTree": ');
-
-// 			rs.on('data', d => out.write(d));
-// 			rs.on('end', ()=> resolve());
-// 			rs.on('error', err => reject(err));
-
-// 		});
-
-// 	}).then(() => {
-// 		let filter = {
-// 			type: "ref",
-// 			_id: { $in: history.current }
-// 		};
-
-// 		return Ref.find({ account, model }, filter);
-
-// 	}).then(refs => {
-
-// 		//for all refs get their tree
-// 		out.write(', "subTrees":[');
-
-// 		return new Promise((resolve, reject) => {
-
-// 			function eachRef(refIndex){
-
-// 				const ref = refs[refIndex];
-// 				//write buffer
-// 				//done
-// 				let getRefId;
-
-// 				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-
-// 					getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
-// 						return _history ? utils.uuidToString(_history._id) : null;
-// 					});
-
-// 				} else {
-// 					getRefId = Promise.resolve(utils.uuidToString(ref._rid));
-// 				}
-
-// 				let status;
-// 				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
-
-// 					if(!granted){
-// 						status = 'NO_ACCESS';
-// 						return;
-// 					}
-
-// 					return getRefId.then(revId => {
-
-// 						if(!revId){
-// 							status = 'NOT_FOUND';
-// 							return;
-// 						}
-
-// 						let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-// 						//return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
-// 						return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName, true);
-// 					});
-
-// 				}).then(rs => {
-
-// 					return new Promise(function(_resolve, _reject){
-
-// 						if(refIndex > 0){
-// 							out.write(",");
-// 						}
-
-// 						let statusString = status && `"status": "${status}" ,` || '';
-
-// 						out.write(`{ ${statusString} "_id": "${utils.uuidToString(ref._id)}", "buf": `);
-
-// 						rs.on('data', d => out.write(d));
-// 						rs.on('end', () => {
-// 							out.write('}');
-// 							_resolve();
-// 						});
-// 						rs.on('error', err => _reject(err));
-
-// 					});
-
-// 				}).then(() => {
-// 					if(refIndex+1 < refs.length){
-// 						eachRef(refIndex+1);
-// 					} else {
-// 						resolve();
-// 					}
-// 				}).catch(err => {
-// 					reject(err);
-// 				});
-// 			}
-
-// 			if(refs.length){
-// 				eachRef(0);
-// 			} else {
-// 				resolve();
-// 			}
-// 		});
-
-
-// 	}).then(() => {
-
-// 		out.write(']');
-// 		out.write("}");
-// 		out.end();
-
-// 	});
-// }
-
 function searchTree(account, model, branch, rev, searchString, username){
-	'use strict';
+	
 
 	let items = [];
 
@@ -968,7 +818,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 }
 
 function listSubModels(account, model, branch){
-	'use strict';
+	
 
 	let subModels = [];
 
@@ -1010,8 +860,7 @@ function listSubModels(account, model, branch){
 
 
 function downloadLatest(account, model){
-	'use strict';
-
+	
 	let bucket =  stash.getGridFSBucket(account, `${model}.history`);
 
 	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
@@ -1040,8 +889,7 @@ function downloadLatest(account, model){
 
 
 function uploadFile(req){
-	'use strict';
-
+	
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -1123,8 +971,7 @@ function uploadFile(req){
 }
 
 function _deleteFiles(files){
-	'use strict';
-
+	
 	files.forEach(file => {
 
 		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
@@ -1146,7 +993,7 @@ function _deleteFiles(files){
 }
 
 function _handleUpload(account, model, username, file, data){
-	'use strict';
+	
 
 
 	let files = function(filePath, fileDir, jsonFile){
@@ -1187,8 +1034,7 @@ function _handleUpload(account, model, username, file, data){
 }
 
 function importModel(account, model, username, modelSetting, source, data){
-	'use strict';
-
+	
 	if(!modelSetting){
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
@@ -1248,17 +1094,6 @@ function importModel(account, model, username, modelSetting, source, data){
 			username
 		});
 
-		//moved to bouncer
-		// const partialOKCodes = [
-		// 	responseCodes.FILE_IMPORT_MISSING_TEXTURES.value,
-		// 	responseCodes.FILE_IMPORT_MISSING_NODES.value,
-		// 	responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES.value
-		// ];
-
-		// if(err && err.bouncerErrorCode && partialOKCodes.indexOf(err.value) !== -1){
-		// 	modelSetting.timestamp = new Date();
-		// }
-
 		modelSetting.status = 'failed';
 		modelSetting.errorReason = err;
 		modelSetting.markModified('errorReason');
@@ -1273,7 +1108,7 @@ function importModel(account, model, username, modelSetting, source, data){
 }
 
 function removeModel(account, model, forceRemove){
-	'use strict';
+	
 
 	let setting;
 	return ModelSetting.findById({account, model}, model).then(_setting => {
@@ -1330,7 +1165,7 @@ function removeModel(account, model, forceRemove){
 }
 
 function getModelPermission(username, setting, account){
-	'use strict';
+	
 
 	if(!setting){
 		return Promise.resolve([]);
@@ -1361,7 +1196,7 @@ function getModelPermission(username, setting, account){
 
 		if(project && project.permissions){
 			permissions = permissions.concat(
-				 _.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
+				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
 			);
 		}
 
@@ -1383,7 +1218,7 @@ function getModelPermission(username, setting, account){
 }
 
 function getMetadata(account, model, id){
-	'use strict';
+	
 
 	let projection = {
 		shared_id: 0,
@@ -1403,9 +1238,9 @@ function getMetadata(account, model, id){
 
 }
 
-var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
-var acceptedFormat = [
+const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+const modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
+const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
 	'stl','lxo','nff','raw','off','ac',
@@ -1422,7 +1257,6 @@ module.exports = {
 	importToyProject,
 	createFederatedModel,
 	listSubModels,
-	// getFullTree,
 	getModelProperties,
 	getUnityAssets,
 	getUnityBundle,
