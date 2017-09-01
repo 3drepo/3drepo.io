@@ -39,13 +39,14 @@ function AnalyticService(ClientConfigService){
 	function init() {
 
 		if (ClientConfigService.development) {
-			console.debug("Development - Not loading Google Analyitics or remarketing")
+			console.debug("Development - Not loading Google Analyitics or remarketing");
 		}
 
 		if (ClientConfigService && 
 			!ClientConfigService.development && 
 			ClientConfigService.gaTrackId
 		) {
+			console.debug("Adding Google Analytics and Remarketing");
 			insertGA();
 			insertRemarketing();
 		}
