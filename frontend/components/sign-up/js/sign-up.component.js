@@ -95,13 +95,12 @@
 				if (ClientConfigService.captcha_client_key) {
 					vm.captchaKey = ClientConfigService.captcha_client_key;
 					vm.useReCAPTCHA = true;
-					console.log(vm.useReCAPTCHA)
 				} else {
-					console.log("Captcha key is not set in config");
+					console.debug("Captcha key is not set in config");
 				}
 				
 			} else {
-				console.log("Captcha is not set in config");
+				console.debug("Captcha is not set in config");
 			}
 			
 
