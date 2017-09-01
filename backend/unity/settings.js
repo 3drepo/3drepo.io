@@ -1,5 +1,5 @@
 module.exports.UNITY_SETTINGS = {
-	TOTAL_MEMORY: 2130706432 / 5,
+	TOTAL_MEMORY: 2130706432,
 	compatibilitycheck: null,
 	backgroundColor: "#222C36",
 	splashStyle: "Light",
