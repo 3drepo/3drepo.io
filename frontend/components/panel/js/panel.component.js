@@ -232,20 +232,22 @@
 			if (Array.isArray(previousContentItems) && (previousContentItems.length === contentItems.length)) {
 				// End the recurse by dividing out the remaining space to remaining content
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
-					contentItem = vm.getContentItemShownFromType(contentItems[i].type);
-					// Flexible content shouldn't have a size smaller than its minHeight
-					// or a requested height that is less than the minHeight
-					if (maxContentItemHeight < contentItem.minHeight) {
-						if (contentItem.requestedHeight < contentItem.minHeight) {
-							contentItem.height = contentItem.requestedHeight;
+					if (contentItems[i] && contentItems[i].type) {
+						contentItem = vm.getContentItemShownFromType(contentItems[i].type);
+						// Flexible content shouldn't have a size smaller than its minHeight
+						// or a requested height that is less than the minHeight
+						if (maxContentItemHeight < contentItem.minHeight) {
+							if (contentItem.requestedHeight < contentItem.minHeight) {
+								contentItem.height = contentItem.requestedHeight;
+							} else {
+								contentItem.height = contentItem.minHeight;
+								availableHeight -= contentItem.height + vm.panelToolbarHeight + vm.itemGap;
+								contentItems.splice(i, 1);
+								assignHeights(availableHeight, contentItems, prev);
+							}
 						} else {
-							contentItem.height = contentItem.minHeight;
-							availableHeight -= contentItem.height + vm.panelToolbarHeight + vm.itemGap;
-							contentItems.splice(i, 1);
-							assignHeights(availableHeight, contentItems, prev);
+							contentItem.height = maxContentItemHeight;
 						}
-					} else {
-						contentItem.height = maxContentItemHeight;
 					}
 				}
 			} else {
