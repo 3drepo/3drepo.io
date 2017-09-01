@@ -177,8 +177,15 @@
 				});
 			}])
 		.service("StateManager", 
-			["$mdDialog", "$location", "$q", "$state", "$rootScope", "$timeout", "EventService", "$window", "AuthService", "ClientConfigService", 
-				function($mdDialog, $location, $q, $state, $rootScope, $timeout, EventService, $window, AuthService, ClientConfigService) {
+			[
+				"$mdDialog", "$location", "$q", "$state", "$rootScope",
+				"$timeout", "EventService", "$window", "AuthService",
+				"ClientConfigService", "ViewerService",
+				function(
+					$mdDialog, $location, $q, $state, $rootScope, 
+					$timeout, EventService, $window, AuthService, 
+					ClientConfigService, ViewerService
+				) {
 							
 					var self = this;
 
@@ -497,7 +504,7 @@
 
 							).then(function() {
 								$location.path(account);
-								UnityUtil.reset();
+								ViewerService.reset();
 							}, function() {
 								
 							});

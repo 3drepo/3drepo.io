@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+"use strict";
 (() => {
-	"use strict";
 
 	const VERSION = require("./VERSION.json").VERSION;
 
@@ -227,6 +226,18 @@
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 	config.userNotice = coalesce(config.userNotice, "");
+
+	// Settings for Unity
+	config.unitySettings = coalesce(config.unitySettings, {
+        TOTAL_MEMORY: 2130706432,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    });
 
 	//default vat validation url
 	config.vat = coalesce(config.vat, {});
