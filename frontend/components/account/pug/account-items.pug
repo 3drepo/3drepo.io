@@ -19,7 +19,7 @@
 				div( layout="column")
 					// Project
 					
-					div(ng-show="vm.shouldShow(account.projects, 'projects', account)")
+					div(ng-show="vm.shouldShow(account.projects, 'projects', account.account)")
 						p.no-federations(ng-show="account.projects.length === 0") No projects created
 
 						md-list.tree-branch(ng-repeat="project in account.projects")
@@ -50,7 +50,7 @@
 														style="color:{{value.color}}") {{value.icon}}
 
 							// Project Models and Federations
-							md-list.tree-branch(ng-show="vm.shouldShow(project, 'project', account)")
+							md-list.tree-branch(ng-show="vm.shouldShow(project, 'project', account.account)")
 
 								div(ng-click="vm.toggleModels(project)")
 									md-list-item.tree-node(flex)
@@ -59,7 +59,7 @@
 											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'models')") folder
 										p Models
 								
-								div(ng-show="vm.shouldShow(project, 'models', account)")
+								div(ng-show="vm.shouldShow(project, 'models', account.account)")
 									div(ng-repeat="model in vm.getIndividualModels(project.models)"
 										ng-show="model.name")
 								
@@ -87,7 +87,7 @@
 											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'federations')") folder
 										p Federations
 									
-								div(ng-show="vm.shouldShow(project, 'federations', account)")
+								div(ng-show="vm.shouldShow(project, 'federations', account.account)")
 
 									div(ng-repeat="federation in vm.getFederations(project.models)"
 										ng-show="federation.name")

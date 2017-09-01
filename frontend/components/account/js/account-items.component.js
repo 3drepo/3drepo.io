@@ -134,8 +134,8 @@
 			// set it to false, unless its the owners account
 			if (node[prop] === undefined) {
 
-				var isCurrentTeamspace = account && vm.account 
-					&& account.account === vm.account;
+				var isCurrentTeamspace = account !== undefined 
+					&& vm.account && account === vm.account;
 
 				if (isCurrentTeamspace) {
 					node[prop] = true;
@@ -154,6 +154,7 @@
 		 * @returns {Boolean} The state of the property (to show or hide)
 		 */
 		vm.shouldShow = function(items, type, account) {
+			//console.log(items, type, account)
 			switch (type) {
 				// Special cases for models and federations
 			case "models":
