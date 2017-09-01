@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager"];
+	RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager", "$window"];
 
-	function RegisterVerifyCtrl (EventService, UtilsService, StateManager) {
+	function RegisterVerifyCtrl (EventService, UtilsService, StateManager, $window) {
 		var vm = this,
 			promise,
 			username = StateManager.query.username,
@@ -60,7 +60,7 @@
 		};
 
 		vm.goToLoginPage = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			$window.location.href = "/";
 		};
 	}
 }());

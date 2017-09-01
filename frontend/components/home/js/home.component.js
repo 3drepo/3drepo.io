@@ -115,16 +115,20 @@
 				* Watch the state to handle moving to and from the login page
 				*/
 				$scope.$watch("vm.state", function (oldState, newState) {
-
-					var change = JSON.stringify(oldState) === JSON.stringify(newState);
+					console.log("nestate register-request", newState["register-request"]);
+					console.log("newstate", newState);
+					var change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
 					// Determine whether to show the Login directive or 
 					// logged in content directives
 					if (newState.loggedIn !== undefined) {
+						console.log("Setting vm.loggedIn");
 						vm.loggedIn = newState.loggedIn;
 					}
 
 					if (newState && change) {
+
+						console.log("state changed", change);
 						// If it's a legal page
 						var legal = vm.pageCheck(newState, vm.legalPages);
 						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
@@ -139,16 +143,20 @@
 							});
 
 						} else if (loggedOut) {
-
+							console.log("Is loggedOut")
 							// If its a logged out page which isnt login
 
 							vm.isLegalPage = false;
 							vm.isLoggedOutPage = true;
 
-							vm.loggedOutPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
+							$timeout(function(){
+								vm.loggedOutPages.forEach(function(page){
+									console.log(newState, page);
 
+									vm.setPage(newState, page);
+								});
+							});
+							
 						}
 					}			
 				}, true);
@@ -166,10 +174,11 @@
 			return pages.filter(function(page) { 
 				return state[page] === true;
 			}).length;
-		}
+		};
 
 		vm.setPage = function(state, page) {
 			if(state[page] === true) {
+				console.log(page);
 				vm.page = page;
 			}
 		};
@@ -182,7 +191,8 @@
 			var preCacheTemplates = [
 				"templates/account-teamspaces.html",
 				"templates/account-info.html",
-				"templates/sign-up.html"
+				"templates/sign-up.html",
+				"templates/register-request"
 			];
 
 			preCacheTemplates.forEach(function(templatePath){

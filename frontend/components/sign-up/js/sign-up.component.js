@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "StateManager"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, StateManager) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -192,7 +192,7 @@
 		};
 
 		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
+			$location.path("/registerRequest");
 		};
 
 		/**
