@@ -194,11 +194,6 @@ var UnityUtil;
 		}
 	};
 
-	UnityUtil.prototype.doubleClicked = function(meshInfo) {
-		var point = JSON.parse(meshInfo);
-		UnityUtil.centreToPoint(point.model, point.meshID);	
-	};
-
 	UnityUtil.prototype.loaded = function(bboxStr) {
 		var res = {};
 		res.bbox = JSON.parse(bboxStr);
