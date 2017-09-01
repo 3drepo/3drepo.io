@@ -283,7 +283,7 @@ var UnityUtil;
 	
 	UnityUtil.prototype.disableMeasuringTool = function(){
 		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
-	}
+	};
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};

@@ -34,16 +34,16 @@
 
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
-		"$timeout", "$compile", "$mdDialog", "$window",
-		"AuthService", "StateManager", "EventService", "UtilsService", 
-		"ClientConfigService", "$location", "SWService", "AnalyticService"
+		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
+		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
+		"$location", "SWService", "AnalyticService", "ViewerService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService
+		SWService, AnalyticService, ViewerService
 	) {
 
 		var vm = this;
@@ -248,7 +248,7 @@
 		};
 
 		vm.home = function () {
-			UnityUtil.reset();
+			ViewerService.reset();
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 

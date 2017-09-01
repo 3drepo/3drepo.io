@@ -29,9 +29,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountMenuCtrl.$inject = ["AuthService", "EventService"];
+	AccountMenuCtrl.$inject = ["AuthService", "EventService", "ViewerService"];
 
-	function AccountMenuCtrl (AuthService, EventService) {
+	function AccountMenuCtrl (AuthService, EventService, ViewerService) {
 		var vm = this;
 		
 		/**
@@ -48,7 +48,7 @@
 		 * Show user models
 		 */
 		vm.showTeamspaces = function () {
-			UnityUtil.reset();
+			ViewerService.reset();
 			EventService.send(EventService.EVENT.SHOW_TEAMSPACES);
 		};
 
@@ -57,7 +57,6 @@
 		 */
 		vm.logout = function () {
 			AuthService.logout();
-			UnityUtil.reset();
 		};
 
 		vm.openUserManual = function(){

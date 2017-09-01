@@ -368,7 +368,6 @@ var Viewer = {};
 		};
 
 		this.objectSelected = function(pointInfo) {
-
 			if(!self.selectionDisabled && !self.pinDropMode && !self.measureMode) {
 				if(pointInfo.id) {
 					if(pointInfo.pin) {
@@ -616,7 +615,10 @@ var Viewer = {};
 		};
 
 		this.reset = function() {
-			UnityUtil.resetCamera();
+			self.setMultiSelectMode(false);
+			self.setMeasureMode(false);
+			self.setPinDropMode(false);
+			UnityUtil.reset();	
 		};
 
 		this.cancelLoadModel = function() {
