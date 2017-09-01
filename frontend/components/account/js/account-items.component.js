@@ -128,9 +128,20 @@
 		 * @param {String} prop The property to set (i.e. 'state')
 		 * @returns {Boolean} The state of the property (to show or hide)
 		 */
-		var getState = function(node, prop) {
+		var getState = function(node, prop, account) {
+
+			// If it hasn't been defined before 
+			// set it to false, unless its the owners account
 			if (node[prop] === undefined) {
-				node[prop] = false;
+
+				var isCurrentTeamspace = account && vm.account 
+					&& account.account === vm.account;
+
+				if (isCurrentTeamspace) {
+					node[prop] = true;
+				} else {
+					node[prop] = false;
+				}
 			}
 			return node[prop];
 		};
@@ -142,17 +153,17 @@
 		 * @param {String} type The type of the data object (project, projects, model, federation etc)
 		 * @returns {Boolean} The state of the property (to show or hide)
 		 */
-		vm.shouldShow = function(items, type) {
+		vm.shouldShow = function(items, type, account) {
 			switch (type) {
 				// Special cases for models and federations
 			case "models":
-				return getState(items, "modelsState");
+				return getState(items, "modelsState", account);
 			case "federations":
-				return getState(items, "fedsState");
+				return getState(items, "fedsState", account);
 
 				// All other cases
 			default:
-				return getState(items, "state");
+				return getState(items, "state", account);
 			}
 		};
 

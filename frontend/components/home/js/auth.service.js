@@ -99,6 +99,7 @@
 					loggedIn  = false;
 					username  = null;
 
+					ViewerService.reset();
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
 					authPromise.resolve(loggedIn);
