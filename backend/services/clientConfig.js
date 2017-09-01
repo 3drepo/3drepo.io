@@ -139,8 +139,13 @@
             "development" : config.development,
             "googleConversionId": config.googleConversionId,
             "userNotice" : config.userNotice,
-            "unitySettings" : config.unitySettings
+            "unitySettings" : config.unitySettings,
+            
         };
+
+        if (config.hasOwnProperty("captcha_client_key")) {
+            clientConfig.captcha_client_key = config.captcha_client_key;
+        }  
 
         if (req) {
             clientConfig.userId = _.get(req, "session.user.username");

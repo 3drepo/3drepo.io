@@ -55,7 +55,7 @@
 			vm.captchaKey = ClientConfigService.captcha_client_key;
 
 			vm.tcAgreed = false;
-			vm.useReCapthca = false;
+			vm.useReCAPTCHA = false;
 			vm.registering = false;
 			vm.showLegalText = false;
 
@@ -84,14 +84,26 @@
 			vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
 			/*
-			* AuthService stuff
+			* Recapcha
 			*/
-			if (ClientConfigService.hasOwnProperty("auth")) {
-				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
-					vm.useReCapthca = true;
+
+			
+			var reCaptchaExists = ClientConfigService.auth.hasOwnProperty("captcha") && 
+									(ClientConfigService.auth.captcha);
+			
+			if (reCaptchaExists) {
+				if (ClientConfigService.captcha_client_key) {
 					vm.captchaKey = ClientConfigService.captcha_client_key;
+					vm.useReCAPTCHA = true;
+					console.log(vm.useReCAPTCHA)
+				} else {
+					console.log("Captcha key is not set in config");
 				}
+				
+			} else {
+				console.log("Captcha is not set in config");
 			}
+			
 
 			// Legal text
 			if (angular.isDefined(ClientConfigService.legal)) {
@@ -234,7 +246,7 @@
 							phoneNo: vm.newUser.phoneNo
 						};
 
-						if (vm.useReCapthca) {
+						if (vm.useReCAPTCHA) {
 							data.captcha = vm.reCaptchaResponse;
 						}
 						vm.registering = true;
@@ -246,7 +258,7 @@
 								vm.registerErrorMessage = UtilsService.getErrorMessage(response.data);
 							}
 							vm.registering = false;
-							if (vm.useReCapthca) {
+							if (vm.useReCAPTCHA) {
 								grecaptcha.reset(); // reset reCaptcha
 							}
 						});

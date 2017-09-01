@@ -66,7 +66,11 @@
 								div(layout="row", layout-align="start center")
 									p(ng-bind-html="vm.legalText")
 						md-input-container(flex)
-							#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
+							#loginCaptcha(
+								vc-recaptcha
+								key="vm.captchaKey"
+								ng-model="vm.reCaptchaResponse"
+								ng-if="vm.useReCAPTCHA")
 					
 					h3.registerError {{vm.registerErrorMessage}}
 
