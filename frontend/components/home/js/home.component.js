@@ -139,20 +139,31 @@
 								vm.setPage(newState, page);
 							});
 
-						} else if (loggedOut) {
+						} else if (loggedOut && !newState.loggedIn) {
 
 							// If its a logged out page which isnt login
-
+							
 							vm.isLegalPage = false;
 							vm.isLoggedOutPage = true;
 
-							$timeout(function(){
-								vm.loggedOutPages.forEach(function(page){
-									vm.setPage(newState, page);
-								});
-							});
+							console.log("loggedOut page", newState);
+
 							
+							vm.loggedOutPages.forEach(function(page){
+								vm.setPage(newState, page);
+							});
+
+							
+						} else if (newState.account !== AuthService.getUsername()) {
+							// If it's some other random page that doesn't match 
+							// anything sensible like legal, logged out pages, or account
+							vm.isLoggedOutPage = false;
+							vm.page = "";
+							$location.path("/" + AuthService.getUsername());
 						}
+
+						console.log("New State:", newState)
+
 					}			
 				}, true);
 			});
@@ -173,7 +184,6 @@
 
 		vm.setPage = function(state, page) {
 			if(state[page] === true) {
-				console.log(page);
 				vm.page = page;
 			}
 		};

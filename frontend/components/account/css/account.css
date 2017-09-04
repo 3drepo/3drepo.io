@@ -11,6 +11,12 @@
 
 }
 
+account-licenses .userContent, account-items .userContent, account-profile .userContent,
+account-billing .userContent, account-assign .userContent{
+  height: calc(100vh - 245px);
+  overflow: auto;
+}
+
 /** Account ***********************************************************************************************************/
 account-dir {
   overflow-y: auto;
@@ -21,7 +27,7 @@ account-dir #account .userContentNoMargin {
   margin-top: 0px !important;
 }
 
-account-dir #account {
+account-dir #account {  
   background-size: contain;
 }
 
@@ -763,11 +769,6 @@ account-teamspaces .loadingText md-progress-circular {
   position: absolute;
   bottom: 52px;
   right: 15px;
-}
-
-.userContent {
-  height: calc(100vh - 245px);
-  overflow: auto;
 }
 
 
