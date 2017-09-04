@@ -43,14 +43,14 @@ md-dialog.newModelDialog(aria-label="New model")
 					maxlength=20)
 				.inputHint Letters, numbers, hyphen and underscore only.
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.newModelData.name.length > 2")
 				input(
 				ng-if="vm.teamspaceAndProjectSelected",
 				placeholder="Model Code (optional)", 
 				ng-model="vm.newModelData.code", 
 				maxlength=5)
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.newModelData.name.length > 2")
 				label Model type
 				md-select(ng-model="vm.newModelData.type")
 					md-option(ng-repeat="modelType in vm.modelTypes", value="{{modelType}}") {{modelType}}
@@ -61,7 +61,7 @@ md-dialog.newModelDialog(aria-label="New model")
 				ng-model="vm.newModelData.otherType")
 
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.newModelData.name.length > 2")
 				label Unit
 				md-select(
 					ng-init="vm.newModelData.unit = vm.units[3].value"
@@ -70,7 +70,7 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-model="vm.newModelData.unit")
 					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.newModelData.name.length > 2")
 				input(
 					ng-if="vm.teamspaceAndProjectSelected"
 					placeholder="Revision name (optional)"
@@ -78,7 +78,7 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected")
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected && vm.newModelData.name.length > 2")
 				textarea(
 				ng-if="vm.teamspaceAndProjectSelected",
 				placeholder="Revision description (optional)", ng-model="vm.desc")

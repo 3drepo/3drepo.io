@@ -72,8 +72,8 @@
 			 * Escape from the add model/federation/project menu
 			 */
 			
-			$element.bind("keydown keypress", function (event) {
-				if(event.which === 27) { // 27 = esc key
+			angular.element(document).bind("keydown keypress", function (event) {
+				if(event.which === 27 && vm.addButtons) { // 27 = esc key
 					vm.addButtons = false;
 					vm.addButtonType = "add";
 					$scope.$apply();
@@ -91,7 +91,6 @@
 		
 		};
 		
-	
 		// GENERIC FUNCTIONS
 
 		/**
@@ -490,8 +489,6 @@
 				}
 			}
 
-		
-
 			if (vm.newModelData && vm.newModelData.name) {
 
 				if (vm.newModelData.name.length < 3) {
@@ -506,7 +503,7 @@
 				
 			} else if (vm.newModelData && vm.teamspaceAndProjectSelected && !vm.newModelData.name) {
 				vm.showNewModelErrorMessage = true;
-				vm.newModelErrorMessage = "Model name is empty or less than 3 characters";
+				vm.newModelErrorMessage = "Model less than 3 characters or has invalid characters";
 			} else {
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";

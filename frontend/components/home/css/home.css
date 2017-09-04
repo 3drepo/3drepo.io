@@ -91,8 +91,6 @@ home .homeUserContent md-toolbar {
 
 home .homeUserContent .userContent {
     padding: 20px;
-    min-height: 400px;
-    max-height: 583px;
     overflow-y: auto;
     overflow-x: hidden;
 }
