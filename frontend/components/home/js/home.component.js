@@ -68,13 +68,16 @@
 			vm.loginPage = true;
 			vm.isLoggedOutPage = false;
 			
-			vm.state = StateManager.state;
-			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
 			vm.pointerEvents = "inherit";
 			vm.goToAccount = false;
 			vm.goToUserPage = false;
 			vm.keysDown = [];
+			vm.firstState = true;
+
+			// Required for everything to work
+			vm.state = StateManager.state;
+			vm.query = StateManager.query;
 
 			vm.isMobileFlag = true;
 
@@ -122,11 +125,12 @@
 		*/
 		$scope.$watch("vm.state", function (oldState, newState) {
 
-			console.log("vm.state changed");
+			console.log("vm.state changed", oldState, newState);
+
 			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
 			console.log("newstate : ", newState);
 			console.log("oldstate : ", oldState);
-			console.log("change?", change)
+			console.log("change?", change);
 
 			// Determine whether to show the Login directive or 
 			// logged in content directives
@@ -134,7 +138,7 @@
 				vm.loggedIn = newState.loggedIn;
 			}
 
-			if (newState && change) {
+			if ( (newState && change) || (newState && vm.firstState) ) {
 
 				// If it's a legal page
 				var legal = vm.pageCheck(newState, vm.legalPages);
@@ -169,7 +173,7 @@
 					$location.path("/" + AuthService.getUsername());
 				}
 
-			}			
+			}
 		}, true);
 
 		vm.pageCheck = function(state, pages) {
