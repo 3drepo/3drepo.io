@@ -91,7 +91,8 @@
 			} else if (uploadFileData.file.size > ClientConfigService.uploadSizeLimit) {
 
 				// Check for file size limit
-				uploadPromise.reject("File exceeds size limit");
+				var maxSize = parseInt(ClientConfigService.uploadSizeLimit / 1048576).toFixed(0);
+				uploadPromise.reject("File exceeds size limit of " + maxSize + "mb");
 
 			} else {
 

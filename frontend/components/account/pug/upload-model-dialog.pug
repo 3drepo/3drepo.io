@@ -26,6 +26,10 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-disabled="vm.uploadButtonDisabled", 
 					ng-click="vm.uploadFile()") Upload
 
+				md-progress-circular.uploadProgress(ng-if="vm.uploading")
+
+				
+
 			#modelDialogFilenameContainer(layout="row", ng-if="vm.modelToUpload")
 				p#modelDialogFilenameIntro Selected file
 				p#modelDialogFilename {{vm.modelToUpload.name}}
