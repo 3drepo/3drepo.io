@@ -226,7 +226,7 @@
 				"SIZE_LIMIT_PAY": "Insufficient quota for model",
 				"USER_NOT_VERIFIED": "Please click on the link in the verify email sent to your account",
 				"ALREADY_VERIFIED": "You have already verified your account successfully. You may now login to your account.",
-				"INVALID_CAPTCHA_RES": "Please prove you're not a robotProve you're not a robot",
+				"INVALID_CAPTCHA_RES": "Please prove you're not a robot",
 				"USER_EXISTS": "User already exists"
 			};
 
