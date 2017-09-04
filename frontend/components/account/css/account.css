@@ -185,7 +185,7 @@ account-items .modelRight .modelUploaded {
 
 account-items .userContent {
   padding: 0 !important;
-  max-height: 585px;
+  height: calc(100vh - 245px);
   overflow: auto;
 }
 

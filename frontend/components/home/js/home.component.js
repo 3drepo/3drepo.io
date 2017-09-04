@@ -187,7 +187,7 @@
 				"templates/account-teamspaces.html",
 				"templates/account-info.html",
 				"templates/sign-up.html",
-				"templates/register-request"
+				"templates/register-request.html"
 			];
 
 			preCacheTemplates.forEach(function(templatePath){
