@@ -13,10 +13,14 @@
 					ng-src='{{vm.avatarUrl}}'
 					ng-click="vm.upload()")
 
-				md-progress-circular.avatarUploadIcon(
-					md-mode="indeterminate"
-					md-diameter="55"
-					ng-if="vm.uploadingAvatar")
+				md-container(
+					ng-if="vm.uploadingAvatar"
+					layout="column", style="margin: 0 auto; padding-top: 15px;"
+					layout-align="center center")
+
+					md-progress-circular.avatarUploadIcon(
+						md-mode="indeterminate"
+						md-diameter="55")
 
 				#noAvatarIcon(
 					ng-if="!vm.uploadingAvatar && (!vm.avatarUrl || !vm.imageLoaded)"
