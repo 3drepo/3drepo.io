@@ -11,10 +11,35 @@
 
 }
 
-account-licenses .userContent, account-items .userContent, account-profile .userContent,
-account-billing .userContent, account-assign .userContent {
+account-items .userContent {
   height: calc(100vh - 245px);
+  max-height: 517px;
   overflow: auto;
+}
+
+account-profile .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px;
+  overflow: auto;
+}
+
+account-licenses .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px;
+  overflow: auto;
+}
+
+account-billing .userContent {
+  height: calc(100vh - 280px);
+  max-height: 480px;
+  overflow: auto;
+}
+
+account-assign md-tabs-content-wrapper {
+  height: calc(100vh - 240px);
+  max-height: 521px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 /** Account ***********************************************************************************************************/
@@ -438,11 +463,6 @@ account-billing .loading {
     margin-top: 20px;
 }
 
-account-billing .userContent {
-  height: calc(100vh - 280px);
-  overflow: auto;
-}
-
 account-billing .md-button {
   margin-bottom: 20px;
 }
@@ -773,12 +793,6 @@ account-teamspaces .loadingText md-progress-circular {
 /** Account Assign ***********************************************************************************************/
 account-assign .assignTabHolder {
   padding: 20px;
-}
-
-account-assign md-tabs-content-wrapper {
-  height: calc(100vh - 240px);
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
 }
 
 account-assign md-tabs md-tab-content {
