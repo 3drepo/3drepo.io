@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "StateManager"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, StateManager) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -95,13 +95,12 @@
 				if (ClientConfigService.captcha_client_key) {
 					vm.captchaKey = ClientConfigService.captcha_client_key;
 					vm.useReCAPTCHA = true;
-					console.log(vm.useReCAPTCHA)
 				} else {
-					console.log("Captcha key is not set in config");
+					console.debug("Captcha key is not set in config");
 				}
 				
 			} else {
-				console.log("Captcha is not set in config");
+				console.debug("Captcha is not set in config");
 			}
 			
 
@@ -192,7 +191,7 @@
 		};
 
 		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
+			$location.path("/registerRequest");
 		};
 
 		/**

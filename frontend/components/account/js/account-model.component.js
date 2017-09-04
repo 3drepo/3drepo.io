@@ -257,6 +257,8 @@
 				console.error("No file defined: ", vm.model);
 			}
 
+			vm.uploading = true;
+
 			vm.uploadErrorMessage = null;
 			var uploadFileData = {
 				model: vm.model, 
@@ -270,12 +272,15 @@
 				.then(function(){
 					vm.addButtons = false;
 					vm.addButtonType = "add";
+					vm.uploading = false;
 					vm.closeDialog();
 				})
 				.catch(function(errorMessage){
+					vm.uploading = false;
 					vm.uploadErrorMessage = errorMessage;
 				});
-
+			
+			
 		};
 
 		/**

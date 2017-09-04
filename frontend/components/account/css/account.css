@@ -327,6 +327,19 @@ account-menu #accountMenuContent md-menu-item > .md-button {
   overflow: hidden;
 }
 
+.newModelDialog .uploadProgress {
+  width: 25px;
+  height: 25px;
+  display: inline;
+  margin-left: 15px;
+}
+
+.newModelDialog .uploadProgress svg {
+  width: 25px !important;
+  height: 25px !important;
+  transform-origin: initial !important;
+}
+
 .newModelDialog #newModelIcon {
   margin-right: 10px;
 }
