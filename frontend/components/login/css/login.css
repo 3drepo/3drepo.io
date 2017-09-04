@@ -9,6 +9,10 @@ login .homeUserContent {
   }
 }
 
+login .homeUserContent md-content {
+  border-radius: 4px;
+}
+
 login .loginButton {
   width: 100% !important;
 }
