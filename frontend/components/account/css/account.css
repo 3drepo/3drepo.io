@@ -12,7 +12,7 @@
 }
 
 account-licenses .userContent, account-items .userContent, account-profile .userContent,
-account-billing .userContent, account-assign .userContent{
+account-billing .userContent, account-assign .userContent {
   height: calc(100vh - 245px);
   overflow: auto;
 }
@@ -204,8 +204,6 @@ account-items .modelRight .modelUploaded {
 
 account-items .userContent {
   padding: 0 !important;
-  height: calc(100vh - 245px);
-  overflow: auto;
 }
 
 account-items .accountModelsSharedIcon {

@@ -109,65 +109,6 @@
 				"register-verify"
 			];
 
-			$timeout(function () {
-
-				/*
-				* Watch the state to handle moving to and from the login page
-				*/
-				$scope.$watch("vm.state", function (oldState, newState) {
-
-					var change = JSON.stringify(oldState) !== JSON.stringify(newState);
-
-					// Determine whether to show the Login directive or 
-					// logged in content directives
-					if (newState.loggedIn !== undefined) {
-						vm.loggedIn = newState.loggedIn;
-					}
-
-					if (newState && change) {
-
-						// If it's a legal page
-						var legal = vm.pageCheck(newState, vm.legalPages);
-						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
-
-						if (legal) {
-
-							vm.isLegalPage = true;
-							vm.isLoggedOutPage = false;
-
-							vm.legalPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-						} else if (loggedOut && !newState.loggedIn) {
-
-							// If its a logged out page which isnt login
-							
-							vm.isLegalPage = false;
-							vm.isLoggedOutPage = true;
-
-							console.log("loggedOut page", newState);
-
-							
-							vm.loggedOutPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-							
-						} else if (newState.account !== AuthService.getUsername()) {
-							// If it's some other random page that doesn't match 
-							// anything sensible like legal, logged out pages, or account
-							vm.isLoggedOutPage = false;
-							vm.page = "";
-							$location.path("/" + AuthService.getUsername());
-						}
-
-						console.log("New State:", newState)
-
-					}			
-				}, true);
-			});
-
 			vm.isMobileFlag = vm.isMobile();
 
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
@@ -175,6 +116,61 @@
 			}
 
 		};
+
+		/*
+		* Watch the state to handle moving to and from the login page
+		*/
+		$scope.$watch("vm.state", function (oldState, newState) {
+
+			console.log("vm.state changed");
+			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
+			console.log("newstate : ", newState);
+			console.log("oldstate : ", oldState);
+			console.log("change?", change)
+
+			// Determine whether to show the Login directive or 
+			// logged in content directives
+			if (newState.loggedIn !== undefined) {
+				vm.loggedIn = newState.loggedIn;
+			}
+
+			if (newState && change) {
+
+				// If it's a legal page
+				var legal = vm.pageCheck(newState, vm.legalPages);
+				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+
+				if (legal) {
+
+					vm.isLegalPage = true;
+					vm.isLoggedOutPage = false;
+
+					vm.legalPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+				} else if (loggedOut && !newState.loggedIn) {
+
+					// If its a logged out page which isnt login
+					
+					vm.isLegalPage = false;
+					vm.isLoggedOutPage = true;
+
+					vm.loggedOutPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+					
+				} else if (newState.account !== AuthService.getUsername()) {
+					// If it's some other random page that doesn't match 
+					// anything sensible like legal, logged out pages, or account
+					vm.isLoggedOutPage = false;
+					vm.page = "";
+					$location.path("/" + AuthService.getUsername());
+				}
+
+			}			
+		}, true);
 
 		vm.pageCheck = function(state, pages) {
 			return pages.filter(function(page) { 
