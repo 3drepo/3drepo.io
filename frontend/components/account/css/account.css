@@ -13,25 +13,25 @@
 
 account-items .userContent {
   height: calc(100vh - 245px);
-  max-height: 517px;
+  max-height: 517px !important;
   overflow: auto;
 }
 
 account-profile .userContent {
   height: calc(100vh - 230px);
-  max-height: 530px;
+  max-height: 530px !important;
   overflow: auto;
 }
 
 account-licenses .userContent {
   height: calc(100vh - 230px);
-  max-height: 530px;
+  max-height: 530px !important;
   overflow: auto;
 }
 
 account-billing .userContent {
   height: calc(100vh - 280px);
-  max-height: 480px;
+  max-height: 480px !important;
   overflow: auto;
 }
 
