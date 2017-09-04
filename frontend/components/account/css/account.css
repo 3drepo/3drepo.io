@@ -1,3 +1,16 @@
+/** Responsive content ****/
+@media (max-width: 960px) { 
+
+  .userContent {
+    height: 100% !important;
+  }
+
+  account-assign md-tabs-content-wrapper {
+    height: 100% !important;
+  }
+
+}
+
 /** Account ***********************************************************************************************************/
 account-dir {
   overflow-y: auto;
@@ -422,7 +435,8 @@ account-billing .loading {
 }
 
 account-billing .userContent {
-  max-height: calc(100vh - 393px) !important;
+  height: calc(100vh - 280px);
+  overflow: auto;
 }
 
 account-billing .md-button {
@@ -752,13 +766,20 @@ account-teamspaces .loadingText md-progress-circular {
 }
 
 .userContent {
-  min-height: 200px;
+  height: calc(100vh - 245px);
+  overflow: auto;
 }
 
 
 /** Account Assign ***********************************************************************************************/
 account-assign .assignTabHolder {
   padding: 20px;
+}
+
+account-assign md-tabs-content-wrapper {
+  height: calc(100vh - 240px);
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 account-assign md-tabs md-tab-content {
