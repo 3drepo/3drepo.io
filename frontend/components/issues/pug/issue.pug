@@ -180,8 +180,9 @@ div.heightFix(
 
 	// New comment
 	.issueItemContainer#issueNewComment(layout="column", layout-align="start", ng-if="vm.data")
-		label.issuesLabel New Comment
+		
 		md-input-container.fillHeight(flex, md-no-float)
+			label.issuesLabel New Comment
 			textarea(
 				aria-label="New Comment"
 				ng-model="vm.comment"
