@@ -91,14 +91,9 @@
 		 * Set role indicator colour
 		 */
 		function setRoleIndicatorColour () {
-			var assignedRoleColour;
-
 			if (vm.data && (vm.data.assigned_roles.length > 0) && vm.issueRoleIndicator) {
-				assignedRoleColour = IssuesService.getJobColor(vm.data.assigned_roles[0]);
-				if (assignedRoleColour !== null) {
-					vm.issueRoleIndicator.css("border", "none");
-					vm.issueRoleIndicator.css("background", assignedRoleColour);
-				}
+				var assignedRole = vm.data.assigned_roles[0];
+				IssuesService.setRoleIndicatorColour(assignedRole, vm.issueRoleIndicator);
 			}
 		}
 

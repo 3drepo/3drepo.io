@@ -79,9 +79,11 @@
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
 					if (!ViewerService.currentModel.model) {
+						console.log("Initiating viewer")
 						ViewerService.initViewer();
 					} else {
 						// Load the model
+						console.log("Loading model: vm.model", vm.model);
 						ViewerService.loadViewerModel(
 							vm.account, 
 							vm.model, 

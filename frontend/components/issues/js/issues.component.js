@@ -44,9 +44,18 @@
 			}
 		});
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", "AnalyticService", "$state", "$q"];
+	IssuesCtrl.$inject = [
+		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
+		"UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "$state", "$q"
+	];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, ClientConfigService, AnalyticService, $state, $q) {
+	function IssuesCtrl(
+		$scope, $timeout, IssuesService, EventService, AuthService, 
+		UtilsService, NotificationService, RevisionsService, ClientConfigService, 
+		AnalyticService, $state, $q
+	) {
+
 		var vm = this;
 
 		/*
@@ -67,6 +76,8 @@
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
 			vm.selectedIssueLoaded = false;
+			vm.displayIssue = null;
+			vm.revisionsStatus = RevisionsService.status;
 
 			vm.modelLoaded = false;
 
@@ -87,16 +98,20 @@
 					vm.toShow = "showIssues";
 					vm.issues = (data === "") ? [] : data;
 					vm.showAddButton = true;
-
+					console.log("vm.displayIssue - issues loaded");
 
 					// if issue id is in url then select the issue
-					var issue = vm.issues.find(function(issue){
+					var issueMatch = vm.issues.find(function(issue){
 						return issue._id === vm.issueId;
 					});
 
-					if(issue){
-						vm.displayIssue = issue;
+					console.log("vm.displayIssue - issueMatch", issueMatch);
+					
+					if(issueMatch){
+						console.log("vm.displayIssue, setting: ", issueMatch);
+						vm.displayIssue = issueMatch;
 					}
+
 				});
 
 					
@@ -181,6 +196,24 @@
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
+		$scope.$watch(function() {
+			return RevisionsService.status.ready;
+		}, function(newValue, oldValue) {
+			console.log("RevisionsService.status changed", newValue, oldValue);
+			if (RevisionsService.status.ready === true) {
+				vm.revisions = RevisionsService.status.data;
+				console.log("issue - watchNotification from revisionsService")
+				watchNotification();
+			}
+		}, true);
+
+		$scope.$watch(function() {
+			return IssuesService.issueId;
+		}, function(){
+			console.log("Setting issueID in watcher", IssuesService.issueId);
+			vm.issueId = IssuesService.issueId;
+		}, true);
+
 		/**
 		 * Set up event watching
 		 */
@@ -199,10 +232,7 @@
 			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
 
 				vm.modelLoaded = true;
-				
-			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
-				vm.revisions = event.value;
-				watchNotification();
+
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
@@ -216,9 +246,7 @@
 				
 				vm.subModels = event.value.subModels || [];
 				watchNotification();
-			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
-				vm.issueId = event.value;
-			}
+			} 
 		});
 
 
@@ -260,9 +288,16 @@
 
 		function watchNotification() {
 
+			console.log("issue - issues.component.js watchNotifdication");
+
+			// console.log("issue - revisions, submodels", vm.revisions, vm.subModels);
+
+			// TODO: Is there a reason this is here?
 			if(!vm.revisions || !vm.subModels){
 				return;
 			}
+
+			console.log("issue - issues.component.js watchNotifdication - NotificationService activated ")
 
 			/*
 			 * Watch for new issues
@@ -342,6 +377,8 @@
 		}
 
 		function issueChangedListener(issue) {
+
+			console.log("issue - issues.component.js : issueChangedListener");
 
 			issue.title = IssuesService.generateTitle(issue);
 			issue.timeStamp = IssuesService.getPrettyTime(issue.created);

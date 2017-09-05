@@ -19,29 +19,47 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("RevisionsService", RevisionsService);
+		.service("RevisionsService", RevisionsService);
 
 	RevisionsService.$inject = ["UtilsService", "ClientConfigService"];
 
 	function RevisionsService(UtilsService, ClientConfigService) {
+		var status = {
+			ready: false,
+			data: null
+		};
 
-		function listAll(account, model){
+		var service = { 
+			status: status,
+			listAll: listAll,
+			isTagFormatInValid: isTagFormatInValid
+		};
+
+		return service;
+
+		///////////
+
+		function listAll(account, model) {
+
 			return UtilsService.doGet(account + "/" + model + "/revisions.json").then(function(response){
 				if(response.status === 200){
-					return (response.data);
+					status.ready = true;
+					status.data = response.data;
+			
+					console.log("issue - service.status.ready", service.status.ready);
+					return response.data;
 				} else {
-					return (response.data);
+					status.ready = false;
+					status.data = response.data;
+					return response.data;
 				}
 			});
+
 		}
 
 		function isTagFormatInValid(tag){
 			return tag && !tag.match(ClientConfigService.tagRegExp);
 		}
 
-		return { 
-			listAll: listAll,
-			isTagFormatInValid: isTagFormatInValid
-		};
 	}
 }());

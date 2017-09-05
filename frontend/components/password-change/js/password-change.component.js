@@ -33,11 +33,7 @@
 	PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
 
 	function PasswordChangeCtrl ($scope, UtilsService, EventService) {
-		var vm = this,
-			enterKey = 13,
-			promise,
-			messageColour = "rgba(0, 0, 0, 0.7)",
-			messageErrorColour = "#F44336";
+		var vm = this;
         
 		/*
          * Init
@@ -45,6 +41,10 @@
 		vm.$onInit = function() {
 			vm.passwordChanged = false;
 			vm.showProgress = false;
+			vm.enterKey = 13,
+			vm.promise,
+			vm.messageColour = "rgba(0, 0, 0, 0.7)",
+			vm.messageErrorColour = "#F44336";
 		};
 
 		/*
@@ -59,7 +59,7 @@
          */
 		vm.passwordChange = function (event) {
 			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
+				if (event.which === vm.enterKey) {
 					doPasswordChange();
 				}
 			} else {
@@ -78,31 +78,40 @@
          * Do password change
          */
 		function doPasswordChange() {
+			console.log("doPasswordChange");
+			console.log(vm.username, vm.token);
 			if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
 				if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
-					vm.messageColor = messageColour;
+					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					promise = UtilsService.doPut(
+					vm.promise = UtilsService.doPut(
 						{
 							token: vm.token,
 							newPassword: vm.newPassword
 						},
 						vm.username + "/password"
 					);
-					promise.then(function (response) {
-						vm.showProgress = false;
-						if (response.status === 400) {
-							vm.messageColor = messageErrorColour;
+					
+					vm.promise
+						.then(function (response) {
+							vm.showProgress = false;
+							if (response.status === 400) {
+								vm.messageColor = vm.messageErrorColour;
+								vm.message = "Error changing password: " + response.data.message;
+							} else {
+								vm.passwordChanged = true;
+								vm.messageColor = vm.messageColour;
+								vm.message = "Your password has been reset. Please go to the login page.";
+							}
+						})
+						.catch(function(){
+							vm.messageColor = vm.messageErrorColour;
 							vm.message = "Error changing password";
-						} else {
-							vm.passwordChanged = true;
-							vm.messageColor = messageColour;
-							vm.message = "Your password has been reset. Please go to the login page.";
-						}
-					});
+						});
+
 				} else {
-					vm.messageColor = messageErrorColour;
+					vm.messageColor = vm.messageErrorColour;
 					vm.message = "A new password must be entered";
 				}
 			}

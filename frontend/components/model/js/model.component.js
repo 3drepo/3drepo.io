@@ -141,9 +141,7 @@
 					vm.handleModelError();
 				});
 
-			RevisionsService.listAll(vm.account, vm.model).then(function(revisions) {
-				EventService.send(EventService.EVENT.REVISIONS_LIST_READY, revisions);
-			});
+			RevisionsService.listAll(vm.account, vm.model);
 
 		};
 
@@ -163,7 +161,7 @@
 			if(vm.issueId){
 				// timeout to make sure event is sent after issue panel card is setup
 				$timeout(function () {
-					EventService.send(EventService.EVENT.SELECT_ISSUE, vm.issueId);
+					IssuesService.issueId = vm.issueId;
 				});
 			}
 		});

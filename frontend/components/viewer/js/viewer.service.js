@@ -82,25 +82,27 @@
 
 		function loadViewerModel(account, model, branch, revision) {
 			
-			if (!account || !model || !branch || !revision) {
-				console.error("Account, model, branch or revision was not defined!");
+			if (!account || !model) {
+				console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
+			} else {
+				currentModel.promise = viewer.loadModel(
+					account, 
+					model, 
+					branch, 
+					revision
+				)
+					.then(function(){
+						// Set the current model in the viewer
+						currentModel.model = model;
+						initialised.resolve();
+						fetchModelProperties(account, model, branch, revision);	
+					})
+					.catch(function(error){
+						console.error("Error loading model: ", error);
+					});
 			}
 
-			currentModel.promise = viewer.loadModel(
-				account, 
-				model, 
-				branch, 
-				revision
-			)
-				.then(function(){
-					// Set the current model in the viewer
-					currentModel.model = model;
-					initialised.resolve();
-					fetchModelProperties(account, model, branch, revision);	
-				})
-				.catch(function(error){
-					console.error("Error loading model: ", error);
-				});
+			
 
 		}
 

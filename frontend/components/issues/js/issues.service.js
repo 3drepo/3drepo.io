@@ -21,9 +21,16 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "$sanitize", "ClientConfigService", "EventService", "UtilsService", "TreeService"];
+	IssuesService.$inject = [
+		"$http", "$q", "$sanitize", "ClientConfigService", "EventService", 
+		"UtilsService", "TreeService", "AuthService"
+	];
 
-	function IssuesService($http, $q, $sanitize, ClientConfigService, EventService, UtilsService, TreeService) {
+	function IssuesService(
+		$http, $q, $sanitize, ClientConfigService, EventService, 
+		UtilsService, TreeService, AuthService
+	) {
+
 		var url = "",
 			data = {},
 			config = {},
@@ -37,6 +44,8 @@
 
 		var service = {
 			init : init,
+			setCanUpdateStatus : setCanUpdateStatus,
+			setRoleIndicatorColour : setRoleIndicatorColour,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -78,8 +87,41 @@
 			return initPromise.promise;
 		}
 
+		function setCanUpdateStatus(issueData, issueId, permissions) {
+			var hasPermission = AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+				permissions
+			);
+
+			if(!hasPermission){
+				return false;
+			}
+
+			var isOwner = (AuthService.getUsername() === issueData.owner);
+			var hasRole = issueData.assigned_roles.indexOf(issueId) !== -1;
+			return isOwner || hasRole;
+
+		}
+
+		/**
+		 * Set the role indicator colour
+		 * @param {String} role
+		 */
+		function setRoleIndicatorColour (role, indicatorEl) {
+			var roleColor = getJobColor(role);
+			if (roleColor !== null) {
+				indicatorEl.css("background", getJobColor(role));
+				indicatorEl.css("border", "none");
+			} else {
+				indicatorEl.css("background", "none");
+				indicatorEl.css("border", "1px solid #DDDDDD");
+			}
+		}
+
+
 		function deselectPin(issue) {
 			var data;
+
 			// Issue with position means pin
 			if (issue.position.length > 0) {
 				data = {
@@ -242,9 +284,9 @@
 
 			var deferred = $q.defer();
 			var endpoint = account + "/" + model + "/issues/" + issueId + ".json";
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
+			var issueUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 
-			$http.get(url).then(function(res){
+			$http.get(issueUrl).then(function(res){
 
 				res.data = cleanIssue(res.data);
 
@@ -273,16 +315,16 @@
 				endpoint = account + "/" + model + "/issues.json";
 			}
 
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
+			var issuesUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 
-			$http.get(url).then(
-				function(data) {
-					deferred.resolve(data.data);
-					for (var i = 0; i < data.data.length; i ++) {
-						data.data[i].timeStamp = getPrettyTime(data.data[i].created);
-						data.data[i].title = generateTitle(data.data[i]);
-						if (data.data[i].thumbnail) {
-							data.data[i].thumbnailPath = UtilsService.getServerUrl(data.data[i].thumbnail);
+			$http.get(issuesUrl).then(
+				function(issuesData) {
+					deferred.resolve(issuesData.data);
+					for (var i = 0; i < issuesData.data.length; i ++) {
+						issuesData.data[i].timeStamp = getPrettyTime(issuesData.data[i].created);
+						issuesData.data[i].title = generateTitle(issuesData.data[i]);
+						if (issuesData.data[i].thumbnail) {
+							issuesData.data[i].thumbnailPath = UtilsService.getServerUrl(issuesData.data[i].thumbnail);
 						}
 					}
 				},
@@ -298,12 +340,13 @@
 
 		function saveIssue(issue) {
 			var deferred = $q.defer(),
-				url;
+				saveUrl;
 
+			var base = issue.account + "/" + issue.model;
 			if (issue.rev_id){
-				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, issue.account + "/" + issue.model + "/revision/" + issue.rev_id + "/issues.json");
+				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
-				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, issue.account + "/" + issue.model + "/issues.json");
+				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/issues.json");
 			}
 
 			config = {withCredentials: true};
@@ -313,7 +356,7 @@
 				issue.norm = issue.pickedNorm;
 			}
 
-			$http.post(url, issue, config)
+			$http.post(saveUrl, issue, config)
 				.then(function successCallback(response) {
 					deferred.resolve(response);
 				});
@@ -327,8 +370,8 @@
 		 * @param data
 		 * @returns {*}
 		 */
-		function updateIssue(issue, data) {
-			return doPut(issue, data);
+		function updateIssue(issue, issueData) {
+			return doPut(issue, issueData);
 		}
 
 		/**
@@ -337,22 +380,22 @@
 		 * @param data
 		 * @returns {*}
 		 */
-		function doPut(issue, data) {
+		function doPut(issue, putData) {
 			var deferred = $q.defer();
-			var url;
+			var putUrl;
 			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
 				endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
-				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
+				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			} else {
 				endpoint += "/issues/" + issue._id + ".json";
-				url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
+				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			}
 				
-			var config = {withCredentials: true};
+			var putConfig = {withCredentials: true};
 
-			$http.put(url, data, config)
+			$http.put(putUrl, putData, putConfig)
 				.then(function (response) {
 					deferred.resolve(response);
 				});
@@ -449,8 +492,9 @@
 			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/jobs.json");
 
 			$http.get(url).then(
-				function(data) {
-					availableJobs = data.data;
+				function(jobsData) {
+					availableJobs = jobsData.data;
+					console.log("availableJobs", availableJobs);
 					deferred.resolve(availableJobs);
 				},
 				function() {
@@ -466,8 +510,8 @@
 			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" +model + "/userJobForModel.json");
 
 			$http.get(url).then(
-				function(data) {
-					deferred.resolve(data.data);
+				function(userJob) {
+					deferred.resolve(userJob.data);
 				},
 				function() {
 					deferred.resolve();
@@ -570,15 +614,15 @@
 
 			var deferred = $q.defer();
 
-			var url = account + "/" + model + "/issues.bcfzip";
+			var bfcUrl = account + "/" + model + "/issues.bcfzip";
 			if(revision){
-				url = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
+				bfcUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
 			}
 
 			var formData = new FormData();
 			formData.append("file", file);
 
-			UtilsService.doPost(formData, url, {"Content-Type": undefined}).then(function(res){
+			UtilsService.doPost(formData, bfcUrl, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
