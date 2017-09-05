@@ -94,6 +94,7 @@
 				"/privacy",
 				"/signUp", 
 				"/passwordForgot", 
+				"/passwordChange",
 				"/registerRequest", 
 				"/registerVerify"
 			];
@@ -109,7 +110,8 @@
 				"sign-up",
 				"password-forgot",
 				"register-request",
-				"register-verify"
+				"register-verify",
+				"password-change"
 			];
 
 			vm.isMobileFlag = vm.isMobile();
@@ -134,9 +136,11 @@
 
 			// Determine whether to show the Login directive or 
 			// logged in content directives
-			if (newState.loggedIn !== undefined) {
-				vm.loggedIn = newState.loggedIn;
-			}
+			// if (newState.loggedIn !== undefined) {
+			// 	vm.loggedIn = newState.loggedIn;
+			// }
+
+			vm.loggedIn = AuthService.isLoggedIn();
 
 			if ( (newState && change) || (newState && vm.firstState) ) {
 

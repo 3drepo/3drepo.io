@@ -17,7 +17,7 @@ div.heightFix(
 
 				div(layout="row", flex, layout-align="space-between")
 					div(layout="row", flex)
-						#issueRoleIndicator
+						#issueRoleIndicator(ng-style="{backgroundColor: vm.issueRoleColor}")
 						md-input-container#issueTitleInput(ng-if="!vm.data", flex, md-no-float)
 							input(
 								type="text"

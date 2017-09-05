@@ -88,10 +88,6 @@
 			vm.editingDescription = false;
 			vm.clearPin = false;
 
-			// TODO: this is bad, just use ng directives
-			var issueRole = $element[0].querySelector("#issueRoleIndicator");
-			vm.issueRoleIndicator = angular.element(issueRole);
-
 			vm.priorities = [
 				{value: "none", label: "None"},
 				{value: "low", label: "Low"},
@@ -178,19 +174,6 @@
 				});
 			}
 		};
-			
-
-		vm.setCanUpdateStatus = function(issueData) {
-
-			if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
-				return vm.canUpdateStatus = false;
-			}
-
-			var isOwner = (AuthService.getUsername() === issueData.owner);
-			var hasRole = issueData.assigned_roles.indexOf(vm.userJob._id) !== -1;
-			vm.canUpdateStatus = isOwner || hasRole;
-
-		};
 
 		$scope.$watch("vm.modelSettings", function() {
 			if(vm.modelSettings){
@@ -221,7 +204,7 @@
 			
 			if (vm.data && vm.statuses && vm.statuses.length) {
 
-				startNotification();
+				vm.startNotification();
 				var disableStatus;
 
 				// Set up statuses
@@ -255,16 +238,16 @@
 					vm.canUpdate = false;
 				}
 
-				vm.setCanUpdateStatus(vm.issueData);
+				vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
 
 				// Can edit description if no comments
 				vm.canEditDescription = (vm.issueData.comments.length === 0);
 
 				// Role colour
 				if (vm.issueData.assigned_roles.length > 0) {
-					setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
+					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 				} else {
-					setRoleIndicatorColour(vm.issueData.creator_role);
+					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.creator_role);
 				}
 
 				// Old issues
@@ -359,7 +342,10 @@
 				comment;
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
+			IssuesService.setRoleIndicatorColour(
+				vm.issueData.assigned_roles[0], 
+				vm.issueRoleIndicator
+			);
 
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
 
@@ -388,7 +374,7 @@
 						vm.issueData.status = response.data.issue.status;
 						vm.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = vm.issueData;
-						vm.setCanUpdateStatus(vm.issueData);
+						vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
 
 						commentAreaScrollToBottom();
 					});
@@ -719,7 +705,7 @@
 					vm.submitDisabled = true;
 					vm.setContentHeight();
 
-					startNotification();
+					vm.startNotification();
 					vm.saving = false;
 
 					var issueState = {
@@ -919,22 +905,6 @@
 			vm.setContentHeight();
 		};
 
-
-		/**
-		 * Set the role indicator colour
-		 * @param {String} role
-		 */
-		function setRoleIndicatorColour (role) {
-			var roleColor = IssuesService.getJobColor(role);
-			if (roleColor !== null) {
-				vm.issueRoleIndicator.css("background", IssuesService.getJobColor(role));
-				vm.issueRoleIndicator.css("border", "none");
-			} else {
-				vm.issueRoleIndicator.css("background", "none");
-				vm.issueRoleIndicator.css("border", "1px solid #DDDDDD");
-			}
-		}
-
 		/**
 		 * Check if user has a role same as the creator role
 		 * @returns {boolean}
@@ -1026,10 +996,42 @@
 		}
 
 
-		function startNotification(){
+		vm.startNotification = function() {
+			console.log("issue - startNotification");
 			if(vm.data && !vm.notificationStarted){
 
+				console.log("issue - notificationStarted", vm.notificationStarted);
+
 				vm.notificationStarted = true;
+
+				/*
+				* Watch for issue change
+				*/
+				NotificationService.subscribe.issueChanged(vm.data.account, vm.data.model, vm.data._id, function(issue){
+					
+					console.log("issue - issueChanged", issue);
+
+					vm.issueData.topic_type = issue.topic_type;
+					vm.issueData.desc = issue.desc;
+					vm.issueData.priority = issue.priority;
+					vm.issueData.status = issue.status;
+					vm.issueData.assigned_roles = issue.assigned_roles;
+
+					vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
+					IssuesService.setRoleIndicatorColour(
+						vm.issueData.assigned_roles[0], 
+						vm.issueRoleIndicator
+					);
+					
+					vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
+						vm.issueData, 
+						vm.userJob._id, 
+						vm.modelSettings.permissions
+					);
+
+					$scope.$apply();
+
+				});
 
 				/*
 				* Watch for new comments
@@ -1085,24 +1087,7 @@
 					}, 4000);
 				});
 
-				/*
-				* Watch for issue change
-				*/
-				NotificationService.subscribe.issueChanged(vm.data.account, vm.data.model, vm.data._id, function(issue){
 
-					vm.issueData.topic_type = issue.topic_type;
-					vm.issueData.desc = issue.desc;
-					vm.issueData.priority = issue.priority;
-					vm.issueData.status = issue.status;
-					vm.issueData.assigned_roles = issue.assigned_roles;
-
-					vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-					setRoleIndicatorColour(vm.issueData.assigned_roles[0]);
-					vm.setCanUpdateStatus(vm.issueData);
-
-					$scope.$apply();
-
-				});
 			}
 		}
 

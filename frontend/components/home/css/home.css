@@ -134,7 +134,7 @@ home #legalLinks {
     user-select: none;
     z-index: 4;
     color: #fff;
-    background: #0c2f54;
+    background: rgba(222, 222, 222, 0);
     border-top-left-radius: 4px;
     padding-bottom: 2px;
     margin-right: 18px;

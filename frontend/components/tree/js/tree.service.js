@@ -101,51 +101,20 @@
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
 					var getSubTrees = [];
+
 					if(subTrees){
 
 						// idToObjRef only needed if model is a fed model. i.e. subTrees.length > 0
-						var idToObjRef = genIdToObjRef(mainTree.nodes);
+						
 						mainTree.subProjIdToPath = {};
-
+			
 						subTrees.forEach(function(tree){
-							//attach the sub tree back on main tree
-							if(idToObjRef[tree._id]){
-
-								if(tree.url){
-									//var obj = JSON.parse(tree.buf);
-									var getSubTree = $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, tree.url)).then(function(res){
-
-										if(res.status === 401){
-											tree.status = "NO_ACCESS";
-										}
-
-										if(res.status === 404){
-											tree.status = "NOT_FOUND";
-										}
-
-										if(tree.status){
-											idToObjRef[tree._id].status = tree.status;
-										}
-
-										tree.buf = res.data.mainTree;
-										var obj = tree.buf;
-
-										// TODO: obj doesn't exist? What is going on here?
-										var subTree = obj.nodes;
-										subTree.parent = idToObjRef[tree._id];
-										
-										angular.extend(mainTree.subProjIdToPath, obj.idToPath);
-
-										idToObjRef[tree._id].children = [subTree];
-										idToObjRef[tree._id].hasSubProjTree = true;
-										subTreesById[subTree._id] = subTree;
-
-									});
-
-									getSubTrees.push(getSubTree);
-								}
-
-							}
+							handleSubTree(
+								tree, 
+								mainTree, 
+								subTreesById, 
+								getSubTrees
+							);
 						});
 
 						mainTree.subTreesById = subTreesById;
@@ -167,6 +136,62 @@
 
 		}
 
+		function handleSubTree(tree, mainTree, subTreesById, getSubTrees) {
+
+			var idToObjRef = genIdToObjRef(mainTree.nodes);
+			
+			//attach the sub tree back on main tree
+			if(idToObjRef[tree._id]){
+
+				if(tree.url){
+
+					//var obj = JSON.parse(tree.buf);
+					var subtreeUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, tree.url);
+					var getSubTree = $http.get(subtreeUrl)
+						.then(function(res){
+
+							handleResponse(res, tree, idToObjRef);
+
+							tree.buf = res.data.mainTree;
+			
+							// TODO: tree.buf doesn't exist? What is going on here?
+							var subTree = tree.buf.nodes;
+							subTree.parent = idToObjRef[tree._id];
+							
+							angular.extend(mainTree.subProjIdToPath, tree.buf.idToPath);
+
+							idToObjRef[tree._id].children = [subTree];
+							idToObjRef[tree._id].hasSubProjTree = true;
+							subTreesById[subTree._id] = subTree;
+
+						})
+						.catch(function(res){
+							handleResponse(res, tree, idToObjRef);	
+							console.error(res);
+						});
+
+					getSubTrees.push(getSubTree);
+
+				}
+
+			}
+			
+		}
+
+		function handleResponse(res, tree, idToObjRef) {
+			if(res.status === 401){
+				tree.status = "NO_ACCESS";
+			}
+
+			if(res.status === 404){
+				tree.status = "NOT_FOUND";
+			}
+
+			if(tree.status){
+				idToObjRef[tree._id].status = tree.status;
+			}
+		}
+
 		function search(searchString) {
 			var deferred = $q.defer(),
 				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
@@ -174,6 +199,9 @@
 			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 				.then(function(json) {
 					deferred.resolve(json);
+				})
+				.catch(function(error){
+					console.error(error);
 				});
 
 			return deferred.promise;
