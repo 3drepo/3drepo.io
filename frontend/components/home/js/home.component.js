@@ -165,7 +165,7 @@
 					});
 
 					
-				} else if (newState.account !== AuthService.getUsername()) {
+				} else if (newState.account !== AuthService.getUsername() && !newState.model) {
 					// If it's some other random page that doesn't match 
 					// anything sensible like legal, logged out pages, or account
 					vm.isLoggedOutPage = false;
