@@ -185,6 +185,7 @@ div(layout="row" flex layout-align="end center")
 		md-button(layout="row" ng-click="vm.setupNewFederation($event, vm.accounts)") Add Federation 
 		md-button(layout="row" ng-click="vm.newProject($event,  vm.accounts)") Add Project
 div(layout="row" flex layout-align="end center")
+	span.addHint(ng-show="!vm.addButtons") Add projects, models & federations
 	md-button.md-accent.md-fab.md-mini(aria-label="Add", ng-click="vm.addButtonsToggle()")
 		md-icon.angular-material-icons {{vm.addButtonType}}
 

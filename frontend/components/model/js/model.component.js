@@ -47,7 +47,7 @@
 
 			vm.issuesCardIndex = 0;
 			vm.pointerEvents = "inherit";
-			
+
 			history.pushState(null, null, document.URL);
 			var popStateHandler = function(event) {
 				StateManager.popStateHandler(event, vm.account, vm.model);

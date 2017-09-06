@@ -63,17 +63,23 @@ home #homeLogo img {
 
 @media (max-width: 960px) {
     home .homeUserContent {
-        margin-top: 10px;
+        margin-bottom: 80px;
+        margin-top: 0px !important;
+    }
+
+    /* home #homeLoggedOut {
+        top: 80px !important;
     }
         
     home .homeHolder {
         padding-bottom: 20px;
-    }
-    
+    } */
+
 }
 
 home .homeUserContent {
-    margin-top: 100px;
+    margin-top: 80px;
+    /* margin-bottom: 80px; */
 }
  
 home .homeUserContent .md-whiteframe-1dp,
@@ -160,11 +166,13 @@ home #homeLegalContainer {
 }
 
 home #homeLoggedOut {
+    top: 80px;
     position: absolute;
     margin: auto 0;
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
+    margin-bottom: 80px;
 }
     
 home #legalLinks a {

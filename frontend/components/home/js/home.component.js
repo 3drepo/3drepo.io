@@ -323,13 +323,15 @@
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
 
 					// TODO: Do this properly using state manager
-					
-					if (AuthService.isLoggedIn()) {
-						$location.path(AuthService.getUsername());
+					var path = "/";
+					if (AuthService.isLoggedIn() && AuthService.getUsername()) {
+						path = "/" + AuthService.getUsername();
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
-					} else {
-						$location.path("");
 					}
+					console.log(path);
+					
+					$location.path(path);
+					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
