@@ -49,15 +49,15 @@
 							label Job title
 							md-select(ng-model="vm.newUser.jobTitle", required)
 								md-option(ng-repeat="jobTitle in vm.jobTitles", value="{{jobTitle}}") {{jobTitle}}
+						md-input-container(flex ng-if="vm.newUser.jobTitle=='Other'")
+							input(type='text', ng-model='vm.newUser.otherJobTitle', placeholder='Please specify' ng-required="vm.newUser.jobTitle=='Other'")
 
 					div(layout="row", layout-xs="column")
-						md-input-container(flex ng-if="vm.newUser.jobTitle!='Other'")
 						md-input-container(flex)
 							label Country
 							md-select#country-select(ng-model="vm.newUser.country", required)
 								md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
-						md-input-container(flex ng-if="vm.newUser.jobTitle=='Other'")
-							input(type='text', ng-model='vm.newUser.otherJobTitle', placeholder='Please specify' ng-required="vm.newUser.jobTitle=='Other'")
+						
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
@@ -71,8 +71,9 @@
 								key="vm.captchaKey"
 								ng-model="vm.reCaptchaResponse"
 								ng-if="vm.useReCAPTCHA")
-					
-					h3.registerError {{vm.registerErrorMessage}}
+
+					div(layout="row", layout-xs="column", flex="100" layout-align="center center")
+						h3.registerError() {{vm.registerErrorMessage}}
 
 					div(layout="row", layout-xs="column", layout-align="start center")
 						md-button.md-accent.md-raised.sign-up-button(

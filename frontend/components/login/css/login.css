@@ -1,11 +1,10 @@
 login .homeUserContent {
-  margin-top: 100px;
   z-index: 2;
 }
 
 @media (max-width: 960px) {
   login .homeUserContent {
-    margin-top: 12vh;
+    margin-top: 8vh;
   }
 }
 

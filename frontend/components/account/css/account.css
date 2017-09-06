@@ -95,7 +95,7 @@ account-dir #account #accountItem userContent {
   account-dir #account #accountItem {
     margin-left: 5%;
     margin-bottom: 100px;
-    margin-top: 200px;
+    /* margin-top: 200px; */
   }
 }
 
@@ -104,6 +104,18 @@ account-dir .userContent .cardInfo {
 }
 
 /** Account Models **************************************************************************************************/
+
+account-items #floating-button {
+  position: absolute;
+  bottom: 52px;
+  right: 15px;
+}
+
+account-items .addHint {
+  color: grey;
+  padding-right: 6px;
+  font-size: 14px;
+}
 
 account-items .md-button {
   z-index: 1 !important;
@@ -781,12 +793,6 @@ account-teamspaces .loadingText {
 account-teamspaces .loadingText md-progress-circular {
   display: inline-block;
   margin: 0 auto;
-}
-
-#floating-button {
-  position: absolute;
-  bottom: 52px;
-  right: 15px;
 }
 
 

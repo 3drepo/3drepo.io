@@ -78,8 +78,6 @@
          * Do password change
          */
 		function doPasswordChange() {
-			console.log("doPasswordChange");
-			console.log(vm.username, vm.token);
 			if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
 				if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
 					vm.messageColor = vm.messageColour;

@@ -179,6 +179,13 @@
 					permissions: user.permissions
 				};
 
+				// Move them to unassigned role if we remove there admin privilidges
+				if (permission === "teamspace_admin" && vm.modelRoles && vm.modelRoles.length > 1) {
+					vm.selectedRole[user.user] = "unassigned";
+				}
+
+				vm.checkIfAdminChanged();
+
 				$http.post(url, permissionData)
 					.catch(function(error){
 						var title = "Issue Updating Teamspace Permissions";
@@ -321,7 +328,8 @@
 		};
 
 		vm.adminDisabled = function(user, permission) {
-			return permission !== "admin_project" && vm.userHasProjectPermissions(user, "admin_project") || 
+			return (permission !== "admin_project" && 
+				vm.userHasProjectPermissions(user, "admin_project")) || 
 				vm.userHasPermissions(user, "teamspace_admin");
 		};
 
@@ -531,6 +539,7 @@
 		};
 
 		vm.checkIfAdminChanged = function() {
+			console.log("checkIfAdminChange", vm.selectedRole)
 			if (vm.selectedRole) {
 				Object.keys(vm.selectedRole).forEach(function(user){
 					if (user && (vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
@@ -565,6 +574,7 @@
 								// If its the teamspace then we can disable 
 								// and assign admin role
 								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
+									console.log(user.user, "admin")
 									vm.selectedRole[user.user] = "admin";
 								} else {
 									vm.selectedRole[user.user] = user.permission || "unassigned";
