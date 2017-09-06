@@ -120,6 +120,21 @@
 			
 		};
 
+		vm.hasViewableProject = function(teamspace) {
+			console.log("teamspace has viewable", teamspace.name, teamspace.projects.filter(
+				vm.hasViewableModel
+			).length > 0);
+			return teamspace.projects.filter(
+				vm.hasViewableModel
+			).length > 0;
+		};
+
+		vm.hasViewableModel = function(project) {
+			return project.models.filter(function(model){
+				return model.permissions.length > 0;
+			}).length > 0;
+		};
+
 		/**
 		 * Get the show/hide state of a data object
 		 *
