@@ -6,7 +6,8 @@
 	md-list#accountList.tree-branch(flex)
 		// Accounts
 		div(ng-repeat="account in vm.accounts")
-			div(layout="column", layout-align="space-between")
+			div(ng-if="account.permissions.length"
+				layout="column", layout-align="space-between")
 				md-list-item.tree-node(flex)
 					.account(layout="row", layout-align="start center", md-ink-ripple, flex, ng-click="vm.toggleProjects(account.projects)")
 						md-button.md-icon-button(aria-label="Folder")
@@ -24,7 +25,8 @@
 
 						md-list.tree-branch(ng-repeat="project in account.projects")
 
-							div(ng-click="vm.toggleProject(project)" layout="row")
+							div(ng-if="project.permissions.length"
+								ng-click="vm.toggleProject(project)" layout="row")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
 										md-icon.angular-material-icons(ng-show="vm.shouldShow(project)") folder_open
@@ -61,6 +63,7 @@
 								
 								div(ng-show="vm.shouldShow(project, 'models', account.account)")
 									div(ng-repeat="model in vm.getIndividualModels(project.models)"
+										ng-if="model.permissions.length"
 										ng-show="model.name")
 								
 										account-model(
@@ -90,7 +93,9 @@
 								div(ng-show="vm.shouldShow(project, 'federations', account.account)")
 
 									div(ng-repeat="federation in vm.getFederations(project.models)"
-										ng-show="federation.name")
+										ng-show="federation.name"
+										ng-if="federation.permissions.length"
+										)
 										
 										account-federations(											
 											federation="federation"
