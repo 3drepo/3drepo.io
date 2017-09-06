@@ -214,7 +214,8 @@
 							thead(layout="row")
 								tr: th.fixedWidth.userColumn User
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
-									th.fixedWidth.sentenceCase(ng-class="{'adminColumn' : value == 'admin'}") {{value}}
+									th.fixedWidth.sentenceCase(
+										ng-class="{'adminColumn' : value == 'admin'}") {{value}}
 
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(
@@ -226,7 +227,9 @@
 									td.fixedWidth.userColumn.userInput()
 										p {{user}}
 
-									td.fixedWidth(ng-repeat="value in vm.modelRoles", layout-align="center center")
+									td.fixedWidth(
+										ng-repeat="value in vm.modelRoles", 
+										layout-align="center center")
 
 										md-radio-group(	
 											ng-disabled="value === 'admin'"

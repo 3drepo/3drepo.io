@@ -5,7 +5,13 @@
 				h2 Licenses
 
 		.userContent
+			div.loadingText(flex="100" ng-if="vm.toShow === undefined") 
+				md-progress-circular
+				h3 Loading License Data...
+
+
 			div(ng-switch="vm.toShow")
+
 				div(ng-switch-when="0")
 					.cardInfo
 						p You do not currently have any licenses.
