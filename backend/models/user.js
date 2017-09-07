@@ -770,7 +770,8 @@ function _createAccounts(roles, userName)
 				let projPromises = [];
 				let account = null;
 				const query = { 'permissions': { '$elemMatch': { user: userName } }};
-				return Project.find({account: user.user}, query).then(projects => {
+				const projection = { 'permissions': { '$elemMatch': { user: userName } }, "models": 1, "name": 1};
+				return Project.find({account: user.user}, query, projection).then(projects => {
 
 					projects.forEach( _proj =>{
 						projPromises.push(new Promise(function(resolve, reject){
@@ -826,7 +827,7 @@ function _createAccounts(roles, userName)
 								//model permissions
 								let modelPromises = [];
 								let dbUserCache = {};
-								return ModelSetting.find({account: user.user},query).then(models => {
+								return ModelSetting.find({account: user.user},query, projection).then(models => {
 
 									models.forEach(model => {
 										if(model.permissions.length > 0){
