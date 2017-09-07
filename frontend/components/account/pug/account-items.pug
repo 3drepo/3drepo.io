@@ -24,10 +24,12 @@
 					div(ng-show="vm.shouldShow(account.projects, 'projects', account.account)")
 						p.no-federations(ng-show="account.projects.length === 0") No projects created
 
-						md-list.tree-branch(ng-repeat="project in account.projects")
+						md-list.tree-branch(
+							ng-if="vm.hasViewableModel(project)"
+							ng-repeat="project in account.projects")
 
-							div(ng-if="vm.hasViewableModel(project)"
-								ng-click="vm.toggleProject(project)" layout="row")
+							div(ng-click="vm.toggleProject(project)" 
+								layout="row")
 
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")

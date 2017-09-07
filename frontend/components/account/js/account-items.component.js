@@ -34,9 +34,18 @@
 			
 		});
 
-	AccountItemsCtrl.$inject = ["StateManager", "$mdDialog", "$scope", "$location", "$element", "$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", "AnalyticService", "NotificationService",  "AuthService", "AccountService"];
+	AccountItemsCtrl.$inject = [
+		"StateManager", "$mdDialog", "$scope", "$location", "$element", 
+		"$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "NotificationService",  "AuthService", "AccountService"
+	];
 
-	function AccountItemsCtrl(StateManager, $mdDialog, $scope, $location, $element, $timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, AnalyticService, NotificationService, AuthService, AccountService) {
+	function AccountItemsCtrl(
+		StateManager, $mdDialog, $scope, $location, $element,
+		$timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, 
+		AnalyticService, NotificationService, AuthService, AccountService
+	) {
+		
 		var vm = this;
 
 		/*
@@ -120,19 +129,38 @@
 			
 		};
 
+		vm.viewableCache = {
+			teamspace : {},
+			projects : {}
+		};
+
 		vm.hasViewableProject = function(teamspace) {
-			console.log("teamspace has viewable", teamspace.name, teamspace.projects.filter(
-				vm.hasViewableModel
-			).length > 0);
-			return teamspace.projects.filter(
+
+			if (vm.viewableCache.teamspace[teamspace.name]) {
+				return vm.viewableCache.teamspace[teamspace.name];
+			} 
+
+			var viewable = teamspace.projects.filter(
 				vm.hasViewableModel
 			).length > 0;
+
+			vm.viewableCache.teamspace[teamspace.name] = viewable;
+			return viewable;
+
 		};
 
 		vm.hasViewableModel = function(project) {
-			return project.models.filter(function(model){
+
+			if (vm.viewableCache.projects[project._id]) {
+				return vm.viewableCache.projects[project._id];
+			} 
+
+			var viewable = project.models.filter(function(model){
 				return model.permissions.length > 0;
 			}).length > 0;
+			vm.viewableCache.projects[project._id] = viewable;
+			return viewable;
+
 		};
 
 		/**
@@ -433,9 +461,9 @@
 		/*
 		 * Watch for change in edited federation
 		 */
-		$scope.$watch("vm.federationData", function (oldVal, newVal) {
-
-		}, true);
+		// $scope.$watch("vm.federationData", function (oldVal, newVal) {
+				
+		// }, true);
 
 		/**
 		 * Open the federation dialog
@@ -504,21 +532,9 @@
 				}
 			}
 
-			if (vm.newModelData && vm.newModelData.name) {
-
-				if (vm.newModelData.name.length < 3) {
-					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = "Name is less than 3 characters";
-				} else if (vm.newModelData.name.length > 20) {
-					vm.showNewModelErrorMessage = true;
-					vm.newModelErrorMessage = "Name must be less than 20 characters";
-				} else {
-					vm.showNewModelErrorMessage = false;
-				}
-				
-			} else if (vm.newModelData && vm.teamspaceAndProjectSelected && !vm.newModelData.name) {
+			if (vm.teamspaceAndProjectSelected() && !vm.newModelData.name) {
 				vm.showNewModelErrorMessage = true;
-				vm.newModelErrorMessage = "Model less than 3 characters or has invalid characters";
+				vm.newModelErrorMessage = "Model name isn't between 3-20 characters, or has invalid characters";
 			} else {
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";
@@ -608,28 +624,11 @@
 			});
 		};
 
-
-		/**
-		 * Find out if teamspace and project have been selected for 
-		 */
-		vm.teamspaceAndProjectSelected = false;
-
-		$scope.$watch("vm.newModelData.teamspace", function (newValue) {
-			if (newValue && vm.newModelData.project) {
-				vm.teamspaceAndProjectSelected = true;
-			} else {
-				vm.teamspaceAndProjectSelected = false;
-			}
-		});
-
-		$scope.$watch("vm.newModelData.project", function (newValue) {
-			if (newValue && vm.newModelData.teamspace) {
-				vm.teamspaceAndProjectSelected = true;
-			} else {
-				vm.teamspaceAndProjectSelected = false;
-			}
-		});
-
+		vm.teamspaceAndProjectSelected = function() {
+			return vm.newModelData && 
+				vm.newModelData.project && 
+				vm.newModelData.teamspace;
+		};
 
 		/**
 		 * Bring up dialog to add a new model
@@ -653,9 +652,7 @@
 		 * Save a new model
 		 */
 		vm.saveNewModel = function (event) {
-			var model,
-				promise,
-				enterKey = 13,
+			var enterKey = 13,
 				doSave = false;
 
 			if (angular.isDefined(event)) {
@@ -667,7 +664,7 @@
 			}
 
 			if (doSave) {
-
+				
 				if(RevisionsService.isTagFormatInValid(vm.tag)){
 					vm.showNewModelErrorMessage = true;
 					vm.newModelErrorMessage = "Invalid revision name";
@@ -680,8 +677,9 @@
 					return;
 				}
 
-				promise = AccountUploadService.newModel(vm.newModelData);
-				promise
+				vm.uploading = true;
+
+				AccountUploadService.newModel(vm.newModelData)
 					.then(function (response) {
 
 						if (response.data.status === 400) {
@@ -690,7 +688,7 @@
 						} else {
 							vm.modelsExist = true;
 							// Add model to list
-							model = {
+							var model = {
 								model: response.data.model,
 								name: response.data.name,
 								project : vm.newModelData.project,
@@ -713,10 +711,12 @@
 								eventAction: "create"
 							});
 						}
+						vm.uploading = false;
 					})
 					.catch(function(error){
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = error.data.message;
+						vm.uploading = false;
 					});
 			}
 		};
@@ -780,6 +780,12 @@
 					// Check if the project exists and it if so
 					accountToUpdate.projects.forEach(function(project){
 						if (project.name === projectName ) {
+			
+							vm.viewableCache = {
+								teamspace : {},
+								projects : {}
+							};
+							
 							project.models.push(model);
 							found = true;
 						} 
