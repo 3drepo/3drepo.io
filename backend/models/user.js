@@ -769,9 +769,8 @@ function _createAccounts(roles, userName)
 				//check project scope permissions
 				let projPromises = [];
 				let account = null;
-				const projection = { 'permissions': { '$elemMatch': { user: userName }, 'name': 1, 'models': 1 }};
-				return Project.find({account: user.user},{}, projection).then(projects => {
-
+				const query = { 'permissions': { '$elemMatch': { user: userName } }};
+				return Project.find({account: user.user}, query).then(projects => {
 
 					projects.forEach( _proj =>{
 						projPromises.push(new Promise(function(resolve, reject){
@@ -827,7 +826,7 @@ function _createAccounts(roles, userName)
 								//model permissions
 								let modelPromises = [];
 								let dbUserCache = {};
-								return ModelSetting.find({account: user.user},{}, projection).then(models => {
+								return ModelSetting.find({account: user.user},query).then(models => {
 
 									models.forEach(model => {
 										if(model.permissions.length > 0){
