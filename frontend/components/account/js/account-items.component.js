@@ -129,6 +129,13 @@
 			
 		};
 
+		vm.resetViewableCache = function() {
+			vm.viewableCache = {
+				teamspace : {},
+				projects : {}
+			};
+		};
+
 		vm.viewableCache = {
 			teamspace : {},
 			projects : {}
@@ -142,7 +149,7 @@
 
 			var viewable = teamspace.projects.filter(
 				vm.hasViewableModel
-			).length > 0;
+			).length > 0 || teamspace.permissions.length > 0;
 
 			vm.viewableCache.teamspace[teamspace.name] = viewable;
 			return viewable;
@@ -157,7 +164,8 @@
 
 			var viewable = project.models.filter(function(model){
 				return model.permissions.length > 0;
-			}).length > 0;
+			}).length > 0 || project.permissions.length > 0;
+
 			vm.viewableCache.projects[project._id] = viewable;
 			return viewable;
 
@@ -360,7 +368,8 @@
 						if (!isEdit) {
 							project.models.push(vm.federationData);
 						}
-
+						vm.resetViewableCache();
+						
 						vm.addButtons = false;
 						vm.addButtonType = "add";
 
@@ -781,10 +790,7 @@
 					accountToUpdate.projects.forEach(function(project){
 						if (project.name === projectName ) {
 			
-							vm.viewableCache = {
-								teamspace : {},
-								projects : {}
-							};
+							vm.resetViewableCache();
 							
 							project.models.push(model);
 							found = true;
@@ -1013,6 +1019,7 @@
 							);
 						}
 
+						vm.resetViewableCache();
 						vm.errorMessage = "";
 						delete vm.newProjectTeamspace;
 						delete vm.newProjectName;
