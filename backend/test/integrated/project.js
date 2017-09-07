@@ -78,6 +78,8 @@ describe('Projects', function () {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
 
+					console.log(res.body.accounts);
+					console.log("looking for", username , " and project: " , project.name);
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 
