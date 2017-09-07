@@ -203,7 +203,7 @@
 								md-option(
 									aria-label="{{model.name}}" 
 									ng-repeat="model in vm.models"
-									value="{{model.model}}") {{model.name}}
+									value="{{model.model}}") {{ vm.formatModelName(model) }} 
 
 					md-card
 						table.scrollable.radiobuttons(
