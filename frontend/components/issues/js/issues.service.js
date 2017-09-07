@@ -45,7 +45,6 @@
 		var service = {
 			init : init,
 			setCanUpdateStatus : setCanUpdateStatus,
-			setRoleIndicatorColour : setRoleIndicatorColour,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -102,22 +101,6 @@
 			return isOwner || hasRole;
 
 		}
-
-		/**
-		 * Set the role indicator colour
-		 * @param {String} role
-		 */
-		function setRoleIndicatorColour (role, indicatorEl) {
-			var roleColor = getJobColor(role);
-			if (roleColor !== null) {
-				indicatorEl.css("background", getJobColor(role));
-				indicatorEl.css("border", "none");
-			} else {
-				indicatorEl.css("background", "none");
-				indicatorEl.css("border", "1px solid #DDDDDD");
-			}
-		}
-
 
 		function deselectPin(issue) {
 			var data;

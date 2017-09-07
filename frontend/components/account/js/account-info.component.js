@@ -128,7 +128,7 @@
 						
 						vm.avatarUrl = getAvatarUrl();
 						//$scope.$apply();
-						console.log("changing URL", vm.avatarUrl);
+
 
 					} else {
 						vm.uploadError("Upload avatar error", res.data);

@@ -171,6 +171,12 @@
 
 		};
 
+		vm.hasProjectWithPermission = function(teamspace, permission) {
+			return teamspace.projects.filter(function(project){
+				return project.permissions.indexOf(permission) !== -1;
+			}).length > 0;
+		};
+
 		/**
 		 * Get the show/hide state of a data object
 		 *
@@ -204,7 +210,7 @@
 		 * @returns {Boolean} The state of the property (to show or hide)
 		 */
 		vm.shouldShow = function(items, type, account) {
-			//console.log(items, type, account)
+
 			switch (type) {
 				// Special cases for models and federations
 			case "models":
@@ -292,7 +298,6 @@
 		};
 
 		// ADD PROJECTS/FEDERATIONS/MODELS
-
 		vm.addButtonsToggle = function() {
 			vm.addButtons = !vm.addButtons;
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
@@ -479,7 +484,7 @@
 		 *
 		 * @param event
 		 */
-		vm.setupNewFederation = function (event, accounts) {
+		vm.setupNewFederation = function (event) {
 
 			vm.isDefaultFederation = false; 
 			vm.federationOriginalData = null;
@@ -893,7 +898,7 @@
 				vm.projectData.deleteName = project.name;
 				vm.projectData.deleteTeamspace = teamspace.name;
 				vm.projectData.deleteWarning = warn;
-				UtilsService.showDialog("delete-project-dialog.html", $scope, event, true);	
+				UtilsService.showDialog("delete-project-dialog.html", $scope, null, true);	
 				break;
 
 			case "edit":
@@ -911,7 +916,7 @@
 			vm.projectData.newProjectName = "";
 			vm.projectData.oldProjectName = "";
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, event, true);
+			UtilsService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 
@@ -925,7 +930,7 @@
 			vm.projectData.teamspaceName = teamspace.name;
 			vm.projectData.newProjectName = project.name;
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, event, true);
+			UtilsService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 
