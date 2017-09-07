@@ -127,18 +127,7 @@
 		*/
 		$scope.$watch("vm.state", function (oldState, newState) {
 
-			console.log("vm.state changed", oldState, newState);
-
 			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
-			console.log("newstate : ", newState);
-			console.log("oldstate : ", oldState);
-			console.log("change?", change);
-
-			// Determine whether to show the Login directive or 
-			// logged in content directives
-			// if (newState.loggedIn !== undefined) {
-			// 	vm.loggedIn = newState.loggedIn;
-			// }
 
 			vm.loggedIn = AuthService.isLoggedIn();
 

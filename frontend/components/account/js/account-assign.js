@@ -539,7 +539,7 @@
 		};
 
 		vm.checkIfAdminChanged = function() {
-			console.log("checkIfAdminChange", vm.selectedRole)
+	
 			if (vm.selectedRole) {
 				Object.keys(vm.selectedRole).forEach(function(user){
 					if (user && (vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
@@ -574,7 +574,6 @@
 								// If its the teamspace then we can disable 
 								// and assign admin role
 								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
-									console.log(user.user, "admin")
 									vm.selectedRole[user.user] = "admin";
 								} else {
 									vm.selectedRole[user.user] = user.permission || "unassigned";

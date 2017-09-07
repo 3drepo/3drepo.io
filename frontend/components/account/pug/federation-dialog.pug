@@ -10,14 +10,23 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 
 			md-input-container()
 				md-select(
-					placeholder="Teamspace", 
+					placeholder="Teamspace"
 					tdr-focus="true"
 					ng-model="vm.federationData.teamspace" 
 					ng-disabled="vm.federationData.teamspace && vm.federationData._isEdit")
+
 					md-option(
 						required
 						ng-repeat="teamspace in vm.accounts"
+						ng-if="vm.federationData.teamspace && vm.federationData._isEdit"
 						ng-selected="vm.federationData.teamspace === teamspace.name"
+						value="{{teamspace.name}}") {{teamspace.name}}
+					
+					md-option(
+						ng-if="!vm.federationData._isEdit && vm.hasProjectWithPermission(teamspace, 'create_federation')"
+						required
+						ng-repeat="teamspace in vm.accounts"
+						ng-selected="teamspace.name === vm.account"
 						value="{{teamspace.name}}") {{teamspace.name}}
 
 			md-input-container()
@@ -25,9 +34,11 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 					placeholder="Project",
 					ng-model="vm.federationData.project"
 					ng-disabled="vm.federationData.project === 'default' || (vm.federationData.project && vm.federationData._isEdit)")
+					
 					md-option(
 						required
 						ng-repeat="project in vm.getProjects(vm.federationData.teamspace)"
+						ng-if="project.permissions.indexOf('create_federation') !== -1"
 						ng-selected="vm.federationData.project === project.name"
 						value="{{project.name}}") {{project.name}}
 

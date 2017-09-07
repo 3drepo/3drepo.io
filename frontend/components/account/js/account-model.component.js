@@ -261,6 +261,7 @@
 
 			vm.uploadErrorMessage = null;
 			console.log(vm.modelToUpload);
+
 			var uploadFileData = {
 				model: vm.model, 
 				account: vm.account, 
@@ -319,7 +320,7 @@
 		};
 
 		vm.handleModelStatus = function(modelData, freshModel) {
-			console.log("modelDAta", modelData)
+
 			if (modelData.status) {
 				vm.model.status = modelData.status;
 			}

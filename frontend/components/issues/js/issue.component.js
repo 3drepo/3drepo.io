@@ -342,10 +342,8 @@
 				comment;
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			IssuesService.setRoleIndicatorColour(
-				vm.issueData.assigned_roles[0], 
-				vm.issueRoleIndicator
-			);
+
+			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
 
@@ -1018,10 +1016,7 @@
 					vm.issueData.assigned_roles = issue.assigned_roles;
 
 					vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-					IssuesService.setRoleIndicatorColour(
-						vm.issueData.assigned_roles[0], 
-						vm.issueRoleIndicator
-					);
+					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 					
 					vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
 						vm.issueData, 

@@ -17,7 +17,9 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-keypress="vm.saveNewModel($event)")
 
 					md-option(
-						ng-repeat="teamspace in vm.accounts",
+						ng-repeat="teamspace in vm.accounts"
+						ng-if="vm.hasProjectWithPermission(teamspace, 'create_model')"
+						ng-selected="teamspace.name === vm.account"
 						value="{{teamspace.name}}") {{teamspace.name}}
 
 			md-input-container(ng-if="vm.newModelData.teamspace !== undefined")
@@ -29,8 +31,10 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-keypress="vm.saveNewModel($event)")
 
 					md-option(
-						ng-repeat="project in vm.getProjects(vm.newModelData.teamspace)",
+						ng-repeat="project in vm.getProjects(vm.newModelData.teamspace)"
+						ng-if="project.permissions.indexOf('create_model')  !== -1"
 						value="{{project.name}}") {{project.name}}
+
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected()")
 				input(
