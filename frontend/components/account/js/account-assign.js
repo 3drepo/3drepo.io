@@ -598,6 +598,12 @@
 			
 		});
 
+		vm.formatModelName = function(model) {
+			return (model.federate === true) ? 
+				model.name + " (Federation)" : 
+				model.name + " (Model)";
+		};
+
 		vm.modelStateChange = function(user, role) {
 			
 			// We don't want people to be able to set admins
@@ -629,6 +635,56 @@
 					}
 
 				}
+			}
+
+			// TODO: Check if the model is a federation and if so, check that they have some 
+			// permission on all submodel
+			//console.log(vm.selectedModel);
+
+			var permissionlessModels = [];
+			
+			if (vm.selectedModel.federate && vm.selectedModel.subModels.length > 0) {
+				vm.selectedModel.subModels.forEach(function(subModel){
+					
+					Object.keys(vm.selectedProject.models).forEach(function(modelId){
+						var projectModel = vm.selectedProject.models[modelId];
+						
+						//console.log(subModel.model, projectModel.model);
+
+						if (
+							subModel.model === projectModel.model
+						) {
+							permissionlessModels.push(projectModel);
+							//console.log(projectModel, " doesn't have permissions");
+						}
+
+					});
+				});
+			}
+
+			if (permissionlessModels.length) {
+				var content = "We noticed the following Federation sub models do not have assigned " +
+				"permissions for " + user + "<br> You may want this behaviour, but we thought we'd let you know." + 
+				"<br><br> These are the models in question: <br><br>";
+				permissionlessModels.forEach(function(model, i) {
+					content += " <strong>" + model.name + "</strong>";
+					if (i !== permissionlessModels.length) {
+						content += ",";
+					}
+
+					if ((i + 1) % 4 === 0) {
+						content += "<br><br>";
+					}
+				});
+
+				$mdDialog.show( 
+					$mdDialog.alert()
+						.clickOutsideToClose(true)
+						.title("Federation has Unassigned Models")
+						.htmlContent(content)
+						.ariaLabel("Federation has Unassigned Models")
+						.ok("OK")
+				);
 			}
 
 			// Update the permissions user for the selected teamspace

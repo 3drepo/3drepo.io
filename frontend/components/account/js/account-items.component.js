@@ -581,7 +581,7 @@
 		vm.deleteModel = function () {
 
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
+			var url = vm.targetAccountToDeleteModel + "/" + encodeURIComponent(vm.modelToDelete.model);
 			var promise = UtilsService.doDelete({}, url);
 
 			promise.then(function (response) {
@@ -898,6 +898,7 @@
 				vm.projectData.deleteName = project.name;
 				vm.projectData.deleteTeamspace = teamspace.name;
 				vm.projectData.deleteWarning = warn;
+				vm.projectData.errorMessage = "";
 				UtilsService.showDialog("delete-project-dialog.html", $scope, null, true);	
 				break;
 
@@ -953,7 +954,7 @@
 		 * @param {String} newProjectName The project name to change to
 		 */
 		vm.updateProject = function(teamspaceName, oldProjectName, newProjectName) {
-			var url = teamspaceName + "/projects/" + oldProjectName;
+			var url = teamspaceName + "/projects/" + encodeURIComponent(oldProjectName);
 			var promise = UtilsService.doPut({"name": newProjectName}, url);
 			vm.handleProjectPromise(promise, teamspaceName, {
 				edit  : true,
@@ -969,7 +970,7 @@
 		 * @param {String} projectName The project name to delete 
 		 */
 		vm.deleteProject = function(teamspaceName, projectName) {
-			var url = teamspaceName + "/projects/" + projectName;
+			var url = teamspaceName + "/projects/" + encodeURIComponent(projectName);
 			var promise = UtilsService.doDelete({},url);
 			vm.handleProjectPromise(promise, teamspaceName, {
 				projectName : projectName,
@@ -1024,6 +1025,7 @@
 							);
 						}
 
+						vm.projectData.errorMessage = "";
 						vm.resetViewableCache();
 						vm.errorMessage = "";
 						delete vm.newProjectTeamspace;
