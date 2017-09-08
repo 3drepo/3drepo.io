@@ -113,12 +113,13 @@
 				if(!branch) {
 					branch = !revision ? "master" : "";
 				}
-						
+					
 				if(!revision) {
-					revision = "head";
+					//revision is master/head 
+					revision = branch + "/head";
 				}
-
-				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
+					
+				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
 
 				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {
