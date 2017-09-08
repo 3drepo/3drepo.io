@@ -145,8 +145,8 @@
 
 		};
 
-		$scope.$watchGroup(["vm.account","vm.model"], function() {
-			if (angular.isDefined(vm.account) && angular.isDefined(vm.model)) {
+		$scope.$watchGroup(["vm.account", "vm.model"], function() {
+			if (vm.account && vm.model) {
 				angular.element(function(){
 					vm.setupModelInfo();
 				});
