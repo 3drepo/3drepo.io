@@ -335,8 +335,8 @@ var UnityUtil;
 	UnityUtil.prototype.cancelLoadModel = function() {
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
-			loadedResolve.reject();
-			loadingResolve.reject();
+			loadedResolve.reject("cancel loading model");
+			loadingResolve.reject("cancel loading model");
 		}
 	};
 
@@ -344,12 +344,7 @@ var UnityUtil;
 		
 		//console.log("pin - loadModel");
 
-		if(!loaded && loadedResolve) {
-			//If the previous model is being loaded but hasn't finished yet
-			loadedResolve.reject();
-			loadingResolve.reject();
-		}
-
+		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();	
 		
 		loadedPromise = null;

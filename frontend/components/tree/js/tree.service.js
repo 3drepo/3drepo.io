@@ -154,7 +154,6 @@
 
 							tree.buf = res.data.mainTree;
 			
-							// TODO: tree.buf doesn't exist? What is going on here?
 							var subTree = tree.buf.nodes;
 							subTree.parent = idToObjRef[tree._id];
 							
@@ -167,7 +166,7 @@
 						})
 						.catch(function(res){
 							handleResponse(res, tree, idToObjRef);	
-							console.error(res);
+							console.warn("Subtree issue: ", res);
 						});
 
 					getSubTrees.push(getSubTree);
