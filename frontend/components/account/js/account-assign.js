@@ -108,7 +108,10 @@
 		vm.teamspacesToAssign = function() {
 			return vm.selectedTeamspace && 
 					vm.selectedTeamspace.teamspacePermissions && 
-					vm.selectedTeamspace.teamspacePermissions.length === 0;
+					(vm.selectedTeamspace.teamspacePermissions.length === 0 || 
+						(vm.selectedTeamspace.teamspacePermissions.length === 1 && 
+						vm.selectedTeamspace.teamspacePermissions[0].user === vm.account)
+					);
 		};
 
 		vm.teamspaceAdminDisabled = function(user, permission) {
@@ -371,8 +374,21 @@
 		});
 
 		vm.handleProjectSelected = function(response){
-						
+			
 			vm.selectedProject.userPermissions = response.data.permissions;
+
+			// We should put the teamspace owner in the list if they 
+			// aren't in it already
+			if (vm.selectedProject.userPermissions.length === 0 
+				&& vm.selectedTeamspace.account === vm.account) {
+
+				vm.selectedProject.userPermissions.push({
+					permissions: ["admin_project"],
+					user : vm.account
+				});
+
+			}
+			
 
 			// Reset the models
 			vm.clearModelState();
@@ -511,7 +527,7 @@
 
 
 		vm.modelUsersToAssign = function() {
-			return vm.modelRoles && Object.keys(vm.modelRoles).length === 0;
+			return vm.modelSelected && vm.selectedRole && Object.keys(vm.selectedRole).length === 0;
 		};
 
 		vm.modelUserValid = function(user) {
@@ -569,6 +585,15 @@
 						.then(function(response){
 
 							var users = response.data;
+
+							// Add the teamspace admin if they don't appear in the list
+							if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
+								users.push({
+									permissions: ["admin"],
+									user : vm.account
+								});
+							}
+							
 							users.forEach(function(user){
 
 								// If its the teamspace then we can disable 
@@ -639,8 +664,7 @@
 
 			// TODO: Check if the model is a federation and if so, check that they have some 
 			// permission on all submodel
-			//console.log(vm.selectedModel);
-
+	
 			var permissionlessModels = [];
 			
 			if (vm.selectedModel.federate && vm.selectedModel.subModels.length > 0) {
@@ -648,14 +672,11 @@
 					
 					Object.keys(vm.selectedProject.models).forEach(function(modelId){
 						var projectModel = vm.selectedProject.models[modelId];
-						
-						//console.log(subModel.model, projectModel.model);
 
 						if (
 							subModel.model === projectModel.model
 						) {
 							permissionlessModels.push(projectModel);
-							//console.log(projectModel, " doesn't have permissions");
 						}
 
 					});
