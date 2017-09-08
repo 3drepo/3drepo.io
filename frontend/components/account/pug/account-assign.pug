@@ -11,7 +11,7 @@
 			md-tab(label="Teamspace")
 				div.assignTabHolder.loadingHolder(layout="row" ng-if="vm.loadingTeamspaces")
 					md-progress-circular.loading
-					h3 Loading Teamspace Data...
+					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.loadingTeamspaces", flex="100")
 
@@ -75,7 +75,7 @@
 			md-tab(label="Project", ng-click="vm.resetState()")
 				div.assignTabHolder.loadingHolder(layout="row" ng-if="vm.projectsLoading")
 					md-progress-circular.loading
-					h3 Loading Teamspace Data...
+					h3 Loading Project Permissions...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
 
@@ -161,7 +161,7 @@
 			md-tab(label="Models & Federations", ng-click="vm.resetState()")
 				div.assignTabHolder.loadingHolder(layout="row", ng-if="vm.loadingTeamspaces || vm.projectsLoading")
 					md-progress-circular.loading
-					h3 Loading Teamspace Data...
+					h3 Loading Model Permissions...
 
 				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
 					div(layout="row")

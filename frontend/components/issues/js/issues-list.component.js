@@ -120,10 +120,8 @@
 		$scope.$watch("vm.filterText", function() {
 
 			// Filter text
-			if (vm.filterText && (typeof vm.filterText !== "undefined")) {
-				setupIssuesToShow();
-				showPins();
-			}
+			setupIssuesToShow();
+			showPins();
 
 		});
 
@@ -347,6 +345,15 @@
 			IssuesService.deselectPin(issue);
 		}
 
+		// Helper function for searching strings
+		function stringSearch(superString, subString) {
+			if(!superString){
+				return false;
+			}
+
+			return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+		}
+
 		/**
 		 * Setup the issues to show
 		 */
@@ -374,16 +381,8 @@
 				}
 
 				// Filter text
-				if (angular.isDefined(vm.filterText) && vm.filterText !== "") {
-
-					// Helper function for searching strings
-					var stringSearch = function(superString, subString) {
-						if(!superString){
-							return false;
-						}
-
-						return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-					};
+				var someText = angular.isDefined(vm.filterText) && vm.filterText !== "";
+				if (someText) {
 
 					vm.issuesToShow = ($filter("filter")(vm.issuesToShow, function(issue) {
 						// Required custom filter due to the fact that Angular
@@ -417,7 +416,7 @@
 
 						return show;
 					}));
-				}
+				} 
 
 				// Closed
 				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
