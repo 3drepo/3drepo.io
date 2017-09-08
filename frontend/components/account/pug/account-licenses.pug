@@ -5,9 +5,12 @@
 				h2 Licenses
 
 		.userContent
-			div.loadingText(flex="100" ng-if="vm.toShow === undefined") 
+			div.loadingText(
+				layout-align="center center"
+				flex="100")
+				//ng-if="vm.toShow === undefined") 
 				md-progress-circular
-				h3 Loading License Data...
+				h3 Loading Licenses...
 
 			div(ng-switch="vm.toShow")
 

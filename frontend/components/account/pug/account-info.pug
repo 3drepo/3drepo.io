@@ -22,15 +22,21 @@
 						md-mode="indeterminate"
 						md-diameter="55")
 
+				
 				#noAvatarIcon(
 					ng-if="!vm.uploadingAvatar && (!vm.avatarUrl || !vm.imageLoaded)"
+					layout-align="center center"
 					flex
 					layout="row")
 				
-					md-icon.angular-material-icons.avatar-upload(
+					div.avatar-upload(
 						ng-if="!vm.hasAvatar || !vm.imageLoaded"
-						ng-click="vm.upload()") person
-			
+						ng-click="vm.upload()") 
+						svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="150")
+							path(
+								fill="#0c2f54" 
+								d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c+0-2.66-5.33-4-8-4z")
+
 			md-list
 
 				md-list-item.md-2-line
