@@ -68,7 +68,7 @@
 											ng-checked="vm.userHasPermissions(user, 'teamspace_admin')")
 
 
-						h3.noUsers(ng-if="vm.teamspacesToAssign()") No available users to assign permissions
+						//h3.noUsers(ng-if="vm.teamspacesToAssign()") No available users to assign permissions
 
 			// PROJECT
 
@@ -106,7 +106,7 @@
 									ng-repeat="project in vm.projects"
 									value="{{project.name}}") {{project.name}}
 
-					h3(ng-if="!vm.modelReady")
+					//h3(ng-if="!vm.modelReady")
 
 					md-card
 						table.scrollable.checkboxes(
@@ -247,4 +247,4 @@
 							//tbody(layout="column", ng-if="vm.modelSelected || !vm.modelReady")
 								h3.noUsers Preparing users...
 
-						h3.noUsers(ng-if="vm.modelUsersToAssign()") No available users to assign permissions
+						//h3.noUsers(ng-if="vm.modelUsersToAssign()") No available users to assign permissions
