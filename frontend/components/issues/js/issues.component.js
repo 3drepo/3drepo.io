@@ -464,13 +464,20 @@
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 
-			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
+			var notCurrentlySelected = vm.selectedIssue && issue && vm.selectedIssue._id !== issue._id;
+
+			if (notCurrentlySelected) {
 				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
+				console.log("editISsue HIGHTLIGHT_OBJECTS");
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
-			if(issue) {
+			if (!issue && vm.selectedIssue) {
+				IssuesService.deselectPin(vm.selectedIssue);
+			}
+
+			if (issue) {
 
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
