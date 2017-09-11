@@ -129,17 +129,18 @@
 		function fetchModelProperties(account, model, branch, revision) {
 			
 			if (account && model) {
-
+				console.log("branch, revision", branch, revision)
 				if(!branch) {
 					branch = !revision ? "master" : "";
 				}
 					
-				if(!revision) {
+				if(!revision || branch === "master") {
 					//revision is master/head 
 					revision = branch + "/head";
 				}
 					
 				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
+				console.log("url", url)
 
 				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {

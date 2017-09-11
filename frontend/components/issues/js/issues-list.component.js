@@ -133,7 +133,7 @@
 					vm.sortOldestFirst = !vm.sortOldestFirst;
 					vm.issueDisplay.sortOldestFirst = vm.sortOldestFirst;
 				} else if (vm.menuOption.value === "showClosed") {
-					vm.showClose = !vm.showClosed;
+					vm.showClosed = !vm.showClosed;
 					vm.issueDisplay.showClosed = vm.showClosed;
 				} else if (vm.menuOption.value === "showSubModels") {
 					vm.showSubModelIssues = !vm.showSubModelIssues;
@@ -420,6 +420,7 @@
 
 				// Closed
 				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+					console.log(vm.showClosed, vm.issuesToShow[i])
 					if (!vm.showClosed && (vm.issuesToShow[i].status === "closed")) {
 						vm.issuesToShow.splice(i, 1);
 					}
