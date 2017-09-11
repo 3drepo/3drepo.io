@@ -684,8 +684,7 @@
 			}
 
 			if (permissionlessModels.length) {
-				var content = "We noticed the following Federation sub models do not have assigned " +
-				"permissions for " + user + "<br> You may want this behaviour, but we thought we'd let you know." + 
+				var content = "Just to let you know, the assigned user will need permissions on submodels also to see them." + 
 				"<br><br> These are the models in question: <br><br>";
 				permissionlessModels.forEach(function(model, i) {
 					content += " <strong>" + model.name + "</strong>";
@@ -701,9 +700,9 @@
 				$mdDialog.show( 
 					$mdDialog.alert()
 						.clickOutsideToClose(true)
-						.title("Federation has Unassigned Models")
+						.title("Reminder about Federation Permissions")
 						.htmlContent(content)
-						.ariaLabel("Federation has Unassigned Models")
+						.ariaLabel("Reminder about Federations")
 						.ok("OK")
 				);
 			}
