@@ -430,14 +430,14 @@
 
 		let length = 0;
 
-		const contentType = mimeTypes[req.params.format];
+		// const contentType = mimeTypes[req.params.format];
 		
-		if (contentType) {
-			res.setHeader("Content-Type", contentType);
-		} else {
-			// Force compression on everything else
-			res.setHeader("Content-Type", "application/json");
-		}
+		// if (contentType) {
+		// 	res.setHeader("Content-Type", contentType);
+		// } else {
+		// 	// Force compression on everything else
+		// 	res.setHeader("Content-Type", "application/json");
+		// }
 
 		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
 		readStream.on("end", () => {
