@@ -143,6 +143,7 @@ var Viewer = {};
 		};
 
 		this.unityLoaderPath = "unity/Release/UnityLoader.js";
+		this.unityScriptInserted = false;
 
 		this.insertUnityLoader = function() {
 			return new Promise(function(resolve, reject) {
@@ -153,7 +154,7 @@ var Viewer = {};
 				}, false);
 				self.unityLoaderScript.addEventListener ("error", function(error) {
 					console.error("Error loading UnityLoader.js", error);
-					reject();
+					reject("Error loading UnityLoader.js");
 				}, false);
 
 				// Event handlers MUST come first before setting src
@@ -161,6 +162,7 @@ var Viewer = {};
 
 				// This kicks off the actual loading of Unity
 				self.viewer.appendChild(self.unityLoaderScript);
+				self.unityScriptInserted = true;
 			});
 		};
 
@@ -644,7 +646,9 @@ var Viewer = {};
 					callback(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch(function(error){
 					document.body.style.cursor = "initial";
-					console.error("Unity error loading model: ", error);
+					if (error !== "cancel") {
+						console.error("Unity error loading model: ", error);						
+					}
 				});
 		};
 

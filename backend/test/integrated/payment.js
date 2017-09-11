@@ -806,6 +806,7 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('after 2nd IPN the last anniversary date and next payment date are set', function(done){
+
 			User.findByUserName(username).then(user => {
 
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(lastPaymentDate.valueOf());
@@ -816,6 +817,7 @@ describe('Enrolling to a subscription', function () {
 			}).catch(err => {
 				done(err);
 			});
+			
 		});
 
 	});

@@ -153,24 +153,30 @@ var UnityUtil;
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
-				console.error("UnityUtil.onLoaded() failed: ", error);
-				UnityUtil.userAlert(error, true);
+				if (error != "cancel") {
+					console.error("UnityUtil.onLoaded() failed: ", error);
+					UnityUtil.userAlert(error, true);
+				}
 			});
 		} else if(requireStatus == LoadingState.MODEL_LOADING) {
 			//Requires model to be loading
 			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			}).catch(function(error){
-				UnityUtil.userAlert(error, true);
-				console.error("UnityUtil.onLoading() failed: ", error);
+				if (error !== "cancel") {
+					UnityUtil.userAlert(error, true);
+					console.error("UnityUtil.onLoading() failed: ", error);
+				}
 			});
 		} else {
 			UnityUtil.onReady().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
-				UnityUtil.userAlert(error, true);
-				console.error("UnityUtil.onReady() failed: ", error);
+				if (error != "cancel") {
+					UnityUtil.userAlert(error, true);
+					console.error("UnityUtil.onReady() failed: ", error);
+				}
 			});
 		}
 
@@ -335,8 +341,8 @@ var UnityUtil;
 	UnityUtil.prototype.cancelLoadModel = function() {
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
-			loadedResolve.reject("cancel loading model");
-			loadingResolve.reject("cancel loading model");
+			loadedResolve.reject("cancel");
+			loadingResolve.reject("cancel");
 		}
 	};
 

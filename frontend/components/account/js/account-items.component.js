@@ -37,13 +37,13 @@
 	AccountItemsCtrl.$inject = [
 		"StateManager", "$mdDialog", "$scope", "$location", "$element", 
 		"$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "NotificationService",  "AuthService", "AccountService"
+		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService"
 	];
 
 	function AccountItemsCtrl(
 		StateManager, $mdDialog, $scope, $location, $element,
 		$timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, 
-		AnalyticService, NotificationService, AuthService, AccountService
+		AnalyticService, NotificationService, AuthService, AccountService, ViewerService
 	) {
 		
 		var vm = this;
@@ -52,7 +52,9 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.info = "Retrieving models...";
+
+			ViewerService.reset();
+
 			vm.showProgress = true;
 			vm.modelTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 			vm.units = ClientConfigService.units;

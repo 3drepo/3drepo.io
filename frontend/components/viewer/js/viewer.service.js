@@ -66,18 +66,38 @@
 			return viewer;
 		}
 
+		function unityInserted() {
+			if (!viewer) {
+				return false;
+			} else {
+				return viewer.unityScriptInserted;
+			}
+			
+		}
+
 		function initViewer() {
-			viewer.insertUnityLoader()
-				.then(function(){
-					var showAll = true;
-					viewer.init({
-						showAll : showAll,
-						getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
-					})
-						.catch(function(error){
-							console.error("Error creating Viewer Directive: ", error);
-						});
+
+			if (unityInserted()) {
+				callInit();
+			} else {
+				viewer.insertUnityLoader()
+					.then(callInit);
+			}
+
+		}
+
+		function callInit() {
+	
+			var showAll = true;
+			viewer
+				.init({
+					showAll : showAll,
+					getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
+				})
+				.catch(function(error){
+					console.error("Error creating Viewer Directive: ", error);
 				});
+			
 		}
 
 		function loadViewerModel(account, model, branch, revision) {

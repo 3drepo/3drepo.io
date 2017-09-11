@@ -20,7 +20,6 @@
 	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
 		var vm = this;
 
-
 		vm.$onInit = function(){
 			vm.revisionsLoading = true;
 		};
@@ -28,8 +27,6 @@
 		$scope.$watch(function(){
 			return RevisionsService.status.ready;
 		}, function(){
-			
-			console.log(RevisionsService.status);
 			
 			if (RevisionsService.status.ready === true) {
 
