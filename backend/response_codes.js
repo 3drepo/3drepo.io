@@ -355,15 +355,6 @@
 		
 		resCode = utils.mongoErrorToResCode(resCode);
 
-		const contentType = mimeTypes[format || req.params.format];
-		
-		if (contentType) {
-			res.setHeader("Content-Type", contentType);
-		} else {
-			// Force compression on everything else
-			res.setHeader("Content-Type", "application/json");
-		}
-		
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -402,7 +393,18 @@
 		} else {
 
 			if (Buffer.isBuffer(extraInfo)) {
+
 				res.status(resCode.status);
+
+				const contentType = mimeTypes[format || req.params.format];
+				
+				if (contentType) {
+					res.setHeader("Content-Type", contentType);
+				} else {
+					// Force compression on everything else
+					res.setHeader("Content-Type", "application/json");
+				}
+				
 
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
