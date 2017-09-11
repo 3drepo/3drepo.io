@@ -215,12 +215,12 @@
 				break;
 
 			case "revision":
-				if(!vm.revisions){
-					UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
-						vm.revisions = response.data;
-						vm.revisionsLoading = false;
-					});
-				}
+				vm.revisionsLoading = true;
+				vm.revisions = null;
+				RevisionsService.listAll(vm.account, vm.model.model).then(function(revisions){
+					vm.revisions = revisions;
+					vm.revisionsLoading = false;
+				});
 				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				break;
 			}
@@ -260,7 +260,6 @@
 			vm.uploading = true;
 
 			vm.uploadErrorMessage = null;
-			console.log(vm.modelToUpload);
 
 			var uploadFileData = {
 				model: vm.model, 

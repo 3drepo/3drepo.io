@@ -477,7 +477,6 @@
 			$http.get(url).then(
 				function(jobsData) {
 					availableJobs = jobsData.data;
-					console.log("availableJobs", availableJobs);
 					deferred.resolve(availableJobs);
 				},
 				function() {

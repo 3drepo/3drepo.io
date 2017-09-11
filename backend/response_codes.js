@@ -354,7 +354,7 @@
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
 		
 		resCode = utils.mongoErrorToResCode(resCode);
-		
+
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -382,7 +382,10 @@
 
 			length = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), { httpCode: resCode.status, contentLength: length });
+			req[C.REQ_REPO].logger.logError(
+				JSON.stringify(responseObject), 
+				{ httpCode: resCode.status, contentLength: length }
+			);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -390,16 +393,18 @@
 		} else {
 
 			if (Buffer.isBuffer(extraInfo)) {
+
 				res.status(resCode.status);
 
-				var contentType = mimeTypes[format || req.params.format];
-
+				const contentType = mimeTypes[format || req.params.format];
+				
 				if (contentType) {
 					res.setHeader("Content-Type", contentType);
 				} else {
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
 				}
+				
 
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
@@ -426,6 +431,15 @@
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
+
+		// const contentType = mimeTypes[req.params.format];
+		
+		// if (contentType) {
+		// 	res.setHeader("Content-Type", contentType);
+		// } else {
+		// 	// Force compression on everything else
+		// 	res.setHeader("Content-Type", "application/json");
+		// }
 
 		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
 		readStream.on("end", () => {

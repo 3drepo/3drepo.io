@@ -98,17 +98,13 @@
 					vm.toShow = "showIssues";
 					vm.issues = (data === "") ? [] : data;
 					vm.showAddButton = true;
-					console.log("vm.displayIssue - issues loaded");
 
 					// if issue id is in url then select the issue
 					var issueMatch = vm.issues.find(function(issue){
 						return issue._id === vm.issueId;
 					});
 
-					console.log("vm.displayIssue - issueMatch", issueMatch);
-					
 					if(issueMatch){
-						console.log("vm.displayIssue, setting: ", issueMatch);
 						vm.displayIssue = issueMatch;
 					}
 
@@ -199,10 +195,8 @@
 		$scope.$watch(function() {
 			return RevisionsService.status.ready;
 		}, function(newValue, oldValue) {
-			console.log("RevisionsService.status changed", newValue, oldValue);
 			if (RevisionsService.status.ready === true) {
 				vm.revisions = RevisionsService.status.data;
-				console.log("issue - watchNotification from revisionsService")
 				watchNotification();
 			}
 		}, true);
@@ -210,7 +204,6 @@
 		$scope.$watch(function() {
 			return IssuesService.issueId;
 		}, function(){
-			console.log("Setting issueID in watcher", IssuesService.issueId);
 			vm.issueId = IssuesService.issueId;
 		}, true);
 
@@ -288,16 +281,10 @@
 
 		function watchNotification() {
 
-			console.log("issue - issues.component.js watchNotifdication");
-
-			// console.log("issue - revisions, submodels", vm.revisions, vm.subModels);
-
 			// TODO: Is there a reason this is here?
 			if(!vm.revisions || !vm.subModels){
 				return;
 			}
-
-			console.log("issue - issues.component.js watchNotifdication - NotificationService activated ")
 
 			/*
 			 * Watch for new issues
@@ -469,7 +456,6 @@
 			if (notCurrentlySelected) {
 				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
-				console.log("editISsue HIGHTLIGHT_OBJECTS");
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 

@@ -368,7 +368,7 @@ describe('Enrolling to a subscription', function () {
 
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
-			return User.findByUserName(username).then(user => {
+			User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true });
 				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
@@ -383,7 +383,8 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('before 1st IPN the last anniversary date and next payment date are set already', function(done){
-			return User.findByUserName(username).then(user => {
+
+			User.findByUserName(username).then(user => {
 
 				let startDate = moment().utc();
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(startDate.clone().startOf('day').toDate().valueOf());
@@ -393,6 +394,7 @@ describe('Enrolling to a subscription', function () {
 			}).catch(err => {
 				done(err);
 			});
+
 		});
 
 		let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
@@ -417,7 +419,7 @@ describe('Enrolling to a subscription', function () {
 				+ '&transaction_subject=abc'
 				+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
 
-			return new Promise((resolve, reject) => {
+			new Promise((resolve, reject) => {
 				agent.post(`/payment/paypal/food`)
 				.send(fakePaymentMsg)
 				.expect(200, function(err, res){
@@ -457,7 +459,7 @@ describe('Enrolling to a subscription', function () {
 
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
-			return User.findByUserName(username).then(user => {
+			User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
 				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
@@ -478,7 +480,8 @@ describe('Enrolling to a subscription', function () {
 		});
 
 		it('after 1st IPN the next payment date are set', function(done){
-			return User.findByUserName(username).then(user => {
+			
+			User.findByUserName(username).then(user => {
 
 				let startDate = moment().utc();
 
@@ -489,6 +492,7 @@ describe('Enrolling to a subscription', function () {
 			}).catch(err => {
 				done(err);
 			});
+
 		});
 
 		let subscriptions;
@@ -780,7 +784,7 @@ describe('Enrolling to a subscription', function () {
 
 			let twoDayLater = moment().utc().add(48, 'hour').toDate();
 
-			return User.findByUserName(username).then(user => {
+			User.findByUserName(username).then(user => {
 				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
 				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
 				subscriptions.forEach(sub => {
@@ -798,10 +802,12 @@ describe('Enrolling to a subscription', function () {
 			}).catch(err => {
 				done(err);
 			});
+
 		});
 
 		it('after 2nd IPN the last anniversary date and next payment date are set', function(done){
-			return User.findByUserName(username).then(user => {
+
+			User.findByUserName(username).then(user => {
 
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(lastPaymentDate.valueOf());
 				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf('date').toDate().valueOf());
@@ -811,6 +817,7 @@ describe('Enrolling to a subscription', function () {
 			}).catch(err => {
 				done(err);
 			});
+			
 		});
 
 	});

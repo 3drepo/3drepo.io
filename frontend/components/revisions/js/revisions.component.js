@@ -20,34 +20,42 @@
 	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
 		var vm = this;
 
-
 		vm.$onInit = function(){
 			vm.revisionsLoading = true;
 		};
 
-		$scope.$watch(RevisionsService.status.ready, function(){
-			vm.revisions = RevisionsService.status.data;
-			vm.revisionsLoading = false;
-			if(!vm.revisions || !vm.revisions[0]){
-				return;
+		$scope.$watch(function(){
+			return RevisionsService.status.ready;
+		}, function(){
+			
+			if (RevisionsService.status.ready === true) {
+
+				vm.revisions = RevisionsService.status.data;
+				vm.revisionsLoading = false;
+				if(!vm.revisions || !vm.revisions[0]){
+					return;
+				}
+	
+				if(!vm.revision){
+					vm.revName = vm.revisions[0].tag || $filter("revisionDate")(vm.revisions[0].timestamp);
+					vm.revisions[0].current = true;
+	
+				} else {
+					vm.revisions && vm.revisions.forEach(function(rev, i){
+						if(rev.tag === vm.revision){
+							vm.revName = vm.revision;
+							vm.revisions[i].current = true;
+						} else if(rev._id === vm.revision){
+							vm.revName = $filter("revisionDate")(rev.timestamp);
+							vm.revisions[i].current = true;
+	
+						}
+					});
+				}
+
 			}
+			
 
-			if(!vm.revision){
-				vm.revName = vm.revisions[0].tag || $filter("revisionDate")(vm.revisions[0].timestamp);
-				vm.revisions[0].current = true;
-
-			} else {
-				vm.revisions && vm.revisions.forEach(function(rev, i){
-					if(rev.tag === vm.revision){
-						vm.revName = vm.revision;
-						vm.revisions[i].current = true;
-					} else if(rev._id === vm.revision){
-						vm.revName = $filter("revisionDate")(rev.timestamp);
-						vm.revisions[i].current = true;
-
-					}
-				});
-			}
 		}, true);
 
 		vm.openDialog = function(event){
@@ -66,7 +74,7 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-
+			console.log("revisions.component.js goToRevision", revId)
 			UtilsService.closeDialog();
 			$location.path("/" + vm.account + "/" + vm.model + "/" + revId , "_self");
 

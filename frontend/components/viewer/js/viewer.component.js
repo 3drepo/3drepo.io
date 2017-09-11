@@ -52,8 +52,10 @@
 		var vm = this;
 
 		vm.$onInit = function() {
+
 			vm.branch   = vm.branch ? vm.branch : "master";
 			vm.revision = vm.revision ? vm.revision : "head";
+
 			vm.pointerEvents = "auto";
 			vm.measureMode = false;
 			
@@ -79,11 +81,10 @@
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
 					if (!ViewerService.currentModel.model) {
-						console.log("Initiating viewer")
+						console.debug("Initiating Viewer");
 						ViewerService.initViewer();
 					} else {
 						// Load the model
-						console.log("Loading model: vm.model", vm.model);
 						ViewerService.loadViewerModel(
 							vm.account, 
 							vm.model, 

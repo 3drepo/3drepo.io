@@ -33,8 +33,21 @@
 	PanelCardOptionMenuCtrl.$inject = ["$timeout"];
 
 	function PanelCardOptionMenuCtrl ($timeout) {
-		var vm = this,
-			currentSortIndex;
+		var vm = this;
+
+		// TODO: This is a work around because 
+		// not entirely sure how vm.menu is generated etc
+		vm.getUniqueMenuItems = function() {
+			var unique = [];
+			return vm.menu.filter(function(item){
+				if (unique.indexOf(item.label)) {
+					unique.push(item.label);
+					return true;
+				} else {
+					return false;
+				}
+			});
+		};
 
 		/**
 		 * Handle a menu selection
@@ -47,12 +60,12 @@
 					vm.menu[index].selected = !vm.menu[index].selected;
 					vm.selectedMenuOption = vm.menu[index];
 				} else {
-					if (index !== currentSortIndex) {
-						currentSortIndex = index;
+					if (index !== vm.currentSortIndex) {
+						vm.currentSortIndex = index;
 					}
-					vm.menu[currentSortIndex].firstSelected = !vm.menu[currentSortIndex].firstSelected;
-					vm.menu[currentSortIndex].secondSelected = !vm.menu[currentSortIndex].secondSelected;
-					vm.selectedMenuOption = vm.menu[currentSortIndex];
+					vm.menu[vm.currentSortIndex].firstSelected = !vm.menu[vm.currentSortIndex].firstSelected;
+					vm.menu[vm.currentSortIndex].secondSelected = !vm.menu[vm.currentSortIndex].secondSelected;
+					vm.selectedMenuOption = vm.menu[vm.currentSortIndex];
 				}
 			} else {
 				vm.selectedMenuOption = vm.menu[index];

@@ -91,6 +91,7 @@ describe('Billing agreement price from PayPal', function () {
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
+			
 			expect(res.body).to.have.property('url');
 			let parsed = url.parse(res.body.url, true);
 			expect(parsed.query).to.have.property('token');

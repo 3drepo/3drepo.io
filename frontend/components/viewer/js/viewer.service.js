@@ -66,18 +66,38 @@
 			return viewer;
 		}
 
+		function unityInserted() {
+			if (!viewer) {
+				return false;
+			} else {
+				return viewer.unityScriptInserted;
+			}
+			
+		}
+
 		function initViewer() {
-			viewer.insertUnityLoader()
-				.then(function(){
-					var showAll = true;
-					viewer.init({
-						showAll : showAll,
-						getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
-					})
-						.catch(function(error){
-							console.error("Error creating Viewer Directive: ", error);
-						});
+
+			if (unityInserted()) {
+				callInit();
+			} else {
+				viewer.insertUnityLoader()
+					.then(callInit);
+			}
+
+		}
+
+		function callInit() {
+	
+			var showAll = true;
+			viewer
+				.init({
+					showAll : showAll,
+					getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
+				})
+				.catch(function(error){
+					console.error("Error creating Viewer Directive: ", error);
 				});
+			
 		}
 
 		function loadViewerModel(account, model, branch, revision) {
@@ -109,17 +129,18 @@
 		function fetchModelProperties(account, model, branch, revision) {
 			
 			if (account && model) {
-
+				console.log("branch, revision", branch, revision)
 				if(!branch) {
 					branch = !revision ? "master" : "";
 				}
 					
-				if(!revision) {
+				if(!revision || branch === "master") {
 					//revision is master/head 
 					revision = branch + "/head";
 				}
 					
 				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
+				console.log("url", url)
 
 				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
 					.then(function(response) {

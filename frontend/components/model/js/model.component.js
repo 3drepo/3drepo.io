@@ -107,23 +107,22 @@
 
 		vm.setupModelInfo = function() {
 
-			var left = PanelService.issuesPanelCard.left[vm.issuesCardIndex];
-
 			ModelService.getModelInfo(vm.account, vm.model)
 				.then(function (data) {
 					vm.settings = data;
 					var index = -1;
 
 					if(!data.federate){
-						left.menu.find(function(item, i){
-							if(item.value === "showSubModels"){
-								index = i;
-							}
-
-						});
+						PanelService.issuesPanelCard.left[vm.issuesCardIndex].menu
+							.find(function(item, i){
+								if(item.value === "showSubModels"){
+									index = i;
+								}
+							});
 
 						if(index !== -1){
-							left.menu.splice(index, 1);
+							PanelService.issuesPanelCard.left[vm.issuesCardIndex].menu
+								.splice(index, 1);
 						}
 					}
 					

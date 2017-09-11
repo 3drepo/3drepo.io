@@ -70,7 +70,7 @@
 		 * Watch type on contentData to create content and tool bar options
 		 */
 		$scope.$watch("vm.contentData.type", function (newValue) {
-			if (angular.isDefined(newValue)) {
+			if (newValue) {
 				angular.element(function(){
 					createCardContent();
 					createToolbarOptions();
@@ -182,8 +182,7 @@
 		 * Create the card content
 		 */
 		function createCardContent () {
-			var i, length,
-				content = angular.element($element[0].querySelector("#content")),
+			var content = angular.element($element[0].querySelector("#content")),
 				contentItem,
 				element;
 
@@ -209,7 +208,7 @@
 
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {
-				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+				for (var i = 0; i < vm.contentData.options.length; i += 1) {
 					switch (vm.contentData.options[i].type) {
 					case "filter":
 						element += "filter-text='vm.filterText' ";
@@ -223,6 +222,7 @@
 					}
 				}
 			}
+			
 			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
 				element += "show-add='vm.showAdd' can-add='vm.canAdd'";
 			}
