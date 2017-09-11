@@ -52,8 +52,10 @@
 		var vm = this;
 
 		vm.$onInit = function() {
+
 			vm.branch   = vm.branch ? vm.branch : "master";
 			vm.revision = vm.revision ? vm.revision : "head";
+
 			vm.pointerEvents = "auto";
 			vm.measureMode = false;
 			
@@ -84,6 +86,9 @@
 					} else {
 						// Load the model
 						console.log("Loading model: vm.model", vm.model);
+						console.log("Loading model: vm.branch", vm.branch);
+						console.log("Loading model: vm.revision", vm.revision);
+
 						ViewerService.loadViewerModel(
 							vm.account, 
 							vm.model, 

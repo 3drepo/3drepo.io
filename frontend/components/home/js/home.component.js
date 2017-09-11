@@ -317,8 +317,7 @@
 						path = "/" + AuthService.getUsername();
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
 					}
-					console.log(path);
-					
+
 					$location.path(path);
 					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {

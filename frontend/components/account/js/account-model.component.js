@@ -215,12 +215,12 @@
 				break;
 
 			case "revision":
-				if(!vm.revisions){
-					UtilsService.doGet(vm.account + "/" + vm.model.model + "/revisions.json").then(function(response){
-						vm.revisions = response.data;
-						vm.revisionsLoading = false;
-					});
-				}
+				vm.revisionsLoading = true;
+				vm.revisions = null;
+				RevisionsService.listAll(vm.account, vm.model.model).then(function(revisions){
+					vm.revisions = revisions;
+					vm.revisionsLoading = false;
+				});
 				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				break;
 			}
@@ -289,6 +289,7 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
+			console.log("account-model.component.js goToRevision", revId);
 			$location.path("/" + vm.account + "/" + vm.model.model + "/" + revId , "_self");
 			AnalyticService.sendEvent({
 				eventCategory: "Model",

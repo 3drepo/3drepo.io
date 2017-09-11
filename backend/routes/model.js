@@ -282,7 +282,6 @@ function getModelTree(req, res, next){
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
-	
 
 	// There may be some errors generated during the streaming process but it is to late and unable to return to client anymore
 	data.outputingPromise.catch(err => {

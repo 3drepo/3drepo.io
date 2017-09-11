@@ -64,9 +64,9 @@
 			//ts.revision = revision ? revision : "head";
 
 			if (!revision) {
-				ts.baseURL = "/" + account + "/" + model + "/revision/master/head/";
+				ts.baseURL = account + "/" + model + "/revision/master/head/";
 			} else {
-				ts.baseURL = "/" + account + "/" + model + "/revision/" + revision + "/";
+				ts.baseURL = account + "/" + model + "/revision/" + revision + "/";
 			}
 
 			var deferred = $q.defer(),
@@ -127,7 +127,7 @@
 				})
 				.catch(function(error){
 					
-					console.error(error);
+					console.error("Tree Init Error:", error);
 					
 				});
 

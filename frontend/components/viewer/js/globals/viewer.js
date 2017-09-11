@@ -420,7 +420,6 @@ var Viewer = {};
 					var multi = multiOverride || this.multiSelectMode;
 					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
 				} else {
-					console.log("clearing from Viewerjs", uniqueIds);
 					UnityUtil.clearHighlights();
 				}
 

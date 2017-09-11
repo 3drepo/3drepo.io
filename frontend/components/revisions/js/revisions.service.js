@@ -29,7 +29,7 @@
 			data: null
 		};
 
-		var service = { 
+		var service = {
 			status: status,
 			listAll: listAll,
 			isTagFormatInValid: isTagFormatInValid
@@ -45,8 +45,6 @@
 				if(response.status === 200){
 					status.ready = true;
 					status.data = response.data;
-			
-					console.log("issue - service.status.ready", service.status.ready);
 					return response.data;
 				} else {
 					status.ready = false;
