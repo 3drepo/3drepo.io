@@ -260,7 +260,6 @@
 			vm.uploading = true;
 
 			vm.uploadErrorMessage = null;
-			console.log(vm.modelToUpload);
 
 			var uploadFileData = {
 				model: vm.model, 
@@ -289,7 +288,6 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			console.log("account-model.component.js goToRevision", revId);
 			$location.path("/" + vm.account + "/" + vm.model.model + "/" + revId , "_self");
 			AnalyticService.sendEvent({
 				eventCategory: "Model",

@@ -995,10 +995,8 @@
 
 
 		vm.startNotification = function() {
-			console.log("issue - startNotification");
-			if(vm.data && !vm.notificationStarted){
 
-				console.log("issue - notificationStarted", vm.notificationStarted);
+			if(vm.data && !vm.notificationStarted){
 
 				vm.notificationStarted = true;
 
@@ -1007,8 +1005,6 @@
 				*/
 				NotificationService.subscribe.issueChanged(vm.data.account, vm.data.model, vm.data._id, function(issue){
 					
-					console.log("issue - issueChanged", issue);
-
 					vm.issueData.topic_type = issue.topic_type;
 					vm.issueData.desc = issue.desc;
 					vm.issueData.priority = issue.priority;
