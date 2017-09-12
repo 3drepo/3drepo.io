@@ -494,6 +494,7 @@ function _fillInModelDetails(accountName, setting, permissions){
 		model: setting._id,
 		name: setting.name,
 		status: setting.status,
+		errorReason: setting.errorReason,
 		subModels: setting.federate && setting.toObject().subModels || undefined,
 		timestamp: setting.timestamp || null
 	};

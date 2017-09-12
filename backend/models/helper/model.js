@@ -389,7 +389,6 @@ function createFederatedModel(account, model, subModels){
 
 function getModelProperties(account, model, branch, rev, username){
 	
-
 	let subProperties;
 	let revId, modelPropertiesFileName;
 	let getHistory, history;

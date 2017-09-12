@@ -155,7 +155,18 @@ function getModelSetting(req, res, next){
 
 		//setting = setting.toObject();
 		
-		let whitelist = ['name', 'owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason', 'federate', 'subModels'];
+		let whitelist = [
+			'name', 
+			'owner', 
+			'desc', 
+			'type', 
+			'permissions', 
+			'properties', 
+			'status', 
+			'errorReason', 
+			'federate', 
+			'subModels'
+		];
 
 
 		whitelist.forEach(key => {
