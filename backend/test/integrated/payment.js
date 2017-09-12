@@ -234,6 +234,11 @@ describe('Enrolling to a subscription', function () {
 		.send(plans)
 		.expect(200, function(err, res){
 			//console.log(res.body);
+
+			// Need to mock: 
+			// Paypal.updateBillingAddress
+			// Paypal.processPayments - Promise
+
 			expect(res.body).to.have.property('url');
 			let parsed = url.parse(res.body.url, true);
 			expect(parsed.query).to.have.property('token');
