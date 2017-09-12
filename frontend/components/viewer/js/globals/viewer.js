@@ -620,6 +620,7 @@ var Viewer = {};
 			self.setMultiSelectMode(false);
 			self.setMeasureMode(false);
 			self.setPinDropMode(false);
+			self.loadingDivText.innerHTML = "";
 			UnityUtil.reset();	
 		};
 

@@ -195,12 +195,14 @@
 							md-label(ng-if="vm.modelsLoaded()") Select Model / Federation
 							md-label(ng-if="!vm.modelsLoaded()") Awaiting Models / Federations...
 							md-select.rowSelects(
+								flex
 								aria-label="Selection for Model"
 								ng-model="vm.modelSelected"
 								ng-required="true" 
 								ng-disabled="!vm.modelsLoaded()")
 
 								md-option(
+									flex
 									aria-label="{{model.name}}" 
 									ng-repeat="model in vm.models"
 									value="{{model.model}}") {{ vm.formatModelName(model) }} 
