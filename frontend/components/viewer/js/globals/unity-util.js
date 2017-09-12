@@ -47,22 +47,28 @@ var UnityUtil;
 	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;
 	
 	UnityUtil.prototype._SendMessage = function(gameObject, func, param) {
-    	if (param === undefined) {
-	      if (!SendMessage_vss) {
+		if (param === undefined) {
+
+			if (!SendMessage_vss) {
 				SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
 			}
-	      SendMessage_vss(gameObject, func);
-    	} else if (typeof param === "string") {
-	      if (!SendMessage_vsss) {
+			SendMessage_vss(gameObject, func);
+
+		} else if (typeof param === "string") {
+
+			if (!SendMessage_vsss) {
 				SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
 			}
-	      SendMessage_vsss(gameObject, func, param);
-	    } else if (typeof param === "number") {
-    	  if (!SendMessage_vssn) {
+			SendMessage_vsss(gameObject, func, param);
+
+		} else if (typeof param === "number") {
+
+			if (!SendMessage_vssn) {
 				SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
 			}
-    	 SendMessage_vssn(gameObject, func, param);
-	    } else {
+			SendMessage_vssn(gameObject, func, param);
+
+		} else {
 			throw "" + param + " is does not have a type which is supported by SendMessage.";
 		}
 	};
@@ -88,11 +94,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.onLoaded = function() {
 		if(!loadedPromise) {
-		   loadedPromise = new Promise(function(resolve, reject) {
+			loadedPromise = new Promise(function(resolve, reject) {
 				loadedResolve = {resolve: resolve, reject: reject};
-			}	
-			);
-
+			});
 		}
 		return loadedPromise;
 		
@@ -100,10 +104,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.onLoading = function() {
 		if(!loadingPromise) {
-		   loadingPromise	= new Promise( function(resolve, reject) {
+			loadingPromise = new Promise( function(resolve, reject) {
 				loadingResolve = {resolve: resolve, reject: reject};
-			}
-			);
+			});
 		}
 		return loadingPromise;
 		
@@ -132,7 +135,7 @@ var UnityUtil;
 		var fullMessage = prefix + message;
 
 		if (!unityHasErrored) {
-			console.log("sending error");
+			
 			// Unity can error multiple times, we don't want 
 			// to keep annoying the user
 			unityHasErrored = true;

@@ -24,17 +24,15 @@ let app = require("../../services/api.js").createApp(
 );
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
-let responseCodes = require("../../response_codes.js");
 let UserBilling = require('../../models/userBilling');
 let getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 let helpers = require("./helpers");
-let async = require('async');
 let moment = require('moment-timezone');
 let User = require('../../models/user');
 let url = require('url');
+
 describe('Billing agreement price from PayPal', function () {
 
-	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'price_testing';
