@@ -156,7 +156,7 @@
 	};
 
 	let getImmediatePaymentStartDate = function(){
-		return moment().utc().add(20, "second");
+		return moment().utc().add(60, "second");
 	};
 
 	billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {

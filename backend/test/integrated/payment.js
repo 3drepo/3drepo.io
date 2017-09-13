@@ -17,24 +17,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require("supertest");
-let expect = require("chai").expect;
-let app = require("../../services/api.js").createApp(
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing"}) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
-let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
-let async = require("async");
-let moment = require("moment-timezone");
+const log_iface = require("../../logger.js");
+const systemLogger = log_iface.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const helpers = require("./helpers");
+const async = require("async");
+const moment = require("moment-timezone");
 
-let Paypal = require("../../models/paypal");
-let UserBilling = require("../../models/userBilling");
-let getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
-let sinon = require("sinon");
+const Paypal = require("../../models/paypal");
+const UserBilling = require("../../models/userBilling");
+const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+const url = require("url");
 
-let url = require("url");
+const sinon = require("sinon");
 
 describe("Enrolling to a subscription", function () {
 	let User = require("../../models/user");
