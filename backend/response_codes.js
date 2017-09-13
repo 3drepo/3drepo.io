@@ -436,27 +436,17 @@
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
-
-		// let reqFormat;
 		
-		// if (req && req.params && req.params.format) {
-		// 	reqFormat = req.params.format;
-		// }
+		if (customHeaders) {
+			res.writeHead(responseCodes.OK.status, customHeaders);
+		}
 
-		// const contentType = mimeTypes[format || req.params.format];
-		
-		// if (contentType) {
-		// 	res.setHeader("Content-Type", contentType);
-		// } else {
-		// 	// Force compression on everything else
-		// 	res.setHeader("Content-Type", "application/json");
-		// }
-		
-
-		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
 		readStream.on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { httpCode: responseCodes.OK.status, contentLength: length });
+			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { 
+				httpCode: responseCodes.OK.status, 
+				contentLength: length 
+			});
 		});
 
 		readStream.on("data", data => {
