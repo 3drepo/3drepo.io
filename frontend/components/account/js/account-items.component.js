@@ -195,7 +195,7 @@
 				var isCurrentTeamspace = account !== undefined 
 					&& vm.account && account === vm.account;
 
-				if (isCurrentTeamspace) {
+				if (isCurrentTeamspace && prop !== "modelState" && prop !== "fedState") {
 					node[prop] = true;
 				} else {
 					node[prop] = false;

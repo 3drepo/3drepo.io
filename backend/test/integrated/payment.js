@@ -55,6 +55,8 @@ describe("Enrolling to a subscription", function () {
 	let email = "test3drepo_payment@mailinator.com";
 	let billingId = "I-000000000000";
 
+	const timeout = 30000;
+
 	let sandbox;
 
 
@@ -141,7 +143,7 @@ describe("Enrolling to a subscription", function () {
 
 
 	// it("should fail if VAT is invalid", function(done){
-	// 	this.timeout(25000);
+	// 	this.timeout(timeout);
 
 	// 	agent.post(`/${username}/subscriptions`)
 	// 	.send(plans)
@@ -153,7 +155,7 @@ describe("Enrolling to a subscription", function () {
 
 
 	it("should succeed no VAT is supplied", function(done){
-		this.timeout(25000);
+		this.timeout(timeout);
 
 		delete plans.billingAddress.vat;
 
@@ -194,7 +196,7 @@ describe("Enrolling to a subscription", function () {
 
 
 	it("should succeed if VAT is supplied and country is non EU", function(done){
-		this.timeout(25000);
+		this.timeout(timeout);
 
 		let _plans = {
 			"plans": [
@@ -254,7 +256,7 @@ describe("Enrolling to a subscription", function () {
 
 
 	it("should succeed VAT is not supplied and country is non EU", function(done){
-		this.timeout(25000);
+		this.timeout(timeout);
 
 		let _plans = {
 			"plans": [
@@ -315,7 +317,7 @@ describe("Enrolling to a subscription", function () {
 
 		plans.billingAddress.vat = "206909015";
 
-		this.timeout(25000);
+		this.timeout(timeout);
 
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
@@ -472,7 +474,7 @@ describe("Enrolling to a subscription", function () {
 		before(function(done){
 
 			//fake payment
-			this.timeout(25000);
+			this.timeout(timeout);
 			let start_date = (new Date()).toISOString();
 			
 			// set fake billing id
@@ -625,7 +627,7 @@ describe("Enrolling to a subscription", function () {
 
 		it("and then 1st IPN arrive", function(done){
 
-			this.timeout(25000);
+			this.timeout(timeout);
 
 			let paymentDate = moment().tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 			let fakePaymentMsg =
@@ -1151,7 +1153,7 @@ describe("Enrolling to a subscription", function () {
 				})
 			);
 
-			this.timeout(25000);
+			this.timeout(timeout);
 
 			agent.post(`/${username3}/subscriptions`)
 			.send(plans)
