@@ -63,5 +63,33 @@ gulp.task("test:lint-fix", function(){
         .pipe(eslint.format());
 });
 
+gulp.task("test:integrated-one", function() {
+    if (process.argv.length === 5) {
+            
+        const envs = env.set({
+            NODE_ENV: "test",
+            NODE_CONFIG_DIR: "../config/"
+        });
+
+        const path = "./test/integrated/" + process.argv[4];
+        console.log("processing " + path);
+
+        gulp.src(path)
+            .pipe(envs)
+            .pipe(mocha({
+                reporter: "spec",
+                timeout: 10000
+            }))
+            .once("error", () => {
+                process.exit(1);
+            })
+            .once("end", () => {
+                process.exit();
+            });
+    } else {
+        console.log("Must provide one argument; the file name of the intergrated test");
+    }
+});
+
 
 gulp.task("test", ["test:unit", "test:integrated"]);

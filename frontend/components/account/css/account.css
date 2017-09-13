@@ -811,8 +811,12 @@ account-assign .assignTabHolder {
   padding: 20px;
 }
 
-account-assign md-tabs md-tab-content {
-  /* max-height: 574px; */
+div.md-select-menu-container, 
+div.md-select-menu-container md-select-menu, 
+div.md-select-menu-container md-select-menu md-content {
+
+  max-height: 50vh !important;
+  min-height: 50vh !important;
 }
 
 account-assign .assignTabHolder .noUsers {

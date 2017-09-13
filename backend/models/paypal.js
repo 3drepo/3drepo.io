@@ -235,6 +235,18 @@
 		});
 	};
 
+	let verifyGenuine = function(url, qs) {
+
+		return httpsPost(url, qs).then(resData => {
+			if(resData === 'VERIFIED') {
+				return Promise.resolve();
+			} else {
+				return Promise.reject({ message: 'ipn message validation failed'});
+			}
+		});
+
+	}
+
 	let validateIPN = function(data){
 
 		// skip ipn validation
@@ -247,14 +259,7 @@
 		qs = 'cmd=_notify-validate&' + qs;
 
 		//first verify this message is genuinely coming from paypal
-		return httpsPost(url, qs).then(resData => {
-			if(resData === 'VERIFIED') {
-				return Promise.resolve();
-			} else {
-				return Promise.reject({ message: 'ipn message validation failed'});
-			}
-
-		});
+		return verifyGenuine(url, qs);
 	};
 
 	let determineIPNType = function(paymentInfo){
@@ -414,7 +419,8 @@
 		cancelOldAgreement: cancelOldAgreement,
 		executeAgreement: executeAgreement,
 		validateIPN: validateIPN,
-		handleIPN: handleIPN
+		handleIPN: handleIPN,
+		verifyGenuine: verifyGenuine
 	};
 
 })();

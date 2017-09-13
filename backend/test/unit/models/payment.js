@@ -77,7 +77,6 @@ describe('UserBilling', function(){
 
 		subscriptions.now = data.paymentDate.toDate();
 		
-
 		let stub = sinon.stub(subscriptions, 'removeSubscriptionByPlan').returns(Promise.resolve());
 
 		return subscriptions.changeSubscriptions(data.newLicences).then(changes => {

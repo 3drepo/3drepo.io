@@ -9,7 +9,7 @@ var Paypal = require("../models/paypal.js");
 // var getSubscription = require('../models/subscription').getSubscription;
 
 // endpoints for paypal IPN message
-router.post("/paypal/food", handleIPN);
+router.post("/paypal/ipn", handleIPN);
 
 //capture a pre-approve payment
 router.post("/paypal/execute", executeAgreement);
@@ -42,6 +42,7 @@ function handleIPN(req, res, next){
 
 	let responsePlace = utils.APIInfo(req);
 	Paypal.handleIPN(req.body);
+
 	//always respond 200 with OK to paypal 
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, 'OK');
 }

@@ -12,6 +12,8 @@
     "Buffer": false,
     "describe": false,
     "it": false,
+    "after": false,
+    "before": false,
     "process": false
   },
   "plugins": ["node"],

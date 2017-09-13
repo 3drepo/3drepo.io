@@ -396,6 +396,12 @@
 
 				res.status(resCode.status);
 
+				let reqFormat;
+				
+				if (req && req.params && req.params.format) {
+					reqFormat = req.params.format;
+				}
+		
 				const contentType = mimeTypes[format || req.params.format];
 				
 				if (contentType) {
@@ -404,8 +410,7 @@
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
 				}
-				
-
+		
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
 
@@ -432,7 +437,13 @@
 
 		let length = 0;
 
-		// const contentType = mimeTypes[req.params.format];
+		// let reqFormat;
+		
+		// if (req && req.params && req.params.format) {
+		// 	reqFormat = req.params.format;
+		// }
+
+		// const contentType = mimeTypes[format || req.params.format];
 		
 		// if (contentType) {
 		// 	res.setHeader("Content-Type", contentType);
@@ -440,6 +451,7 @@
 		// 	// Force compression on everything else
 		// 	res.setHeader("Content-Type", "application/json");
 		// }
+		
 
 		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
 		readStream.on("end", () => {

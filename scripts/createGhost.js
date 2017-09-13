@@ -8,14 +8,18 @@ let User = require('../backend/models/user');
 let C = require("../backend/constants");
 let ghosts = C.REPO_BLACKLIST_USERNAME;
 
+console.log(`Connecting to default`);
+
 DB.getDB('default').then( db => {
+
+	console.log(`Connected to default`);
 	// set db to singleton modelFactory class
 	require('../backend/models/factory/modelFactory').setDB(db);
 
 }).then(() => {
 	
 	let promises = [];
-	
+	console.log(`Assigning ghost users ...`);
 	ghosts.forEach(username => {
 		promises.push(
 			User.findByUserName(username).then(user => {
