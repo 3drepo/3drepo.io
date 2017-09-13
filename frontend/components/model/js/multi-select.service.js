@@ -52,12 +52,12 @@
 		 * Handle component input changes
 		 */
 		function handleKeysDown(keysDown) {
-			
+
 			if (pinDropMode) {
 				return;
 			}
 
-			if (isMutliselectDown(keysDown)) {
+			if (isMultiSelectDown(keysDown)) {
 
 				multiSelectEnabled();
 
@@ -103,7 +103,7 @@
 			return !isMac && keysDown.indexOf(keys.ctrlKey) !== -1;
 		}
 
-		function isMutliselectDown(keysDown) {
+		function isMultiSelectDown(keysDown) {
 			return isCmd(keysDown) || isCtrlKey(keysDown);
 		}
 

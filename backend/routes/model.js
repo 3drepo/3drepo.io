@@ -289,7 +289,10 @@ function getModelTree(req, res, next){
 	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
 
 	data.readStreamPromise.then(readStream => {
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream);
+		let headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
@@ -357,7 +360,7 @@ function downloadLatest(req, res, next){
 		};
 
 		if(file.meta.contentType){
-			headers['Content-Type'] = file.meta.contentType;
+			headers['Content-Type'] = "application/json";
 		}
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);

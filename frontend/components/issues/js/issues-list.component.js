@@ -420,7 +420,7 @@
 
 				// Closed
 				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-					console.log(vm.showClosed, vm.issuesToShow[i])
+					//console.log(vm.showClosed, vm.issuesToShow[i])
 					if (!vm.showClosed && (vm.issuesToShow[i].status === "closed")) {
 						vm.issuesToShow.splice(i, 1);
 					}

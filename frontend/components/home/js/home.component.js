@@ -36,14 +36,15 @@
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
 		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
-		"$location", "SWService", "AnalyticService", "ViewerService"
+		"$location", "SWService", "AnalyticService", "ViewerService",
+		"$document"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService, ViewerService
+		SWService, AnalyticService, ViewerService, $document
 	) {
 
 		var vm = this;
@@ -58,10 +59,11 @@
 			if (hasTrailingSlash()) {
 				removeTrailingSlash();
 			}
-
+			
 			AnalyticService.init();
 			SWService.init();
 
+			vm.initKeyWatchers();
 			vm.precacheTeamspaceTemplate();
 
 			vm.loggedIn = false;
@@ -326,40 +328,33 @@
 			}
 		});
 
+		vm.initKeyWatchers = function() {
 
-		/**
-		 * Keep a list of keys held down
-		 * For changes to be registered by directives and especially components the list needs to be recreated
-		 *
-		 * @param event
-		 */
-		vm.keyAction = function (event) {
-			var i, tmp;
-			// Update list, but avoid repeat
-			if (event.type === "keydown") {
+			$document.bind("keydown", function(event) {
 				if (vm.keysDown.indexOf(event.which) === -1) {
-					// Recreate list so that it changes are registered in components
-					tmp = vm.keysDown;
-					delete vm.keysDown;
 					
-					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
+					
+					// Recreate list so that it changes are registered in components
+					vm.keysDown = vm.keysDown.slice();
 
 				}
-			} else if (event.type === "keyup") {
+			});
+
+			$document.bind("keyup", function(event) {
 				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+				for (var i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
 						vm.keysDown.splice(i, 1);
 					}
 				}
+				
 				// Recreate list so that it changes are registered in components
-				tmp = vm.keysDown;
-				delete vm.keysDown;
-				vm.keysDown = angular.copy(tmp);
-			}
-		};
+				vm.keysDown = vm.keysDown.slice();
+			});
 
+
+		};
 
 		/**
 		 * Close the dialog
