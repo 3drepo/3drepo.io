@@ -147,7 +147,7 @@
 		vm.getTeamspaces = function() {
 			
 			var json = encodeURIComponent(vm.account) + ".json";
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, json);]
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, json);
 			
 			$http.get(url)
 				.then(function(response) {
