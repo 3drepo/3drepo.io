@@ -176,7 +176,9 @@
 				// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
 				if (this.billingAgreementId && this.billingInfo.isModified())
 				{	
-					return Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
+					const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
+					//console.log("Paypal.updateBillingAddress", paypalUpdate)
+					return paypalUpdate;
 				}
 
 			} else if (changes.canceledAllPlans){
@@ -202,6 +204,9 @@
 
 				// Once we have calculated a set of payments send them
 				return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
+
+					//console.log("Paypal.processPayments response: ", JSON.stringify(paypalData, null, 4));
+
 					//save the payment token to user billing info
 					this.paypalPaymentToken = paypalData.paypalPaymentToken;
 
