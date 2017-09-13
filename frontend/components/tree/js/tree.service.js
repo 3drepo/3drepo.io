@@ -72,7 +72,11 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "fulltree.json";
 
-			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
+			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url), {
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
 				.then(function(json) {
 					//var mainTree = JSON.parse(json.data.mainTree);
 					var mainTree = json.data.mainTree;
