@@ -170,46 +170,13 @@
 		 * Watch for events
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
-			var element;
 
 			vm.event = event;
 			
-			//if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
-			// if (event.value.on) {
-				
-			// 	if (event.value.hasOwnProperty("issue")) {
-			// 		vm.issueAreaIssue = event.value.issue;
-			// 		vm.issueArea = vm.issueAreaElIssue;
-			// 	} else if (event.value.hasOwnProperty("type")) {
-			// 		vm.issueAreaType = event.value.type;
-			// 		vm.issueArea = vm.issueAreaElType;
-			// 	}
-
-			// 	vm.modelUI.prepend(vm.issueArea);
-			// 	$compile(vm.issueArea)($scope);
-
-			// } else {
-
-			// 	if (angular.isDefined(vm.issueArea)) {
-			// 		vm.issueArea.remove();
-			// 	}
-			// }
-			//} else 
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "inherit";
-			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-				if (event.value) {
-					// Create measure display
-					//element = angular.element("");
-					//angular.element($element[0].querySelector("#model")).append(element);
-					//$compile(element)($scope);
-
-				} else {
-					// Remove measure display
-					element = angular.element($element[0].querySelector("#tdrMeasure"));
-					element.remove();
-				}
-			}
+			} 
+			
 		});
 
 
