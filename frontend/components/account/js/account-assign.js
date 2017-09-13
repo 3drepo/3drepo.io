@@ -146,7 +146,9 @@
 
 		vm.getTeamspaces = function() {
 			
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + ".json" );
+			var json = encodeURIComponent(vm.account) + ".json";
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, json);]
+			
 			$http.get(url)
 				.then(function(response) {
 
@@ -175,7 +177,7 @@
 				}
 
 				// Update the permissions user for the selected teamspace
-				var endpoint = vm.selectedTeamspace.account + "/permissions/";
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account) + "/permissions/";
 				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 				var permissionData = {
 					user : user.user,
@@ -220,7 +222,7 @@
 
 		vm.appendTeamspacePermissions = function(teamspace) {
 
-			var endpoint = teamspace.account + "/permissions";
+			var endpoint = encodeURIComponent(teamspace.account) + "/permissions";
 			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 			return $http.get(url)
 				.then(function(response) {
@@ -267,7 +269,7 @@
 
 		vm.setPermissionTemplates = function(teamspace){
 
-			var permission = teamspace.account + "/permission-templates";
+			var permission = encodeURIComponent(teamspace.account) + "/permission-templates";
 			var permissionUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, permission);
 			
 			return $http.get(permissionUrl)
@@ -356,7 +358,8 @@
 			if (vm.projectSelected) {
 				vm.selectedProject = vm.projects[vm.projectSelected];
 
-				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.projectSelected;
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+				endpoint += "/projects/" + encodeURIComponent(vm.projectSelected);
 				var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 				
 				// We can use the current users object as its matches the required 
@@ -480,7 +483,8 @@
 				} 
 
 				//Update the permissions user for the selected teamspace
-				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+				endpoint += "/projects/" + encodeURIComponent(vm.selectedProject.name);
 				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 				$http.put(url, {
 					permissions: vm.selectedProject.userPermissions
@@ -578,7 +582,8 @@
 
 				return $q(function(resolve, reject) {
 
-					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/permissions";
+					var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+					endpoint += "/" + encodeURIComponent(vm.modelSelected) +  "/permissions";
 					var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 
 					$http.get(url)
@@ -708,7 +713,8 @@
 			}
 
 			// Update the permissions user for the selected teamspace
-			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
+			var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+			endpoint += "/" + encodeURIComponent(vm.modelSelected) + "/permissions";
 			var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 
 			$http.post(url, permissionsToSend)
