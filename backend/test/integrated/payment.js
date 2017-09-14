@@ -737,12 +737,18 @@ describe("Enrolling to a subscription", function () {
 				subscriptions = res.body;
 
 				subscriptions.forEach(sub => {
-					expect(sub).to.have.deep.property("limits.spaceLimit");
+
+					expect(sub).to.have.property("limits");
+					expect(sub.limits).to.have.property("spaceLimit");
 					expect(sub.limits.spaceLimit).to.be.above(0);
-					expect(sub).to.have.deep.property("active", true);
-					expect(sub).to.have.deep.property("plan", plans.plans[0].plan);
-					expect(sub).to.have.deep.property("limits.collaboratorLimit");
+
+					expect(sub.limits).to.have.property("collaboratorLimit");
 					expect(sub.limits.collaboratorLimit).to.be.above(0);
+
+					expect(sub).to.have.property("active");
+					expect(sub.active).to.equal(true);
+					expect(sub).to.have.property("plan");
+					expect(sub.plan).to.equal(plans.plans[0].plan);
 
 				});
 

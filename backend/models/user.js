@@ -945,7 +945,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	plans = plans || [];
 	
-	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress).then(_billingAgreement => {
+	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress)
+	.then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;
 		return this.save();

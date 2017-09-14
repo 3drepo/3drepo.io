@@ -70,17 +70,17 @@ describe('Revision', function () {
 	});
 
 
-	it('list revisions should sccuess', function(done){
+	it('list revisions should succeed', function(done){
 		agent.get(`/${username}/${model}/revisions.json`)
 		.expect(200, function(err, res){
 			expect(res.body.length).to.equal(3);
-			expect(res.body[0]).to.have._id;
-			expect(res.body[0]).to.have.timestamp;
-			expect(res.body[0]).to.have.author;
+			expect(res.body[0]).to.have.property("_id");
+			expect(res.body[0]).to.have.property("timestamp");
+			expect(res.body[0]).to.have.property("author");
 			revisions = res.body;
 			done(err);
 		});
-	})
+	});
 
 
 	it('get x3d mp by revision id should success', function(done){

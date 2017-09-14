@@ -4,6 +4,8 @@ const gulp = require("gulp");
 const eslint = require("gulp-eslint");
 const env = require("gulp-env");
 const mocha = require("gulp-mocha");
+const path = require("path");
+const abs = path.resolve;
 
 gulp.task("test:integrated", function(){
 
@@ -12,7 +14,7 @@ gulp.task("test:integrated", function(){
         NODE_CONFIG_DIR: "../config/"
     });
 
-    gulp.src("./test/integrated/**/*.js")
+    gulp.src(abs("./test/integrated/**/*.js"))
         .pipe(envs)
         .pipe(mocha({
             reporter: "spec",
@@ -34,9 +36,10 @@ gulp.task("test:unit", function(){
         NODE_CONFIG_DIR: "../config/"
     });
 
-    gulp.src("./test/unit/**/*.js")
+    gulp.src(abs("./test/unit/**/*.js"), {read: false})
         .pipe(mocha({reporter: "spec"}))
-        .once("error", () => {
+        .once("error", (error) => {
+            console.log(error);
             process.exit(1);
         })
         .once("end", () => {
@@ -71,7 +74,7 @@ gulp.task("test:integrated-one", function() {
             NODE_CONFIG_DIR: "../config/"
         });
 
-        const path = "./test/integrated/" + process.argv[4];
+        const path = abs("./test/integrated/" + process.argv[4]);
         console.log("processing " + path);
 
         gulp.src(path)

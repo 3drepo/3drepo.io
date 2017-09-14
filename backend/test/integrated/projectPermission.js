@@ -214,7 +214,7 @@ describe('Project Permissions::', function () {
 		.expect(200, function(err, res){
 			expect(err).to.be.null;
 			const perm = res.body.find(p => p.user === userCanCreateModel.username);
-			expect(perm).to.exists;
+			expect(perm).to.exist;
 			expect(perm.permission).to.equal('admin');
 			done();
 		});
@@ -238,7 +238,7 @@ describe('Project Permissions::', function () {
 		.expect(200, function(err, res){
 
 			expect(err).to.be.null;
-			expect(res.body.permissions).to.exists;
+			expect(res.body.permissions).to.exist;
 
 			let permissions = res.body.permissions;
 
@@ -265,12 +265,12 @@ describe('Project Permissions::', function () {
 				.expect(200, function(err, res){
 
 					expect(err).to.be.null;
-					expect(res.body.permissions).to.exists;
+					expect(res.body.permissions).to.exist;
 
 					permissions = res.body.permissions;
 
 					const userPerm = permissions.find(p => p.user === userCanCreateModel.username);
-					expect(userPerm).to.exists;
+					expect(userPerm).to.exist;
 
 					userPerm.permissions = [];
 					callback(err);

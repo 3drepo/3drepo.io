@@ -38,7 +38,7 @@
     "jsonschema": "1.1.0",
     "lodash": "3.10.1",
     "mathjs": "1.7.1",
-    "mocha": "2.4.5",
+    "mocha": "3.5.3",
     "moment": "2.13.0",
     "moment-timezone": "0.5.4",
     "mongodb": "2.2.16",
@@ -71,7 +71,7 @@
     "yauzl": "git://github.com/3drepo/yauzl.git"
   },
   "devDependencies": {
-    "chai": "3.5.0",
+    "chai": "^4.1.2",
     "eslint": "^4.6.1",
     "eslint-plugin-node": "^5.1.1",
     "gulp": "3.9.1",
@@ -85,7 +85,7 @@
     "mongoose-mock": "0.4.0",
     "proxyquire": "1.7.4",
     "response-time": "2.3.1",
-    "sinon": "1.17.3",
+    "sinon": "3.2.1",
     "socket.io-client-cookie": "0.1.0",
     "supertest": "3.0.0",
     "xmlhttprequest": "1.8.0"

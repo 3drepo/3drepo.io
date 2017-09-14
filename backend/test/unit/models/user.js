@@ -100,16 +100,23 @@ describe('User', function(){
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
 				//expect(user.toObject().customData).to.deep.equal(updateObj);
-				expect(user.toObject()).to.have.deep.property('customData.firstName', updateObj.firstName);
-				expect(user.toObject()).to.have.deep.property('customData.lastName', updateObj.lastName);
-				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
+				expect(user.toObject()).to.have.property('customData');
+				expect(user.toObject().customData).to.have.property('firstName');
+				expect(user.toObject().customData.firstName).to.equal(updateObj.firstName);
+
+				expect(user.toObject().customData).to.have.property('lastName');
+				expect(user.toObject().customData.lastName).to.equal(updateObj.lastName);
+
+				expect(user.toObject().customData).to.have.property('email');
+				expect(user.toObject().customData.email).to.equal(updateObj.email);
+
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
 				spy.restore();
 				stub.restore();
 			});
 
-		})
+		});
 	});
 
 	describe('#updatePassword', function(){
