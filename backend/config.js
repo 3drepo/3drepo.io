@@ -37,6 +37,39 @@
 	};
 
 	/*******************************************************************************
+	 * Round robin API ClientConfiguration
+	 * @param {Object} variable - variable to coalesce
+	 * @param {Object} value - value to return if object is null or undefined
+	 *******************************************************************************/
+
+	function createRoundRobinAlgorithm(algoConfig) {
+
+		const roundRobin = {
+			apiUrls : algoConfig.apiUrls,
+			apiUrlCounter: {}
+		};
+
+		for (let k in algoConfig.apiUrls) {
+			if(algoConfig.apiUrls.hasOwnProperty(k)){
+				roundRobin.apiUrlCounter[k] = 0;
+			}
+		}
+		
+		// self variable will be filled in by frontend
+		roundRobin.apiUrl = function(type, path) {
+			const typeFunctions = this.apiUrls[type];
+			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+
+			this.apiUrlCounter[type] += 1;
+
+			return this.apiUrls[type][functionIndex](path);
+		};
+
+		return roundRobin;
+
+	}
+
+	/*******************************************************************************
 	 * Fill in the details of a server
 	 * @param {Object} serverObject - The object to populate
 	 * @param {string} name - The name of the server (also populates sub-domain/sub-directory)
@@ -159,7 +192,7 @@
 	}
 
 	// Change the algorithm for choosing an API server
-	//config.apiAlgorithm = createRoundRobinAlgorithm();
+	config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
 	config.disableCache = coalesce(config.disableCache, false);
 

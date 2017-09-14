@@ -33,8 +33,7 @@ module.exports = {
 			public_protocol: "http"
 		},
 		{
-			service: "frontend",
-			template:   "frontend.pug"
+			service: "frontend"
 		},
 		{
 			service: "chat",

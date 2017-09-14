@@ -145,7 +145,7 @@
 
         if (config.hasOwnProperty("captcha_client_key")) {
             clientConfig.captcha_client_key = config.captcha_client_key;
-        }  
+        }
 
         if (req) {
             clientConfig.userId = _.get(req, "session.user.username");

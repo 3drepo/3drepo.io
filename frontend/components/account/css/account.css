@@ -814,9 +814,7 @@ account-assign .assignTabHolder {
 div.md-select-menu-container, 
 div.md-select-menu-container md-select-menu, 
 div.md-select-menu-container md-select-menu md-content {
-
   max-height: 50vh !important;
-  min-height: 50vh !important;
 }
 
 account-assign .assignTabHolder .noUsers {
