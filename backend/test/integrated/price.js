@@ -352,7 +352,7 @@ describe("Billing agreement price from PayPal", function () {
 
 		makeTest({ 
 			noOfLicence: 3, 
-			vat: "9009009", 
+			vat: "DE129273398", // BMW
 			country: "DE", 
 			amount: "300",
 			taxAmount: "0"

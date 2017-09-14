@@ -4,9 +4,6 @@ let vat = require('../../../models/vat');
 let chai = require("chai");
 let expect = require('chai').expect;
 
-
-
-
 describe('VAT', function(){
 
 	describe('for business user', function(){

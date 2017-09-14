@@ -1517,7 +1517,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										issue.number = ++issueCounter;
 										return issue.save();
 									} else {
-										console.log('duplicate issue');
+										//console.log('duplicate issue');
 										return Promise.resolve();
 									}
 
