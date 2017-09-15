@@ -78,8 +78,15 @@ module.exports = {
 			return this.models[modelName].mongooseModel;
 		}
 
-		let mongooseModel =  mongoose.model(modelName, schema);
+		let mongooseModel;
+		if (mongoose.models[modelName]) {
+			mongooseModel = mongoose.model(modelName);
+		  } else {
+			mongooseModel = mongoose.model(modelName, schema);
+		  }
+		
 
+		//let mongooseModel =  mongoose.model(modelName, schema);
 
 		this.models[modelName] = { 
 			collectionName,

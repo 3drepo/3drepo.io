@@ -1039,4 +1039,5 @@ var User = ModelFactory.createClass(
 	}
 );
 
+
 module.exports = User;
