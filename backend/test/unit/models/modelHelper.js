@@ -50,7 +50,7 @@ describe('Model Helpers', function(){
 
 	describe('#modelNameRegExp', function(){
 		it('should have modelNameRegExp exposed', function(){
-			expect(ModelHelper.modelNameRegExp).to.have.exists;
+			expect(ModelHelper.modelNameRegExp).to.have.exist;
 		});
 
 		it('test model name format should succee', function(){

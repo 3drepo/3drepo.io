@@ -56,10 +56,7 @@ describe("Enrolling to a subscription", function () {
 	let billingId = "I-000000000000";
 
 	const timeout = 30000;
-
-	let sandbox;
-
-
+	
 	before(function(done){
 
 		server = app.listen(8080, function () {
@@ -159,9 +156,8 @@ describe("Enrolling to a subscription", function () {
 
 		delete plans.billingAddress.vat;
 
-		sandbox = sinon.sandbox.create();
-		sandbox.stub(Paypal, "processPayments").returns(
-			Promise.resolve({
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function(){
+			return Promise.resolve({
 				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-09X091704Y2940153",
 				"paypalPaymentToken": "EC-09X091704Y2940153",
 				"agreement": {
@@ -183,13 +179,13 @@ describe("Enrolling to a subscription", function () {
 					"start_date": "2017-09-12T15:40:36Z",
 					"httpStatusCode": 201
 				}
-			})
-		);
+			});
+		});
 
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
-			sandbox.restore();
+			stub.restore();
 			done(err);
 		});
 	});
@@ -219,9 +215,8 @@ describe("Enrolling to a subscription", function () {
 			}
 		};
 
-		sandbox = sinon.sandbox.create();
-		sandbox.stub(Paypal, "processPayments").returns(
-			Promise.resolve({
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
+			return Promise.resolve({
 				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-44W21718DX6163938",
 				"paypalPaymentToken": "EC-44W21718DX6163938",
 				"agreement": {
@@ -243,13 +238,13 @@ describe("Enrolling to a subscription", function () {
 					"start_date": "2017-09-12T15:40:49Z",
 					"httpStatusCode": 201
 				}
-			})
-		);
+			});
+		});
 
 		agent.post(`/${username}/subscriptions`)
 		.send(_plans)
 		.expect(200, function(err, res){
-			sandbox.restore();
+			stub.restore();
 			done(err);
 		});
 	});
@@ -277,10 +272,9 @@ describe("Enrolling to a subscription", function () {
 				"countryCode": "HK"
 			}
 		};
-
-		sandbox = sinon.sandbox.create();
-		sandbox.stub(Paypal, "processPayments").returns(
-			Promise.resolve({
+		
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
+			return Promise.resolve({
 				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-3M948685LE836592J",
 				"paypalPaymentToken": "EC-3M948685LE836592J",
 				"agreement": {
@@ -302,13 +296,13 @@ describe("Enrolling to a subscription", function () {
 					"start_date": "2017-09-12T15:40:55Z",
 					"httpStatusCode": 201
 				}
-			})
-		);
+			});
+		});
 
 		agent.post(`/${username}/subscriptions`)
 		.send(_plans)
 		.expect(200, function(err, res){
-			sandbox.restore();
+			stub.restore();
 			done(err);
 		});
 	});
@@ -319,140 +313,76 @@ describe("Enrolling to a subscription", function () {
 
 		this.timeout(timeout);
 
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function(){
+			return Promise.resolve({  
+				"url":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-2AX25360HG2794932",
+				"paypalPaymentToken":"EC-2AX25360HG2794932",
+				"agreement":{  
+					"name":"3D Repo Licences",
+					"description":"Regular monthly recurring payment £360. This agreement starts on 15th Sep 2017",
+					"plan":{  
+						"id":"P-07M85527XP798190YQWWKIPQ",
+						"state":"ACTIVE",
+						"name":"3D Repo Licences",
+						"description":"3D Repo Licence",
+						"type":"INFINITE",
+						"payment_definitions":[  
+							{  
+								"id":"PD-83H636509P8266139QWWKIPQ",
+								"name":"Regular monthly price",
+								"type":"REGULAR",
+								"frequency":"Month",
+								"amount":{  
+									"currency":"GBP",
+									"value":"300"
+								},
+								"cycles":"0",
+								"charge_models":[  
+									{  
+										"id":"CHM-22S96885W5688111LQWWKIPQ",
+										"type":"TAX",
+										"amount":{  
+											"currency":"GBP",
+											"value":"60"
+										}
+									}
+								],
+								"frequency_interval":"1"
+							}
+						],
+						"merchant_preferences":{  
+							"setup_fee":{  
+								"currency":"GBP",
+								"value":"0"
+							},
+							"max_fail_attempts":"0",
+							"return_url":"http://127.0.0.1/payment_testing?page=billing",
+							"cancel_url":"http://127.0.0.1/payment_testing?page=billing&cancel=1",
+							"auto_bill_amount":"YES",
+							"initial_fail_amount_action":"CONTINUE"
+						}
+					},
+					"links":[  
+						{  
+							"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-2AX25360HG2794932",
+							"rel":"approval_url",
+							"method":"REDIRECT"
+						},
+						{  
+							"href":"https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-2AX25360HG2794932/agreement-execute",
+							"rel":"execute",
+							"method":"POST"
+						}
+					],
+					"start_date":"2017-09-15T13:14:54Z",
+					"httpStatusCode":201
+				}
+			});
+		});
+
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
-
-			sandbox = sinon.sandbox.create();
-			sandbox.stub(Paypal, "executeAgreement").returns(
-			Promise.resolve({  
-				"id":"I-000000000000",
-				"name":"3D Repo Licenses",
-				"description":"Regualr monthly recurring payment £360, starts on 1st Aug 2016",
-				"plan":{  
-					"id":"P-0E4438980T7694020I2RECCQ",
-					"state":"ACTIVE",
-					"name":"3D Repo Licences",
-					"description":"3D Repo Licence",
-					"type":"INFINITE",
-					"payment_definitions":[  
-						{  
-							"id":"PD-4N463346D9639034UI2RECCQ",
-							"name":"Regular monthly price",
-							"type":"REGULAR",
-							"frequency":"Month",
-							"amount":{  
-								"currency":"GBP",
-								"value":"300"
-							},
-							"cycles":"0",
-							"charge_models":[  
-								{  
-									"id":"CHM-3R965001UL5436050I2RECCQ",
-									"type":"TAX",
-									"amount":{  
-										"currency":"GBP",
-										"value":"60"
-									}
-								}
-							],
-							"frequency_interval":"1"
-						}
-					],
-					"merchant_preferences":{  
-						"setup_fee":{  
-							"currency":"GBP",
-							"value":"0"
-						},
-						"max_fail_attempts":"0",
-						"return_url":"http://127.0.0.1/payment_testing?page=billing",
-						"cancel_url":"http://127.0.0.1/payment_testing?page=billing&cancel=1",
-						"auto_bill_amount":"YES",
-						"initial_fail_amount_action":"CONTINUE"
-					}
-				},
-				"links":[  
-					{  
-						"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-5EL17555M32938829",
-						"rel":"approval_url",
-						"method":"REDIRECT"
-					},
-					{  
-						"href":"https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-5EL17555M32938829/agreement-execute",
-						"rel":"execute",
-						"method":"POST"
-					}
-				],
-				"start_date":"2017-09-13T08:52:36.027Z",
-				"httpStatusCode":201
-			})
-			);
-			sandbox.stub(Paypal, "processPayments").returns(
-				Promise.resolve({
-					"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6AG60298MX906911J",
-					"paypalPaymentToken": "EC-6AG60298MX906911J",
-					"agreement": {
-						"name": "3D Repo Licences",
-						"description": "Regular monthly recurring payment £360. This agreement starts on 12th Sep 2017",
-						"plan": {
-							"id": "P-93788460V1888120PO3R4VIQ",
-							"state": "ACTIVE",
-							"name": "3D Repo Licences",
-							"description": "3D Repo Licence",
-							"type": "INFINITE",
-							"payment_definitions": [
-								{
-									"id": "PD-673956658G4958633O3R4VIQ",
-									"name": "Regular monthly price",
-									"type": "REGULAR",
-									"frequency": "Month",
-									"amount": {
-										"currency": "GBP",
-										"value": "300"
-									},
-									"cycles": "0",
-									"charge_models": [
-										{
-											"id": "CHM-5CU66195R8755281VO3R4VIQ",
-											"type": "TAX",
-											"amount": {
-												"currency": "GBP",
-												"value": "60"
-											}
-										}
-									],
-									"frequency_interval": "1"
-								}
-							],
-							"merchant_preferences": {
-								"setup_fee": {
-									"currency": "GBP",
-									"value": "0"
-								},
-								"max_fail_attempts": "0",
-								"return_url": "http://127.0.0.1/payment_testing?page=billing",
-								"cancel_url": "http://127.0.0.1/payment_testing?page=billing&cancel=1",
-								"auto_bill_amount": "YES",
-								"initial_fail_amount_action": "CONTINUE"
-							}
-						},
-						"links": [
-							{
-								"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6AG60298MX906911J",
-								"rel": "approval_url",
-								"method": "REDIRECT"
-							},
-							{
-								"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-6AG60298MX906911J/agreement-execute",
-								"rel": "execute",
-								"method": "POST"
-							}
-						],
-						"start_date": "2017-09-12T16:20:11Z",
-						"httpStatusCode": 201
-					}
-				})
-			);
 
 			expect(res.body).to.have.property("url");
 			let parsed = url.parse(res.body.url, true);
@@ -460,17 +390,15 @@ describe("Enrolling to a subscription", function () {
 
 			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
 			expect(paymentDef).to.be.not.null;
-			sandbox.restore();
+			stub.restore();
 
 			done(err);
 		});
 	});
 
 
-
-
 	describe("and then pay", function(){
-
+		let stub;
 		before(function(done){
 
 			//fake payment
@@ -478,12 +406,9 @@ describe("Enrolling to a subscription", function () {
 			let start_date = (new Date()).toISOString();
 			
 			// set fake billing id
-			sandbox = sinon.sandbox.create();
-			User.findByUserName(username).then(user => {
+			stub = sinon.stub(Paypal, "executeAgreement").callsFake(function(){
 
-				//stub paypal execute agreement
-				
-				sandbox.stub(Paypal, "executeAgreement").returns(Promise.resolve({
+				return Promise.resolve({
 					"id":billingId,
 					"name":"3D Repo Licenses",
 					"description":"Regualr monthly recurring payment £360, starts on 1st Aug 2016",
@@ -543,7 +468,11 @@ describe("Enrolling to a subscription", function () {
 					],
 					"start_date":start_date,
 					"httpStatusCode":201
-				}));
+				});
+
+			});
+
+			User.findByUserName(username).then(user => {
 
 				return user.executeBillingAgreement();
 
@@ -558,8 +487,7 @@ describe("Enrolling to a subscription", function () {
 						expect(res.body).to.be.an("array").and.to.have.length(1);
 						expect(res.body[0].invoiceNo).to.equal("SO-1");
 						expect(res.body[0].pending).to.equal(true);
-						sandbox.restore();
-
+				
 						if(err){
 							reject(err);
 						} else {
@@ -568,8 +496,7 @@ describe("Enrolling to a subscription", function () {
 					});
 				});
 
-			}).then(() => {
-
+			}).then(() => {		
 				done();
 
 			}).catch(err => {
@@ -580,6 +507,7 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		after(function(done){
+			stub.restore();		
 			agent.post("/logout")
 			.send({})
 			.expect(200, function(err, res){
@@ -645,8 +573,9 @@ describe("Enrolling to a subscription", function () {
 				+ "&transaction_subject=abc"
 				+ "&payment_gross=&shipping=0.00&product_type=1&time_created=" + paymentDate + "&ipn_track_id=78a335fad3b16";
 
-			sandbox = sinon.sandbox.create();
-			sandbox.stub(Paypal, "verifyGenuine").returns(Promise.resolve());
+			const verifyStub = sinon.stub(Paypal, "verifyGenuine").callsFake(function(){
+				return Promise.resolve();
+			});
 
 			new Promise((resolve, reject) => {
 				agent.post("/payment/paypal/ipn")
@@ -662,11 +591,11 @@ describe("Enrolling to a subscription", function () {
 					}, 3000);
 				});
 			}).then(() => {
-				sandbox.restore();
+				verifyStub.restore();
 				done();
 
 			}).catch(err => {
-				sandbox.restore();
+				verifyStub.restore();
 				done(err);
 			});
 
@@ -737,12 +666,18 @@ describe("Enrolling to a subscription", function () {
 				subscriptions = res.body;
 
 				subscriptions.forEach(sub => {
-					expect(sub).to.have.deep.property("limits.spaceLimit");
+
+					expect(sub).to.have.property("limits");
+					expect(sub.limits).to.have.property("spaceLimit");
 					expect(sub.limits.spaceLimit).to.be.above(0);
-					expect(sub).to.have.deep.property("active", true);
-					expect(sub).to.have.deep.property("plan", plans.plans[0].plan);
-					expect(sub).to.have.deep.property("limits.collaboratorLimit");
+
+					expect(sub.limits).to.have.property("collaboratorLimit");
 					expect(sub.limits.collaboratorLimit).to.be.above(0);
+
+					expect(sub).to.have.property("active");
+					expect(sub.active).to.equal(true);
+					expect(sub).to.have.property("plan");
+					expect(sub.plan).to.equal(plans.plans[0].plan);
 
 				});
 
@@ -1085,9 +1020,8 @@ describe("Enrolling to a subscription", function () {
 			plans.billingAddress.line2 = "2nduser line2";
 			plans.billingAddress.line3 = "2nduser line3";
 
-			sandbox = sinon.sandbox.create();
-			sandbox.stub(Paypal, "processPayments").returns(
-				Promise.resolve({
+			const stub = sinon.stub(Paypal, "processPayments").callsFake( function() {
+				return Promise.resolve({
 					"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-7CF55778SV0933845",
 					"paypalPaymentToken": "EC-7CF55778SV0933845",
 					"agreement": {
@@ -1150,33 +1084,33 @@ describe("Enrolling to a subscription", function () {
 						"start_date": "2017-09-12T16:29:03Z",
 						"httpStatusCode": 201
 					}
-				})
-			);
+				});
+
+			});
 
 			this.timeout(timeout);
 
 			agent.post(`/${username3}/subscriptions`)
 			.send(plans)
 			.expect(200, function(err, res){
+				//console.log(res.body);
 				expect(res.body).to.have.property("url");
 				let parsed = url.parse(res.body.url, true);
 				expect(parsed.query).to.have.property("token");
 
 				let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
 				expect(paymentDef).to.be.not.null;
-				sandbox.restore();
+				stub.restore();
 
 				done(err);
 			});
 		});
 
 		it("should have an invoice with invoice number SO-3", function(){
-			return User.findByUserName(username3).then(user => {
 
-				let start_date = (new Date()).toISOString();
-
-				sandbox = sinon.sandbox.create();
-				sandbox.stub(Paypal, "executeAgreement").returns(Promise.resolve({
+			const start_date = (new Date()).toISOString();
+			const stub = sinon.stub(Paypal, "executeAgreement").callsFake(function() {
+				return Promise.resolve({
 					"id": billingId,
 					"name": "3D Repo Licenses",
 					"description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
@@ -1234,10 +1168,12 @@ describe("Enrolling to a subscription", function () {
 					],
 					"start_date": start_date,
 					"httpStatusCode": 201
-				}));
+				});
+			});
+
+			return User.findByUserName(username3).then(user => {
 
 				return user.executeBillingAgreement();
-
 
 			}).then(() => {
 
@@ -1251,7 +1187,7 @@ describe("Enrolling to a subscription", function () {
 						expect(res.body[0].invoiceNo).to.equal("SO-3");
 						expect(res.body[0].pending).to.equal(true);
 						
-						sandbox.restore();
+						stub.restore();
 						if(err){
 							reject(err);
 						} else {

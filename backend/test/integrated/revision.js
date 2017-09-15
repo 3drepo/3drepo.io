@@ -70,18 +70,19 @@ describe('Revision', function () {
 	});
 
 
-	it('list revisions should sccuess', function(done){
+	it('list revisions should succeed', function(done){
 		agent.get(`/${username}/${model}/revisions.json`)
 		.expect(200, function(err, res){
 			expect(res.body.length).to.equal(3);
-			expect(res.body[0]).to.have._id;
-			expect(res.body[0]).to.have.timestamp;
-			expect(res.body[0]).to.have.author;
+			expect(res.body[0]).to.have.property("_id");
+			expect(res.body[0]).to.have.property("timestamp");
+			expect(res.body[0]).to.have.property("author");
 			revisions = res.body;
 			done(err);
 		});
-	})
+	});
 
+	// TODO: X3DOM isn't used any more
 
 	it('get x3d mp by revision id should success', function(done){
 		agent.get(`/${username}/${model}/revision/${revisions[0]._id}.x3d.mp`)
@@ -100,8 +101,6 @@ describe('Revision', function () {
 	});
 
 	it('get non existing rev should fail', function(done){
-
-		let revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/invalidtag.x3d.mp`)
 		.expect(404, function(err, res){
 			done(err);

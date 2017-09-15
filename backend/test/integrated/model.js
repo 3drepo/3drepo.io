@@ -87,7 +87,6 @@ describe('Model', function () {
 				agent.post(`/${username}/${model}`)
 				.send({ desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
-					console.log(res.body);
 					expect(res.body.name).to.equal(model);
 					modelId = res.body.model;
 					callback(err);
@@ -111,8 +110,6 @@ describe('Model', function () {
 
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
-
-					console.log(account);
 
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;

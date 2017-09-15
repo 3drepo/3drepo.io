@@ -78,7 +78,7 @@ module.exports.createApp = function (server, serverConfig){
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
 
-			console.log("consumeEventMessage --- ", msg);
+			//console.log("consumeEventMessage --- ", msg);
 
 			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message

@@ -15,130 +15,126 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
 
-	const middlewares = require("../middlewares/middlewares");
-	const express = require("express");
-	const router = express.Router({ mergeParams: true });
-	const User = require("../models/user");
-	const responseCodes = require("../response_codes.js");
-	const config = require("../config");
-	const utils = require("../utils");
+"use strict";
 
-	router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
-	router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
-	router.post("/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
-	router.put("/subscriptions/:sid/assign", middlewares.isAccountAdmin, updateAssignDetail);
-	router.delete("/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
+const middlewares = require("../middlewares/middlewares");
+const express = require("express");
+const router = express.Router({ mergeParams: true });
+const User = require("../models/user");
+const responseCodes = require("../response_codes.js");
+const config = require("../config");
+const utils = require("../utils");
 
-	function createSubscription(req, res, next) {
+router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
+router.post("/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
+router.put("/subscriptions/:sid/assign", middlewares.isAccountAdmin, updateAssignDetail);
+router.delete("/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
 
-		let responsePlace = utils.APIInfo(req);
-		let dbUser;
+function createSubscription(req, res, next) {
 
-		User.findByUserName(req.params.account)
-			.then(_dbUser => {
+	const responsePlace = utils.APIInfo(req);
 
-				dbUser = _dbUser;
-				let billingUser = req.session.user.username;
-				return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
-			})
-			.then(agreement => {
+	User.findByUserName(req.params.account)
+		.then(dbUser => {
+			let billingUser = req.session.user.username;
+			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+		})
+		.then(agreement => {
 
-				let resData = {
-					url: agreement.url
-				};
+			let resData = {
+				url: agreement.url
+			};
 
-				if (config.paypal.debug && config.paypal.debug.showFullAgreement) {
-					resData.agreement = agreement.agreement;
-				}
+			if (config.paypal.debug && config.paypal.debug.showFullAgreement) {
+				resData.agreement = agreement.agreement;
+			}
 
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
-			})
-			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	}
+		})
+		.catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
 
-	function listSubscriptions(req, res, next) {
+function listSubscriptions(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(user => {
-				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+	let responsePlace = utils.APIInfo(req);
+	User.findByUserName(req.params.account)
+		.then(user => {
+			let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
-			})
-			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	}
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
+		})
+		.catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
 
-	function assignSubscription(req, res, next) {
+function assignSubscription(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
+	let responsePlace = utils.APIInfo(req);
+	User.findByUserName(req.params.account)
+		.then(dbUser => {
 
-				let userData = {};
+			let userData = {};
 
-				if (req.body.email) {
-					userData.email = req.body.email;
-				} else if (req.body.user) {
-					userData.user = req.body.user;
-				}
+			if (req.body.email) {
+				userData.email = req.body.email;
+			} else if (req.body.user) {
+				userData.user = req.body.user;
+			}
 
-				if (req.body.job) {
-					userData.job = req.body.job;
-				}
+			if (req.body.job) {
+				userData.job = req.body.job;
+			}
 
-				if (req.body.permissions){
-					userData.permissions = req.body.permissions;
-				}
+			if (req.body.permissions){
+				userData.permissions = req.body.permissions;
+			}
 
-				return dbUser.assignSubscriptionToUser(req.params.sid, userData);
-			})
-			.then(subscription => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
-			})
-			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	}
+			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+		})
+		.then(subscription => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		})
+		.catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
 
-	function updateAssignDetail(req, res, next){
-		let responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
+function updateAssignDetail(req, res, next){
+	let responsePlace = utils.APIInfo(req);
+	User.findByUserName(req.params.account)
+		.then(dbUser => {
 
-				return dbUser.updateAssignDetail(req.params.sid, req.body);
-			})
-			.then(subscription => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
-			})
-			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	}
+			return dbUser.updateAssignDetail(req.params.sid, req.body);
+		})
+		.then(subscription => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		})
+		.catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
 
-	function removeAssignedSubscription(req, res, next) {
+function removeAssignedSubscription(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
+	let responsePlace = utils.APIInfo(req);
+	User.findByUserName(req.params.account)
+		.then(dbUser => {
 
-				return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
+			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
 
-			})
-			.then(subscription => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
-			})
-			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
-			});
-	}
+		})
+		.then(subscription => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		})
+		.catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
+		});
+}
 
-	module.exports = router;
-})();
+module.exports = router;

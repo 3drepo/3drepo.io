@@ -3,7 +3,7 @@ git:
   submodules: false
   depth: 1
 node_js:
-    - "6.11.2"
+    - "6.11.3"
 env:
   - CXX=g++-4.8
 sudo: required
