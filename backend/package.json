@@ -9,6 +9,7 @@
     "upgrade": "git checkout master && git pull && yarn run restart",
     "create-ghost": "NODE_ENV=test NODE_CONFIG_DIR=../config node ../scripts/createGhost",
     "test": "yarn run test:unit && yarn run test:int",
+    "test:coverage": "yarn test:int-clean && nyc yarn run test",
     "test:all": "yarn run test",
     "test:unit": "gulp test:unit",
     "test:int-clean": "./test/cleanup/cleanup.sh",
@@ -73,6 +74,7 @@
     "mocha": "3.5.3",
     "mockgoose": "6.0.3",
     "mongoose-mock": "0.4.0",
+    "nyc": "^11.2.1",
     "proxyquire": "1.7.4",
     "sinon": "3.2.1",
     "supertest": "3.0.0"

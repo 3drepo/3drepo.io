@@ -82,6 +82,7 @@ describe('Revision', function () {
 		});
 	});
 
+	// TODO: X3DOM isn't used any more
 
 	it('get x3d mp by revision id should success', function(done){
 		agent.get(`/${username}/${model}/revision/${revisions[0]._id}.x3d.mp`)
@@ -100,8 +101,6 @@ describe('Revision', function () {
 	});
 
 	it('get non existing rev should fail', function(done){
-
-		let revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/invalidtag.x3d.mp`)
 		.expect(404, function(err, res){
 			done(err);
