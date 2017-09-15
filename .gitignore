@@ -6,6 +6,7 @@ node_modules
 config/*
 !config/test/
 
+yarn-error.log
 bower_components
 
 certs

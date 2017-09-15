@@ -30,7 +30,9 @@ const helpers = require("./helpers");
 const moment = require("moment-timezone");
 const User = require("../../models/user");
 const url = require("url");
+
 const Paypal = require("../../models/paypal");
+// const Subscriptions = require("../../models/subscriptions");
 
 const sinon = require("sinon");
 
@@ -41,6 +43,10 @@ describe("Billing agreement price from PayPal", function () {
 	let username = "price_testing";
 	let password = "price_testing";
 	let email = "price_testing@mailinator.com";
+
+	// console.log(Paypal);
+	// Paypal.processPayments = function() { return Promise.resolve(); };
+	const timeout = 30000;
 
 	before(function(done){
 
@@ -68,7 +74,7 @@ describe("Billing agreement price from PayPal", function () {
 		});
 	});
 
-	function makeTest(options, stub, done){
+	function makeTest(options, stubs, done){
 		let plans = {
 			"plans": [
 				{    
@@ -89,14 +95,37 @@ describe("Billing agreement price from PayPal", function () {
 			}
 		};
 
-		const sandbox = sinon.sandbox.create();
-		sandbox.stub(Paypal, "processPayments").returns(
-			Promise.resolve(stub)
-		);
+		const restores = [];
+		
+		stubs.forEach(function(stubDetails){
+
+			const objToStub = stubDetails[0];
+			const funcName = stubDetails[1];
+			const stubObj = stubDetails[2];
+			if (funcName === "processPayments") {
+				console.log("sinon: ", objToStub, funcName, stubObj);
+				console.log("sinon objToStub: ", objToStub);
+				console.log("sinon funcName", funcName);
+				console.log("sinon stubObj", stubObj);
+			}
+
+			const stub = sinon.stub(objToStub, funcName).callsFake(function(){
+				console.log("USING STUB");
+				return Promise.resolve(stubObj);
+			});
+
+			restores.push(stub);
+
+		});
 
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
+
+			restores.forEach(function(restoreStub){
+				console.log("restoreStub", restoreStub)
+				restoreStub.restore();
+			});
 			
 			expect(res.body).to.have.property("url");
 			let parsed = url.parse(res.body.url, true);
@@ -127,76 +156,78 @@ describe("Billing agreement price from PayPal", function () {
 			done(err);
 		});
 
-		sandbox.restore();
 	}
 
 	it("GB Business", function(done) {
-		this.timeout(30000);
-		const stub = {
-			"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-53W81821MT2829201",
-			"paypalPaymentToken": "EC-53W81821MT2829201",
-			"agreement": {
-				"name": "3D Repo Licences",
-				"description": "Regular monthly recurring payment £360. This agreement starts on 13th Sep 2017",
-				"plan": {
-					"id": "P-35R25115F9941233GPKYRU5Q",
-					"state": "ACTIVE",
+		this.timeout(timeout);
+		const stub = [
+			[Paypal, "processPayments", 
+			{
+				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-53W81821MT2829201",
+				"paypalPaymentToken": "EC-53W81821MT2829201",
+				"agreement": {
 					"name": "3D Repo Licences",
-					"description": "3D Repo Licence",
-					"type": "INFINITE",
-					"payment_definitions": [
-						{
-							"id": "PD-6RL2715138822751APKYRU5Q",
-							"name": "Regular monthly price",
-							"type": "REGULAR",
-							"frequency": "Month",
-							"amount": {
-								"currency": "GBP",
-								"value": "300"
-							},
-							"cycles": "0",
-							"charge_models": [
-								{
-									"id": "CHM-1BY98212LK880653HPKYRU5Q",
-									"type": "TAX",
-									"amount": {
-										"currency": "GBP",
-										"value": "60"
+					"description": "Regular monthly recurring payment £360. This agreement starts on 13th Sep 2017",
+					"plan": {
+						"id": "P-35R25115F9941233GPKYRU5Q",
+						"state": "ACTIVE",
+						"name": "3D Repo Licences",
+						"description": "3D Repo Licence",
+						"type": "INFINITE",
+						"payment_definitions": [
+							{
+								"id": "PD-6RL2715138822751APKYRU5Q",
+								"name": "Regular monthly price",
+								"type": "REGULAR",
+								"frequency": "Month",
+								"amount": {
+									"currency": "GBP",
+									"value": "300"
+								},
+								"cycles": "0",
+								"charge_models": [
+									{
+										"id": "CHM-1BY98212LK880653HPKYRU5Q",
+										"type": "TAX",
+										"amount": {
+											"currency": "GBP",
+											"value": "60"
+										}
 									}
-								}
-							],
-							"frequency_interval": "1"
+								],
+								"frequency_interval": "1"
+							}
+						],
+						"merchant_preferences": {
+							"setup_fee": {
+								"currency": "GBP",
+								"value": "0"
+							},
+							"max_fail_attempts": "0",
+							"return_url": "http://127.0.0.1/price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"auto_bill_amount": "YES",
+							"initial_fail_amount_action": "CONTINUE"
+						}
+					},
+					"links": [
+						{
+							"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-53W81821MT2829201",
+							"rel": "approval_url",
+							"method": "REDIRECT"
+						},
+						{
+							"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-53W81821MT2829201/agreement-execute",
+							"rel": "execute",
+							"method": "POST"
 						}
 					],
-					"merchant_preferences": {
-						"setup_fee": {
-							"currency": "GBP",
-							"value": "0"
-						},
-						"max_fail_attempts": "0",
-						"return_url": "http://127.0.0.1/price_testing?page=billing",
-						"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
-						"auto_bill_amount": "YES",
-						"initial_fail_amount_action": "CONTINUE"
-					}
-				},
-				"links": [
-					{
-						"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-53W81821MT2829201",
-						"rel": "approval_url",
-						"method": "REDIRECT"
-					},
-					{
-						"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-53W81821MT2829201/agreement-execute",
-						"rel": "execute",
-						"method": "POST"
-					}
-				],
-				"start_date": "2017-09-13T10:03:53Z",
-				"httpStatusCode": 201
-			}
-		};
-		
+					"start_date": "2017-09-13T10:03:53Z",
+					"httpStatusCode": 201
+				}
+			}]
+		];
+	
 		makeTest({ 
 			noOfLicence: 3, 
 			vat: "206909015", 
@@ -207,71 +238,74 @@ describe("Billing agreement price from PayPal", function () {
 	});
 
 	it("GB Personal", function(done){
-		this.timeout(30000);
-		const stub = {
-			"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-20896650H4046874W",
-			"paypalPaymentToken": "EC-20896650H4046874W",
-			"agreement": {
-				"name": "3D Repo Licences",
-				"description": "Regular monthly recurring payment £240. This agreement starts on 13th Sep 2017",
-				"plan": {
-					"id": "P-4NK93752GA207012UPKYTCRY",
-					"state": "ACTIVE",
+		this.timeout(timeout);
+		const stub = [
+			[Paypal, "processPayments", 
+			{
+				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-20896650H4046874W",
+				"paypalPaymentToken": "EC-20896650H4046874W",
+				"agreement": {
 					"name": "3D Repo Licences",
-					"description": "3D Repo Licence",
-					"type": "INFINITE",
-					"payment_definitions": [
-						{
-							"id": "PD-5DB61909LV769472KPKYTCRY",
-							"name": "Regular monthly price",
-							"type": "REGULAR",
-							"frequency": "Month",
-							"amount": {
-								"currency": "GBP",
-								"value": "200"
-							},
-							"cycles": "0",
-							"charge_models": [
-								{
-									"id": "CHM-6HR30982D3293461TPKYTCRY",
-									"type": "TAX",
-									"amount": {
-										"currency": "GBP",
-										"value": "40"
+					"description": "Regular monthly recurring payment £240. This agreement starts on 13th Sep 2017",
+					"plan": {
+						"id": "P-4NK93752GA207012UPKYTCRY",
+						"state": "ACTIVE",
+						"name": "3D Repo Licences",
+						"description": "3D Repo Licence",
+						"type": "INFINITE",
+						"payment_definitions": [
+							{
+								"id": "PD-5DB61909LV769472KPKYTCRY",
+								"name": "Regular monthly price",
+								"type": "REGULAR",
+								"frequency": "Month",
+								"amount": {
+									"currency": "GBP",
+									"value": "200"
+								},
+								"cycles": "0",
+								"charge_models": [
+									{
+										"id": "CHM-6HR30982D3293461TPKYTCRY",
+										"type": "TAX",
+										"amount": {
+											"currency": "GBP",
+											"value": "40"
+										}
 									}
-								}
-							],
-							"frequency_interval": "1"
+								],
+								"frequency_interval": "1"
+							}
+						],
+						"merchant_preferences": {
+							"setup_fee": {
+								"currency": "GBP",
+								"value": "0"
+							},
+							"max_fail_attempts": "0",
+							"return_url": "http://127.0.0.1/price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"auto_bill_amount": "YES",
+							"initial_fail_amount_action": "CONTINUE"
+						}
+					},
+					"links": [
+						{
+							"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-20896650H4046874W",
+							"rel": "approval_url",
+							"method": "REDIRECT"
+						},
+						{
+							"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-20896650H4046874W/agreement-execute",
+							"rel": "execute",
+							"method": "POST"
 						}
 					],
-					"merchant_preferences": {
-						"setup_fee": {
-							"currency": "GBP",
-							"value": "0"
-						},
-						"max_fail_attempts": "0",
-						"return_url": "http://127.0.0.1/price_testing?page=billing",
-						"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
-						"auto_bill_amount": "YES",
-						"initial_fail_amount_action": "CONTINUE"
-					}
-				},
-				"links": [
-					{
-						"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-20896650H4046874W",
-						"rel": "approval_url",
-						"method": "REDIRECT"
-					},
-					{
-						"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-20896650H4046874W/agreement-execute",
-						"rel": "execute",
-						"method": "POST"
-					}
-				],
-				"start_date": "2017-09-13T10:04:05Z",
-				"httpStatusCode": 201
-			}
-		};		
+					"start_date": "2017-09-13T10:04:05Z",
+					"httpStatusCode": 201
+				}
+			}]
+		];		
 
 		makeTest({ 
 			noOfLicence: 2, 
@@ -283,71 +317,74 @@ describe("Billing agreement price from PayPal", function () {
 	});
 
 	it("DE Business", function(done){
-		this.timeout(30000);
-		const stub ={
-			"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-8MM22444YE692384N",
-			"paypalPaymentToken": "EC-8MM22444YE692384N",
-			"agreement": {
-				"name": "3D Repo Licences",
-				"description": "Regular monthly recurring payment £300. This agreement starts on 13th Sep 2017",
-				"plan": {
-					"id": "P-88584007R1739600CPKYV5JI",
-					"state": "ACTIVE",
+		this.timeout(timeout);
+		const stub = [
+			[Paypal, "processPayments", 
+			{
+				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-8MM22444YE692384N",
+				"paypalPaymentToken": "EC-8MM22444YE692384N",
+				"agreement": {
 					"name": "3D Repo Licences",
-					"description": "3D Repo Licence",
-					"type": "INFINITE",
-					"payment_definitions": [
-						{
-							"id": "PD-0NB29022KE5928340PKYV5JI",
-							"name": "Regular monthly price",
-							"type": "REGULAR",
-							"frequency": "Month",
-							"amount": {
-								"currency": "GBP",
-								"value": "300"
-							},
-							"cycles": "0",
-							"charge_models": [
-								{
-									"id": "CHM-6GN06805CH6123530PKYV5JI",
-									"type": "TAX",
-									"amount": {
-										"currency": "GBP",
-										"value": "0"
+					"description": "Regular monthly recurring payment £300. This agreement starts on 13th Sep 2017",
+					"plan": {
+						"id": "P-88584007R1739600CPKYV5JI",
+						"state": "ACTIVE",
+						"name": "3D Repo Licences",
+						"description": "3D Repo Licence",
+						"type": "INFINITE",
+						"payment_definitions": [
+							{
+								"id": "PD-0NB29022KE5928340PKYV5JI",
+								"name": "Regular monthly price",
+								"type": "REGULAR",
+								"frequency": "Month",
+								"amount": {
+									"currency": "GBP",
+									"value": "300"
+								},
+								"cycles": "0",
+								"charge_models": [
+									{
+										"id": "CHM-6GN06805CH6123530PKYV5JI",
+										"type": "TAX",
+										"amount": {
+											"currency": "GBP",
+											"value": "0"
+										}
 									}
-								}
-							],
-							"frequency_interval": "1"
+								],
+								"frequency_interval": "1"
+							}
+						],
+						"merchant_preferences": {
+							"setup_fee": {
+								"currency": "GBP",
+								"value": "0"
+							},
+							"max_fail_attempts": "0",
+							"return_url": "http://127.0.0.1/price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"auto_bill_amount": "YES",
+							"initial_fail_amount_action": "CONTINUE"
+						}
+					},
+					"links": [
+						{
+							"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-8MM22444YE692384N",
+							"rel": "approval_url",
+							"method": "REDIRECT"
+						},
+						{
+							"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-8MM22444YE692384N/agreement-execute",
+							"rel": "execute",
+							"method": "POST"
 						}
 					],
-					"merchant_preferences": {
-						"setup_fee": {
-							"currency": "GBP",
-							"value": "0"
-						},
-						"max_fail_attempts": "0",
-						"return_url": "http://127.0.0.1/price_testing?page=billing",
-						"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
-						"auto_bill_amount": "YES",
-						"initial_fail_amount_action": "CONTINUE"
-					}
-				},
-				"links": [
-					{
-						"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-8MM22444YE692384N",
-						"rel": "approval_url",
-						"method": "REDIRECT"
-					},
-					{
-						"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-8MM22444YE692384N/agreement-execute",
-						"rel": "execute",
-						"method": "POST"
-					}
-				],
-				"start_date": "2017-09-13T10:04:10Z",
-				"httpStatusCode": 201
-			}
-		};
+					"start_date": "2017-09-13T10:04:10Z",
+					"httpStatusCode": 201
+				}
+			}]
+		];
 		
 
 		makeTest({ 
@@ -360,8 +397,74 @@ describe("Billing agreement price from PayPal", function () {
 	});
 
 	it("DE Personal", function(done){
-		this.timeout(30000);
-		const stub = {};
+		this.timeout(timeout);
+		const stub = [
+			[Paypal, "processPayments", 
+			{  
+				"url":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-0PS51725E1940781W",
+				"paypalPaymentToken":"EC-0PS51725E1940781W",
+				"agreement":{  
+					"name":"3D Repo Licences",
+					"description":"Regular monthly recurring payment £238. This agreement starts on 15th Sep 2017",
+					"plan":{  
+						"id":"P-1LV62557KX855630CQVCHT5Y",
+						"state":"ACTIVE",
+						"name":"3D Repo Licences",
+						"description":"3D Repo Licence",
+						"type":"INFINITE",
+						"payment_definitions":[  
+							{  
+								"id":"PD-11J63997F8299793SQVCHT5Y",
+								"name":"Regular monthly price",
+								"type":"REGULAR",
+								"frequency":"Month",
+								"amount":{  
+									"currency":"GBP",
+									"value":"200"
+								},
+								"cycles":"0",
+								"charge_models":[  
+									{  
+										"id":"CHM-09932724JT6424848QVCHT5Y",
+										"type":"TAX",
+										"amount":{  
+											"currency":"GBP",
+											"value":"38"
+										}
+									}
+								],
+								"frequency_interval":"1"
+							}
+						],
+						"merchant_preferences":{  
+							"setup_fee":{  
+								"currency":"GBP",
+								"value":"0"
+							},
+							"max_fail_attempts":"0",
+							"return_url":"http://127.0.0.1/price_testing?page=billing",
+							"cancel_url":"http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"auto_bill_amount":"YES",
+							"initial_fail_amount_action":"CONTINUE"
+						}
+					},
+					"links":[  
+						{  
+							"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-0PS51725E1940781W",
+							"rel":"approval_url",
+							"method":"REDIRECT"
+						},
+						{  
+							"href":"https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-0PS51725E1940781W/agreement-execute",
+							"rel":"execute",
+							"method":"POST"
+						}
+					],
+					"start_date":"2017-09-15T11:21:06Z",
+					"httpStatusCode":201
+				}
+			}]
+		];
 
 		makeTest({ 
 			noOfLicence: 2, 
@@ -406,93 +509,99 @@ describe("Billing agreement price from PayPal", function () {
 
 
 		it("for a GB Business", function(done){
-			this.timeout(30000);
-			const stub = {
-				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6YW47478M33522711",
-				"paypalPaymentToken": "EC-6YW47478M33522711",
-				"agreement": {
-					"name": "3D Repo Licences",
-					"description": "This month's pro-rata: £112. Regular monthly recurring payment £240. This agreement starts on 13th Sep 2017",
-					"plan": {
-						"id": "P-10T58675JS639823KPKXN5HI",
-						"state": "ACTIVE",
+			this.timeout(timeout);
+			//console.log(Subscriptions);
+
+			const stub = [
+				[Paypal, "processPayments", 
+				{
+					"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6YW47478M33522711",
+					"paypalPaymentToken": "EC-6YW47478M33522711",
+					"agreement": {
 						"name": "3D Repo Licences",
-						"description": "3D Repo Licence",
-						"type": "INFINITE",
-						"payment_definitions": [
-							{
-								"id": "PD-99Y81256A4313542TPKXN5HI",
-								"name": "First month pro-rata price",
-								"type": "TRIAL",
-								"frequency": "Day",
-								"amount": {
-									"currency": "GBP",
-									"value": "93.33"
-								},
-								"cycles": "1",
-								"charge_models": [
-									{
-										"id": "CHM-56A55438DD999280GPKXN5HI",
-										"type": "TAX",
-										"amount": {
-											"currency": "GBP",
-											"value": "18.67"
+						"description": "This month's pro-rata: £112. Regular monthly recurring payment £240. This agreement starts on 13th Sep 2017",
+						"plan": {
+							"id": "P-10T58675JS639823KPKXN5HI",
+							"state": "ACTIVE",
+							"name": "3D Repo Licences",
+							"description": "3D Repo Licence",
+							"type": "INFINITE",
+							"payment_definitions": [
+								{
+									"id": "PD-99Y81256A4313542TPKXN5HI",
+									"name": "First month pro-rata price",
+									"type": "TRIAL",
+									"frequency": "Day",
+									"amount": {
+										"currency": "GBP",
+										"value": "93.33"
+									},
+									"cycles": "1",
+									"charge_models": [
+										{
+											"id": "CHM-56A55438DD999280GPKXN5HI",
+											"type": "TAX",
+											"amount": {
+												"currency": "GBP",
+												"value": "18.67"
+											}
 										}
-									}
-								],
-								"frequency_interval": "28"
+									],
+									"frequency_interval": "28"
+								},
+								{
+									"id": "PD-6UG75616PJ8337823PKXN5HI",
+									"name": "Regular monthly price",
+									"type": "REGULAR",
+									"frequency": "Month",
+									"amount": {
+										"currency": "GBP",
+										"value": "200"
+									},
+									"cycles": "0",
+									"charge_models": [
+										{
+											"id": "CHM-22F924941N1721837PKXN5HI",
+											"type": "TAX",
+											"amount": {
+												"currency": "GBP",
+												"value": "40"
+											}
+										}
+									],
+									"frequency_interval": "1"
+								}
+							],
+							"merchant_preferences": {
+								"setup_fee": {
+									"currency": "GBP",
+									"value": "0"
+								},
+								"max_fail_attempts": "0",
+								"return_url": "http://127.0.0.1/price_testing?page=billing",
+								"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+								"auto_bill_amount": "YES",
+								"initial_fail_amount_action": "CONTINUE"
+							}
+						},
+						"links": [
+							{
+								"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6YW47478M33522711",
+								"rel": "approval_url",
+								"method": "REDIRECT"
 							},
 							{
-								"id": "PD-6UG75616PJ8337823PKXN5HI",
-								"name": "Regular monthly price",
-								"type": "REGULAR",
-								"frequency": "Month",
-								"amount": {
-									"currency": "GBP",
-									"value": "200"
-								},
-								"cycles": "0",
-								"charge_models": [
-									{
-										"id": "CHM-22F924941N1721837PKXN5HI",
-										"type": "TAX",
-										"amount": {
-											"currency": "GBP",
-											"value": "40"
-										}
-									}
-								],
-								"frequency_interval": "1"
+								"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-6YW47478M33522711/agreement-execute",
+								"rel": "execute",
+								"method": "POST"
 							}
 						],
-						"merchant_preferences": {
-							"setup_fee": {
-								"currency": "GBP",
-								"value": "0"
-							},
-							"max_fail_attempts": "0",
-							"return_url": "http://127.0.0.1/price_testing?page=billing",
-							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
-							"auto_bill_amount": "YES",
-							"initial_fail_amount_action": "CONTINUE"
-						}
-					},
-					"links": [
-						{
-							"href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-6YW47478M33522711",
-							"rel": "approval_url",
-							"method": "REDIRECT"
-						},
-						{
-							"href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-6YW47478M33522711/agreement-execute",
-							"rel": "execute",
-							"method": "POST"
-						}
-					],
-					"start_date": "2017-09-13T10:01:08Z",
-					"httpStatusCode": 201
+						"start_date": "2017-09-13T10:01:08Z",
+						"httpStatusCode": 201
+					}
 				}
-			};
+				]
+			];
 
 			makeTest({ 
 				noOfLicence: 2, 
