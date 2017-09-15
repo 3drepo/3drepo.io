@@ -16,6 +16,7 @@
  */
 var _ = require('lodash');
 
+
 function Utils() {
     "use strict";
 
