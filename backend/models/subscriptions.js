@@ -179,7 +179,7 @@ Subscriptions.prototype.removePendingDeleteSubscription = function(){
 Subscriptions.prototype.getActiveSubscriptions = function (options) {
 	options = options || {};
 
-	console.log('buySubscription - jumping into subscriptions.js and calling getActiveSubscriptions');
+	//console.log('buySubscription - jumping into subscriptions.js and calling getActiveSubscriptions');
 	const basicPlan = Subscription.getBasicPlan().plan;
 	return this.subscriptions.filter(sub => {
 		let basicCond = options.skipBasic ? sub.plan !== basicPlan : true;

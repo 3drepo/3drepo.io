@@ -102,15 +102,8 @@ describe("Billing agreement price from PayPal", function () {
 			const objToStub = stubDetails[0];
 			const funcName = stubDetails[1];
 			const stubObj = stubDetails[2];
-			if (funcName === "processPayments") {
-				console.log("sinon: ", objToStub, funcName, stubObj);
-				console.log("sinon objToStub: ", objToStub);
-				console.log("sinon funcName", funcName);
-				console.log("sinon stubObj", stubObj);
-			}
 
 			const stub = sinon.stub(objToStub, funcName).callsFake(function(){
-				console.log("USING STUB");
 				return Promise.resolve(stubObj);
 			});
 
@@ -123,7 +116,6 @@ describe("Billing agreement price from PayPal", function () {
 		.expect(200, function(err, res){
 
 			restores.forEach(function(restoreStub){
-				console.log("restoreStub", restoreStub)
 				restoreStub.restore();
 			});
 			

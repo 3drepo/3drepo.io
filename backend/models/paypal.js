@@ -97,7 +97,7 @@ let cancelOldAgreement = function(billingAgreementId) {
 
 let createBillingAgreement = function(billing, payments, paymentDate) {
 
-	console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
+	//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
 	
 	let paymentDefs = [];
 	let hasProRata = false;
@@ -193,7 +193,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 					let token = url.parse(link.href, true)
 						.query.token;
 
-					console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
+					//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
 					resolve({
 						url: link.href,
 						paypalPaymentToken: token,
@@ -215,7 +215,7 @@ let processPayments = function(billing, payments, paymentDate) {
 	// otherwise if user decide not to complete the payment in paypal page it will
 	// leave users with no agreements at all in their account
 	//cancelOldAgreement(this).then(function() {
-	console.log(new Date().getSeconds(), "buySubscription - paypal.processPayments calling createBillingAgreement");
+	//(new Date().getSeconds(), "buySubscription - paypal.processPayments calling createBillingAgreement");
 	return createBillingAgreement(billing, payments, paymentDate);
 	//});
 };

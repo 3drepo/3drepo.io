@@ -233,7 +233,7 @@ describe('Notification', function () {
 			done();
 		});
 
-		console.log('issueId2', issueId);
+		//console.log('issueId2', issueId);
 		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
 		.send(comment)
 		.expect(200 , function(err, res){

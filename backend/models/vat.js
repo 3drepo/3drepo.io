@@ -86,7 +86,7 @@ function checkVAT(code, vatNum){
 			return reject({message: vatMsg});
 		}
 
-		console.log("checkVAT Slow Path hit")
+		//console.log("checkVAT Slow Path hit")
 
 		soapClient.then((client) => {
 			return client.checkVatAsync({

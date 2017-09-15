@@ -151,7 +151,7 @@ billingSchema.methods.cancelAgreement = function(){
 };
 
 billingSchema.methods.isNewPayment = function(changes){
-	console.log(new Date().getSeconds(), "buySubscription - isNewPayment")
+	//console.log(new Date().getSeconds(), "buySubscription - isNewPayment")
 	return changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence();
 };
 
@@ -168,7 +168,7 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 	this.billingUser = billingUser;
 
 	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
-		console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress called")
+		//console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress called")
 		this.markModified('billingInfo');
 		return this.subscriptions.changeSubscriptions(plans);
 
@@ -178,19 +178,19 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 			if (this.billingAgreementId && this.billingInfo.isModified())
 			{	
 				const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
-				console.log(new Date().getSeconds(), "buySubscription - Paypal.updateBillingAddress", paypalUpdate)
+				//console.log(new Date().getSeconds(), "buySubscription - Paypal.updateBillingAddress", paypalUpdate)
 				return paypalUpdate;
 			}
 
 		} else if (changes.canceledAllPlans){
 			// User cancelled everything, no need to calculate/create new bills,
 			// just cancel the previous agreement
-			console.log(new Date().getSeconds(), "buySubscription - cancelAgreement");
+			//console.log(new Date().getSeconds(), "buySubscription - cancelAgreement");
 			return this.cancelAgreement();
 
 		} else if (changes) {
 
-			console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress has changes")
+			//console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress has changes")
 			//changes in plans
 			
 			let startDate = getImmediatePaymentStartDate();
@@ -207,12 +207,12 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 				this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 			}
 
-			console.log(new Date().getSeconds(), "buySubscription - finished isNewPayment, firing Paypal.processPayments");
+			//console.log(new Date().getSeconds(), "buySubscription - finished isNewPayment, firing Paypal.processPayments");
 
 			// Once we have calculated a set of payments send them
 			return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
 
-				console.log(new Date().getSeconds(), "buySubscription - return of Paypal.processPayments response: ", JSON.stringify(paypalData, null, 4));
+				//console.log(new Date().getSeconds(), "buySubscription - return of Paypal.processPayments response: ", JSON.stringify(paypalData, null, 4));
 
 				//save the payment token to user billing info
 				this.paypalPaymentToken = paypalData.paypalPaymentToken;
@@ -220,9 +220,9 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 				// create invoice with init state for payment happens right after executing agreement
 				if(data.paymentDate <= startDate.toDate()){
 
-					console.log(new Date().getSeconds(), "buySubscription - creating Invoice")
+					//console.log(new Date().getSeconds(), "buySubscription - creating Invoice")
 					let invoice = Invoice.createInstance({ account: user });
-					console.log(new Date().getSeconds(), "buySubscription - initInvoice")
+					//console.log(new Date().getSeconds(), "buySubscription - initInvoice")
 					invoice.initInvoice({ 
 						changes, 
 						payments: data.payments,
