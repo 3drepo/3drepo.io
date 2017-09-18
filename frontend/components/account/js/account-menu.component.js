@@ -22,9 +22,6 @@
 		.component("accountMenu", {
 			restrict: "EA",
 			templateUrl: "templates/account-menu.html",
-			bindings: {
-				account: "="
-			},
 			controller: AccountMenuCtrl,
 			controllerAs: "vm"
 		});
@@ -33,6 +30,11 @@
 
 	function AccountMenuCtrl (AuthService, EventService, ViewerService) {
 		var vm = this;
+
+
+		vm.$onInit = function() {
+			vm.userAccount = AuthService.getUsername();
+		};
 		
 		/**
 		 * Open menu

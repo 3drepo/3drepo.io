@@ -257,8 +257,9 @@ issues-list .closedText{
 }
 
 issues-list-item:hover {
-   background: rgb(244, 234, 238);
+   background: #eaeaea;
 }
+
 issues-list-item .issueListItemMissingThumbnail {
   font-size: 50px;
   width: 50px;

@@ -23,6 +23,8 @@
 
 	const sessionFactory = require("./services/session.js");
 
+	const systemLogger = require("./logger.js").systemLogger;
+
 	/*******************************************************************************
 	 * Coalesce function
 	 * @param {Object} variable - variable to coalesce
@@ -132,7 +134,7 @@
 
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {
-		console.log("Cookie secret phrase has the default value. Update the config");
+		systemLogger.logInfo("Cookie secret phrase has the default value. Update the config");
 		process.exit(1);
 	}
 
@@ -205,13 +207,13 @@
 	config.db.port = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
 
 	if (config.db.port.length !== config.db.host.length) {
-		console.log("Incorrect number of hosts and ports");
+		systemLogger.logInfo("Incorrect number of hosts and ports");
 		process.exit(1);
 	}
 
 	if (config.db.host.length > 1 && !config.db.replicaSet)
 	{
-		console.log("You must specify the replica set name");
+		systemLogger.logInfo("You must specify the replica set name");
 		process.exit(1);
 	}
 

@@ -194,6 +194,9 @@
 					*/
 					return availableJob._id;
 				});
+
+				// Always have an unassign option for users
+				vm.modelJobs.push("Unassigned");
 			}
 		});
 
@@ -347,13 +350,18 @@
 
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
 
+				// If it's unassigned we can update so that there are no assigned roles
+				if (vm.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
+					vm.issueData.assigned_roles = [];
+				}
+
 				data = {
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
 					assigned_roles: vm.issueData.assigned_roles
 				};
-				
+	
 				IssuesService.updateIssue(vm.issueData, data)
 					.then(function (response) {
 

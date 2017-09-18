@@ -60,7 +60,6 @@
 			vm.showSubModelIssues = false;
 			vm.showClosed = false;
 			vm.sortOldestFirst = false;
-			vm.issuesToShowWithPinsIDs = undefined;
 			vm.infoHeight = 135;
 			vm.issuesListItemHeight = 141;
 			vm.selectedIssueIndex = null;
@@ -358,27 +357,22 @@
 		 * Setup the issues to show
 		 */
 		function setupIssuesToShow () {
-			var i = 0, j = 0, length = 0,
-				sortedIssuesLength;
 
 			vm.issuesToShow = [];
-			vm.issuesToShowWithPinsIDs = {};
 
-			// TODO: This needs tidying up
 			if (vm.allIssues.length > 0) {
+
 				// Sort
-				vm.issuesToShow = [vm.allIssues[0]];
-				for (i = 1, length = vm.allIssues.length; i < length; i += 1) {
-					for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-						if (((vm.allIssues[i].created < vm.issuesToShow[j].created) && (vm.sortOldestFirst)) ||
-							((vm.allIssues[i].created > vm.issuesToShow[j].created) && (!vm.sortOldestFirst))) {
-							vm.issuesToShow.splice(j, 0, vm.allIssues[i]);
-							break;
-						} else if (j === (vm.issuesToShow.length - 1)) {
-							vm.issuesToShow.push(vm.allIssues[i]);
-						}
-					}
-				}
+				vm.issuesToShow = vm.allIssues.slice(); // Duplicate
+				vm.issuesToShow.sort(function(a, b){
+					if (vm.sortOldestFirst) {
+						return a.created < b.created;
+					} 
+					return a.created > b.created;
+				});
+
+				// TODO: There is certainly a better way of doing this, but I don't want to
+				// dig into it right before release
 
 				// Filter text
 				var someText = angular.isDefined(vm.filterText) && vm.filterText !== "";
@@ -419,7 +413,7 @@
 				} 
 
 				// Closed
-				for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+				for (var i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
 					//console.log(vm.showClosed, vm.issuesToShow[i])
 					if (!vm.showClosed && (vm.issuesToShow[i].status === "closed")) {
 						vm.issuesToShow.splice(i, 1);
@@ -435,13 +429,6 @@
 				vm.issuesToShow = vm.issuesToShow.filter(function(issue){
 					return vm.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
-			}
-
-			// Create list of issues to show with pins
-			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-				if (vm.issuesToShow[i].position.length > 0) {
-					vm.issuesToShowWithPinsIDs[vm.issuesToShow[i]._id] = true;
-				}
 			}
 
 			// Setup what to show
@@ -461,45 +448,40 @@
 		 * Add issue pins to the viewer
 		 */
 		function showPins () {
-			var i, length,
-				pin,
-				pinData;
-			
-			// TODO: This needs tidying up
-
+		
 			// Go through all issues with pins
-			for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
-				if (vm.allIssues[i].position.length > 0) {
-					pin = angular.element(document.getElementById(vm.allIssues[i]._id));
-					if (pin.length > 0) {
-						// Existing pin
-						if (vm.issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
-							pin[0].setAttribute("render", "true");
-						} else {
-							pin[0].setAttribute("render", "false");
+			vm.allIssues.forEach(function(issue){
+
+				if (issue.position.length > 0) {
+
+					// If we are showing all the closed issues, or it's open
+					var show = (vm.showClosed === true || issue.status === "open");
+
+					if (show) {
+						// Create new pin
+						var pinData = {
+							id: issue._id,
+							position: issue.position,
+							norm:issue.norm,
+							account: issue.account,
+							model: issue.model
+						};
+						var pinColor = Pin.pinColours.blue;
+						var isSelectedPin = vm.selectedIssue && issue._id === vm.selectedIssue._id;
+
+						if (isSelectedPin) {
+							pinColor = Pin.pinColours.yellow;
 						}
+
+						IssuesService.addPin(pinData, pinColor, issue.viewpoint);
 					} else {
-						if (vm.issuesToShowWithPinsIDs[vm.allIssues[i]._id]) {
-							// Create new pin
-							pinData = {
-								id: vm.allIssues[i]._id,
-								position: vm.allIssues[i].position,
-								norm: vm.allIssues[i].norm,
-								account: vm.allIssues[i].account,
-								model: vm.allIssues[i].model
-							};
-							var pinColor = Pin.pinColours.blue;
-							var isSelectedPin = vm.selectedIssue && vm.allIssues[i]._id === vm.selectedIssue._id;
-
-							if (isSelectedPin) {
-								pinColor = Pin.pinColours.yellow;
-							}
-
-							IssuesService.addPin(pinData, pinColor, vm.allIssues[i].viewpoint);
-						}
+						// Remove pin
+						IssuesService.removePin(issue._id);
 					}
+					
 				}
-			}
+
+			});
 		}
 
 
