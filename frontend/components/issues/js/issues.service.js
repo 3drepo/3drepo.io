@@ -32,7 +32,6 @@
 	) {
 
 		var url = "",
-			data = {},
 			config = {},
 			numIssues = 0,
 			availableJobs = [],
@@ -103,31 +102,31 @@
 		}
 
 		function deselectPin(issue) {
-			var data;
+			var pinData;
 
 			// Issue with position means pin
 			if (issue.position.length > 0) {
-				data = {
+				pinData = {
 					id: issue._id,
 					colours: Pin.pinColours.blue
 				};
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
+				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, pinData);
 			}
 		}
 
 		function showIssue(issue) {
-			var data;
+			var issueData;
 				
 			// Highlight pin, move camera and setup clipping plane
-			data = {
+			issueData = {
 				id: issue._id,
 				colours: Pin.pinColours.yellow
 			};
 			
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, data);
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, issueData);
 
 			// Set the camera position
-			data = {
+			issueData = {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
 				up: issue.viewpoint.up,
@@ -135,16 +134,16 @@
 				model: issue.model
 			};
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, data);
+			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
 
 			// Set the clipping planes
-			data = {
+			issueData = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
 				model: issue.model
 			};
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, data);
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			// Remove highlight from any multi objects
 			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
@@ -200,7 +199,7 @@
 				var account = vals[0];
 				var model = vals[1];
 
-				data = {
+				var treeData = {
 					source: "tree",
 					account: account,
 					model: model,
@@ -209,7 +208,7 @@
 					multi: true
 				
 				};
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, treeData);
 			}
 		}
 
@@ -350,7 +349,7 @@
 		/**
 		 * Update issue
 		 * @param issue
-		 * @param data
+		 * @param issueData
 		 * @returns {*}
 		 */
 		function updateIssue(issue, issueData) {
@@ -360,7 +359,7 @@
 		/**
 		 * Handle PUT requests
 		 * @param issue
-		 * @param data
+		 * @param putData
 		 * @returns {*}
 		 */
 		function doPut(issue, putData) {

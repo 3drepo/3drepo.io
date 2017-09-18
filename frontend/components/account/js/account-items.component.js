@@ -713,7 +713,7 @@
 								timestamp: null
 							};
 
-							updateAccountModels(
+							vm.updateAccountModels(
 								response.data.account,
 								model, 
 								vm.newModelData.project
@@ -784,7 +784,7 @@
 		 * @param account
 		 * @param model
 		 */
-		function updateAccountModels (account, model, projectName) {
+		vm.updateAccountModels = function (account, model, projectName) {
 
 			var i, length,
 				accountToUpdate;
@@ -838,7 +838,7 @@
 				});
 
 			}
-		}
+		};
 
 
 		// PROJECT SPECIFIC CODE

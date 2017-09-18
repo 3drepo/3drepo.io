@@ -144,7 +144,8 @@
 		/**
 		 * Go to the model viewer
 		 */
-		vm.goToModel = function () {
+		vm.goToModel = function (event) {
+
 			if (!vm.model.uploading) {
 				if (vm.model.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
