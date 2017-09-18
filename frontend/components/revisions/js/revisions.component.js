@@ -60,13 +60,13 @@
 
 		vm.openDialog = function(event){
 
-			if(!vm.revisions){
-				RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
-					vm.revisionsLoading = false;
-					vm.revisions = revisions;
-				});
-			}
+			vm.revisions = [];
 
+			RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
+				vm.revisionsLoading = false;
+				vm.revisions = revisions;
+			});
+			
 			UtilsService.showDialog("revisions-dialog.html", $scope, event, true);
 		};
 

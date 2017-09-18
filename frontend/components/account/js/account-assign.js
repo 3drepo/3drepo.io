@@ -45,7 +45,7 @@
 			vm.modelReady = false;
 			vm.teamspaces = [];
 			vm.projects = {};
-			vm.models = {};
+			vm.models = [];
 			vm.selectedRole = {};
 
 			vm.check = $location.search();
@@ -400,7 +400,7 @@
 
 			if (projectSelected && projectReady) {
 
-				vm.models = vm.selectedProject.models;
+				vm.models = vm.selectedProject.models.sort(vm.sortModels);
 
 				if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
 					vm.modelSelected = vm.fromURL.modelSelected;
@@ -627,6 +627,23 @@
 			}
 			
 		});
+
+		vm.sortModels = function(a, b) {
+
+			if (a.name && b.name) {
+				var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+				var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+			}
+
+			// names must be equal
+			return 0;
+		};
 
 		vm.formatModelName = function(model) {
 			return (model.federate === true) ? 

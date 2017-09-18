@@ -11,6 +11,12 @@
 
 }
 
+account-modelsetting .userContent {
+  height: calc(100vh - 230px);
+  max-height: 517px !important;
+  overflow: auto;
+}
+
 account-items .userContent {
   height: calc(100vh - 245px);
   max-height: 517px !important;

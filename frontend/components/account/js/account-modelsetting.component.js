@@ -119,12 +119,15 @@
 		vm.save = function(){
 
 			var data = {
+				name: vm.modelName,
 				mapTile: vm.mapTile,
 				unit: vm.unit,
 				code: vm.code,
 				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n")
 			};
 
+			console.log(data);
+			
 			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
 				.then(function(response){
 					if(response.status === 200){
