@@ -366,9 +366,9 @@
 				vm.issuesToShow = vm.allIssues.slice(); // Duplicate
 				vm.issuesToShow.sort(function(a, b){
 					if (vm.sortOldestFirst) {
-						return a.created < b.created;
+						return a.created > b.created;
 					} 
-					return a.created > b.created;
+					return a.created < b.created;
 				});
 
 				// TODO: There is certainly a better way of doing this, but I don't want to
