@@ -227,7 +227,7 @@
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage, data) {
-			UnityUtil.reset();
+
 			vm.itemToShow = page;
 			vm.callingPage = callingPage;
 			vm.data = data;

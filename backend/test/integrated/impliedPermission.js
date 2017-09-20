@@ -298,7 +298,7 @@ describe('Implied permission::', function () {
 
 
 		// 	middlewares.hasDeleteAccessToModel(req, null, err => {
-		// 		expect(err).to.exists;
+		// 		expect(err).to.exist;
 		// 		done();
 		// 	});
 		// });

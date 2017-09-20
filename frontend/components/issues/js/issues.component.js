@@ -44,9 +44,18 @@
 			}
 		});
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", "AnalyticService", "$state", "$q"];
+	IssuesCtrl.$inject = [
+		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
+		"UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "$state", "$q"
+	];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, ClientConfigService, AnalyticService, $state, $q) {
+	function IssuesCtrl(
+		$scope, $timeout, IssuesService, EventService, AuthService, 
+		UtilsService, NotificationService, RevisionsService, ClientConfigService, 
+		AnalyticService, $state, $q
+	) {
+
 		var vm = this;
 
 		/*
@@ -67,6 +76,8 @@
 			vm.savingIssue = false;
 			vm.issueDisplay = {};
 			vm.selectedIssueLoaded = false;
+			vm.displayIssue = null;
+			vm.revisionsStatus = RevisionsService.status;
 
 			vm.modelLoaded = false;
 
@@ -88,15 +99,15 @@
 					vm.issues = (data === "") ? [] : data;
 					vm.showAddButton = true;
 
-
 					// if issue id is in url then select the issue
-					var issue = vm.issues.find(function(issue){
+					var issueMatch = vm.issues.find(function(issue){
 						return issue._id === vm.issueId;
 					});
 
-					if(issue){
-						vm.displayIssue = issue;
+					if(issueMatch){
+						vm.displayIssue = issueMatch;
 					}
+
 				});
 
 					
@@ -181,6 +192,21 @@
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
+		$scope.$watch(function() {
+			return RevisionsService.status.ready;
+		}, function(newValue, oldValue) {
+			if (RevisionsService.status.ready === true) {
+				vm.revisions = RevisionsService.status.data;
+				watchNotification();
+			}
+		}, true);
+
+		$scope.$watch(function() {
+			return IssuesService.issueId;
+		}, function(){
+			vm.issueId = IssuesService.issueId;
+		}, true);
+
 		/**
 		 * Set up event watching
 		 */
@@ -199,10 +225,7 @@
 			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
 
 				vm.modelLoaded = true;
-				
-			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
-				vm.revisions = event.value;
-				watchNotification();
+
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
@@ -216,9 +239,7 @@
 				
 				vm.subModels = event.value.subModels || [];
 				watchNotification();
-			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
-				vm.issueId = event.value;
-			}
+			} 
 		});
 
 
@@ -260,6 +281,7 @@
 
 		function watchNotification() {
 
+			// TODO: Is there a reason this is here?
 			if(!vm.revisions || !vm.subModels){
 				return;
 			}
@@ -342,6 +364,8 @@
 		}
 
 		function issueChangedListener(issue) {
+
+			console.log("issue - issues.component.js : issueChangedListener");
 
 			issue.title = IssuesService.generateTitle(issue);
 			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
@@ -427,13 +451,19 @@
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 
-			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
+			var notCurrentlySelected = vm.selectedIssue && issue && vm.selectedIssue._id !== issue._id;
+
+			if (notCurrentlySelected) {
 				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
 				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			}
 
-			if(issue) {
+			if (!issue && vm.selectedIssue) {
+				IssuesService.deselectPin(vm.selectedIssue);
+			}
+
+			if (issue) {
 
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
@@ -484,7 +514,7 @@
 		 * Exit issue editing
 		 * @param issue
 		 */
-		vm.editIssueExit = function (issue) {
+		vm.editIssueExit = function () {
 			vm.hideItem = true;
 		};
 

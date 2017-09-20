@@ -1,8 +1,16 @@
 
 if (window) {
+
 	if (!window.ClientConfig) {
 		console.error("ClientConfig has not been provided...");
-	} 
+	} else {
+		if (window.ClientConfig.unitySettings) {
+			// Assign unity settings
+			window.Module = ClientConfig.unitySettings;
+		} else {
+			console.error("ClientConfig does not have any provided Unity settings!");
+		}
+	}
 
 	// Add some offline UX
 	window.addEventListener("load", function() {
@@ -27,7 +35,7 @@ if (window) {
 		window.addEventListener("online",  updateOnlineStatus);
 		window.addEventListener("offline", updateOnlineStatus);
 	});
-}
 
+}
 
 angular.module("3drepo", ["ui.router", "ngMaterial", "ngAnimate", "ngSanitize", "vcRecaptcha"]);

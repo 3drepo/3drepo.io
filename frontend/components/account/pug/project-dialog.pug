@@ -15,9 +15,10 @@ md-dialog.newModelDialog(aria-label="New project")
 					tdr-focus="true"
 					ng-model="vm.projectData.teamspaceName")
 					md-option(
-						ng-repeat="account in vm.accounts"
-						ng-selected="account.name == vm.projectData.teamspaceName"
-						value="{{account.name}}") {{account.name}}
+						ng-repeat="teamspace in vm.accounts"
+						ng-if="teamspace.name && teamspace.permissions.indexOf('create_project') !== -1"
+						ng-selected="teamspace.name == vm.account"
+						value="{{teamspace.name}}") {{teamspace.name}}
 
 			md-input-container
 				input(

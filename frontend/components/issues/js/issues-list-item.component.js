@@ -32,21 +32,16 @@
 			}
 		);
 
-	IssuesListItemCtrl.$inject = ["$scope", "$element", "$timeout", "IssuesService"];
+	IssuesListItemCtrl.$inject = ["$scope", "IssuesService"];
 
-	function IssuesListItemCtrl ($scope, $element, $timeout, IssuesService) {
+	function IssuesListItemCtrl ($scope, IssuesService) {
 		var vm = this;
 
 		/**
 		 * Init
 		 */
 		vm.$onInit = function () {
-			// Role indicator
-			vm.issueRoleIndicator = null;
-			$timeout(function () {
-				vm.issueRoleIndicator = angular.element($element[0].querySelector("#issueRoleIndicator"));
-				setRoleIndicatorColour();
-			});
+			vm.setRoleIndicatorColour();
 		};
 
 		/**
@@ -57,7 +52,7 @@
 
 			// Data
 			if (vm.data) {
-				setRoleIndicatorColour();
+				vm.setRoleIndicatorColour();
 
 				// Title
 				if (vm.userJob) {
@@ -90,15 +85,10 @@
 		/**
 		 * Set role indicator colour
 		 */
-		function setRoleIndicatorColour () {
-			var assignedRoleColour;
-
-			if (vm.data && (vm.data.assigned_roles.length > 0) && vm.issueRoleIndicator) {
-				assignedRoleColour = IssuesService.getJobColor(vm.data.assigned_roles[0]);
-				if (assignedRoleColour !== null) {
-					vm.issueRoleIndicator.css("border", "none");
-					vm.issueRoleIndicator.css("background", assignedRoleColour);
-				}
+		vm.setRoleIndicatorColour = function() {
+			if (vm.data && (vm.data.assigned_roles.length > 0)) {
+				var assignedRole = vm.data.assigned_roles[0];
+				vm.issueRoleColor = vm.issueRoleColor = IssuesService.getJobColor(assignedRole);
 			}
 		}
 

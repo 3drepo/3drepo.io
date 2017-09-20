@@ -44,12 +44,13 @@ div.homeContainer(
 		
 
 	#homeLoggedOut(
-		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
+		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage && !vm.state.model")
 		
 		login(ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
 		
 		sign-up(ng-if="vm.page === 'sign-up'")
 		password-forgot(ng-if="vm.page === 'password-forgot'")
+		password-change(ng-if="vm.page === 'password-change'", token="vm.query.token", username="vm.query.username")
 		register-request(ng-if="vm.page === 'register-request'")
 		register-verify(ng-if="vm.page === 'register-verify'")
 

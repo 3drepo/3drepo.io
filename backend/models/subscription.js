@@ -15,51 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
-	
-	let subscriptions = [{
-			plan: "THE-100-QUID-PLAN",
-			description: "Advanced Licence",
-			limits: {
-				spaceLimit: 10737418240, //bytes
-				collaboratorLimit: 1,
-			},
-			billingCycle: 1, //month
-			freeTrial: 1, //month
-			currency: "GBP",
-			amount: 100
+"use strict";
+
+const subscriptions = {
+	"THE-100-QUID-PLAN" : {
+		plan: "THE-100-QUID-PLAN",
+		description: "Advanced Licence",
+		limits: {
+			spaceLimit: 10737418240, //bytes
+			collaboratorLimit: 1,
 		},
-
-		{
-			plan: "BASIC",
-			limits: {
-				spaceLimit: 209715200, //bytes
-				collaboratorLimit: 0,
-			},
-			billingCycle: -1, //month
-			freeTrial: 0, //month
-			currency: "GBP",
-			amount: 0
-		}
-	];
-
-	function getSubscription(plan) {
-		return subscriptions.find(sub => sub.plan === plan);
+		billingCycle: 1, //month
+		freeTrial: 1, //month
+		currency: "GBP",
+		amount: 100
+	},
+	"BASIC" : {
+		plan: "BASIC",
+		limits: {
+			spaceLimit: 209715200, //bytes
+			collaboratorLimit: 0,
+		},
+		billingCycle: -1, //month
+		freeTrial: 0, //month
+		currency: "GBP",
+		amount: 0
 	}
+};
 
-	function getBasicPlan() {
-		return getSubscription("BASIC");
-	}
+const subscriptionsArr = Object.keys(subscriptions).map( plan => {
+	return subscriptions[plan];
+});
 
-	function getAll() {
-		return subscriptions;
-	}
+function getSubscription(plan) {
+	return subscriptions[plan];
+}
 
-	module.exports = {
-		getAll,
-		getSubscription,
-		getBasicPlan
-	};
-	
-})();
+function getBasicPlan() {
+	return subscriptions["BASIC"];
+}
+
+function getAll() {
+	return subscriptionsArr;
+}
+
+module.exports = {
+	getAll,
+	getSubscription,
+	getBasicPlan
+};

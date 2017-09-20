@@ -69,8 +69,12 @@ issues #issuesAddButton {
   margin-right: 12px;
 }
 
+issues #issueDescriptionContainer {
+  margin-top: 0px;
+}
+
 issues #issuesContent {
-  height: 100%;
+  height: calc(100% - 70px);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -88,6 +92,7 @@ issues #issueRoleIndicator {
 /** Issue *************************************************************************************************************/
 issue {
   display: block;
+  height: 100%;
 }
 
 issue md-list-item .md-button,
@@ -99,6 +104,17 @@ issue h3,
 issue h4 {
   word-wrap: break-word;
   white-space: normal !important;
+}
+
+issue #descriptionText {
+  max-height: 120px;
+  height: 100px;
+}
+
+issue #descriptionText textarea {
+  max-height: 120px;
+  height: 100px;
+  overflow-y: auto;
 }
 
 issue .issueCommentsContainer {
@@ -240,6 +256,10 @@ issues-list .closedText{
   padding-left: 4px;
 }
 
+issues-list-item:hover {
+   background: #eaeaea;
+}
+
 issues-list-item .issueListItemMissingThumbnail {
   font-size: 50px;
   width: 50px;
@@ -255,6 +275,14 @@ issues-list-item #issueListItemStatus {
 issue #issueAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+issue #issueFooterButtons {
+  position: absolute;
+  bottom: 0;
+  background: white;
+  width: 100%;
+  z-index: 10;
 }
 
 issue .issueItemContainer {

@@ -53,7 +53,7 @@ describe('Infrastructure', function () {
 
 
 	describe('Queue', function(){
-		this.timeout(10000);
+		this.timeout(15000);
 
 		describe('died before app start', function(){
 			before(function(done){

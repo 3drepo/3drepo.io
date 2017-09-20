@@ -1,5 +1,6 @@
+"use strict";
+
 (() => {
-    "use strict";
     
     const _ = require("lodash");
     const fs = require("fs");
@@ -14,7 +15,6 @@
     const config = require("../config.js");
     const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
     const C = require("../constants");
-
 
     /**
      * Get the pug files for the required state or plugin
@@ -121,8 +121,8 @@
 			for (let i = 0; i < config.legal.length; i += 1) {
 				pluginStructure.functions.push(config.legal[i].page);
 			}
-		}
-
+        }
+        
         let clientConfig = {
             "pluginLoaded": [],
             "pluginPug": [],
@@ -138,8 +138,14 @@
             "gaTrackId": config.gaTrackId,
             "development" : config.development,
             "googleConversionId": config.googleConversionId,
-            "userNotice" : config.userNotice
+            "userNotice" : config.userNotice,
+            "unitySettings" : config.unitySettings,
+            
         };
+
+        if (config.hasOwnProperty("captcha_client_key")) {
+            clientConfig.captcha_client_key = config.captcha_client_key;
+        }
 
         if (req) {
             clientConfig.userId = _.get(req, "session.user.username");

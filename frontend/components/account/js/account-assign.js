@@ -28,7 +28,6 @@
 			controller: accountAssignCtrl,
 			controllerAs: "vm"
 		});
-	
 
 	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$mdDialog", "$location", "UtilsService", "ClientConfigService"];
 
@@ -46,7 +45,7 @@
 			vm.modelReady = false;
 			vm.teamspaces = [];
 			vm.projects = {};
-			vm.models = {};
+			vm.models = [];
 			vm.selectedRole = {};
 
 			vm.check = $location.search();
@@ -61,7 +60,7 @@
 				teamspace_admin : "Admin",
 				// assign_licence	: "Assign Licence",
 				// revoke_licence	: "Revoke Licence",
-				create_project	: "Create Project",
+				// create_project	: "Create Project",
 				// create_job	: "Create Job",
 				// delete_job	: "Delete Job",
 				// assign_job : "Assign Job"
@@ -69,13 +68,11 @@
 			};
 
 			vm.projectPermissions = {
-
-				create_model : "Create Model",
-				create_federation : "Create Federation",
-				admin_project : "Admin Project",
-				edit_project :  "Edit Project",
-				delete_project : "Delete Federation"
-
+				// create_model : "Create Model",
+				// create_federation : "Create Federation",
+				// delete_project : "Delete Project",
+				// edit_project :  "Edit Project",
+				admin_project : "Admin Project"
 			};
 
 			vm.modelRoles = ["unassigned"];
@@ -87,6 +84,7 @@
 			$location.search("account", null);
 			$location.search("project", null);
 			$location.search("model", null);
+			vm.checkIfAdminChanged();
 		};
 
 		vm.getStateFromParams = function() {
@@ -110,7 +108,10 @@
 		vm.teamspacesToAssign = function() {
 			return vm.selectedTeamspace && 
 					vm.selectedTeamspace.teamspacePermissions && 
-					vm.selectedTeamspace.teamspacePermissions.length === 0;
+					(vm.selectedTeamspace.teamspacePermissions.length === 0 || 
+						(vm.selectedTeamspace.teamspacePermissions.length === 1 && 
+						vm.selectedTeamspace.teamspacePermissions[0].user === vm.account)
+					);
 		};
 
 		vm.teamspaceAdminDisabled = function(user, permission) {
@@ -145,7 +146,9 @@
 
 		vm.getTeamspaces = function() {
 			
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + ".json" );
+			var json = encodeURIComponent(vm.account) + ".json";
+			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, json);
+			
 			$http.get(url)
 				.then(function(response) {
 
@@ -174,12 +177,19 @@
 				}
 
 				// Update the permissions user for the selected teamspace
-				var endpoint = vm.selectedTeamspace.account + "/permissions/";
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account) + "/permissions/";
 				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 				var permissionData = {
 					user : user.user,
 					permissions: user.permissions
 				};
+
+				// Move them to unassigned role if we remove there admin privilidges
+				if (permission === "teamspace_admin" && vm.modelRoles && vm.modelRoles.length > 1) {
+					vm.selectedRole[user.user] = "unassigned";
+				}
+
+				vm.checkIfAdminChanged();
 
 				$http.post(url, permissionData)
 					.catch(function(error){
@@ -203,7 +213,7 @@
 			var hasPermissions = false;
 			vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
 				if (permissionUser.user === user.user) {
-					hasPermissions = user.permissions.indexOf(permission) !== -1;
+					hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
 				} 
 			});
 			
@@ -212,7 +222,7 @@
 
 		vm.appendTeamspacePermissions = function(teamspace) {
 
-			var endpoint = teamspace.account + "/permissions";
+			var endpoint = encodeURIComponent(teamspace.account) + "/permissions";
 			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 			return $http.get(url)
 				.then(function(response) {
@@ -259,7 +269,7 @@
 
 		vm.setPermissionTemplates = function(teamspace){
 
-			var permission = teamspace.account + "/permission-templates";
+			var permission = encodeURIComponent(teamspace.account) + "/permission-templates";
 			var permissionUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, permission);
 			
 			return $http.get(permissionUrl)
@@ -318,12 +328,15 @@
 
 		vm.adminChecked = function(user, permission) {
 			return vm.userHasProjectPermissions(user, permission) ||
-					vm.userHasProjectPermissions(user, "admin_project");
+					vm.userHasProjectPermissions(user, "admin_project") ||
+					vm.userHasPermissions(user, "teamspace_admin");
 		};
 
 		vm.adminDisabled = function(user, permission) {
-			return permission !== "admin_project" && vm.userHasProjectPermissions(user, "admin_project");
-		}
+			return (permission !== "admin_project" && 
+				vm.userHasProjectPermissions(user, "admin_project")) || 
+				vm.userHasPermissions(user, "teamspace_admin");
+		};
 
 		vm.setProjects = function() {
 
@@ -345,7 +358,8 @@
 			if (vm.projectSelected) {
 				vm.selectedProject = vm.projects[vm.projectSelected];
 
-				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.projectSelected;
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+				endpoint += "/projects/" + encodeURIComponent(vm.projectSelected);
 				var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
 				
 				// We can use the current users object as its matches the required 
@@ -363,8 +377,21 @@
 		});
 
 		vm.handleProjectSelected = function(response){
-						
+			
 			vm.selectedProject.userPermissions = response.data.permissions;
+
+			// We should put the teamspace owner in the list if they 
+			// aren't in it already
+			if (vm.selectedProject.userPermissions.length === 0 
+				&& vm.selectedTeamspace.account === vm.account) {
+
+				vm.selectedProject.userPermissions.push({
+					permissions: ["admin_project"],
+					user : vm.account
+				});
+
+			}
+			
 
 			// Reset the models
 			vm.clearModelState();
@@ -373,7 +400,7 @@
 
 			if (projectSelected && projectReady) {
 
-				vm.models = vm.selectedProject.models;
+				vm.models = vm.selectedProject.models.sort(vm.sortModels);
 
 				if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
 					vm.modelSelected = vm.fromURL.modelSelected;
@@ -445,12 +472,19 @@
 						if (index !== -1) {
 							targetUser.permissions.splice(index, 1);
 						}
+
+						// Move them to unassigned role if we remove there admin privilidges
+						if (permission === "admin_project" && vm.modelRoles && vm.modelRoles.length > 1) {
+							vm.selectedRole[user.user] = "unassigned";
+						}
+
 					} 
 					
 				} 
 
 				//Update the permissions user for the selected teamspace
-				var endpoint = vm.selectedTeamspace.account + "/projects/" + vm.selectedProject.name;
+				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+				endpoint += "/projects/" + encodeURIComponent(vm.selectedProject.name);
 				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 				$http.put(url, {
 					permissions: vm.selectedProject.userPermissions
@@ -459,14 +493,45 @@
 					vm.showError(title, error);
 				});
 
+				// Check if we removed or added an admins
+				vm.checkIfAdminChanged();
+
 			}
 
 		};
 
 		// MODELS
+		
+		vm.isProjectAdmin = function(user) {
+
+			var userObj;
+			if (typeof(user) === "string") {
+				userObj = {user: user};
+			} else {
+				userObj = user;
+			}
+
+			return vm.userHasProjectPermissions(userObj, "admin_project");
+
+		};
+
+		vm.isTeamspaceAdmin = function(user) {
+
+			var userObj;
+			if (typeof(user) === "string") {
+				userObj = {user: user};
+			} else {
+				userObj = user;
+			}
+
+			return vm.userHasPermissions(userObj, "teamspace_admin");
+					
+
+		};
+
 
 		vm.modelUsersToAssign = function() {
-			return vm.modelRoles && Object.keys(vm.modelRoles).length === 0;
+			return vm.modelSelected && vm.selectedRole && Object.keys(vm.selectedRole).length === 0;
 		};
 
 		vm.modelUserValid = function(user) {
@@ -493,6 +558,17 @@
 			vm.selectedRole = {};
 		};
 
+		vm.checkIfAdminChanged = function() {
+	
+			if (vm.selectedRole) {
+				Object.keys(vm.selectedRole).forEach(function(user){
+					if (user && (vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
+						vm.selectedRole[user] = "admin";
+					}
+				});
+			}
+		};
+
 		$scope.$watch("vm.modelSelected", function(){
 			// Find the matching project to the one selected
 			vm.modelReady = false;
@@ -506,18 +582,28 @@
 
 				return $q(function(resolve, reject) {
 
-					var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected +  "/permissions";
+					var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+					endpoint += "/" + encodeURIComponent(vm.modelSelected) +  "/permissions";
 					var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 
 					$http.get(url)
 						.then(function(response){
 
 							var users = response.data;
+
+							// Add the teamspace admin if they don't appear in the list
+							if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
+								users.push({
+									permissions: ["admin"],
+									user : vm.account
+								});
+							}
+							
 							users.forEach(function(user){
 
 								// If its the teamspace then we can disable 
 								// and assign admin role
-								if (user.user === vm.account) {
+								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
 									vm.selectedRole[user.user] = "admin";
 								} else {
 									vm.selectedRole[user.user] = user.permission || "unassigned";
@@ -542,8 +628,38 @@
 			
 		});
 
+		vm.sortModels = function(a, b) {
+
+			if (a.name && b.name) {
+				var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+				var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+			}
+
+			// names must be equal
+			return 0;
+		};
+
+		vm.formatModelName = function(model) {
+			return (model.federate === true) ? 
+				model.name + " (Federation)" : 
+				model.name + " (Model)";
+		};
+
 		vm.modelStateChange = function(user, role) {
 			
+			// We don't want people to be able to set admins
+			// as it should come from a higher priority
+			var upperAdmin = vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user);
+			if (role === "admin" || upperAdmin) {
+				return;
+			}
+
 			var permissionsToSend = [];
 
 			var validInput = user && role;
@@ -568,8 +684,54 @@
 				}
 			}
 
+			// TODO: Check if the model is a federation and if so, check that they have some 
+			// permission on all submodel
+	
+			var permissionlessModels = [];
+			
+			if (vm.selectedModel.federate && vm.selectedModel.subModels.length > 0) {
+				vm.selectedModel.subModels.forEach(function(subModel){
+					
+					Object.keys(vm.selectedProject.models).forEach(function(modelId){
+						var projectModel = vm.selectedProject.models[modelId];
+
+						if (
+							subModel.model === projectModel.model
+						) {
+							permissionlessModels.push(projectModel);
+						}
+
+					});
+				});
+			}
+
+			if (permissionlessModels.length) {
+				var content = "Just to let you know, the assigned user will need permissions on submodels also to see them." + 
+				"<br><br> These are the models in question: <br><br>";
+				permissionlessModels.forEach(function(model, i) {
+					content += " <strong>" + model.name + "</strong>";
+					if (i !== permissionlessModels.length) {
+						content += ",";
+					}
+
+					if ((i + 1) % 4 === 0) {
+						content += "<br><br>";
+					}
+				});
+
+				$mdDialog.show( 
+					$mdDialog.alert()
+						.clickOutsideToClose(true)
+						.title("Reminder about Federation Permissions")
+						.htmlContent(content)
+						.ariaLabel("Reminder about Federations")
+						.ok("OK")
+				);
+			}
+
 			// Update the permissions user for the selected teamspace
-			var endpoint = vm.selectedTeamspace.account + "/" + vm.modelSelected + "/permissions";
+			var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
+			endpoint += "/" + encodeURIComponent(vm.modelSelected) + "/permissions";
 			var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 
 			$http.post(url, permissionsToSend)

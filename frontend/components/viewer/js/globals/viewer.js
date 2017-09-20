@@ -107,7 +107,9 @@ var Viewer = {};
 		this.logos    = [];
 
 
-		this.preInit = function() {
+		this.prepareViewer = function() {
+			
+			self.unityLoaderReady = false;
 
 			self.viewer = document.createElement("div");
 			self.viewer.className = "viewer";
@@ -137,12 +139,35 @@ var Viewer = {};
 			self.viewer.appendChild(self.loadingDiv);
 
 			self.unityLoaderScript = document.createElement("script");
-			self.unityLoaderScript.setAttribute("src", "unity/Release/UnityLoader.js");
+			
+		};
+
+		this.unityLoaderPath = "unity/Release/UnityLoader.js";
+		this.unityScriptInserted = false;
+
+		this.insertUnityLoader = function() {
+			return new Promise(function(resolve, reject) {
+				self.unityLoaderScript.async = true;
+				self.unityLoaderScript.addEventListener ("load", function() {
+					console.debug("Loaded UnityLoader.js succesfully");
+					resolve();
+				}, false);
+				self.unityLoaderScript.addEventListener ("error", function(error) {
+					console.error("Error loading UnityLoader.js", error);
+					reject("Error loading UnityLoader.js");
+				}, false);
+
+				// Event handlers MUST come first before setting src
+				self.unityLoaderScript.src = self.unityLoaderPath;
+
+				// This kicks off the actual loading of Unity
+				self.viewer.appendChild(self.unityLoaderScript);
+				self.unityScriptInserted = true;
+			});
 		};
 
 		this.init = function(options) {
 
-	
 			return new Promise(function(resolve, reject) {
 
 				if (self.initialized) {
@@ -154,8 +179,6 @@ var Viewer = {};
 
 				self.loadingDivText.innerHTML = "Loading Viewer...";
 				document.body.style.cursor = "wait";
-				// This kicks off the actual loading of Unity
-				self.viewer.appendChild(self.unityLoaderScript);
 
 				//Shouldn't need this, but for something it is not being recognised from unitySettings!
 				Module.errorhandler = UnityUtil.onError;
@@ -347,7 +370,6 @@ var Viewer = {};
 		};
 
 		this.objectSelected = function(pointInfo) {
-
 			if(!self.selectionDisabled && !self.pinDropMode && !self.measureMode) {
 				if(pointInfo.id) {
 					if(pointInfo.pin) {
@@ -380,20 +402,31 @@ var Viewer = {};
 
 		this.lastMultipart = null;
 
-		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
-			if (!this.pinDropMode && !this.measureMode) {
-				// TODO: We shouldn't use Set here
-				idsIn = idsIn || [];
-				var uniqueIds = idsIn.filter(function(value, index, self){
-					return self.indexOf(value) === index;
-				});
+		this.clearHighlights = function() {
+			UnityUtil.clearHighlights();
+		};
 
+		this.highlightObjects = function(account, model, idsIn, zoom, colour, multiOverride) {
+		
+			var canHighlight = !this.pinDropMode && !this.measureMode;
+
+			if (canHighlight) {
+				
+
+				idsIn = idsIn || [];
+				var uniqueIds = idsIn.filter(function(value, index){
+					return idsIn.indexOf(value) === index;
+				});
+				
 				if(uniqueIds.length) {
-					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride || this.multiSelectMode);
+					var multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
 				} else {
 					UnityUtil.clearHighlights();
 				}
+
 			}
+
 		};
 
 		this.switchObjectVisibility = function(account, model, ids, visibility) {
@@ -584,7 +617,11 @@ var Viewer = {};
 		};
 
 		this.reset = function() {
-			UnityUtil.resetCamera();
+			self.setMultiSelectMode(false);
+			self.setMeasureMode(false);
+			self.setPinDropMode(false);
+			self.loadingDivText.innerHTML = "";
+			UnityUtil.reset();	
 		};
 
 		this.cancelLoadModel = function() {
@@ -610,7 +647,9 @@ var Viewer = {};
 					callback(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch(function(error){
 					document.body.style.cursor = "initial";
-					console.error("Unity error loading model: ", error);
+					if (error !== "cancel") {
+						console.error("Unity error loading model: ", error);						
+					}
 				});
 		};
 

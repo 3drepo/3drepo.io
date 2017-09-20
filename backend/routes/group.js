@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 var express = require('express');
 var router = express.Router({mergeParams: true});
 var middlewares = require('../middlewares/middlewares');
@@ -23,9 +24,7 @@ var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Group = require('../models/group');
 var utils = require('../utils');
-// var uuid = require('node-uuid');
-// var uuidToString = utils.uuidToString;
-//var mongo    = require("mongodb");
+const systemLogger = require("../logger.js").systemLogger;
 
 router.get('/', middlewares.issue.canView, listGroups);
 router.get('/:uid', middlewares.issue.canView, findGroup);
@@ -52,7 +51,7 @@ function listGroups(req, res, next){
 
 	}).catch(err => {
 
-		console.log(err.stack);
+		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 
 	});
@@ -72,7 +71,7 @@ function findGroup(req, res, next){
 	}).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
 	}).catch(err => {
-		console.log(err.stack);
+		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -125,7 +124,7 @@ function updateGroup(req, res, next){
 	}).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
 	}).catch(err => {
-		console.log(err.stack);
+		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

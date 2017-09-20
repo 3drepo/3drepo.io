@@ -19,8 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.service("AuthService", ["$injector", "$q", "$http", "$interval", "ClientConfigService", "EventService", "AnalyticService", 
-			function($injector, $q, $http, $interval, ClientConfigService, EventService, AnalyticService) {
+		.service("AuthService", [
+			"$injector", "$q", "$http", "$interval", "ClientConfigService",
+			"EventService", "AnalyticService", "ViewerService", 
+			function(
+				$injector, $q, $http, $interval, ClientConfigService, 
+				EventService, AnalyticService, ViewerService
+			) {
 
 				var authPromise = $q.defer();
 
@@ -94,6 +99,7 @@
 					loggedIn  = false;
 					username  = null;
 
+					ViewerService.reset();
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
 					authPromise.resolve(loggedIn);
@@ -194,7 +200,7 @@
 				function logout() {
 					authPromise = $q.defer();
 
-					UnityUtil.reset();
+					ViewerService.reset();
 					
 					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "logout"))
 						.then(logoutSuccess)

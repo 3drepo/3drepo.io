@@ -30,101 +30,45 @@
 			link: function (scope, element) {
 				// Cleanup when destroyed
 				element.on("$destroy", function(){
-					scope.vm.viewer.destroy(); // Remove events watch
+					scope.vm.viewer.reset(); // Remove events watch
 				});
 			},
 			controller: ViewerCtrl,
 			controllerAs: "vm"
 		});
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "ClientConfigService", "EventService", "$location", "$mdDialog"];
+	ViewerCtrl.$inject = [
+		"$scope", "$q", "$http", "$element", "$timeout", 
+		"ClientConfigService", "EventService", "ViewerService", 
+		"$location", "$mdDialog"
+	];
 
-	function ViewerCtrl ($scope, $q, $http, $element, ClientConfigService, EventService, $location, $mdDialog) {
+	function ViewerCtrl (
+		$scope, $q, $http, $element, $timeout, 
+		ClientConfigService, EventService, ViewerService, 
+		$location, $mdDialog
+	) {
+
 		var vm = this;
 
 		vm.$onInit = function() {
 
 			vm.branch   = vm.branch ? vm.branch : "master";
 			vm.revision = vm.revision ? vm.revision : "head";
+
 			vm.pointerEvents = "auto";
-			vm.initialisedViewer = false;
-			vm.currentModel = null;
-			vm.currentModelPromise = null;
-			vm.initialisedPromise = $q.defer();
 			vm.measureMode = false;
-
-			vm.viewer = new Viewer(
-				vm.name, 
-				$element[0],
-				eventCallback, 
-				errCallback
-			);
-
-			vm.viewer.preInit();
-
-		};
-
-		function errCallback(errorType, errorValue) {
-			EventService.sendError(errorType, errorValue);
-		}
-
-		function eventCallback(type, value) {
-			EventService.send(type, value);
-		}
-
-		// vm.reload = function() {
-		// 	vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
-		// };
-
-		vm.initViewer = function() {
-
-			var showAll = true;
-			vm.viewer.init({
-				showAll : showAll,
-				getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
-			})
-				.then(function(){
-		
-				})
-				.catch(function(error){
-					console.error("Error creating Viewer Directive: ", error);
-				});
-		
-		};
-
-		function fetchModelProperties(account, model, branch, revision) {
-
-			if (account && model) {
-
-				if(!branch) {
-					branch = (!revision) ? "master" : "";
-				}
-						
-				if(!revision) {
-					revision = "head";
-				}
-
-				var url = account + "/" + model + "/revision/" + branch + "/" + revision + "/modelProperties.json";
-				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
-					.then(function(response) {
-						if (response.data && response.data.properties) {
-							vm.viewer.applyModelProperties(account, model, response.data.properties);
-						} else {
-							var message = "No data properties returned. This was the response:";
-							console.error(message, response);
-						}
-					})
-					.catch(function(error){
-						console.error("Model properties failed to fetch", error);
-					});
-
-			} else {
-				console.warn("Account and model were not set correctly " +
-				"for model property fetching: ", account, model);
-			}
 			
-
-		}
+			vm.viewer = ViewerService.getViewer(
+				vm.name,
+				$element[0], 
+				EventService.send, 
+				EventService.sendError
+			);
+	
+			vm.viewer.prepareViewer();
+			
+		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 
@@ -136,11 +80,17 @@
 					
 					// If no model is loaded it is the first time 
 					// the viewer has loaded
-					if (!vm.currentModel) {
-						vm.initViewer();
+					if (!ViewerService.currentModel.model) {
+						console.debug("Initiating Viewer");
+						ViewerService.initViewer();
 					} else {
 						// Load the model
-						vm.loadViewerModel();	
+						ViewerService.loadViewerModel(
+							vm.account, 
+							vm.model, 
+							vm.branch, 
+							vm.revision
+						);	
 					}
 					
 				}
@@ -148,8 +98,13 @@
 				if (event.type === EventService.EVENT.VIEWER.UNITY_READY) {
 					// When the viewer and unity are ready send a load model event 
 					// to load the model
-					if (!vm.currentModel) {
-						vm.loadViewerModel();	
+					if (!ViewerService.currentModel.model) {
+						ViewerService.loadViewerModel(
+							vm.account, 
+							vm.model, 
+							vm.branch, 
+							vm.revision
+						);
 					}
 
 				}
@@ -171,14 +126,9 @@
 					});
 				}
 
-				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
+				if (ViewerService.initialised)  {
 
-					vm.initialisedPromise.resolve();
-					fetchModelProperties(vm.account, vm.model, vm.branch, vm.revision);	
-
-				} else if (vm.initialisedPromise)  {
-
-					vm.initialisedPromise.promise.then(function() {
+					ViewerService.initialised.promise.then(function() {
 
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
 							vm.viewer.showAll();
@@ -229,19 +179,9 @@
 								event.value.model,
 								event.value.promise
 							);
-						/*} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-							if(!event.value.noHighlight)
-							{
-
-								vm.viewer.highlightObjects(
-									event.value.account,
-									event.value.model,
-									event.value.id ? [event.value.id] : event.value.ids,
-									event.value.zoom,
-									event.value.colour
-								);
-							}*/
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
+							console.log("highlight - HIGHLIGHT_OBJECTS");
+
 							vm.viewer.highlightObjects(
 								event.value.account,
 								event.value.model,
@@ -250,27 +190,24 @@
 								event.value.colour,
 								event.value.multi
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_AND_UNHIGHLIGHT_OBJECTS) {
-							vm.viewer.highlightAndUnhighlightObjects(
-								event.value.account,
-								event.value.model,
-								event.value.highlight_ids,
-								event.value.unhighlight_ids,
-								event.value.zoom,
-								event.value.colour
-							);
+
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-							vm.viewer.highlightObjects();
+
+							console.log("highlight - clearHighlights");
+							vm.viewer.clearHighlights();
+
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
+
 							vm.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.model,
 								event.value.ids,
 								event.value.visible
 							);
+
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 	
-							vm.currentModelPromise.then(function(){
+							ViewerService.currentModel.promise.then(function(){
 								vm.viewer.setCamera(
 									event.value.position,
 									event.value.view_dir,
@@ -316,15 +253,6 @@
 
 			}
 		});
-
-		vm.loadViewerModel = function() {
-
-			vm.currentModelPromise = vm.viewer.loadModel(vm.account, vm.model, vm.branch, vm.revision);
-
-			// Set the current model in the viewer
-			vm.currentModel = vm.model;
-
-		};
 
 	}
 }());

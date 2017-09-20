@@ -43,8 +43,17 @@ const jsOrder = [
           'bootstrap.js'
         ];
 
+function swallowError (error) {
+
+  // If you want details of the error in the console
+  console.log(error.toString())
+
+  this.emit('end')
+}
+
 gulp.task('index', function(){
     return gulp.src('./index.html')
+          .on('error', swallowError)
           .pipe(gulp.dest('./../public/'))
           .pipe(livereload())
 })
@@ -55,6 +64,7 @@ gulp.task('pug', function(){
         // .pipe(print())
         .pipe(rename({dirname: ''}))
         .pipe(pug({ verbose : false }))
+        .on('error', swallowError)
         .pipe(gulp.dest("./../public/templates/"))
         .pipe(livereload())
   
@@ -66,6 +76,7 @@ gulp.task('css', function() {
          //.pipe(print())
          .pipe(concat("three_d_repo.min.css"))
          .pipe(cssnano())
+         .on('error', swallowError)
          .pipe(gulp.dest("./../public/dist/"))
          .pipe(livereload())
 
@@ -73,6 +84,7 @@ gulp.task('css', function() {
 
 gulp.task('icons', function () {
   return gulp.src('./icons/*.svg')
+    .on('error', swallowError)
     //.pipe(print())
     .pipe(gulp.dest('./../public/icons/'))
     .pipe(livereload())
@@ -80,27 +92,33 @@ gulp.task('icons', function () {
 
 gulp.task('images', function() {
   return gulp.src(allImages)
+        .on('error', swallowError)
         .pipe(gulp.dest('./../public/images/'))
         .pipe(livereload())
 });
 
 gulp.task('fonts', function() {
   return gulp.src(allFonts)
+        .on('error', swallowError)
         .pipe(gulp.dest('./../public/fonts/'))
         .pipe(livereload())
 });
 
 gulp.task('unity', function() {
-  return gulp.src("./unity/**").pipe(gulp.dest('./../public/unity/'));
+  return gulp.src("./unity/**")
+        .on('error', swallowError)  
+        .pipe(gulp.dest('./../public/unity/'));
 });
 
 gulp.task('manifest-file', function() {
   return gulp.src("./manifest.json")
+    .on('error', swallowError)
     .pipe(gulp.dest('./../public/'));
 });
 
 gulp.task('manifest-icons', function() {
   return gulp.src("./manifest-icons/**.png")
+    .on('error', swallowError)
     .pipe(gulp.dest('./../public/manifest-icons/'));
 });
 

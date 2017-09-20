@@ -47,22 +47,28 @@ var UnityUtil;
 	var SendMessage_vss, SendMessage_vssn, SendMessage_vsss;
 	
 	UnityUtil.prototype._SendMessage = function(gameObject, func, param) {
-    	if (param === undefined) {
-	      if (!SendMessage_vss) {
+		if (param === undefined) {
+
+			if (!SendMessage_vss) {
 				SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
 			}
-	      SendMessage_vss(gameObject, func);
-    	} else if (typeof param === "string") {
-	      if (!SendMessage_vsss) {
+			SendMessage_vss(gameObject, func);
+
+		} else if (typeof param === "string") {
+
+			if (!SendMessage_vsss) {
 				SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
 			}
-	      SendMessage_vsss(gameObject, func, param);
-	    } else if (typeof param === "number") {
-    	  if (!SendMessage_vssn) {
+			SendMessage_vsss(gameObject, func, param);
+
+		} else if (typeof param === "number") {
+
+			if (!SendMessage_vssn) {
 				SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
 			}
-    	 SendMessage_vssn(gameObject, func, param);
-	    } else {
+			SendMessage_vssn(gameObject, func, param);
+
+		} else {
 			throw "" + param + " is does not have a type which is supported by SendMessage.";
 		}
 	};
@@ -88,11 +94,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.onLoaded = function() {
 		if(!loadedPromise) {
-		   loadedPromise = new Promise(function(resolve, reject) {
+			loadedPromise = new Promise(function(resolve, reject) {
 				loadedResolve = {resolve: resolve, reject: reject};
-			}	
-			);
-
+			});
 		}
 		return loadedPromise;
 		
@@ -100,10 +104,9 @@ var UnityUtil;
 
 	UnityUtil.prototype.onLoading = function() {
 		if(!loadingPromise) {
-		   loadingPromise	= new Promise( function(resolve, reject) {
+			loadingPromise = new Promise( function(resolve, reject) {
 				loadingResolve = {resolve: resolve, reject: reject};
-			}
-			);
+			});
 		}
 		return loadingPromise;
 		
@@ -132,7 +135,7 @@ var UnityUtil;
 		var fullMessage = prefix + message;
 
 		if (!unityHasErrored) {
-			console.log("sending error");
+			
 			// Unity can error multiple times, we don't want 
 			// to keep annoying the user
 			unityHasErrored = true;
@@ -153,24 +156,30 @@ var UnityUtil;
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
-				console.error("UnityUtil.onLoaded() failed: ", error);
-				UnityUtil.userAlert(error, true);
+				if (error != "cancel") {
+					console.error("UnityUtil.onLoaded() failed: ", error);
+					UnityUtil.userAlert(error, true);
+				}
 			});
 		} else if(requireStatus == LoadingState.MODEL_LOADING) {
 			//Requires model to be loading
 			UnityUtil.onLoading().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			}).catch(function(error){
-				UnityUtil.userAlert(error, true);
-				console.error("UnityUtil.onLoading() failed: ", error);
+				if (error !== "cancel") {
+					UnityUtil.userAlert(error, true);
+					console.error("UnityUtil.onLoading() failed: ", error);
+				}
 			});
 		} else {
 			UnityUtil.onReady().then(function() {
 				SendMessage(UNITY_GAME_OBJECT, methodName, params);
 			
 			}).catch(function(error){
-				UnityUtil.userAlert(error, true);
-				console.error("UnityUtil.onReady() failed: ", error);
+				if (error != "cancel") {
+					UnityUtil.userAlert(error, true);
+					console.error("UnityUtil.onReady() failed: ", error);
+				}
 			});
 		}
 
@@ -192,11 +201,6 @@ var UnityUtil;
 		if(UnityUtil.objectSelectedCallback) {
 			UnityUtil.objectSelectedCallback(point);
 		}
-	};
-
-	UnityUtil.prototype.doubleClicked = function(meshInfo) {
-		var point = JSON.parse(meshInfo);
-		UnityUtil.centreToPoint(point.model, point.meshID);	
 	};
 
 	UnityUtil.prototype.loaded = function(bboxStr) {
@@ -283,7 +287,7 @@ var UnityUtil;
 	
 	UnityUtil.prototype.disableMeasuringTool = function(){
 		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
-	}
+	};
 
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};
@@ -340,8 +344,8 @@ var UnityUtil;
 	UnityUtil.prototype.cancelLoadModel = function() {
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
-			loadedResolve.reject();
-			loadingResolve.reject();
+			loadedResolve.reject("cancel");
+			loadingResolve.reject("cancel");
 		}
 	};
 
@@ -349,12 +353,7 @@ var UnityUtil;
 		
 		//console.log("pin - loadModel");
 
-		if(!loaded && loadedResolve) {
-			//If the previous model is being loaded but hasn't finished yet
-			loadedResolve.reject();
-			loadingResolve.reject();
-		}
-
+		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();	
 		
 		loadedPromise = null;
@@ -382,6 +381,8 @@ var UnityUtil;
 	};
 	
 	UnityUtil.prototype.reset = function() {
+		this.disableMeasuringTool();
+		this.disableClippingPlanes();
 		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
 	};
 

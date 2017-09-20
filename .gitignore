@@ -6,6 +6,7 @@ node_modules
 config/*
 !config/test/
 
+yarn-error.log
 bower_components
 
 certs
@@ -64,6 +65,8 @@ pug/legal
 
 uploads/
 backend/uploads/
+backend/coverage
+backend/.nyc_output
 backend/mongodb-prebuilt-*
 backend/3drepo.log
 npm-debug.log.*

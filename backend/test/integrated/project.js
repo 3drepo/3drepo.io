@@ -77,7 +77,6 @@ describe('Projects', function () {
 			callback => {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
-
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 

@@ -34,16 +34,17 @@
 
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
-		"$timeout", "$compile", "$mdDialog", "$window",
-		"AuthService", "StateManager", "EventService", "UtilsService", 
-		"ClientConfigService", "$location", "SWService", "AnalyticService"
+		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
+		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
+		"$location", "SWService", "AnalyticService", "ViewerService",
+		"$document"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService
+		SWService, AnalyticService, ViewerService, $document
 	) {
 
 		var vm = this;
@@ -58,23 +59,27 @@
 			if (hasTrailingSlash()) {
 				removeTrailingSlash();
 			}
-
+			
 			AnalyticService.init();
 			SWService.init();
 
+			vm.initKeyWatchers();
 			vm.precacheTeamspaceTemplate();
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
 			vm.isLoggedOutPage = false;
 			
-			vm.state = StateManager.state;
-			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
 			vm.pointerEvents = "inherit";
 			vm.goToAccount = false;
 			vm.goToUserPage = false;
 			vm.keysDown = [];
+			vm.firstState = true;
+
+			// Required for everything to work
+			vm.state = StateManager.state;
+			vm.query = StateManager.query;
 
 			vm.isMobileFlag = true;
 
@@ -91,6 +96,7 @@
 				"/privacy",
 				"/signUp", 
 				"/passwordForgot", 
+				"/passwordChange",
 				"/registerRequest", 
 				"/registerVerify"
 			];
@@ -106,53 +112,9 @@
 				"sign-up",
 				"password-forgot",
 				"register-request",
-				"register-verify"
+				"register-verify",
+				"password-change"
 			];
-
-			$timeout(function () {
-
-				/*
-				* Watch the state to handle moving to and from the login page
-				*/
-				$scope.$watch("vm.state", function (oldState, newState) {
-
-					var change = JSON.stringify(oldState) === JSON.stringify(newState);
-
-					// Determine whether to show the Login directive or 
-					// logged in content directives
-					if (newState.loggedIn !== undefined) {
-						vm.loggedIn = newState.loggedIn;
-					}
-
-					if (newState && change) {
-						// If it's a legal page
-						var legal = vm.pageCheck(newState, vm.legalPages);
-						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
-
-						if (legal) {
-
-							vm.isLegalPage = true;
-							vm.isLoggedOutPage = false;
-
-							vm.legalPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-						} else if (loggedOut) {
-
-							// If its a logged out page which isnt login
-
-							vm.isLegalPage = false;
-							vm.isLoggedOutPage = true;
-
-							vm.loggedOutPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-						}
-					}			
-				}, true);
-			});
 
 			vm.isMobileFlag = vm.isMobile();
 
@@ -162,11 +124,58 @@
 
 		};
 
+		/*
+		* Watch the state to handle moving to and from the login page
+		*/
+		$scope.$watch("vm.state", function (oldState, newState) {
+
+			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
+
+			vm.loggedIn = AuthService.isLoggedIn();
+
+			if ( (newState && change) || (newState && vm.firstState) ) {
+
+				// If it's a legal page
+				var legal = vm.pageCheck(newState, vm.legalPages);
+				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+
+				if (legal) {
+
+					vm.isLegalPage = true;
+					vm.isLoggedOutPage = false;
+
+					vm.legalPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+				} else if (loggedOut && !newState.loggedIn) {
+
+					// If its a logged out page which isnt login
+					
+					vm.isLegalPage = false;
+					vm.isLoggedOutPage = true;
+
+					vm.loggedOutPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+					
+				} else if (newState.account !== AuthService.getUsername() && !newState.model) {
+					// If it's some other random page that doesn't match 
+					// anything sensible like legal, logged out pages, or account
+					vm.isLoggedOutPage = false;
+					vm.page = "";
+					$location.path("/" + AuthService.getUsername());
+				}
+
+			}
+		}, true);
+
 		vm.pageCheck = function(state, pages) {
 			return pages.filter(function(page) { 
 				return state[page] === true;
 			}).length;
-		}
+		};
 
 		vm.setPage = function(state, page) {
 			if(state[page] === true) {
@@ -182,7 +191,8 @@
 			var preCacheTemplates = [
 				"templates/account-teamspaces.html",
 				"templates/account-info.html",
-				"templates/sign-up.html"
+				"templates/sign-up.html",
+				"templates/register-request.html"
 			];
 
 			preCacheTemplates.forEach(function(templatePath){
@@ -248,6 +258,7 @@
 		};
 
 		vm.home = function () {
+			ViewerService.reset();
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
@@ -303,53 +314,47 @@
 					//EventService.send(EventService.EVENT.CLEAR_STATE);
 
 					// TODO: Do this properly using state manager
-					
-					if (AuthService.isLoggedIn()) {
-						$location.path(AuthService.getUsername());
+					var path = "/";
+					if (AuthService.isLoggedIn() && AuthService.getUsername()) {
+						path = "/" + AuthService.getUsername();
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
-					} else {
-						$location.path("");
 					}
+
+					$location.path(path);
+					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});
 
+		vm.initKeyWatchers = function() {
 
-		/**
-		 * Keep a list of keys held down
-		 * For changes to be registered by directives and especially components the list needs to be recreated
-		 *
-		 * @param event
-		 */
-		vm.keyAction = function (event) {
-			var i, tmp;
-			// Update list, but avoid repeat
-			if (event.type === "keydown") {
+			$document.bind("keydown", function(event) {
 				if (vm.keysDown.indexOf(event.which) === -1) {
-					// Recreate list so that it changes are registered in components
-					tmp = vm.keysDown;
-					delete vm.keysDown;
 					
-					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
+					
+					// Recreate list so that it changes are registered in components
+					vm.keysDown = vm.keysDown.slice();
 
 				}
-			} else if (event.type === "keyup") {
+			});
+
+			$document.bind("keyup", function(event) {
 				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+				for (var i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
 						vm.keysDown.splice(i, 1);
 					}
 				}
+				
 				// Recreate list so that it changes are registered in components
-				tmp = vm.keysDown;
-				delete vm.keysDown;
-				vm.keysDown = angular.copy(tmp);
-			}
-		};
+				vm.keysDown = vm.keysDown.slice();
+			});
 
+
+		};
 
 		/**
 		 * Close the dialog

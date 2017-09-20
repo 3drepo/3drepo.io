@@ -15,72 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
+"use strict";
 
-	const mongoose = require("mongoose");
-	const vat = require("./vat");
-	const responseCodes = require("../response_codes");
+const mongoose = require("mongoose");
+const vat = require("./vat");
+const responseCodes = require("../response_codes");
+const systemLogger = require("../logger.js").systemLogger;
 
-	let billingAddressSchema = new mongoose.Schema({
-		//vat setter was async. setter cannot be async at the momnent. 
-		// could happen in the future versions of mongoose
-		// https://github.com/Automattic/mongoose/issues/4227 
-		vat: { type: String },
-		line1: { type: String },
-		line2: { type: String },
-		line3: { type: String },
-		firstName: { type: String },
-		lastName: { type: String },
-		company: { type: String },
-		city: { type: String },
-		postalCode: { type: String },
-		countryCode: { type: String },
-		state: { type: String },
-		jobTitle: {type: String },
-		phoneNo: {type: String }
+let billingAddressSchema = new mongoose.Schema({
+	//vat setter was async. setter cannot be async at the momnent. 
+	// could happen in the future versions of mongoose
+	// https://github.com/Automattic/mongoose/issues/4227 
+	vat: { type: String },
+	line1: { type: String },
+	line2: { type: String },
+	line3: { type: String },
+	firstName: { type: String },
+	lastName: { type: String },
+	company: { type: String },
+	city: { type: String },
+	postalCode: { type: String },
+	countryCode: { type: String },
+	state: { type: String },
+	jobTitle: {type: String },
+	phoneNo: {type: String }
+});
+
+
+billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
+	
+	Object.keys(billingAddress).forEach(key => {
+
+		if(key === '_id') {
+			return;
+		} 
+
+		this.set(key, billingAddress[key]);
+		
 	});
 
+	if(billingAddress.vat){
+		return this.changeVATNumber(billingAddress.vat);
+	} else {
+		return Promise.resolve();
+	}
+};
 
-	billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
-		
-		Object.keys(billingAddress).forEach(key => {
+billingAddressSchema.methods.changeVATNumber = function(vatCode){
 
-			if(key === '_id') {
-				return;
-			} 
+	this.vat = vatCode;
 
-			this.set(key, billingAddress[key]);
-			
-		});
+	let cleanedVATNumber = this.vat.replace(/ /g,'');
+	if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
+		cleanedVATNumber = cleanedVATNumber.substr(2); 
+	}
 
-		if(billingAddress.vat){
-			return this.changeVATNumber(billingAddress.vat);
-		} else {
-			return Promise.resolve();
-		}
-	};
-
-	billingAddressSchema.methods.changeVATNumber = function(vatCode){
-
-		this.vat = vatCode;
-
-		let cleanedVATNumber = this.vat.replace(/ /g,'');
-		if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
-			cleanedVATNumber = cleanedVATNumber.substr(2); 
-		}
-
-//		console.log(this.countryCode, cleanedVATNumber);
-		return vat.checkVAT(this.countryCode, cleanedVATNumber).then(result => {
-			if (!result.valid)
-			{
+	return vat.checkVAT(this.countryCode, cleanedVATNumber)
+		.then(result => {
+			if (!result.valid) {
 				return Promise.reject(responseCodes.INVALID_VAT);
 			} else {
 				return Promise.resolve();
 			}
+		})
+		.catch(err => {
+			systemLogger.logError(`VAT Error - ${err}`);
+			return Promise.reject(responseCodes.VAT_CODE_ERROR);
 		});
-	};
+};
 
-	module.exports = billingAddressSchema;
-
-})();
+module.exports = billingAddressSchema;

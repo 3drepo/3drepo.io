@@ -38,7 +38,7 @@
 		vm.$onInit = function() {
 
 			vm.highlightBackground = "#FF9800";
-			
+			vm.measureDisabled = false;
 			vm.addIssueMode = null;
 			vm.measureMode = false;
 			vm.metaData = false;
@@ -94,12 +94,13 @@
          * Setup event watch
          */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
-				if (vm.addIssueMode !== null) {
-					vm.issueButtons[vm.addIssueMode].background = "";
-					vm.addIssueMode = null;
-				}
-			} else if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
+			// if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
+			// 	if (vm.addIssueMode !== null) {
+			// 		vm.issueButtons[vm.addIssueMode].background = "";
+			// 		vm.addIssueMode = null;
+			// 	}
+			// } else 
+			if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
 				if (vm.addIssueMode !== event.value) {
 					vm.issueButtons[vm.addIssueMode].background = "";
 					vm.addIssueMode = event.value;
@@ -107,6 +108,13 @@
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
+			} else if (event.type === EventService.EVENT.MEASURE_MODE_BUTTON) {
+				if (event.value === "disable") {
+					vm.measureModeOff();	
+					vm.measureDisabled = true;				
+				} else if (event.value === "enable") {
+					vm.measureDisabled = false;
+				}
 			}
 		});
 
@@ -135,7 +143,15 @@
 				vm.addIssueMode = buttonType;
 				vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
 				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
-			}
+			} 
+		};
+
+		
+
+		vm.measureModeOff = function() {
+			vm.measureMode = false;
+			vm.measureBackground = vm.measureMode ? vm.highlightBackground : "";
+			EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
 		};
 
 		/**
@@ -143,6 +159,7 @@
          */
 		vm.toggleMeasure = function () {
 
+			// If not measure mode and metadata enabled
 			if (!vm.measureMode && vm.metaData) {
 				vm.toggleAutoMetaData();
 			}

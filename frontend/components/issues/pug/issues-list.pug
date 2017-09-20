@@ -2,7 +2,7 @@
 	// List
 	div(ng-switch-when="list")
 		.issueListItem(
-			ng-repeat="issue in vm.issuesToShow"
+			ng-repeat="issue in vm.issuesToShow track by $index"
 			layout="column"
 			ng-click="vm.select($event, issue)"
 			ng-mouseenter="vm.setFocus(issue, $index)"

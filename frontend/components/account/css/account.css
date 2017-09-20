@@ -1,4 +1,73 @@
+/** Responsive content ****/
+@media (max-width: 960px) { 
+
+  .userContent {
+    height: 100% !important;
+  }
+
+  account-assign md-tabs-content-wrapper {
+    height: 100% !important;
+  }
+
+}
+
+account-modelsetting .userContent {
+  height: calc(100vh - 230px);
+  max-height: 517px !important;
+  overflow: auto;
+}
+
+account-items .userContent {
+  height: calc(100vh - 245px);
+  max-height: 517px !important;
+  overflow: auto;
+}
+
+account-profile .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px !important;
+  overflow: auto;
+}
+
+account-licenses .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px !important;
+  overflow: auto;
+}
+
+account-billing .userContent {
+  height: calc(100vh - 280px);
+  max-height: 480px !important;
+  overflow: auto;
+}
+
+account-assign md-tabs-content-wrapper {
+  height: calc(100vh - 240px);
+  max-height: 521px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
 /** Account ***********************************************************************************************************/
+.loadingText {
+  padding-top: 100px;
+  min-height: 200px;
+  height: 100%;
+  text-align: center;
+  font-weight: lighter !important;
+}
+
+.loadingText h3 {
+  font-weight: lighter !important;
+}
+
+.loadingText md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+  margin-left: 0 !important;
+}
+
+
 account-dir {
   overflow-y: auto;
   padding-top: 30px;
@@ -8,7 +77,7 @@ account-dir #account .userContentNoMargin {
   margin-top: 0px !important;
 }
 
-account-dir #account {
+account-dir #account {  
   background-size: contain;
 }
 
@@ -51,7 +120,7 @@ account-dir #account #accountItem userContent {
   account-dir #account #accountItem {
     margin-left: 5%;
     margin-bottom: 100px;
-    margin-top: 200px;
+    /* margin-top: 200px; */
   }
 }
 
@@ -60,6 +129,18 @@ account-dir .userContent .cardInfo {
 }
 
 /** Account Models **************************************************************************************************/
+
+account-items #floating-button {
+  position: absolute;
+  bottom: 52px;
+  right: 15px;
+}
+
+account-items span.addHint {
+  color: grey;
+  padding-right: 6px;
+  font-size: 14px;
+}
 
 account-items .md-button {
   z-index: 1 !important;
@@ -185,8 +266,6 @@ account-items .modelRight .modelUploaded {
 
 account-items .userContent {
   padding: 0 !important;
-  max-height: 585px;
-  overflow: auto;
 }
 
 account-items .accountModelsSharedIcon {
@@ -279,6 +358,7 @@ account-info .accountInfoPage .md-button {
   max-width: 300px;
   min-width: 100px;
   max-height: 150px;
+  height: 100px;
   min-height: 100px;
   background: #E8EAF6;
   margin: auto;
@@ -327,6 +407,19 @@ account-menu #accountMenuContent md-menu-item > .md-button {
   overflow: hidden;
 }
 
+.newModelDialog .uploadProgress {
+  width: 25px;
+  height: 25px;
+  display: inline;
+  margin-left: 15px;
+}
+
+.newModelDialog .uploadProgress svg {
+  width: 25px !important;
+  height: 25px !important;
+  transform-origin: initial !important;
+}
+
 .newModelDialog #newModelIcon {
   margin-right: 10px;
 }
@@ -351,7 +444,9 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 
 .newModelDialog #modelDialogError {
   margin: 0;
+  text-align: center;
   color: #F44336;
+  max-width: 300px;
 }
 
 /** Delete Dialog *********************************************************************************************/
@@ -403,10 +498,6 @@ account-billing .loading {
     height: 50px;
     margin: 0 auto;
     margin-top: 20px;
-}
-
-account-billing .userContent {
-  max-height: calc(100vh - 393px) !important;
 }
 
 account-billing .md-button {
@@ -718,26 +809,7 @@ account-teamspaces md-content {
   min-height: 300px;
 }
 
-account-teamspaces .loadingText {
-  padding-top: 100px;
-  min-height: 200px;
-  text-align: center;
-}
 
-account-teamspaces .loadingText md-progress-circular {
-  display: inline-block;
-  margin: 0 auto;
-}
-
-#floating-button {
-  position: absolute;
-  bottom: 52px;
-  right: 15px;
-}
-
-.userContent {
-  min-height: 200px;
-}
 
 
 /** Account Assign ***********************************************************************************************/
@@ -745,8 +817,10 @@ account-assign .assignTabHolder {
   padding: 20px;
 }
 
-account-assign md-tabs md-tab-content {
-  /* max-height: 574px; */
+div.md-select-menu-container, 
+div.md-select-menu-container md-select-menu, 
+div.md-select-menu-container md-select-menu md-content {
+  max-height: 50vh !important;
 }
 
 account-assign .assignTabHolder .noUsers {

@@ -29,9 +29,9 @@
 			controllerAs: "vm"
 		});
 
-	RegisterRequestCtrl.$inject = ["$scope", "$window", "AuthService"];
+	RegisterRequestCtrl.$inject = ["$scope", "$window", "AuthService", "$location"];
 
-	function RegisterRequestCtrl ($scope, $window, AuthService) {
+	function RegisterRequestCtrl ($scope, $window, AuthService, $location) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -62,7 +62,7 @@
 		// });
 
 		vm.goToLoginPage = function () {
-			$window.location.href = "/";
+			$location.path("/");
 		};
 	}
 }());

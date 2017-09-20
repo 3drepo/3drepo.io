@@ -12,6 +12,13 @@
     <title>3D Repo | Online BIM collaboration platform</title>
     <!-- Manifest file (PWA)-->
     <link rel="manifest" href="/manifest.json">
+    
+    <!-- All CSS minified-->
+    <link rel="stylesheet" type="text/css" href="/dist/three_d_repo.min.css">
+    
+    <!-- Styling used in the Angular Material demos-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    
   </head>
   <body>
 
@@ -85,20 +92,17 @@
     <home flex layout="column"></home>
     
     <!-- CSS AND JAVASCRIPT -->
-    
-    <!-- All CSS minified-->
-    <link rel="stylesheet" type="text/css" href="/dist/three_d_repo.min.css">
-    
-    <!-- Styling used in the Angular Material demos-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-    
+
     <!-- Load config from server and dependencies + 3D Repo JavaScript-->
     <script type="text/javascript" src="/config.js"></script>
     <script type="text/javascript" src="/dist/three_d_repo.min.js" async></script>
    
+    <script type="text/javascript", src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
+
     <!-- Load LiveReload if on Dev-->
     <script async>
       if (window) {
+        console.debug("Development Environment?", window.ClientConfig.development);
         if (window.ClientConfig && window.ClientConfig.development === true) {
             console.debug("Development - Loading livereload.js");
             var src = "//localhost:35729/livereload.js";

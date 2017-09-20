@@ -85,7 +85,7 @@
 
 		// This is pretty horrible 
 		document.addEventListener("click", function(event) {
-			if (!event.target.classList.contains("ignoreClick")) {
+			if (event && event.target && !event.target.classList.contains("ignoreClick")) {
 				vm.showViewingOptionButtons = false;
 			} 
 		}, false);

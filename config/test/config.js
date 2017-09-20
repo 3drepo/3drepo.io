@@ -33,8 +33,7 @@ module.exports = {
 			public_protocol: "http"
 		},
 		{
-			service: "frontend",
-			template:   "frontend.pug"
+			service: "frontend"
 		},
 		{
 			service: "chat",
@@ -55,31 +54,6 @@ module.exports = {
 		username: 'admintesting',
 		password: 'admintesting'
 	},
-	// ssl: {
-	// 	key: "my_key.pem",
-	// 	cert:"my_server.crt",
-	// 	ca: "my_server.ca"
-	// },
-	os: {
-		keys: {
-			'property': '<your key>',
-			'place': '<your key>',
-			'map': '<your key>'
-		},
-		endpoints:{
-			bbox: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox',
-			radius: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/radius',
-			dimensions: params => { return `https://api2.ordnancesurvey.co.uk/insights/beta/properties/${params.uprn}/dimensions` },
-			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
-		}
-	},
-	// cn_queue: {
-	// 	host: "amqp://localhost:5672",
-	// 	worker_queue: "jobq",
-	// 	callback_queue: "callbackq",
-	// 	upload_dir: "uploads",
-	// 	shared_storage: "D:/sharedSpace/"
-	// },
 	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
