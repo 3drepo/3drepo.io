@@ -118,9 +118,10 @@
 
 			vm.isMobileFlag = vm.isMobile();
 
-			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
-				AuthService.login(vm.account, vm.password);
-			}
+			// if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
+				
+			// 	AuthService.login(vm.account, vm.password);
+			// }
 
 		};
 
@@ -160,7 +161,11 @@
 					});
 
 					
-				} else if (newState.account !== AuthService.getUsername() && !newState.model) {
+				} else if (
+					AuthService.getUsername() && 
+					newState.account !== AuthService.getUsername() && 
+					!newState.model
+				) {
 					// If it's some other random page that doesn't match 
 					// anything sensible like legal, logged out pages, or account
 					vm.isLoggedOutPage = false;
@@ -277,13 +282,14 @@
 				if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 					if (!event.value.error) {
 						if(!event.value.initialiser) {
-							StateManager.setStateVar("loggedIn", true);
+							
 							EventService.send(EventService.EVENT.UPDATE_STATE);
 
 							if(!StateManager.state.account){
+								
 								var username = AuthService.getUsername();
 								if (!username) {
-									console.error("Username is not defined for statemanager!")
+									console.error("Username is not defined for statemanager!");
 								}
 								EventService.send(EventService.EVENT.SET_STATE, { 
 									account: username
@@ -315,6 +321,7 @@
 
 					// TODO: Do this properly using state manager
 					var path = "/";
+					//console.log("AuthService.getUsername", AuthService.getUsername());
 					if (AuthService.isLoggedIn() && AuthService.getUsername()) {
 						path = "/" + AuthService.getUsername();
 						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });

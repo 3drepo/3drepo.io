@@ -21,7 +21,7 @@
 	angular.module("3drepo")
 		.service("AuthService", [
 			"$injector", "$q", "$http", "$interval", "ClientConfigService",
-			"EventService", "AnalyticService", "ViewerService", 
+			"EventService", "AnalyticService", "ViewerService",
 			function(
 				$injector, $q, $http, $interval, ClientConfigService, 
 				EventService, AnalyticService, ViewerService
@@ -29,7 +29,7 @@
 
 				var authPromise = $q.defer();
 
-				// TODO: null means it's the first login, 
+				// TODO: null means it"s the first login, 
 				// should be a seperate var
 				var loggedIn = null;
 				var username;
@@ -46,7 +46,8 @@
 					logout: logout,
 					hasPermission: hasPermission,
 					sendLoginRequest: sendLoginRequest,
-					authPromise : authPromise.promise
+					authPromise : authPromise.promise,
+					localStorageLoggedIn: localStorageLoggedIn
 				};
 
 				return service;
@@ -59,8 +60,9 @@
 
 				function initAutoLogout() {
 					// Check for expired sessions
-					var checkExpiredSessionTime = ClientConfigService.login_check_interval || 8; // Seconds
+					var checkExpiredSessionTime = ClientConfigService.login_check_interval || 4; // Seconds
 					$interval(function() {
+						//console.log("auto - calling interval init")
 						init(true);
 					}, 1000 * checkExpiredSessionTime);
 				}
@@ -69,6 +71,10 @@
 
 					loggedIn = true;
 					username = response.data.username;
+
+					// Set the session as logged in on the client 
+					// using local storage
+					localStorage.setItem("loggedIn", "true");
 
 					EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
 						username: response.data.username, 
@@ -86,6 +92,8 @@
 					var initialiser = response.initialiser;
 					response.initialiser = undefined;
 
+					localStorage.setItem("loggedIn", "false");
+
 					EventService.send(EventService.EVENT.USER_LOGGED_IN, { 
 						username: null, 
 						initialiser: initialiser, 
@@ -99,6 +107,8 @@
 					loggedIn  = false;
 					username  = null;
 
+					localStorage.setItem("loggedIn", "false");
+
 					ViewerService.reset();
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
@@ -109,7 +119,7 @@
 					loggedIn  = false;
 					username  = null;
 
-					localStorage.setItem("tdrLoggedIn", "false");
+					// localStorage.setItem("logged", "false");
 					EventService.send(
 						EventService.EVENT.USER_LOGGED_OUT, 
 						{ error: reason }
@@ -118,6 +128,31 @@
 					authPromise.resolve(loggedIn);
 				}
 
+				function localStorageLoggedIn() {
+					if (localStorage.getItem("loggedIn") === "true") {
+						return true;
+					}
+					return false;
+				}
+
+
+				function shouldAutoLogout() {
+
+					
+					var sessionLogin = localStorageLoggedIn();
+
+					// We are logged in on another tab but not this OR 
+					// we are looged out in another tab and not this
+					var loginStateMismatch = (sessionLogin && !loggedIn) ||
+												(!sessionLogin && loggedIn);
+
+					if (loginStateMismatch) {
+						location.reload();
+					}
+						
+				}
+
+				// TODO: This needs tidying up. Probably lots of irrelvant logic in this now
 				function init(interval) {
 
 					var initPromise = $q.defer();
@@ -127,8 +162,9 @@
 					// If we are not logged in, check
 					// with the API server whether we
 					// are or not
-					if(loggedIn === null || interval) {
+					if(loggedIn === null) {
 						// Initialize
+						//console.log("auto - sendLoginRequest");
 						sendLoginRequest()
 							.then(function(data) {
 								// If we are not logging in because of an interval
@@ -160,18 +196,16 @@
 						authPromise.promise.then(function() {
 							initPromise.resolve(loggedIn);
 						}).catch(function(error){
-							console.error("Authentication error:", error);
+							//console.error("auto - Authentication error:", error);
 							initPromise.reject(error);
 						});
 
-					} else {
-						if (loggedIn) {
-							EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: username });
-						} else {
-							EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-						}
-
-						initPromise.resolve(loggedIn);
+					} else if (interval) {
+						authPromise.promise.then(function(){
+							shouldAutoLogout();
+							initPromise.resolve(loggedIn);
+	
+						});				
 					}
 
 					return initPromise.promise;

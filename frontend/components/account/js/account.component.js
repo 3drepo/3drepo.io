@@ -43,13 +43,6 @@
 			vm.loadingAccount = true;
 
 			vm.initUserData();
-
-			window.addEventListener("storage", loginStatusListener, false);
-			// Set the logged in status to the account name just once
-			if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
-				localStorage.setItem("tdrLoggedIn", vm.account);
-			}
-
 		};
 
 
@@ -232,17 +225,6 @@
 			vm.callingPage = callingPage;
 			vm.data = data;
 		};
-
-		/**
-		 * Event listener for change in local storage login status
-		 *
-		 * @param event
-		 */
-		function loginStatusListener (event) {
-			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
-				AuthService.logout();
-			}
-		}
 
 		vm.getUserInfo = function() {
 
