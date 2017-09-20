@@ -71,13 +71,8 @@
 
 			vm.reasonCommentText = "Comment requires text";
 			vm.reasonTitleText = "Issue requires name";
+			vm.disabledReason = "";
 
-			if (vm.data) {
-				vm.disabledReason = vm.reasonCommentText;
-			} else {
-				vm.disabledReason = vm.reasonTitleText;
-			}
-			
 			vm.issueProgressInfo = "Loading Issue...";
 			vm.textInputHasFocusFlag = false;
 			vm.hideDescription = false;
@@ -109,7 +104,7 @@
 						if (!vm.data) {
 							return vm.submitDisabled;
 						} else {
-							return false;
+							return !vm.canComment;
 						}
 					}, 
 					visible: function() { 
@@ -200,10 +195,10 @@
 			}
 		});
 
-
-		$scope.$watchGroup(["vm.data", "vm.statuses"], function() {
+		$scope.$watch("vm.data", function() {
 
 			// Data
+			console.log("vm.data watch", vm.data, vm.statuses);
 			
 			if (vm.data && vm.statuses && vm.statuses.length) {
 
@@ -216,9 +211,13 @@
 				vm.statuses[3].disabled = disableStatus;
 
 				vm.issueData = angular.copy(vm.data);
-			
+
 				vm.issueData.comments = vm.issueData.comments || [];
 				vm.issueData.name = IssuesService.generateTitle(vm.issueData); // Change name to title for display purposes
+				if (!vm.issueData.name) {
+					vm.disabledReason = vm.reasonTitleText;
+				}
+
 				vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
 				vm.issueData.comments.forEach(function(comment){
 					if(comment.owner !== AuthService.getUsername()){
@@ -232,14 +231,8 @@
 				}
 
 				// Issue owner or user with same role as issue creator role can update issue
-				vm.canUpdate = (AuthService.getUsername() === vm.issueData.owner);
-				if (!vm.canUpdate) {
-					vm.canUpdate = vm.userJob._id && vm.issueData.creator_role && (vm.userJob._id === vm.issueData.creator_role);
-				}
-
-				if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
-					vm.canUpdate = false;
-				}
+				console.log("canUpdateIssue");
+				vm.checkCanUpdate();
 
 				vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
 
@@ -262,7 +255,7 @@
 				if(vm.issueData.status === "closed"){
 					vm.canUpdate = false;
 					vm.canComment = false;
-				}
+				} 
 			
 				vm.convertCommentTopicType();
 				
@@ -337,15 +330,27 @@
 			}
 		};
 
+		vm.checkCanUpdate = function() {
+			vm.canUpdate = (AuthService.getUsername() === vm.issueData.owner);
+			if (!vm.canUpdate) {
+				vm.canUpdate = vm.userJob._id && 
+								vm.issueData.creator_role && 
+								(vm.userJob._id === vm.issueData.creator_role);
+			}
+
+			if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
+				vm.canUpdate = false;
+			}
+		};
+
 		/**
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
-			var data,
-				comment;
+
+			console.log("statusChange");
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-
 			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
@@ -355,18 +360,18 @@
 					vm.issueData.assigned_roles = [];
 				}
 
-				data = {
+				var statusChangeData = {
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
 					assigned_roles: vm.issueData.assigned_roles
 				};
 	
-				IssuesService.updateIssue(vm.issueData, data)
+				IssuesService.updateIssue(vm.issueData, statusChangeData)
 					.then(function (response) {
 
-					// Add info for new comment
-						comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+						// Add info for new comment
+						var comment = response.data.issue.comments[response.data.issue.comments.length - 1];
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 						vm.issueData.comments.push(comment);
@@ -386,9 +391,13 @@
 					});
 
 
-				if(vm.issueData.status === "closed"){
+				if (vm.issueData.status === "closed"){
 					vm.canUpdate = false;
 					vm.canComment = false;
+				} else {
+					console.log("canUpdateIssue");
+					vm.checkCanUpdate();
+					vm.canComment = vm.canUpdate;
 				}
 
 				AnalyticService.sendEvent({

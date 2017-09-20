@@ -431,8 +431,11 @@ issue #issueAdditional {
 }
 
 issue #issueNewComment {
-  padding-top: 20px;
+  padding-top:  0px;
   padding-bottom: 0px;
+  margin: 0px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 issue #issueNewComment md-input-container {

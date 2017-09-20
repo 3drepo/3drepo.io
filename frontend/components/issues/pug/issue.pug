@@ -176,14 +176,24 @@ div.heightFix(
 					md-divider
 					
 
-	md-divider
+md-divider
 
-	// New comment
-	.issueItemContainer#issueNewComment(layout="column", layout-align="start", ng-if="vm.data")
-		
-		md-input-container.fillHeight(flex, md-no-float)
-			label.issuesLabel New Comment
+
+
+.issueItemContainer#issueFooterButtons(layout="column")
+
+	.issueThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
+		img.issueThumbnailImage(ng-src="{{vm.commentThumbnail}}")
+	
+	div(layout="row")
+		// New comment
+		.issueItemContainer#issueNewComment(layout="row", layout-align="start center", flex="100" ng-if="vm.data")
+			
+			//- md-input-container(flex md-no-float class="md-block")
+			//- 	label.issuesLabel
 			textarea(
+				flex="100"
+				placeholder="Comment here"
 				aria-label="New Comment"
 				ng-model="vm.comment"
 				ng-change="vm.commentChange()"
@@ -192,15 +202,9 @@ div.heightFix(
 				ng-disabled="!vm.canComment"
 				ng-required="true")
 
-			.issueThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
-				img.issueThumbnailImage(ng-src="{{vm.commentThumbnail}}")
+			
 
-
-	md-divider
-
-	// Footer
-	.issueItemContainer#issueFooterButtons(layout="row", layout-align="space-between center")
-		div
+		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
 				ng-repeat="(action, actionData) in vm.actions"
 				aria-label="{{action}}"
@@ -211,20 +215,28 @@ div.heightFix(
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
 		
-		span(ng-if="vm.submitDisabled" style="color: #9e9e9e;") {{ vm.disabledReason }}
+		div(flex="100" ng-if="!vm.data")
 
-		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
-			md-tooltip(md-direction="bottom") Submit
-			md-icon.angular-material-icons save
-		md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
+		div(layout="row" layout-align="end center")
+			md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
+				md-tooltip(md-direction="bottom") Submit
+				md-icon.angular-material-icons save
+			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
+	
+	//span(
+		layout="row" 
+		layout-align="center center"
+		ng-if="vm.submitDisabled && vm.canComment" 
+		style="color: #9e9e9e;") {{ vm.disabledReason }}
 
-	// Action components
-	issues-pin(
-		account="vm.account"
-		model="vm.model"
-		event="vm.event"
-		set-pin="vm.setPin({data: data})"
-		clear-pin="vm.clearPin")
+
+// Action components
+issues-pin(
+	account="vm.account"
+	model="vm.model"
+	event="vm.event"
+	set-pin="vm.setPin({data: data})"
+	clear-pin="vm.clearPin")
 
 // Whilst issue is loading
 div.heightFix(

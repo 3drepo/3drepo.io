@@ -40,7 +40,7 @@
 		vm.getUniqueMenuItems = function() {
 			var unique = [];
 			return vm.menu.filter(function(item){
-				if (unique.indexOf(item.label)) {
+				if (unique.indexOf(item.label) === -1) {
 					unique.push(item.label);
 					return true;
 				} else {
