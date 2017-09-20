@@ -407,6 +407,14 @@
 			}
 		};
 
+		vm.getCommentPlaceholderText = function() {
+			if (vm.canComment) {
+				return "Comment here";
+			} else {
+				return "Issue closed, comments disabled";
+			}
+		}
+
 		/**
 		 * Submit - new issue or comment or update issue
 		 */
@@ -855,29 +863,29 @@
 		 * @param event
 		 * @param index
 		 */
-		vm.toggleEditComment = function(event, index) {
-			event.stopPropagation();
-			if (vm.issueData.comments[index].editing) {
-				vm.editingCommentIndex = null;
-				vm.issueData.comments[index].editing = false;
-				if (vm.issueData.comments[index].comment !== vm.savedComment) {
-					IssuesService.editComment(vm.issueData, vm.issueData.comments[index].comment, index)
-						.then(function(response) {
-							vm.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
-							IssuesService.updatedIssue = vm.issueData;
-							vm.savedComment = vm.issueData.comments[index].comment;
-						});
-					AnalyticService.sendEvent({
-						eventCategory: "Issue",
-						eventAction: "editComment"
-					});
-				}
-			} else {
-				vm.editingCommentIndex = index;
-				vm.issueData.comments[index].editing = true;
-				vm.savedComment = vm.issueData.comments[index].comment;
-			}
-		};
+		// vm.toggleEditComment = function(event, index) {
+		// 	event.stopPropagation();
+		// 	if (vm.issueData.comments[index].editing) {
+		// 		vm.editingCommentIndex = null;
+		// 		vm.issueData.comments[index].editing = false;
+		// 		if (vm.issueData.comments[index].comment !== vm.savedComment) {
+		// 			IssuesService.editComment(vm.issueData, vm.issueData.comments[index].comment, index)
+		// 				.then(function(response) {
+		// 					vm.issueData.comments[index].timeStamp = IssuesService.getPrettyTime(response.data.created);
+		// 					IssuesService.updatedIssue = vm.issueData;
+		// 					vm.savedComment = vm.issueData.comments[index].comment;
+		// 				});
+		// 			AnalyticService.sendEvent({
+		// 				eventCategory: "Issue",
+		// 				eventAction: "editComment"
+		// 			});
+		// 		}
+		// 	} else {
+		// 		vm.editingCommentIndex = index;
+		// 		vm.issueData.comments[index].editing = true;
+		// 		vm.savedComment = vm.issueData.comments[index].comment;
+		// 	}
+		// };
 
 		/**
 		 * A screen shot has been saved

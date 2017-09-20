@@ -131,7 +131,7 @@ div.heightFix(
 								ng-blur="vm.textInputHasFocus(false)")
 
 						.issueTextActions(layout="row", ng-if="!comment.sealed && !comment.action", flex="none")
-							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditComment($event, $index)")
+							//md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditComment($event, $index)")
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 							md-button.md-icon-button.md-accent(aria-label="Delete Comment", ng-click="vm.deleteComment($event, $index)")
@@ -193,7 +193,7 @@ md-divider
 			//- 	label.issuesLabel
 			textarea(
 				flex="100"
-				placeholder="Comment here"
+				placeholder="{{vm.getCommentPlaceholderText()}}"
 				aria-label="New Comment"
 				ng-model="vm.comment"
 				ng-change="vm.commentChange()"
