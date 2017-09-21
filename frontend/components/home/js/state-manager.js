@@ -466,8 +466,9 @@
 						}
 
 						var updateLocation = !dontUpdateLocation ? true: false; // In case of null
-						$state.transitionTo(newStateName, self.state, { location: updateLocation });
+						$state.transitionTo(newStateName, self.state, { location: updateLocation })
 
+						// TODO: Do we have to use $timeout? :(
 						$timeout(function () {
 							self.state.changing = false;
 						});
