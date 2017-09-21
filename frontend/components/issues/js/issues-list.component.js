@@ -363,22 +363,13 @@
 			if (vm.allIssues.length > 0) {
 
 				// Sort
-				vm.issuesToShow = [vm.allIssues[0]];
-
-				// TODO: This needs cleaning up
-				for (var k = 1; k < vm.allIssues.length; k ++) {
-					for (var j = 0; j < vm.issuesToShow.length; j += 1) {
-						var kIssue = vm.allIssues[k];
-						var jIssue = vm.issuesToShow[j];
-						if (((kIssue.created < jIssue.created) && (vm.sortOldestFirst)) ||
-							((kIssue.created > jIssue.created) && (!vm.sortOldestFirst))) {
-							vm.issuesToShow.splice(j, 0, kIssue);
-							break;
-						} else if (j === (vm.issuesToShow.length - 1)) {
-							vm.issuesToShow.push(kIssue);
-						}
-					}
-				}
+				vm.issuesToShow = vm.allIssues.slice();
+				vm.issuesToShow.sort(function(a, b){
+					if (vm.sortOldestFirst) {
+						return a.created > b.created;
+					} 
+					return a.created < b.created;
+				});
 
 				// TODO: There is certainly a better way of doing this, but I don't want to
 				// dig into it right before release
