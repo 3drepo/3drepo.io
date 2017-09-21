@@ -30,7 +30,8 @@
 				subscriptions: "=",
 				loading: "=",
 				selectedIndex: "=",
-				itemToShow: "="
+				itemToShow: "=",
+				isMobileDevice: "<"
 			},
 			controller: AccountReposCtrl,
 			controllerAs: "vm"

@@ -73,6 +73,7 @@
 										ng-show="model.name")
 								
 										account-model(
+											is-mobile-device="vm.isMobileDevice"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
@@ -147,6 +148,7 @@
 										ng-repeat="model in account.models")
 
 										account-model(
+											is-mobile-device="vm.isMobileDevice"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"

@@ -81,7 +81,7 @@
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
 
-			vm.isMobileFlag = true;
+			vm.isMobileDevice = true;
 
 			vm.legalDisplays = [];
 			if (angular.isDefined(ClientConfigService.legal)) {
@@ -116,7 +116,7 @@
 				"password-change"
 			];
 
-			vm.isMobileFlag = vm.isMobile();
+			vm.isMobileDevice = vm.isMobile();
 
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
 				AuthService.login(vm.account, vm.password);

@@ -27,7 +27,8 @@
 				accounts: "=",
 				onShowPage: "&",
 				quota: "=",
-				subscriptions: "="
+				subscriptions: "=",
+				isMobileDevice: "<"
 			},
 			controller: AccountItemsCtrl,
 			controllerAs: "vm"
@@ -52,7 +53,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-
+			console.log("isMobileDevice", vm.isMobileDevice);
 			ViewerService.reset();
 
 			vm.showProgress = true;

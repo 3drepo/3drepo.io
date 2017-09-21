@@ -13,6 +13,7 @@
 
 			account-items(
 				ng-if="!vm.loading"
+				is-mobile-device="vm.isMobileDevice"
 				account="vm.account"
 				accounts="vm.accounts"
 				on-show-page="vm.showPage(page, callingPage)"

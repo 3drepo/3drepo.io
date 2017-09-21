@@ -26,6 +26,7 @@
 			bindings: {
 				account: "=",
 				model: "=",
+				isMobileDevice: "<",
 				project: "=",
 				userAccount: "=",
 				onUploadFile: "&",
@@ -59,7 +60,7 @@
 		// Init
 
 		vm.$onInit = function() {
-			
+	
 			vm.infoTimeout = 10000;
 			vm.isUserAccount = (vm.account === vm.userAccount);
 

@@ -26,7 +26,8 @@
 				state: "=",
 				query: "=",
 				account: "=",
-				keysDown: "="
+				keysDown: "=",
+				isMobileDevice: "<"
 			},
 			controller: AccountCtrl,
 			controllerAs: "vm"
@@ -38,6 +39,7 @@
 		var vm = this;
 
 		vm.$onInit = function() {
+			console.log("isMobileDevice", vm.isMobileDevice);
 			vm.accountInitialised = false;
 			vm.userInfoPromise = null;
 			vm.loadingAccount = true;

@@ -28,6 +28,7 @@ div#accountHolder(
 		#accountItem(flex="100")
 
 			account-teamspaces(
+				is-mobile-device="vm.isMobileDevice"
 				loading="vm.loadingAccount"
 				ng-show="vm.itemToShow === 'teamspaces'"
 				account="vm.account"
