@@ -36,11 +36,6 @@ bottom-buttons .actionButton {
   line-height: inherit !important;
 }
 
-bottom-buttons .actionButton md-icon {
-  color: #FFFFFF !important;
-  font-size: 25px;
-}
-
 bottom-buttons label {
   padding-top: 5px;
 }
@@ -65,19 +60,15 @@ bottom-buttons label:hover {
   width: 100px;
 }
 
-/*.bottomButtonIconCardboard {
-  font-size: 20px !important;
-  margin-left: -4px;
-}
-.bottomButtonIconWalk {
-  margin-left: 0;
+.actionButton {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.bottomButtonIconHelicopter {
-  margin-left: -10px;
-}
-
-.viewingOptionButtons .bottomButtonIconHelicopter {
-  margin-left: -10px;
-  padding-left: 7px;
-}*/
+/* .viewingOptionButtonHolder {
+  pointer-events: none;
+} */
+/* 
+.viewingOptionButtons svg {
+  pointer-events: none;
+} */
