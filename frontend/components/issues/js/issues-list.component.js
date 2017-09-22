@@ -220,7 +220,6 @@
 
 			// Selected issue
 			if(vm.displayIssue){
-				
 				vm.editIssue(vm.displayIssue);
 				$timeout(function(){
 					showIssue(vm.displayIssue);

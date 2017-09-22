@@ -9,6 +9,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				h2
 					span {{vm.contentData.title}}
 			#filterContainer(flex)
+			div(flex, ng-if="!vm.showFilter")
 
 			// Options
 			#options(layout="row")

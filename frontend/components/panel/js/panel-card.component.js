@@ -132,6 +132,7 @@
 				event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
 				event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
 			) {
+
 				// Only one card can be in modify mode at a time
 				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
@@ -233,6 +234,7 @@
 			content.append(contentItem);
 			$compile(contentItem)($scope);
 		}
+		
 
 		/**
 		 * Create the tool bar options
@@ -241,17 +243,22 @@
 
 			// TODO: We shouldn't use string concat and angular.element
 			// definite antipattern
-
+						
 			var i, length,
-				option, optionElement;
+				option, optionElement,
+				optionType, isMenuOrFilter;
 
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-					option = null;
-					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
-					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
 
-					if(vm.contentData.options[i].type === "menu"){
+					optionType = vm.contentData.options[i].type;
+					option = null;
+					optionElement = "<panel-card-option-" + optionType;
+					optionElement += " id='panal_card_option_" + optionType + "'";
+					
+					isMenuOrFilter = optionType === "menu" || optionType === "filter";
+
+					if(isMenuOrFilter){
 						optionElement += " ng-if='!vm.hideMenuButton'";
 					} else {
 						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
@@ -260,7 +267,7 @@
 					vm.contentData.options[i].color = "";
 					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
-					switch (vm.contentData.options[i].type) {
+					switch (optionType) {
 					case "filter":
 						optionElement += " show-filter='vm.showFilter'";
 						break;
@@ -278,7 +285,7 @@
 						break;
 					}
 
-					optionElement += "><panel-card-option-" + vm.contentData.options[i].type + ">";
+					optionElement += "><panel-card-option-" + optionType + ">";
 					option = angular.element(optionElement);
 
 					// Create the element
@@ -326,25 +333,6 @@
 				}
 			}
 		}
-
-		/**
-		 * Create the add button
-		 */
-		// function createAdd () {
-		// 	// TODO: We shouldn't use string concat and angular.element
-		// 	// definite antipattern
-
-
-		// 	var panelCardContainer = angular.element($element[0].querySelector("#panelCardContainer")),
-		// 		add;
-		// 	if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
-		// 		add = angular.element(
-		// 			"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
-		// 		);
-		// 		panelCardContainer.append(add);
-		// 		$compile(add)($scope);
-		// 	}
-		// }
 
 		/**
 		 * Handle adding content

@@ -198,7 +198,7 @@
 		$scope.$watch("vm.data", function() {
 
 			// Data
-			console.log("vm.data watch", vm.data, vm.statuses);
+			//console.log("vm.data watch", vm.data, vm.statuses);
 			
 			if (vm.data && vm.statuses && vm.statuses.length) {
 
