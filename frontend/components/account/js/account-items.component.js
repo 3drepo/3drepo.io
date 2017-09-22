@@ -112,7 +112,6 @@
 			UtilsService.closeDialog();
 		};
 
-		
 		// HIDE / SHOW STATE
 
 		vm.showDefaults = function(project, type) {
@@ -490,7 +489,7 @@
 		vm.setupNewFederation = function (event) {
 
 			vm.isDefaultFederation = false; 
-			vm.federationOriginalData = null;
+			vm.originalFederationData = null;
 			vm.federationData = {
 				desc: "",
 				type: "",

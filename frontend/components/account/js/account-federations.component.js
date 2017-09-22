@@ -29,6 +29,7 @@
 				federation: "=",
 				project: "=",
 				federationData: "=",
+				originalFederationData: "=",
 				federationIndex: "=",
 				onShowPage: "&",
 				quota: "=",
@@ -178,6 +179,19 @@
 		};
 
 
+		vm.closeFederationDialog = function() {
+			
+			if (vm.originalFederationData) {
+				Object.keys(vm.federationData).forEach(function(key){
+					if (vm.federationData[key] !== vm.originalFederationData[key]) {
+						vm.federationData[key] = vm.originalFederationData[key];
+					}
+				});
+			}
+			
+			vm.closeDialog();
+		};
+
 		/**
 		 * Open the federation in the viewer if it has sub models otherwise open edit dialog
 		 *
@@ -298,6 +312,8 @@
 				vm.federationData.project = "default";
 			}
 			vm.federationData._isEdit = true;
+
+			vm.originalFederationData = angular.copy(vm.federationData);
 			UtilsService.showDialog("federation-dialog.html", $scope, event, true);
 		}
 
