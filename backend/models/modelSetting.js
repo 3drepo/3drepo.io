@@ -90,6 +90,10 @@ schema.methods.updateProperties = function(updateObj){
 
 	Object.keys(updateObj).forEach(key => {
 
+		if (key === "name") {
+			this.name = updateObj[key];
+		}
+
 		if(key === "code" && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
 			throw responseCodes.INVALID_MODEL_CODE;
 		}

@@ -454,7 +454,8 @@
 				if (issue.position.length > 0) {
 
 					// If we are showing all the closed issues, or it's open
-					var show = (vm.showClosed === true || issue.status === "open");
+					var show = (vm.showClosed === true && vm.showSubModelIssues === true) || 
+								(issue.status === "open" && vm.showSubModelIssues === true);
 
 					if (show) {
 						// Create new pin

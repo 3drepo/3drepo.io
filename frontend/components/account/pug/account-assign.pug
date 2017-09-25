@@ -215,6 +215,7 @@
 
 							thead(layout="row")
 								tr: th.fixedWidth.userColumn User
+								//tr: th.fixedWidth.userColumn Role
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
 									th.fixedWidth.sentenceCase(
 										ng-class="{'adminColumn' : value == 'admin'}") {{value}}
@@ -228,6 +229,9 @@
 
 									td.fixedWidth.userColumn.userInput()
 										p {{user}}
+
+									//td.fixedWidth.userColumn.userInput()
+										md-progress-circular.roleLoading
 
 									td.fixedWidth(
 										ng-repeat="value in vm.modelRoles", 

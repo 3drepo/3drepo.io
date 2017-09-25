@@ -24,6 +24,7 @@
 			templateUrl: "templates/account-modelsetting.html",
 			bindings: {
 				account: "=",
+				accounts: "=",
 				model: "=",
 				showPage: "&",
 				subscriptions: "=",
@@ -33,9 +34,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService", "AccountService"];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService) {
+	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService, AccountService) {
 		
 		var vm = this;
 
@@ -52,6 +53,7 @@
 			vm.modelId = vm.urlData["modelId"];
 			vm.modelName = vm.urlData["modelName"];
 			vm.targetAcct = vm.urlData["targetAcct"];
+			vm.targetProj = vm.urlData["targetProj"];
 
 			UtilsService.doGet(vm.targetAcct + "/" + vm.modelId + ".json")
 				.then(function (response) {
@@ -99,6 +101,7 @@
 			$location.search("modelId", null);
 			$location.search("modelName", null);
 			$location.search("targetAcct", null);
+			$location.search("targetProj", null);
 			$location.search("page", null);
 			
 			vm.showPage({page: "teamspaces", data: vm.data});
@@ -116,6 +119,19 @@
 			return result.join("\n");
 		}
 
+		vm.updateModel = function(){
+
+			var model = AccountService.getModel(
+				vm.accounts, 
+				vm.targetAcct, 
+				vm.targetProj, 
+				vm.modelId
+			);
+
+			model.name = vm.modelName;
+
+		};
+
 		vm.save = function(){
 
 			var data = {
@@ -128,7 +144,8 @@
 	
 			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
 				.then(function(response){
-					if(response.status === 200){
+					if(response.status === 200) {
+						vm.updateModel();
 						vm.message = "Saved";
 						if (response.data && response.data.properties && response.data.properties.topicTypes) {
 							vm.topicTypes = convertTopicTypesToString(response.data.properties.topicTypes);

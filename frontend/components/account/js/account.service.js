@@ -35,6 +35,7 @@
 			isSubModel : isSubModel,
 			getNoneFederatedModels : getNoneFederatedModels,
 			getModels : getModels,
+			getModel : getModel,
 			getProject : getProject,
 			getProjectsByTeamspaceName : getProjectsByTeamspaceName,
 			getTeamspaceByName : getTeamspaceByName,
@@ -201,6 +202,11 @@
 	
 		}
 
+		function getModel(teamspaces, teamspaceName, projectName, id) {
+			return getModels(teamspaces, teamspaceName, projectName).find(function(model){
+				return model.model === id;
+			});
+		}
 
 		function getModels(teamspaces, teamspaceName, projectName) {
 			return getProject(teamspaces, teamspaceName, projectName).models;

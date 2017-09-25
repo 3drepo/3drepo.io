@@ -177,9 +177,9 @@
 		vm.doModelOption = function (event, option) {
 			switch (option) {
 			case "modelsetting":
-
 				$location.search("modelName", vm.model.name);
 				$location.search("modelId", vm.model.model);
+				$location.search("targetProj", vm.project.name);
 				$location.search("targetAcct", vm.account);
 				$location.search("page", "modelsetting");
 
