@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService"];
+	RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService", "MeasureService"];
 
-	function RightPanelCtrl ($scope, $timeout, EventService) {
+	function RightPanelCtrl ($scope, $timeout, EventService, MeasureService) {
 		var vm = this;
 			
 		/*
@@ -38,9 +38,11 @@
 		vm.$onInit = function() {
 
 			vm.highlightBackground = "#FF9800";
+			vm.measureActive = false;
 			vm.measureDisabled = false;
+
 			vm.addIssueMode = null;
-			vm.measureMode = false;
+			
 			vm.metaData = false;
 			vm.showPanel = true;
 			vm.issueButtons = {
@@ -62,16 +64,13 @@
 			};
 			vm.measureBackground = "";
 			vm.metaBackground = "";
-			// $timeout(function () {
-			// 	EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
-			// });
 
 		};
 
 		vm.disableOtherModes = function(setMode) {
 			if (setMode === "meta") {
 
-				if (vm.measureMode) {
+				if (vm.measureActive) {
 					vm.toggleMeasure();
 				} 
 
@@ -81,8 +80,7 @@
 
 			} else if (setMode === "measure") {
 
-
-				if (!vm.measureMode) {
+				if (!vm.measureActive) {
 					vm.toggleMeasure();
 				} 
 
@@ -90,16 +88,35 @@
 		};
 
 
+		$scope.$watch(function(){
+			return MeasureService;
+		}, function(){
+
+			if (vm.measureActive !== MeasureService.state.active ) {
+				vm.measureActive = MeasureService.state.active;
+
+				// Clear the background of measure tooltip
+				if (!vm.measureActive) {
+					vm.measureBackground = "";
+				} else {
+					vm.measureBackground = vm.highlightBackground;
+				}
+			}
+
+			if (vm.measureDisabled !== MeasureService.state.disabled ) {
+				vm.measureDisabled = MeasureService.state.disabled;
+				if (vm.measureDisabled) {
+					vm.measureBackground = "";
+					vm.measureActive = false;
+				}
+			}
+			
+		}, true);
+
 		/*
          * Setup event watch
          */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			// if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
-			// 	if (vm.addIssueMode !== null) {
-			// 		vm.issueButtons[vm.addIssueMode].background = "";
-			// 		vm.addIssueMode = null;
-			// 	}
-			// } else 
 			if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
 				if (vm.addIssueMode !== event.value) {
 					vm.issueButtons[vm.addIssueMode].background = "";
@@ -108,14 +125,7 @@
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
-			} else if (event.type === EventService.EVENT.MEASURE_MODE_BUTTON) {
-				if (event.value === "disable") {
-					vm.measureModeOff();	
-					vm.measureDisabled = true;				
-				} else if (event.value === "enable") {
-					vm.measureDisabled = false;
-				}
-			}
+			} 
 		});
 
 		/**
@@ -124,10 +134,8 @@
 		vm.issueButtonClick = function (buttonType) {
 			
 			// Turn off measure mode
-			if (vm.measureMode) {
-				vm.measureMode = false;
-				vm.measureBackground = "";
-				EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
+			if (vm.measureActive) {
+				MeasureService.deactivateMeasure();
 			}
 
 			if (vm.addIssueMode === null) {
@@ -145,22 +153,16 @@
 				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
 			} 
 		};
-
 		
-
-		vm.measureModeOff = function() {
-			vm.measureMode = false;
-			vm.measureBackground = vm.measureMode ? vm.highlightBackground : "";
-			EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
-		};
 
 		/**
          * Toggle measuring tool
          */
 		vm.toggleMeasure = function () {
+			console.log(MeasureService.state.active);
 
 			// If not measure mode and metadata enabled
-			if (!vm.measureMode && vm.metaData) {
+			if (!vm.measureActive && vm.metaData) {
 				vm.toggleAutoMetaData();
 			}
 
@@ -169,9 +171,8 @@
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 			}
 
-			vm.measureMode = !vm.measureMode;
-			vm.measureBackground = vm.measureMode ? vm.highlightBackground : "";
-			EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
+			MeasureService.toggleMeasure();
+			
 		};
 
 		/**
@@ -179,7 +180,7 @@
          */
 		vm.toggleAutoMetaData = function () {
 
-			if (vm.measureMode && !vm.metaData) {
+			if (vm.measureActive && !vm.metaData) {
 				vm.toggleMeasure();
 			}
 

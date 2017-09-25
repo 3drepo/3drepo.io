@@ -46,13 +46,13 @@
 		"$location", "$q", "$mdDialog", "$element", "EventService", 
 		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
-		"$state", "StateManager"
+		"$state", "StateManager", "MeasureService"
 	];
 
 	function IssueCtrl (
 		$location, $q, $mdDialog, $element, EventService, IssuesService,
 		UtilsService, NotificationService, AuthService, $timeout,
-		$scope, ClientConfigService, AnalyticService, $state, StateManager
+		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService
 	) {
 		
 		var vm = this;
@@ -295,7 +295,7 @@
 			// Get out of pin drop mode
 
 			EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
-			EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "enable");
+			MeasureService.setDisabled(false);
 			vm.clearPin = true;
 			
 
@@ -489,10 +489,11 @@
 
 				if(selected){
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
-					EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "disable");
+					MeasureService.deactivateMeasure();
+					MeasureService.setDisabled(true);
 				} else {
 					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
-					EventService.send(EventService.EVENT.MEASURE_MODE_BUTTON, "enable");
+					MeasureService.setDisabled(false);
 				}
 				break;
 

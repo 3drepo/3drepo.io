@@ -21,14 +21,16 @@
 	angular.module("3drepo")
 		.component("measure", {
 			restrict: "E",
-			bindings: {},
+			bindings: {
+				keysDown: "<"
+			},
 			controller: MeasureCtrl,
 			controllerAs: "vm"
 		});
 
-	MeasureCtrl.$inject = ["$scope", "$q", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$q", "EventService", "MeasureService"];
 
-	function MeasureCtrl ($scope, $q, EventService) {
+	function MeasureCtrl ($scope, $q, EventService, MeasureService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -53,8 +55,24 @@
 		};
 
 		vm.initialiseWatchers = function() {
-			$scope.$watch(EventService.currentEvent, function (event) {
 
+			$scope.$watch("vm.keysDown", function(keysDown){
+				var esc = 27;
+				if (keysDown.indexOf(esc) !== -1) {
+					vm.measureMode = false;
+					MeasureService.deactivateMeasure();
+				}
+			});
+
+			$scope.$watch(function(){
+				return MeasureService.active;
+			}, function(){
+				if (MeasureService.active !== vm.measureMode) {
+					vm.measureMode = MeasureService.active;
+				}
+			}, true);
+
+			$scope.$watch(EventService.currentEvent, function (event) {
 
 				if(event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					vm.unityReady.resolve();
@@ -65,25 +83,11 @@
 					vm.units = event.value.settings.unit;
 					vm.modelSettingsReady.resolve();
 
-				} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-					vm.measureMode = event.value;
-
-					if (vm.measureMode) {
-
-						vm.show = true;
-						UnityUtil.enableMeasuringTool();
-
-					} else {
-
-						vm.show = false;
-						UnityUtil.disableMeasuringTool();
-
-					}
-
-				}
+				} 
 
 			});
-		}
+
+		};
 
 			
 	}
