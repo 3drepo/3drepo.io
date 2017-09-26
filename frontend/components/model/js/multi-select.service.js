@@ -35,10 +35,8 @@
 
 		var isMac = (navigator.platform.indexOf("Mac") !== -1);
 		var multiMode = false;
-		var pinDropMode = false;
 
 		var service = {
-			pinDropMode : pinDropMode,
 			isMultiMode : isMultiMode,
 			handleKeysDown : handleKeysDown,
 			disableMultiSelect : disableMultiSelect

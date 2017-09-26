@@ -21,13 +21,45 @@
 	angular.module("3drepo")
 		.service("AuthService", [
 			"$injector", "$q", "$http", "$interval", "ClientConfigService",
-			"EventService", "AnalyticService", "ViewerService",
+			"EventService", "AnalyticService", "ViewerService", "$location", "$window",
 			function(
 				$injector, $q, $http, $interval, ClientConfigService, 
-				EventService, AnalyticService, ViewerService
+				EventService, AnalyticService, ViewerService, $location, $window
 			) {
 
 				var authPromise = $q.defer();
+
+				var doNotLogout = [
+					"/terms", 
+					"/privacy",
+					"/signUp", 
+					"/passwordForgot", 
+					"/passwordChange",
+					"/registerRequest", 
+					"/registerVerify"
+				];
+
+				var legalPages = [
+					"terms", 
+					"privacy",
+					"cookies"
+				];
+
+				var loggedOutPages = [
+					"sign-up",
+					"password-forgot",
+					"register-request",
+					"register-verify",
+					"password-change"
+				];
+
+				var loggedOutPagesCamel = [
+					"signUp",
+					"passwordForgot",
+					"registerRequest",
+					"registerVerify",
+					"passwordChange"
+				];
 
 				// TODO: null means it"s the first login, 
 				// should be a seperate var
@@ -47,7 +79,11 @@
 					hasPermission: hasPermission,
 					sendLoginRequest: sendLoginRequest,
 					authPromise : authPromise.promise,
-					localStorageLoggedIn: localStorageLoggedIn
+					localStorageLoggedIn: localStorageLoggedIn,
+					loggedOutPage: loggedOutPage,
+					legalPages: legalPages,
+					doNotLogout: doNotLogout,
+					loggedOutPages: loggedOutPages
 				};
 
 				return service;
@@ -138,7 +174,6 @@
 
 				function shouldAutoLogout() {
 
-					
 					var sessionLogin = localStorageLoggedIn();
 
 					// We are logged in on another tab but not this OR 
@@ -146,10 +181,23 @@
 					var loginStateMismatch = (sessionLogin && !loggedIn) ||
 												(!sessionLogin && loggedIn);
 
-					if (loginStateMismatch) {
-						location.reload();
+					// Check if we're on a logged out page i.e. registerVerify
+					var isLoggedOutPage = loggedOutPage();
+
+					if (loginStateMismatch && !isLoggedOutPage) {
+						$window.location.reload();
+					} else if (loginStateMismatch && isLoggedOutPage) {
+						$location.path("/");
 					}
 						
+				}
+
+				function loggedOutPage() {
+					var path = $location.path();
+					var isLoggedOutPage = loggedOutPagesCamel.filter(function(page){
+						return path.indexOf(page) !== -1;
+					}).length > 0;
+					return isLoggedOutPage; 
 				}
 
 				// TODO: This needs tidying up. Probably lots of irrelvant logic in this now

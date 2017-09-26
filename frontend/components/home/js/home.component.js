@@ -53,18 +53,19 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+			vm.handlePaths();
 
-			// TODO: this is a bit of a hack, it would be nice to 
-			// include this in the StateManager
-			if (hasTrailingSlash()) {
-				removeTrailingSlash();
-			}
-			
 			AnalyticService.init();
 			SWService.init();
-
+			
 			vm.initKeyWatchers();
 			vm.precacheTeamspaceTemplate();
+
+			// Pages to not attempt a interval triggered logout from
+
+			vm.doNotLogout = AuthService.doNotLogout;
+			vm.legalPages = AuthService.legalPages;
+			vm.loggedOutPages = AuthService.loggedOutPages;
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
@@ -90,40 +91,40 @@
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-			// Pages to not attempt a interval triggered logout from
-			vm.doNotLogout = [
-				"/terms", 
-				"/privacy",
-				"/signUp", 
-				"/passwordForgot", 
-				"/passwordChange",
-				"/registerRequest", 
-				"/registerVerify"
-			];
-
-
-			vm.legalPages = [
-				"terms", 
-				"privacy",
-				"cookies"
-			];
-
-			vm.loggedOutPages = [
-				"sign-up",
-				"password-forgot",
-				"register-request",
-				"register-verify",
-				"password-change"
-			];
-
 			vm.isMobileDevice = vm.isMobile();
 
-			// if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
-				
-			// 	AuthService.login(vm.account, vm.password);
-			// }
+		
+		};
+
+		vm.handlePaths = function() {
+			
+			// TODO: this is a bit of a hack, it would be nice to 
+			// include this in the StateManager
+			if (hasTrailingSlash()) {
+				removeTrailingSlash();
+			}
+
+			// If it's a logged in page just redirect to the
+			// users teamspace page
+			AuthService.authPromise.then(function(){
+				if (
+					AuthService.loggedOutPage() && 
+					AuthService.getUsername()
+				) {
+					$location.path("/" + AuthService.getUsername());
+				}
+			});	
 
 		};
+
+		$scope.$watch(function(){
+			return $location.path();
+		}, function() {
+
+			vm.handlePaths();
+			
+		});
+
 
 		/*
 		* Watch the state to handle moving to and from the login page
@@ -134,7 +135,7 @@
 
 			vm.loggedIn = AuthService.isLoggedIn();
 
-			if ( (newState && change) || (newState && vm.firstState) ) {
+			if ( (newState && change) || (newState && vm.firstState)) {
 
 				// If it's a legal page
 				var legal = vm.pageCheck(newState, vm.legalPages);
@@ -170,6 +171,7 @@
 					// anything sensible like legal, logged out pages, or account
 					vm.isLoggedOutPage = false;
 					vm.page = "";
+					$location.search({}); // Reset query parameters
 					$location.path("/" + AuthService.getUsername());
 				}
 
