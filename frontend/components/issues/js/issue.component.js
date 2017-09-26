@@ -46,13 +46,14 @@
 		"$location", "$q", "$mdDialog", "$element", "EventService", 
 		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
-		"$state", "StateManager", "MeasureService"
+		"$state", "StateManager", "MeasureService", "ViewerService"
 	];
 
 	function IssueCtrl (
 		$location, $q, $mdDialog, $element, EventService, IssuesService,
 		UtilsService, NotificationService, AuthService, $timeout,
-		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService
+		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService,
+		ViewerService
 	) {
 		
 		var vm = this;
@@ -231,7 +232,6 @@
 				}
 
 				// Issue owner or user with same role as issue creator role can update issue
-				console.log("canUpdateIssue");
 				vm.checkCanUpdate();
 
 				vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
@@ -293,8 +293,8 @@
 				vm.issueData.comments[vm.editingCommentIndex].editing = false;
 			}
 			// Get out of pin drop mode
-
-			EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+			
+			ViewerService.pin.pinDropMode = false;
 			MeasureService.setDisabled(false);
 			vm.clearPin = true;
 			
@@ -488,11 +488,11 @@
 			case "pin":
 
 				if(selected){
-					EventService.send(EventService.EVENT.PIN_DROP_MODE, true);
+					ViewerService.pin.pinDropMode = true;
 					MeasureService.deactivateMeasure();
 					MeasureService.setDisabled(true);
 				} else {
-					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+					ViewerService.pin.pinDropMode = false;
 					MeasureService.setDisabled(false);
 				}
 				break;
@@ -724,7 +724,7 @@
 					vm.issueCreated({issue: vm.issueData});
 
 					// Hide some actions
-					EventService.send(EventService.EVENT.PIN_DROP_MODE, false);
+					ViewerService.pin.pinDropMode = false;
 
 					vm.submitDisabled = true;
 					vm.setContentHeight();

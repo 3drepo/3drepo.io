@@ -34,6 +34,9 @@
 		var initialised = $q.defer();
 			
 		var service = {
+			pin : {
+				pinDropMode : false
+			},
 			initViewer : initViewer,
 			getViewer : getViewer,
 			loadViewerModel : loadViewerModel,

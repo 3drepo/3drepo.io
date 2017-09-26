@@ -70,6 +70,14 @@
 			
 		};
 
+		$scope.$watch(function(){
+			return ViewerService.pin;
+		}, function(){
+
+			vm.viewer.setPinDropMode(ViewerService.pin.pinDropMode);
+			
+		}, true);
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 
 			var validEvent = angular.isDefined(event) && angular.isDefined(event.type);
@@ -242,14 +250,11 @@
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							vm.viewer.setMultiSelectMode(event.value);
-						} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-							vm.viewer.setPinDropMode(event.value);
 						} 
 
 					});
 
 				}
-					
 
 			}
 		});

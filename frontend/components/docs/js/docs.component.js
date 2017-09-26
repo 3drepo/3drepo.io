@@ -32,24 +32,23 @@
 			
 		});
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService"];
+	DocsCtrl.$inject = [
+		"$scope", "$mdDialog", "$timeout", "$filter", 
+		"EventService", "DocsService", "ViewerService"
+	];
 
-	function DocsCtrl($scope, $mdDialog, $timeout, $filter, EventService, DocsService) {	
+	function DocsCtrl(
+		$scope, $mdDialog, $timeout, $filter, 
+		EventService, DocsService, ViewerService
+	) {	
 
-		// TODO: What does this component even do? I am confused
-
-		var vm = this,
-			promise,
-			docTypeHeight = 50,
-			allDocTypesHeight,
-			currentOpenDocTypes = [],
-			autoMetaData,
-			pinMode;
+		var vm = this;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
+			vm.docTypeHeight = 50;
 			vm.showDocsGetProgress = false;
 			vm.onContentHeightRequest({height: 80});
 		};
@@ -73,12 +72,12 @@
 							//TODO: Do we need to do this for all docs
 							// if  we don't support PDFs anymore?
 							vm.docs = data;
-							allDocTypesHeight = 0;
+							vm.allDocTypesHeight = 0;
 							// Open all doc types initially
 							for (var docType in vm.docs) {
 								if (vm.docs.hasOwnProperty(docType)) {
 									vm.docs[docType].show = true;
-									allDocTypesHeight += docTypeHeight;
+									vm.allDocTypesHeight += vm.docTypeHeight;
 								}
 							}
 							setContentHeight();
@@ -96,7 +95,7 @@
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 
-			var valid = autoMetaData && !pinMode;
+			var valid = vm.autoMetaData && !ViewerService.pin.pinDropMode;
 			if (
 				valid && 
 				event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED
@@ -110,38 +109,14 @@
 
 			} else if (event.type === EventService.EVENT.AUTO_META_DATA) {
 
-				autoMetaData = event.value;
+				vm.autoMetaData = event.value;
 
 				// Hide or show depending if it's closed or open
 				vm.show = false;
 
 
-			} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-
-				pinMode = event.value;
-
-			}
+			} 
 		});
-
-		// vm.prettyDates = function(docType) {
-			
-		// 	// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
-		// 	if (docType === "Meta Data") {
-		// 		for (var i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
-		// 			for (var item in vm.docs["Meta Data"].data[i].metadata) {
-		// 				if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
-		// 					if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
-		// 						(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
-		// 						(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
-		// 						vm.docs["Meta Data"].data[i].metadata[item] =
-		// 							$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-
-		// };
 
 		/**
 		 * Show a document in a dialog
@@ -201,7 +176,7 @@
 				metaDataItemHeight = 50; // It could be higher for items with long text but ignore that
 
 			angular.forEach(vm.docs, function(value, key) {
-				contentHeight += docTypeHeight;
+				contentHeight += vm.docTypeHeight;
 				if (value.show) {
 					if (key === "Meta Data") {
 						itemsHeight = Object.keys(value.data[0].metadata).length * metaDataItemHeight;

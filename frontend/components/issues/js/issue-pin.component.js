@@ -32,9 +32,9 @@
 			bindToController: true
 		});
 
-	IssuesPinCtrl.$inject = ["$scope", "EventService"];
+	IssuesPinCtrl.$inject = ["$scope", "EventService", "ViewerService"];
 
-	function IssuesPinCtrl ($scope, EventService) {
+	function IssuesPinCtrl ($scope, EventService, ViewerService) {
 		var vm = this;
 			
 
@@ -88,16 +88,22 @@
 
 					vm.removePin();
 
-				} else if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-
-					vm.pinDropMode = event.value;
-					
-				}
+				} 
 			}
 
 
 
 		});
+
+		$scope.$watch(function(){
+			return ViewerService.pin;
+		}, function(){
+
+			if (vm.pinDropMode !== ViewerService.pin.pinDropMode ) {
+				vm.pinDropMode = ViewerService.pin.pinDropMode;
+			}
+			
+		}, true);
 
 
 		/**

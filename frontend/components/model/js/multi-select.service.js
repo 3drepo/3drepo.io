@@ -23,9 +23,9 @@
 		.module("3drepo")
 		.service("MultiSelectService", MultiSelectService);
 
-	MultiSelectService.$inject = ["EventService"];
+	MultiSelectService.$inject = ["EventService", "ViewerService"];
 
-	function MultiSelectService(EventService) {
+	function MultiSelectService(EventService, ViewerService) {
 
 		var keys = {
 			cmdKey : 91,
@@ -53,7 +53,7 @@
 		 */
 		function handleKeysDown(keysDown) {
 
-			if (pinDropMode) {
+			if (ViewerService.pin.pinDropMode) {
 				return;
 			}
 

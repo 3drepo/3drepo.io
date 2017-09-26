@@ -56,7 +56,6 @@
 			// If we're disabling the button we also 
 			// want to deactivate the tool itself
 			if (disabled) {
-				console.log("measure - deactivate");
 				service.state.active = false;
 			}
 		}

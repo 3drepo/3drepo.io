@@ -35,9 +35,22 @@
 			controllerAs: "vm"
 		});
 
-	ModelCtrl.$inject = ["$window", "$timeout", "$scope", "$element", "$location", "$compile", "$mdDialog", "EventService", "ModelService", "TreeService", "RevisionsService", "AuthService", "IssuesService", "MultiSelectService", "StateManager", "PanelService"];
+	ModelCtrl.$inject = [
+		"$window", "$timeout", "$scope", "$element", 
+		"$location", "$compile", "$mdDialog", "EventService",
+		"ModelService", "TreeService", "RevisionsService", 
+		"AuthService", "IssuesService", "MultiSelectService", 
+		"StateManager", "PanelService", "ViewerService"
+	];
 
-	function ModelCtrl($window, $timeout, $scope, $element, $location, $compile, $mdDialog, EventService, ModelService, TreeService, RevisionsService, AuthService, IssuesService, MultiSelectService, StateManager, PanelService) {
+	function ModelCtrl(
+		$window, $timeout, $scope, $element, 
+		$location, $compile, $mdDialog, EventService, 
+		ModelService, TreeService, RevisionsService, 
+		AuthService, IssuesService, MultiSelectService, 
+		StateManager, PanelService, ViewerService
+	) {
+
 		var vm = this;
 
 		/*
@@ -77,17 +90,6 @@
 			// vm.issueAreaElType = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 			
 		};
-
-		/**
-		 * Set up event watching
-		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			
-			if (event.type === EventService.EVENT.PIN_DROP_MODE) {
-				MultiSelectService.pinDropMode = event.value;
-			}
-
-		});
 
 		vm.handleModelError = function(){
 			var message = "The model was not found or failed to load correctly. " +
