@@ -43,10 +43,13 @@
 							label Password
 							input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
 
-					div(layout="row", layout-align="start" flex="none")
+					div(layout="row", flex="none", layout-align="center")
 						md-button.md-accent.md-raised.loginButton(
-							ng-click="vm.login()"
-						) Log In
+							ng-disabled="vm.loggingIn"
+							ng-click="vm.login()") 
+							span(ng-if="!vm.loggingIn") Log In
+							md-progress-circular(ng-if="vm.loggingIn").loginProgress
+								
 					h3.loginError {{vm.errorMessage}}
 					div(layout="row", layout-align="start center", flex="none")
 						a.loginLinks(href="passwordForgot") Forgot password?

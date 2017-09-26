@@ -38,6 +38,20 @@
 		vm.$onInit = function() {
 			vm.version = ClientConfigService.VERSION;
 			vm.userNotice = ClientConfigService.userNotice;
+			vm.loggingIn = false;
+		};
+
+
+		vm.handleLogin = function() {
+			vm.errorMessage = "";
+			vm.loggingIn = true;
+			AuthService.login(vm.user.username, vm.user.password)
+				.then(function(){
+					vm.loggingIn = false;
+				})
+				.catch(function(){
+					vm.loggingIn = false;
+				});
 		};
 
 		/**
@@ -50,14 +64,11 @@
 
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
-					AuthService.login(vm.user.username, vm.user.password);
+					vm.handleLogin();
 				}
 			} else {
 				if (vm.user && vm.user.username && vm.user.password) {
-					vm.errorMessage = "";
-					AuthService.login(vm.user.username, vm.user.password).then(function(response){
-						//console.log(response);
-					});
+					vm.handleLogin();
 				} else {
 
 					vm.errorMessage = "Username and/or password not provided";

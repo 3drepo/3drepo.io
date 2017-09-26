@@ -8,6 +8,33 @@ login .homeUserContent {
   }
 }
 
+login .loginProgress {
+  width: 25px;
+  height: 25px;
+}
+
+login md-progress-circular {
+  width: 25px !important;
+  height: 25px !important;
+  margin: 0px;
+  margin-right: 25px;
+  margin-left: 0px;
+  display: inline;
+  padding: 5px;
+}
+
+login .loginProgress svg {
+  width: 25px !important;
+  height: 25px !important;
+  transform-origin: initial !important;
+}
+
+login .loginProgress svg path {
+  width: 25px !important;
+  height: 25px !important;
+  stroke: rgb(6,86,60) !important;
+}
+
 login .homeUserContent md-content {
   border-radius: 4px;
 }
