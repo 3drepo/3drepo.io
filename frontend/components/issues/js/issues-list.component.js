@@ -363,13 +363,16 @@
 
 				// Sort
 				vm.issuesToShow = vm.allIssues.slice();
-				vm.issuesToShow.sort(function(a, b){
-					if (vm.sortOldestFirst) {
-						return a.created > b.created;
-					} 
-					return a.created < b.created;
-				});
-
+				if (vm.sortOldestFirst) {
+					vm.issuesToShow.sort(function(a, b){
+						return a.created - b.created;
+					});
+				} else {
+					vm.issuesToShow.sort(function(a, b){
+						return b.created - a.created;
+					});
+				}
+				
 				// TODO: There is certainly a better way of doing this, but I don't want to
 				// dig into it right before release
 
