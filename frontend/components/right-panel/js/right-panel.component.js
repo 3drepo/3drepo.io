@@ -153,13 +153,12 @@
 				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
 			} 
 		};
-		
+
 
 		/**
          * Toggle measuring tool
          */
 		vm.toggleMeasure = function () {
-			console.log(MeasureService.state.active);
 
 			// If not measure mode and metadata enabled
 			if (!vm.measureActive && vm.metaData) {

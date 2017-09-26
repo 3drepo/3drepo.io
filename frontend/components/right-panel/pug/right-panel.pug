@@ -10,8 +10,9 @@
 
 		// META DATA TOOL
 		md-button.md-accent.md-fab.md-mini(
-			aria-label="Meta", 
-			ng-click="vm.toggleAutoMetaData()", 
+			aria-label="Meta"
+			ng-click="vm.toggleAutoMetaData()"
+			ng-disabled="vm.measureDisabled"
 			style="background:{{vm.metaBackground}}")
 
 			md-tooltip(ng-if="vm.metaData" md-direction="left") Disable
