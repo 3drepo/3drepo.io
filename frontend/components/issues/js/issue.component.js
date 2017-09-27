@@ -545,6 +545,9 @@
 					};
 					IssuesService.updateIssue(vm.issueData, data)
 						.then(function (issueData) {
+							if (issueData && issueData.status && (issueData.status > 400)) {
+								console.error("Something went wrong saving the issue!", issueData);
+							}
 							IssuesService.updatedIssue = vm.issueData;
 							vm.savedDescription = vm.issueData.desc;
 
@@ -553,6 +556,9 @@
 							IssuesService.convertActionCommentToText(comment, vm.topic_types);
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 							vm.issueData.comments.push(comment);
+						})
+						.catch(function(error){
+							console.error("Something went wrong saving the issue!: ", error);
 						});
 				}
 
