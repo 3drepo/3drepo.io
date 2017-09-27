@@ -705,7 +705,8 @@
 				});
 			}
 
-			if (permissionlessModels.length) {
+			if (permissionlessModels.length && role !== "unassigned") {
+				
 				var content = "Just to let you know, the assigned user will need permissions on submodels also to see them." + 
 				"<br><br> These are the models in question: <br><br>";
 				permissionlessModels.forEach(function(model, i) {
