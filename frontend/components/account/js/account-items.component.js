@@ -296,7 +296,10 @@
 		};
 
 		vm.getProjects = function(teamspace) { 
-			return AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace); 
+			console.log("getProjects", teamspace);
+			var projects = AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace);
+			console.log("getProjects : ", projects);
+			return projects; 
 		};
 
 		// ADD PROJECTS/FEDERATIONS/MODELS
@@ -496,7 +499,15 @@
 				subModels: []
 			};
 			vm.errorMessage = "";
-			UtilsService.showDialog("federation-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+			UtilsService.showDialog(
+				"federation-dialog.html", 
+				$scope, 
+				event, 
+				true, 
+				null, 
+				false, 
+				vm.dialogCloseToId
+			);
 		};
 
 
@@ -998,13 +1009,12 @@
 						var project = response.data;
 
 						//TODO: This is a hack, why does the API not return the correct permissions?
-						if (project.permissions.indexOf("edit_project") === -1)  {
-							project.permissions.push("edit_project");
-						}
-
-						if (project.permissions.indexOf("delete_project") === -1) {
-							project.permissions.push("delete_project");
-						}
+						var permissions = [
+							"create_federation", "create_model", 
+							"admin_project", "delete_project", 
+							"edit_project"
+						];
+						project.permissions = project.permissions.concat(permissions);
 						
 						if (update.edit) {
 							AccountService.renameProjectInTeamspace(

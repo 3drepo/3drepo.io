@@ -21,12 +21,14 @@ login md-progress-circular {
   margin-left: 0px;
   display: inline;
   padding: 5px;
+  stroke: rgb(6,86,60) !important;
 }
 
 login .loginProgress svg {
   width: 25px !important;
   height: 25px !important;
   transform-origin: initial !important;
+  stroke: rgb(6,86,60) !important;
 }
 
 login .loginProgress svg path {

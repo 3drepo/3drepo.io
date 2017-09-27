@@ -195,7 +195,9 @@
 					$mdDialog.cancel();
 				}
 			};
+
 			data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
+
 			data.scope = (angular.isDefined(scope)) ? scope : null;
 			data.preserveScope = (data.scope !== null);
 			data.targetEvent = (angular.isDefined(event)) ? event : null;

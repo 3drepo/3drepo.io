@@ -827,6 +827,10 @@ account-assign .assignTabHolder .noUsers {
   text-align: center;
 }
 
+account-assign .adminRadio div.md-on {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
 /* account-assign .roleLoading {
   width: 25px !important;
   height: 25px !important;
