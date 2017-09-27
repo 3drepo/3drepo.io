@@ -238,6 +238,7 @@
 										layout-align="center center")
 
 										md-radio-group(	
+											ng-class="{'adminRadio' : value == 'admin'}"
 											ng-disabled="value === 'admin'"
 											ng-model="vm.selectedRole[user]"
 											layout-align="center center"
