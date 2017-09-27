@@ -92,7 +92,9 @@
 					if (vm.issueDisplay.sortOldestFirst) {
 						vm.sortOldestFirst = vm.issueDisplay.sortOldestFirst;
 					}
+
 					if (vm.issueDisplay.showSubModelIssues){
+						
 						vm.showSubModelIssues = vm.issueDisplay.showSubModelIssues;
 					}
 					setupIssuesToShow();
@@ -110,7 +112,6 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			
 			if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-				//console.log("Disabled - Heard event VIEWER.MODEL_LOADED in issues.component.js - model is:", event.value);
 				vm.modelLoaded = true;
 			} 
 			
@@ -450,41 +451,36 @@
 		 * Add issue pins to the viewer
 		 */
 		function showPins () {
-		
-			// Go through all issues with pins
+
+			// TODO: This is still inefficent and unclean
 			vm.allIssues.forEach(function(issue){
+				var show = vm.issuesToShow.find(function(shownIssue){
+					return issue._id === shownIssue._id;
+				});
 
-				if (issue.position.length > 0) {
+				if (show !== undefined) {
+					// Create new pin
+					var pinData = {
+						id: issue._id,
+						position: issue.position,
+						norm:issue.norm,
+						account: issue.account,
+						model: issue.model
+					};
+					var pinColor = Pin.pinColours.blue;
+					var isSelectedPin = vm.selectedIssue && issue._id === vm.selectedIssue._id;
 
-					// If we are showing all the closed issues, or it's open
-					var show = (vm.showClosed === true && vm.showSubModelIssues === true) || 
-								(issue.status === "open" && vm.showSubModelIssues === true);
-
-					if (show) {
-						// Create new pin
-						var pinData = {
-							id: issue._id,
-							position: issue.position,
-							norm:issue.norm,
-							account: issue.account,
-							model: issue.model
-						};
-						var pinColor = Pin.pinColours.blue;
-						var isSelectedPin = vm.selectedIssue && issue._id === vm.selectedIssue._id;
-
-						if (isSelectedPin) {
-							pinColor = Pin.pinColours.yellow;
-						}
-
-						IssuesService.addPin(pinData, pinColor, issue.viewpoint);
-					} else {
-						// Remove pin
-						IssuesService.removePin(issue._id);
+					if (isSelectedPin) {
+						pinColor = Pin.pinColours.yellow;
 					}
-					
-				}
 
+					IssuesService.addPin(pinData, pinColor, issue.viewpoint);
+				} else {
+					// Remove pin
+					IssuesService.removePin(issue._id);
+				}
 			});
+
 		}
 
 
