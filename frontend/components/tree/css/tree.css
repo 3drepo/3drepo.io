@@ -1,0 +1,99 @@
+tree .virtualRepeatInfiniteScroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .vertical-container {
+  height: 100%;
+  width: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
+  cursor: default;
+  padding: 0 0;
+  min-height: 1px;
+}
+
+tree span {
+  outline: none;
+  margin: 0;
+}
+tree span .fa {
+  color: #5C6BC0;
+  font-size: 14px;
+  padding: 0 2px 0 0;
+}
+
+tree .treeNodes p {
+  outline: none;
+  word-break: break-all;
+  word-wrap: break-word;
+  margin: 8px 0 8px -5px;
+  font-size: 14px;
+}
+
+tree .treeNode {
+  outline: none;
+}
+tree .treeNode:hover {
+  cursor: pointer;
+  background: rgba(250,250,250,1);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+tree .treeNodeSelected {
+  background: rgba(0,69,148, 0.2);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+tree md-checkbox {
+  margin-right: 8px !important;
+}
+
+.angular-ui-tree-handle {
+  cursor: default;
+  display: inline-block;
+  font-weight: normal;
+}
+
+tree .treeButtonDisabled {
+  color: #CCCCCC !important;
+}
+
+tree .expandButton {
+  margin-left: 0 !important;
+}
+
+tree .noAccessButton {
+  margin-left: 0 !important;
+  opacity: 0.5;
+}
+tree .noAccessName {
+  opacity: 0.5;
+}
+tree .noAccessName:hover {
+  cursor: default !important;
+}
+
+tree .toggleButton {
+  margin-right: 0 !important;
+}
+
+tree .parentOfInvisible {
+  color: #999 !important;
+}
+
+/** Tree filter list **************************************************************************************************/
+tree .filterNode {
+  height: 41px;
+}
+
+tree .filterNode div {
+  height: 100%;
+}
+
+tree .filterListNodeName {
+  margin-left: 15px !important;
+}

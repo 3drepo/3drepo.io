@@ -22,8 +22,7 @@ var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
-var History = require('./history');
-var Role = require('./role');
+const Role = require('./role');
 
 var systemLogger = require("../logger.js").systemLogger;
 
@@ -31,20 +30,19 @@ var Subscription = require('./subscription');
 var config = require('../config');
 
 
-var ProjectSetting = require('./projectSetting');
+var ModelSetting = require('./modelSetting');
 var C = require('../constants');
 var userBilling = require("./userBilling");
-
+var job = require('./job');
+var permissionTemplate = require('./permissionTemplate');
+var accountPermission = require('./accountPermission');
+var Project = require('./project');
 
 var schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
 	customData: {
-		projects: [{
-			account: String,
-			project: String
-		}],
 		firstName: String,
 		lastName: String,
 		email: String,
@@ -57,9 +55,38 @@ var schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: { type: userBilling, default: userBilling },
+		billing: { 
+			type: userBilling, 
+			default: userBilling,
+			get: function(billing){
+				if(billing){
+					billing._parent = this;
+				}
+				return billing;
+			}
+
+		},
 		avatar: Object,
-		lastLoginAt: Date
+		lastLoginAt: Date,
+		jobs: {
+			type: [job.schema],
+			get: function(jobs){
+				return job.methods.init(this, jobs);
+			}
+		},
+		permissionTemplates: {
+			type: [permissionTemplate.schema],
+			get: function(permissionTemplates){
+				return permissionTemplate.methods.init(this, permissionTemplates);
+			}
+		},
+		//teamspace level permissions
+		permissions: {
+			type: [accountPermission.schema],
+			get: function(permissions){
+				return accountPermission.methods.init(this, permissions);
+			}
+		},
 	},
 	roles: [{}]
 });
@@ -85,13 +112,13 @@ schema.statics.historyChunksStats = function(dbName){
 schema.statics.authenticate = function(logger, username, password){
 	'use strict';
 
-	let authDB = DB(logger).getAuthDB();
-
 	if(!username || !password){
 		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
-	return authDB.authenticate(username, password).then(() => {
+	return DB.getAuthDB().then(authDB => {
+		return authDB.authenticate(username, password);
+	}).then(() => {
 		return this.findByUserName(username);
 	}).then(user => {
 		if(user.customData && user.customData.inactive) {
@@ -210,7 +237,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
 
-schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
+schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime, skipCheckEmail){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
 
@@ -229,6 +256,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	if(!this.usernameRegExp.test(username)){
 		return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 	}
+
+	for(let i=0 ; i < C.REPO_BLACKLIST_USERNAME.length; i++){
+		if(C.REPO_BLACKLIST_USERNAME[i] === username){
+			return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
+		}
+	}
+
 
 	['firstName', 'lastName', 'email'].forEach(key => {
 		if (customData && customData[key]){
@@ -251,6 +285,34 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 	cleanedCustomData.inactive = true;
 
+	//default permission
+	cleanedCustomData.permissions = [{
+		user: username,
+		permissions: [C.PERM_TEAMSPACE_ADMIN]
+	}];
+
+	//default templates
+	cleanedCustomData.permissionTemplates = [
+		{
+			_id: C.ADMIN_TEMPLATE,
+			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.VIEWER_TEMPLATE,
+			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COMMENTER_TEMPLATE,
+			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COLLABORATOR_TEMPLATE,
+			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+		}
+	];
+
+	cleanedCustomData.jobs = C.DEFAULT_JOBS;
+	
 	if(customData){
 		cleanedCustomData.emailVerifyToken = {
 			token: crypto.randomBytes(64).toString('hex'),
@@ -264,8 +326,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			return Promise.reject(responseCodes.USER_EXISTS);
 		}
 
-		return this.isEmailTaken(customData.email);
+		let checkEmail = Promise.resolve(0);
 
+		if(!skipCheckEmail){
+			checkEmail = this.isEmailTaken(customData.email);
+		}
+
+		return checkEmail;
 	}).then(count => {
 
 		if(count === 0){
@@ -296,7 +363,7 @@ schema.statics.verify = function(username, token, options){
 	options = options || {};
 
 	let allowRepeatedVerify = options.allowRepeatedVerify;
-	let skipImportToyProject = options.skipImportToyProject;
+	let skipImportToyModel = options.skipImportToyModel;
 	let skipCreateBasicPlan = options.skipCreateBasicPlan;
 
 	let user;
@@ -329,30 +396,28 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(user => {
 
-		if(!skipImportToyProject){
+		if(!skipImportToyModel){
 
-			//import toy project
-			var ProjectHelper = require('./helper/project');
+			//import toy model
+			var ModelHelper = require('./helper/model');
 
-			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError('Failed to import toy project', { err : err && err.stack ? err.stack : err});
+			ModelHelper.importToyProject(username, username).catch(err => {
+				systemLogger.logError('Failed to import toy model', { err : err && err.stack ? err.stack : err});
 			});
 		}
 
 		if(!skipCreateBasicPlan){
 			//basic quota
-			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
+			user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
 		}
+		
+		Role.createTeamSpaceRole(username).then(role => {
+				return Role.grantTeamSpaceRoleToUser(username, username);
+			}
+		).catch(err => {
+			systemLogger.logError('Failed to create role for ', username);
+		});
 
-		return Promise.resolve();
-
-	}).then(() => {
-
-		return Role.createRole(username, null, C.ADMIN_TEMPLATE);
-
-	}).then(role => {
-
-		return Role.grantRolesToUser(username, [role]);
 	});
 };
 
@@ -415,250 +480,463 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 };
 
-schema.statics.grantRoleToUser = function(username, db, role){
+
+function _fillInModelDetails(accountName, setting, permissions){
 	'use strict';
 
-	return this.findByUserName(username).then(user => {
+	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
 
-		let dup = false;
-		user.roles.forEach(_role => {
-			if(_role.role === role && _role.db === db){
-				dup = true;
-			}
-		});
-
-		if(!dup){
-			user.roles.push({ role, db});
-
-			let grantRoleCmd = {
-				grantRolesToUser: username,
-				roles: user.roles
-			};
-
-			return ModelFactory.db.admin().command(grantRoleCmd);
-		}
-
-		return Promise.resolve();
-
-	});
-};
-
-schema.statics.revokeRolesFromUser = function(username, db, role){
-	'use strict';
-
-	let cmd = {
-		revokeRolesFromUser: username,
-		roles: [{ role, db }]
+	let model = {
+		federate: setting.federate,
+		permissions: permissions,
+		model: setting._id,
+		name: setting.name,
+		status: setting.status,
+		errorReason: setting.errorReason,
+		subModels: setting.federate && setting.toObject().subModels || undefined,
+		timestamp: setting.timestamp || null
 	};
 
-	return ModelFactory.db.admin().command(cmd);
-};
+	return Promise.resolve(model);
 
+	// the following is not needed any more after caching timestamp and submodels in model settings
 
-schema.methods.listAccounts = function(){
+	// return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
+
+	// 	if(history){
+	// 		model.timestamp = history.timestamp;
+	// 	} else {
+	// 		model.timestamp = null;
+	// 	}
+
+	// 	if(setting.federate){
+		
+	// 		//list all sub models of a fed model
+	// 		return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
+	// 			model.subModels = subModels;
+	// 		}).then(() => model);
+
+	// 	}
+
+	// 	return model;
+	// });
+
+}
+//list all models in an account
+function _getModels(accountName, ids, permissions){
 	'use strict';
 
-	let accounts = [];
+	let models = [];
+	let fedModels = [];
 
-	// group projects by accounts
-	return this.listProjectsAndAccountAdmins().then(data => {
+	let query = {};
 
-		let projects = data.projects;
-		let adminAccounts = data.adminAccounts;
+	if(ids){
+		query = { _id : { '$in': ids}};
+	}
 
-		projects.forEach(project => {
+	return ModelSetting.find({account: accountName}, query).then(settings => {
 
-			let account = _.find(accounts, account => account.account === project.account);
+		let promises = [];
 
-			if(!account){
-
-				account = {
-					account: project.account,
-					projects: [],
-					fedProjects: []
-				};
-
-				accounts.push(account);
-			}
-
-			if(project.federate){
-				account.fedProjects.push({
-					project: project.project,
-					timestamp: project.timestamp,
-					status: project.status,
-					federate: project.federate,
-					subProjects: project.subProjects,
-					permissions: project.permissions
-				});
-			} else {
-				account.projects.push({
-					project: project.project,
-					timestamp: project.timestamp,
-					status: project.status,
-					subProjects: project.subProjects,
-					permissions: project.permissions
-				});
-			}
-
-
-		});
-
-		adminAccounts.forEach(account => {
-			let accObj = accounts.find(_account => _account.account === account);
-			if(accObj){
-				accObj.isAdmin = true;
-			} else {
-				accounts.push({
-					account: account,
-					projects: [],
-					fedProjects: [],
-					isAdmin: true
-				});
-			}
-		});
-
-		let getQuotaPromises = [];
-
-		accounts.forEach(account => {
-			account.projects.sort((a, b) => {
-				if(a.timestamp < b.timestamp){
-					return 1;
-				} else if (a.timestamp > b.timestamp){
-					return -1;
-				} else {
-					return 0;
-				}
-			});
-
-			getQuotaPromises.push(
-				User.findByUserName(account.account).then(user => {
-					if(user){
-						account.quota = user.customData.billing.subscriptions.getSubscriptionLimits();
-						//console.log(account.quota );
-						return User.historyChunksStats(account.account);
-					}
-
-				}).then(stats => {
-
-					if(stats && account.quota.spaceLimit > 0){
-						let totalSize = 0;
-						stats.forEach(stat => {
-							totalSize += stat.size;
-						});
-
-						account.quota.spaceUsed = totalSize;
-					} else if(account.quota) {
-						account.quota.spaceUsed = 0;
-					}
+		settings.forEach(setting => {
+			promises.push(
+				_fillInModelDetails(accountName, setting, permissions).then(model => {
+					if(!(model.permissions.length == 1 && model.permissions[0] == null))
+						setting.federate ? fedModels.push(model) : models.push(model);
 				})
 			);
+		});
+
+		return Promise.all(promises).then(() => { return {models, fedModels}; });
+	});
+}
+
+// find projects and put models into project
+function _addProjects(account, username, models){
+	'use strict';
+	
+	let query = {};
+
+	if (models){
+		query = { models: { $in: models} };
+	}
+
+	return Project.find({account: account.account}, query).then(projects => {
+
+		projects.forEach((project, i) => {
+		
+			project = project.toObject();
+
+			let permissions = project.permissions.find(p => p.user === username);
+			permissions = _.get(permissions, 'permissions') || [];
+			// show inherited and implied permissions
+			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+			permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
+			
+			project.permissions = _.uniq(_.compact(_.flatten(permissions)));
+			
+			projects[i] = project;
+
+			const findModel = model => (m, i, models) => {
+				if (m.model === model){
+					models.splice(i, 1);
+					return true;
+				}
+			};
+
+			project.models.forEach((model, i) => {
+
+				let fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
+				project.models[i] = fullModel;
+
+			});
+
+			project.models = _.compact(project.models);
 
 		});
 
-		accounts.sort((a, b) => {
-			if (a.account.toLowerCase() < b.account.toLowerCase()){
-				return -1;
-			} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+		account.projects = account.projects.concat(projects);
+	});
+}
+
+
+function _findModelDetails(dbUserCache, username, model){
+	'use strict';
+
+	let getUser;
+	let dbUser;
+
+	if(dbUserCache[model.account]){
+		getUser = Promise.resolve(dbUserCache[model.account]);
+	} else {
+		getUser = User.findByUserName(model.account).then(user => {
+			dbUserCache[model.account] = user;
+			return dbUserCache[model.account];
+		});
+	}
+
+	return getUser.then(_user => {
+		dbUser = _user;
+		return ModelSetting.findById({account: model.account}, model.model);
+
+	}).then(setting => {
+
+		let permissions = [];
+
+		if(!setting){
+			setting = { _id: model.model };
+		} else {
+			const template = setting.findPermissionByUser(username);
+			
+			if (template){
+				permissions = dbUser.customData.permissionTemplates.findById(template.permission).permissions;
+			}
+		}
+
+		return {setting, permissions};
+	});
+}
+
+function _calSpace(user){
+	'use strict';
+
+	let quota = user.customData.billing.subscriptions.getSubscriptionLimits();
+
+	return User.historyChunksStats(user.user).then(stats => {
+
+		if(stats && quota.spaceLimit > 0){
+			let totalSize = 0;
+			stats.forEach(stat => {
+				totalSize += stat.size;
+			});
+
+			quota.spaceUsed = totalSize;
+		} else if(quota) {
+			quota.spaceUsed = 0;
+		}
+
+		return quota;
+	});
+
+}
+
+function _sortAccountsAndModels(accounts){
+	'use strict';
+
+	function sortModel(a, b) {
+			if(a.timestamp < b.timestamp){
 				return 1;
+			} else if (a.timestamp > b.timestamp){
+				return -1;
 			} else {
 				return 0;
 			}
-		});
+	}
 
-		// own acconut always ranks top of the list
-		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
-		if(myAccountIndex > -1){
-			let myAccount = accounts[myAccountIndex];
-			accounts.splice(myAccountIndex, 1);
-			accounts.unshift(myAccount);
-		}
-
-		return Promise.all(getQuotaPromises).then(() => {
-			return Promise.resolve(accounts);
-		});
+	accounts.forEach(account => {
+		account.models.sort(sortModel);
+		account.fedModels.sort(sortModel);
+		account.projects.forEach(p => p.models.sort(sortModel));
 	});
-};
 
-schema.methods.listProjectsAndAccountAdmins = function(options){
+	accounts.sort((a, b) => {
+		if (a.account.toLowerCase() < b.account.toLowerCase()){
+			return -1;
+		} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
+}
+
+// function _findModel(id, accounts){
+
+// 	//flatten all the model ids in accounts object
+// 	const ids = accounts.reduce(
+// 		(arr, account) => arr.concat(
+// 			account.models.map(model => model.model), 
+// 			account.fedModels.map(model => model.model), 
+// 			account.projects.reduce((arr, project) => arr.concat(project.models.map(model => model.model)), [])
+// 		), 
+// 		[]
+// 	);
+
+// 	console.log('findModel', ids, id);
+// 	return ids.indexOf(id) !== -1;
+// }
+
+function _findModel(id, account){
+	return account.models.find(m => m.model === id) ||
+		account.fedModels.find(m => m.model === id) ||
+		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
+}
+
+function _makeAccountObject(name){
+	return {account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false};
+}
+
+function _createAccounts(roles, userName)
+{
 	'use strict';
 
-	let ProjectHelper = require('./helper/project');
-	let adminAccounts = [];
-	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
+	let accounts = [];
+	let promises = [];
 
-		return Role.listProjectsAndAccountAdmin(roles);
+	roles.forEach( role => {
+		promises.push(User.findByUserName(role.db).then(user => {
+			if(!user) return;
+			let tsPromises = [];
+			const permission = user.customData.permissions.findByUser(userName);
+			if(permission){
+				//Check for admin Privileges first
+				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
+					let account = {
+					account: user.user,
+					projects: [],
+					models: [],
+					fedModels: [],
+					isAdmin: isTeamspaceAdmin,
+					permissions: permission.permissions || []
+				};
 
-	}).then(data => {
+				//show all implied and inherted permissions
+				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
+				accounts.push(account);
+				if (isTeamspaceAdmin || canViewProjects){
+					//show all implied and inherted permissions
+					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
+					
+					tsPromises.push(
+						// list all models under this account as they have full access
+						_getModels(account.account, null, inheritedModelPermissions).then(data => {
+							account.models = data.models;
+							account.fedModels = data.fedModels;
+								// add space usage stat info into account object
+							if (isTeamspaceAdmin){
+								return _calSpace(user).then(quota => account.quota = quota);
+							}
+						}).then(() => _addProjects(account, userName))	
+					);
+				}
+				
+			}
 
-		let projects = data.projects;
-		adminAccounts = data.adminAccounts;
+			return Promise.all(tsPromises).then(()=>{
+				//check project scope permissions
+				let projPromises = [];
+				let account = null;
+				const query = { 'permissions': { '$elemMatch': { user: userName } }};
+				const projection = { 'permissions': { '$elemMatch': { user: userName } }, "models": 1, "name": 1};
+				return Project.find({account: user.user}, query, projection).then(projects => {
 
-		//get timestamp for project
-		if(options && options.skipTimestamp){
-			return Promise.resolve(projects);
-		}
+					projects.forEach( _proj =>{
+						projPromises.push(new Promise(function(resolve, reject){
+							let myProj;
+							if(!_proj || _proj.permissions.length === 0){
+								resolve();
+								return;
+							}
+							if(!account){
+	
+								account = accounts.find(account => account.account === user.user);
+								if(!account)
+								{
+									account = _makeAccountObject(user.user);
+									accounts.push(account);
+								}
+							}	
 
-		let promises = [];
-		projects.forEach((project, index) => {
-			promises.push(
-				History.findByBranch(project, C.MASTER_BRANCH_NAME).then(history => {
+							myProj = account.projects.find(p => p.name === _proj.name);
 
-					if(history){
-						projects[index].timestamp = history.timestamp;
-					} else {
-						projects[index].timestamp = null;
-					}
-
-					return Promise.resolve();
-
-				}).catch(() => Promise.resolve())
-			);
-		});
-
-		return Promise.all(promises).then(() => Promise.resolve(projects));
-
-	}).then(projects => {
-
-		//get status for project
-		if(options && options.skipStatus){
-			return Promise.resolve(projects);
-		}
-
-		let promises = [];
-
-		projects.forEach((project, index) => {
-			promises.push(
-				ProjectSetting.findById(project, project.project).then(setting => {
-
-					if(setting){
-						projects[index].status = setting.status;
-						projects[index].federate = setting.federate;
-					}
-
-					return Promise.resolve();
-
-				}).then(() => {
+							if(!myProj){
+								myProj = _proj.toObject();
+								account.projects.push(myProj);
+								myProj.permissions = myProj.permissions[0].permissions;
+							} else {
+								myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
+							}
 
 
-					if(projects[index].federate){
-						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, C.MASTER_BRANCH_NAME);
-					}
+							// show implied and inherited permissions
+							myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+							myProj.permissions = _.uniq(_.flatten(myProj.permissions));
+	
+							let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+							inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
 
-					return Promise.resolve();
+							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
+							if(newModelIds.length){
+								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+									myProj.models = models.models.concat(models.fedModels);
+									resolve();
+								});
+							}
+							else
+							{
+								resolve();
+							}
+						}));						
 
-				}).then(subProjects => {
+					})
+					return Promise.all(projPromises).then(()=>
+							{
+								//model permissions
+								let modelPromises = [];
+								let dbUserCache = {};
+								return ModelSetting.find({account: user.user},query, projection).then(models => {
 
-					if(subProjects){
-						projects[index].subProjects = subProjects;
-					}
+									models.forEach(model => {
+										if(model.permissions.length > 0){
+											if(!account){
+												account = accounts.find(account => account.account === user.user);
+												if(!account){
+													account = _makeAccountObject(user.user);
+													accounts.push(account);
+												}
+											}	
+											const existingModel = _findModel(model._id, account);
+											modelPromises.push(
+												_findModelDetails(dbUserCache, userName, { 
+													account: user.user, model: model._id
+												}).then(data => {
+														return _fillInModelDetails(account.account, data.setting, data.permissions);
+			
+												}).then(_model => {
+			
+													if(existingModel){
+								
+														existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
+															return;
+													}
+	
+													//push result to account object
+													return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
+														if (projectObj){
+									
+															let project = account.projects.find(p => p.name === projectObj.name);
+								
+															if(!project){
+																project = {
+																	_id: projectObj._id,
+																	name: projectObj.name,
+																	permissions: [],
+																	models: []
+																};
+																account.projects.push(project);
+															}
+															project.models.push(_model);
 
-				}).catch(() => Promise.resolve())
-			);
-		});
+														} else {
+															_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
+														}
+													});
+												})
+											);
+										}
+									});
+									
 
-		return Promise.all(promises).then(() => Promise.resolve({projects, adminAccounts}));
+
+									return Promise.all(modelPromises).then(() => {
+
+										//fill in all subModels name
+										accounts.forEach(account => {
+											//all fed models
+											const allFedModels = account.fedModels.concat(
+											account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+											);
+
+											//all models	
+											const allModels = account.models.concat(
+												account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+											);
+
+											allFedModels.forEach(fed => {
+												fed.subModels.forEach(subModel => {
+													const foundModel = allModels.find(m => m.model === subModel.model);
+													subModel.name = foundModel && foundModel.name;
+												});
+											});
+										});
+
+
+										//sorting models
+										_sortAccountsAndModels(accounts);
+
+										// own acconut always ranks top of the list
+										let myAccountIndex = accounts.findIndex(account => account.account === userName);
+										if(myAccountIndex > -1){
+											let myAccount = accounts[myAccountIndex];
+											accounts.splice(myAccountIndex, 1);
+											accounts.unshift(myAccount);
+										}
+
+
+										return accounts;
+
+									});			
+								});
+							});
+				});
+				
+			});
+		}));
+
 	});
-};
+
+	return Promise.all(promises).then(() => { return accounts;});
+
+}
+schema.methods.listAccounts = function(){
+	'use strict';
+
+	return _createAccounts(this.roles, this.user);	
+}
 
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
@@ -666,9 +944,9 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let billingAgreement;
 
 	plans = plans || [];
-	//console.log(this.customData);
 	
-	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress).then(_billingAgreement => {
+	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress)
+	.then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;
 		return this.save();
@@ -677,6 +955,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		return Promise.resolve(billingAgreement || {});
 	});
 };
+
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	'use strict';
@@ -711,8 +990,12 @@ schema.methods.executeBillingAgreement = function(){
 
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
-
+	var sub = this.customData.billing.subscriptions.findByID(id);
+	var username = sub ? sub.assignedUser : null ;
 	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
+		if(username){
+			Role.revokeTeamSpaceRoleFromUser(username, this.user);
+		}
 		return this.save().then(() => subscription);
 	});
 
@@ -722,37 +1005,26 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
 	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
+		//add this user to the role
+		Role.grantTeamSpaceRoleToUser(userData.user, this.user);
 		return this.save().then(() => subscription);
 	});
 };
 
-
-schema.methods.getPrivileges = function(){
+schema.methods.updateAssignDetail = function(id, data){
 	'use strict';
 
-	return Role.viewRolesWithInheritedPrivs(this.roles).then(roles => {
-
-		let privs = [];
-		if (roles && roles.length) {
-			for (let i = 0; i < roles.length; i++) {
-				privs = privs.concat(roles[i].inheritedPrivileges);
-			}
-		}
-
-		return Promise.resolve({inheritedPrivileges: privs});
+	return this.customData.billing.subscriptions.updateAssignDetail(id, data).then(subscription => {
+		return this.save().then(() => subscription);
 	});
-
 };
 
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
-	//console.log('create sub', plan, this.user, billingUser);
 	this.customData.billing.billingUser = billingUser;
-	//console.log(' this.customData.billing.subscriptions',  this.customData.billing.subscriptions);
 	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
 	//this.markModified('customData.billing');
-	//console.log(this.user, this.customData.billing.billingUser, subscription)
 	return this.save().then(() => {
 		return Promise.resolve(subscription);
 	});
@@ -766,5 +1038,6 @@ var User = ModelFactory.createClass(
 		return 'system.users';
 	}
 );
+
 
 module.exports = User;

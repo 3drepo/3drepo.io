@@ -1,0 +1,50 @@
+{
+  "env": {
+    "browser": false,
+    "node" : true,
+    "es6" : true
+  },
+  "globals": {
+    "console": false,
+    "module": true,
+    "document": false,
+    "require": false,
+    "Buffer": false,
+    "describe": false,
+    "it": false,
+    "after": false,
+    "before": false,
+    "process": false
+  },
+  "plugins": ["node"],
+  "extends": ["eslint:recommended", "plugin:node/recommended"],
+  "rules": {
+    "node/no-unpublished-require": 0,
+    "strict": ["error", "global"],
+    "no-bitwise": 2,
+    "curly": 2,
+    "eqeqeq": 2,
+    "guard-for-in": 2,
+    "no-extend-native": 2,
+    "no-var": 2,
+    "no-undef": 2,
+    "no-shadow" : [
+        "error"
+    ],
+    "semi": [
+        "error",
+        "always"
+    ],
+    "linebreak-style": [
+        "error",
+        "unix"
+    ],
+    "block-scoped-var" : [
+       "error"
+    ],
+    "quotes": [
+      "error",
+      "double"
+    ]
+  }
+}

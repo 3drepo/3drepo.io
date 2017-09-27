@@ -25,7 +25,7 @@ module.exports.createApp = function (server, serverConfig){
 	let session = require('./session').session(config);
 	
 	let log_iface = require("../logger.js");
-	let middlewares = require('../routes/middlewares');
+	let middlewares = require('../middlewares/middlewares');
 	let systemLogger = log_iface.systemLogger;
 
 	//console.log(serverConfig);
@@ -46,7 +46,7 @@ module.exports.createApp = function (server, serverConfig){
 
 	io.use((socket, next) => {
 		// init the singleton db connection
-		let DB = require("../db/db")(systemLogger);
+		let DB = require("../db/db");
 		DB.getDB("admin").then( db => {
 			// set db to singleton modelFactory class
 			require("../models/factory/modelFactory").setDB(db);
@@ -78,11 +78,13 @@ module.exports.createApp = function (server, serverConfig){
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
 
+			//console.log("consumeEventMessage --- ", msg);
+
 			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message
 				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				
-				let projectNameSpace = msg.project ?  `::${msg.project}` : ''; 
+				let modelNameSpace = msg.model ?  `::${msg.model}` : ''; 
 				let extraPrefix = '';
 
 				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0){
@@ -91,8 +93,8 @@ module.exports.createApp = function (server, serverConfig){
 					});
 				}
 
-				let eventName = `${msg.account}${projectNameSpace}${extraPrefix}::${msg.event}`;
-				emitter.to(`${msg.account}${projectNameSpace}`).emit(eventName, msg.data);
+				let eventName = `${msg.account}${modelNameSpace}${extraPrefix}::${msg.event}`;
+				emitter.to(`${msg.account}${modelNameSpace}`).emit(eventName, msg.data);
 			}
 		});
 
@@ -101,6 +103,7 @@ module.exports.createApp = function (server, serverConfig){
 			//socket error handler, frontend will attempt to reconnect
 			socket.on('error', err => {
 				systemLogger.logError('Chat server - socket error - ' + err.message);
+				systemLogger.logError(err.stack);
 			});
 
 			if(!_.get(socket, 'handshake.session.user')){
@@ -121,29 +124,29 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('join', data => {
 				//check permission if the user have permission to join room
-				let auth = data.project ? middlewares.hasReadAccessToProjectHelper : middlewares.isAccountAdminHelper;
+				let auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				
-				auth(username, data.account, data.project).then(hasAccess => {
+				auth(username, data.account, data.model).then(hasAccess => {
 
-					let projectNameSpace = data.project ?  `::${data.project}` : '';
+					let modelNameSpace = data.model ?  `::${data.model}` : '';
 
 					if(hasAccess){
 
-						socket.join(`${data.account}${projectNameSpace}`);
-						socket.emit(joinedEventName, { account: data.account, project: data.project});
+						socket.join(`${data.account}${modelNameSpace}`);
+						socket.emit(joinedEventName, { account: data.account, model: data.model});
 
-						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${projectNameSpace}`, { 
+						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, { 
 							username, 
 							account: data.account, 
-							project: data.project 
+							model: data.model 
 						});
 						
 					} else {
-						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${projectNameSpace}`});
-						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${projectNameSpace}`, { 
+						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
+						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${modelNameSpace}`, { 
 							username, 
 							account: data.account, 
-							project: data.project
+							model: data.model
 						});
 					}
 				});
@@ -152,13 +155,13 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on('leave', data => {
 
-				let projectNameSpace = data.project ?  `::${data.project}` : '';
+				let modelNameSpace = data.model ?  `::${data.model}` : '';
 
-				socket.leave(`${data.account}${projectNameSpace}`);
-				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}${projectNameSpace}`, { 
+				socket.leave(`${data.account}${modelNameSpace}`);
+				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}${modelNameSpace}`, { 
 					username, 
 					account: data.account, 
-					project: data.project 
+					model: data.model 
 				});
 			});
 

@@ -1,0 +1,58 @@
+.homeUserContent(
+	layout="row"
+	layout-align="center"
+	flex)
+	
+	md-content.md-whiteframe-2dp(
+		aria-label="Registered"
+		flex-xl="15"
+		flex-lg="20"
+		flex-md="30"
+		flex-sm="50"
+		flex-xs="75")
+
+		md-toolbar
+			.md-toolbar-tools
+				h2 Log in
+
+		.userContent(layout="column")
+			div.loginBox.loadingBox(layout="row")
+				h3.welcome Welcome to 3D Repo!
+
+			// Behaviour if we provide a notice to the user
+			span(ng-if="vm.userNotice") 
+				strong Notice 
+				span : {{vm.userNotice}}
+			br(ng-if="vm.userNotice")
+			
+			// Register or login
+			div.loginBox(layout="row")
+				// Login
+				div(layout="column", flex)
+					div
+						md-input-container.md-block
+							label Username
+							input(type='text', ng-model='vm.user.username', ng-required, tdr-focus="true", ng-keypress="vm.login($event)")
+
+						// Hidden inputs to prevent autofill
+						#loginHiddenInputs(ng-show="false", layout="column")
+							input(type='text')
+							input(type='password')
+
+						md-input-container.md-block
+							label Password
+							input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
+
+					div(layout="row", flex="none", layout-align="center")
+						md-button.md-accent.md-raised.loginButton(
+							ng-disabled="vm.loggingIn"
+							ng-click="vm.login()") 
+							span(ng-if="!vm.loggingIn") Log In
+							md-progress-circular(ng-if="vm.loggingIn").loginProgress
+								
+					h3.loginError {{vm.errorMessage}}
+					div(layout="row", layout-align="start center", flex="none")
+						a.loginLinks(href="passwordForgot") Forgot password?
+					div(layout="row", layout-align="start center", flex="none")
+						a.loginLinks(href="http://3drepo.org/pricing/") Sign up
+					h2.md-subhead#loginVersion Version: {{vm.version}}

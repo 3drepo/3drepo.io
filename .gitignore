@@ -1,11 +1,12 @@
 node_modules
 
+*.bak
 *.swp
-/public/css/*.css~
 /*.log
 config/*
 !config/test/
 
+yarn-error.log
 bower_components
 
 certs
@@ -13,6 +14,7 @@ certs
 public/images/logos
 
 .DS_Store
+.directory
 
 sessions
 
@@ -51,16 +53,21 @@ create_node_user.js
 #WebStorm config files
 .idea/sasslintPlugin.xml
 
-public/css/fonts/three-d-repo.eot
-public/css/fonts/three-d-repo.ttf
-public/css/fonts/three-d-repo.woff
-
 #Distribution files
-public/dist
+public/
 
 #installation temporary files
 tools/release/tmp
 tools/release/*.exe
 
 #legal
-jade/legal
+pug/legal
+
+uploads/
+backend/uploads/
+backend/coverage
+backend/.nyc_output
+backend/mongodb-prebuilt-*
+backend/3drepo.log
+npm-debug.log.*
+.vscode/

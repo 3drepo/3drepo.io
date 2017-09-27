@@ -21,7 +21,7 @@
 	var router = express.Router({mergeParams: true});
 	var responseCodes = require("../response_codes.js");
 	var C = require("../constants");
-	var middlewares = require("./middlewares");
+	var middlewares = require("../middlewares/middlewares");
 	var config = require('../config');
 	//var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
@@ -29,7 +29,6 @@
 	var addressMeta = require("../models/addressMeta");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
-	//var Role = require('../models/role');
 	//var crypto = require('crypto');
 
 	var multer = require("multer");
@@ -65,6 +64,7 @@
 
 	function createSession(place, req, res, next, user){
 		req.session.regenerate(function(err) {
+			req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
 			if(err) {
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
@@ -117,7 +117,7 @@
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.");
-			//res.clearCookie("connect.sid", { domain: config.cookie.domain, path: "/" });
+			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}
@@ -370,13 +370,16 @@
 
 		}).then(databases => {
 
+			let customData = user.customData.toObject();
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 				accounts: databases,
-				firstName: user.customData.firstName,
-				lastName: user.customData.lastName,
-				email: user.customData.email,
-				billingInfo: user.customData.billing.billingInfo,
-				hasAvatar: user.customData.avatar ? true : false
+				firstName: customData.firstName,
+				lastName: customData.lastName,
+				email: customData.email,
+				billingInfo: customData.billing.billingInfo,
+				hasAvatar: customData.avatar ? true : false,
+				jobs: customData.jobs
 			});
 
 		}).catch(err => {

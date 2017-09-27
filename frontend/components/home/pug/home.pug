@@ -1,0 +1,63 @@
+div.homeContainer(
+	layout="column"
+	flex="100"
+	ng-keydown="vm.keyAction($event)"
+	ng-keyup="vm.keyAction($event)")
+
+	viewer(
+		ng-if="!vm.isMobileDevice && !vm.isLegalPage"
+		hide-xs
+		hide-sm
+		node="node"
+		account="vm.state.account"
+		model="vm.state.model"
+		branch="vm.state.revision"
+		revision = "vm.state.revision"
+		style="pointer-events:none")
+
+	div.homeHolder(
+		layout="column"
+		flex="100"
+		ng-if="!vm.state.changing && !vm.isLegalPage")
+
+		div.homeTopBar
+		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
+			img(src="/images/3drepo-logo-white.png", alt="3D Repo Logo (White)" ng-click="vm.home()")
+
+		account-dir(
+			flex="100"
+			layout="column"
+			account='vm.state.account'
+			state='vm.state'
+			query='vm.query'
+			ng-if="vm.loggedIn"
+			is-mobile-device="vm.isMobileDevice"
+			keys-down="vm.keysDown")
+
+	#homeLegalContainer(
+		flex="100"
+		layout="column"
+		ng-if="vm.isLegalPage")
+
+		privacy(ng-if="vm.page === 'privacy'")
+		terms(ng-if="vm.page === 'terms'")
+		cookies(ng-if="vm.page === 'cookies'")
+		
+
+	#homeLoggedOut(
+		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage && !vm.state.model")
+		
+		login(ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
+		
+		sign-up(ng-if="vm.page === 'sign-up'")
+		password-forgot(ng-if="vm.page === 'password-forgot'")
+		password-change(ng-if="vm.page === 'password-change'", token="vm.query.token", username="vm.query.username")
+		register-request(ng-if="vm.page === 'register-request'")
+		register-verify(ng-if="vm.page === 'register-verify'")
+
+	#legalLinks
+		a(
+			ng-repeat="display in vm.legalDisplays"
+			target="_blank"
+			rel="noopener"
+			href="{{display.page}}") {{display.title}}

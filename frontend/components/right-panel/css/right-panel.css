@@ -1,0 +1,26 @@
+right-panel {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+}
+
+right-panel #rightPanelButtons .rightPanelButtonGroup {
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+right-panel #rightPanelButtons .md-button {
+    margin-bottom: 2px;
+    margin-top: 14px;
+}
+
+right-panel #rightPanelButtons .fa {
+    font-size: 24px;
+}
+
+right-panel #rightPanelButtons label {
+    color: #FFFFFF;
+    text-shadow: 0 0 2px rgb(0, 0, 0);
+    font-weight: bold;
+    font-size: 14px;
+}

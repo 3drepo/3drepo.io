@@ -14,16 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+"use strict";
 (() => {
-	"use strict";
 
-	const VERSION="1.12.9";
+	const VERSION = require("./VERSION.json").VERSION;
 
-	let config = require("app-config")
-		.config;
-	const frontend_scripts = require("../common_public_files.js");
+	const config = require("app-config").config;
+
 	const sessionFactory = require("./services/session.js");
+
+	const systemLogger = require("./logger.js").systemLogger;
 
 	/*******************************************************************************
 	 * Coalesce function
@@ -39,53 +39,37 @@
 	};
 
 	/*******************************************************************************
-	 * Round robin API configuration
+	 * Round robin API ClientConfiguration
 	 * @param {Object} variable - variable to coalesce
 	 * @param {Object} value - value to return if object is null or undefined
 	 *******************************************************************************/
-	let createRoundRobinAlgorithm = function()
-	{
-			let roundRobin = {
-				apiUrls : config.apiUrls,
-				apiUrlCounter: {}
-			};
 
-			/*
-			params.config_js += "server_config.apiUrls = {";
+	function createRoundRobinAlgorithm(algoConfig) {
 
-			for (let k in config.apiUrls) {
-				if (config.apiUrls.hasOwnProperty(k)) {
-					params.config_js += "\"" + k + "\" : [";
-					params.config_js += config.apiUrls[k].join(",");
-					params.config_js += "],";
-				}
+		const roundRobin = {
+			apiUrls : algoConfig.apiUrls,
+			apiUrlCounter: {}
+		};
+
+		for (let k in algoConfig.apiUrls) {
+			if(algoConfig.apiUrls.hasOwnProperty(k)){
+				roundRobin.apiUrlCounter[k] = 0;
 			}
+		}
+		
+		// self variable will be filled in by frontend
+		roundRobin.apiUrl = function(type, path) {
+			const typeFunctions = this.apiUrls[type];
+			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
-			params.config_js += "};\n";
+			this.apiUrlCounter[type] += 1;
 
-			params.config_js += "server_config.apiUrlCounter = {";
-			*/
+			return this.apiUrls[type][functionIndex](path);
+		};
 
-			for (let k in config.apiUrls) {
-				if(config.apiUrls.hasOwnProperty(k)){
-					roundRobin.apiUrlCounter[k] = 0;
-				}
-			}
+		return roundRobin;
 
-			//params.config_js += "};\n";
-
-			// self variable will be filled in by frontend
-			roundRobin.apiUrl = function(type, path) {
-				var typeFunctions = this.apiUrls[type];
-				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-				this.apiUrlCounter[type] += 1;
-
-				return this.apiUrls[type][functionIndex](path);
-			};
-
-			return roundRobin;
-	};
+	}
 
 	/*******************************************************************************
 	 * Fill in the details of a server
@@ -144,10 +128,13 @@
 	config.cookie_domain = coalesce(config.cookie.domain, config.host);
 
 	config.chat_reconnection_attempts = coalesce(config.chat_reconnection_attempts, 5);
-	
+
+	// Check user login interval
+	config.login_check_interval = coalesce(config.login_check_interval, 8); // seconds
+
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {
-		console.log("Cookie secret phrase has the default value. Update the config");
+		systemLogger.logInfo("Cookie secret phrase has the default value. Update the config");
 		process.exit(1);
 	}
 
@@ -207,7 +194,7 @@
 	}
 
 	// Change the algorithm for choosing an API server
-	config.apiAlgorithm = createRoundRobinAlgorithm();
+	config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
 	config.disableCache = coalesce(config.disableCache, false);
 
@@ -220,13 +207,13 @@
 	config.db.port = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
 
 	if (config.db.port.length !== config.db.host.length) {
-		console.log("Incorrect number of hosts and ports");
+		systemLogger.logInfo("Incorrect number of hosts and ports");
 		process.exit(1);
 	}
 
 	if (config.db.host.length > 1 && !config.db.replicaSet)
 	{
-		console.log("You must specify the replica set name");
+		systemLogger.logInfo("You must specify the replica set name");
 		process.exit(1);
 	}
 
@@ -239,7 +226,7 @@
 	config.backgroundImage = coalesce(config.backgroundImage, "public/images/dummies/login-background.jpg");
 
 	config.default_format = coalesce(config.default_format, "html");
-	config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
+	//config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 	// Log file options
 	config.logfile = coalesce(config.logfile, {});
@@ -259,14 +246,12 @@
 	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
 	//captcha
-	config.captcha = coalesce(config.captcha, {});
-	config.captcha.validateUrl = coalesce(config.captcha.validateUrl, "https://www.google.com/recaptcha/api/siteverify");
-	config.captcha.secretKey = coalesce(config.captcha.secretKey, "");
+	config.captcha = coalesce(config.captcha, null);
 
 	//default auth settings
 	config.auth = coalesce(config.auth, {});
-	config.auth.captcha = coalesce(config.auth.captcha, {});
-	config.auth.register = coalesce(config.auth.register, {});
+	config.auth.captcha = coalesce(config.auth.captcha, false);
+	config.auth.register = coalesce(config.auth.register,true);
 
 	//paypal
 	config.paypal = coalesce(config.paypal, {});
@@ -275,6 +260,19 @@
 	//upload size limit
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
+	config.userNotice = coalesce(config.userNotice, "");
+
+	// Settings for Unity
+	config.unitySettings = coalesce(config.unitySettings, {
+        TOTAL_MEMORY: 2130706432,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    });
 
 	//default vat validation url
 	config.vat = coalesce(config.vat, {});

@@ -1,0 +1,50 @@
+{
+  "name": "3drepo.io-frontend",
+  "version": "1.0.0",
+  "description": "The frontend for 3drepo.io",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gulp": "gulp"
+  },
+  "keywords": [
+    "3drepo",
+    "3drepo.io"
+  ],
+  "author": "3D Repo",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "angular": "1.6.5",
+    "angular-animate": "1.6.5",
+    "angular-aria": "1.6.5",
+    "angular-material": "1.1.4",
+    "angular-recaptcha": "3.0.3",
+    "angular-sanitize": "1.6.5",
+    "angular-ui-router": "0.4.2",
+    "font-awesome": "^4.7.0",
+    "gulp-pug": "^3.3.0",
+    "material-design-icons": "^3.0.1",
+    "socket.io-client": "^2.0.3",
+    "sw-precache": "^5.2.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-livereload": "^3.8.1",
+    "gulp-order": "^1.1.1",
+    "gulp-print": "^2.0.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-size": "^2.1.0",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-uglify": "^3.0.0",
+    "gulp-util": "^3.0.8",
+    "gulp-watch": "^4.3.11",
+    "merge-stream": "^1.0.1",
+    "webpack": "^3.0.0",
+    "webpack-stream": "^4.0.0"
+  }
+}

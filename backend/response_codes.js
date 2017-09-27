@@ -21,6 +21,7 @@
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
+	const utils = require("./utils");
 
 	/**
 	 * List of response and error codes
@@ -38,9 +39,9 @@
 
 		AUTH_ERROR: { message: "Authentication error", status: 401 },
 		USERNAME_NOT_SPECIFIED: { message: "Username not specifed", status: 422 },
-		PROJECT_NOT_SPECIFIED: { message: "Project not specifed", status: 422 },
+		MODEL_NOT_SPECIFIED: { message: "Model not specifed", status: 422 },
 
-		PROJECT_NOT_PUBLIC: { message: "Not a public project", status: 401 },
+		MODEL_NOT_PUBLIC: { message: "Not a public model", status: 401 },
 
 		NOT_AUTHORIZED: { message: "Not Authorized", status: 401 },
 
@@ -58,8 +59,8 @@
 
 		INVALID_INPUTS_TO_PASSWORD_UPDATE: { message: "Invalid new or old password", status: 422 },
 
-		PROJECT_HISTORY_NOT_FOUND: { message: "Project history not found", status: 404 },
-		PROJECT_INFO_NOT_FOUND: { message: "Project info not found", status: 404 },
+		MODEL_HISTORY_NOT_FOUND: { message: "Model history not found", status: 404 },
+		MODEL_INFO_NOT_FOUND: { message: "Model info not found", status: 404 },
 
 		BRANCH_NOT_FOUND: { message: "Branch not found", status: 404 },
 
@@ -81,6 +82,10 @@
 		FILE_IMPORT_INVALID_ARGS: { message: "Invalid arguments", status: 500 },
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Unknown error", status: 500 },
 		FILE_IMPORT_UNKNOWN_CMD: { message: "Unknown command", status: 500 },
+
+		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "File processing failed to start", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_FAIL: { message: "Failed to import file to scene", status: 500},
+
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 404 },
@@ -105,6 +110,7 @@
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
+		MODEL_EXIST: { message: "Model already exists", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
@@ -115,9 +121,10 @@
 
 		SIZE_LIMIT: { message: "Single file size exceeded system limit", status: 400 },
 		INVALID_PROJECT_NAME: { message: "Invalid project name", status: 400 },
+		INVALID_MODEL_NAME: { message: "Invalid model name", status: 400 },
 		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
-		BLACKLISTED_PROJECT_NAME: { message: "Project name reserved", status: 400 },
+		BLACKLISTED_MODEL_NAME: { message: "Model name reserved", status: 400 },
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
@@ -125,12 +132,20 @@
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
 		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 500 },
 
+
+		FILE_IMPORT_GET_FILE_FAILED: { message: "Failed to get file from project", status: 500 },
+		FILE_IMPORT_CRASHED: { message: "Failed to finish", status: 500 },
+		FILE_IMPORT_FILE_READ_FAILED: { message: "Failed to read import parameters from file (Unity)", status: 500 },
+		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Failed to generate asset bundles (Unity)", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Untriangulated meshes", status: 500 },
+
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },
 		ISSUE_COMMENT_PERMISSION_DECLINED: { message: "Can't edit comment made by others", status: 400 },
 		ISSUE_COMMENT_SEALED: { message: "Can't edit a sealed comment or a comment in closed issue", status: 400 },
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },
-		PROJECT_NOT_FOUND: { message: "Project not found", status: 400 },
+		PROJECT_NOT_FOUND: { message: "Project not found", status: 404 },
+		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -145,7 +160,7 @@
 		USER_ALREADY_ASSIGNED: { message: "This user is already in another subscription", status: 400 },
 		USER_NOT_ASSIGNED_WITH_LICENSE: { message: "This user is not assigned with license", status: 400 },
 		SUBSCRIPTION_NOT_ASSIGNED: { message: "This subscription is not assigned to any user", status: 400 },
-		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a project", status: 400 },
+		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a model", status: 400 },
 		SUBSCRIPTION_CANNOT_REMOVE_SELF: { message: "You cannot remove yourself", status: 400 },
 
 		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
@@ -158,7 +173,7 @@
 		PAYPAL_ERROR: { status: 400 },
 		NO_FILE_FOUND: { message: "No file can be downloaded", status: 404 },
 
-		PROJECT_NO_UNIT: { status: 400, message: "Unit is not specified" },
+		MODEL_NO_UNIT: { status: 400, message: "Unit is not specified" },
 
 		TREE_NOT_FOUND: { message: "Model fulltree not found in stash", status: 404 },
 		REPOERR_FED_GEN_FAIL: { message: "Failed to create federation", status: 400 },
@@ -171,7 +186,9 @@
 
 		FED_MODEL_IN_OTHER_DB: { message: "Models of federation must reside in the same account", status: 400 },
 		FED_MODEL_IS_A_FED: { message: "Models of federation cannot be a federation", status: 400 },
-		PROJECT_IS_NOT_A_FED: { message: "Project is not a federation", status: 400 },
+		MODEL_IS_NOT_A_FED: { message: "Model is not a federation", status: 400 },
+		MODEL_IS_A_SUBMODEL: { message: "Model cannot be deleted as it is currently a sub model of another federation", status: 400 },
+		SUBMODEL_IS_MISSING: { message: "subModels field is missing in request body", status: 400 },
 
 		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB` },
 		INVALID_USERNAME: { message: "Invalid username", status: 400 },
@@ -185,20 +202,37 @@
 		MESH_NOT_FOUND: { message: "Mesh not found", status: 400 },
 		GROUP_ID_NOT_FOUND_IN_MESH: { message: "Group ID not found in mesh", status: 400 },
 
-		PROJECT_NAME_TOO_LONG: { message: "Project name cannot be longer than 60 characters", status: 400 },
+		MODEL_NAME_TOO_LONG: { message: "Model name cannot be longer than 60 characters", status: 400 },
 		ISSUE_SYSTEM_COMMENT: { message: "Can't edit or remove system comment", status: 400 },
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
 
-		INVALID_PROJECT_CODE: { message: "Project code must contain only alphabets and numerical digits", status: 400 },
+		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
 
 		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
+		BUNDLE_STASH_NOT_FOUND: { message: "Asset bundle not found", status: 404},
 		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
 		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500},
 		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500},
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
+
+		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
+		DUP_JOB: {message: "Duplicate job id", status: 400},
+		JOB_ASSIGNED: {message: "Cannot remove assigned job", status: 400},
+		JOB_ID_VALID: { message: "Invalid job ID", status: 400},
+		DUP_PERM_TEMPLATE: {message: "Duplicate template ID", status: 400},
+		PERM_NOT_FOUND: {message: "Permission template not found", status: 404},
+		INVALID_PERM: {message: "Invalid permission", status: 400},
+		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
+		DUP_ACCOUNT_PERM: { message: "Duplicate account permission", status: 400},
+		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404},
+		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
+		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
+
+		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
+		
 	};
 
 
@@ -292,6 +326,7 @@
 			return {
 				value: 4000,
 				message: "Internal Error",
+				system_message: message,
 				status: 500
 			};
 		}
@@ -320,6 +355,8 @@
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
 		
+		resCode = utils.mongoErrorToResCode(resCode);
+
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -329,7 +366,9 @@
 				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 			}
 
-			resCode = responseCodes.PROCESS_ERROR(resCode);
+			if(!resCode.value){
+				resCode = responseCodes.PROCESS_ERROR(resCode);
+			}
 
 		}
 
@@ -345,7 +384,10 @@
 
 			length = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), { httpCode: resCode.status, contentLength: length });
+			req[C.REQ_REPO].logger.logError(
+				JSON.stringify(responseObject), 
+				{ httpCode: resCode.status, contentLength: length }
+			);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -353,17 +395,24 @@
 		} else {
 
 			if (Buffer.isBuffer(extraInfo)) {
+
 				res.status(resCode.status);
 
-				var contentType = mimeTypes[format || req.params.format];
-
+				let reqFormat;
+				
+				if (req && req.params && req.params.format) {
+					reqFormat = req.params.format;
+				}
+		
+				const contentType = mimeTypes[format || req.params.format];
+				
 				if (contentType) {
 					res.setHeader("Content-Type", contentType);
 				} else {
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
 				}
-
+		
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
 
@@ -384,6 +433,28 @@
 		}
 
 		//next();
+	};
+
+	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
+
+		let length = 0;
+		
+		if (customHeaders) {
+			res.writeHead(responseCodes.OK.status, customHeaders);
+		}
+
+		readStream.on("end", () => {
+			res.end();
+			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { 
+				httpCode: responseCodes.OK.status, 
+				contentLength: length 
+			});
+		});
+
+		readStream.on("data", data => {
+			res.write(data);
+			length += data.length;
+		});
 	};
 
 	// On error respond with error code and errInfo (containing helpful information)

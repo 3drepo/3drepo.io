@@ -54,8 +54,8 @@
 	// extend statics method
 	_.extend(meshSchema.statics, repoBase.statics);
 
-	meshSchema.statics.addGroup = function (account, project, id, gid) {
-		return this.findById({ account, project }, utils.stringToUUID(id), { groups: 1, shared_id: 1 })
+	meshSchema.statics.addGroup = function (account, model, id, gid) {
+		return this.findById({ account, model }, utils.stringToUUID(id), { groups: 1, shared_id: 1 })
 			.then(mesh => {
 				if (!mesh) {
 					return Promise.reject(responseCode.MESH_NOT_FOUND);
@@ -66,8 +66,8 @@
 			});
 	};
 
-	meshSchema.statics.removeGroup = function (account, project, id, gid) {
-		return this.findById({ account, project }, utils.stringToUUID(id), { groups: 1 })
+	meshSchema.statics.removeGroup = function (account, model, id, gid) {
+		return this.findById({ account, model }, utils.stringToUUID(id), { groups: 1 })
 			.then(mesh => {
 
 				if (!mesh) {
@@ -96,7 +96,7 @@
 		"Mesh",
 		meshSchema,
 		arg => {
-			return `${arg.project}.scene`;
+			return `${arg.model}.scene`;
 		}
 	);
 

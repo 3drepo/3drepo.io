@@ -1,0 +1,932 @@
+/** Responsive content ****/
+@media (max-width: 960px) { 
+
+  .userContent {
+    height: 100% !important;
+  }
+
+  account-assign md-tabs-content-wrapper {
+    height: 100% !important;
+  }
+
+}
+
+account-modelsetting .userContent {
+  height: calc(100vh - 230px);
+  max-height: 517px !important;
+  overflow: auto;
+}
+
+account-items .userContent {
+  height: calc(100vh - 245px);
+  max-height: 517px !important;
+  overflow: auto;
+}
+
+account-profile .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px !important;
+  overflow: auto;
+}
+
+account-licenses .userContent {
+  height: calc(100vh - 230px);
+  max-height: 530px !important;
+  overflow: auto;
+}
+
+account-billing .userContent {
+  height: calc(100vh - 280px);
+  max-height: 480px !important;
+  overflow: auto;
+}
+
+account-assign md-tabs-content-wrapper {
+  height: calc(100vh - 240px);
+  max-height: 521px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/** Account ***********************************************************************************************************/
+.loadingText {
+  padding-top: 100px;
+  min-height: 200px;
+  height: 100%;
+  text-align: center;
+  font-weight: lighter !important;
+}
+
+.loadingText h3 {
+  font-weight: lighter !important;
+}
+
+.loadingText md-progress-circular {
+  display: inline-block;
+  margin: 0 auto;
+  margin-left: 0 !important;
+}
+
+
+account-dir {
+  overflow-y: auto;
+  padding-top: 30px;
+}
+
+account-dir #account .userContentNoMargin {
+  margin-top: 0px !important;
+}
+
+account-dir #account {  
+  background-size: contain;
+}
+
+account-dir #accountHolder {
+  width: 100%;
+  position: relative;
+}
+
+account-dir #logo {
+  background: #3F51B5;
+}
+
+account-dir #noAvatarIcon {
+  background: rgba(250,250,250,1);
+  height: 150px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1)
+}
+account-dir #noAvatarIcon md-icon {
+  font-size: 150px;
+  width: 150px;
+  height: 150px;
+  color: rgb(12,47,84);
+}
+
+account-dir .dataContainer {
+  border: solid 1px rgba(0,0,0,0.2);
+  margin-top: 20px;
+}
+
+account-dir #account #accountItem {
+   margin-right: 5%;
+}
+
+account-dir #account #accountItem userContent {
+  max-height: 660px;
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  account-dir #account #accountItem {
+    margin-left: 5%;
+    margin-bottom: 100px;
+    /* margin-top: 200px; */
+  }
+}
+
+account-dir .userContent .cardInfo {
+  text-align: left;
+}
+
+/** Account Models **************************************************************************************************/
+
+account-items #floating-button {
+  position: absolute;
+  bottom: 52px;
+  right: 15px;
+}
+
+account-items span.addHint {
+  color: grey;
+  padding-right: 6px;
+  font-size: 14px;
+}
+
+account-items .md-button {
+  z-index: 1 !important;
+}
+
+account-items #accountList {
+  overflow: auto;
+}
+
+account-items .no-federations {
+  padding-left: 43px;
+  color: rgb(6, 86, 60);
+}
+
+account-items .md-list-item-text {
+  color: rgb(6, 86, 60);
+}
+
+account-items md-list {
+  padding: 0;
+}
+
+account-items .model-indent {
+  padding-left: 10px;
+}
+
+account-items .account,
+account-items .model {
+  outline: none;
+  /*padding-left: 10px;*/
+}
+
+account-items .tree-node:hover{
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-items .projectName {
+  color: rgb(6, 86, 60);
+}
+
+account-items md-list-item.tree-node > div {
+    padding-left: 0px;
+}
+
+account-items .tree-branch {
+  margin-left: 20px;
+}
+
+account-items .models .modelName,
+account-items .models md-icon {
+  color: rgb(6, 86, 60);
+}
+account-items .models md-icon {
+  margin: 0 !important;
+}
+account-items .modelTimestamp {
+  margin-left: 20px;
+}
+
+account-items .models .modelTimestamp {
+  color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
+}
+account-items .models p {
+  margin: 0;
+}
+
+account-items #existingModelFileUploader,
+account-items #newModelFileUploader {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+account-items .accountRight,
+account-items .modelRight {
+  /*margin-right: 10px !important;*/
+}
+
+account-items .md-whiteframe-1dp {
+  border-radius: 4px;
+  background: #FFF;
+}
+account-items md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  height: 40px;
+  min-height: 40px;
+}
+
+account-items .cardInfo md-progress-circular {
+  margin-left: 5px;
+}
+
+account-items .modelUploadInfo {
+  margin-right: 20px;
+}
+
+account-items .modelUploadFilename {
+  color: rgba(0,0,0,0.5);
+  margin: 0 !important;
+}
+
+account-items .modelUploadInfo {
+  color: rgba(0,0,0,0.7);
+  margin: 0 0 0 10px !important;
+}
+
+account-items .modelUploadIcon {
+  width: 15px;
+  height: 15px;
+  margin-left: 10px;
+}
+
+account-items .modelRight .modelUploaded {
+  margin-top: -10px !important;
+  color: rgba(0,0,0,0.5);
+}
+
+account-items .userContent {
+  padding: 0 !important;
+}
+
+account-items .accountModelsSharedIcon {
+  margin: 0 0 0 20px;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Account Profile ***************************************************************************************************/
+account-profile md-input-container {
+  margin-right: 5px;
+}
+
+account-profile .updateContainer {
+  margin: -20px 0 0;
+}
+
+account-profile .md-title {
+  margin: -10px 0 20px;
+}
+
+account-profile md-divider {
+  margin: 20px 0 20px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+   margin-left: 5%; 
+   /* min-width: 100%;  */
+   margin-right: 5%; 
+}
+
+@media (max-width: 960px) {
+  
+  account-info #account #accountItem {
+    min-height: 700px;
+  }
+
+  account-info #accountInfoContent {
+     max-height: 100% !important;
+  }
+
+  account-info {
+    margin-bottom: 100px;
+  }
+  
+}
+
+account-info #accountInfoContent {
+  max-height: calc(100vh - 190px);
+}
+
+account-info #accountInfoContent md-list {
+  overflow-y: auto !important;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
+  margin: 10px 0;
+}
+account-info md-input-container input,
+account-info md-input-container label {
+  font-size: initial;
+  color: rgba(0,0,0,0.7) !important;
+}
+
+account-info p {
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
+}
+
+/*
+account-info .accountInfoPage {
+  min-height: 50px;
+}
+account-info .accountInfoPage .md-button {
+  min-height: 50px!important;
+  height: 50px;
+}
+*/
+
+/** Avatar Image ******************************************************************************************************/
+.account-avatar-image {
+  max-width: 300px;
+  min-width: 100px;
+  max-height: 150px;
+  height: 100px;
+  min-height: 100px;
+  background: #E8EAF6;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.avatar-upload{
+  cursor: pointer;
+}
+
+/** Account Menu ******************************************************************************************************/
+account-menu {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+account-menu md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-size: 45px !important;
+  width: 45px;
+  height: 45px;
+  outline: none;
+}
+
+account-menu button {
+    width: 65px !important;
+    height: 65px !important;
+}
+
+account-menu #accountMenuContent {
+  border-radius: 4px;
+}
+account-menu #accountMenuContent md-menu-item > .md-button {
+  display: block;
+}
+
+/** New Model Dialog ************************************************************************************************/
+.newModelDialog {
+  min-width: 350px;
+  min-height: 350px;
+  overflow: hidden;
+}
+
+.newModelDialog .uploadProgress {
+  width: 25px;
+  height: 25px;
+  display: inline;
+  margin-left: 15px;
+}
+
+.newModelDialog .uploadProgress svg {
+  width: 25px !important;
+  height: 25px !important;
+  transform-origin: initial !important;
+}
+
+.newModelDialog #newModelIcon {
+  margin-right: 10px;
+}
+
+.newModelDialog #modelDialogFilenameContainer {
+  margin: 0 0 20px 16px;
+}
+.newModelDialog #modelDialogFilenameIntro {
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 5px 0 0;
+}
+.newModelDialog #modelDialogFilename {
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
+
+.newModelDialog #modelRequiredHint {
+  text-align: center;
+  margin: 0;
+  color: #a3a3a3;
+}
+
+.newModelDialog #modelDialogError {
+  margin: 0;
+  text-align: center;
+  color: #F44336;
+  max-width: 300px;
+}
+
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+  margin: 0;
+}
+.deleteDialog #deleteName {
+  color: rgba(0 ,0, 0, 0.9);
+}
+
+.deleteDialog #deleteWarning {
+  color: #F44336;
+  margin: 0;
+}
+
+.deleteDialog #deleteError {
+  margin: 0;
+  color: #F44336;
+  margin-top: 5px;
+}
+
+/** Account Billing ***************************************************************************************************/
+account-billing md-input-container {
+  margin-right: 10px;
+}
+
+account-billing md-tabs md-tab-content {
+  /* max-height: 574px; */
+}
+
+account-billing .accountBillingSave button {
+  margin-left: 0px;
+}
+
+account-billing .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-billing .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+}
+
+
+account-billing .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+account-billing .md-button {
+  margin-bottom: 20px;
+}
+
+account-billing #accountBillingSubscription md-select {
+  margin-bottom: 24px;
+}
+account-billing #accountBillingSubscription .md-button {
+  margin-top: 10px;
+}
+
+account-billing #accountBillingHistory section {
+  margin-left: -10px;
+}
+account-billing #accountBillingHistory .md-subheader ._md-subheader-inner {
+  padding: 16px 10px;
+}
+account-billing #accountBillingHistory .md-subheader label {
+  margin-right: 10px;
+}
+
+account-billing .accountBillingHistoryListItem {
+  font-size: 14px;
+}
+account-billing .accountBillingHistoryListItem md-input-container {
+  margin-right: 10px;
+}
+account-billing .accountBillingHistoryListItem .md-button {
+  margin-top: 15px;
+}
+
+account-billing .accountBillingSave img {
+  height: 20px;
+  margin-top: 17px;
+  margin-left: 5px;
+}
+
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/** Account Licenses *********************************************************************************************/
+account-licenses .licenseIcon {
+  margin: 0 10px !important;
+}
+
+account-licenses #accountLicensesAdd {
+  margin-top: -10px;
+}
+account-licenses .userContent md-input-container {
+  margin-bottom: 0;
+  width: 80%;
+}
+
+account-licenses .selectJob {
+  margin-left: -10px;
+}
+
+account-licenses .assignButton {
+  margin-bottom: 25px;
+}
+
+account-licenses #errorMessage {
+  font-size: 12px;
+  color: red;
+  margin-bottom: 20px;
+}
+
+account-licenses .md-subheader .md-subheader-inner {
+  padding-left: 0px !important;
+}
+
+account-licenses #accountJobList {
+  padding-top: 20px;
+}
+
+account-licenses #accountJobList #jobIcon md-icon {
+  padding-top: 12px;
+}
+
+account-licenses #accountLicensesUnassigned md-icon {
+  margin-bottom: 0px;
+  margin: 0px;
+}
+
+account-licenses #accountLicensesUnassigned {
+  opacity: 0.4;
+  margin-top: -5px;
+}
+
+account-licenses #accountLicenseMessage {
+  margin: 0;
+  opacity: 0.8;
+}
+
+account-licenses #accountLicensesList {
+  overflow-y: auto;
+}
+
+account-licenses #accountLicensesBillingPage {
+  margin-top: 30px;
+}
+
+/** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
+account-team .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-team #model {
+  margin: -10px 0 10px;
+}
+account-team #model md-icon {
+  margin: 0 !important;
+}
+
+account-team #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-team #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-team #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-team #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Collaborator Dialog ***********************************************************************************************/
+#collaboratorDialog {
+  width: 400px;
+}
+
+#collaboratorDialog .collaboratorIcon {
+  margin: 0 10px;
+}
+
+/** PayPal Dialog *****************************************************************************************************/
+#paypalDialog .userContent .cardInfo {
+  text-align: left;
+}
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
+}
+
+
+/** Account Model Setting ******************************************************************************************/
+account-itemsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-itemsetting #model {
+  margin: -10px 0 10px;
+}
+account-itemsetting #model md-icon {
+  margin: 0 !important;
+}
+
+account-itemsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-itemsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-itemsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-itemsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Federation Dialog *************************************************************************************************/
+
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationModel {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+.isSavingProgress {
+  width: 14px !important;
+  display: inline-block;
+  height: 14px !important;
+  margin-top: 5px !important;
+  margin-left: 10px;
+}
+
+.isSavingProgress svg { 
+  width: 14px !important;
+  height: 14px !important;
+  transform-origin: initial !important;
+}
+
+.isSavingProgress svg path {
+  stroke: grey;
+}
+
+.addFederations {
+  padding-bottom: 10px;
+}
+
+#federationDialog #federatedModelAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+#federationDialog .modelDialogError{
+  color: #F44336;
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+  
+account-federations .md-list-item-text {
+  color: rgb(6, 86, 60);
+}
+
+account-federations .federationModelsList {
+    margin: 0px 0 5px 50px;
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 13px;
+}
+
+account-federations .federationModelsList .modelSpacing {
+    margin-left: 5px;
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+}
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations #federationInfoRight p:only-child {
+  margin-right: 20px;
+}
+
+account-teamspaces label, account-teamspaces p {
+  font-size: 14px;
+}
+
+account-teamspaces md-content {
+  margin-bottom: 30px;
+  min-height: 300px;
+}
+
+
+
+
+/** Account Assign ***********************************************************************************************/
+account-assign .assignTabHolder {
+  padding: 20px;
+}
+
+div.md-select-menu-container, 
+div.md-select-menu-container md-select-menu, 
+div.md-select-menu-container md-select-menu md-content {
+  max-height: 50vh !important;
+}
+
+account-assign .assignTabHolder .noUsers {
+  text-align: center;
+}
+
+account-assign .adminRadio div.md-on {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* account-assign .roleLoading {
+  width: 25px !important;
+  height: 25px !important;
+  display: block;
+  margin: auto;
+}
+
+account-assign .roleLoading svg {
+  width: 25px !important;
+  height: 25px !important;
+  transform-origin: initial !important;
+} */
+
+account-assign .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+account-assign .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-assign .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+}
+
+account-assign .scrollable {
+  overflow-x: auto;
+}
+
+account-assign thead { 
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+account-assign .md-label {
+  line-height: 4;
+}
+
+account-assign h5 {
+  margin: 0;
+}
+
+account-assign md-checkbox span { 
+  font-size: 12px;
+}
+
+account-assign .adminColumn {
+  border-left: black solid 1px;
+}
+
+account-assign .rowSelects {
+  padding-right: 20px;
+}
+
+account-assign md-checkbox .md-container {
+  margin-left: 25%;
+}
+
+account-assign .radioButtons {
+  margin-left: 8px;
+}
+
+account-assign md-radio-button > div {
+  margin-left: 50%;
+}
+
+account-assign table td, account-assign table th {
+    width: 120px;
+    min-width: 120px;
+    height: 40px;
+    margin-left: 0px;
+    margin-right: 0px;
+    text-align: center;
+    padding: 0;
+}
+
+account-assign .checkboxes { 
+  overflow-x: hidden;
+}
+
+account-assign .checkboxes p {
+  margin-top: 0px;
+}
+
+account-assign .radiobuttons p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+account-assign .sentenceCase {
+  text-transform: capitalize;
+  
+}
+

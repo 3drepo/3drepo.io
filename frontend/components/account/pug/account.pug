@@ -1,0 +1,90 @@
+account-menu(account="vm.account")
+div#accountHolder(
+	layout="row"
+	flex="100"
+	ng-if="!vm.state.model")
+
+	#account(
+		flex="100"
+		layout="row"
+		layout-xs="column"
+		layout-sm="column")
+		
+		account-info(
+			flex-xs="85"
+			flex-sm="85"
+			flex-md="45"
+			flex-lg="30"
+			flex-xl="25"
+
+			loading="vm.loadingAccount"
+			username="vm.username"
+			first-name="vm.firstName"
+			last-name="vm.lastName"
+			email="vm.email"
+			has-avatar="vm.hasAvatar"
+			item-to-show="vm.itemToShow")
+
+		#accountItem(flex="100")
+
+			account-teamspaces(
+				is-mobile-device="vm.isMobileDevice"
+				loading="vm.loadingAccount"
+				ng-show="vm.itemToShow === 'teamspaces'"
+				account="vm.account"
+				accounts="vm.accounts"
+				on-show-page="vm.showPage(page, callingPage, data)"
+				quota="vm.quota"
+				selected-index="vm.data.tabIndex"
+				subscriptions="vm.subscriptions")
+
+			account-profile(
+				ng-if="vm.username && vm.itemToShow === 'profile'"
+				username="vm.username"
+				first-name="vm.firstName"
+				last-name="vm.lastName"
+				email="vm.email")
+
+			account-billing(
+				ng-if="vm.username && vm.itemToShow === 'billing'"
+				account="vm.account"
+				billing-address="vm.billingAddress"
+				quota="vm.quota"
+				billings="vm.billings"
+				subscriptions="vm.subscriptions"
+				plans="vm.plans"
+				first-name="vm.firstName"
+				last-name="vm.lastName")
+
+			account-licenses(
+				ng-if="vm.username && vm.itemToShow === 'licenses'"
+				account="vm.account"
+				show-page="vm.showPage(page, callingPage)"
+				subscriptions="vm.subscriptions")
+
+			account-modelsetting(
+				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
+				account="vm.account"
+				accounts="vm.accounts"
+				model="vm.model"
+				data="vm.data"
+				show-page="vm.showPage(page, callingPage, data)"
+				subscriptions="vm.subscriptions")
+
+			account-assign(
+				ng-if="vm.username && vm.itemToShow === 'assign'"
+				account="vm.account"
+				model="vm.model"
+				data="vm.data"
+				show-page="vm.showPage(page, callingPage, data)"
+				subscriptions="vm.subscriptions")
+
+div(ng-if="vm.state.model")
+	model(
+		keys-down="vm.keysDown"
+		account="vm.state.account"
+		model="vm.state.model"
+		branch="vm.state.branch"
+		revision="vm.state.revision"
+		issue-id="vm.state.issue"
+		state="vm.state")

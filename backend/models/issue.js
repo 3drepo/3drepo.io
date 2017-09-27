@@ -19,7 +19,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Schema = mongoose.Schema;
-var ProjectSetting = require('./projectSetting');
+var ModelSetting = require('./modelSetting');
 var utils = require('../utils');
 var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
@@ -28,7 +28,7 @@ var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
-var middlewares = require('../routes/middlewares');
+var middlewares = require('../middlewares/middlewares');
 var _ = require('lodash');
 
 var ChatEvent = require('./chatEvent');
@@ -42,6 +42,7 @@ var _ = require('lodash');
 var systemLogger = require("../logger.js").systemLogger;
 var Group = require('./group');
 var gm = require('gm');
+var C = require('../constants');
 
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -165,6 +166,8 @@ var schema = Schema({
 		//bcf extra fields we don't care
 		extras: {}
 	}],
+	commentCount: { type: Number, default: 0},
+	viewCount: { type: Number, default: 0},
 	assigned_roles: [String],
 	closed_time: Number,
 	status_last_changed: Number,
@@ -196,11 +199,12 @@ function parseXmlString(xml, options){
 //internal helper _find
 
 var statusEnum = {
-	'OPEN': 'open', 
-	'IN_PROGRESS': 'in progress', 
-	'FOR_APPROVAL': 'for approval', 
-	'CLOSED': 'closed'
+	'OPEN': C.ISSUE_STATUS_OPEN, 
+	'IN_PROGRESS': C.ISSUE_STATUS_IN_PROGRESS, 
+	'FOR_APPROVAL': C.ISSUE_STATUS_FOR_APPROVAL, 
+	'CLOSED': C.ISSUE_STATUS_CLOSED
 };
+
 var priorityEnum = {
 	'NONE': 'none', 
 	'LOW': 'low', 
@@ -208,15 +212,15 @@ var priorityEnum = {
 	'HIGH': 'high'
 };
 
-schema.statics._find = function(dbColOptions, filter, projection, noClean){
+schema.statics._find = function(dbColOptions, filter, projection, sort, noClean){
 	'use strict';
-	//get project type
+	//get model type
 	let settings;
 	let issues;
 
-	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
+	return ModelSetting.findById(dbColOptions, dbColOptions.model).then(_settings => {
 		settings = _settings;
-		return this.find(dbColOptions, filter, projection);
+		return this.find(dbColOptions, filter, projection, sort);
 	}).then(_issues => {
 
 		issues = _issues;
@@ -228,7 +232,7 @@ schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	});
 };
 
-schema.statics.getFederatedProjectList = function(dbColOptions, username, branch, revision){
+schema.statics.getFederatedModelList = function(dbColOptions, username, branch, revision){
 	'use strict';
 
 	var allRefs = [];
@@ -244,7 +248,6 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 		}
 
 		return getHistory.then(history => {
-
 
 			if(!history){
 				return Promise.resolve([]);
@@ -264,7 +267,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 
 			refs.forEach(ref => {
 				var childDbName  = ref.owner ? ref.owner : dbColOptions.account;
-				var childProject = ref.project;
+				var childModel = ref.project;
 
 				var unique = ref.unique;
 
@@ -281,7 +284,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 
 				let dbCol = {
 					account: childDbName,
-					project: childProject
+					model: childModel
 				};
 
 				promises.push(_get(dbCol, childBranch, childRevision));
@@ -304,7 +307,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 };
 
 
-schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean, ids){
+schema.statics.findByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 	'use strict';
 
 	let issues;
@@ -320,6 +323,16 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 		});
 	}
 
+	let sort;
+
+	if(sortBy === 'activity'){
+		sort = {sort: {'commentCount': -1}};
+	} else if (sortBy === 'view') {
+		sort = {sort: {'viewCount': -1}};
+	}  else if (sortBy === 'createdDate') {
+		sort = {sort: {'created': -1}};
+	}
+
 	if (revId){
 
 		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
@@ -327,7 +340,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 		addRevFilter = findHistory(dbColOptions, revId).then(history => {
 
 			if(!history){
-				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
 
 				currHistory = history;
@@ -384,11 +397,11 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 			};
 		}
 
-		return this._find(dbColOptions, filter, projection, noClean);
+		return this._find(dbColOptions, filter, projection, sort, noClean);
 
 	}).then(_issues => {
 		issues = _issues;
-		return self.getFederatedProjectList(
+		return self.getFederatedModelList(
 			dbColOptions,
 			username,
 			branch,
@@ -404,10 +417,10 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 			let promises = [];
 			refs.forEach(ref => {
 				let childDbName = ref.owner || dbColOptions.account;
-				let childProject = ref.project;
+				let childModel = ref.project;
 
 				promises.push(
-					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
+					middlewares.hasReadAccessToModelHelper(username, childDbName, childModel).then(granted => {
 						if(granted){
 
 							let filter = {};
@@ -418,7 +431,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 								};
 							}
 
-							return self._find({account: childDbName, project: childProject}, filter, projection, noClean);
+							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean);
 						} else {
 							return Promise.resolve([]);
 						}
@@ -438,22 +451,22 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 
 };
 
-schema.statics.getBCFZipReadStream = function(account, project, username, branch, revId){
+schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId){
 	'use strict';
 
 	var zip = archiver.create('zip');
 
-	zip.append(new Buffer(this.getProjectBCF(project), 'utf8'), {name: 'project.bcf'})
+	zip.append(new Buffer(this.getModelBCF(model), 'utf8'), {name: 'model.bcf'})
 	.append(new Buffer(this.getBCFVersion(), 'utf8'), {name: 'bcf.version'});
 
 	let projection = {};
 	let noClean = true;
 	let settings;
 
-	return ProjectSetting.findById({account, project}, project).then(_settings => {
+	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return this.findByProjectName({account, project}, username, branch, revId, projection, noClean);
+		return this.findByModelName({account, model}, username, branch, revId, projection, noClean);
 
 	}).then(issues => {
 
@@ -517,7 +530,7 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 
 	let settings;
 
-	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
+	return ModelSetting.findById(dbColOptions, dbColOptions.model).then(_settings => {
 
 		settings = _settings;
 		return this.findById(dbColOptions, stringToUUID(uid));
@@ -571,7 +584,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 	//assign rev_id for issue
 	promises.push(getHistory.then(history => {
 		if(!history && data.revId){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){
 			issue.rev_id = history._id;
 		}
@@ -655,7 +668,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
 				systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
 					account: dbColOptions.account, 
-					project: dbColOptions.project, 
+					model: dbColOptions.model, 
 					issueId: utils.uuidToString(issue._id), 
 					viewpointId: utils.uuidToString(data.viewpoint.guid),
 					err: err
@@ -688,12 +701,12 @@ schema.statics.createIssue = function(dbColOptions, data){
 			}
 
 		}).then(() => {
-			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
+			return ModelSetting.findById(dbColOptions, dbColOptions.model);
 		}).then(settings => {
 
 			let cleaned = issue.clean(_.get(settings, 'type', ''), _.get(settings, 'properties.code', ''));
 			
-			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.project, [cleaned]);
+			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
 			return Promise.resolve(cleaned);
 
@@ -853,7 +866,7 @@ schema.methods.updateComment = function(commentIndex, data){
 		//assign rev_id for issue
 		return getHistory.then(history => {
 			if(!history && data.revId){
-				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
 
 				data.viewpoint = data.viewpoint || {};
@@ -885,6 +898,9 @@ schema.methods.updateComment = function(commentIndex, data){
 					guid: commentGuid,
 					viewpoint: data.viewpoint.guid
 				});
+
+				this.commentCount++;
+
 			}
 		}).then(() => {
 			return this.save();
@@ -895,7 +911,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 			let eventData = comment;
 
-			ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, eventData);
 			return comment;
 		});
 
@@ -930,7 +946,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
 			let eventData = comment;
 
-			ChatEvent.commentChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, eventData);
+			ChatEvent.commentChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, eventData);
 			return comment;
 		});
 	}
@@ -973,7 +989,7 @@ schema.methods.removeComment = function(commentIndex, data){
 		ChatEvent.commentDeleted(
 			data.sessionId, 
 			this._dbcolOptions.account, 
-			this._dbcolOptions.project, 
+			this._dbcolOptions.model, 
 			issue._id, comment);
 
 		return issue;
@@ -998,6 +1014,7 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	};
 
 	this.comments.push(comment);
+	this.commentCount++;
 
 	//seal the last comment if it is a human commnet after adding system comments
 	let commentLen = this.comments.length;
@@ -1032,15 +1049,11 @@ schema.methods.updateAttrs = function(data){
 
 			throw responseCodes.ISSUE_INVALID_STATUS;
 
-		} else if (data.status === statusEnum.CLOSED && !data.isAdmin && data.owner_roles.indexOf(this.creator_role) === -1){
-
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
-
 		} else {
 			
 			//change status to for_approval if assigned roles is changed.
 			if(data.status === statusEnum.FOR_APPROVAL){
-				this.assigned_roles = [this.creator_role];
+				this.assigned_roles = this.creator_role ? [this.creator_role] : [];
 			}
 
 			if(data.status !== this.status){
@@ -1077,7 +1090,7 @@ schema.methods.updateAttrs = function(data){
 
 	let settings;
 
-	return ProjectSetting.findById(this._dbcolOptions, this._dbcolOptions.project).then(_settings => {
+	return ModelSetting.findById(this._dbcolOptions, this._dbcolOptions.model).then(_settings => {
 
 		settings = _settings;
 		return this.save();
@@ -1086,8 +1099,8 @@ schema.methods.updateAttrs = function(data){
 
 		let issue = this.clean(settings.type, settings.properties.code);
 
-		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, issue);
-		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.project, issue._id, systemComment);
+		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, issue);
+		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, systemComment);
 		
 		return issue;
 
@@ -1095,16 +1108,16 @@ schema.methods.updateAttrs = function(data){
 	
 };
 
-schema.methods.clean = function(typePrefix, projectCode){
+schema.methods.clean = function(typePrefix, modelCode){
 	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.typePrefix = typePrefix;
-	cleaned.projectCode = projectCode;
+	cleaned.modelCode = modelCode;
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
-	cleaned.project = this._dbcolOptions.project;
+	cleaned.model = this._dbcolOptions.model;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
 
@@ -1113,8 +1126,8 @@ schema.methods.clean = function(typePrefix, projectCode){
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
-			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
-			cleaned.viewpoints[i].screenshotSmall = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshotSmall.png';
+			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.model +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
+			cleaned.viewpoints[i].screenshotSmall = cleaned.account + '/' + cleaned.model +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshotSmall.png';
 		}
 
 		if(cleaned.viewpoints[i].up.length === 0){
@@ -1134,7 +1147,7 @@ schema.methods.clean = function(typePrefix, projectCode){
 	});
 
 	if(_.get(cleaned, `thumbnail.flag`)){
-		cleaned.thumbnail = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/thumbnail.png';
+		cleaned.thumbnail = cleaned.account + '/' + cleaned.model +'/issues/' + cleaned._id + '/thumbnail.png';
 	}
 
 	cleaned.comments && cleaned.comments.forEach( (comment, i) => {
@@ -1394,18 +1407,18 @@ schema.statics.getBCFVersion = function(){
 
 };
 
-schema.statics.getProjectBCF = function(projectId){
+schema.statics.getModelBCF = function(modelId){
 	'use strict';
 
-	let project = {
+	let model = {
 		ProjectExtension:{
 			'@' : {
 				'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 				'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema'
 			},
 			'Project': {
-				'@': { 'ProjectId': projectId },
-				'Name': projectId,
+				'@': { 'ProjectId': modelId },
+				'Name': modelId,
 			},
 			'ExtensionSchema': {
 
@@ -1413,11 +1426,11 @@ schema.statics.getProjectBCF = function(projectId){
 		}
 	};
 
-	return xmlBuilder.buildObject(project);
+	return xmlBuilder.buildObject(model);
 };
 
 
-schema.statics.importBCF = function(requester, account, project, revId, zipPath){
+schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 	'use strict';
 
 	let self = this;
@@ -1426,21 +1439,21 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 
 	if(revId){
 		getHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
-		getHistory = getHistory({account, project}, revId, {_id: 1});
+		getHistory = getHistory({account, model}, revId, {_id: 1});
 	} else {
-		getHistory = History.findByBranch({account, project}, 'master', {_id: 1});
+		getHistory = History.findByBranch({account, model}, 'master', {_id: 1});
 	}
 
 	//assign revId for issue
 	return getHistory.then(history => {
 		if(!history){
-			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){
 			revId = history._id;
 		}
 	}).then(() => {
 
-		return ProjectSetting.findById({account, project}, project);
+		return ModelSetting.findById({account, model}, model);
 
 	}).then(_settings => {
 		settings = _settings;
@@ -1467,7 +1480,7 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 
 					let issueCounter;
 
-					Issue.count({account, project}).then(count => {
+					Issue.count({account, model}).then(count => {
 
 						issueCounter = count;
 
@@ -1498,13 +1511,13 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 						issues.forEach(issue => {
 
 							saveIssueProms.push(
-								Issue.count({account, project}, { _id: issue._id}).then(count => {
+								Issue.count({account, model}, { _id: issue._id}).then(count => {
 
 									if(count <= 0) {
 										issue.number = ++issueCounter;
 										return issue.save();
 									} else {
-										console.log('duplicate issue');
+										//console.log('duplicate issue');
 										return Promise.resolve();
 									}
 
@@ -1526,7 +1539,7 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 						});
 
 						if(notifications.length){
-							ChatEvent.newIssues(requester, account, project, notifications);
+							ChatEvent.newIssues(requester, account, model, notifications);
 						}
 						
 						resolve();
@@ -1582,7 +1595,7 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 
 					xml = _xml;
 
-					issue = Issue.createInstance({account, project});
+					issue = Issue.createInstance({account, model});
 					issue._id = stringToUUID(guid);
 					issue.extras = {};
 					issue.rev_id = revId;
@@ -1734,7 +1747,7 @@ schema.statics.importBCF = function(requester, account, project, revId, zipPath)
 
 							systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated', {
 								account, 
-								project, 
+								model, 
 								issueId: utils.uuidToString(issue._id), 
 								viewpointId: vpGuids[0],
 								err: err
@@ -1819,7 +1832,7 @@ var Issue = ModelFactory.createClass(
 	'Issue',
 	schema,
 	arg => {
-		return `${arg.project}.issues`;
+		return `${arg.model}.issues`;
 	}
 );
 

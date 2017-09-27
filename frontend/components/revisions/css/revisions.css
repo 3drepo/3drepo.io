@@ -1,0 +1,51 @@
+
+/** Revisions dropdown in 3dviewer ***********************************************************************************/
+revisions {
+    z-index: 2;
+    position: absolute;
+    color: white;
+    text-shadow: 1px 1px#666666;
+    font-size: 14px;
+    width: 250px;
+    top: 65px;
+    left: 50%;
+    font-weight: bold;
+    margin-left: -125px;
+    text-align: center;
+}
+
+.revisions-dropdown .angular-material-icons {
+  color: white;
+}
+
+.revisions-dropdown {
+    cursor:pointer;
+    outline: none;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.08);
+}
+
+.revisionsDialog h3 {
+   font-weight: lighter;
+    text-align: center;
+}
+
+/** Revisions Dialog *************************************************************************************************/
+.revisionsDialog {
+  width: 40%;
+}
+
+.revisionsDialog md-list {
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.revisionsDialog .revisionsDialogText {
+    margin: 5px 5px;
+}
+
+.revisionsDialog .revisionsDialogInfo {
+    color: rgba(0, 0, 0, 0.5);
+    margin: -35px 0 0;
+}

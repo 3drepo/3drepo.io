@@ -18,14 +18,14 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Your project ${data.project} has been processed successfully without errors and is now ready.<br><br>
-	<a href="${data.url}">Go to my project</a>
+	Your model ${data.model} has been processed successfully without errors and is now ready.<br><br>
+	<a href="${data.url}">Go to my model</a>
 	<br><br>
 	Best,<br>
 	3D Repo
 `;
 
-var subject = data => `Your project ${data.project} is now ready`;
+var subject = data => `Your model ${data.model} is now ready`;
 
 module.exports =  {
 	html: html,

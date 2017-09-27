@@ -28,24 +28,24 @@ let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
 let async = require('async');
-let Role = require('../../models/role');
-let ProjectSetting = require('../../models/projectSetting');
+let ModelSetting = require('../../models/modelSetting');
 let User = require('../../models/user');
 let config = require('../../config');
 let fs = require('fs');
 let unit = 'm';
 
-describe('Federated Project', function () {
+describe('Federated Model', function () {
 
 	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'fed';
 	let password = '123456';
-	let subProjects = ['proj1', 'proj2'];
+	let subModels = ['proj1', 'proj2'];
 	let desc = 'desc';
 	let type = 'type';
-	let fedProject = 'fedproj';
+	let fedModelName = 'fedproj';
+	let fedModelId;
 
 	before(function(done){
 
@@ -70,9 +70,13 @@ describe('Federated Project', function () {
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {
-			server.close(function(){
-				console.log('API test server is closed');
-				done();
+			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
+				return q.channel.purgeQueue(q.modelQName);
+			}).then(() => {
+				server.close(function(){
+					console.log('API test server is closed');
+					done();
+				});
 			});
 		});
 	});
@@ -109,14 +113,14 @@ describe('Federated Project', function () {
 
 		}, 1000);
 
-		agent.post(`/${username}/${fedProject}`)
+		agent.post(`/${username}/${fedModelName}`)
 		.send({ 
 			desc, 
 			type,
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
 		.expect(200, function(err ,res) {
@@ -125,11 +129,12 @@ describe('Federated Project', function () {
 				return done(err);
 			}
 
-			expect(res.body.project).to.equal(fedProject);
+			expect(res.body.name).to.equal(fedModelName);
+			fedModelId = res.body.model;
 
 			async.series([
 				done => {
-					agent.get(`/${username}/${fedProject}.json`)
+					agent.get(`/${username}/${fedModelId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
@@ -140,7 +145,7 @@ describe('Federated Project', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedProjects.find(p => p.project === fedProject);
+						let fed = account.fedModels.find(m => m.model === fedModelId);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -154,15 +159,16 @@ describe('Federated Project', function () {
 	});
 
 
-	it('should be created successfully even if no sub projects are specified', function(done){
+	it('should be created successfully even if no sub models are specified', function(done){
 		let emptyFed = 'emptyFed';
+		let emptyFedId;
 
 		agent.post(`/${username}/${emptyFed}`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[] 
+			subModels:[] 
 		})
 		.expect(200, function(err ,res) {
 
@@ -170,11 +176,13 @@ describe('Federated Project', function () {
 				return done(err);
 			}
 
-			expect(res.body.project).to.equal(emptyFed);
+			expect(res.body.name).to.equal(emptyFed);
+			emptyFedId = res.body.model;
+
 
 			async.series([
 				done => {
-					agent.get(`/${username}/${emptyFed}.json`)
+					agent.get(`/${username}/${emptyFedId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
@@ -185,7 +193,7 @@ describe('Federated Project', function () {
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedProjects.find(p => p.project === emptyFed);
+						let fed = account.fedModels.find(p => p.model === emptyFedId);
 						expect(fed.federate).to.equal(true);
 						done(err);
 					})
@@ -198,42 +206,41 @@ describe('Federated Project', function () {
 		});
 	});
 
-	it('should fail if create federation using existing project name (fed or model)', function(done){
+	it('should fail if create federation using existing model name (fed or model)', function(done){
 
-
-		agent.post(`/${username}/${subProjects[0]}`)
+		agent.post(`/${username}/${subModels[0]}`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 			done(err);
 
 		});
 	});
 
-	it('should fail if create federation using invalid project name', function(done){
+	it('should fail if create federation using invalid model name', function(done){
 
 
 		agent.post(`/${username}/a%20c`)
 		.send({ 
 			desc, 
 			type, 
-			subProjects:[{
+			subModels:[{
 				"database": 'testing',
-				"project": 'testproject'
+				"model": 'testproject'
 			}] 
 		})
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+			expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
 			done(err);
 
 		});
@@ -248,9 +255,9 @@ describe('Federated Project', function () {
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": 'testing',
-				"project": 'testproject'
+				"model": 'testproject'
 			}] 
 		})
 		.expect(400, function(err ,res) {
@@ -318,12 +325,12 @@ describe('Federated Project', function () {
 				desc, 
 				type, 
 				unit,
-				subProjects:[{
+				subModels:[{
 					"database": username,
-					"project": subProjects[0]
+					"model": subModels[0]
 				}, {
 					"database": username,
-					"project": subProjects[0]
+					"model": subModels[0]
 				}] 
 			})
 			.expect(200, function(err ,res) {
@@ -341,9 +348,9 @@ describe('Federated Project', function () {
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": fedProject
+				"model": fedModelId
 			}] 
 		})
 		.expect(400, function(err ,res) {
@@ -354,46 +361,46 @@ describe('Federated Project', function () {
 		});
 	});
 
-	it('update should fail if project is not a fed', function(done){
+	it('update should fail if model is not a fed', function(done){
 
-		agent.put(`/${username}/${subProjects[0]}`)
+		agent.put(`/${username}/${subModels[0]}`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
 		.expect(400, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.PROJECT_IS_NOT_A_FED.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_IS_NOT_A_FED.value);
 			done(err);
 
 		});
 	});
 
-	it('update should fail if project does not exist', function(done){
-		agent.put(`/${username}/nonexistproject`)
+	it('update should fail if model does not exist', function(done){
+		agent.put(`/${username}/nonexistmodel`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[0]
+				"model": subModels[0]
 			}] 
 		})
-		.expect(400, function(err ,res) {
+		.expect(404, function(err ,res) {
 
-			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
 			done(err);
 
 		});
 	});
 
-	it('update should success if project is a federation', function(done){
+	it('update should success if model is a federation', function(done){
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
@@ -425,20 +432,30 @@ describe('Federated Project', function () {
 
 		}, 1000);
 
-		agent.put(`/${username}/${fedProject}`)
+		agent.put(`/${username}/${fedModelId}`)
 		.send({ 
 			desc, 
 			type, 
 			unit,
-			subProjects:[{
+			subModels:[{
 				"database": username,
-				"project": subProjects[1]
+				"model": subModels[1]
 			}] 
 		})
 		.expect(200, function(err ,res) {
-
-			expect(res.body.project).to.equal(fedProject);
 			return done(err);
 		});
 	});
+
+	it('should fail to delete a model that is a sub model of another federation', function(done){
+		const model = 'f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40';
+		agent.delete(`/${username}/${model}`)
+		.send({})
+		.expect(400, function(err, res){
+			
+			expect(err).to.be.null;
+			expect(res.body.value).to.equal(responseCodes.MODEL_IS_A_SUBMODEL.value);
+			done();
+		});
+	})
 });

@@ -48,12 +48,12 @@ describe('Infrastructure', function () {
 	let agent;
 	let username = 'testing';
 	let password = 'testing';
-	let project = 'testproject';
+	let model = 'testproject';
 
 
 
 	describe('Queue', function(){
-		this.timeout(10000);
+		this.timeout(15000);
 
 		describe('died before app start', function(){
 			before(function(done){
@@ -99,7 +99,7 @@ describe('Infrastructure', function () {
 
 			it('should report error for queue based api if queue service is not running', function(done){
 
-				agent.post(`/testing/testproject/upload`)
+				agent.post(`/testing/${model}/upload`)
 				.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 				.expect(500, function(err, res){
 					done(err);
@@ -133,7 +133,7 @@ describe('Infrastructure', function () {
 
 			it('should report error for queue based api if queue service is not running', function(done){
 
-				agent.post(`/testing/testproject/upload`)
+				agent.post(`/testing/${model}/upload`)
 				.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 				.expect(500, function(err, res){
 					done(err);
@@ -154,7 +154,7 @@ describe('Infrastructure', function () {
 						return done(err);
 					}
 
-					agent.post(`/testing/testproject/upload`)
+					agent.post(`/testing/${model}/upload`)
 					.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 					.end(function(err, res){
 						expect(res.statusCode).to.not.equal(500);

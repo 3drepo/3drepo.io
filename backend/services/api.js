@@ -29,33 +29,55 @@
 		const sharedSession = serverConfig.session;
 		const log_iface = require("../logger.js");
 		const express = require("express");
-		const routes = require("../routes/routes.js")();
+		//const routes = require("../routes/routes.js")();
 		const compress = require("compression");
 		const responseCodes = require("../response_codes");
 		const C = require("../constants");
 		const cors = require("cors");
 		const bodyParser = require("body-parser");
+		const utils = require("../utils");
+		const config = require('../config');
 
 		// Express app
 		let app = express();
 
 		// Attach the encoders to the router
-		require("../encoders/x3dom_encoder.js")
-			.route(routes);
-		require("../encoders/json_encoder.js")
-			.route(routes);
+		// require("../encoders/x3dom_encoder.js")
+		// 	.route(routes);
+		// require("../encoders/json_encoder.js")
+		// 	.route(routes);
 
-		// Configure various middleware
-		app.use(sharedSession);
-		app.use(cors({ origin: true, credentials: true }));
+		app.disable('etag');
 
 		// put logger in req object
 		app.use(log_iface.startRequest);
 
+		// Configure various middleware
+		app.use((req, res, next) => {
+			sharedSession(req, res, myNext);
+			function myNext(err){
+				if(err){
+					// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
+					//res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+					
+					req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
+					req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
+					req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
+
+					//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
+
+				} else {
+					next();
+				}
+			}
+		});
+
+		app.use(cors({ origin: true, credentials: true }));
+
 		// init the singleton db connection for modelFactory
 		app.use((req, res, next) => {
 			// init the singleton db connection
-			let DB = require("../db/db")(req[C.REQ_REPO].logger);
+			const DB = require("../db/db");
 			DB.getDB("admin")
 				.then(db => {
 					// set db to singleton modelFactory class
@@ -72,13 +94,11 @@
 			extended: true
 		}));
 
-		app.set("views", "./jade");
-		app.set("view_engine", "jade");
+		app.set("views", "./pug");
+		app.set("view_engine", "pug");
 
 		app.use(bodyParser.json({ limit: "2mb" }));
-		app.use(function (req, res, next) {
-			sharedSession(req, res, next);
-		});
+
 		app.use(compress());
 
 		app.use(function (req, res, next) {
@@ -89,6 +109,8 @@
 				next();
 			}
 		});
+
+
 
 		app.use("/", require("../routes/plan"));
 		//auth handler
@@ -102,25 +124,44 @@
 		// payment api header
 		app.use("/payment", require("../routes/payment"));
 
-		//project handlers
+		app.use("/:account", require("../routes/job"));
+		app.use("/:account", require("../routes/permissionTemplate"));
+		app.use("/:account", require("../routes/accountPermission"));
+		
+		// projects handlers
 		app.use("/:account", require("../routes/project"));
 
+		//models handlers
+		app.use("/:account", require("../routes/model"));
+
 		//metadata handler
-		app.use("/:account/:project", require("../routes/meta"));
+		app.use("/:account/:model", require("../routes/meta"));
 
 		//groups handler
-		app.use("/:account/:project/groups", require("../routes/group"));
+		app.use("/:account/:model/groups", require("../routes/group"));
+		
 		//issues handler
-		app.use("/:account/:project", require("../routes/issue"));
+		app.use("/:account/:model", require("../routes/issueAnalytic"));
+		app.use("/:account/:model", require("../routes/issue"));
+
 		//mesh handler
-		app.use("/:account/:project", require("../routes/mesh"));
+		app.use("/:account/:model", require("../routes/mesh"));
 		//texture handler
-		app.use("/:account/:project", require("../routes/texture"));
+		app.use("/:account/:model", require("../routes/texture"));
 
 		//history handler
-		app.use("/:account/:project", require("../routes/history"));
+		app.use("/:account/:model", require("../routes/history"));
 
-		app.use("/", routes.router);
+		//app.use("/", routes.router);
+
+		app.use(function(err, req, res, next) {
+			if(err){
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			}
+
+			err.stack && req[C.REQ_REPO].logger.logError(err.stack);
+			//next(err);
+		});
 
 		return app;
 	};

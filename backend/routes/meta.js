@@ -21,17 +21,17 @@
 	const express = require('express');
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
-	const ProjectHelpers = require('../models/helper/project');
-	const middlewares = require('./middlewares');
+	const ModelHelpers = require('../models/helper/model');
+	const middlewares = require('../middlewares/middlewares');
 	const utils = require('../utils');
 
 	//Get meta data
-	router.get('/meta/:id.json', middlewares.hasReadAccessToProject, getMetadata);
+	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
 
 
 	function getMetadata(req, res, next){
 
-		ProjectHelpers.getMetadata(req.params.account, req.params.project, req.params.id).then(meta => {
+		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id).then(meta => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {

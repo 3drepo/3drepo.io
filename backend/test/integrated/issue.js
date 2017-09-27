@@ -39,7 +39,7 @@ describe('Issues', function () {
 	let username2 = 'issue_username2';
 
 	let email = 'test3drepo_issue@mailinator.com';
-	let project = 'project1';
+	let model = 'project1';
 
 	let desc = 'desc';
 	let type = 'type';
@@ -64,8 +64,8 @@ describe('Issues', function () {
 			"clippingPlanes":[]
 		},
 		"scale":1,
-		"creator_role":"project1.collaborator",
-		"assigned_roles":["project1.collaborator"],
+		"creator_role":"jobA",
+		"assigned_roles":["jobB"],
 	};
 
 	let bcf = {
@@ -77,15 +77,6 @@ describe('Issues', function () {
 
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
-
-			// helpers.signUpAndLoginAndCreateProject({
-			// 	server, request, agent, expect, User, systemLogger,
-			// 	username, password, email, project, desc, type, unit,
-			// 	done: function(err, _agent){
-			// 		agent = _agent;
-			// 		done(err);
-			// 	}
-			// });
 
 			agent = request.agent(server);
 			agent.post('/login')
@@ -116,7 +107,7 @@ describe('Issues', function () {
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						
@@ -145,7 +136,7 @@ describe('Issues', function () {
 				},
 
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+					agent.get(`/${username}/${model}/issues/${issueId}.json`).expect(200, function(err , res){
 
 						expect(res.body.name).to.equal(issue.name);
 						expect(res.body.scale).to.equal(issue.scale);
@@ -183,7 +174,7 @@ describe('Issues', function () {
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						
@@ -193,9 +184,9 @@ describe('Issues', function () {
 				},
 
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+					agent.get(`/${username}/${model}/issues/${issueId}.json`).expect(200, function(err , res){
 
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${project}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 						return done(err);
 
 					});
@@ -207,7 +198,7 @@ describe('Issues', function () {
 
 			let issue = baseIssue;
 
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
 			.expect(400 , function(err, res){
 				expect(res.body.value).to.equal(responseCodes.ISSUE_NO_NAME.value);
@@ -219,7 +210,7 @@ describe('Issues', function () {
 
 			let issue = Object.assign({}, baseIssue, {"name":"Issue test", "priority":"abc"});
 
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
 			.expect(400 , function(err, res){
 				expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_PRIORITY.value);
@@ -231,7 +222,7 @@ describe('Issues', function () {
 
 			let issue = Object.assign({}, baseIssue, {"name":"Issue test", "status":"abc"});
 
-			agent.post(`/${username}/${project}/issues.json`)
+			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
 			.expect(400 , function(err, res){
 				expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_STATUS.value);
@@ -251,7 +242,7 @@ describe('Issues', function () {
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -262,7 +253,7 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+					agent.get(`/${username}/${model}/issues/${issueId}.json`).expect(200, function(err , res){
 
 						expect(res.body.norm).to.deep.equal(issue.norm);
 						expect(res.body.position).to.deep.equal(issue.position);
@@ -281,7 +272,7 @@ describe('Issues', function () {
 			let status = { status: 'in progress'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -290,12 +281,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(status)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.status === status.status);
 						done(err);
@@ -312,7 +303,7 @@ describe('Issues', function () {
 			let status = { status: '999'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -321,7 +312,7 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(status)
 					.expect(400, function(err, res){
 						expect(res.body.value === responseCodes.ISSUE_INVALID_STATUS.value);
@@ -338,7 +329,7 @@ describe('Issues', function () {
 			let priority = { priority: 'high'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -347,12 +338,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(priority)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.priority === priority.priority);
 						done(err);
@@ -368,7 +359,7 @@ describe('Issues', function () {
 			let priority = { priority: 'xxx'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -377,7 +368,7 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(priority)
 					.expect(400, function(err, res){
 						expect(res.body.value === responseCodes.ISSUE_INVALID_PRIORITY.value);
@@ -395,7 +386,7 @@ describe('Issues', function () {
 			let topic_type = { topic_type: 'for abcdef'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -404,12 +395,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(topic_type)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.topic_type === topic_type.topic_type);
 						done(err);
@@ -426,7 +417,7 @@ describe('Issues', function () {
 			let status = { status: 'in progress'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -435,12 +426,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(status)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.status === status.status);
 						expect(res.body.comments[0].action).to.deep.equal({
@@ -463,7 +454,7 @@ describe('Issues', function () {
 			let data = { topic_type: 'abc123'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -472,12 +463,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(data)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.topic_type === data.topic_type);
 						expect(res.body.comments[0].action).to.deep.equal({
@@ -497,12 +488,12 @@ describe('Issues', function () {
 
 		it('change assigned_roles should succee and create system comment', function(done){
 
-			let issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["project1.collaborator"]});
+			let issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
 			let issueId;
-			let data = { assigned_roles: ["project1.viewer"]};
+			let data = { assigned_roles: ["jobB"]};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -511,19 +502,19 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(data)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.assigned_roles).to.deep.equal(data.assigned_roles);
 						expect(res.body.comments[0].action).to.deep.equal({
 							property: 'assigned_roles',
 							propertyText: 'Assigned',
-							from: 'project1.collaborator',
-							to: 'project1.viewer' 
+							from: 'jobA',
+							to: 'jobB' 
 						});
 						expect(res.body.comments[0].owner).to.equal(username);
 						done(err);
@@ -540,7 +531,7 @@ describe('Issues', function () {
 			let data = { topic_type: 'abc123'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -549,17 +540,17 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send({ comment : 'hello world'})
 					.expect(200 , done);
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(data)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.comments[0].sealed).to.equal(true);
 						done(err);
@@ -577,12 +568,12 @@ describe('Issues', function () {
 				'topic_type': 'for abcdef',
 				"status": "in progress",
 				"priority": "high",
-				"assigned_roles":["testproject.viewer"],
+				"assigned_roles":["jobB"],
 			};
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -591,12 +582,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.topic_type).to.equal(updateData.topic_type);
 						expect(res.body.status).to.equal(updateData.status);
@@ -612,19 +603,19 @@ describe('Issues', function () {
 
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
-				"assigned_roles":["testproject.viewer"],
-				"creator_role": "project1.collaborator"
+				"assigned_roles":["jobB"],
+				"creator_role": "jobA"
 			});
 			
 			let issueId;
 			let updateData = { 
 				"status": "for approval",
-				"assigned_roles":["testproject.viewer"]
+				"assigned_roles":["jobB"]
 			};
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -634,12 +625,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.status).to.equal(updateData.status);
 						expect(res.body.assigned_roles).to.deep.equal([issue.creator_role]);
@@ -655,7 +646,7 @@ describe('Issues', function () {
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
 				"status": "for approval",
-				"assigned_roles":["testproject.viewer"]
+				"assigned_roles":["jobB"]
 			});
 			
 			//console.log(issue)
@@ -663,12 +654,12 @@ describe('Issues', function () {
 			let issueId;
 			let updateData = { 
 				"status": "open",
-				"assigned_roles":["testproject.collaborator"]
+				"assigned_roles":["jobA"]
 			};
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						//console.log(res.body);
@@ -678,12 +669,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.status).to.equal('in progress');
 						expect(res.body.assigned_roles).to.deep.equal(updateData.assigned_roles);
@@ -701,7 +692,7 @@ describe('Issues', function () {
 			let desc = { desc: 'for abcdef'};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
+					agent.post(`/${username}/${model}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
@@ -710,12 +701,12 @@ describe('Issues', function () {
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(desc)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${project}/issues/${issueId}.json`)
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc === desc.desc);
 						done(err);
@@ -725,34 +716,79 @@ describe('Issues', function () {
 		});
 
 
-		it('user with different role but is an admin try to close an issue should succee', function(done){
+		describe('user with different role but is an admin', function(){
 
-			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'abcdef.123456'});
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
 			let issueId;
 			let close = { status: 'closed'};
-			async.series([
-				function(done){
-					agent.post(`/${username}/${project}/issues.json`)
-					.send(issue)
-					.expect(200 , function(err, res){
-						issueId = res.body._id;
-						return done(err);
-						
-					});
-				},
-				function(done){
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
-					.send(close)
-					.expect(200, done);
-				},
 
-			], done);
+			before(function(done){
+				async.series([
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username: username2, password})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return done(err);
+							
+						});
+					},
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username, password})
+						.expect(200, done);
+					}
+				],done);
+			});
+
+			it('try to close an issue should succee', function(done){
+
+				async.series([
+					function(done){
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						.send(close)
+						.expect(200, done);
+					},
+
+				], done);
+			});
+
 		});
 
 
 		describe('user with different role and is not an admin ', function(){
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+			let issueId;
+			let close = { status: 'closed'};
+
 			before(function(done){
 				async.series([
+					function(done){
+						agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return done(err);
+							
+						});
+					},
 					function(done){
 						agent.post('/logout')
 						.send({})
@@ -783,23 +819,12 @@ describe('Issues', function () {
 
 			it('try to close an issue should fail', function(done){
 
-				let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'abcdef.123456'});
-				let issueId;
-				let close = { status: 'closed'};
 				async.series([
 					function(done){
-						agent.post(`/${username}/${project}/issues.json`)
-						.send(issue)
-						.expect(200 , function(err, res){
-							issueId = res.body._id;
-							return done(err);
-							
-						});
-					},
-					function(done){
-						agent.put(`/${username}/${project}/issues/${issueId}.json`)
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
 						.send(close)
 						.expect(400, function(err, res){
+
 							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 							done(err);
 						});
@@ -817,7 +842,7 @@ describe('Issues', function () {
 
 		// 	async.series([
 		// 		function(done){
-		// 			agent.post(`/${username}/${project}/issues.json`)
+		// 			agent.post(`/${username}/${model}/issues.json`)
 		// 			.send(issue)
 		// 			.expect(200 , function(err, res){
 		// 				issueId = res.body._id;
@@ -826,7 +851,7 @@ describe('Issues', function () {
 		// 			});
 		// 		},
 		// 		function(done){
-		// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
 		// 			.send({ desc: 'desc'})
 		// 			.expect(400, function(err, res){
 		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
@@ -834,7 +859,7 @@ describe('Issues', function () {
 		// 			});
 		// 		},
 		// 		function(done){
-		// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
 		// 			.send({ topic_type: 'desc'})
 		// 			.expect(400, function(err, res){
 		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
@@ -842,7 +867,7 @@ describe('Issues', function () {
 		// 			});
 		// 		},
 		// 		function(done){
-		// 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
 		// 			.send({ priority: 'high'})
 		// 			.expect(400, function(err, res){
 		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
@@ -862,7 +887,7 @@ describe('Issues', function () {
 
 				async.series([
 					function(done){
-						agent.post(`/${username}/${project}/issues.json`)
+						agent.post(`/${username}/${model}/issues.json`)
 						.send(issue)
 						.expect(200 , function(err, res){
 							issueId = res.body._id;
@@ -888,7 +913,7 @@ describe('Issues', function () {
 							},
 						};
 
-						agent.put(`/${username}/${project}/issues/${issueId}.json`)
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
 						.send(comment)
 						.expect(200 , done);
 
@@ -898,7 +923,7 @@ describe('Issues', function () {
 			});
 
 			it('should succee', function(done){
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send({sealed: true, commentIndex: 0})
 				.expect(200, function(err, res){
 					done(err);
@@ -907,7 +932,7 @@ describe('Issues', function () {
 
 
 			it('should fail if editing a sealed comment', function(done){
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send({comment: 'abcd', commentIndex: 0, edit: true})
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
@@ -925,7 +950,7 @@ describe('Issues', function () {
 
 				let issue = Object.assign({"name":"Issue test"}, baseIssue);
 
-				agent.post(`/${username}/${project}/issues.json`)
+				agent.post(`/${username}/${model}/issues.json`)
 				.send(issue)
 				.expect(200 , function(err, res){
 					issueId = res.body._id;
@@ -955,13 +980,13 @@ describe('Issues', function () {
 
 				async.series([
 					function(done){
-						agent.put(`/${username}/${project}/issues/${issueId}.json`)
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
 						.send(comment)
 						.expect(200 , done);
 					},
 
 					function(done){
-						agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+						agent.get(`/${username}/${model}/issues/${issueId}.json`).expect(200, function(err , res){
 
 							expect(res.body.comments.length).to.equal(1);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
@@ -992,13 +1017,13 @@ describe('Issues', function () {
 
 				async.series([
 					function(done){
-						agent.put(`/${username}/${project}/issues/${issueId}.json`)
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
 						.send(comment)
 						.expect(200 , done);
 					},
 
 					function(done){
-						agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+						agent.get(`/${username}/${model}/issues/${issueId}.json`).expect(200, function(err , res){
 
 							expect(res.body.comments.length).to.equal(1);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
@@ -1017,7 +1042,7 @@ describe('Issues', function () {
 
 				let comment = { comment: '' };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send({comment})
 				.expect(400 , function(err, res){
 					expect(res.body.value).to.equal(responseCodes.MONGOOSE_VALIDATION_ERROR({}).value);
@@ -1030,7 +1055,7 @@ describe('Issues', function () {
 
 				let comment = { commentIndex: 0, delete: true };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(200 , function(err, res){
 					done(err);
@@ -1042,7 +1067,7 @@ describe('Issues', function () {
 				let invalidId = '00000000-0000-0000-0000-000000000000';
 				let comment = { comment: 'hello world' };
 
-				agent.put(`/${username}/${project}/issues/${invalidId}.json`)
+				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
 				.send(comment)
 				.expect(404 , function(err, res){
 					done(err);
@@ -1059,7 +1084,7 @@ describe('Issues', function () {
 
 				let issue = Object.assign({"name":"Issue test"}, baseIssue);
 
-				agent.post(`/${username}/${project}/issues.json`)
+				agent.post(`/${username}/${model}/issues.json`)
 				.send(issue)
 				.expect(200 , function(err, res){
 
@@ -1072,7 +1097,7 @@ describe('Issues', function () {
 					//add an comment
 					let comment = { comment: 'hello world' };
 
-					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(comment)
 					.expect(200 , function(err, res){
 						done(err);
@@ -1085,7 +1110,7 @@ describe('Issues', function () {
 
 				let close = { status: 'closed' };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send(close)
 				.expect(200 , function(err, res){
 
@@ -1097,7 +1122,7 @@ describe('Issues', function () {
 			// it('should fail if adding a comment', function(done){
 			// 	let comment = { comment: 'hello world' };
 
-			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1110,7 +1135,7 @@ describe('Issues', function () {
 			// it('should fail if removing a comment', function(done){
 			// 	let comment = { commentIndex: 0, delete: true };
 
-			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1123,7 +1148,7 @@ describe('Issues', function () {
 			// it('should fail if editing a comment', function(done){
 			// 	let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
 
-			// 	agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1138,7 +1163,7 @@ describe('Issues', function () {
 
 				let open = {  status: 'open' };
 
-				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send(open)
 				.expect(200 , function(err, res){
 					done(err)
@@ -1151,7 +1176,7 @@ describe('Issues', function () {
 				let invalidId = '00000000-0000-0000-0000-000000000000';
 				let close = { status: 'closed' };
 
-				agent.put(`/${username}/${project}/issues/${invalidId}.json`)
+				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
 				.send(close )
 				.expect(404 , function(err, res){
 					done(err);
@@ -1166,7 +1191,7 @@ describe('Issues', function () {
 
 		var bcfusername = 'testing';
 		var bcfpassword = 'testing';
-		var bcfproject = 'testproject';
+		var bcfmodel = 'testproject';
 
 		before(function(done){
 			async.series([
@@ -1189,7 +1214,7 @@ describe('Issues', function () {
 
 				async.series([
 					function(done){
-						agent.post(`/${bcfusername}/${bcfproject}/issues.bcfzip`)
+						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 						.attach('file', __dirname + bcf.path)
 						.expect(200, function(err, res){
 							done(err);
@@ -1197,7 +1222,7 @@ describe('Issues', function () {
 					},
 
 					function(done){
-						agent.get(`/${bcfusername}/${bcfproject}/issues.json`)
+						agent.get(`/${bcfusername}/${bcfmodel}/issues.json`)
 						.expect(200, function(err, res){
 
 							//issues in bcf file should be imported
@@ -1211,7 +1236,7 @@ describe('Issues', function () {
 					},
 
 					function(done){
-						agent.get(`/${bcfusername}/${bcfproject}/issues/${bcf.issue1}.json`)
+						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}.json`)
 						.expect(200, function(err, res){
 
 							let issue1 = res.body;
@@ -1244,7 +1269,7 @@ describe('Issues', function () {
 
 		describe('Exporting a bcf file', function(){
 			it('should succee', function(done){
-				agent.get(`/${bcfusername}/${bcfproject}/issues.bcfzip`)
+				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 				.expect(200, function(err, res){
 					done(err);
 				});

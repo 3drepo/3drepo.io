@@ -23,7 +23,7 @@
 	const addressMeta = require("./addressMeta");
 	const moment = require("moment");
 	const fs = require("fs");
-	const jade = require("jade");
+	const pug = require("pug");
 	const phantom = require("phantom");
 	const config = require("../config");
 	const Subscription = require("./subscription");
@@ -35,6 +35,7 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
+	const path  =require('path');
 
 
 	const SchemaTypes = mongoose.Schema.Types;
@@ -105,7 +106,7 @@
 		return (addressMeta.euCountriesCode.indexOf(this.info.countryCode) !== -1) && this.info.vat ? true : false;
 	});
 
-	//TO-DO: the current design of the invoice (invoice.jade) assume user only buy one type of products which is always true for now but not for the future
+	//TO-DO: the current design of the invoice (invoice.pug) assume user only buy one type of products which is always true for now but not for the future
 	// remove unit price and change the layout of invoice and use price in the items array
 	schema.virtual('unitPrice').get(function(){
 
@@ -345,7 +346,10 @@
 			User.findByUserName(user.customData.billing.billingUser).then(billingUser => {
 				Mailer.sendPaymentRefundedEmail(billingUser.customData.email, {
 					amount: `${data.currency}${data.amount}`
-				}, attachments);
+				}, attachments)
+				.catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
 
 				//make a copy to sales
 				Mailer.sendPaymentReceivedEmailToSales({
@@ -354,7 +358,10 @@
 					email: billingUser.customData.email,
 					invoiceNo: invoice.invoiceNo,
 					type: invoice.type
-				}, attachments);
+				}, attachments)
+				.catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
 			});
 
 			return invoice;
@@ -377,12 +384,12 @@
 
 				let useNonPublicPort = true;
 
-				let template = "./jade/invoice.jade";
+				let template = path.join(__dirname, "../../pug/invoice.pug");
 				if (this.type === "refund") {
-					template = "./jade/refund.jade";
+					template = path.join(__dirname, "../../pug/refund.pug");
 				}
 
-				jade.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
+				pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
 					if (err) {
 						reject(err);
 					} else {

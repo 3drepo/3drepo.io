@@ -25,37 +25,41 @@ code = os.system("git checkout " + branch)
 if code:
     fatalError("git checkout failed")
 
-if production:
-    code = os.system("grunt webfont --force")
+# if production:
+#     code = os.system("grunt webfont --force")
 
-    if code:
-        fatalError("Webfont compilation failed")
+#     if code:
+#         fatalError("Webfont compilation failed")
 
-    code = os.system("grunt frontend")
+#     code = os.system("grunt frontend")
 
-    if code:
-        fatalError("Frontend compilation failed")
+#     if code:
+#         fatalError("Frontend compilation failed")
 
 code = 0
 
-if production:
-    code |= os.system("git add -f ./public/css/external/three-d-repo.css")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.woff")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.eot")
-    code |= os.system("git add -f ./public/css/fonts/three-d-repo.ttf")
-    code |= os.system("git add -f ./public/dist")
+# if production:
+#     code |= os.system("git add -f ./public/css/external/three-d-repo.css")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.woff")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.eot")
+#     code |= os.system("git add -f ./public/css/fonts/three-d-repo.ttf")
+#     code |= os.system("git add -f ./public/dist")
 
 if code:
     fatalError("git force add failed")
 
-os.system("git commit -m \"Version " + version + "\"")
-
-os.system("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + version + "\"/' backend/config.js")
+VERSION_FILE = 'backend/VERSION.json'
+with open(VERSION_FILE, 'r+') as f:
+    text = f.read()
+    text = '{ "VERSION" : "' + version + '" }'
+    f.seek(0)
+    f.write(text)
+    f.truncate()
 
 os.system("git add backend")
 os.system("git clean -f -d")
 
-os.system("git commit -m \"Version string update\"")
+os.system("git commit -m \"Version " + version + "\"")
 
 os.system("git push origin :refs/tags/" + version)
 os.system("git tag -fa " + version + " -m \" Version " + version + " \"")

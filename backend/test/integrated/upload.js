@@ -27,16 +27,17 @@ let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let moment = require("moment");
+let async = require('async');
 
-describe('Uploading a project', function () {
+describe('Uploading a model', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'upload_username';
 	let password = 'password';
 	let email = 'test3drepo_upload@mailinator.com';
-	let project = 'project1';
-
+	let model = 'project1';
+	let modelId;
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'meter';
@@ -46,14 +47,27 @@ describe('Uploading a project', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			helpers.signUpAndLoginAndCreateProject({
-				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type, noBasicPlan: true, unit,
-				done: function(err, _agent){
-					agent = _agent;
-					done(err);
+			async.series([
+				function(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username, password, email, model, desc, type, noBasicPlan: true, unit,
+						done: function(err, _agent){
+							agent = _agent;
+							done(err);
+						}
+					});
+				},
+				function(done){
+					//create a model
+					agent.post(`/${username}/${model}`)
+					.send({ type, desc, unit })
+					.expect(200, function(err, res){
+						modelId = res.body.model;
+						done(err);
+					});
 				}
-			});
+			], done);
 			
 		});
 
@@ -62,7 +76,7 @@ describe('Uploading a project', function () {
 	after(function(done){
 
 		let q = require('../../services/queue');
-		q.channel.purgeQueue(q.workerQName).then(() => {
+		q.channel.purgeQueue(q.modelQName).then(() => {
 			server.close(function(){
 				console.log('API test server is closed');
 				done();
@@ -74,7 +88,7 @@ describe('Uploading a project', function () {
 	describe('without quota', function(){
 
 		it('should return error (no subscriptions)', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
@@ -83,7 +97,7 @@ describe('Uploading a project', function () {
 		});
 
 		it('should return error (has a subscription but ran out of space)', function(done){
-			//user: testing loaded with a valid subscription and a project with 6MB and subscription limit is 8MB
+			//user: testing loaded with a valid subscription and a model with 6MB and subscription limit is 8MB
 			let agent2 = request.agent(server);
 			agent2.post('/login')
 			.send({ username: 'testing', password: 'testing' })
@@ -94,8 +108,9 @@ describe('Uploading a project', function () {
 					return done(err);
 				}
 
-				//create a project
-				agent2.post(`/testing/testproject/upload`)
+				//create a model
+				let myModel = 'testproject';
+				agent2.post(`/testing/${myModel}/upload`)
 				.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
@@ -117,7 +132,7 @@ describe('Uploading a project', function () {
 		});
 
 		it('should succee', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, function(err, res){
 				done(err);
@@ -132,7 +147,7 @@ describe('Uploading a project', function () {
 			// upload api return before insert item to queue so introduce some time lag here
 			setTimeout(function(){
 
-				q.channel.assertQueue(q.workerQName, { durable: true }).then( info => {
+				q.channel.assertQueue(q.modelQName, { durable: true }).then( info => {
 
 					//expect 1 message in the worker queue
 					expect(info.messageCount).to.equal(1);
@@ -147,7 +162,7 @@ describe('Uploading a project', function () {
 		});
 
 		it('should succee (uppercase extension)', function(done){
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/upper.OBJ')
 			.expect(200, function(err, res){
 				done(err);
@@ -156,7 +171,7 @@ describe('Uploading a project', function () {
 		
 		it('but empty file size should fail', function(done){
 
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/empty.ifc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -167,7 +182,7 @@ describe('Uploading a project', function () {
 
 		it('but unaccepted extension should failed', function(done){
 
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy.abc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -178,7 +193,7 @@ describe('Uploading a project', function () {
 
 		it('but no extension should failed', function(done){
 
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
@@ -189,7 +204,7 @@ describe('Uploading a project', function () {
 
 		it('but file size exceeded fixed single file size limit should fail', function(done){
 
-			agent.post(`/${username}/${project}/upload`)
+			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/toy.ifc')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);

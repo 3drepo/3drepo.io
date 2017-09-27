@@ -1,0 +1,27 @@
+md-dialog(aria-label="Remove License")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Remove License
+			span(flex)
+	md-content(layout-margin, layout="column", layout-align="start")
+		.cardInfo
+			p User {{vm.licenses[vm.licenseAssigneeIndex].user}} has permissions assigned on the following items, they will be removed together with the license. Do you really want to remove this license?
+		p(ng-if="vm.models.length") Models:
+		md-list
+			md-list-item(ng-repeat="model in vm.models")
+				p {{model.model}}
+
+		p(ng-if="vm.projects.length") Projects:
+		md-list
+			md-list-item(ng-repeat="project in vm.projects")
+				p {{project}}
+
+
+		p(ng-if="vm.teamspacePerms") Teamspace:
+		md-list
+			md-list-item
+				p {{vm.teamspacePerms}}
+
+		div(layout="row", layout-align="start")
+			md-button.md-raised.md-accent(ng-click="vm.removeLicenseConfirmed()") Remove
+			md-button.md-accent(ng-click="utilsRemoveDialog()") Cancel

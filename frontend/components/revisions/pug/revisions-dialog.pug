@@ -1,0 +1,37 @@
+md-dialog.revisionsDialog(aria-label="Revisions")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Revisions
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+
+	md-list
+
+		md-list-item(
+			ng-if="vm.revisions.length"
+			ng-repeat="rev in vm.revisions"
+			ng-click="vm.goToRevision(rev.tag || rev._id, rev.current)"
+			ng-class="rev.current ? 'current' : ''")
+
+			div(layout="column", flex)
+				p(ng-if="rev.tag") {{rev.tag}}
+				p(ng-if="!rev.tag") {{rev._id}}
+				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
+					p {{rev.author}}
+					p(ng-if="rev.current") (current revision)
+					p {{rev.timestamp | revisionDate }}
+				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
+					p {{rev.desc}}
+
+		div(ng-if="vm.revisionsLoading" 
+			layout-align="center center")
+			h3.revisions Revisions Loading
+
+			md-divider
+
+		div(ng-if="vm.revisionsLoading === false && vm.revisions.length === 0" 
+			layout-align="center center")
+			h3.revisions No Revisions Present
+
+			md-divider

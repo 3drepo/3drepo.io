@@ -51,6 +51,8 @@
 			return Promise.reject({ message: "Please define callback_queue in queue config" });
 		} else if (!options.worker_queue) {
 			return Promise.reject({ message: "Please define worker_queue in queue config" });
+		} else if (!options.model_queue) {
+			return Promise.reject({ message: "Please define model_queue in queue config" });
 		} else if (!options.event_exchange) {
 			return Promise.reject({ message: "Please define event_exchange in queue config" });
 		}
@@ -75,6 +77,7 @@
 				this.logger = options.logger;
 				this.callbackQName = options.callback_queue;
 				this.workerQName = options.worker_queue;
+				this.modelQName = options.model_queue;
 				this.deferedObjs = {};
 				this.eventExchange = options.event_exchange;
 
@@ -90,13 +93,13 @@
 	 * @param {filePath} filePath - Path to uploaded file
 	 * @param {orgFileName} orgFileName - Original file name of the file
 	 * @param {databaseName} databaseName - name of database to commit to
-	 * @param {projectName} projectName - name of project to commit to
+	 * @param {modelName} modelName - name of model to commit to
 	 * @param {userName} userName - name of user
 	 * @param {copy} copy - use fs.copy or fs.move, default fs.move
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	ImportQueue.prototype.importFile = function (filePath, orgFileName, databaseName, projectName, userName, copy, tag, desc) {
+	ImportQueue.prototype.importFile = function (filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
 		let corID = uuid.v1();
 
 		let newPath;
@@ -111,7 +114,7 @@
 				let json = {
 					file: newPath,
 					database: databaseName,
-					project: projectName,
+					project: modelName,
 					owner: userName,
 				};
 
@@ -136,7 +139,7 @@
 			})
 			.then(() => {
 				let msg = `import -f ${jsonFilename}`;
-				return this._dispatchWork(corID, msg);
+				return this._dispatchWork(corID, msg, true);
 			})
 			.then(() => {
 				return new Promise((resolve, reject) => {
@@ -149,11 +152,11 @@
 	};
 
 	/*******************************************************************************
-	 * Dispatch work to queue to create a federated project
+	 * Dispatch work to queue to create a federated model
 	 * @param {account} account - username
-	 * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
 	 *******************************************************************************/
-	ImportQueue.prototype.createFederatedProject = function (account, defObj) {
+	ImportQueue.prototype.createFederatedModel = function (account, defObj) {
 		let corID = uuid.v1();
 		let newFileDir = this.sharedSpacePath + "/" + corID;
 		let filename = `${newFileDir}/obj.json`;
@@ -208,21 +211,23 @@
 
 
 	/*******************************************************************************
-	 * Dispatch work to import toyproject
-	 * @param {database} database - database name
+	 * Dispatch work to import toy model
+	 * @param {string} database - database name
+	 * @param {string} model - model id
+	 * @param {string} modeDirName - the dir name of the model database dump staying in 
 	 *******************************************************************************/
-	ImportQueue.prototype.importToyProject = function (database, project) {
+	ImportQueue.prototype.importToyModel = function (database, model, options) {
 		let corID = uuid.v1();
 
-
-		let msg = `importToy ${database} ${project}`;
+		const skip = options.skip && JSON.stringify(options.skip) || '';
+		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
 		return this._dispatchWork(corID, msg).then(() => {
 
 			return new Promise((resolve, reject) => {
 				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, database, project}),
-					reject: (errCode, message, rep) => reject({ corID, errCode, database, project, message, appId: rep.properties.appId })
+					resolve: () => resolve({corID, database, model}),
+					reject: (errCode, message, rep) => reject({ corID, errCode, database, model, message, appId: rep.properties.appId })
 				};
 			});
 		});
@@ -238,9 +243,9 @@
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	ImportQueue.prototype._moveFileToSharedSpace = function (corID, orgFilePath, newFileName, copy) {
-		let ProjectHelper = require("../models/helper/project");
+		let ModelHelper = require("../models/helper/model");
 
-		newFileName = newFileName.replace(ProjectHelper.fileNameRegExp, "_");
+		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
 
 		let newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		let filePath = newFileDir + newFileName;
@@ -272,14 +277,16 @@
 	 *
 	 * @param {corID} corID - Correlation ID
 	 * @param {msg} orgFilePath - Path to where the file is currently
+	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
-	ImportQueue.prototype._dispatchWork = function (corID, msg) {
+	ImportQueue.prototype._dispatchWork = function (corID, msg, isModelImport) {
 		let info;
-		return this.channel.assertQueue(this.workerQName, { durable: true })
+		const queueName = isModelImport? this.modelQName : this.workerQName;
+		return this.channel.assertQueue(queueName, { durable: true })
 			.then(_info => {
 				info = _info;
 
-				return this.channel.sendToQueue(this.workerQName,
+				return this.channel.sendToQueue(queueName,
 					new Buffer(msg), {
 						correlationId: corID,
 						appId: this.uid,
@@ -290,7 +297,7 @@
 			})
 			.then(() => {
 				this.logger.logInfo(
-					"Sent work to queue[" + this.workerQName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
+					"Sent work to queue[" + queueName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
 						corID: corID.toString()
 					}
 				);

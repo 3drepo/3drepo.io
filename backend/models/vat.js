@@ -1,95 +1,105 @@
-var soap = require('soap');
-var config = require('../config');
-var vatValidationUrl = config.vat.checkUrl;
-var addressMeta = require("./addressMeta");
+"use strict";
 
-var vat = [
-	{ countryCode: 'AT', standardRate: 20 },
-	{ countryCode: 'BE', standardRate: 21 },
-	{ countryCode: 'BG', standardRate: 20 },
-	{ countryCode: 'CY', standardRate: 19 },
-	{ countryCode: 'CZ', standardRate: 21 },
-	{ countryCode: 'DE', standardRate: 19 },
-	{ countryCode: 'DK', standardRate: 25 },
-	{ countryCode: 'EE', standardRate: 20 },
-	{ countryCode: 'GR', standardRate: 23 },
-	{ countryCode: 'ES', standardRate: 21 },
-	{ countryCode: 'FI', standardRate: 24 },
-	{ countryCode: 'FR', standardRate: 20 },
-	{ countryCode: 'HR', standardRate: 25 },
-	{ countryCode: 'HU', standardRate: 27 },
-	{ countryCode: 'IE', standardRate: 23 },
-	{ countryCode: 'IT', standardRate: 22 },
-	{ countryCode: 'LT', standardRate: 21 },
-	{ countryCode: 'LU', standardRate: 17 },
-	{ countryCode: 'LV', standardRate: 21 },
-	{ countryCode: 'MT', standardRate: 18 },
-	{ countryCode: 'NL', standardRate: 21 },
-	{ countryCode: 'PL', standardRate: 23 },
-	{ countryCode: 'PT', standardRate: 23 },
-	{ countryCode: 'RO', standardRate: 19 },
-	{ countryCode: 'SE', standardRate: 25 },
-	{ countryCode: 'SI', standardRate: 22 },
-	{ countryCode: 'SK', standardRate: 20 },
-	{ countryCode: 'GB', standardRate: 20 }
-];
+const soap = require("soap");
+const config = require("../config");
+const vatValidationUrl = config.vat.checkUrl;
+const addressMeta = require("./addressMeta");
+
+// Country Code : Standard Rate
+const vat = { 
+	AT: 20,
+	BE: 21,
+	BG: 20,
+	CY: 19,
+	CZ: 21,
+	DE: 19,
+	DK: 25,
+	EE: 20,
+	GR: 23,
+	ES: 21,
+	FI: 24,
+	FR: 20,
+	HR: 25,
+	HU: 27,
+	IE: 23,
+	IT: 22,
+	LT: 21,
+	LU: 17,
+	LV: 21,
+	MT: 18,
+	NL: 21,
+	PL: 23,
+	PT: 23,
+	RO: 19,
+	SE: 25,
+	SI: 22,
+	SK: 20,
+	GB: 20 
+};
+  
 
 function getByCountryCode(code, isBusiness){
-	'use strict';
 
 	let rate;
 
 	if(isBusiness) {
 
-		if(code === 'GB'){
-			rate = vat.find(item => item.countryCode === 'GB');
+		if(code === "GB"){
+			rate = { standardRate : vat["GB"] };
 		} else {
-			rate = {standardRate : 0 };
+			rate = { standardRate : 0 };
 		}
 
 	} else {
 
-		rate = vat.find(item => item.countryCode === code);
+		rate = { standardRate : vat[code] };
 
 		if(!rate){
 			rate = {standardRate : 0 };
 		}
 	}
 
-	return rate.standardRate / 100;
+	if (rate.standardRate) {
+		return rate.standardRate / 100;
+	} else {
+		return 0;
+	}
 
 }
 
+const soapClient = soap.createClientAsync(vatValidationUrl);
 
-function checkVAT(code, vat){
-	'use strict';
+function checkVAT(code, vatNum){
 
+	const isDebug = config.vat && config.vat.debug && config.vat.debug.skipChecking;
+	const isOutsideEU = addressMeta.euCountriesCode.indexOf(code) === -1;
+	
 	return new Promise((resolve, reject) => {
 
-		if(addressMeta.euCountriesCode.indexOf(code) === -1){
+		// TODO: Should we try to validate the country code at least?
+		if(isDebug || isOutsideEU) {
 			return resolve({ valid: true });
 		} 
 
-		if(config.vat && config.vat.debug && config.vat.debug.skipChecking){
-			return resolve({ valid: true });
-		}
-
 		if(!vatValidationUrl){
-			return reject({message: 'vat.checkUrl is not defined in config file'});
+			const vatMsg = "vat.checkUrl is not defined in config file";
+			return reject({message: vatMsg});
 		}
 
-		soap.createClient(vatValidationUrl, function(err, client) {
-			client.checkVat({
+		//console.log("checkVAT Slow Path hit")
+
+		soapClient.then((client) => {
+			return client.checkVatAsync({
 				countryCode: code,
-				vatNumber: vat
-			}, function(err, result) {
-				if(err){
-					reject(err);
-				} else {
-					resolve(result);
-				}
+				vatNumber: vatNum
 			});
+		}).then((result) => {
+			resolve(result);
+		})
+		.catch((err) => {
+			reject(err);
 		});
+
 	});
 
 }

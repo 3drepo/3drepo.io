@@ -27,26 +27,15 @@
 	module.exports.createApp = function (serverConfig) {
 
 		const express = require("express");
-		const config = require("../config.js");
-		const sharedSession = serverConfig.session;
 		const bodyParser = require("body-parser");
 		const compress = require("compression");
-		const fs = require("fs");
-		const jade = require("jade");
-		const addressMeta = require("../models/addressMeta");
-		const units = require("../models/unit");
+		const path = require("path");
 		const favicon = require("serve-favicon");
-		const History = require("../models/history");
-		const ProjectHelper = require("../models/helper/project");
-		const User = require("../models/user");
-		const systemLogger = require("../logger.js").systemLogger;
-		const responseCodes = require("../response_codes.js");
-		const _ = require('lodash');
-		const C = require('../constants');
+		const serialize = require("serialize-javascript");
+		const app = express();
+		const _ = require("lodash");
+		const createClientConfig = require("./clientConfig.js").createClientConfig;
 
-		let app = express();
-
-		app.use(sharedSession);
 		app.use(compress({ level: 9 }));
 
 		app.use(bodyParser.urlencoded({
@@ -54,292 +43,84 @@
 		}));
 		app.use(bodyParser.json());
 
-		app.set("views", "./jade");
-		app.set("view_engine", "jade");
+		app.set("views", "./pug");
+		app.set("view_engine", "pug");
 		app.locals.pretty = true;
 
-		app.use(favicon("public/images/favicon.ico"));
+		app.use(favicon("./public/images/favicon.ico"));
 
-		let objectToString = function(obj) {
-			let objString = "{";
+		// TODO: This is better than before
+		// but still not great, we could just use nginx or 
+		// a static file server for all of this stuff and 
+		// use Node for the API
 
-			for(let prop in obj)
-			{
-				// to avoid jshint to complain
-				if(obj.hasOwnProperty(prop)){
-					let aProperty       = obj[prop];
-					
-					objString += "\"" + prop + "\":"; 
-					if (typeof aProperty === "object")
-					{
-						objString += objectToString(aProperty);
-					} else {
-						objString += "" + aProperty; 
-					} 
+		// Static file serving
+		const publicDir = __dirname + "/../../public";
+		const statics = [
+			"/images",
+			"/dist",
+			"/icons",
+			"/fonts",
+			"/manifest-icons",
+			"/templates",
+			"/unity"
+		];
 
-					objString += ",";
-				}
-			}
-
-			objString += "}";
-
-			return objString;
-		};
-
-		app.get("/public/plugins/base/config.js", function (req, res) {
-			let params = {};
-
-			params.config_js = "var server_config = {};\n";
-
-			params.config_js += "server_config.api_algorithm = (function () {'use strict'; var self = " + objectToString(config.apiAlgorithm) + "; return self; })();";
-
-			params.config_js += "server_config.apiUrls = server_config.api_algorithm.apiUrls;\n";
-			params.config_js += "server_config.apiUrl = server_config.api_algorithm.apiUrl.bind(server_config.api_algorithm);\n";
-
-			params.config_js += "server_config.GET_API =  \"" + C.GET_API + "\";\n";
-			params.config_js += "server_config.POST_API = (\"" + C.POST_API + "\" in server_config.apiUrls) ? \"" + C.POST_API + "\" : server_config.GET_API;\n";
-			params.config_js += "server_config.MAP_API = (\"" + C.MAP_API + "\" in server_config.apiUrls) ? \"" + C.MAP_API + "\" : server_config.GET_API;\n";
-
-			if ("wayfinder" in config) {
-				// TODO: Make a public section in config for vars to be revealed
-				params.config_js += "\nserver_config.democompany = '" + config.wayfinder.democompany + "';";
-				params.config_js += "\nserver_config.demoproject = '" + config.wayfinder.demoproject + "';";
-			}
-
-			if (config.chat_server) {
-				params.config_js += "\nserver_config.chatHost	= '" + config.chat_server.chat_host + "';";
-				params.config_js += "\nserver_config.chatPath	= '" + '/' + config.chat_server.subdirectory + "';";
-			}
-
-			params.config_js += "\nserver_config.chatReconnectionAttempts = " + config.chat_reconnection_attempts + ";";
-
-			params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
-
-			if (serverConfig.backgroundImage) {
-				params.config_js += "\nserver_config.backgroundImage = '" + serverConfig.backgroundImage + "'";
-			}
-
-			params.config_js += "\nwindow.hostAlias = {};\n";
-			params.config_js += "\nwindow.hostAlias[\"3drepo_api\"] = function(path) { return server_config.apiUrl(server_config.GET_API, path); }\n";
-
-			params.config_js += "\nserver_config.return_path = '/';";
-			params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
-			params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
-			params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
-			params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
-			params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
-			params.config_js += "\n\nserver_config.euCountriesCode = " + JSON.stringify(addressMeta.euCountriesCode) + ";";
-			params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
-			params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
-			params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";
-			params.config_js += "\n\nserver_config.tagRegExp = " + History.tagRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.projectNameRegExp = " + ProjectHelper.projectNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.fileNameRegExp = " + ProjectHelper.fileNameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.usernameRegExp = " + User.usernameRegExp.toString() + ";";
-			params.config_js += "\n\nserver_config.acceptedFormat = " + JSON.stringify(ProjectHelper.acceptedFormat) + ";";
-
-			params.config_js += '\n\nserver_config.responseCodes = ' +  JSON.stringify(_.each(responseCodes.codesMap)) + ";";
-			params.config_js += '\n\nserver_config.permissions = ' +  JSON.stringify({
-				'PERM_DELETE_PROJECT': C.PERM_DELETE_PROJECT,
-				'PERM_CHANGE_PROJECT_SETTINGS': C.PERM_CHANGE_PROJECT_SETTINGS,
-				'PERM_ASSIGN_LICENCE': C.PERM_ASSIGN_LICENCE,
-				'PERM_UPLOAD_FILES': C.PERM_UPLOAD_FILES,
-				'PERM_CREATE_ISSUE': C.PERM_CREATE_ISSUE,
-				'PERM_COMMENT_ISSUE': C.PERM_COMMENT_ISSUE,
-				'PERM_VIEW_ISSUE': C.PERM_VIEW_ISSUE,
-				'PERM_DOWNLOAD_PROJECT': C.PERM_DOWNLOAD_PROJECT,
-				'PERM_VIEW_PROJECT': C.PERM_VIEW_PROJECT,
-				'PERM_CREATE_PROJECT': C.PERM_CREATE_PROJECT,
-				'PERM_EDIT_PROJECT': C.PERM_EDIT_PROJECT
-			}) + ";";
-
-			res.header("Content-Type", "text/javascript");
-			res.render("config.jade", params);
+		statics.forEach((folder) => {
+			const staticPath = path.resolve(publicDir + folder);
+			app.use(folder, express.static(staticPath, {fallthrough: true}));
+			app.use(folder, function(req, res) {
+				res.status(404).send('404 - File Not Found');
+			});
 		});
 
-		app.use("/public", express.static(__dirname + "/../../public"));
 
-		let DEFAULT_PLUGIN_STRUCTURE = {
-			"plugin": "home",
-			"friends": [
-				"login"
-			],
-			"functions": [
-				"registerRequest",
-				"registerVerify",
-				"passwordForgot",
-				"passwordChange",
-				"pricing",
-				"signUp",
-				"contact",
-				"payment",
-				"billing"
-			],
-			"children": [{
-				"plugin": "account",
-				"url": ":account",
-				"children": [{
-					"plugin": "project",
-					"children": [
-						{ "plugin": "revision" }
-					],
-					"friends": [
-						"panel",
-						"filter",
-						"tree",
-						"viewpoints",
-						"issues",
-						"clip",
-						"bottomButtons",
-						"qrCodeReader",
-						"docs",
-						"utils",
-						"groups",
-						"measure",
-						"rightPanel",
-						"building",
-						"revisions"
-					]
-				}]
-			}]
-		};
+		app.get("/index.html", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/index.html"));
+		});
 
-		// Set up the legal plugins
-		if (config.hasOwnProperty("legal")) {
-			for (let i = 0; i < config.legal.length; i += 1) {
-				DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
-			}
-		}
+		app.get("/manifest.json", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/manifest.json"));
+		});
 
-		// TODO: Replace with user based plugin selection
-		let pluginStructure = {};
+		app.get("/precache.js", function (req, res) {
+			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
+		});
 
-		if (serverConfig.pluginStructure) {
-			pluginStructure = require("../../" + serverConfig.pluginStructure);
-		} else {
-			pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
-		}
 
-		/**
-		 * Get the jade files for the required state or plugin
-		 *
-		 * @param {string} required - Name of required plugin
-		 * @param {string} pathToStatesAndPlugins - Root path of plugins 
-		 * @param {Object} params - Updates with information from plugin structure 
-		 */
-		function getJadeFiles(required, pathToStatesAndPlugins, params) {
-			let requiredFiles,
-				requiredDir,
-				fileSplit;
+		const clientConfig = createClientConfig(serverConfig);
 
-			requiredDir = pathToStatesAndPlugins + "/" + required + "/jade";
-			try {
-				fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
+		app.get("/version.json", function (req, res) {
+			return res.json({"VERSION": clientConfig.VERSION });
+		});
 
-				requiredFiles = fs.readdirSync(requiredDir);
-				requiredFiles.forEach(function (file) {
-					fileSplit = file.split(".");
-					params.frontendJade.push({
-						id: fileSplit[0] + ".html",
-						path: requiredDir + "/" + file
-					});
-				});
-			} catch (e) {
-				// Jade files don't exist
-				systemLogger.logFatal(e.message);
-			}
-		}
+		app.get("/config.js", function (req, res) {
 
-		/**
-		 * Setup loading only the required states and plugins jade files
-		 *
-		 * @private
-		 * @param {string[]} statesAndPlugins - List of states and plugins to load 
-		 * @param {string} required - Plugin to load
-		 * @param {string} pathToStatesAndPlugins - Base directory to load plugins from
-		 * @param {Object} params - Updates with information from plugin structure
-		 */
-		function setupRequiredJade(statesAndPlugins, required, pathToStatesAndPlugins, params) {
-			let i, length;
+			// Only need to set the userId the rest is static
+			clientConfig.userId = _.get(req, "session.user.username");
 
-			if (statesAndPlugins.indexOf(required.plugin) !== -1) {
-				getJadeFiles(required.plugin, pathToStatesAndPlugins, params);
+			// TODO: This used to be a long string concat, 
+			// this is marginally better but still a complete hack. 
+			// There is definitely a better way to do this
+			const serializedConfig = serialize(clientConfig); 
 
-				// Friends
-				if (required.hasOwnProperty("friends")) {
-					for (i = 0, length = required.friends.length; i < length; i += 1) {
-						if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
-							getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
-						}
-					}
-				}
+			res.header("Content-Type", "text/javascript");
+			res.render("config.pug", {config: serializedConfig});
+		});
 
-				// Functions
-				if (required.hasOwnProperty("functions")) {
-					for (i = 0, length = required.functions.length; i < length; i += 1) {
-						if (statesAndPlugins.indexOf(required.functions[i]) !== -1) {
-							getJadeFiles(required.functions[i], pathToStatesAndPlugins, params);
-						}
-					}
-				}
+		// app.get('/*.html', function(req, res){
+		// 	res.status(404).send("File not found");
+		// });
 
-				// Recurse for children
-				if (required.hasOwnProperty("children")) {
-					for (i = 0, length = required.children.length; i < length; i += 1) {
-						setupRequiredJade(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
-					}
-				}
-			}
-		}
-
-		/**
-		 * Get all available states and plugins
-		 *
-		 * @param {Object} params - updates with information from plugin structure
-		 */
-		function setupJade(params) {
-			let pathToStatesAndPlugins = "./frontend",
-				statesAndPlugins;
-
-			// Get all available states and plugins in the file system
-			statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
-			setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
-		}
-
-		app.get("*", function (req, res) {
-			// Generate the list of files to load for the plugins
-			let params = {
-				"jsfiles": config.external.js,
-				"cssfiles": config.external.css,
-				"pluginLoaded": [],
-				"pluginJade": [],
-				"pluginJS": [],
-				"pluginAngular": {},
-				"parentStateJSON": {},
-				"ui": {},
-				"uistate": {},
-				"pluginCSS": [],
-				"renderMe": jade.renderFile,
-				"structure": JSON.stringify(pluginStructure),
-				"frontendJade": [],
-				"gaTrackId": config.gaTrackId,
-				"googleConversionId": config.googleConversionId,
-				"userId": _.get(req, 'session.user.username')
-			};
-
-			params.parentStateJSON = JSON.stringify(params.parentStateJSON);
-			params.uistate = JSON.stringify(params.uistate);
-
-			// Set up the legal plugins
-			params.legalTemplates = [];
-			if (config.hasOwnProperty("legal")) {
-				params.legalTemplates = config.legal;
-			}
-
-			setupJade(params);
-			res.render(serverConfig.template, params);
+		// app.get('/*.js', function(req, res){
+		// 	res.status(404).send("File not found");
+		// });
+		
+		app.get('*', function(req,res){
+			res.sendFile(path.resolve(publicDir + "/index.html"));
 		});
 
 		return app;
 	};
+
 })();

@@ -40,6 +40,8 @@
 	define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
 	define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
 
+	define("DEFAULT_MEMBER_ROLE", "team_member");
+
 	// Main collections (tables) in 3D Repo
 	define("REPO_COLLECTION_SCENE", "scene");
 	define("REPO_COLLECTION_HISTORY", "history");
@@ -260,19 +262,147 @@
 	//
 	//-----------------------------------------------------------------------------
 
-	define("PERM_DELETE_PROJECT", "delete_project");
-	define("PERM_CHANGE_PROJECT_SETTINGS", "change_project_settings");
+	// not sure when to use
+	define("PERM_CREATE_TEAM_SPACE", "create_team_space");
+	define("PERM_DELETE_TEAM_SPACE", "delete_team_space");
+
+	//team space
 	define("PERM_ASSIGN_LICENCE", "assign_licence");
+	define("PERM_REVOKE_LICENCE","revoke_licence");
+	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
+	define("PERM_CREATE_PROJECT", "create_project");
+	define("PERM_CREATE_JOB","create_job");
+	define("PERM_DELETE_JOB","delete_job");
+	define("PERM_ASSIGN_JOB","assign_job");
+	define("PERM_VIEW_PROJECTS", "view_projects"),
+
+	//project level permission
+	define("PERM_CREATE_MODEL", "create_model");
+	define("PERM_CREATE_FEDERATION", "create_federation");
+	define("PERM_PROJECT_ADMIN", "admin_project");
+	define("PERM_EDIT_PROJECT", "edit_project");
+	define("PERM_DELETE_PROJECT", "delete_project");
+
+	define("PERM_UPLOAD_FILES_ALL_MODELS", "upload_files_all_models");
+	define("PERM_EDIT_FEDERATION_ALL_MODELS", "edit_federation_all_models");
+	define("PERM_CREATE_ISSUE_ALL_MODELS", "create_issue_all_models");
+	define("PERM_COMMENT_ISSUE_ALL_MODELS", "comment_issue_all_models");
+	define("PERM_VIEW_ISSUE_ALL_MODELS", "view_issue_all_models");
+	define("PERM_VIEW_MODEL_ALL_MODELS", "view_model_all_models");
+	define("PERM_DOWNLOAD_MODEL_ALL_MODELS", "download_model_all_models");
+	define("PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS", "change_model_settings_all_models");
+
+	// models
+	define("PERM_CHANGE_MODEL_SETTINGS", "change_model_settings");
 	define("PERM_UPLOAD_FILES", "upload_files");
 	define("PERM_CREATE_ISSUE", "create_issue");
 	define("PERM_COMMENT_ISSUE", "comment_issue");
 	define("PERM_VIEW_ISSUE", "view_issue");
-	define("PERM_DOWNLOAD_PROJECT", "download_project");
-	define("PERM_VIEW_PROJECT", "view_project");
-	define("PERM_CREATE_PROJECT", "create_project");
-	define("PERM_PROJECT_ADMIN", "admin");
-	// edit fed project
-	define("PERM_EDIT_PROJECT", "edit_project");
+	define("PERM_VIEW_MODEL", "view_model");
+	define("PERM_DOWNLOAD_MODEL", "download_model");
+	define("PERM_EDIT_FEDERATION", "edit_federation");
+	define("PERM_DELETE_FEDERATION", "delete_federation");
+	define("PERM_DELETE_MODEL", "delete_model");
+	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
+
+	//team space
+	define("ACCOUNT_PERM_LIST", [
+		module.exports.PERM_ASSIGN_LICENCE,
+		module.exports.PERM_REVOKE_LICENCE,
+		module.exports.PERM_TEAMSPACE_ADMIN,
+		module.exports.PERM_CREATE_PROJECT,
+		module.exports.PERM_CREATE_JOB,
+		module.exports.PERM_DELETE_JOB,
+		module.exports.PERM_ASSIGN_JOB,
+		module.exports.PERM_VIEW_PROJECTS
+	]);
+
+	//project level permission
+	define("PROJECT_PERM_LIST", [
+		module.exports.PERM_CREATE_MODEL,
+		module.exports.PERM_CREATE_FEDERATION,
+		module.exports.PERM_PROJECT_ADMIN,
+		module.exports.PERM_EDIT_PROJECT,
+		module.exports.PERM_DELETE_PROJECT,
+		module.exports.PERM_UPLOAD_FILES_ALL_MODELS,
+		module.exports.PERM_EDIT_FEDERATION_ALL_MODELS,
+		module.exports.PERM_CREATE_ISSUE_ALL_MODELS,
+		module.exports.PERM_COMMENT_ISSUE_ALL_MODELS,
+		module.exports.PERM_VIEW_ISSUE_ALL_MODELS,
+		module.exports.PERM_VIEW_MODEL_ALL_MODELS,
+		module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS,
+		module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS
+	]);
+
+	// models
+	define("MODEL_PERM_LIST",[
+		module.exports.PERM_CHANGE_MODEL_SETTINGS,
+		module.exports.PERM_UPLOAD_FILES,
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL,
+		module.exports.PERM_DOWNLOAD_MODEL,
+		module.exports.PERM_EDIT_FEDERATION,
+		module.exports.PERM_DELETE_FEDERATION,
+		module.exports.PERM_DELETE_MODEL,
+		module.exports.PERM_MANAGE_MODEL_PERMISSION
+	]);
+
+	define("IMPLIED_PERM", {
+		[module.exports.PERM_TEAMSPACE_ADMIN]:{
+			'account': module.exports.ACCOUNT_PERM_LIST,
+			'project': module.exports.PROJECT_PERM_LIST,
+			'model': module.exports.MODEL_PERM_LIST
+		},
+
+		[module.exports.PERM_VIEW_PROJECTS]:{
+			'project': [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
+			'model': [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
+		},
+
+		[module.exports.PERM_PROJECT_ADMIN]: {
+			'project': module.exports.PROJECT_PERM_LIST,
+			'model': module.exports.MODEL_PERM_LIST
+		},
+
+		[module.exports.PERM_UPLOAD_FILES_ALL_MODELS]: {
+			'model': [module.exports.PERM_UPLOAD_FILES]
+		},
+
+		[module.exports.PERM_EDIT_FEDERATION_ALL_MODELS]: {
+			'model': [module.exports.PERM_EDIT_FEDERATION]
+		},
+
+		[module.exports.PERM_CREATE_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_CREATE_ISSUE]
+		},
+
+		[module.exports.PERM_COMMENT_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_COMMENT_ISSUE]
+		},
+
+		[module.exports.PERM_VIEW_ISSUE_ALL_MODELS]: {
+			'model': [module.exports.PERM_VIEW_ISSUE]
+		},
+
+		[module.exports.PERM_VIEW_MODEL_ALL_MODELS]: {
+			'model': [module.exports.PERM_VIEW_MODEL]
+		},
+
+		[module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS]: {
+			'model': [module.exports.PERM_DOWNLOAD_MODEL]
+		},
+
+		[module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS]: {
+			'model': [module.exports.PERM_CHANGE_MODEL_SETTINGS]
+		},
+
+		[module.exports.PERM_MANAGE_MODEL_PERMISSION]: {
+			'model': module.exports.MODEL_PERM_LIST
+		}
+
+	});
 
 	//-----------------------------------------------------------------------------
 	//
@@ -284,6 +414,32 @@
 	define("COLLABORATOR_TEMPLATE", "collaborator");
 	define("COMMENTER_TEMPLATE", "commenter");
 	define("VIEWER_TEMPLATE", "viewer");
+
+	define("VIEWER_TEMPLATE_PERMISSIONS", [
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL
+	]);
+
+	define("COMMENTER_TEMPLATE_PERMISSIONS", [
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL
+	]);
+
+	define("COLLABORATOR_TEMPLATE_PERMISSIONS",[
+		module.exports.PERM_UPLOAD_FILES,
+		module.exports.PERM_CREATE_ISSUE,
+		module.exports.PERM_COMMENT_ISSUE,
+		module.exports.PERM_VIEW_ISSUE,
+		module.exports.PERM_VIEW_MODEL,
+		module.exports.PERM_DOWNLOAD_MODEL,
+		module.exports.PERM_EDIT_FEDERATION,
+	]);
+
+	define("ADMIN_TEMPLATE_PERMISSIONS",[
+		module.exports.PERM_MANAGE_MODEL_PERMISSION
+	]);
 
 	//-----------------------------------------------------------------------------
 	//
@@ -306,16 +462,20 @@
 		"registerVerify",
 		"signUp",
 		"termsAndConditions",
-		"false"
+		"false",
+		"admin",
+		"root"
 	]);
 
-	define("REPO_BLACKLIST_PROJECT", [
+	define("REPO_BLACKLIST_MODEL", [
 		"database",
 		"verify",
 		"forgot-password",
 		"password",
 		"subscriptions",
-		"billings"
+		"billings",
+		"projects",
+		"system"
 	]);
 
 
@@ -374,4 +534,32 @@
 	//-----------------------------------------------------------------------------
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
+	define("PROJECT_DEFAULT_ID", "default");
+
+
+	//issues
+
+	define('ISSUE_STATUS_OPEN', 'open'); 
+	define('ISSUE_STATUS_IN_PROGRESS', 'in progress'); 
+	define('ISSUE_STATUS_FOR_APPROVAL', 'for approval'); 
+	define('ISSUE_STATUS_CLOSED', 'closed'); 
+
+	define('MAIL_URLS',{
+		'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
+		'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
+		'model': data => `/${data.account}/${data.model}`
+	});
+
+	define('DEFAULT_JOBS',[
+		{ _id: 'Client' },
+		{ _id: 'Architect'},
+		{ _id: 'Structural Engineer'},
+		{ _id: 'MEP Engineer'},
+		{ _id: 'Project Manager'},
+		{ _id: 'Quantity Surveyor'},
+		{ _id: 'Asset Manager'},
+		{ _id: 'Main Contractor'},
+		{ _id: 'Supplier'}
+	]);
+	
 })();

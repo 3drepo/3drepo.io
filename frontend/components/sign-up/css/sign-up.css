@@ -1,0 +1,96 @@
+sign-up .registerLinks {
+    font-size: 14px;
+    margin: 10px 10px 10px 10px
+}
+
+sign-up {
+}
+
+sign-up #tc {
+    margin-top: 15px;
+    margin-right: 15px;
+}
+sign-up #tc md-checkbox {
+    margin : 0;
+}
+sign-up #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+sign-up #tc a {
+    font-size: 12px;
+}
+sign-up #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+    margin: -3px 0 20px 10px;
+}
+sign-up #tc a {
+    outline: none;
+}
+
+sign-up .sign-up-button {
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 80%;
+}
+
+sign-up .sign-up-button md-progress-circular {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px !important;
+}
+
+sign-up #loginCaptcha > div {
+    margin-left: 20px;  
+}
+
+sign-up #registerWait {
+    height: 30px;
+}
+sign-up #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+sign-up #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+sign-up .registerError {
+    max-width: 400px;
+    color: #e44539 !important;
+    margin: 20px 20px 5px;
+    font-weight: normal;
+    text-align: center;
+}
+
+sign-up .rc-anchor-light {
+    background: red;
+}
+
+sign-up form md-input-container {
+    margin: 10px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+sign-up #signUpFormHiddenInputs {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+}
+
+sign-up .bottom-links {
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    sign-up {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}

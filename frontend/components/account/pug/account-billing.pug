@@ -1,0 +1,115 @@
+#accountBillingPage.homeUserContent.userContentNoMargin
+	md-content.md-whiteframe-1dp(aria-label="Billing", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Billing
+
+		md-tabs(md-dynamic-height, md-border-bottom, ng-if="true") 
+			md-tab(label="Subscription")
+
+				div.assignTabHolder.loadingHolder(
+					ng-if="!vm.billings || !vm.subscriptions"
+					layout="row")
+
+					md-progress-circular.loading
+					br
+					h3 Loading Billing Data
+
+				div.userContent#accountBillingSubscription(ng-if="vm.billings && vm.subscriptions")
+
+					div(layout="row")
+						md-input-container(flex)
+							label Licenses
+							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", required)
+						md-input-container(flex)
+							label Payment (£ / month) **
+							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
+						md-input-container(flex)
+							label Quota available
+							input(type="text", value="{{vm.quota.spaceLimit | formatBytes}}", ng-disabled="true")
+						md-input-container(flex)
+							label Quota used
+							input(type="text", value="{{vm.quota.spaceUsed | formatBytes:vm.quota.spaceLimit}}", ng-disabled="true")
+
+					div(layout="row")
+						md-input-container(flex)
+							label First name
+							input(type="text", ng-model="vm.newBillingAddress.firstName", required)
+						md-input-container(flex)
+							label Last name
+							input(type="text", ng-model="vm.newBillingAddress.lastName", required)
+
+					div(layout="row")
+						md-input-container(flex)
+							label Business name
+							input(type="text", ng-model="vm.newBillingAddress.company", ng-required="vm.companyNameRequired")
+						md-input-container(flex)
+							label VAT number
+							input(type="text", ng-model="vm.newBillingAddress.vat")
+
+					div(layout="column", flex)
+						div(layout="row", flex, layout-align="start start")
+							div(layout="column", flex)
+								md-input-container(flex)
+									label Address
+									input(type="text", ng-model="vm.newBillingAddress.line1", required)
+								md-input-container(flex)
+									label Address 2
+									input(type="text", ng-model="vm.newBillingAddress.line2")
+
+							div(layout="column", flex)
+								md-input-container(flex)
+									label City
+									input(type="text", ng-model="vm.newBillingAddress.city", required)
+								md-input-container(flex, ng-if="vm.showStates")
+									label State
+									md-select(ng-model="vm.newBillingAddress.state", ng-required="true")
+										md-option(ng-repeat="state in vm.usStates", value="{{state.code}}") {{state.name}}
+								md-input-container(flex)
+									label Postal code
+									input(type="text", ng-model="vm.newBillingAddress.postalCode", required)
+								md-input-container(flex)
+									label Country
+									md-select(ng-model="vm.newBillingAddress.countryCode", required, ng-disabled="vm.countrySelectDisabled")
+										md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
+
+
+					.accountBillingSave
+						div(layout="row", layout-align="start")
+							md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save") Confirm
+							img(src="/images/paypal.png")
+
+					p.accountBillingAddressInfo Changing your billing information could affect your applicable tax rate
+					p.accountBillingAddressInfo * Required field
+					p.accountBillingAddressInfo ** Subject to VAT where applicable
+
+
+			md-tab(label="History")
+				.userContent#accountBillingHistory
+					section
+						md-subheader
+							div(layout="row", layout-align="start")
+								label(flex="10") Number
+								label(flex="15") Date
+								label(flex="15") Status
+								label(flex="25") Description
+								label(flex="15") Payment
+								label(flex="10") Amount (£)
+								span(flex="5")
+
+					div
+						.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billings")
+							md-input-container(flex="10")
+								input(type="text", value="{{billing.invoiceNo}}", ng-disabled="true", aria-label="number")
+							md-input-container(flex="15")
+								input(type="text", value="{{billing.createdAtDate | date:'dd-MM-yyyy'}}", ng-disabled="true", aria-label="date")
+							md-input-container(flex="15")
+								input(type="text", value="{{billing.status}}", ng-disabled="true", aria-label="status")
+							md-input-container(flex="25")
+								input(type="text", value="{{billing.description}}", ng-disabled="true", aria-label="description")
+							md-input-container(flex="15")
+								input(type="text", value="{{billing.gateway}}", ng-disabled="true", aria-label="paymentMethod")
+							md-input-container(flex="10")
+								input(type="text", value="{{billing.amount}}", ng-disabled="true", aria-label="amount")
+							md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)", flex="5")
+								md-icon.angular-material-icons cloud_download

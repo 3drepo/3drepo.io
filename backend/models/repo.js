@@ -99,7 +99,7 @@ var Camera = ModelFactory.createClass(
 	'Camera', 
 	cameraSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 
@@ -107,7 +107,7 @@ var Material = ModelFactory.createClass(
 	'Material', 
 	materialSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 
@@ -116,7 +116,7 @@ var Metadata = ModelFactory.createClass(
 	'Metadata', 
 	metaDataSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 
@@ -124,7 +124,7 @@ var Reference = ModelFactory.createClass(
 	'Reference', 
 	referenceSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 
@@ -132,7 +132,7 @@ var Texture = ModelFactory.createClass(
 	'Texture', 
 	textureSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 
@@ -141,7 +141,7 @@ var Transformation = ModelFactory.createClass(
 	'Transformation', 
 	transformationSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.model}.scene`;
 	}
 );
 

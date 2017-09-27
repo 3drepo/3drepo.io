@@ -33,7 +33,7 @@ var groupSchema = Schema({
 		_id : false,
 		shared_id: Object,
 		account: String,
-		project: String
+		model: String
 	}],
 	issue_id: Object,
 	color: [Number]
@@ -83,7 +83,7 @@ groupSchema.methods.updateAttrs = function(data){
 		addPromises.push(
 			Mesh.addGroup(
 				obj.account,
-				obj.project,
+				obj.model,
 				id,
 				utils.uuidToString(this._id)
 			).then( mesh => {
@@ -105,7 +105,7 @@ groupSchema.methods.updateAttrs = function(data){
 			removePromises.push(
 				Mesh.removeGroup(
 					obj.account,
-					obj.project,
+					obj.model,
 					id,
 					utils.uuidToString(this._id)
 				)
@@ -117,7 +117,7 @@ groupSchema.methods.updateAttrs = function(data){
 	}).then(() => {
 
 		data.objects.forEach(obj => {
-			obj.id = stringToUUID(obj.id);
+			obj.id = utils.stringToUUID(obj.id);
 		});
 
 		this.name = data.name || this.name;
@@ -142,11 +142,11 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 	let group = this.model('Group').createInstance({
 		account: dbCol.account, 
-		project: dbCol.project
+		model: dbCol.model
 	});
 
 
-	group._id = stringToUUID(uuid.v1());
+	group._id = utils.stringToUUID(uuid.v1());
 	return group.updateAttrs(data);
 	
 };
@@ -155,11 +155,11 @@ groupSchema.methods.clean = function(){
 	'use strict';
 
 	let cleaned = this.toObject();
-	cleaned._id = uuidToString(cleaned._id);
-	cleaned.issue_id = cleaned.issue_id && uuidToString(cleaned.issue_id);
+	cleaned._id = utils.uuidToString(cleaned._id);
+	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.objects.forEach(object => {
-		//object.id = uuidToString(object.id);
-		object.shared_id && (object.shared_id = uuidToString(object.shared_id));
+		//object.id = utils.uuidToString(object.id);
+		object.shared_id && (object.shared_id = utils.uuidToString(object.shared_id));
 	});
 	return cleaned;
 
@@ -169,7 +169,7 @@ groupSchema.methods.clean = function(){
 groupSchema.statics.deleteGroup = function(dbCol, id){
 	'use strict';
 
-	return Group.findOneAndRemove(dbCol, { _id : stringToUUID(id)}).then(group => {
+	return Group.findOneAndRemove(dbCol, { _id : utils.stringToUUID(id)}).then(group => {
 
 		if(!group){
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
@@ -180,7 +180,7 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 		group.objects.forEach(obj => removePromises.push(
 			Mesh.removeGroup(
 				obj.account,
-				obj.project,
+				obj.model,
 				utils.uuidToString(obj.id),
 				id
 			)
@@ -195,7 +195,7 @@ var Group = ModelFactory.createClass(
 	'Group', 
 	groupSchema, 
 	arg => { 
-		return `${arg.project}.groups`;
+		return `${arg.model}.groups`;
 	}
 );
 

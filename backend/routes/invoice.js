@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const middlewares = require("./middlewares");
+	const middlewares = require("../middlewares/middlewares");
 	const express = require("express");
 	const router = express.Router({ mergeParams: true });
 
@@ -53,10 +53,10 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			let template = "invoice.jade";
+			let template = "invoice.pug";
 
 			if(invoice.type === "refund"){
-				template = "refund.jade";
+				template = "refund.pug";
 			}
 
 			//console.log( invoice.toJSON());

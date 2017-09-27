@@ -1,0 +1,20 @@
+md-menu#accountMenu(md-position-mode="target-right target")
+	md-button.md-icon-button.accountMenuButton(aria-label="Account Menu", ng-click="vm.openMenu($mdOpenMenu, $event)")
+		md-icon.angular-material-icons(md-menu-origin) account_circle
+	md-menu-content#accountMenuContent(width="3")
+		md-menu-item(style="color: #adadad;" layout-align="start center" flex)
+			md-icon.angular-material-icons(style="width: 56px;" md-menu-origin layout-align="start center") account_circle
+			| {{vm.userAccount}}
+		md-divider
+		md-menu-item
+			md-button(ng-click="vm.showTeamspaces()")
+				md-icon.angular-material-icons(md-menu-align-target) view_list
+				| Teamspaces
+		md-menu-item
+			md-button(ng-click="vm.openUserManual()")
+				md-icon.angular-material-icons(md-menu-align-target) description
+				| User Manual
+		md-menu-item
+			md-button(ng-click="vm.logout()")
+				md-icon.angular-material-icons exit_to_app
+				| Logout

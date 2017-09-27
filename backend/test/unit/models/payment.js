@@ -19,7 +19,7 @@ let UserBilling = proxyquire('../../../models/userBilling', {
 });
 
 let Subscriptions = proxyquire('../../../models/subscriptions', {
-	'./projectSetting' :  {}
+	'./modelSetting' :  {}
 });
 
 let C = require('../../../constants');
@@ -73,11 +73,10 @@ describe('UserBilling', function(){
 
 	function createPaymentTest(data){
 
-		let subscriptions = new Subscriptions('', {}, data.currentSubscriptions);
+		let subscriptions = new Subscriptions('', '', {}, data.currentSubscriptions);
 
 		subscriptions.now = data.paymentDate.toDate();
 		
-
 		let stub = sinon.stub(subscriptions, 'removeSubscriptionByPlan').returns(Promise.resolve());
 
 		return subscriptions.changeSubscriptions(data.newLicences).then(changes => {
@@ -133,7 +132,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.tax).to.closeTo(20, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
 		});
@@ -163,7 +162,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.tax).to.closeTo(60, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
 		});
@@ -194,7 +193,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.tax).to.closeTo(0, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
 		});
@@ -225,7 +224,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.tax).to.closeTo(20, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
 		});
@@ -255,7 +254,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.tax).to.closeTo(38, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
 		});
@@ -492,7 +491,7 @@ describe('UserBilling', function(){
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
 
-				expect(result.proRataPayment).to.not.exists;
+				expect(result.proRataPayment).to.not.exist;
 
 				expect(result.paymentDate.toISOString()).to.equal(nextPaymentDate.toISOString());
 			});

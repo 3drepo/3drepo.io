@@ -18,7 +18,7 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Your payment of ${data.amount} is confirmed and you can start uploading projects in your 
+	Your payment of ${data.amount} is confirmed and you can start uploading models in your 
 	${data.account} repository.
 	<br><br>
 	Best,<br>

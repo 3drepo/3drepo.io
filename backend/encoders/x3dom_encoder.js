@@ -33,8 +33,6 @@ var jsonCache = {};
 
 var mathjs		= require('mathjs');
 
-var dbInterface  = require('../db/db_interface.js');
-
 var utils       = require('../utils.js');
 
 var deferred    = require("deferred");
@@ -716,52 +714,52 @@ function X3D_AddToShape(xmlDoc, shape, account, project, mesh, subMeshID, mode, 
 			break;
 
 
-		case "pbf":
-			var popGeometry = xmlDoc.createElement('PopGeometry');
-			popCache.getPopCache(dbInterface, project, false, null, mesh['id'], function(err, cacheObj) {
-				if (mesh['id'] in GLOBAL.pbfCache) {
-					var cacheMesh = GLOBAL.pbfCache[mesh['id']];
+		// case "pbf":
+		// 	var popGeometry = xmlDoc.createElement('PopGeometry');
+		// 	popCache.getPopCache(dbInterface, project, false, null, mesh['id'], function(err, cacheObj) {
+		// 		if (mesh['id'] in GLOBAL.pbfCache) {
+		// 			var cacheMesh = GLOBAL.pbfCache[mesh['id']];
 
-					popGeometry.setAttribute('id', 'tst');
-					popGeometry.setAttribute('vertexCount', mesh.faces_count * 3);
-					popGeometry.setAttribute('vertexBufferSize', mesh.vertices_count);
-					popGeometry.setAttribute('primType', "TRIANGLES");
-					popGeometry.setAttribute('attributeStride', cacheMesh.stride);
-					popGeometry.setAttribute('normalOffset', 8);
-					popGeometry.setAttribute('bbMin', bbox.min.join(' '));
+		// 			popGeometry.setAttribute('id', 'tst');
+		// 			popGeometry.setAttribute('vertexCount', mesh.faces_count * 3);
+		// 			popGeometry.setAttribute('vertexBufferSize', mesh.vertices_count);
+		// 			popGeometry.setAttribute('primType', "TRIANGLES");
+		// 			popGeometry.setAttribute('attributeStride', cacheMesh.stride);
+		// 			popGeometry.setAttribute('normalOffset', 8);
+		// 			popGeometry.setAttribute('bbMin', bbox.min.join(' '));
 
-					if (cacheMesh.has_tex) {
-						popGeometry.setAttribute('texcoordOffset', 12);
-					}
+		// 			if (cacheMesh.has_tex) {
+		// 				popGeometry.setAttribute('texcoordOffset', 12);
+		// 			}
 
-					popGeometry.setAttribute('size', bbox.size.join(' '));
-					popGeometry.setAttribute('tightSize', bbox.size.join(' '));
-					popGeometry.setAttribute('maxBBSize', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('size', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('tightSize', bbox.size.join(' '));
+		// 			popGeometry.setAttribute('maxBBSize', bbox.size.join(' '));
 
-					if ('min_texcoordu' in cacheMesh) {
-						popGeometry.setAttribute('texcoordMinU', cacheMesh.minTexcoordU);
-						popGeometry.setAttribute('texcoordScaleU', (cacheMesh.maxTexcoordu - cacheMesh.minTexcoordU));
-						popGeometry.setAttribute('texcoordMinV', cacheMesh.minTexcoordV);
-						popGeometry.setAttribute('texcoordScaleV', (cacheMesh.maxTexcoordV - cacheMesh.minTexcoordV));
-					}
+		// 			if ('min_texcoordu' in cacheMesh) {
+		// 				popGeometry.setAttribute('texcoordMinU', cacheMesh.minTexcoordU);
+		// 				popGeometry.setAttribute('texcoordScaleU', (cacheMesh.maxTexcoordu - cacheMesh.minTexcoordU));
+		// 				popGeometry.setAttribute('texcoordMinV', cacheMesh.minTexcoordV);
+		// 				popGeometry.setAttribute('texcoordScaleV', (cacheMesh.maxTexcoordV - cacheMesh.minTexcoordV));
+		// 			}
 
-					for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
-						var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
+		// 			for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
+		// 				var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
 
-						popGeometryLevel.setAttribute('src', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
-						popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
-						popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
+		// 				popGeometryLevel.setAttribute('src', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
+		// 				popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
+		// 				popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
 
-						popGeometryLevel.textContent = ' ';
-						popGeometry.appendChild(popGeometryLevel);
-					}
+		// 				popGeometryLevel.textContent = ' ';
+		// 				popGeometry.appendChild(popGeometryLevel);
+		// 			}
 
-					shape.appendChild(popGeometry);
+		// 			shape.appendChild(popGeometry);
 
-					//shape.setAttribute('bboxCenter', bbox.center.join(' '));
-					//shape.setAttribute('bboxSize', bbox.size.join(' '));
-				}
-			});
+		// 			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+		// 			//shape.setAttribute('bboxSize', bbox.size.join(' '));
+		// 		}
+		// 	});
 
 		break;
 	}
@@ -987,9 +985,7 @@ exports.render = function (account, project, doc, logger){
 
 }
 
-exports.route = function(router)
-{
-
+exports.generateMPC = function(account, project, uid, objs){
 
 	function addMeshToBoundingBox(bbox, currentMeshBBox)
 	{
@@ -1011,154 +1007,144 @@ exports.route = function(router)
 		}
 	}
 
-	router.get('x3d', '/:account/:project/:uid', function(req, res, params, err_callback)
+	var projection = {};
+	projection[C.REPO_NODE_LABEL_COMBINED_MAP] = 1;
+	projection[C.REPO_NODE_LABEL_BOUNDING_BOX] = 1;
+
+	var subMeshIDX       = 0;
+	var runningVertTotal = 0;
+	var runningFaceTotal = 0;
+
+	var xmlDoc      = X3D_Header();
+	var sceneRoot	= X3D_CreateScene(xmlDoc);
+
+	var mesh = objs.meshes[uid];
+	var maxSubMeshIDX = 0;
+
+	// First sort the combined map in order of vertex ID
+	mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
+
+	var subMeshBBoxes = [];
+	var bbox = [[],[]];
+	var runningVertTotal = 0;
+	var numAddedMeshes   = 0;
+
+	// Loop through submeshes and collect bounding boxes
+	for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
 	{
-		if (params.subformat == "mpc")
+		var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
+
+		var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+		var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+		var currentMeshBBox  = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
+
+		var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
+
+		if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
 		{
-			var projection = {};
-			projection[C.REPO_NODE_LABEL_COMBINED_MAP] = 1;
-			projection[C.REPO_NODE_LABEL_BOUNDING_BOX] = 1;
-
-			var subMeshIDX       = 0;
-			var runningVertTotal = 0;
-			var runningFaceTotal = 0;
-
-			// TODO: Only needs the shell not the whole thing
-			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
+			if (bbox[0].length)
 			{
-				if (err.value) {
-					return callback(err);
-				}
-
-				var xmlDoc      = X3D_Header();
-				var sceneRoot	= X3D_CreateScene(xmlDoc);
-
-				var mesh = objs.meshes[params.uid];
-				var maxSubMeshIDX = 0;
-
-				// First sort the combined map in order of vertex ID
-				mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
-
-				var subMeshBBoxes = [];
-				var bbox = [[],[]];
-				var runningVertTotal = 0;
-				var numAddedMeshes   = 0;
-
-				// Loop through submeshes and collect bounding boxes
-				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+				for (var j = 0; j < numAddedMeshes; j++)
 				{
-					var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
-
-					var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-					var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
-					var currentMeshBBox  = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
-
-					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
-
-					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
-					{
-						if (bbox[0].length)
-						{
-							for (var j = 0; j < numAddedMeshes; j++)
-							{
-								subMeshBBoxes.push(bbox);
-							}
-							maxSubMeshIDX += 1;
-							bbox = [[],[]];
-						}
-
-						addMeshToBoundingBox(bbox, currentMeshBBox);
-						numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT);
-						runningVertTotal = 0;
-
-						if (bbox[0].length)
-						{
-							for (var j = 0; j < numAddedMeshes; j++)
-							{
-								subMeshBBoxes.push(bbox);
-							}
-							maxSubMeshIDX += numAddedMeshes;
-							bbox = [[],[]];
-
-							numAddedMeshes = 0;
-						}
-					}
-					// If current mesh pushes merged mesh over limit then
-					// finish old mesh and start new mesh and add current mesh to next mesh
-					else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT)
-					{
-						if (bbox[0].length)
-						{
-							for (var j = 0; j < numAddedMeshes; j++)
-							{
-								subMeshBBoxes.push(bbox);
-							}
-							maxSubMeshIDX += 1;
-							bbox = [[],[]];
-						}
-
-						addMeshToBoundingBox(bbox, currentMeshBBox);
-						numAddedMeshes = 1;
-						runningVertTotal = currentMeshNumVertices;
-					} else {
-						addMeshToBoundingBox(bbox, currentMeshBBox);
-						runningVertTotal += currentMeshNumVertices;
-						if(numAddedMeshes == 0)
-							numAddedMeshes = 1;
-					}
+					subMeshBBoxes.push(bbox);
 				}
+				maxSubMeshIDX += 1;
+				bbox = [[],[]];
+			}
 
-				if (bbox[0].length)
+			addMeshToBoundingBox(bbox, currentMeshBBox);
+			numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT);
+			runningVertTotal = 0;
+
+			if (bbox[0].length)
+			{
+				for (var j = 0; j < numAddedMeshes; j++)
 				{
-					for (var j = 0; j < numAddedMeshes; j++)
-					{
-						subMeshBBoxes.push(bbox);
-					}
-					maxSubMeshIDX += 1;
-					bbox = [[],[]];
+					subMeshBBoxes.push(bbox);
 				}
+				maxSubMeshIDX += numAddedMeshes;
+				bbox = [[],[]];
 
-				// Loop through all IDs up to and including the maxSubMeshIDX
-				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
-				{
-					var subMeshName = mesh["id"] + "_" + subMeshIDX;
-
-					var shape = xmlDoc.createElement('Shape');
-					shape.setAttribute('DEF', subMeshName);
-
-					var fakeMesh = {};
-					fakeMesh[C.REPO_NODE_LABEL_BOUNDING_BOX] = subMeshBBoxes[subMeshIDX];
-					var bbox = repoNodeMesh.extractBoundingBox(fakeMesh);
-
-					shape.setAttribute('bboxCenter', bbox.center);
-					shape.setAttribute('bboxSize', bbox.size);
-
-					var app = xmlDoc.createElement('Appearance');
-					var mat = xmlDoc.createElement('TwoSidedMaterial');
-					mat.textContent = ' ';
-					app.appendChild(mat);
-					shape.appendChild(app);
-
-					var eg  = xmlDoc.createElement('ExternalGeometry');
-				
-					if (maxSubMeshIDX > 1)
-					{
-						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
-					} else {
-						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
-					}
-
-					eg.textContent = ' ';
-					eg.setAttribute("solid", "true");
-					shape.appendChild(eg);
-
-					sceneRoot.root.appendChild(shape);
-				}
-
-				return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
-			});
-		} else {
-			return err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
+				numAddedMeshes = 0;
+			}
 		}
-	});
+		// If current mesh pushes merged mesh over limit then
+		// finish old mesh and start new mesh and add current mesh to next mesh
+		else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT)
+		{
+			if (bbox[0].length)
+			{
+				for (var j = 0; j < numAddedMeshes; j++)
+				{
+					subMeshBBoxes.push(bbox);
+				}
+				maxSubMeshIDX += 1;
+				bbox = [[],[]];
+			}
+
+			addMeshToBoundingBox(bbox, currentMeshBBox);
+			numAddedMeshes = 1;
+			runningVertTotal = currentMeshNumVertices;
+		} else {
+			addMeshToBoundingBox(bbox, currentMeshBBox);
+			runningVertTotal += currentMeshNumVertices;
+			if(numAddedMeshes == 0)
+				numAddedMeshes = 1;
+		}
+	}
+
+	if (bbox[0].length)
+	{
+		for (var j = 0; j < numAddedMeshes; j++)
+		{
+			subMeshBBoxes.push(bbox);
+		}
+		maxSubMeshIDX += 1;
+		bbox = [[],[]];
+	}
+
+	// Loop through all IDs up to and including the maxSubMeshIDX
+	for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
+	{
+		var subMeshName = mesh["id"] + "_" + subMeshIDX;
+
+		var shape = xmlDoc.createElement('Shape');
+		shape.setAttribute('DEF', subMeshName);
+
+		var fakeMesh = {};
+		fakeMesh[C.REPO_NODE_LABEL_BOUNDING_BOX] = subMeshBBoxes[subMeshIDX];
+		var bbox = repoNodeMesh.extractBoundingBox(fakeMesh);
+
+		shape.setAttribute('bboxCenter', bbox.center);
+		shape.setAttribute('bboxSize', bbox.size);
+
+		var app = xmlDoc.createElement('Appearance');
+		var mat = xmlDoc.createElement('TwoSidedMaterial');
+		mat.textContent = ' ';
+		app.appendChild(mat);
+		shape.appendChild(app);
+
+		var eg  = xmlDoc.createElement('ExternalGeometry');
+	
+		if (maxSubMeshIDX > 1)
+		{
+			eg.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + uid + '.src.mpc#' + subMeshName);
+		} else {
+			eg.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + uid + '.src.mpc');
+		}
+
+		eg.textContent = ' ';
+		eg.setAttribute("solid", "true");
+		shape.appendChild(eg);
+
+		sceneRoot.root.appendChild(shape);
+	}
+
+	return new xmlSerial().serializeToString(xmlDoc);
+
+}
+
+exports.route = function(router)
+{
+
 }

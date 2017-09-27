@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base href="/">
+    <!-- Meta, title, CSS, favicons, etc.-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Theme colour (PWA)-->
+    <meta name="theme-color" content="#0c2f54">
+    <title>3D Repo | Online BIM collaboration platform</title>
+    <!-- Manifest file (PWA)-->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- All CSS minified-->
+    <link rel="stylesheet" type="text/css" href="/dist/three_d_repo.min.css">
+    
+    <!-- Styling used in the Angular Material demos-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    
+  </head>
+  <body>
+
+    <!-- Inline CSS if CSS fails, also faster-->
+    <style>
+
+      body #notSupported {
+      	max-width: 100%;
+      	max-height: 100%;
+      	overflow: hidden;
+      	position: absolute;
+      	background: #0c2f54;
+      	color: white;
+      	left: 0;
+      	right: 0;
+      	width: 100%;
+      	height: 100%;
+      	text-align: center;
+      	z-index: 10;
+      	font-size: 20px;
+      }
+      
+      body #notSupported a {
+      	color: #289874;
+      }
+      
+      body #notSupported img {
+      	margin: 4%;
+      	width: 90%;
+      	max-width: 500px;
+      }
+      
+      body #notSupported div {
+      	margin: 4%; 
+      	text-align: center;
+      }
+
+    </style>
+
+    <noscript>
+      <div id="notSupported" aria-label="Not Supported">
+        <div><img src="images/3drepo-logo-white.png"></div>
+        <div>JavaScript is currently disabled, this site requires JavaScript to run!</div>
+      </div>
+    </noscript>
+
+    <div id="notSupported" style="visibility:hidden;" aria-label="Not Supported">
+      <div><img src="images/3drepo-logo-white.png"></div>
+      <div>
+
+        Your browser is not supported.
+        Please upgrade to the latest version of 
+        <a href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a>, 
+        <a href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a> or 
+        <a href="https://www.microsoft.com/en-gb/windows/microsoft-edge" rel="noopener"target="_blank">Edge</a>
+        <br><br><br>
+
+        <input id="notSupportedButton" type="button" value="OK" style="padding:10px 60px; font-size:14px;" onclick="document.getElementById(&quot;notSupported&quot;).style.visibility=&quot;hidden&quot;">
+      </div>
+    </div>
+
+    <!-- Fallback for IE --><!--[if (IE)]>
+    	<script type="text/javascript">
+    		document.getElementById('notSupported').style.visibility='visible';
+    		document.getElementById('notSupportedButton').style.display = 'none';
+    	</script>
+    	
+    <![endif]-->
+
+    <!-- Entry point for all components-->
+    <home flex layout="column"></home>
+    
+    <!-- CSS AND JAVASCRIPT -->
+
+    <!-- Load config from server and dependencies + 3D Repo JavaScript-->
+    <script type="text/javascript" src="/config.js"></script>
+    <script type="text/javascript" src="/dist/three_d_repo.min.js" async></script>
+   
+    <script type="text/javascript", src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
+
+    <!-- Load LiveReload if on Dev-->
+    <script async>
+      if (window) {
+        console.debug("Development Environment?", window.ClientConfig.development);
+        if (window.ClientConfig && window.ClientConfig.development === true) {
+            console.debug("Development - Loading livereload.js");
+            var src = "//localhost:35729/livereload.js";
+            var script = document.createElement("script");
+            script.setAttribute("src", src);
+            script.setAttribute("async", true);
+            document.head.appendChild(script);
+        }
+      }
+    </script>
+  </body>
+</html>

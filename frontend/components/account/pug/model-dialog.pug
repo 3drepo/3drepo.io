@@ -1,0 +1,113 @@
+md-dialog.newModelDialog(aria-label="New model")
+	md-toolbar
+		.md-toolbar-tools
+			h2 New Model
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+
+		form( name="modelForm" layout="column")
+			md-input-container
+
+				md-select(
+					placeholder="Teamspace"
+					tdr-focus="true"
+					ng-model="vm.newModelData.teamspace"
+					ng-keypress="vm.saveNewModel($event)")
+
+					md-option(
+						ng-repeat="teamspace in vm.accounts"
+						ng-if="vm.hasProjectWithPermission(teamspace, 'create_model')"
+						ng-selected="teamspace.name === vm.account"
+						value="{{teamspace.name}}") {{teamspace.name}}
+
+			md-input-container(ng-if="vm.newModelData.teamspace !== undefined")
+
+				md-select(
+					placeholder="Project"
+					tdr-focus="true"
+					ng-model="vm.newModelData.project" 
+					ng-keypress="vm.saveNewModel($event)")
+
+					md-option(
+						ng-repeat="project in vm.getProjects(vm.newModelData.teamspace)"
+						ng-if="project.permissions.indexOf('create_model') !== -1"
+						value="{{project.name}}") {{project.name}}
+
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected()")
+				input(
+					placeholder="Model name (required)"
+					tdr-focus="true"
+					ng-model="vm.newModelData.name"
+					ng-required="required"
+					ng-keypress="vm.saveNewModel($event)"
+					ng-pattern="vm.modelRegExp" 
+					maxlength=20)
+				.inputHint Letters, numbers, hyphen and underscore only.
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+				input(
+				ng-if="vm.teamspaceAndProjectSelected()",
+				placeholder="Model Code (optional)", 
+				ng-model="vm.newModelData.code", 
+				maxlength=5)
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+				label Model type
+				md-select(ng-model="vm.newModelData.type")
+					md-option(ng-repeat="modelType in vm.modelTypes", value="{{modelType}}") {{modelType}}
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.showModelTypeOtherInput")
+				input(
+				ng-if="vm.teamspaceAndProjectSelected()", 
+				placeholder="Other model type", 
+				ng-model="vm.newModelData.otherType")
+
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+				label Unit
+				md-select(
+					ng-init="vm.newModelData.unit = vm.units[3].value"
+					ng-required="required"
+					ng-if="vm.teamspaceAndProjectSelected()",
+					ng-model="vm.newModelData.unit")
+					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+				input(
+					ng-if="vm.teamspaceAndProjectSelected()"
+					placeholder="Revision name (optional)"
+					maxlength=20
+					ng-model="vm.tag")
+				.inputHint Letters, numbers and underscore only
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+				textarea(
+				ng-if="vm.teamspaceAndProjectSelected()",
+				placeholder="Revision description (optional)", ng-model="vm.desc")
+
+			//p#modelRequiredHint(
+				ng-if="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected()") 
+				span Please check form inputs 
+				
+			div
+				p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
+
+			md-input-container(ng-if="vm.teamspaceAndProjectSelected()")
+				md-button.md-accent(
+					ng-if="vm.teamspaceAndProjectSelected()",
+					ng-click="vm.uploadFileForNewModel()") Upload File
+				md-button.md-raised.md-accent(
+					ng-disabled="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected()" 
+					ng-click="vm.saveNewModel()") Save
+
+				md-progress-circular.uploadProgress(ng-if="vm.uploading")
+			
+
+
+			#modelDialogFilenameContainer(layout="row", ng-if="vm.newModelFileToUpload")
+				p#modelDialogFilenameIntro Selected file
+				p#modelDialogFilename {{vm.newModelFileToUpload.name}}
+				
+

@@ -1,0 +1,16 @@
+.homeUserContent(layout="row", layout-align="center", flex)
+	md-content.md-whiteframe-1dp(aria-label="Registered"
+			flex-xs="85"
+			flex-sm="85"
+			flex-md="45"
+			flex-lg="30"
+			flex-xl="25")
+		md-toolbar
+			.md-toolbar-tools
+				h2 Registered for 3D Repo
+		.userContent(layout="column")
+			h3(ng-if="!vm.verified") {{vm.verifyErrorMessage}}
+			div(ng-if="vm.verified", layout="column", layout-align="start")
+				h3 {{vm.verifySuccessMessage}}
+				div(layout="row")
+					md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
