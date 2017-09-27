@@ -32,7 +32,7 @@ md-dialog.newModelDialog(aria-label="New model")
 
 					md-option(
 						ng-repeat="project in vm.getProjects(vm.newModelData.teamspace)"
-						ng-if="project.permissions.indexOf('create_model')  !== -1"
+						ng-if="project.permissions.indexOf('create_model') !== -1"
 						value="{{project.name}}") {{project.name}}
 
 

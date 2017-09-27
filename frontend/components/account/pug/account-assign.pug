@@ -192,14 +192,15 @@
 									value="{{project.name}}") {{project.name}}
 
 						div(flex="33", layout="column")
-							md-label(ng-if="vm.modelsLoaded()") Select Model / Federation
+							md-label(ng-if="vm.modelsLoaded() && !vm.modelsEmpty()") Select Model / Federation
+							md-label(ng-if="vm.modelsLoaded() && vm.modelsEmpty()") No Models / Federations 
 							md-label(ng-if="!vm.modelsLoaded()") Awaiting Models / Federations...
 							md-select.rowSelects(
 								flex
 								aria-label="Selection for Model"
 								ng-model="vm.modelSelected"
-								ng-required="true" 
-								ng-disabled="!vm.modelsLoaded()")
+								ng-required="!(vm.modelsLoaded() && vm.modelsEmpty())" 
+								ng-disabled="!vm.modelsLoaded() || (vm.modelsLoaded() && vm.modelsEmpty())")
 
 								md-option(
 									flex

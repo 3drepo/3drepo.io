@@ -529,7 +529,6 @@
 
 		};
 
-
 		vm.modelUsersToAssign = function() {
 			return vm.modelSelected && vm.selectedRole && Object.keys(vm.selectedRole).length === 0;
 		};
@@ -543,8 +542,12 @@
 					(vm.isFromUrl && vm.modelReady);
 		};
 
+		vm.modelsEmpty = function() {
+			return Object.keys(vm.models).length === 0;
+		};
+
 		vm.modelsLoaded = function() {
-			return vm.projectSelected && vm.models && Object.keys(vm.models).length > 0;
+			return vm.projectSelected && vm.models;
 		};
 
 		vm.clearModelState = function() {
@@ -706,7 +709,7 @@
 			}
 
 			if (permissionlessModels.length && role !== "unassigned") {
-				
+
 				var content = "Just to let you know, the assigned user will need permissions on submodels also to see them." + 
 				"<br><br> These are the models in question: <br><br>";
 				permissionlessModels.forEach(function(model, i) {
