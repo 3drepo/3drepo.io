@@ -59,6 +59,16 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
+		unitySettings: {
+        TOTAL_MEMORY: 2130706432,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 	auth: {
 		captcha: false,
 		register: true
@@ -92,5 +102,21 @@ module.exports = {
 			skipChecking: true
 		}
 	},
-	bcf_dir: '/tmp'
+	bcf_dir: '/tmp',
+	legal: [
+		{title: "Terms & Conditions", type: "agreeTo", page: "terms", path: "pug/legal/terms.pug"},
+		{title: "Privacy", type: "haveRead", page: "privacy", path: "pug/legal/privacy.pug"},
+		{title: "Cookies", type: "haveRead", page: "cookies", path: "pug/legal/cookies.pug"}
+	],
+	userNotice: false,
+	unitySettings: {
+        TOTAL_MEMORY: 2130706432,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 }

@@ -15,6 +15,10 @@ addons:
     packages:
       - g++-4.8
 before_install:
+    - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+    - sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+    - sudo apt-get update
+    - sudo dpkg –I google-chrome-stable_current_amd64.deb
     - mkdir -p submodules
     - cd submodules
     - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
@@ -33,9 +37,8 @@ before_install:
     - git status
     - cd backend
     - mongorestore
-    - cd ../../../backend
 
-install: yarn install
+install: cd backend && yarn install && cd ../frontend && yarn install
 
 cache:
   yarn: true
@@ -45,7 +48,8 @@ cache:
 services:
   - rabbitmq
 script:
-    - yarn run test
+    - cd ../../../backend && yarn run test
+    - cd ../frontend
 notifications:
     email: 
         recipients:

@@ -8,7 +8,7 @@ describe("Terms page ", function () {
             imports_1.browser.get(imports_1.env.baseUrl + "/terms");
             imports_1.browser.waitForAngular();
         });
-        it("with the 3D Repo logo", () => {
+        it("with the with the correct terms text", () => {
             imports_1.expect(imports_1.element(imports_1.by.id("homeLegalContainer")).isPresent()).to.eventually.equal(true);
             imports_1.expect(imports_1.element(imports_1.by.tagName("terms")).isPresent()).to.eventually.equal(true);
             imports_1.expect(imports_1.element(imports_1.by.id("legal")).isPresent()).to.eventually.equal(true);

@@ -11,7 +11,7 @@ describe("Terms page ", function() {
 			browser.waitForAngular();
 		})
 		
-		it("with the 3D Repo logo", () => {
+		it("with the with the correct terms text", () => {
 			expect(element(by.id("homeLegalContainer")).isPresent()).to.eventually.equal(true); 
 			expect(element(by.tagName("terms")).isPresent()).to.eventually.equal(true);
 			expect(element(by.id("legal")).isPresent()).to.eventually.equal(true);

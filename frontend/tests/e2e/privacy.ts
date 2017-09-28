@@ -11,7 +11,7 @@ describe("Privacy page ", function() {
 			browser.waitForAngular();
 		})
 		
-		it("with the 3D Repo logo", () => {
+		it("with the correct privacy text", () => {
 			expect(element(by.id("homeLegalContainer")).isPresent()).to.eventually.equal(true); 
 			expect(element(by.tagName("privacy")).isPresent()).to.eventually.equal(true);
 			expect(element(by.id("legal")).isPresent()).to.eventually.equal(true);

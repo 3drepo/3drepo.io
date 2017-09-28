@@ -10,8 +10,8 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 exports.expect = expect;
 const USER = {
-    USERNAME: "jamesm",
-    PASSWORD: "test"
+    USERNAME: process.env.E2EUSERNAME || "testuser",
+    PASSWORD: process.env.E2EPASSWORD || "testuser"
 };
 exports.USER = USER;
 function login() {

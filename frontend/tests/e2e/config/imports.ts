@@ -11,8 +11,8 @@ const expect = chai.expect;
 
 // Username and password for running e2e tests
 const USER = {
-    USERNAME: "jamesm",
-    PASSWORD: "test"
+    USERNAME: process.env.E2EUSERNAME || "testuser",
+    PASSWORD: process.env.E2EPASSWORD || "testuser"
 }
 
 // Assumes you are logged out
