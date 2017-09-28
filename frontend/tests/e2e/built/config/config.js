@@ -1,8 +1,8 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
     seleniumAddress: 'http://localhost:4444/wd/hub',
-    specs: ['login.js'],
+    specs: ['../**.js'],
     framework: "mocha",
     mochaOpts: {
         reporter: "spec",
@@ -10,6 +10,8 @@ exports.config = {
     },
     capabilities: {
         'browserName': 'chrome',
-        args: ["--headless", "--disable-gpu", "--window-size=1920x1080"]
-    }
+        chromeOptions: {
+            args: ["--headless", "--disable-gpu", "--window-size=1920x1080"]
+        }
+    },
 };

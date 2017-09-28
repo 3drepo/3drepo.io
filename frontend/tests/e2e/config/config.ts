@@ -2,7 +2,7 @@ import {Config} from 'protractor';
 
 export let config: Config = {
   seleniumAddress: 'http://localhost:4444/wd/hub',
-  specs: [ 'login.js' ],
+  specs: [ '../**.js' ],
   framework: "mocha",
   mochaOpts: {
     reporter: "spec",
@@ -10,6 +10,8 @@ export let config: Config = {
   },
   capabilities: {
     'browserName': 'chrome',
-    args: [ "--headless", "--disable-gpu", "--window-size=1920x1080" ]
+    chromeOptions: {
+      args: [ "--headless", "--disable-gpu", "--window-size=1920x1080"  ]
+    }
   },
 };

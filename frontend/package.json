@@ -12,8 +12,8 @@
     "wdm": "webdriver-manager",
     "wdm:start": "webdriver-manager start",
     "wdm:update": "webdriver-manager update",
-    "e2e": "protractor ./tests/e2e/built/config.js",
-    "tsc:tests": "tsc ./tests/e2e/*.ts --outDir ./tests/e2e/built/"
+    "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js",
+    "tsc:tests": "tsc --project ./"
   },
   "keywords": [
     "3drepo",

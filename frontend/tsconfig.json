@@ -11,9 +11,10 @@
       "types": ["mocha", "chai", "node"]
     },
     "include": [
-      "tests/e2e/*.ts"
+      "./tests/e2e/**/*"
     ],
     "exclude": [
-      "node_modules"
+      "./tests/e2e/built",
+      "./node_modules"
     ]
   }
