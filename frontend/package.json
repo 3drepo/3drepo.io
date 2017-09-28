@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
     "wdm": "webdriver-manager",
-    "wdm:start": "webdriver-manager start",
-    "wdm:update": "webdriver-manager update",
+    "wdm:start": "webdriver-manager start --standalone",
+    "wdm:update": "webdriver-manager update --standalone",
     "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js",
     "tsc:tests": "tsc --project ./"
   },

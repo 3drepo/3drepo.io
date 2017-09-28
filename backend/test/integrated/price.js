@@ -196,8 +196,8 @@ describe("Billing agreement price from PayPal", function () {
 								"value": "0"
 							},
 							"max_fail_attempts": "0",
-							"return_url": "http://127.0.0.1/price_testing?page=billing",
-							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"return_url": "http://127.0.0.1:8080//price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1:8080//price_testing?page=billing&cancel=1",
 							"auto_bill_amount": "YES",
 							"initial_fail_amount_action": "CONTINUE"
 						}
@@ -275,8 +275,8 @@ describe("Billing agreement price from PayPal", function () {
 								"value": "0"
 							},
 							"max_fail_attempts": "0",
-							"return_url": "http://127.0.0.1/price_testing?page=billing",
-							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"return_url": "http://127.0.0.1:8080//price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1:8080//price_testing?page=billing&cancel=1",
 							"auto_bill_amount": "YES",
 							"initial_fail_amount_action": "CONTINUE"
 						}
@@ -354,8 +354,8 @@ describe("Billing agreement price from PayPal", function () {
 								"value": "0"
 							},
 							"max_fail_attempts": "0",
-							"return_url": "http://127.0.0.1/price_testing?page=billing",
-							"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"return_url": "http://127.0.0.1:8080//price_testing?page=billing",
+							"cancel_url": "http://127.0.0.1:8080//price_testing?page=billing&cancel=1",
 							"auto_bill_amount": "YES",
 							"initial_fail_amount_action": "CONTINUE"
 						}
@@ -434,8 +434,8 @@ describe("Billing agreement price from PayPal", function () {
 								"value":"0"
 							},
 							"max_fail_attempts":"0",
-							"return_url":"http://127.0.0.1/price_testing?page=billing",
-							"cancel_url":"http://127.0.0.1/price_testing?page=billing&cancel=1",
+							"return_url":"http://127.0.0.1:8080//price_testing?page=billing",
+							"cancel_url":"http://127.0.0.1:8080//price_testing?page=billing&cancel=1",
 							"auto_bill_amount":"YES",
 							"initial_fail_amount_action":"CONTINUE"
 						}
@@ -570,8 +570,8 @@ describe("Billing agreement price from PayPal", function () {
 									"value": "0"
 								},
 								"max_fail_attempts": "0",
-								"return_url": "http://127.0.0.1/price_testing?page=billing",
-								"cancel_url": "http://127.0.0.1/price_testing?page=billing&cancel=1",
+								"return_url": "http://127.0.0.1:8080//price_testing?page=billing",
+								"cancel_url": "http://127.0.0.1:8080//price_testing?page=billing&cancel=1",
 								"auto_bill_amount": "YES",
 								"initial_fail_amount_action": "CONTINUE"
 							}

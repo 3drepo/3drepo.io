@@ -16,11 +16,12 @@
  */
 
 var hostname   = "127.0.0.1";
-var http_port  = 80;
+var http_port  = 8080;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
+	port: 8080,
 	cookie: {
 		secret: "a",
 		parser_secret : "b"
@@ -33,7 +34,9 @@ module.exports = {
 			public_protocol: "http"
 		},
 		{
-			service: "frontend"
+			service: "frontend",
+			public_port: http_port,
+			http_port: http_port
 		},
 		{
 			service: "chat",
