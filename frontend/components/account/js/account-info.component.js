@@ -48,8 +48,8 @@
 				teamspaces: {label: "Teamspaces"},
 				profile: {label: "Profile"},
 				billing: {label: "Billing"},
-				licenses: {label: "Licenses"},
-				assign: {label: "Assign Permissons" }
+				licenses: {label: "Licences"},
+				assign: {label: "Assign Permissions" }
 			};
 			vm.imageLoaded = false;
 			vm.registerUrlCallback();
