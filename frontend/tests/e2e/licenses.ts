@@ -29,4 +29,15 @@ describe("Licenses page ", function() {
 
 	});
 
+	describe(" it should have no current licenses", () => {
+		
+		it(" with text for the user to notify them", () => {
+			const licenceText = element(by.css(".cardInfo"));
+			expect(licenceText.isDisplayed()).to.eventually.equal(true);
+			expect(licenceText.getText()).to.eventually.contain("You do not currently have any licenses.");
+		});	
+
+	});
+	
+
 });

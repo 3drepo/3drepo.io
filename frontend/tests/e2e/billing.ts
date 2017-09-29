@@ -25,7 +25,23 @@ describe("Billing page ", function() {
 			billing.click();
 			expect(element(by.tagName("account-billing")).isPresent()).to.eventually.equal(true);
 			expect(element(by.tagName("account-billing")).isDisplayed()).to.eventually.equal(true);
+
 		});
+		
+
+		describe(" it should have a tabs holder", () => {
+			
+			it(" with two tabs with the correct text", () => {
+				const tabs = element(by.tagName("md-tabs-canvas")).all(by.tagName("md-tab-item"))
+				expect(tabs.count()).to.eventually.equal(2);
+				expect(tabs.get(0).getText()).to.eventually.equal("Subscription");
+				expect(tabs.get(0).isDisplayed()).to.eventually.equal("Subscription");
+				expect(tabs.get(1).getText()).to.eventually.equal("History");
+				expect(tabs.get(1).isDisplayed()).to.eventually.equal("History");
+			});	
+
+		});
+		
 
 	});
 
