@@ -32,7 +32,6 @@ before_install:
     - cd backend && mongorestore
     - cd ./../../../
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
-    - echo $PWD
 
 install:
     - cd ./backend 
@@ -50,11 +49,9 @@ services:
   - mongodb
   
 script:
-    - echo $PWD
     - yarn run wdm:update
     - yarn run wdm:start > /dev/null 2>&1 &
     - cd ./../backend 
-    - echo $PWD
     - yarn run test
     - cd ./../ 
     - cd ./frontend 
@@ -63,7 +60,6 @@ script:
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
     - cd ./frontend
     - yarn run e2e
-    - echo "FINISHED"
 
 notifications:
     email: 
