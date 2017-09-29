@@ -8,7 +8,7 @@ describe("Login page ", () => {
 
   after(() => {
     logout();
-  })
+  });
 
   describe("should have login box", () => {
 
