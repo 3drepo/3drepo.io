@@ -21,4 +21,11 @@ describe("Licenses page ", function () {
             imports_1.expect(imports_1.element(imports_1.by.tagName("account-licenses")).isDisplayed()).to.eventually.equal(true);
         });
     });
+    describe(" it should have no current licenses", () => {
+        it(" with text for the user to notify them", () => {
+            const licenceText = imports_1.element(imports_1.by.css(".cardInfo"));
+            imports_1.expect(licenceText.isDisplayed()).to.eventually.equal(true);
+            imports_1.expect(licenceText.getText()).to.eventually.contain("You do not currently have any licenses.");
+        });
+    });
 });

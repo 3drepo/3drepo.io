@@ -9,7 +9,12 @@ describe("Cookies page ", function() {
 		before(() => {
 			browser.get(env.baseUrl + "/cookies");
 			browser.waitForAngular();
-		})
+		});
+		
+		after(() =>{
+			browser.get(env.baseUrl);
+			browser.waitForAngular();
+		});
 		
 		it("with the correct cookies text", () => {
 			expect(element(by.id("homeLegalContainer")).isPresent()).to.eventually.equal(true); 

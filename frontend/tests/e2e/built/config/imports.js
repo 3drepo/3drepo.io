@@ -28,6 +28,13 @@ function logout() {
     protractor_1.element(protractor_1.by.css('[ng-click="vm.logout()"]')).click();
 }
 exports.logout = logout;
+function hasClass(element, cls) {
+    return element.getAttribute('class').then((classes) => {
+        return classes.split(' ').indexOf(cls) !== -1;
+    });
+}
+exports.hasClass = hasClass;
+;
 var protractor_2 = require("protractor");
 exports.ElementFinder = protractor_2.ElementFinder;
 exports.browser = protractor_2.browser;

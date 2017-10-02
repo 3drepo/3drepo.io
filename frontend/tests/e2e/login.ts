@@ -33,6 +33,10 @@ describe("Login page ", () => {
         expect(element(by.model("vm.user.password")).isPresent()).to.eventually.equal(true);
       });
 
+      it("with a login button", () => {
+        expect(element(by.id("loginVersion")).isPresent()).to.eventually.equal(true);
+      });
+
   });
 
   describe("should login correctly", () => {

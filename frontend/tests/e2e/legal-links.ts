@@ -2,23 +2,19 @@ import { USER, browser, by, element , env, expect, login, logout } from "./confi
 
 describe("Legal links", () => {
 
-  before(() => {
-    browser.get(env.baseUrl);
-  });
-
-  after(() => {
-    logout();
-  });
-
   describe("are visible logged out", () => {
-    
-      const legal = element(by.id("legalLinks"));
 
+      before(() => {
+        browser.get(env.baseUrl);
+      });
+    
       it("with a holding box", () => {
+        const legal = element(by.id("legalLinks"));        
         expect(legal.isDisplayed()).to.eventually.equal(true);
       });
 
       it("all the correct links", () => {
+        const legal = element(by.id("legalLinks"));        
         expect(legal.all(by.linkText("Terms & Conditions")).first().isDisplayed()).to.eventually.equal(true);
         expect(legal.all(by.linkText("Privacy")).first().isDisplayed()).to.eventually.equal(true);
         expect(legal.all(by.linkText("Cookies")).first().isDisplayed()).to.eventually.equal(true);
@@ -30,15 +26,22 @@ describe("Legal links", () => {
 
   describe("should exist if logged in", () => {
 
-      const legal = element(by.id("legalLinks"));
+      before(() => {
+        login();
+      })
+
+      after(() => {
+        logout();
+      })
 
       it("with a holding box", function() {
         this.timeout(6000);
-        login();
+        const legal = element(by.id("legalLinks"));
         expect(legal.isDisplayed()).to.eventually.equal(true);
       });
 
       it("all the correct links", () => {
+        const legal = element(by.id("legalLinks"));
         expect(legal.all(by.linkText("Terms & Conditions")).first().isDisplayed()).to.eventually.equal(true);
         expect(legal.all(by.linkText("Privacy")).first().isDisplayed()).to.eventually.equal(true);
         expect(legal.all(by.linkText("Cookies")).first().isDisplayed()).to.eventually.equal(true);

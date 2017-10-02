@@ -25,6 +25,9 @@ describe("Login page ", () => {
             imports_1.expect(imports_1.element(imports_1.by.model("vm.user.username")).isPresent()).to.eventually.equal(true);
             imports_1.expect(imports_1.element(imports_1.by.model("vm.user.password")).isPresent()).to.eventually.equal(true);
         });
+        it("with a login button", () => {
+            imports_1.expect(imports_1.element(imports_1.by.id("loginVersion")).isPresent()).to.eventually.equal(true);
+        });
     });
     describe("should login correctly", () => {
         it("when username and password are inserted", function () {

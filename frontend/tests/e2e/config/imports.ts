@@ -31,6 +31,12 @@ export function logout() {
     element(by.css('[ng-click="vm.logout()"]')).click();
 }
 
+export function hasClass(element, cls) {
+    return element.getAttribute('class').then((classes) => {
+        return classes.split(' ').indexOf(cls) !== -1;
+    });
+};
+
 // EXPORTS
 export { USER };
 export { expect };
