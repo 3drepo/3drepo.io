@@ -458,7 +458,11 @@
 					return issue._id === shownIssue._id;
 				});
 
-				if (show !== undefined) {
+				// Check that there is a position for the pin
+				var pinPosition = issue.position && issue.position.length;
+
+				if (show !== undefined && pinPosition) {
+
 					// Create new pin
 					var pinData = {
 						id: issue._id,
