@@ -6,6 +6,8 @@ node_modules
 config/*
 !config/test/
 
+frontend/tests/e2e/built
+
 yarn-error.log
 bower_components
 

@@ -16,11 +16,12 @@
  */
 
 var hostname   = "127.0.0.1";
-var http_port  = 80;
+var http_port  = 8080;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
+	port: 8080,
 	cookie: {
 		secret: "a",
 		parser_secret : "b"
@@ -33,7 +34,9 @@ module.exports = {
 			public_protocol: "http"
 		},
 		{
-			service: "frontend"
+			service: "frontend",
+			public_port: http_port,
+			http_port: http_port
 		},
 		{
 			service: "chat",
@@ -43,6 +46,7 @@ module.exports = {
 		}
 	],
 	js_debug_level: 'debug',
+	consoleLogging: false,
 	logfile: {
 		filename: './3drepo.log',
 		console_level: 'info',
@@ -59,6 +63,16 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
+		unitySettings: {
+        TOTAL_MEMORY: 2130706432 / 10,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 	auth: {
 		captcha: false,
 		register: true
@@ -92,5 +106,21 @@ module.exports = {
 			skipChecking: true
 		}
 	},
-	bcf_dir: '/tmp'
+	bcf_dir: '/tmp',
+	legal: [
+		{title: "Terms & Conditions", type: "agreeTo", page: "terms", path: "pug/legal/terms.pug"},
+		{title: "Privacy", type: "haveRead", page: "privacy", path: "pug/legal/privacy.pug"},
+		{title: "Cookies", type: "haveRead", page: "cookies", path: "pug/legal/cookies.pug"}
+	],
+	userNotice: false,
+	unitySettings: {
+        TOTAL_MEMORY: 2130706432 / 10,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 }

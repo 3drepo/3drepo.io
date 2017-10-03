@@ -74,10 +74,10 @@ gulp.task("test:integrated-one", function() {
             NODE_CONFIG_DIR: "../config/"
         });
 
-        const path = abs("./test/integrated/" + process.argv[4]);
-        console.log("processing " + path);
+        const intPath = abs("./test/integrated/" + process.argv[4]);
+        console.log("processing " + intPath);
 
-        gulp.src(path)
+        gulp.src(intPath)
             .pipe(envs)
             .pipe(mocha({
                 reporter: "spec",
