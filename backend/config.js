@@ -108,6 +108,8 @@
 		//serverObject.location_url = serverObject.location_url.toString();
 	};
 
+	config.consoleLogging = coalesce(config.consoleLogging, true);
+
 	// Check for hostname and ip here
 	config.host = coalesce(config.host, "127.0.0.1");
 	config.numThreads = coalesce(config.numThreads, 1);
