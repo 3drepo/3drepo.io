@@ -64,7 +64,7 @@ module.exports = {
 		forgotPassword: 24
 	},
 		unitySettings: {
-        TOTAL_MEMORY: 2130706432,
+        TOTAL_MEMORY: 2130706432 / 10,
         compatibilitycheck: null,
         backgroundColor: "#222C36",
         splashStyle: "Light",
@@ -114,7 +114,7 @@ module.exports = {
 	],
 	userNotice: false,
 	unitySettings: {
-        TOTAL_MEMORY: 2130706432,
+        TOTAL_MEMORY: 2130706432 / 10,
         compatibilitycheck: null,
         backgroundColor: "#222C36",
         splashStyle: "Light",
