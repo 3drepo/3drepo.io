@@ -64,7 +64,7 @@ const transports = [
 	fileOutTransport
 ];
 
-if (config.consoleLogging === undefined || config.consoleLogging === "both") {
+if (config.consoleLogging === undefined || config.consoleLogging === true) {
 	transports.push(new winston.transports.Console({
 		colorize: true,
 		level: config.logfile.console_level,
