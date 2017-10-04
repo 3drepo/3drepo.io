@@ -38,6 +38,7 @@ const ChatEvent = require('../chatEvent');
 const Project = require('../project');
 const stream = require('stream');
 const _ = require('lodash');
+const uuid = require("node-uuid");
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -105,6 +106,42 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+/**
+ * Create correlation ID, store it in model setting, and return it
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
+function createCorrelationId(account, model) {
+	let correlationId = uuid.v1();
+
+	// store corID
+	ModelSetting.findById({account, model}, model).then(setting => {
+		setting = setting || ModelSetting.createInstance({
+			account: account,
+			model: model
+		});
+
+		setting._id = model;
+		setting.corID = correlationId;
+		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+		setting.save();
+	});
+
+	return correlationId;
+}
+
+/**
+ * Clear correlation ID from model setting when processing returns
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
+function resetCorrelationId(account, model) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		setting.corID = undefined;
+		systemLogger.logInfo(`Correlation ID reset`);
+		setting.save();
+	});
+}
 
 function createAndAssignRole(modelName, account, username, data) {
 	
@@ -183,7 +220,6 @@ function createAndAssignRole(modelName, account, username, data) {
 			setting.subModels = data.subModels;
 			setting.timestamp = new Date();
 		}
-
 
 		setting.updateProperties({
 			unit: data.unit,
@@ -317,7 +353,8 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 }
 
 function createFederatedModel(account, model, subModels){
-	
+
+	let correlationId = createCorrelationId(account, model);
 
 	let federatedJSON = {
 		database: account,
@@ -367,10 +404,11 @@ function createFederatedModel(account, model, subModels){
 	//console.log(federatedJSON);
 	return Promise.all(addSubModels).then(() => {
 
-		return importQueue.createFederatedModel(account, federatedJSON);
+		return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 
 	}).then(data => {
 
+		resetCorrelationId(account, model);
 
 		_deleteFiles(files(data));
 
@@ -991,10 +1029,11 @@ function _deleteFiles(files){
 	});
 }
 
-function _handleUpload(account, model, username, file, data){
+/**
+ * Called by importModel to perform model upload
+ */
+function _handleUpload(correlationId, account, model, username, file, data){
 	
-
-
 	let files = function(filePath, fileDir, jsonFile){
 		return [
 			{desc: 'tmp model file', type: 'file', path: filePath},
@@ -1004,6 +1043,7 @@ function _handleUpload(account, model, username, file, data){
 	};
 
 	return importQueue.importFile(
+		correlationId,
 		file.path,
 		file.originalname,
 		account,
@@ -1014,9 +1054,7 @@ function _handleUpload(account, model, username, file, data){
 		data.desc
 	).then(obj => {
 
-		let corID = obj.corID;
-
-		systemLogger.logInfo(`Job ${corID} imported without error`,{
+		systemLogger.logInfo(`Job ${correlationId} imported without error`,{
 			account,
 			model,
 			username
@@ -1033,10 +1071,13 @@ function _handleUpload(account, model, username, file, data){
 }
 
 function importModel(account, model, username, modelSetting, source, data){
-	
+
 	if(!modelSetting){
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
+
+	let correlationId = uuid.v1();
+	modelSetting.corID = correlationId;
 
 	ChatEvent.modelStatusChanged(null, account, model, { status: 'processing' });
 
@@ -1045,17 +1086,19 @@ function importModel(account, model, username, modelSetting, source, data){
 	return modelSetting.save().then(() => {
 
 		if (source.type === 'upload'){
-			return _handleUpload(account, model, username, source.file, data);
+			return _handleUpload(correlationId, account, model, username, source.file, data);
 
 		} else if (source.type === 'toy'){
 
-			return importQueue.importToyModel(account, model, source).then(obj => {
-				let corID = obj.corID;
-				systemLogger.logInfo(`Job ${corID} imported without error`,{account, model, username});
+			return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+				modelSetting.corID = correlationId;
+				systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
 			});
 		}
 
 	}).then(() => {
+
+		resetCorrelationId(account, model);
 
 		modelSetting.status = 'ok';
 		modelSetting.errorReason = undefined;
