@@ -717,53 +717,55 @@
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-			// Remove highlight from the current selection and highlight this node if not the same
-			if (currentSelectedNode !== null) {
+
+			var sameNodeSelected = currentSelectedNode !== null && currentSelectedNode._id === node._id;
+			console.log("Same node selected? ", sameNodeSelected);			
+			if(!MultiSelectService.isMultiMode())
+			{
+				//If it is not multiselect mode, remove all highlights.
+				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
+			}
+
+			if(sameNodeSelected)
+			{
+				//Same node has been pressed -> reset selection
 				currentSelectedNode.selected = false;
-				if (currentSelectedNode._id === node._id) {
-					currentSelectedNode = null;
-				} else {
-					node.selected = true;
-					currentSelectedNode = node;
-				}
-			} else {
+				currentSelectedNode = null;
+			}
+			else
+			{
+				//This node now becomes the currently selected
 				node.selected = true;
 				currentSelectedNode = node;
 			}
 
-			// Remove highlight from the current selection in the viewer and highlight this object if not the same
+			var map = [];
 
-			if (currentSelectedNode === null && !MultiSelectService.isMultiMode()) {
-				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
-			} else {
-				var map = [];
+			traverseNodeAndPushId(node, map);
 
-				traverseNodeAndPushId(node, map);
-
-				// Select the parent node in the group for cards and viewer
-				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+			// Select the parent node in the group for cards and viewer
+			EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+				source: "tree",
+				account: node.account,
+				model: node.project,
+				id: node._id,
+				name: node.name,
+				noHighlight : true
+			});
+			for(var key in map) {
+				var vals = key.split("@");
+				var account = vals[0];
+				var model = vals[1];
+			
+				// Separately highlight the children
+				// but only for multipart meshes
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
 					source: "tree",
-					account: node.account,
-					model: node.project,
-					id: node._id,
-					name: node.name,
-					noHighlight : true
+					account: account,
+					model: model,
+					ids: map[key],
+					multi: true
 				});
-				for(var key in map) {
-					var vals = key.split("@");
-					var account = vals[0];
-					var model = vals[1];
-				
-					// Separately highlight the children
-					// but only for multipart meshes
-					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-						source: "tree",
-						account: account,
-						model: model,
-						ids: map[key],
-						multi: false
-					});
-				}
 			}
 		};
 
