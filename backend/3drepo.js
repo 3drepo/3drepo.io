@@ -132,7 +132,7 @@
 					let myCertGroup = serverConfig.certificate ? serverConfig.certificate : "default";
 					certMap[serverConfig.hostname] = myCertGroup;
 
-					systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.host_dir);
+					systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.port + serverConfig.host_dir);
 
 
 					if (!serverConfig.external)
