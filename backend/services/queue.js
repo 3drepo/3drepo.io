@@ -78,7 +78,7 @@
 				this.callbackQName = options.callback_queue;
 				this.workerQName = options.worker_queue;
 				this.modelQName = options.model_queue;
-				this.deferedObjs = {};
+				this.deferedObjs = {}; //cclw05 - should be deferred?
 				this.eventExchange = options.event_exchange;
 
 				return this._consumeCallbackQueue();
@@ -160,6 +160,7 @@
 		let corID = uuid.v1();
 		let newFileDir = this.sharedSpacePath + "/" + corID;
 		let filename = `${newFileDir}/obj.json`;
+		//let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
 
 		return new Promise((resolve, reject) => {
 			fs.mkdir(this.sharedSpacePath, function (err) {
@@ -348,6 +349,10 @@
 					let resErrorCode = parseInt(resData.value);
 
 					let resErrorMessage = resData.message;
+
+					let resDatabase = resData.database;
+
+					let resProject = resData.project;
 
 					if (defer && resErrorCode === 0) {
 						defer.resolve(rep);
