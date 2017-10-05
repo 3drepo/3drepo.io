@@ -27,6 +27,7 @@
 
 	//Get meta data
 	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
+	router.get('/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 
 	function getMetadata(req, res, next){
@@ -35,10 +36,17 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+	}
+
+	function getAllIdsWithMetadataField(req, res, next){
+
+		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, req.params.metaKey).then(obj =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+		}).catch(err =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	module.exports = router;

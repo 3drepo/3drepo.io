@@ -1458,6 +1458,35 @@ function getModelPermission(username, setting, account){
 	});
 }
 
+function getAllIdsWithMetadataField(account, model, fieldName){
+	//Get the revision object to find all relevant IDs
+	return History.findLatest({account, model}, {current : 1}).then(rev => {
+		let fullFieldName = "metadata." + fieldName;
+		let match = {
+			_id: {"$in": rev.current},
+		}
+		match[fullFieldName] =  {"$exists" : true};
+
+		let projection = {
+			parents: 1
+		};
+		projection[fullFieldName] = 1;
+
+		return Scene.find({account, model}, match, projection).then(obj => {
+			if(obj){
+				//rename fieldName to "value"
+				const objStr = JSON.stringify(obj);
+				return JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"));
+			} else {
+				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			}
+		});
+
+	}) ;
+
+
+}
+
 function getMetadata(account, model, id){
 	
 
@@ -1513,5 +1542,6 @@ module.exports = {
 	removeModel,
 	getModelPermission,
 	getMetadata,
-	getFullTree_noSubTree
+	getFullTree_noSubTree,
+    getAllIdsWithMetadataField
 };

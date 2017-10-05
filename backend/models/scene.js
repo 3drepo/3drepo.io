@@ -23,7 +23,8 @@ var utils = require("../utils");
 
 
 var schema = Schema({
-	_id: Object
+	_id: Object,
+	parents: []
 });
 
 
@@ -33,6 +34,12 @@ if (!schema.options.toJSON){
 
 schema.options.toJSON.transform = function (doc, ret) {
 	ret._id = utils.uuidToString(doc._id);
+	let newParents = [];
+	doc.parents.forEach(function(parentId)
+			{
+				newParents.push(utils.uuidToString(parentId));
+			});
+	ret.parents = newParents;
 	return ret;
 };
 
