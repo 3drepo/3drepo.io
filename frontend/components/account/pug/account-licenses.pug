@@ -1,8 +1,8 @@
 .homeUserContent.userContentNoMargin
-	md-content.md-whiteframe-1dp(aria-label="Licenses", flex)
+	md-content.md-whiteframe-1dp(aria-label="Licences", flex)
 		md-toolbar
 			.md-toolbar-tools
-				h2 Licenses
+				h2 Licences
 
 		.userContent
 			div.loadingText(
@@ -11,25 +11,25 @@
 				ng-if="vm.toShow === undefined") 
 
 				md-progress-circular
-				h3 Loading Licenses...
+				h3 Loading Licences...
 
 			div(ng-switch="vm.toShow")
 
 				div(ng-switch-when="0")
 					.cardInfo
-						p You do not currently have any licenses.
+						p You do not currently have any licences.
 						br
 						p
 							| Please go to the
 							=" "
 							a(href="", ng-click="vm.goToBillingPage()") Billing Page
 							=" "
-							| to add licenses.
+							| to add licences.
 
 				div(ng-switch-when="0+")
 					#accountLicensesAdd(layout="row")
 						div(flex="50", layout="column")
-							p Assign a license
+							p Assign a licence
 							md-input-container
 								label Username
 								input(
@@ -46,7 +46,7 @@
 							//div(layout="column")
 								p {{vm.addMessage}}
 
-					p#errorMessage(ng-if="vm.allLicensesAssigned") All licenses have been assigned
+					p#errorMessage(ng-if="vm.allLicensesAssigned") All licences have been assigned
 
 
 					md-divider
@@ -55,7 +55,7 @@
 					md-content#accountLicensesList
 						section
 							md-subheader
-								div Licenses ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
+								div Licences ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
 						md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
 							div(layout="row", layout-align="start center", flex)
 								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
@@ -122,6 +122,6 @@
 						div(ng-if="vm.allLicensesAssigned")
 							md-divider
 							p#accountLicensesBillingPage
-								| To add more licenses please go to the
+								| To add more licences please go to the
 								=" "
 								a(href="", ng-click="vm.goToBillingPage()") Billing Page

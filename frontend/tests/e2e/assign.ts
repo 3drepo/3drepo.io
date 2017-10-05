@@ -18,8 +18,7 @@ describe("Assign page ", function() {
 
 			const assign = element.all(by.repeater("(key, value) in vm.accountOptions")).filter(function(elem, index) {
 				return elem.getText().then(function(text) {
-					// TODO: This needs correct spelling
-					return text === 'Assign Permissons';
+					return text === 'Assign Permissions';
 				});
 			});
 
