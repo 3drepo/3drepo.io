@@ -125,25 +125,21 @@ gulp.task('manifest-icons', function() {
 gulp.task('service-workers', function(callback) {
 
   var swPrecache = require('sw-precache');
-  var rootDir = '../public/';
-  var serviceWorkerName = "precache";
-
-  swPrecache.write(`${rootDir}/service-workers/${serviceWorkerName}.js`, {
+  var serviceWorkerName = "service-worker";
+  console.log("Service workers");
+  const dir = "../public/";
+  swPrecache.write(path.join(dir, `${serviceWorkerName}.js`) , {
     staticFileGlobs: [
-      rootDir + 'index.html',
-      rootDir + 'templates/.{html}',
-      rootDir + 'dist/**/*.{js,css}',
-      rootDir + 'fonts/**/*.{svg,eot,ttf,woff,woff2}',
-      rootDir + 'icons/**/*.{svg}',
-      rootDir + 'images/**/*.{png,jpg}',
-      rootDir + 'unity/**/*.{js,html,data,mem,css,png,jpg}',
+      `${dir}/index.html`,
+      `${dir}/templates/.{html}`,
+      `${dir}/dist/**/*.{js,css}`,
+      `${dir}/fonts/**/*.{svg,eot,ttf,woff,woff2}`,
+      `${dir}/icons/**/*.{svg}`,
+      `${dir}/images/**/*.{png,jpg}`,
+      `${dir}/unity/**/*.{js,html,data,mem,css,png,jpg}`,
     ],
-    dynamicUrlToDependencies: {
-        '/' : "index.html"
-    },
-    navigateFallback: '/index.html',
-    stripPrexix: rootDir,
-    replacePrefix: "/"
+    stripPrefix: `${dir}`,
+    verbose: true,
   }, callback);
 
 });
@@ -216,7 +212,18 @@ gulp.task('watch', function() {
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
-gulp.task('build', ['index', 'pug', 'javascript', 'css', 'icons', 'fonts', 'images', 'unity', 'manifest-icons', 'manifest-file'], function () {
+gulp.task('build', [
+  'index', 
+  'pug', 
+  'javascript',
+  'css', 
+  'icons', 
+  'fonts', 
+  'images', 
+  'unity', 
+  'manifest-icons', 
+  'manifest-file'
+], function () {
   gulp.start('service-workers');
 });
 
