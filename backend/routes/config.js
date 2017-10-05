@@ -15,6 +15,7 @@ const History = require("../models/history");
 const ModelHelper = require("../models/helper/model");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
+const path = require("path");
 
 const config = require("../config");
 
@@ -97,11 +98,13 @@ function setupRequiredPug(statesAndPlugins, required, pathToStatesAndPlugins, pa
  * @param {Object} params - updates with information from plugin structure
  */
 function setupPug(params, pluginStructure) {
-    const pathToStatesAndPlugins = "./../../frontend/components";
+
+    const pathToStatesAndPlugins = path.join(__dirname + "./../../frontend/components");
 
     // Get all available states and plugins in the file system
     const statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
     setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
+    
 }
 
 function createClientConfig(serverConfig, req) {
