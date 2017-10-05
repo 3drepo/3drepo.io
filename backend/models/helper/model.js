@@ -115,7 +115,7 @@ function createCorrelationId(account, model) {
 	let correlationId = uuid.v1();
 
 	// store corID
-	ModelSetting.findById({account, model}, model).then(setting => {
+	return ModelSetting.findById({account, model}, model).then(setting => {
 		setting = setting || ModelSetting.createInstance({
 			account: account,
 			model: model
@@ -124,10 +124,10 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-		setting.save();
+		return setting.save().then(() => {
+			return correlationId;
+		});;
 	});
-
-	return correlationId;
 }
 
 /**
@@ -354,75 +354,76 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 
 function createFederatedModel(account, model, subModels){
 
-	let correlationId = createCorrelationId(account, model);
+	return createCorrelationId(account, model).then(correlationId => {
 
-	let federatedJSON = {
-		database: account,
-		project: model,
-		subProjects: []
-	};
+		let federatedJSON = {
+			database: account,
+			project: model,
+			subProjects: []
+		};
 
-	let error;
+		let error;
 
-	let addSubModels = [];
+		let addSubModels = [];
 
-	let files = function(data){
-		return [
-			{desc: 'json file', type: 'file', path: data.jsonFilename},
-			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
-		];
-	};
+		let files = function(data){
+			return [
+				{desc: 'json file', type: 'file', path: data.jsonFilename},
+				{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
+			];
+		};
 
-	subModels.forEach(subModel => {
+		subModels.forEach(subModel => {
 
-		if(subModel.database !== account){
-			error = responseCodes.FED_MODEL_IN_OTHER_DB;
-		}
-
-		addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-			if(setting && setting.federate){
-				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
-
-			} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-				federatedJSON.subProjects.push({
-					database: subModel.database,
-					project: subModel.model
-				});
+			if(subModel.database !== account){
+				error = responseCodes.FED_MODEL_IN_OTHER_DB;
 			}
-		}));
 
-	});
+			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+				if(setting && setting.federate){
+					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
-	if(error){
-		return Promise.reject(error);
-	}
+				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
+					federatedJSON.subProjects.push({
+						database: subModel.database,
+						project: subModel.model
+					});
+				}
+			}));
 
-	if(subModels.length === 0) {
-		return Promise.resolve();
-	}
+		});
 
-	//console.log(federatedJSON);
-	return Promise.all(addSubModels).then(() => {
-
-		return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-
-	}).then(data => {
-
-		resetCorrelationId(account, model);
-
-		_deleteFiles(files(data));
-
-		return;
-
-	}).catch(err => {
-		//catch here to provide custom error message
-		if(err.errCode){
-			return Promise.reject(convertToErrorCode(err.errCode));
+		if(error){
+			return Promise.reject(error);
 		}
-		return Promise.reject(err);
+
+		if(subModels.length === 0) {
+			return Promise.resolve();
+		}
+
+		//console.log(federatedJSON);
+		return Promise.all(addSubModels).then(() => {
+
+			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+
+		}).then(data => {
+
+			resetCorrelationId(account, model);
+
+			_deleteFiles(files(data));
+
+			return;
+
+		}).catch(err => {
+			//catch here to provide custom error message
+			if(err.errCode){
+				return Promise.reject(convertToErrorCode(err.errCode));
+			}
+			return Promise.reject(err);
+
+		});
 
 	});
-
 }
 
 function getModelProperties(account, model, branch, rev, username){
@@ -1064,6 +1065,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		return Promise.resolve(obj);
 
 	}).catch(err => {
+		// ISSUE_520... don't delete files if importFile fails
 		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
 		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
 	});
@@ -1143,7 +1145,8 @@ function importModel(account, model, username, modelSetting, source, data){
 
 		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
 
-
+		// cclw05 - something wrong with error here
+		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
 		return Promise.reject(err);
 
 	});
