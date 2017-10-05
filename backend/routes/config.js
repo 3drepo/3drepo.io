@@ -234,7 +234,7 @@ router.get("/version.json", function (req, res) {
 });
 
 router.get("/config.js", function (req, res) {
-    
+
     // Only need to set the userId the rest is static
     clientConfig.userId = _.get(req, "session.user.username");
 
@@ -244,7 +244,7 @@ router.get("/config.js", function (req, res) {
     const serializedConfig = serialize(clientConfig); 
 
     res.header("Content-Type", "text/javascript");
-    res.render("config.pug", {config: serializedConfig});
+    res.render(path.resolve(__dirname, "./../../pug/config.pug"), {config: serializedConfig});
 });
 
 module.exports = router;

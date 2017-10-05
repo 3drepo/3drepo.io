@@ -17,14 +17,14 @@
 
 "use strict";
 
-const request = require("request");
+const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing", resave: false, saveUninitialized: false }) }
 );
 
 
-describe("config.js", function () {
+describe("Config", function () {
 	let server;
 
 	before(function(done){
@@ -43,20 +43,36 @@ describe("config.js", function () {
 	});
 
 
-	describe("should return", function(){
+	describe("version endpoint", function(){
 
-		it("as JavaScript", function(done){
+		it("should return { VERSION : $version }", function(done){
 
             const agent = request.agent(server);
-            agent.post("/config/config.js")
-            .get()
+            agent.get("/config/version.json")
             .expect(200, function(err, res){
-                expect(res).to.not.be.undefined;
+                expect(typeof res).to.equal("object");
+                expect(typeof res.body.VERSION).to.equal("string");
+                expect(res.body.VERSION.split(".").length-1).to.equal(2);
                 done(err);
             });
 				
 		});
 
-	});
+    });
+    
+    describe("config endpoint", function(){
+        
+        it("should JavaScript file", function(done){
+
+            const agent = request.agent(server);
+            agent.get("/config/config.js")
+            .expect(200, function(err, res){
+                expect(typeof res).to.equal("object");
+                done(err);
+            });
+                
+        });
+
+    });
 
 });
