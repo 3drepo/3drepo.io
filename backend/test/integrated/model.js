@@ -20,7 +20,7 @@
 let request = require('supertest');
 let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
