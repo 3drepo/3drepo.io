@@ -425,6 +425,107 @@ function createFederatedModel(account, model, subModels){
 
 }
 
+function getIdMap(account, model, branch, rev, username){
+	'use strict'	
+	let subIdMaps;
+	let revId, idMapsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getIdMaps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getIdMaps.push(
+				getIdMap(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idMap: obj.idMap,
+						owner: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getIdMaps);
+
+	}).then(_subIdMaps => {
+
+		subIdMaps = _subIdMaps;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idMapsFileName);
+
+	}).then(buf => {
+		let idMaps = {};
+
+		if(buf){
+			idMaps = JSON.parse(buf);
+		}
+
+		if (!idMaps.idMap)
+		{
+			idMaps.idMap = [];
+		}
+
+		if(subIdMaps.length > 0)
+		{
+			idMaps.subModels = [];
+		}
+		subIdMaps.forEach(subIdMap => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			console.log(subIdMaps);
+			if (subIdMaps.idMap.idMap)
+			{
+				idMaps.subModels.push({idMaps: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
+			}
+		});
+
+		return Promise.resolve({idMaps, status});
+
+	});
+}
+
+
 function getModelProperties(account, model, branch, rev, username){
 	
 	let subProperties;
@@ -1299,6 +1400,7 @@ module.exports = {
 	importToyProject,
 	createFederatedModel,
 	listSubModels,
+	getIdMap,
 	getModelProperties,
 	getUnityAssets,
 	getUnityBundle,

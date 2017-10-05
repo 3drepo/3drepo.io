@@ -70,10 +70,14 @@ router.get('/:model/userJobForModel.json', middlewares.hasReadAccessToModel, get
 
 //master tree
 router.get('/:model/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
+//router.get('/:model/revision/master/head/tree_path.json', middlewares.hasReadAccessToModel, getTreePath);
+router.get('/:model/revision/master/head/idMap.json', middlewares.hasReadAccessToModel, getIdMap);
 
 router.get('/:model/revision/master/head/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
 router.get('/:model/revision/:rev/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
+//router.get('/:model/revision/:rev/tree_path.json', middlewares.hasReadAccessToModel, getTreePath);
+router.get('/:model/revision/:rev/idMap.json', middlewares.hasReadAccessToModel, getIdMap);
 
 router.get('/:model/revision/:rev/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
 
@@ -271,6 +275,25 @@ function deleteModel(req, res, next){
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
+}
+
+function getIdMap(req, res, next){
+	'use strict';
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ModelHelpers.getIdMap(account, model, branch, req.params.rev, username).then(idMap => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idMap.idMaps);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
