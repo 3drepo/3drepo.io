@@ -16,7 +16,6 @@ home {
     height: 100%;
     overflow: hidden; 
     background-size: cover; 
-    background-image: url("/images/viewer_background.png");
 }
 
 home .homeContainer {

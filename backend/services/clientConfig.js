@@ -140,7 +140,7 @@
             "googleConversionId": config.googleConversionId,
             "userNotice" : config.userNotice,
             "unitySettings" : config.unitySettings,
-            
+            "customLogin" : config.customLogin
         };
 
         if (config.hasOwnProperty("captcha_client_key")) {
@@ -217,7 +217,7 @@
 
         clientConfig.impliedPermission = C.IMPLIED_PERM;
 
-        setupPug(clientConfig, pluginStructure);
+        //setupPug(clientConfig, pluginStructure);
         
         return clientConfig;
 

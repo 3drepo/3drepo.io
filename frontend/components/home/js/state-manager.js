@@ -17,7 +17,7 @@
 
 (function() {
 	"use strict";
-
+	console.log("STATE MANAGER")
 	angular.module("3drepo")
 		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider",
 			function($stateProvider, $urlRouterProvider, $locationProvider) {
@@ -30,7 +30,6 @@
 					resolve: {
 						init: ["AuthService", "StateManager", "$q", function(AuthService, StateManager, $q) {
 							StateManager.state.authInitialized = false;
-
 							var finishedAuth = $q.defer();
 
 							StateManager.state.changing = true;
