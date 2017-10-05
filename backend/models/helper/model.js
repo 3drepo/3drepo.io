@@ -401,7 +401,6 @@ function createFederatedModel(account, model, subModels){
 		return Promise.resolve();
 	}
 
-	//console.log(federatedJSON);
 	return Promise.all(addSubModels).then(() => {
 
 		return importQueue.createFederatedModel(correlationId, account, federatedJSON);
@@ -677,7 +676,6 @@ function getTreePath(account, model, branch, rev, username){
 
 			getTreePaths.push(
 				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					console.log(ref);
 					return Promise.resolve({
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
