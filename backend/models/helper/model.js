@@ -478,7 +478,7 @@ function getIdMap(account, model, branch, rev, username){
 			getIdMaps.push(
 				getIdMap(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
 					return Promise.resolve({
-						idMap: obj.idMap,
+						idMap: obj.idMaps.idMap,
 						owner: ref.owner,
 						model: ref.project
 					});
@@ -513,10 +513,9 @@ function getIdMap(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			console.log(subIdMaps);
-			if (subIdMaps.idMap.idMap)
+			if (subIdMap.idMap)
 			{
-				idMaps.subModels.push({idMaps: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
+				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
 			}
 		});
 
