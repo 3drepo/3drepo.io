@@ -22,11 +22,10 @@
 				console.debug("ServiceWorker in navigator");
 
 				var serviceWorkers = [
-					"precache"
+					"service-worker"
 					//"google-analytics"
 				];
 
-				
 				serviceWorkers.forEach(registerSW);
 
 			}		

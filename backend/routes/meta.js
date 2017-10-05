@@ -43,7 +43,7 @@
 	function getAllIdsWithMetadataField(req, res, next){
 
 		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, req.params.metaKey).then(obj =>{
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {data : obj});
 		}).catch(err =>{
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
