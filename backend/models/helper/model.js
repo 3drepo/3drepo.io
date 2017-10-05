@@ -677,6 +677,7 @@ function getTreePath(account, model, branch, rev, username){
 
 			getTreePaths.push(
 				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					console.log(ref);
 					return Promise.resolve({
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
@@ -715,7 +716,7 @@ function getTreePath(account, model, branch, rev, username){
 			// single array
 			if (subTreePath.idToPath)
 			{
-				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePaths.model});
+				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
 			}
 		});
 
