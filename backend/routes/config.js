@@ -97,11 +97,10 @@ function setupRequiredPug(statesAndPlugins, required, pathToStatesAndPlugins, pa
  * @param {Object} params - updates with information from plugin structure
  */
 function setupPug(params, pluginStructure) {
-    let pathToStatesAndPlugins = "./frontend/components",
-        statesAndPlugins;
+    const pathToStatesAndPlugins = "./../../frontend/components";
 
     // Get all available states and plugins in the file system
-    statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
+    const statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
     setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 }
 
