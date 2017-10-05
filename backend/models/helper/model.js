@@ -625,6 +625,106 @@ function getModelProperties(account, model, branch, rev, username){
 	});
 }
 
+function getTreePath(account, model, branch, rev, username){
+	'use strict'	
+	let subTreePaths;
+	let revId, treePathsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.resolve([]);
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		} else {
+			revId = utils.uuidToString(history._id);
+			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTreePaths = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getTreePaths.push(
+				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToPath: obj.treePaths.idToPath,
+						owner: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getTreePaths);
+
+	}).then(_subTreePaths => {
+
+		subTreePaths = _subTreePaths;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treePathsFileName);
+
+	}).then(buf => {
+		let treePaths = {};
+
+		if(buf){
+			treePaths = JSON.parse(buf);
+		}
+
+		if (!treePaths.idToPath)
+		{
+			treePaths.idToPath = [];
+		}
+
+		if(subTreePaths.length > 0)
+		{
+			treePaths.subModels = [];
+		}
+		subTreePaths.forEach(subTreePath => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subTreePath.idToPath)
+			{
+				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePaths.model});
+			}
+		});
+
+		return Promise.resolve({treePaths, status});
+
+	});
+}
+
+
 function getUnityAssets(account, model, branch, rev, username){
 	
 
@@ -1401,6 +1501,7 @@ module.exports = {
 	listSubModels,
 	getIdMap,
 	getModelProperties,
+	getTreePath,
 	getUnityAssets,
 	getUnityBundle,
 	searchTree,
