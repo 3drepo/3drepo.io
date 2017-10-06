@@ -33,7 +33,7 @@
 
 	var multer = require("multer");
 
-
+	router.get("/validCookie", checkLogin);
 	router.post("/login", login);
 	router.post("/logout", logout);
 
@@ -60,6 +60,14 @@
 	// 		req.session.cookie.expires = new Date(0);
 	// 		req.session.cookie.maxAge = 0;
 	// 	}
+	// }
+
+	// function validCookie(req, res, next) {
+	// 	//console.log(req);
+	// 	if (req.session) {
+	// 		req[C.REQ_REPO].logger.logInfo("Checking session cookie still valid");
+	// 	}
+	// 	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	// }
 
 	function createSession(place, req, res, next, user){

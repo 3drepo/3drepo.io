@@ -22,9 +22,11 @@
 		.service("AuthService", [
 			"$injector", "$q", "$http", "$interval", "ClientConfigService",
 			"EventService", "AnalyticService", "ViewerService", "$location", "$window",
+			"$mdDialog",
 			function(
 				$injector, $q, $http, $interval, ClientConfigService, 
-				EventService, AnalyticService, ViewerService, $location, $window
+				EventService, AnalyticService, ViewerService, $location, $window,
+				$mdDialog
 			) {
 
 				var authPromise = $q.defer();
@@ -95,12 +97,42 @@
 				}
 
 				function initAutoLogout() {
-					// Check for expired sessions
-					var checkExpiredSessionTime = ClientConfigService.login_check_interval || 4; // Seconds
+					// Check for mismatch
+					var checkLoginMismatch = ClientConfigService.login_check_interval || 4; // Seconds
+
+					// Check for timeout
+					var checkTimeout = 5;
+
 					$interval(function() {
 						//console.log("auto - calling interval init")
 						init(true);
-					}, 1000 * checkExpiredSessionTime);
+					}, 1000 * checkLoginMismatch);
+
+					$interval(function() {
+						//console.log("auto - calling interval init")
+						checkSessionTimeout();
+					}, 1000 * checkTimeout);
+				}
+
+				function checkSessionTimeout() {
+					if (localStorageLoggedIn()) {
+						validCookie().catch(sessionExpired);
+					}
+				}
+
+				function sessionExpired(reason) {
+					console.debug("Cookie not valid", reason);
+					logoutSuccess();
+
+					var content = "You have been logged out as your session has expired.";
+					$mdDialog.show( 
+						$mdDialog.alert()
+							.clickOutsideToClose(true)
+							.title("Your Session Has Expired")
+							.textContent(content)
+							.ariaLabel("Your Session Has Expired")
+							.ok("OK")
+					);
 				}
 				
 				function loginSuccess(response) {
@@ -261,6 +293,10 @@
 
 				function getUsername( ) { 
 					return username; 
+				}
+
+				function validCookie() {
+					return $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, "validCookie"));
 				}
 
 				function sendLoginRequest() {
