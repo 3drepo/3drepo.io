@@ -37,19 +37,27 @@ let certs   = {};
 let certMap = {};
 let ssl_options = {};
 
+// The core express application
+const mainApp = express();
+
 if ("ssl" in config) {
 
 	for (let certGroup in config.ssl) {
-		let certGroupOptions = {};
 
-		certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
-		certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
+		if (config.ssl.hasOwnProperty(certGroup)) {
+			let certGroupOptions = {};
 
-		if (config.ssl[certGroup].ca) {
-			certGroupOptions.ca = fs.readFileSync(config.ssl[certGroup].ca, "utf8");
+			certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
+			certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
+
+			if (config.ssl[certGroup].ca) {
+				certGroupOptions.ca = fs.readFileSync(config.ssl[certGroup].ca, "utf8");
+			}
+
+			certs[certGroup] = tls.createSecureContext(certGroupOptions);
+			
 		}
 
-		certs[certGroup] = tls.createSecureContext(certGroupOptions);
 	}
 
 	ssl_options = {
@@ -75,13 +83,6 @@ if ("ssl" in config) {
 	}
 }
 
-const serverStartFunction = function(serverHost, serverPort) {
-	return function() {
-		systemLogger.logInfo("Starting server on " + serverHost + " port " + serverPort);
-	};
-};
-
-const mainApp = express();
 
 if (cluster.isMaster) {
 
@@ -112,6 +113,7 @@ if (cluster.isMaster) {
 		http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
 			systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
 		});
+
 	}
 
 	if (config.hasOwnProperty("subdomains")) {
@@ -120,31 +122,29 @@ if (cluster.isMaster) {
 
 			if (config.subdomains.hasOwnProperty(subdomain)) {
 
-				console.log("SUBDOMAINS FROM CONFIG", config.subdomains);
-				
+
 				let subDomainApp = express();
 	
 				let subdomainServers = config.subdomains[subdomain];
-	
-				for(let subId = 0; subId < subdomainServers.length; subId++) {
+
+				for (let subId = 0; subId < subdomainServers.length; subId++) {
 
 					let serverConfig = subdomainServers[subId];
 	
-					// My certificate group
-					let myCertGroup = serverConfig.certificate ? serverConfig.certificate : "default";
-					certMap[serverConfig.hostname] = myCertGroup;
+					// Certificate group
+					let certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
+					certMap[serverConfig.hostname] = certGroup;
 	
 					systemLogger.logInfo(
 						"Loading " + 
 						serverConfig.service + 
-						" on " + serverConfig.hostname + 
+						" on " + serverConfig.hostname + ":" +
 						serverConfig.port + 
 						serverConfig.host_dir
 					);
-	
-	
-					if (!serverConfig.external)
-					{
+
+					if (!serverConfig.external) {
+
 						if(serverConfig.service === "chat"){
 							//chat server has its own port and can't attach to express
 	
@@ -161,14 +161,13 @@ if (cluster.isMaster) {
 							let service = `./services/${serverConfig.service}.js`;
 							require(service).createApp(server, serverConfig);
 	
-							// let app = require("./services/" + serverConfig.service + ".js").createApp(serverConfig);
-							// let server = config.using_ssl ? https.createServer(ssl_options) : http.createServer(app);
-							// server.listen(serverConfig.chat_port, "0.0.0.0", serverStartFunction("0.0.0.0", serverConfig.chat_port));
-	
 						} else {
+							
 							let service = `./services/${serverConfig.service}.js`;
 							let app = require(service).createApp(serverConfig);
+
 							subDomainApp.use(serverConfig.host_dir, app);
+
 						}
 	
 					}
@@ -179,28 +178,40 @@ if (cluster.isMaster) {
 					}
 				}
 	
-				systemLogger.logInfo("SUBDOMAIN" + subdomain);
-	
 				if (subdomain !== "undefined") {
-					mainApp.use(vhost(subdomain + "." + config.host, subDomainApp));
+					let subdomainHost = subdomain + "." + config.host;
+					mainApp.use(vhost(subdomainHost, subDomainApp));
 				} else {
 					mainApp.use(vhost(config.host, subDomainApp));
 				}
+
 			}
 		}
 	}
 	
-	let server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
+	const server = config.using_ssl ? 
+					https.createServer(ssl_options, mainApp) : 
+					http.createServer(mainApp);
+
+	const startFunc = serverStartFunction("0.0.0.0", config.port);
+
 	server.setTimeout(config.timeout * 1000);
-	server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
+	server.listen(config.port, "0.0.0.0", startFunc);
+
+}
+
+function serverStartFunction(serverHost, serverPort) {
+	return function() {
+		systemLogger.logInfo("Starting server on " + serverHost + " port " + serverPort);
+	};
 }
 
 function configRedirect(serverConfig, app) {
 
 	app.all(/.*/, function(req, res, next) {
-		let host = req.header("host");
+		const host = req.header("host");
 		const redirectArr = Array.isArray(serverConfig.redirect);
-		let redirect = (redirectArr) ? serverConfig.redirect : [serverConfig.redirect];
+		const redirect = (redirectArr) ? serverConfig.redirect : [serverConfig.redirect];
 
 		for(let i = 0; i < redirect.length; i++) {
 

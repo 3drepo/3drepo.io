@@ -144,7 +144,7 @@ function createClientConfig(serverConfig, req) {
         "googleConversionId": config.googleConversionId,
         "userNotice" : config.userNotice,
         "unitySettings" : config.unitySettings,
-        
+        "customLogins" : config.customLogins
     };
 
     if (config.hasOwnProperty("captcha_client_key")) {

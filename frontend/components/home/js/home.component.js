@@ -110,18 +110,22 @@
 
 		vm.setLoginPage = function() {
 
-			if (ClientConfigService.customLogin !== undefined) {
+			if (ClientConfigService.customLogins !== undefined) {
 			
 				var sub = vm.getSubdomain();
-				var custom = ClientConfigService.customLogin[sub];
-
-				console.log(sub, custom);
+				var custom = ClientConfigService.customLogins[sub];
 
 				if (sub && custom) {
-					if (typeof custom.backgroundImage === "string") {
+					if (
+						custom.backgroundImage &&
+						typeof custom.backgroundImage === "string"
+					) {
 						vm.backgroundImage = custom.backgroundImage;
 					}
-					if (typeof ClientConfigService.customLogin.topLogo === "string") {
+					if (
+						custom.topLogo &&
+						typeof custom.topLogo === "string"
+					) {
 						vm.topLogo = custom.topLogo;
 					}
 				} 

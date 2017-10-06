@@ -40,7 +40,7 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon("./public/images/favicon.ico"));
+	app.use(favicon(publicDir + "/images/favicon.ico"));
 
 	app.locals.pretty = true;
 
@@ -60,8 +60,6 @@ module.exports.createApp = function () {
 		res.sendFile(path.resolve(publicDir + "/index.html"));
 		
 	});
-
-
 
 	return app;
 

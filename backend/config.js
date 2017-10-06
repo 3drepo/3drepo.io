@@ -108,8 +108,6 @@
 		//serverObject.location_url = serverObject.location_url.toString();
 	};
 
-	config.consoleLogging = coalesce(config.consoleLogging, true);
-
 	// Check for hostname and ip here
 	config.host = coalesce(config.host, "127.0.0.1");
 	config.numThreads = coalesce(config.numThreads, 1);
@@ -148,7 +146,9 @@
 	for (let i = 0; i < config.servers.length; i++) {
 		let server = config.servers[i];
 
-		if (!config.subdomains.hasOwnProperty(server.subdomain)) {
+		let hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
+		if (!hasSubdomainArr) {
+			// Create empty array for the subdomain to hold servers
 			config.subdomains[server.subdomain] = [];
 		}
 
