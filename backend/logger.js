@@ -64,7 +64,14 @@ const transports = [
 	fileOutTransport
 ];
 
-if (config.consoleLogging === undefined || config.consoleLogging === true) {
+// Whether the logger should log to the console or not
+if (config.logfile.silent === true) {
+	transports.push(new winston.transports.Console({
+		colorize: true,
+		level: config.logfile.console_level,
+		silent: true
+	}));
+} else {
 	transports.push(new winston.transports.Console({
 		colorize: true,
 		level: config.logfile.console_level,
