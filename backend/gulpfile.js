@@ -20,7 +20,8 @@ gulp.task("test:integrated", function(){
             reporter: "spec",
             timeout: 10000
         }))
-        .once("error", () => {
+        .once("error", (error) => {
+            console.log(error);
             process.exit(1);
         })
         .once("end", () => {
@@ -83,7 +84,8 @@ gulp.task("test:integrated-one", function() {
                 reporter: "spec",
                 timeout: 10000
             }))
-            .once("error", () => {
+            .once("error", (error) => {
+                console.log(error);
                 process.exit(1);
             })
             .once("end", () => {

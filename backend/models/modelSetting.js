@@ -29,6 +29,7 @@ const schema = mongoose.Schema({
 	users: [String],
 	desc: String,
 	type: String,
+	corID: String,
 	status: {type: String, default: "ok"},
 	errorReason: Object,
 	federate: Boolean,

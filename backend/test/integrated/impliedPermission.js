@@ -10,7 +10,7 @@ describe('Implied permission::', function () {
 	let agent;
 
 	const app = require("../../services/api.js").createApp(
-		{ session: require('express-session')({ secret: 'testing'}) }
+		{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 	);
 	const sharedTeamspace = 'imsharedTeamspace';
 	const C = require('../../constants');

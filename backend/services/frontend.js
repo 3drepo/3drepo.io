@@ -15,112 +15,46 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
+"use strict";
 
-	/**
-	 * Creates frontend API Express app 
-	 * 
-	 * @param {Object} serverConfig - Config for server instance
-	 * @returns
-	 */
-	module.exports.createApp = function (serverConfig) {
+/**
+ * Creates frontend API Express app 
+ * 
+ * @param {Object} serverConfig - Config for server instance
+ * @returns
+ */
+module.exports.createApp = function () {
 
-		const express = require("express");
-		const bodyParser = require("body-parser");
-		const compress = require("compression");
-		const path = require("path");
-		const favicon = require("serve-favicon");
-		const serialize = require("serialize-javascript");
-		const app = express();
-		const _ = require("lodash");
-		const createClientConfig = require("./clientConfig.js").createClientConfig;
+	const express = require("express");
+	const bodyParser = require("body-parser");
+	const compress = require("compression");
+	const favicon = require("serve-favicon");
+	const app = express();
+	const path = require("path");
+	
+	const publicDir = __dirname + "/../../public";
 
-		app.use(compress({ level: 9 }));
+	app.use(compress({ level: 9 }));
+	app.use(bodyParser.urlencoded({
+		extended: true
+	}));
+	app.use(bodyParser.json());
+	app.use(favicon("./public/images/favicon.ico"));
 
-		app.use(bodyParser.urlencoded({
-			extended: true
-		}));
-		app.use(bodyParser.json());
-
-		app.set("views", "./pug");
-		app.set("view_engine", "pug");
-		app.locals.pretty = true;
-
-		app.use(favicon("./public/images/favicon.ico"));
-
-		// TODO: This is better than before
-		// but still not great, we could just use nginx or 
-		// a static file server for all of this stuff and 
-		// use Node for the API
-
-		// Static file serving
-		const publicDir = __dirname + "/../../public";
-		const statics = [
-			"/images",
-			"/dist",
-			"/icons",
-			"/fonts",
-			"/manifest-icons",
-			"/templates",
-			"/unity"
-		];
-
-		statics.forEach((folder) => {
-			const staticPath = path.resolve(publicDir + folder);
-			app.use(folder, express.static(staticPath, {fallthrough: true}));
-			app.use(folder, function(req, res) {
-				res.status(404).send('404 - File Not Found');
-			});
-		});
+	app.locals.pretty = true;
 
 
-		app.get("/index.html", function (req, res) {
-			res.sendFile(path.resolve(publicDir + "/index.html"));
-		});
-
-		app.get("/manifest.json", function (req, res) {
-			res.sendFile(path.resolve(publicDir + "/manifest.json"));
-		});
-
-		app.get("/precache.js", function (req, res) {
-			res.sendFile(path.resolve(publicDir + "/service-workers/precache.js"));
-		});
+	app.use(express.static(publicDir));
 
 
-		const clientConfig = createClientConfig(serverConfig);
+	app.use(function(req, res, next) {
 
-		app.get("/version.json", function (req, res) {
-			return res.json({"VERSION": clientConfig.VERSION });
-		});
-
-		app.get("/config.js", function (req, res) {
-
-			// Only need to set the userId the rest is static
-			clientConfig.userId = _.get(req, "session.user.username");
-
-			// TODO: This used to be a long string concat, 
-			// this is marginally better but still a complete hack. 
-			// There is definitely a better way to do this
-			const serializedConfig = serialize(clientConfig); 
-
-			res.header("Content-Type", "text/javascript");
-			res.render("config.pug", {config: serializedConfig});
-		});
-
-		// app.get('/*.html', function(req, res){
-		// 	res.status(404).send("File not found");
-		// });
-
-		// app.get('/*.js', function(req, res){
-		// 	res.status(404).send("File not found");
-		// });
+		if (req.path.indexOf(".") !== -1) {
+			next();
+		}
+		res.sendFile(path.resolve(publicDir + "/index.html"));
 		
-		app.get('*', function(req,res){
-			res.sendFile(path.resolve(publicDir + "/index.html"));
-		});
+	});
 
-		return app;
-	};
-
-})();
+	return app;
+};
