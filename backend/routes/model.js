@@ -562,6 +562,7 @@ function getUnityAssets(req, res, next){
 	ModelHelpers.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
+		console.log(err);
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }

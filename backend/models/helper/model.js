@@ -444,10 +444,10 @@ function getIdMap(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
-			return Promise.resolve([]);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
 			status = 'NO_ACCESS';
-			return Promise.resolve([]);
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
@@ -644,10 +644,10 @@ function getTreePath(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
-			return Promise.resolve([]);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
 			status = 'NO_ACCESS';
-			return Promise.resolve([]);
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
@@ -745,10 +745,10 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
-			return Promise.resolve([]);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
 			status = 'NO_ACCESS';
-			return Promise.resolve([]);
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
