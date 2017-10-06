@@ -31,6 +31,7 @@ module.exports.createApp = function () {
 	const favicon = require("serve-favicon");
 	const app = express();
 	const path = require("path");
+	const configRoutes = require("../routes/config.js");
 	
 	const publicDir = __dirname + "/../../public";
 
@@ -43,10 +44,14 @@ module.exports.createApp = function () {
 
 	app.locals.pretty = true;
 
+	// Serve configs
+	app.use("/config", configRoutes);
 
+	// Statically serve assets 
 	app.use(express.static(publicDir));
 
-
+	// Unless they are frontend Angular routes and just serve the index page
+	// which will in turn get the state from URL paths
 	app.use(function(req, res, next) {
 
 		if (req.path.indexOf(".") !== -1) {
@@ -56,5 +61,8 @@ module.exports.createApp = function () {
 		
 	});
 
+
+
 	return app;
+
 };
