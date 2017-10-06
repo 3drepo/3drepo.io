@@ -19,128 +19,134 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.service("AuthService", [
-			"$injector", "$q", "$http", "$interval", "ClientConfigService",
-			function(
-				$injector, $q, $http, $interval, ClientConfigService
-			) {
+		.service("APIService", APIService);
+		
+	APIService.$inject = [
+		"$injector", "$q", "$http", "$interval", "ClientConfigService"
+	];
+		
+	function APIService(
+		$injector, $q, $http, $interval, ClientConfigService
+	) {
 
-				var service = {
-					delete: del,
-					post: post,
-					get: get,
-					put: put
-				};
+		var service = {
+			getAPIUrl: getAPIUrl,
+			delete: del,
+			post: post,
+			get: get,
+			put: put
+		};
 
-				return service;
+		return service;
 
-				////////
+		////////
 
-				/**
-				 * Handle GET requests
-				 * 
-				 * @param url
-				 * @returns {*|promise}
-				 */
-				function get(url) {
-					var deferred = $q.defer(),
-						urlUse = ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
+		function getAPIUrl(url) {
+			return ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
+		}
 
-					$http.get(urlUse).then(
-						function (response) {
-							deferred.resolve(response);
-						},
-						function (response) {
-							deferred.resolve(response);
-						});
-					return deferred.promise;
-				}
+		/**
+		 * Handle GET requests
+		 * 
+		 * @param url
+		 * @returns {*|promise}
+		 */
+		function get(url) {
 
-				/**
-				 * Handle POST requests
-				 * @param data
-				 * @param url
-				 * @param headers
-				 * @returns {*}
-				 */
-				function post(data, url, headers) {
-					var deferred = $q.defer(),
-						urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-						config = {withCredentials: true};
+			checkUrl(url);
+			url = encodeURI(url);
+			var urlUse = ClientConfigService.apiUrl(
+				ClientConfigService.GET_API, 
+				url
+			);
 
-					if (angular.isDefined(headers)) {
-						config.headers = headers;
-					}
+			return $http.get(urlUse);
+		}
 
-					$http.post(urlUse, data, config)
-						.then(
-							function (response) {
-								deferred.resolve(response);
-							},
-							function (error) {
-								deferred.resolve(error);
-							}
-						);
-					return deferred.promise;
-				}
-
-				/**
-				 * Handle PUT requests
-				 * @param data
-				 * @param url
-				 * @returns {*}
-				 */
-				function put(data, url) {
-					var deferred = $q.defer(),
-						urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-						config = {withCredentials: true};
-
-					$http.put(urlUse, data, config)
-						.then(
-							function (response) {
-								deferred.resolve(response);
-							},
-							function (error) {
-								deferred.resolve(error);
-							}
-						);
-					return deferred.promise;
-				}
-
-				/**
-				 * Handle DELETE requests
-				 * @param data
-				 * @param url
-				 * @returns {*}
-				 */
-				function del(data, url) {
-					var deferred = $q.defer(),
-						config = {
-							method: "DELETE",
-							url: ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-							data: data,
-							withCredentials: true,
-							headers: {
-								"Content-Type": "application/json"
-							}
-						};
-
-					$http(config)
-						.then(
-							function (response) {
-								deferred.resolve(response);
-							},
-							function (error) {
-								deferred.resolve(error);
-							}
-						);
-					return deferred.promise;
-				}
-
-
-			}]);
+		/**
+		 * Handle POST requests
+		 * @param data
+		 * @param url
+		 * @param headers
+		 * @returns {*}
+		 */
+		function post(url, data, headers) {
 			
+			checkUrl(url);
+			url = encodeURI(url);
 
+			var urlUse = ClientConfigService.apiUrl(
+				ClientConfigService.POST_API, 
+				url
+			);
+			var config = { 
+				withCredentials: true 
+			};
+
+			if (headers) {
+				config.headers = headers;
+			}
+
+			return $http.post(urlUse, data, config);
+
+		}
+
+		/**
+		 * Handle PUT requests
+		 * @param data
+		 * @param url
+		 * @returns {*}
+		 */
+		function put(url, data) {
+			
+			checkUrl(url);
+			url = encodeURI(url);
+
+			var urlUse = ClientConfigService.apiUrl(
+				ClientConfigService.POST_API, 
+				url
+			);
+			var config = {withCredentials: true};
+
+			return $http.put(urlUse, data, config);
+
+		}
+
+		/**
+		 * Handle DELETE requests
+		 * @param data
+		 * @param url
+		 * @returns {*}
+		 */
+		function del(url, data) {
+
+			checkUrl(url);
+			url = encodeURI(url);
+
+			var config = {
+				method: "DELETE",
+				url: ClientConfigService.apiUrl(
+					ClientConfigService.POST_API, 
+					url
+				),
+				data: data,
+				withCredentials: true,
+				headers: {
+					"Content-Type": "application/json"
+				}
+			};
+			
+			return $http(config);
+		}
+
+		function checkUrl(url) {
+			if (typeof url !== "string") {
+				throw new Error("URL is not a string");
+			}
+		}
+
+	}
+			
 })();
 
 

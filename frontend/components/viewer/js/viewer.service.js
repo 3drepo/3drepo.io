@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("ViewerService", ViewerService);
 
-	ViewerService.$inject = ["ClientConfigService", "$q", "$http"];
+	ViewerService.$inject = ["ClientConfigService", "$q", "APIService"];
 
-	function ViewerService(ClientConfigService, $q, $http) {
+	function ViewerService(ClientConfigService, $q, APIService) {
 
 		var viewer;
 		var currentModel = {
@@ -143,9 +143,8 @@
 				}
 					
 				var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
-				console.log("url", url)
 
-				$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
+				APIService.get(url)
 					.then(function(response) {
 						if (response.data && response.data.status) {
 							if (response.data.status === "NOT_FOUND") {

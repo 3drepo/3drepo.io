@@ -20,13 +20,13 @@
 
 	angular.module("3drepo")
 		.service("AuthService", [
-			"$injector", "$q", "$http", "$interval", "ClientConfigService",
+			"$injector", "$q", "$interval", "ClientConfigService",
 			"EventService", "AnalyticService", "ViewerService", "$location", "$window",
-			"$mdDialog",
+			"$mdDialog", "APIService",
 			function(
-				$injector, $q, $http, $interval, ClientConfigService, 
+				$injector, $q, $interval, ClientConfigService, 
 				EventService, AnalyticService, ViewerService, $location, $window,
-				$mdDialog
+				$mdDialog, APIService
 			) {
 
 				var authPromise = $q.defer();
@@ -116,6 +116,7 @@
 
 				function checkSessionTimeout() {
 					if (localStorageLoggedIn()) {
+						console.log("Checking valid cookie")
 						validCookie().catch(sessionExpired);
 					}
 				}
@@ -296,11 +297,11 @@
 				}
 
 				function validCookie() {
-					return $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, "validCookie"));
+					return APIService.get("validCookie");
 				}
 
 				function sendLoginRequest() {
-					return $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, "login"));
+					return APIService.get("login");
 				}
 
 				function login(loginUsername, password) {
@@ -308,7 +309,7 @@
 
 					var postData = {username: loginUsername, password: password};
 
-					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "login"), postData)
+					APIService.post("login", postData)
 						.then(loginSuccess)
 						.catch(loginFailure);
 
@@ -320,7 +321,7 @@
 
 					ViewerService.reset();
 					
-					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "logout"))
+					APIService.post("logout")
 						.then(logoutSuccess)
 						.catch(logoutFailure);
 

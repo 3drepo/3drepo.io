@@ -19,7 +19,7 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("EventService", EventService);
+		.service("EventService", EventService);
 
 	EventService.$inject = ["$timeout"];
 

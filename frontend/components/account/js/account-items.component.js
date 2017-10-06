@@ -38,13 +38,15 @@
 	AccountItemsCtrl.$inject = [
 		"StateManager", "$mdDialog", "$scope", "$location", "$element", 
 		"$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService"
+		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService",
+		"APIService"
 	];
 
 	function AccountItemsCtrl(
 		StateManager, $mdDialog, $scope, $location, $element,
 		$timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, 
-		AnalyticService, NotificationService, AuthService, AccountService, ViewerService
+		AnalyticService, NotificationService, AuthService, AccountService, ViewerService,
+		APIService
 	) {
 		
 		var vm = this;
@@ -339,9 +341,9 @@
 			
 			if (isEdit) {
 				delete vm.federationData._isEdit;
-				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+				promise = APIService.put(teamspaceName + "/" + vm.federationData.model, vm.federationData);
 			} else {
-				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.name);
+				promise = APIService.post(teamspaceName + "/" + vm.federationData.name, vm.federationData);
 			}
 			
 			promise
@@ -595,7 +597,7 @@
 
 			var account;
 			var url = vm.targetAccountToDeleteModel + "/" + encodeURIComponent(vm.modelToDelete.model);
-			var promise = UtilsService.doDelete({}, url);
+			var promise = APIService.delete(url, {});
 
 			promise.then(function (response) {
 
@@ -955,7 +957,7 @@
 		 */
 		vm.saveNewProject = function(teamspaceName, projectName) {
 			var url = teamspaceName + "/projects/";
-			var promise = UtilsService.doPost({"name": projectName}, url);
+			var promise = APIService.post(url, {"name": projectName});
 			vm.handleProjectPromise(promise, teamspaceName, false);
 		};
 
@@ -967,8 +969,8 @@
 		 * @param {String} newProjectName The project name to change to
 		 */
 		vm.updateProject = function(teamspaceName, oldProjectName, newProjectName) {
-			var url = teamspaceName + "/projects/" + encodeURIComponent(oldProjectName);
-			var promise = UtilsService.doPut({"name": newProjectName}, url);
+			var url = teamspaceName + "/projects/" + oldProjectName;
+			var promise = APIService.put(url, {"name": newProjectName});
 			vm.handleProjectPromise(promise, teamspaceName, {
 				edit  : true,
 				newProjectName: newProjectName, 
@@ -983,8 +985,8 @@
 		 * @param {String} projectName The project name to delete 
 		 */
 		vm.deleteProject = function(teamspaceName, projectName) {
-			var url = teamspaceName + "/projects/" + encodeURIComponent(projectName);
-			var promise = UtilsService.doDelete({},url);
+			var url = teamspaceName + "/projects/" + projectName;
+			var promise = APIService.delete(url, {});
 			vm.handleProjectPromise(promise, teamspaceName, {
 				projectName : projectName,
 				delete: true

@@ -32,9 +32,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager", "APIService"];
 
-	function AccountTeamCtrl($scope, $location, $timeout, UtilsService, StateManager) {
+	function AccountTeamCtrl($scope, $location, $timeout, UtilsService, StateManager, APIService) {
 		var vm = this,
 			promise;
 
@@ -50,7 +50,7 @@
 			vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 			vm.showList = true;
 
-			promise = UtilsService.doGet(vm.account + "/" + vm.item.model + "/permissions");
+			promise = APIService.get(vm.account + "/" + vm.item.model + "/permissions");
 
 			promise.then(function (response) {
 				if (response.status === 200) {
@@ -88,7 +88,7 @@
 				user: vm.selectedUser.user
 			};
 
-			promise = UtilsService.doPost(vm.members.concat([data]), vm.account + "/" + vm.item.model + "/permissions");
+			promise = APIService.post(vm.account + "/" + vm.item.model + "/permissions", vm.members.concat([data]));
 
 			promise.then(function (response) {
 				if (response.status === 200) {
@@ -123,7 +123,7 @@
 
 			var member = vm.members.splice(index, 1);
 
-			promise = UtilsService.doPost(vm.members, vm.account + "/" + vm.item.model + "/permissions");
+			promise = APIService.post(vm.account + "/" + vm.item.model + "/permissions", vm.members);
 
 			promise.then(function (response) {
 				if (response.status === 200) {

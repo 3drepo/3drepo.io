@@ -251,7 +251,7 @@
 		 */
 		vm.deleteModel = function () {
 
-			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.modelToDelete.model);
+			var promise = APIService.delete(vm.currentAccount.name + "/" + vm.modelToDelete.model, {});
 
 			promise.then(function (response) {
 

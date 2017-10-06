@@ -46,14 +46,15 @@
 		"$location", "$q", "$mdDialog", "$element", "EventService", 
 		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
-		"$state", "StateManager", "MeasureService", "ViewerService"
+		"$state", "StateManager", "MeasureService", "ViewerService",
+		"APIService"
 	];
 
 	function IssueCtrl (
 		$location, $q, $mdDialog, $element, EventService, IssuesService,
 		UtilsService, NotificationService, AuthService, $timeout,
 		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService,
-		ViewerService
+		ViewerService, APIService
 	) {
 		
 		var vm = this;
@@ -219,7 +220,7 @@
 					vm.disabledReason = vm.reasonTitleText;
 				}
 
-				vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
+				vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
 				vm.issueData.comments.forEach(function(comment){
 					if(comment.owner !== AuthService.getUsername()){
 						comment.sealed = true;
@@ -228,7 +229,7 @@
 
 				vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
 				if (vm.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
-					vm.descriptionThumbnail = UtilsService.getServerUrl(vm.issueData.viewpoint.screenshotSmall);
+					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
 				}
 
 				// Issue owner or user with same role as issue creator role can update issue
@@ -455,7 +456,7 @@
 		 * @param viewpoint
 		 */
 		vm.showScreenShot = function (event, viewpoint) {
-			vm.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+			vm.screenShot = APIService.getAPIUrl(viewpoint.screenshot);
 			vm.showScreenshotDialog(event);
 		};
 
@@ -663,7 +664,7 @@
 				objects: objectInfo.highlightedNodes
 			};
 
-			UtilsService.doPost(groupData, vm.account + "/" + vm.model + "/groups")
+			APIService.post(vm.account + "/" + vm.model + "/groups", groupData)
 				.then(function (response) {
 					vm.doSaveIssue(viewpoint, screenShot, response.data._id);
 				}).catch(function(error){
@@ -718,8 +719,8 @@
 					vm.issueData = response.data;
 					
 					vm.issueData.title = IssuesService.generateTitle(vm.issueData);
-					vm.issueData.thumbnailPath = UtilsService.getServerUrl(vm.issueData.thumbnail);
-					vm.descriptionThumbnail = UtilsService.getServerUrl(vm.issueData.viewpoint.screenshotSmall);
+					vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
+					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
 					vm.issueData.timeStamp = IssuesService.getPrettyTime(vm.issueData.created);
 
 					// Hide the description input if no description
@@ -814,7 +815,7 @@
 			}
 
 			if(comment.viewpoint && comment.viewpoint.screenshot){
-				comment.viewpoint.screenshotPath = UtilsService.getServerUrl(comment.viewpoint.screenshot);
+				comment.viewpoint.screenshotPath = APIService.getAPIUrl(comment.viewpoint.screenshot);
 			}
 
 

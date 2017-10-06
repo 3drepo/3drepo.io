@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager", "$window"];
+	RegisterVerifyCtrl.$inject = ["EventService", "APIService", "StateManager", "$window"];
 
-	function RegisterVerifyCtrl (EventService, UtilsService, StateManager, $window) {
+	function RegisterVerifyCtrl (EventService, APIService, StateManager, $window) {
 		var vm = this,
 			promise,
 			username = StateManager.query.username,
@@ -45,7 +45,7 @@
 			vm.databaseName = username;
 
 			vm.verifyErrorMessage = "Verifying. Please wait...";
-			promise = UtilsService.doPost({token: token}, username + "/verify");
+			promise = APIService.post(username + "/verify", {token: token});
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.verified = true;

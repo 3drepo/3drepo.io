@@ -25,24 +25,19 @@ const expressSession = require("express-session");
 const FileStore = require("session-file-store")(expressSession);
 
 module.exports.session = function(config) {
-	
-	// The amount of time before we expire the session
-	const maxAge = 60000 * 60;
-	
-	const sessionConfig = expressSession({
+
+	return expressSession({
 		secret: config.cookie.secret,
 		resave: false,
 		saveUninitialized: false,
 		cookie: {
-			maxAge: maxAge,
+			maxAge: 1000 * 60 * 60,
 			domain: config.cookie.domain,
 			path: "/",
 			secure: config.using_ssl
 		},
 		store: new FileStore()
 	});
-
-	return sessionConfig;
 };
 
 

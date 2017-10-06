@@ -19,11 +19,11 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("UtilsService", UtilsService);
+		.service("UtilsService", UtilsService);
 
-	UtilsService.$inject = ["$http", "$q", "$mdDialog", "ClientConfigService"];
+	UtilsService.$inject = ["$q", "$mdDialog", "ClientConfigService"];
 
-	function UtilsService($http, $q, $mdDialog, ClientConfigService) {
+	function UtilsService($q, $mdDialog, ClientConfigService) {
 		
 		var service = {
 			capitalizeFirstLetter: capitalizeFirstLetter,

@@ -19,7 +19,7 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("authInterceptor", ["EventService", "$q", function(EventService, $q) {
+		.service("authInterceptor", ["EventService", "$q", function(EventService, $q) {
 			return {
 				responseError: function(res) {
 					if (res.status === 401) {
