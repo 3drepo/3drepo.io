@@ -84,17 +84,34 @@ describe('Revision', function () {
 
 	// TODO: X3DOM isn't used any more
 
-	it('get x3d mp by revision id should success', function(done){
+	it('get x3d mp by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${revisions[0]._id}.x3d.mp`)
 		.expect(200, function(err, res){
 			done(err);
 		});
 	});
 
-	it('get x3d mp by revision tag should success', function(done){
+	it('get asset bundle list by revision id should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/unityAssets.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get x3d mp by revision tag should succeed', function(done){
 
 		let revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/${revWithTag.tag}.x3d.mp`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+
+	it('get asset bundle list by revision tag should succeed', function(done){
+
+		let revWithTag = revisions.find(rev => rev.tag);
+		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/unityAssets.json`)
 		.expect(200, function(err, res){
 			done(err);
 		});
@@ -107,14 +124,21 @@ describe('Revision', function () {
 		});
 	});
 
-	it('get issues by revision id should success', function(done){
+	it('get asset bundle list of non existing rev should fail', function(done){
+		agent.get(`/${username}/${model}/revision/invalidtag/unityAssets.json`)
+		.expect(404, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get issues by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${revisions[0]._id}/issues.json`)
 		.expect(200, function(err, res){
 			done(err);
 		});
 	});
 
-	it('get issues by revision tag should success', function(done){
+	it('get issues by revision tag should succeed', function(done){
 		let revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/issues.json`)
 		.expect(200, function(err, res){
@@ -123,7 +147,7 @@ describe('Revision', function () {
 	});
 
 
-	it('get tree by revision tag should success', function(done){
+	it('get tree by revision tag should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/original/fulltree.json`)
 		.expect(200, function(err, res){
 			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('suzanne-flat.obj');
@@ -132,7 +156,7 @@ describe('Revision', function () {
 	});
 
 
-	it('get tree by revision id should success', function(done){
+	it('get tree by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/6c558faa-8236-4255-a48a-a4ce99465182/fulltree.json`)
 		.expect(200, function(err, res){
 			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('suzanne-flat.obj');
@@ -150,13 +174,57 @@ describe('Revision', function () {
 
 
 
-	it('get tree of head of master should success', function(done){
+	it('get tree of head of master should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/master/head/fulltree.json`)
 		.expect(200, function(err, res){
 			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('3DrepoBIM.obj');
 			done(err);
 		});
 	});
+
+	//IdMap
+	it('get idMap by revision id should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/idMap.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get idMap by non existing revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/000/idMap.json`)
+		.expect(404, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get idMap of head of master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/idMap.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});	
+
+	//treePath
+	it('get treePath by revision id should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/tree_path.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get treePath by non existing revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/000/tree_path.json`)
+		.expect(404, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get treePath of head of master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/tree_path.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});	
 
 	it('upload with exisitng tag name should fail', function(done){
 
