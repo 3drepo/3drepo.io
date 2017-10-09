@@ -47,13 +47,13 @@
 	IssuesCtrl.$inject = [
 		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
 		"UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "$state", "$q"
+		"AnalyticService", "$state", "$q", "APIService"
 	];
 
 	function IssuesCtrl(
 		$scope, $timeout, IssuesService, EventService, AuthService, 
 		UtilsService, NotificationService, RevisionsService, ClientConfigService, 
-		AnalyticService, $state, $q
+		AnalyticService, $state, $q, APIService
 	) {
 
 		var vm = this;
@@ -350,7 +350,7 @@
 					
 					issue.title = IssuesService.generateTitle(issue);
 					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-					issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+					issue.thumbnailPath = APIService.getAPIUrl(issue.thumbnail);
 
 					vm.issues.unshift(issue);
 					
@@ -369,7 +369,7 @@
 
 			issue.title = IssuesService.generateTitle(issue);
 			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-			issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
+			issue.thumbnailPath = APIService.getAPIUrl(issue.thumbnail);
 
 			vm.issues.find(function(oldIssue, i){
 				if(oldIssue._id === issue._id){

@@ -27,11 +27,10 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "StateManager"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "APIService"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, StateManager) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, APIService) {
 		var vm = this;
-
 
 		/*
 		 * Init
@@ -280,7 +279,7 @@
 				data.captcha = vm.reCaptchaResponse;
 			}
 			vm.registering = true;
-			UtilsService.doPost(data, vm.newUser.username)
+			APIService.post(vm.newUser.username, data)
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.showPage("registerRequest");

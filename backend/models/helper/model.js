@@ -111,6 +111,20 @@ function convertToErrorCode(bouncerErrorCode){
  * @param {account} account - User account
  * @param {model} model - Model
  */
+function setStatus(account, model, status) {
+	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+	ModelSetting.findById({account, model}, model).then(setting => {
+		setting.status = status;
+		setting.save();
+		systemLogger.logInfo(`Model status changed to ${status}`);
+	});
+}
+
+/**
+ * Create correlation ID, store it in model setting, and return it
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
 function createCorrelationId(account, model) {
 	let correlationId = uuid.v1();
 
@@ -1081,9 +1095,9 @@ function importModel(account, model, username, modelSetting, source, data){
 	let correlationId = uuid.v1();
 	modelSetting.corID = correlationId;
 
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'processing' });
+	ChatEvent.modelStatusChanged(null, account, model, { status: 'queued' });
 
-	modelSetting.status = 'processing';
+	modelSetting.status = 'queued';
 
 	return modelSetting.save().then(() => {
 
@@ -1315,5 +1329,6 @@ module.exports = {
 	removeModel,
 	getModelPermission,
 	getMetadata,
-	getFullTree_noSubTree
+	getFullTree_noSubTree,
+	setStatus
 };

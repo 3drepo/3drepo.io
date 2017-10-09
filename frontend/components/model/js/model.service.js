@@ -19,18 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("ModelService", ModelService);
+		.service("ModelService", ModelService);
 
-	ModelService.$inject = ["$http", "$q", "StateManager", "ClientConfigService"];
+	ModelService.$inject = ["$q", "StateManager", "ClientConfigService", "APIService"];
 
-	function ModelService($http, $q, StateManager, ClientConfigService) {
+	function ModelService($q, StateManager, ClientConfigService, APIService) {
 		var state = StateManager.state;
 
 		var getModelInfo = function (account, model) {
 			var deferred = $q.defer(),
-				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + ".json");
+				url = account + "/" + model + ".json";
 
-			$http.get(url)
+			APIService.get(url)
 				.then(function(res){
 					var data = res.data;
 					data.account = account;
@@ -51,8 +51,8 @@
 
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
-				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, state.account + "/" + state.model + "/" + urlEnd);
-			$http.get(url)
+				url = state.account + "/" + state.model + "/" + urlEnd;
+			APIService.get(url)
 				.then(
 					function (response) {
 						deferred.resolve(response);

@@ -24,7 +24,8 @@ module.exports = {
 	port: 8080,
 	cookie: {
 		secret: "a",
-		parser_secret : "b"
+		parser_secret : "b",
+		maxAge: 1000 * 60 * 60
 	},
 	servers: [
 		{

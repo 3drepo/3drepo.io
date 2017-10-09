@@ -36,15 +36,15 @@
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
 		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
-		"$location", "SWService", "AnalyticService", "ViewerService",
-		"$document"
+		"$location", "SWService", "AnalyticService", "ViewerService", 
+		"$document", "TemplateService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService, ViewerService, $document
+		SWService, AnalyticService, ViewerService, $document, TemplateService
 	) {
 
 		var vm = this;
@@ -247,11 +247,7 @@
 				"templates/register-request.html"
 			];
 
-			preCacheTemplates.forEach(function(templatePath){
-				$http.get(templatePath).then(function(response) {
-					$templateCache.put(templatePath, response.data);
-				});
-			});
+			TemplateService.precache(preCacheTemplates)
 
 		};
 
@@ -307,6 +303,7 @@
 
 		vm.logout = function () {
 			AuthService.logout();
+			ViewerService.reset();
 		};
 
 		vm.home = function () {

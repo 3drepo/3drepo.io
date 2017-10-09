@@ -80,13 +80,35 @@
       </div>
     </div>
 
-    <!-- Fallback for IE --><!--[if (IE)]>
-    	<script type="text/javascript">
-    		document.getElementById('notSupported').style.visibility='visible';
-    		document.getElementById('notSupportedButton').style.display = 'none';
-    	</script>
+    <!-- Handle Internet Explorer -->
+    <script type="text/javascript" async>
+
+      if (window && window.navigator && window.navigator.userAgent) {
+        var ua = window.navigator.userAgent;
+
+        var msie = ua.indexOf('MSIE ');
+        if (msie > 0) {
+            // IE 10 or older => return version number
+            ie = true;
+        }
+
+        var trident = ua.indexOf('Trident/');
+        if (trident > 0) {
+            // IE 11 => return version number
+            var rv = ua.indexOf('rv:');
+            ie = true;
+        } 
+        if (ie) {
+          console.log("INTERNET EXPLORER")
+          document.getElementById('notSupported').style.visibility='visible';
+          document.getElementById('notSupportedButton').style.display = 'none';
+        }
+
+      } 
+
+    </script>
     	
-    <![endif]-->
+ 
 
     <!-- Entry point for all components-->
     <home flex layout="column"></home>
