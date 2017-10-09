@@ -298,9 +298,7 @@
 		};
 
 		vm.getProjects = function(teamspace) { 
-			console.log("getProjects", teamspace);
 			var projects = AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace);
-			console.log("getProjects : ", projects);
 			return projects; 
 		};
 

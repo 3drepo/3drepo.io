@@ -55,13 +55,12 @@
 			return res;
 		};
 
-		function sessionExpired(reason) {
-			console.log("sessionExpired, Cookie not valid", reason);
+		function sessionExpired() {
+
 			dialogOpen = true;
 			var content = "You have been logged out as your session has expired.";
 			var DialogService = $injector.get("DialogService");
 			var AuthService = $injector.get("AuthService");
-			console.log(AuthService);
 
 			DialogService.text("Session Expired", content).then(function(){
 				AuthService.logoutSuccess();
