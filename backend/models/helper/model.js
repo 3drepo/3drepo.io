@@ -1471,6 +1471,10 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
 	return getHistory.then(history => {
+		if(!history){
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
 		let fullFieldName = "metadata." + fieldName;
 		let match = {
 			_id: {"$in": history.current},

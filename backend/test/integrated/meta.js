@@ -72,8 +72,6 @@ describe('Metadata', function () {
 	it('metadata search of a specific revision should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
 		.expect(200, function(err, res){
-			console.log(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`);
-			console.log(res, err);
 			done(err);
 		});
 	});
