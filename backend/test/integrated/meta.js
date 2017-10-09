@@ -52,7 +52,6 @@ describe('Metadata', function () {
 			agent.post('/login')
 			.send({ username, password })
 			.expect(200, function(err, res){
-				console.log(res.body);
 				expect(res.body.username).to.equal(username);
 				done(err);
 			});
@@ -71,37 +70,37 @@ describe('Metadata', function () {
 	});
 
 	it('metadata search of a specific revision should succeed', function(done){
-		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/Category.json`)
+		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
 		.expect(200, function(err, res){
-			console.log(`/${username}/${model}/revision/${oldRevision}/meta/Category.json`);
+			console.log(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`);
 			console.log(res, err);
 			done(err);
 		});
 	});
 
 	it('metadata search of head master should succeed', function(done){
-		agent.get(`/${username}/${model}/revision/master/head/meta/Category.json`)
+		agent.get(`/${username}/${model}/revision/master/head/meta/findObjsWith/Category.json`)
 		.expect(200, function(err, res){
 			done(err);
 		});
 	});
 
 	it('get metadata by revision tag should succeed', function(done){
-		agent.get(`/${username}/${model}/revision/myTag/meta/Category.json`)
+		agent.get(`/${username}/${model}/revision/myTag/meta/findObjsWith/Category.json`)
 		.expect(200, function(err, res){
 			done(err);
 		});
 	});
 
 	it('get metadata of invalid revision should fail', function(done){
-		agent.get(`/${username}/${model}/revision/blahblah123/meta/Category.json`)
+		agent.get(`/${username}/${model}/revision/blahblah123/meta/findObjsWith/Category.json`)
 		.expect(404, function(err, res){
 			done(err);
 		});
 	});
 
 	it('metadata search of non existent field should succeed', function(done){
-		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/blahblah.json`)
+		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/blahblah.json`)
 		.expect(200, function(err, res){
 			done(err);
 		});
