@@ -126,7 +126,7 @@ describe('Revision', function () {
 
 	it('get asset bundle list of non existing rev should fail', function(done){
 		agent.get(`/${username}/${model}/revision/invalidtag/unityAssets.json`)
-		.expect(404, function(err, res){
+		.expect(400, function(err, res){
 			done(err);
 		});
 	});
@@ -192,7 +192,7 @@ describe('Revision', function () {
 
 	it('get idMap by non existing revision should fail', function(done){
 		agent.get(`/${username}/${model}/revision/000/idMap.json`)
-		.expect(404, function(err, res){
+		.expect(400, function(err, res){
 			done(err);
 		});
 	});
@@ -214,7 +214,7 @@ describe('Revision', function () {
 
 	it('get treePath by non existing revision should fail', function(done){
 		agent.get(`/${username}/${model}/revision/000/tree_path.json`)
-		.expect(404, function(err, res){
+		.expect(400, function(err, res){
 			done(err);
 		});
 	});
