@@ -1459,12 +1459,21 @@ function getModelPermission(username, setting, account){
 	});
 }
 
-function getAllIdsWithMetadataField(account, model, fieldName){
+function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
 	//Get the revision object to find all relevant IDs
-	return History.findLatest({account, model}, {current : 1}).then(rev => {
+	let getHistory;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+	return getHistory.then(history => {
 		let fullFieldName = "metadata." + fieldName;
 		let match = {
-			_id: {"$in": rev.current},
+			_id: {"$in": history.current},
 		}
 		match[fullFieldName] =  {"$exists" : true};
 
@@ -1483,9 +1492,7 @@ function getAllIdsWithMetadataField(account, model, fieldName){
 			}
 		});
 
-	}) ;
-
-
+	}); 
 }
 
 function getMetadata(account, model, id){
