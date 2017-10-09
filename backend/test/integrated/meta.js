@@ -33,7 +33,7 @@ let User = require('../../models/user');
 let config = require('../../config');
 let fs = require('fs');
 
-describe('Revision', function () {
+describe('Metadata', function () {
 
 	let User = require('../../models/user');
 	let server;
@@ -52,6 +52,7 @@ describe('Revision', function () {
 			agent.post('/login')
 			.send({ username, password })
 			.expect(200, function(err, res){
+				console.log(res.body);
 				expect(res.body.username).to.equal(username);
 				done(err);
 			});
