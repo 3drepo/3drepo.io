@@ -19,19 +19,14 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("UtilsService", UtilsService);
+		.service("UtilsService", UtilsService);
 
-	UtilsService.$inject = ["$http", "$q", "$mdDialog", "ClientConfigService"];
+	UtilsService.$inject = ["$q", "$mdDialog", "ClientConfigService"];
 
-	function UtilsService($http, $q, $mdDialog, ClientConfigService) {
+	function UtilsService($q, $mdDialog, ClientConfigService) {
 		
 		var service = {
-			// snakeCase : snakeCase,
 			capitalizeFirstLetter: capitalizeFirstLetter,
-			doGet: doGet,
-			doPost: doPost,
-			doPut: doPut,
-			doDelete: doDelete,
 			showDialog: showDialog,
 			closeDialog: closeDialog,
 			getServerUrl: getServerUrl,
@@ -43,20 +38,6 @@
 
 		/////////////////
 
-		/**
-		 * Convert blah_test to blahTest
-         *
-         * @param name
-         * @param separator
-         * @returns {*|void|string|{REPLACE, REPLACE_NEGATIVE}|XML}
-         */
-		// function snakeCase(name, separator) {
-		// 	var SNAKE_CASE_REGEXP = /[A-Z]/g;
-		// 	separator = separator || "_";
-		// 	return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
-		// 		return (pos ? separator : "") + letter.toLowerCase();
-		// 	});
-		// }
 
 		/**
          * Capitalise the first letter of a string
@@ -67,107 +48,6 @@
          */
 		function capitalizeFirstLetter(string) {
 			return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
-		}
-
-		/**
-         * Handle GET requests
-         * 
-         * @param url
-         * @returns {*|promise}
-         */
-		function doGet(url) {
-			var deferred = $q.defer(),
-				urlUse = ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
-
-			$http.get(urlUse).then(
-				function (response) {
-					deferred.resolve(response);
-				},
-				function (response) {
-					deferred.resolve(response);
-				});
-			return deferred.promise;
-		}
-
-		/**
-         * Handle POST requests
-         * @param data
-         * @param url
-         * @param headers
-         * @returns {*}
-         */
-		function doPost(data, url, headers) {
-			var deferred = $q.defer(),
-				urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-				config = {withCredentials: true};
-
-			if (angular.isDefined(headers)) {
-				config.headers = headers;
-			}
-
-			$http.post(urlUse, data, config)
-				.then(
-					function (response) {
-						deferred.resolve(response);
-					},
-					function (error) {
-						deferred.resolve(error);
-					}
-				);
-			return deferred.promise;
-		}
-
-		/**
-         * Handle PUT requests
-         * @param data
-         * @param url
-         * @returns {*}
-         */
-		function doPut(data, url) {
-			var deferred = $q.defer(),
-				urlUse = ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-				config = {withCredentials: true};
-
-			$http.put(urlUse, data, config)
-				.then(
-					function (response) {
-						deferred.resolve(response);
-					},
-					function (error) {
-						deferred.resolve(error);
-					}
-				);
-			return deferred.promise;
-		}
-
-		/**
-         * Handle DELETE requests
-         * @param data
-         * @param url
-         * @returns {*}
-         */
-		function doDelete(data, url) {
-			var deferred = $q.defer(),
-				config = {
-					method: "DELETE",
-					url: ClientConfigService.apiUrl(ClientConfigService.POST_API, url),
-					data: data,
-					withCredentials: true,
-					headers: {
-						"Content-Type": "application/json"
-					}
-				};
-
-			$http(config)
-				.then(
-					function (response) {
-						deferred.resolve(response);
-					},
-					function (error) {
-						deferred.resolve(error);
-					}
-				);
-			return deferred.promise;
 		}
 
 		/**

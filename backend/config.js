@@ -125,6 +125,7 @@
 	config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
 	config.cookie = coalesce(config.cookie, {});
+	config.cookie.maxAge = coalesce(config.cookie.maxAge, 1000 * 60 * 60);
 	config.cookie.secret = coalesce(config.cookie.secret, config.default_cookie_secret);
 	config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 	config.cookie_domain = coalesce(config.cookie.domain, config.host);

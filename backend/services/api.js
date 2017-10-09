@@ -50,8 +50,8 @@ module.exports.createApp = function (serverConfig) {
 
 	// Configure various middleware
 	app.use((req, res, next) => {
-		sharedSession(req, res, myNext);
-		function myNext(err){
+
+		sharedSession(req, res, function(err) {
 			if(err){
 				// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
 				//res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
@@ -65,7 +65,8 @@ module.exports.createApp = function (serverConfig) {
 			} else {
 				next();
 			}
-		}
+		});
+		
 	});
 
 	app.use("/config", require("../routes/config"));

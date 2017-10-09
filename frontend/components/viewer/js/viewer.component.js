@@ -38,13 +38,13 @@
 		});
 
 	ViewerCtrl.$inject = [
-		"$scope", "$q", "$http", "$element", "$timeout", 
+		"$scope", "$q", "$element", "$timeout", 
 		"ClientConfigService", "EventService", "ViewerService", 
 		"$location", "$mdDialog"
 	];
 
 	function ViewerCtrl (
-		$scope, $q, $http, $element, $timeout, 
+		$scope, $q, $element, $timeout, 
 		ClientConfigService, EventService, ViewerService, 
 		$location, $mdDialog
 	) {
