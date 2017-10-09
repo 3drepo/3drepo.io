@@ -84,7 +84,9 @@
     <script type="text/javascript" async>
 
       if (window && window.navigator && window.navigator.userAgent) {
+        
         var ua = window.navigator.userAgent;
+        var ie = false;
 
         var msie = ua.indexOf('MSIE ');
         if (msie > 0) {
@@ -95,10 +97,10 @@
         var trident = ua.indexOf('Trident/');
         if (trident > 0) {
             // IE 11 => return version number
-            var rv = ua.indexOf('rv:');
             ie = true;
         } 
-        if (ie) {
+
+        if (ie === true) {
           console.log("INTERNET EXPLORER")
           document.getElementById('notSupported').style.visibility='visible';
           document.getElementById('notSupportedButton').style.display = 'none';
