@@ -135,11 +135,11 @@ module.exports.createApp = function (server, serverConfig){
 						socket.join(`${data.account}${modelNameSpace}`);
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
 
-						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, { 
-							username, 
-							account: data.account, 
-							model: data.model 
-						});
+						// systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, { 
+						// 	username, 
+						// 	account: data.account, 
+						// 	model: data.model 
+						// });
 						
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});

@@ -19,8 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider",
-			function($stateProvider, $urlRouterProvider, $locationProvider) {
+		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider",
+			function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				
 				$locationProvider.html5Mode(true);
 
@@ -49,6 +49,8 @@
 						}]
 					}
 				});
+
+				$httpProvider.interceptors.push("AuthInterceptor");
 
 				// Convert blah_test to blahTest
 				function camelCase(name) {

@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountInfoCtrl.$inject = ["$location", "$scope", "$element", "$mdDialog", "ClientConfigService", "UtilsService"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "$element", "$mdDialog", "ClientConfigService", "APIService"];
 
-	function AccountInfoCtrl ($location, $scope, $element, $mdDialog, ClientConfigService, UtilsService) {
+	function AccountInfoCtrl ($location, $scope, $element, $mdDialog, ClientConfigService, APIService) {
 		var vm = this;
 		
 		/*
@@ -120,7 +120,7 @@
 
 		vm.postAvatar = function(formData) {
 
-			UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined})
+			APIService.post(vm.username + "/avatar", formData, {"Content-Type": undefined})
 				.then(function(res){
 					vm.uploadingAvatar = false;
 					

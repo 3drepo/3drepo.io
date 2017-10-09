@@ -19,11 +19,11 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("TreeService", TreeService);
+		.service("TreeService", TreeService);
 
-	TreeService.$inject = ["$http", "$q", "EventService", "ClientConfigService"];
+	TreeService.$inject = ["$q", "EventService", "APIService"];
 
-	function TreeService($http, $q, EventService, ClientConfigService) {
+	function TreeService($q, EventService, APIService) {
 		var ts = this;
 		var cachedTreeDefer = $q.defer();
 		var cachedTree = cachedTreeDefer.promise;
@@ -72,7 +72,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "fulltree.json";
 
-			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url), {
+			APIService.get(url, {
 				headers: {
 					"Content-Type": "application/json"
 				}
@@ -150,8 +150,7 @@
 				if(tree.url){
 
 					//var obj = JSON.parse(tree.buf);
-					var subtreeUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, tree.url);
-					var getSubTree = $http.get(subtreeUrl)
+					var getSubTree = APIService.get(tree.url)
 						.then(function(res){
 
 							handleResponse(res, tree, idToObjRef);
@@ -199,7 +198,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
 
-			$http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, url))
+			APIService.get(url)
 				.then(function(json) {
 					deferred.resolve(json);
 				})

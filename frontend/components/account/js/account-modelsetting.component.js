@@ -34,9 +34,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService", "AccountService"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService", "AccountService", "APIService"];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService, AccountService) {
+	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService, AccountService, APIService) {
 		
 		var vm = this;
 
@@ -55,7 +55,7 @@
 			vm.targetAcct = vm.urlData["targetAcct"];
 			vm.targetProj = vm.urlData["targetProj"];
 
-			UtilsService.doGet(vm.targetAcct + "/" + vm.modelId + ".json")
+			APIService.get(vm.targetAcct + "/" + vm.modelId + ".json")
 				.then(function (response) {
 
 					if (response.status === 200 && response.data && response.data.properties) {
@@ -142,7 +142,7 @@
 				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n")
 			};
 	
-			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
+			APIService.put(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
 				.then(function(response){
 					if(response.status === 200) {
 						vm.updateModel();

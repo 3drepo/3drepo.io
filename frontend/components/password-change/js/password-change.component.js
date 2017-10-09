@@ -30,9 +30,9 @@
 			controllerAs: "vm"
 		});
 
-	PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
+	PasswordChangeCtrl.$inject = ["$scope", "APIService", "EventService"];
 
-	function PasswordChangeCtrl ($scope, UtilsService, EventService) {
+	function PasswordChangeCtrl ($scope, APIService, EventService) {
 		var vm = this;
         
 		/*
@@ -83,7 +83,7 @@
 					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					vm.promise = UtilsService.doPut(
+					vm.promise = APIService.put(
 						{
 							token: vm.token,
 							newPassword: vm.newPassword

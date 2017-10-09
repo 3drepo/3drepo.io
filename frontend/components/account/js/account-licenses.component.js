@@ -30,18 +30,18 @@
 			controllerAs: "vm"
 		});
 	
-	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
+	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager", "APIService"];
 
-	function AccountLicensesCtrl($scope, UtilsService, StateManager) {
+	function AccountLicensesCtrl($scope, UtilsService, StateManager, APIService) {
 		var vm = this;
 
 		vm.$onInit = function() {
 			vm.promise = null;
 			vm.jobs = [];
-			UtilsService.doGet(vm.account + "/subscriptions").then(function(res){
+			APIService.get(vm.account + "/subscriptions").then(function(res){
 				vm.subscriptions = res.data;
 			});
-			UtilsService.doGet(vm.account + "/jobs").then(function(data){
+			APIService.get(vm.account + "/jobs").then(function(data){
 				vm.jobs = data.data;
 			});
 
@@ -90,7 +90,7 @@
 		vm.assignJob = function(index){
 			var licence = vm.licenses[index];
 	
-			UtilsService.doPut(
+			APIService.put(
 				{job: licence.job},
 				vm.account + "/subscriptions/" + licence.id + "/assign"
 			).then(function(res){
@@ -106,19 +106,21 @@
 			var job = { _id: vm.newJob };
 			vm.addJobMessage = null;
 
-			UtilsService.doPost( job, vm.account + "/jobs").then(function(res){
-				if (res.status !== 200) {
-					vm.addJobMessage = res.data.message;
-				} else {
-					vm.jobs.push(job);
-				}
-			});
+			APIService.post(vm.account + "/jobs", job)
+				.then(function(res){
+					if (res.status !== 200) {
+						vm.addJobMessage = res.data.message;
+					} else {
+						vm.jobs.push(job);
+					}
+				});
 		};
 
 		vm.removeJob = function(index){
 
 			vm.deleteJobMessage = null;
-			UtilsService.doDelete(null, vm.account + "/jobs/" + vm.jobs[index]._id).then(function(res){
+			var url = vm.account + "/jobs/" + vm.jobs[index]._id;
+			APIService.delete(url, null).then(function(res){
 				if (res.status !== 200) {
 					vm.deleteJobMessage = res.data.message;
 				} else {
@@ -143,9 +145,9 @@
 			}
 
 			if (doSave) {
-				UtilsService.doPost(
-					{user: vm.newLicenseAssignee},
-					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
+				APIService.post(
+					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign",
+					{user: vm.newLicenseAssignee}
 				).then(function (response) {
 					if (response.status === 200) {
 						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
@@ -171,7 +173,7 @@
 		 */
 		vm.removeLicense = function (index) {
 			var removeUrl = vm.account + "/subscriptions/" + vm.licenses[index].id + "/assign";
-			UtilsService.doDelete({}, removeUrl)
+			APIService.delete(removeUrl, {})
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.unassigned.push(vm.licenses[index].id);
@@ -202,7 +204,7 @@
 		vm.removeLicenseConfirmed = function () {
 			var license = vm.licenses[vm.licenseAssigneeIndex].id;
 			var removeLicenseUrl = vm.account + "/subscriptions/" + license + "/assign?cascadeRemove=true";
-			UtilsService.doDelete({}, removeLicenseUrl)
+			APIService.delete(removeLicenseUrl, {})
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);

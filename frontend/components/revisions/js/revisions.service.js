@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("RevisionsService", RevisionsService);
 
-	RevisionsService.$inject = ["UtilsService", "ClientConfigService"];
+	RevisionsService.$inject = ["APIService", "ClientConfigService"];
 
-	function RevisionsService(UtilsService, ClientConfigService) {
+	function RevisionsService(APIService, ClientConfigService) {
 		var status = {
 			ready: false,
 			data: null
@@ -41,18 +41,19 @@
 
 		function listAll(account, model) {
 
-			return UtilsService.doGet(account + "/" + model + "/revisions.json").then(function(response){
+			return APIService.get(account + "/" + model + "/revisions.json")
+				.then(function(response){
 
-				if(response.status === 200){
-					status.ready = true;
-					status.data = response.data;
-					return response.data;
-				} else {
-					status.ready = false;
-					status.data = response.data;
-					return response.data;
-				}
-			});
+					if(response.status === 200){
+						status.ready = true;
+						status.data = response.data;
+						return response.data;
+					} else {
+						status.ready = false;
+						status.data = response.data;
+						return response.data;
+					}
+				});
 
 		}
 

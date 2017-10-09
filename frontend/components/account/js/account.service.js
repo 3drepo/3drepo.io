@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("AccountService", AccountService);
 
-	AccountService.$inject = ["UtilsService", "$q"];
+	AccountService.$inject = ["APIService", "$q"];
 
-	function AccountService(UtilsService, $q) {
+	function AccountService(APIService, $q) {
 
 		var accountPromise = $q.defer();
 
@@ -240,7 +240,7 @@
 		 * @returns {*}
 		 */
 		function updateInfo(username, info) {
-			return UtilsService.doPut(info, username);
+			return APIService.put(info, username);
 		}
 
 		/**
@@ -251,7 +251,7 @@
 		 * @returns {*}
 		 */
 		function updatePassword(username, passwords) {
-			return UtilsService.doPut(passwords, username);
+			return APIService.put(passwords, username);
 		}
 
 		/**
@@ -262,7 +262,7 @@
 		 * @returns {*|promise}
 		 */
 		function newSubscription(teamspace, data) {
-			return UtilsService.doPost(data, teamspace + "/subscriptions");
+			return APIService.post(teamspace + "/subscriptions", data);
 		}
 
 
@@ -273,7 +273,7 @@
 		 * @returns {*|promise}
 		 */
 		function getUserInfo(username) {
-			var currentAccount = UtilsService.doGet(username + ".json");
+			var currentAccount = APIService.get(username + ".json");
 			accountPromise.resolve(currentAccount);
 			return currentAccount;
 		}
