@@ -31,7 +31,7 @@
 
 	accountAssignCtrl.$inject = [
 		"$scope", "$window", "$q", 
-		"$mdDialog", "$location", "UtilsService", "ClientConfigService"
+		"$mdDialog", "$location", "UtilsService", "ClientConfigService", "APIService"
 	];
 
 	function accountAssignCtrl(

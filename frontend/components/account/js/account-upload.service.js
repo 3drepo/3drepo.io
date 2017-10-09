@@ -23,7 +23,7 @@
 
 	AccountUploadService.$inject = ["$q", "ClientConfigService", "UtilsService", "RevisionsService", "APIService"];
 
-	function AccountUploadService($q, ClientConfigService, UtilsService, RevisionsService) {
+	function AccountUploadService($q, ClientConfigService, UtilsService, RevisionsService, APIService) {
 		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
 
 		var service = {

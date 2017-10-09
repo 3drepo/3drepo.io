@@ -22,11 +22,11 @@
 		.service("APIService", APIService);
 		
 	APIService.$inject = [
-		"$injector", "$q", "$http", "$interval", "ClientConfigService"
+		"$http", "ClientConfigService"
 	];
 		
 	function APIService(
-		$injector, $q, $http, $interval, ClientConfigService
+		$http, ClientConfigService
 	) {
 
 		var service = {
@@ -44,7 +44,7 @@
 		function getAPIUrl(url) {
 			return ClientConfigService.apiUrl(ClientConfigService.GET_API, url);
 		}
-
+	
 		/**
 		 * Handle GET requests
 		 * 
@@ -60,13 +60,17 @@
 				url
 			);
 
-			return $http.get(urlUse);
+			var request = $http.get(urlUse);
+			//var response = AuthService.handleSessionExpiration(request);
+
+			return request;
+
 		}
 
 		/**
 		 * Handle POST requests
-		 * @param data
 		 * @param url
+		 * @param data
 		 * @param headers
 		 * @returns {*}
 		 */
@@ -87,14 +91,17 @@
 				config.headers = headers;
 			}
 
-			return $http.post(urlUse, data, config);
+			var request = $http.post(urlUse, data, config);
+			//var response = AuthService.handleSessionExpiration(request);
+
+			return request;
 
 		}
 
 		/**
 		 * Handle PUT requests
-		 * @param data
 		 * @param url
+		 * @param data
 		 * @returns {*}
 		 */
 		function put(url, data) {
@@ -108,14 +115,17 @@
 			);
 			var config = {withCredentials: true};
 
-			return $http.put(urlUse, data, config);
+			var request = $http.put(urlUse, data, config);
+			//var response = AuthService.handleSessionExpiration(request);
+
+			return request;
 
 		}
 
 		/**
 		 * Handle DELETE requests
-		 * @param data
 		 * @param url
+		 * @param data
 		 * @returns {*}
 		 */
 		function del(url, data) {
@@ -136,12 +146,16 @@
 				}
 			};
 			
-			return $http(config);
+			var request = $http(config);
+			//var response = AuthService.handleSessionExpiration(request);
+			return request;
 		}
 
 		function checkUrl(url) {
 			if (typeof url !== "string") {
 				throw new Error("URL is not a string");
+			} else if (url.length === 0) {
+				throw new Error("Empty URL provided");
 			}
 		}
 

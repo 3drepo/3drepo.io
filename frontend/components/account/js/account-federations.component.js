@@ -45,9 +45,17 @@
 			controllerAs: "vm"
 		});
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "ClientConfigService", "AuthService", "AnalyticService", "AccountService"];
+	AccountFederationsCtrl.$inject = [
+		"$scope", "$location", "$timeout", "UtilsService", 
+		"ClientConfigService", "AuthService", "AnalyticService", 
+		"AccountService", "APIService"
+	];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, ClientConfigService, AuthService, AnalyticService, AccountService) {
+	function AccountFederationsCtrl (
+		$scope, $location, $timeout, UtilsService, 
+		ClientConfigService, AuthService, AnalyticService, 
+		AccountService, APIService
+	) {
 		var vm = this;
 
 		vm.$onInit = function() {

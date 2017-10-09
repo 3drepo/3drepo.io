@@ -59,6 +59,7 @@
 		 */
 		vm.logout = function () {
 			AuthService.logout();
+			ViewerService.reset();
 		};
 
 		vm.openUserManual = function(){

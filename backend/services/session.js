@@ -31,7 +31,7 @@ module.exports.session = function(config) {
 		resave: false,
 		saveUninitialized: false,
 		cookie: {
-			maxAge: 1000 * 60 * 60,
+			maxAge: config.cookie.maxAge,
 			domain: config.cookie.domain,
 			path: "/",
 			secure: config.using_ssl

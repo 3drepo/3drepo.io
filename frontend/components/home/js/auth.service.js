@@ -21,11 +21,11 @@
 	angular.module("3drepo")
 		.service("AuthService", [
 			"$injector", "$q", "$interval", "ClientConfigService",
-			"EventService", "AnalyticService", "ViewerService", "$location", "$window",
+			"EventService", "AnalyticService", "$location", "$window",
 			"$mdDialog", "APIService",
 			function(
 				$injector, $q, $interval, ClientConfigService, 
-				EventService, AnalyticService, ViewerService, $location, $window,
+				EventService, AnalyticService, $location, $window,
 				$mdDialog, APIService
 			) {
 
@@ -85,7 +85,8 @@
 					loggedOutPage: loggedOutPage,
 					legalPages: legalPages,
 					doNotLogout: doNotLogout,
-					loggedOutPages: loggedOutPages
+					loggedOutPages: loggedOutPages,
+					logoutSuccess: logoutSuccess
 				};
 
 				return service;
@@ -100,40 +101,11 @@
 					// Check for mismatch
 					var checkLoginMismatch = ClientConfigService.login_check_interval || 4; // Seconds
 
-					// Check for timeout
-					var checkTimeout = 5;
-
 					$interval(function() {
 						//console.log("auto - calling interval init")
 						init(true);
 					}, 1000 * checkLoginMismatch);
 
-					$interval(function() {
-						//console.log("auto - calling interval init")
-						checkSessionTimeout();
-					}, 1000 * checkTimeout);
-				}
-
-				function checkSessionTimeout() {
-					if (localStorageLoggedIn()) {
-						console.log("Checking valid cookie")
-						validCookie().catch(sessionExpired);
-					}
-				}
-
-				function sessionExpired(reason) {
-					console.debug("Cookie not valid", reason);
-					logoutSuccess();
-
-					var content = "You have been logged out as your session has expired.";
-					$mdDialog.show( 
-						$mdDialog.alert()
-							.clickOutsideToClose(true)
-							.title("Your Session Has Expired")
-							.textContent(content)
-							.ariaLabel("Your Session Has Expired")
-							.ok("OK")
-					);
 				}
 				
 				function loginSuccess(response) {
@@ -178,7 +150,6 @@
 
 					localStorage.setItem("loggedIn", "false");
 
-					ViewerService.reset();
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
 					authPromise.resolve(loggedIn);
@@ -296,9 +267,6 @@
 					return username; 
 				}
 
-				function validCookie() {
-					return APIService.get("validCookie");
-				}
 
 				function sendLoginRequest() {
 					return APIService.get("login");
@@ -319,8 +287,6 @@
 				function logout() {
 					authPromise = $q.defer();
 
-					ViewerService.reset();
-					
 					APIService.post("logout")
 						.then(logoutSuccess)
 						.catch(logoutFailure);

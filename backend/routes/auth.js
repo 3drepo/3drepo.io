@@ -33,7 +33,7 @@ var httpsPost = require("../libs/httpsReq").post;
 
 var multer = require("multer");
 
-router.get("/validCookie", validCookie);
+
 router.post("/login", login);
 router.post("/logout", logout);
 
@@ -61,16 +61,6 @@ router.put("/:account/password", resetPassword);
 // 		req.session.cookie.maxAge = 0;
 // 	}
 // }
-
-function validCookie(req, res, next) {
-
-	if (!req.session || !req.session.user) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_COOKIE, {});
-	} else {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.VALID_COOKIE, {});
-	}
-
-}
 
 function createSession(place, req, res, next, user){
 
