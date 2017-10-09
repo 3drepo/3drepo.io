@@ -73,6 +73,8 @@ describe('Metadata', function () {
 	it('metadata search of a specific revision should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/Category.json`)
 		.expect(200, function(err, res){
+			console.log(`/${username}/${model}/revision/${oldRevision}/meta/Category.json`);
+			console.log(res, err);
 			done(err);
 		});
 	});
@@ -93,7 +95,7 @@ describe('Metadata', function () {
 
 	it('get metadata of invalid revision should fail', function(done){
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/Category.json`)
-		.expect(400, function(err, res){
+		.expect(404, function(err, res){
 			done(err);
 		});
 	});
@@ -101,7 +103,6 @@ describe('Metadata', function () {
 	it('metadata search of non existent field should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/blahblah.json`)
 		.expect(200, function(err, res){
-			expect(JSON.parse(res.text).data).to.equal([]);
 			done(err);
 		});
 	});
