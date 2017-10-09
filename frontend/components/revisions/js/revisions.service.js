@@ -42,6 +42,7 @@
 		function listAll(account, model) {
 
 			return UtilsService.doGet(account + "/" + model + "/revisions.json").then(function(response){
+
 				if(response.status === 200){
 					status.ready = true;
 					status.data = response.data;

@@ -27,40 +27,47 @@
 		$scope.$watch(function(){
 			return RevisionsService.status.ready;
 		}, function(){
-			
+
 			if (RevisionsService.status.ready === true) {
 
 				vm.revisions = RevisionsService.status.data;
 				vm.revisionsLoading = false;
+
 				if(!vm.revisions || !vm.revisions[0]){
 					return;
 				}
 	
-				if(!vm.revision){
+				if(!vm.revision) {
+
 					vm.revName = vm.revisions[0].tag || $filter("revisionDate")(vm.revisions[0].timestamp);
 					vm.revisions[0].current = true;
 	
 				} else {
-					vm.revisions && vm.revisions.forEach(function(rev, i){
-						if(rev.tag === vm.revision){
+
+					vm.revisions.forEach(function(rev, i){
+
+						if (rev.tag === vm.revision){
 							vm.revName = vm.revision;
 							vm.revisions[i].current = true;
-						} else if(rev._id === vm.revision){
+						} else if (rev._id === vm.revision){
 							vm.revName = $filter("revisionDate")(rev.timestamp);
 							vm.revisions[i].current = true;
-	
 						}
+
 					});
+
 				}
 
-			}
-			
+				RevisionsService.status.ready = false;
 
+			} 
+			
 		}, true);
 
 		vm.openDialog = function(event){
 
 			vm.revisions = [];
+			vm.revisionsLoading = true;
 
 			RevisionsService.listAll(vm.account, vm.model).then(function(revisions){
 				vm.revisionsLoading = false;
@@ -74,7 +81,7 @@
 		* Go to the specified revision
 		*/
 		vm.goToRevision = function(revId){
-			console.log("revisions.component.js goToRevision", revId)
+			vm.revision = revId;
 			UtilsService.closeDialog();
 			$location.path("/" + vm.account + "/" + vm.model + "/" + revId , "_self");
 
