@@ -59,7 +59,7 @@ const schema = mongoose.Schema({
 		}]
 
 	},
-
+	fourDSequenceTag: String,
 	timestamp: Date,
 	subModels: [{
 		_id: false,
