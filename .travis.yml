@@ -15,9 +15,10 @@ addons:
    sources:
       - mongodb-3.2-precise
   chrome: stable
+  hosts:
+    - test.127.0.0.1
 
 before_install:
-    - sudo echo "127.0.0.1  test.127.0.0.1" >> /etc/hosts
     - mongo --version
     - mkdir -p submodules
     - cd submodules
