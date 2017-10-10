@@ -90,13 +90,16 @@ describe('Federated Model', function () {
 		//fake a response from bouncer;
 		setTimeout(function(){
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
+				console.log('TEST AAAAAAAAAAAAAA');
 				expect(info.messageCount).to.equal(1);
 				return q.channel.get(q.workerQName);
 			}).then(res => {
+				console.log('TEST BBBBBBBBBBBBBB');
 				corId = res.properties.correlationId;
 				appId = res.properties.appId;
 				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 			}).then(() => {
+				console.log('TEST CCCCCCCCCCCCCC');
 				//send fake job done message to the queue;
 				return q.channel.publish(
 					q.callbackQName,
@@ -108,6 +111,7 @@ describe('Federated Model', function () {
 					}
 				);
 			}).catch(err => {
+				console.log('TEST DDDDDDDDDDDDDD');
 				done(err);
 			});
 
