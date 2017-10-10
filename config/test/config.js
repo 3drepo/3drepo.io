@@ -31,6 +31,7 @@ module.exports = {
 		{
 			service: "api",
 			subdirectory: "api",
+			port: http_port,
 			public_port: http_port,
 			public_protocol: "http"
 		},

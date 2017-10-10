@@ -14,78 +14,70 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 "use strict";
 
-const winston = require("winston");
-require("winston-daily-rotate-file");
-const config = require("./config.js");
-const shortid = require("shortid");
-const C = require("./constants");
+function createLogger() {
 
-// Custom logging levels for logger
-const myCustomLevels = {
-	levels: {
-		nothing: -1,
-		fatal: 0,
-		error: 1,
-		warn: 2,
-		info: 3,
-		debug: 4,
-		trace: 5
-	},
-	colors: {
-		trace: "magenta",
-		debug: "white",
-		info: "green",
-		warn: "orange",
-		error: "red",
-		fatal: "grey"
+	const config = require("./config.js");
+	const winston = require("winston");
+	require("winston-daily-rotate-file");
+	
+	// Custom logging levels for logger
+	const customLevels = {
+		levels: {
+			nothing: -1,
+			fatal: 0,
+			error: 1,
+			warn: 2,
+			info: 3,
+			debug: 4,
+			trace: 5
+		},
+		colors: {
+			trace: "magenta",
+			debug: "white",
+			info: "green",
+			warn: "orange",
+			error: "red",
+			fatal: "grey"
+		}
+	};
+	
+	let fileOutTransport;
+	
+	if (config.logfile.logDirectory) {
+		fileOutTransport = new winston.transports.DailyRotateFile({
+			filename: config.logfile.logDirectory + "/3drepo",
+			datePattern: "-yyyy-MM-dd.log",
+			level: config.logfile.file_level
+		});
+	} else {
+		fileOutTransport = new winston.transports.File({
+			level: config.logfile.file_level,
+			filename: config.logfile.filename
+		});
 	}
-};
-
-let fileOutTransport;
-
-if (config.logfile.logDirectory) {
-	fileOutTransport = new winston.transports.DailyRotateFile({
-		filename: config.logfile.logDirectory + "/3drepo",
-		datePattern: "-yyyy-MM-dd.log",
-		level: config.logfile.file_level
-	});
-} else {
-	fileOutTransport = new winston.transports.File({
-		level: config.logfile.file_level,
-		filename: config.logfile.filename
+	
+	const transports = [
+		fileOutTransport
+	];
+	
+	if (config.consoleLogging === undefined || config.consoleLogging === true) {
+		transports.push(new winston.transports.Console({
+			colorize: true,
+			level: config.logfile.console_level,
+		}));
+	}
+	
+	// Creates logger which outputs to both the console
+	// and a log file simultaneously
+	// Levels are set separately in the config.
+	return new(winston.Logger)({
+		levels: customLevels.levels,
+		colors: customLevels.colors,
+		transports: transports
 	});
 }
-
-const transports = [
-	fileOutTransport
-];
-
-// Whether the logger should log to the console or not
-if (config.logfile.silent === true) {
-	transports.push(new winston.transports.Console({
-		colorize: true,
-		level: config.logfile.console_level,
-		silent: true
-	}));
-} else {
-	transports.push(new winston.transports.Console({
-		colorize: true,
-		level: config.logfile.console_level,
-	}));
-}
-
-// Creates logger which outputs to both the console
-// and a log file simultaneously
-// Levels are set separately in the config.
-const logger = new(winston.Logger)({
-	levels: myCustomLevels.levels,
-	colors: myCustomLevels.colors,
-	transports: transports
-});
 
 /**
  * The repoLogger init and factory
@@ -95,7 +87,7 @@ const logger = new(winston.Logger)({
  * @param {string} id - Unique logger ID
  * @returns
  */
-let repoLogger = function (req, res, id) {
+const repoLogger = function (req, res, id) {
 	let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
 
 	self.uid = id;
@@ -107,7 +99,7 @@ let repoLogger = function (req, res, id) {
 
 	self.res = res;
 
-	self.logger = logger;
+	self.logger = createLogger();
 	self.startTime = (new Date())
 		.getTime();
 
@@ -209,10 +201,14 @@ repoLogger.prototype.logFatal = function (msg, meta) {
  * @returns
  */
 module.exports.startRequest = function (req, res, next) {
+
+	const shortid = require("shortid");
+	const C = require("./constants");
+
 	req[C.REQ_REPO] = {};
 	req[C.REQ_REPO].logger = new repoLogger(req, res, shortid.generate()); // Create logger for this request
 
 	next();
 };
-
+	
 module.exports.systemLogger = new repoLogger(null, null, "system");

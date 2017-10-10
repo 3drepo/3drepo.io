@@ -69,8 +69,6 @@ module.exports.createApp = function (serverConfig) {
 		
 	});
 
-	app.use("/config", require("../routes/config"));
-
 	app.use(cors({ origin: true, credentials: true }));
 
 	// init the singleton db connection for modelFactory
