@@ -118,6 +118,7 @@ describe('Federated Model', function () {
 
 		}, 1000);
 
+		console.log('TEST EEEEEEEEEEEEEE');
 		agent.post(`/${username}/${fedModelName}`)
 		.send({ 
 			desc, 
@@ -134,11 +135,14 @@ describe('Federated Model', function () {
 				return done(err);
 			}
 
+			console.log('TEST EEEEEEEEEEEEEE');
 			expect(res.body.name).to.equal(fedModelName);
 			fedModelId = res.body.model;
 
+			console.log('TEST FFFFFFFFFFFFFF');
 			async.series([
 				done => {
+					console.log('TEST GGGGGGGGGGGGGG');
 					agent.get(`/${username}/${fedModelId}.json`)
 					.expect(200, function(err, res){
 						expect(res.body.desc).to.equal(desc);
@@ -147,6 +151,7 @@ describe('Federated Model', function () {
 					})
 				},
 				done => {
+					console.log('TEST HHHHHHHHHHHHHH');
 					agent.get(`/${username}.json`)
 					.expect(200, function(err, res){
 						let account = res.body.accounts.find(a => a.account === username);
