@@ -1099,7 +1099,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	modelSetting.status = 'queued';
 
-	return modelSetting.save().then(() => {
+	modelSetting.save().then(() => {
 
 		if (source.type === 'upload'){
 			return _handleUpload(correlationId, account, model, username, source.file, data);
@@ -1112,41 +1112,20 @@ function importModel(account, model, username, modelSetting, source, data){
 			});
 		}
 
-	}).then(() => {
+	});
 
-		resetCorrelationId(account, model);
-
-		modelSetting.status = 'ok';
-		modelSetting.errorReason = undefined;
-
-		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
+	return ModelSetting.findById({account, model}, model).then(setting => {
+		setting.errorReason = undefined;
 		if(source.type === 'toy'){
-			modelSetting.timestamp = new Date();
+			setting.timestamp = new Date();
 		}
-		modelSetting.markModified('errorReason');
+		setting.markModified('errorReason');
+		ChatEvent.modelStatusChanged(null, account, model, setting);
+		setting.save();
+		return setting;
+	});
 
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		return modelSetting.save();
-		
-		/*systemLogger.logInfo("MHELPDER111111111111");
-		return ModelSetting.findById({account, model}, model).then(setting => {
-		systemLogger.logInfo("MHELPDER222222222222");
-			setting.errorReason = undefined;
-		systemLogger.logInfo("MHELPDER333333333333");
-			if(source.type === 'toy'){
-		systemLogger.logInfo("MHELPDER444444444444");
-				setting.timestamp = new Date();
-		systemLogger.logInfo("MHELPDER555555555555");
-			}
-		systemLogger.logInfo("MHELPDER666666666666");
-			setting.markModified('errorReason');
-		systemLogger.logInfo("MHELPDER777777777777");
-			ChatEvent.modelStatusChanged(null, account, model, setting);
-		systemLogger.logInfo("MHELPDER888888888888");
-			return setting.save();
-		});*/
-
+	/*
 	}).then(() => {
 
 		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
@@ -1182,6 +1161,7 @@ function importModel(account, model, username, modelSetting, source, data){
 		return Promise.reject(err);
 
 	});
+	*/
 }
 
 function removeModel(account, model, forceRemove){
