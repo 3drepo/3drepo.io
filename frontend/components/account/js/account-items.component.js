@@ -399,7 +399,8 @@
 				});
 
 			// Close the dialog
-			vm.closeDialog();
+			vm.isSaving = false;
+			UtilsService.closeDialog();
 
 			$timeout(function () {
 				$scope.$apply();
@@ -510,6 +511,20 @@
 			);
 		};
 
+		vm.closeFederationDialog = function() {
+			
+			if (vm.originalFederationData) {
+				Object.keys(vm.federationData).forEach(function(key){
+					if (vm.federationData[key] !== vm.originalFederationData[key]) {
+						vm.federationData[key] = vm.originalFederationData[key];
+					}
+				});
+			}
+			
+			vm.isSaving = false;
+			UtilsService.closeDialog();
+		};
+
 
 		// MODELS
 
@@ -587,6 +602,7 @@
 			vm.targetAccountToDeleteModel = account;
 			UtilsService.showDialog("delete-dialog.html", $scope, event, true);
 		};
+
 
 		/**
 		 * Delete model
