@@ -38,6 +38,7 @@ install:
     - yarn install
     - cd ./../frontend 
     - yarn install
+    - yarn run gulp build
 
 cache:
   yarn: true
@@ -54,9 +55,6 @@ script:
     - cd ./../backend 
     - yarn run test
     - cd ./../ 
-    - cd ./frontend 
-    - yarn run gulp build
-    - cd ./../
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
     - cd ./frontend
     - yarn run e2e
