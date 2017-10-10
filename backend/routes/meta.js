@@ -53,7 +53,7 @@
 		}
 
 		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev).then(obj =>{
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {data : obj});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 		}).catch(err =>{
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
@@ -67,7 +67,7 @@
 		}
 
 		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey).then(obj =>{
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {data : obj});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 		}).catch(err =>{
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

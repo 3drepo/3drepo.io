@@ -1475,9 +1475,11 @@ function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 	});
 }
 
-function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
+function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
 	//Get the revision object to find all relevant IDs
 	let getHistory;
+	let history;
+	let fullFieldName = "metadata." + fieldName;
 
 	if(rev && utils.isUUID(rev)){
 		getHistory = History.findByUID({ account, model }, rev);
@@ -1486,12 +1488,48 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
 	} else if (branch) {
 		getHistory = History.findByBranch({ account, model }, branch);
 	}
-	return getHistory.then(history => {
+	return getHistory.then(_history => {
+		history = _history;
 		if(!history){
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
+		//Check for submodel references
+		let revId = utils.uuidToString(history._id);
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+		return Ref.find({ account, model }, filter);
+	}).then(refs =>{
 
-		let fullFieldName = "metadata." + fieldName;
+		//for all refs get their tree
+		let getMeta = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username).then(obj => {
+					return Promise.resolve({
+						data: obj.data,
+						account: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getMeta);
+
+	}).then(_subMeta => {
+
 		let match = {
 			_id: {"$in": history.current},
 		}
@@ -1505,14 +1543,26 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
 		return Scene.find({account, model}, match, projection).then(obj => {
 			if(obj){
 				//rename fieldName to "value"
-				const objStr = JSON.stringify(obj);
-				return JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"));
+				let parsedObj = {data: obj};
+				if(obj.length > 0)
+				{
+					const objStr = JSON.stringify(obj);
+					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
+				}
+				if(_subMeta.length > 0){
+					parsedObj.subModels = _subMeta;
+				}
+				return parsedObj;
 			} else {
 				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 			}
 		});
 
-	}); 
+	});
+
+
+
+
 }
 
 function getMetadata(account, model, id){
