@@ -75,6 +75,7 @@
 		ROOT_NODE_NOT_FOUND: { message: "No root node found for revision", status: 500 },
 
 		ISSUE_NOT_FOUND: { message: "Issue not found", status: 404 },
+		
 
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
@@ -125,6 +126,9 @@
 		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 		BLACKLISTED_MODEL_NAME: { message: "Model name reserved", status: 400 },
+
+		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
+		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},

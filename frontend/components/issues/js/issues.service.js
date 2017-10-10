@@ -19,16 +19,16 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("IssuesService", IssuesService);
+		.service("IssuesService", IssuesService);
 
 	IssuesService.$inject = [
-		"$http", "$q", "$sanitize", "ClientConfigService", "EventService", 
-		"UtilsService", "TreeService", "AuthService"
+		"$q", "$sanitize", "ClientConfigService", "EventService", 
+		"UtilsService", "TreeService", "AuthService", "APIService"
 	];
 
 	function IssuesService(
-		$http, $q, $sanitize, ClientConfigService, EventService, 
-		UtilsService, TreeService, AuthService
+		$q, $sanitize, ClientConfigService, EventService, 
+		UtilsService, TreeService, AuthService, APIService
 	) {
 
 		var url = "",
@@ -162,7 +162,7 @@
 		function showMultiIds(issue) {
 			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
 
-			UtilsService.doGet(groupUrl)
+			APIService.get(groupUrl)
 				.then(function (response) {
 
 					TreeService.cachedTree
@@ -265,10 +265,9 @@
 		function getIssue(account, model, issueId){
 
 			var deferred = $q.defer();
-			var endpoint = account + "/" + model + "/issues/" + issueId + ".json";
-			var issueUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-
-			$http.get(issueUrl).then(function(res){
+			var issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
+		
+			APIService.get(issueUrl).then(function(res){
 
 				res.data = cleanIssue(res.data);
 
@@ -297,16 +296,14 @@
 				endpoint = account + "/" + model + "/issues.json";
 			}
 
-			var issuesUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-
-			$http.get(issuesUrl).then(
+			APIService.get(endpoint).then(
 				function(issuesData) {
 					deferred.resolve(issuesData.data);
 					for (var i = 0; i < issuesData.data.length; i ++) {
 						issuesData.data[i].timeStamp = getPrettyTime(issuesData.data[i].created);
 						issuesData.data[i].title = generateTitle(issuesData.data[i]);
 						if (issuesData.data[i].thumbnail) {
-							issuesData.data[i].thumbnailPath = UtilsService.getServerUrl(issuesData.data[i].thumbnail);
+							issuesData.data[i].thumbnailPath = APIService.getAPIUrl(issuesData.data[i].thumbnail);
 						}
 					}
 				},
@@ -326,9 +323,9 @@
 
 			var base = issue.account + "/" + issue.model;
 			if (issue.rev_id){
-				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/revision/" + issue.rev_id + "/issues.json");
+				saveUrl = base + "/revision/" + issue.rev_id + "/issues.json";
 			} else {
-				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/issues.json");
+				saveUrl = base + "/issues.json";
 			}
 
 			config = {withCredentials: true};
@@ -338,7 +335,7 @@
 				issue.norm = issue.pickedNorm;
 			}
 
-			$http.post(saveUrl, issue, config)
+			APIService.post(saveUrl, issue, config)
 				.then(function successCallback(response) {
 					deferred.resolve(response);
 				});
@@ -364,20 +361,17 @@
 		 */
 		function doPut(issue, putData) {
 			var deferred = $q.defer();
-			var putUrl;
 			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
 				endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
-				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			} else {
 				endpoint += "/issues/" + issue._id + ".json";
-				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			}
 				
 			var putConfig = {withCredentials: true};
 
-			$http.put(putUrl, putData, putConfig)
+			APIService.put(endpoint, putData, putConfig)
 				.then(function (response) {
 					deferred.resolve(response);
 				});
@@ -471,9 +465,9 @@
 		function getJobs(account, model){
 
 			var deferred = $q.defer();
-			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/jobs.json");
+			url = account + "/" + model + "/jobs.json";
 
-			$http.get(url).then(
+			APIService.get(url).then(
 				function(jobsData) {
 					availableJobs = jobsData.data;
 					deferred.resolve(availableJobs);
@@ -488,9 +482,9 @@
 
 		function getUserJobFormodel(account, model){
 			var deferred = $q.defer();
-			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" +model + "/userJobForModel.json");
+			url = account + "/" +model + "/userJobForModel.json";
 
-			$http.get(url).then(
+			APIService.get(url).then(
 				function(userJob) {
 					deferred.resolve(userJob.data);
 				},
@@ -603,7 +597,7 @@
 			var formData = new FormData();
 			formData.append("file", file);
 
-			UtilsService.doPost(formData, bfcUrl, {"Content-Type": undefined}).then(function(res){
+			APIService.post(bfcUrl, formData, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
@@ -704,7 +698,7 @@
 					}
 					//screen shot path
 					if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
-						issue.comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(issue.comments[j].viewpoint.screenshot);
+						issue.comments[j].viewpoint.screenshotPath = APIService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
 					}
 				}
 			}

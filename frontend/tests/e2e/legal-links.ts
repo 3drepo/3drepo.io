@@ -1,7 +1,9 @@
 import { USER, browser, by, element , env, expect, login, logout } from "./config/imports";
 
-describe("Legal links", () => {
-
+describe("Legal links", function() {
+  
+  this.timeout(6000);
+	
   describe("are visible logged out", () => {
 
       before(() => {

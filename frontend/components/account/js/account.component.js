@@ -33,9 +33,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "UtilsService", "APIService"];
 
-	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, AuthService, UtilsService) {
+	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, AuthService, UtilsService, APIService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -94,14 +94,14 @@
 		};
 
 		vm.initBillings = function() {
-			return UtilsService.doGet(vm.account + "/invoices")
+			return APIService.get(vm.account + "/invoices")
 				.then(function (response) {
 					vm.billings = response.data;
 				});
 		};
 
 		vm.initPlans = function() {
-			return UtilsService.doGet("plans")
+			return APIService.get("plans")
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.plans = response.data;
@@ -110,7 +110,7 @@
 		};
 
 		vm.initSubscriptions = function() {
-			return UtilsService.doGet(vm.account + "/subscriptions")
+			return APIService.get(vm.account + "/subscriptions")
 				.then(function (response) {
 					vm.subscriptions = response.data;
 				});
@@ -152,7 +152,7 @@
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
 							UtilsService.showDialog("paypal-dialog.html", $scope);
-							UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute")
+							APIService.post("payment/paypal/execute", {token: ($location.search()).token})
 								.then(function (response) {
 									if (response.status !== 200) {
 										console.error("PayPal error", response);

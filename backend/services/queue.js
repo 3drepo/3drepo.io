@@ -340,6 +340,8 @@
 				return this.channel.consume(queue, function (rep) {
 
 					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
+					
+					let ModelHelper = require("../models/helper/model");
 
 					let defer = self.deferedObjs[rep.properties.correlationId];
 
@@ -353,15 +355,21 @@
 
 					let resProject = resData.project;
 
-					if (defer && resErrorCode === 0) {
-						defer.resolve(rep);
-					} else if (defer) {
-						defer.reject(resErrorCode, resErrorMessage, rep);
-					} else {
-						self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
-					}
+					let status = resData.status;
 
-					defer && delete self.deferedObjs[rep.properties.correlationId];
+					if ("processing" === status) {
+						ModelHelper.setStatus(resDatabase, resProject, 'processing');
+					} else {
+						if (defer && resErrorCode === 0) {
+							defer.resolve(rep);
+						} else if (defer) {
+							defer.reject(resErrorCode, resErrorMessage, rep);
+						} else {
+							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
+						}
+
+						defer && delete self.deferedObjs[rep.properties.correlationId];
+					}
 
 				}, { noAck: true });
 			});

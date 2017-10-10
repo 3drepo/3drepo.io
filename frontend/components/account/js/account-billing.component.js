@@ -35,9 +35,15 @@
 		});
 
 
-	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "ClientConfigService"];
+	AccountBillingCtrl.$inject = [
+		"$scope", "$window", "$timeout", "UtilsService", 
+		"ClientConfigService", "APIService"
+	];
 
-	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, ClientConfigService) {
+	function AccountBillingCtrl(
+		$scope, $window, $timeout, UtilsService, 
+		ClientConfigService, APIService
+	) {
 		var vm = this;
 
 		/*
@@ -161,7 +167,7 @@
 			}
 			UtilsService.showDialog("paypal-dialog.html", $scope, null, true);
 
-			var promise = UtilsService.doPost(data, vm.account + "/subscriptions");
+			var promise = APIService.post(vm.account + "/subscriptions", data);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					if (vm.numLicenses === vm.numNewLicenses) {

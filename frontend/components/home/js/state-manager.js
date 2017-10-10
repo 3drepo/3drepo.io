@@ -17,10 +17,10 @@
 
 (function() {
 	"use strict";
-
+	console.log("STATE MANAGER")
 	angular.module("3drepo")
-		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider",
-			function($stateProvider, $urlRouterProvider, $locationProvider) {
+		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider",
+			function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				
 				$locationProvider.html5Mode(true);
 
@@ -30,7 +30,6 @@
 					resolve: {
 						init: ["AuthService", "StateManager", "$q", function(AuthService, StateManager, $q) {
 							StateManager.state.authInitialized = false;
-
 							var finishedAuth = $q.defer();
 
 							StateManager.state.changing = true;
@@ -49,6 +48,8 @@
 						}]
 					}
 				});
+
+				$httpProvider.interceptors.push("AuthInterceptor");
 
 				// Convert blah_test to blahTest
 				function camelCase(name) {

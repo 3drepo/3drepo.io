@@ -20,11 +20,13 @@
 
 	angular.module("3drepo")
 		.service("AuthService", [
-			"$injector", "$q", "$http", "$interval", "ClientConfigService",
-			"EventService", "AnalyticService", "ViewerService", "$location", "$window",
+			"$injector", "$q", "$interval", "ClientConfigService",
+			"EventService", "AnalyticService", "$location", "$window",
+			"$mdDialog", "APIService",
 			function(
-				$injector, $q, $http, $interval, ClientConfigService, 
-				EventService, AnalyticService, ViewerService, $location, $window
+				$injector, $q, $interval, ClientConfigService, 
+				EventService, AnalyticService, $location, $window,
+				$mdDialog, APIService
 			) {
 
 				var authPromise = $q.defer();
@@ -83,7 +85,8 @@
 					loggedOutPage: loggedOutPage,
 					legalPages: legalPages,
 					doNotLogout: doNotLogout,
-					loggedOutPages: loggedOutPages
+					loggedOutPages: loggedOutPages,
+					logoutSuccess: logoutSuccess
 				};
 
 				return service;
@@ -95,12 +98,14 @@
 				}
 
 				function initAutoLogout() {
-					// Check for expired sessions
-					var checkExpiredSessionTime = ClientConfigService.login_check_interval || 4; // Seconds
+					// Check for mismatch
+					var checkLoginMismatch = ClientConfigService.login_check_interval || 4; // Seconds
+
 					$interval(function() {
 						//console.log("auto - calling interval init")
 						init(true);
-					}, 1000 * checkExpiredSessionTime);
+					}, 1000 * checkLoginMismatch);
+
 				}
 				
 				function loginSuccess(response) {
@@ -145,7 +150,6 @@
 
 					localStorage.setItem("loggedIn", "false");
 
-					ViewerService.reset();
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 
 					authPromise.resolve(loggedIn);
@@ -263,8 +267,9 @@
 					return username; 
 				}
 
+
 				function sendLoginRequest() {
-					return $http.get(ClientConfigService.apiUrl(ClientConfigService.GET_API, "login"));
+					return APIService.get("login");
 				}
 
 				function login(loginUsername, password) {
@@ -272,7 +277,7 @@
 
 					var postData = {username: loginUsername, password: password};
 
-					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "login"), postData)
+					APIService.post("login", postData)
 						.then(loginSuccess)
 						.catch(loginFailure);
 
@@ -282,9 +287,7 @@
 				function logout() {
 					authPromise = $q.defer();
 
-					ViewerService.reset();
-					
-					$http.post(ClientConfigService.apiUrl(ClientConfigService.POST_API, "logout"))
+					APIService.post("logout")
 						.then(logoutSuccess)
 						.catch(logoutFailure);
 

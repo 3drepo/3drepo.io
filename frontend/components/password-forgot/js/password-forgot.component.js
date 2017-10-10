@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
+	PasswordForgotCtrl.$inject = ["$scope", "APIService"];
 
-	function PasswordForgotCtrl ($scope, UtilsService) {
+	function PasswordForgotCtrl ($scope, APIService) {
 		var vm = this,
 			promise,
 			messageColour = "rgba(0, 0, 0, 0.7)",
@@ -67,7 +67,7 @@
 					vm.messageColor = messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
+					promise = APIService.post(vm.username + "/forgot-password", {email: vm.email});
 					promise.then(function (response) {
 						vm.showProgress = false;
 						if (response.status === 200) {
