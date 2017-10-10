@@ -31,6 +31,7 @@ module.exports = {
 		{
 			service: "api",
 			subdirectory: "api",
+			port: http_port,
 			public_port: http_port,
 			public_protocol: "http"
 		},
@@ -47,7 +48,7 @@ module.exports = {
 		}
 	],
 	js_debug_level: 'debug',
-	consoleLogging: false,
+	consoleLogging: true,
 	logfile: {
 		filename: './3drepo.log',
 		console_level: 'info',

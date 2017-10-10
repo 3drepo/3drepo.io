@@ -43,6 +43,7 @@ module.exports.createApp = function () {
 
 	app.locals.pretty = true;
 
+	app.use("/config", require("../routes/config"));	
 
 	app.use(express.static(publicDir));
 
