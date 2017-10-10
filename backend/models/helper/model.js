@@ -1114,20 +1114,15 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	}).then(() => {
 
-		resetCorrelationId(account, model);
-
-		modelSetting.status = 'ok';
-		modelSetting.errorReason = undefined;
-
-		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
-		if(source.type === 'toy'){
-			modelSetting.timestamp = new Date();
-		}
-		modelSetting.markModified('errorReason');
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		return modelSetting.save();
+		return ModelSetting.findById({account, model}, model).then(setting => {
+			setting.errorReason = undefined;
+			if(source.type === 'toy'){
+				setting.timestamp = new Date();
+			}
+			setting.markModified('errorReason');
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+			return setting.save();
+		});
 
 	}).then(() => {
 
@@ -1330,5 +1325,6 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
-	setStatus
+	setStatus,
+	resetCorrelationId
 };

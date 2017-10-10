@@ -361,6 +361,8 @@
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
 						if (defer && resErrorCode === 0) {
+							ModelHelper.setStatus(resDatabase, resProject, 'ok');
+							ModelHelper.resetCorrelationId(resDatabase, resProject);
 							defer.resolve(rep);
 						} else if (defer) {
 							defer.reject(resErrorCode, resErrorMessage, rep);
