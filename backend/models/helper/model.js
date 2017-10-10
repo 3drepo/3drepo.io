@@ -1635,7 +1635,7 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
-    	getAllIdsWith4DSequenceTag,
-	getAllIdsWithMetadataField
+   	getAllIdsWith4DSequenceTag,
+	getAllIdsWithMetadataField,
 	setStatus
 };
