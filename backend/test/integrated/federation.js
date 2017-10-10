@@ -87,6 +87,7 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
+		console.log('TEST ASDASDASDASDAS');
 		//fake a response from bouncer;
 		setTimeout(function(){
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
@@ -104,7 +105,7 @@ describe('Federated Model', function () {
 				return q.channel.publish(
 					q.callbackQName,
 					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
+					new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
 					{
 						correlationId: corId, 
 						persistent: true 
