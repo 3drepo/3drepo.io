@@ -17,6 +17,7 @@
 
 "use strict";
 
+
 /**
  * Creates frontend API Express app 
  * 
@@ -31,6 +32,8 @@ module.exports.createApp = function () {
 	const favicon = require("serve-favicon");
 	const app = express();
 	const path = require("path");
+	const configRoute = require("../routes/config");
+	app.use("/config", configRoute);
 	
 	const publicDir = __dirname + "/../../public";
 
@@ -39,14 +42,11 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon("./public/images/favicon.ico"));
+	app.use(favicon(publicDir + "/images/favicon.ico"));
 
 	app.locals.pretty = true;
 
-	app.use("/config", require("../routes/config"));	
-
 	app.use(express.static(publicDir));
-
 
 	app.use(function(req, res, next) {
 
