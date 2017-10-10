@@ -54,8 +54,6 @@
 		 */
 		vm.$onInit = function() {
 
-			console.log("hello");
-
 			vm.handlePaths();
 
 			vm.setLoginPage();
