@@ -361,8 +361,8 @@
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
 						if (defer && resErrorCode === 0) {
-							ModelHelper.setStatus(resDatabase, resProject, 'ok');
-							//ModelHelper.resetCorrelationId(resDatabase, resProject);
+							//ModelHelper.setStatus(resDatabase, resProject, 'ok');
+							ModelHelper.resetCorrelationId(resDatabase, resProject);
 							self.logger.logError("QWERTYUIOP3333333333333333");
 							defer.resolve(rep);
 							self.logger.logError("QWERTYUIOP4444444444444444");
