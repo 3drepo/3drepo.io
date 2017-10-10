@@ -16,13 +16,13 @@ home {
     height: 100%;
     overflow: hidden; 
     background-size: cover; 
-    background-image: url("/images/viewer_background.png");
 }
 
 home .homeContainer {
     height: 100%;
     overflow: hidden; 
     position: relative;
+    background-size: cover;
 }
 
 home h3 {

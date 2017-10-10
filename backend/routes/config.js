@@ -120,13 +120,6 @@
             pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
         }
     
-        // Set up the legal plugins
-        if (config.hasOwnProperty("legal")) {
-            for (let i = 0; i < config.legal.length; i += 1) {
-                pluginStructure.functions.push(config.legal[i].page);
-            }
-        }
-        
         let clientConfig = {
             "pluginLoaded": [],
             "pluginPug": [],
@@ -144,8 +137,20 @@
             "googleConversionId": config.googleConversionId,
             "userNotice" : config.userNotice,
             "unitySettings" : config.unitySettings,
+            "customLogins" : config.customLogins
         };
-    
+
+        if (config.hasOwnProperty("captcha_client_key")) {
+            clientConfig.captcha_client_key = config.captcha_client_key;
+        }
+
+        // Set up the legal plugins
+        if (config.hasOwnProperty("legal")) {
+            for (let i = 0; i < config.legal.length; i += 1) {
+                pluginStructure.functions.push(config.legal[i].page);
+            }
+        }
+        
         if (config.hasOwnProperty("captcha_client_key")) {
             clientConfig.captcha_client_key = config.captcha_client_key;
         }
@@ -223,7 +228,6 @@
         setupPug(clientConfig, pluginStructure);
         
         return clientConfig;
-    
     }
     
     const clientConfig = createClientConfig(config);

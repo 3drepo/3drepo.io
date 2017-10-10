@@ -62,7 +62,7 @@ function createLogger() {
 		fileOutTransport
 	];
 	
-	if (config.consoleLogging === undefined || config.consoleLogging === true) {
+	if (config.logfile.silent === undefined || config.logfile.silent === false) {
 		transports.push(new winston.transports.Console({
 			colorize: true,
 			level: config.logfile.console_level,

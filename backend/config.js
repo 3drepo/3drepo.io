@@ -23,8 +23,6 @@ const config = require("app-config").config;
 
 const sessionFactory = require("./services/session.js");
 
-//const systemLogger = require("./logger.js").systemLogger;
-
 /*******************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
@@ -119,6 +117,11 @@ config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 let default_http_port = coalesce(config.http_port, 80); // Default http port
 let default_https_port = coalesce(config.https_port, 443); // Default https port
 
+// Check for hostname and ip here
+config.host = coalesce(config.host, "127.0.0.1");
+config.numThreads = coalesce(config.numThreads, 1);
+config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
+
 config.using_ssl = config.hasOwnProperty("ssl");
 config.port = coalesce(config.port, config.using_ssl ? default_https_port : default_http_port);
 
@@ -169,6 +172,12 @@ for (let i = 0; i < config.servers.length; i++) {
 			}
 
 			server.external = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
+		}
+
+		let hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
+		if (!hasSubdomainArr) {
+			// Create empty array for the subdomain to hold servers
+			config.subdomains[server.subdomain] = [];
 		}
 
 		server.session = sessionFactory.session(config);

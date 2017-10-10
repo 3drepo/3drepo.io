@@ -28,7 +28,6 @@
 	function themeConfig($mdThemingProvider) {
 
 		//$mdThemingProvider.generateThemesOnDemand(true);
-
 		var paletteName = "three_d_repo_primary";
 		$mdThemingProvider.definePalette(paletteName, {
 			"50": "0C2F54",

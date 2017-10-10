@@ -41,15 +41,30 @@ module.exports = {
 			http_port: http_port
 		},
 		{
+			service: "frontend",
+			subdomain: "test",
+			public_port: http_port,
+			http_port: http_port
+		},
+		{
 			service: "chat",
 			http_port: 3000,
 			https_port: 3000,
 			subdirectory: 'chat'
 		}
 	],
+	customLogins: {
+		test: {	
+			loginMessage: "Test",
+			css: "custom/test/css/test.css",
+			topLogo: "custom/test/images/test_logo.png",
+			topLogoLink: "example.com",
+			backgroundImage: "custom/test/images/test_background.png"
+		}
+	},
 	js_debug_level: 'debug',
-	consoleLogging: false,
 	logfile: {
+		silent: true,
 		filename: './3drepo.log',
 		console_level: 'info',
 		file_level: 'debug'

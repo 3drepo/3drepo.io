@@ -53,8 +53,11 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
 			vm.handlePaths();
 
+			vm.setLoginPage();
+			
 			AnalyticService.init();
 			SWService.init();
 			
@@ -93,7 +96,62 @@
 
 			vm.isMobileDevice = vm.isMobile();
 
-		
+		};
+
+		vm.getSubdomain = function() {
+			var host = $location.host();
+			if (host.indexOf(".") < 0) {
+				return "";
+			} 
+			return host.split(".")[0];
+		};
+
+		vm.setLoginPage = function() {
+
+			if (ClientConfigService.customLogins !== undefined) {
+			
+				var sub = vm.getSubdomain();
+				var custom = ClientConfigService.customLogins[sub];
+
+				if (sub && custom) {
+					if (
+						custom.loginMessage
+					) {
+						vm.loginMessage = custom.loginMessage;
+					}
+					if (
+						custom.backgroundImage &&
+						typeof custom.backgroundImage === "string"
+					) {
+						vm.backgroundImage = custom.backgroundImage;
+					}
+					if (
+						custom.topLogo &&
+						typeof custom.topLogo === "string"
+					) {
+						vm.topLogo = custom.topLogo;
+					}
+					if (
+						custom.css
+					) {
+						console.log(custom.css);
+						var link = document.createElement("link");
+						link.setAttribute("rel", "stylesheet");
+						link.setAttribute("type", "text/css");
+						link.setAttribute("href", custom.css);
+						document.getElementsByTagName("head")[0].appendChild(link);
+					}
+				} 
+
+			}
+
+			if (!vm.topLogo) {
+				vm.topLogo = "/images/3drepo-logo-white.png";
+			}
+			if (!vm.backgroundImage) {
+				vm.backgroundImage = "/images/viewer_background.png";
+			}
+
 		};
 
 		vm.handlePaths = function() {
