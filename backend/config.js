@@ -23,8 +23,6 @@ const config = require("app-config").config;
 
 const sessionFactory = require("./services/session.js");
 
-//const systemLogger = require("./logger.js").systemLogger;
-
 /*******************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
@@ -173,11 +171,13 @@ for (let i = 0; i < config.servers.length; i++) {
 				config.api_server.url = "{3drepo_api}";
 			}
 
+			server.external = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
+		}
+
 		let hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
 		if (!hasSubdomainArr) {
 			// Create empty array for the subdomain to hold servers
 			config.subdomains[server.subdomain] = [];
-			server.external = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
 		}
 
 		server.session = sessionFactory.session(config);

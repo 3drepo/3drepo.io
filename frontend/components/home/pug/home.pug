@@ -49,6 +49,7 @@ div.homeContainer(
 		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage && !vm.state.model")
 		
 		login(
+			login-message="vm.loginMessage"
 			ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
 		
 		sign-up(ng-if="vm.page === 'sign-up'")

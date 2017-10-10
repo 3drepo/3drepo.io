@@ -115,6 +115,11 @@
 
 				if (sub && custom) {
 					if (
+						custom.loginMessage
+					) {
+						vm.loginMessage = custom.loginMessage;
+					}
+					if (
 						custom.backgroundImage &&
 						typeof custom.backgroundImage === "string"
 					) {
@@ -125,6 +130,16 @@
 						typeof custom.topLogo === "string"
 					) {
 						vm.topLogo = custom.topLogo;
+					}
+					if (
+						custom.css
+					) {
+						console.log(custom.css);
+						var link = document.createElement("link");
+						link.setAttribute("rel", "stylesheet");
+						link.setAttribute("type", "text/css");
+						link.setAttribute("href", custom.css);
+						document.getElementsByTagName("head")[0].appendChild(link);
 					}
 				} 
 

@@ -110,6 +110,12 @@ gulp.task('unity', function() {
         .pipe(gulp.dest('./../public/unity/'));
 });
 
+gulp.task('custom', function() {
+  return gulp.src("./custom/**")
+        .on('error', swallowError)  
+        .pipe(gulp.dest('./../public/custom/'));
+});
+
 gulp.task('manifest-file', function() {
   return gulp.src("./manifest.json")
     .on('error', swallowError)
@@ -221,6 +227,7 @@ gulp.task('build', [
   'fonts', 
   'images', 
   'unity', 
+  'custom',
   'manifest-icons', 
   'manifest-file'
 ], function () {

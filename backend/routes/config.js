@@ -228,7 +228,7 @@
         setupPug(clientConfig, pluginStructure);
         
         return clientConfig;
-    
+    }
     
     const clientConfig = createClientConfig(config);
     

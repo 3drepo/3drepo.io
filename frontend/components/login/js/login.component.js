@@ -22,7 +22,9 @@
 		.component("login", {
 			restrict: "EA",
 			templateUrl: "templates/login.html",
-			bindings: {},
+			bindings: {
+				loginMessage : "<" 
+			},
 			controller: LoginCtrl,
 			controllerAs: "vm"
 		});
@@ -41,14 +43,10 @@
 			vm.loggingIn = false;
 
 			// Set a custom login message if there is one
-			if (
-				ClientConfigService.customLogin && 
-				ClientConfigService.customLogin.loginMessage
-			) {
-				vm.loginMessage = ClientConfigService.customLogin.loginMessage;
-			} else {
+			if (!vm.loginMessage) {
 				vm.loginMessage = "Welcome to 3D Repo";
 			}
+			
 		};
 
 		vm.handleLogin = function() {
