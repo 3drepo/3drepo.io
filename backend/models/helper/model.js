@@ -1459,6 +1459,22 @@ function getModelPermission(username, setting, account){
 	});
 }
 
+function getAllIdsWith4DSequenceTag(account, model, branch, rev){
+	//Get sequence tag then call the generic getAllIdsWithMetadataField
+	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
+		if(!settings)
+		{
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+		if(!settings.fourDSequenceTag)
+		{
+			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
+		}
+		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
+
+	});
+}
+
 function getAllIdsWithMetadataField(account, model, branch, rev, fieldName){
 	//Get the revision object to find all relevant IDs
 	let getHistory;
@@ -1555,5 +1571,6 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
+    getAllIdsWith4DSequenceTag,
     getAllIdsWithMetadataField
 };

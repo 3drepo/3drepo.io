@@ -41,6 +41,7 @@ describe('Metadata', function () {
 	let username = 'metaTest';
 	let password = '123456';
 	let model = '4d3df6a7-b4d5-4304-a6e1-dc192a761490';
+	let model2 = '2fb5635e-f357-410f-a0cd-0df6f1e45a66';
 	let oldRevision = "c01daebe-9fe1-452e-a77e-d201280d1fb9";
 
 	before(function(done){
@@ -96,10 +97,46 @@ describe('Metadata', function () {
 			done(err);
 		});
 	});
+	
 
 	it('metadata search of non existent field should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/blahblah.json`)
 		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('metadata search of a specific revision should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/4DTaskSequence.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('4D Task Sequence search of head master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/meta/4DTaskSequence.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('4D Task Sequence search of revision tag should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/myTag/meta/4DTaskSequence.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('4D Task Sequence search of non existent revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/blahblah123/meta/4DTaskSequence.json`)
+		.expect(404, function(err, res){
+			done(err);
+		});
+	});
+
+	it('4D Task Sequence search of a model with no Sequence Tag should fail', function(done){
+		agent.get(`/${username}/${model2}/revision/master/head/meta/4DTaskSequence.json`)
+		.expect(404, function(err, res){
 			done(err);
 		});
 	});

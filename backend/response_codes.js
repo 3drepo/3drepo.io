@@ -217,6 +217,7 @@
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
+		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
 
 		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
 		DUP_JOB: {message: "Duplicate job id", status: 400},

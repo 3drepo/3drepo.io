@@ -27,7 +27,10 @@
 	const C = require("../constants");
 
 	//Get meta data
+	router.get('/revision/master/head/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
+	router.get('/revision/:rev/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
+	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 	router.get('/revision/:rev/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
@@ -38,6 +41,20 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getAllIdsWith4DSequenceTag(req, res, next){
+		let branch;
+		
+		if(!req.params.rev){
+			branch = C.MASTER_BRANCH_NAME;
+		}
+
+		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev).then(obj =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {data : obj});
+		}).catch(err =>{
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
