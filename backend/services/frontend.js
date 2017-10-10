@@ -29,7 +29,7 @@ module.exports.createApp = function () {
 	const express = require("express");
 	const bodyParser = require("body-parser");
 	const compress = require("compression");
-	const favicon = require("serve-favicon");
+	//const favicon = require("serve-favicon");
 	const app = express();
 	const path = require("path");
 	const configRoute = require("../routes/config");
@@ -42,7 +42,7 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon(publicDir + "/images/favicon.ico"));
+	// app.use(favicon(publicDir + "/images/favicon.ico"));
 
 	app.locals.pretty = true;
 
