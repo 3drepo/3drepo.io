@@ -1296,7 +1296,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	modelSetting.status = 'queued';
 
-	modelSetting.save().then(() => {
+	return modelSetting.save().then(() => {
 
 		if (source.type === 'upload'){
 			return _handleUpload(correlationId, account, model, username, source.file, data);
@@ -1311,7 +1311,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	});
 
-	return ModelSetting.findById({account, model}, model).then(setting => {
+	/*return ModelSetting.findById({account, model}, model).then(setting => {
 		setting.errorReason = undefined;
 		if(source.type === 'toy'){
 			setting.timestamp = new Date();
@@ -1320,7 +1320,7 @@ function importModel(account, model, username, modelSetting, source, data){
 		ChatEvent.modelStatusChanged(null, account, model, setting);
 		setting.save();
 		return setting;
-	});
+	});*/
 
 	/*
 	}).then(() => {
