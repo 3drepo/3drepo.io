@@ -87,7 +87,7 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
-		console.log('TEST ASDASDASDASDAS corId:' + corId + ' appId:' + appId);
+		console.log('TEST ASDASDASDASDAS');
 		//fake a response from bouncer;
 		setTimeout(function(){
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
@@ -100,7 +100,7 @@ describe('Federated Model', function () {
 				appId = res.properties.appId;
 				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 			}).then(() => {
-				console.log('TEST CCCCCCCCCCCCCC');
+				console.log('TEST CCCCCCCCCCCCCC corId:' + corId + ' appId:' + appId);
 				//send fake job done message to the queue;
 				return q.channel.publish(
 					q.callbackQName,
