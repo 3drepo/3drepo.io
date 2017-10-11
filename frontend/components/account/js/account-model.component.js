@@ -191,6 +191,7 @@
 				vm.modelToUpload = null;
 				vm.tag = null;
 				vm.desc = null;
+				vm.uploadButtonDisabled = true;
 				UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				//vm.uploadFile();
 				break;
