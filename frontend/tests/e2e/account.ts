@@ -60,17 +60,8 @@ describe("Account page ", function() {
 			expect(element(by.css(".addHint")).isPresent()).to.eventually.equal(true);
 		});
 
-		//TODO: Use classes instead of ng-click
-		it(" and button for adding projects, models and federations should exist", () => {
-			expect(element(by.css('[ng-click="vm.addButtonsToggle()"]')).isPresent()).to.eventually.equal(true);
-		});
-
-		//TODO: Use classes instead of ng-click
-		it(" and add button should show add menu and hide on second click", () => {
-			element(by.css('[ng-click="vm.addButtonsToggle()"]')).click();
-			expect(element(by.id("floating-button")).isDisplayed()).to.eventually.equal(true);
-			element(by.css('[ng-click="vm.addButtonsToggle()"]')).click();
-			expect(element(by.id("floating-button")).isDisplayed()).to.eventually.equal(false);
+		it("and button for adding projects, models and federations should exist", () => {
+			expect(element(by.id('addButtons')).isPresent()).to.eventually.equal(true);
 		});
 
 		it(" has the test teamspace listed in the teamspace tree", () => {

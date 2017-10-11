@@ -5,6 +5,8 @@ node_modules
 /*.log
 config/*
 !config/test/
+frontend/custom/*
+frontend/custom/test
 
 frontend/tests/e2e/built
 
