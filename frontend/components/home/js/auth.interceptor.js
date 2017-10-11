@@ -62,7 +62,7 @@
 			var DialogService = $injector.get("DialogService");
 			var AuthService = $injector.get("AuthService");
 
-			DialogService.text("Session Expired", content).then(function(){
+			DialogService.text("Session Expired", content, false).then(function(){
 				AuthService.logoutSuccess();
 				dialogOpen = false;
 			});

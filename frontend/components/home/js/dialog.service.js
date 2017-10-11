@@ -38,10 +38,16 @@
 
 		////////
 
-		function text(title, content) {
+		function text(title, content, escapable) {
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
 			return $mdDialog.show( 
 				$mdDialog.alert()
-					.clickOutsideToClose(true)
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
 					.title("Your Session Has Expired")
 					.textContent(content)
 					.ariaLabel("Your Session Has Expired")
@@ -49,10 +55,16 @@
 			);
 		}
 
-		function html(title, content) {
+		function html(title, content, escapable) {
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
 			return $mdDialog.show( 
 				$mdDialog.alert()
-					.clickOutsideToClose(true)
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
 					.title("Your Session Has Expired")
 					.htmlContent(content)
 					.ariaLabel("Your Session Has Expired")
