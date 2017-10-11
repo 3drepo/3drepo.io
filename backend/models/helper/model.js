@@ -117,6 +117,7 @@ function setStatus(account, model, status) {
 		setting.status = status;
 		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
+		systemLogger.logInfo(`Setting is ${setting}`);
 	});
 }
 
@@ -138,6 +139,7 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+		systemLogger.logInfo(`Setting is ${setting}`);
 		return setting.save().then(() => {
 			return correlationId;
 		});;

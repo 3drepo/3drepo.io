@@ -363,9 +363,9 @@
 						if (defer && resErrorCode === 0) {
 							ModelHelper.setStatus(resDatabase, resProject, 'ok');
 							ModelHelper.resetCorrelationId(resDatabase, resProject);
-							//defer.resolve(rep);
+							defer.resolve(rep);
 						} else if (defer) {
-							//defer.reject(resErrorCode, resErrorMessage, rep);
+							defer.reject(resErrorCode, resErrorMessage, rep);
 						} else {
 							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
 						}

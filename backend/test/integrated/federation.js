@@ -89,83 +89,86 @@ describe('Federated Model', function () {
 
 		console.log('TEST ASDASDASDASDAS');
 		//fake a response from bouncer;
-		setTimeout(function(){
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-				console.log('TEST AAAAAAAAAAAAAA');
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-			}).then(res => {
-				console.log('TEST BBBBBBBBBBBBBB');
-				corId = res.properties.correlationId;
-				appId = res.properties.appId;
-				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-			}).then(() => {
-				console.log('TEST CCCCCCCCCCCCCC corId:' + corId + ' appId:' + appId);
-				//send fake job done message to the queue;
-				return q.channel.publish(
-					q.callbackQName,
-					appId,
-					new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
-					{
-						correlationId: corId, 
-						persistent: true 
+		async.series([
+			done => {
+				q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
+					console.log('TEST AAAAAAAAAAAAAA');
+					expect(info.messageCount).to.equal(1);
+					return q.channel.get(q.workerQName);
+				}).then(res => {
+					console.log('TEST BBBBBBBBBBBBBB');
+					corId = res.properties.correlationId;
+					appId = res.properties.appId;
+					return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
+				}).then(() => {
+					console.log('TEST CCCCCCCCCCCCCC corId:' + corId + ' appId:' + appId);
+					//send fake job done message to the queue;
+					return q.channel.publish(
+						q.callbackQName,
+						appId,
+						new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
+						{
+							correlationId: corId, 
+							persistent: true 
+						}
+					);
+				}).catch(err => {
+					console.log('TEST DDDDDDDDDDDDDD');
+					done(err);
+				});
+			},
+			done => {
+				agent.post(`/${username}/${fedModelName}`)
+				.send({ 
+					desc, 
+					type,
+					unit,
+					subModels:[{
+						"database": username,
+						"model": subModels[0]
+					}] 
+				})
+				.expect(200, function(err ,res) {
+
+					if(err){
+						return done(err);
 					}
-				);
-			}).catch(err => {
-				console.log('TEST DDDDDDDDDDDDDD');
-				done(err);
-			});
 
-		}, 1000);
+					console.log('TEST EEEEEEEEEEEEEE');
+					expect(res.body.name).to.equal(fedModelName);
+					fedModelId = res.body.model;
 
-		console.log('TEST EEEEEEEEEEEEEE');
-		agent.post(`/${username}/${fedModelName}`)
-		.send({ 
-			desc, 
-			type,
-			unit,
-			subModels:[{
-				"database": username,
-				"model": subModels[0]
-			}] 
-		})
-		.expect(200, function(err ,res) {
+					console.log('TEST FFFFFFFFFFFFFF');
+					async.series([
+						done => {
+							console.log('TEST GGGGGGGGGGGGGG');
+							agent.get(`/${username}/${fedModelId}.json`)
+							.expect(200, function(err, res){
+								expect(res.body.desc).to.equal(desc);
+								expect(res.body.type).to.equal(type);
+								done(err);
+							})
+						},
+						done => {
+							console.log('TEST HHHHHHHHHHHHHH');
+							agent.get(`/${username}.json`)
+							.expect(200, function(err, res){
+								let account = res.body.accounts.find(a => a.account === username);
+								let fed = account.fedModels.find(m => m.model === fedModelId);
+								expect(fed.federate).to.equal(true);
+								done(err);
+							})
+						}
+					], err => {
+						done(err);
+					})
 
-			if(err){
-				return done(err);
+				});
 			}
-
-			console.log('TEST EEEEEEEEEEEEEE');
-			expect(res.body.name).to.equal(fedModelName);
-			fedModelId = res.body.model;
-
-			console.log('TEST FFFFFFFFFFFFFF');
-			async.series([
-				done => {
-					console.log('TEST GGGGGGGGGGGGGG');
-					agent.get(`/${username}/${fedModelId}.json`)
-					.expect(200, function(err, res){
-						expect(res.body.desc).to.equal(desc);
-						expect(res.body.type).to.equal(type);
-						done(err);
-					})
-				},
-				done => {
-					console.log('TEST HHHHHHHHHHHHHH');
-					agent.get(`/${username}.json`)
-					.expect(200, function(err, res){
-						let account = res.body.accounts.find(a => a.account === username);
-						let fed = account.fedModels.find(m => m.model === fedModelId);
-						expect(fed.federate).to.equal(true);
-						done(err);
-					})
-				}
-			], err => {
-				done(err);
-			})
-
-			
+		], err => {
+			done(err);
 		});
+
 	});
 
 
