@@ -26,7 +26,7 @@
 
 						md-list.tree-branch(
 							ng-if="vm.hasViewableModel(project)"
-							ng-repeat="project in account.projects")
+							ng-repeat="project in account.projects | orderBy:'name'")
 
 							div(ng-click="vm.toggleProject(project)" 
 								layout="row")

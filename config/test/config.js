@@ -31,11 +31,18 @@ module.exports = {
 		{
 			service: "api",
 			subdirectory: "api",
+			port: http_port,
 			public_port: http_port,
 			public_protocol: "http"
 		},
 		{
 			service: "frontend",
+			public_port: http_port,
+			http_port: http_port
+		},
+		{
+			service: "frontend",
+			subdomain: "test",
 			public_port: http_port,
 			http_port: http_port
 		},
@@ -46,9 +53,18 @@ module.exports = {
 			subdirectory: 'chat'
 		}
 	],
+	customLogins: {
+		test: {	
+			loginMessage: "Test",
+			css: "custom/test/css/test.css",
+			topLogo: "custom/test/images/test_logo.png",
+			topLogoLink: "example.com",
+			backgroundImage: "custom/test/images/test_background.png"
+		}
+	},
 	js_debug_level: 'debug',
-	consoleLogging: false,
 	logfile: {
+		silent: true,
 		filename: './3drepo.log',
 		console_level: 'info',
 		file_level: 'debug'

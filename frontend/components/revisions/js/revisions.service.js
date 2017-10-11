@@ -41,17 +41,19 @@
 
 		function listAll(account, model) {
 
-			return APIService.get(account + "/" + model + "/revisions.json").then(function(response){
-				if(response.status === 200){
-					status.ready = true;
-					status.data = response.data;
-					return response.data;
-				} else {
-					status.ready = false;
-					status.data = response.data;
-					return response.data;
-				}
-			});
+			return APIService.get(account + "/" + model + "/revisions.json")
+				.then(function(response){
+
+					if(response.status === 200){
+						status.ready = true;
+						status.data = response.data;
+						return response.data;
+					} else {
+						status.ready = false;
+						status.data = response.data;
+						return response.data;
+					}
+				});
 
 		}
 

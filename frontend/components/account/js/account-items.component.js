@@ -1065,7 +1065,7 @@
 				// Accounts
 				for (var i = 0; i < vm.accounts.length; i++) {
 					vm.accounts[i].name = vm.accounts[i].account;
-					vm.accounts[i].canAddModel = vm.accounts[i].permissions.indexOf("teamspace_admin");
+					vm.accounts[i].canAddModel = vm.accounts[i].permissions.indexOf("teamspace_admin");				
 				}
 			}
 		});

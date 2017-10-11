@@ -317,7 +317,7 @@
 
 		vm.isProcessing = function() {
 			return vm.model.status === "uploading" ||
-					vm.model.status === "processing";
+					vm.model.status === "processing" || vm.model.status === "queued";
 		};
 
 		vm.handleModelStatus = function(modelData, freshModel) {
@@ -363,6 +363,10 @@
 				// 	vm.fileUploadInfo = "";
 				// }, vm.infoTimeout);
 			
+			} else if (modelData.status === "queued"){
+
+				vm.fileUploadInfo = "Queued...";
+
 			} else if (modelData.status === "uploading"){
 
 				vm.fileUploadInfo = "Uploading...";

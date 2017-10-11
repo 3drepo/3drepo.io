@@ -11,8 +11,10 @@
     "gulp": "gulp",
     "wdm": "webdriver-manager",
     "wdm:start": "webdriver-manager start --standalone",
-    "wdm:update": "webdriver-manager update --standalone",
-    "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js",
+    "wdm:update": "webdriver-manager update --standalone", 
+    "e2e:ie": "protractor ./tests/e2e/built/ie/ie-config.js --specs ./tests/e2e/built/ie/ie.js",
+    "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
+    "e2e:one": "yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./"
   },
   "keywords": [
