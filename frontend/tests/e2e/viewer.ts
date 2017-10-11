@@ -1,8 +1,6 @@
 import { USER, browser, by, element , env, expect, login, logout} from "./config/imports";
 
-
-
-describe("Model page", function() {
+describe("Viewer page", function() {
 
 	this.timeout(10000);
 
