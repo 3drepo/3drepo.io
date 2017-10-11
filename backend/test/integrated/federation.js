@@ -99,8 +99,8 @@ describe('Federated Model', function () {
 					console.log('TEST BBBBBBBBBBBBBB');
 					corId = res.properties.correlationId;
 					appId = res.properties.appId;
-					return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-				}).then(() => {
+					/*return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
+				}).then(() => {*/
 					console.log('TEST CCCCCCCCCCCCCC corId:' + corId + ' appId:' + appId);
 					//send fake job done message to the queue;
 					return q.channel.publish(
