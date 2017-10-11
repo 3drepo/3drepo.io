@@ -178,29 +178,6 @@
 
 
 		/**
-		 * Close the federation dialog
-		 *
-		 */
-		vm.closeDialog = function () {
-			vm.isSaving = false;
-			UtilsService.closeDialog();
-		};
-
-
-		vm.closeFederationDialog = function() {
-			
-			if (vm.originalFederationData) {
-				Object.keys(vm.federationData).forEach(function(key){
-					if (vm.federationData[key] !== vm.originalFederationData[key]) {
-						vm.federationData[key] = vm.originalFederationData[key];
-					}
-				});
-			}
-			
-			vm.closeDialog();
-		};
-
-		/**
 		 * Open the federation in the viewer if it has sub models otherwise open edit dialog
 		 *
 		 * @param {Object} event
@@ -285,7 +262,8 @@
 					
 					vm.addButtons = false;
 					vm.addButtonType = "add";
-					vm.closeDialog();
+					vm.isSaving = false;
+					UtilsService.closeDialog();
 					
 					AnalyticService.sendEvent({
 						eventCategory: "Model",
