@@ -75,7 +75,6 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	} else {
 		query.shared_id = stringToUUID(branch);
 	}
-
 	return History.findOne(
 		dbColOptions, 
 		query, 
