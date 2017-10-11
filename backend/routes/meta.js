@@ -24,9 +24,15 @@
 	const ModelHelpers = require('../models/helper/model');
 	const middlewares = require('../middlewares/middlewares');
 	const utils = require('../utils');
+	const C = require("../constants");
 
 	//Get meta data
+	router.get('/revision/master/head/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
+	router.get('/revision/:rev/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
+	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+	router.get('/revision/:rev/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 
 	function getMetadata(req, res, next){
@@ -35,10 +41,36 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
+
+	function getAllIdsWith4DSequenceTag(req, res, next){
+		let branch;
 		
+		if(!req.params.rev){
+			branch = C.MASTER_BRANCH_NAME;
+		}
+
+		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev).then(obj =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+		}).catch(err =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getAllIdsWithMetadataField(req, res, next){
+		let branch;
+		
+		if(!req.params.rev){
+			branch = C.MASTER_BRANCH_NAME;
+		}
+
+		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey).then(obj =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+		}).catch(err =>{
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	module.exports = router;

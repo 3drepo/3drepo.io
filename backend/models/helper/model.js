@@ -414,10 +414,7 @@ function createFederatedModel(account, model, subModels){
 		if(subModels.length === 0) {
 			return Promise.resolve();
 		}
-
-		//console.log(federatedJSON);
 		return Promise.all(addSubModels).then(() => {
-
 			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 
 		}).then(data => {
@@ -439,6 +436,106 @@ function createFederatedModel(account, model, subModels){
 
 	});
 }
+
+function getIdMap(account, model, branch, rev, username){
+	'use strict'	
+	let subIdMaps;
+	let revId, idMapsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getIdMaps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getIdMaps.push(
+				getIdMap(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idMap: obj.idMaps.idMap,
+						owner: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getIdMaps);
+
+	}).then(_subIdMaps => {
+
+		subIdMaps = _subIdMaps;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idMapsFileName);
+
+	}).then(buf => {
+		let idMaps = {};
+
+		if(buf){
+			idMaps = JSON.parse(buf);
+		}
+
+		if (!idMaps.idMap)
+		{
+			idMaps.idMap = [];
+		}
+
+		if(subIdMaps.length > 0)
+		{
+			idMaps.subModels = [];
+		}
+		subIdMaps.forEach(subIdMap => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdMap.idMap)
+			{
+				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
+			}
+		});
+
+		return Promise.resolve({idMaps, status});
+
+	});
+}
+
 
 function getModelProperties(account, model, branch, rev, username){
 	
@@ -540,6 +637,106 @@ function getModelProperties(account, model, branch, rev, username){
 	});
 }
 
+function getTreePath(account, model, branch, rev, username){
+	'use strict'	
+	let subTreePaths;
+	let revId, treePathsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTreePaths = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getTreePaths.push(
+				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToPath: obj.treePaths.idToPath,
+						owner: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getTreePaths);
+
+	}).then(_subTreePaths => {
+
+		subTreePaths = _subTreePaths;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treePathsFileName);
+
+	}).then(buf => {
+		let treePaths = {};
+
+		if(buf){
+			treePaths = JSON.parse(buf);
+		}
+
+		if (!treePaths.idToPath)
+		{
+			treePaths.idToPath = [];
+		}
+
+		if(subTreePaths.length > 0)
+		{
+			treePaths.subModels = [];
+		}
+		subTreePaths.forEach(subTreePath => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subTreePath.idToPath)
+			{
+				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
+			}
+		});
+
+		return Promise.resolve({treePaths, status});
+
+	});
+}
+
+
 function getUnityAssets(account, model, branch, rev, username){
 	
 
@@ -562,10 +759,10 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
-			return Promise.resolve([]);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
 			status = 'NO_ACCESS';
-			return Promise.resolve([]);
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
@@ -1274,6 +1471,112 @@ function getModelPermission(username, setting, account){
 	});
 }
 
+function getAllIdsWith4DSequenceTag(account, model, branch, rev){
+	//Get sequence tag then call the generic getAllIdsWithMetadataField
+	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
+		if(!settings)
+		{
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+		if(!settings.fourDSequenceTag)
+		{
+			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
+		}
+		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
+
+	});
+}
+
+function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
+	//Get the revision object to find all relevant IDs
+	let getHistory;
+	let history;
+	let fullFieldName = "metadata." + fieldName;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+	return getHistory.then(_history => {
+		history = _history;
+		if(!history){
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+		//Check for submodel references
+		let revId = utils.uuidToString(history._id);
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+		return Ref.find({ account, model }, filter);
+	}).then(refs =>{
+
+		//for all refs get their tree
+		let getMeta = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username).then(obj => {
+					return Promise.resolve({
+						data: obj.data,
+						account: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getMeta);
+
+	}).then(_subMeta => {
+
+		let match = {
+			_id: {"$in": history.current},
+		}
+		match[fullFieldName] =  {"$exists" : true};
+
+		let projection = {
+			parents: 1
+		};
+		projection[fullFieldName] = 1;
+
+		return Scene.find({account, model}, match, projection).then(obj => {
+			if(obj){
+				//rename fieldName to "value"
+				let parsedObj = {data: obj};
+				if(obj.length > 0)
+				{
+					const objStr = JSON.stringify(obj);
+					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
+				}
+				if(_subMeta.length > 0){
+					parsedObj.subModels = _subMeta;
+				}
+				return parsedObj;
+			} else {
+				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			}
+		});
+
+	});
+
+
+
+
+}
+
 function getMetadata(account, model, id){
 	
 
@@ -1314,7 +1617,9 @@ module.exports = {
 	importToyProject,
 	createFederatedModel,
 	listSubModels,
+	getIdMap,
 	getModelProperties,
+	getTreePath,
 	getUnityAssets,
 	getUnityBundle,
 	searchTree,
@@ -1329,5 +1634,8 @@ module.exports = {
 	getMetadata,
 	getFullTree_noSubTree,
 	setStatus,
-	resetCorrelationId
+	resetCorrelationId,
+   	getAllIdsWith4DSequenceTag,
+	getAllIdsWithMetadataField,
+	setStatus
 };

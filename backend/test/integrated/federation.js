@@ -87,7 +87,7 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
-		console.log('TEST ASDASDASDASDAS');
+		console.log('TEST ASDASDASDASDAS corId:' + corId + ' appId:' + appId);
 		//fake a response from bouncer;
 		setTimeout(function(){
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
