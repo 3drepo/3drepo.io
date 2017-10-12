@@ -236,49 +236,48 @@
 		 */
 		vm.deleteModel = function () {
 
-			var promise = APIService.delete(vm.currentAccount.name + "/" + vm.modelToDelete.model, {});
+			var deleteUrl = vm.currentAccount.name + "/" + vm.modelToDelete.model;
+			APIService.delete(deleteUrl, {})
+				.then(function (response) {
 
-			promise.then(function (response) {
+					if (response.status === 200) {
+						var account = vm.currentAccount;
+						if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
+							AccountService.removeModelByProjectName(
+								vm.accounts, 
+								account.name, 
+								vm.projectToDeleteFrom.name, 
+								response.data.model
+							);
+						} 
 
-				if (response.status === 200) {
-					var account = vm.currentAccount;
-					if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
-						AccountService.removeModelByProjectName(
-							vm.accounts, 
-							account.name, 
-							vm.projectToDeleteFrom.name, 
-							response.data.model
-						);
-					} 
-					// else {
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						vm.isSaving = false;
+						UtilsService.closeDialog();
 						
-					// 	for (var j = 0; j < account.fedModels.length; j++) { 
-					// 		if (account.fedModels[j].model === response.data.model) {
-					// 			account.fedModels.splice(j, 1);
-					// 			break;
-					// 		}
-					// 	}
-					// }
-					
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					vm.isSaving = false;
-					UtilsService.closeDialog();
-					
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "delete",
-						eventLabel: "federation"
-					});
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "delete",
+							eventLabel: "federation"
+						});
 
-				} else {
+					} else {
+						vm.deleteError = "Error deleting federation";
+						if (response.data.message) {
+							vm.deleteError = response.data.message;
+						} 
+					}
+
+				})
+				.catch(function(response){
+					console.log("Delete");
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
 					} 
-				}
+				});
 
-			});
 		};
 
 		/**

@@ -92,7 +92,6 @@
 			}
 
 			var request = $http.post(urlUse, data, config);
-			//var response = AuthService.handleSessionExpiration(request);
 
 			return request;
 
@@ -116,7 +115,6 @@
 			var config = {withCredentials: true};
 
 			var request = $http.put(urlUse, data, config);
-			//var response = AuthService.handleSessionExpiration(request);
 
 			return request;
 
@@ -131,14 +129,14 @@
 		function del(url, data) {
 
 			checkUrl(url);
+
 			url = encodeURI(url);
+			url = ClientConfigService.apiUrl(
+				ClientConfigService.POST_API, 
+				url
+			);
 
 			var config = {
-				method: "DELETE",
-				url: ClientConfigService.apiUrl(
-					ClientConfigService.POST_API, 
-					url
-				),
 				data: data,
 				withCredentials: true,
 				headers: {
@@ -146,8 +144,7 @@
 				}
 			};
 			
-			var request = $http(config);
-			//var response = AuthService.handleSessionExpiration(request);
+			var request = $http.delete(url, config);
 			return request;
 		}
 

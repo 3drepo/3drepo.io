@@ -608,63 +608,69 @@
 		 * Delete model
 		 */
 		vm.deleteModel = function () {
-
+			
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + encodeURIComponent(vm.modelToDelete.model);
-			var promise = APIService.delete(url, {});
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
+			APIService.delete(url, {})
+				.then(function (response) {
 
-			promise.then(function (response) {
+					if (response.status === 200) {
+					
+						// Remove model from list
+						for (var i = 0; i < vm.accounts.length; i += 1) {
+							account = vm.accounts[i];
+							if (account.name === response.data.account) {
+								if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
 
-				if (response.status === 200) {
-				
-					// Remove model from list
-					for (var i = 0; i < vm.accounts.length; i += 1) {
-						account = vm.accounts[i];
-						if (account.name === response.data.account) {
-							if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
+									var projectToDeleteFrom = vm.projectToDeleteFrom.name;
+									AccountService.removeModelByProjectName(
+										vm.accounts, 
+										account.name, 
+										projectToDeleteFrom, 
+										response.data.model
+									);
+									AccountService.removeFromFederationByProjectName(
+										vm.accounts, 
+										account.name, 
+										projectToDeleteFrom, 
+										response.data.model
+									);
+									break;
 
-								var projectToDeleteFrom = vm.projectToDeleteFrom.name;
-								AccountService.removeModelByProjectName(
-									vm.accounts, 
-									account.name, 
-									projectToDeleteFrom, 
-									response.data.model
-								);
-								AccountService.removeFromFederationByProjectName(
-									vm.accounts, 
-									account.name, 
-									projectToDeleteFrom, 
-									response.data.model
-								);
-								break;
-
-							} else {
-								// If default
-								for (var j = 0; j < vm.accounts[i].models.length; j += 1) { 
-									if (account.models[j].name === response.data.model) {
-										account.models.splice(j, 1);
-										break;
+								} else {
+									// If default
+									for (var j = 0; j < vm.accounts[i].models.length; j += 1) { 
+										if (account.models[j].name === response.data.model) {
+											account.models.splice(j, 1);
+											break;
+										}
 									}
 								}
 							}
 						}
-					}
 
-					vm.closeDialog();
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "delete"
-					});
-				} else {
+						vm.closeDialog();
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "delete"
+						});
+					} else {
+						vm.deleteError = "Error deleting model";
+						if (response.data.message) {
+							vm.deleteError = "Error: " + response.data.message;
+							console.error("Deleting model error: ", response);
+						} 
+					}
+				})
+				.catch(function(response){
 					vm.deleteError = "Error deleting model";
 					if (response.data.message) {
 						vm.deleteError = "Error: " + response.data.message;
 						console.error("Deleting model error: ", response);
 					} 
-				}
-			});
+				});
 		};
 
 		vm.teamspaceAndProjectSelected = function() {
