@@ -181,7 +181,6 @@
 						var subTreeId = subTree._id;
 						subTree.parent = idToObjRef[treeId];
 						
-						console.log("idToPath", tree.buf.idToPath);
 						angular.extend(mainTree.subProjIdToPath, tree.buf.idToPath);
 
 						idToObjRef[treeId].children = [subTree];
