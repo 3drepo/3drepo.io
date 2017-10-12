@@ -466,8 +466,8 @@ function createFederatedModel(account, model, subModels){
 			//return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 			// cclw05 - this is a temporary workaround!
 			// cclw05 - genFed needs to be merged with importModel
-			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-			//return Promise.resolve();
+			importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			return Promise.resolve();
 
 		}).then(data => {
 
