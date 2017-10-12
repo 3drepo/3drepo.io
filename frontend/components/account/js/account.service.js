@@ -240,7 +240,7 @@
 		 * @returns {*}
 		 */
 		function updateInfo(username, info) {
-			return APIService.put(info, username);
+			return APIService.put(username, info);
 		}
 
 		/**
@@ -251,7 +251,7 @@
 		 * @returns {*}
 		 */
 		function updatePassword(username, passwords) {
-			return APIService.put(passwords, username);
+			return APIService.put(username, passwords);
 		}
 
 		/**
