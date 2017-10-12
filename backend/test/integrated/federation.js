@@ -87,21 +87,17 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
-		console.log('TEST ASDASDASDASDAS');
 		//fake a response from bouncer;
 		async.series([
 			done => {
 				q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-					console.log('TEST AAAAAAAAAAAAAA');
 					expect(info.messageCount).to.equal(1);
 					return q.channel.get(q.workerQName);
 				}).then(res => {
-					console.log('TEST BBBBBBBBBBBBBB');
 					corId = res.properties.correlationId;
 					appId = res.properties.appId;
 					return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
 				}).then(() => {
-					console.log('TEST CCCCCCCCCCCCCC corId:' + corId + ' appId:' + appId);
 					//send fake job done message to the queue;
 					return q.channel.publish(
 						q.callbackQName,
@@ -113,7 +109,6 @@ describe('Federated Model', function () {
 						}
 					);
 				}).catch(err => {
-					console.log('TEST DDDDDDDDDDDDDD');
 					done(err);
 				});
 			},
@@ -134,14 +129,11 @@ describe('Federated Model', function () {
 						return done(err);
 					}
 
-					console.log('TEST EEEEEEEEEEEEEE');
 					expect(res.body.name).to.equal(fedModelName);
 					fedModelId = res.body.model;
 
-					console.log('TEST FFFFFFFFFFFFFF');
 					async.series([
 						done => {
-							console.log('TEST GGGGGGGGGGGGGG');
 							agent.get(`/${username}/${fedModelId}.json`)
 							.expect(200, function(err, res){
 								expect(res.body.desc).to.equal(desc);
@@ -150,7 +142,6 @@ describe('Federated Model', function () {
 							})
 						},
 						done => {
-							console.log('TEST HHHHHHHHHHHHHH');
 							agent.get(`/${username}.json`)
 							.expect(200, function(err, res){
 								let account = res.body.accounts.find(a => a.account === username);
