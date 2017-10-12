@@ -518,6 +518,7 @@
 				vm.showProgress = false;
 				vm.subTreesById = event.value.subTreesById;
 				vm.idToPath = event.value.idToPath;
+				
 				vm.subProjIdToPath = event.value.subProjIdToPath;
 
 				initNodesToShow();
