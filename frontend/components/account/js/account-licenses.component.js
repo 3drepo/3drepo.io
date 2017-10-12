@@ -120,13 +120,17 @@
 
 			vm.deleteJobMessage = null;
 			var url = vm.account + "/jobs/" + vm.jobs[index]._id;
-			APIService.delete(url, null).then(function(res){
-				if (res.status !== 200) {
-					vm.deleteJobMessage = res.data.message;
-				} else {
-					vm.jobs.splice(index, 1);
-				}
-			});
+			APIService.delete(url, null)
+				.then(function(response){
+					if (response.status !== 200) {
+						vm.deleteJobMessage = response.data.message;
+					} else {
+						vm.jobs.splice(index, 1);
+					}
+				})
+				.catch(function(response){
+					vm.deleteJobMessage = response.data.message;
+				});
 		};
 
 		/**
@@ -195,6 +199,9 @@
 							UtilsService.showDialog("remove-license-dialog.html", $scope);
 						}
 					}
+				})
+				.catch(function(response) {
+					console.error("Error removing license", response);
 				});
 		};
 
@@ -214,6 +221,9 @@
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
 						UtilsService.closeDialog();
 					}
+				})
+				.catch(function(response) {
+					console.error("Error removing license", response);
 				});
 		};
 
