@@ -106,6 +106,52 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+function importSuccess(account, model) {
+	let status = 'ok';
+	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+	ModelSetting.findById({account, model}, model).then(setting => {
+		setting.status = status;
+		systemLogger.logInfo(`Model status changed to ${status}`);
+		setting.corID = undefined;
+		systemLogger.logInfo(`Correlation ID reset`);
+		setting.errorReason = undefined;
+		if(source.type === 'toy'){
+			setting.timestamp = new Date();
+		}
+		setting.markModified('errorReason');
+		ChatEvent.modelStatusChanged(null, account, model, setting);
+		systemLogger.logInfo(`Setting is ${setting}`);
+		setting.save();
+	});
+
+}
+
+function importFail(account, model) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		// import failed for some reason(s)...
+		//mark model failed
+
+		systemLogger.logError(`Error while importing model from source ${source.type}`, {
+			stack : err.stack,
+			err: err,
+			account,
+			model,
+			username
+		});
+
+		setting.status = 'failed';
+		setting.errorReason = err;
+		setting.markModified('errorReason');
+		setting.save();
+
+		ChatEvent.modelStatusChanged(null, account, model, setting);
+
+		// cclw05 - something wrong with error here
+		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
+		//return Promise.reject(err);
+	});
+}
+
 /**
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
@@ -1643,5 +1689,7 @@ module.exports = {
 	resetCorrelationId,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
-	setStatus
+	setStatus,
+	importSuccess,
+	importFail
 };
