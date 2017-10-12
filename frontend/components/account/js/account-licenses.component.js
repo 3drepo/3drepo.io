@@ -89,16 +89,16 @@
 
 		vm.assignJob = function(index){
 			var licence = vm.licenses[index];
-	
-			APIService.put(
-				{job: licence.job},
-				vm.account + "/subscriptions/" + licence.id + "/assign"
-			).then(function(res){
-				if (res.status !== 200) {
+			
+			var url = vm.account + "/subscriptions/" + licence.id + "/assign";
 
-					vm.addMessage = res.data.message;
-				}
-			});
+			APIService.put(url, {job: licence.job})
+				.then(function(res){
+					if (res.status !== 200) {
+
+						vm.addMessage = res.data.message;
+					}
+				});
 		};
 
 		vm.addJob = function(){

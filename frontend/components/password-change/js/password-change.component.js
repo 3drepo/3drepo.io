@@ -83,15 +83,12 @@
 					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					vm.promise = APIService.put(
+					APIService.put(
+						vm.username + "/password", 
 						{
 							token: vm.token,
 							newPassword: vm.newPassword
-						},
-						vm.username + "/password"
-					);
-					
-					vm.promise
+						})
 						.then(function (response) {
 							vm.showProgress = false;
 							if (response.status === 400) {

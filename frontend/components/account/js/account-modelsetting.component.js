@@ -80,6 +80,11 @@
 							vm.unit = props.unit;
 							vm.oldUnit = vm.unit;	
 						}
+						//console.log(props);
+						if (response.data.fourDSequenceTag) {
+							//console.log(response.data.fourDSequenceTag);
+							vm.fourDSequenceTag = response.data.fourDSequenceTag;
+						}
 					
 		
 					} else {
@@ -139,10 +144,13 @@
 				mapTile: vm.mapTile,
 				unit: vm.unit,
 				code: vm.code,
-				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n")
+				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n"),
+				fourDSequenceTag: vm.fourDSequenceTag
 			};
-	
-			APIService.put(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
+			
+			var saveUrl = vm.targetAcct + "/" + vm.modelId +  "/settings";
+
+			APIService.put(saveUrl, data)
 				.then(function(response){
 					if(response.status === 200) {
 						vm.updateModel();

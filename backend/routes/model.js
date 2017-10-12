@@ -169,7 +169,8 @@ function getModelSetting(req, res, next){
 			'status', 
 			'errorReason', 
 			'federate', 
-			'subModels'
+			'subModels',
+			'fourDSequenceTag'
 		];
 
 
