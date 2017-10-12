@@ -363,13 +363,15 @@
 						if (defer && resErrorCode === 0) {
 							//ModelHelper.setStatus(resDatabase, resProject, 'ok');
 							//ModelHelper.resetCorrelationId(resDatabase, resProject);
-							ModelHelper.importSuccess(resDatabase, resProject);
-							// cclw05 - this is a temporary workaround!
-							// cclw05 - genFed needs to be merged with importModel
-							defer.resolve(rep);
+							new Promise((resolve, reject) => {
+								ModelHelper.importSuccess(resDatabase, resProject);
+								// cclw05 - this is a temporary workaround!
+								// cclw05 - genFed needs to be merged with importModel
+								defer.resolve(rep);
+							});
 						} else if (defer) {
 							//defer.reject(resErrorCode, resErrorMessage, rep);
-							importFail(resDatabase, resProject);
+							ModelHelper.importFail(resDatabase, resProject);
 						} else {
 							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
 						}
