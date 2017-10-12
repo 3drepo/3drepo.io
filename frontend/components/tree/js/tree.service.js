@@ -69,8 +69,8 @@
 				ts.baseURL = account + "/" + model + "/revision/" + revision + "/";
 			}
 
-			var deferred = $q.defer(),
-				url = ts.baseURL + "fulltree.json";
+			var deferred = $q.defer();
+			var	url = ts.baseURL + "fulltree.json";
 
 			APIService.get(url, {
 				headers: {
@@ -104,30 +104,38 @@
 
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
-					var getSubTrees = [];
+					
+					getIdToPath(ts.baseURL)
+						.then(function(idToPath){
 
-					if(subTrees){
+							mainTree.idToPath = idToPath.treePaths.idToPath;
+							var getSubTrees = [];
+							
+							if(subTrees){
+								
+								// idToObjRef only needed if model is a fed model. 
+								// i.e. subTrees.length > 0
+								
+								mainTree.subProjIdToPath = {};
+					
+								subTrees.forEach(function(tree){
+									handleSubTree(
+										tree, 
+										mainTree, 
+										subTreesById, 
+										getSubTrees
+									);
+								});
 
-						// idToObjRef only needed if model is a fed model. i.e. subTrees.length > 0
-						
-						mainTree.subProjIdToPath = {};
-			
-						subTrees.forEach(function(tree){
-							handleSubTree(
-								tree, 
-								mainTree, 
-								subTreesById, 
-								getSubTrees
-							);
+								mainTree.subTreesById = subTreesById;
+							}
+
+							Promise.all(getSubTrees).then(function(){
+								deferred.resolve(mainTree);
+							});
+
 						});
-
-						mainTree.subTreesById = subTreesById;
-					}
-
-					Promise.all(getSubTrees).then(function(){
-						deferred.resolve(mainTree);
-					});
-				
+						
 				})
 				.catch(function(error){
 					
@@ -140,47 +148,59 @@
 
 		}
 
+		function getIdToPath(baseURL) {
+
+			var url = baseURL + "tree_path.json";
+			return APIService.get(url, {
+				headers: {
+					"Content-Type": "application/json"
+				}
+			}).
+				then(function(response){
+					return response.data;
+				});
+		}
+
 		function handleSubTree(tree, mainTree, subTreesById, getSubTrees) {
 
+			var treeId = tree._id;
 			var idToObjRef = genIdToObjRef(mainTree.nodes);
 			
 			//attach the sub tree back on main tree
-			if(idToObjRef[tree._id]){
+			if(idToObjRef[treeId] && tree.url){
 
-				if(tree.url){
+				//var obj = JSON.parse(tree.buf);
+				var getSubTree = APIService.get(tree.url)
+					.then(function(res){
 
-					//var obj = JSON.parse(tree.buf);
-					var getSubTree = APIService.get(tree.url)
-						.then(function(res){
+						attachStatus(res, tree, idToObjRef);
 
-							handleResponse(res, tree, idToObjRef);
+						tree.buf = res.data.mainTree;
+		
+						var subTree = tree.buf.nodes;
+						var subTreeId = subTree._id;
+						subTree.parent = idToObjRef[treeId];
+						
+						console.log("idToPath", tree.buf.idToPath);
+						angular.extend(mainTree.subProjIdToPath, tree.buf.idToPath);
 
-							tree.buf = res.data.mainTree;
-			
-							var subTree = tree.buf.nodes;
-							subTree.parent = idToObjRef[tree._id];
-							
-							angular.extend(mainTree.subProjIdToPath, tree.buf.idToPath);
+						idToObjRef[treeId].children = [subTree];
+						idToObjRef[treeId].hasSubProjTree = true;
+						subTreesById[subTreeId] = subTree;
 
-							idToObjRef[tree._id].children = [subTree];
-							idToObjRef[tree._id].hasSubProjTree = true;
-							subTreesById[subTree._id] = subTree;
+					})
+					.catch(function(res){
+						attachStatus(res, tree, idToObjRef);	
+						console.warn("Subtree issue: ", res);
+					});
 
-						})
-						.catch(function(res){
-							handleResponse(res, tree, idToObjRef);	
-							console.warn("Subtree issue: ", res);
-						});
-
-					getSubTrees.push(getSubTree);
-
-				}
+				getSubTrees.push(getSubTree);
 
 			}
 			
 		}
 
-		function handleResponse(res, tree, idToObjRef) {
+		function attachStatus(res, tree, idToObjRef) {
 			if(res.status === 401){
 				tree.status = "NO_ACCESS";
 			}
@@ -195,20 +215,9 @@
 		}
 
 		function search(searchString) {
-			var deferred = $q.defer(),
-				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
-
-			APIService.get(url)
-				.then(function(json) {
-					deferred.resolve(json);
-				})
-				.catch(function(error){
-					console.error(error);
-				});
-
-			return deferred.promise;
+			var url = ts.baseURL + "searchtree.json?searchString=" + searchString;
+			return APIService.get(url);
 		}
-
 
 		function getMap(treeItem){
 
@@ -218,18 +227,22 @@
 			var sharedIdToUid = {};
 			var oIdToMetaId = {};
 
-			function genMap(treeItem){
-				if(treeItem){
+			function genMap(leaf){
+
+				var leafId = leaf._id;
+				var sharedId = leaf.shared_id;
+
+				if(leaf){
 					
-					if(treeItem.children){
-						treeItem.children.forEach(genMap);
+					if(leaf.children){
+						leaf.children.forEach(genMap);
 					}
 
-					uidToSharedId[treeItem._id] = treeItem.shared_id;
-					sharedIdToUid[treeItem.shared_id] = treeItem._id;
+					uidToSharedId[leafId] = sharedId;
+					sharedIdToUid[sharedId] = leafId;
 
-					if(treeItem.meta){
-						oIdToMetaId[treeItem._id] = treeItem.meta;
+					if(leaf.meta){
+						oIdToMetaId[leafId] = leaf.meta;
 					}
 
 				}
