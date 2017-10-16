@@ -371,13 +371,13 @@
 							//});
 						} else if (defer) {
 							ModelHelper.importFail(resDatabase, resProject);
+							defer.reject(rep);
 						} else {
 							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
 						}
 
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
-
 				}, { noAck: true });
 			});
 	};
