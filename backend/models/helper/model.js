@@ -944,7 +944,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 					pass.write(",");
 				}
 
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);

@@ -465,30 +465,43 @@
 			}
 		}
 
+		vm.getPath = function(objectID) {
+			
+			var path;
+			if(vm.idToPath[objectID]){
+				// If the Object ID is on the main tree then use that path
+				path = vm.idToPath[objectID].split("__");
+			} else if (vm.subModelIdToPath[objectID]) {
+				// Else check the submodel for the id for the path
+				path = vm.subModelIdToPath[objectID].split("__");
+				var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
+				path = parentPath.concat(path);
+			}
+
+			return path;
+
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject) {
 					var objectID = event.value.id;
 
 					if (objectID && vm.idToPath) {
-						var path;
-						if(vm.idToPath[objectID]){
-							path = vm.idToPath[objectID].split("__");
+						var path = vm.getPath(objectID);
+						if (!path) {
+							console.error("Couldn't find the object path");
 						} else {
-							path = vm.subProjIdToPath[objectID].split("__");
-							var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
-							path = parentPath.concat(path);
+							initNodesToShow();
+							lastParentWithName = null;
+							expandToSelection(path, 0);
+							lastParentWithName && vm.selectNode(lastParentWithName);
 						}
-
-						initNodesToShow();
-						//console.log('path', path);
-						lastParentWithName = null;
-						expandToSelection(path, 0);
-						lastParentWithName && vm.selectNode(lastParentWithName);
-
 					}
 				}
+
 			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				// Remove highlight from any selected node in the tree
 				if (currentSelectedNode !== null) {
@@ -519,7 +532,7 @@
 				vm.subTreesById = event.value.subTreesById;
 				vm.idToPath = event.value.idToPath;
 				
-				vm.subProjIdToPath = event.value.subProjIdToPath;
+				vm.subModelIdToPath = event.value.subModelIdToPath;
 
 				initNodesToShow();
 				expandFirstNode();
