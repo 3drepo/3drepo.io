@@ -110,18 +110,20 @@ function importSuccess(account, model) {
 	let status = 'ok';
 	ChatEvent.modelStatusChanged(null, account, model, { status: status });
 	ModelSetting.findById({account, model}, model).then(setting => {
-		setting.status = status;
-		systemLogger.logInfo(`Model status changed to ${status}`);
-		setting.corID = undefined;
-		systemLogger.logInfo(`Correlation ID reset`);
-		setting.errorReason = undefined;
-		if(source.type === 'toy'){
-			setting.timestamp = new Date();
+		if (setting) {
+			setting.status = status;
+			systemLogger.logInfo(`Model status changed to ${status}`);
+			setting.corID = undefined;
+			systemLogger.logInfo(`Correlation ID reset`);
+			setting.errorReason = undefined;
+			if(source.type === 'toy'){
+				setting.timestamp = new Date();
+			}
+			setting.markModified('errorReason');
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+			systemLogger.logInfo(`Setting is ${setting}`);
+			setting.save();
 		}
-		setting.markModified('errorReason');
-		ChatEvent.modelStatusChanged(null, account, model, setting);
-		systemLogger.logInfo(`Setting is ${setting}`);
-		setting.save();
 	});
 
 }

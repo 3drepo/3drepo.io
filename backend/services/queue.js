@@ -364,7 +364,7 @@
 							//ModelHelper.setStatus(resDatabase, resProject, 'ok');
 							//ModelHelper.resetCorrelationId(resDatabase, resProject);
 							//new Promise((resolve, reject) => {
-								//ModelHelper.importSuccess(resDatabase, resProject);
+								ModelHelper.importSuccess(resDatabase, resProject);
 								// cclw05 - this is a temporary workaround!
 								// cclw05 - genFed needs to be merged with importModel
 								defer.resolve(rep);
