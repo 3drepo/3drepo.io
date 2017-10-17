@@ -14,11 +14,11 @@ describe("Licences page ", function() {
 
 	describe("should load the licences page content ", () => {
 
-		it(" when we click on the licences page", () => {
+		it("when we click on the licences page", () => {
 
 			const licences = element.all(by.repeater("(key, value) in vm.accountOptions")).filter(function(elem, index) {
 				return elem.getText().then(function(text) {
-					return text === 'Licences';
+					return text === 'Licences & Jobs';
 				});
 			});
 
@@ -29,9 +29,25 @@ describe("Licences page ", function() {
 
 	});
 
-	describe(" it should have no current licences", () => {
+	describe("it should have two tabs", () => {
+
+		const tabs = element.all(by.tagName("md-tabs"));
+
+		it("including a licences tab", () => {
+			expect(tabs.get(0).isDisplayed()).to.eventually.equal(true);
+			expect(tabs.get(1).getText()).to.eventually.equal("Licences");
+		});	
+
+		it("including a jobs tab", () => {
+			expect(tabs.get(1).isDisplayed()).to.eventually.equal(true);
+			expect(tabs.get(1).getText()).to.eventually.equal("Jobs");
+		});	
+
+	});
+
+	describe("it should have no current licences", () => {
 		
-		it(" with text for the user to notify them", () => {
+		it("with text for the user to notify them", () => {
 			const licenceText = element(by.css(".cardInfo"));
 			expect(licenceText.isDisplayed()).to.eventually.equal(true);
 			expect(licenceText.getText()).to.eventually.contain("You do not currently have any licences.");

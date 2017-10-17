@@ -45,7 +45,26 @@
 				vm.jobs = data.data;
 			});
 
+			vm.jobColors = [
+				"#a6cee3",
+				"#1f78b4",
+				"#213f99",
+				"#b2df8a",
+				"#33a02c",
+				"#fb9a99",
+				"#e31a1c",
+				"#fdbf6f",
+				"#ff7f00",
+				"#e3bd1a",
+				"#ffff99",
+				"#b15928",
+				"#cab2d6",
+				"#6a3d9a"
+			];
+
 		};
+
+		
 
 		/*
 		 * Watch subscriptions
@@ -86,6 +105,23 @@
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
+
+		vm.updateJob = function(job) {
+
+			var url = vm.account + "/jobs/" + job._id;
+
+			APIService.put(url, job)
+				.then(function(res){
+					if (res.status !== 200) {
+						vm.addMessage = res.data.message;
+					} else {
+						console.error("Changing colour failed");
+					}
+				})
+				.catch(function(){
+					console.error("Changing colour failed");
+				});
+		};
 
 		vm.assignJob = function(index){
 			var licence = vm.licenses[index];
