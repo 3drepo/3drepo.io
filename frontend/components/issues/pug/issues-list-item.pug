@@ -1,6 +1,6 @@
 #issuesListItemContent(layout='column')
 	div(layout='row')
-		#issueRoleIndicator(ng-style="{backgroundColor: vm.issueRoleColor}")
+		#issueRoleIndicator(ng-style="{backgroundColor: vm.data.issueRoleColor}")
 		.issueListItemThumbnail(layout="column", layout-align="center center")
 			img(ng-if="vm.data.thumbnail", ng-src="{{vm.data.thumbnailPath}}")
 			md-icon.angular-material-icons.issueListItemMissingThumbnail(ng-if="!vm.data.thumbnail") insert_photo
@@ -8,8 +8,11 @@
 			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: vm.assignedToUserRole}") {{vm.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
 				div(layout="row", layout-align="start start")
+
 					md-icon.angular-material-icons#issueListItemStatus(
-					ng-style="{'color': '{{ vm.getStatusColour(vm.data) }}' }") {{vm.getStatusIcon(vm.data)}}
+						aria-label="Status Icon"
+						ng-style="{'color': vm.data.statusIcon.colour }") {{vm.data.statusIcon.icon}}
+
 					label(flex) {{vm.data.owner}}
 				label {{vm.data.timeStamp}}
 			#issuesListItemDescription

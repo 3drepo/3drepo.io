@@ -47,7 +47,7 @@
 
 			document.addEventListener("click", function(event) {
 				// If the click is on the scene somewhere, hide the buttons
-				var valid = event && event.target;
+				var valid = event && event.target && event.target.classList;
 				if (valid && event.target.classList.contains("emscripten")) {
 					vm.showViewingOptionButtons = false;
 				} 
