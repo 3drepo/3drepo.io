@@ -31,11 +31,11 @@ describe("Licences page ", function() {
 
 	describe("it should have two tabs", () => {
 
-		const tabs = element.all(by.tagName("md-tabs"));
+		const tabs = element.all(by.tagName("md-tabs-item"));
 
 		it("including a licences tab", () => {
 			expect(tabs.get(0).isDisplayed()).to.eventually.equal(true);
-			expect(tabs.get(1).getText()).to.eventually.equal("Licences");
+			expect(tabs.get(0).getText()).to.eventually.equal("Licences");
 		});	
 
 		it("including a jobs tab", () => {
@@ -56,10 +56,10 @@ describe("Licences page ", function() {
 	});
 	
 
-	describe("it should allow you to jobs tab", () => {
+	describe("it should allow you to click on the jobs tab", () => {
 		
 		it("correctly", () => {
-			const licenseTab = element(by.id(".licenceJobs"));
+			const licenseTab = element(by.id("licenceJobs"));
 			expect(licenseTab.isDisplayed()).to.eventually.equal(true);
 			licenseTab.click();
 			expect(hasClass(licenseTab, "md-active")).to.eventually.equal(true);
