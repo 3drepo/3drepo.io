@@ -432,6 +432,8 @@
 				vm.issuesToShow = vm.issuesToShow.filter(function(issue){
 					return vm.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
+
+
 			}
 
 			// Setup what to show
@@ -445,6 +447,8 @@
 				vm.info = "There are currently no open issues";
 				vm.contentHeight({height: vm.infoHeight});
 			}
+
+			console.log("rt - issuesToShow Updated");
 		}
 
 		/**

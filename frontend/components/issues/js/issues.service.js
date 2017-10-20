@@ -52,6 +52,7 @@
 			handleTree: handleTree,
 			getPrettyTime: getPrettyTime,
 			generateTitle: generateTitle,
+			getThumbnailPath: getThumbnailPath,
 			getIssue: getIssue,
 			getIssues: getIssues,
 			saveIssue: saveIssue,
@@ -67,7 +68,7 @@
 			removePin: removePin,
 			fixPin: fixPin,
 			getJobs: getJobs,
-			getUserJobFormodel: getUserJobFormodel,
+			getUserJobForModel: getUserJobForModel,
 			hexToRgb: hexToRgb,
 			getJobColor: getJobColor,
 			getStatusIcon: getStatusIcon,
@@ -262,6 +263,10 @@
 			}
 		}
 
+		function getThumbnailPath(url) {
+			return APIService.getAPIUrl(url);
+		}
+
 		function getIssue(account, model, issueId){
 
 			var deferred = $q.defer();
@@ -360,7 +365,7 @@
 		 * @returns {*}
 		 */
 		function doPut(issue, putData) {
-			var deferred = $q.defer();
+
 			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
@@ -371,11 +376,8 @@
 				
 			var putConfig = {withCredentials: true};
 
-			APIService.put(endpoint, putData, putConfig)
-				.then(function (response) {
-					deferred.resolve(response);
-				});
-			return deferred.promise;
+			return APIService.put(endpoint, putData, putConfig);
+		
 		}
 
 		function toggleCloseIssue(issue) {
@@ -480,7 +482,7 @@
 			return deferred.promise;
 		}
 
-		function getUserJobFormodel(account, model){
+		function getUserJobForModel(account, model){
 			var deferred = $q.defer();
 			url = account + "/" +model + "/userJobForModel.json";
 
