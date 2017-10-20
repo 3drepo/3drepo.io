@@ -24,10 +24,9 @@
 	TreeService.$inject = ["$q", "EventService", "APIService"];
 
 	function TreeService($q, EventService, APIService) {
-		var ts = this;
 		var cachedTreeDefer = $q.defer();
 		var cachedTree = cachedTreeDefer.promise;
-
+		var baseURL;
 
 		var service = {
 			init: init,
@@ -58,19 +57,26 @@
 
 		function init(account, model, branch, revision, setting) {
 
-			ts.account  = account;
-			ts.model  = model;
-			ts.branch   = branch ? branch : "master";
-			//ts.revision = revision ? revision : "head";
+
+			branch = branch ? branch : "master";
+			//revision = revision ? revision : "head";
 
 			if (!revision) {
-				ts.baseURL = account + "/" + model + "/revision/master/head/";
+				baseURL = account + "/" + model + "/revision/master/head/";
 			} else {
-				ts.baseURL = account + "/" + model + "/revision/" + revision + "/";
+				baseURL = account + "/" + model + "/revision/" + revision + "/";
 			}
 
 			var deferred = $q.defer();
-			var	url = ts.baseURL + "fulltree.json";
+			var	url = baseURL + "fulltree.json";
+			getTrees(url, setting, deferred);
+			
+			cachedTreeDefer.resolve(deferred.promise);
+			return deferred.promise;
+
+		}
+
+		function getTrees(url, setting, deferred) {
 
 			APIService.get(url, {
 				headers: {
@@ -78,7 +84,7 @@
 				}
 			})
 				.then(function(json) {
-					//var mainTree = JSON.parse(json.data.mainTree);
+
 					var mainTree = json.data.mainTree;
 					
 					//replace model id with model name in the tree if it is a federate model
@@ -105,10 +111,11 @@
 					var subTrees = json.data.subTrees;
 					var subTreesById = {};
 					
-					getIdToPath(ts.baseURL)
+					getIdToPath()
 						.then(function(idToPath){
 
 							mainTree.idToPath = idToPath.treePaths.idToPath;
+
 							var getSubTrees = [];
 							
 							if(subTrees){
@@ -116,11 +123,18 @@
 								// idToObjRef only needed if model is a fed model. 
 								// i.e. subTrees.length > 0
 								
-								mainTree.subProjIdToPath = {};
+								mainTree.subModelIdToPath = {};
 					
-								subTrees.forEach(function(tree){
+								subTrees.forEach(function(subtree){
+
+									var subtreeIdToPath = idToPath.treePaths.subModels.find(function(submodel) {
+										return subtree.model === submodel.model;
+									});
+								
+									subtree.idToPath = subtreeIdToPath.idToPath;
+
 									handleSubTree(
-										tree, 
+										subtree, 
 										mainTree, 
 										subTreesById, 
 										getSubTrees
@@ -142,13 +156,9 @@
 					console.error("Tree Init Error:", error);
 					
 				});
-
-			cachedTreeDefer.resolve(deferred.promise);
-			return deferred.promise;
-
 		}
 
-		function getIdToPath(baseURL) {
+		function getIdToPath() {
 
 			var url = baseURL + "tree_path.json";
 			return APIService.get(url, {
@@ -159,37 +169,38 @@
 				then(function(response){
 					return response.data;
 				});
+
 		}
 
-		function handleSubTree(tree, mainTree, subTreesById, getSubTrees) {
+		function handleSubTree(subtree, mainTree, subTreesById, getSubTrees) {
 
-			var treeId = tree._id;
+			var treeId = subtree._id;
 			var idToObjRef = genIdToObjRef(mainTree.nodes);
-			
-			//attach the sub tree back on main tree
-			if(idToObjRef[treeId] && tree.url){
 
-				//var obj = JSON.parse(tree.buf);
-				var getSubTree = APIService.get(tree.url)
+			//attach the sub tree back on main tree
+			if(idToObjRef[treeId] && subtree.url){
+
+				var getSubTree = APIService.get(subtree.url)
 					.then(function(res){
 
-						attachStatus(res, tree, idToObjRef);
-
-						tree.buf = res.data.mainTree;
-		
-						var subTree = tree.buf.nodes;
-						var subTreeId = subTree._id;
-						subTree.parent = idToObjRef[treeId];
+						attachStatus(res, subtree, idToObjRef);
 						
-						angular.extend(mainTree.subProjIdToPath, tree.buf.idToPath);
+						subtree.buf = res.data.mainTree;
+		
+						var subTree = subtree.buf.nodes;
+						var subTreeId = subTree._id;
+
+						subTree.parent = idToObjRef[treeId];
+					
+						angular.extend(mainTree.subModelIdToPath, subtree.idToPath);
 
 						idToObjRef[treeId].children = [subTree];
-						idToObjRef[treeId].hasSubProjTree = true;
+						idToObjRef[treeId].hasSubModelTree = true;
 						subTreesById[subTreeId] = subTree;
 
 					})
 					.catch(function(res){
-						attachStatus(res, tree, idToObjRef);	
+						attachStatus(res, subtree, idToObjRef);	
 						console.warn("Subtree issue: ", res);
 					});
 
@@ -214,7 +225,7 @@
 		}
 
 		function search(searchString) {
-			var url = ts.baseURL + "searchtree.json?searchString=" + searchString;
+			var url = baseURL + "searchtree.json?searchString=" + searchString;
 			return APIService.get(url);
 		}
 

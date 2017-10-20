@@ -106,6 +106,54 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+function importSuccess(account, model) {
+	let status = 'ok';
+	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+	ModelSetting.findById({account, model}, model).then(setting => {
+		if (setting) {
+			setting.status = status;
+			systemLogger.logInfo(`Model status changed to ${status}`);
+			setting.corID = undefined;
+			systemLogger.logInfo(`Correlation ID reset`);
+			setting.errorReason = undefined;
+			if(source.type === 'toy'){
+				setting.timestamp = new Date();
+			}
+			setting.markModified('errorReason');
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+			systemLogger.logInfo(`Setting is ${setting}`);
+			setting.save();
+		}
+	});
+
+}
+
+function importFail(account, model) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		// import failed for some reason(s)...
+		//mark model failed
+
+		systemLogger.logError(`Error while importing model from source ${source.type}`, {
+			stack : err.stack,
+			err: err,
+			account,
+			model,
+			username
+		});
+
+		setting.status = 'failed';
+		setting.errorReason = err;
+		setting.markModified('errorReason');
+		setting.save();
+
+		ChatEvent.modelStatusChanged(null, account, model, setting);
+
+		// cclw05 - something wrong with error here
+		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
+		//return Promise.reject(err);
+	});
+}
+
 /**
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
@@ -117,6 +165,7 @@ function setStatus(account, model, status) {
 		setting.status = status;
 		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
+		systemLogger.logInfo(`Setting is ${setting}`);
 	});
 }
 
@@ -138,6 +187,7 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+		systemLogger.logInfo(`Setting is ${setting}`);
 		return setting.save().then(() => {
 			return correlationId;
 		});;
@@ -415,7 +465,11 @@ function createFederatedModel(account, model, subModels){
 			return Promise.resolve();
 		}
 		return Promise.all(addSubModels).then(() => {
+			//return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			// cclw05 - this is a temporary workaround!
+			// cclw05 - genFed needs to be merged with importModel
 			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			//return Promise.resolve();
 
 		}).then(data => {
 
@@ -944,7 +998,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 					pass.write(",");
 				}
 
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -1309,58 +1363,8 @@ function importModel(account, model, username, modelSetting, source, data){
 			});
 		}
 
-	}).then(() => {
-
-		resetCorrelationId(account, model);
-
-		modelSetting.status = 'ok';
-		modelSetting.errorReason = undefined;
-
-		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
-		if(source.type === 'toy'){
-			modelSetting.timestamp = new Date();
-		}
-		modelSetting.markModified('errorReason');
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		return modelSetting.save();
-
-	}).then(() => {
-
-		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
-			account,
-			model,
-			username
-		});
-
-		return modelSetting;
-
-	}).catch(err => {
-
-		// import failed for some reason(s)...
-		//mark model failed
-
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
-			account,
-			model,
-			username
-		});
-
-		modelSetting.status = 'failed';
-		modelSetting.errorReason = err;
-		modelSetting.markModified('errorReason');
-		modelSetting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		return Promise.reject(err);
-
 	});
+
 }
 
 function removeModel(account, model, forceRemove){
@@ -1635,7 +1639,11 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
+	setStatus,
+	resetCorrelationId,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
-	setStatus
+	setStatus,
+	importSuccess,
+	importFail
 };

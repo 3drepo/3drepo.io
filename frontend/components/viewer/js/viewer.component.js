@@ -188,7 +188,6 @@
 								event.value.promise
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
-							console.log("highlight - HIGHLIGHT_OBJECTS");
 
 							vm.viewer.highlightObjects(
 								event.value.account,
@@ -201,7 +200,6 @@
 
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 
-							console.log("highlight - clearHighlights");
 							vm.viewer.clearHighlights();
 
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {

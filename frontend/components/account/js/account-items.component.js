@@ -55,7 +55,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			console.log("isMobileDevice", vm.isMobileDevice);
+
 			ViewerService.reset();
 
 			vm.showProgress = true;

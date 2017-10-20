@@ -1,4 +1,9 @@
-#issuesListContainer(ng-switch="vm.toShow", tabindex="0", tdr-focus="true", ng-mousemove="vm.initSetFocus()")
+#issuesListContainer(
+	ng-switch="vm.toShow" 
+	tabindex="0"
+	tdr-focus="true"
+	ng-mousemove="vm.initSetFocus()")
+	
 	// List
 	div(ng-switch-when="list")
 		.issueListItem(
@@ -18,7 +23,12 @@
 
 			md-divider
 
-			#issuesListItemEnter(ng-if="issue.selected", ng-click="vm.editIssue(issue)", layout="column", layout-align="center center")
+			#issuesListItemEnter(
+				ng-if="issue.selected"
+				ng-click="vm.editIssue(issue)"
+				layout="column"
+				layout-align="center center")
+				
 				md-icon.angular-material-icons arrow_forward
 
 
