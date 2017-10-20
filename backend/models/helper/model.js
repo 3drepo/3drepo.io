@@ -1365,54 +1365,6 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	});
 
-	/*return ModelSetting.findById({account, model}, model).then(setting => {
-		setting.errorReason = undefined;
-		if(source.type === 'toy'){
-			setting.timestamp = new Date();
-		}
-		setting.markModified('errorReason');
-		ChatEvent.modelStatusChanged(null, account, model, setting);
-		setting.save();
-		return setting;
-	});*/
-
-	/*
-	}).then(() => {
-
-		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
-			account,
-			model,
-			username
-		});
-
-		return modelSetting;
-
-	}).catch(err => {
-
-		// import failed for some reason(s)...
-		//mark model failed
-
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
-			account,
-			model,
-			username
-		});
-
-		modelSetting.status = 'failed';
-		modelSetting.errorReason = err;
-		modelSetting.markModified('errorReason');
-		modelSetting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		return Promise.reject(err);
-
-	});
-	*/
 }
 
 function removeModel(account, model, forceRemove){
