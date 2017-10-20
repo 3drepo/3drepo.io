@@ -212,8 +212,7 @@
 				rgbColour = IssuesService.hexToRgb(roleColour);
 				pinColours.push(rgbColour);
 			}
-		}
-
+		};
 
 		/*
 		 * New issue must have type and non-empty title
@@ -321,7 +320,7 @@
 			/*
 			 * Watch for status changes for all issues
 			 */ 	
-			NotificationService.subscribe.issueChanged(vm.account, vm.model, handleIssueChanged);
+			NotificationService.subscribe.issueChanged(vm.account, vm.model, vm.handleIssueChanged);
 
 			// Do the same for all subModels
 			if(vm.subModels){
@@ -337,7 +336,7 @@
 					NotificationService.subscribe.issueChanged(
 						subModel.database,
 						subModel.model, 
-						handleIssueChanged
+						vm.handleIssueChanged
 					);
 				});
 			}
