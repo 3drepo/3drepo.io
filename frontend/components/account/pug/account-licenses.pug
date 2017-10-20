@@ -6,7 +6,7 @@
 
 		md-tabs(md-dynamic-height, md-border-bottom, ng-if="true") 
 
-			md-tab(label="Licences")
+			md-tab(label="Licences" id="licenceLicences")
 				.userContent
 					div.loadingText(
 						layout-align="center center"
@@ -93,7 +93,7 @@
 										=" "
 										a(href="", ng-click="vm.goToBillingPage()") Billing Page
 			// Add a job
-			md-tab(label="Jobs")
+			md-tab(label="Jobs" id="licenceJobs")
 				.userContent
 					md-content#accountJobList
 						md-subheader Add a job
@@ -106,7 +106,9 @@
 										type="text"
 										ng-model="vm.newJob")
 							.md-list-item(flex="50")
-								md-button.md-raised.md-accent(ng-click="vm.addJob()") Add
+								md-button.md-raised.md-accent(
+									id="addJob"
+									ng-click="vm.addJob()") Add
 						div(layout="row" ng-if="vm.addJobMessage")
 							p {{vm.addJobMessage}}
 						
@@ -154,6 +156,5 @@
 									md-button.md-icon-button.md-accent(ng-click="vm.removeJob($index)", aria-label="Close dialog")
 										md-icon.angular-material-icons remove_circle
 							
-						p#accountLicenseMessage {{vm.deleteJobMessage}}
 						br
 						

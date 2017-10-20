@@ -1,4 +1,4 @@
-import { USER, browser, by, element , env, expect, login, logout} from "./config/imports";
+import { USER, browser, by, element , env, expect, login, logout, hasClass} from "./config/imports";
 
 describe("Licences page ", function() {
 
@@ -12,7 +12,7 @@ describe("Licences page ", function() {
 		logout();
 	});
 
-	describe("should load the licences page content ", () => {
+	describe("should load the licences page content", () => {
 
 		it("when we click on the licences page", () => {
 
@@ -55,5 +55,26 @@ describe("Licences page ", function() {
 
 	});
 	
+
+	describe("it should allow you to jobs tab", () => {
+		
+		it("correctly", () => {
+			const licenseTab = element(by.id(".licenceJobs"));
+			expect(licenseTab.isDisplayed()).to.eventually.equal(true);
+			licenseTab.click();
+			expect(hasClass(licenseTab, "md-active")).to.eventually.equal(true);
+		});	
+
+		it("and have a add input", () => {
+			const addJobInput = element(by.id("addJobInput"));
+			expect(addJobInput.isDisplayed()).to.eventually.equal(true);
+		});	
+
+		it("and have a add button", () => {
+			const addJobButton = element(by.id("addJob"));
+			expect(addJobButton.isDisplayed()).to.eventually.equal(true);
+		});	
+
+	});
 
 });
