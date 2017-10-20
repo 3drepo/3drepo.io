@@ -61,7 +61,7 @@ describe("Licences page", function() {
 		const tabs = element.all(by.tagName("md-tab-item"));
 		
 		it("correctly", () => {
-			const jobsTab = element(tabs.get(1));
+			const jobsTab = tabs.get(1);
 			expect(jobsTab.isDisplayed()).to.eventually.equal(true);
 			jobsTab.click();
 			expect(hasClass(jobsTab, "md-active")).to.eventually.equal(true);
