@@ -181,7 +181,7 @@ describe('Implied permission::', function () {
 					return q.channel.publish(
 						q.callbackQName,
 						appId,
-						new Buffer(JSON.stringify({ value: 0})), 
+						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
 						{
 							correlationId: corId, 
 							persistent: true 
@@ -485,7 +485,7 @@ describe('Implied permission::', function () {
 					return q.channel.publish(
 						q.callbackQName,
 						appId,
-						new Buffer(JSON.stringify({ value: 0})), 
+						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
 						{
 							correlationId: corId, 
 							persistent: true 
