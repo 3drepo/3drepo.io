@@ -31,7 +31,7 @@ describe("Licences page ", function() {
 
 	describe("it should have two tabs", () => {
 
-		const tabs = element.all(by.tagName("md-tabs-item"));
+		const tabs = element.all(by.tagName("md-tab-item"));
 
 		it("including a licences tab", () => {
 			expect(tabs.get(0).isDisplayed()).to.eventually.equal(true);
