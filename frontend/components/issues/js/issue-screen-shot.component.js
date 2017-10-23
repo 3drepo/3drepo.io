@@ -32,9 +32,9 @@
 			}
 		);
 
-	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService"];
+	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService", "ViewerService"];
 
-	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
+	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService, ViewerService) {
 		var vm = this,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
@@ -82,7 +82,7 @@
 					vm.actionsPointerEvents = "auto";
 
 					// Get the screen shot
-					EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: screenShotPromise});
+					ViewerService.getScreenshot(screenShotPromise);
 					
 					screenShotPromise.promise.then(function(screenShot) {
 						vm.screenShotUse = screenShot;

@@ -45,7 +45,10 @@
 			reset : reset,
 			fetchModelProperties : fetchModelProperties,
 			activateMeasure: activateMeasure,
-			disableMeasure: disableMeasure
+			disableMeasure: disableMeasure,
+			getScreenshot: getScreenshot,
+			getExtent: getExtent,
+			setNavMode: setNavMode
 		};
 	
 		return service;
@@ -70,6 +73,20 @@
 			} 
 
 			return viewer;
+		}
+
+		function getScreenshot(promise) {
+			if (promise) {
+				viewer.getScreenshot(promise);
+			}
+		}
+
+		function getExtent() {
+			viewer.goToExtent();
+		}
+
+		function setNavMode(mode) {
+			viewer.setNavMode(mode);
 		}
 
 		function unityInserted() {

@@ -608,8 +608,7 @@
 				viewpointPromise.resolve(vm.commentViewpoint);
 			} else {
 				// Get the viewpoint
-				EventService.send(
-					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.account, model: vm.model}
 				);
 			}
@@ -648,10 +647,7 @@
 
 			} else {
 				// Get a screen shot if not already created
-				EventService.send(
-					EventService.EVENT.VIEWER.GET_SCREENSHOT, 
-					{promise: screenShotPromise}
-				);
+				ViewerService.getScreenshot(screenShotPromise);
 
 				screenShotPromise.promise.then(function (screenShot) {
 					if (objectInfo.highlightedNodes.length > 0) {
@@ -797,8 +793,8 @@
 					});
 				
 			} else {
-				EventService.send(
-					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+
+				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
 				);
 				
@@ -960,8 +956,7 @@
 
 				// Get the viewpoint and add the screen shot to it
 				// Remove base64 header text from screen shot
-				EventService.send(
-					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT,
+				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
 				);
 
@@ -969,8 +964,7 @@
 				// Description
 				vm.descriptionThumbnail = data.screenShot;
 				
-				EventService.send(
-					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
+				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.account, model: vm.model}
 				);
 			}

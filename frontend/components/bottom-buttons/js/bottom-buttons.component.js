@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	BottomButtonsCtrl.$inject = ["EventService"];
+	BottomButtonsCtrl.$inject = ["ViewerService"];
 
-	function BottomButtonsCtrl (EventService) {
+	function BottomButtonsCtrl (ViewerService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -68,7 +68,7 @@
 		};
 
 		vm.extent = function () {
-			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
+			ViewerService.goToExtent();
 		};
 
 		vm.setViewingOption = function (type) {
@@ -76,10 +76,7 @@
 			if (type !== undefined) {
 				// Set the viewing mode
 				vm.selectedMode = type;
-				EventService.send(EventService.EVENT.VIEWER.SET_NAV_MODE,
-					{mode: vm.viewingOptions[type].mode}
-				);
-
+				ViewerService.setNavMode(vm.viewingOptions[type].mode);
 				vm.showViewingOptionButtons = false;
 			} else {
 				vm.showViewingOptionButtons = !vm.showViewingOptionButtons;

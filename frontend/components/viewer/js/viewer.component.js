@@ -138,15 +138,7 @@
 
 					ViewerService.initialised.promise.then(function() {
 
-						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
-							vm.viewer.showAll();
-						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
-							vm.viewer.switchFullScreen(null);
-						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							vm.oculus.switchVR();
-						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
-							vm.viewer.onViewpointChanged(event.value.callback);
-						} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+						if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 							if (event.value.account === vm.account && event.value.model === vm.model) {
 								vm.viewer.updateSettings(event.value.settings);
 								//vm.mapTile && vm.mapTile.updateSettings(event.value.settings);
@@ -228,18 +220,6 @@
 								console.error("Setting the camera errored because model failed to load: ", error);
 							});
 							
-						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
-							if (angular.isDefined(event.value.promise)) {
-								vm.viewer.getCurrentViewpointInfo(event.value.account, event.value.model, event.value.promise);
-							}
-						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
-							if (angular.isDefined(event.value.promise)) {
-								vm.viewer.getScreenshot(event.value.promise);
-							}
-						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.viewer.setNavMode(event.value.mode);
-						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							vm.viewer.setMeasureMode(event.value);
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							vm.viewer.setMultiSelectMode(event.value);
 						} 
