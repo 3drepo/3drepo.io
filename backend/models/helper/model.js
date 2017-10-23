@@ -1605,7 +1605,7 @@ function getMetadata(account, model, id){
 }
 
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
+const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
 const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',

@@ -44,7 +44,7 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-required="required"
 					ng-keypress="vm.saveNewModel($event)"
 					ng-pattern="vm.modelRegExp" 
-					maxlength=20)
+					maxlength=120)
 				.inputHint Letters, numbers, hyphen and underscore only.
 
 			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
@@ -78,7 +78,7 @@ md-dialog.newModelDialog(aria-label="New model")
 				input(
 					ng-if="vm.teamspaceAndProjectSelected()"
 					placeholder="Revision name (optional)"
-					maxlength=20
+					maxlength=120
 					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 

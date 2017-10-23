@@ -576,7 +576,7 @@
 
 			if (vm.teamspaceAndProjectSelected() && !vm.newModelData.name) {
 				vm.showNewModelErrorMessage = true;
-				vm.newModelErrorMessage = "Model name isn't between 3-20 characters, or has invalid characters";
+				vm.newModelErrorMessage = "Model name isn't between 1-120 characters, or has invalid characters";
 			} else {
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";
