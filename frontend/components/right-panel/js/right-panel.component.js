@@ -41,27 +41,9 @@
 			vm.measureActive = false;
 			vm.measureDisabled = false;
 
-			vm.addIssueMode = null;
-			
 			vm.metaData = false;
 			vm.showPanel = true;
-			vm.issueButtons = {
-				// "scribble": {
-				//     label: "Scribble",
-				//     icon: "border_color",
-				//     background: ""
-				// },
-				// "erase": {
-				//     label: "Erase",
-				//     faIcon: "fa fa-eraser",
-				//     background: ""
-				// },
-				// "pin": {
-				//     label: "Pin",
-				//     icon: "pin_drop",
-				//     background: ""
-				// }
-			};
+			
 			vm.measureBackground = "";
 			vm.metaBackground = "";
 
@@ -86,7 +68,6 @@
 
 			}
 		};
-
 
 		$scope.$watch(function(){
 			return MeasureService;
@@ -117,42 +98,10 @@
          * Setup event watch
          */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
-				if (vm.addIssueMode !== event.value) {
-					vm.issueButtons[vm.addIssueMode].background = "";
-					vm.addIssueMode = event.value;
-					vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
-				}
-			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+			if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
 			} 
 		});
-
-		/**
-         * Set up adding an issue with scribble
-         */
-		vm.issueButtonClick = function (buttonType) {
-			
-			// Turn off measure mode
-			if (vm.measureActive) {
-				MeasureService.deactivateMeasure();
-			}
-
-			if (vm.addIssueMode === null) {
-				vm.addIssueMode = buttonType;
-				vm.issueButtons[buttonType].background = vm.highlightBackground;
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
-			} else if (vm.addIssueMode === buttonType) {
-				vm.addIssueMode = null;
-				vm.issueButtons[buttonType].background = "";
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
-			} else {
-				vm.issueButtons[vm.addIssueMode].background = "";
-				vm.addIssueMode = buttonType;
-				vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
-				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
-			} 
-		};
 
 
 		/**
@@ -163,11 +112,6 @@
 			// If not measure mode and metadata enabled
 			if (!vm.measureActive && vm.metaData) {
 				vm.toggleAutoMetaData();
-			}
-
-			//Turn off issue mode
-			if (vm.addIssueMode !== null) {
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 			}
 
 			MeasureService.toggleMeasure();
@@ -187,5 +131,12 @@
 			vm.metaBackground = vm.metaData ? vm.highlightBackground : "";
 			EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
 		};
+
+		vm.$onDestroy = function () {
+			vm.metaBackground = "";
+			vm.measureBackground = "";
+			MeasureService.deactivateMeasure();
+		};
+
 	}
 }());

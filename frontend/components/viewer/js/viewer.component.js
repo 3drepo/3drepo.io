@@ -240,12 +240,6 @@
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 							vm.viewer.setMeasureMode(event.value);
-						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-							$location.path("/" + vm.account + "/" + vm.model).search({
-								at: event.value.at,
-								view: event.value.view,
-								up: event.value.up
-							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							vm.viewer.setMultiSelectMode(event.value);
 						} 
