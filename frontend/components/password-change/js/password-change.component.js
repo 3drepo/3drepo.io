@@ -30,9 +30,9 @@
 			controllerAs: "vm"
 		});
 
-	PasswordChangeCtrl.$inject = ["$scope", "APIService", "EventService"];
+	PasswordChangeCtrl.$inject = ["$scope", "APIService", "StateManager"];
 
-	function PasswordChangeCtrl ($scope, APIService, EventService) {
+	function PasswordChangeCtrl ($scope, APIService, StateManager) {
 		var vm = this;
         
 		/*
@@ -71,7 +71,7 @@
          * Take the user back to the login page
          */
 		vm.goToLoginPage = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 
 		/**

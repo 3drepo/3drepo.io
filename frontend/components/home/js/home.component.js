@@ -335,7 +335,7 @@
 
 		vm.home = function () {
 			ViewerService.reset();
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 
 		/**
@@ -383,22 +383,8 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
 
-				} else if (event.type === EventService.EVENT.SHOW_TEAMSPACES) {
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-					$location.path(AuthService.getUsername());
 				} else if (event.type === EventService.EVENT.GO_HOME) {
 
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-
-					// TODO: Do this properly using state manager
-					var path = "/";
-					//console.log("AuthService.getUsername", AuthService.getUsername());
-					if (AuthService.isLoggedIn() && AuthService.getUsername()) {
-						path = "/" + AuthService.getUsername();
-						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
-					}
-
-					$location.path(path);
 					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";

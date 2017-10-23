@@ -27,13 +27,13 @@
 			controllerAs: "vm"
 		});
 
-	TermsCtrl.$inject = ["EventService"];
+	TermsCtrl.$inject = ["StateManager"];
 
-	function TermsCtrl (EventService) {
+	function TermsCtrl (StateManager) {
 		var vm = this;
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 	}
 }());

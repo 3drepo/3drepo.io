@@ -26,9 +26,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountMenuCtrl.$inject = ["AuthService", "EventService", "ViewerService"];
+	AccountMenuCtrl.$inject = ["AuthService", "$location", "ViewerService"];
 
-	function AccountMenuCtrl (AuthService, EventService, ViewerService) {
+	function AccountMenuCtrl (AuthService, $location, ViewerService) {
 		var vm = this;
 
 
@@ -51,7 +51,7 @@
 		 */
 		vm.showTeamspaces = function () {
 			ViewerService.reset();
-			EventService.send(EventService.EVENT.SHOW_TEAMSPACES);
+			$location.path(AuthService.getUsername());
 		};
 
 		/**
