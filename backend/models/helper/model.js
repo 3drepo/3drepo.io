@@ -547,7 +547,9 @@ function getIdMap(account, model, branch, rev, username){
 						idMap: obj.idMaps.idMap,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -579,7 +581,7 @@ function getIdMap(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdMap.idMap)
+			if (subIdMap && subIdMap.idMap)
 			{
 				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
 			}
@@ -747,7 +749,9 @@ function getTreePath(account, model, branch, rev, username){
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -779,7 +783,7 @@ function getTreePath(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subTreePath.idToPath)
+			if (subTreePath && subTreePath.idToPath)
 			{
 				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
 			}
@@ -848,7 +852,9 @@ function getUnityAssets(account, model, branch, rev, username){
 						models: obj.models,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -873,7 +879,7 @@ function getUnityAssets(account, model, branch, rev, username){
 		}
 
 		subAssets.forEach(subAsset => {
-			if (subAsset.models)
+			if (subAsset && subAsset.models)
 			{
 				models = models.concat(subAsset.models);
 			}
