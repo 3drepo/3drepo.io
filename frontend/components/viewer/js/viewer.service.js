@@ -92,8 +92,7 @@
 		function callInit() {
 	
 			var showAll = true;
-			
-			console.log("apiUrls", ClientConfigService.apiUrls["all"]);
+
 			viewer
 				.init({
 					showAll : showAll,
