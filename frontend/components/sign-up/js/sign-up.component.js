@@ -290,6 +290,11 @@
 					if (vm.useReCAPTCHA) {
 						grecaptcha.reset(); // reset reCaptcha
 					}
+				})
+				.catch(function(response){
+					console.error(response);
+					vm.registering = false;
+					vm.registerErrorMessage = response.data.message;
 				});
 		}
 
