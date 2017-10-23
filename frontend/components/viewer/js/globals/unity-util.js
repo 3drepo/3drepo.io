@@ -414,7 +414,7 @@ var UnityUtil;
 	}
 
 	UnityUtil.prototype.setAPIHost = function(hostname) {
-		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
+		toUnity("SetAPIHost", LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	};
 
 	UnityUtil.prototype.setNavigation = function(navMode) {

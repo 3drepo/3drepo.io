@@ -92,10 +92,14 @@
 		function callInit() {
 	
 			var showAll = true;
+			
+			console.log("apiUrls", ClientConfigService.apiUrls["all"]);
 			viewer
 				.init({
 					showAll : showAll,
-					getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
+					getAPI: {
+						hostNames:  ClientConfigService.apiUrls["all"]
+					}
 				})
 				.catch(function(error){
 					console.error("Error creating Viewer Directive: ", error);

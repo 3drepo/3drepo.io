@@ -24,36 +24,30 @@ function ClientConfigService() {
 
 	return ClientConfig;
 
-	/*******************************************************************************
-	 * Round robin API ClientConfiguration
-	 * @param {Object} variable - variable to coalesce
-	 * @param {Object} value - value to return if object is null or undefined
-	 *******************************************************************************/
-	function createRoundRobinAlgorithm() {
 
+	function createRoundRobinAlgorithm() {
+		
 		var roundRobin = {
 			apiUrls : Config.apiUrls,
-			apiUrlCounter: {}
+			apiUrlCounter: {},
+			apiUrl : function(type, path) {
+				var typeFunctions = this.apiUrls[type];
+				var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+		
+				this.apiUrlCounter[type] += 1;
+		
+				return this.apiUrls[type][functionIndex] + "/" + path;
+			}
 		};
-
+	
 		for (var k in Config.apiUrls) {
 			if(Config.apiUrls.hasOwnProperty(k)){
 				roundRobin.apiUrlCounter[k] = 0;
 			}
 		}
 		
-		// self variable will be filled in by frontend
-		roundRobin.apiUrl = function(type, path) {
-			var typeFunctions = this.apiUrls[type];
-			var functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-			this.apiUrlCounter[type] += 1;
-
-			return this.apiUrls[type][functionIndex](path);
-		};
-
 		return roundRobin;
-
+	
 	}
 
 }
