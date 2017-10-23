@@ -43,7 +43,9 @@
 			currentModel : currentModel,
 			initialised : initialised,
 			reset : reset,
-			fetchModelProperties : fetchModelProperties
+			fetchModelProperties : fetchModelProperties,
+			activateMeasure: activateMeasure,
+			disableMeasure: disableMeasure
 		};
 	
 		return service;
@@ -52,6 +54,7 @@
 
 		function reset() {
 			if (viewer) {
+				disableMeasure();
 				viewer.reset();
 			}
 		}
@@ -87,6 +90,14 @@
 					.then(callInit);
 			}
 
+		}
+
+		function activateMeasure() {
+			viewer.setMeasureMode(true);
+		}
+
+		function disableMeasure() {
+			viewer.setMeasureMode(false);
 		}
 
 		function callInit() {
