@@ -53,7 +53,8 @@ describe('Model Helpers', function(){
 			expect(ModelHelper.modelNameRegExp).to.have.exist;
 		});
 
-		it('test model name format should succee', function(){
+		it('test model name format should succeed', function(){
+			expect(ModelHelper.modelNameRegExp.test('')).to.be.false;
 			expect(ModelHelper.modelNameRegExp.test('abc')).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test('123-4a')).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test('123_4a')).to.be.true;
@@ -62,7 +63,10 @@ describe('Model Helpers', function(){
 			expect(ModelHelper.modelNameRegExp.test('aasa[')).to.be.false;
 			expect(ModelHelper.modelNameRegExp.test('aasa/')).to.be.false;
 			expect(ModelHelper.modelNameRegExp.test('aasa%')).to.be.false;
-			expect(ModelHelper.modelNameRegExp.test('aaaaaaaaaaaaaaaaaaaaa')).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test('aaaaaaaaaaaaaaaaaaaaa')).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test(
+				'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+			)).to.be.false;
 		});
 	});
 
