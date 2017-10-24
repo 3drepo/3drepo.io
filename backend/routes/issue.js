@@ -132,7 +132,7 @@ function updateIssue(req, res, next){
 				const job = sub && sub.job;
 				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
 				const isAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-				
+
 				const canCloseIssue = (issue.creator_role === job && issue.creator_role && job) || 
 					req.session.user.username === issue.owner ||
 					isAdmin;

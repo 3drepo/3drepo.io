@@ -43,7 +43,7 @@
 
 		var service = {
 			init : init,
-			setCanUpdateStatus : setCanUpdateStatus,
+			setCanUpdateIssue : setCanUpdateIssue,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -86,19 +86,34 @@
 			return initPromise.promise;
 		}
 
-		function setCanUpdateStatus(issueData, issueId, permissions) {
-			var hasPermission = AuthService.hasPermission(
-				ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+
+		function setCanUpdateIssue(issueData, userJob, permissions) {
+			
+			// If they are the owner
+			var isOwner = (AuthService.getUsername() === issueData.owner);
+
+			// Check that the jobs match
+			var jobsMatch = (userJob._id && 
+							issueData.creator_role && 
+							userJob._id === issueData.creator_role);
+
+			// And also that they can also at least comment ('edit' so to speak)
+			jobsMatch = jobsMatch && AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
 				permissions
 			);
 
-			if(!hasPermission){
-				return false;
-			}
+			// Or alternatively they just have full permissions
+			var hasPermission = AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+				permissions
+			);
 
-			var isOwner = (AuthService.getUsername() === issueData.owner);
-			var hasRole = issueData.assigned_roles.indexOf(issueId) !== -1;
-			return isOwner || hasRole;
+			console.log("Permssions:", ClientConfigService.permissions);
+
+			console.log("Issue", isOwner, jobsMatch, hasPermission);
+
+			return isOwner || jobsMatch || hasPermission;
 
 		}
 
