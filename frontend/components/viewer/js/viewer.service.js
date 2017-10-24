@@ -45,12 +45,21 @@
 			reset : reset,
 			fetchModelProperties : fetchModelProperties,
 			activateMeasure: activateMeasure,
-			disableMeasure: disableMeasure
+			disableMeasure: disableMeasure,
+			getModelInfo: getModelInfo
 		};
 	
 		return service;
 	
 		///////////////
+
+
+		function getModelInfo(account, model) {
+			
+			var url = account + "/" + model + ".json";
+
+			return APIService.get(url);
+		}
 
 		function reset() {
 			if (viewer) {
