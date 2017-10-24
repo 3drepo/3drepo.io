@@ -199,6 +199,10 @@
 				var legal = vm.pageCheck(newState, vm.legalPages);
 				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
 
+				console.log("legal", legal);
+				console.log("loggedOut", loggedOut);
+				console.log(newState);
+
 				if (legal) {
 
 					vm.isLegalPage = true;
@@ -231,6 +235,16 @@
 					vm.page = "";
 					$location.search({}); // Reset query parameters
 					$location.path("/" + AuthService.getUsername());
+				} else if (
+					!AuthService.getUsername() &&
+					!legal &&
+					!loggedOut
+				) {
+
+					// Login page or none existant page
+					
+					vm.isLoggedOutPage = false;
+					vm.page = "";
 				}
 
 			}

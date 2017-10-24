@@ -86,7 +86,9 @@
 				.then(function(json) {
 
 					var mainTree = json.data.mainTree;
-					
+
+					// TODO: This needs sorting out. 
+				
 					//replace model id with model name in the tree if it is a federate model
 					if(setting.federate){
 						mainTree.nodes.children.forEach(function(child){

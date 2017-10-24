@@ -292,12 +292,10 @@
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				vm.units = event.value.settings.unit;
-				if(vm.units === "mm")
-				{
+				vm.units = event.value.properties.unit;
+				if(vm.units === "mm") {
 					vm.precision = 0;
-				}
-				else{
+				} else{
 					vm.precison = 3;
 				}
 
