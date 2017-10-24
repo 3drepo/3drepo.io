@@ -188,7 +188,6 @@
 								event.value.promise
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
-							console.log("highlight - HIGHLIGHT_OBJECTS");
 
 							vm.viewer.highlightObjects(
 								event.value.account,
@@ -201,7 +200,6 @@
 
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 
-							console.log("highlight - clearHighlights");
 							vm.viewer.clearHighlights();
 
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
@@ -242,12 +240,6 @@
 							vm.viewer.setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 							vm.viewer.setMeasureMode(event.value);
-						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-							$location.path("/" + vm.account + "/" + vm.model).search({
-								at: event.value.at,
-								view: event.value.view,
-								up: event.value.up
-							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
 							vm.viewer.setMultiSelectMode(event.value);
 						} 

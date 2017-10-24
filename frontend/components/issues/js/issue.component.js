@@ -47,14 +47,14 @@
 		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
-		"APIService"
+		"APIService", "DialogService"
 	];
 
 	function IssueCtrl (
 		$location, $q, $mdDialog, $element, EventService, IssuesService,
 		UtilsService, NotificationService, AuthService, $timeout,
 		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService,
-		ViewerService, APIService
+		ViewerService, APIService, DialogService
 	) {
 		
 		var vm = this;
@@ -386,9 +386,20 @@
 						vm.issueData.status = response.data.issue.status;
 						vm.issueData.assigned_roles = response.data.issue.assigned_roles;
 						IssuesService.updatedIssue = vm.issueData;
-						vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
+						vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
+							vm.issueData, 
+							vm.userJob._id, 
+							vm.modelSettings.permissions
+						);
 
 						commentAreaScrollToBottom();
+					})
+					.catch(function(error) {
+						var content = "We tried to update your issue but it failed. " +
+						"If this continues please message support@3drepo.io.";
+						var escapable = true;
+						console.error(error);
+						DialogService.text("Error Updating Issue", content, escapable);
 					});
 
 
@@ -396,7 +407,6 @@
 					vm.canUpdate = false;
 					vm.canComment = false;
 				} else {
-					console.log("canUpdateIssue");
 					vm.checkCanUpdate();
 					vm.canComment = vm.canUpdate;
 				}
@@ -414,7 +424,7 @@
 			} else {
 				return "Issue closed, comments disabled";
 			}
-		}
+		};
 
 		/**
 		 * Submit - new issue or comment or update issue
@@ -756,6 +766,10 @@
 					);
 				})
 				.catch(function(error){
+					var content = "Something went wrong saving the issue. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Saving Issue", content, escapable);
 					console.error("Something went wrong saving the Issue: ", error);
 				});
 
@@ -777,7 +791,11 @@
 					.then(function (response) {
 						vm.saving = false;
 						afterNewComment(response.data.issue);
+					})
+					.catch(function(error){
+						vm.errorSavingComment(error);
 					});
+				
 			} else {
 				EventService.send(
 					EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, 
@@ -789,6 +807,9 @@
 						.then(function (response) {
 							vm.saving = false;
 							afterNewComment(response.data.issue);
+						})
+						.catch(function(error){
+							vm.errorSavingComment(error);
 						});
 				});
 			}
@@ -798,6 +819,31 @@
 				eventAction: "comment"
 			});
 		}
+
+		vm.errorSavingComment = function(error) {
+			var content = "Something went wrong saving the comment. " +
+			"If this continues please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.text("Error Saving Comment", content, escapable);
+			console.error("Something went wrong saving the issue comment: ", error);
+		};
+
+		vm.errorDeleteComment = function(error) {
+			var content = "Something went wrong deleting the comment. " +
+			"If this continues please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.text("Error Deleting Comment", content, escapable);
+			console.error("Something went wrong deleting the issue comment: ", error);
+		};
+
+		vm.errorSavingScreemshot = function(error) {
+			var content = "Something went wrong saving the screenshot. " +
+			"If this continues please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.text("Error Saving Screenshot", content, escapable);
+			console.error("Something went wrong saving the screenshot: ", error);
+		};
+
 
 		/**
 		 * Process after new comment saved
@@ -858,6 +904,9 @@
 			IssuesService.deleteComment(vm.issueData, index)
 				.then(function() {
 					vm.issueData.comments.splice(index, 1);
+				})
+				.catch(function(error){
+					vm.errorDeleteComment(error);
 				});
 			AnalyticService.sendEvent({
 				eventCategory: "Issue",
@@ -930,7 +979,7 @@
 				vm.commentViewpoint = viewpoint;
 				vm.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
 			}).catch(function(error){
-				console.error("Screenshot request failed: ", error);
+				vm.errorSavingScreemshot(error);
 			});
 
 			vm.setContentHeight();
@@ -1027,6 +1076,29 @@
 		}
 
 
+		vm.handleIssueChange = function(issue) {
+
+			console.log("rt - issueChanged");
+
+			vm.issueData.topic_type = issue.topic_type;
+			vm.issueData.desc = issue.desc;
+			vm.issueData.priority = issue.priority;
+			vm.issueData.status = issue.status;
+			vm.issueData.assigned_roles = issue.assigned_roles;
+
+			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
+			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
+			
+			vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
+				vm.issueData, 
+				vm.userJob._id, 
+				vm.modelSettings.permissions
+			);
+
+			$scope.$apply();
+
+		};
+
 		vm.startNotification = function() {
 
 			if(vm.data && !vm.notificationStarted){
@@ -1036,26 +1108,13 @@
 				/*
 				* Watch for issue change
 				*/
-				NotificationService.subscribe.issueChanged(vm.data.account, vm.data.model, vm.data._id, function(issue){
-					
-					vm.issueData.topic_type = issue.topic_type;
-					vm.issueData.desc = issue.desc;
-					vm.issueData.priority = issue.priority;
-					vm.issueData.status = issue.status;
-					vm.issueData.assigned_roles = issue.assigned_roles;
-
-					vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
-					
-					vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
-						vm.issueData, 
-						vm.userJob._id, 
-						vm.modelSettings.permissions
-					);
-
-					$scope.$apply();
-
-				});
+				console.log("rt - issue", vm.data.account, vm.data.model, vm.data._id)
+				NotificationService.subscribe.issueChanged(
+					vm.data.account, 
+					vm.data.model, 
+					vm.data._id, 
+					vm.handleIssueChange
+				);
 
 				/*
 				* Watch for new comments

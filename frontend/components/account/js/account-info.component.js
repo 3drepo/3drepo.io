@@ -48,7 +48,7 @@
 				teamspaces: {label: "Teamspaces"},
 				profile: {label: "Profile"},
 				billing: {label: "Billing"},
-				licenses: {label: "Licences"},
+				licenses: {label: "Licences & Jobs"},
 				assign: {label: "Assign Permissions" }
 			};
 			vm.imageLoaded = false;

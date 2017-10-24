@@ -26,6 +26,7 @@
 	const utils = require("../utils");
 
 	router.post("/jobs", middlewares.job.canCreate, createJob);
+	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
 	router.get("/jobs", middlewares.job.canView, listJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
@@ -39,6 +40,29 @@
 			}
 			
 			return user.customData.jobs.add({
+				_id: req.body._id,
+				color: req.body.color
+			});
+
+		}).then(user => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.jobs);
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+		
+	}
+
+	function updateJob(req, res, next){
+		
+		User.findByUserName(req.params.account).then(user => {
+
+			if(!user){
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+			
+			return user.customData.jobs.update({
 				_id: req.body._id,
 				color: req.body.color
 			});

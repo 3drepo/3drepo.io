@@ -30,32 +30,59 @@
 			controllerAs: "vm"
 		});
 	
-	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager", "APIService"];
+	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager", "APIService" ,"DialogService"];
 
-	function AccountLicensesCtrl($scope, UtilsService, StateManager, APIService) {
+	function AccountLicensesCtrl($scope, UtilsService, StateManager, APIService, DialogService) {
 		var vm = this;
 
 		vm.$onInit = function() {
 			vm.promise = null;
 			vm.jobs = [];
-			APIService.get(vm.account + "/subscriptions").then(function(res){
-				vm.subscriptions = res.data;
-			});
-			APIService.get(vm.account + "/jobs").then(function(data){
-				vm.jobs = data.data;
-			});
+			APIService.get(vm.account + "/subscriptions")
+				.then(function(response){
+					vm.subscriptions = response.data;
+					vm.initSubscriptions();
+				})
+				.catch(function(error){
+					var content = "Something went wrong retriving subscriptions. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Retriving Subscriptions", content, escapable);
+					console.error("Something went wrong retiving the subscriptions: ", error);
+				});
+			
+			APIService.get(vm.account + "/jobs")
+				.then(function(response){
+					vm.jobs = response.data;
+				})
+				.catch(function(error){
+					var content = "Something went wrong retriving jobs. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Retriving Jobs", content, escapable);
+					console.error("Something went wrong retriving the jobs: ", error);
+				});
+
+			vm.jobColors = [
+				"#a6cee3",
+				"#1f78b4",
+				"#213f99",
+				"#b2df8a",
+				"#33a02c",
+				"#fb9a99",
+				"#e31a1c",
+				"#fdbf6f",
+				"#ff7f00",
+				"#e3bd1a",
+				"#ffff99",
+				"#b15928",
+				"#cab2d6",
+				"#6a3d9a"
+			];
 
 		};
 
-		/*
-		 * Watch subscriptions
-		 */
-		$scope.$watch("vm.subscriptions", function () {
-
-			if(!vm.subscriptions){
-				return;
-			}
-
+		vm.initSubscriptions = function() {
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
@@ -77,15 +104,33 @@
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-		});
+		};
 
 		/*
 		 * Watch changes to the new license assignee name
 		 */
 		$scope.$watch("vm.newLicenseAssignee", function (newValue) {
-			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
+
+		vm.updateJob = function(job) {
+
+			var url = vm.account + "/jobs/" + job._id;
+
+			APIService.put(url, job)
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
+					}
+				})
+				.catch(function(error){
+					var content = "Something went wrong saving the job colour. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Saving Colour", content, escapable);
+					console.error("Something went wrong saving the Colour: ", error);
+				});
+		};
 
 		vm.assignJob = function(index){
 			var licence = vm.licenses[index];
@@ -93,11 +138,17 @@
 			var url = vm.account + "/subscriptions/" + licence.id + "/assign";
 
 			APIService.put(url, {job: licence.job})
-				.then(function(res){
-					if (res.status !== 200) {
-
-						vm.addMessage = res.data.message;
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
 					}
+				})
+				.catch(function(error){
+					var content = "Something went wrong assigning the job to user. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Assigning Job", content, escapable);
+					console.error("Something went wrong assigning the job: ", error);
 				});
 		};
 
@@ -107,12 +158,19 @@
 			vm.addJobMessage = null;
 
 			APIService.post(vm.account + "/jobs", job)
-				.then(function(res){
-					if (res.status !== 200) {
-						vm.addJobMessage = res.data.message;
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
 					} else {
 						vm.jobs.push(job);
 					}
+				})
+				.catch(function(error){
+					var content = "Something went wrong saving the new job. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Saving Job", content, escapable);
+					console.error("Something went wrong saving the job: ", error);
 				});
 		};
 
@@ -123,13 +181,17 @@
 			APIService.delete(url, null)
 				.then(function(response){
 					if (response.status !== 200) {
-						vm.deleteJobMessage = response.data.message;
+						throw(response);
 					} else {
 						vm.jobs.splice(index, 1);
 					}
 				})
-				.catch(function(response){
-					vm.deleteJobMessage = response.data.message;
+				.catch(function(error){
+					var content = "Something went wrong removing the job. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Removing Job", content, escapable);
+					console.error("Something went wrong saving the job: ", error);
 				});
 		};
 
@@ -152,21 +214,27 @@
 				APIService.post(
 					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign",
 					{user: vm.newLicenseAssignee}
-				).then(function (response) {
-					if (response.status === 200) {
-						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
-						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
-						vm.unassigned.splice(0, 1);
-						vm.allLicensesAssigned = (vm.unassigned.length === 0);
-						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-						vm.addDisabled = vm.allLicensesAssigned;
-						vm.newLicenseAssignee = "";
-					} else if (response.status === 400) {
-						vm.addMessage = "This user has already been assigned a license";
-					} else if (response.status === 404) {
-						vm.addMessage = "User not found";
-					}
-				});
+				)
+					.then(function (response) {
+						if (response.status === 200) {
+							vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
+							vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
+							vm.unassigned.splice(0, 1);
+							vm.allLicensesAssigned = (vm.unassigned.length === 0);
+							vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+							vm.addDisabled = vm.allLicensesAssigned;
+							vm.newLicenseAssignee = "";
+						} else if (response.status === 400) {
+							throw(response);
+						}
+					})
+					.catch(function(error){
+						var content = "Something went wrong assigning the license. " +
+							"If this continues please message support@3drepo.io.";
+						var escapable = true;
+						DialogService.text("Error Assigning Licence", content, escapable);
+						console.error("Something went wrong assigning the licence: ", error);
+					});
 			}
 		};
 
@@ -200,8 +268,12 @@
 						}
 					}
 				})
-				.catch(function(response) {
-					console.error("Error removing license", response);
+				.catch(function(error){
+					var content = "Something went wrong removing the license. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Removing Licence", content, escapable);
+					console.error("Something went wrong removing the licence: ", error);
 				});
 		};
 
@@ -222,8 +294,12 @@
 						UtilsService.closeDialog();
 					}
 				})
-				.catch(function(response) {
-					console.error("Error removing license", response);
+				.catch(function(error){
+					var content = "Something went wrong removing the license. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Removing Licence", content, escapable);
+					console.error("Something went wrong removing the licence: ", error);
 				});
 		};
 

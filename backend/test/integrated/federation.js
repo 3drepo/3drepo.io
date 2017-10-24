@@ -88,7 +88,7 @@ describe('Federated Model', function () {
 		let corId, appId;
 
 		//fake a response from bouncer;
-		setTimeout(function(){
+		setTimeout(function() {
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
 				expect(info.messageCount).to.equal(1);
 				return q.channel.get(q.workerQName);
@@ -101,7 +101,7 @@ describe('Federated Model', function () {
 				return q.channel.publish(
 					q.callbackQName,
 					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
+					new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
 					{
 						correlationId: corId, 
 						persistent: true 
@@ -110,9 +110,8 @@ describe('Federated Model', function () {
 			}).catch(err => {
 				done(err);
 			});
-
 		}, 1000);
-
+		
 		agent.post(`/${username}/${fedModelName}`)
 		.send({ 
 			desc, 
@@ -154,8 +153,8 @@ describe('Federated Model', function () {
 				done(err);
 			})
 
-			
 		});
+
 	});
 
 
@@ -305,7 +304,7 @@ describe('Federated Model', function () {
 				return q.channel.publish(
 					q.callbackQName,
 					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
+					new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
 					{
 						correlationId: corId, 
 						persistent: true 
@@ -420,7 +419,7 @@ describe('Federated Model', function () {
 				return q.channel.publish(
 					q.callbackQName,
 					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
+					new Buffer(JSON.stringify({ value: 0, database: username, project: fedModelName })), 
 					{
 						correlationId: corId, 
 						persistent: true 
