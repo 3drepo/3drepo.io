@@ -46,7 +46,15 @@ function createRoundRobinAlgorithm(algoConfig) {
 
 	const roundRobin = {
 		apiUrls : algoConfig.apiUrls,
-		apiUrlCounter: {}
+		apiUrlCounter: {},
+		apiUrl : function(type, path) {
+			const typeFunctions = this.apiUrls[type];
+			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
+	
+			this.apiUrlCounter[type] += 1;
+	
+			return this.apiUrls[type][functionIndex] + "/" + path;
+		}
 	};
 
 	for (let k in algoConfig.apiUrls) {
@@ -55,16 +63,6 @@ function createRoundRobinAlgorithm(algoConfig) {
 		}
 	}
 	
-	// self variable will be filled in by frontend
-	roundRobin.apiUrl = function(type, path) {
-		const typeFunctions = this.apiUrls[type];
-		const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-		this.apiUrlCounter[type] += 1;
-
-		return this.apiUrls[type][functionIndex](path);
-	};
-
 	return roundRobin;
 
 }
@@ -95,15 +93,8 @@ let fillInServerDetails = function (serverObject, name, using_ssl, host, default
 	//serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
 	serverObject.url = serverObject.base_url + serverObject.host_dir;
 
-	if (serverObject.use_location) {
-		/*jslint evil: true */
-		serverObject.location_url = new Function("path", "return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
-	} else {
-		/*jslint evil: true */
-		serverObject.location_url = new Function("path", "return '" + serverObject.url + "/' + path;");
-	}
+	serverObject.location_url = serverObject.url;
 
-	//serverObject.location_url = serverObject.location_url.toString();
 };
 
 config.consoleLogging = coalesce(config.consoleLogging, true);
