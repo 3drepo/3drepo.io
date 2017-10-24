@@ -96,7 +96,10 @@
 				callInit();
 			} else {
 				viewer.insertUnityLoader()
-					.then(callInit);
+					.then(callInit)
+					.catch(function(error){
+						console.error("Error inserting Unity script: ", error);
+					});
 			}
 
 		}
