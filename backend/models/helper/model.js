@@ -1610,6 +1610,20 @@ function getMetadata(account, model, id){
 
 }
 
+function isUserAdmin(account, model, user)
+{
+	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	//find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  //This model belongs to a project
+			&& project.permissions.length > 0 //This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
+			);
+	});
+}
+
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
 const acceptedFormat = [
@@ -1627,6 +1641,7 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
+	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
