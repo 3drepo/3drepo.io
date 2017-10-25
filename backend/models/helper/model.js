@@ -137,6 +137,14 @@ function importFail(account, model, errCode) {
 			ChatEvent.modelStatusChanged(null, account, model, setting);
 		})
 	});
+
+	Mailer.sendImportError({
+		account,
+		model,
+		username: account,
+		err: convertToErrorCode(errCode),
+	});
+
 }
 
 /**
