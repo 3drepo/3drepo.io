@@ -37,6 +37,7 @@ describe('Issues', function () {
 	let username = 'issue_username';
 	let password = 'password';
 	let username2 = 'issue_username2';
+	let projectAdminUser = 'imProjectAdmin';
 
 	let email = 'test3drepo_issue@mailinator.com';
 	let model = 'project1';
@@ -770,6 +771,63 @@ describe('Issues', function () {
 			});
 
 		});
+
+
+		describe('user with different role but is a project admin', function(){
+
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+			let issueId;
+			let close = { status: 'closed'};
+
+			before(function(done){
+				async.series([
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username: projectAdminUser, projectAdminUser})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return done(err);
+							
+						});
+					},
+					function(done){
+						agent.post('/logout')
+						.send({})
+						.expect(200, done);
+					},
+					function(done){
+						agent.post('/login')
+						.send({username, password})
+						.expect(200, done);
+					}
+				],done);
+			});
+
+			it('try to close an issue should succee', function(done){
+
+				async.series([
+					function(done){
+						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						.send(close)
+						.expect(200, done);
+					},
+
+				], done);
+			});
+
+		});
+
 
 
 		describe('user with different role and is not an admin ', function(){
