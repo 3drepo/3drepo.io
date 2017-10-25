@@ -347,12 +347,8 @@
 
 					let resData = JSON.parse(rep.content);
 
-					let resErrorCode = parseInt(resData.value);
-
-					let resErrorMessage = resData.message;
-
+					let resErrorCode = resData.value;
 					let resDatabase = resData.database;
-
 					let resProject = resData.project;
 
 					let status = resData.status;
@@ -366,7 +362,7 @@
 							// cclw05 - genFed needs to be merged with importModel
 							defer.resolve(rep);
 						} else if (defer) {
-							ModelHelper.importFail(resDatabase, resProject);
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode);
 							defer.reject(rep);
 						} else {
 							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);

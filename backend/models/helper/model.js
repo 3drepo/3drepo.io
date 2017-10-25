@@ -121,32 +121,22 @@ function importSuccess(account, model) {
 			}
 			setting.markModified('errorReason');
 			ChatEvent.modelStatusChanged(null, account, model, setting);
-			systemLogger.logInfo(`Setting is ${setting}`);
 			setting.save();
 		}
 	});
 
 }
 
-function importFail(account, model) {
+function importFail(account, model, errCode) {
 	ModelSetting.findById({account, model}, model).then(setting => {
-		// import failed for some reason(s)...
 		//mark model failed
-
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
-			account,
-			model,
-			username
-		});
-
 		setting.status = 'failed';
-		setting.errorReason = err;
+		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified('errorReason');
-		setting.save();
+		setting.save().then( () => {
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+		})
 
-		ChatEvent.modelStatusChanged(null, account, model, setting);
 
 		// cclw05 - something wrong with error here
 		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
@@ -165,7 +155,6 @@ function setStatus(account, model, status) {
 		setting.status = status;
 		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
-		systemLogger.logInfo(`Setting is ${setting}`);
 	});
 }
 
@@ -187,7 +176,6 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-		systemLogger.logInfo(`Setting is ${setting}`);
 		return setting.save().then(() => {
 			return correlationId;
 		});;
