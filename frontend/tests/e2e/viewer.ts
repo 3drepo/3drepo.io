@@ -27,7 +27,7 @@ describe("Viewer page", function() {
             const revisions = element(by.tagName("revisions"));
             expect(revisions.isPresent()).to.eventually.equal(true);
             revisions.click();
-            expect(element(by.repeater('rev in vm.revisions'))).to.eventually.equal(true);
+            expect(element(by.repeater('rev in vm.revisions')).isPresent()).to.eventually.equal(true);
             element(by.css('[ng-click="vm.closeDialog()"]')).click();
         });
 
@@ -60,30 +60,35 @@ describe("Viewer page", function() {
 
                 // Shown by default
                 const issues = element(by.id("issuesPanel"));
-                expect(issues.isPresent()).to.eventually.equal(true);
-                issues.click();
+                const issuesButton = element(by.id("treeLeftButton"))
+
+                expect(issuesButton.isPresent()).to.eventually.equal(true);
+                issuesButton.click();
                 expect(issues.isPresent()).to.eventually.equal(true);          
 
             });
 
             it("clicking the tree button should hide and shows issues panel", () => {
 
+                const treeButton = element(by.id("treeLeftButton"));
                 const tree = element(by.id("treePanel"));
+
                 expect(tree.isPresent()).to.eventually.equal(false);
-                tree.click();
+                treeButton.click();
                 expect(tree.isPresent()).to.eventually.equal(true);
-                tree.click();
+                treeButton.click();
                 expect(tree.isPresent()).to.eventually.equal(false);
 
             });
 
             it("clicking the clip button should hide and shows issues panel", () => {
                 
+                const clipButton = element(by.id("clipLeftButton"));
                 const clip = element(by.id("clipPanel"));
                 expect(clip.isPresent()).to.eventually.equal(false);
-                clip.click();
+                clipButton.click();
                 expect(clip.isPresent()).to.eventually.equal(true);
-                clip.click();
+                clipButton.click();
                 expect(clip.isPresent()).to.eventually.equal(false);
 
             });
@@ -91,6 +96,8 @@ describe("Viewer page", function() {
         });
 
         describe("with the right side buttons", () => {
+            const orange = 'rgba(255, 152, 0, 1)';
+            const green = 'rgb(6, 86, 60, 1)';
 
             it("with a metadata button", () => {
                 expect(element(by.id("metadataButton")).isPresent()).to.eventually.equal(true);
@@ -104,16 +111,16 @@ describe("Viewer page", function() {
                 const meta = element(by.id("metadataButton"))
                 const measure = element(by.id("measureButton"))
                 meta.click();
-                expect(meta.getCssValue('background-color')).to.eventually.equal('#FF9800');
-                expect(measure.getCssValue('background-color')).to.eventually.equal('rgb(6,86,60)');
+                expect(meta.getCssValue('background-color')).to.eventually.equal(orange);
+                expect(measure.getCssValue('background-color')).to.eventually.equal(green);
             });
 
             it("click on the measure button and it should be activated", () => {
                 const measure = element(by.id("measureButton"))
                 const meta = element(by.id("metadataButton"))
                 measure.click();
-                expect(meta.getCssValue('background-color')).to.eventually.equal('rgb(6,86,60)');
-                expect(measure.getCssValue('background-color')).to.eventually.equal('#FF9800');
+                expect(meta.getCssValue('background-color')).to.eventually.equal(green);
+                expect(measure.getCssValue('background-color')).to.eventually.equal(orange);
             });
 
         });
