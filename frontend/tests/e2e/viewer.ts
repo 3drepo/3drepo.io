@@ -24,7 +24,11 @@ describe("Viewer page", function() {
         });
 
         it("with the revisions drop down", () => {
-			expect(element(by.tagName("revisions")).isPresent()).to.eventually.equal(true);
+            const revisions = element(by.tagName("revisions"));
+            expect(revisions.isPresent()).to.eventually.equal(true);
+            revisions.click();
+            expect(element(by.repeater('rev in vm.revisions'))).to.eventually.equal(true);
+            element(by.css('[ng-click="vm.closeDialog()"]')).click();
         });
 
         describe("with the left bottom buttons", () => {
@@ -35,12 +39,13 @@ describe("Viewer page", function() {
 
         });
 
-        describe("with the right side buttons", () => {
+        describe("with the right bottom buttons", () => {
 
             it("visible", () => {
                 expect(element(by.id("rightButtons")).isPresent()).to.eventually.equal(true);
             });
 
+           
         });
 
         describe("with the left side buttons", () => {
@@ -49,6 +54,34 @@ describe("Viewer page", function() {
                 expect(element(by.id("buttons")).isPresent()).to.eventually.equal(true);                
             });
             
+        });
+
+        describe("with the right side buttons", () => {
+
+            it("with a metadata button", () => {
+                expect(element(by.id("metadataButton")).isPresent()).to.eventually.equal(true);
+            });
+
+            it("with a measure button", () => {
+                expect(element(by.id("metadataButton")).isPresent()).to.eventually.equal(true);
+            });
+
+            it("click on the metadata button and it should be activated", () => {
+                const meta = element(by.id("metadataButton"))
+                const measure = element(by.id("measureButton"))
+                meta.click();
+                expect(meta.getCssValue('background-color')).to.eventually.equal('#FF9800');
+                expect(measure.getCssValue('background-color')).to.eventually.equal('rgb(6,86,60)');
+            });
+
+            it("click on the measure button and it should be activated", () => {
+                const measure = element(by.id("measureButton"))
+                const meta = element(by.id("metadataButton"))
+                measure.click();
+                expect(meta.getCssValue('background-color')).to.eventually.equal('rgb(6,86,60)');
+                expect(measure.getCssValue('background-color')).to.eventually.equal('#FF9800');
+            });
+
         });
 
         describe("with the issues list", () => {
