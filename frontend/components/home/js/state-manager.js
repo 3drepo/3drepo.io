@@ -17,7 +17,7 @@
 
 (function() {
 	"use strict";
-	console.log("STATE MANAGER")
+
 	angular.module("3drepo")
 		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider",
 			function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
@@ -198,6 +198,19 @@
 					// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 					this.state = {
 						changing: true
+					};
+
+					this.goHome = function() {
+
+						// TODO: Do this properly using state manager
+						var path = "/";
+						//console.log("AuthService.getUsername", AuthService.getUsername());
+						if (AuthService.isLoggedIn() && AuthService.getUsername()) {
+							path = "/" + AuthService.getUsername();
+							//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
+						}
+
+						$location.path(path);
 					};
 
 					this.changedState = {};
