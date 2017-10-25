@@ -109,9 +109,6 @@
 				permissions
 			);
 
-			console.log("Permssions:", ClientConfigService.permissions);
-
-			console.log("Issue", isOwner, jobsMatch, hasPermission);
 
 			return isOwner || jobsMatch || hasPermission;
 
