@@ -77,7 +77,7 @@
 		function handleEvent(event, account, model) {
 
 			initialised.promise.then(function() {
-				console.log("handleEvent", event.type)
+
 				switch(event.type) {
 				
 				case EventService.EVENT.MODEL_SETTINGS_READY:
@@ -106,7 +106,6 @@
 					break;
 
 				case EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-					console.log("clearHighlights");
 					viewer.clearHighlights();
 					break;
 
@@ -181,7 +180,7 @@
 		}
 
 		function highlightObjects(params) {
-			console.log("highlightObjects");
+
 			viewer.highlightObjects(
 				params.account,
 				params.model,
@@ -325,7 +324,7 @@
 		function fetchModelProperties(account, model, branch, revision) {
 			
 			if (account && model) {
-				console.log("branch, revision", branch, revision)
+	
 				if(!branch) {
 					branch = !revision ? "master" : "";
 				}
