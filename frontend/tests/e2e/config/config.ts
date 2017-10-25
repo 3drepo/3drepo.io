@@ -13,7 +13,7 @@ export let config: Config = {
     chromeOptions: {
       args: [
         "--headless", 
-        "--disable-gpu", 
+        //"--disable-gpu", 
         "--window-size=1920x1080"
       ]
     }
