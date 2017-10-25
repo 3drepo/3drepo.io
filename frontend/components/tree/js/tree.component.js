@@ -733,7 +733,7 @@
 		vm.selectNode = function (node) {
 
 			var sameNodeSelected = currentSelectedNode !== null && currentSelectedNode._id === node._id;
-			console.log("Same node selected? ", sameNodeSelected);			
+		
 			if(!MultiSelectService.isMultiMode())
 			{
 				//If it is not multiselect mode, remove all highlights.

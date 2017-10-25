@@ -84,25 +84,6 @@
 			
 			if (validEvent) {
 
-				if (event.type === EventService.EVENT.ISSUES_READY) {
-					
-					// If no model is loaded it is the first time 
-					// the viewer has loaded
-					if (!ViewerService.currentModel.model) {
-						console.debug("Initiating Viewer");
-						ViewerService.initViewer();
-					} else {
-						// Load the model
-						ViewerService.loadViewerModel(
-							vm.account, 
-							vm.model, 
-							vm.branch, 
-							vm.revision
-						);	
-					}
-					
-				}
-
 				if (event.type === EventService.EVENT.VIEWER.UNITY_READY) {
 					// When the viewer and unity are ready send a load model event 
 					// to load the model

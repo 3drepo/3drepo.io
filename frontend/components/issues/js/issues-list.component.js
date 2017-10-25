@@ -448,7 +448,6 @@
 				vm.contentHeight({height: vm.infoHeight});
 			}
 
-			console.log("rt - issuesToShow Updated");
 		}
 
 		/**

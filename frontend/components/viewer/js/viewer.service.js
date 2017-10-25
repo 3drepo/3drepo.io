@@ -45,12 +45,21 @@
 			reset : reset,
 			fetchModelProperties : fetchModelProperties,
 			activateMeasure: activateMeasure,
-			disableMeasure: disableMeasure
+			disableMeasure: disableMeasure,
+			getModelInfo: getModelInfo
 		};
 	
 		return service;
 	
 		///////////////
+
+
+		function getModelInfo(account, model) {
+			
+			var url = account + "/" + model + ".json";
+
+			return APIService.get(url);
+		}
 
 		function reset() {
 			if (viewer) {
@@ -87,7 +96,10 @@
 				callInit();
 			} else {
 				viewer.insertUnityLoader()
-					.then(callInit);
+					.then(callInit)
+					.catch(function(error){
+						console.error("Error inserting Unity script: ", error);
+					});
 			}
 
 		}
@@ -103,10 +115,13 @@
 		function callInit() {
 	
 			var showAll = true;
+
 			viewer
 				.init({
 					showAll : showAll,
-					getAPI: ClientConfigService.apiUrl(ClientConfigService.GET_API, "")
+					getAPI: {
+						hostNames:  ClientConfigService.apiUrls["all"]
+					}
 				})
 				.catch(function(error){
 					console.error("Error creating Viewer Directive: ", error);

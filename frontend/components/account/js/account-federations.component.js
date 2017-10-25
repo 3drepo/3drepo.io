@@ -271,7 +271,6 @@
 
 				})
 				.catch(function(response){
-					console.log("Delete");
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
