@@ -29,7 +29,7 @@ var html = data => `
 	appId: ${data.appId}
 `;
 
-var subject = data.appId? '[System] Toy model import error' : '[System] Model import error';
+var subject = '[System] Model import error';
 
 module.exports =  {
 	html: html,

@@ -133,17 +133,19 @@ function importFail(account, model, errCode) {
 		setting.status = 'failed';
 		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified('errorReason');
-		setting.save().then( () => {
-			ChatEvent.modelStatusChanged(null, account, model, setting);
+		setting.save().then( () => {				
+			ChatEvent.modelStatusChanged(null, account, model, setting);						
 		})
+
+		Mailer.sendImportError({
+			account,
+			model,
+			username: account,
+			err: convertToErrorCode(errCode).message,
+		});
 	});
 
-	Mailer.sendImportError({
-		account,
-		model,
-		username: account,
-		err: convertToErrorCode(errCode),
-	});
+
 
 }
 
