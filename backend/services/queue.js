@@ -347,12 +347,8 @@
 
 					let resData = JSON.parse(rep.content);
 
-					let resErrorCode = parseInt(resData.value);
-
-					let resErrorMessage = resData.message;
-
+					let resErrorCode = resData.value;
 					let resDatabase = resData.database;
-
 					let resProject = resData.project;
 
 					let status = resData.status;
@@ -360,18 +356,20 @@
 					if ("processing" === status) {
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
-						if (defer && resErrorCode === 0) {
+						if (resErrorCode === 0) {
 							ModelHelper.importSuccess(resDatabase, resProject);
 							// cclw05 - this is a temporary workaround!
 							// cclw05 - genFed needs to be merged with importModel
-							defer.resolve(rep);
-						} else if (defer) {
-							ModelHelper.importFail(resDatabase, resProject);
-							defer.reject(rep);
-						} else {
-							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
+							if(defer) {
+								defer.resolve(rep);
+							}
+						} 
+						else {
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode);
+							if(defer){
+								defer.reject(rep);
+							}
 						}
-
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
 				}, { noAck: true });
