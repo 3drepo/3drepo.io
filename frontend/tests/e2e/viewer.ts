@@ -51,7 +51,41 @@ describe("Viewer page", function() {
         describe("with the left side buttons", () => {
 
             it("visible", () => {
-                expect(element(by.id("buttons")).isPresent()).to.eventually.equal(true);                
+                expect(element(by.id("issuesLeftButton")).isPresent()).to.eventually.equal(true); 
+                expect(element(by.id("treeLeftButton")).isPresent()).to.eventually.equal(true); 
+                expect(element(by.id("clipLeftButton")).isPresent()).to.eventually.equal(true); 
+            });
+
+            it("clicking the issues button should hide and shows issues panel", () => {
+
+                // Shown by default
+                const issues = element(by.id("issuesPanel"));
+                expect(issues.isPresent()).to.eventually.equal(true);
+                issues.click();
+                expect(issues.isPresent()).to.eventually.equal(true);          
+
+            });
+
+            it("clicking the tree button should hide and shows issues panel", () => {
+
+                const tree = element(by.id("treePanel"));
+                expect(tree.isPresent()).to.eventually.equal(false);
+                tree.click();
+                expect(tree.isPresent()).to.eventually.equal(true);
+                tree.click();
+                expect(tree.isPresent()).to.eventually.equal(false);
+
+            });
+
+            it("clicking the clip button should hide and shows issues panel", () => {
+                
+                const clip = element(by.id("clipPanel"));
+                expect(clip.isPresent()).to.eventually.equal(false);
+                clip.click();
+                expect(clip.isPresent()).to.eventually.equal(true);
+                clip.click();
+                expect(clip.isPresent()).to.eventually.equal(false);
+
             });
             
         });
@@ -86,9 +120,7 @@ describe("Viewer page", function() {
 
         describe("with the issues list", () => {
 
-            it("visible", () => {
-                expect(element(by.tagName("panel-card")).isPresent()).to.eventually.equal(true);                
-            });
+            
 
         });
     
