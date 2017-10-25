@@ -138,8 +138,6 @@ function updateIssue(req, res, next){
 					const canEditIssue = sameRoleAsOwner || 
 					req.session.user.username === issue.owner || isAdmin || isTSAdmin;
 					
-					console.log(sameRoleAsOwner, req.session.user.username === issue.owner, isAdmin, isTSAdmin);
-
 					if(!canEditIssue){
 						return Promise.reject(responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED);
 					} else {
@@ -156,7 +154,6 @@ function updateIssue(req, res, next){
 		return action;
 
 	}).then(issue => {
-		console.log(issue);
 		let resData = {
 			_id: issueId,
 			account: req.params.account,
