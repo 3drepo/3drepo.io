@@ -789,7 +789,7 @@ describe('Issues', function () {
 					},
 					function(done){
 						agent.post('/login')
-						.send({username: projectAdminUser, projectAdminUser})
+						.send({username: projectAdminUser, password: projectAdminUser})
 						.expect(200, done);
 					},
 					function(done){
