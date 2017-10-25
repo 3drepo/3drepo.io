@@ -144,7 +144,12 @@ function updateIssue(req, res, next){
 						return issue.updateAttrs(data);
 					}
 				}).catch(err =>{
-						return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
+						if(err){
+							return Promise.reject(err);
+						}
+						else{
+							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
+						}
 				});
 
 
