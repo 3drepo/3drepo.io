@@ -56,7 +56,7 @@ describe("Viewer page", function() {
                 expect(element(by.id("clipLeftButton")).isPresent()).to.eventually.equal(true); 
             });
 
-            it("clicking the issues button should hide and show issues panel", () => {
+            it("and clicking the issues button should hide and show issues panel", () => {
 
                 // Shown by default
                 const issues = element(by.id("issuesPanel"));
@@ -68,7 +68,7 @@ describe("Viewer page", function() {
 
             });
 
-            it("clicking the tree button should hide and show issues panel", () => {
+            it("and clicking the tree button should hide and show tree panel", () => {
 
                 const treeButton = element(by.id("treeLeftButton"));
                 const tree = element(by.id("treePanel"));
@@ -81,7 +81,7 @@ describe("Viewer page", function() {
 
             });
 
-            it("clicking the clip button should hide and show issues panel", () => {
+            it("and clicking the clip button should hide and show clip panel", () => {
                 
                 const clipButton = element(by.id("clipLeftButton"));
                 const clip = element(by.id("clipPanel"));
@@ -97,7 +97,7 @@ describe("Viewer page", function() {
 
         describe("with the right side buttons", () => {
             const orange = 'rgba(255, 152, 0, 1)';
-            const green = 'rgb(6, 86, 60, 1)';
+            const green = 'rgba(6, 86, 60, 1)';
 
             it("with a metadata button", () => {
                 expect(element(by.id("metadataButton")).isPresent()).to.eventually.equal(true);
