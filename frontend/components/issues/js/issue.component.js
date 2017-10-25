@@ -175,9 +175,9 @@
 
 		$scope.$watch("vm.modelSettings", function() {
 			if(vm.modelSettings){
+
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
-				vm.canComment = AuthService.hasPermission(ClientConfigService.permissions.PERM_COMMENT_ISSUE, vm.modelSettings.permissions);
-				//convert comment topic_types
+				vm.checkCanComment();
 				vm.convertCommentTopicType();
 			}
 		});
@@ -205,12 +205,6 @@
 			if (vm.data && vm.statuses && vm.statuses.length) {
 
 				vm.startNotification();
-				var disableStatus;
-
-				// Set up statuses
-				disableStatus = !userHasCreatorRole() && !userHasAdminRole() && !(AuthService.getUsername() === vm.data.owner);
-				vm.statuses[0].disabled = disableStatus;
-				vm.statuses[3].disabled = disableStatus;
 
 				vm.issueData = angular.copy(vm.data);
 
@@ -235,8 +229,6 @@
 				// Issue owner or user with same role as issue creator role can update issue
 				vm.checkCanUpdate();
 
-				vm.canUpdateStatus = IssuesService.setCanUpdateStatus(vm.issueData, vm.userJob._id, vm.modelSettings.permissions);
-
 				// Can edit description if no comments
 				vm.canEditDescription = (vm.issueData.comments.length === 0);
 
@@ -253,14 +245,12 @@
 				vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
 				vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
-				if(vm.issueData.status === "closed"){
-					vm.canUpdate = false;
-					vm.canComment = false;
-				} 
+				vm.checkCanComment();
 			
 				vm.convertCommentTopicType();
 				
 			} else {
+				
 				vm.issueData = {
 					priority: "none",
 					status: "open",
@@ -269,14 +259,12 @@
 					viewpoint: {}
 				};
 				vm.canUpdate = true;
-				vm.canUpdateStatus = true;
+
 			}
 		
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			vm.setContentHeight();
 	
-			
-			
 		});
 
 		/**
@@ -332,24 +320,33 @@
 		};
 
 		vm.checkCanUpdate = function() {
-			vm.canUpdate = (AuthService.getUsername() === vm.issueData.owner);
-			if (!vm.canUpdate) {
-				vm.canUpdate = vm.userJob._id && 
-								vm.issueData.creator_role && 
-								(vm.userJob._id === vm.issueData.creator_role);
-			}
-
-			if(!AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, vm.modelSettings.permissions)){
-				vm.canUpdate = false;
-			}
+			vm.canUpdate = IssuesService.setCanUpdateIssue(
+				vm.issueData, 
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
 		};
+
+		vm.checkCanComment = function() {
+			
+			var isNotClosed = vm.issueData && 
+				vm.issueData.status && 
+				vm.issueData.status !== "closed";
+
+			var canComment = AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+				vm.modelSettings.permissions
+			);
+
+			vm.canComment = (canComment || vm.canUpdate) && isNotClosed;
+
+		};
+		
 
 		/**
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
-
-			console.log("statusChange");
 
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
@@ -371,45 +368,35 @@
 				IssuesService.updateIssue(vm.issueData, statusChangeData)
 					.then(function (response) {
 
-						// Add info for new comment
-						var comment = response.data.issue.comments[response.data.issue.comments.length - 1];
-						IssuesService.convertActionCommentToText(comment, vm.topic_types);
-						comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-						vm.issueData.comments.push(comment);
+						if (response) {
 
-						// Update last but one comment in case it was "sealed"
-						if (vm.issueData.comments.length > 1) {
-							vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
+							// Add info for new comment
+							var comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+							IssuesService.convertActionCommentToText(comment, vm.topic_types);
+							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+							vm.issueData.comments.push(comment);
+	
+							// Update last but one comment in case it was "sealed"
+							if (vm.issueData.comments.length > 1) {
+								vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
+							}
+	
+							// The status could have changed due to assigning role
+							vm.issueData.status = response.data.issue.status;
+							vm.issueData.assigned_roles = response.data.issue.assigned_roles;
+							IssuesService.updatedIssue = vm.issueData;
+							vm.checkCanUpdate();
+	
+							commentAreaScrollToBottom();
 						}
-
-						// The status could have changed due to assigning role
-						vm.issueData.status = response.data.issue.status;
-						vm.issueData.assigned_roles = response.data.issue.assigned_roles;
-						IssuesService.updatedIssue = vm.issueData;
-						vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
-							vm.issueData, 
-							vm.userJob._id, 
-							vm.modelSettings.permissions
-						);
-
-						commentAreaScrollToBottom();
+						
 					})
-					.catch(function(error) {
-						var content = "We tried to update your issue but it failed. " +
-						"If this continues please message support@3drepo.io.";
-						var escapable = true;
-						console.error(error);
-						DialogService.text("Error Updating Issue", content, escapable);
-					});
+					.catch(vm.handleUpdateError);
 
 
-				if (vm.issueData.status === "closed"){
-					vm.canUpdate = false;
-					vm.canComment = false;
-				} else {
-					vm.checkCanUpdate();
-					vm.canComment = vm.canUpdate;
-				}
+
+				vm.checkCanUpdate();
+				vm.checkCanComment();
 
 				AnalyticService.sendEvent({
 					eventCategory: "Issue",
@@ -418,11 +405,19 @@
 			}
 		};
 
+		vm.handleUpdateError = function(error) {
+			var content = "We tried to update your issue but it failed. " +
+			"If this continues please message support@3drepo.io.";
+			var escapable = true;
+			console.error(error);
+			DialogService.text("Error Updating Issue", content, escapable);
+		}
+
 		vm.getCommentPlaceholderText = function() {
 			if (vm.canComment) {
-				return "Comment here";
+				return "Write your comment here";
 			} else {
-				return "Issue closed, comments disabled";
+				return "You are not able to comment";
 			}
 		};
 
@@ -556,21 +551,23 @@
 					};
 					IssuesService.updateIssue(vm.issueData, data)
 						.then(function (issueData) {
-							if (issueData && issueData.status && (issueData.status > 400)) {
-								console.error("Something went wrong saving the issue!", issueData);
-							}
-							IssuesService.updatedIssue = vm.issueData;
-							vm.savedDescription = vm.issueData.desc;
+							if (issueData) {
 
-							// Add info for new comment
-							var comment = data.data.issue.comments[issueData.data.issue.comments.length - 1];
-							IssuesService.convertActionCommentToText(comment, vm.topic_types);
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							vm.issueData.comments.push(comment);
+								IssuesService.updatedIssue = vm.issueData;
+								vm.savedDescription = vm.issueData.desc;
+	
+								// Add info for new comment
+								var comment = data.data.issue.comments[issueData.data.issue.comments.length - 1];
+								IssuesService.convertActionCommentToText(comment, vm.topic_types);
+								comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+								vm.issueData.comments.push(comment);
+
+							} else {
+								vm.handleUpdateError(issueData);
+							}
+							
 						})
-						.catch(function(error){
-							console.error("Something went wrong saving the issue!: ", error);
-						});
+						.catch(vm.handleUpdateError);
 				}
 
 			} else {
@@ -1083,11 +1080,7 @@
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 			
-			vm.canUpdateStatus = IssuesService.setCanUpdateStatus(
-				vm.issueData, 
-				vm.userJob._id, 
-				vm.modelSettings.permissions
-			);
+			vm.checkCanUpdate();
 
 			$scope.$apply();
 

@@ -209,6 +209,7 @@
 		MODEL_NAME_TOO_LONG: { message: "Model name cannot be longer than 60 characters", status: 400 },
 		ISSUE_SYSTEM_COMMENT: { message: "Can't edit or remove system comment", status: 400 },
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
+		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
 
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
