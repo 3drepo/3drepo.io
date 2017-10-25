@@ -56,11 +56,11 @@ describe("Viewer page", function() {
                 expect(element(by.id("clipLeftButton")).isPresent()).to.eventually.equal(true); 
             });
 
-            it("clicking the issues button should hide and shows issues panel", () => {
+            it("clicking the issues button should hide and show issues panel", () => {
 
                 // Shown by default
                 const issues = element(by.id("issuesPanel"));
-                const issuesButton = element(by.id("treeLeftButton"))
+                const issuesButton = element(by.id("issuesLeftButton"))
 
                 expect(issuesButton.isPresent()).to.eventually.equal(true);
                 issuesButton.click();
@@ -68,7 +68,7 @@ describe("Viewer page", function() {
 
             });
 
-            it("clicking the tree button should hide and shows issues panel", () => {
+            it("clicking the tree button should hide and show issues panel", () => {
 
                 const treeButton = element(by.id("treeLeftButton"));
                 const tree = element(by.id("treePanel"));
@@ -81,7 +81,7 @@ describe("Viewer page", function() {
 
             });
 
-            it("clicking the clip button should hide and shows issues panel", () => {
+            it("clicking the clip button should hide and show issues panel", () => {
                 
                 const clipButton = element(by.id("clipLeftButton"));
                 const clip = element(by.id("clipPanel"));
@@ -125,12 +125,6 @@ describe("Viewer page", function() {
 
         });
 
-        describe("with the issues list", () => {
-
-            
-
-        });
-    
 	});
 
 });
