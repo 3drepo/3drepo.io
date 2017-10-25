@@ -41,7 +41,6 @@
 		// Init
 		vm.$onInit = function() {
 			vm.newPinId = "newPinId";
-			vm.pinDropMode = false;
 			vm.setPin({data: null});
 		};
 
@@ -55,7 +54,7 @@
 
 				if (event.type === EventService.EVENT.VIEWER.PICK_POINT &&
 					event.value.hasOwnProperty("id") &&
-					vm.pinDropMode
+					ViewerService.pin.pinDropMode
 				) {
 
 					vm.removePin();
@@ -78,12 +77,14 @@
 						colours: Pin.pinColours.yellow
 
 					};
-					EventService.send(EventService.EVENT.VIEWER.ADD_PIN, data);
+
+
+					ViewerService.addPin(data);
 					vm.setPin({data: data});
 
 				} else if (
 					event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE && 
-					vm.pinDropMode
+					ViewerService.pin.pinDropMode
 				) {
 
 					vm.removePin();
@@ -95,16 +96,6 @@
 
 		});
 
-		$scope.$watch(function(){
-			return ViewerService.pin;
-		}, function(){
-
-			if (vm.pinDropMode !== ViewerService.pin.pinDropMode ) {
-				vm.pinDropMode = ViewerService.pin.pinDropMode;
-			}
-			
-		}, true);
-
 
 		/**
 		 * Remove pin when component is destroyed
@@ -114,8 +105,7 @@
 		};
 
 		vm.removePin = function() {
-			EventService.send(
-				EventService.EVENT.VIEWER.REMOVE_PIN, 
+			ViewerService.removePin(
 				{id: vm.newPinId}
 			);
 			vm.setPin({data: null});

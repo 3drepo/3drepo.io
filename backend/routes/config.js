@@ -8,7 +8,6 @@
     const serialize = require("serialize-javascript");
     const _ = require("lodash");
     const fs = require("fs");
-    const pug = require("pug");
     const addressMeta = require("../models/addressMeta");
     const units = require("../models/unit");
     const History = require("../models/history");
@@ -129,7 +128,6 @@
             "ui": {},
             "uistate": {},
             "pluginCSS": [],
-            "renderMe": pug.renderFile,
             "structure": pluginStructure,
             "frontendPug": [],
             "gaTrackId": config.gaTrackId,

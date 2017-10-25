@@ -47,13 +47,13 @@
 	IssuesCtrl.$inject = [
 		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
 		"UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "$state", "$q", "APIService", "DialogService"
+		"AnalyticService", "$state", "$q", "APIService", "DialogService", "ViewerService"
 	];
 
 	function IssuesCtrl(
 		$scope, $timeout, IssuesService, EventService, AuthService, 
 		UtilsService, NotificationService, RevisionsService, ClientConfigService, 
-		AnalyticService, $state, $q, APIService, DialogService
+		AnalyticService, $state, $q, APIService, DialogService, ViewerService
 	) {
 
 		var vm = this;
@@ -166,8 +166,6 @@
 				.then(function(){
 					vm.setAllIssuesAssignedRolesColors();
 					EventService.send(EventService.EVENT.ISSUES_READY, true);
-					// Check if the model has loaded
-					EventService.send(EventService.EVENT.VIEWER.CHECK_MODEL_LOADED);
 				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
@@ -494,7 +492,7 @@
 			if (notCurrentlySelected) {
 				IssuesService.deselectPin(vm.selectedIssue);
 				// Remove highlight from any multi objects
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+				ViewerService.highlightObjects([]);
 			}
 
 			if (!issue && vm.selectedIssue) {

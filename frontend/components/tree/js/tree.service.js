@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("TreeService", TreeService);
 
-	TreeService.$inject = ["$q", "EventService", "APIService"];
+	TreeService.$inject = ["$q", "APIService"];
 
-	function TreeService($q, EventService, APIService) {
+	function TreeService($q, APIService) {
 		var cachedTreeDefer = $q.defer();
 		var cachedTree = cachedTreeDefer.promise;
 		var baseURL;
@@ -86,7 +86,9 @@
 				.then(function(json) {
 
 					var mainTree = json.data.mainTree;
-					
+
+					// TODO: This needs sorting out. 
+				
 					//replace model id with model name in the tree if it is a federate model
 					if(setting.federate){
 						mainTree.nodes.children.forEach(function(child){

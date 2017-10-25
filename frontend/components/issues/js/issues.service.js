@@ -23,12 +23,14 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"UtilsService", "TreeService", "AuthService", "APIService"
+		"UtilsService", "TreeService", "AuthService", "APIService",
+		"ViewerService"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		UtilsService, TreeService, AuthService, APIService
+		UtilsService, TreeService, AuthService, APIService,
+		ViewerService
 	) {
 
 		var url = "",
@@ -64,9 +66,6 @@
 			editComment: editComment,
 			deleteComment: deleteComment,
 			sealComment: sealComment,
-			addPin: addPin,
-			removePin: removePin,
-			fixPin: fixPin,
 			getJobs: getJobs,
 			getUserJobForModel: getUserJobForModel,
 			hexToRgb: hexToRgb,
@@ -147,7 +146,7 @@
 			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			// Remove highlight from any multi objects
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+			ViewerService.highlightObjects([]);
 
 			// clear selection
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
@@ -209,7 +208,7 @@
 					multi: true
 				
 				};
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, treeData);
+				ViewerService.highlightObjects(treeData);
 			}
 		}
 
@@ -433,34 +432,6 @@
 				number: issue.number,
 				sealed: true,
 				commentIndex: commentIndex
-			});
-		}
-
-		function addPin(pin, colours, viewpoint) {
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: pin.id,
-				account: pin.account,
-				model: pin.model,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours,
-				viewpoint: viewpoint
-			});
-		}
-
-		function removePin(id) {
-			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
-				id: id
-			});
-		}
-
-		function fixPin(pin, colours) {
-			removePin();
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: newPinId,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours
 			});
 		}
 

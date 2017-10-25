@@ -51,10 +51,11 @@
 	];
 
 	function IssueCtrl (
-		$location, $q, $mdDialog, $element, EventService, IssuesService,
-		UtilsService, NotificationService, AuthService, $timeout,
-		$scope, ClientConfigService, AnalyticService, $state, StateManager, MeasureService,
-		ViewerService, APIService, DialogService
+		$location, $q, $mdDialog, $element, EventService, 
+		IssuesService, UtilsService, NotificationService, AuthService, 
+		$timeout, $scope, ClientConfigService, AnalyticService, 
+		$state, StateManager, MeasureService, ViewerService,
+		APIService, DialogService
 	) {
 		
 		var vm = this;
@@ -200,8 +201,7 @@
 		$scope.$watch("vm.data", function() {
 
 			// Data
-			//console.log("vm.data watch", vm.data, vm.statuses);
-			
+
 			if (vm.data && vm.statuses && vm.statuses.length) {
 
 				vm.startNotification();
@@ -613,11 +613,13 @@
 				);
 			}
 
+
 			//Get selected objects
-			EventService.send(
-				EventService.EVENT.VIEWER.GET_CURRENT_OBJECT_STATUS, 
-				{promise: objectsPromise, account: vm.account, model: vm.model}
-			);
+			ViewerService.getObjectsStatus({
+				promise: objectsPromise, 
+				account: vm.account, 
+				model: vm.model
+			});
 
 			viewpointPromise.promise
 				.then(function (viewpoint) {
@@ -1072,8 +1074,6 @@
 
 		vm.handleIssueChange = function(issue) {
 
-			console.log("rt - issueChanged");
-
 			vm.issueData.topic_type = issue.topic_type;
 			vm.issueData.desc = issue.desc;
 			vm.issueData.priority = issue.priority;
@@ -1102,7 +1102,7 @@
 				/*
 				* Watch for issue change
 				*/
-				console.log("rt - issue", vm.data.account, vm.data.model, vm.data._id)
+
 				NotificationService.subscribe.issueChanged(
 					vm.data.account, 
 					vm.data.model, 
