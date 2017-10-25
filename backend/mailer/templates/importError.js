@@ -16,7 +16,7 @@
  */
 
 var html = data => `
-	Toy model failed to import. Please help this user out.
+	Model failed to import. Please help this user out.
 	<br>
 	account: ${data.account}
 	<br>
