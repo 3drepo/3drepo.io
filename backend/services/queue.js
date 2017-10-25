@@ -356,18 +356,20 @@
 					if ("processing" === status) {
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
-						if (defer && resErrorCode === 0) {
+						if (resErrorCode === 0) {
 							ModelHelper.importSuccess(resDatabase, resProject);
 							// cclw05 - this is a temporary workaround!
 							// cclw05 - genFed needs to be merged with importModel
-							defer.resolve(rep);
-						} else if (defer) {
+							if(defer) {
+								defer.resolve(rep);
+							}
+						} 
+						else {
 							ModelHelper.importFail(resDatabase, resProject, resErrorCode);
-							defer.reject(rep);
-						} else {
-							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
+							if(defer){
+								defer.reject(rep);
+							}
 						}
-
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
 				}, { noAck: true });

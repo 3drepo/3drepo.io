@@ -136,11 +136,6 @@ function importFail(account, model, errCode) {
 		setting.save().then( () => {
 			ChatEvent.modelStatusChanged(null, account, model, setting);
 		})
-
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		//return Promise.reject(err);
 	});
 }
 
