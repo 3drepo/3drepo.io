@@ -127,16 +127,16 @@ describe("Viewer page", function() {
 
                 // Won't run on CI :( probably because there is no graphics card?
 
-                it("should open metadata panel on clicking on the center of the model", () => {
+                // it("should open metadata panel on clicking on the center of the model", () => {
                     
-                    const canvas = element(by.id("canvas"))
-                    const size = canvas.getSize()
-                    expect(size).to.eventually.haveOwnProperty("width")
-                    expect(size).to.eventually.haveOwnProperty("height")
-                    expect(clickElement(canvas, size)).to.eventually.exist
-                    expect(element(by.id('docsPanel')).isDisplayed()).to.eventually.equal(true);
+                //     const canvas = element(by.id("canvas"))
+                //     const size = canvas.getSize()
+                //     expect(size).to.eventually.haveOwnProperty("width")
+                //     expect(size).to.eventually.haveOwnProperty("height")
+                //     expect(clickElement(canvas, size)).to.eventually.exist
+                //     expect(element(by.id('docsPanel')).isDisplayed()).to.eventually.equal(true);
                        
-                });
+                // });
     
                 it("click on the measure button and it should be activated", () => {
                     const measure = element(by.id("measureButton"))
@@ -148,20 +148,25 @@ describe("Viewer page", function() {
     
             });
 
-            // describe("with an issues panel that", () => {
+            describe("with an issues panel that", () => {
 
-            //     const issuesButton = element(by.id("issuesLeftButton"))
-                
-            //     expect(element(by.id("issuesPanel")).isDisplayed()).to.eventually.equal(true);
-            //     issuesButton.click();
+                it("allows to click on the top issue", () => {
 
+                    const issuesButton = element(by.id("issuesLeftButton"))
+                    issuesButton.click();
+                    expect(element(by.id("issuesPanel")).isDisplayed()).to.eventually.equal(true);
 
-            // }); 
+                    const issues = element.all(by.tagName("issues-list-item"));
+                    issues.first().click();
+                    const arrow = element(by.id("issuesListItemEnter"));
+                    expect(arrow.isDisplayed()).to.eventually.equal(true);
+
+                });
+
+            }); 
             
 
         });
-
-        
 
 	});
 
