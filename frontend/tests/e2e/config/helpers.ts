@@ -1,4 +1,4 @@
-import { ElementFinder, browser, by, element } from "protractor";
+import { ElementFinder, browser, by, element, ExpectedConditions } from "protractor";
 import { USER } from "./user";
 import * as env from "./environment";
 

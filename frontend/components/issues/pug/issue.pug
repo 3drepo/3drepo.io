@@ -183,7 +183,7 @@ md-divider
 .issueItemContainer#issueFooterButtons(layout="column")
 
 	.issueThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
-		img.issueThumbnailImage(ng-src="{{vm.commentThumbnail}}")
+		img.issueThumbnailImage(id="commentThumbnail" ng-src="{{vm.commentThumbnail}}")
 	
 	div(layout="row")
 		// New comment
@@ -194,6 +194,7 @@ md-divider
 			textarea(
 				flex="100"
 				placeholder="{{vm.getCommentPlaceholderText()}}"
+				id="newCommentInput"
 				aria-label="New Comment"
 				ng-model="vm.comment"
 				ng-change="vm.commentChange()"
@@ -202,11 +203,11 @@ md-divider
 				ng-disabled="!vm.canComment"
 				ng-required="true")
 
-			
-
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
+
 				ng-repeat="(action, actionData) in vm.actions"
+				id="{{actionData.id + 'CommentButton'}}"
 				aria-label="{{action}}"
 				ng-click="vm.doAction($event, action)"
 				ng-if="actionData.visible()"
@@ -218,7 +219,12 @@ md-divider
 		div(flex="100" ng-if="!vm.data")
 
 		div(layout="row" layout-align="end center")
-			md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
+			md-button.md-fab.md-mini(
+				id="submitCommentButton"
+				aria-label="Submit"
+				ng-disabled="vm.submitDisabled"
+				ng-click="vm.submit()"
+				ng-if="!vm.saving")
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")

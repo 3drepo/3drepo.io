@@ -2,7 +2,7 @@ import { USER, browser, by, element , env, expect, login, logout, ExpectedCondit
 
 describe("Viewer page", function() {
 
-	this.timeout(60000 * 2);
+    this.timeout(60000 * 2);
 
 	before(() => {
         login();
@@ -11,13 +11,10 @@ describe("Viewer page", function() {
         browser.get(url);
         browser.waitForAngular();
 
- 
         browser.wait(
-            ExpectedConditions.invisibilityOf(element(by.className("loadingViewerText"))), 
-            30000
-        )
-
-        browser.sleep(20000);
+            ExpectedConditions.elementToBeClickable(element(by.id("addIssue"))),
+            60000 * 2
+        );
 
 	});
 
@@ -161,6 +158,49 @@ describe("Viewer page", function() {
                     const arrow = element(by.id("issuesListItemEnter"));
                     expect(arrow.isDisplayed()).to.eventually.equal(true);
 
+                });
+
+                it("the top issue opens correctly", () => {
+                
+                    const arrow = element(by.id("issuesListItemEnter"));
+                    arrow.click();
+                    expect(element(by.id("issueTitleArea")).isDisplayed()).to.eventually.equal(true);
+                    expect(element(by.id("issueInfoArea")).isDisplayed()).to.eventually.equal(true);
+                    expect(element(by.id("issueAdditional")).isDisplayed()).to.eventually.equal(true);
+                    expect(element.all(by.className("issueThumbnailImage")).count()).to.eventually.greaterThan(1)
+                    expect(element(by.id("submitCommentButton")).isDisplayed()).to.eventually.equal(true);
+                    expect(element(by.id("screenshotCommentButton")).isDisplayed()).to.eventually.equal(true);
+
+                });
+
+                describe("allows you to add a comment", () => {
+                    
+                    it("with some custom text", () => {
+                        
+                        const comment = element(by.id("newCommentInput"));
+                        comment.sendKeys("A new comment");
+
+                    });
+
+                    it("with a screenshot", () => {
+
+                        element(by.id("screenshotCommentButton")).click();
+                        expect(element(by.id("scribbleCanvas")).isDisplayed()).to.eventually.equal(true);
+                        expect(element(by.id("saveCommentScreenshot")).isDisplayed()).to.eventually.equal(true);
+                        element(by.id("saveCommentScreenshot")).click();
+
+                    })
+
+                    it("and when filled in should be saveable", () => {
+
+                        expect(element.all(by.id("scribbleCanvas")).count()).to.eventually.equal(0);
+                        expect(element(by.id("commentThumbnail")).isDisplayed()).to.eventually.equal(true);
+                        expect(element(by.id("submitCommentButton")).isDisplayed()).to.eventually.equal(true);
+                        element(by.id("submitCommentButton")).click();
+                        expect(element.all(by.className("issueComment")).count()).to.eventually.greaterThan(1);
+             
+                    });
+ 
                 });
 
             }); 
