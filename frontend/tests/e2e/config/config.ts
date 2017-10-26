@@ -12,9 +12,9 @@ export let config: Config = {
     'browserName': 'chrome',
     chromeOptions: {
       args: [
-        "--headless", 
+        //"--headless", 
         '--start-maximized',
-        //"--disable-gpu", 
+        "--disable-gpu", 
         "--window-size=1920x1080"
       ]
     }

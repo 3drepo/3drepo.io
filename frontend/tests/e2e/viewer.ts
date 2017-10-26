@@ -125,6 +125,8 @@ describe("Viewer page", function() {
 
                 });
 
+                // Won't run on CI :( probably because there is no graphics card?
+
                 it("should open metadata panel on clicking on the center of the model", () => {
                     
                     const canvas = element(by.id("canvas"))
@@ -145,6 +147,18 @@ describe("Viewer page", function() {
                 });
     
             });
+
+            // describe("with an issues panel that", () => {
+
+            //     const issuesButton = element(by.id("issuesLeftButton"))
+                
+            //     expect(element(by.id("issuesPanel")).isDisplayed()).to.eventually.equal(true);
+            //     issuesButton.click();
+
+
+            // }); 
+            
+
         });
 
         
