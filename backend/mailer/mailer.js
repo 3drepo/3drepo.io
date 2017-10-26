@@ -74,6 +74,11 @@ function getURL(urlName, params){
 	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
+function sendNoConsumerAlert(){
+	const template = require('./templates/noConsumers');
+	return sendEmail(template, config.contact.email, {domain: config.host});
+}
+
 function sendVerifyUserEmail(to, data){
 	'use strict';
 
@@ -215,6 +220,7 @@ function sendImportError(data){
 	'use strict';
 
 	let template = require('./templates/importError');
+	data.domain = config.host;
 	return sendEmail(template, config.contact.email, data);
 }
 
@@ -231,4 +237,5 @@ module.exports = {
 	sendPaymentRefundedEmail,
 	sendImportError,
 	sendNewUser,
+	sendNoConsumerAlert
 }

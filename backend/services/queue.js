@@ -27,6 +27,7 @@
 	const fs = require("fs.extra");
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
+	const Mailer = require('../mailer/mailer');
 
 	function ImportQueue() {}
 
@@ -308,6 +309,9 @@
 							corID: corID.toString()
 						}
 					);
+					this.logger.logInfo("Sending email alert...");
+					Mailer.sendNoConsumerAlert().catch(err =>{ console.log("Failed to send email: ", err) });
+
 				}
 
 				return Promise.resolve(() => {});
