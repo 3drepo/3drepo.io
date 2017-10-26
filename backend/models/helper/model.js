@@ -127,7 +127,7 @@ function importSuccess(account, model) {
 
 }
 
-function importFail(account, model, errCode) {
+function importFail(account, model, errCode, corId) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
 		setting.status = 'failed';
@@ -142,6 +142,7 @@ function importFail(account, model, errCode) {
 			model,
 			username: account,
 			err: convertToErrorCode(errCode).message,
+			corID: corId
 		});
 	});
 

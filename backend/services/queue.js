@@ -310,7 +310,7 @@
 						}
 					);
 					this.logger.logInfo("Sending email alert...");
-					Mailer.sendNoConsumerAlert().catch(err =>{ console.log("Failed to send email: ", err) });
+					Mailer.sendNoConsumerAlert();
 
 				}
 
@@ -369,7 +369,7 @@
 							}
 						} 
 						else {
-							ModelHelper.importFail(resDatabase, resProject, resErrorCode);
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode, rep.properties.correlationId);
 							if(defer){
 								defer.reject(rep);
 							}
