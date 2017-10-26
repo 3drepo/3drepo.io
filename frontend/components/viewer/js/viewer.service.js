@@ -52,7 +52,7 @@
 			activateMeasure: activateMeasure,
 			disableMeasure: disableMeasure,
 			getScreenshot: getScreenshot,
-			getExtent: getExtent,
+			goToExtent: goToExtent,
 			setNavMode: setNavMode,
 			getModelInfo: getModelInfo,
 			setMultiSelectMode: setMultiSelectMode,
@@ -241,7 +241,7 @@
 			}
 		}
 
-		function getExtent() {
+		function goToExtent() {
 			viewer.goToExtent();
 		}
 
