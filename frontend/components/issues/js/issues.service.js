@@ -23,13 +23,13 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"UtilsService", "TreeService", "AuthService", "APIService",
+		"APIService", "TreeService", "AuthService",
 		"ViewerService"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		UtilsService, TreeService, AuthService, APIService,
+		APIService, TreeService, AuthService,
 		ViewerService
 	) {
 

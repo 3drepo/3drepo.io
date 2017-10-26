@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("AccountUploadService", AccountUploadService);
 
-	AccountUploadService.$inject = ["$q", "ClientConfigService", "UtilsService", "RevisionsService", "APIService"];
+	AccountUploadService.$inject = ["$q", "ClientConfigService", "APIService", "RevisionsService"];
 
-	function AccountUploadService($q, ClientConfigService, UtilsService, RevisionsService, APIService) {
+	function AccountUploadService($q, ClientConfigService, APIService, RevisionsService) {
 		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
 
 		var service = {
@@ -114,7 +114,7 @@
 					.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
 							// Upload error
-							uploadPromise.reject(UtilsService.getErrorMessage(response.data));
+							uploadPromise.reject(APIService.getErrorMessage(response.data));
 						} else {
 							uploadPromise.resolve();
 						}

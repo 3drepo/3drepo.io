@@ -37,16 +37,16 @@
 
 	AccountItemsCtrl.$inject = [
 		"StateManager", "$mdDialog", "$scope", "$location", "$element", 
-		"$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", 
+		"$timeout", "AccountUploadService", "RevisionsService", "ClientConfigService", 
 		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService",
-		"APIService"
+		"APIService", "DialogService"
 	];
 
 	function AccountItemsCtrl(
 		StateManager, $mdDialog, $scope, $location, $element,
-		$timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, 
+		$timeout, AccountUploadService, RevisionsService, ClientConfigService, 
 		AnalyticService, NotificationService, AuthService, AccountService, ViewerService,
-		APIService
+		APIService, DialogService
 	) {
 		
 		var vm = this;
@@ -111,7 +111,7 @@
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		// HIDE / SHOW STATE
@@ -400,7 +400,7 @@
 
 			// Close the dialog
 			vm.isSaving = false;
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 
 			$timeout(function () {
 				$scope.$apply();
@@ -500,7 +500,7 @@
 				subModels: []
 			};
 			vm.errorMessage = "";
-			UtilsService.showDialog(
+			DialogService.showDialog(
 				"federation-dialog.html", 
 				$scope, 
 				event, 
@@ -522,7 +522,7 @@
 			}
 			
 			vm.isSaving = false;
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 
@@ -600,7 +600,7 @@
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
-			UtilsService.showDialog("delete-dialog.html", $scope, event, true);
+			DialogService.showDialog("delete-dialog.html", $scope, event, true);
 		};
 
 
@@ -693,7 +693,7 @@
 				type: vm.modelTypes[0]
 			};
 			vm.newModelFileToUpload = null;
-			UtilsService.showDialog("model-dialog.html", $scope, event, true);
+			DialogService.showDialog("model-dialog.html", $scope, event, true);
 		};
 
 
@@ -934,7 +934,7 @@
 				vm.projectData.deleteTeamspace = teamspace.name;
 				vm.projectData.deleteWarning = warn;
 				vm.projectData.errorMessage = "";
-				UtilsService.showDialog("delete-project-dialog.html", $scope, null, true);	
+				DialogService.showDialog("delete-project-dialog.html", $scope, null, true);	
 				break;
 
 			case "edit":
@@ -952,7 +952,7 @@
 			vm.projectData.newProjectName = "";
 			vm.projectData.oldProjectName = "";
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, null, true);
+			DialogService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 
@@ -966,7 +966,7 @@
 			vm.projectData.teamspaceName = teamspace.name;
 			vm.projectData.newProjectName = project.name;
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, null, true);
+			DialogService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 

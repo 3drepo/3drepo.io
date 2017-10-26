@@ -31,13 +31,12 @@
 
 	accountAssignCtrl.$inject = [
 		"$scope", "$window", "$q", 
-		"$mdDialog", "$location", "UtilsService", "ClientConfigService", "APIService"
+		"$mdDialog", "$location", "APIService"
 	];
 
 	function accountAssignCtrl(
 		$scope, $window, $q, $mdDialog, 
-		$location, UtilsService, ClientConfigService, 
-		APIService
+		$location, APIService
 	) {
 		var vm = this;
 

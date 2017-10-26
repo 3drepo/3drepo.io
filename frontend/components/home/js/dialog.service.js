@@ -31,12 +31,60 @@
 
 		var service = {
 			text: text,
-			html: html
+			html: html,
+			showDialog: showDialog,
+			closeDialog: closeDialog
 		};
 
 		return service;
 
 		////////
+
+
+		/**
+         * Show a dialog
+         *
+         * @param {String} dialogTemplate - required
+         * @param {Object} scope - required
+         * @param {Object} event
+         * @param {Boolean} clickOutsideToClose
+         * @param {Object} parent
+         * @param {Boolean} fullscreen
+         * @param {String} closeTo
+         */
+		function showDialog(dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
+			// Allow the dialog to have cancel ability
+			scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {
+				$mdDialog.cancel();
+			};
+
+			// Set up and show dialog
+			var data = {
+				controller: function () {},
+				templateUrl: "/templates/" + dialogTemplate,
+				onRemoving: function () {
+					$mdDialog.cancel();
+				}
+			};
+
+			data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
+
+			data.scope = (angular.isDefined(scope)) ? scope : null;
+			data.preserveScope = (data.scope !== null);
+			data.targetEvent = (angular.isDefined(event)) ? event : null;
+			data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
+			data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : false;
+			data.closeTo = (angular.isDefined(closeTo)) ? closeTo : false;
+			$mdDialog.show(data);
+		}
+
+		/**
+         * close a dialog
+         */
+		function closeDialog() {
+			$mdDialog.cancel();
+		}
+
 
 		function text(title, content, escapable) {
 

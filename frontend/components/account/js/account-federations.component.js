@@ -46,15 +46,15 @@
 		});
 
 	AccountFederationsCtrl.$inject = [
-		"$scope", "$location", "$timeout", "UtilsService", 
+		"$scope", "$location", "$timeout", "APIService", 
 		"ClientConfigService", "AuthService", "AnalyticService", 
-		"AccountService", "APIService"
+		"AccountService", "DialogService"
 	];
 
 	function AccountFederationsCtrl (
-		$scope, $location, $timeout, UtilsService, 
+		$scope, $location, $timeout, APIService, 
 		ClientConfigService, AuthService, AnalyticService, 
-		AccountService, APIService
+		AccountService, DialogService
 	) {
 		var vm = this;
 
@@ -254,7 +254,7 @@
 						vm.addButtons = false;
 						vm.addButtonType = "add";
 						vm.isSaving = false;
-						UtilsService.closeDialog();
+						DialogService.closeDialog();
 						
 						AnalyticService.sendEvent({
 							eventCategory: "Model",
@@ -298,7 +298,7 @@
 			vm.federationData._isEdit = true;
 
 			vm.originalFederationData = angular.copy(vm.federationData);
-			UtilsService.showDialog("federation-dialog.html", $scope, event, true);
+			DialogService.showDialog("federation-dialog.html", $scope, event, true);
 		}
 
 		function setupSetting(event, teamspace, project, federation){
@@ -325,7 +325,7 @@
 			vm.deleteName = model.name;
 			vm.projectToDeleteFrom = project;
 			vm.currentAccount = account;
-			UtilsService.showDialog("delete-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+			DialogService.showDialog("delete-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 		}
 
 		/**

@@ -36,13 +36,13 @@
 
 
 	AccountBillingCtrl.$inject = [
-		"$scope", "$window", "$timeout", "UtilsService", 
-		"ClientConfigService", "APIService"
+		"$scope", "$window", "$timeout", 
+		"ClientConfigService", "DialogService", "APIService"
 	];
 
 	function AccountBillingCtrl(
-		$scope, $window, $timeout, UtilsService, 
-		ClientConfigService, APIService
+		$scope, $window, $timeout, 
+		ClientConfigService, DialogService, APIService
 	) {
 		var vm = this;
 
@@ -165,7 +165,7 @@
 			} else {
 				vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
 			}
-			UtilsService.showDialog("paypal-dialog.html", $scope, null, true);
+			DialogService.showDialog("paypal-dialog.html", $scope, null, true);
 
 			var promise = APIService.post(vm.account + "/subscriptions", data);
 			promise.then(function (response) {
@@ -173,7 +173,7 @@
 					if (vm.numLicenses === vm.numNewLicenses) {
 						vm.payPalInfo = "Billing information updated.";
 						$timeout(function () {
-							UtilsService.closeDialog();
+							DialogService.closeDialog();
 						}, 2000);
 					} else {
 						location.href = response.data.url;
@@ -188,7 +188,7 @@
 		};
 
 		vm.closeDialog = function () {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		}; 
 
 		/**

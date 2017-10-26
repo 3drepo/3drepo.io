@@ -34,9 +34,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService", "AccountService", "APIService"];
+	AccountModelsettingCtrl.$inject = ["$scope", "$location", "APIService", "ClientConfigService", "AccountService", "APIService"];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService, AccountService, APIService) {
+	function AccountModelsettingCtrl($scope, $location, APIService, ClientConfigService, AccountService, APIService) {
 		
 		var vm = this;
 

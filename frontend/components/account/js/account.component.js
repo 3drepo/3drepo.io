@@ -33,9 +33,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "UtilsService", "APIService"];
+	AccountCtrl.$inject = ["DialogService", "$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "APIService"];
 
-	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, AuthService, UtilsService, APIService) {
+	function AccountCtrl(DialogService, $scope, $injector, $location, $timeout, AccountService, AuthService, APIService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -116,6 +116,10 @@
 				});
 		};
 
+		vm.capitalizeFirstLetter = function(string) {
+			return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
+		};
+
 		vm.handleStateChange = function(type, oldValue, newValue) {
 
 			// TODO: This is total mess... needs refactor!
@@ -125,7 +129,7 @@
 				// Go to the correct "page"
 				if (vm.query.hasOwnProperty("page")) {
 					// Check that there is a directive for that "page"
-					var page = UtilsService.capitalizeFirstLetter(vm.query.page);
+					var page = vm.capitalizeFirstLetter(vm.query.page);
 					var directiveExists = "account" + page + "Directive";
 					if ($injector.has(directiveExists)) {
 						vm.itemToShow = vm.query.page;
@@ -151,7 +155,7 @@
 							
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
-							UtilsService.showDialog("paypal-dialog.html", $scope);
+							DialogService.showDialog("paypal-dialog.html", $scope);
 							APIService.post("payment/paypal/execute", {token: ($location.search()).token})
 								.then(function (response) {
 									if (response.status !== 200) {
@@ -163,7 +167,7 @@
 									$location.search("token", null);
 
 									$timeout(function () {
-										UtilsService.closeDialog();
+										DialogService.closeDialog();
 										//initDirectiveData();
 									}, 2000);
 

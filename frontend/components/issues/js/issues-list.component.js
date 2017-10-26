@@ -46,13 +46,13 @@
 		});
 
 	IssuesListCtrl.$inject = [
-		"$scope", "$filter", "$window", "UtilsService", 
+		"$scope", "$filter", "$window", "APIService", 
 		"IssuesService", "EventService", "ClientConfigService", 
 		"$timeout", "ViewerService"
 	];
 
 	function IssuesListCtrl (
-		$scope, $filter, $window, UtilsService, IssuesService, 
+		$scope, $filter, $window, APIService, IssuesService, 
 		EventService, ClientConfigService, $timeout, ViewerService
 	) {
 
@@ -60,7 +60,7 @@
 
 		// Init
 		vm.$onInit = function() {
-			vm.UtilsService = UtilsService;
+			vm.APIService = APIService;
 			vm.IssuesService = IssuesService;
 			vm.setFocus = setFocus;
 			vm.focusedIssueIndex = null;

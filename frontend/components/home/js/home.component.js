@@ -35,7 +35,7 @@
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
-		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
+		"StateManager", "EventService", "APIService", "ClientConfigService", 
 		"$location", "SWService", "AnalyticService", "ViewerService", 
 		"$document", "TemplateService"
 	];
@@ -43,7 +43,7 @@
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
-		EventService, UtilsService, ClientConfigService, $location,
+		EventService, APIService, ClientConfigService, $location,
 		SWService, AnalyticService, ViewerService, $document, TemplateService
 	) {
 

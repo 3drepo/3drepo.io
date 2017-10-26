@@ -32,9 +32,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "StateManager", "APIService"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "$timeout", "APIService", "StateManager", "DialogService"];
 
-	function AccountTeamCtrl($scope, $location, $timeout, UtilsService, StateManager, APIService) {
+	function AccountTeamCtrl($scope, $location, $timeout, APIService, StateManager, DialogService) {
 		var vm = this,
 			promise;
 
@@ -153,7 +153,7 @@
 		};
 
 		vm.closeDialog = function () {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**

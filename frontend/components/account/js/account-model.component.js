@@ -50,9 +50,9 @@
 			}
 		});
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "ClientConfigService", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
+	AccountModelCtrl.$inject = ["DialogService", "APIService", "$scope", "$location", "$timeout", "$interval", "$filter", "ClientConfigService", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, ClientConfigService, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
+	function AccountModelCtrl (DialogService, APIService, $scope, $location, $timeout, $interval, $filter, ClientConfigService, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
 
 		var vm = this;
 
@@ -154,7 +154,7 @@
 						vm.tag = null;
 						vm.desc = null;
 						vm.modelToUpload = null;
-						UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+						DialogService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 					} else {
 						console.warn("Incorrect permissions");
 					}
@@ -192,7 +192,7 @@
 				vm.tag = null;
 				vm.desc = null;
 				vm.uploadButtonDisabled = true;
-				UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				DialogService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				//vm.uploadFile();
 				break;
 
@@ -224,7 +224,7 @@
 					vm.revisions = revisions;
 					vm.revisionsLoading = false;
 				});
-				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				DialogService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				break;
 			}
 		};
@@ -234,14 +234,14 @@
 		 */
 		vm.setupAddLicenses = function () {
 			vm.onShowPage({page: "billing", callingPage: "permissionsspaces"});
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**
@@ -333,8 +333,8 @@
 				// that the errors are acceptable
 				var error = modelData.errorReason;
 				var valid = modelData.status === "ok" || 
-					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) || 
-					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
+					(error && error.value === APIService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) || 
+					(error && error.value === APIService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
 
 				// We don't want to show the import successful message
 				// for models that were there before, so we use the isFreshModel flag

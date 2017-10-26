@@ -15,9 +15,9 @@
 			controllerAs: "vm"
 		});
 
-	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+	revisionsCtrl.$inject = ["DialogService", "$location", "$scope", "RevisionsService", "APIService", "$filter"];
 
-	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+	function revisionsCtrl (DialogService, $location, $scope, RevisionsService, APIService, $filter) {
 		var vm = this;
 
 		vm.$onInit = function(){
@@ -74,7 +74,7 @@
 				vm.revisions = revisions;
 			});
 			
-			UtilsService.showDialog("revisions-dialog.html", $scope, event, true);
+			DialogService.showDialog("revisions-dialog.html", $scope, event, true);
 		};
 
 		/**
@@ -82,13 +82,13 @@
 		*/
 		vm.goToRevision = function(revId){
 			vm.revision = revId;
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 			$location.path("/" + vm.account + "/" + vm.model + "/" + revId , "_self");
 
 		};
 
 		vm.closeDialog = function() {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 	}

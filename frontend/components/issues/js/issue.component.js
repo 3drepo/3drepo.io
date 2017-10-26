@@ -44,18 +44,18 @@
 
 	IssueCtrl.$inject = [
 		"$location", "$q", "$mdDialog", "$element", "EventService", 
-		"IssuesService", "UtilsService", "NotificationService", "AuthService", 
+		"IssuesService", "APIService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
-		"APIService", "DialogService"
+		"DialogService"
 	];
 
 	function IssueCtrl (
 		$location, $q, $mdDialog, $element, EventService, 
-		IssuesService, UtilsService, NotificationService, AuthService, 
+		IssuesService, APIService, NotificationService, AuthService, 
 		$timeout, $scope, ClientConfigService, AnalyticService, 
 		$state, StateManager, MeasureService, ViewerService,
-		APIService, DialogService
+		DialogService
 	) {
 		
 		var vm = this;
