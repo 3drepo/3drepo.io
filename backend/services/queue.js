@@ -27,6 +27,7 @@
 	const fs = require("fs.extra");
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
+	const Mailer = require('../mailer/mailer');
 
 	function ImportQueue() {}
 
@@ -308,6 +309,14 @@
 							corID: corID.toString()
 						}
 					);
+					this.logger.logInfo("No consumer in queue. Sending email alert...");
+
+					Mailer.sendNoConsumerAlert().then(() => {
+						this.logger.logInfo("Email sent.");
+					}).catch(err =>{
+						this.logger.logInfo("Failed to send email:", err);
+					});
+
 				}
 
 				return Promise.resolve(() => {});
@@ -365,7 +374,7 @@
 							}
 						} 
 						else {
-							ModelHelper.importFail(resDatabase, resProject, resErrorCode);
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode, rep.properties.correlationId);
 							if(defer){
 								defer.reject(rep);
 							}
