@@ -3,7 +3,7 @@
 
 3drepo.io is a web based front-end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the [3D Repo Bouncer](https://github.com/3drepo/3drepobouncer) library and [3D Repo GUI](https://github.com/3drepo/3drepogui) separate projects.
 
-![3drepoio_1a](https://cloud.githubusercontent.com/assets/3008807/12302435/09590660-ba1d-11e5-8bab-c95de3f788c5.jpg)
+![skanska2](https://user-images.githubusercontent.com/3008807/32048840-c75fc92e-ba42-11e7-964d-1587974dce6e.png)
 
 ### Latest Release
 * [3drepo.io](https://github.com/3drepo/3drepo.io/releases/tag/latest)
