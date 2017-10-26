@@ -1,8 +1,8 @@
-import { USER, browser, by, element , env, expect, login, logout, ExpectedConditions} from "./config/imports";
+import { USER, browser, by, element , env, expect, login, logout, ExpectedConditions, clickElement} from "./config/imports";
 
 describe("Viewer page", function() {
 
-	this.timeout(60000);
+	this.timeout(60000 * 2);
 
 	before(() => {
         login();
@@ -14,11 +14,10 @@ describe("Viewer page", function() {
  
         browser.wait(
             ExpectedConditions.invisibilityOf(element(by.className("loadingViewerText"))), 
-            20000
+            30000
         )
 
-        console.log("Waited for Viewer, now waiting for model");
-        browser.sleep(15000);
+        browser.sleep(20000);
 
 	});
 
@@ -116,11 +115,25 @@ describe("Viewer page", function() {
                 });
     
                 it("click on the metadata button and it should be activated", () => {
+                    
                     const meta = element(by.id("metadataButton"))
                     const measure = element(by.id("measureButton"))
                     meta.click();
+
                     expect(meta.getCssValue('background-color')).to.eventually.equal(orange);
                     expect(measure.getCssValue('background-color')).to.eventually.equal(green);
+
+                });
+
+                it("should open metadata panel on clicking on the center of the model", () => {
+                    
+                    const canvas = element(by.id("canvas"))
+                    const size = canvas.getSize()
+                    expect(size).to.eventually.haveOwnProperty("width")
+                    expect(size).to.eventually.haveOwnProperty("height")
+                    expect(clickElement(canvas, size)).to.eventually.exist
+                    expect(element(by.id('docsPanel')).isDisplayed()).to.eventually.equal(true);
+                       
                 });
     
                 it("click on the measure button and it should be activated", () => {

@@ -25,3 +25,17 @@ export function hasClass(element, cls) {
         return classes.split(' ').indexOf(cls) !== -1;
     });
 };
+
+export function clickElement(element, sizePromise) { 
+    
+    return sizePromise.then( (size) => {
+        
+        const pos = {x: size.width / 2, y: size.height / 2};
+        console.log("Clicking at position: ", pos)
+        return browser.actions()
+            .mouseMove(element)
+            .mouseDown()
+            .mouseUp()
+            .perform();
+    }) ;
+};
