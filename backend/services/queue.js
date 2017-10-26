@@ -309,8 +309,13 @@
 							corID: corID.toString()
 						}
 					);
-					this.logger.logInfo("Sending email alert...");
-					Mailer.sendNoConsumerAlert();
+					this.logger.logInfo("No consumer in queue. Sending email alert...");
+
+					Mailer.sendNoConsumerAlert().then(() => {
+						this.logger.logInfo("Email sent.");
+					}).catch(err =>{
+						this.logger.logInfo("Failed to send email:", err);
+					});
 
 				}
 
