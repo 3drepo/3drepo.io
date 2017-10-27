@@ -27,7 +27,8 @@
 	];
 
 	function ViewerService(
-		ClientConfigService, $q, APIService, DialogService, EventService
+		ClientConfigService, $q, APIService, DialogService, 
+		EventService
 	) {
 
 		var viewer;
