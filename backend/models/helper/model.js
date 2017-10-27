@@ -121,37 +121,33 @@ function importSuccess(account, model) {
 			}
 			setting.markModified('errorReason');
 			ChatEvent.modelStatusChanged(null, account, model, setting);
-			systemLogger.logInfo(`Setting is ${setting}`);
 			setting.save();
 		}
 	});
 
 }
 
-function importFail(account, model) {
+function importFail(account, model, errCode, corId) {
 	ModelSetting.findById({account, model}, model).then(setting => {
-		// import failed for some reason(s)...
 		//mark model failed
+		setting.status = 'failed';
+		setting.errorReason = convertToErrorCode(errCode);
+		setting.markModified('errorReason');
+		setting.save().then( () => {				
+			ChatEvent.modelStatusChanged(null, account, model, setting);						
+		})
 
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
+		Mailer.sendImportError({
 			account,
 			model,
-			username
+			username: account,
+			err: convertToErrorCode(errCode).message,
+			corID: corId
 		});
-
-		setting.status = 'failed';
-		setting.errorReason = err;
-		setting.markModified('errorReason');
-		setting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, setting);
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		//return Promise.reject(err);
 	});
+
+
+
 }
 
 /**
@@ -165,7 +161,6 @@ function setStatus(account, model, status) {
 		setting.status = status;
 		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
-		systemLogger.logInfo(`Setting is ${setting}`);
 	});
 }
 
@@ -187,7 +182,6 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-		systemLogger.logInfo(`Setting is ${setting}`);
 		return setting.save().then(() => {
 			return correlationId;
 		});;
@@ -1610,6 +1604,20 @@ function getMetadata(account, model, id){
 
 }
 
+function isUserAdmin(account, model, user)
+{
+	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	//find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  //This model belongs to a project
+			&& project.permissions.length > 0 //This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
+			);
+	});
+}
+
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
 const acceptedFormat = [
@@ -1627,6 +1635,7 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
+	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
