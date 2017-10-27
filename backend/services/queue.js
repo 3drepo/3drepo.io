@@ -223,15 +223,7 @@
 		const skip = options.skip && JSON.stringify(options.skip) || '';
 		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
-		return this._dispatchWork(corID, msg).then(() => {
-
-			return new Promise((resolve, reject) => {
-				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, database, model}),
-					reject: (errCode, message, rep) => reject({ corID, errCode, database, model, message, appId: rep.properties.appId })
-				};
-			});
-		});
+		return this._dispatchWork(corID, msg);
 	};
 
 	/*******************************************************************************

@@ -107,16 +107,14 @@ function convertToErrorCode(bouncerErrorCode){
 }
 
 function importSuccess(account, model) {
-	let status = 'ok';
-	ChatEvent.modelStatusChanged(null, account, model, { status: status });
-	ModelSetting.findById({account, model}, model).then(setting => {
+	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
-			setting.status = status;
-			systemLogger.logInfo(`Model status changed to ${status}`);
+			systemLogger.logInfo(`importSuccess::setting = ${setting}`);
+			systemLogger.logInfo(`Model status changed to ${setting.status}`);
 			setting.corID = undefined;
 			systemLogger.logInfo(`Correlation ID reset`);
 			setting.errorReason = undefined;
-			if(source.type === 'toy'){
+			if(setting.type === 'toy' || setting.type === 'sample'){
 				setting.timestamp = new Date();
 			}
 			setting.markModified('errorReason');
@@ -157,10 +155,10 @@ function importFail(account, model, errCode, corId) {
  */
 function setStatus(account, model, status) {
 	ChatEvent.modelStatusChanged(null, account, model, { status: status });
-	ModelSetting.findById({account, model}, model).then(setting => {
+	return ModelSetting.findById({account, model}, model).then(setting => {
 		setting.status = status;
-		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
+		return setting.save();
 	});
 }
 
@@ -355,6 +353,9 @@ function importToyProject(account, username){
 			const subModels = models.map(m => {
 				
 				m = m.toObject();
+				
+				importSuccess(account, m._id);
+
 				return {
 					model: m._id,
 					database: account
@@ -1308,7 +1309,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		];
 	};
 
-	return importQueue.importFile(
+	importQueue.importFile(
 		correlationId,
 		file.path,
 		file.originalname,
@@ -1327,12 +1328,10 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		});
 
 		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
-		return Promise.resolve(obj);
 
 	}).catch(err => {
 		// ISSUE_520... don't delete files if importFile fails
 		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
-		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
 	});
 
 }
@@ -1343,26 +1342,25 @@ function importModel(account, model, username, modelSetting, source, data){
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	let correlationId = uuid.v1();
-	modelSetting.corID = correlationId;
-
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'queued' });
-
-	modelSetting.status = 'queued';
-
 	return modelSetting.save().then(() => {
+		return createCorrelationId(account, model).then(correlationId => {
+			return setStatus(account, model, 'queued').then(setting => {
 
-		if (source.type === 'upload'){
-			return _handleUpload(correlationId, account, model, username, source.file, data);
+				modelSetting = setting;
 
-		} else if (source.type === 'toy'){
+				if (source.type === 'upload'){
+					return _handleUpload(correlationId, account, model, username, source.file, data);
 
-			return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
-				modelSetting.corID = correlationId;
-				systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+				} else if (source.type === 'toy'){
+
+					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+						return modelSetting;
+					});
+				}
+
 			});
-		}
-
+		});
 	});
 
 }
