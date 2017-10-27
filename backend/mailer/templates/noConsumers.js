@@ -16,22 +16,10 @@
  */
 
 var html = data => `
-	Model failed to import. Please help this user out.
-	<br>
-	account: ${data.account}
-	<br>
-	model: ${data.model}
-	<br>
-	Error: ${data.err}
-	<br>
-	correlationId: ${data.corID}
-	<br>
-	appId: ${data.appId}
-	<br>
-	domain: ${data.domain}
+	No consumers found in ${data.domain}. Please look into it!
 `;
 
-var subject = '[System] Model import error';
+var subject = '[System] No consumers found in queue';
 
 module.exports =  {
 	html: html,

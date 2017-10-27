@@ -134,7 +134,6 @@
 					if (
 						custom.css
 					) {
-						console.log(custom.css);
 						var link = document.createElement("link");
 						link.setAttribute("rel", "stylesheet");
 						link.setAttribute("type", "text/css");
@@ -198,10 +197,6 @@
 				// If it's a legal page
 				var legal = vm.pageCheck(newState, vm.legalPages);
 				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
-
-				console.log("legal", legal);
-				console.log("loggedOut", loggedOut);
-				console.log(newState);
 
 				if (legal) {
 

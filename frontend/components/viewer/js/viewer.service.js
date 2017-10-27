@@ -56,6 +56,7 @@
 			setNavMode: setNavMode,
 			getModelInfo: getModelInfo,
 			setMultiSelectMode: setMultiSelectMode,
+			switchObjectVisibility: switchObjectVisibility,
 			handleUnityError: handleUnityError,
 			handleEvent: handleEvent,
 			highlightObjects: highlightObjects,
@@ -193,6 +194,10 @@
 
 		function setMultiSelectMode(value) {
 			viewer.setMultiSelectMode(value);
+		}
+
+		function switchObjectVisibility(account, model, ids, visibility){
+			viewer.switchObjectVisibility(account, model, ids, visibility);
 		}
 
 		function handleUnityError(message) {

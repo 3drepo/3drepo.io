@@ -30,9 +30,9 @@
 			controllerAs: "vm"
 		});
 	
-	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager", "APIService" ,"DialogService"];
+	AccountLicensesCtrl.$inject = ["$scope", "APIService", "StateManager", "UtilsService", "DialogService"];
 
-	function AccountLicensesCtrl($scope, UtilsService, StateManager, APIService, DialogService) {
+	function AccountLicensesCtrl($scope, APIService, StateManager, UtilsService, DialogService) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -253,27 +253,31 @@
 						vm.addDisabled = false;
 						vm.allLicensesAssigned = false;
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-					} else if (response.status === 400) {
-						//var message = UtilsService.getErrorMessage(response.data);
+					} 
+				})
+				.catch(function(error){
+
+					if (error.status === 400) {
+						//var message = APIService.getErrorMessage(response.data);
 						var responseCode = UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST");
-						if (response.data.value === responseCode) {
+						if (error.data.value === responseCode) {
 							vm.licenseAssigneeIndex = index;
-							vm.models = response.data.models;
-							vm.projects = response.data.projects;
-							if(response.data.teamspace){
-								vm.teamspacePerms = response.data.teamspace.permissions.join(", ");
+							vm.models = error.data.models;
+							vm.projects = error.data.projects;
+							if(error.data.teamspace){
+								vm.teamspacePerms = error.data.teamspace.permissions.join(", ");
 							}
 							
 							UtilsService.showDialog("remove-license-dialog.html", $scope);
 						}
-					}
-				})
-				.catch(function(error){
-					var content = "Something went wrong removing the license. " +
+					} else {
+						var content = "Something went wrong removing the license. " +
 						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Removing Licence", content, escapable);
-					console.error("Something went wrong removing the licence: ", error);
+						var escapable = true;
+						DialogService.text("Error Removing Licence", content, escapable);
+						console.error("Something went wrong removing the licence: ", error);
+					}
+					
 				});
 		};
 
