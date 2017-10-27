@@ -91,6 +91,7 @@
 				
 					//replace model id with model name in the tree if it is a federate model
 					if(setting.federate){
+						mainTree.nodes.name = setting.name;
 						mainTree.nodes.children.forEach(function(child){
 							var name = child.name.split(":");
 							
