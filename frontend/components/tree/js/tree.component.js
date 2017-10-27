@@ -635,15 +635,7 @@
 				var vals = key.split("@");
 				var account = vals[0];
 				var model = vals[1];
-
-				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
-					source: "tree",
-					account: account,
-					model: model,
-					name: node.name,
-					visible : node.toggleState != "invisible",
-					ids: childNodes[key]
-				});
+				ViewerService.switchObjectVisibility(account, model, childNodes[key], node.toggleState != "invisible");
 			}
 
 		};
