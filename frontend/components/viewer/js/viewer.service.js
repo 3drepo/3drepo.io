@@ -247,7 +247,7 @@
 		}
 
 		function goToExtent() {
-			viewer.goToExtent();
+			viewer.showAll();
 		}
 
 		function setNavMode(mode) {
