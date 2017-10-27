@@ -43,11 +43,7 @@
 					vm.initSubscriptions();
 				})
 				.catch(function(error){
-					var content = "Something went wrong retriving subscriptions. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Retriving Subscriptions", content, escapable);
-					console.error("Something went wrong retiving the subscriptions: ", error);
+					vm.handleError("retrieve", "subscriptions", error);
 				});
 			
 			APIService.get(vm.account + "/jobs")
@@ -55,11 +51,7 @@
 					vm.jobs = response.data;
 				})
 				.catch(function(error){
-					var content = "Something went wrong retriving jobs. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Retriving Jobs", content, escapable);
-					console.error("Something went wrong retriving the jobs: ", error);
+					vm.handleError("retrieve", "jobs", error);
 				});
 
 			vm.jobColors = [
@@ -123,11 +115,7 @@
 					}
 				})
 				.catch(function(error){
-					var content = "Something went wrong saving the job colour. " +
-					"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Saving Colour", content, escapable);
-					console.error("Something went wrong saving the Colour: ", error);
+					vm.handleError("update", "job", error);
 				});
 		};
 
@@ -143,11 +131,7 @@
 					}
 				})
 				.catch(function(error){
-					var content = "Something went wrong assigning the job to user. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Assigning Job", content, escapable);
-					console.error("Something went wrong assigning the job: ", error);
+					vm.handleError("assign", "job", error);
 				});
 		};
 
@@ -165,11 +149,7 @@
 					}
 				})
 				.catch(function(error){
-					var content = "Something went wrong saving the new job. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Saving Job", content, escapable);
-					console.error("Something went wrong saving the job: ", error);
+					vm.handleError("add", "job", error);
 				});
 		};
 
@@ -186,11 +166,7 @@
 					}
 				})
 				.catch(function(error){
-					var content = "Something went wrong removing the job. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Removing Job", content, escapable);
-					console.error("Something went wrong saving the job: ", error);
+					vm.handleError("remove", "job", error);
 				});
 		};
 
@@ -228,11 +204,7 @@
 						}
 					})
 					.catch(function(error){
-						var content = "Something went wrong assigning the license. " +
-							"If this continues please message support@3drepo.io.";
-						var escapable = true;
-						DialogService.text("Error Assigning Licence", content, escapable);
-						console.error("Something went wrong assigning the licence: ", error);
+						vm.handleError("assign", "licence", error);
 					});
 			}
 		};
@@ -257,8 +229,7 @@
 				.catch(function(error){
 
 					if (error.status === 400) {
-						//var message = APIService.getErrorMessage(response.data);
-						var responseCode = DialogService.getResponseCode("USER_IN_COLLABORATOR_LIST");
+						var responseCode = APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
 						if (error.data.value === responseCode) {
 							vm.licenseAssigneeIndex = index;
 							vm.models = error.data.models;
@@ -270,14 +241,23 @@
 							DialogService.showDialog("remove-license-dialog.html", $scope);
 						}
 					} else {
-						var content = "Something went wrong removing the license. " +
-						"If this continues please message support@3drepo.io.";
-						var escapable = true;
-						DialogService.text("Error Removing Licence", content, escapable);
-						console.error("Something went wrong removing the licence: ", error);
+						vm.handleError("remove", "licence", error);
 					}
 					
 				});
+		};
+
+		vm.capitalizeFirstLetter = function(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+		};
+
+		vm.handleError = function(action, type, error){
+			var content = "Something went wrong trying to" + action + "the " + type + ". " +
+			"If this continues please message support@3drepo.io.";
+			var escapable = true;
+			var title = "Error";
+			DialogService.text(title, content, escapable);
+			console.error("Something went wrong trying to" + action + " the " + type + ": ", error);
 		};
 
 		/**
@@ -298,11 +278,7 @@
 					}
 				})
 				.catch(function(error){
-					var content = "Something went wrong removing the license. " +
-						"If this continues please message support@3drepo.io.";
-					var escapable = true;
-					DialogService.text("Error Removing Licence", content, escapable);
-					console.error("Something went wrong removing the licence: ", error);
+					vm.handleError("remove", "licence", error);
 				});
 		};
 
