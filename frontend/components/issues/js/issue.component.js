@@ -235,9 +235,7 @@
 				// Role colour
 				if (vm.issueData.assigned_roles.length > 0) {
 					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
-				} else {
-					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.creator_role);
-				}
+				} 
 
 				// Old issues
 				vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
@@ -341,13 +339,12 @@
 			vm.canComment = (canComment || vm.canUpdate) && isNotClosed;
 
 		};
-		
 
 		/**
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
-
+		
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 
@@ -411,7 +408,7 @@
 			var escapable = true;
 			console.error(error);
 			DialogService.text("Error Updating Issue", content, escapable);
-		}
+		};
 
 		vm.getCommentPlaceholderText = function() {
 			if (vm.canComment) {
@@ -978,24 +975,6 @@
 			vm.setContentHeight();
 		};
 
-		/**
-		 * Check if user has a role same as the creator role
-		 * @returns {boolean}
-		 */
-		function userHasCreatorRole () {
-			if(vm.userJob._id && vm.data.creator_role){
-				return vm.userJob._id === vm.data.creator_role;
-			}
-		}
-
-		/**
-		 * Check if user has admin role
-		 * @returns {boolean}
-		 */
-		function userHasAdminRole () {
-			var hasAdminRole = false;
-			return hasAdminRole;
-		}
 
 		/**
 		 * Set the content height
@@ -1159,7 +1138,7 @@
 
 
 			}
-		}
+		};
 
 	}
 }());
