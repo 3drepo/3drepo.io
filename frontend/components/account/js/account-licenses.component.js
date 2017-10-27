@@ -259,7 +259,7 @@
 
 					if (error.status === 400) {
 						//var message = APIService.getErrorMessage(response.data);
-						var responseCode = APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
+						var responseCode = UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST");
 						if (error.data.value === responseCode) {
 							vm.licenseAssigneeIndex = index;
 							vm.models = error.data.models;
@@ -295,7 +295,7 @@
 						vm.addDisabled = false;
 						vm.allLicensesAssigned = false;
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-						DialogService.closeDialog();
+						UtilsService.closeDialog();
 					}
 				})
 				.catch(function(error){
