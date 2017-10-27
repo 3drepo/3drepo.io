@@ -25,8 +25,8 @@
 				controller: IssuesListItemCtrl,
 				templateUrl: "templates/issues-list-item.html",
 				bindings: {
-					data: "<",
-					userJob: "<"
+					data: "=",
+					userJob: "="
 				},
 				controllerAs: "vm"
 			}
@@ -41,61 +41,45 @@
 		 * Init
 		 */
 		vm.$onInit = function () {
-			vm.setRoleIndicatorColour();
+			vm.setIssueData();
 		};
 
-		/**
-		 * Monitor changes to parameters
-		 * @param {Object} changes
-		 */
-		$scope.$watch("data", function () {
-
-			// Data
-			if (vm.data) {
-				vm.setRoleIndicatorColour();
-
-				// Title
-				if (vm.userJob) {
-					vm.assignedToAUserRole = issueIsAssignedToAUserRole();
-				}
-			}
-
-		});
-
-		$scope.$watch("userJob", function () {
+		$scope.$watch("vm.userJob", function () {
 			
-			// User roles
-			if (vm.userJob) {
-				// Title
-				if (vm.data) {
-					vm.assignedToAUserRole = issueIsAssignedToAUserRole();
-				}
+			if (vm.userJob && vm.data) {
+				vm.setIssueData();
 			}
 
-		});
+		}, true);
 
-		vm.getStatusIcon = function(issueData) {
-			return IssuesService.getStatusIcon(issueData).icon;
+		$scope.$watch("vm.data", function () {
+			
+			if (vm.data) {
+				vm.setIssueData();
+			}
+
+		}, true);
+
+		vm.setIssueData = function() {
+			vm.data.statusIcon = IssuesService.getStatusIcon(vm.data);
+			vm.setRoleIndicatorColour();
+			vm.assignedToAUserRole = vm.issueIsAssignedToAUserRole();
 		};
-
-		vm.getStatusColour = function(issueData) {
-			return IssuesService.getStatusIcon(issueData).colour;
-		};
-
+		
 		/**
 		 * Set role indicator colour
 		 */
 		vm.setRoleIndicatorColour = function() {
 			if (vm.data && (vm.data.assigned_roles.length > 0)) {
 				var assignedRole = vm.data.assigned_roles[0];
-				vm.issueRoleColor = vm.issueRoleColor = IssuesService.getJobColor(assignedRole);
+				vm.data.issueRoleColor = IssuesService.getJobColor(assignedRole);
 			}
-		}
+		};
 
 		/**
 		 * Check if the issue is assigned to one of the user's roles
 		 */
-		function issueIsAssignedToAUserRole () {
+		vm.issueIsAssignedToAUserRole = function () {
 			return vm.data.assigned_roles.indexOf(vm.userJob._id) !==  -1;
 		}
 

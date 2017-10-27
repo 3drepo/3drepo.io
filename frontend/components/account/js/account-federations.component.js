@@ -271,7 +271,6 @@
 
 				})
 				.catch(function(response){
-					console.log("Delete");
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
@@ -303,8 +302,11 @@
 		}
 
 		function setupSetting(event, teamspace, project, federation){
-			$location.search("proj", federation.name);
+			$location.search("modelName", federation.name);
+			$location.search("modelId", federation.model);
+			$location.search("targetProj", project.name);
 			$location.search("targetAcct", teamspace.account);
+			$location.search("page", "modelsetting");
 
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}

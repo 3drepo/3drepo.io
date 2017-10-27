@@ -48,9 +48,9 @@
 				$mdDialog.alert()
 					.clickOutsideToClose(escapable)
 					.escapeToClose(escapable)
-					.title("Your Session Has Expired")
+					.title(title)
 					.textContent(content)
-					.ariaLabel("Your Session Has Expired")
+					.ariaLabel(title)
 					.ok("OK")
 			);
 		}
@@ -65,9 +65,9 @@
 				$mdDialog.alert()
 					.clickOutsideToClose(escapable)
 					.escapeToClose(escapable)
-					.title("Your Session Has Expired")
+					.title(title)
 					.htmlContent(content)
-					.ariaLabel("Your Session Has Expired")
+					.ariaLabel(title)
 					.ok("OK")
 			);
 		}

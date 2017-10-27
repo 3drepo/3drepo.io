@@ -27,6 +27,7 @@
 	const fs = require("fs.extra");
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
+	const Mailer = require('../mailer/mailer');
 
 	function ImportQueue() {}
 
@@ -308,6 +309,14 @@
 							corID: corID.toString()
 						}
 					);
+					this.logger.logInfo("No consumer in queue. Sending email alert...");
+
+					Mailer.sendNoConsumerAlert().then(() => {
+						this.logger.logInfo("Email sent.");
+					}).catch(err =>{
+						this.logger.logInfo("Failed to send email:", err);
+					});
+
 				}
 
 				return Promise.resolve(() => {});
@@ -347,12 +356,8 @@
 
 					let resData = JSON.parse(rep.content);
 
-					let resErrorCode = parseInt(resData.value);
-
-					let resErrorMessage = resData.message;
-
+					let resErrorCode = resData.value;
 					let resDatabase = resData.database;
-
 					let resProject = resData.project;
 
 					let status = resData.status;
@@ -360,17 +365,22 @@
 					if ("processing" === status) {
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
-						if (defer && resErrorCode === 0) {
-							defer.resolve(rep);
-						} else if (defer) {
-							defer.reject(resErrorCode, resErrorMessage, rep);
-						} else {
-							self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
+						if (resErrorCode === 0) {
+							ModelHelper.importSuccess(resDatabase, resProject);
+							// cclw05 - this is a temporary workaround!
+							// cclw05 - genFed needs to be merged with importModel
+							if(defer) {
+								defer.resolve(rep);
+							}
+						} 
+						else {
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode, rep.properties.correlationId);
+							if(defer){
+								defer.reject(rep);
+							}
 						}
-
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
-
 				}, { noAck: true });
 			});
 	};

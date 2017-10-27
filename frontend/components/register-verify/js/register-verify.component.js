@@ -30,33 +30,43 @@
 	RegisterVerifyCtrl.$inject = ["EventService", "APIService", "StateManager", "$window"];
 
 	function RegisterVerifyCtrl (EventService, APIService, StateManager, $window) {
-		var vm = this,
-			promise,
-			username = StateManager.query.username,
-			token = StateManager.query.token;
+		var vm = this;
+			
 
 		/*
          * Init
          */
 		vm.$onInit = function() {
 
-			vm.verified = false;
-			vm.showPaymentWait = false;
-			vm.databaseName = username;
+			if (StateManager && StateManager.query &&
+				StateManager.query.username && StateManager.query.token
+			) {
 
-			vm.verifyErrorMessage = "Verifying. Please wait...";
-			promise = APIService.post(username + "/verify", {token: token});
-			promise.then(function (response) {
-				if (response.status === 200) {
-					vm.verified = true;
-					vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
-				} else if (response.data.code === "ALREADY_VERIFIED") {
-					vm.verified = true;
-					vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
-				} else {
-					vm.verifyErrorMessage = "Error with verification";
-				}
-			});
+				vm.username = StateManager.query.username,
+				vm.token = StateManager.query.token;
+				vm.verified = false;
+				vm.showPaymentWait = false;
+				vm.databaseName = vm.username;
+	
+				vm.verifyErrorMessage = "Verifying. Please wait...";
+				APIService.post(vm.username + "/verify", { token: vm.token})
+					.then(function (response) {
+						if (response.status === 200) {
+							vm.verified = true;
+							vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
+						} else if (response.data.code === "ALREADY_VERIFIED") {
+							vm.verified = true;
+							vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+						} else {
+							vm.verifyErrorMessage = "Error with verification";
+						}
+					});
+			
+			} else {
+				vm.verifyErrorMessage = "Can't verify: Token and/or Username not provided";
+			}
+			
+			
 		};
 
 		vm.goToLoginPage = function () {

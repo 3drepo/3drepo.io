@@ -238,7 +238,7 @@ var Viewer = {};
 		};
 
 		this.handleError = function(message) {
-			callback(Viewer.EVENT.UNITY_ERROR, message);
+			errCallback(message);
 		};
 
 		this.destroy = function() {
@@ -861,7 +861,6 @@ var Viewer = {};
 		UNITY_ERROR: "VIEWER_EVENT_UNITY_ERROR",
 		START_LOADING: "VIEWING_START_LOADING",
 		LOAD_MODEL: "VIEWER_LOAD_MODEL",
-		CHECK_MODEL_LOADED: "VIEWER_CHECK_MODEL_LOADED",
 		BBOX_READY: "BBOX_READY",
 		MODEL_LOADED: "VIEWER_MODEL_LOADED",
 		LOADED: "VIEWER_EVENT_LOADED",

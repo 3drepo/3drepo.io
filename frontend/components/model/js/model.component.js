@@ -38,7 +38,7 @@
 	ModelCtrl.$inject = [
 		"$window", "$timeout", "$scope", "$element", 
 		"$location", "$compile", "$mdDialog", "EventService",
-		"ModelService", "TreeService", "RevisionsService", 
+		"TreeService", "RevisionsService", 
 		"AuthService", "IssuesService", "MultiSelectService", 
 		"StateManager", "PanelService", "ViewerService"
 	];
@@ -46,7 +46,7 @@
 	function ModelCtrl(
 		$window, $timeout, $scope, $element, 
 		$location, $compile, $mdDialog, EventService, 
-		ModelService, TreeService, RevisionsService, 
+		TreeService, RevisionsService, 
 		AuthService, IssuesService, MultiSelectService, 
 		StateManager, PanelService, ViewerService
 	) {
@@ -83,11 +83,6 @@
 				// Get the model element
 				vm.modelUI = angular.element($element[0].querySelector("#modelUI"));
 			});
-
-
-			// vm.issueArea = angular.element("<issue-area></issue-area>");
-			// vm.issueAreaElIssue = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
-			// vm.issueAreaElType = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 			
 		};
 
@@ -109,9 +104,37 @@
 
 		vm.setupModelInfo = function() {
 
-			ModelService.getModelInfo(vm.account, vm.model)
-				.then(function (data) {
+			IssuesService.init();
+			RevisionsService.listAll(vm.account, vm.model);
+
+			if (!ViewerService.currentModel.model) {
+				console.debug("Initiating Viewer");
+				ViewerService.initViewer()
+					.then(function(){
+						ViewerService.loadViewerModel(
+							vm.account, 
+							vm.model, 
+							vm.branch, 
+							vm.revision
+						);	
+					});
+			} else {
+				// Load the model
+				ViewerService.loadViewerModel(
+					vm.account, 
+					vm.model, 
+					vm.branch, 
+					vm.revision
+				);	
+			}
+
+			ViewerService.getModelInfo(vm.account, vm.model)
+				.then(function (response) {
+					var data = response.data;
+
 					vm.settings = data;
+					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
+
 					var index = -1;
 
 					if(!data.federate){
@@ -127,10 +150,6 @@
 								.splice(index, 1);
 						}
 					}
-					
-					IssuesService.init().then(function(){
-						EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
-					});
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
 						vm.treeMap = TreeService.getMap(tree.nodes);
@@ -141,8 +160,6 @@
 					console.error(error);
 					vm.handleModelError();
 				});
-
-			RevisionsService.listAll(vm.account, vm.model);
 
 		};
 

@@ -34,7 +34,7 @@
 			controllerAs: "vm"
 		});
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService", "MultiSelectService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService", "MultiSelectService", "ViewerService"];
 
 	/**
 	 *
@@ -44,7 +44,7 @@
 	 * @param EventService
 	 * @constructor
 	 */
-	function TreeCtrl($scope, $timeout, TreeService, EventService, MultiSelectService) {
+	function TreeCtrl($scope, $timeout, TreeService, EventService, MultiSelectService, ViewerService) {
 		var vm = this,
 			promise = null,
 			currentSelectedNode = null,
@@ -69,7 +69,6 @@
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.visible   = {};
 			vm.invisible = {};
-			vm.multiSelectMode = false;
 
 		};
 
@@ -465,30 +464,43 @@
 			}
 		}
 
+		vm.getPath = function(objectID) {
+			
+			var path;
+			if(vm.idToPath[objectID]){
+				// If the Object ID is on the main tree then use that path
+				path = vm.idToPath[objectID].split("__");
+			} else if (vm.subModelIdToPath[objectID]) {
+				// Else check the submodel for the id for the path
+				path = vm.subModelIdToPath[objectID].split("__");
+				var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
+				path = parentPath.concat(path);
+			}
+
+			return path;
+
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject) {
 					var objectID = event.value.id;
 
 					if (objectID && vm.idToPath) {
-						var path;
-						if(vm.idToPath[objectID]){
-							path = vm.idToPath[objectID].split("__");
+						var path = vm.getPath(objectID);
+						if (!path) {
+							console.error("Couldn't find the object path");
 						} else {
-							path = vm.subProjIdToPath[objectID].split("__");
-							var parentPath = vm.subTreesById[path[0]].parent.path.split("__");
-							path = parentPath.concat(path);
+							initNodesToShow();
+							lastParentWithName = null;
+							expandToSelection(path, 0);
+							lastParentWithName && vm.selectNode(lastParentWithName);
 						}
-
-						initNodesToShow();
-						//console.log('path', path);
-						lastParentWithName = null;
-						expandToSelection(path, 0);
-						lastParentWithName && vm.selectNode(lastParentWithName);
-
 					}
 				}
+
 			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				// Remove highlight from any selected node in the tree
 				if (currentSelectedNode !== null) {
@@ -504,9 +516,7 @@
 			) {
 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 				highlightSelectedViewerObject = !event.value.on;
-			} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
-				vm.multiSelectMode = event.value;
-			} else if (event.type === EventService.EVENT.TREE_READY){
+			}  else if (event.type === EventService.EVENT.TREE_READY){
 				/*
 				 * Get all the tree nodes
 				 */
@@ -518,7 +528,8 @@
 				vm.showProgress = false;
 				vm.subTreesById = event.value.subTreesById;
 				vm.idToPath = event.value.idToPath;
-				vm.subProjIdToPath = event.value.subProjIdToPath;
+				
+				vm.subModelIdToPath = event.value.subModelIdToPath;
 
 				initNodesToShow();
 				expandFirstNode();
@@ -624,15 +635,7 @@
 				var vals = key.split("@");
 				var account = vals[0];
 				var model = vals[1];
-
-				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
-					source: "tree",
-					account: account,
-					model: model,
-					name: node.name,
-					visible : node.toggleState != "invisible",
-					ids: childNodes[key]
-				});
+				ViewerService.switchObjectVisibility(account, model, childNodes[key], node.toggleState != "invisible");
 			}
 
 		};
@@ -719,21 +722,17 @@
 		vm.selectNode = function (node) {
 
 			var sameNodeSelected = currentSelectedNode !== null && currentSelectedNode._id === node._id;
-			console.log("Same node selected? ", sameNodeSelected);			
-			if(!MultiSelectService.isMultiMode())
-			{
+		
+			if(!MultiSelectService.isMultiMode()) {
 				//If it is not multiselect mode, remove all highlights.
-				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
+				ViewerService.clearHighlights();
 			}
 
-			if(sameNodeSelected)
-			{
+			if(sameNodeSelected) {
 				//Same node has been pressed -> reset selection
 				currentSelectedNode.selected = false;
 				currentSelectedNode = null;
-			}
-			else
-			{
+			} else {
 				//This node now becomes the currently selected
 				node.selected = true;
 				currentSelectedNode = node;
@@ -759,7 +758,7 @@
 			
 				// Separately highlight the children
 				// but only for multipart meshes
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+				ViewerService.highlightObjects({
 					source: "tree",
 					account: account,
 					model: model,

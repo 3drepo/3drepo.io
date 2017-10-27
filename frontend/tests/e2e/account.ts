@@ -35,7 +35,7 @@ describe("Account page ", function() {
 			expect(tabs.get(0).getText()).to.eventually.equal("Teamspaces");
 			expect(tabs.get(1).getText()).to.eventually.equal("Profile");
 			expect(tabs.get(2).getText()).to.eventually.equal("Billing");
-			expect(tabs.get(3).getText()).to.eventually.equal("Licences");
+			expect(tabs.get(3).getText()).to.eventually.equal("Licences & Jobs");
 			// TODO: fix this on staging
 			//expect(tabs.get(4).getText()).to.eventually.equal("Assign Permissions");
 		});

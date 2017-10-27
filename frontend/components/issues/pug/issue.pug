@@ -55,8 +55,11 @@ div.heightFix(
 						md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
 				md-input-container.issueItemStatus(flex)
 					label Status
-					md-select(ng-model="vm.issueData.status", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdateStatus")
-						md-option(ng-repeat="status in vm.statuses", value="{{status.value}}", ng-disabled="status.disabled") {{status.label}}
+					md-select(ng-model="vm.issueData.status", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+						md-option(
+							ng-repeat="status in vm.statuses"
+							value="{{status.value}}") {{status.label}}
+
 			div(layout="row")
 				md-input-container(flex)
 					label Assign

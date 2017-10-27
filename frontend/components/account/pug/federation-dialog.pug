@@ -54,9 +54,7 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 							value="{{vm.federationData.name}}"
 							tdr-focus="true"
 							ng-disabled="vm.federationData.name && vm.federationData._isEdit"
-							ng-model="vm.federationData.name"
-							ng-pattern="vm.modelRegExp" 
-							maxlength=20)
+							ng-model="vm.federationData.name")
 						.inputHint(ng-if="!vm.federationData.name") Letters, numbers, hyphen and underscore only
 				
 				div( layout="row", flex)

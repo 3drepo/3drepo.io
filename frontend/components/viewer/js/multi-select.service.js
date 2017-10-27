@@ -23,9 +23,9 @@
 		.module("3drepo")
 		.service("MultiSelectService", MultiSelectService);
 
-	MultiSelectService.$inject = ["EventService", "ViewerService"];
+	MultiSelectService.$inject = ["ViewerService"];
 
-	function MultiSelectService(EventService, ViewerService) {
+	function MultiSelectService(ViewerService) {
 
 		var keys = {
 			cmdKey : 91,
@@ -77,20 +77,20 @@
 
 		function multiSelectEnabled() {
 			multiMode = true;
-			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, true);
+			ViewerService.setMultiSelectMode(true);
 		}
 
 		function multiSelectDisabled() {
 			multiMode = false;
-			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
+			ViewerService.setMultiSelectMode(false);
 		}
 
 		function unhighlightAll() {
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);			
+			ViewerService.highlightObjects([]);			
 		}
 
 		function disableMultiSelect() {
-			EventService.send(EventService.EVENT.MULTI_SELECT_MODE, false);
+			ViewerService.setMultiSelectMode(false);
 		}
 
 		function isCmd(keysDown) {

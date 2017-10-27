@@ -74,6 +74,16 @@ function getURL(urlName, params){
 	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
+function sendNoConsumerAlert(){
+	if(config.contact){
+		const template = require('./templates/noConsumers');
+		return sendEmail(template, config.contact.email, {domain: config.host});
+	}
+	else{
+		return Promise.reject({ message: 'config.contact is not set'});
+	}
+}
+
 function sendVerifyUserEmail(to, data){
 	'use strict';
 
@@ -214,8 +224,15 @@ function sendModelInvitation(to, data){
 function sendImportError(data){
 	'use strict';
 
-	let template = require('./templates/importError');
-	return sendEmail(template, config.contact.email, data);
+	if(config.contact){
+		let template = require('./templates/importError');
+		data.domain = config.host;
+		return sendEmail(template, config.contact.email, data);
+	}
+	else
+	{
+		return Promise.reject({ message: 'config.mail.sender is not set'});
+	}
 }
 
 module.exports = {
@@ -231,4 +248,5 @@ module.exports = {
 	sendPaymentRefundedEmail,
 	sendImportError,
 	sendNewUser,
+	sendNoConsumerAlert
 }

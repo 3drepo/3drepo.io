@@ -30,16 +30,16 @@
 	PasswordForgotCtrl.$inject = ["$scope", "APIService"];
 
 	function PasswordForgotCtrl ($scope, APIService) {
-		var vm = this,
-			promise,
-			messageColour = "rgba(0, 0, 0, 0.7)",
-			messageErrorColour = "#F44336";
+		var vm = this;
+			
         
 		/*
          * Init
          */
 		vm.$onInit = function() {
 			vm.showProgress = false;
+			vm.messageColour = "rgba(0, 0, 0, 0.7)";
+			vm.messageErrorColour = "#F44336";
 		};
 
 		/*
@@ -64,23 +64,25 @@
 
 			if (requestChange) {
 				if (vm.username && vm.email) {
-					vm.messageColor = messageColour;
+
+					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					promise = APIService.post(vm.username + "/forgot-password", {email: vm.email});
-					promise.then(function (response) {
-						vm.showProgress = false;
-						if (response.status === 200) {
-							vm.verified = true;
-							vm.messageColor = messageColour;
-							vm.message = "Thank you. You will receive an email shortly with a link to change your password";
-						} else {
-							vm.messageColor = messageErrorColour;
-							vm.message = response.data.message;
-						}
-					});
+					APIService.post(vm.username + "/forgot-password", {email: vm.email})
+						.then(function (response) {
+							vm.showProgress = false;
+							if (response.status === 200) {
+								vm.verified = true;
+								vm.messageColor = vm.messageColour;
+								vm.message = "Thank you. You will receive an email shortly with a link to change your password";
+							} else {
+								vm.messageColor = vm.messageErrorColour;
+								vm.message = response.data.message;
+							}
+						});
+
 				} else {
-					vm.messageColor = messageErrorColour;
+					vm.messageColor = vm.messageErrorColour;
 					vm.message = "Missing username or email";
 				}
 			}

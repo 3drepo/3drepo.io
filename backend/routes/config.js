@@ -8,7 +8,6 @@
     const serialize = require("serialize-javascript");
     const _ = require("lodash");
     const fs = require("fs");
-    const pug = require("pug");
     const addressMeta = require("../models/addressMeta");
     const units = require("../models/unit");
     const History = require("../models/history");
@@ -129,7 +128,6 @@
             "ui": {},
             "uistate": {},
             "pluginCSS": [],
-            "renderMe": pug.renderFile,
             "structure": pluginStructure,
             "frontendPug": [],
             "gaTrackId": config.gaTrackId,
@@ -209,19 +207,7 @@
     
         clientConfig.responseCodes = _.each(responseCodes.codesMap);
     
-        clientConfig.permissions = {
-            "PERM_DELETE_MODEL": C.PERM_DELETE_MODEL,
-            "PERM_CHANGE_MODEL_SETTINGS": C.PERM_CHANGE_MODEL_SETTINGS,
-            "PERM_ASSIGN_LICENCE": C.PERM_ASSIGN_LICENCE,
-            "PERM_UPLOAD_FILES": C.PERM_UPLOAD_FILES,
-            "PERM_CREATE_ISSUE": C.PERM_CREATE_ISSUE,
-            "PERM_COMMENT_ISSUE": C.PERM_COMMENT_ISSUE,
-            "PERM_VIEW_ISSUE": C.PERM_VIEW_ISSUE,
-            "PERM_DOWNLOAD_MODEL": C.PERM_DOWNLOAD_MODEL,
-            "PERM_VIEW_MODEL": C.PERM_VIEW_MODEL,
-            "PERM_CREATE_MODEL": C.PERM_CREATE_MODEL,
-            "PERM_EDIT_FEDERATION": C.PERM_EDIT_FEDERATION
-        };
+        clientConfig.permissions = C.MODEL_PERM_OBJ;
     
         clientConfig.impliedPermission = C.IMPLIED_PERM;
     

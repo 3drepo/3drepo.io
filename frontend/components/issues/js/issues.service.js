@@ -23,12 +23,14 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"UtilsService", "TreeService", "AuthService", "APIService"
+		"UtilsService", "TreeService", "AuthService", "APIService",
+		"ViewerService"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		UtilsService, TreeService, AuthService, APIService
+		UtilsService, TreeService, AuthService, APIService,
+		ViewerService
 	) {
 
 		var url = "",
@@ -43,7 +45,7 @@
 
 		var service = {
 			init : init,
-			setCanUpdateStatus : setCanUpdateStatus,
+			setCanUpdateIssue : setCanUpdateIssue,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -52,6 +54,7 @@
 			handleTree: handleTree,
 			getPrettyTime: getPrettyTime,
 			generateTitle: generateTitle,
+			getThumbnailPath: getThumbnailPath,
 			getIssue: getIssue,
 			getIssues: getIssues,
 			saveIssue: saveIssue,
@@ -63,11 +66,8 @@
 			editComment: editComment,
 			deleteComment: deleteComment,
 			sealComment: sealComment,
-			addPin: addPin,
-			removePin: removePin,
-			fixPin: fixPin,
 			getJobs: getJobs,
-			getUserJobFormodel: getUserJobFormodel,
+			getUserJobForModel: getUserJobForModel,
 			hexToRgb: hexToRgb,
 			getJobColor: getJobColor,
 			getStatusIcon: getStatusIcon,
@@ -85,19 +85,31 @@
 			return initPromise.promise;
 		}
 
-		function setCanUpdateStatus(issueData, issueId, permissions) {
-			var hasPermission = AuthService.hasPermission(
-				ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+
+		function setCanUpdateIssue(issueData, userJob, permissions) {
+			
+			// If they are the owner
+			var isOwner = (AuthService.getUsername() === issueData.owner);
+
+			// Check that the jobs match
+			var jobsMatch = (userJob._id && 
+							issueData.creator_role && 
+							userJob._id === issueData.creator_role);
+
+			// And also that they can also at least comment ('edit' so to speak)
+			jobsMatch = jobsMatch && AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
 				permissions
 			);
 
-			if(!hasPermission){
-				return false;
-			}
+			// Or alternatively they just have full permissions
+			var hasPermission = AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+				permissions
+			);
 
-			var isOwner = (AuthService.getUsername() === issueData.owner);
-			var hasRole = issueData.assigned_roles.indexOf(issueId) !== -1;
-			return isOwner || hasRole;
+
+			return isOwner || jobsMatch || hasPermission;
 
 		}
 
@@ -146,7 +158,7 @@
 			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			// Remove highlight from any multi objects
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+			ViewerService.highlightObjects([]);
 
 			// clear selection
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
@@ -208,7 +220,7 @@
 					multi: true
 				
 				};
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, treeData);
+				ViewerService.highlightObjects(treeData);
 			}
 		}
 
@@ -260,6 +272,10 @@
 			} else {
 				return issue.number + " " + issue.name;
 			}
+		}
+
+		function getThumbnailPath(url) {
+			return APIService.getAPIUrl(url);
 		}
 
 		function getIssue(account, model, issueId){
@@ -360,7 +376,7 @@
 		 * @returns {*}
 		 */
 		function doPut(issue, putData) {
-			var deferred = $q.defer();
+
 			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
@@ -371,11 +387,8 @@
 				
 			var putConfig = {withCredentials: true};
 
-			APIService.put(endpoint, putData, putConfig)
-				.then(function (response) {
-					deferred.resolve(response);
-				});
-			return deferred.promise;
+			return APIService.put(endpoint, putData, putConfig);
+		
 		}
 
 		function toggleCloseIssue(issue) {
@@ -434,34 +447,6 @@
 			});
 		}
 
-		function addPin(pin, colours, viewpoint) {
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: pin.id,
-				account: pin.account,
-				model: pin.model,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours,
-				viewpoint: viewpoint
-			});
-		}
-
-		function removePin(id) {
-			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
-				id: id
-			});
-		}
-
-		function fixPin(pin, colours) {
-			removePin();
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: newPinId,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours
-			});
-		}
-
 		function getJobs(account, model){
 
 			var deferred = $q.defer();
@@ -480,7 +465,7 @@
 			return deferred.promise;
 		}
 
-		function getUserJobFormodel(account, model){
+		function getUserJobForModel(account, model){
 			var deferred = $q.defer();
 			url = account + "/" +model + "/userJobForModel.json";
 

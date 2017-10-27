@@ -27,13 +27,13 @@
 			controllerAs: "vm"
 		});
 
-	paymentCtrl.$inject = ["EventService"];
+	paymentCtrl.$inject = ["StateManager"];
 
-	function paymentCtrl (EventService) {
+	function paymentCtrl (StateManager) {
 		var vm = this;
 
 		vm.goToLoginPage = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 	}
 }());

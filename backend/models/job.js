@@ -15,64 +15,79 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
 
-	const mongoose = require("mongoose");
-	const schema = mongoose.Schema({
-		_id: String,
-		color: String
-	});
-	const responseCodes = require('../response_codes.js');
+"use strict";
 
-	const methods = {
+const mongoose = require("mongoose");
+const schema = mongoose.Schema({
+	_id: String,
+	color: String
+});
+const responseCodes = require('../response_codes.js');
 
-		init: function(user, jobs) {
+const methods = {
 
-			this.user = user;
-			this.jobs = jobs;
-			return this;
-		},
+	init: function(user, jobs) {
 
-		findById: function(id){
-			return this.jobs.id(id);
-		},
+		this.user = user;
+		this.jobs = jobs;
+		return this;
+	},
 
-		add: function(job) {
-			if(!job._id){
-				return Promise.reject(responseCodes.JOB_ID_VALID);
-			} else if (this.findById(job._id)){
-				return Promise.reject(responseCodes.DUP_JOB);
-			} else {
-				this.jobs.push(job);
-				return this.user.save();
-			}
+	findById: function(id){
+		return this.jobs.id(id);
+	},
 
-		},
-
-		remove: function(name){
-
-			let job = this.findById(name);
-			
-			if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
-				return Promise.reject(responseCodes.JOB_ASSIGNED);
-			} else if (!job) {
-				return Promise.reject(responseCodes.JOB_NOT_FOUND);
-			} else {
-				job.remove();
-				return this.user.save();
-			}
-			
-		},
-
-		get: function(){
-			return this.jobs;
+	add: function(job) {
+		if(!job._id){
+			return Promise.reject(responseCodes.JOB_ID_VALID);
+		} else if (this.findById(job._id)){
+			return Promise.reject(responseCodes.DUP_JOB);
+		} else {
+			this.jobs.push(job);
+			return this.user.save();
 		}
-	};
 
-	// Mongoose doesn't support subschema static method
-	module.exports = {
-		schema, methods
-	};
+	},
 
-})();
+	update: function(job) {
+	
+		const jobToUpdate = this.findById(job._id);
+
+		if(!job._id){
+			return Promise.reject(responseCodes.JOB_ID_VALID);
+		}
+		else if (!jobToUpdate) {
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		} else {
+			jobToUpdate.color = job.color;
+			return this.user.save();
+		}
+
+	},
+
+	remove: function(name){
+
+		let job = this.findById(name);
+		
+		if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
+			return Promise.reject(responseCodes.JOB_ASSIGNED);
+		} else if (!job) {
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		} else {
+			job.remove();
+			return this.user.save();
+		}
+		
+	},
+
+	get: function(){
+		return this.jobs;
+	}
+};
+
+// Mongoose doesn't support subschema static method
+module.exports = {
+	schema, methods
+};
+

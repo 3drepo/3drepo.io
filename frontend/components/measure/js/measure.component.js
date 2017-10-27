@@ -80,7 +80,7 @@
 				
 				if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-					vm.units = event.value.settings.unit;
+					vm.units = event.value.properties.unit;
 					vm.modelSettingsReady.resolve();
 
 				} 

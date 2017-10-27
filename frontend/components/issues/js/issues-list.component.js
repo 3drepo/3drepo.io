@@ -45,9 +45,17 @@
 			}
 		});
 
-	IssuesListCtrl.$inject = ["$scope", "$filter", "$window", "UtilsService", "IssuesService", "EventService", "ClientConfigService", "$timeout"];
+	IssuesListCtrl.$inject = [
+		"$scope", "$filter", "$window", "UtilsService", 
+		"IssuesService", "EventService", "ClientConfigService", 
+		"$timeout", "ViewerService"
+	];
 
-	function IssuesListCtrl ($scope, $filter, $window, UtilsService, IssuesService, EventService, ClientConfigService, $timeout) {
+	function IssuesListCtrl (
+		$scope, $filter, $window, UtilsService, IssuesService, 
+		EventService, ClientConfigService, $timeout, ViewerService
+	) {
+
 		var vm = this;
 
 		// Init
@@ -432,6 +440,8 @@
 				vm.issuesToShow = vm.issuesToShow.filter(function(issue){
 					return vm.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
+
+
 			}
 
 			// Setup what to show
@@ -445,6 +455,7 @@
 				vm.info = "There are currently no open issues";
 				vm.contentHeight({height: vm.infoHeight});
 			}
+
 		}
 
 		/**
@@ -463,14 +474,6 @@
 
 				if (show !== undefined && pinPosition) {
 
-					// Create new pin
-					var pinData = {
-						id: issue._id,
-						position: issue.position,
-						norm:issue.norm,
-						account: issue.account,
-						model: issue.model
-					};
 					var pinColor = Pin.pinColours.blue;
 					var isSelectedPin = vm.selectedIssue && issue._id === vm.selectedIssue._id;
 
@@ -478,10 +481,19 @@
 						pinColor = Pin.pinColours.yellow;
 					}
 
-					IssuesService.addPin(pinData, pinColor, issue.viewpoint);
+					ViewerService.addPin({
+						id: issue._id,
+						account: vm.account,
+						model: vm.model,
+						pickedPos: issue.position,
+						pickedNorm: issue.norm,
+						colours: pinColor,
+						viewpoint: issue.viewpoint
+					});
+
 				} else {
 					// Remove pin
-					IssuesService.removePin(issue._id);
+					ViewerService.removePin({ id: issue._id });
 				}
 			});
 

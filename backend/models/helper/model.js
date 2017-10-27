@@ -106,6 +106,50 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+function importSuccess(account, model) {
+	let status = 'ok';
+	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+	ModelSetting.findById({account, model}, model).then(setting => {
+		if (setting) {
+			setting.status = status;
+			systemLogger.logInfo(`Model status changed to ${status}`);
+			setting.corID = undefined;
+			systemLogger.logInfo(`Correlation ID reset`);
+			setting.errorReason = undefined;
+			if(source.type === 'toy'){
+				setting.timestamp = new Date();
+			}
+			setting.markModified('errorReason');
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+			setting.save();
+		}
+	});
+
+}
+
+function importFail(account, model, errCode, corId) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		//mark model failed
+		setting.status = 'failed';
+		setting.errorReason = convertToErrorCode(errCode);
+		setting.markModified('errorReason');
+		setting.save().then( () => {				
+			ChatEvent.modelStatusChanged(null, account, model, setting);						
+		})
+
+		Mailer.sendImportError({
+			account,
+			model,
+			username: account,
+			err: convertToErrorCode(errCode).message,
+			corID: corId
+		});
+	});
+
+
+
+}
+
 /**
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
@@ -415,7 +459,11 @@ function createFederatedModel(account, model, subModels){
 			return Promise.resolve();
 		}
 		return Promise.all(addSubModels).then(() => {
+			//return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			// cclw05 - this is a temporary workaround!
+			// cclw05 - genFed needs to be merged with importModel
 			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			//return Promise.resolve();
 
 		}).then(data => {
 
@@ -493,7 +541,9 @@ function getIdMap(account, model, branch, rev, username){
 						idMap: obj.idMaps.idMap,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -525,7 +575,7 @@ function getIdMap(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdMap.idMap)
+			if (subIdMap && subIdMap.idMap)
 			{
 				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
 			}
@@ -693,7 +743,9 @@ function getTreePath(account, model, branch, rev, username){
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -725,7 +777,7 @@ function getTreePath(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subTreePath.idToPath)
+			if (subTreePath && subTreePath.idToPath)
 			{
 				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
 			}
@@ -794,7 +846,9 @@ function getUnityAssets(account, model, branch, rev, username){
 						models: obj.models,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -819,7 +873,7 @@ function getUnityAssets(account, model, branch, rev, username){
 		}
 
 		subAssets.forEach(subAsset => {
-			if (subAsset.models)
+			if (subAsset && subAsset.models)
 			{
 				models = models.concat(subAsset.models);
 			}
@@ -944,7 +998,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 					pass.write(",");
 				}
 
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -1309,58 +1363,8 @@ function importModel(account, model, username, modelSetting, source, data){
 			});
 		}
 
-	}).then(() => {
-
-		resetCorrelationId(account, model);
-
-		modelSetting.status = 'ok';
-		modelSetting.errorReason = undefined;
-
-		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
-		if(source.type === 'toy'){
-			modelSetting.timestamp = new Date();
-		}
-		modelSetting.markModified('errorReason');
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		return modelSetting.save();
-
-	}).then(() => {
-
-		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
-			account,
-			model,
-			username
-		});
-
-		return modelSetting;
-
-	}).catch(err => {
-
-		// import failed for some reason(s)...
-		//mark model failed
-
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
-			account,
-			model,
-			username
-		});
-
-		modelSetting.status = 'failed';
-		modelSetting.errorReason = err;
-		modelSetting.markModified('errorReason');
-		modelSetting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		return Promise.reject(err);
-
 	});
+
 }
 
 function removeModel(account, model, forceRemove){
@@ -1600,8 +1604,22 @@ function getMetadata(account, model, id){
 
 }
 
+function isUserAdmin(account, model, user)
+{
+	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	//find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  //This model belongs to a project
+			&& project.permissions.length > 0 //This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
+			);
+	});
+}
+
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
+const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
 const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -1617,6 +1635,7 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
+	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
@@ -1635,7 +1654,11 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
+	setStatus,
+	resetCorrelationId,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
-	setStatus
+	setStatus,
+	importSuccess,
+	importFail
 };
