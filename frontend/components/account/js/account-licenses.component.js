@@ -252,12 +252,12 @@
 		};
 
 		vm.handleError = function(action, type, error){
-			var content = "Something went wrong trying to" + action + "the " + type + ". " +
+			var content = "Something went wrong trying to " + action + " the " + type + ". " +
 			"If this continues please message support@3drepo.io.";
 			var escapable = true;
 			var title = "Error";
 			DialogService.text(title, content, escapable);
-			console.error("Something went wrong trying to" + action + " the " + type + ": ", error);
+			console.error("Something went wrong trying to " + action + " the " + type + ": ", error);
 		};
 
 		/**
