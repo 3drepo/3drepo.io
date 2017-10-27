@@ -125,7 +125,11 @@ schema.methods.updateProperties = function(updateObj){
 		} else {
 			this.properties[key] = updateObj[key];
 		}
-		
+		if(key === "fourDSequenceTag"){
+			this[key] = updateObj[key];
+
+		}	
+		console.log("Key is : ", key);
 	});
 
 };
