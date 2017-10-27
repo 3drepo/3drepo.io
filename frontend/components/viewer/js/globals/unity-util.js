@@ -345,6 +345,9 @@ var UnityUtil;
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject("cancel");
+		}
+		
+		if (loadingResolve) {
 			loadingResolve.reject("cancel");
 		}
 	};
