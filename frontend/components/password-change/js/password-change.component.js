@@ -100,9 +100,12 @@
 								vm.message = "Your password has been reset. Please go to the login page.";
 							}
 						})
-						.catch(function(){
+						.catch(function(error){
 							vm.messageColor = vm.messageErrorColour;
 							vm.message = "Error changing password";
+							if (error.data.message === "Token is invalid or expired") {
+								vm.message += " " + error.data.message;
+							}
 						});
 
 				} else {
