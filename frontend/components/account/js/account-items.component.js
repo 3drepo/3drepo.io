@@ -728,7 +728,8 @@
 				}
 
 				vm.uploading = true;
-
+				vm.closeDialog();
+				
 				AccountUploadService.newModel(vm.newModelData)
 					.then(function (response) {
 
@@ -754,8 +755,7 @@
 							);
 							vm.addButtons = false;
 							vm.addButtonType = "add";
-							vm.closeDialog();
-							
+
 							AnalyticService.sendEvent({
 								eventCategory: "model",
 								eventAction: "create"
