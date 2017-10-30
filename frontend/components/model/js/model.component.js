@@ -87,7 +87,8 @@
 		};
 
 		vm.handleModelError = function(){
-			var message = "The model was not found or failed to load correctly. " +
+			var message = "The model was either not found, failed to load correctly "+
+			"or you are not authorized to view it. " +
 			" You will now be redirected to the teamspace page.";
 
 			$mdDialog.show(
