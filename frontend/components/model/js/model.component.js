@@ -158,7 +158,11 @@
 				})
 				.catch(function(error){
 					console.error(error);
-					vm.handleModelError();
+					// If we are not logged in the 
+					// session expired popup takes prescedence
+					if (error.data.message !== "You are not logged in") {
+						vm.handleModelError();
+					}
 				});
 
 		};

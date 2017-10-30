@@ -32,7 +32,9 @@
 		service.responseError = function(response) {
 
 			var notLogin = response.data.place !== "GET /login";
-			var unauthorized = response.status === 401;
+
+			var unauthorized = response.status === 401 &&
+								response.data.message === "You are not logged in";
 			var sessionHasExpired = unauthorized && !dialogOpen && notLogin;
 
 			if (sessionHasExpired) {
