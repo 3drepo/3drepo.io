@@ -26,6 +26,7 @@
 				.updateContainer(layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(ng-click="vm.updateInfo()") Update
 					p {{vm.infoSaveInfo}}
+					p(ng-if="vm.updateError").updateError {{vm.updateError}}
 
 			md-divider
 
@@ -39,5 +40,8 @@
 						label New password
 						input(ng-model="vm.newPassword", type="password")
 				.updateContainer(layout="row", layout-align="start center")
-					md-button.md-raised.md-accent(ng-click="vm.updatePassword()") Update
+					md-button.md-raised.md-accent(
+						ng-disabled="(!vm.oldPassword || !vm.newPassword) || (vm.oldPassword === vm.newPassword)"
+						ng-click="vm.updatePassword()") Update
 					p {{vm.passwordSaveInfo}}
+					p(ng-if="vm.passwordSaveError").updateError {{vm.passwordSaveError}}

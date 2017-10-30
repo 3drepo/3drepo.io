@@ -282,6 +282,10 @@ account-profile .updateContainer {
   margin: -20px 0 0;
 }
 
+account-profile .updateError {
+  color: #F44336;
+}
+
 account-profile .md-title {
   margin: -10px 0 20px;
 }
