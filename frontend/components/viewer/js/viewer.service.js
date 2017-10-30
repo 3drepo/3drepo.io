@@ -23,12 +23,12 @@
 
 	ViewerService.$inject = [
 		"ClientConfigService", "$q", "APIService", "DialogService", 
-		"EventService"
+		"EventService", "DocsService"
 	];
 
 	function ViewerService(
 		ClientConfigService, $q, APIService, DialogService, 
-		EventService
+		EventService, DocsService
 	) {
 
 		var viewer;
@@ -37,12 +37,14 @@
 			promise : null
 		};
 
+		var pin = {
+			pinDropMode : false
+		};
+
 		var initialised = $q.defer();
 			
 		var service = {
-			pin : {
-				pinDropMode : false
-			},
+			pin : pin,
 			initViewer : initViewer,
 			getViewer : getViewer,
 			loadViewerModel : loadViewerModel,
@@ -108,7 +110,15 @@
 					break;
 
 				case EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
+					DocsService.state.show = false;
 					viewer.clearHighlights();
+					break;
+	
+				case EventService.EVENT.VIEWER.OBJECT_SELECTED:
+					var valid = DocsService.state.active && !pin.pinDropMode;
+					if (valid) {
+						DocsService.handleObjectSelected(event);
+					}
 					break;
 
 				case EventService.EVENT.VIEWER.SET_CAMERA:

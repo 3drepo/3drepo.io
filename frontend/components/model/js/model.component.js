@@ -152,7 +152,7 @@
 					}
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
-						vm.treeMap = TreeService.getMap(tree.nodes);
+						TreeService.treeMap = TreeService.getMap(tree.nodes);
 						EventService.send(EventService.EVENT.TREE_READY, tree);
 					});
 				})

@@ -40,7 +40,6 @@
 			newPinId = "newPinId",
 			updatedIssue = null;
 
-
 		var initPromise = $q.defer();
 
 		var service = {
@@ -200,8 +199,8 @@
 					ids[key] = [];
 				}	
 
-				var treeMap = TreeService.getMap(tree.nodes);
-				ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+				var handledTreeMap = TreeService.getMap(tree.nodes);
+				ids[key].push(handledTreeMap.sharedIdToUid[obj.shared_id]);
 
 			});
 

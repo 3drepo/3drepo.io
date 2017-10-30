@@ -38,7 +38,6 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
-				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			}

@@ -27,7 +27,6 @@
 				account: "<",
 				model: "<",
 				allIssues: "<",
-				treeMap: "<",
 				filterText: "<",
 				event: "<",
 				onEditIssue: "&",

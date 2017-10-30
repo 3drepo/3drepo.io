@@ -25,7 +25,6 @@
 			bindings: {
 				show: "=",
 				onContentHeightRequest: "&",
-				treeMap: "="
 			},
 			controller: DocsCtrl,
 			controllerAs: "vm"
@@ -34,12 +33,12 @@
 
 	DocsCtrl.$inject = [
 		"$scope", "$mdDialog", "$timeout", "$filter", 
-		"EventService", "DocsService", "ViewerService"
+		"EventService", "DocsService"
 	];
 
 	function DocsCtrl(
 		$scope, $mdDialog, $timeout, $filter, 
-		EventService, DocsService, ViewerService
+		EventService, DocsService
 	) {	
 
 		var vm = this;
@@ -48,75 +47,33 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			vm.docTypeHeight = 50;
+			DocsService.docTypeHeight = 50;
 			vm.showDocsGetProgress = false;
 			vm.onContentHeightRequest({height: 80});
+			vm.state = DocsService.state;
 		};
 
-		vm.handleObjectSelected = function(event) {
-			// Get any documents associated with an object
-			var object = event.value;
+		vm.$onDestroy = function() {
+			DocsService.state.active = false;
+			DocsService.state.show = false;
+		};
 
-			var metadataIds = vm.treeMap.oIdToMetaId[object.id];
-			if(metadataIds && metadataIds.length){
-				DocsService.getDocs(object.account, object.model, metadataIds[0])
-					.then(function(data){
+		$scope.$watch(function(){
+			return DocsService.state;
+		}, function(){
 
-						if(!data){
-							return;
-						}
-						
-						vm.show = true;
-						
-						$timeout(function(){
-							//TODO: Do we need to do this for all docs
-							// if  we don't support PDFs anymore?
-							vm.docs = data;
-							vm.allDocTypesHeight = 0;
-							// Open all doc types initially
-							for (var docType in vm.docs) {
-								if (vm.docs.hasOwnProperty(docType)) {
-									vm.docs[docType].show = true;
-									vm.allDocTypesHeight += vm.docTypeHeight;
-								}
-							}
-							setContentHeight();
-						});
-					
-					});
-
-			} else {
-				vm.show = false;
+			if (DocsService.state.updated === true) {
+				vm.docs = DocsService.state.docs;
+				vm.allDocTypesHeight = DocsService.state.allDocTypesHeight;
+				DocsService.state.updated = false;
+				setContentHeight();
 			}
-		};
 
-		/*
-		 * Set up event watching
-		 */
-		$scope.$watch(EventService.currentEvent, function (event) {
+			if (vm.show !== DocsService.state.show) {
+				vm.show = DocsService.state.show;
+			}
 
-			var valid = vm.autoMetaData && !ViewerService.pin.pinDropMode;
-			if (
-				valid && 
-				event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED
-			) {
-
-				vm.handleObjectSelected(event);
-
-			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-
-				vm.show = false;
-
-			} else if (event.type === EventService.EVENT.AUTO_META_DATA) {
-
-				vm.autoMetaData = event.value;
-
-				// Hide or show depending if it's closed or open
-				vm.show = false;
-
-
-			} 
-		});
+		}, true);
 
 		/**
 		 * Show a document in a dialog
@@ -128,7 +85,7 @@
 			vm.progressInfo = "Loading document " + doc.name;
 			vm.showDocLoadProgress = true;
 			$mdDialog.show({
-				controller: docsDialogController,
+				controller: function(){},
 				templateUrl: "templates/docs-dialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
@@ -154,9 +111,6 @@
 			$scope.closeDialog();
 		}
 
-		function docsDialogController() {
-		}
-
 		/**
 		 * Open and close doc types
 		 *
@@ -176,7 +130,7 @@
 				metaDataItemHeight = 50; // It could be higher for items with long text but ignore that
 
 			angular.forEach(vm.docs, function(value, key) {
-				contentHeight += vm.docTypeHeight;
+				contentHeight += DocsService.docTypeHeight;
 				if (value.show) {
 					if (key === "Meta Data") {
 						itemsHeight = Object.keys(value.data[0].metadata).length * metaDataItemHeight;

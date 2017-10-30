@@ -29,7 +29,6 @@
 				revision: "=",
 				position: "=",
 				modelSettings: "=",
-				treeMap: "=",
 				contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
@@ -203,7 +202,6 @@
 				"model-settings='vm.modelSettings' " +
 				"revision='vm.revision' " +
 				"keys-down='vm.keysDown' " +
-				"tree-map='vm.treeMap' " +
 				"selected-objects='vm.selectedObjects' " +
 				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
 
