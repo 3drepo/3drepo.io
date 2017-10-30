@@ -109,10 +109,8 @@ function convertToErrorCode(bouncerErrorCode){
 function importSuccess(account, model) {
 	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
-			systemLogger.logInfo(`importSuccess::setting = ${setting}`);
-			systemLogger.logInfo(`Model status changed to ${setting.status}`);
+			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
-			systemLogger.logInfo(`Correlation ID reset`);
 			setting.errorReason = undefined;
 			if(setting.type === 'toy' || setting.type === 'sample'){
 				setting.timestamp = new Date();
@@ -122,7 +120,6 @@ function importSuccess(account, model) {
 			setting.save();
 		}
 	});
-
 }
 
 function importFail(account, model, errCode, corId) {
@@ -143,9 +140,6 @@ function importFail(account, model, errCode, corId) {
 			corID: corId
 		});
 	});
-
-
-
 }
 
 /**
@@ -1330,8 +1324,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
 
 	}).catch(err => {
-		// ISSUE_520... don't delete files if importFile fails
-		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
+		systemLogger.logError(`Failed to import model:`, err);
 	});
 
 }

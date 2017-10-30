@@ -63,9 +63,9 @@ describe("Model Helpers", function(){
 		});
 
 		it("hyphens dashes and underscores in test model name format should succeed", function(){
-			expect(ModelHelper.modelNameRegExp.test("aasa[")).to.be.false;
-			expect(ModelHelper.modelNameRegExp.test("aasa/")).to.be.false;
-			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test("aasa[")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("aasa/")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.true;
 		});
 
 		it("long strings less than 120 characters in test model name format should succeed", function(){
