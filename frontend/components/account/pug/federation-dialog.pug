@@ -60,9 +60,10 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div( layout="row", flex)
 					md-input-container(flex="50")
 						label Unit
-						md-select(ng-model="vm.federationData.unit")
+						md-select(
+							ng-disabled="true"
+							ng-model="vm.federationData.unit")
 							md-option(
-								ng-disabled="true"
 								ng-repeat="unit in vm.units", 
 								value="{{unit.value}}"
 								selected
