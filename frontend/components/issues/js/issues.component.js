@@ -347,11 +347,11 @@
 
 				var showIssue;
 
-				if(submodel){
+				if (submodel){
 					
 					showIssue = true;
 
-				} else {
+				} else if (vm.revisions && vm.revisions.length) {
 
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
