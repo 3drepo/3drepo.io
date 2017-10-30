@@ -220,11 +220,11 @@
 		});
 
 		$scope.$watch(function() {
-			return RevisionsService.status.ready;
+			return RevisionsService.status;
 		}, function(newValue, oldValue) {
-			if (RevisionsService.status.ready === true) {
+			console.log("issues - RevisionsService.status.ready", RevisionsService.status);
+			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
-				vm.watchNotification();
 			}
 		}, true);
 
@@ -344,15 +344,13 @@
 		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
+				
+				console.log("issues - ", issue, submodel)
 
 				var showIssue;
 
-				if (submodel){
-					
-					showIssue = true;
-
-				} else if (vm.revisions && vm.revisions.length) {
-
+				if (vm.revisions && vm.revisions.length) {
+					console.log("issues - revisions", vm.revisions);
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
 					});
@@ -368,6 +366,8 @@
 					}
 
 					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+				} else {
+					showIssue = true;
 				}
 
 				if(showIssue){
