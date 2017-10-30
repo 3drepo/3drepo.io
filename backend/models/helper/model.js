@@ -109,10 +109,8 @@ function convertToErrorCode(bouncerErrorCode){
 function importSuccess(account, model) {
 	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
-			systemLogger.logInfo(`importSuccess::setting = ${setting}`);
-			systemLogger.logInfo(`Model status changed to ${setting.status}`);
+			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
-			systemLogger.logInfo(`Correlation ID reset`);
 			setting.errorReason = undefined;
 			if(setting.type === 'toy' || setting.type === 'sample'){
 				setting.timestamp = new Date();
