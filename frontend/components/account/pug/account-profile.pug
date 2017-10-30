@@ -24,7 +24,11 @@
 						label Email
 						input(ng-model="vm.emailNew", type="email")
 				.updateContainer(layout="row", layout-align="start center")
-					md-button.md-raised.md-accent(ng-click="vm.updateInfo()") Update
+					md-button.md-raised.md-accent(
+						ng-click="vm.updateInfo()" 
+						flex-gt-md="20"
+						flex-gt-lg="15"
+						flex="80")  Update Profile
 					p {{vm.infoSaveInfo}}
 					p(ng-if="vm.updateError").updateError {{vm.updateError}}
 
@@ -42,6 +46,9 @@
 				.updateContainer(layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(
 						ng-disabled="(!vm.oldPassword || !vm.newPassword) || (vm.oldPassword === vm.newPassword)"
-						ng-click="vm.updatePassword()") Update
+						ng-click="vm.updatePassword()"
+						flex-gt-md="20"
+						flex-gt-lg="15"
+						flex="80") Update Password
 					p {{vm.passwordSaveInfo}}
 					p(ng-if="vm.passwordSaveError").updateError {{vm.passwordSaveError}}
