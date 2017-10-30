@@ -548,6 +548,11 @@ account-licenses .licenseIcon {
   margin: 0 10px !important;
 }
 
+account-licenses .licenseColorBox {
+  margin-top: 25px;
+  margin-right: 35px !important;
+}
+
 account-licenses .colorBox {
   width: 25px;
   margin-right: 10px;
