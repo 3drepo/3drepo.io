@@ -1423,9 +1423,9 @@ function removeModel(account, model, forceRemove){
 
 		//remove model from all project
 		return Project.removeModel(account, model);
-	}).catch(err => {
+	/*}).catch(err => {
 		systemLogger.logError(`Failed to removeModel:`, err);
-		return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
+		return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});*/
 	});
 
 }
