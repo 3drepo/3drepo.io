@@ -25,6 +25,7 @@
 	const utils = require("../utils");
 	const _ = require('lodash');
 	const ModelSetting = require('./modelSetting');
+	const systemLogger = require("../logger.js").systemLogger;
 
 	const schema = mongoose.Schema({
 		name: { type: String, unique: true},
@@ -106,7 +107,10 @@
 			}
 		}).then(() => {
 			return Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
-		}).then(() => project);
+		}).then(() => project).
+		catch(err => {
+			systemLogger.logError(`Failed to delete:`, err);
+		});
 	};
 
 	schema.statics.removeModel = function(account, model){
