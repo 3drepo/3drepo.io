@@ -864,12 +864,22 @@
 					tag: vm.tag, 
 					desc: vm.desc, 
 					newModel: true
-				}).then(function(){
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "upload"
+				})
+					.then(function(){
+
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "upload"
+						});
+
+					})
+					.catch(function(errorMsg) {
+						
+						setTimeout(function(){
+							DialogService.text("Model Upload Failed", errorMsg, false)
+						}, 1000);
+						
 					});
-				});
 
 			}
 		};
