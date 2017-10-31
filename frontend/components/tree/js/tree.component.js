@@ -47,8 +47,7 @@
 	function TreeCtrl($scope, $timeout, TreeService, EventService, MultiSelectService, ViewerService) {
 		var vm = this,
 			promise = null,
-			currentSelectedNode = null,
-			//currentScrolledToNode = null,
+			currentSelectedNodes = [],
 			highlightSelectedViewerObject = true,
 			clickedHidden = {}, // Nodes that have actually been clicked to hide
 			clickedShown = {}; // Nodes that have actually been clicked to show
@@ -69,6 +68,7 @@
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.visible   = {};
 			vm.invisible = {};
+			vm.currentSelectedNodes = [];
 
 		};
 
@@ -413,7 +413,6 @@
 						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
-							vm.currentSelectedNode = vm.nodesToShow[i].children[j];
 
 						}
 
@@ -490,14 +489,10 @@
 				}
 
 			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-				// Remove highlight from any selected node in the tree
-				if (vm.currentSelectedNode !== null) {
-					vm.currentSelectedNode.selected = false;
-					vm.currentSelectedNode = null;
-					if (vm.currentFilterItemSelected !== null) {
-						vm.currentFilterItemSelected.class = "";
-						vm.currentFilterItemSelected = null;
-					}
+				vm.clearCurrentlySelected();
+				if (vm.currentFilterItemSelected !== null) {
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			} else if  (event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
 						event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
@@ -703,34 +698,44 @@
 		});
 
 		/**
+		 * Unselect all selected items and clear the array
+		 */
+		vm.clearCurrentlySelected = function(){
+			vm.currentSelectedNodes.forEach(function(selectedNode){
+				selectedNode.selected = false;
+			});
+			vm.currentSelectedNodes = [];
+		}
+		/**
 		 * Selected a node in the tree
 		 *
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-			var sameNodeSelected = vm.currentSelectedNode !== null && vm.currentSelectedNode._id === node._id;
-			console.log("selected node, same node selected: " + sameNodeSelected + " multi select: " + MultiSelectService.isMultiMode());
+			var sameNodeIndex = vm.currentSelectedNodes.findIndex(function(element){
+										return element._id === node._id;
+									});
+			console.log("selected node , current length: " + vm.currentSelectedNodes.length + ", same node selected: " + sameNodeIndex + " multi select: " + MultiSelectService.isMultiMode());
+			console.log("before", vm.currentSelectedNodes)
 		
 			if(!MultiSelectService.isMultiMode()) {
 				//If it is not multiselect mode, remove all highlights.
 				ViewerService.clearHighlights();
-				if(!sameNodeSelected && vm.currentSelectedNode !== null){				
-					//Not multiselect mode and a different node has been selected
-					vm.currentSelectedNode.selected = false;
-				}
+				vm.clearCurrentlySelected();
 				node.selected = true;
-				vm.currentSelectedNode = node;
+				vm.currentSelectedNodes.push(node);
 			}
-			else if(sameNodeSelected)
+			else if(sameNodeIndex > -1)
 			{
 					//Multiselect mode and we selected the same node - unselect it
-					vm.currentSelectedNode.selected = false;
-					vm.currentSelectedNode = null;				
+					vm.currentSelectedNodes[sameNodeIndex].selected = false;
+					vm.currentSelectedNodes.splice(sameNodeIndex);				
 			}
 			else{
 				node.selected = true;
-				vm.currentSelectedNode = node;
+				vm.currentSelectedNodes.push(node);
 			}
+			console.log("after", vm.currentSelectedNodes)
 
 
 			var map = [];
