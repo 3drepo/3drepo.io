@@ -310,7 +310,7 @@ describe('Model', function () {
 		agent.post(`/${username}/${spacedName}`)
 		.send({ desc, type, unit })
 		.expect(200, function(err ,res) {
-			expect(res.body.name).to.equal(spacedName.replace(/%20/g, " ");
+			expect(res.body.name).to.equal(spacedName.replace(/%20/g, " "));
 			done(err);
 		});
 	});
