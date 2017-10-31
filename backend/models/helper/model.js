@@ -119,6 +119,8 @@ function importSuccess(account, model) {
 			ChatEvent.modelStatusChanged(null, account, model, setting);
 			setting.save();
 		}
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke importSuccess:`, err);
 	});
 }
 
@@ -139,6 +141,8 @@ function importFail(account, model, errCode, corId) {
 			err: convertToErrorCode(errCode).message,
 			corID: corId
 		});
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke importFail:`, err);
 	});
 }
 
@@ -153,6 +157,8 @@ function setStatus(account, model, status) {
 		setting.status = status;
 		systemLogger.logInfo(`Model status changed to ${status}`);
 		return setting.save();
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke setStatus:`, err);
 	});
 }
 
@@ -177,6 +183,8 @@ function createCorrelationId(account, model) {
 		return setting.save().then(() => {
 			return correlationId;
 		});;
+	}).catch(err => {
+		systemLogger.logError(`Failed to createCorrelationId:`, err);
 	});
 }
 
@@ -190,6 +198,8 @@ function resetCorrelationId(account, model) {
 		setting.corID = undefined;
 		systemLogger.logInfo(`Correlation ID reset`);
 		setting.save();
+	}).catch(err => {
+		systemLogger.logError(`Failed to resetCorrelationId:`, err);
 	});
 }
 
@@ -1354,6 +1364,8 @@ function importModel(account, model, username, modelSetting, source, data){
 
 			});
 		});
+	}).catch(err => {
+		systemLogger.logError(`Failed to importModel:`, err);
 	});
 
 }
@@ -1411,6 +1423,8 @@ function removeModel(account, model, forceRemove){
 
 		//remove model from all project
 		return Project.removeModel(account, model);
+	}).catch(err => {
+		systemLogger.logError(`Failed to removeModel:`, err);
 	});
 
 }
@@ -1645,7 +1659,6 @@ module.exports = {
 	getModelPermission,
 	getMetadata,
 	getFullTree_noSubTree,
-	setStatus,
 	resetCorrelationId,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
