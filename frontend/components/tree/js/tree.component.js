@@ -483,6 +483,11 @@
 							initNodesToShow();
 							lastParentWithName = null;
 							expandToSelection(path, 0);
+							//all these init and expanding unselects the selected, so let's select them again
+							//FIXME: ugly as hell but this is the easiest solution until we refactor this.
+							vm.currentSelectedNodes.forEach(function(selectedNode){
+								selectedNode.selected = true;
+							});
 							lastParentWithName && vm.selectNode(lastParentWithName);
 						}
 					}
@@ -715,28 +720,25 @@
 			var sameNodeIndex = vm.currentSelectedNodes.findIndex(function(element){
 										return element._id === node._id;
 									});
-			console.log("selected node , current length: " + vm.currentSelectedNodes.length + ", same node selected: " + sameNodeIndex + " multi select: " + MultiSelectService.isMultiMode());
-			console.log("before", vm.currentSelectedNodes)
-		
-			if(!MultiSelectService.isMultiMode()) {
+			if(MultiSelectService.isMultiMode()) {
+				if(sameNodeIndex > -1)
+				{
+					//Multiselect mode and we selected the same node - unselect it
+					vm.currentSelectedNodes[sameNodeIndex].selected = false;
+					vm.currentSelectedNodes.splice(sameNodeIndex, 1);				
+				}
+				else{
+					node.selected = true;
+					vm.currentSelectedNodes.push(node);
+				}
+			}
+			else{
 				//If it is not multiselect mode, remove all highlights.
 				ViewerService.clearHighlights();
 				vm.clearCurrentlySelected();
 				node.selected = true;
 				vm.currentSelectedNodes.push(node);
 			}
-			else if(sameNodeIndex > -1)
-			{
-					//Multiselect mode and we selected the same node - unselect it
-					vm.currentSelectedNodes[sameNodeIndex].selected = false;
-					vm.currentSelectedNodes.splice(sameNodeIndex);				
-			}
-			else{
-				node.selected = true;
-				vm.currentSelectedNodes.push(node);
-			}
-			console.log("after", vm.currentSelectedNodes)
-
 
 			var map = [];
 
