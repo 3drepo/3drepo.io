@@ -709,7 +709,7 @@
 		 */
 		vm.selectNode = function (node) {
 			var sameNodeSelected = vm.currentSelectedNode !== null && vm.currentSelectedNode._id === node._id;
-			//console.log("selected node, same node selected: " + sameNodeSelected + " multi select: " + MultiSelectService.isMultiMode());
+			console.log("selected node, same node selected: " + sameNodeSelected + " multi select: " + MultiSelectService.isMultiMode());
 		
 			if(!MultiSelectService.isMultiMode()) {
 				//If it is not multiselect mode, remove all highlights.
@@ -729,7 +729,7 @@
 			}
 			else{
 				node.selected = true;
-				currentSelectedNode = node;
+				vm.currentSelectedNode = node;
 			}
 
 
