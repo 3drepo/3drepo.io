@@ -240,7 +240,6 @@
 					break;
 				}
 			}
-
 			var _ids = [_id];
 			// Found
 			if (index !== -1) {
@@ -249,7 +248,7 @@
 						// Collapse
 
 						//if the target itself contains subModelTree
-						if(vm.nodesToShow[index].hasSubProjTree){
+						if(vm.nodesToShow[index].hasSubModelTree){
 							//node containing sub model tree must have only one child
 							var subModelNode = vm.subTreesById[vm.nodesToShow[index].children[0]._id];
 							_ids.push(subModelNode._id);
@@ -259,7 +258,7 @@
 
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && matchPath(_ids, vm.nodesToShow[index + 1].path)) {
 
-								if(vm.nodesToShow[index + 1].hasSubProjTree){
+								if(vm.nodesToShow[index + 1].hasSubModelTree){
 									var subModelNode = vm.subTreesById[vm.nodesToShow[index + 1].children[0]._id];
 									_ids.push(subModelNode._id);
 								}
