@@ -112,7 +112,7 @@
 				.then(function(response){
 					if (response.status !== 200) {
 						throw(response);
-					}
+					} 
 				})
 				.catch(function(error){
 					vm.handleError("update", "job", error);
@@ -251,12 +251,32 @@
 			return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 		};
 
+		vm.getJobColor = function(job){
+			var jobColor = "white";
+
+			if (job) {
+				console.log("JOB ", job);
+				vm.jobs.forEach(function(j){
+					console.log("JOB ", j);
+					if (j._id === job) {
+						console.log("JOB match", j._id, job);
+						jobColor = j.color;
+					}
+				});
+			}
+
+			console.log(jobColor);
+			return { "background-color" : jobColor};
+		};
+
 		vm.handleError = function(action, type, error){
-			var content = "Something went wrong trying to " + action + " the " + type + ". " +
-			"If this continues please message support@3drepo.io.";
+			var message = (error.data.message) ? error.data.message : "";
+			var content = "Something went wrong trying to " + action + " the " + type + ": <br><br>" +
+				"<strong> " + message + "</strong>" +
+				"<br><br> If this is unexpected please message support@3drepo.io.";
 			var escapable = true;
 			var title = "Error";
-			DialogService.text(title, content, escapable);
+			DialogService.html(title, content, escapable);
 			console.error("Something went wrong trying to " + action + " the " + type + ": ", error);
 		};
 

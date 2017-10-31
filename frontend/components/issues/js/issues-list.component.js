@@ -62,7 +62,6 @@
 		vm.$onInit = function() {
 			vm.APIService = APIService;
 			vm.IssuesService = IssuesService;
-			vm.setFocus = setFocus;
 			vm.focusedIssueIndex = null;
 			vm.excludeRoles = [];
 			vm.showSubModelIssues = false;
@@ -72,7 +71,6 @@
 			vm.issuesListItemHeight = 141;
 			vm.selectedIssueIndex = null;
 			vm.internalSelectedIssue = null;
-			vm.modelLoaded = false;
 		};
 
 
@@ -105,9 +103,9 @@
 						
 						vm.showSubModelIssues = vm.issueDisplay.showSubModelIssues;
 					}
-					setupIssuesToShow();
+					vm.setupIssuesToShow();
 
-					showPins();
+					vm.showPins();
 				} else {
 					vm.toShow = "info";
 					vm.info = "There are currently no open issues";
@@ -117,47 +115,53 @@
 
 		});
 
-		$scope.$watch(EventService.currentEvent, function(event) {
-			
-			if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-				vm.modelLoaded = true;
-			} 
-			
-		});
-
 		$scope.$watch("vm.filterText", function() {
 
 			// Filter text
-			setupIssuesToShow();
-			showPins();
+			vm.setupIssuesToShow();
+			vm.showPins();
 
 		});
 
 		$scope.$watch("vm.menuOption", function(){
 
 			// Menu option
-			if (vm.menuOption) {
-				if (vm.menuOption.value === "sortByDate") {
+			if (vm.menuOption && vm.menuOption.value) {
+
+				switch(vm.menuOption.value) {
+				
+				case "sortByDate":
 					vm.sortOldestFirst = !vm.sortOldestFirst;
 					vm.issueDisplay.sortOldestFirst = vm.sortOldestFirst;
-				} else if (vm.menuOption.value === "showClosed") {
+					break;
+				
+				case "showClosed":
 					vm.showClosed = !vm.showClosed;
 					vm.issueDisplay.showClosed = vm.showClosed;
-				} else if (vm.menuOption.value === "showSubModels") {
+					break;
+
+				case "showSubModels":
 					vm.showSubModelIssues = !vm.showSubModelIssues;
 					vm.issueDisplay.showSubModelIssues = vm.showSubModelIssues;
-				} else if (vm.menuOption.value === "print") {
+					break;
+				
+				case "print":
 					var ids = [];
-					
 					vm.issuesToShow.forEach(function(issue){
 						ids.push(issue._id);
 					});
+					var printEndpoint = vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",");
+					var printUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, printEndpoint);
+					$window.open(printUrl, "_blank");
+					break;
 
-					$window.open(ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",")), "_blank");
-				} else if (vm.menuOption.value === "exportBCF") {
-					$window.open(ClientConfigService.apiUrl(ClientConfigService.GET_API, vm.account + "/" + vm.model + "/issues.bcfzip"), "_blank");
-				} else if (vm.menuOption.value === "importBCF") {
+				case "exportBCF":
+					var bcfEndpoint = vm.account + "/" + vm.model + "/issues.bcfzip";
+					var bcfUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, bcfEndpoint);
+					$window.open(bcfUrl, "_blank");
+					break;
 
+				case "importBCF":
 					var file = document.createElement("input");
 					file.setAttribute("type", "file");
 					file.setAttribute("accept", ".zip,.bcfzip");
@@ -166,10 +170,10 @@
 					file.addEventListener("change", function () {
 						vm.importBcf({file: file.files[0]});
 					});
-				} else if(vm.menuOption.value === "filterRole"){
-					
-					var roleIndex = vm.excludeRoles.indexOf(vm.menuOption.role);
+					break;
 
+				case "filterRole":
+					var roleIndex = vm.excludeRoles.indexOf(vm.menuOption.role);
 					if(vm.menuOption.selected){
 						if(roleIndex !== -1){
 							vm.excludeRoles.splice(roleIndex, 1);
@@ -179,28 +183,29 @@
 							vm.excludeRoles.push(vm.menuOption.role);
 						}
 					}
+					break;
 
-					
 				}
-				setupIssuesToShow();
-				showPins();
+
+				vm.setupIssuesToShow();
+				vm.showPins();
 			}
 
 		});
 
-		$scope.$watch("vm.updatedIssue", function(){
+		// $scope.$watch("vm.updatedIssue", function(){
 
-			// Updated issue
-			if (vm.updatedIssue) {
-				for (var i = 0; i < vm.allIssues.length; i++) {
-					if (vm.updatedIssue._id === vm.allIssues[i]._id) {
-						vm.allIssues[i] = vm.updatedIssue;
-						break;
-					}
-				}
-			}
+		// 	// Updated issue
+		// 	if (vm.updatedIssue) {
+		// 		for (var i = 0; i < vm.allIssues.length; i++) {
+		// 			if (vm.updatedIssue._id === vm.allIssues[i]._id) {
+		// 				vm.allIssues[i] = vm.updatedIssue;
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
 
-		});
+		// });
 
 		$scope.$watch("vm.selectedIssue", function(){
 
@@ -223,16 +228,16 @@
 				}
 			}
 
-		});
+		}, true);
 
 		$scope.$watch("vm.displayIssue", function(){
 
 			// Selected issue
-			if(vm.displayIssue){
+			if (vm.displayIssue){
 				vm.editIssue(vm.displayIssue);
 				$timeout(function(){
-					showIssue(vm.displayIssue);
-				}.bind(this), 1500);
+					IssuesService.showIssue(vm.displayIssue);
+				}.bind(this), 500);
 
 			}
 
@@ -244,69 +249,64 @@
 		 * @param event
 		 * @param issue
 		 */
-		vm.select = function (event, issue) {
-			if (event.type === "click") {
-
-				if ((vm.internalSelectedIssue === null) || (vm.internalSelectedIssue._id === issue._id)) {
-					resetViewerState(issue);
-					setViewerState(issue);
-				} else {
-					setViewerState(issue);
-				}
-
-				vm.onSelectIssue({issue: vm.internalSelectedIssue});
+		vm.select = function (issue) {
+			
+			console.log("select - click");
+			if (
+				vm.internalSelectedIssue === null || 
+				vm.internalSelectedIssue._id === issue._id
+			) {
+				console.log("select - reset and set viewer state", issue)
+				vm.resetViewerState(issue);
+				vm.setViewerState(issue);
+			} else {
+				console.log("select - just set viewer state")
+				vm.setViewerState(issue);
 			}
+			
+			vm.onSelectIssue({issue: vm.internalSelectedIssue});
+			
 		};
 
-		function resetViewerState(issue) {
+		vm.resetViewerState = function(issue) {
 
 			vm.internalSelectedIssue = issue;
 			vm.internalSelectedIssue.selected = false;
 			vm.internalSelectedIssue.focus = false;
 
-			deselectPin(vm.internalSelectedIssue);
+			IssuesService.deselectPin(vm.internalSelectedIssue);
 
-		}
+		};
 
-		function setViewerState(issue) {
+		vm.setViewerState = function(issue) {
 
 			vm.internalSelectedIssue = issue;
 			vm.internalSelectedIssue.selected = true;
 			vm.internalSelectedIssue.focus = true;
 
-			showIssue(vm.internalSelectedIssue);
-			setSelectedIssueIndex(vm.internalSelectedIssue);
+			IssuesService.showIssue(vm.internalSelectedIssue);
+			vm.setSelectedIssueIndex(vm.internalSelectedIssue);
 
-		}
+		}; 
 
 		/**
 		 * Set focus on issue
 		 * @param issue
 		 * @param index
 		 */
-		function setFocus (issue, index) {
+		vm.setFocus = function(issue, index) {
 			if (vm.internalSelectedIssue !== null) {
 				vm.internalSelectedIssue.focus = false;
 			}
 			vm.focusedIssueIndex = index;
 			issue.focus = true;
-		}
-
-		/**
-		 * Allow set focus
-		 */
-		vm.initSetFocus = function () {
-			if (vm.setFocus === null) {
-				vm.setFocus = setFocus;
-			}
 		};
 
 		/**
 		 * Remove focus from issue
-		 * @param event
 		 * @param issue
 		 */
-		vm.removeFocus = function (event, issue) {
+		vm.removeFocus = function (issue) {
 			vm.focusedIssueIndex = null;
 			issue.focus = false;
 		};
@@ -322,11 +322,10 @@
 		 * Set the selected issue index
 		 * @param selectedIssue
 		 */
-		function setSelectedIssueIndex(selectedIssueObj) {
-			var i, length;
+		vm.setSelectedIssueIndex = function(selectedIssueObj) {
 
 			if (selectedIssueObj !== null) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+				for (var i = 0; i < vm.issuesToShow.length; i += 1) {
 					if (vm.issuesToShow[i]._id === selectedIssueObj._id) {
 						vm.selectedIssueIndex = i;
 					}
@@ -334,37 +333,22 @@
 			} else {
 				vm.selectedIssueIndex = null;
 			}
-		}
 
-		/**
-		 * Show issue details
-		 * @param issue
-		 */
-		function showIssue (issue) {
-			IssuesService.showIssue(issue);
-		}
-
-		/**
-		 * Set the issue pin to look deselected
-		 * @param issue
-		 */
-		function deselectPin (issue) {
-			IssuesService.deselectPin(issue);
-		}
+		};
 
 		// Helper function for searching strings
-		function stringSearch(superString, subString) {
+		vm.stringSearch = function(superString, subString) {
 			if(!superString){
 				return false;
 			}
 
 			return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-		}
+		};
 
 		/**
 		 * Setup the issues to show
 		 */
-		function setupIssuesToShow () {
+		vm.setupIssuesToShow = function() {
 
 			vm.issuesToShow = [];
 
@@ -395,15 +379,15 @@
 						var i;
 
 						// Search the title
-						var show = stringSearch(issue.title, vm.filterText);
-						show = show || stringSearch(issue.timeStamp, vm.filterText);
-						show = show || stringSearch(issue.owner, vm.filterText);
+						var show = vm.stringSearch(issue.title, vm.filterText);
+						show = show || vm.stringSearch(issue.timeStamp, vm.filterText);
+						show = show || vm.stringSearch(issue.owner, vm.filterText);
 
 						// Search the list of assigned issues
 						if (!show && issue.hasOwnProperty("assigned_roles")) {
 							i = 0;
 							while(!show && (i < issue.assigned_roles.length)) {
-								show = show || stringSearch(issue.assigned_roles[i], vm.filterText);
+								show = show || vm.stringSearch(issue.assigned_roles[i], vm.filterText);
 								i += 1;
 							}
 						}
@@ -413,8 +397,8 @@
 							i = 0;
 
 							while(!show && (i < issue.comments.length)) {
-								show = show || stringSearch(issue.comments[i].comment, vm.filterText);
-								show = show || stringSearch(issue.comments[i].owner, vm.filterText);
+								show = show || vm.stringSearch(issue.comments[i].comment, vm.filterText);
+								show = show || vm.stringSearch(issue.comments[i].owner, vm.filterText);
 								i += 1;
 							}
 						}
@@ -456,12 +440,12 @@
 				vm.contentHeight({height: vm.infoHeight});
 			}
 
-		}
+		};
 
 		/**
 		 * Add issue pins to the viewer
 		 */
-		function showPins () {
+		vm.showPins = function() {
 
 			// TODO: This is still inefficent and unclean
 			vm.allIssues.forEach(function(issue){
@@ -497,7 +481,7 @@
 				}
 			});
 
-		}
+		};
 
 
 	}

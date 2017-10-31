@@ -54,7 +54,11 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue || !vm.modelLoaded")
+	md-button.md-accent.md-fab.md-mini(
+		aria-label="Add"
+		ng-click="vm.editIssue()"
+		ng-disabled="!vm.canAddIssue || !vm.loaded.model")
+
 		md-icon.angular-material-icons add
 
 

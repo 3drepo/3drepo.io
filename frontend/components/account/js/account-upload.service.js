@@ -120,7 +120,7 @@
 						}
 					})
 					.catch(function(error){
-						uploadPromise.reject(error);
+						uploadPromise.reject(APIService.getErrorMessage(error.data));
 					});
 
 			}

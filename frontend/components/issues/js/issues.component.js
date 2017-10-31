@@ -79,7 +79,7 @@
 			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
 
-			vm.modelLoaded = false;
+			vm.loaded = ViewerService.currentModel;
 
 			/*
 			* Get the user roles for the model
@@ -220,11 +220,11 @@
 		});
 
 		$scope.$watch(function() {
-			return RevisionsService.status.ready;
+			return RevisionsService.status;
 		}, function(newValue, oldValue) {
-			if (RevisionsService.status.ready === true) {
+			console.log("issues - RevisionsService.status.ready", RevisionsService.status);
+			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
-				vm.watchNotification();
 			}
 		}, true);
 
@@ -249,10 +249,6 @@
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-
-				vm.modelLoaded = true;
-
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				vm.issuesReady.then(function(){
@@ -344,15 +340,13 @@
 		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
+				
+				console.log("issues - ", issue, submodel)
 
 				var showIssue;
 
-				if(submodel){
-					
-					showIssue = true;
-
-				} else {
-
+				if (vm.revisions && vm.revisions.length) {
+					console.log("issues - revisions", vm.revisions);
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
 					});
@@ -368,6 +362,8 @@
 					}
 
 					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+				} else {
+					showIssue = true;
 				}
 
 				if(showIssue){
@@ -545,9 +541,15 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
+			console.log("select - vm.selectIssue in issues.component.js", issue);
+
 			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
+				console.log("select - vm.selectIssue firing deselect pin");
 				IssuesService.deselectPin(vm.selectedIssue);
 			}
+
+			console.log("select - selectedIssue is becoming: ", issue);
+			
 			vm.selectedIssue = issue;
 		};
 

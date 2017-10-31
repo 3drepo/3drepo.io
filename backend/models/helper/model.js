@@ -109,10 +109,8 @@ function convertToErrorCode(bouncerErrorCode){
 function importSuccess(account, model) {
 	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
-			systemLogger.logInfo(`importSuccess::setting = ${setting}`);
-			systemLogger.logInfo(`Model status changed to ${setting.status}`);
+			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
-			systemLogger.logInfo(`Correlation ID reset`);
 			setting.errorReason = undefined;
 			if(setting.type === 'toy' || setting.type === 'sample'){
 				setting.timestamp = new Date();
@@ -1612,7 +1610,7 @@ function isUserAdmin(account, model, user)
 }
 
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
+const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',

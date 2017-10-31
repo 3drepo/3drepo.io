@@ -87,7 +87,8 @@
 		};
 
 		vm.handleModelError = function(){
-			var message = "The model was not found or failed to load correctly. " +
+			var message = "The model was either not found, failed to load correctly "+
+			"or you are not authorized to view it. " +
 			" You will now be redirected to the teamspace page.";
 
 			$mdDialog.show(
@@ -131,25 +132,16 @@
 			ViewerService.getModelInfo(vm.account, vm.model)
 				.then(function (response) {
 					var data = response.data;
-
 					vm.settings = data;
-					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 
-					var index = -1;
-
-					if(!data.federate){
-						PanelService.issuesPanelCard.left[vm.issuesCardIndex].menu
-							.find(function(item, i){
-								if(item.value === "showSubModels"){
-									index = i;
-								}
-							});
-
-						if(index !== -1){
-							PanelService.issuesPanelCard.left[vm.issuesCardIndex].menu
-								.splice(index, 1);
-						}
+					var isFederation = data.federate;
+					if(isFederation){
+						PanelService.hideSubModels(vm.issuesCardIndex, false);
+					} else {
+						PanelService.hideSubModels(vm.issuesCardIndex, true);
 					}
+
+					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
 						vm.treeMap = TreeService.getMap(tree.nodes);
@@ -158,7 +150,11 @@
 				})
 				.catch(function(error){
 					console.error(error);
-					vm.handleModelError();
+					// If we are not logged in the 
+					// session expired popup takes prescedence
+					if (error.data.message !== "You are not logged in") {
+						vm.handleModelError();
+					}
 				});
 
 		};

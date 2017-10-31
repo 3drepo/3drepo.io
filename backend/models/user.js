@@ -87,6 +87,7 @@ var schema = mongoose.Schema({
 				return accountPermission.methods.init(this, permissions);
 			}
 		},
+		vrEnabled : Boolean
 	},
 	roles: [{}]
 });
@@ -429,11 +430,10 @@ schema.methods.getAvatar = function(){
 
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
-
+	
 	let updateableFields = [ 'firstName', 'lastName', 'email' ];
 
 	this.customData = this.customData || {};
-
 	updateableFields.forEach(field => {
 		if(updateObj.hasOwnProperty(field)){
 			this.customData[field] = updateObj[field];

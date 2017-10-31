@@ -282,6 +282,10 @@ account-profile .updateContainer {
   margin: -20px 0 0;
 }
 
+account-profile .updateError {
+  color: #F44336;
+}
+
 account-profile .md-title {
   margin: -10px 0 20px;
 }
@@ -546,6 +550,11 @@ account-billing .accountBillingAddressInfo {
 /** Account Licenses *********************************************************************************************/
 account-licenses .licenseIcon {
   margin: 0 10px !important;
+}
+
+account-licenses .licenseColorBox {
+  margin-top: 25px;
+  margin-right: 35px !important;
 }
 
 account-licenses .colorBox {

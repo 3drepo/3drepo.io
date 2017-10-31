@@ -1,4 +1,9 @@
-md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50")
+md-dialog#federationDialog(
+	aria-label="Federation", 
+	flex="70"
+	flex-gt-md="60"
+	flex-gt-lg="50")
+
 	md-toolbar
 		.md-toolbar-tools
 			h2 Federation
@@ -60,7 +65,9 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div( layout="row", flex)
 					md-input-container(flex="50")
 						label Unit
-						md-select(ng-model="vm.federationData.unit")
+						md-select(
+							ng-disabled="true"
+							ng-model="vm.federationData.unit")
 							md-option(
 								ng-repeat="unit in vm.units", 
 								value="{{unit.value}}"

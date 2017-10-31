@@ -71,6 +71,24 @@
 			return projects;
 		};
 
+		vm.closeDialog = function() {
+			console.log("vm.closeDialog")
+			DialogService.closeDialog();
+		};
+
+		vm.closeFederationDialog = function() {
+			
+			if (vm.originalFederationData) {
+				Object.keys(vm.federationData).forEach(function(key){
+					if (vm.federationData[key] !== vm.originalFederationData[key]) {
+						vm.federationData[key] = vm.originalFederationData[key];
+					}
+				});
+			}
+			
+			vm.isSaving = false;
+			DialogService.closeDialog();
+		};
 
 		vm.showMenu = function(model, account){
 			

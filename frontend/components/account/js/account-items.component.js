@@ -111,6 +111,7 @@
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
+			console.log("vm.closeDialog")
 			DialogService.closeDialog();
 		};
 
@@ -727,7 +728,8 @@
 				}
 
 				vm.uploading = true;
-
+				vm.closeDialog();
+				
 				AccountUploadService.newModel(vm.newModelData)
 					.then(function (response) {
 
@@ -753,8 +755,7 @@
 							);
 							vm.addButtons = false;
 							vm.addButtonType = "add";
-							vm.closeDialog();
-							
+
 							AnalyticService.sendEvent({
 								eventCategory: "model",
 								eventAction: "create"
@@ -863,12 +864,22 @@
 					tag: vm.tag, 
 					desc: vm.desc, 
 					newModel: true
-				}).then(function(){
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "upload"
+				})
+					.then(function(){
+
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "upload"
+						});
+
+					})
+					.catch(function(errorMsg) {
+
+						setTimeout(function(){
+							DialogService.text("Model Upload Failed", errorMsg, false)
+						}, 500);
+						
 					});
-				});
 
 			}
 		};

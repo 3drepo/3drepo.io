@@ -59,15 +59,29 @@
 								section
 									md-subheader
 										div Licences ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
-								md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
+								
+								md-list-item(
+									ng-repeat="license in vm.licenses"
+									layout="row"
+									layout-align="space-between"
+									flex)
+
 									div(layout="row", layout-align="start center", flex)
 										md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
 										.md-list-item-text(flex="50")
 											p {{license.user}}
-										.md-list-item(flex=25)
-											md-select.selectJob(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
+										.md-list-item(layout="row" flex="35")
+											
+											md-select.selectJob(
+												flex
+												ng-change="vm.assignJob($index)" 
+												ng-model="license.job" 
+												aria-label="job" 
+												placeholder="Select a job")
 												md-option(value="") Unassign
-												md-option(ng-repeat="job in vm.jobs", value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
+												md-option(
+													ng-repeat="job in vm.jobs"
+													value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
 
 
 									div(layout="row", layout-align="end center")

@@ -29,6 +29,7 @@
 			left: [],
 			right: []
 		};
+		
 
 		issuesPanelCard.left.push({
 			type: "issues",
@@ -38,6 +39,7 @@
 			icon: "place",
 			menu: [
 				{
+					hidden: false,
 					value: "print",
 					label: "Print",
 					selected: false,
@@ -45,6 +47,7 @@
 					icon: "fa-print"
 				},
 				{
+					hidden: false,
 					value: "exportBCF",
 					label: "Export BCF",
 					selected: false,
@@ -53,6 +56,7 @@
 					divider: true
 				},
 				{
+					hidden: false,
 					value: "sortByDate",
 					label: "Sort by Date",
 					firstSelectedIcon: "fa-sort-amount-desc",
@@ -63,6 +67,7 @@
 					secondSelected: false
 				},
 				{
+					hidden: false,
 					value: "showClosed",
 					label: "Show resolved issues",
 					toggle: true,
@@ -71,6 +76,7 @@
 					secondSelected: false
 				},
 				{
+					hidden: false,
 					value: "showSubModels",
 					label: "Show sub model issues",
 					toggle: true,
@@ -78,6 +84,7 @@
 					firstSelected: false,
 					secondSelected: false
 				},{
+					hidden: false,
 					upperDivider: true,
 					label: "Created by: "
 				}
@@ -146,13 +153,26 @@
 
 		var service = {
 
-			issuesPanelCard : issuesPanelCard
+			issuesPanelCard : issuesPanelCard,
+			hideSubModels: hideSubModels
 
 		};
 	
 		return service;
 	
 		///////////////
+
+		function hideSubModels(issuesCardIndex, hide) {
+			
+			issuesPanelCard.left[issuesCardIndex].menu
+				.forEach(function(item){
+					if(item.value === "showSubModels") {
+						console.log("setting hidden", hide);
+						item.hidden = hide;
+					}
+				});
+
+		}
 
 	}
 }());
