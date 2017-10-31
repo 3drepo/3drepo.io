@@ -78,8 +78,7 @@
 			vm.selectedIssueLoaded = false;
 			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
-
-			vm.loaded = ViewerService.currentModel;
+			
 
 			/*
 			* Get the user roles for the model
@@ -177,6 +176,9 @@
 
 		};
 
+		vm.modelLoaded = function() {
+			return !!ViewerService.currentModel.model;
+		};
 
 		/**
 		 * Define the assigned role colors for each issue
@@ -296,7 +298,7 @@
 					{notify: false}
 				);
 			}
-		});
+		});ViewerService.currentModel;
 
 
 		vm.watchNotification = function() {
