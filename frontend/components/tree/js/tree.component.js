@@ -47,8 +47,7 @@
 	function TreeCtrl($scope, $timeout, TreeService, EventService, MultiSelectService, ViewerService) {
 		var vm = this,
 			promise = null,
-			currentSelectedNode = null,
-			//currentScrolledToNode = null,
+			currentSelectedNodes = [],
 			highlightSelectedViewerObject = true,
 			clickedHidden = {}, // Nodes that have actually been clicked to hide
 			clickedShown = {}; // Nodes that have actually been clicked to show
@@ -69,6 +68,7 @@
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.visible   = {};
 			vm.invisible = {};
+			vm.currentSelectedNodes = [];
 
 		};
 
@@ -351,10 +351,6 @@
 			for (i = 0, length = vm.nodesToShow.length; i < length && condLoop; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
 
-					//console.log('name', vm.nodesToShow[i].name);
-					//console.log('selectedId', selectedId);
-					//console.log('length', vm.nodesToShow.length)
-					
 					lastParentWithName = vm.nodesToShow[i];
 
 					vm.nodesToShow[i].expanded = true;
@@ -374,7 +370,6 @@
 						if (vm.nodesToShow[i].children[j]._id === selectedId) {
 
 							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
-								//console.log('selected', vm.nodesToShow[i].children[j].name);
 								vm.nodesToShow[i].children[j].selected = true;
 								if(!noHighlight) {
 									vm.selectNode(vm.nodesToShow[i].children[j]);
@@ -389,10 +384,7 @@
 								vm.selectNode(vm.nodesToShow[i]);
 								selectedId = vm.nodesToShow[i]._id;
 								selectedIndex = i;
-								//console.log('selectedIndex', selectedIndex);
-								//console.log(vm.nodesToShow[i]);
 								lastParentWithName = null;
-								//console.log('vm.nodesToShow[i]', vm.nodesToShow[i]);
 								selectedId = vm.nodesToShow[i]._id;
 							}
 
@@ -421,7 +413,6 @@
 						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
-							currentSelectedNode = vm.nodesToShow[i].children[j];
 
 						}
 
@@ -449,15 +440,11 @@
 
 					// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 					$scope.$broadcast("$md-resize");
-					//console.log('this selectedIndex', selectedIndex);
 					vm.topIndex = selectedIndex;
 				});
 
 				$timeout(function(){
 					var el = document.getElementById(selectedId);
-					if(!el){
-						//console.log('el not found')
-					}
 					el && el.scrollIntoView();
 				});
 
@@ -502,14 +489,10 @@
 				}
 
 			} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-				// Remove highlight from any selected node in the tree
-				if (currentSelectedNode !== null) {
-					currentSelectedNode.selected = false;
-					currentSelectedNode = null;
-					if (vm.currentFilterItemSelected !== null) {
-						vm.currentFilterItemSelected.class = "";
-						vm.currentFilterItemSelected = null;
-					}
+				vm.clearCurrentlySelected();
+				if (vm.currentFilterItemSelected !== null) {
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			} else if  (event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
 						event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
@@ -715,28 +698,45 @@
 		});
 
 		/**
+		 * Unselect all selected items and clear the array
+		 */
+		vm.clearCurrentlySelected = function(){
+			vm.currentSelectedNodes.forEach(function(selectedNode){
+				selectedNode.selected = false;
+			});
+			vm.currentSelectedNodes = [];
+		}
+		/**
 		 * Selected a node in the tree
 		 *
 		 * @param node
 		 */
 		vm.selectNode = function (node) {
-
-			var sameNodeSelected = currentSelectedNode !== null && currentSelectedNode._id === node._id;
+			var sameNodeIndex = vm.currentSelectedNodes.findIndex(function(element){
+										return element._id === node._id;
+									});
+			console.log("selected node , current length: " + vm.currentSelectedNodes.length + ", same node selected: " + sameNodeIndex + " multi select: " + MultiSelectService.isMultiMode());
+			console.log("before", vm.currentSelectedNodes)
 		
 			if(!MultiSelectService.isMultiMode()) {
 				//If it is not multiselect mode, remove all highlights.
 				ViewerService.clearHighlights();
-			}
-
-			if(sameNodeSelected) {
-				//Same node has been pressed -> reset selection
-				currentSelectedNode.selected = false;
-				currentSelectedNode = null;
-			} else {
-				//This node now becomes the currently selected
+				vm.clearCurrentlySelected();
 				node.selected = true;
-				currentSelectedNode = node;
+				vm.currentSelectedNodes.push(node);
 			}
+			else if(sameNodeIndex > -1)
+			{
+					//Multiselect mode and we selected the same node - unselect it
+					vm.currentSelectedNodes[sameNodeIndex].selected = false;
+					vm.currentSelectedNodes.splice(sameNodeIndex);				
+			}
+			else{
+				node.selected = true;
+				vm.currentSelectedNodes.push(node);
+			}
+			console.log("after", vm.currentSelectedNodes)
+
 
 			var map = [];
 
