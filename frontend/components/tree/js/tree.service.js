@@ -116,36 +116,42 @@
 					
 					getIdToPath()
 						.then(function(idToPath){
-
-							mainTree.idToPath = idToPath.treePaths.idToPath;
-
+						
 							var getSubTrees = [];
 							
-							if(subTrees){
+							if (idToPath && idToPath.treePaths) {
+							
+								mainTree.idToPath = idToPath.treePaths.idToPath;
 								
-								// idToObjRef only needed if model is a fed model. 
-								// i.e. subTrees.length > 0
-								
-								mainTree.subModelIdToPath = {};
-					
-								subTrees.forEach(function(subtree){
+								if(subTrees){
+									
+									// idToObjRef only needed if model is a fed model. 
+									// i.e. subTrees.length > 0
+									
+									mainTree.subModelIdToPath = {};
+						
+									subTrees.forEach(function(subtree){
 
-									var subtreeIdToPath = idToPath.treePaths.subModels.find(function(submodel) {
-										return subtree.model === submodel.model;
+										var subtreeIdToPath = idToPath.treePaths.subModels.find(function(submodel) {
+											return subtree.model === submodel.model;
+										});
+										
+										if (subtreeIdToPath) {
+											subtree.idToPath = subtreeIdToPath.idToPath;
+										}
+										
+										handleSubTree(
+											subtree, 
+											mainTree, 
+											subTreesById, 
+											getSubTrees
+										);
 									});
+								}
 								
-									subtree.idToPath = subtreeIdToPath.idToPath;
-
-									handleSubTree(
-										subtree, 
-										mainTree, 
-										subTreesById, 
-										getSubTrees
-									);
-								});
-
-								mainTree.subTreesById = subTreesById;
 							}
+
+							mainTree.subTreesById = subTreesById;
 
 							Promise.all(getSubTrees).then(function(){
 								deferred.resolve(mainTree);
