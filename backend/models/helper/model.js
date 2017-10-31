@@ -1379,8 +1379,7 @@ function removeModel(account, model, forceRemove){
 		setting = _setting;
 
 		if(!setting){
-			//return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
 		}
 
 		return ModelSetting.find({ account, model}, { federate: true });
@@ -1426,7 +1425,7 @@ function removeModel(account, model, forceRemove){
 		return Project.removeModel(account, model);
 	}).catch(err => {
 		systemLogger.logError(`Failed to removeModel:`, err);
-		return Promise.reject({resCode: responseCodes.MODEL_IS_A_SUBMODEL});
+		return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
 	});
 
 }

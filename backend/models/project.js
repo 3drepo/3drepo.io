@@ -107,10 +107,7 @@
 			}
 		}).then(() => {
 			return Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
-		}).then(() => project).
-		catch(err => {
-			systemLogger.logError(`Failed to delete:`, err);
-		});
+		}).then(() => project);
 	};
 
 	schema.statics.removeModel = function(account, model){
