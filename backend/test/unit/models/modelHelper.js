@@ -60,12 +60,14 @@ describe("Model Helpers", function(){
 			expect(ModelHelper.modelNameRegExp.test("123-4a")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("123_4a")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("123-_4A")).to.be.true;
-		});
-
-		it("hyphens dashes and underscores in test model name format should succeed", function(){
 			expect(ModelHelper.modelNameRegExp.test("aasa[")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("aasa/")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.true;
+		});
+
+		it("non-ASCII characters should fail", function(){
+			expect(ModelHelper.modelNameRegExp.test("失败")).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test("😕")).to.be.false;
 		});
 
 		it("long strings less than 120 characters in test model name format should succeed", function(){
