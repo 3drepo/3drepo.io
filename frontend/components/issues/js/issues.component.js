@@ -79,7 +79,7 @@
 			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
 
-			vm.modelLoaded = false;
+			vm.loaded = ViewerService.currentModel;
 
 			/*
 			* Get the user roles for the model
@@ -249,10 +249,6 @@
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-
-				vm.modelLoaded = true;
-
 			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
 				vm.issuesReady.then(function(){

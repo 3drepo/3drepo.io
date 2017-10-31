@@ -242,6 +242,9 @@
 					.then(function(response) {
 
 						if (response.data) {
+
+							console.log("Response.data", response.data);
+							
 							vm.accounts = response.data.accounts;
 							vm.username = vm.account;
 							vm.firstName = response.data.firstName;

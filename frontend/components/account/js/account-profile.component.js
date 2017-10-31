@@ -35,9 +35,8 @@
 	AccountProfileCtrl.$inject = ["AccountService"];
 
 	function AccountProfileCtrl(AccountService) {
-		var vm = this,
-			promise;
-
+		var vm = this;
+		
 		/*
 		 * Init
 		 */

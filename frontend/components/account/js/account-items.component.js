@@ -874,10 +874,10 @@
 
 					})
 					.catch(function(errorMsg) {
-						
+
 						setTimeout(function(){
 							DialogService.text("Model Upload Failed", errorMsg, false)
-						}, 1000);
+						}, 500);
 						
 					});
 

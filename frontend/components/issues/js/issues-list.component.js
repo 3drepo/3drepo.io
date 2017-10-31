@@ -72,7 +72,6 @@
 			vm.issuesListItemHeight = 141;
 			vm.selectedIssueIndex = null;
 			vm.internalSelectedIssue = null;
-			vm.modelLoaded = false;
 		};
 
 
@@ -115,14 +114,6 @@
 				}
 			}
 
-		});
-
-		$scope.$watch(EventService.currentEvent, function(event) {
-			
-			if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-				vm.modelLoaded = true;
-			} 
-			
 		});
 
 		$scope.$watch("vm.filterText", function() {
