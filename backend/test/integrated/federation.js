@@ -450,7 +450,7 @@ describe('Federated Model', function () {
 		const model = 'f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40';
 		agent.delete(`/${username}/${model}`)
 		.send({})
-		.expect(200, function(err, res){
+		.expect(400, function(err, res){
 			
 			expect(err).to.be.null;
 			expect(res.body.value).to.equal(responseCodes.MODEL_IS_A_SUBMODEL.value);
