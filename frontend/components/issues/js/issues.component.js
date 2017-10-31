@@ -541,9 +541,15 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
+			console.log("select - vm.selectIssue in issues.component.js", issue);
+
 			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
+				console.log("select - vm.selectIssue firing deselect pin");
 				IssuesService.deselectPin(vm.selectedIssue);
 			}
+
+			console.log("select - selectedIssue is becoming: ", issue);
+			
 			vm.selectedIssue = issue;
 		};
 
