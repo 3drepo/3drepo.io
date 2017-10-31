@@ -1379,7 +1379,8 @@ function removeModel(account, model, forceRemove){
 		setting = _setting;
 
 		if(!setting){
-			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
+			//return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
 		return ModelSetting.find({ account, model}, { federate: true });
