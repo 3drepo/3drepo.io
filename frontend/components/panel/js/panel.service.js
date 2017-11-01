@@ -167,7 +167,6 @@
 			issuesPanelCard.left[issuesCardIndex].menu
 				.forEach(function(item){
 					if(item.value === "showSubModels") {
-						console.log("setting hidden", hide);
 						item.hidden = hide;
 					}
 				});
