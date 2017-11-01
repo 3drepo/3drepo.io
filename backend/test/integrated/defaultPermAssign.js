@@ -86,8 +86,11 @@ describe('Default permission assignment', function () {
 
 	it('user should be able to create model', function(done){
 
-		agent.post(`/${username}/model1`)
-		.send({unit: 'm'})
+		agent.post(`/${username}/model`)
+		.send({
+			modelName: "model1",
+			unit: 'm'
+		})
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);

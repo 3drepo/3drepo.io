@@ -158,8 +158,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 
 		agentNoPermission
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(401, function(err, res){
 			done(err);
 		});
@@ -172,8 +172,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 
 		agentNoPermission
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName, subModels: [] }, modelDetail))
 		.expect(401, function(err, res){
 			done(err);
 		});
@@ -200,8 +200,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 		
 		agentCanCreateModel
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);
@@ -226,8 +226,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel001';
 		
 		agentCanCreateModel
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ modelName: modelName, subModels: [] }, modelDetail))
 		.expect(401, done);
 	});
 
@@ -307,8 +307,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel002';
 		
 		agentCanCreateFed
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ subModels: [], modelName: modelName }, modelDetail))
 		.expect(200, done);
 
 	});
@@ -318,8 +318,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel002';
 		
 		agentCanCreateFed
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ modelName: modelName }, modelDetail))
 		.expect(401, done);
 
 	});
@@ -350,8 +350,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model002';
 		
 		agentProjectAdmin
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);

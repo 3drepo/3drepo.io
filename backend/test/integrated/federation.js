@@ -36,7 +36,6 @@ let unit = 'm';
 
 describe('Federated Model', function () {
 
-	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'fed';
@@ -112,8 +111,9 @@ describe('Federated Model', function () {
 			});
 		}, 1000);
 		
-		agent.post(`/${username}/${fedModelName}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName : `${fedModelName}`,
 			desc, 
 			type,
 			unit,
@@ -162,8 +162,9 @@ describe('Federated Model', function () {
 		let emptyFed = 'emptyFed';
 		let emptyFedId;
 
-		agent.post(`/${username}/${emptyFed}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: emptyFed,
 			desc, 
 			type, 
 			unit,
@@ -207,8 +208,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation using existing model name (fed or model)', function(done){
 
-		agent.post(`/${username}/${subModels[0]}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: subModels[0],
 			desc, 
 			type, 
 			unit,
@@ -227,9 +229,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation using invalid model name', function(done){
 
-
-		agent.post(`/${username}/错误`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "错误",
 			desc, 
 			type, 
 			subModels:[{
@@ -249,8 +251,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation from models in a different database', function(done){
 
-		agent.post(`/${username}/badfed`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "badfed",
 			desc, 
 			type, 
 			unit,
@@ -319,8 +322,9 @@ describe('Federated Model', function () {
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {
-			agent.post(`/${username}/dupfed`)
+			agent.post(`/${username}/model`)
 			.send({ 
+				modelName: "dupfed",
 				desc, 
 				type, 
 				unit,
@@ -342,8 +346,9 @@ describe('Federated Model', function () {
 
 
 	it('should fail if create fed of fed', function(done){
-		agent.post(`/${username}/fedfed`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "fedfed",
 			desc, 
 			type, 
 			unit,
@@ -382,7 +387,7 @@ describe('Federated Model', function () {
 
 	it('update should fail if model does not exist', function(done){
 		agent.put(`/${username}/nonexistmodel`)
-		.send({ 
+		.send({
 			desc, 
 			type, 
 			unit,

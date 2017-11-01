@@ -129,7 +129,6 @@ schema.methods.updateProperties = function(updateObj){
 			this[key] = updateObj[key];
 
 		}	
-		console.log("Key is : ", key);
 	});
 
 };
