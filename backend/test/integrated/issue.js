@@ -22,16 +22,11 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
 let async = require('async');
 
 describe('Issues', function () {
 
-	let Issue = require('../../models/issue');
-	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'issue_username';
@@ -74,6 +69,7 @@ describe('Issues', function () {
 		issue1: '75959a60-8ef1-11e6-8d05-9717c0574272',
 		issue2: '8d46d1b0-8ef1-11e6-8d05-9717c0574272'
 	}
+
 	before(function(done){
 
 		server = app.listen(8080, function () {
@@ -96,8 +92,6 @@ describe('Issues', function () {
 			done();
 		});
 	});
-
-
 
 	describe('Creating an issue', function(){
 
