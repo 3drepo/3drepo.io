@@ -84,8 +84,8 @@ describe('Model', function () {
 		async.series([
 			callback => {
 
-				agent.post(`/${username}/${model}`)
-				.send({ desc, type, unit, code, project })
+				agent.post(`/${username}/model`)
+				.send({ modelName: model, desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
 					expect(res.body.name).to.equal(model);
 					modelId = res.body.model;
@@ -145,8 +145,8 @@ describe('Model', function () {
 
 	it('should fail if project supplied is not found', function(done){
 
-		agent.post(`/${username}/model2`)
-		.send({ desc, type, unit, code, project: 'noexist' })
+		agent.post(`/${username}/model`)
+		.send({ modelName: "model2", desc, type, unit, code, project: 'noexist' })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);
@@ -156,8 +156,8 @@ describe('Model', function () {
 
 	it('should fail if no unit specified', function(done){
 
-		agent.post(`/${username}/model3`)
-		.send({ desc, type })
+		agent.post(`/${username}/model`)
+		.send({ desc, type, modelName: "model3" })
 		.expect(400, function(err ,res) {
 
 			expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
@@ -267,8 +267,8 @@ describe('Model', function () {
 
 		let model = 'project7';
 		
-		agent.post(`/${username}/${model}`)
-		.send({ desc, type, unit })
+		agent.post(`/${username}/model`)
+		.send({ desc, type, unit, modelName: model })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 			done(err);
@@ -292,8 +292,8 @@ describe('Model', function () {
 				return done();
 			}
 
-			agent.post(`/${username}/${modelName}`)
-			.send({ desc, type, unit })
+			agent.post(`/${username}/model`)
+			.send({ desc, type, unit, modelName: modelName })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_MODEL_NAME.value);
 				done(err);
@@ -306,11 +306,11 @@ describe('Model', function () {
 
 	it('should succeed if model name contains spaces', function(done){
 
-		let spacedName = 'you%20are%20genius';
-		agent.post(`/${username}/${spacedName}`)
-		.send({ desc, type, unit })
+		let spacedName = 'you are genius';
+		agent.post(`/${username}/model`)
+		.send({ desc, type, unit, modelName: spacedName })
 		.expect(200, function(err ,res) {
-			expect(res.body.name).to.equal(spacedName.replace(/%20/g, " "));
+			expect(res.body.name).to.equal(spacedName);
 			done(err);
 		});
 	});
@@ -318,8 +318,8 @@ describe('Model', function () {
 
 	it('should return error if creating a model in a database that doesn\'t exists or not authorized for', function(done){
 
-		agent.post(`/${username}_someonelese/${model}`)
-		.send({ desc, type, unit })
+		agent.post(`/${username}_someonelese/model`)
+		.send({ modelName: "testmodel", desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
 		});

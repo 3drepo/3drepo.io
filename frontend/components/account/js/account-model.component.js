@@ -323,7 +323,6 @@
 
 		vm.handleModelStatus = function(modelData, freshModel) {
 
-			console.log(modelData.status);
 			if (modelData.status) {
 				vm.model.status = modelData.status;
 			}

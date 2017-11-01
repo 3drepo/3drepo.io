@@ -54,16 +54,16 @@
 
 		$scope.$watch("vm.data", function () {
 			
-			if (vm.data) {
+			if (vm.userJob && vm.data) {
 				vm.setIssueData();
 			}
 
 		}, true);
 
 		vm.setIssueData = function() {
+
 			vm.data.statusIcon = IssuesService.getStatusIcon(vm.data);
 			vm.setRoleIndicatorColour();
-			vm.assignedToAUserRole = vm.issueIsAssignedToAUserRole();
 		};
 		
 		/**
@@ -75,13 +75,6 @@
 				vm.data.issueRoleColor = IssuesService.getJobColor(assignedRole);
 			}
 		};
-
-		/**
-		 * Check if the issue is assigned to one of the user's roles
-		 */
-		vm.issueIsAssignedToAUserRole = function () {
-			return vm.data.assigned_roles.indexOf(vm.userJob._id) !==  -1;
-		}
 
 	}
 }());

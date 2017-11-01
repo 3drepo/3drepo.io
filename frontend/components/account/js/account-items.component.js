@@ -111,7 +111,6 @@
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			console.log("vm.closeDialog")
 			DialogService.closeDialog();
 		};
 

@@ -5,7 +5,7 @@
 			img(ng-if="vm.data.thumbnail", ng-src="{{vm.data.thumbnailPath}}")
 			md-icon.angular-material-icons.issueListItemMissingThumbnail(ng-if="!vm.data.thumbnail") insert_photo
 		div(flex, layout="column")
-			label#issuesListItemTitle(flex="none", ng-class="{userRoleIssueListItemTitle: vm.assignedToUserRole}") {{vm.data.title}}
+			label#issuesListItemTitle(flex="none") {{vm.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
 				div(layout="row", layout-align="start start")
 
