@@ -1480,6 +1480,8 @@ function getModelPermission(username, setting, account){
 		}
 
 		return _.uniq(permissions);
+	}).catch(err => {
+		systemLogger.logError(`Failed to getModelPermission:`, err);
 	});
 }
 
