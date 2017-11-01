@@ -399,7 +399,7 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('update should success if model is a federation', function(done){
+	it('update should succeed if model is a federation', function(done){
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
