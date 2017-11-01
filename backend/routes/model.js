@@ -16,17 +16,17 @@
  */
 "use strict";
 
-var express = require('express');
-var router = express.Router({mergeParams: true});
-var utils = require('../utils');
-var middlewares = require('../middlewares/middlewares');
-var ModelSetting = require('../models/modelSetting');
-var responseCodes = require('../response_codes');
-var C = require('../varants');
-var ModelHelpers = require('../models/helper/model');
-var History = require('../models/history');
-var createAndAssignRole = ModelHelpers.createAndAssignRole;
-var User = require('../models/user');
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const utils = require("../utils");
+const middlewares = require("../middlewares/middlewares");
+const ModelSetting = require("../models/modelSetting");
+const responseCodes = require("../response_codes");
+const C = require("../constants");
+const ModelHelpers = require("../models/helper/model");
+const History = require("../models/history");
+const createAndAssignRole = ModelHelpers.createAndAssignRole;
+const User = require("../models/user");
 
 function getDbColOptions(req){
 	return {account: req.params.account, model: req.params.model};
@@ -396,12 +396,12 @@ function downloadLatest(req, res, next){
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		let headers = {
-			'Content-Length': file.meta.length,
-			'Content-Disposition': 'attachment;filename=' + file.meta.filename,
+			"Content-Length": file.meta.length,
+			"Content-Disposition": "attachment;filename=" + file.meta.filename,
 		};
 
 		if(file.meta.contentType){
-			headers['Content-Type'] = "application/json";
+			headers["Content-Type"] = "application/json";
 		}
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
@@ -433,7 +433,7 @@ function uploadModel(req, res, next){
 
 	}).then(file => {
 		// api respond ok once the file is uploaded
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 
 		let data = {
 			tag: req.body.tag,
@@ -441,7 +441,7 @@ function uploadModel(req, res, next){
 		};
 
 		let source = {
-			type: 'upload',
+			type: "upload",
 			file: file
 		};
 		//FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
@@ -576,7 +576,7 @@ function getUnityBundle(req, res, next){
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
-		req.params.format= 'unity3d';
+		req.params.format= "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
