@@ -111,7 +111,7 @@
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
-		MODEL_EXIST: { message: "Model already exists", status: 400 },
+		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
