@@ -78,8 +78,7 @@
 			vm.selectedIssueLoaded = false;
 			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
-
-			vm.loaded = ViewerService.currentModel;
+			
 
 			/*
 			* Get the user roles for the model
@@ -177,6 +176,9 @@
 
 		};
 
+		vm.modelLoaded = function() {
+			return !!ViewerService.currentModel.model;
+		};
 
 		/**
 		 * Define the assigned role colors for each issue
@@ -222,7 +224,6 @@
 		$scope.$watch(function() {
 			return RevisionsService.status;
 		}, function(newValue, oldValue) {
-			console.log("issues - RevisionsService.status.ready", RevisionsService.status);
 			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
 			}
@@ -296,7 +297,7 @@
 					{notify: false}
 				);
 			}
-		});
+		});ViewerService.currentModel;
 
 
 		vm.watchNotification = function() {
@@ -341,12 +342,10 @@
 
 			issues.forEach(function(issue) {
 				
-				console.log("issues - ", issue, submodel)
-
 				var showIssue;
 
 				if (vm.revisions && vm.revisions.length) {
-					console.log("issues - revisions", vm.revisions);
+
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
 					});

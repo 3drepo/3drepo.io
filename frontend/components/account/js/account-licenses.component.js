@@ -251,24 +251,6 @@
 			return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 		};
 
-		vm.getJobColor = function(job){
-			var jobColor = "white";
-
-			if (job) {
-				console.log("JOB ", job);
-				vm.jobs.forEach(function(j){
-					console.log("JOB ", j);
-					if (j._id === job) {
-						console.log("JOB match", j._id, job);
-						jobColor = j.color;
-					}
-				});
-			}
-
-			console.log(jobColor);
-			return { "background-color" : jobColor};
-		};
-
 		vm.handleError = function(action, type, error){
 			var message = (error.data.message) ? error.data.message : "";
 			var content = "Something went wrong trying to " + action + " the " + type + ": <br><br>" +

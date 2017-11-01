@@ -111,11 +111,11 @@
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
-		MODEL_EXIST: { message: "Model already exists", status: 400 },
+		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
-		SIZE_LIMIT_PAY: { message: "Ran of out database space. Please pay for more space.", status: 400 },
+		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
 
 		FILE_FORMAT_NOT_SUPPORTED: { message: "Format not supported", status: 400 },

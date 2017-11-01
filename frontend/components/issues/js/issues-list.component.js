@@ -242,7 +242,6 @@
 			}
 
 		}, true);
-
 		
 		/**
 		 * Select issue

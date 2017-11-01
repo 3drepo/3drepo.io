@@ -52,10 +52,10 @@
 				project : modelData.project,
 				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
 				unit: modelData.unit,
-				code: modelData.code
+				code: modelData.code,
+				modelName: modelData.name
 			};
-			var modelName = encodeURIComponent(modelData.name);
-			return APIService.post(modelData.teamspace + "/" + modelName, data);
+			return APIService.post(modelData.teamspace + "/model", data);
 		}
 
 		/**
