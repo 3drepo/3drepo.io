@@ -115,7 +115,7 @@
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
-		SIZE_LIMIT_PAY: { message: "Ran of out database space. Please pay for more space.", status: 400 },
+		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
 
 		FILE_FORMAT_NOT_SUPPORTED: { message: "Format not supported", status: 400 },
