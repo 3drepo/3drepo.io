@@ -231,6 +231,7 @@ gulp.task('build', [
   'manifest-icons', 
   'manifest-file'
 ], function () {
+  console.log("None service worker tasks finished")
   gulp.start('service-workers');
 });
 
