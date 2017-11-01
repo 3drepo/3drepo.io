@@ -41,7 +41,9 @@ const _ = require('lodash');
 const uuid = require("node-uuid");
 
 /*******************************************************************************
- * Converts error code from repobouncerclient to a response error object
+ * Converts error code from repobouncerclient to a response error object.
+ * Uncaught error codes that are valid responseCodes will be returned,
+ * otherwise FILE_IMPORT_UNKNOWN_ERR is returned.
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
@@ -62,7 +64,7 @@ function convertToErrorCode(bouncerErrorCode){
 			errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
 			break;
 		case 4:
-			errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
 			break;
 		case 5:
 			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
@@ -98,7 +100,7 @@ function convertToErrorCode(bouncerErrorCode){
 			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
 			break;
 		default:
-			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			errObj = (bouncerErrorCode) ? bouncerErrorCode : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
 			break;
 
 	}
@@ -124,6 +126,13 @@ function importSuccess(account, model) {
 	});
 }
 
+/**
+ * Sets failed status, error code, chat event, and E-mail upon import failure
+ * @param {account} acount - User account
+ * @param {model} model - Model
+ * @param {errCode} errCode - Defined bouncer error code or IO response code
+ * @param {corId} corId - CorrelationId (Mail will not be sent if undefined)
+ */
 function importFail(account, model, errCode, corId) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
@@ -134,13 +143,15 @@ function importFail(account, model, errCode, corId) {
 			ChatEvent.modelStatusChanged(null, account, model, setting);						
 		})
 
-		Mailer.sendImportError({
-			account,
-			model,
-			username: account,
-			err: convertToErrorCode(errCode).message,
-			corID: corId
-		});
+		if (corId) {
+			Mailer.sendImportError({
+				account,
+				model,
+				username: account,
+				err: convertToErrorCode(errCode).message,
+				corID: corId
+			});
+		}
 	}).catch(err => {
 		systemLogger.logError(`Failed to invoke importFail:`, err);
 	});
@@ -1252,6 +1263,7 @@ function uploadFile(req){
 
 					if(size > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+						importFail(account, model, responseCodes.SIZE_LIMIT_PAY, undefined);
 					} else {
 						cb(null, true);
 					}
