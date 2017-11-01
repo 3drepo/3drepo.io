@@ -4,6 +4,13 @@ if (window) {
 	if (!window.ClientConfig) {
 		console.error("ClientConfig has not been provided...");
 	} else {
+
+		if (window.ClientConfig.VERSION) {
+			console.log("======== 3D REPO - Version " + window.ClientConfig.VERSION + " ======");
+		} else {
+			console.log("No version number in config...");
+		}
+
 		if (window.ClientConfig.unitySettings) {
 			// Assign unity settings
 			window.Module = ClientConfig.unitySettings;
