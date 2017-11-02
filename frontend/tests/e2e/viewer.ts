@@ -203,6 +203,67 @@ describe("Viewer page", function() {
  
                 });
 
+                describe("allows you to change the details", () => {
+                    
+                    it("including priority", () => {
+                        
+                        const menu = element(by.id('issuePriority'));
+                        menu.click();
+                        browser.sleep(500);
+                        
+                        const high = element.all(by.repeater('priority in vm.priorities')).get(0);
+                        high.click();
+
+                        const text = menu.all(by.tagName("md-select-value")).first().getText();
+                        expect(text).to.eventually.equal("High");
+                       
+                    });
+
+                    it("including status", () => {
+
+                        const menu = element(by.id('issueStatuses'));
+                        menu.click();
+                        browser.sleep(500);
+                        
+                        const high = element.all(by.repeater('status in vm.statuses')).get(1);
+                        high.click();
+
+                        const text = menu.all(by.tagName("md-select-value")).first().getText()
+                        expect(text).to.eventually.equal("In Progress");
+
+                    })
+
+                    it("including assign", () => {
+
+                        const menu = element(by.id('issueAssign'));
+                        menu.click();
+                        browser.sleep(500);
+                        
+                        const high = element.all(by.repeater('job in vm.modelJobs')).get(0);
+                        high.click();
+
+                        const text = menu.all(by.tagName("md-select-value")).first().getText()
+                        expect(text).to.eventually.equal("Client");
+             
+                    });
+
+                    it("including type", () => {
+                    
+                        const menu = element(by.id('issueType'));
+                        menu.click();
+                        browser.sleep(500);
+                        
+                        const high = element.all(by.repeater('type in vm.topic_types')).get(0);
+                        high.click();
+
+                        const text = menu.all(by.tagName("md-select-value")).first().getText()
+                        expect(text).to.eventually.equal("For information");
+                
+                    });
+                         
+ 
+                });
+
             }); 
             
 

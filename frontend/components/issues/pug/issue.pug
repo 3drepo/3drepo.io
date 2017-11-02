@@ -51,11 +51,20 @@ div.heightFix(
 			div(layout="row")
 				md-input-container.issueItemStatus(flex)
 					label Priority
-					md-select(ng-model="vm.issueData.priority", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+					md-select(
+						id="issuePriority"
+						ng-model="vm.issueData.priority"
+						ng-change="vm.statusChange()"
+						ng-disabled="!vm.canUpdate")
 						md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
+				
 				md-input-container.issueItemStatus(flex)
 					label Status
-					md-select(ng-model="vm.issueData.status", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+					md-select(
+						id="issueStatus"		
+						ng-model="vm.issueData.status"
+						ng-change="vm.statusChange()"
+						ng-disabled="!vm.canUpdate")
 						md-option(
 							ng-repeat="status in vm.statuses"
 							value="{{status.value}}") {{status.label}}
@@ -63,11 +72,22 @@ div.heightFix(
 			div(layout="row")
 				md-input-container(flex)
 					label Assign
-					md-select(ng-model="vm.issueData.assigned_roles[0]", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+					md-select(
+						id="issueAssign"
+						ng-model="vm.issueData.assigned_roles[0]"
+						ng-change="vm.statusChange()"
+						ng-disabled="!vm.canUpdate")
+
 						md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
+				
 				md-input-container(flex)
 					label Type
-					md-select(ng-model="vm.issueData.topic_type", ng-change="vm.statusChange()", ng-disabled="!vm.canUpdate")
+					md-select(
+						id="issueType"
+						ng-model="vm.issueData.topic_type"
+						ng-change="vm.statusChange()"
+						ng-disabled="!vm.canUpdate")
+
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
