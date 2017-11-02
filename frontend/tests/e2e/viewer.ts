@@ -10,12 +10,6 @@ describe("Viewer page", function() {
         const url = env.baseUrl + "/" + USER.USERNAME + "/" + USER.MODEL_ID;
         browser.get(url);
         browser.waitForAngular();
-
-        browser.wait(
-            ExpectedConditions.elementToBeClickable(element(by.id("addIssue"))),
-            60000 * 2
-        );
-
 	});
 
 	after(() => {
@@ -28,14 +22,6 @@ describe("Viewer page", function() {
 			expect(element(by.id("homeLogo")).isDisplayed()).to.eventually.equal(true);
         });
 
-        it("with the revisions drop down", () => {
-            const revisions = element(by.tagName("revisions"));
-            expect(revisions.isDisplayed()).to.eventually.equal(true);
-            revisions.click();
-            expect(element(by.repeater('rev in vm.revisions')).isDisplayed()).to.eventually.equal(true);
-            element(by.css('[ng-click="vm.closeDialog()"]')).click();
-        });
-
         describe("with the left bottom buttons", () => {
             
             it("visible", () => {
@@ -43,6 +29,22 @@ describe("Viewer page", function() {
             });
 
         });
+
+        describe("with the legal links", () => {
+            
+            it("visible", () => {
+                expect(element(by.id("legalLinks")).isDisplayed()).to.eventually.equal(true);
+            });
+
+        });
+
+        describe("with the account menu", () => {
+
+            it("visible", () => {
+                expect(element(by.tagName("account-menu")).isDisplayed()).to.eventually.equal(true);
+            });
+           
+        })
 
         describe("with the right bottom buttons", () => {
 
@@ -52,17 +54,63 @@ describe("Viewer page", function() {
 
         });
 
-        describe("with the model loaded", () => {
+        describe("left side buttons", () => {
+            it("visible", () => {
+                expect(element(by.id("issuesLeftButton")).isDisplayed()).to.eventually.equal(true); 
+                expect(element(by.id("treeLeftButton")).isDisplayed()).to.eventually.equal(true); 
+                expect(element(by.id("clipLeftButton")).isDisplayed()).to.eventually.equal(true); 
+            });
+        })
+
+        describe("right side buttons", () => {
+            it("with a visible metadata button", () => {
+                expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
+            });
+
+            it("with a visible measure button", () => {
+                expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
+            });
+        })
+
+        describe("viewer", () => {
             
-            describe("the left side buttons", () => {
+            it("visible", () => {
+                expect(element(by.tagName("viewer")).isDisplayed()).to.eventually.equal(true);
+            });
+
+        })
+
+        describe("loading text", () => {
+            
+            it("to exist", () => {
+                expect(element(by.className("loadingViewer")).isDisplayed()).to.eventually.equal(true);
+                expect(element(by.className("loadingViewerText")).isDisplayed()).to.eventually.equal(true);
+            });
+
+        })
+
+        describe("with the model loaded", () => {
+
+            before(() => {
+
+                browser.wait(
+                    ExpectedConditions.elementToBeClickable(element(by.id("addIssue"))),
+                    60000 * 2
+                );        
+
+            });
+
+            it("with the revisions drop down", () => {
+                const revisions = element(by.tagName("revisions"));
+                expect(revisions.isDisplayed()).to.eventually.equal(true);
+                revisions.click();
+                expect(element(by.repeater('rev in vm.revisions')).isDisplayed()).to.eventually.equal(true);
+                element(by.css('[ng-click="vm.closeDialog()"]')).click();
+            });
+            
+            describe("and interacting with the left side buttons", () => {
     
-                it("visible", () => {
-                    expect(element(by.id("issuesLeftButton")).isDisplayed()).to.eventually.equal(true); 
-                    expect(element(by.id("treeLeftButton")).isDisplayed()).to.eventually.equal(true); 
-                    expect(element(by.id("clipLeftButton")).isDisplayed()).to.eventually.equal(true); 
-                });
-    
-                it("and clicking the issues button should hide and show issues panel", () => {
+                it("by clicking the issues button should hide and show issues panel", () => {
     
                     // Shown by default
                     const issuesButton = element(by.id("issuesLeftButton"))
@@ -73,7 +121,7 @@ describe("Viewer page", function() {
     
                 });
     
-                it("and clicking the tree button should hide and show tree panel", () => {
+                it("by clicking the tree button should hide and show tree panel", () => {
     
                     const treeButton = element(by.id("treeLeftButton"));
     
@@ -99,19 +147,12 @@ describe("Viewer page", function() {
                 
             });
     
-            describe("with the right side buttons", () => {
+            describe("and interacting with the right side buttons", () => {
+
                 const orange = 'rgba(255, 152, 0, 1)';
                 const green = 'rgba(6, 86, 60, 1)';
     
-                it("with a metadata button", () => {
-                    expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
-                });
-    
-                it("with a measure button", () => {
-                    expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
-                });
-    
-                it("click on the metadata button and it should be activated", () => {
+                it("by clicking on the metadata button should be activate it", () => {
                     
                     const meta = element(by.id("metadataButton"))
                     const measure = element(by.id("measureButton"))
@@ -135,7 +176,7 @@ describe("Viewer page", function() {
                        
                 // });
     
-                it("click on the measure button and it should be activated", () => {
+                it("by clicking on the measure button should activate it", () => {
                     const measure = element(by.id("measureButton"))
                     const meta = element(by.id("metadataButton"))
                     measure.click();
@@ -154,6 +195,8 @@ describe("Viewer page", function() {
                     expect(element(by.id("issuesPanel")).isDisplayed()).to.eventually.equal(true);
 
                     const issues = element.all(by.tagName("issues-list-item"));
+                    expect(issues.count()).to.eventually.be.greaterThan(0);
+
                     issues.first().click();
                     const arrow = element(by.id("issuesListItemEnter"));
                     expect(arrow.isDisplayed()).to.eventually.equal(true);
@@ -167,7 +210,7 @@ describe("Viewer page", function() {
                     expect(element(by.id("issueTitleArea")).isDisplayed()).to.eventually.equal(true);
                     expect(element(by.id("issueInfoArea")).isDisplayed()).to.eventually.equal(true);
                     expect(element(by.id("issueAdditional")).isDisplayed()).to.eventually.equal(true);
-                    expect(element.all(by.className("issueThumbnailImage")).count()).to.eventually.greaterThan(1)
+                    expect(element.all(by.className("issueThumbnailImage")).count()).to.eventually.greaterThan(0)
                     expect(element(by.id("submitCommentButton")).isDisplayed()).to.eventually.equal(true);
                     expect(element(by.id("screenshotCommentButton")).isDisplayed()).to.eventually.equal(true);
 
@@ -260,9 +303,8 @@ describe("Viewer page", function() {
                         expect(text).to.eventually.equal("For information");
                 
                     });
-                    
-                         
- 
+
+                        
                 });
 
             }); 

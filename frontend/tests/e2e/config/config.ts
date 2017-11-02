@@ -6,7 +6,8 @@ export let config: Config = {
   framework: "mocha",
   mochaOpts: {
     reporter: "spec",
-    slow: 3000
+    slow: 3000,
+    bail: true
   },
   capabilities: {
     'browserName': 'chrome',
