@@ -318,11 +318,15 @@
 		};
 
 		vm.checkCanUpdate = function() {
-			vm.canUpdate = IssuesService.setCanUpdateIssue(
-				vm.issueData, 
-				vm.userJob,
-				vm.modelSettings.permissions
-			);
+			if (vm.modelSettings && vm.modelSettings.permissions) {
+				vm.canUpdate = IssuesService.setCanUpdateIssue(
+					vm.issueData, 
+					vm.userJob,
+					vm.modelSettings.permissions
+				);
+			} else {
+				console.error("Model permissions is are defined", vm.modelSettings)
+			}
 		};
 
 		vm.checkCanComment = function() {
