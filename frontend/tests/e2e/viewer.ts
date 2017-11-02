@@ -260,6 +260,7 @@ describe("Viewer page", function() {
                         expect(text).to.eventually.equal("For information");
                 
                     });
+                    
                          
  
                 });
