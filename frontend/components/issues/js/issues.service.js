@@ -95,6 +95,9 @@
 			var jobsMatch = (userJob._id && 
 							issueData.creator_role && 
 							userJob._id === issueData.creator_role);
+			
+			console.log("jobs - jobsMatch - ", userJob._id, issueData.creator_role, userJob._id === issueData.creator_role);
+			console.log("jobs - jobsMatch - ", jobsMatch)
 
 			// And also that they can also at least comment ('edit' so to speak)
 			jobsMatch = jobsMatch && AuthService.hasPermission(
@@ -108,6 +111,10 @@
 				permissions
 			);
 
+			console.log("jobs - permissions: ", permissions)
+			console.log("jobs - isOwner", isOwner)
+			console.log("jobs - jobsMatch", jobsMatch)
+			console.log("jobs - hasPermission", hasPermission)
 
 			return isOwner || jobsMatch || hasPermission;
 

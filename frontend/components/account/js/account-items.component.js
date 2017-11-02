@@ -677,6 +677,10 @@
 				});
 		};
 
+		vm.showAllModelDialogInputs = function() {
+			return vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 0;
+		};
+
 		vm.teamspaceAndProjectSelected = function() {
 			return vm.newModelData && 
 				vm.newModelData.project && 

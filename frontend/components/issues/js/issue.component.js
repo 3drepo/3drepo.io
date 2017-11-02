@@ -324,6 +324,7 @@
 					vm.userJob,
 					vm.modelSettings.permissions
 				);
+				console.log("jobs - checkCanUpdate - vm.canUpdate set: ", vm.canUpdate)
 			} else {
 				console.error("Model permissions is are defined", vm.modelSettings)
 			}
