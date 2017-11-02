@@ -167,6 +167,7 @@
 			} 
 
 			var viewable = project.models.filter(function(model){
+				console.log(model);
 				return model.permissions.length > 0;
 			}).length > 0 || project.permissions.length > 0;
 
@@ -336,12 +337,13 @@
 			var currentFederation = vm.federationData.name;
 
 			vm.federationsSaving[currentFederation] = true;
+			vm.federationData.modelName = vm.federationData.name;
 			
 			if (isEdit) {
 				delete vm.federationData._isEdit;
 				promise = APIService.put(teamspaceName + "/" + vm.federationData.model, vm.federationData);
 			} else {
-				promise = APIService.post(teamspaceName + "/" + vm.federationData.name, vm.federationData);
+				promise = APIService.post(teamspaceName + "/model", vm.federationData);
 			}
 			
 			promise
