@@ -395,8 +395,10 @@
 					vm.federationsSaving[currentFederation] = false;
 
 				})
-				.catch(function(){
-					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
+				.catch(function(error) {
+					var title = "Error Saving Federation";
+					var action = "saving the federation";
+					vm.errorDialog(title, action, error);
 					vm.federationsSaving[currentFederation] = false;
 				});
 
@@ -769,15 +771,20 @@
 						vm.newModelErrorMessage = error.data.message;
 						vm.uploading = false;
 
-						var message = (error.data.message) ? error.data.message : "Unknown Error";
-						var content = "Something went wrong uploading your model: <br><br>" +
-							"<strong> " + message + "</strong>" +
-							"<br><br> If this is unexpected please message support@3drepo.io.";
-						var escapable = true;
-						var title = "Error Uploading Model";
-						DialogService.html(title, content, escapable);
+						var title = "Error Uploading Model"
+						var action = "uploading your model";
+						vm.errorDialog(title, action, error);
 					});
 			}
+		};
+
+		vm.errorDialog = function(title, action, error) {
+			var message = (error.data.message) ? error.data.message : "Unknown Error";
+			var content = "Something went wrong " +  action + ": <br><br>" +
+				"<strong> " + message + "</strong>" +
+				"<br><br> If this is unexpected please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.html(title, content, escapable);
 		};
 
 
