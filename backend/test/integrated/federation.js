@@ -228,7 +228,7 @@ describe('Federated Model', function () {
 	it('should fail if create federation using invalid model name', function(done){
 
 
-		agent.post(`/${username}/a%20c`)
+		agent.post(`/${username}/错误`)
 		.send({ 
 			desc, 
 			type, 

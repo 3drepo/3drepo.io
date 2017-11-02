@@ -107,50 +107,38 @@ function convertToErrorCode(bouncerErrorCode){
 }
 
 function importSuccess(account, model) {
-	let status = 'ok';
-	ChatEvent.modelStatusChanged(null, account, model, { status: status });
-	ModelSetting.findById({account, model}, model).then(setting => {
+	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
-			setting.status = status;
-			systemLogger.logInfo(`Model status changed to ${status}`);
+			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
-			systemLogger.logInfo(`Correlation ID reset`);
 			setting.errorReason = undefined;
-			if(source.type === 'toy'){
+			if(setting.type === 'toy' || setting.type === 'sample'){
 				setting.timestamp = new Date();
 			}
 			setting.markModified('errorReason');
 			ChatEvent.modelStatusChanged(null, account, model, setting);
-			systemLogger.logInfo(`Setting is ${setting}`);
 			setting.save();
 		}
 	});
-
 }
 
-function importFail(account, model) {
+function importFail(account, model, errCode, corId) {
 	ModelSetting.findById({account, model}, model).then(setting => {
-		// import failed for some reason(s)...
 		//mark model failed
+		setting.status = 'failed';
+		setting.errorReason = convertToErrorCode(errCode);
+		setting.markModified('errorReason');
+		setting.save().then( () => {				
+			ChatEvent.modelStatusChanged(null, account, model, setting);						
+		})
 
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
+		Mailer.sendImportError({
 			account,
 			model,
-			username
+			username: account,
+			err: convertToErrorCode(errCode).message,
+			corID: corId
 		});
-
-		setting.status = 'failed';
-		setting.errorReason = err;
-		setting.markModified('errorReason');
-		setting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, setting);
-
-		// cclw05 - something wrong with error here
-		// (node:11862) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 3): [object Object]
-		//return Promise.reject(err);
 	});
 }
 
@@ -161,11 +149,10 @@ function importFail(account, model) {
  */
 function setStatus(account, model, status) {
 	ChatEvent.modelStatusChanged(null, account, model, { status: status });
-	ModelSetting.findById({account, model}, model).then(setting => {
+	return ModelSetting.findById({account, model}, model).then(setting => {
 		setting.status = status;
-		setting.save();
 		systemLogger.logInfo(`Model status changed to ${status}`);
-		systemLogger.logInfo(`Setting is ${setting}`);
+		return setting.save();
 	});
 }
 
@@ -187,7 +174,6 @@ function createCorrelationId(account, model) {
 		setting._id = model;
 		setting.corID = correlationId;
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-		systemLogger.logInfo(`Setting is ${setting}`);
 		return setting.save().then(() => {
 			return correlationId;
 		});;
@@ -361,6 +347,9 @@ function importToyProject(account, username){
 			const subModels = models.map(m => {
 				
 				m = m.toObject();
+				
+				importSuccess(account, m._id);
+
 				return {
 					model: m._id,
 					database: account
@@ -1314,7 +1303,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		];
 	};
 
-	return importQueue.importFile(
+	importQueue.importFile(
 		correlationId,
 		file.path,
 		file.originalname,
@@ -1333,12 +1322,9 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		});
 
 		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
-		return Promise.resolve(obj);
 
 	}).catch(err => {
-		// ISSUE_520... don't delete files if importFile fails
-		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
-		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
+		systemLogger.logError(`Failed to import model:`, err);
 	});
 
 }
@@ -1349,26 +1335,25 @@ function importModel(account, model, username, modelSetting, source, data){
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	let correlationId = uuid.v1();
-	modelSetting.corID = correlationId;
-
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'queued' });
-
-	modelSetting.status = 'queued';
-
 	return modelSetting.save().then(() => {
+		return createCorrelationId(account, model).then(correlationId => {
+			return setStatus(account, model, 'queued').then(setting => {
 
-		if (source.type === 'upload'){
-			return _handleUpload(correlationId, account, model, username, source.file, data);
+				modelSetting = setting;
 
-		} else if (source.type === 'toy'){
+				if (source.type === 'upload'){
+					return _handleUpload(correlationId, account, model, username, source.file, data);
 
-			return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
-				modelSetting.corID = correlationId;
-				systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+				} else if (source.type === 'toy'){
+
+					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+						return modelSetting;
+					});
+				}
+
 			});
-		}
-
+		});
 	});
 
 }
@@ -1610,8 +1595,22 @@ function getMetadata(account, model, id){
 
 }
 
+function isUserAdmin(account, model, user)
+{
+	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	//find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  //This model belongs to a project
+			&& project.permissions.length > 0 //This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
+			);
+	});
+}
+
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[a-zA-Z0-9_\-]{1,120}$/;
+const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
@@ -1627,6 +1626,7 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
+	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
 	getIdMap,

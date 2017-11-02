@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "APIService"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "APIService", "AuthService", "$window"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, APIService) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, APIService, AuthService, $window) {
 		var vm = this;
 
 		/*
@@ -284,7 +284,7 @@
 					if (response.status === 200) {
 						vm.showPage("registerRequest");
 					} else {
-						vm.registerErrorMessage = UtilsService.getErrorMessage(response.data);
+						vm.registerErrorMessage = APIService.getErrorMessage(response.data);
 					}
 					vm.registering = false;
 					if (vm.useReCAPTCHA) {

@@ -32,9 +32,9 @@
 			}
 		);
 
-	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService", "ViewerService"];
+	IssuesScreenShotCtrl.$inject = ["DialogService", "$q", "$timeout", "$element", "APIService", "EventService", "ViewerService"];
 
-	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService, ViewerService) {
+	function IssuesScreenShotCtrl (DialogService, $q, $timeout, $element, APIService, EventService, ViewerService) {
 		var vm = this,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
@@ -105,7 +105,7 @@
 		};
 
 		vm.closeDialog = function () {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**

@@ -27,7 +27,8 @@
 	];
 
 	function ViewerService(
-		ClientConfigService, $q, APIService, DialogService, EventService
+		ClientConfigService, $q, APIService, DialogService, 
+		EventService
 	) {
 
 		var viewer;
@@ -52,10 +53,11 @@
 			activateMeasure: activateMeasure,
 			disableMeasure: disableMeasure,
 			getScreenshot: getScreenshot,
-			getExtent: getExtent,
+			goToExtent: goToExtent,
 			setNavMode: setNavMode,
 			getModelInfo: getModelInfo,
 			setMultiSelectMode: setMultiSelectMode,
+			switchObjectVisibility: switchObjectVisibility,
 			handleUnityError: handleUnityError,
 			handleEvent: handleEvent,
 			highlightObjects: highlightObjects,
@@ -195,6 +197,10 @@
 			viewer.setMultiSelectMode(value);
 		}
 
+		function switchObjectVisibility(account, model, ids, visibility){
+			viewer.switchObjectVisibility(account, model, ids, visibility);
+		}
+
 		function handleUnityError(message) {
 
 			DialogService.html("Unity Error", message, true)
@@ -241,8 +247,8 @@
 			}
 		}
 
-		function getExtent() {
-			viewer.goToExtent();
+		function goToExtent() {
+			viewer.showAll();
 		}
 
 		function setNavMode(mode) {

@@ -9,15 +9,15 @@
 		.issueListItem(
 			ng-repeat="issue in vm.issuesToShow track by $index"
 			layout="column"
-			ng-click="vm.select($event, issue)"
+			ng-click="vm.select(issue)"
 			ng-mouseenter="vm.setFocus(issue, $index)"
-			ng-mouseleave="vm.removeFocus($event, issue)"
+			ng-mouseleave="vm.removeFocus(issue)"
 			ng-class="{issueListItemFocus: issue.focus}")
 
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
 			issues-list-item(
-				ng-disabled="!vm.modelLoaded"
+				ng-disabled="!vm.loaded.model"
 				data="issue"
 				user-job="vm.userJob")
 

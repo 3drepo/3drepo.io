@@ -304,12 +304,13 @@ describe('Model', function () {
 
 
 
-	it('should return error message if model name contains spaces', function(done){
+	it('should succeed if model name contains spaces', function(done){
 
-		agent.post('/' + username + '/you%20are%20genius')
+		let spacedName = 'you%20are%20genius';
+		agent.post(`/${username}/${spacedName}`)
 		.send({ desc, type, unit })
-		.expect(400, function(err ,res) {
-			expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
+		.expect(200, function(err ,res) {
+			expect(res.body.name).to.equal(spacedName.replace(/%20/g, " "));
 			done(err);
 		});
 	});
@@ -343,7 +344,7 @@ describe('Model', function () {
 			], done);
 		});
 
-		it('should success and get the latest file', function(done){
+		it('should succeed and get the latest file', function(done){
 			agent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res){
 
 				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
@@ -379,7 +380,7 @@ describe('Model', function () {
 		});
 
 
-		it('should success', function(done){
+		it('should succeed', function(done){
 			agent.delete(`/${username}/${model}`).expect(200, done);
 		});
 

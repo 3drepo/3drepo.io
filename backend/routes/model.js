@@ -446,9 +446,11 @@ function uploadModel(req, res, next){
 			type: 'upload',
 			file: file
 		};
-		//do not return this promise!, error will be logged in importModel function
-		//returning this promise may cause sending double http headers
-		ModelHelpers.importModel(account, model, username, modelSetting, source, data);
+		//FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
+		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
+			}).catch(() => {
+
+			});
 
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;

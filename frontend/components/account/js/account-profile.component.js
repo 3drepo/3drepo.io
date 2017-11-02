@@ -35,9 +35,8 @@
 	AccountProfileCtrl.$inject = ["AccountService"];
 
 	function AccountProfileCtrl(AccountService) {
-		var vm = this,
-			promise;
-
+		var vm = this;
+		
 		/*
 		 * Init
 		 */
@@ -54,40 +53,59 @@
 		 * Update the user info
 		 */
 		vm.updateInfo = function () {
-			promise = AccountService.updateInfo(vm.username, {
+			AccountService.updateInfo(vm.username, {
 				email: vm.emailNew,
 				firstName: vm.firstNameNew,
 				lastName: vm.lastNameNew
-			});
-			promise.then(function (response) {
+			})
+				.then(function (response) {
+					console.log(response);
 
-				if (response.statusText === "OK") {
-					vm.infoSaveInfo = "Saved";
-					vm.firstName = vm.firstNameNew;
-					vm.lastName = vm.lastNameNew;
-					vm.email = vm.emailNew;
+					if (response.status === 200) {
+						vm.infoSaveInfo = "Saved";
+						vm.updateError = "";
+						vm.firstName = vm.firstNameNew;
+						vm.lastName = vm.lastNameNew;
+						vm.email = vm.emailNew;
 
-				} else {
-					vm.infoSaveInfo = response.data.message;
-				}
-			});
+					} else {
+						vm.updateError = response.data.message;
+					}
+				})
+				.catch(function(error) {
+					if (error && error.data && error.data.message) {
+						vm.updateError = error.data.message;
+					} else {
+						vm.updateError = "Unknown error updating profile";
+					}
+				});
 		};
 
 		/**
 		 * Update the user password
 		 */
 		vm.updatePassword = function () {
-			promise = AccountService.updatePassword(vm.username, {
+			AccountService.updatePassword(vm.username, {
 				oldPassword: vm.oldPassword,
 				newPassword: vm.newPassword
-			});
-			promise.then(function (response) {
-				if (response.statusText === "OK") {
-					vm.passwordSaveInfo = "Saved";
-				} else {
-					vm.passwordSaveInfo = response.data.message;
-				}
-			});
+			})
+				.then(function (response) {
+					console.log(response);
+					if (response.status === 200) {
+						vm.passwordSaveInfo = "Saved";
+						vm.passwordSaveError = "";
+					} else {
+						vm.passwordSaveError = response.data.message;
+					}
+				})
+				.catch(function (error) {
+					console.log(error);
+					if (error && error.data && error.data.message) {
+						vm.passwordSaveError = error.data.message;
+					} else {
+						vm.passwordSaveError = "Unknown error updating password";
+					}
+				});
 		};
 
 		/**

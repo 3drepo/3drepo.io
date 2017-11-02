@@ -34,12 +34,45 @@
 			delete: del,
 			post: post,
 			get: get,
-			put: put
+			put: put,
+			getErrorMessage: getErrorMessage,
+			getResponseCode: getResponseCode
 		};
 
 		return service;
 
 		////////
+
+		function getResponseCode(errorToFind) {
+			return Object.keys(ClientConfigService.responseCodes).indexOf(errorToFind);
+		}
+
+		function getErrorMessage(resData){
+            
+			var messages = {
+				"FILE_FORMAT_NOT_SUPPORTED": "Unsupported file format",
+				"SIZE_LIMIT_PAY": "Insufficient quota for model",
+				"USER_NOT_VERIFIED": "Please click on the link in the verify email sent to your account",
+				"ALREADY_VERIFIED": "You have already verified your account successfully. You may now login to your account.",
+				"INVALID_CAPTCHA_RES": "Please prove you're not a robot",
+				"USER_EXISTS": "User already exists"
+			};
+
+			var message;
+
+			Object.keys(ClientConfigService.responseCodes).forEach(function(key){
+				if(ClientConfigService.responseCodes[key].value === resData.value){
+					if(messages[key]){
+						message = messages[key]; 
+					} else {
+						message = ClientConfigService.responseCodes[key].message;
+					}
+				}
+			});
+
+			return message;
+
+		}
 
 		function getAPIUrl(url) {
 			return ClientConfigService.apiUrl(ClientConfigService.GET_API, url);

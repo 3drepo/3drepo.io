@@ -40,6 +40,7 @@
 			vm.showProgress = false;
 			vm.messageColour = "rgba(0, 0, 0, 0.7)";
 			vm.messageErrorColour = "#F44336";
+			vm.buttonDisabled = true;
 		};
 
 		/*
@@ -47,6 +48,9 @@
          */
 		$scope.$watchGroup(["vm.username", "vm.email"], function () {
 			vm.message = "";
+			if (vm.username && vm.email) {
+				vm.buttonDisabled = false;
+			}
 		});
 
 		/**
@@ -64,21 +68,30 @@
 
 			if (requestChange) {
 				if (vm.username && vm.email) {
-
+					
 					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
+					vm.buttonDisabled = true;
 					APIService.post(vm.username + "/forgot-password", {email: vm.email})
 						.then(function (response) {
 							vm.showProgress = false;
 							if (response.status === 200) {
 								vm.verified = true;
+								
 								vm.messageColor = vm.messageColour;
 								vm.message = "Thank you. You will receive an email shortly with a link to change your password";
 							} else {
+								vm.buttonDisabled = false;
 								vm.messageColor = vm.messageErrorColour;
 								vm.message = response.data.message;
 							}
+						})
+						.catch(function(error){
+							vm.showProgress = false;
+							vm.messageColor = vm.messageErrorColour;
+							vm.message = error.data.message;
+							vm.buttonDisabled = false;
 						});
 
 				} else {

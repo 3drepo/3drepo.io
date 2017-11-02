@@ -27,6 +27,7 @@ var multer = require("multer");
 var config = require("../config.js");
 
 var User = require('../models/user');
+var ModelHelper = require('../models/helper/model');
 
 var stringToUUID = utils.stringToUUID;
 
@@ -131,17 +132,26 @@ function updateIssue(req, res, next){
 				const sub = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username);
 				const job = sub && sub.job;
 				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
-				const isAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-				
-				const canCloseIssue = (issue.creator_role === job && issue.creator_role && job) || 
-					req.session.user.username === issue.owner ||
-					isAdmin;
+				return ModelHelper.isUserAdmin(req.params.account, req.params.model, req.session.user.username).then( isAdmin =>{
+					const isTSAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+					const sameRoleAsOwner = issue.creator_role === job && issue.creator_role && job; 
+					const canEditIssue = sameRoleAsOwner || 
+					req.session.user.username === issue.owner || isAdmin || isTSAdmin;
+					
+					if(!canEditIssue){
+						return Promise.reject(responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED);
+					} else {
+						return issue.updateAttrs(data);
+					}
+				}).catch(err =>{
+						if(err){
+							return Promise.reject(err);
+						}
+						else{
+							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
+						}
+				});
 
-				if(data.status === C.ISSUE_STATUS_CLOSED && !canCloseIssue){
-					return Promise.reject(responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED);
-				} else {
-					return issue.updateAttrs(data);
-				}
 
 			});
 		}
@@ -149,7 +159,6 @@ function updateIssue(req, res, next){
 		return action;
 
 	}).then(issue => {
-
 		let resData = {
 			_id: issueId,
 			account: req.params.account,

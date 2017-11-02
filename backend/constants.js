@@ -305,6 +305,8 @@
 	define("PERM_DELETE_MODEL", "delete_model");
 	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
 
+
+
 	//team space
 	define("ACCOUNT_PERM_LIST", [
 		module.exports.PERM_ASSIGN_LICENCE,
@@ -348,6 +350,20 @@
 		module.exports.PERM_DELETE_MODEL,
 		module.exports.PERM_MANAGE_MODEL_PERMISSION
 	]);
+
+	define("MODEL_PERM_OBJ", {
+		PERM_CHANGE_MODEL_SETTINGS : module.exports.PERM_CHANGE_MODEL_SETTINGS,
+		PERM_UPLOAD_FILES : module.exports.PERM_UPLOAD_FILES,
+		PERM_CREATE_ISSUE : module.exports.PERM_CREATE_ISSUE,
+		PERM_COMMENT_ISSUE : module.exports.PERM_COMMENT_ISSUE,
+		PERM_VIEW_ISSUE : module.exports.PERM_VIEW_ISSUE,
+		PERM_VIEW_MODEL : module.exports.PERM_VIEW_MODEL,
+		PERM_DOWNLOAD_MODEL : module.exports.PERM_DOWNLOAD_MODEL,
+		PERM_EDIT_FEDERATION : module.exports.PERM_EDIT_FEDERATION,
+		PERM_DELETE_FEDERATION : module.exports.PERM_DELETE_FEDERATION,
+		PERM_DELETE_MODEL : module.exports.PERM_DELETE_MODEL,
+		PERM_MANAGE_MODEL_PERMISSION : module.exports.PERM_MANAGE_MODEL_PERMISSION
+	});
 
 	define("IMPLIED_PERM", {
 		[module.exports.PERM_TEAMSPACE_ADMIN]:{

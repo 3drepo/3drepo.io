@@ -35,7 +35,7 @@
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
-		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
+		"StateManager", "EventService", "APIService", "ClientConfigService", 
 		"$location", "SWService", "AnalyticService", "ViewerService", 
 		"$document", "TemplateService"
 	];
@@ -43,7 +43,7 @@
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
-		EventService, UtilsService, ClientConfigService, $location,
+		EventService, APIService, ClientConfigService, $location,
 		SWService, AnalyticService, ViewerService, $document, TemplateService
 	) {
 
@@ -134,7 +134,6 @@
 					if (
 						custom.css
 					) {
-						console.log(custom.css);
 						var link = document.createElement("link");
 						link.setAttribute("rel", "stylesheet");
 						link.setAttribute("type", "text/css");
@@ -198,10 +197,6 @@
 				// If it's a legal page
 				var legal = vm.pageCheck(newState, vm.legalPages);
 				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
-
-				console.log("legal", legal);
-				console.log("loggedOut", loggedOut);
-				console.log(newState);
 
 				if (legal) {
 
@@ -383,9 +378,6 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
 
-				} else if (event.type === EventService.EVENT.GO_HOME) {
-
-					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}

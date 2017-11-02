@@ -32,7 +32,9 @@
 		service.responseError = function(response) {
 
 			var notLogin = response.data.place !== "GET /login";
-			var unauthorized = response.status === 401;
+
+			var unauthorized = response.status === 401 &&
+								response.data.message === "You are not logged in";
 			var sessionHasExpired = unauthorized && !dialogOpen && notLogin;
 
 			if (sessionHasExpired) {
@@ -57,15 +59,18 @@
 
 		function sessionExpired() {
 
-			dialogOpen = true;
-			var content = "You have been logged out as your session has expired.";
-			var DialogService = $injector.get("DialogService");
-			var AuthService = $injector.get("AuthService");
-
-			DialogService.text("Session Expired", content, false).then(function(){
-				AuthService.logoutSuccess();
-				dialogOpen = false;
-			});
+			if (dialogOpen === false) {
+				dialogOpen = true;
+				var content = "You have been logged out as your session has expired.";
+				var DialogService = $injector.get("DialogService");
+				var AuthService = $injector.get("AuthService");
+				
+				DialogService.text("Session Expired", content, false).then(function(){
+					AuthService.logoutSuccess();
+					dialogOpen = false;
+				});
+			}
+			
 		}
 
 	}
