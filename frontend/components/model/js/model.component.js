@@ -126,7 +126,7 @@
 					vm.model, 
 					vm.branch, 
 					vm.revision
-				);	
+				);
 			}
 
 			ViewerService.getModelInfo(vm.account, vm.model)

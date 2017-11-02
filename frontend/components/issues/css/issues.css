@@ -62,6 +62,12 @@ issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
 }
 
+issues span.addHint {
+  color: grey;
+  padding-right: 6px;
+  font-size: 14px;
+}
+
 issues #issuesAddButton {
   position: absolute;
   bottom: 0;

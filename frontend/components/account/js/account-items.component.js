@@ -111,7 +111,6 @@
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			console.log("vm.closeDialog")
 			DialogService.closeDialog();
 		};
 
@@ -767,6 +766,14 @@
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = error.data.message;
 						vm.uploading = false;
+
+						var message = (error.data.message) ? error.data.message : "Unknown Error";
+						var content = "Something went wrong uploading your model: <br><br>" +
+							"<strong> " + message + "</strong>" +
+							"<br><br> If this is unexpected please message support@3drepo.io.";
+						var escapable = true;
+						var title = "Error Uploading Model";
+						DialogService.html(title, content, escapable);
 					});
 			}
 		};

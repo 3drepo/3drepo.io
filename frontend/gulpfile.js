@@ -203,17 +203,50 @@ gulp.task('javascript', function() {
 
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
+
   livereload.listen({host: 'localhost', port: '35729', start: true })
-  gulp.watch("./index.html", ['index']);
-  gulp.watch("./components/**/*.pug", ['pug']);
-  gulp.watch("./entry.js", ['javascript-dev']);
-  gulp.watch(allJs, ['javascript-dev']);
-  gulp.watch(allCss, ['css']);
-  gulp.watch(allPug, ['pug']);
-  gulp.watch(icons, ['icons']);
-  gulp.watch(allImages, ['images']);
-  gulp.watch("./manifest.json", ['manifest-file']);
-  gulp.watch("./manifest-icons/**.png", ['manifest-icons']);
+
+  // Because gulp is annoying and only allows paralell execution
+  // of tasks, we need to setup a dependency order using a task
+  // registration. Sigh.
+
+  watches = {
+    "index" : [ ["./index.html"], ['index'] ],
+    "entry" :[ ["./entry.js"], ['javascript-dev'] ],
+    "js" : [ allJs, ['javascript-dev'] ],
+    "css" : [ allCss, ['css'] ],
+    "pug" : [ allPug, ['pug'] ],
+    "icons" : [ icons, ['icons'] ],
+    "manifest" : [ ["./manifest.json"], ['manifest-file'] ],
+    "mainfest-icons" : [ ["./manifest-icons/**.png"], ['manifest-icons'] ]
+  };
+
+  for (let key in watches) {
+    let taskData = watches[key];
+    let files = taskData[0];
+    let task = taskData[1][0]
+    registerTasksWithSW(task);
+    watchTask(files, task)
+  }
+
+});
+
+const registerTasksWithSW = function(task){
+  gulp.task(task + "SW", [task], function() {
+    gulp.start("service-workers")
+  });
+}
+
+const watchTask = function(files, task){
+  gulp.watch(files, [task + "SW"]);
+};
+
+gulp.task('clean', function() {
+  return gulp.src('dist/*').pipe(rm());
+});
+
+gulp.task('concat', ['clean'], function() {
+  return gulp.src('app/**/*.js').pipe(concat('main.js')).pipe(gulp.dest('dist'));
 });
 
 // Final task to build everything for the frontend (public folder)
@@ -231,6 +264,7 @@ gulp.task('build', [
   'manifest-icons', 
   'manifest-file'
 ], function () {
+  console.log("None service worker tasks finished")
   gulp.start('service-workers');
 });
 

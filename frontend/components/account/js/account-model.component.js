@@ -63,11 +63,11 @@
 	
 			vm.infoTimeout = 10000;
 			vm.isUserAccount = (vm.account === vm.userAccount);
-
 			vm.modelToUpload = null;
-			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
+			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.model;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
+
 			if (vm.model.timestamp !== null) {
 				vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 			}
@@ -317,7 +317,7 @@
 		};
 
 		vm.isProcessing = function() {
-			return vm.model.status === "uploading" ||
+			return vm.model.status === "uploading" || vm.model.status === "uploaded" ||
 					vm.model.status === "processing" || vm.model.status === "queued";
 		};
 
@@ -372,7 +372,7 @@
 
 				vm.fileUploadInfo = "Uploading...";
 				
-			} else if (modelData.status === "processing"){
+			} else if (modelData.status === "processing" || modelData.status === "uploaded"){
 
 				vm.fileUploadInfo = "Processing...";
 

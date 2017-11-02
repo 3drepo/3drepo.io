@@ -59,8 +59,6 @@
 				lastName: vm.lastNameNew
 			})
 				.then(function (response) {
-					console.log(response);
-
 					if (response.status === 200) {
 						vm.infoSaveInfo = "Saved";
 						vm.updateError = "";
@@ -90,7 +88,6 @@
 				newPassword: vm.newPassword
 			})
 				.then(function (response) {
-					console.log(response);
 					if (response.status === 200) {
 						vm.passwordSaveInfo = "Saved";
 						vm.passwordSaveError = "";
@@ -99,7 +96,6 @@
 					}
 				})
 				.catch(function (error) {
-					console.log(error);
 					if (error && error.data && error.data.message) {
 						vm.passwordSaveError = error.data.message;
 					} else {
