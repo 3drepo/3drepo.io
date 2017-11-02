@@ -258,21 +258,21 @@ describe("Viewer page", function() {
                         high.click();
 
                         const text = menu.all(by.tagName("md-select-value")).first().getText();
-                        expect(text).to.eventually.equal("High");
+                        expect(text).to.eventually.equal("None");
                        
                     });
 
                     it("including status", () => {
 
-                        const menu = element(by.id('issueStatuses'));
+                        const menu = element(by.id('issueStatus'));
                         menu.click();
                         browser.sleep(500);
                         
-                        const high = element.all(by.repeater('status in vm.statuses')).get(1);
+                        const high = element.all(by.repeater('status in vm.statuses')).get(0);
                         high.click();
 
                         const text = menu.all(by.tagName("md-select-value")).first().getText()
-                        expect(text).to.eventually.equal("In Progress");
+                        expect(text).to.eventually.equal("Open");
 
                     })
 
