@@ -1066,12 +1066,15 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		} else {
 
 			const statusHasChanged = data.status !== this.status;
+			
 			if(statusHasChanged) {
 
 				const canChangeStatus = isAdmin || 
 										hasOwnerJob || 
 										(hasAssignedJob && data.status !== statusEnum.CLOSED);
+				
 				if (canChangeStatus) {
+
 					//change status to for_approval if assigned roles is changed.
 					if (data.status === statusEnum.FOR_APPROVAL) {
 						this.assigned_roles = this.creator_role ? [this.creator_role] : [];

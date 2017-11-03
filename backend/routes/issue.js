@@ -144,7 +144,7 @@ function updateIssue(req, res, next){
 					const isAdmin = projAdmin || tsAdmin;
 					const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
 					const hasAssignedJob = job === issue.assigned_roles[0];
-					
+
 					return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
 					
 
