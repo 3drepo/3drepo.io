@@ -167,7 +167,6 @@
 			} 
 
 			var viewable = project.models.filter(function(model){
-				console.log(model);
 				return model.permissions.length > 0;
 			}).length > 0 || project.permissions.length > 0;
 
@@ -677,6 +676,10 @@
 				});
 		};
 
+		vm.showAllModelDialogInputs = function() {
+			return vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 0;
+		};
+
 		vm.teamspaceAndProjectSelected = function() {
 			return vm.newModelData && 
 				vm.newModelData.project && 
@@ -771,7 +774,7 @@
 						vm.newModelErrorMessage = error.data.message;
 						vm.uploading = false;
 
-						var title = "Error Uploading Model"
+						var title = "Error Uploading Model";
 						var action = "uploading your model";
 						vm.errorDialog(title, action, error);
 					});
@@ -892,7 +895,7 @@
 					.catch(function(errorMsg) {
 
 						setTimeout(function(){
-							DialogService.text("Model Upload Failed", errorMsg, false)
+							DialogService.text("Model Upload Failed", errorMsg, false);
 						}, 500);
 						
 					});
