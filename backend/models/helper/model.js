@@ -138,6 +138,9 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
 		setting.status = 'failed';
+		if(setting.type === 'toy' || setting.type === 'sample'){
+			setting.timestamp = undefined;
+		}
 		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified('errorReason');
 		setting.save().then( () => {				
@@ -220,7 +223,6 @@ function resetCorrelationId(account, model) {
 }
 
 function createAndAssignRole(modelName, account, username, data) {
-	
 
 	let project;
 	//generate model id
@@ -356,7 +358,7 @@ function createAndAssignRole(modelName, account, username, data) {
 }
 
 function importToyProject(account, username){
-	
+
 	// create a project named Sample_Project
 	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
