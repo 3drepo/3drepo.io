@@ -60,6 +60,13 @@
 						} else {
 							vm.verifyErrorMessage = "Error with verification";
 						}
+					}).catch(function (error){
+						if (error.data.code === "ALREADY_VERIFIED") {
+							vm.verified = true;
+							vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+						} else {
+							vm.verifyErrorMessage = "Error with verification";
+						}
 					});
 			
 			} else {
