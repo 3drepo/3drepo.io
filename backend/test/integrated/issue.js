@@ -826,8 +826,7 @@ describe("Issues", function () {
 			before(function(done){
 
 				const issue = Object.assign(baseIssue, {"name":"Issue test", "assigned_roles": ["jobC"]});
-				console.log("ISSUEP: ", issue);
-				
+
 				async.series([
 					function(_done){
 						agent.post("/logout")
