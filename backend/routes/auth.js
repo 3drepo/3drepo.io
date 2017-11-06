@@ -74,8 +74,7 @@ function createSession(place, req, res, next, user){
 			req.session[C.REPO_SESSION_USER] = user;
 			req.session.cookie.domain        = config.cookie_domain;
 
-			if (config.cookie.maxAge)
-			{
+			if (config.cookie.maxAge) {
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 

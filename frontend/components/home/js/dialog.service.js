@@ -44,18 +44,10 @@
 		////////
 
 
-		/**
-         * Show a dialog
-         *
-         * @param {String} dialogTemplate - required
-         * @param {Object} scope - required
-         * @param {Object} event
-         * @param {Boolean} clickOutsideToClose
-         * @param {Object} parent
-         * @param {Boolean} fullscreen
-         * @param {String} closeTo
-         */
-		function showDialog(dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo) {
+		function showDialog(
+			dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo
+		) {
+			
 			// Allow the dialog to have cancel ability
 			scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {
 				$mdDialog.cancel();
@@ -91,11 +83,23 @@
 		function sessionExpired() {
 
 			if (!expiredDialogOpen) {
+
 				expiredDialogOpen = true;
 				var content = "You have been logged out as your session has expired.";
-				return text("Session Expired", content, false).then(function(){
+				return $mdDialog.show( 
+					$mdDialog.alert()
+						.clickOutsideToClose(false)
+						.escapeToClose(false)
+						.title("Session Expired")
+						.textContent(content)
+						.ariaLabel("Session Expired")
+						.ok("OK")
+				).then(function(){
 					expiredDialogOpen = false;
 				});
+						
+			} else {
+				return Promise.resolve();
 			}
 
 		}
@@ -118,6 +122,8 @@
 						.ok("OK")
 				);
 
+			} else {
+				return Promise.resolve();
 			}
 			
 		}
@@ -139,6 +145,8 @@
 						.ariaLabel(title)
 						.ok("OK")
 				);
+			} else {
+				return Promise.resolve();
 			}
 
 		}

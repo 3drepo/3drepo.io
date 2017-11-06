@@ -250,16 +250,13 @@
 		 */
 		vm.select = function (issue) {
 			
-			console.log("select - click");
 			if (
 				vm.internalSelectedIssue === null || 
 				vm.internalSelectedIssue._id === issue._id
 			) {
-				console.log("select - reset and set viewer state", issue)
 				vm.resetViewerState(issue);
 				vm.setViewerState(issue);
 			} else {
-				console.log("select - just set viewer state")
 				vm.setViewerState(issue);
 			}
 			
