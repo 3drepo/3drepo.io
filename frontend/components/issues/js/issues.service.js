@@ -80,7 +80,8 @@
 			canChangeType: canChangeType,
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
-			canChangeStatusToClosed: canChangeStatusToClosed
+			canChangeStatusToClosed: canChangeStatusToClosed,
+			isOpen: isOpen
 			
 		};
 
@@ -128,11 +129,10 @@
 		}
 
 		function canChangeStatusToClosed(issueData, userJob, permissions) {
-			console.log("canChangeStatusToClosed");
-			
+
 			var jobOwner = (userJobMatchesCreator(userJob, issueData) &&
 							!isViewer(permissions));
-			console.log("isAdmin, jobOwner", isAdmin(permissions), jobOwner);
+
 			return isAdmin(permissions) || jobOwner;
 					
 		}
@@ -160,11 +160,15 @@
 
 		}
 
+		function isOpen(issueData) {
+			return issueData.status !== "closed";
+		}
+
 		function canComment(issueData, userJob, permissions) {
 			
 			var isNotClosed = issueData && 
 				issueData.status && 
-				issueData.status !== "closed";
+				isOpen(issueData);
 
 			var ableToComment = AuthService.hasPermission(
 				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 

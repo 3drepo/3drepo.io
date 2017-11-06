@@ -204,8 +204,8 @@
 
 		vm.viewFederation = function (event, account, project, model) {
 
-			if (!model.hasOwnProperty("subModels")) {
-				setupEditFederation(event, model);
+			if (!model.hasOwnProperty("subModels") || model.subModels.length === 0) {
+				setupEditFederation(event, account, project, model);
 			} else {
 
 				$location.path("/" + account.name + "/" + model.model, "_self").search({});

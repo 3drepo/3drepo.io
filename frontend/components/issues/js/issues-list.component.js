@@ -47,13 +47,13 @@
 
 	IssuesListCtrl.$inject = [
 		"$scope", "$filter", "$window", "APIService", 
-		"IssuesService", "EventService", "ClientConfigService", 
+		"IssuesService", "ClientConfigService", 
 		"$timeout", "ViewerService"
 	];
 
 	function IssuesListCtrl (
 		$scope, $filter, $window, APIService, IssuesService, 
-		EventService, ClientConfigService, $timeout, ViewerService
+		ClientConfigService, $timeout, ViewerService
 	) {
 
 		var vm = this;
@@ -250,16 +250,13 @@
 		 */
 		vm.select = function (issue) {
 			
-			console.log("select - click");
 			if (
 				vm.internalSelectedIssue === null || 
 				vm.internalSelectedIssue._id === issue._id
 			) {
-				console.log("select - reset and set viewer state", issue)
 				vm.resetViewerState(issue);
 				vm.setViewerState(issue);
 			} else {
-				console.log("select - just set viewer state")
 				vm.setViewerState(issue);
 			}
 			
