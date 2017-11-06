@@ -116,8 +116,20 @@ div.heightFix(
 								aria-label="Edit Description Toggle"
 								ng-click="vm.toggleEditDescription($event)")
 
-								md-tooltip(md-direction="bottom") edit
-								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
+								md-tooltip(
+									ng-if="!vm.editingDescription"
+									md-direction="bottom") Edit Description
+								md-icon.angular-material-icons(
+									ng-if="!vm.editingDescription"
+									style="color:{{vm.editCommentColor}}") mode_edit
+
+								md-tooltip(
+									ng-if="vm.editingDescription"
+									md-direction="bottom") Save Description
+								md-icon.angular-material-icons(
+									ng-if="vm.editingDescription"
+									style="color:{{vm.editCommentColor}}") save
+								
 				
 				.issueThumbnail(
 					ng-if="vm.descriptionThumbnail"

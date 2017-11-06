@@ -227,7 +227,7 @@
 				}
 
 				// Can edit description if no comments
-				vm.canEditDescription = (vm.issueData.comments.length === 0);
+				vm.canEditDescription = vm.checkCanEditDesc();
 
 				// Role colour
 				if (vm.issueData.assigned_roles.length > 0) {
@@ -261,6 +261,24 @@
 	
 		});
 
+		vm.checkCanEditDesc = function() {
+			// Comments that aren't notifciations
+			var canEditDesc = IssuesService.canChangeStatusToClosed(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+			if (!canEditDesc) {
+				return false;
+			}
+
+			var comments = vm.issueData.comments.filter(function(comment){ 
+				return comment.action === undefined;
+			});
+			return comments.length === 0;
+		};
+
 		/**
 		 * Save a comment if one was being typed before close
 		 * Cancel editing comment
@@ -270,7 +288,7 @@
 			vm.aboutToBeDestroyed = true;
 			if (vm.comment) {
 				IssuesService.updatedIssue = vm.issueData; // So that issues list is notified
-				saveComment();
+				vm.saveComment();
 			}
 			if (vm.editingCommentIndex !== null) {
 				vm.issueData.comments[vm.editingCommentIndex].editing = false;
@@ -406,35 +424,6 @@
 
 		};
 
-
-		// vm.checkCanUpdate = function() {
-		// 	if (vm.modelSettings && vm.modelSettings.permissions) {
-		// 		vm.canUpdate = IssuesService.setCanUpdateIssue(
-		// 			vm.issueData, 
-		// 			vm.userJob,
-		// 			vm.modelSettings.permissions
-		// 		);
-		// 		console.log("jobs - checkCanUpdate - vm.canUpdate set: ", vm.canUpdate)
-		// 	} else {
-		// 		console.error("Model permissions is are defined", vm.modelSettings)
-		// 	}
-		// };
-
-		// vm.checkCanComment = function() {
-			
-		// 	var isNotClosed = vm.issueData && 
-		// 		vm.issueData.status && 
-		// 		vm.issueData.status !== "closed";
-
-		// 	var canComment = AuthService.hasPermission(
-		// 		ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
-		// 		vm.modelSettings.permissions
-		// 	);
-
-		// 	vm.canComment = (canComment || vm.canUpdate) && isNotClosed;
-
-		// };
-
 		/**
 		 * Handle status change
 		 */
@@ -519,7 +508,7 @@
 			vm.saving = true;
 
 			if (vm.data) {
-				saveComment();
+				vm.saveComment();
 			} else {
 				vm.saveIssue();
 			}
@@ -864,17 +853,14 @@
 			});
 		};
 
-		/**
-		 * Add comment to issue
-		 * Save screen shot viewpoint or current viewpoint
-		 */
-		function saveComment () {
+		vm.saveComment = function() {
 			var	viewpointPromise = $q.defer();
 
 			if (angular.isDefined(vm.commentThumbnail)) {
 				IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
 					.then(function (response) {
 						vm.saving = false;
+						vm.canEditDescription = vm.checkCanEditDesc();
 						afterNewComment(response.data.issue);
 					})
 					.catch(function(error){
@@ -903,7 +889,7 @@
 				eventCategory: "Issue",
 				eventAction: "comment"
 			});
-		}
+		};
 
 		vm.errorSavingComment = function(error) {
 			var content = "Something went wrong saving the comment. " +

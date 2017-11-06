@@ -222,7 +222,7 @@
 
 		$scope.$watch("vm.modelSettings", function() {
 			if (vm.modelSettings) {
-				console.log("vm.modelSettings", vm.modelSettings)
+
 				vm.issuesReady.then(function(){
 					var hasPerm = AuthService.hasPermission(
 						ClientConfigService.permissions.PERM_CREATE_ISSUE, 
@@ -236,6 +236,7 @@
 								
 				vm.subModels = vm.modelSettings.subModels || [];
 				vm.watchNotification();
+				
 			}
 		});
 
