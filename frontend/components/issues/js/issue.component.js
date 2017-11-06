@@ -323,18 +323,11 @@
 
 		};
 
-
-		vm.canComment = function() {
-			
-			return IssuesService.canComment(
-				vm.issueData,
-				vm.userJob,
-				vm.modelSettings.permissions
-			);
-
-		};
-
 		vm.canChangePriority = function() {
+
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
 
 			return IssuesService.canChangePriority(
 				vm.issueData,
@@ -360,6 +353,9 @@
 
 		vm.canChangeStatus = function() {
 
+			// We don't check is open because we need to be
+			// able to open the issue!
+
 			return IssuesService.canChangeStatus(
 				vm.issueData,
 				vm.userJob,
@@ -370,6 +366,10 @@
 
 		vm.canChangeType = function() {
 			
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
+
 			return IssuesService.canChangeType(
 				vm.issueData,
 				vm.userJob,
@@ -379,6 +379,10 @@
 		};
 
 		vm.canChangeAssigned = function() {
+
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
 			
 			return IssuesService.canChangeAssigned(
 				vm.issueData,
@@ -389,6 +393,10 @@
 		};
 
 		vm.canComment = function() {
+
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
 			
 			return IssuesService.canComment(
 				vm.issueData,
@@ -639,6 +647,7 @@
 								vm.savedDescription = vm.issueData.desc;
 	
 								// Add info for new comment
+								console.log(data, issueData);
 								var comment = data.data.issue.comments[issueData.data.issue.comments.length - 1];
 								IssuesService.convertActionCommentToText(comment, vm.topic_types);
 								comment.timeStamp = IssuesService.getPrettyTime(comment.created);
