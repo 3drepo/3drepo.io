@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	RegisterVerifyCtrl.$inject = ["EventService", "APIService", "StateManager", "$window"];
+	RegisterVerifyCtrl.$inject = ["APIService", "StateManager", "$window"];
 
-	function RegisterVerifyCtrl (EventService, APIService, StateManager, $window) {
+	function RegisterVerifyCtrl (APIService, StateManager, $window) {
 		var vm = this;
 			
 

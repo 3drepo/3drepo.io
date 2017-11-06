@@ -164,7 +164,6 @@
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
 				.then(function(){
 					vm.setAllIssuesAssignedRolesColors();
-					EventService.send(EventService.EVENT.ISSUES_READY, true);
 				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
@@ -221,6 +220,27 @@
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
+		$scope.$watch("vm.modelSettings", function() {
+			if (vm.modelSettings) {
+
+				vm.issuesReady.then(function(){
+					var hasPerm = AuthService.hasPermission(
+						ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+						vm.modelSettings.permissions
+					);
+	
+					if(hasPerm) {
+						vm.canAddIssue = true;
+					} 
+				});
+								
+				vm.subModels = vm.modelSettings.subModels || [];
+				vm.watchNotification();
+				
+			}
+		});
+
+
 		$scope.$watch(function() {
 			return RevisionsService.status;
 		}, function(newValue, oldValue) {
@@ -250,17 +270,19 @@
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
-
-				vm.issuesReady.then(function(){
-					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-						vm.canAddIssue = true;
-					} 
-				});
-				
-				vm.subModels = event.value.subModels || [];
-				vm.watchNotification();
 			} 
+			// else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+
+			// 	vm.issuesReady.then(function(){
+			// 		if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+			// 			vm.canAddIssue = true;
+			// 		} 
+			// 	});
+				
+			// 	vm.subModels = event.value.subModels || [];
+			// 	vm.watchNotification();
+				
+			// } 
 		});
 
 
@@ -540,15 +562,11 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-			console.log("select - vm.selectIssue in issues.component.js", issue);
 
 			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				console.log("select - vm.selectIssue firing deselect pin");
 				IssuesService.deselectPin(vm.selectedIssue);
 			}
-
-			console.log("select - selectedIssue is becoming: ", issue);
-			
+						
 			vm.selectedIssue = issue;
 		};
 
