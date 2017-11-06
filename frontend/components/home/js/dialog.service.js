@@ -29,11 +29,14 @@
 		$mdDialog
 	) {
 
+		var expiredDialogOpen = false;
+
 		var service = {
 			text: text,
 			html: html,
 			showDialog: showDialog,
-			closeDialog: closeDialog
+			closeDialog: closeDialog,
+			sessionExpired: sessionExpired
 		};
 
 		return service;
@@ -85,39 +88,59 @@
 			$mdDialog.cancel();
 		}
 
+		function sessionExpired() {
+
+			if (!expiredDialogOpen) {
+				expiredDialogOpen = true;
+				var content = "You have been logged out as your session has expired.";
+				return text("Session Expired", content, false).then(function(){
+					expiredDialogOpen = false;
+				});
+			}
+
+		}
 
 		function text(title, content, escapable) {
 
-			if (escapable === undefined) {
-				escapable = true;
-			}
+			if (!expiredDialogOpen) {
 
-			return $mdDialog.show( 
-				$mdDialog.alert()
-					.clickOutsideToClose(escapable)
-					.escapeToClose(escapable)
-					.title(title)
-					.textContent(content)
-					.ariaLabel(title)
-					.ok("OK")
-			);
+				if (escapable === undefined) {
+					escapable = true;
+				}
+	
+				return $mdDialog.show( 
+					$mdDialog.alert()
+						.clickOutsideToClose(escapable)
+						.escapeToClose(escapable)
+						.title(title)
+						.textContent(content)
+						.ariaLabel(title)
+						.ok("OK")
+				);
+
+			}
+			
 		}
 
 		function html(title, content, escapable) {
+			
+			if (!expiredDialogOpen) {
+				
+				if (escapable === undefined) {
+					escapable = true;
+				}
 
-			if (escapable === undefined) {
-				escapable = true;
+				return $mdDialog.show( 
+					$mdDialog.alert()
+						.clickOutsideToClose(escapable)
+						.escapeToClose(escapable)
+						.title(title)
+						.htmlContent(content)
+						.ariaLabel(title)
+						.ok("OK")
+				);
 			}
 
-			return $mdDialog.show( 
-				$mdDialog.alert()
-					.clickOutsideToClose(escapable)
-					.escapeToClose(escapable)
-					.title(title)
-					.htmlContent(content)
-					.ariaLabel(title)
-					.ok("OK")
-			);
 		}
 
 	}	

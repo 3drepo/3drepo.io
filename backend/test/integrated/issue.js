@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,31 +17,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
+let request = require("supertest");
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 let responseCodes = require("../../response_codes.js");
-let async = require('async');
+let async = require("async");
 
-describe('Issues', function () {
+describe("Issues", function () {
 
 	let server;
 	let agent;
-	let username = 'issue_username';
-	let password = 'password';
-	let username2 = 'issue_username2';
-	let projectAdminUser = 'imProjectAdmin';
 
-	let email = 'test3drepo_issue@mailinator.com';
-	let model = 'project1';
+	const username = "issue_username";
+	const username2 = "issue_username2";
+	const password = "password";
+	
+	const projectAdminUser = "imProjectAdmin";
 
-	let desc = 'desc';
-	let type = 'type';
-	let unit = 'meter';
+	const model = "project1";
 
-	let pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC';
+	let pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
 	let baseIssue = {
 		"status": "open",
 		"priority": "low",
@@ -65,18 +62,18 @@ describe('Issues', function () {
 	};
 
 	let bcf = {
-		path: '/../../statics/bcf/example1.bcfzip',
-		issue1: '75959a60-8ef1-11e6-8d05-9717c0574272',
-		issue2: '8d46d1b0-8ef1-11e6-8d05-9717c0574272'
-	}
+		path: "/../../statics/bcf/example1.bcfzip",
+		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
+		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
+	};
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
@@ -88,14 +85,14 @@ describe('Issues', function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	describe('Creating an issue', function(){
+	describe("Creating an issue", function(){
 
-		it('should succee', function(done){
+		it("should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
@@ -160,7 +157,7 @@ describe('Issues', function () {
 
 		});
 
-		it('with screenshot should succee', function(done){
+		it("with screenshot should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			issue.viewpoint.screenshot = pngBase64;
@@ -189,7 +186,7 @@ describe('Issues', function () {
 			], done);
 
 		});
-		it('without name should fail', function(done){
+		it("without name should fail", function(done){
 
 			let issue = baseIssue;
 
@@ -201,7 +198,7 @@ describe('Issues', function () {
 			});
 		});
 
-		it('with invalid priority value', function(done){
+		it("with invalid priority value", function(done){
 
 			let issue = Object.assign({}, baseIssue, {"name":"Issue test", "priority":"abc"});
 
@@ -213,7 +210,7 @@ describe('Issues', function () {
 			});
 		});
 
-		it('with invalid status value', function(done){
+		it("with invalid status value", function(done){
 
 			let issue = Object.assign({}, baseIssue, {"name":"Issue test", "status":"abc"});
 
@@ -225,7 +222,7 @@ describe('Issues', function () {
 			});
 		});
 
-		it('with pin should succee and pin info is saved', function(done){
+		it("with pin should succeed and pin info is saved", function(done){
 
 			let issue = Object.assign({
 				"name":"Issue test",
@@ -260,11 +257,11 @@ describe('Issues', function () {
 		});
 
 
-		it('change status should succee', function(done){
+		it("change status should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let status = { status: 'in progress'};
+			let status = { status: "in progress"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -291,11 +288,11 @@ describe('Issues', function () {
 		});
 
 
-		it('change status should fail if value is invalid', function(done){
+		it("change status should fail if value is invalid", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let status = { status: '999'};
+			let status = { status: "999"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -315,13 +312,14 @@ describe('Issues', function () {
 					});
 				}
 			], done);
+
 		});
 
-		it('change priority should succee', function(done){
+		it("change priority should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let priority = { priority: 'high'};
+			let priority = { priority: "high"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -347,11 +345,11 @@ describe('Issues', function () {
 			], done);
 		});
 
-		it('change priority should fail if value is invalid', function(done){
+		it("change priority should fail if value is invalid", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let priority = { priority: 'xxx'};
+			let priority = { priority: "xxx"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -374,11 +372,11 @@ describe('Issues', function () {
 		});
 
 
-		it('change topic_type should succee', function(done){
+		it("change topic_type should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let topic_type = { topic_type: 'for abcdef'};
+			let topic_type = { topic_type: "for abcdef"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -405,11 +403,11 @@ describe('Issues', function () {
 		});
 
 
-		it('change status should succee and create system comment', function(done){
+		it("change status should succeed and create system comment", function(done){
 
-			let issue = Object.assign({"name":"Issue test"}, baseIssue, { status: 'open'});
+			let issue = Object.assign({"name":"Issue test"}, baseIssue, { status: "open"});
 			let issueId;
-			let status = { status: 'in progress'};
+			let status = { status: "in progress"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -430,10 +428,10 @@ describe('Issues', function () {
 					.expect(200, function(err, res){
 						expect(res.body.status === status.status);
 						expect(res.body.comments[0].action).to.deep.equal({
-							property: 'status',
-							propertyText: 'Status',
-							from: 'open',
-							to: 'in progress' 
+							property: "status",
+							propertyText: "Status",
+							from: "open",
+							to: "in progress" 
 						});
 						expect(res.body.comments[0].owner).to.equal(username);
 						done(err);
@@ -442,11 +440,11 @@ describe('Issues', function () {
 			], done);
 		});
 
-		it('change topic type should succee and create system comment', function(done){
+		it("change topic type should succeed and create system comment", function(done){
 
-			let issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: 'ru123'});
+			let issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
 			let issueId;
-			let data = { topic_type: 'abc123'};
+			let data = { topic_type: "abc123"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -467,10 +465,10 @@ describe('Issues', function () {
 					.expect(200, function(err, res){
 						expect(res.body.topic_type === data.topic_type);
 						expect(res.body.comments[0].action).to.deep.equal({
-							property: 'topic_type',
-							propertyText: 'Type',
-							from: 'ru123',
-							to: 'abc123' 
+							property: "topic_type",
+							propertyText: "Type",
+							from: "ru123",
+							to: "abc123" 
 						});
 						expect(res.body.comments[0].owner).to.equal(username);
 						done(err);
@@ -481,7 +479,7 @@ describe('Issues', function () {
 
 
 
-		it('change assigned_roles should succee and create system comment', function(done){
+		it("change assigned_roles should succeed and create system comment", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
 			let issueId;
@@ -506,10 +504,10 @@ describe('Issues', function () {
 					.expect(200, function(err, res){
 						expect(res.body.assigned_roles).to.deep.equal(data.assigned_roles);
 						expect(res.body.comments[0].action).to.deep.equal({
-							property: 'assigned_roles',
-							propertyText: 'Assigned',
-							from: 'jobA',
-							to: 'jobB' 
+							property: "assigned_roles",
+							propertyText: "Assigned",
+							from: "jobA",
+							to: "jobB" 
 						});
 						expect(res.body.comments[0].owner).to.equal(username);
 						done(err);
@@ -519,11 +517,11 @@ describe('Issues', function () {
 		});
 
 
-		it('seal last non system comment when adding system comment', function(done){
+		it("seal last non system comment when adding system comment", function(done){
 
-			let issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: 'ru123'});
+			let issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
 			let issueId;
-			let data = { topic_type: 'abc123'};
+			let data = { topic_type: "abc123"};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -536,7 +534,7 @@ describe('Issues', function () {
 				},
 				function(done){
 					agent.put(`/${username}/${model}/issues/${issueId}.json`)
-					.send({ comment : 'hello world'})
+					.send({ comment : "hello world"})
 					.expect(200 , done);
 				},
 				function(done){
@@ -554,13 +552,13 @@ describe('Issues', function () {
 			], done);
 		});
 
-		it('change topic_type, desc, priority, status and assigned_roles in one go should succee', function(done){
+		it("change topic_type, desc, priority, status and assigned_roles in one go should succeed", function(done){
 
 			let issue = Object.assign({}, baseIssue, {"name":"Issue test"});
 			let issueId;
 
 			let updateData = { 
-				'topic_type': 'for abcdef',
+				"topic_type": "for abcdef",
 				"status": "in progress",
 				"priority": "high",
 				"assigned_roles":["jobB"],
@@ -594,7 +592,7 @@ describe('Issues', function () {
 			], done);
 		});
 
-		it('change status to for approval will change to roles back to creator role', function(done){
+		it("change status to for approval will change to roles back to creator role", function(done){
 
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
@@ -614,7 +612,7 @@ describe('Issues', function () {
 					.send(issue)
 					.expect(200 , function(err, res){
 						issueId = res.body._id;
-						expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles)
+						expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
 						return done(err);
 						
 					});
@@ -636,7 +634,7 @@ describe('Issues', function () {
 		});
 
 
-		it('change assigned_roles during status=for approval will change the status back to in progress', function(done){
+		it("change assigned_roles during status=for approval will change the status back to in progress", function(done){
 
 			let issue = Object.assign({}, baseIssue, {
 				"name":"Issue test",
@@ -671,7 +669,7 @@ describe('Issues', function () {
 				function(done){
 					agent.get(`/${username}/${model}/issues/${issueId}.json`)
 					.expect(200, function(err, res){
-						expect(res.body.status).to.equal('in progress');
+						expect(res.body.status).to.equal("in progress");
 						expect(res.body.assigned_roles).to.deep.equal(updateData.assigned_roles);
 						done(err);
 					});
@@ -680,11 +678,13 @@ describe('Issues', function () {
 		});
 
 
-		it('change desc should succee', function(done){
+		it("change desc should succeed", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let desc = { desc: 'for abcdef'};
+
+			const desc = { desc: "for abcdef"};
+
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/issues.json`)
@@ -710,23 +710,242 @@ describe('Issues', function () {
 			], done);
 		});
 
-
-		describe('user with different role but is an admin', function(){
-
-
-			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+		describe("user who is collaborator/commentor and assigned to the issue job can", function(){
+			
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
-			let close = { status: 'closed'};
+
+			before(function(done){
+				async.series([
+					function(_done){
+						agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post("/login")
+						.send({username: username, password})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return _done(err);
+							
+						});
+					},
+					function(_done){
+						agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post("/login")
+						.send({username: username2, password})
+						.expect(200, _done);
+					},
+				], done);
+			});
+
+			it("not change priority", function(done) {
+				
+				const updateData = { 
+					"priority": "high",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(400, function(err, res){
+					expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+					done(err);
+				});
+				
+			});
+
+			it("can change status to anything but closed", function(done) {
+				
+				const updateData = { 
+					"status": "in progress",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(200, function(err, res){
+					expect(res.body.value);
+					done(err);
+				});
+
+			});
+
+			it("not change status to closed", function(done) {
+
+				const updateData = { 
+					"status": "closed",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(400, function(err, res){
+					done(err);
+				});
+
+			});
+
+			it("change type should succeed", function(done) {
+				
+				const updateData = { 
+					"topic_type": "For VR"
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(200, function(err, res){
+					done(err);
+				});
+
+			});
+
+			it("change assigned should succeed", function(done) {
+				
+				const updateData = { 
+					"assigned_roles": ["jobA"]
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(200, function(err, res){
+					done(err);
+				});
+
+			});
+			
+		});
+
+
+		describe("user who is collaborator/commentor but not assigned to issue job can", function(){
+			
+			let issueId;
+
+			before(function(done){
+
+				const issue = Object.assign(baseIssue, {"name":"Issue test", "assigned_roles": ["jobC"]});
+
+				async.series([
+					function(_done){
+						agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post("/login")
+						.send({username: username, password})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res){
+							issueId = res.body._id;
+							return _done(err);
+						});
+					},
+					function(_done){
+						agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+					},
+					function(_done){
+						agent.post("/login")
+						.send({username: username2, password})
+						.expect(200, _done);
+					},
+				], done);
+			});
+
+			it("not change priority", function(done) {
+				
+				const updateData = { 
+					"priority": "high",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(400, function(err, res){
+					expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+					done(err);
+				});
+				
+			});
+
+			it("not changed the status to in progress", function(done) {
+				
+				const updateDataProgress = { 
+					"status": "in progress",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateDataProgress)
+				.expect(400, function(err, res){
+					expect(res.body.value);
+					done(err);
+				});
+
+			});
+
+
+			it("not changed the status to closed", function(done) {
+				
+				const updateDataClosed = { 
+					"status": "closed",
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateDataClosed)
+				.expect(400, function(err, res){
+					done(err);
+				});
+
+			});
+
+			
+			it("can change type", function(done) {
+				
+				const updateData = { 
+					"topic_type": "For VR"
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(200, function(err, res){
+					done(err);
+				});
+
+			});
+
+			it("can change assigned", function(done) {
+				
+				const updateData = { 
+					"assigned_roles": ["jobA"]
+				};
+				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				.send(updateData)
+				.expect(200, function(err, res){
+					done(err);
+				});
+
+			});
+			
+		});
+
+
+		describe("user with different role but is an admin", function(){
+
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
+			let issueId;
+			let close = { status: "closed"};
 
 			before(function(done){
 				async.series([
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username: username2, password})
 						.expect(200, done);
 					},
@@ -740,19 +959,19 @@ describe('Issues', function () {
 						});
 					},
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username, password})
 						.expect(200, done);
 					}
 				],done);
 			});
 
-			it('try to close an issue should succee', function(done){
+			it("try to close an issue should succeed", function(done){
 
 				async.series([
 					function(done){
@@ -767,22 +986,21 @@ describe('Issues', function () {
 		});
 
 
-		describe('user with different role but is a project admin', function(){
+		describe("user with different role but is a project admin", function(){
 
-
-			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
 			let issueId;
-			let close = { status: 'closed'};
+			let close = { status: "closed"};
 
 			before(function(done){
 				async.series([
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username: projectAdminUser, password: projectAdminUser})
 						.expect(200, done);
 					},
@@ -796,19 +1014,19 @@ describe('Issues', function () {
 						});
 					},
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username, password})
 						.expect(200, done);
 					}
 				],done);
 			});
 
-			it('try to close an issue should succee', function(done){
+			it("try to close an issue should succeed", function(done){
 
 				async.series([
 					function(done){
@@ -824,11 +1042,11 @@ describe('Issues', function () {
 
 
 
-		describe('user with different role and is not an admin ', function(){
+		describe("user with different role and is not an admin ", function(){
 
-			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: 'jobC'});
+			let issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
 			let issueId;
-			let close = { status: 'closed'};
+			let close = { status: "closed"};
 
 			before(function(done){
 				async.series([
@@ -842,12 +1060,12 @@ describe('Issues', function () {
 						});
 					},
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username: username2, password})
 						.expect(200, done);
 					}
@@ -857,19 +1075,19 @@ describe('Issues', function () {
 			after(function(done){
 				async.series([
 					function(done){
-						agent.post('/logout')
+						agent.post("/logout")
 						.send({})
 						.expect(200, done);
 					},
 					function(done){
-						agent.post('/login')
+						agent.post("/login")
 						.send({username, password})
 						.expect(200, done);
 					}
 				],done);
 			});
 
-			it('try to close an issue should fail', function(done){
+			it("try to close an issue should fail", function(done){
 
 				async.series([
 					function(done){
@@ -929,7 +1147,7 @@ describe('Issues', function () {
 		// 	], done);
 		// });
 
-		describe('and then sealing a comment', function(){
+		describe("and then sealing a comment", function(){
 
 			let issueId;
 
@@ -949,7 +1167,7 @@ describe('Issues', function () {
 					function(done){
 
 						let comment = { 
-							comment: 'hello world',
+							comment: "hello world",
 							"viewpoint":{
 								"up":[0,1,0],
 								"position":[38,38 ,125.08011914810137],
@@ -974,7 +1192,7 @@ describe('Issues', function () {
 
 			});
 
-			it('should succee', function(done){
+			it("should succeed", function(done){
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send({sealed: true, commentIndex: 0})
 				.expect(200, function(err, res){
@@ -983,9 +1201,9 @@ describe('Issues', function () {
 			});
 
 
-			it('should fail if editing a sealed comment', function(done){
+			it("should fail if editing a sealed comment", function(done){
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
-				.send({comment: 'abcd', commentIndex: 0, edit: true})
+				.send({comment: "abcd", commentIndex: 0, edit: true})
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
 					done(err);
@@ -994,7 +1212,7 @@ describe('Issues', function () {
 
 		});
 
-		describe('and then commenting', function(){
+		describe("and then commenting", function(){
 
 			let issueId;
 
@@ -1011,10 +1229,10 @@ describe('Issues', function () {
 
 			});
 
-			it('should succee', function(done){
+			it("should succeed", function(done){
 
 				let comment = { 
-					comment: 'hello world',
+					comment: "hello world",
 					"viewpoint":{
 						"up":[0,1,0],
 						"position":[38,38 ,125.08011914810137],
@@ -1063,9 +1281,9 @@ describe('Issues', function () {
 			});
 
 
-			it('should succee if editing an existing comment', function(done){
+			it("should succeed if editing an existing comment", function(done){
 
-				let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
+				let comment = { comment: "hello world 2", commentIndex: 0, edit: true };
 
 				async.series([
 					function(done){
@@ -1090,9 +1308,9 @@ describe('Issues', function () {
 
 
 
-			it('should fail if comment is empty', function(done){
+			it("should fail if comment is empty", function(done){
 
-				let comment = { comment: '' };
+				let comment = { comment: "" };
 
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send({comment})
@@ -1103,7 +1321,7 @@ describe('Issues', function () {
 			});
 
 
-			it('should succee if removing an existing comment', function(done){
+			it("should succeed if removing an existing comment", function(done){
 
 				let comment = { commentIndex: 0, delete: true };
 
@@ -1114,10 +1332,10 @@ describe('Issues', function () {
 				});
 			});
 
-			it('should fail if invalid issue ID is given', function(done){
+			it("should fail if invalid issue ID is given", function(done){
 				
-				let invalidId = '00000000-0000-0000-0000-000000000000';
-				let comment = { comment: 'hello world' };
+				let invalidId = "00000000-0000-0000-0000-000000000000";
+				let comment = { comment: "hello world" };
 
 				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
 				.send(comment)
@@ -1128,7 +1346,7 @@ describe('Issues', function () {
 
 		});
 
-		describe('and then closing it', function(){
+		describe("and then closing it", function(){
 
 			let issueId;
 
@@ -1147,7 +1365,7 @@ describe('Issues', function () {
 					issueId = res.body._id;
 
 					//add an comment
-					let comment = { comment: 'hello world' };
+					let comment = { comment: "hello world" };
 
 					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(comment)
@@ -1158,9 +1376,9 @@ describe('Issues', function () {
 
 			});
 
-			it('should succee', function(done){
+			it("should succeed", function(done){
 
-				let close = { status: 'closed' };
+				let close = { status: "closed" };
 
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send(close)
@@ -1211,22 +1429,22 @@ describe('Issues', function () {
 			// });
 
 
-			it('should succee if reopening', function(done){
+			it("should succeed if reopening", function(done){
 
-				let open = {  status: 'open' };
+				let open = {  status: "open" };
 
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 				.send(open)
 				.expect(200 , function(err, res){
-					done(err)
+					done(err);
 
 				});
 			});
 
-			it('should fail if invalid issue ID is given', function(done){
+			it("should fail if invalid issue ID is given", function(done){
 				
-				let invalidId = '00000000-0000-0000-0000-000000000000';
-				let close = { status: 'closed' };
+				let invalidId = "00000000-0000-0000-0000-000000000000";
+				let close = { status: "closed" };
 
 				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
 				.send(close )
@@ -1239,35 +1457,35 @@ describe('Issues', function () {
 
 	});
 
-	describe('BCF', function(){
+	describe("BCF", function(){
 
-		var bcfusername = 'testing';
-		var bcfpassword = 'testing';
-		var bcfmodel = 'testproject';
+		let bcfusername = "testing";
+		let bcfpassword = "testing";
+		let bcfmodel = "testproject";
 
 		before(function(done){
 			async.series([
 				function(done){
-					agent.post('/logout')
+					agent.post("/logout")
 					.send({})
 					.expect(200, done);
 				},
 				function(done){
-					agent.post('/login')
+					agent.post("/login")
 					.send({ username: bcfusername, password: bcfpassword})
 					.expect(200, done);
 				}
 			], done);
 		});
 
-		describe('Importing a bcf file', function(){
+		describe("Importing a bcf file", function(){
 
-			it('should succee', function(done){
+			it("should succeed", function(done){
 
 				async.series([
 					function(done){
 						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
-						.attach('file', __dirname + bcf.path)
+						.attach("file", __dirname + bcf.path)
 						.expect(200, function(err, res){
 							done(err);
 						});
@@ -1294,18 +1512,18 @@ describe('Issues', function () {
 							let issue1 = res.body;
 
 							expect(issue1._id).to.equal(bcf.issue1);
-							expect(issue1.desc).to.equal('cc');
+							expect(issue1.desc).to.equal("cc");
 							expect(issue1.created).to.equal(1476107839000);
-							expect(issue1.priority).to.equal('medium');
-							expect(issue1.name).to.equal('monkey');
-							expect(issue1.status).to.equal('in progress');
-							expect(issue1.topic_type).to.equal('for_approval');
+							expect(issue1.priority).to.equal("medium");
+							expect(issue1.name).to.equal("monkey");
+							expect(issue1.status).to.equal("in progress");
+							expect(issue1.topic_type).to.equal("for_approval");
 							expect(issue1.thumbnail).to.exist;
 							expect(issue1.viewpoint).to.exist;
 							expect(issue1.viewpoint.screenshot).to.exist;
 
 							expect(issue1.comments.length).to.equal(1);
-							expect(issue1.comments[0].comment).to.equal('cccc');
+							expect(issue1.comments[0].comment).to.equal("cccc");
 							expect(issue1.comments[0].viewpoint).to.exist;
 							expect(issue1.comments[0].viewpoint.screenshot).to.exist;
 
@@ -1319,15 +1537,15 @@ describe('Issues', function () {
 		});
 
 
-		describe('Exporting a bcf file', function(){
-			it('should succee', function(done){
+		describe("Exporting a bcf file", function(){
+			it("should succeed", function(done){
 				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 				.expect(200, function(err, res){
 					done(err);
 				});
 			});
 		});
-	})
+	});
 
 });
 
