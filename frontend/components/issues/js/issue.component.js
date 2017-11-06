@@ -108,7 +108,7 @@
 						if (!vm.data) {
 							return vm.submitDisabled;
 						} else {
-							return !vm.canComment;
+							return !vm.canComment();
 						}
 					}, 
 					visible: function() { 
@@ -155,7 +155,7 @@
 		};
 
 		vm.getPlaceholderText = function() {
-			if (vm.canComment) {
+			if (vm.canComment()) {
 				return "Write a new comment";
 			} else if (vm.issueData.status === "closed") {
 				return "You cannot comment on a closed issue";
@@ -228,9 +228,6 @@
 					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
 				}
 
-				// Issue owner or user with same role as issue creator role can update issue
-				vm.checkCanUpdate();
-
 				// Can edit description if no comments
 				vm.canEditDescription = (vm.issueData.comments.length === 0);
 
@@ -258,7 +255,6 @@
 					topic_type: "for_information",
 					viewpoint: {}
 				};
-				vm.canUpdate = true;
 
 			}
 		
@@ -319,28 +315,119 @@
 			}
 		};
 
-		vm.checkCanUpdate = function() {
-			vm.canUpdate = IssuesService.setCanUpdateIssue(
-				vm.issueData, 
+		vm.checkCanComment = function() {
+			
+			return IssuesService.canComment(
+				vm.issueData,
 				vm.userJob,
 				vm.modelSettings.permissions
 			);
+
 		};
 
-		vm.checkCanComment = function() {
-			
-			var isNotClosed = vm.issueData && 
-				vm.issueData.status && 
-				vm.issueData.status !== "closed";
 
-			var canComment = AuthService.hasPermission(
-				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		vm.canComment = function() {
+			
+			return IssuesService.canComment(
+				vm.issueData,
+				vm.userJob,
 				vm.modelSettings.permissions
 			);
 
-			vm.canComment = (canComment || vm.canUpdate) && isNotClosed;
+		};
+
+		vm.canChangePriority = function() {
+
+			return IssuesService.canChangePriority(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
 
 		};
+
+		vm.disableStatusOption = function(status) {
+			
+			if (status.value === "closed" || status.value === "open") {
+				return !IssuesService.canChangeStatusToClosed(
+					vm.issueData,
+					vm.userJob,
+					vm.modelSettings.permissions
+				);
+			} 
+
+			return false;
+			
+		};
+
+		vm.canChangeStatus = function() {
+
+			return IssuesService.canChangeStatus(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+			
+		};
+
+		vm.canChangeType = function() {
+			
+			return IssuesService.canChangeType(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+		};
+
+		vm.canChangeAssigned = function() {
+			
+			return IssuesService.canChangeAssigned(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+		};
+
+		vm.canComment = function() {
+			
+			return IssuesService.canComment(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+		};
+
+
+		// vm.checkCanUpdate = function() {
+		// 	if (vm.modelSettings && vm.modelSettings.permissions) {
+		// 		vm.canUpdate = IssuesService.setCanUpdateIssue(
+		// 			vm.issueData, 
+		// 			vm.userJob,
+		// 			vm.modelSettings.permissions
+		// 		);
+		// 		console.log("jobs - checkCanUpdate - vm.canUpdate set: ", vm.canUpdate)
+		// 	} else {
+		// 		console.error("Model permissions is are defined", vm.modelSettings)
+		// 	}
+		// };
+
+		// vm.checkCanComment = function() {
+			
+		// 	var isNotClosed = vm.issueData && 
+		// 		vm.issueData.status && 
+		// 		vm.issueData.status !== "closed";
+
+		// 	var canComment = AuthService.hasPermission(
+		// 		ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		// 		vm.modelSettings.permissions
+		// 	);
+
+		// 	vm.canComment = (canComment || vm.canUpdate) && isNotClosed;
+
+		// };
 
 		/**
 		 * Handle status change
@@ -384,7 +471,6 @@
 							vm.issueData.status = response.data.issue.status;
 							vm.issueData.assigned_roles = response.data.issue.assigned_roles;
 							IssuesService.updatedIssue = vm.issueData;
-							vm.checkCanUpdate();
 	
 							commentAreaScrollToBottom();
 						}
@@ -394,7 +480,6 @@
 
 
 
-				vm.checkCanUpdate();
 				vm.checkCanComment();
 
 				AnalyticService.sendEvent({
@@ -413,7 +498,7 @@
 		};
 
 		vm.getCommentPlaceholderText = function() {
-			if (vm.canComment) {
+			if (vm.canComment()) {
 				return "Write your comment here";
 			} else {
 				return "You are not able to comment";
@@ -1061,8 +1146,6 @@
 			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
 			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
 			
-			vm.checkCanUpdate();
-
 			$scope.$apply();
 
 		};

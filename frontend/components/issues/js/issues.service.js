@@ -45,7 +45,6 @@
 
 		var service = {
 			init : init,
-			setCanUpdateIssue : setCanUpdateIssue,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -74,7 +73,15 @@
 			importBcf: importBcf,
 			convertActionCommentToText: convertActionCommentToText,
 			cleanIssue: cleanIssue,
-			convertActionValueToText: convertActionValueToText
+			convertActionValueToText: convertActionValueToText,
+			
+			canChangePriority: canChangePriority,
+			canChangeStatus: canChangeStatus,
+			canChangeType: canChangeType,
+			canChangeAssigned: canChangeAssigned,
+			canComment: canComment,
+			canChangeStatusToClosed: canChangeStatusToClosed
+			
 		};
 
 		return service;
@@ -85,33 +92,130 @@
 			return initPromise.promise;
 		}
 
+		function userJobMatchesCreator(userJob, issueData) {
+			return (userJob._id && 
+				issueData.creator_role && 
+				userJob._id === issueData.creator_role);
+		}
 
-		function setCanUpdateIssue(issueData, userJob, permissions) {
+		function isViewer(permissions) {
+			//console.log("isViewer", permissions);
+			return !AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+				permissions
+			);
+		}
+
+		function isAssignedJob(userJob, issueData, permissions) {
+			//console.log("isAssignedJob", permissions);
+			return (userJob._id && 
+					issueData.assigned_roles[0] && 
+					userJob._id === issueData.assigned_roles[0]) &&
+					!isViewer(permissions);
+		}
+
+		function isAdmin(permissions) {
+			return AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+				permissions
+			);
+		}
+
+		function canChangePriority(issueData, userJob, permissions) {
+			return isAdmin(permissions) || 
+				(userJobMatchesCreator(userJob, issueData) &&
+				!isViewer(permissions));
+		}
+
+		function canChangeStatusToClosed(issueData, userJob, permissions) {
+			console.log("canChangeStatusToClosed");
 			
-			// If they are the owner
-			var isOwner = (AuthService.getUsername() === issueData.owner);
+			var jobOwner = (userJobMatchesCreator(userJob, issueData) &&
+							!isViewer(permissions));
+			console.log("isAdmin, jobOwner", isAdmin(permissions), jobOwner);
+			return isAdmin(permissions) || jobOwner;
+					
+		}
 
-			// Check that the jobs match
-			var jobsMatch = (userJob._id && 
-							issueData.creator_role && 
-							userJob._id === issueData.creator_role);
+		function canChangeStatus(issueData, userJob, permissions) {
 
-			// And also that they can also at least comment ('edit' so to speak)
-			jobsMatch = jobsMatch && AuthService.hasPermission(
+			var assigned = isAssignedJob(userJob, issueData, permissions);
+			var jobMatches = (
+				userJobMatchesCreator(userJob, issueData) &&
+				!isViewer(permissions)
+			);
+			return isAdmin(permissions) || jobMatches || assigned;
+					
+		}
+
+		function canChangeType(issueData, userJob, permissions) {
+			
+			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canChangeAssigned(issueData, userJob, permissions) {
+			
+			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canComment(issueData, userJob, permissions) {
+			
+			var isNotClosed = issueData && 
+				issueData.status && 
+				issueData.status !== "closed";
+
+			var ableToComment = AuthService.hasPermission(
 				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
 				permissions
 			);
 
-			// Or alternatively they just have full permissions
-			var hasPermission = AuthService.hasPermission(
-				ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
-				permissions
-			);
-
-
-			return isOwner || jobsMatch || hasPermission;
+			return ableToComment && isNotClosed;
 
 		}
+
+
+		// function setCanUpdateIssue(issueData, userJob, permissions) {
+			
+		// 	// If they are the owner
+		// 	var isOwner = (AuthService.getUsername() === issueData.owner);
+
+		// 	// Check that the jobs match
+		// 	var jobsMatch = (userJob._id && 
+		// 					issueData.creator_role && 
+		// 					userJob._id === issueData.creator_role &&
+		// 					// And also that they can also at least comment ('edit' so to speak)
+		// 					AuthService.hasPermission(
+		// 						ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		// 						permissions
+		// 					))l
+			
+		// 	console.log("jobs - jobsMatch - ", userJob._id, issueData.creator_role, userJob._id === issueData.creator_role);
+		// 	console.log("jobs - jobsMatch - ", jobsMatch)
+
+		// 	var jobsMatchAssigned = (userJob._id && 
+		// 						issueData.assigned_roles[0] && 
+		// 						userJob._id === issueData.assigned_roles[0] && 
+		// 						AuthService.hasPermission(
+		// 							ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		// 							permissions
+		// 						));
+
+		// 	// Or alternatively they just have full permissions
+		// 	var hasPermission = AuthService.hasPermission(
+		// 		ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+		// 		permissions
+		// 	);
+
+		// 	console.log("jobs - permissions: ", permissions)
+		// 	console.log("jobs - isOwner", isOwner)
+		// 	console.log("jobs - jobsMatch", jobsMatch)
+		// 	console.log("jobs - hasPermission", hasPermission)
+
+		// 	return isOwner || jobsMatch || hasPermission || jobsMatchAssigned;
+
+		// }
 
 		function deselectPin(issue) {
 			var pinData;
@@ -274,8 +378,8 @@
 			}
 		}
 
-		function getThumbnailPath(url) {
-			return APIService.getAPIUrl(url);
+		function getThumbnailPath(thumbnailUrl) {
+			return APIService.getAPIUrl(thumbnailUrl);
 		}
 
 		function getIssue(account, model, issueId){

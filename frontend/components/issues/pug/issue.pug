@@ -55,18 +55,21 @@ div.heightFix(
 						id="issuePriority"
 						ng-model="vm.issueData.priority"
 						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canUpdate")
+						ng-disabled="!vm.canChangePriority()")
+				
 						md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
 				
 				md-input-container.issueItemStatus(flex)
 					label Status
 					md-select(
-						id="issueStatus"		
+						id="issueStatus"
 						ng-model="vm.issueData.status"
 						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canUpdate")
+						ng-disabled="!vm.canChangeStatus()")
+						
 						md-option(
 							ng-repeat="status in vm.statuses"
+							ng-disabled="vm.disableStatusOption(status)"
 							value="{{status.value}}") {{status.label}}
 
 			div(layout="row")
@@ -76,7 +79,7 @@ div.heightFix(
 						id="issueAssign"
 						ng-model="vm.issueData.assigned_roles[0]"
 						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canUpdate")
+						ng-disabled="!vm.canChangeAssigned()")
 
 						md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
 				
@@ -86,8 +89,8 @@ div.heightFix(
 						id="issueType"
 						ng-model="vm.issueData.topic_type"
 						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canUpdate")
-
+						ng-disabled="!vm.canChangeType()")
+						
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
@@ -111,7 +114,7 @@ div.heightFix(
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
 						.issueTextActions(layout="row", ng-if="vm.canEditDescription")
-							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditDescription($event)", ng-if="vm.canUpdate")
+							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditDescription($event)", ng-if="vm.checkCanComment()")
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 				
@@ -223,9 +226,13 @@ md-divider
 				ng-change="vm.commentChange()"
 				ng-focus="vm.textInputHasFocus(true)"
 				ng-blur="vm.textInputHasFocus(false)"
-				ng-disabled="!vm.canComment"
+				ng-disabled="!vm.checkCanComment()"
 				ng-required="true")
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4f7014e7ddd0012850884d5a7a4ac1419495d050
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
 
@@ -255,7 +262,7 @@ md-divider
 	//span(
 		layout="row" 
 		layout-align="center center"
-		ng-if="vm.submitDisabled && vm.canComment" 
+		ng-if="vm.submitDisabled && vm.checkCanComment" 
 		style="color: #9e9e9e;") {{ vm.disabledReason }}
 
 

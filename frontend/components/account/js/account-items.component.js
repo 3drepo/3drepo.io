@@ -336,12 +336,13 @@
 			var currentFederation = vm.federationData.name;
 
 			vm.federationsSaving[currentFederation] = true;
+			vm.federationData.modelName = vm.federationData.name;
 			
 			if (isEdit) {
 				delete vm.federationData._isEdit;
 				promise = APIService.put(teamspaceName + "/" + vm.federationData.model, vm.federationData);
 			} else {
-				promise = APIService.post(teamspaceName + "/" + vm.federationData.name, vm.federationData);
+				promise = APIService.post(teamspaceName + "/model", vm.federationData);
 			}
 			
 			promise
@@ -393,8 +394,10 @@
 					vm.federationsSaving[currentFederation] = false;
 
 				})
-				.catch(function(){
-					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
+				.catch(function(error) {
+					var title = "Error Saving Federation";
+					var action = "saving the federation";
+					vm.errorDialog(title, action, error);
 					vm.federationsSaving[currentFederation] = false;
 				});
 
@@ -673,6 +676,10 @@
 				});
 		};
 
+		vm.showAllModelDialogInputs = function() {
+			return vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 0;
+		};
+
 		vm.teamspaceAndProjectSelected = function() {
 			return vm.newModelData && 
 				vm.newModelData.project && 
@@ -767,15 +774,20 @@
 						vm.newModelErrorMessage = error.data.message;
 						vm.uploading = false;
 
-						var message = (error.data.message) ? error.data.message : "Unknown Error";
-						var content = "Something went wrong uploading your model: <br><br>" +
-							"<strong> " + message + "</strong>" +
-							"<br><br> If this is unexpected please message support@3drepo.io.";
-						var escapable = true;
 						var title = "Error Uploading Model";
-						DialogService.html(title, content, escapable);
+						var action = "uploading your model";
+						vm.errorDialog(title, action, error);
 					});
 			}
+		};
+
+		vm.errorDialog = function(title, action, error) {
+			var message = (error.data.message) ? error.data.message : "Unknown Error";
+			var content = "Something went wrong " +  action + ": <br><br>" +
+				"<strong> " + message + "</strong>" +
+				"<br><br> If this is unexpected please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.html(title, content, escapable);
 		};
 
 
@@ -883,7 +895,7 @@
 					.catch(function(errorMsg) {
 
 						setTimeout(function(){
-							DialogService.text("Model Upload Failed", errorMsg, false)
+							DialogService.text("Model Upload Failed", errorMsg, false);
 						}, 500);
 						
 					});

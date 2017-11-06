@@ -294,7 +294,7 @@
 					return authPromise.promise;
 				}
 
-				function hasPermission(requiredPerm, permissions){
+				function hasPermission(requiredPerm, permissions) {
 					return permissions.indexOf(requiredPerm) !== -1;
 				}
 
