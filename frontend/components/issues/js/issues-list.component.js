@@ -47,13 +47,13 @@
 
 	IssuesListCtrl.$inject = [
 		"$scope", "$filter", "$window", "APIService", 
-		"IssuesService", "EventService", "ClientConfigService", 
+		"IssuesService", "ClientConfigService", 
 		"$timeout", "ViewerService"
 	];
 
 	function IssuesListCtrl (
 		$scope, $filter, $window, APIService, IssuesService, 
-		EventService, ClientConfigService, $timeout, ViewerService
+		ClientConfigService, $timeout, ViewerService
 	) {
 
 		var vm = this;

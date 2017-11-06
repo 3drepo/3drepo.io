@@ -43,7 +43,7 @@
 		});
 
 	IssueCtrl.$inject = [
-		"$location", "$q", "$mdDialog", "$element", "EventService", 
+		"$location", "$q", "$mdDialog", "$element",  
 		"IssuesService", "APIService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
@@ -51,7 +51,7 @@
 	];
 
 	function IssueCtrl (
-		$location, $q, $mdDialog, $element, EventService, 
+		$location, $q, $mdDialog, $element, 
 		IssuesService, APIService, NotificationService, AuthService, 
 		$timeout, $scope, ClientConfigService, AnalyticService, 
 		$state, StateManager, MeasureService, ViewerService,
@@ -647,8 +647,7 @@
 								vm.savedDescription = vm.issueData.desc;
 	
 								// Add info for new comment
-								console.log(data, issueData);
-								var comment = data.data.issue.comments[issueData.data.issue.comments.length - 1];
+								var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
 								IssuesService.convertActionCommentToText(comment, vm.topic_types);
 								comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 								vm.issueData.comments.push(comment);

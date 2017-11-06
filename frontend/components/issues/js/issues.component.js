@@ -163,8 +163,23 @@
 
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
 				.then(function(){
+					
 					vm.setAllIssuesAssignedRolesColors();
-					EventService.send(EventService.EVENT.ISSUES_READY, true);
+
+					vm.issuesReady.then(function(){
+						var hasPerm = AuthService.hasPermission(
+							ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+							vm.modelSettings.permissions
+						);
+
+						if(hasPerm) {
+							vm.canAddIssue = true;
+						} 
+					});
+					
+					vm.subModels = vm.modelSettings.subModels || [];
+					vm.watchNotification();
+					
 				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
@@ -250,17 +265,19 @@
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
-
-				vm.issuesReady.then(function(){
-					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-						vm.canAddIssue = true;
-					} 
-				});
-				
-				vm.subModels = event.value.subModels || [];
-				vm.watchNotification();
 			} 
+			// else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+
+			// 	vm.issuesReady.then(function(){
+			// 		if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
+			// 			vm.canAddIssue = true;
+			// 		} 
+			// 	});
+				
+			// 	vm.subModels = event.value.subModels || [];
+			// 	vm.watchNotification();
+				
+			// } 
 		});
 
 

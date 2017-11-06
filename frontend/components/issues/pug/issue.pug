@@ -99,6 +99,7 @@ div.heightFix(
 							ng-disabled="vm.data"
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
+
 				#issueDescription(ng-if="vm.data", layout="column", ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
 					div(layout='row', layout-align="space-between", flex)
 						label(ng-if="!vm.editingDescription", ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
@@ -109,8 +110,12 @@ div.heightFix(
 							tdr-focus="true"
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
+						
 						.issueTextActions(layout="row", ng-if="vm.canEditDescription")
-							md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="vm.toggleEditDescription($event)", ng-if="vm.checkCanComment()")
+							md-button.md-icon-button.md-accent(
+								aria-label="Edit Description Toggle"
+								ng-click="vm.toggleEditDescription($event)")
+
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 				
