@@ -67,15 +67,15 @@ describe("Adding items", function() {
 				const menu = element.all(by.tagName('md-select'));
 				menu.get(1).click();
 
-				browser.sleep(500);
+				browser.sleep(1000);
 				
 				const select = element.all(by.css(".md-active"));
 
 				const option = select.all(by.tagName("md-option")).get(0)
 				option.click();
 
-				const save = element(by.css('[ng-click="vm.saveNewModel()"]'));
-				expect(save.isDisplayed()).to.eventually.equal(true);
+				const name = element(by.model('vm.newModelData.name'));
+				expect(name.isDisplayed()).to.eventually.equal(true);
 		
 			});
 

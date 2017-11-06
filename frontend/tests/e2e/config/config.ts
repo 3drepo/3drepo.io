@@ -14,6 +14,7 @@ export let config: Config = {
       args: [
         "--headless", 
         "--disable-gpu", 
+        "--start-maximized", 
         "--window-size=1920x1080"
       ]
     }
