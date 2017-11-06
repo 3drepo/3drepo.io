@@ -163,23 +163,7 @@
 
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
 				.then(function(){
-					
 					vm.setAllIssuesAssignedRolesColors();
-
-					vm.issuesReady.then(function(){
-						var hasPerm = AuthService.hasPermission(
-							ClientConfigService.permissions.PERM_CREATE_ISSUE, 
-							vm.modelSettings.permissions
-						);
-
-						if(hasPerm) {
-							vm.canAddIssue = true;
-						} 
-					});
-					
-					vm.subModels = vm.modelSettings.subModels || [];
-					vm.watchNotification();
-					
 				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
@@ -235,6 +219,26 @@
 		$scope.$watch("vm.title", function () {
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
+
+		$scope.$watch("vm.modelSettings", function() {
+			if (vm.modelSettings) {
+				console.log("vm.modelSettings", vm.modelSettings)
+				vm.issuesReady.then(function(){
+					var hasPerm = AuthService.hasPermission(
+						ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+						vm.modelSettings.permissions
+					);
+	
+					if(hasPerm) {
+						vm.canAddIssue = true;
+					} 
+				});
+								
+				vm.subModels = vm.modelSettings.subModels || [];
+				vm.watchNotification();
+			}
+		});
+
 
 		$scope.$watch(function() {
 			return RevisionsService.status;
