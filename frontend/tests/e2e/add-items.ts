@@ -74,9 +74,8 @@ describe("Adding items", function() {
 				const option = select.all(by.tagName("md-option")).get(0)
 				option.click();
 
-				const save = element(by.model('vm.newModelData.name'));
-				expect(save.isDisplayed()).to.eventually.equal(true);
-				expect(element(by.css('[ng-click="vm.saveNewModel()"]')).isDisplayed()).to.eventually.equal(false);
+				const name = element(by.model('vm.newModelData.name'));
+				expect(name.isDisplayed()).to.eventually.equal(true);
 		
 			});
 
