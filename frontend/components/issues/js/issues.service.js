@@ -244,26 +244,31 @@
 			};
 			
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, issueData);
+			if(issue.viewpoint.position.length > 0) {
+				// Set the camera position
+				issueData = {
+					position : issue.viewpoint.position,
+					view_dir : issue.viewpoint.view_dir,
+					up: issue.viewpoint.up,
+					account: issue.account,
+					model: issue.model
+				};
 
-			// Set the camera position
-			issueData = {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				model: issue.model
-			};
+				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
-
-			// Set the clipping planes
-			issueData = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			};
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				// Set the clipping planes
+				issueData = {
+					clippingPlanes: issue.viewpoint.clippingPlanes,
+					fromClipPanel: false,
+					account: issue.account,
+					model: issue.model
+				};
+				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+			}
+			else {
+				//This issue does not have a viewpoint, go to default viewpoint
+				ViewerService.goToExtent();
+			}
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);

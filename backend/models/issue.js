@@ -634,8 +634,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
-		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
-		//issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
@@ -662,7 +660,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
 
 
-		if(data.viewpoint.screenshot){
+		if(data.viewpoint && data.viewpoint.screenshot){
 
 			return this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated",{
@@ -1138,7 +1136,6 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}).then(() => {
 
 		let issue = this.clean(settings.type, settings.properties.code);
-
 		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, issue);
 		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, systemComment);
 		
@@ -1160,7 +1157,6 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.model = this._dbcolOptions.model;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
-
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
@@ -1169,20 +1165,6 @@ schema.methods.clean = function(typePrefix, modelCode){
 			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
 			cleaned.viewpoints[i].screenshotSmall = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshotSmall.png";
 		}
-
-		if(cleaned.viewpoints[i].up.length === 0){
-			cleaned.viewpoints[i].up = [1,0,0];
-		}
-
-		if(cleaned.viewpoints[i].position.length === 0){
-			cleaned.viewpoints[i].position = [0,0,0];
-		}
-
-		if(cleaned.viewpoints[i].view_dir.length === 0){
-			cleaned.viewpoints[i].view_dir = [1,0,0];
-		}
-
-		cleaned.viewpoints[i].fov = cleaned.viewpoints[i].fov || 1;
 
 	});
 

@@ -529,6 +529,7 @@
 				// overwrite the original issue data itself
 				var newViewpointData = angular.copy(vm.issueData);
 				newViewpointData.viewpoint = viewpoint;
+				newViewpointData
 				IssuesService.showIssue(newViewpointData);
 
 			}
