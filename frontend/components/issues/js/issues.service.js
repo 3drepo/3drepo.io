@@ -249,6 +249,7 @@
 			issueData = {
 				position : issue.viewpoint.position,
 				view_dir : issue.viewpoint.view_dir,
+				look_at : issue.viewpoint.look_at,
 				up: issue.viewpoint.up,
 				account: issue.account,
 				model: issue.model
