@@ -113,7 +113,7 @@
 				}
 			}
 
-		});
+		}, true);
 
 		$scope.$watch("vm.filterText", function() {
 
@@ -192,20 +192,6 @@
 			}
 
 		});
-
-		// $scope.$watch("vm.updatedIssue", function(){
-
-		// 	// Updated issue
-		// 	if (vm.updatedIssue) {
-		// 		for (var i = 0; i < vm.allIssues.length; i++) {
-		// 			if (vm.updatedIssue._id === vm.allIssues[i]._id) {
-		// 				vm.allIssues[i] = vm.updatedIssue;
-		// 				break;
-		// 			}
-		// 		}
-		// 	}
-
-		// });
 
 		$scope.$watch("vm.selectedIssue", function(){
 

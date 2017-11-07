@@ -27,7 +27,7 @@
 				account: "<",
 				model: "<",
 				revision: "<",
-				data: "<",
+				data: "=",
 				keysDown: "<",
 				exit: "&",
 				event: "<",
@@ -78,7 +78,6 @@
 
 			vm.issueProgressInfo = "Loading Issue...";
 			vm.textInputHasFocusFlag = false;
-			vm.hideDescription = false;
 			vm.submitDisabled = true;
 			vm.pinDisabled = true;
 			vm.pinData = null;
@@ -209,7 +208,7 @@
 				vm.issueData = angular.copy(vm.data);
 
 				vm.issueData.comments = vm.issueData.comments || [];
-				vm.issueData.name = IssuesService.generateTitle(vm.issueData); // Change name to title for display purposes
+
 				if (!vm.issueData.name) {
 					vm.disabledReason = vm.reasonTitleText;
 				}
@@ -220,19 +219,6 @@
 						comment.sealed = true;
 					}
 				});
-
-				vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
-				if (vm.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
-					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
-				}
-
-				// Can edit description if no comments
-				vm.canEditDescription = vm.checkCanEditDesc();
-
-				// Role colour
-				if (vm.issueData.assigned_roles.length > 0) {
-					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
-				} 
 
 				// Old issues
 				vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
@@ -255,8 +241,11 @@
 				};
 
 			}
-		
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
+			
+			// Can edit description if no comments
+			vm.canEditDescription = vm.checkCanEditDesc();
+							
+			IssuesService.populateIssue(vm.issueData);
 			vm.setContentHeight();
 	
 		});
@@ -273,6 +262,10 @@
 				return false;
 			}
 
+			if (!vm.issueData || !vm.issueData.comments) {
+				return false;
+			}
+
 			var comments = vm.issueData.comments.filter(function(comment){ 
 				return comment.action === undefined;
 			});
@@ -280,7 +273,7 @@
 		};
 
 		/**
-		 * Save a comment if one was being typed before close
+		 * Save a comment if one was being typed before closegh
 		 * Cancel editing comment
 		 */
 		vm.$onDestroy = function () {
@@ -428,9 +421,8 @@
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
-		
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
+			
+			console.log("notification - vm.statusChange");
 
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
 
@@ -448,11 +440,16 @@
 	
 				IssuesService.updateIssue(vm.issueData, statusChangeData)
 					.then(function (response) {
-
+						console.log("notification - updateIssue.then", response);
 						if (response) {
 
+							var respData = response.data.issue;
+							IssuesService.populateIssue(respData);
+							vm.issueData = respData;
+						
 							// Add info for new comment
-							var comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+							var commentCount = respData.comments.length;
+							var comment = respData.comments[commentCount - 1];
 							IssuesService.convertActionCommentToText(comment, vm.topic_types);
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
 							vm.issueData.comments.push(comment);
@@ -463,8 +460,6 @@
 							}
 	
 							// The status could have changed due to assigning role
-							vm.issueData.status = response.data.issue.status;
-							vm.issueData.assigned_roles = response.data.issue.assigned_roles;
 							IssuesService.updatedIssue = vm.issueData;
 	
 							commentAreaScrollToBottom();
@@ -636,10 +631,10 @@
 								vm.savedDescription = vm.issueData.desc;
 	
 								// Add info for new comment
-								var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
-								IssuesService.convertActionCommentToText(comment, vm.topic_types);
-								comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-								vm.issueData.comments.push(comment);
+								// var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
+								// IssuesService.convertActionCommentToText(comment, vm.topic_types);
+								// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+								// vm.issueData.comments.push(comment);
 
 							} else {
 								vm.handleUpdateError(issueData);
@@ -800,15 +795,11 @@
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
 					vm.data = response.data; // So that new changes are registered as updates
-					vm.issueData = response.data;
+					var responseIssue = response.data;
+					IssuesService.populateIssue(responseIssue);
+					vm.issueData = responseIssue;
 					
-					vm.issueData.title = IssuesService.generateTitle(vm.issueData);
-					vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
-					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
-					vm.issueData.timeStamp = IssuesService.getPrettyTime(vm.issueData.created);
-
 					// Hide the description input if no description
-					vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
 					vm.pinHidden = true;
 
 					// Notify parent of new issue
@@ -1037,7 +1028,7 @@
 
 			} else {
 				// Description
-				vm.descriptionThumbnail = data.screenShot;
+				vm.issueData.descriptionThumbnail = data.screenShot;
 				
 				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.account, model: vm.model}
@@ -1102,7 +1093,7 @@
 					height += additionalInfoHeight;
 				}
 				// Description thumbnail
-				if (vm.descriptionThumbnail) {
+				if (vm.issueData && vm.issueData.descriptionThumbnail) {
 					height += thumbnailHeight;
 				}
 			}
@@ -1129,14 +1120,8 @@
 
 		vm.handleIssueChange = function(issue) {
 
-			vm.issueData.topic_type = issue.topic_type;
-			vm.issueData.desc = issue.desc;
-			vm.issueData.priority = issue.priority;
-			vm.issueData.status = issue.status;
-			vm.issueData.assigned_roles = issue.assigned_roles;
-
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
+			IssuesService.populateIssue(issue);
+			vm.issueData = issue;
 			
 			$scope.$apply();
 

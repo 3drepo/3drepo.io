@@ -163,7 +163,7 @@
 
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
 				.then(function(){
-					vm.setAllIssuesAssignedRolesColors();
+					vm.issues.forEach(vm.populateIssueData);
 				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
@@ -177,40 +177,6 @@
 
 		vm.modelLoaded = function() {
 			return !!ViewerService.currentModel.model;
-		};
-
-		/**
-		 * Define the assigned role colors for each issue
-		 */
-		vm.setAllIssuesAssignedRolesColors = function() {
-			var i, length;
-
-			if (vm.availableJobs !== null) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					vm.setIssueAssignedRolesColors(vm.issues[i]);
-				}
-			}
-		};
-
-		/**
-		 * Define the assigned role colors for an issue
-		 * Also set the pin colors
-		 *
-		 * @param issue
-		 */
-		vm.setIssueAssignedRolesColors = function(issue) {
-			var i, length, roleColour, pinColours = [];
-			var rgbColour;
-			issue.assignedRolesColors = [];
-
-			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-
-				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
-	
-				issue.assignedRolesColors.push(roleColour);
-				rgbColour = IssuesService.hexToRgb(roleColour);
-				pinColours.push(rgbColour);
-			}
 		};
 
 		/*
@@ -271,18 +237,7 @@
 					}
 				}
 			} 
-			// else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-			// 	vm.issuesReady.then(function(){
-			// 		if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-			// 			vm.canAddIssue = true;
-			// 		} 
-			// 	});
-				
-			// 	vm.subModels = event.value.subModels || [];
-			// 	vm.watchNotification();
-				
-			// } 
 		});
 
 
@@ -319,15 +274,12 @@
 					{notify: false}
 				);
 			}
-		});ViewerService.currentModel;
+		});
 
 
 		vm.watchNotification = function() {
 
-			// TODO: Is there a reason this is here?
-			// if(!vm.revisions || !vm.subModels){
-			// 	return;
-			// }
+			console.log("notification - watchNotification", vm.account, vm.model);
 
 			/*
 			 * Watch for new issues
@@ -389,59 +341,61 @@
 
 				if(showIssue){
 					
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-					issue.thumbnailPath = APIService.getAPIUrl(issue.thumbnail);
-
+					vm.populateIssueData(issue);
 					vm.issues.unshift(issue);
 					
 				}
 
 			});
 
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
+			vm.updateIssues();
 
 		};
 
-		vm.updateIssue = function(issue) {
+		vm.populateIssueData = function(issue) {
+			IssuesService.populateIssue(issue);
+		};
+
+
+		vm.handleIssueChanged = function(issue) {
+			console.log("notification - handleIssueChanged", issue);
+
+			vm.populateIssueData(issue);
+
+			console.log("notification - ", issue.issueRoleColor);
+
 			vm.issues.forEach(function(oldIssue, i){
 				var matchs = oldIssue._id === issue._id;
 				if(matchs){
-
+					console.log("notification - updating from ", oldIssue);
 					if(issue.status === "closed"){
 						
 						vm.issues[i].justClosed = true;
-						
+
 						$timeout(function(){
 
 							vm.issues[i] = issue;
-							vm.issues = vm.issues.slice(0);
-							$scope.$apply();
+							vm.updateIssues();
 
 						}, 4000);
 
 					} else {
+						console.log("notification - updating to", issue);
 						vm.issues[i] = issue;
+						vm.updateIssues();
 					}
 
 				}
 			});
-		};
 
-		vm.handleIssueChanged = function(issue) {
-
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-			issue.thumbnailPath = IssuesService.getThumbnailPath(issue.thumbnail);
-			issue.statusIcon = IssuesService.getStatusIcon(issue);
-			issue.issueRoleColor = IssuesService.getJobColor(issue.assigned_roles[0]);
-
-			vm.updateIssue(issue);
-			var updatedIssues = vm.issues.slice(0);
-			vm.issues = updatedIssues;
 			$scope.$apply();
 			
+		};
+
+		vm.updateIssues = function() {
+			// TODO: This is horrible? Angular binding doesn't work on arrays?
+			vm.issues = vm.issues.slice(0);
+			$scope.$apply();
 		};
 
 
@@ -585,6 +539,7 @@
 		vm.issueCreated = function (issue) {
 			vm.issues.unshift(issue);
 			vm.selectedIssue = issue;
+			vm.issues = vm.issues.slice(0);
 		};
 
 	}

@@ -81,7 +81,9 @@
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
 			canChangeStatusToClosed: canChangeStatusToClosed,
-			isOpen: isOpen
+			isOpen: isOpen,
+
+			populateIssue: populateIssue
 			
 		};
 
@@ -91,6 +93,36 @@
 
 		function init() {
 			return initPromise.promise;
+		}
+
+		function populateIssue(issue) {
+			
+			if (issue) {
+				issue.title = generateTitle(issue);
+			}
+			
+			if (issue.created) {
+				issue.timeStamp = getPrettyTime(issue.created);
+			}
+			
+			if (issue.thumbnail) {
+				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
+			}
+
+			if (issue) {
+				issue.statusIcon = getStatusIcon(issue);
+			}
+			
+			if (issue.assigned_roles[0]) {
+				issue.issueRoleColor = getJobColor(issue.assigned_roles[0]);
+			}
+			
+			if (!issue.descriptionThumbnail) {
+				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
+					issue.descriptionThumbnail = APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+				}
+			}
+
 		}
 
 		function userJobMatchesCreator(userJob, issueData) {
@@ -421,15 +453,12 @@
 			}
 
 			APIService.get(endpoint).then(
-				function(issuesData) {
-					deferred.resolve(issuesData.data);
-					for (var i = 0; i < issuesData.data.length; i ++) {
-						issuesData.data[i].timeStamp = getPrettyTime(issuesData.data[i].created);
-						issuesData.data[i].title = generateTitle(issuesData.data[i]);
-						if (issuesData.data[i].thumbnail) {
-							issuesData.data[i].thumbnailPath = APIService.getAPIUrl(issuesData.data[i].thumbnail);
-						}
+				function(response) {
+					var issuesData = response.data;
+					for (var i = 0; i < response.data.length; i ++) {
+						populateIssue(issuesData[i]);
 					}
+					deferred.resolve(response.data);
 				},
 				function() {
 					deferred.resolve([]);
@@ -622,15 +651,25 @@
 		}
 
 		function getJobColor(id) {
-			var i, length,
-				roleColor = null;
 
-			for (i = 0, length = availableJobs.length; i < length; i += 1) {
-				if (availableJobs[i]._id === id && availableJobs[i].color) {
-					roleColor = availableJobs[i].color;
-					break;
-				}
+			var roleColor = "#ffffff";
+			var found = false;
+
+			if (id) {
+				for (var i = 0; i < availableJobs.length; i ++) {
+					var job = availableJobs[i];
+					if (job._id === id && job.color) {
+						roleColor = job.color;
+						found = true;
+						break;
+					}
+				}	
 			}
+			
+			if (!found) {
+				console.debug("Job color not found for", id);
+			}
+
 			return roleColor;
 		}
 
