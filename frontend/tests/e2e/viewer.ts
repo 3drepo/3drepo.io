@@ -252,7 +252,7 @@ describe("Viewer page", function() {
                         
                         const menu = element(by.id('issuePriority'));
                         menu.click();
-                        browser.sleep(500);
+                        browser.sleep(1000);
                         
                         const high = element.all(by.repeater('priority in vm.priorities')).get(0);
                         high.click();
@@ -266,7 +266,7 @@ describe("Viewer page", function() {
 
                         const menu = element(by.id('issueStatus'));
                         menu.click();
-                        browser.sleep(500);
+                        browser.sleep(1000);
                         
                         const high = element.all(by.repeater('status in vm.statuses')).get(0);
                         high.click();
@@ -280,7 +280,7 @@ describe("Viewer page", function() {
 
                         const menu = element(by.id('issueAssign'));
                         menu.click();
-                        browser.sleep(500);
+                        browser.sleep(1000);
                         
                         const high = element.all(by.repeater('job in vm.modelJobs')).get(0);
                         high.click();
@@ -294,7 +294,7 @@ describe("Viewer page", function() {
                     
                         const menu = element(by.id('issueType'));
                         menu.click();
-                        browser.sleep(500);
+                        browser.sleep(1000);
                         
                         const high = element.all(by.repeater('type in vm.topic_types')).get(0);
                         high.click();

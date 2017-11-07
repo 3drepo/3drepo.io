@@ -41,7 +41,10 @@ div.heightFix(
 		// Info
 		.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 			div(flex="10")
-				md-icon.angular-material-icons#issueStatus(style="color:{{vm.statusIcon.colour}}") {{vm.statusIcon.icon}}
+				md-icon.angular-material-icons(
+					id="issueStatusCircle"
+					style="color:{{vm.statusIcon.colour}}") {{vm.statusIcon.icon}}
+					
 			.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
 				label {{vm.data.owner}}
 				label {{vm.data.timeStamp}}
@@ -245,11 +248,7 @@ md-divider
 				ng-blur="vm.textInputHasFocus(false)"
 				ng-disabled="!vm.checkCanComment()"
 				ng-required="true")
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 4f7014e7ddd0012850884d5a7a4ac1419495d050
+				
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
 
