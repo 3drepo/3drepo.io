@@ -284,26 +284,19 @@
 
 			APIService.get(groupUrl)
 				.then(function (response) {
-
-					TreeService.cachedTree
-						.then(function(tree) {
-							handleTree(response, tree);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting the tree: ", error);
-						});
-				
+					handleTree(response);
 				})
 				.catch(function(error){
 					console.error("There was a problem getting the highlights: ", error);
 				});
 		}
 
-		function handleTree(response, tree) {
+		function handleTree(response) {
 
 			var ids = [];
-		    TreeService.getMap(tree.nodes)
+		    TreeService.getMap()
 				.then(function(treeMap){
+					console.log("treeMaps : " + Object.keys(treeMap.sharedIdToUid).length)
 					response.data.objects.forEach(function(obj){
 						var key = obj.account + "@" +  obj.model;
 						if(!ids[key]){

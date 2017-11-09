@@ -24,16 +24,14 @@
 	TreeService.$inject = ["$q", "APIService"];
 
 	function TreeService($q, APIService) {
-		var cachedTreeDefer = $q.defer();
-		var cachedTree = cachedTreeDefer.promise;
+		var treeReady;
 		var treeMap = null;
 		var baseURL;
 
 		var service = {
 			init: init,
 			search: search,
-			getMap: getMap,
-			cachedTree: cachedTree
+			getMap: getMap
 		};
 
 
@@ -57,8 +55,8 @@
 		}
 
 		function init(account, model, branch, revision, setting) {
-
-
+			var cachedTreeDefer = $q.defer();
+			treeMap = null;
 			branch = branch ? branch : "master";
 			//revision = revision ? revision : "head";
 
@@ -71,7 +69,7 @@
 			var	url = baseURL + "fulltree.json";
 			getTrees(url, setting, cachedTreeDefer);
 			
-			return cachedTreeDefer.promise;
+			return treeReady = cachedTreeDefer.promise;
 
 		}
 
@@ -262,7 +260,7 @@
 			)
 		}
 
-		function getMap(treeItem){
+			function getMap(){
 			//only do this once!
 			if(treeMap)
 			{
@@ -275,7 +273,9 @@
 					sharedIdToUid: {},
 					oIdToMetaId: {}
 				};
-				return genMap(treeItem, treeMap);
+				return treeReady.then(function(tree) {
+					genMap(tree.nodes, treeMap);
+				});
 
 			}
 
