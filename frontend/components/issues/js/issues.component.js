@@ -414,8 +414,7 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			console.log("editIssue", issue);
-			vm.onShowItem();
+			
 
 			var notCurrentlySelected = IssuesService.state.selectedIssue && 
 										issue && 
@@ -468,6 +467,7 @@
 
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
+			vm.onShowItem();
 
 		};
 

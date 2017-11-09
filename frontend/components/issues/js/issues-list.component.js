@@ -72,11 +72,9 @@
 			vm.onEditIssue({issue: issue});
 		};
 
-
 		vm.checkShouldShowIssue = function() {
 			var issueToDisplay = IssuesService.getDisplayIssue();
 			if (issueToDisplay) {
-				console.log(issueToDisplay);
 				vm.editIssue(issueToDisplay);
 				$timeout(function(){
 					IssuesService.showIssue(issueToDisplay);
@@ -206,7 +204,6 @@
 		};
 
 		vm.selectIssue = function (issue) {
-			console.log("vm.selectIssue", issue);
 			IssuesService.setSelectedIssue(issue);
 		};
 

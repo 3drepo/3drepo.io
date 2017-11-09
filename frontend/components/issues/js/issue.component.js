@@ -462,7 +462,7 @@
 							
 							IssuesService.updateIssues(vm.issueData);
 
-							commentAreaScrollToBottom();
+							vm.commentAreaScrollToBottom();
 						}
 						
 					})
@@ -949,7 +949,7 @@
 			}
 
 
-			commentAreaScrollToBottom();
+			vm.commentAreaScrollToBottom();
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!vm.aboutToBeDestroyed) {
 				vm.setContentHeight();
@@ -1107,7 +1107,7 @@
 
 		};
 
-		function commentAreaScrollToBottom(){
+		vm.commentAreaScrollToBottom = function (){
 
 			$timeout(function(){
 				var commentArea = document.getElementById("descriptionAndComments");
@@ -1115,8 +1115,7 @@
 					commentArea.scrollTop = commentArea.scrollHeight;
 				}
 			});
-		}
-
+		};
 
 		vm.handleIssueChange = function(issue) {
 
@@ -1157,7 +1156,7 @@
 
 					//necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 				});
 
 				/*
@@ -1172,7 +1171,7 @@
 					comment.comment = newComment.comment;
 
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 				});
 
 				/*
@@ -1191,7 +1190,7 @@
 
 
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 
 					$timeout(function(){
 						vm.issueData.comments.splice(deleteIndex, 1);
