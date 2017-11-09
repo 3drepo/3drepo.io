@@ -64,4 +64,4 @@ script:
 notifications:
     email: 
         recipients:
-            - team@3drepo.org
+            - devOps@3drepo.org
