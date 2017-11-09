@@ -233,7 +233,7 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			var i, length;
 
-			vm.event = event;
+			//vm.event = event;
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
@@ -413,8 +413,8 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-
-			vm.event = null; // To clear any events so they aren't registered
+			
+			console.log("editIssue", issue);
 			vm.onShowItem();
 
 			var notCurrentlySelected = IssuesService.state.selectedIssue && 
@@ -436,10 +436,7 @@
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id)
 					.then(function(retrievedIssue){
-
 						IssuesService.setSelectedIssue(retrievedIssue);
-						//vm.selectedIssueLoaded = true;
-						//vm.selectedIssue = retrievedIssue;
 					})
 					.catch(function(error) {
 						var content = "We tried to get the selected issue but it failed. " +
@@ -464,6 +461,7 @@
 					eventCategory: "Issue",
 					eventAction: "view"
 				});
+
 			} else {
 				IssuesService.resetSelectedIssue();
 			}
@@ -471,14 +469,6 @@
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
 
-		};
-
-		/**
-		 * Select issue
-		 * @param issue
-		 */
-		vm.selectIssue = function (issue) {
-			IssuesService.setSelectedIssue(issue);
 		};
 
 		/**
@@ -496,7 +486,7 @@
 		vm.issueCreated = function (issue) {
 
 			IssuesService.addIssue(issue);
-			IssuesService.state.selectedIssue = issue;
+			IssuesService.setSelectedIssue(issue);
 
 		};
 

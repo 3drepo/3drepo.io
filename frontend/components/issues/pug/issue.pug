@@ -22,10 +22,11 @@ div.heightFix(
 						div(ng-if="!vm.data"
 							flex)
 							md-input-container#issueTitleInput(
+								flex
 								md-no-float)
 
 								input(
-									flex
+									style="width=100%;"
 									type="text"
 									ng-model="vm.issueData.name"
 									ng-change="vm.nameChange()"

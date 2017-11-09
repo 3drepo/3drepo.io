@@ -28,20 +28,14 @@
 				model: "<",
 				allIssues: "<",
 				issuesToShow: "<",
-				treeMap: "<",
 				filterText: "<",
-				event: "<",
 				onEditIssue: "&",
-				onSelectIssue: "&",
 				nonListSelect: "<",
-				keysDown: "=",
 				contentHeight: "&",
 				menuOption: "<",
 				importBcf: "&",
 				selectedIssue: "<",
-				userJob: "<",
-				issueDisplay: "<",
-				availableJobs: "<"
+				issueDisplay: "<"
 			}
 		});
 
@@ -68,41 +62,21 @@
 
 		};
 
-
-		$scope.$watch(function(){
-			return IssuesService.state.selectedIssue;
-		}, function(){
-
-			// Selected issue
-			if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow) {
-
-				for (var i = 0; i < IssuesService.state.issuesToShow.length; i++) {
-					// To clear any previously selected issue
-					IssuesService.state.issuesToShow[i].selected = false;
-					IssuesService.state.issuesToShow[i].focus = false;
-
-					// Set up the current selected iss
-					if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow[i]._id === IssuesService.state.selectedIssue._id) {
-						vm.internalSelectedIssue = IssuesService.state.issuesToShow[i];
-						vm.internalSelectedIssue.selected = true;
-						vm.internalSelectedIssue.focus = true;
-						vm.focusedIssueIndex = i;
-						vm.selectedIssueIndex = i;
-					}
-				}
-			}
-
-		}, true);
-
 		$scope.$watch(function(){
 			IssuesService.state.displayIssue;
 		}, function(){
 			vm.checkShouldShowIssue();
 		}, true);
 
+		vm.editIssue = function (issue) {
+			vm.onEditIssue({issue: issue});
+		};
+
+
 		vm.checkShouldShowIssue = function() {
 			var issueToDisplay = IssuesService.getDisplayIssue();
 			if (issueToDisplay) {
+				console.log(issueToDisplay);
 				vm.editIssue(issueToDisplay);
 				$timeout(function(){
 					IssuesService.showIssue(issueToDisplay);
@@ -231,99 +205,15 @@
 			vm.showPins();
 		};
 
-		/**
-		 * Select issue
-		 * @param event
-		 * @param issue
-		 */
-		vm.select = function (issue) {
-			
-			if (
-				vm.internalSelectedIssue === null || 
-				vm.internalSelectedIssue._id === issue._id
-			) {
-				vm.resetViewerState(issue);
-				vm.setViewerState(issue);
-			} else {
-				vm.setViewerState(issue);
-			}
-			
-			vm.onSelectIssue({issue: vm.internalSelectedIssue});
-			
+		vm.selectIssue = function (issue) {
+			console.log("vm.selectIssue", issue);
+			IssuesService.setSelectedIssue(issue);
 		};
 
-		vm.resetViewerState = function(issue) {
-
-			vm.internalSelectedIssue = issue;
-			vm.internalSelectedIssue.selected = false;
-			vm.internalSelectedIssue.focus = false;
-
-			IssuesService.deselectPin(vm.internalSelectedIssue);
-
+		vm.isSelectedIssue = function(issue) {
+			return IssuesService.isSelectedIssue(issue);
 		};
 
-		vm.setViewerState = function(issue) {
-
-			vm.internalSelectedIssue = issue;
-			vm.internalSelectedIssue.selected = true;
-			vm.internalSelectedIssue.focus = true;
-
-			IssuesService.showIssue(vm.internalSelectedIssue);
-			vm.setSelectedIssueIndex(vm.internalSelectedIssue);
-
-		}; 
-
-		/**
-		 * Set focus on issue
-		 * @param issue
-		 * @param index
-		 */
-		vm.setFocus = function(issue, index) {
-			if (vm.internalSelectedIssue !== null) {
-				vm.internalSelectedIssue.focus = false;
-			}
-			vm.focusedIssueIndex = index;
-			issue.focus = true;
-		};
-
-		/**
-		 * Remove focus from issue
-		 * @param issue
-		 */
-		vm.removeFocus = function (issue) {
-			vm.focusedIssueIndex = null;
-			issue.focus = false;
-		};
-
-		/**
-		 * Set up editing of issue
-		 */
-		vm.editIssue = function (issue) {
-			vm.onEditIssue({issue: issue});
-		};
-
-		/**
-		 * Set the selected issue index
-		 * @param selectedIssue
-		 */
-		vm.setSelectedIssueIndex = function(selectedIssueObj) {
-
-			if (selectedIssueObj !== null) {
-				for (var i = 0; i < IssuesService.state.issuesToShow.length; i += 1) {
-					if (IssuesService.state.issuesToShow[i]._id === selectedIssueObj._id) {
-						vm.selectedIssueIndex = i;
-					}
-				}
-			} else {
-				vm.selectedIssueIndex = null;
-			}
-
-		};
-
-
-		/**
-		 * Add issue pins to the viewer
-		 */
 		vm.showPins = function() {
 
 			// TODO: This is still inefficent and unclean
@@ -338,7 +228,8 @@
 				if (show !== undefined && pinPosition) {
 
 					var pinColor = Pin.pinColours.blue;
-					var isSelectedPin = IssuesService.state.selectedIssue && issue._id === IssuesService.state.selectedIssue._id;
+					var isSelectedPin = IssuesService.state.selectedIssue && 
+										issue._id === IssuesService.state.selectedIssue._id;
 
 					if (isSelectedPin) {
 						pinColor = Pin.pinColours.yellow;

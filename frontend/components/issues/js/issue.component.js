@@ -65,7 +65,6 @@
 		 */
 		vm.$onInit = function() { 
 
-			vm.issueIsCreated = !!IssuesService.state.selectedIssue;
 			vm.canEditDescription = false;
 
 			vm.savedScreenShot = null;

@@ -24,13 +24,15 @@
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
 		"APIService", "TreeService", "AuthService",
-		"ViewerService", "$timeout", "$filter"
+		"ViewerService", "$timeout", "$filter", "$state", "AnalyticService",
+		"DialogService"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
 		APIService, TreeService, AuthService,
-		ViewerService, $timeout, $filter
+		ViewerService, $timeout, $filter, $state, AnalyticService,
+		DialogService
 	) {
 
 		var url = "",
@@ -107,9 +109,10 @@
 			getDisplayIssue: getDisplayIssue,
 			resetSelectedIssue: resetSelectedIssue,
 			createBlankIssue: createBlankIssue,
+			isSelectedIssue: isSelectedIssue,
+
 			state: state
 			
-		
 		};
 
 		return service;
@@ -225,13 +228,22 @@
 				state.issuesToShow = state.issuesToShow.filter(function(issue){
 					return state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
-
+			
 			}
 
 		}
 
 		function resetSelectedIssue() {
 			state.selectedIssue = undefined;
+		}
+
+		function isSelectedIssue(issue) {
+			//console.log(state.selectedIssue);
+			if (!state.selectedIssue || !state.selectedIssue._id) {
+				return false;
+			} else {
+				return issue._id === state.selectedIssue._id;
+			}
 		}
 
 		function setSelectedIssue(issue) {
@@ -242,7 +254,9 @@
 					deselectPin(state.selectedIssue);
 				}
 			}
+			
 			state.selectedIssue = issue;
+			console.log("setSelectedIssue", state.selectedIssue);
 		}
 
 		function populateNewIssues(newIssues) {

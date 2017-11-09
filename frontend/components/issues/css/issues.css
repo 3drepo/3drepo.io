@@ -170,13 +170,11 @@ issues-list .issueListItem {
 }
 issues-list .issueListItem:hover {
   cursor: pointer;
+  background: #f3f3f3;
+
 }
 issues-list .issueListItem *:hover {
   cursor: inherit;
-}
-
-issues-list .issueListItemFocus {
-  background: rgba(250,250,250,1);
 }
 
 issues-list .issueListItem div:first-child {
