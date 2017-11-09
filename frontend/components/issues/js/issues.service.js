@@ -296,7 +296,6 @@
 			var ids = [];
 		    TreeService.getMap()
 				.then(function(treeMap){
-					console.log("treeMaps : " + Object.keys(treeMap.sharedIdToUid).length)
 					response.data.objects.forEach(function(obj){
 						var key = obj.account + "@" +  obj.model;
 						if(!ids[key]){
