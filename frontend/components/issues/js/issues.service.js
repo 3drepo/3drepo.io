@@ -256,7 +256,7 @@
 			}
 			
 			state.selectedIssue = issue;
-			console.log("setSelectedIssue", state.selectedIssue);
+
 		}
 
 		function populateNewIssues(newIssues) {

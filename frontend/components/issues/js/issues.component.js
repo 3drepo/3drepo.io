@@ -414,8 +414,6 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			
-
 			var notCurrentlySelected = IssuesService.state.selectedIssue && 
 										issue && 
 										IssuesService.state.selectedIssue._id !== issue._id;
@@ -432,10 +430,25 @@
 
 			if (issue) {
 
-				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id)
 					.then(function(retrievedIssue){
 						IssuesService.setSelectedIssue(retrievedIssue);
+						IssuesService.showIssue(issue);
+						$state.go("home.account.model.issue", 
+							{
+								account: vm.account, 
+								model: vm.model, 
+								revision: vm.revision,
+								issue: issue._id,
+								noSet: true
+							}, 
+							{notify: false}
+						);
+		
+						AnalyticService.sendEvent({
+							eventCategory: "Issue",
+							eventAction: "view"
+						});
 					})
 					.catch(function(error) {
 						var content = "We tried to get the selected issue but it failed. " +
@@ -444,22 +457,6 @@
 						DialogService.text("Error Getting Issue", content, escapable);
 						console.error(error);
 					});
-
-				$state.go("home.account.model.issue", 
-					{
-						account: vm.account, 
-						model: vm.model, 
-						revision: vm.revision,
-						issue: issue._id,
-						noSet: true
-					}, 
-					{notify: false}
-				);
-
-				AnalyticService.sendEvent({
-					eventCategory: "Issue",
-					eventAction: "view"
-				});
 
 			} else {
 				IssuesService.resetSelectedIssue();

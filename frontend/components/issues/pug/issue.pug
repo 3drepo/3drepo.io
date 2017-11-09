@@ -20,13 +20,15 @@ div.heightFix(
 						#issueRoleIndicator(ng-style="{backgroundColor: vm.issueData.issueRoleColor}")
 						
 						div(ng-if="!vm.data"
+							layout="column"
 							flex)
 							md-input-container#issueTitleInput(
+								style="width=100%;"
 								flex
 								md-no-float)
 
 								input(
-									style="width=100%;"
+									flex
 									type="text"
 									ng-model="vm.issueData.name"
 									ng-change="vm.nameChange()"

@@ -171,7 +171,6 @@
 		}
 
 		function subscribeIssueChanged(account, model, issueId, callback){
-			console.log("notification - subscribeIssueChanged");
 			if(arguments.length === 3){
 				callback = issueId;
 				subscribe(account, model, [], "issueChanged", callback);
