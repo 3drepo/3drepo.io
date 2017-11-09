@@ -214,13 +214,14 @@
 		};
 
 		vm.userHasPermissions = function(user, permission) {
-
 			var hasPermissions = false;
-			vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
-				if (permissionUser.user === user.user) {
-					hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
-				} 
-			});
+			if(vm.selectedTeamspace.teamspacePermissions) {
+				vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
+					if (permissionUser.user === user.user) {
+						hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
+					} 
+				});
+			}
 			
 			return hasPermissions;
 		};
@@ -305,6 +306,7 @@
 						vm.setPermissionTemplates(vm.selectedTeamspace)
 							.then(function() {
 								if (vm.fromURL.projectSelected) {
+									console.log("changing project selected:" , vm.fromURL);
 									vm.projectSelected = vm.fromURL.projectSelected;
 									delete vm.fromURL.projectSelected;
 								}
