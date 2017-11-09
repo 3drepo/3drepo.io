@@ -67,12 +67,10 @@
 				baseURL = account + "/" + model + "/revision/" + revision + "/";
 			}
 
-			var deferred = $q.defer();
 			var	url = baseURL + "fulltree.json";
-			getTrees(url, setting, deferred);
+			getTrees(url, setting, cachedTreeDefer);
 			
-			cachedTreeDefer.resolve(deferred.promise);
-			return deferred.promise;
+			return cachedTreeDefer.promise;
 
 		}
 
