@@ -145,7 +145,8 @@
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
 						EventService.send(EventService.EVENT.TREE_READY, tree);
-						vm.treeMap = TreeService.getMap(tree.nodes).then();
+						//FIXME: I don't know if treeMap is still used. Doc component now uses Tree Service directly.
+						vm.treeMap = TreeService.getMap(tree.nodes);
 					});
 				})
 				.catch(function(error){
