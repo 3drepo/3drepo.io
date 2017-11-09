@@ -260,7 +260,7 @@
 			)
 		}
 
-			function getMap(){
+		function getMap(){
 			//only do this once!
 			if(treeMap)
 			{
