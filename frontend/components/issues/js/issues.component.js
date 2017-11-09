@@ -64,7 +64,7 @@
 		vm.$onInit = function() {
 
 			vm.saveIssueDisabled = true;
-			vm.issues = [];
+			vm.allIssues = [];
 			vm.issuesToShow = [];
 			vm.showProgress = true;
 			vm.progressInfo = "Loading issues";
@@ -74,9 +74,6 @@
 			vm.autoSaveComment = false;
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.savingIssue = false;
-			vm.issueDisplay = {};
-			vm.selectedIssueLoaded = false;
-			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
 			
 
@@ -98,22 +95,24 @@
 			/*
 			* Get all the Issues
 			*/
+			console.log("issues - getIssues");
+
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
 
-					vm.showProgress = false;
-					vm.toShow = "showIssues";
-					vm.issues = (data === "") ? [] : data;
-					vm.showAddButton = true;
+					if (data) {
+						console.log("issues - got issues: ", data);
+						vm.showProgress = false;
+						vm.toShow = "showIssues";
+						IssuesService.populateNewIssues(data);
+						vm.showAddButton = true;
 
-					// if issue id is in url then select the issue
-					var issueMatch = vm.issues.find(function(issue){
-						return issue._id === vm.issueId;
-					});
-
-					if(issueMatch){
-						vm.displayIssue = issueMatch;
+						console.log("issues - allIssues issues.component", IssuesService.state.allIssues);
+						
+					} else {
+						throw "Error";
 					}
+					
 
 				})
 				.catch(function(error){
@@ -162,9 +161,6 @@
 				});
 
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
-				.then(function(){
-					vm.issues.forEach(vm.populateIssueData);
-				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
 						"If this continues please message support@3drepo.io.";
@@ -209,17 +205,39 @@
 
 		$scope.$watch(function() {
 			return RevisionsService.status;
-		}, function(newValue, oldValue) {
+		}, function() {
 			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
 			}
 		}, true);
 
-		$scope.$watch(function() {
-			return IssuesService.issueId;
+		$scope.$watch(function(){
+			return IssuesService.state.allIssues;
 		}, function(){
-			vm.issueId = IssuesService.issueId;
+			vm.allIssues = IssuesService.state.allIssues;
 		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.issuesToShow;
+		}, function(){
+			vm.issuesToShow = IssuesService.state.issuesToShow;
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.selectedIssue;
+		}, function(){
+			vm.selectedIssue = IssuesService.state.selectedIssue;
+		}, true);
+
+
+		// $scope.$watch(function(){
+		// 	return IssuesService.state.issueId;
+		// }, function(){
+		// 	if(IssuesService.state.issueId) {
+		// 		IssuesService.state.displayIssue = IssuesService.state.issueId;
+		// 	}
+		// }, true);
+
 
 		/**
 		 * Set up event watching
@@ -230,16 +248,15 @@
 			vm.event = event;
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					if (vm.issues[i]._id === event.value.id) {
-						vm.editIssue(vm.issues[i]);
+				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
+					if (vm.allIssues[i]._id === event.value.id) {
+						vm.editIssue(vm.allIssues[i]);
 						break;
 					}
 				}
 			} 
 
 		});
-
 
 		/**
 		 * Close the add alert
@@ -256,6 +273,8 @@
 			vm.onContentHeightRequest({height: height});
 		};
 
+		
+
 		/*
 		 * Go back to issues list
 		 */
@@ -263,7 +282,7 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
-				vm.displayIssue = null;
+				IssuesService.state.displayIssue = null;
 				$state.go("home.account.model", 
 					{
 						account: vm.account, 
@@ -275,7 +294,6 @@
 				);
 			}
 		});
-
 
 		vm.watchNotification = function() {
 
@@ -316,7 +334,7 @@
 
 			issues.forEach(function(issue) {
 				
-				var showIssue;
+				var issueShouldShow = false;
 
 				if (vm.revisions && vm.revisions.length) {
 
@@ -334,70 +352,25 @@
 						});
 					}
 
-					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					issueShouldShow = issueRevision && issueInDate;
 				} else {
-					showIssue = true;
+					issueShouldShow = true;
 				}
 
-				if(showIssue){
+				if(issueShouldShow){
 					
-					vm.populateIssueData(issue);
-					vm.issues.unshift(issue);
+					IssuesService.addIssue(issue);
 					
 				}
 
 			});
 
-			vm.updateIssues();
-
 		};
-
-		vm.populateIssueData = function(issue) {
-			IssuesService.populateIssue(issue);
-		};
-
 
 		vm.handleIssueChanged = function(issue) {
-			console.log("notification - handleIssueChanged", issue);
-
-			vm.populateIssueData(issue);
-
-			console.log("notification - ", issue.issueRoleColor);
-
-			vm.issues.forEach(function(oldIssue, i){
-				var matchs = oldIssue._id === issue._id;
-				if(matchs){
-					console.log("notification - updating from ", oldIssue);
-					if(issue.status === "closed"){
-						
-						vm.issues[i].justClosed = true;
-
-						$timeout(function(){
-
-							vm.issues[i] = issue;
-							vm.updateIssues();
-
-						}, 4000);
-
-					} else {
-						console.log("notification - updating to", issue);
-						vm.issues[i] = issue;
-						vm.updateIssues();
-					}
-
-				}
-			});
-
-			$scope.$apply();
-			
+			IssuesService.updateIssues(issue);
 		};
-
-		vm.updateIssues = function() {
-			// TODO: This is horrible? Angular binding doesn't work on arrays?
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
-		};
-
 
 		/*
 		* Unsubscribe notifcation on destroy
@@ -433,7 +406,7 @@
 				.then(function(data){
 
 					vm.importingBCF = false;
-					vm.issues = (data === "") ? [] : data;
+					vm.allIssues = (data === "") ? [] : data;
 
 				})
 				.catch(function(error){
@@ -458,16 +431,16 @@
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 
-			var notCurrentlySelected = vm.selectedIssue && issue && vm.selectedIssue._id !== issue._id;
+			var notCurrentlySelected = IssuesService.state.selectedIssue && issue && IssuesService.state.selectedIssue._id !== issue._id;
 
 			if (notCurrentlySelected) {
-				IssuesService.deselectPin(vm.selectedIssue);
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 				// Remove highlight from any multi objects
 				ViewerService.highlightObjects([]);
 			}
 
-			if (!issue && vm.selectedIssue) {
-				IssuesService.deselectPin(vm.selectedIssue);
+			if (!issue && IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 			}
 
 			if (issue) {
@@ -475,8 +448,10 @@
 				IssuesService.showIssue(issue);
 				IssuesService.getIssue(issue.account, issue.model, issue._id)
 					.then(function(retrievedIssue){
-						vm.selectedIssueLoaded = true;
-						vm.selectedIssue = retrievedIssue;
+
+						IssuesService.setSelectedIssue(retrievedIssue);
+						//vm.selectedIssueLoaded = true;
+						//vm.selectedIssue = retrievedIssue;
 					})
 					.catch(function(error) {
 						var content = "We tried to get the selected issue but it failed. " +
@@ -502,8 +477,8 @@
 					eventAction: "view"
 				});
 			} else {
-				vm.selectedIssueLoaded = true;
-				vm.selectedIssue = issue;
+				//vm.selectedIssueLoaded = true;
+				IssuesService.setSelectedIssue(issue);
 			}
 
 			vm.toShow = "showIssue";
@@ -516,12 +491,8 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-
-			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				IssuesService.deselectPin(vm.selectedIssue);
-			}
 						
-			vm.selectedIssue = issue;
+			IssuesService.setSelectedIssue(issue);
 		};
 
 		/**
@@ -537,9 +508,10 @@
 		 * @param issue
 		 */
 		vm.issueCreated = function (issue) {
-			vm.issues.unshift(issue);
-			vm.selectedIssue = issue;
-			vm.issues = vm.issues.slice(0);
+
+			IssuesService.addIssue(issue);
+			IssuesService.state.selectedIssue = issue;
+			
 		};
 
 	}

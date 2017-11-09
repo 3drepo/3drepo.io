@@ -175,7 +175,7 @@
 			if(vm.issueId){
 				// timeout to make sure event is sent after issue panel card is setup
 				$timeout(function () {
-					IssuesService.issueId = vm.issueId;
+					IssuesService.state.displayIssue = vm.issueId;
 				});
 			}
 		});

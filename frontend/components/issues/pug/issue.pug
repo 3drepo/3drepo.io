@@ -1,9 +1,9 @@
 div.heightFix(
+	ng-if="vm.data && vm.modelSettings"
 	flex
 	layout="column"
 	layout-fill
 	tabindex="0"
-	ng-if="vm.selectedIssueLoaded"
 	tdr-focus="true")
 
 	div
@@ -100,7 +100,7 @@ div.heightFix(
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
 			div(layout="column", layout-align="start", flex)
 				div(ng-if="!vm.data", flex, layout="column")
-					md-input-container#descriptionText(ng-if="vm.issueData.desc")
+					md-input-container#descriptionText()
 						label Description
 						textarea(
 							ng-model="vm.issueData.desc"
@@ -108,16 +108,22 @@ div.heightFix(
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
 
-				#issueDescription(ng-if="vm.data", layout="column", ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
+				#issueDescription(
+					ng-if="vm.data"
+					layout="column"
+					ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
+
 					div(layout='row', layout-align="space-between", flex)
-						label(ng-if="!vm.editingDescription", ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
+						label(
+							ng-if="!vm.editingDescription"
+							ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
 						md-input-container(flex, ng-if="vm.editingDescription")
 							textarea(
-							ng-model="vm.issueData.desc"
-							aria-label="Description"
-							tdr-focus="true"
-							ng-focus="vm.textInputHasFocus(true)"
-							ng-blur="vm.textInputHasFocus(false)")
+								ng-model="vm.issueData.desc"
+								aria-label="Description"
+								tdr-focus="true"
+								ng-focus="vm.textInputHasFocus(true)"
+								ng-blur="vm.textInputHasFocus(false)")
 						
 						.issueTextActions(layout="row", ng-if="vm.canEditDescription")
 							md-button.md-icon-button.md-accent(
@@ -151,7 +157,8 @@ div.heightFix(
 		// Comments
 		.issueItemContainer(layout="column", layout-align="start", flex)
 			label.issuesLabel Comments
-			div(ng-repeat="comment in vm.issueData.comments track by comment._id", layout="column", layout-align="start", flex)
+			div(ng-repeat="comment in vm.issueData.comments | orderBy : comment.timeStamp : true"
+				layout="column", layout-align="start", flex)
 				div(ng-click="vm.showViewpoint($event, comment.viewpoint)"
 					layout="column"
 					layout-align="start"
@@ -286,7 +293,7 @@ issues-pin(
 
 // Whilst issue is loading
 div.heightFix(
-	ng-if="!vm.selectedIssueLoaded"
+	ng-if="!vm.data || !vm.modelSettings"
 	flex
 	layout="column"
 	layout-fill

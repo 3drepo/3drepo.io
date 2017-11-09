@@ -65,6 +65,9 @@
 		 */
 		vm.$onInit = function() { 
 
+			vm.issueIsCreated = !!IssuesService.state.selectedIssue;
+			vm.canEditDescription = false;
+			
 			vm.savedScreenShot = null;
 			vm.editingCommentIndex = null;
 			vm.commentViewpoint;
@@ -229,6 +232,9 @@
 				vm.checkCanComment();
 			
 				vm.convertCommentTopicType();
+
+				// Can edit description if no comments
+				vm.canEditDescription = vm.checkCanEditDesc();
 				
 			} else {
 				
@@ -241,9 +247,6 @@
 				};
 
 			}
-			
-			// Can edit description if no comments
-			vm.canEditDescription = vm.checkCanEditDesc();
 							
 			IssuesService.populateIssue(vm.issueData);
 			vm.setContentHeight();
@@ -280,7 +283,7 @@
 
 			vm.aboutToBeDestroyed = true;
 			if (vm.comment) {
-				IssuesService.updatedIssue = vm.issueData; // So that issues list is notified
+				IssuesService.updateIssues(vm.issueData); // So that issues list is notified
 				vm.saveComment();
 			}
 			if (vm.editingCommentIndex !== null) {
@@ -452,16 +455,16 @@
 							var comment = respData.comments[commentCount - 1];
 							IssuesService.convertActionCommentToText(comment, vm.topic_types);
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							vm.issueData.comments.push(comment);
+							// vm.issueData.comments.push(comment);
 	
 							// Update last but one comment in case it was "sealed"
 							if (vm.issueData.comments.length > 1) {
 								vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
 							}
 	
-							// The status could have changed due to assigning role
-							IssuesService.updatedIssue = vm.issueData;
-	
+							// Update the actual data model
+							IssuesService.updateIssues(vm.issueData);
+
 							commentAreaScrollToBottom();
 						}
 						
@@ -627,9 +630,9 @@
 						.then(function (issueData) {
 							if (issueData) {
 
-								IssuesService.updatedIssue = vm.issueData;
+								IssuesService.updateIssues(vm.issueData);
 								vm.savedDescription = vm.issueData.desc;
-	
+
 								// Add info for new comment
 								// var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
 								// IssuesService.convertActionCommentToText(comment, vm.topic_types);
@@ -852,7 +855,7 @@
 					.then(function (response) {
 						vm.saving = false;
 						vm.canEditDescription = vm.checkCanEditDesc();
-						afterNewComment(response.data.issue);
+						vm.afterNewComment(response.data.issue);
 					})
 					.catch(function(error){
 						vm.errorSavingComment(error);
@@ -868,7 +871,7 @@
 					IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
 						.then(function (response) {
 							vm.saving = false;
-							afterNewComment(response.data.issue);
+							vm.afterNewComment(response.data.issue);
 						})
 						.catch(function(error){
 							vm.errorSavingComment(error);
@@ -911,7 +914,7 @@
 		 * Process after new comment saved
 		 * @param comment
 		 */
-		function afterNewComment(comment, noDeleteInput) {
+		vm.afterNewComment = function(comment, noDeleteInput) {
 
 			// mark all other comments sealed
 			vm.issueData.comments.forEach(function(otherComment){
@@ -944,7 +947,7 @@
 			if(!noDeleteInput){
 				delete vm.comment;
 				delete vm.commentThumbnail;
-				IssuesService.updatedIssue = vm.issueData;
+				IssuesService.updateIssues(vm.issueData);
 				vm.submitDisabled = true;
 			}
 
@@ -1153,7 +1156,7 @@
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 					}
 
-					afterNewComment(comment, true);
+					vm.afterNewComment(comment, true);
 
 					//necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
 					$scope.$apply();
