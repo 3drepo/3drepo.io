@@ -19,7 +19,7 @@
 						md-label Select Teamspace
 						md-select(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 							md-option(
-								ng-selected="teamspace.account === vm.account"
+								ng-selected="vm.isFromUrl? teamspace.account === vm.check.account : teamspace.account === vm.account"
 								ng-repeat="teamspace in vm.adminstrableTeamspaces(vm.teamspaces)"
 								aria-label="{{teamspace.account}}" 
 								value="{{teamspace.account}}") {{teamspace.account}}
@@ -176,7 +176,7 @@
 								md-option(
 									aria-label="{{teamspace.account}}" 
 									ng-repeat="teamspace in vm.teamspaces"
-									ng-selected="teamspace.account === vm.account"
+									ng-selected="vm.isFromUrl? teamspace.account === vm.check.account : teamspace.account === vm.account"
 									value="{{teamspace.account}}") {{teamspace.account}}
 
 						div(flex="33", layout="column")
