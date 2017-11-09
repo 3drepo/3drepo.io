@@ -309,7 +309,6 @@
 						vm.setPermissionTemplates(vm.selectedTeamspace)
 							.then(function() {
 								if (vm.fromURL.projectSelected) {
-									console.log("changing project selected:" , vm.fromURL);
 									vm.projectSelected = vm.fromURL.projectSelected;
 									delete vm.fromURL.projectSelected;
 								}
