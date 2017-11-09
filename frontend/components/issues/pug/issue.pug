@@ -1,5 +1,5 @@
 div.heightFix(
-	ng-if="vm.data && vm.modelSettings"
+	ng-if="vm.issueData && vm.modelSettings"
 	flex
 	layout="column"
 	layout-fill
@@ -19,23 +19,24 @@ div.heightFix(
 					div(layout="row", flex)
 						#issueRoleIndicator(ng-style="{backgroundColor: vm.issueData.issueRoleColor}")
 						
-						md-input-container#issueTitleInput(
-							ng-if="!vm.data"
-							flex
-							md-no-float)
+						div(ng-if="!vm.data"
+							flex)
+							md-input-container#issueTitleInput(
+								md-no-float)
 
-							input(
-								type="text"
-								ng-model="vm.issueData.name"
-								ng-change="vm.nameChange()"
-								ng-disabled="vm.data"
-								ng-focus="vm.textInputHasFocus(true)"
-								ng-blur="vm.textInputHasFocus(false)"
-								aria-label="Title"
-								tdr-focus="true"
-								required
-								placeholder="Title",
-								ng-click="vm.titleInputClick($event)")
+								input(
+									flex
+									type="text"
+									ng-model="vm.issueData.name"
+									ng-change="vm.nameChange()"
+									ng-disabled="vm.data"
+									ng-focus="vm.textInputHasFocus(true)"
+									ng-blur="vm.textInputHasFocus(false)"
+									aria-label="Title"
+									tdr-focus="true"
+									required
+									placeholder="Title",
+									ng-click="vm.titleInputClick($event)")
 
 						label#issueTitle(ng-if="vm.data") {{vm.issueData.title}}
 
@@ -293,7 +294,7 @@ issues-pin(
 
 // Whilst issue is loading
 div.heightFix(
-	ng-if="!vm.data || !vm.modelSettings"
+	ng-if="!vm.modelSettings"
 	flex
 	layout="column"
 	layout-fill

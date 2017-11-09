@@ -67,7 +67,7 @@
 
 			vm.issueIsCreated = !!IssuesService.state.selectedIssue;
 			vm.canEditDescription = false;
-			
+
 			vm.savedScreenShot = null;
 			vm.editingCommentIndex = null;
 			vm.commentViewpoint;
@@ -177,7 +177,6 @@
 
 		$scope.$watch("vm.modelSettings", function() {
 			if(vm.modelSettings){
-
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
 				vm.checkCanComment();
 				vm.convertCommentTopicType();
@@ -230,21 +229,14 @@
 				vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 				vm.checkCanComment();
-			
 				vm.convertCommentTopicType();
 
 				// Can edit description if no comments
 				vm.canEditDescription = vm.checkCanEditDesc();
 				
 			} else {
-				
-				vm.issueData = {
-					priority: "none",
-					status: "open",
-					assigned_roles: [],
-					topic_type: "for_information",
-					viewpoint: {}
-				};
+
+				vm.issueData = IssuesService.createBlankIssue();
 
 			}
 							
@@ -420,15 +412,20 @@
 
 		};
 
+		// This keeps the colours updated etc
+		$scope.$watch("vm.issueData", function(){
+			if (vm.issueData) {
+				IssuesService.populateIssue(vm.issueData);
+			}
+		}, true);
+
 		/**
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
 			
-			console.log("notification - vm.statusChange");
-
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
-
+				
 				// If it's unassigned we can update so that there are no assigned roles
 				if (vm.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
 					vm.issueData.assigned_roles = [];
@@ -443,7 +440,7 @@
 	
 				IssuesService.updateIssue(vm.issueData, statusChangeData)
 					.then(function (response) {
-						console.log("notification - updateIssue.then", response);
+
 						if (response) {
 
 							var respData = response.data.issue;
@@ -463,6 +460,7 @@
 							}
 	
 							// Update the actual data model
+							
 							IssuesService.updateIssues(vm.issueData);
 
 							commentAreaScrollToBottom();

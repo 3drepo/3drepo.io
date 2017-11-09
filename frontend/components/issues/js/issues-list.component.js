@@ -69,6 +69,47 @@
 		};
 
 
+		$scope.$watch(function(){
+			return IssuesService.state.selectedIssue;
+		}, function(){
+
+			// Selected issue
+			if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow) {
+
+				for (var i = 0; i < IssuesService.state.issuesToShow.length; i++) {
+					// To clear any previously selected issue
+					IssuesService.state.issuesToShow[i].selected = false;
+					IssuesService.state.issuesToShow[i].focus = false;
+
+					// Set up the current selected iss
+					if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow[i]._id === IssuesService.state.selectedIssue._id) {
+						vm.internalSelectedIssue = IssuesService.state.issuesToShow[i];
+						vm.internalSelectedIssue.selected = true;
+						vm.internalSelectedIssue.focus = true;
+						vm.focusedIssueIndex = i;
+						vm.selectedIssueIndex = i;
+					}
+				}
+			}
+
+		}, true);
+
+		$scope.$watch(function(){
+			IssuesService.state.displayIssue;
+		}, function(){
+			vm.checkShouldShowIssue();
+		}, true);
+
+		vm.checkShouldShowIssue = function() {
+			var issueToDisplay = IssuesService.getDisplayIssue();
+			if (issueToDisplay) {
+				vm.editIssue(issueToDisplay);
+				$timeout(function(){
+					IssuesService.showIssue(issueToDisplay);
+				}.bind(this), 500);
+			}
+		};
+
 		// All issues
 		$scope.$watch(function(){
 			return IssuesService.state.allIssues;
@@ -79,7 +120,7 @@
 
 					vm.toShow = "list";
 					vm.setupIssuesToShow();
-	
+
 				} else {
 					vm.toShow = "info";
 					vm.info = "There are currently no open issues";
@@ -190,49 +231,6 @@
 			vm.showPins();
 		};
 
-		$scope.$watch(function(){
-			return IssuesService.state.selectedIssue;
-		}, function(){
-
-			// Selected issue
-			if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow) {
-
-				for (var i = 0; i < IssuesService.state.issuesToShow.length; i++) {
-					// To clear any previously selected issue
-					IssuesService.state.issuesToShow[i].selected = false;
-					IssuesService.state.issuesToShow[i].focus = false;
-
-					// Set up the current selected iss
-					if (IssuesService.state.selectedIssue && IssuesService.state.issuesToShow[i]._id === IssuesService.state.selectedIssue._id) {
-						vm.internalSelectedIssue = IssuesService.state.issuesToShow[i];
-						vm.internalSelectedIssue.selected = true;
-						vm.internalSelectedIssue.focus = true;
-						vm.focusedIssueIndex = i;
-						vm.selectedIssueIndex = i;
-					}
-				}
-			}
-
-		}, true);
-
-
-
-		$scope.$watch(function(){
-			IssuesService.state.displayIssue;
-		}, function(){
-			vm.checkShouldShowIssue();
-		}, true);
-
-		vm.checkShouldShowIssue = function() {
-			var issueToDisplay = IssuesService.getDisplayIssue();
-			if (issueToDisplay) {
-				vm.editIssue(issueToDisplay);
-				$timeout(function(){
-					IssuesService.showIssue(issueToDisplay);
-				}.bind(this), 500);
-			}
-		};
-		
 		/**
 		 * Select issue
 		 * @param event

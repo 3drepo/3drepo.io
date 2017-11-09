@@ -95,19 +95,16 @@
 			/*
 			* Get all the Issues
 			*/
-			console.log("issues - getIssues");
 
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
 
 					if (data) {
-						console.log("issues - got issues: ", data);
+
 						vm.showProgress = false;
 						vm.toShow = "showIssues";
 						IssuesService.populateNewIssues(data);
 						vm.showAddButton = true;
-
-						console.log("issues - allIssues issues.component", IssuesService.state.allIssues);
 						
 					} else {
 						throw "Error";
@@ -230,15 +227,6 @@
 		}, true);
 
 
-		// $scope.$watch(function(){
-		// 	return IssuesService.state.issueId;
-		// }, function(){
-		// 	if(IssuesService.state.issueId) {
-		// 		IssuesService.state.displayIssue = IssuesService.state.issueId;
-		// 	}
-		// }, true);
-
-
 		/**
 		 * Set up event watching
 		 */
@@ -296,8 +284,6 @@
 		});
 
 		vm.watchNotification = function() {
-
-			console.log("notification - watchNotification", vm.account, vm.model);
 
 			/*
 			 * Watch for new issues
@@ -431,7 +417,9 @@
 			vm.event = null; // To clear any events so they aren't registered
 			vm.onShowItem();
 
-			var notCurrentlySelected = IssuesService.state.selectedIssue && issue && IssuesService.state.selectedIssue._id !== issue._id;
+			var notCurrentlySelected = IssuesService.state.selectedIssue && 
+										issue && 
+										IssuesService.state.selectedIssue._id !== issue._id;
 
 			if (notCurrentlySelected) {
 				IssuesService.deselectPin(IssuesService.state.selectedIssue);
@@ -477,8 +465,7 @@
 					eventAction: "view"
 				});
 			} else {
-				//vm.selectedIssueLoaded = true;
-				IssuesService.setSelectedIssue(issue);
+				IssuesService.resetSelectedIssue();
 			}
 
 			vm.toShow = "showIssue";
@@ -491,7 +478,6 @@
 		 * @param issue
 		 */
 		vm.selectIssue = function (issue) {
-						
 			IssuesService.setSelectedIssue(issue);
 		};
 
@@ -511,7 +497,7 @@
 
 			IssuesService.addIssue(issue);
 			IssuesService.state.selectedIssue = issue;
-			
+
 		};
 
 	}

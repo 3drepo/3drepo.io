@@ -105,6 +105,8 @@
 			addIssue: addIssue,
 			setupIssuesToShow: setupIssuesToShow,
 			getDisplayIssue: getDisplayIssue,
+			resetSelectedIssue: resetSelectedIssue,
+			createBlankIssue: createBlankIssue,
 			state: state
 			
 		
@@ -114,17 +116,23 @@
 
 		/////////////
 
+		function createBlankIssue() {
+			return {
+				priority: "none",
+				status: "open",
+				assigned_roles: [],
+				topic_type: "for_information",
+				viewpoint: {}
+			};
+		}
+
 		function getDisplayIssue() {
 			if (state.displayIssue && state.allIssues.length > 0){
-				console.log("showIssue displayIssue", state.displayIssue);
-				
+
 				var issueToDisplay = state.allIssues.find(function(issue){
-					console.log("showIssue ISSUES", issue);
 					return issue._id === state.displayIssue;
 				});
 				
-				console.log("showIssue ", issueToDisplay);
-
 				return issueToDisplay;
 					
 			}
@@ -222,7 +230,12 @@
 
 		}
 
+		function resetSelectedIssue() {
+			state.selectedIssue = undefined;
+		}
+
 		function setSelectedIssue(issue) {
+
 			if (state.selectedIssue) {
 				var different = (state.selectedIssue._id !== issue._id);
 				if (different) {
