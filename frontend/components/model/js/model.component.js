@@ -144,8 +144,11 @@
 					EventService.send(EventService.EVENT.MODEL_SETTINGS_READY, data);
 
 					TreeService.init(vm.account, vm.model, vm.branch, vm.revision, data).then(function(tree){
-						vm.treeMap = TreeService.getMap(tree.nodes);
-						EventService.send(EventService.EVENT.TREE_READY, tree);
+						//FIXME: is this even used?
+						TreeService.getMap(tree.nodes).then(function(mapping){
+						 	vm.treeMap = mapping;
+							EventService.send(EventService.EVENT.TREE_READY, tree);
+						});
 					});
 				})
 				.catch(function(error){

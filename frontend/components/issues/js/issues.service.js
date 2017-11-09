@@ -302,34 +302,37 @@
 		function handleTree(response, tree) {
 
 			var ids = [];
-			response.data.objects.forEach(function(obj){
-				var key = obj.account + "@" +  obj.model;
-				if(!ids[key]){
-					ids[key] = [];
-				}	
+		    TreeService.getMap(tree.nodes)
+				.then(function(treeMap){
+					response.data.objects.forEach(function(obj){
+						var key = obj.account + "@" +  obj.model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
 
-				var treeMap = TreeService.getMap(tree.nodes);
-				ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-			});
+					});
 
-			for(var key in ids) {
+					for(var key in ids) {
 
-				var vals = key.split("@");
-				var account = vals[0];
-				var model = vals[1];
+						var vals = key.split("@");
+						var account = vals[0];
+						var model = vals[1];
 
-				var treeData = {
-					source: "tree",
-					account: account,
-					model: model,
-					ids: ids[key],
-					colour: response.data.colour,
-					multi: true
-				
-				};
-				ViewerService.highlightObjects(treeData);
-			}
+						var treeData = {
+							source: "tree",
+							account: account,
+							model: model,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true					
+						};
+						ViewerService.highlightObjects(treeData);
+					}
+
+
+				});
 		}
 
 		// TODO: Internationalise and make globally accessible
