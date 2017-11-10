@@ -31,9 +31,9 @@
 			controllerAs: "vm"
 		});
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "EventService", "ViewerService"];
 
-	function ClipCtrl($scope, $timeout, EventService) {
+	function ClipCtrl($scope, $timeout, EventService, ViewerService) {
 		var vm = this;
 
 		/*
@@ -232,7 +232,7 @@
 				if (newValue) {
 					vm.updateClippingPlane();
 				} else {
-					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+					ViewerService.clearClippingPlanes();
 				}
 			}
 		});
@@ -292,12 +292,10 @@
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				vm.units = event.value.settings.unit;
-				if(vm.units === "mm")
-				{
+				vm.units = event.value.properties.unit;
+				if(vm.units === "mm") {
 					vm.precision = 0;
-				}
-				else{
+				} else{
 					vm.precison = 3;
 				}
 

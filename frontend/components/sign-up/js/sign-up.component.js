@@ -27,11 +27,10 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window", "StateManager"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "APIService", "AuthService", "$window"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window, StateManager) {
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, APIService, AuthService, $window) {
 		var vm = this;
-
 
 		/*
 		 * Init
@@ -280,17 +279,22 @@
 				data.captcha = vm.reCaptchaResponse;
 			}
 			vm.registering = true;
-			UtilsService.doPost(data, vm.newUser.username)
+			APIService.post(vm.newUser.username, data)
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.showPage("registerRequest");
 					} else {
-						vm.registerErrorMessage = UtilsService.getErrorMessage(response.data);
+						vm.registerErrorMessage = APIService.getErrorMessage(response.data);
 					}
 					vm.registering = false;
 					if (vm.useReCAPTCHA) {
 						grecaptcha.reset(); // reset reCaptcha
 					}
+				})
+				.catch(function(response){
+					console.error(response);
+					vm.registering = false;
+					vm.registerErrorMessage = response.data.message;
 				});
 		}
 

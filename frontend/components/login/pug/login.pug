@@ -17,7 +17,7 @@
 
 		.userContent(layout="column")
 			div.loginBox.loadingBox(layout="row")
-				h3.welcome Welcome to 3D Repo!
+				h3.welcome {{vm.loginMessage}}!
 
 			// Behaviour if we provide a notice to the user
 			span(ng-if="vm.userNotice") 

@@ -27,13 +27,13 @@
 			controllerAs: "vm"
 		});
 
-	CookiesCtrl.$inject = ["EventService"];
+	CookiesCtrl.$inject = ["StateManager"];
 
-	function CookiesCtrl (EventService) {
+	function CookiesCtrl (StateManager) {
 		var vm = this;
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 	}
 }());

@@ -19,31 +19,47 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("IssuesService", IssuesService);
+		.service("IssuesService", IssuesService);
 
 	IssuesService.$inject = [
-		"$http", "$q", "$sanitize", "ClientConfigService", "EventService", 
-		"UtilsService", "TreeService", "AuthService"
+		"$q", "$sanitize", "ClientConfigService", "EventService", 
+		"APIService", "TreeService", "AuthService",
+		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
-		$http, $q, $sanitize, ClientConfigService, EventService, 
-		UtilsService, TreeService, AuthService
+		$q, $sanitize, ClientConfigService, EventService, 
+		APIService, TreeService, AuthService,
+		ViewerService, $timeout, $filter
 	) {
 
 		var url = "",
 			config = {},
 			numIssues = 0,
 			availableJobs = [],
-			newPinId = "newPinId",
 			updatedIssue = null;
-
 
 		var initPromise = $q.defer();
 
+		var state = {
+			heights : {
+				infoHeight : 135,
+				issuesListItemHeight : 141
+			},
+			selectedIssue: null,
+			allIssues: [],
+			issuesToShow: [],
+			displayIssue: null,
+			issueDisplay: {
+				showSubModelIssues: false,
+				showClosed: false,
+				sortOldestFirst : false,
+				excludeRoles: []
+			}
+		};
+
 		var service = {
 			init : init,
-			setCanUpdateStatus : setCanUpdateStatus,
 			numIssues: numIssues,
 			updatedIssue: updatedIssue,
 			deselectPin: deselectPin,
@@ -52,6 +68,7 @@
 			handleTree: handleTree,
 			getPrettyTime: getPrettyTime,
 			generateTitle: generateTitle,
+			getThumbnailPath: getThumbnailPath,
 			getIssue: getIssue,
 			getIssues: getIssues,
 			saveIssue: saveIssue,
@@ -63,67 +80,436 @@
 			editComment: editComment,
 			deleteComment: deleteComment,
 			sealComment: sealComment,
-			addPin: addPin,
-			removePin: removePin,
-			fixPin: fixPin,
 			getJobs: getJobs,
-			getUserJobFormodel: getUserJobFormodel,
+			getUserJobForModel: getUserJobForModel,
 			hexToRgb: hexToRgb,
 			getJobColor: getJobColor,
 			getStatusIcon: getStatusIcon,
 			importBcf: importBcf,
 			convertActionCommentToText: convertActionCommentToText,
 			cleanIssue: cleanIssue,
-			convertActionValueToText: convertActionValueToText
+			convertActionValueToText: convertActionValueToText,
+			
+			canChangePriority: canChangePriority,
+			canChangeStatus: canChangeStatus,
+			canChangeType: canChangeType,
+			canChangeAssigned: canChangeAssigned,
+			canComment: canComment,
+			canChangeStatusToClosed: canChangeStatusToClosed,
+			isOpen: isOpen,
+
+			setSelectedIssue: setSelectedIssue,
+			populateIssue: populateIssue,
+			populateNewIssues: populateNewIssues,
+			updateIssues: updateIssues,
+			addIssue: addIssue,
+			setupIssuesToShow: setupIssuesToShow,
+			getDisplayIssue: getDisplayIssue,
+			resetSelectedIssue: resetSelectedIssue,
+			createBlankIssue: createBlankIssue,
+			isSelectedIssue: isSelectedIssue,
+			showIssuePins: showIssuePins,
+
+			state: state
+			
 		};
 
 		return service;
 
 		/////////////
 
+		function createBlankIssue() {
+			return {
+				priority: "none",
+				status: "open",
+				assigned_roles: [],
+				topic_type: "for_information",
+				viewpoint: {}
+			};
+		}
+
+		function getDisplayIssue() {
+			if (state.displayIssue && state.allIssues.length > 0){
+
+				var issueToDisplay = state.allIssues.find(function(issue){
+					return issue._id === state.displayIssue;
+				});
+				
+				return issueToDisplay;
+					
+			}
+			return false;
+		}
+
+		// Helper function for searching strings
+		function stringSearch(superString, subString) {
+			if(!superString){
+				return false;
+			}
+
+			return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+		}
+
+		function setupIssuesToShow(model, filterText) {
+			state.issuesToShow = [];
+
+			if (state.allIssues.length > 0) {
+
+				// Sort
+				state.issuesToShow = state.allIssues.slice();
+				if (state.issueDisplay.sortOldestFirst) {
+					state.issuesToShow.sort(function(a, b){
+						return a.created - b.created;
+					});
+				} else {
+					state.issuesToShow.sort(function(a, b){
+						return b.created - a.created;
+					});
+				}
+				
+				// TODO: There is certainly a better way of doing this, but I don't want to
+				// dig into it right before release
+
+				// Filter text
+				var someText = angular.isDefined(filterText) && filterText !== "";
+				if (someText) {
+
+					// TODO: do we need $filter?
+
+					state.issuesToShow = ($filter("filter")(state.issuesToShow, function(issue) {
+						// Required custom filter due to the fact that Angular
+						// does not allow compound OR filters
+						var i;
+
+						// Search the title
+						var show = stringSearch(issue.title, filterText);
+						show = show || stringSearch(issue.timeStamp, filterText);
+						show = show || stringSearch(issue.owner, filterText);
+
+						// Search the list of assigned issues
+						if (!show && issue.hasOwnProperty("assigned_roles")) {
+							i = 0;
+							while(!show && (i < issue.assigned_roles.length)) {
+								show = show || stringSearch(issue.assigned_roles[i], filterText);
+								i += 1;
+							}
+						}
+
+						// Search the comments
+						if (!show && issue.hasOwnProperty("comments")) {
+							i = 0;
+
+							while(!show && (i < issue.comments.length)) {
+								show = show || stringSearch(issue.comments[i].comment, filterText);
+								show = show || stringSearch(issue.comments[i].owner, filterText);
+								i += 1;
+							}
+						}
+
+						return show;
+					}));
+				} 
+
+				// Closed
+				for (var i = (state.issuesToShow.length - 1); i >= 0; i -= 1) {
+
+					if (!state.issueDisplay.showClosed && (state.issuesToShow[i].status === "closed")) {
+						state.issuesToShow.splice(i, 1);
+					}
+				}
+
+				// Sub models
+				state.issuesToShow = state.issuesToShow.filter(function (issue) {
+					return state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+				});
+
+				//Roles Filter
+				state.issuesToShow = state.issuesToShow.filter(function(issue){
+					return state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
+				});
+			
+			}
+
+		}
+
+		function resetSelectedIssue() {
+			state.selectedIssue = undefined;
+		}
+
+		function isSelectedIssue(issue) {
+			//console.log(state.selectedIssue);
+			if (!state.selectedIssue || !state.selectedIssue._id) {
+				return false;
+			} else {
+				return issue._id === state.selectedIssue._id;
+			}
+		}
+
+		function showIssuePins() {
+
+			// TODO: This is still inefficent and unclean
+			state.allIssues.forEach(function(issue) {
+				var show = state.issuesToShow.find(function(shownIssue){
+					return issue._id === shownIssue._id;
+				});
+
+				// Check that there is a position for the pin
+				var pinPosition = issue.position && issue.position.length;
+
+				if (show !== undefined && pinPosition) {
+
+					var pinColor = Pin.pinColours.blue;
+					var isSelectedPin = state.selectedIssue && 
+										issue._id === state.selectedIssue._id;
+
+					if (isSelectedPin) {
+						pinColor = Pin.pinColours.yellow;
+					}
+
+					ViewerService.addPin({
+						id: issue._id,
+						account: issue.account,
+						model: issue.model,
+						pickedPos: issue.position,
+						pickedNorm: issue.norm,
+						colours: pinColor,
+						viewpoint: issue.viewpoint
+					});
+
+				} else {
+					// Remove pin
+					ViewerService.removePin({ id: issue._id });
+				}
+			});
+
+		}
+
+		function setSelectedIssue(issue) {
+
+			if (state.selectedIssue) {
+				var different = (state.selectedIssue._id !== issue._id);
+				if (different) {
+					deselectPin(state.selectedIssue);
+				}
+			}
+			
+			state.selectedIssue = issue;
+			showIssuePins();
+			showIssue(issue);
+		}
+
+		function populateNewIssues(newIssues) {
+			newIssues.forEach(populateIssue);
+			state.allIssues = newIssues;
+		}
+
+		function addIssue(issue) {
+			populateIssue(issue);
+			state.allIssues.unshift(issue);
+		}
+
+		function updateIssues(issue) {
+
+			populateIssue(issue);
+
+			state.allIssues.forEach(function(oldIssue, i){
+				var matchs = oldIssue._id === issue._id;
+				if(matchs){
+
+					if(issue.status === "closed"){
+						
+						state.allIssues[i].justClosed = true;
+
+						$timeout(function(){
+
+							state.allIssues[i] = issue;
+
+						}, 4000);
+
+					} else {
+						state.allIssues[i] = issue;
+					}
+
+				}
+			});
+		}
+
 		function init() {
 			return initPromise.promise;
 		}
 
-		function setCanUpdateStatus(issueData, issueId, permissions) {
-			var hasPermission = AuthService.hasPermission(
-				ClientConfigService.permissions.PERM_CREATE_ISSUE, 
-				permissions
-			);
-
-			if(!hasPermission){
-				return false;
+		function populateIssue(issue) {
+			
+			if (issue) {
+				issue.title = generateTitle(issue);
+			}
+			
+			if (issue.created) {
+				issue.timeStamp = getPrettyTime(issue.created);
+			}
+			
+			if (issue.thumbnail) {
+				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
 			}
 
-			var isOwner = (AuthService.getUsername() === issueData.owner);
-			var hasRole = issueData.assigned_roles.indexOf(issueId) !== -1;
-			return isOwner || hasRole;
+			if (issue) {
+				issue.statusIcon = getStatusIcon(issue);
+			}
+			
+			if (issue.assigned_roles[0]) {
+				issue.issueRoleColor = getJobColor(issue.assigned_roles[0]);
+			}
+			
+			if (!issue.descriptionThumbnail) {
+				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
+					issue.descriptionThumbnail = APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+				}
+			}
 
 		}
 
-		function deselectPin(issue) {
-			var pinData;
+		function userJobMatchesCreator(userJob, issueData) {
+			return (userJob._id && 
+				issueData.creator_role && 
+				userJob._id === issueData.creator_role);
+		}
 
+		function isViewer(permissions) {
+			//console.log("isViewer", permissions);
+			return !AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+				permissions
+			);
+		}
+
+		function isAssignedJob(userJob, issueData, permissions) {
+			//console.log("isAssignedJob", permissions);
+			return (userJob._id && 
+					issueData.assigned_roles[0] && 
+					userJob._id === issueData.assigned_roles[0]) &&
+					!isViewer(permissions);
+		}
+
+		function isAdmin(permissions) {
+			return AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+				permissions
+			);
+		}
+
+		function canChangePriority(issueData, userJob, permissions) {
+			return isAdmin(permissions) || 
+				(userJobMatchesCreator(userJob, issueData) &&
+				!isViewer(permissions));
+		}
+
+		function canChangeStatusToClosed(issueData, userJob, permissions) {
+
+			var jobOwner = (userJobMatchesCreator(userJob, issueData) &&
+							!isViewer(permissions));
+
+			return isAdmin(permissions) || jobOwner;
+					
+		}
+
+		function canChangeStatus(issueData, userJob, permissions) {
+
+			var assigned = isAssignedJob(userJob, issueData, permissions);
+			var jobMatches = (
+				userJobMatchesCreator(userJob, issueData) &&
+				!isViewer(permissions)
+			);
+			return isAdmin(permissions) || jobMatches || assigned;
+					
+		}
+
+		function canChangeType(issueData, userJob, permissions) {
+			
+			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canChangeAssigned(issueData, userJob, permissions) {
+			
+			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function isOpen(issueData) {
+			return issueData.status !== "closed";
+		}
+
+		function canComment(issueData, userJob, permissions) {
+			
+			var isNotClosed = issueData && 
+				issueData.status && 
+				isOpen(issueData);
+
+			var ableToComment = AuthService.hasPermission(
+				ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+				permissions
+			);
+
+			return ableToComment && isNotClosed;
+
+		}
+
+
+		// function setCanUpdateIssue(issueData, userJob, permissions) {
+			
+		// 	// If they are the owner
+		// 	var isOwner = (AuthService.getUsername() === issueData.owner);
+
+		// 	// Check that the jobs match
+		// 	var jobsMatch = (userJob._id && 
+		// 					issueData.creator_role && 
+		// 					userJob._id === issueData.creator_role &&
+		// 					// And also that they can also at least comment ('edit' so to speak)
+		// 					AuthService.hasPermission(
+		// 						ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		// 						permissions
+		// 					))l
+			
+		// 	console.log("jobs - jobsMatch - ", userJob._id, issueData.creator_role, userJob._id === issueData.creator_role);
+		// 	console.log("jobs - jobsMatch - ", jobsMatch)
+
+		// 	var jobsMatchAssigned = (userJob._id && 
+		// 						issueData.assigned_roles[0] && 
+		// 						userJob._id === issueData.assigned_roles[0] && 
+		// 						AuthService.hasPermission(
+		// 							ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+		// 							permissions
+		// 						));
+
+		// 	// Or alternatively they just have full permissions
+		// 	var hasPermission = AuthService.hasPermission(
+		// 		ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+		// 		permissions
+		// 	);
+
+		// 	console.log("jobs - permissions: ", permissions)
+		// 	console.log("jobs - isOwner", isOwner)
+		// 	console.log("jobs - jobsMatch", jobsMatch)
+		// 	console.log("jobs - hasPermission", hasPermission)
+
+		// 	return isOwner || jobsMatch || hasPermission || jobsMatchAssigned;
+
+		// }
+
+		function deselectPin(issue) {
 			// Issue with position means pin
-			if (issue.position.length > 0) {
-				pinData = {
+			if (issue.position.length > 0 && issue._id) {
+				ViewerService.changePinColours({
 					id: issue._id,
 					colours: Pin.pinColours.blue
-				};
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, pinData);
+				});
 			}
 		}
 
 		function showIssue(issue) {
 			var issueData;
 				
-			// Highlight pin, move camera and setup clipping plane
-			issueData = {
-				id: issue._id,
-				colours: Pin.pinColours.yellow
-			};
-			
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, issueData);
+			showIssuePins();
 
 			// Set the camera position
 			issueData = {
@@ -146,7 +532,7 @@
 			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			// Remove highlight from any multi objects
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+			ViewerService.highlightObjects([]);
 
 			// clear selection
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
@@ -162,54 +548,49 @@
 		function showMultiIds(issue) {
 			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
 
-			UtilsService.doGet(groupUrl)
+			APIService.get(groupUrl)
 				.then(function (response) {
-
-					TreeService.cachedTree
-						.then(function(tree) {
-							handleTree(response, tree);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting the tree: ", error);
-						});
-				
+					handleTree(response);
 				})
 				.catch(function(error){
 					console.error("There was a problem getting the highlights: ", error);
 				});
 		}
 
-		function handleTree(response, tree) {
+		function handleTree(response) {
 
 			var ids = [];
-			response.data.objects.forEach(function(obj){
-				var key = obj.account + "@" +  obj.model;
-				if(!ids[key]){
-					ids[key] = [];
-				}	
+			TreeService.getMap()
+				.then(function(treeMap){
+					response.data.objects.forEach(function(obj){
+						var key = obj.account + "@" +  obj.model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
 
-				var treeMap = TreeService.getMap(tree.nodes);
-				ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-			});
+					});
 
-			for(var key in ids) {
+					for(var key in ids) {
 
-				var vals = key.split("@");
-				var account = vals[0];
-				var model = vals[1];
+						var vals = key.split("@");
+						var account = vals[0];
+						var model = vals[1];
 
-				var treeData = {
-					source: "tree",
-					account: account,
-					model: model,
-					ids: ids[key],
-					colour: response.data.colour,
-					multi: true
-				
-				};
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, treeData);
-			}
+						var treeData = {
+							source: "tree",
+							account: account,
+							model: model,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true					
+						};
+						ViewerService.highlightObjects(treeData);
+					}
+
+
+				});
 		}
 
 		// TODO: Internationalise and make globally accessible
@@ -262,13 +643,16 @@
 			}
 		}
 
+		function getThumbnailPath(thumbnailUrl) {
+			return APIService.getAPIUrl(thumbnailUrl);
+		}
+
 		function getIssue(account, model, issueId){
 
 			var deferred = $q.defer();
-			var endpoint = account + "/" + model + "/issues/" + issueId + ".json";
-			var issueUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-
-			$http.get(issueUrl).then(function(res){
+			var issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
+		
+			APIService.get(issueUrl).then(function(res){
 
 				res.data = cleanIssue(res.data);
 
@@ -297,18 +681,13 @@
 				endpoint = account + "/" + model + "/issues.json";
 			}
 
-			var issuesUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-
-			$http.get(issuesUrl).then(
-				function(issuesData) {
-					deferred.resolve(issuesData.data);
-					for (var i = 0; i < issuesData.data.length; i ++) {
-						issuesData.data[i].timeStamp = getPrettyTime(issuesData.data[i].created);
-						issuesData.data[i].title = generateTitle(issuesData.data[i]);
-						if (issuesData.data[i].thumbnail) {
-							issuesData.data[i].thumbnailPath = UtilsService.getServerUrl(issuesData.data[i].thumbnail);
-						}
+			APIService.get(endpoint).then(
+				function(response) {
+					var issuesData = response.data;
+					for (var i = 0; i < response.data.length; i ++) {
+						populateIssue(issuesData[i]);
 					}
+					deferred.resolve(response.data);
 				},
 				function() {
 					deferred.resolve([]);
@@ -326,9 +705,9 @@
 
 			var base = issue.account + "/" + issue.model;
 			if (issue.rev_id){
-				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/revision/" + issue.rev_id + "/issues.json");
+				saveUrl = base + "/revision/" + issue.rev_id + "/issues.json";
 			} else {
-				saveUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, base + "/issues.json");
+				saveUrl = base + "/issues.json";
 			}
 
 			config = {withCredentials: true};
@@ -338,7 +717,7 @@
 				issue.norm = issue.pickedNorm;
 			}
 
-			$http.post(saveUrl, issue, config)
+			APIService.post(saveUrl, issue, config)
 				.then(function successCallback(response) {
 					deferred.resolve(response);
 				});
@@ -363,25 +742,19 @@
 		 * @returns {*}
 		 */
 		function doPut(issue, putData) {
-			var deferred = $q.defer();
-			var putUrl;
+
 			var endpoint = issue.account + "/" + issue.model;
 
 			if(issue.rev_id){
 				endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
-				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			} else {
 				endpoint += "/issues/" + issue._id + ".json";
-				putUrl = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
 			}
 				
 			var putConfig = {withCredentials: true};
 
-			$http.put(putUrl, putData, putConfig)
-				.then(function (response) {
-					deferred.resolve(response);
-				});
-			return deferred.promise;
+			return APIService.put(endpoint, putData, putConfig);
+		
 		}
 
 		function toggleCloseIssue(issue) {
@@ -440,40 +813,12 @@
 			});
 		}
 
-		function addPin(pin, colours, viewpoint) {
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: pin.id,
-				account: pin.account,
-				model: pin.model,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours,
-				viewpoint: viewpoint
-			});
-		}
-
-		function removePin(id) {
-			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
-				id: id
-			});
-		}
-
-		function fixPin(pin, colours) {
-			removePin();
-			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: newPinId,
-				pickedPos: pin.position,
-				pickedNorm: pin.norm,
-				colours: colours
-			});
-		}
-
 		function getJobs(account, model){
 
 			var deferred = $q.defer();
-			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/jobs.json");
+			url = account + "/" + model + "/jobs.json";
 
-			$http.get(url).then(
+			APIService.get(url).then(
 				function(jobsData) {
 					availableJobs = jobsData.data;
 					deferred.resolve(availableJobs);
@@ -486,11 +831,11 @@
 			return deferred.promise;
 		}
 
-		function getUserJobFormodel(account, model){
+		function getUserJobForModel(account, model){
 			var deferred = $q.defer();
-			url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" +model + "/userJobForModel.json");
+			url = account + "/" +model + "/userJobForModel.json";
 
-			$http.get(url).then(
+			APIService.get(url).then(
 				function(userJob) {
 					deferred.resolve(userJob.data);
 				},
@@ -535,15 +880,25 @@
 		}
 
 		function getJobColor(id) {
-			var i, length,
-				roleColor = null;
 
-			for (i = 0, length = availableJobs.length; i < length; i += 1) {
-				if (availableJobs[i]._id === id && availableJobs[i].color) {
-					roleColor = availableJobs[i].color;
-					break;
-				}
+			var roleColor = "#ffffff";
+			var found = false;
+
+			if (id) {
+				for (var i = 0; i < availableJobs.length; i ++) {
+					var job = availableJobs[i];
+					if (job._id === id && job.color) {
+						roleColor = job.color;
+						found = true;
+						break;
+					}
+				}	
 			}
+			
+			if (!found) {
+				console.debug("Job color not found for", id);
+			}
+
 			return roleColor;
 		}
 
@@ -603,7 +958,7 @@
 			var formData = new FormData();
 			formData.append("file", file);
 
-			UtilsService.doPost(formData, bfcUrl, {"Content-Type": undefined}).then(function(res){
+			APIService.post(bfcUrl, formData, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
@@ -704,7 +1059,7 @@
 					}
 					//screen shot path
 					if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
-						issue.comments[j].viewpoint.screenshotPath = UtilsService.getServerUrl(issue.comments[j].viewpoint.screenshot);
+						issue.comments[j].viewpoint.screenshotPath = APIService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
 					}
 				}
 			}

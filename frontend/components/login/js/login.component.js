@@ -22,14 +22,16 @@
 		.component("login", {
 			restrict: "EA",
 			templateUrl: "templates/login.html",
-			bindings: {},
+			bindings: {
+				loginMessage : "<" 
+			},
 			controller: LoginCtrl,
 			controllerAs: "vm"
 		});
 
-	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "APIService"];
 
-	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, UtilsService) {
+	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, APIService) {
 		var vm = this;
 
 		/*
@@ -39,8 +41,13 @@
 			vm.version = ClientConfigService.VERSION;
 			vm.userNotice = ClientConfigService.userNotice;
 			vm.loggingIn = false;
-		};
 
+			// Set a custom login message if there is one
+			if (!vm.loginMessage) {
+				vm.loginMessage = "Welcome to 3D Repo";
+			}
+			
+		};
 
 		vm.handleLogin = function() {
 			vm.errorMessage = "";
@@ -96,7 +103,7 @@
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
 					} else {
-						vm.errorMessage = UtilsService.getErrorMessage(event.value.error);
+						vm.errorMessage = APIService.getErrorMessage(event.value.error);
 					}
 				}
 			}

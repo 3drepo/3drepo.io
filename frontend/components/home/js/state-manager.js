@@ -19,8 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider",
-			function($stateProvider, $urlRouterProvider, $locationProvider) {
+		.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider",
+			function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				
 				$locationProvider.html5Mode(true);
 
@@ -30,7 +30,6 @@
 					resolve: {
 						init: ["AuthService", "StateManager", "$q", function(AuthService, StateManager, $q) {
 							StateManager.state.authInitialized = false;
-
 							var finishedAuth = $q.defer();
 
 							StateManager.state.changing = true;
@@ -49,6 +48,8 @@
 						}]
 					}
 				});
+
+				$httpProvider.interceptors.push("AuthInterceptor");
 
 				// Convert blah_test to blahTest
 				function camelCase(name) {
@@ -197,6 +198,19 @@
 					// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 					this.state = {
 						changing: true
+					};
+
+					this.goHome = function() {
+
+						// TODO: Do this properly using state manager
+						var path = "/";
+						//console.log("AuthService.getUsername", AuthService.getUsername());
+						if (AuthService.isLoggedIn() && AuthService.getUsername()) {
+							path = "/" + AuthService.getUsername();
+							//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
+						}
+
+						$location.path(path);
 					};
 
 					this.changedState = {};

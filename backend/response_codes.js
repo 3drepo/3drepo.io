@@ -75,6 +75,7 @@
 		ROOT_NODE_NOT_FOUND: { message: "No root node found for revision", status: 500 },
 
 		ISSUE_NOT_FOUND: { message: "Issue not found", status: 404 },
+		
 
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
@@ -110,11 +111,11 @@
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
-		MODEL_EXIST: { message: "Model already exists", status: 400 },
+		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
-		SIZE_LIMIT_PAY: { message: "Ran of out database space. Please pay for more space.", status: 400 },
+		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
 
 		FILE_FORMAT_NOT_SUPPORTED: { message: "Format not supported", status: 400 },
@@ -125,6 +126,9 @@
 		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 		BLACKLISTED_MODEL_NAME: { message: "Model name reserved", status: 400 },
+
+		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
+		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
@@ -205,6 +209,7 @@
 		MODEL_NAME_TOO_LONG: { message: "Model name cannot be longer than 60 characters", status: 400 },
 		ISSUE_SYSTEM_COMMENT: { message: "Can't edit or remove system comment", status: 400 },
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
+		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
 
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
@@ -217,6 +222,7 @@
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
+		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
 
 		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
 		DUP_JOB: {message: "Duplicate job id", status: 400},

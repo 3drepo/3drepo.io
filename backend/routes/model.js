@@ -14,23 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
-var express = require('express');
-var router = express.Router({mergeParams: true});
-// var _ = require('lodash');
-var utils = require('../utils');
-var middlewares = require('../middlewares/middlewares');
-var ModelSetting = require('../models/modelSetting');
-var responseCodes = require('../response_codes');
-var C = require("../constants");
-var ModelHelpers = require('../models/helper/model');
-var History = require('../models/history');
-var createAndAssignRole = ModelHelpers.createAndAssignRole;
-var User = require('../models/user');
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const utils = require("../utils");
+const middlewares = require("../middlewares/middlewares");
+const ModelSetting = require("../models/modelSetting");
+const responseCodes = require("../response_codes");
+const C = require("../constants");
+const ModelHelpers = require("../models/helper/model");
+const History = require("../models/history");
+const createAndAssignRole = ModelHelpers.createAndAssignRole;
+const User = require("../models/user");
 
-var getDbColOptions = function(req){
+function getDbColOptions(req){
 	return {account: req.params.account, model: req.params.model};
-};
+}
 
 function convertProjectToParam(req, res, next){
 	if(req.body.project){
@@ -40,11 +40,11 @@ function convertProjectToParam(req, res, next){
 }
 
 // Get model info
-router.get('/:model.json', middlewares.hasReadAccessToModel, getModelSetting);
+router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
 
-router.put('/:model/settings', middlewares.hasWriteAccessToModelSettings, updateSettings);
+router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-router.post('/:modelName', 
+router.post("/model", 
 	convertProjectToParam, 
 	middlewares.connectQueue,
 	middlewares.canCreateModel, 
@@ -52,46 +52,48 @@ router.post('/:modelName',
 );
 
 //Unity information
-router.get('/:model/revision/master/head/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
-router.get('/:model/revision/:rev/unityAssets.json', middlewares.hasReadAccessToModel, getUnityAssets);
-router.get('/:model/:uid.unity3d', middlewares.hasReadAccessToModel, getUnityBundle);
+router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
+router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
+router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 //update federated model
-router.put('/:model', middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
+router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 //model permission
-router.post('/:model/permissions', middlewares.hasEditPermissionsAccessToModel, updatePermissions);
+router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 //model permission
-router.get('/:model/permissions',  middlewares.hasEditPermissionsAccessToModel, getPermissions);
+router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
-router.get('/:model/jobs.json', middlewares.hasReadAccessToModel, getJobs);
-router.get('/:model/userJobForModel.json', middlewares.hasReadAccessToModel, getUserJobForModel);
+router.get("/:model/jobs.json", middlewares.hasReadAccessToModel, getJobs);
+router.get("/:model/userJobForModel.json", middlewares.hasReadAccessToModel, getUserJobForModel);
 
 //master tree
-router.get('/:model/revision/master/head/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
+router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
+router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
+router.get("/:model/revision/master/head/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
-router.get('/:model/revision/master/head/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
+router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
-router.get('/:model/revision/:rev/fulltree.json', middlewares.hasReadAccessToModel, getModelTree);
+router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
+router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
+router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
-router.get('/:model/revision/:rev/modelProperties.json', middlewares.hasReadAccessToModel, getModelProperties);
+router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 //search master tree
-router.get('/:model/revision/master/head/searchtree.json', middlewares.hasReadAccessToModel, searchModelTree);
+router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
-router.get('/:model/revision/:rev/searchtree.json', middlewares.hasReadAccessToModel, searchModelTree);
+router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
-router.delete('/:model', middlewares.hasDeleteAccessToModel, deleteModel);
+router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
-router.post('/:model/upload', middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
+router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
 
-router.get('/:model/download/latest', middlewares.hasDownloadAccessToModel, downloadLatest);
+router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
 function updateSettings(req, res, next){
-	'use strict';
-
-
+	
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
@@ -113,7 +115,7 @@ function updateSettings(req, res, next){
 
 
 function _getModel(req){
-	'use strict';
+	
 
 	let setting;
 	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
@@ -146,7 +148,7 @@ function _getModel(req){
 
 
 function getModelSetting(req, res, next){
-	'use strict';
+	
 
 	let place = utils.APIInfo(req);
 	let resObj = {};
@@ -156,16 +158,17 @@ function getModelSetting(req, res, next){
 		//setting = setting.toObject();
 		
 		let whitelist = [
-			'name', 
-			'owner', 
-			'desc', 
-			'type', 
-			'permissions', 
-			'properties', 
-			'status', 
-			'errorReason', 
-			'federate', 
-			'subModels'
+			"name", 
+			"owner", 
+			"desc", 
+			"type", 
+			"permissions", 
+			"properties", 
+			"status", 
+			"errorReason", 
+			"federate", 
+			"subModels",
+			"fourDSequenceTag"
 		];
 
 
@@ -194,10 +197,10 @@ function getModelSetting(req, res, next){
 
 
 function createModel(req, res, next){
-	'use strict';
+	
 
 	let responsePlace = utils.APIInfo(req);
-	let modelName = req.params.modelName;
+	let modelName = req.body.modelName;
 	let account = req.params.account;
 	let username = req.session.user.username;
 
@@ -221,7 +224,7 @@ function createModel(req, res, next){
 }
 
 function updateModel(req, res, next){
-	'use strict';
+	
 
 	let responsePlace = utils.APIInfo(req);
 	let model = req.params.model;
@@ -260,7 +263,7 @@ function updateModel(req, res, next){
 }
 
 function deleteModel(req, res, next){
-	'use strict';
+	
 
 	let responsePlace = utils.APIInfo(req);
 	let model = req.params.model;
@@ -274,8 +277,27 @@ function deleteModel(req, res, next){
 	});
 }
 
+function getIdMap(req, res, next){
+	
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ModelHelpers.getIdMap(account, model, branch, req.params.rev, username).then(idMap => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idMap.idMaps);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 function getModelTree(req, res, next){
-	'use strict';
+	
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -306,7 +328,7 @@ function getModelTree(req, res, next){
 }
 
 function getModelProperties(req, res, next) {
-	'use strict';
+	
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -324,10 +346,29 @@ function getModelProperties(req, res, next) {
 	});
 }
 
+function getTreePath(req, res, next){
+	
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ModelHelpers.getTreePath(account, model, branch, req.params.rev, username).then(treePath => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treePath);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 
 
 function searchModelTree(req, res, next){
-	'use strict';
+	
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -351,16 +392,16 @@ function searchModelTree(req, res, next){
 
 
 function downloadLatest(req, res, next){
-	'use strict';
+	
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		let headers = {
-			'Content-Length': file.meta.length,
-			'Content-Disposition': 'attachment;filename=' + file.meta.filename,
+			"Content-Length": file.meta.length,
+			"Content-Disposition": "attachment;filename=" + file.meta.filename,
 		};
 
 		if(file.meta.contentType){
-			headers['Content-Type'] = "application/json";
+			headers["Content-Type"] = "application/json";
 		}
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
@@ -371,7 +412,7 @@ function downloadLatest(req, res, next){
 }
 
 function uploadModel(req, res, next){
-	'use strict';
+	
 
 	let responsePlace = utils.APIInfo(req);
 	let modelSetting;
@@ -392,7 +433,7 @@ function uploadModel(req, res, next){
 
 	}).then(file => {
 		// api respond ok once the file is uploaded
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 
 		let data = {
 			tag: req.body.tag,
@@ -400,12 +441,14 @@ function uploadModel(req, res, next){
 		};
 
 		let source = {
-			type: 'upload',
+			type: "upload",
 			file: file
 		};
-		//do not return this promise!, error will be logged in importModel function
-		//returning this promise may cause sending double http headers
-		ModelHelpers.importModel(account, model, username, modelSetting, source, data);
+		//FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
+		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
+			}).catch(() => {
+
+			});
 
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
@@ -414,7 +457,7 @@ function uploadModel(req, res, next){
 }
 
 function updatePermissions(req, res, next){
-	'use strict';
+	
 
 	let account = req.params.account;
 	let model = req.params.model;
@@ -437,7 +480,7 @@ function updatePermissions(req, res, next){
 }
 
 function getPermissions(req, res, next){
-	'use strict';
+	
 
 	let account = req.params.account;
 	let model = req.params.model;
@@ -461,7 +504,7 @@ function getPermissions(req, res, next){
 }
 
 function getJobs(req, res, next){
-	'use strict';
+	
 
 	const account = req.params.account;
 
@@ -482,7 +525,7 @@ function getJobs(req, res, next){
 }
 
 function getUserJobForModel(req, res, next){
-	'use strict';
+	
 
 	const account = req.params.account;
 	const username = req.session.user.username;
@@ -506,7 +549,7 @@ function getUserJobForModel(req, res, next){
 }
 
 function getUnityAssets(req, res, next){
-	'use strict';
+	
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -525,7 +568,7 @@ function getUnityAssets(req, res, next){
 }
 
 function getUnityBundle(req, res, next){
-	'use strict';
+	
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -533,7 +576,7 @@ function getUnityBundle(req, res, next){
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
-		req.params.format= 'unity3d';
+		req.params.format= "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);

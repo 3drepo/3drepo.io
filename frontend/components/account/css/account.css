@@ -11,6 +11,18 @@
 
 }
 
+account-licenses .userContent {
+  height: calc(100vh - 280px);
+  max-height: 482px !important;
+  overflow: auto;
+}
+
+account-billing .userContent {
+  height: calc(100vh - 280px);
+  max-height: 482px !important;
+  overflow: auto;
+}
+
 account-modelsetting .userContent {
   height: calc(100vh - 230px);
   max-height: 517px !important;
@@ -26,18 +38,6 @@ account-items .userContent {
 account-profile .userContent {
   height: calc(100vh - 230px);
   max-height: 530px !important;
-  overflow: auto;
-}
-
-account-licenses .userContent {
-  height: calc(100vh - 230px);
-  max-height: 530px !important;
-  overflow: auto;
-}
-
-account-billing .userContent {
-  height: calc(100vh - 280px);
-  max-height: 480px !important;
   overflow: auto;
 }
 
@@ -280,6 +280,10 @@ account-profile md-input-container {
 
 account-profile .updateContainer {
   margin: -20px 0 0;
+}
+
+account-profile .updateError {
+  color: #F44336;
 }
 
 account-profile .md-title {
@@ -548,6 +552,23 @@ account-licenses .licenseIcon {
   margin: 0 10px !important;
 }
 
+account-licenses .licenseColorBox {
+  margin-top: 25px;
+  margin-right: 35px !important;
+}
+
+account-licenses .colorBox {
+  width: 25px;
+  margin-right: 10px;
+  height: 25px;
+  vertical-align: middle;
+  border: 1px solid grey;
+}
+
+account-licenses .colorOption {
+  width: 119px;
+}
+
 account-licenses #accountLicensesAdd {
   margin-top: -10px;
 }
@@ -570,12 +591,14 @@ account-licenses #errorMessage {
   margin-bottom: 20px;
 }
 
-account-licenses .md-subheader .md-subheader-inner {
-  padding-left: 0px !important;
+account-licenses .jobTableText {
+  text-align: center;
+  margin: auto;
+  font-weight: bold;
 }
 
-account-licenses #accountJobList {
-  padding-top: 20px;
+account-licenses .md-subheader .md-subheader-inner {
+  padding-left: 0px !important;
 }
 
 account-licenses #accountJobList #jobIcon md-icon {

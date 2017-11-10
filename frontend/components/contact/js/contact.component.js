@@ -27,9 +27,9 @@
 			controllerAs: "vm"
 		});
 
-	ContactCtrl.$inject = ["$scope", "UtilsService"];
+	ContactCtrl.$inject = ["$scope", "APIService"];
 
-	function ContactCtrl ($scope, UtilsService) {
+	function ContactCtrl ($scope, APIService) {
 		var vm = this,
 			promise;
 
@@ -57,7 +57,7 @@
 
 		vm.send = function () {
 			vm.sending = true;
-			promise = UtilsService.doPost(vm.contact, "contact");
+			promise = APIService.post("contact", vm.contact);
 			promise.then(function (response) {
 				vm.sending = false;
 				if (response.status === 200) {

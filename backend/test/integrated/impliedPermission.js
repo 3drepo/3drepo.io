@@ -10,7 +10,7 @@ describe('Implied permission::', function () {
 	let agent;
 
 	const app = require("../../services/api.js").createApp(
-		{ session: require('express-session')({ secret: 'testing'}) }
+		{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 	);
 	const sharedTeamspace = 'imsharedTeamspace';
 	const C = require('../../constants');
@@ -40,7 +40,7 @@ describe('Implied permission::', function () {
 	});
 
 	//teamspace admin
-	describe('Teamspace admin::', function(){
+	describe('Teamspace admin', function(){
 
 		let agent;
 
@@ -157,8 +157,8 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(model)
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({modelName: modelName}, model))
 			.expect(200, done);
 		});
 
@@ -181,7 +181,7 @@ describe('Implied permission::', function () {
 					return q.channel.publish(
 						q.callbackQName,
 						appId,
-						new Buffer(JSON.stringify({ value: 0})), 
+						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
 						{
 							correlationId: corId, 
 							persistent: true 
@@ -194,15 +194,16 @@ describe('Implied permission::', function () {
 			}, 1000);
 
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
+				modelName: modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId
 				}] 
 			}, model))
 			.expect(200, done);
-		})
+		});
 
 		it('can view model', function(done){
 			agent
@@ -308,7 +309,7 @@ describe('Implied permission::', function () {
 
 
 	//project admin
-	describe('Project admin::', function(){
+	describe('Project admin', function(){
 
 		let agent;
 
@@ -437,8 +438,8 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(model)
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({modelName: modelName}, model))
 			.expect(401, done);
 		});
 
@@ -446,8 +447,8 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(Object.assign({project: project2}, model))
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({project: project2, modelName: modelName}, model))
 			.expect(200, done);
 		});
 
@@ -455,8 +456,9 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
+				modelName : modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId
@@ -485,7 +487,7 @@ describe('Implied permission::', function () {
 					return q.channel.publish(
 						q.callbackQName,
 						appId,
-						new Buffer(JSON.stringify({ value: 0})), 
+						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
 						{
 							correlationId: corId, 
 							persistent: true 
@@ -498,9 +500,10 @@ describe('Implied permission::', function () {
 			}, 1000);
 
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
 				project: project2,
+				modelName: modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId
@@ -673,7 +676,7 @@ describe('Implied permission::', function () {
 	});
 
 	//model admin
-	describe('Model admin::', function(){
+	describe('Model admin', function(){
 
 		let agent;
 
@@ -785,9 +788,10 @@ describe('Implied permission::', function () {
 		it('cannot create a model', function(done){
 
 			const modelName = 'model123';
+
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(model)
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({modelName: modelName}, model))
 			.expect(401, done);
 		});
 
@@ -796,8 +800,9 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
+				modelName: modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId
@@ -1078,8 +1083,8 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(model)
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({modelName: modelName}, model))
 			.expect(401, done);
 		});
 
@@ -1088,8 +1093,9 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
+				modelName: modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId
@@ -1361,8 +1367,8 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
-			.send(model)
+			.post(`/${sharedTeamspace}/model`)
+			.send(Object.assign({modelName: modelName}, model))
 			.expect(401, done);
 		});
 
@@ -1371,8 +1377,9 @@ describe('Implied permission::', function () {
 
 			const modelName = 'model123';
 			agent
-			.post(`/${sharedTeamspace}/${modelName}`)
+			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
+				modelName: modelName,
 				subModels:[{
 					"database": sharedTeamspace,
 					"model": modelId

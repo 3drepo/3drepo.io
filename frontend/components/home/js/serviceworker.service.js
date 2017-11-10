@@ -22,11 +22,10 @@
 				console.debug("ServiceWorker in navigator");
 
 				var serviceWorkers = [
-					"precache"
+					"service-worker"
 					//"google-analytics"
 				];
 
-				
 				serviceWorkers.forEach(registerSW);
 
 			}		
@@ -40,6 +39,10 @@
 			navigator.serviceWorker.register(swPath).then(function(registration) {
 				// Registration was successful
 				console.debug("ServiceWorker (" + sw + ") registration successful with scope: ", registration.scope);
+				if (registration && registration.update) {
+					console.debug("Updating Service Worker...");
+					registration.update();
+				}
 			}, function(err) {
 				// registration failed :(
 				console.debug("ServiceWorker (" + sw + ") registration failed: ", err);

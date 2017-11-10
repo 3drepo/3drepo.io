@@ -37,14 +37,16 @@
 
 	AccountItemsCtrl.$inject = [
 		"StateManager", "$mdDialog", "$scope", "$location", "$element", 
-		"$timeout", "AccountUploadService", "UtilsService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService"
+		"$timeout", "AccountUploadService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "NotificationService",  "AuthService", "AccountService", "ViewerService",
+		"APIService", "DialogService"
 	];
 
 	function AccountItemsCtrl(
 		StateManager, $mdDialog, $scope, $location, $element,
-		$timeout, AccountUploadService, UtilsService, RevisionsService, ClientConfigService, 
-		AnalyticService, NotificationService, AuthService, AccountService, ViewerService
+		$timeout, AccountUploadService, RevisionsService, ClientConfigService, 
+		AnalyticService, NotificationService, AuthService, AccountService, ViewerService,
+		APIService, DialogService
 	) {
 		
 		var vm = this;
@@ -53,7 +55,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
-			console.log("isMobileDevice", vm.isMobileDevice);
+
 			ViewerService.reset();
 
 			vm.showProgress = true;
@@ -109,7 +111,7 @@
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		// HIDE / SHOW STATE
@@ -296,9 +298,7 @@
 		};
 
 		vm.getProjects = function(teamspace) { 
-			console.log("getProjects", teamspace);
 			var projects = AccountService.getProjectsByTeamspaceName(vm.accounts, teamspace);
-			console.log("getProjects : ", projects);
 			return projects; 
 		};
 
@@ -336,12 +336,13 @@
 			var currentFederation = vm.federationData.name;
 
 			vm.federationsSaving[currentFederation] = true;
+			vm.federationData.modelName = vm.federationData.name;
 			
 			if (isEdit) {
 				delete vm.federationData._isEdit;
-				promise = UtilsService.doPut(vm.federationData, teamspaceName + "/" + vm.federationData.model);
+				promise = APIService.put(teamspaceName + "/" + vm.federationData.model, vm.federationData);
 			} else {
-				promise = UtilsService.doPost(vm.federationData, teamspaceName + "/" + vm.federationData.name);
+				promise = APIService.post(teamspaceName + "/model", vm.federationData);
 			}
 			
 			promise
@@ -393,13 +394,16 @@
 					vm.federationsSaving[currentFederation] = false;
 
 				})
-				.catch(function(){
-					vm.errorMessage = "Something went wrong on our servers saving the federation!"; 
+				.catch(function(error) {
+					var title = "Error Saving Federation";
+					var action = "saving the federation";
+					vm.errorDialog(title, action, error);
 					vm.federationsSaving[currentFederation] = false;
 				});
 
 			// Close the dialog
-			vm.closeDialog();
+			vm.isSaving = false;
+			DialogService.closeDialog();
 
 			$timeout(function () {
 				$scope.$apply();
@@ -499,7 +503,7 @@
 				subModels: []
 			};
 			vm.errorMessage = "";
-			UtilsService.showDialog(
+			DialogService.showDialog(
 				"federation-dialog.html", 
 				$scope, 
 				event, 
@@ -508,6 +512,20 @@
 				false, 
 				vm.dialogCloseToId
 			);
+		};
+
+		vm.closeFederationDialog = function() {
+			
+			if (vm.originalFederationData) {
+				Object.keys(vm.federationData).forEach(function(key){
+					if (vm.federationData[key] !== vm.originalFederationData[key]) {
+						vm.federationData[key] = vm.originalFederationData[key];
+					}
+				});
+			}
+			
+			vm.isSaving = false;
+			DialogService.closeDialog();
 		};
 
 
@@ -561,7 +579,7 @@
 
 			if (vm.teamspaceAndProjectSelected() && !vm.newModelData.name) {
 				vm.showNewModelErrorMessage = true;
-				vm.newModelErrorMessage = "Model name isn't between 3-20 characters, or has invalid characters";
+				vm.newModelErrorMessage = "Model name isn't between 1-120 characters, or has invalid characters";
 			} else {
 				vm.showNewModelErrorMessage = false;
 				vm.newModelErrorMessage = "";
@@ -585,70 +603,81 @@
 			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
 			vm.deleteName = vm.modelToDelete.name;
 			vm.targetAccountToDeleteModel = account;
-			UtilsService.showDialog("delete-dialog.html", $scope, event, true);
+			DialogService.showDialog("delete-dialog.html", $scope, event, true);
 		};
+
 
 		/**
 		 * Delete model
 		 */
 		vm.deleteModel = function () {
-
+			
 			var account;
-			var url = vm.targetAccountToDeleteModel + "/" + encodeURIComponent(vm.modelToDelete.model);
-			var promise = UtilsService.doDelete({}, url);
+			var url = vm.targetAccountToDeleteModel + "/" + vm.modelToDelete.model;
+			APIService.delete(url, {})
+				.then(function (response) {
 
-			promise.then(function (response) {
+					if (response.status === 200) {
+					
+						// Remove model from list
+						for (var i = 0; i < vm.accounts.length; i += 1) {
+							account = vm.accounts[i];
+							if (account.name === response.data.account) {
+								if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
 
-				if (response.status === 200) {
-				
-					// Remove model from list
-					for (var i = 0; i < vm.accounts.length; i += 1) {
-						account = vm.accounts[i];
-						if (account.name === response.data.account) {
-							if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
+									var projectToDeleteFrom = vm.projectToDeleteFrom.name;
+									AccountService.removeModelByProjectName(
+										vm.accounts, 
+										account.name, 
+										projectToDeleteFrom, 
+										response.data.model
+									);
+									AccountService.removeFromFederationByProjectName(
+										vm.accounts, 
+										account.name, 
+										projectToDeleteFrom, 
+										response.data.model
+									);
+									break;
 
-								var projectToDeleteFrom = vm.projectToDeleteFrom.name;
-								AccountService.removeModelByProjectName(
-									vm.accounts, 
-									account.name, 
-									projectToDeleteFrom, 
-									response.data.model
-								);
-								AccountService.removeFromFederationByProjectName(
-									vm.accounts, 
-									account.name, 
-									projectToDeleteFrom, 
-									response.data.model
-								);
-								break;
-
-							} else {
-								// If default
-								for (var j = 0; j < vm.accounts[i].models.length; j += 1) { 
-									if (account.models[j].name === response.data.model) {
-										account.models.splice(j, 1);
-										break;
+								} else {
+									// If default
+									for (var j = 0; j < vm.accounts[i].models.length; j += 1) { 
+										if (account.models[j].name === response.data.model) {
+											account.models.splice(j, 1);
+											break;
+										}
 									}
 								}
 							}
 						}
-					}
 
-					vm.closeDialog();
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "delete"
-					});
-				} else {
+						vm.closeDialog();
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "delete"
+						});
+					} else {
+						vm.deleteError = "Error deleting model";
+						if (response.data.message) {
+							vm.deleteError = "Error: " + response.data.message;
+							console.error("Deleting model error: ", response);
+						} 
+					}
+				})
+				.catch(function(response){
 					vm.deleteError = "Error deleting model";
 					if (response.data.message) {
 						vm.deleteError = "Error: " + response.data.message;
 						console.error("Deleting model error: ", response);
 					} 
-				}
-			});
+				});
+		};
+
+		vm.showAllModelDialogInputs = function() {
+			return vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 0;
 		};
 
 		vm.teamspaceAndProjectSelected = function() {
@@ -671,7 +700,7 @@
 				type: vm.modelTypes[0]
 			};
 			vm.newModelFileToUpload = null;
-			UtilsService.showDialog("model-dialog.html", $scope, event, true);
+			DialogService.showDialog("model-dialog.html", $scope, event, true);
 		};
 
 
@@ -705,7 +734,8 @@
 				}
 
 				vm.uploading = true;
-
+				vm.closeDialog();
+				
 				AccountUploadService.newModel(vm.newModelData)
 					.then(function (response) {
 
@@ -731,8 +761,7 @@
 							);
 							vm.addButtons = false;
 							vm.addButtonType = "add";
-							vm.closeDialog();
-							
+
 							AnalyticService.sendEvent({
 								eventCategory: "model",
 								eventAction: "create"
@@ -744,8 +773,21 @@
 						vm.showNewModelErrorMessage = true;
 						vm.newModelErrorMessage = error.data.message;
 						vm.uploading = false;
+
+						var title = "Error Uploading Model";
+						var action = "uploading your model";
+						vm.errorDialog(title, action, error);
 					});
 			}
+		};
+
+		vm.errorDialog = function(title, action, error) {
+			var message = (error.data.message) ? error.data.message : "Unknown Error";
+			var content = "Something went wrong " +  action + ": <br><br>" +
+				"<strong> " + message + "</strong>" +
+				"<br><br> If this is unexpected please message support@3drepo.io.";
+			var escapable = true;
+			DialogService.html(title, content, escapable);
 		};
 
 
@@ -841,12 +883,22 @@
 					tag: vm.tag, 
 					desc: vm.desc, 
 					newModel: true
-				}).then(function(){
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "upload"
+				})
+					.then(function(){
+
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "upload"
+						});
+
+					})
+					.catch(function(errorMsg) {
+
+						setTimeout(function(){
+							DialogService.text("Model Upload Failed", errorMsg, false);
+						}, 500);
+						
 					});
-				});
 
 			}
 		};
@@ -912,7 +964,7 @@
 				vm.projectData.deleteTeamspace = teamspace.name;
 				vm.projectData.deleteWarning = warn;
 				vm.projectData.errorMessage = "";
-				UtilsService.showDialog("delete-project-dialog.html", $scope, null, true);	
+				DialogService.showDialog("delete-project-dialog.html", $scope, null, true);	
 				break;
 
 			case "edit":
@@ -930,7 +982,7 @@
 			vm.projectData.newProjectName = "";
 			vm.projectData.oldProjectName = "";
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, null, true);
+			DialogService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 
@@ -944,7 +996,7 @@
 			vm.projectData.teamspaceName = teamspace.name;
 			vm.projectData.newProjectName = project.name;
 			vm.projectData.errorMessage = "";
-			UtilsService.showDialog("project-dialog.html", $scope, null, true);
+			DialogService.showDialog("project-dialog.html", $scope, null, true);
 		};
 
 
@@ -955,7 +1007,7 @@
 		 */
 		vm.saveNewProject = function(teamspaceName, projectName) {
 			var url = teamspaceName + "/projects/";
-			var promise = UtilsService.doPost({"name": projectName}, url);
+			var promise = APIService.post(url, {"name": projectName});
 			vm.handleProjectPromise(promise, teamspaceName, false);
 		};
 
@@ -967,8 +1019,8 @@
 		 * @param {String} newProjectName The project name to change to
 		 */
 		vm.updateProject = function(teamspaceName, oldProjectName, newProjectName) {
-			var url = teamspaceName + "/projects/" + encodeURIComponent(oldProjectName);
-			var promise = UtilsService.doPut({"name": newProjectName}, url);
+			var url = teamspaceName + "/projects/" + oldProjectName;
+			var promise = APIService.put(url, {"name": newProjectName});
 			vm.handleProjectPromise(promise, teamspaceName, {
 				edit  : true,
 				newProjectName: newProjectName, 
@@ -983,8 +1035,8 @@
 		 * @param {String} projectName The project name to delete 
 		 */
 		vm.deleteProject = function(teamspaceName, projectName) {
-			var url = teamspaceName + "/projects/" + encodeURIComponent(projectName);
-			var promise = UtilsService.doDelete({},url);
+			var url = teamspaceName + "/projects/" + projectName;
+			var promise = APIService.delete(url, {});
 			vm.handleProjectPromise(promise, teamspaceName, {
 				projectName : projectName,
 				delete: true
@@ -1065,7 +1117,7 @@
 				// Accounts
 				for (var i = 0; i < vm.accounts.length; i++) {
 					vm.accounts[i].name = vm.accounts[i].account;
-					vm.accounts[i].canAddModel = vm.accounts[i].permissions.indexOf("teamspace_admin");
+					vm.accounts[i].canAddModel = vm.accounts[i].permissions.indexOf("teamspace_admin");				
 				}
 			}
 		});

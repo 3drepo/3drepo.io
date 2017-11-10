@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("AccountService", AccountService);
 
-	AccountService.$inject = ["UtilsService", "$q"];
+	AccountService.$inject = ["APIService", "$q"];
 
-	function AccountService(UtilsService, $q) {
+	function AccountService(APIService, $q) {
 
 		var accountPromise = $q.defer();
 
@@ -150,6 +150,19 @@
 					projects = teamspace.projects;
 				}
 			});
+
+			projects.sort(function(a, b){
+				if (a.name < b.name) {
+					return -1;
+				}
+					
+				if (a.name > b.name) {
+					return 1;
+				}
+	
+				return 0;
+				
+			});
 			
 			return projects;
 	
@@ -240,7 +253,7 @@
 		 * @returns {*}
 		 */
 		function updateInfo(username, info) {
-			return UtilsService.doPut(info, username);
+			return APIService.put(username, info);
 		}
 
 		/**
@@ -251,7 +264,7 @@
 		 * @returns {*}
 		 */
 		function updatePassword(username, passwords) {
-			return UtilsService.doPut(passwords, username);
+			return APIService.put(username, passwords);
 		}
 
 		/**
@@ -262,7 +275,7 @@
 		 * @returns {*|promise}
 		 */
 		function newSubscription(teamspace, data) {
-			return UtilsService.doPost(data, teamspace + "/subscriptions");
+			return APIService.post(teamspace + "/subscriptions", data);
 		}
 
 
@@ -273,7 +286,7 @@
 		 * @returns {*|promise}
 		 */
 		function getUserInfo(username) {
-			var currentAccount = UtilsService.doGet(username + ".json");
+			var currentAccount = APIService.get(username + ".json");
 			accountPromise.resolve(currentAccount);
 			return currentAccount;
 		}

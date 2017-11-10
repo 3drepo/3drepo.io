@@ -66,27 +66,50 @@
     </noscript>
 
     <div id="notSupported" style="visibility:hidden;" aria-label="Not Supported">
-      <div><img src="images/3drepo-logo-white.png"></div>
+      <div><img id="notSupportedLogo" src="images/3drepo-logo-white.png"></div>
       <div>
 
         Your browser is not supported.
         Please upgrade to the latest version of 
-        <a href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a>, 
-        <a href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a> or 
-        <a href="https://www.microsoft.com/en-gb/windows/microsoft-edge" rel="noopener"target="_blank">Edge</a>
+        <a id="notSupportedChrome" href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a>, 
+        <a id="notSupportedFirefox" href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a> or 
+        <a id="notSupportedEdge" href="https://www.microsoft.com/en-gb/windows/microsoft-edge" rel="noopener"target="_blank">Edge</a>
         <br><br><br>
 
         <input id="notSupportedButton" type="button" value="OK" style="padding:10px 60px; font-size:14px;" onclick="document.getElementById(&quot;notSupported&quot;).style.visibility=&quot;hidden&quot;">
       </div>
     </div>
 
-    <!-- Fallback for IE --><!--[if (IE)]>
-    	<script type="text/javascript">
-    		document.getElementById('notSupported').style.visibility='visible';
-    		document.getElementById('notSupportedButton').style.display = 'none';
-    	</script>
+    <!-- Handle Internet Explorer -->
+    <script type="text/javascript" async>
+
+      if (window && window.navigator && window.navigator.userAgent) {
+        
+        var ua = window.navigator.userAgent;
+        var ie = false;
+
+        var msie = ua.indexOf('MSIE ');
+        if (msie > 0) {
+            // IE 10 or older => return version number
+            ie = true;
+        }
+
+        var trident = ua.indexOf('Trident/');
+        if (trident > 0) {
+            // IE 11 => return version number
+            ie = true;
+        } 
+
+        if (ie === true) {
+          document.getElementById('notSupported').style.visibility='visible';
+          document.getElementById('notSupportedButton').style.display = 'visible';
+        }
+
+      } 
+
+    </script>
     	
-    <![endif]-->
+ 
 
     <!-- Entry point for all components-->
     <home flex layout="column"></home>
@@ -94,7 +117,7 @@
     <!-- CSS AND JAVASCRIPT -->
 
     <!-- Load config from server and dependencies + 3D Repo JavaScript-->
-    <script type="text/javascript" src="/config.js"></script>
+    <script type="text/javascript" src="/config/config.js"></script>
     <script type="text/javascript" src="/dist/three_d_repo.min.js" async></script>
    
     <script type="text/javascript", src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
@@ -102,8 +125,9 @@
     <!-- Load LiveReload if on Dev-->
     <script async>
       if (window) {
-        console.debug("Development Environment?", window.ClientConfig.development);
+
         if (window.ClientConfig && window.ClientConfig.development === true) {
+            console.debug("Development Environment");
             console.debug("Development - Loading livereload.js");
             var src = "//localhost:35729/livereload.js";
             var script = document.createElement("script");

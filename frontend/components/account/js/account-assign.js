@@ -29,9 +29,15 @@
 			controllerAs: "vm"
 		});
 
-	accountAssignCtrl.$inject = ["$scope", "$window", "$http", "$q", "$mdDialog", "$location", "UtilsService", "ClientConfigService"];
+	accountAssignCtrl.$inject = [
+		"$scope", "$window", "$q", 
+		"$mdDialog", "$location", "APIService"
+	];
 
-	function accountAssignCtrl($scope, $window, $http,  $q, $mdDialog, $location, UtilsService, ClientConfigService) {
+	function accountAssignCtrl(
+		$scope, $window, $q, $mdDialog, 
+		$location, APIService
+	) {
 		var vm = this;
 
 		// TODO: All of this probably needs simplifying and definitely needs abstracting
@@ -146,10 +152,9 @@
 
 		vm.getTeamspaces = function() {
 			
-			var json = encodeURIComponent(vm.account) + ".json";
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, json);
-			
-			$http.get(url)
+			var accountUrl = vm.account + ".json";
+
+			APIService.get(accountUrl)
 				.then(function(response) {
 
 					vm.teamspaces = response.data.accounts;
@@ -177,8 +182,8 @@
 				}
 
 				// Update the permissions user for the selected teamspace
-				var endpoint = encodeURIComponent(vm.selectedTeamspace.account) + "/permissions/";
-				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
+				var url = vm.selectedTeamspace.account + "/permissions/";
+				
 				var permissionData = {
 					user : user.user,
 					permissions: user.permissions
@@ -191,7 +196,7 @@
 
 				vm.checkIfAdminChanged();
 
-				$http.post(url, permissionData)
+				APIService.post(url, permissionData)
 					.catch(function(error){
 						var title = "Issue Updating Teamspace Permissions";
 						vm.showError(title, error);
@@ -209,22 +214,22 @@
 		};
 
 		vm.userHasPermissions = function(user, permission) {
-
 			var hasPermissions = false;
-			vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
-				if (permissionUser.user === user.user) {
-					hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
-				} 
-			});
+			if(vm.selectedTeamspace.teamspacePermissions) {
+				vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
+					if (permissionUser.user === user.user) {
+						hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
+					} 
+				});
+			}
 			
 			return hasPermissions;
 		};
 
 		vm.appendTeamspacePermissions = function(teamspace) {
 
-			var endpoint = encodeURIComponent(teamspace.account) + "/permissions";
-			var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-			return $http.get(url)
+			var endpoint = teamspace.account + "/permissions";
+			return APIService.get(endpoint)
 				.then(function(response) {
 					var permissionsUsers = response.data;
 					teamspace.teamspacePermissions = permissionsUsers;
@@ -267,12 +272,14 @@
 		
 		});
 
-		vm.setPermissionTemplates = function(teamspace){
-
-			var permission = encodeURIComponent(teamspace.account) + "/permission-templates";
-			var permissionUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, permission);
+		vm.setPermissionTemplates = function(teamspace, model){
 			
-			return $http.get(permissionUrl)
+			var permissionUrl = teamspace.account + "/permission-templates";
+			if(model) {
+				permissionUrl = teamspace.account + "/" + model + "/permission-templates" ;
+			}
+
+			return APIService.get(permissionUrl)
 				.then(function(response) {
 					vm.modelRoles = ["unassigned"];
 
@@ -358,13 +365,12 @@
 			if (vm.projectSelected) {
 				vm.selectedProject = vm.projects[vm.projectSelected];
 
-				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
-				endpoint += "/projects/" + encodeURIComponent(vm.projectSelected);
-				var url = ClientConfigService.apiUrl(ClientConfigService.GET_API, endpoint);
-				
+				var endpoint = vm.selectedTeamspace.account +
+								"/projects/" + vm.projectSelected;
+
 				// We can use the current users object as its matches the required 
 				// data structure the API expects
-				$http.get(url)
+				APIService.get(endpoint)
 					.then(vm.handleProjectSelected)
 					.catch(function(error) {
 						console.error(error);
@@ -405,6 +411,8 @@
 				if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
 					vm.modelSelected = vm.fromURL.modelSelected;
 					delete vm.fromURL.modelSelected;
+					vm.fromURL = {};
+					vm.isFromUrl = false;
 				}
 
 			} 
@@ -483,10 +491,10 @@
 				} 
 
 				//Update the permissions user for the selected teamspace
-				var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
-				endpoint += "/projects/" + encodeURIComponent(vm.selectedProject.name);
-				var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
-				$http.put(url, {
+				var endpoint = vm.selectedTeamspace.account + 
+								"/projects/" + vm.selectedProject.name;
+				
+				APIService.put(endpoint, {
 					permissions: vm.selectedProject.userPermissions
 				}).catch(function(error){
 					var title = "Issue Updating Project Permissions";
@@ -578,54 +586,55 @@
 			vm.resetSelectedModel();
 			
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
-
+			
 				vm.selectedModel = vm.models.find(function(model){
 					return model.model ===  vm.modelSelected;
 				});
 
-				return $q(function(resolve, reject) {
+				return vm.setPermissionTemplates(vm.teamspaceSelected, vm.modelSelected).then(function(){
+					return $q(function(resolve, reject) {
 
-					var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
-					endpoint += "/" + encodeURIComponent(vm.modelSelected) +  "/permissions";
-					var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
+						var endpoint = vm.selectedTeamspace.account + "/" + 
+										vm.modelSelected +  "/permissions";
 
-					$http.get(url)
-						.then(function(response){
+						APIService.get(endpoint)
+							.then(function(response){
 
-							var users = response.data;
+								var users = response.data;
 
-							// Add the teamspace admin if they don't appear in the list
-							if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
-								users.push({
-									permissions: ["admin"],
-									user : vm.account
-								});
-							}
-							
-							users.forEach(function(user){
-
-								// If its the teamspace then we can disable 
-								// and assign admin role
-								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
-									vm.selectedRole[user.user] = "admin";
-								} else {
-									vm.selectedRole[user.user] = user.permission || "unassigned";
+								// Add the teamspace admin if they don't appear in the list
+								if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
+									users.push({
+										permissions: ["admin"],
+										user : vm.account
+									});
 								}
+							
+								users.forEach(function(user){
+		
+									// If its the teamspace then we can disable 
+									// and assign admin role
+									if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
+										vm.selectedRole[user.user] = "admin";
+									} else {
+										vm.selectedRole[user.user] = user.permission || "unassigned";
+									}
 								
-							});
-							vm.modelReady = true;
+								});
+								vm.modelReady = true;
 
 	
-							resolve();
-						})
-						.catch(function(error){
-							var title = "Issue Retrieving Model Permissions";
-							vm.showError(title, error);
+								resolve();
+							})
+							.catch(function(error){
+								var title = "Issue Retrieving Model Permissions";
+								vm.showError(title, error);
 
-							reject(error);
-						});	
+								reject(error);
+							});		
 					
-				});		
+					});		
+				});
 				
 			}
 			
@@ -734,11 +743,10 @@
 			}
 
 			// Update the permissions user for the selected teamspace
-			var endpoint = encodeURIComponent(vm.selectedTeamspace.account);
-			endpoint += "/" + encodeURIComponent(vm.modelSelected) + "/permissions";
-			var url = ClientConfigService.apiUrl(ClientConfigService.POST_API, endpoint);
-
-			$http.post(url, permissionsToSend)
+			var endpoint = vm.selectedTeamspace.account + "/" 
+							+ vm.modelSelected + "/permissions";
+		
+			APIService.post(endpoint, permissionsToSend)
 				.catch(function(error) {
 					var title = "Model Permission Assignment Error";
 					vm.showError(title, error);

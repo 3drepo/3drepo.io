@@ -44,48 +44,44 @@ md-dialog.newModelDialog(aria-label="New model")
 					ng-required="required"
 					ng-keypress="vm.saveNewModel($event)"
 					ng-pattern="vm.modelRegExp" 
-					maxlength=20)
+					maxlength=120)
 				.inputHint Letters, numbers, hyphen and underscore only.
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				input(
-				ng-if="vm.teamspaceAndProjectSelected()",
 				placeholder="Model Code (optional)", 
 				ng-model="vm.newModelData.code", 
 				maxlength=5)
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				label Model type
 				md-select(ng-model="vm.newModelData.type")
 					md-option(ng-repeat="modelType in vm.modelTypes", value="{{modelType}}") {{modelType}}
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.showModelTypeOtherInput")
+
+			md-input-container(ng-if="vm.showAllModelDialogInputs() && vm.showModelTypeOtherInput")
 				input(
-				ng-if="vm.teamspaceAndProjectSelected()", 
 				placeholder="Other model type", 
 				ng-model="vm.newModelData.otherType")
 
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				label Unit
 				md-select(
 					ng-init="vm.newModelData.unit = vm.units[3].value"
 					ng-required="required"
-					ng-if="vm.teamspaceAndProjectSelected()",
 					ng-model="vm.newModelData.unit")
 					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				input(
-					ng-if="vm.teamspaceAndProjectSelected()"
 					placeholder="Revision name (optional)"
-					maxlength=20
+					maxlength=120
 					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected() && vm.newModelData.name.length > 2")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				textarea(
-				ng-if="vm.teamspaceAndProjectSelected()",
-				placeholder="Revision description (optional)", ng-model="vm.desc")
+					placeholder="Revision description (optional)", ng-model="vm.desc")
 
 			//p#modelRequiredHint(
 				ng-if="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected()") 
@@ -94,12 +90,13 @@ md-dialog.newModelDialog(aria-label="New model")
 			div
 				p#modelDialogError(ng-if="vm.showNewModelErrorMessage") {{vm.newModelErrorMessage}}
 
-			md-input-container(ng-if="vm.teamspaceAndProjectSelected()")
+			md-input-container(ng-if="vm.showAllModelDialogInputs()")
+			
 				md-button.md-accent(
-					ng-if="vm.teamspaceAndProjectSelected()",
 					ng-click="vm.uploadFileForNewModel()") Upload File
+
 				md-button.md-raised.md-accent(
-					ng-disabled="vm.newModelButtonDisabled && vm.teamspaceAndProjectSelected()" 
+					ng-disabled="vm.newModelButtonDisabled && vm.showAllModelDialogInputs()" 
 					ng-click="vm.saveNewModel()") Save
 
 				md-progress-circular.uploadProgress(ng-if="vm.uploading")

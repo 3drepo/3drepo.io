@@ -10,35 +10,27 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
 
-#issuesContent(ng-switch="vm.toShow")
+#issuesContent
 
 	// Issues list
 	issues-list(
-		ng-switch-when="showIssues"
+		ng-if="vm.toShow === 'showIssues'"
+		issues-to-show="vm.issuesToShow"
 		account="vm.account"
 		model="vm.model"
-		all-issues="vm.issues"
 		filter-text="vm.filterText"
 		import-bcf="vm.importBcf(file)"
-		event="vm.event"
 		on-edit-issue="vm.editIssue(issue)"
-		on-select-issue="vm.selectIssue(issue)"
-		keys-down="vm.keysDown"
 		content-height="vm.setContentHeight(height)"
 		menu-option="vm.selectedMenuOption"
-		user-job="vm.modelUserJob"
-		tree-map="vm.treeMap"
-		selected-issue="vm.selectedIssue"
-		display-issue="vm.displayIssue"
-		issue-display="vm.issueDisplay"
-		available-jobs="vm.availableJobs")
+		issue-display="vm.issueDisplay")
 
 	// Issue
 	issue(
-		ng-switch-when="showIssue"
+		ng-if="vm.toShow === 'showIssue'"
 		account="vm.account"
-		model="vm.model"
 		data="vm.selectedIssue"
+		model="vm.model"
 		keys-down="vm.keysDown"
 		exit="vm.editIssueExit(issue)"
 		model-settings="vm.modelSettings"
@@ -47,14 +39,19 @@ md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15",
 		content-height="vm.setContentHeight(height)"
 		selected-objects="vm.selectedObjects"
 		revision="vm.revision"
-		selected-issue-loaded="vm.selectedIssueLoaded"
 		set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
 		user-job="vm.modelUserJob"
 		available-jobs="vm.availableJobs")
 
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()" ng-disabled="!vm.canAddIssue || !vm.modelLoaded")
+	span.addHint(ng-if="!vm.canAddIssue") You don't have permission to add an issue
+	span.addHint(ng-if="vm.canAddIssue && !vm.modelLoaded()") You can add an issue after model load
+	md-button.md-accent.md-fab.md-mini(
+		aria-label="Add"
+		ng-click="vm.editIssue()"
+		ng-disabled="!vm.canAddIssue || !vm.modelLoaded()")
+
 		md-icon.angular-material-icons add
 
 

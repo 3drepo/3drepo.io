@@ -34,9 +34,15 @@
 			controllerAs: "vm"
 		});
 
-	AccountModelsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "ClientConfigService", "AccountService"];
+	AccountModelsettingCtrl.$inject = [
+		"$scope", "$location", "APIService", "ClientConfigService", 
+		"AccountService"
+	];
 
-	function AccountModelsettingCtrl($scope, $location, UtilsService, ClientConfigService, AccountService) {
+	function AccountModelsettingCtrl(
+		$scope, $location, APIService, ClientConfigService, 
+		AccountService
+	) {
 		
 		var vm = this;
 
@@ -55,7 +61,7 @@
 			vm.targetAcct = vm.urlData["targetAcct"];
 			vm.targetProj = vm.urlData["targetProj"];
 
-			UtilsService.doGet(vm.targetAcct + "/" + vm.modelId + ".json")
+			APIService.get(vm.targetAcct + "/" + vm.modelId + ".json")
 				.then(function (response) {
 
 					if (response.status === 200 && response.data && response.data.properties) {
@@ -79,6 +85,11 @@
 						if (props.unit) {
 							vm.unit = props.unit;
 							vm.oldUnit = vm.unit;	
+						}
+						//console.log(props);
+						if (response.data.fourDSequenceTag) {
+							//console.log(response.data.fourDSequenceTag);
+							vm.fourDSequenceTag = response.data.fourDSequenceTag;
 						}
 					
 		
@@ -139,10 +150,13 @@
 				mapTile: vm.mapTile,
 				unit: vm.unit,
 				code: vm.code,
-				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n")
+				topicTypes: vm.topicTypes.replace(/\r/g, "").split("\n"),
+				fourDSequenceTag: vm.fourDSequenceTag
 			};
-	
-			UtilsService.doPut(data, vm.targetAcct + "/" + vm.modelId +  "/settings")
+			
+			var saveUrl = vm.targetAcct + "/" + vm.modelId +  "/settings";
+
+			APIService.put(saveUrl, data)
 				.then(function(response){
 					if(response.status === 200) {
 						vm.updateModel();

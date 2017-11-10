@@ -345,6 +345,9 @@ var UnityUtil;
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
 			loadedResolve.reject("cancel");
+		}
+		
+		if (loadingResolve) {
 			loadingResolve.reject("cancel");
 		}
 	};
@@ -414,7 +417,7 @@ var UnityUtil;
 	}
 
 	UnityUtil.prototype.setAPIHost = function(hostname) {
-		toUnity("SetAPIHost", LoadingState.VIEWER_READY, hostname);
+		toUnity("SetAPIHost", LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	};
 
 	UnityUtil.prototype.setNavigation = function(navMode) {

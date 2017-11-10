@@ -27,13 +27,13 @@
 			controllerAs: "vm"
 		});
 
-	PrivacyCtrl.$inject = ["EventService"];
+	PrivacyCtrl.$inject = ["StateManager"];
 
-	function PrivacyCtrl (EventService) {
+	function PrivacyCtrl (StateManager) {
 		var vm = this;
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 	}
 }());

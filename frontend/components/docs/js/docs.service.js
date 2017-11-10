@@ -19,19 +19,19 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("DocsService", DocsService);
+		.service("DocsService", DocsService);
 
-	DocsService.$inject = ["$http", "$q", "ClientConfigService"];
+	DocsService.$inject = ["$q", "ClientConfigService", "APIService"];
 
-	function DocsService($http, $q, ClientConfigService) {
+	function DocsService($q, ClientConfigService, APIService) {
 		var getDocs = function (account, model, metadataId) {
 			var i,
 				length,
 				data = {},
 				deferred = $q.defer(),
-				url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/meta/" + metadataId + ".json");
+				url = account + "/" + model + "/meta/" + metadataId + ".json";
 
-			$http.get(url)
+			APIService.get(url)
 				.then(
 					function(json) {
 						var dataType;
@@ -50,7 +50,11 @@
 							data[dataType].data.push(json.data.meta[i]);
 
 							// Setup PDF url
-							json.data.meta[i].url = ClientConfigService.apiUrl(ClientConfigService.GET_API, account + "/" + model + "/" + json.data.meta[i]._id + ".pdf");
+							var endpoint = account + "/" + model + "/" + json.data.meta[i]._id + ".pdf";
+							json.data.meta[i].url = ClientConfigService.apiUrl(
+								ClientConfigService.GET_API,
+								endpoint
+							);
 						}
 						deferred.resolve(data);
 					},

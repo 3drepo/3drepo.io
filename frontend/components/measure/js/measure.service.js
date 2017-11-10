@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("MeasureService", MeasureService);
 
-	MeasureService.$inject = [];
+	MeasureService.$inject = ["ViewerService"];
 
-	function MeasureService() {
+	function MeasureService(ViewerService) {
 		
 		var service = {
 			state : {
@@ -42,11 +42,13 @@
 
 		function activateMeasure () {
 			service.state.active = true;
+			ViewerService.activateMeasure();
 			UnityUtil.enableMeasuringTool();
 		}
 
 		function deactivateMeasure () {
 			service.state.active = false;
+			ViewerService.disableMeasure();
 			UnityUtil.disableMeasuringTool();
 		}
 

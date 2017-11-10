@@ -46,14 +46,14 @@
 
 	IssuesCtrl.$inject = [
 		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
-		"UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", 
-		"AnalyticService", "$state", "$q"
+		"APIService", "NotificationService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "$state", "$q", "DialogService", "ViewerService"
 	];
 
 	function IssuesCtrl(
 		$scope, $timeout, IssuesService, EventService, AuthService, 
-		UtilsService, NotificationService, RevisionsService, ClientConfigService, 
-		AnalyticService, $state, $q
+		APIService, NotificationService, RevisionsService, ClientConfigService, 
+		AnalyticService, $state, $q, DialogService, ViewerService
 	) {
 
 		var vm = this;
@@ -64,7 +64,7 @@
 		vm.$onInit = function() {
 
 			vm.saveIssueDisabled = true;
-			vm.issues = [];
+			vm.allIssues = [];
 			vm.issuesToShow = [];
 			vm.showProgress = true;
 			vm.progressInfo = "Loading issues";
@@ -74,40 +74,50 @@
 			vm.autoSaveComment = false;
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.savingIssue = false;
-			vm.issueDisplay = {};
-			vm.selectedIssueLoaded = false;
-			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
-
-			vm.modelLoaded = false;
+			
 
 			/*
 			* Get the user roles for the model
 			*/
-			IssuesService.getUserJobFormodel(vm.account, vm.model).then(function (data) {
-				vm.modelUserJob = data;
-			});
+			IssuesService.getUserJobForModel(vm.account, vm.model)
+				.then(function (data) {
+					vm.modelUserJob = data;
+				})
+				.catch(function(error){
+					var content = "We tried to get the user job for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting User Job", content, escapable);
+					console.error(error);
+				});
 
 			/*
 			* Get all the Issues
 			*/
+
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
 
-					vm.showProgress = false;
-					vm.toShow = "showIssues";
-					vm.issues = (data === "") ? [] : data;
-					vm.showAddButton = true;
+					if (data) {
 
-					// if issue id is in url then select the issue
-					var issueMatch = vm.issues.find(function(issue){
-						return issue._id === vm.issueId;
-					});
-
-					if(issueMatch){
-						vm.displayIssue = issueMatch;
+						vm.showProgress = false;
+						vm.toShow = "showIssues";
+						IssuesService.populateNewIssues(data);
+						vm.showAddButton = true;
+						
+					} else {
+						throw "Error";
 					}
+					
 
+				})
+				.catch(function(error){
+					var content = "We tried to get the issues for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Issues", content, escapable);
+					console.error(error);
 				});
 
 					
@@ -138,52 +148,29 @@
 						menu: menu
 					});
 
+				})
+				.catch(function(error){
+					var content = "We tried to get the jobs for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Jobs", content, escapable);
+					console.error(error);
 				});
 
-			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs]).then(function(){
-				setAllIssuesAssignedRolesColors();
-				EventService.send(EventService.EVENT.ISSUES_READY, true);
-				// Check if the model has loaded
-				EventService.send(EventService.EVENT.VIEWER.CHECK_MODEL_LOADED);
-			});
+			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
+				.catch(function(error){
+					var content = "We had an issue getting all the issues and jobs for this model. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Model Issues and Jobs", content, escapable);
+					console.error(error);
+				});
 
 		};
 
-
-		/**
-		 * Define the assigned role colors for each issue
-		 */
-		function setAllIssuesAssignedRolesColors () {
-			var i, length;
-
-			if (vm.availableJobs !== null) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					setIssueAssignedRolesColors(vm.issues[i]);
-				}
-			}
-		}
-
-		/**
-		 * Define the assigned role colors for an issue
-		 * Also set the pin colors
-		 *
-		 * @param issue
-		 */
-		function setIssueAssignedRolesColors (issue) {
-			var i, length, roleColour, pinColours = [];
-			var rgbColour;
-			issue.assignedRolesColors = [];
-
-			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-
-				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
-	
-				issue.assignedRolesColors.push(roleColour);
-				rgbColour = IssuesService.hexToRgb(roleColour);
-				pinColours.push(rgbColour);
-			}
-		}
-
+		vm.modelLoaded = function() {
+			return !!ViewerService.currentModel.model;
+		};
 
 		/*
 		 * New issue must have type and non-empty title
@@ -192,20 +179,53 @@
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
+		$scope.$watch("vm.modelSettings", function() {
+			if (vm.modelSettings) {
+
+				vm.issuesReady.then(function(){
+					var hasPerm = AuthService.hasPermission(
+						ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+						vm.modelSettings.permissions
+					);
+	
+					if(hasPerm) {
+						vm.canAddIssue = true;
+					} 
+				});
+								
+				vm.subModels = vm.modelSettings.subModels || [];
+				vm.watchNotification();
+				
+			}
+		});
+
+
 		$scope.$watch(function() {
-			return RevisionsService.status.ready;
-		}, function(newValue, oldValue) {
-			if (RevisionsService.status.ready === true) {
+			return RevisionsService.status;
+		}, function() {
+			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
-				watchNotification();
 			}
 		}, true);
 
-		$scope.$watch(function() {
-			return IssuesService.issueId;
+		$scope.$watch(function(){
+			return IssuesService.state.allIssues;
 		}, function(){
-			vm.issueId = IssuesService.issueId;
+			vm.allIssues = IssuesService.state.allIssues;
 		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.issuesToShow;
+		}, function(){
+			vm.issuesToShow = IssuesService.state.issuesToShow;
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.selectedIssue;
+		}, function(){
+			vm.selectedIssue = IssuesService.state.selectedIssue;
+		}, true);
+
 
 		/**
 		 * Set up event watching
@@ -213,35 +233,18 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			var i, length;
 
-			vm.event = event;
+			//vm.event = event;
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					if (vm.issues[i]._id === event.value.id) {
-						vm.editIssue(vm.issues[i]);
+				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
+					if (vm.allIssues[i]._id === event.value.id) {
+						vm.editIssue(vm.allIssues[i]);
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
-
-				vm.modelLoaded = true;
-
-			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
-
-				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
-				vm.issuesReady.then(function(){
-					//console.log("Disabled - canAddUse before permission check in issues.component.js");
-					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-						vm.canAddIssue = true;
-						//console.log("Disabled - canAddUse set to true in issues.component.js");
-					} 
-				});
-				
-				vm.subModels = event.value.subModels || [];
-				watchNotification();
 			} 
-		});
 
+		});
 
 		/**
 		 * Close the add alert
@@ -258,6 +261,8 @@
 			vm.onContentHeightRequest({height: height});
 		};
 
+		
+
 		/*
 		 * Go back to issues list
 		 */
@@ -265,7 +270,7 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
-				vm.displayIssue = null;
+				IssuesService.state.displayIssue = null;
 				$state.go("home.account.model", 
 					{
 						account: vm.account, 
@@ -278,23 +283,17 @@
 			}
 		});
 
-
-		function watchNotification() {
-
-			// TODO: Is there a reason this is here?
-			if(!vm.revisions || !vm.subModels){
-				return;
-			}
+		vm.watchNotification = function() {
 
 			/*
 			 * Watch for new issues
 			 */
-			NotificationService.subscribe.newIssues(vm.account, vm.model, newIssueListener);
+			NotificationService.subscribe.newIssues(vm.account, vm.model, vm.newIssueListener);
 
 			/*
 			 * Watch for status changes for all issues
-			 */
-			NotificationService.subscribe.issueChanged(vm.account, vm.model, issueChangedListener);
+			 */ 	
+			NotificationService.subscribe.issueChanged(vm.account, vm.model, vm.handleIssueChanged);
 
 			// Do the same for all subModels
 			if(vm.subModels){
@@ -304,30 +303,26 @@
 						subModel.database, 
 						subModel.model, 
 						function(issues){ 
-							newIssueListener(issues, submodel); 
+							vm.newIssueListener(issues, submodel); 
 						}
 					);
 					NotificationService.subscribe.issueChanged(
 						subModel.database,
 						subModel.model, 
-						issueChangedListener
+						vm.handleIssueChanged
 					);
 				});
 			}
 
-		}
+		};
 
-		function newIssueListener(issues, submodel) {
+		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
+				
+				var issueShouldShow = false;
 
-				var showIssue;
-
-				if(submodel){
-					
-					showIssue = true;
-
-				} else {
+				if (vm.revisions && vm.revisions.length) {
 
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
@@ -343,60 +338,25 @@
 						});
 					}
 
-					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					issueShouldShow = issueRevision && issueInDate;
+				} else {
+					issueShouldShow = true;
 				}
 
-				if(showIssue){
+				if(issueShouldShow){
 					
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-					issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-					vm.issues.unshift(issue);
+					IssuesService.addIssue(issue);
 					
 				}
 
 			});
 
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
+		};
 
-		}
-
-		function issueChangedListener(issue) {
-
-			console.log("issue - issues.component.js : issueChangedListener");
-
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-			issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-			vm.issues.find(function(oldIssue, i){
-				if(oldIssue._id === issue._id){
-
-
-					if(issue.status === "closed"){
-						
-						vm.issues[i].justClosed = true;
-						
-						$timeout(function(){
-
-							vm.issues[i] = issue;
-							vm.issues = vm.issues.slice(0);
-
-						}, 4000);
-
-					} else {
-						vm.issues[i] = issue;
-					}
-				}
-			});
-
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
-			
-		}
-
+		vm.handleIssueChanged = function(issue) {
+			IssuesService.updateIssues(issue);
+		};
 
 		/*
 		* Unsubscribe notifcation on destroy
@@ -425,20 +385,26 @@
 
 			vm.importingBCF = true;
 
-			IssuesService.importBcf(vm.account, vm.model, vm.revision, file).then(function(){
+			IssuesService.importBcf(vm.account, vm.model, vm.revision, file)
+				.then(function(){
+					return IssuesService.getIssues(vm.account, vm.model, vm.revision);
+				})
+				.then(function(data){
 
-				return IssuesService.getIssues(vm.account, vm.model, vm.revision);
+					vm.importingBCF = false;
+					vm.allIssues = (data === "") ? [] : data;
 
-			}).then(function(data){
+				})
+				.catch(function(error){
 
-				vm.importingBCF = false;
-				vm.issues = (data === "") ? [] : data;
-
-			}).catch(function(err){
-
-				vm.importingBCF = false;
+					vm.importingBCF = false;
+					var content = "We tried to get import BCF but it failed. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting User Job", content, escapable);
+					console.error(error);
 				
-			});
+				});
 
 		};
 
@@ -447,67 +413,59 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-
-			vm.event = null; // To clear any events so they aren't registered
-			vm.onShowItem();
-
-			var notCurrentlySelected = vm.selectedIssue && issue && vm.selectedIssue._id !== issue._id;
+			
+			var notCurrentlySelected = IssuesService.state.selectedIssue && 
+										issue && 
+										IssuesService.state.selectedIssue._id !== issue._id;
 
 			if (notCurrentlySelected) {
-				IssuesService.deselectPin(vm.selectedIssue);
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 				// Remove highlight from any multi objects
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+				ViewerService.highlightObjects([]);
 			}
 
-			if (!issue && vm.selectedIssue) {
-				IssuesService.deselectPin(vm.selectedIssue);
+			if (!issue && IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 			}
 
 			if (issue) {
 
-				IssuesService.showIssue(issue);
-				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
-					
-					vm.selectedIssueLoaded = true;
-					vm.selectedIssue = issue;
-				}).catch(function(error) {
-					console.error(error);
-				});
+				IssuesService.getIssue(issue.account, issue.model, issue._id)
+					.then(function(retrievedIssue){
+						IssuesService.setSelectedIssue(retrievedIssue);
+						IssuesService.showIssue(issue);
+						$state.go("home.account.model.issue", 
+							{
+								account: vm.account, 
+								model: vm.model, 
+								revision: vm.revision,
+								issue: issue._id,
+								noSet: true
+							}, 
+							{notify: false}
+						);
+		
+						AnalyticService.sendEvent({
+							eventCategory: "Issue",
+							eventAction: "view"
+						});
+					})
+					.catch(function(error) {
+						var content = "We tried to get the selected issue but it failed. " +
+							"If this continues please message support@3drepo.io.";
+						var escapable = true;
+						DialogService.text("Error Getting Issue", content, escapable);
+						console.error(error);
+					});
 
-				$state.go("home.account.model.issue", 
-					{
-						account: vm.account, 
-						model: vm.model, 
-						revision: vm.revision,
-						issue: issue._id,
-						noSet: true
-					}, 
-					{notify: false}
-				);
-
-				AnalyticService.sendEvent({
-					eventCategory: "Issue",
-					eventAction: "view"
-				});
 			} else {
-				vm.selectedIssueLoaded = true;
-				vm.selectedIssue = issue;
+				IssuesService.resetSelectedIssue();
 			}
 
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
+			vm.onShowItem();
 
-		};
-
-		/**
-		 * Select issue
-		 * @param issue
-		 */
-		vm.selectIssue = function (issue) {
-			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				IssuesService.deselectPin(vm.selectedIssue);
-			}
-			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -523,8 +481,10 @@
 		 * @param issue
 		 */
 		vm.issueCreated = function (issue) {
-			vm.issues.unshift(issue);
-			vm.selectedIssue = issue;
+
+			IssuesService.addIssue(issue);
+			IssuesService.setSelectedIssue(issue);
+
 		};
 
 	}

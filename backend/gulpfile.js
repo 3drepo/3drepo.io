@@ -20,7 +20,8 @@ gulp.task("test:integrated", function(){
             reporter: "spec",
             timeout: 10000
         }))
-        .once("error", () => {
+        .once("error", (error) => {
+            console.log(error);
             process.exit(1);
         })
         .once("end", () => {
@@ -74,16 +75,17 @@ gulp.task("test:integrated-one", function() {
             NODE_CONFIG_DIR: "../config/"
         });
 
-        const path = abs("./test/integrated/" + process.argv[4]);
-        console.log("processing " + path);
+        const intPath = abs("./test/integrated/" + process.argv[4]);
+        console.log("processing " + intPath);
 
-        gulp.src(path)
+        gulp.src(intPath)
             .pipe(envs)
             .pipe(mocha({
                 reporter: "spec",
                 timeout: 10000
             }))
-            .once("error", () => {
+            .once("error", (error) => {
+                console.log(error);
                 process.exit(1);
             })
             .once("end", () => {

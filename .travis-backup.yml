@@ -1,0 +1,66 @@
+language: node_js
+git:
+  submodules: false
+  depth: 1
+node_js:
+    - "6.11.3"
+env:
+  - CXX=g++-4.8
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+before_install:
+    - mkdir -p submodules
+    - cd submodules
+    - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+    - cd ..
+    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+    - echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+    - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    - sudo dpkg -I google-chrome-stable_current_amd64.deb
+    - sudo apt-get install -y mongodb-org graphicsmagick 
+    - mongod --version
+    - sudo service mongod start
+    - until nc -z localhost 27017; do sleep 1; done
+    - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
+    - cd submodules/tests
+    - git checkout $test_ver
+    - git status
+    - cd backend && mongorestore
+    - cd ./../../../
+    - echo $PWD
+
+install: cd ./backend && yarn install && cd ./../frontend && yarn install
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+services:
+  - rabbitmq
+  
+script:
+    - echo $PWD
+    - yarn run wdm:update && wdm:start &
+    - cd ./../backend 
+    - echo $PWD
+    - yarn run test
+    - cd ./../ 
+    - cd ./frontend 
+    - yarn run gulp build
+    - cd ./../
+    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
+    - cd ./frontend
+    - yarn run e2e
+    - echo "FINISHED"
+
+notifications:
+    email: 
+        recipients:
+            - team@3drepo.org

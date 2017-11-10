@@ -29,6 +29,7 @@ const schema = mongoose.Schema({
 	users: [String],
 	desc: String,
 	type: String,
+	corID: String,
 	status: {type: String, default: "ok"},
 	errorReason: Object,
 	federate: Boolean,
@@ -58,7 +59,7 @@ const schema = mongoose.Schema({
 		}]
 
 	},
-
+	fourDSequenceTag: String,
 	timestamp: Date,
 	subModels: [{
 		_id: false,
@@ -124,7 +125,10 @@ schema.methods.updateProperties = function(updateObj){
 		} else {
 			this.properties[key] = updateObj[key];
 		}
-		
+		if(key === "fourDSequenceTag"){
+			this[key] = updateObj[key];
+
+		}	
 	});
 
 };

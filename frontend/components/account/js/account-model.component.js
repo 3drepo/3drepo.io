@@ -50,9 +50,9 @@
 			}
 		});
 
-	AccountModelCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "ClientConfigService", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
+	AccountModelCtrl.$inject = ["DialogService", "APIService", "$scope", "$location", "$timeout", "$interval", "$filter", "ClientConfigService", "RevisionsService", "NotificationService", "AuthService", "AnalyticService", "AccountService", "AccountUploadService"];
 
-	function AccountModelCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, ClientConfigService, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
+	function AccountModelCtrl (DialogService, APIService, $scope, $location, $timeout, $interval, $filter, ClientConfigService, RevisionsService, NotificationService, AuthService, AnalyticService, AccountService, AccountUploadService) {
 
 		var vm = this;
 
@@ -63,11 +63,11 @@
 	
 			vm.infoTimeout = 10000;
 			vm.isUserAccount = (vm.account === vm.userAccount);
-
 			vm.modelToUpload = null;
-			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.name;
 
+			vm.dialogCloseTo = "accountModelsOptionsMenu_" + vm.account + "_" + vm.model.model;
 			vm.dialogCloseToId = "#" + vm.dialogCloseTo;
+
 			if (vm.model.timestamp !== null) {
 				vm.model.timestampPretty = $filter("prettyDate")(vm.model.timestamp, {showSeconds: true});
 			}
@@ -154,7 +154,7 @@
 						vm.tag = null;
 						vm.desc = null;
 						vm.modelToUpload = null;
-						UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+						DialogService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 					} else {
 						console.warn("Incorrect permissions");
 					}
@@ -191,7 +191,8 @@
 				vm.modelToUpload = null;
 				vm.tag = null;
 				vm.desc = null;
-				UtilsService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				vm.uploadButtonDisabled = true;
+				DialogService.showDialog("upload-model-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				//vm.uploadFile();
 				break;
 
@@ -223,7 +224,7 @@
 					vm.revisions = revisions;
 					vm.revisionsLoading = false;
 				});
-				UtilsService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+				DialogService.showDialog("revisions-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 				break;
 			}
 		};
@@ -233,14 +234,14 @@
 		 */
 		vm.setupAddLicenses = function () {
 			vm.onShowPage({page: "billing", callingPage: "permissionsspaces"});
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**
@@ -316,8 +317,8 @@
 		};
 
 		vm.isProcessing = function() {
-			return vm.model.status === "uploading" ||
-					vm.model.status === "processing";
+			return vm.model.status === "uploading" || vm.model.status === "uploaded" ||
+					vm.model.status === "processing" || vm.model.status === "queued";
 		};
 
 		vm.handleModelStatus = function(modelData, freshModel) {
@@ -332,8 +333,8 @@
 				// that the errors are acceptable
 				var error = modelData.errorReason;
 				var valid = modelData.status === "ok" || 
-					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) || 
-					(error && error.value === UtilsService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
+					(error && error.value === APIService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) || 
+					(error && error.value === APIService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
 
 				// We don't want to show the import successful message
 				// for models that were there before, so we use the isFreshModel flag
@@ -363,11 +364,15 @@
 				// 	vm.fileUploadInfo = "";
 				// }, vm.infoTimeout);
 			
+			} else if (modelData.status === "queued"){
+
+				vm.fileUploadInfo = "Queued...";
+
 			} else if (modelData.status === "uploading"){
 
 				vm.fileUploadInfo = "Uploading...";
 				
-			} else if (modelData.status === "processing"){
+			} else if (modelData.status === "processing" || modelData.status === "uploaded"){
 
 				vm.fileUploadInfo = "Processing...";
 

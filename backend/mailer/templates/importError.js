@@ -16,7 +16,7 @@
  */
 
 var html = data => `
-	Toy model failed to import. Please help this user out.
+	Model failed to import. Please help this user out.
 	<br>
 	account: ${data.account}
 	<br>
@@ -27,9 +27,11 @@ var html = data => `
 	correlationId: ${data.corID}
 	<br>
 	appId: ${data.appId}
+	<br>
+	domain: ${data.domain}
 `;
 
-var subject = '[System] Toy model import error';
+var subject = '[System] Model import error';
 
 module.exports =  {
 	html: html,

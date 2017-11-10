@@ -30,32 +30,50 @@
 			controllerAs: "vm"
 		});
 	
-	AccountLicensesCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
-
-	function AccountLicensesCtrl($scope, UtilsService, StateManager) {
+	AccountLicensesCtrl.$inject = ["$scope", "APIService", "StateManager", "DialogService"];
+	function AccountLicensesCtrl($scope, APIService, StateManager, DialogService) {
 		var vm = this;
 
 		vm.$onInit = function() {
 			vm.promise = null;
 			vm.jobs = [];
-			UtilsService.doGet(vm.account + "/subscriptions").then(function(res){
-				vm.subscriptions = res.data;
-			});
-			UtilsService.doGet(vm.account + "/jobs").then(function(data){
-				vm.jobs = data.data;
-			});
+			APIService.get(vm.account + "/subscriptions")
+				.then(function(response){
+					vm.subscriptions = response.data;
+					vm.initSubscriptions();
+				})
+				.catch(function(error){
+					vm.handleError("retrieve", "subscriptions", error);
+				});
+			
+			APIService.get(vm.account + "/jobs")
+				.then(function(response){
+					vm.jobs = response.data;
+				})
+				.catch(function(error){
+					vm.handleError("retrieve", "jobs", error);
+				});
+
+			vm.jobColors = [
+				"#a6cee3",
+				"#1f78b4",
+				"#213f99",
+				"#b2df8a",
+				"#33a02c",
+				"#fb9a99",
+				"#e31a1c",
+				"#fdbf6f",
+				"#ff7f00",
+				"#e3bd1a",
+				"#ffff99",
+				"#b15928",
+				"#cab2d6",
+				"#6a3d9a"
+			];
 
 		};
 
-		/*
-		 * Watch subscriptions
-		 */
-		$scope.$watch("vm.subscriptions", function () {
-
-			if(!vm.subscriptions){
-				return;
-			}
-
+		vm.initSubscriptions = function() {
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
@@ -77,28 +95,44 @@
 			}
 			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-		});
+		};
 
 		/*
 		 * Watch changes to the new license assignee name
 		 */
 		$scope.$watch("vm.newLicenseAssignee", function (newValue) {
-			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
 
+		vm.updateJob = function(job) {
+
+			var url = vm.account + "/jobs/" + job._id;
+
+			APIService.put(url, job)
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
+					} 
+				})
+				.catch(function(error){
+					vm.handleError("update", "job", error);
+				});
+		};
+
 		vm.assignJob = function(index){
 			var licence = vm.licenses[index];
-	
-			UtilsService.doPut(
-				{job: licence.job},
-				vm.account + "/subscriptions/" + licence.id + "/assign"
-			).then(function(res){
-				if (res.status !== 200) {
+			
+			var url = vm.account + "/subscriptions/" + licence.id + "/assign";
 
-					vm.addMessage = res.data.message;
-				}
-			});
+			APIService.put(url, {job: licence.job})
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
+					}
+				})
+				.catch(function(error){
+					vm.handleError("assign", "job", error);
+				});
 		};
 
 		vm.addJob = function(){
@@ -106,25 +140,34 @@
 			var job = { _id: vm.newJob };
 			vm.addJobMessage = null;
 
-			UtilsService.doPost( job, vm.account + "/jobs").then(function(res){
-				if (res.status !== 200) {
-					vm.addJobMessage = res.data.message;
-				} else {
-					vm.jobs.push(job);
-				}
-			});
+			APIService.post(vm.account + "/jobs", job)
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
+					} else {
+						vm.jobs.push(job);
+					}
+				})
+				.catch(function(error){
+					vm.handleError("add", "job", error);
+				});
 		};
 
 		vm.removeJob = function(index){
 
 			vm.deleteJobMessage = null;
-			UtilsService.doDelete(null, vm.account + "/jobs/" + vm.jobs[index]._id).then(function(res){
-				if (res.status !== 200) {
-					vm.deleteJobMessage = res.data.message;
-				} else {
-					vm.jobs.splice(index, 1);
-				}
-			});
+			var url = vm.account + "/jobs/" + vm.jobs[index]._id;
+			APIService.delete(url, null)
+				.then(function(response){
+					if (response.status !== 200) {
+						throw(response);
+					} else {
+						vm.jobs.splice(index, 1);
+					}
+				})
+				.catch(function(error){
+					vm.handleError("remove", "job", error);
+				});
 		};
 
 		/**
@@ -143,24 +186,26 @@
 			}
 
 			if (doSave) {
-				UtilsService.doPost(
-					{user: vm.newLicenseAssignee},
-					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
-				).then(function (response) {
-					if (response.status === 200) {
-						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
-						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
-						vm.unassigned.splice(0, 1);
-						vm.allLicensesAssigned = (vm.unassigned.length === 0);
-						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-						vm.addDisabled = vm.allLicensesAssigned;
-						vm.newLicenseAssignee = "";
-					} else if (response.status === 400) {
-						vm.addMessage = "This user has already been assigned a license";
-					} else if (response.status === 404) {
-						vm.addMessage = "User not found";
-					}
-				});
+				APIService.post(
+					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign",
+					{user: vm.newLicenseAssignee}
+				)
+					.then(function (response) {
+						if (response.status === 200) {
+							vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
+							vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
+							vm.unassigned.splice(0, 1);
+							vm.allLicensesAssigned = (vm.unassigned.length === 0);
+							vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
+							vm.addDisabled = vm.allLicensesAssigned;
+							vm.newLicenseAssignee = "";
+						} else if (response.status === 400) {
+							throw(response);
+						}
+					})
+					.catch(function(error){
+						vm.handleError("assign", "licence", error);
+					});
 			}
 		};
 
@@ -171,7 +216,7 @@
 		 */
 		vm.removeLicense = function (index) {
 			var removeUrl = vm.account + "/subscriptions/" + vm.licenses[index].id + "/assign";
-			UtilsService.doDelete({}, removeUrl)
+			APIService.delete(removeUrl, {})
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.unassigned.push(vm.licenses[index].id);
@@ -179,21 +224,42 @@
 						vm.addDisabled = false;
 						vm.allLicensesAssigned = false;
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-					} else if (response.status === 400) {
-						//var message = UtilsService.getErrorMessage(response.data);
-						var responseCode = UtilsService.getResponseCode("USER_IN_COLLABORATOR_LIST");
-						if (response.data.value === responseCode) {
+					} 
+				})
+				.catch(function(error){
+
+					if (error.status === 400) {
+						var responseCode = APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
+						if (error.data.value === responseCode) {
 							vm.licenseAssigneeIndex = index;
-							vm.models = response.data.models;
-							vm.projects = response.data.projects;
-							if(response.data.teamspace){
-								vm.teamspacePerms = response.data.teamspace.permissions.join(", ");
+							vm.models = error.data.models;
+							vm.projects = error.data.projects;
+							if(error.data.teamspace){
+								vm.teamspacePerms = error.data.teamspace.permissions.join(", ");
 							}
 							
-							UtilsService.showDialog("remove-license-dialog.html", $scope);
+							DialogService.showDialog("remove-license-dialog.html", $scope);
 						}
+					} else {
+						vm.handleError("remove", "licence", error);
 					}
+					
 				});
+		};
+
+		vm.capitalizeFirstLetter = function(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+		};
+
+		vm.handleError = function(action, type, error){
+			var message = (error.data.message) ? error.data.message : "";
+			var content = "Something went wrong trying to " + action + " the " + type + ": <br><br>" +
+				"<strong> " + message + "</strong>" +
+				"<br><br> If this is unexpected please message support@3drepo.io.";
+			var escapable = true;
+			var title = "Error";
+			DialogService.html(title, content, escapable);
+			console.error("Something went wrong trying to " + action + " the " + type + ": ", error);
 		};
 
 		/**
@@ -202,7 +268,7 @@
 		vm.removeLicenseConfirmed = function () {
 			var license = vm.licenses[vm.licenseAssigneeIndex].id;
 			var removeLicenseUrl = vm.account + "/subscriptions/" + license + "/assign?cascadeRemove=true";
-			UtilsService.doDelete({}, removeLicenseUrl)
+			APIService.delete(removeLicenseUrl, {})
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
@@ -210,8 +276,11 @@
 						vm.addDisabled = false;
 						vm.allLicensesAssigned = false;
 						vm.numLicensesAssigned = vm.numLicenses - vm.unassigned.length;
-						UtilsService.closeDialog();
+						DialogService.closeDialog();
 					}
+				})
+				.catch(function(error){
+					vm.handleError("remove", "licence", error);
 				});
 		};
 

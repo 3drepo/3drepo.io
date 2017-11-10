@@ -35,16 +35,16 @@
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
-		"StateManager", "EventService", "UtilsService", "ClientConfigService", 
-		"$location", "SWService", "AnalyticService", "ViewerService",
-		"$document"
+		"StateManager", "EventService", "APIService", "ClientConfigService", 
+		"$location", "SWService", "AnalyticService", "ViewerService", 
+		"$document", "TemplateService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
-		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService, ViewerService, $document
+		EventService, APIService, ClientConfigService, $location,
+		SWService, AnalyticService, ViewerService, $document, TemplateService
 	) {
 
 		var vm = this;
@@ -53,8 +53,11 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+
 			vm.handlePaths();
 
+			vm.setLoginPage();
+			
 			AnalyticService.init();
 			SWService.init();
 			
@@ -93,7 +96,61 @@
 
 			vm.isMobileDevice = vm.isMobile();
 
-		
+		};
+
+		vm.getSubdomain = function() {
+			var host = $location.host();
+			if (host.indexOf(".") < 0) {
+				return "";
+			} 
+			return host.split(".")[0];
+		};
+
+		vm.setLoginPage = function() {
+
+			if (ClientConfigService.customLogins !== undefined) {
+			
+				var sub = vm.getSubdomain();
+				var custom = ClientConfigService.customLogins[sub];
+
+				if (sub && custom) {
+					if (
+						custom.loginMessage
+					) {
+						vm.loginMessage = custom.loginMessage;
+					}
+					if (
+						custom.backgroundImage &&
+						typeof custom.backgroundImage === "string"
+					) {
+						vm.backgroundImage = custom.backgroundImage;
+					}
+					if (
+						custom.topLogo &&
+						typeof custom.topLogo === "string"
+					) {
+						vm.topLogo = custom.topLogo;
+					}
+					if (
+						custom.css
+					) {
+						var link = document.createElement("link");
+						link.setAttribute("rel", "stylesheet");
+						link.setAttribute("type", "text/css");
+						link.setAttribute("href", custom.css);
+						document.getElementsByTagName("head")[0].appendChild(link);
+					}
+				} 
+
+			}
+
+			if (!vm.topLogo) {
+				vm.topLogo = "/images/3drepo-logo-white.png";
+			}
+			if (!vm.backgroundImage) {
+				vm.backgroundImage = "/images/viewer_background.png";
+			}
+
 		};
 
 		vm.handlePaths = function() {
@@ -173,6 +230,16 @@
 					vm.page = "";
 					$location.search({}); // Reset query parameters
 					$location.path("/" + AuthService.getUsername());
+				} else if (
+					!AuthService.getUsername() &&
+					!legal &&
+					!loggedOut
+				) {
+
+					// Login page or none existant page
+					
+					vm.isLoggedOutPage = false;
+					vm.page = "";
 				}
 
 			}
@@ -202,11 +269,7 @@
 				"templates/register-request.html"
 			];
 
-			preCacheTemplates.forEach(function(templatePath){
-				$http.get(templatePath).then(function(response) {
-					$templateCache.put(templatePath, response.data);
-				});
-			});
+			TemplateService.precache(preCacheTemplates)
 
 		};
 
@@ -262,11 +325,12 @@
 
 		vm.logout = function () {
 			AuthService.logout();
+			ViewerService.reset();
 		};
 
 		vm.home = function () {
 			ViewerService.reset();
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 
 		/**
@@ -314,23 +378,6 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
 
-				} else if (event.type === EventService.EVENT.SHOW_TEAMSPACES) {
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-					$location.path(AuthService.getUsername());
-				} else if (event.type === EventService.EVENT.GO_HOME) {
-
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-
-					// TODO: Do this properly using state manager
-					var path = "/";
-					//console.log("AuthService.getUsername", AuthService.getUsername());
-					if (AuthService.isLoggedIn() && AuthService.getUsername()) {
-						path = "/" + AuthService.getUsername();
-						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
-					}
-
-					$location.path(path);
-					
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}

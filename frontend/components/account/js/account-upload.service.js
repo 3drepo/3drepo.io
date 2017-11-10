@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("AccountUploadService", AccountUploadService);
 
-	AccountUploadService.$inject = ["$http", "$q", "ClientConfigService", "UtilsService", "RevisionsService"];
+	AccountUploadService.$inject = ["$q", "ClientConfigService", "APIService", "RevisionsService"];
 
-	function AccountUploadService($http, $q, ClientConfigService, UtilsService, RevisionsService) {
+	function AccountUploadService($q, ClientConfigService, APIService, RevisionsService) {
 		// https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#services
 
 		var service = {
@@ -52,10 +52,10 @@
 				project : modelData.project,
 				type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
 				unit: modelData.unit,
-				code: modelData.code
+				code: modelData.code,
+				modelName: modelData.name
 			};
-			var modelName = encodeURIComponent(modelData.name);
-			return UtilsService.doPost(data, modelData.teamspace + "/" + modelName);
+			return APIService.post(modelData.teamspace + "/model", data);
 		}
 
 		/**
@@ -65,7 +65,7 @@
 		 * @returns {*|promise}
 		 */
 		function uploadStatus(modelData) {
-			return UtilsService.doGet(modelData.teamspace + "/" + modelData.model + ".json");
+			return APIService.get(modelData.teamspace + "/" + modelData.model + ".json");
 		}
 
 		function uploadRevisionToModel(uploadFileData) {
@@ -108,19 +108,19 @@
 				}
 				
 				var endpoint = uploadFileData.account + "/" + uploadFileData.model.model + "/upload";
-				var postData =  {"Content-Type": undefined};
+				var headers =  {"Content-Type": undefined};
 
-				UtilsService.doPost(formData, endpoint, postData)
+				APIService.post(endpoint, formData, headers)
 					.then(function (response) {
 						if ((response.status === 400) || (response.status === 404)) {
 							// Upload error
-							uploadPromise.reject(UtilsService.getErrorMessage(response.data));
+							uploadPromise.reject(APIService.getErrorMessage(response.data));
 						} else {
 							uploadPromise.resolve();
 						}
 					})
 					.catch(function(error){
-						uploadPromise.reject(error);
+						uploadPromise.reject(APIService.getErrorMessage(error.data));
 					});
 
 			}

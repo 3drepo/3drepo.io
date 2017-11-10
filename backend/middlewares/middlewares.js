@@ -36,9 +36,22 @@
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
 
-	function loggedIn(req, res, next){
+	function skipLoggedIn(req) {
 
-		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+		const loginIgnores = [
+			"/config.js", 
+			"/version.json"
+		];		
+
+		return loginIgnores.indexOf(req.url) !== -1;
+
+	}
+
+	function loggedIn(req, res, next){
+		if (skipLoggedIn(req)) {
+			next();
+		}
+		else if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
 			responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
 		} else {
 			next();
