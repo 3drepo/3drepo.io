@@ -27,7 +27,7 @@
 				account: "<",
 				model: "<",
 				revision: "<",
-				data: "<",
+				data: "=",
 				keysDown: "<",
 				exit: "&",
 				event: "<",
@@ -65,6 +65,8 @@
 		 */
 		vm.$onInit = function() { 
 
+			vm.canEditDescription = false;
+
 			vm.savedScreenShot = null;
 			vm.editingCommentIndex = null;
 			vm.commentViewpoint;
@@ -78,7 +80,6 @@
 
 			vm.issueProgressInfo = "Loading Issue...";
 			vm.textInputHasFocusFlag = false;
-			vm.hideDescription = false;
 			vm.submitDisabled = true;
 			vm.pinDisabled = true;
 			vm.pinData = null;
@@ -175,7 +176,6 @@
 
 		$scope.$watch("vm.modelSettings", function() {
 			if(vm.modelSettings){
-
 				vm.topic_types = vm.modelSettings.properties && vm.modelSettings.properties.topicTypes || [];
 				vm.checkCanComment();
 				vm.convertCommentTopicType();
@@ -209,7 +209,7 @@
 				vm.issueData = angular.copy(vm.data);
 
 				vm.issueData.comments = vm.issueData.comments || [];
-				vm.issueData.name = IssuesService.generateTitle(vm.issueData); // Change name to title for display purposes
+
 				if (!vm.issueData.name) {
 					vm.disabledReason = vm.reasonTitleText;
 				}
@@ -221,19 +221,6 @@
 					}
 				});
 
-				vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
-				if (vm.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
-					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
-				}
-
-				// Can edit description if no comments
-				vm.canEditDescription = vm.checkCanEditDesc();
-
-				// Role colour
-				if (vm.issueData.assigned_roles.length > 0) {
-					vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
-				} 
-
 				// Old issues
 				vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
 				vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
@@ -241,22 +228,18 @@
 				vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 				vm.checkCanComment();
-			
 				vm.convertCommentTopicType();
+
+				// Can edit description if no comments
+				vm.canEditDescription = vm.checkCanEditDesc();
 				
 			} else {
-				
-				vm.issueData = {
-					priority: "none",
-					status: "open",
-					assigned_roles: [],
-					topic_type: "for_information",
-					viewpoint: {}
-				};
+
+				vm.issueData = IssuesService.createBlankIssue();
 
 			}
-		
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
+							
+			IssuesService.populateIssue(vm.issueData);
 			vm.setContentHeight();
 	
 		});
@@ -273,6 +256,10 @@
 				return false;
 			}
 
+			if (!vm.issueData || !vm.issueData.comments) {
+				return false;
+			}
+
 			var comments = vm.issueData.comments.filter(function(comment){ 
 				return comment.action === undefined;
 			});
@@ -280,14 +267,14 @@
 		};
 
 		/**
-		 * Save a comment if one was being typed before close
+		 * Save a comment if one was being typed before closegh
 		 * Cancel editing comment
 		 */
 		vm.$onDestroy = function () {
 
 			vm.aboutToBeDestroyed = true;
 			if (vm.comment) {
-				IssuesService.updatedIssue = vm.issueData; // So that issues list is notified
+				IssuesService.updateIssues(vm.issueData); // So that issues list is notified
 				vm.saveComment();
 			}
 			if (vm.editingCommentIndex !== null) {
@@ -424,16 +411,20 @@
 
 		};
 
+		// This keeps the colours updated etc
+		$scope.$watch("vm.issueData", function(){
+			if (vm.issueData) {
+				IssuesService.populateIssue(vm.issueData);
+			}
+		}, true);
+
 		/**
 		 * Handle status change
 		 */
 		vm.statusChange = function () {
-		
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
-
+			
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
-
+				
 				// If it's unassigned we can update so that there are no assigned roles
 				if (vm.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
 					vm.issueData.assigned_roles = [];
@@ -451,23 +442,27 @@
 
 						if (response) {
 
+							var respData = response.data.issue;
+							IssuesService.populateIssue(respData);
+							vm.issueData = respData;
+						
 							// Add info for new comment
-							var comment = response.data.issue.comments[response.data.issue.comments.length - 1];
+							var commentCount = respData.comments.length;
+							var comment = respData.comments[commentCount - 1];
 							IssuesService.convertActionCommentToText(comment, vm.topic_types);
 							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							vm.issueData.comments.push(comment);
+							// vm.issueData.comments.push(comment);
 	
 							// Update last but one comment in case it was "sealed"
 							if (vm.issueData.comments.length > 1) {
 								vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
 							}
 	
-							// The status could have changed due to assigning role
-							vm.issueData.status = response.data.issue.status;
-							vm.issueData.assigned_roles = response.data.issue.assigned_roles;
-							IssuesService.updatedIssue = vm.issueData;
-	
-							commentAreaScrollToBottom();
+							// Update the actual data model
+							
+							IssuesService.updateIssues(vm.issueData);
+
+							vm.commentAreaScrollToBottom();
 						}
 						
 					})
@@ -632,14 +627,14 @@
 						.then(function (issueData) {
 							if (issueData) {
 
-								IssuesService.updatedIssue = vm.issueData;
+								IssuesService.updateIssues(vm.issueData);
 								vm.savedDescription = vm.issueData.desc;
-	
+
 								// Add info for new comment
-								var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
-								IssuesService.convertActionCommentToText(comment, vm.topic_types);
-								comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-								vm.issueData.comments.push(comment);
+								// var comment = issueData.data.issue.comments[issueData.data.issue.comments.length - 1];
+								// IssuesService.convertActionCommentToText(comment, vm.topic_types);
+								// comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+								// vm.issueData.comments.push(comment);
 
 							} else {
 								vm.handleUpdateError(issueData);
@@ -800,15 +795,11 @@
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
 					vm.data = response.data; // So that new changes are registered as updates
-					vm.issueData = response.data;
+					var responseIssue = response.data;
+					IssuesService.populateIssue(responseIssue);
+					vm.issueData = responseIssue;
 					
-					vm.issueData.title = IssuesService.generateTitle(vm.issueData);
-					vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
-					vm.descriptionThumbnail = APIService.getAPIUrl(vm.issueData.viewpoint.screenshotSmall);
-					vm.issueData.timeStamp = IssuesService.getPrettyTime(vm.issueData.created);
-
 					// Hide the description input if no description
-					vm.hideDescription = !vm.issueData.hasOwnProperty("desc");
 					vm.pinHidden = true;
 
 					// Notify parent of new issue
@@ -861,7 +852,7 @@
 					.then(function (response) {
 						vm.saving = false;
 						vm.canEditDescription = vm.checkCanEditDesc();
-						afterNewComment(response.data.issue);
+						vm.afterNewComment(response.data.issue);
 					})
 					.catch(function(error){
 						vm.errorSavingComment(error);
@@ -877,7 +868,7 @@
 					IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
 						.then(function (response) {
 							vm.saving = false;
-							afterNewComment(response.data.issue);
+							vm.afterNewComment(response.data.issue);
 						})
 						.catch(function(error){
 							vm.errorSavingComment(error);
@@ -920,7 +911,7 @@
 		 * Process after new comment saved
 		 * @param comment
 		 */
-		function afterNewComment(comment, noDeleteInput) {
+		vm.afterNewComment = function(comment, noDeleteInput) {
 
 			// mark all other comments sealed
 			vm.issueData.comments.forEach(function(otherComment){
@@ -953,12 +944,12 @@
 			if(!noDeleteInput){
 				delete vm.comment;
 				delete vm.commentThumbnail;
-				IssuesService.updatedIssue = vm.issueData;
+				IssuesService.updateIssues(vm.issueData);
 				vm.submitDisabled = true;
 			}
 
 
-			commentAreaScrollToBottom();
+			vm.commentAreaScrollToBottom();
 			// Don't set height of content if about to be destroyed as it overrides the height set by the issues list
 			if (!vm.aboutToBeDestroyed) {
 				vm.setContentHeight();
@@ -1037,7 +1028,7 @@
 
 			} else {
 				// Description
-				vm.descriptionThumbnail = data.screenShot;
+				vm.issueData.descriptionThumbnail = data.screenShot;
 				
 				ViewerService.getCurrentViewpoint(
 					{promise: viewpointPromise, account: vm.account, model: vm.model}
@@ -1102,7 +1093,7 @@
 					height += additionalInfoHeight;
 				}
 				// Description thumbnail
-				if (vm.descriptionThumbnail) {
+				if (vm.issueData && vm.issueData.descriptionThumbnail) {
 					height += thumbnailHeight;
 				}
 			}
@@ -1116,7 +1107,7 @@
 
 		};
 
-		function commentAreaScrollToBottom(){
+		vm.commentAreaScrollToBottom = function (){
 
 			$timeout(function(){
 				var commentArea = document.getElementById("descriptionAndComments");
@@ -1124,19 +1115,12 @@
 					commentArea.scrollTop = commentArea.scrollHeight;
 				}
 			});
-		}
-
+		};
 
 		vm.handleIssueChange = function(issue) {
 
-			vm.issueData.topic_type = issue.topic_type;
-			vm.issueData.desc = issue.desc;
-			vm.issueData.priority = issue.priority;
-			vm.issueData.status = issue.status;
-			vm.issueData.assigned_roles = issue.assigned_roles;
-
-			vm.statusIcon = IssuesService.getStatusIcon(vm.issueData);
-			vm.issueRoleColor = IssuesService.getJobColor(vm.issueData.assigned_roles[0]);
+			IssuesService.populateIssue(issue);
+			vm.issueData = issue;
 			
 			$scope.$apply();
 
@@ -1168,11 +1152,11 @@
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 					}
 
-					afterNewComment(comment, true);
+					vm.afterNewComment(comment, true);
 
 					//necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 				});
 
 				/*
@@ -1187,7 +1171,7 @@
 					comment.comment = newComment.comment;
 
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 				});
 
 				/*
@@ -1206,7 +1190,7 @@
 
 
 					$scope.$apply();
-					commentAreaScrollToBottom();
+					vm.commentAreaScrollToBottom();
 
 					$timeout(function(){
 						vm.issueData.comments.splice(deleteIndex, 1);

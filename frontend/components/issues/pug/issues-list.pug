@@ -9,21 +9,38 @@
 		.issueListItem(
 			ng-repeat="issue in vm.issuesToShow track by $index"
 			layout="column"
-			ng-click="vm.select(issue)"
-			ng-mouseenter="vm.setFocus(issue, $index)"
-			ng-mouseleave="vm.removeFocus(issue)"
-			ng-class="{issueListItemFocus: issue.focus}")
+			ng-click="vm.selectIssue(issue)")
+
+			#issuesListItemContent(layout='column')
+				
+				div(layout='row')
+					#issueRoleIndicator(ng-style="{backgroundColor: issue.issueRoleColor}")
+					.issueListItemThumbnail(layout="column", layout-align="center center")
+						img(ng-if="issue.thumbnail", ng-src="{{issue.thumbnailPath}}")
+						md-icon.angular-material-icons.issueListItemMissingThumbnail(
+							ng-if="!issue.thumbnail") insert_photo
+					
+					div(flex, layout="column")
+						label#issuesListItemTitle(flex="none") {{issue.title}}
+						#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
+							div(layout="row", layout-align="start start")
+
+								md-icon.angular-material-icons#issueListItemStatus(
+									aria-label="Status Icon"
+									ng-style="{'color': issue.statusIcon.colour }") {{issue.statusIcon.icon}}
+
+								label(flex) {{issue.owner}}
+							label {{issue.timeStamp}}
+						#issuesListItemDescription
+							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
 
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
-			issues-list-item(
-				data="issue"
-				user-job="vm.userJob")
 
 			md-divider
 
 			#issuesListItemEnter(
-				ng-if="issue.selected"
+				ng-if="vm.isSelectedIssue(issue)"
 				ng-click="vm.editIssue(issue)"
 				layout="column"
 				layout-align="center center")

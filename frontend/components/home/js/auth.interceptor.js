@@ -61,8 +61,10 @@
 
 			var DialogService = $injector.get("DialogService");
 			var AuthService = $injector.get("AuthService");
+			var ViewerService = $injector.get("ViewerService");
 			
 			DialogService.sessionExpired().then(function(){
+				ViewerService.reset();
 				AuthService.logoutSuccess();
 			});
 			
