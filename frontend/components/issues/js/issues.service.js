@@ -245,7 +245,7 @@
 			}
 		}
 
-		function showIssuePins(account, model) {
+		function showIssuePins() {
 
 			// TODO: This is still inefficent and unclean
 			state.allIssues.forEach(function(issue) {
@@ -268,8 +268,8 @@
 
 					ViewerService.addPin({
 						id: issue._id,
-						account: account,
-						model: model,
+						account: issue.account,
+						model: issue.model,
 						pickedPos: issue.position,
 						pickedNorm: issue.norm,
 						colours: pinColor,
@@ -295,6 +295,7 @@
 			
 			state.selectedIssue = issue;
 			showIssuePins();
+			showIssue(issue);
 		}
 
 		function populateNewIssues(newIssues) {
@@ -496,28 +497,19 @@
 		// }
 
 		function deselectPin(issue) {
-			var pinData;
-
 			// Issue with position means pin
-			if (issue.position.length > 0) {
-				pinData = {
+			if (issue.position.length > 0 && issue._id) {
+				ViewerService.changePinColours({
 					id: issue._id,
 					colours: Pin.pinColours.blue
-				};
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, pinData);
+				});
 			}
 		}
 
 		function showIssue(issue) {
 			var issueData;
 				
-			// Highlight pin, move camera and setup clipping plane
-			issueData = {
-				id: issue._id,
-				colours: Pin.pinColours.yellow
-			};
-			
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, issueData);
+			showIssuePins();
 
 			// Set the camera position
 			issueData = {
