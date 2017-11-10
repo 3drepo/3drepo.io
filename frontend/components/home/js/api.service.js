@@ -92,8 +92,11 @@
 				ClientConfigService.GET_API, 
 				url
 			);
+			var config = { 
+				withCredentials: true 
+			};
 
-			var request = $http.get(urlUse);
+			var request = $http.get(urlUse, config);
 			//var response = AuthService.handleSessionExpiration(request);
 
 			return request;
