@@ -137,7 +137,7 @@
 				
 				case "print":
 					var ids = [];
-					IssuesService.state.issueDisplay.issuesToShow.forEach(function(issue){
+					IssuesService.state.issuesToShow.forEach(function(issue){
 						ids.push(issue._id);
 					});
 					var printEndpoint = vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",");
