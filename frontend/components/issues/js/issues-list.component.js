@@ -78,7 +78,7 @@
 				vm.editIssue(issueToDisplay);
 				$timeout(function(){
 					IssuesService.showIssue(issueToDisplay);
-				}.bind(this), 500);
+				}.bind(this), 50);
 			}
 		};
 
@@ -200,7 +200,7 @@
 				vm.contentHeight({height: IssuesService.state.heights.infoHeight});
 			}
 
-			vm.showPins();
+			IssuesService.showIssuePins(vm.account, vm.model);
 		};
 
 		vm.selectIssue = function (issue) {
@@ -210,46 +210,6 @@
 		vm.isSelectedIssue = function(issue) {
 			return IssuesService.isSelectedIssue(issue);
 		};
-
-		vm.showPins = function() {
-
-			// TODO: This is still inefficent and unclean
-			IssuesService.state.allIssues.forEach(function(issue){
-				var show = IssuesService.state.issuesToShow.find(function(shownIssue){
-					return issue._id === shownIssue._id;
-				});
-
-				// Check that there is a position for the pin
-				var pinPosition = issue.position && issue.position.length;
-
-				if (show !== undefined && pinPosition) {
-
-					var pinColor = Pin.pinColours.blue;
-					var isSelectedPin = IssuesService.state.selectedIssue && 
-										issue._id === IssuesService.state.selectedIssue._id;
-
-					if (isSelectedPin) {
-						pinColor = Pin.pinColours.yellow;
-					}
-
-					ViewerService.addPin({
-						id: issue._id,
-						account: vm.account,
-						model: vm.model,
-						pickedPos: issue.position,
-						pickedNorm: issue.norm,
-						colours: pinColor,
-						viewpoint: issue.viewpoint
-					});
-
-				} else {
-					// Remove pin
-					ViewerService.removePin({ id: issue._id });
-				}
-			});
-
-		};
-
 
 	}
 }());
