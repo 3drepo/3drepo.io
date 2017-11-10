@@ -24,13 +24,13 @@
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
 		"APIService", "TreeService", "AuthService",
-		"ViewerService", "$timeout", "$filter", "$state", "AnalyticService",
+		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
 		APIService, TreeService, AuthService,
-		ViewerService, $timeout, $filter, $state, AnalyticService,
+		ViewerService, $timeout, $filter
 	) {
 
 		var url = "",
