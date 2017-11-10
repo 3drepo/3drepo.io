@@ -86,7 +86,7 @@
 		$scope.$watch(function(){
 			return IssuesService.state.allIssues;
 		}, function(){
-
+	
 			if (IssuesService.state.allIssues) {
 				if (IssuesService.state.allIssues.length > 0) {
 
@@ -94,6 +94,7 @@
 					vm.setupIssuesToShow();
 
 				} else {
+					
 					vm.toShow = "info";
 					vm.info = "There are currently no open issues";
 					vm.contentHeight({height: IssuesService.state.heights.infoHeight});
