@@ -1,5 +1,5 @@
-div(ng-if="vm.modelLoaded() == false", layout="column", layout-align="center center")
-	h3 Model is loading... 
+div(ng-if="vm.modelLoaded() == false", layout="column", layout-align="center center" flex, layout-fill)
+	tdr-progress(info="vm.progressInfo" flex, layout-fill)
 
 div(ng-if="vm.modelLoaded() == true", layout="column", layout-align="start center", flex, layout-fill)
 	div.axisHolder(layout="row"

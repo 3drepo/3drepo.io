@@ -40,6 +40,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() {
+			vm.progressInfo = "Model loading...";
 			vm.sliderMin = 0;
 			vm.sliderMax = 100;
 			vm.sliderStep = 0.1;
@@ -191,11 +192,13 @@
 		};
 
 		vm.increment = function() {
-			//vm.displayDistance += (vm.displayDistance * 0.01) * vm.scaler;
+			vm.displayDistance += (vm.displayDistance * 0.01) * vm.scaler;
+			vm.updateDisplaySlider(false, true);
 		};
 
 		vm.decrement = function() {
-			//vm.displayDistance -= (vm.displayDistance * 0.01) * vm.scaler;
+			vm.displayDistance -= (vm.displayDistance * 0.01) * vm.scaler;
+			vm.updateDisplaySlider(false, true);
 		};
 
 		/**
@@ -244,7 +247,6 @@
 				var scaler = vm.getScaler(vm.modelUnits, vm.units);
 
 				var percentage = ((vm.displayDistance *scaler) - min) / ( Math.abs(max-min));
-				console.log(scaler, vm.displayDistance, percentage);
 
 				if(!updateDistance) {
 					vm.disableWatchSlider = true;
@@ -292,13 +294,10 @@
 			};
 		};
 
-		vm.displayDistance = function() {
-			
-		};
-
 		$scope.$watch("vm.units", function(newUnit, oldUnit){
-			//vm.setPrecision(newUnit, oldUnit);
-			vm.displayDistance = vm.displayDistance * vm.getScaler(newUnit, oldUnit);
+			if (vm.displayDistance) {
+				vm.displayDistance = vm.displayDistance * vm.getScaler(newUnit, oldUnit);
+			}
 		});
 
 		$scope.$watch("vm.displayDistance", function () {
@@ -377,6 +376,12 @@
 
 		});
 
+		vm.initClip = function(modelUnits) {
+			vm.modelUnits  = modelUnits;
+			vm.units = modelUnits;
+			vm.updateDisplayedDistance(true, vm.visible);
+		};
+
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
@@ -397,9 +402,8 @@
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				vm.modelUnits  = event.value.properties.unit;
-				vm.units = vm.modelUnits;
-
+				vm.initClip(event.value.properties.unit);
+				
 			}
 			
 		});
