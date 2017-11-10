@@ -34,12 +34,12 @@
 
 	DocsCtrl.$inject = [
 		"$scope", "$mdDialog", "$timeout", "$filter", 
-		"EventService", "DocsService", "ViewerService"
+		"EventService", "DocsService", "ViewerService", "TreeService"
 	];
 
 	function DocsCtrl(
 		$scope, $mdDialog, $timeout, $filter, 
-		EventService, DocsService, ViewerService
+		EventService, DocsService, ViewerService, TreeService
 	) {	
 
 		var vm = this;
@@ -57,37 +57,39 @@
 			// Get any documents associated with an object
 			var object = event.value;
 
-			var metadataIds = vm.treeMap.oIdToMetaId[object.id];
-			if(metadataIds && metadataIds.length){
-				DocsService.getDocs(object.account, object.model, metadataIds[0])
-					.then(function(data){
-
-						if(!data){
-							return;
-						}
-						
-						vm.show = true;
-						
-						$timeout(function(){
-							//TODO: Do we need to do this for all docs
-							// if  we don't support PDFs anymore?
-							vm.docs = data;
-							vm.allDocTypesHeight = 0;
-							// Open all doc types initially
-							for (var docType in vm.docs) {
-								if (vm.docs.hasOwnProperty(docType)) {
-									vm.docs[docType].show = true;
-									vm.allDocTypesHeight += vm.docTypeHeight;
-								}
+			TreeService.getMap().then(function(map)
+				{
+					var metadataIds = map.oIdToMetaId[object.id];
+					if(metadataIds && metadataIds.length){
+						DocsService.getDocs(object.account, object.model, metadataIds[0])
+						.then(function(data){
+							if(!data){
+								return;
 							}
-							setContentHeight();
-						});
 					
-					});
+							vm.show = true;
+					
+							$timeout(function(){
+								//TODO: Do we need to do this for all docs
+								// if  we don't support PDFs anymore?
+								vm.docs = data;
+								vm.allDocTypesHeight = 0;
+								// Open all doc types initially
+								for (var docType in vm.docs) {
+									if (vm.docs.hasOwnProperty(docType)) {
+										vm.docs[docType].show = true;
+										vm.allDocTypesHeight += vm.docTypeHeight;
+									}
+								}
+								setContentHeight();
+							});
+				
+						});
+					} else {
+							vm.show = false;
+					}
+				});
 
-			} else {
-				vm.show = false;
-			}
 		};
 
 		/*

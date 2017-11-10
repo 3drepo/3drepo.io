@@ -66,7 +66,8 @@
 			addPin: addPin,
 			removePin: removePin,
 			getCurrentViewpoint: getCurrentViewpoint,
-			clearHighlights: clearHighlights
+			clearHighlights: clearHighlights,
+			changePinColours: changePinColours
 		};
 	
 		return service;
@@ -132,6 +133,13 @@
 				
 			});
 
+		}
+		
+		function changePinColours(params) {
+			viewer.changePinColours(
+				params.id,
+				params.colours
+			);
 		}
 
 		function clearHighlights() {
