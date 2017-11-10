@@ -1,39 +1,67 @@
-div(layout="column", layout-align="start center", flex, layout-fill)
-	div(layout="row", flex)
+div(ng-if="vm.modelLoaded() == false", layout="column", layout-align="center center")
+	h3 Model is loading... 
 
-		md-radio-group(
-			layout-align="center center"
-			ng-model="vm.displayedAxis"
-			layout="row")
-			
-			md-radio-button(
-				ng-repeat="axis in vm.axes"
-				value="{{axis}}"
-				ng-disabled="!vm.visible") {{axis}}
+div(ng-if="vm.modelLoaded() == true", layout="column", layout-align="start center", flex, layout-fill)
+	div.axisHolder(layout="row"
+		flex
+		layout-align="space-between center")
 
-		md-button.md-mini.md-fab(
+		div.axis(layout="row")
+			div.axisLabel Axis
+			md-radio-group(
+				layout-align="center center"
+				ng-model="vm.displayedAxis"
+				layout="row")
+				
+				md-radio-button(
+					ng-repeat="axis in vm.axes"
+					value="{{axis}}"
+					ng-disabled="!vm.visible") {{axis}}
+
+		md-button.direction.md-mini.md-fab(
 			ng-class="{ 'invertDirection' : vm.direction }"
 			ng-click="vm.invertDirection()"
 			aria-label="Invert Clip Direction")
 			md-icon.angular-material-icons compare_arrows
 
 			md-tooltip="Invert Clip Direction"
+	
+	md-divider 
 
 	.clipSlider(flex="100")
-		div(layout="column" flex="100")
+		div.clipSliderHolder(layout="column" flex="100")
 			div(layout="row", layout-align="center center", flex="100")
 				
 				md-slider(
 					ng-model="vm.sliderPosition"
 					step="{{vm.sliderStep}}"
 					min="{{vm.sliderMin}}"
-					nmax="{{vm.sliderMax}}"
+					max="{{vm.sliderMax}}"
 					aria-label="Position"
 					ng-disabled="!vm.visible")
 
 				div(flex, layout="row")
 					input(
-						type="number"
 						ng-model="vm.displayDistance"
 						ng-disabled="!vm.visible")
-					| &nbsp;{{vm.units}}
+					| 
+					div 
+						button.upDownButtons.angular-material-icons(
+							ng-click="vm.increment()"
+						) keyboard_arrow_up
+						button.upDownButtons.angular-material-icons(
+							ng-click="vm.decrement()"
+						) keyboard_arrow_down
+
+					md-select(
+						ng-disabled="vm.units == 'ft'"
+						ng-selected="vm.modelUnits"
+						ng-model="vm.units"
+						ng-required="true")
+
+						md-option(
+							ng-disabled="unit.value === 'ft'"
+							ng-repeat="unit in vm.availableUnits" 
+							value="{{unit.value}}") {{unit.value}}
+					
+

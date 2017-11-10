@@ -4,12 +4,50 @@ clip {
   padding-top: 5px;
 }
 
+clip .axisHolder {
+  width: 100% !important;
+}
+
+clip .axisLabel {
+  padding-right: 20px;
+}
+
+clip .clipSlider md-select {
+  margin: 0px;
+  margin-left: 10px;
+}
+
+clip .upDownButtons {
+    background-color: #06563c;
+    color: white;
+    outline: none;
+    border: none;
+    display: inherit;
+    font-size: 16px;
+    height: 1;
+    padding: 0px;
+    margin: 0px;
+}
+
+clip .clipSliderHolder {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+clip .axis {
+  margin-left: 20px;
+}
+
+clip .direction {
+  margin-right: 20px;
+}
+
 clip .invertDirection {
   background-color:#FF9800 !important;
 }
 
 clip md-radio-button .md-label {
-  margin-right: 10px
+  margin-right: 20px
 }
 
 clip #clipAxislabel {
@@ -17,11 +55,14 @@ clip #clipAxislabel {
 }
 
 .clipSlider {
-  margin-top: 20px;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: 15px;
+  width: 100%;
 }
 .clipSlider md-slider {
   width: 150px;
-  padding-right: 20px;
+  padding-right: 5px;
 }
 .clipSlider input {
   width: 85px;

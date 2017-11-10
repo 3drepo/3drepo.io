@@ -31,9 +31,9 @@
 			controllerAs: "vm"
 		});
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "EventService", "ViewerService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "EventService", "ViewerService", "ClientConfigService"];
 
-	function ClipCtrl($scope, $timeout, EventService, ViewerService) {
+	function ClipCtrl($scope, $timeout, EventService, ViewerService, ClientConfigService) {
 		var vm = this;
 
 		/*
@@ -50,21 +50,75 @@
 			vm.visible = false;
 			vm.bbox = null;
 			vm.onContentHeightRequest({height: 130});
-			vm.units = "m";
 			vm.direction = false;
+			vm.availableUnits = ClientConfigService.units;
+		};
+
+		vm.getScaler = function(targetUnit, currentUnit) {
+			var scaler = 1;
+			
+			switch(targetUnit) {
+			case "mm":
+				if (currentUnit == "cm") {
+					scaler = 10;
+				}
+				if (currentUnit == "m") {
+					scaler = 1000;
+				}
+				break;
+			case "cm":
+				if (currentUnit == "mm") {
+					scaler = 0.1;
+				}
+				if (currentUnit == "m") {
+					scaler = 100;
+				}
+				break;
+			case "m":
+				if (currentUnit == "mm") {
+					scaler = 0.001;
+				}
+				if (currentUnit == "cm") {
+					scaler = 0.01;
+				}
+				break;
+			}
+			
+			return scaler;
+
+		};
+
+		vm.setPrecision = function(newUnit){
+			switch(newUnit) {
+			case "mm":
+				vm.precision = 0;
+				break;
+			case "cm":
+				vm.precision = 3;
+				break;
+			case "m":
+				vm.precision = 5;
+				break;
+			}
+		};
+
+		vm.modelLoaded = function() {
+			return !!ViewerService.currentModel.model;
 		};
 
 		vm.invertDirection = function() {
-			vm.direction = !vm.direction;	
+			vm.direction = !vm.direction;
+			vm.updateClippingPlane();
 		};
 
 		vm.updateClippingPlane = function() {
 			if(vm.bbox) {
+				var scaler = vm.getScaler(vm.modelUnits, vm.units);
 				var event = {
 					clippingPlanes:[{
 						normal: vm.getNormal(),
-						distance: vm.displayDistance,
-						clipDirection: -1
+						distance: vm.displayDistance * scaler,
+						clipDirection: vm.direction ? 1 : -1
 					}],
 					fromClipPanel: true
 				};
@@ -101,7 +155,7 @@
 		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
 
-			vm.displayDistance = parseFloat(distance.toFixed(vm.precision));
+			vm.displayDistance = parseFloat(distance) * vm.scaler;
 
 			vm.displayedAxis = axis;
 			if(slider != null) {
@@ -136,6 +190,14 @@
 
 		};
 
+		vm.increment = function() {
+			//vm.displayDistance += (vm.displayDistance * 0.01) * vm.scaler;
+		};
+
+		vm.decrement = function() {
+			//vm.displayDistance -= (vm.displayDistance * 0.01) * vm.scaler;
+		};
+
 		/**
 		 * Update displayed Distance based on slider position and axis
 		 */
@@ -152,7 +214,9 @@
 					vm.disableWatchDistance = true;
 				}
 				
-				var newDistance = parseFloat((min + (Math.abs(max - min) * percentage)).toFixed(vm.precision));
+				var scaler = vm.getScaler(vm.units, vm.modelUnits);
+				var newDistance = parseFloat((min + (Math.abs(max - min) * percentage))) * scaler;
+
 				vm.displayDistance = newDistance;
 				
 				if(moveClip) {
@@ -176,8 +240,12 @@
 				var minMax = vm.getMinMax();
 				var max = minMax.max;
 				var min = minMax.min;
-				
-				var percentage = (vm.displayDistance - min) / Math.abs(max-min);
+
+				var scaler = vm.getScaler(vm.modelUnits, vm.units);
+
+				var percentage = ((vm.displayDistance *scaler) - min) / ( Math.abs(max-min));
+				console.log(scaler, vm.displayDistance, percentage);
+
 				if(!updateDistance) {
 					vm.disableWatchSlider = true;
 				}
@@ -224,15 +292,29 @@
 			};
 		};
 
+		vm.displayDistance = function() {
+			
+		};
+
+		$scope.$watch("vm.units", function(newUnit, oldUnit){
+			//vm.setPrecision(newUnit, oldUnit);
+			vm.displayDistance = vm.displayDistance * vm.getScaler(newUnit, oldUnit);
+		});
+
 		$scope.$watch("vm.displayDistance", function () {
 
 			var minMax = vm.getMinMax();
+			var scaler = vm.getScaler(vm.modelUnits, vm.units);
 			
 			if (minMax.max && vm.displayDistance > minMax.max) {
-				vm.displayDistance = minMax.max;
+				vm.displayDistance = minMax.max * scaler;
 			}
 			if (minMax.min && vm.displayDistance < minMax.min) {
-				vm.displayDistance = minMax.min;
+				vm.displayDistance = minMax.min * scaler;
+			}
+
+			if (minMax.max) {
+				vm.sliderStep = minMax.max * scaler * 0.01; // 1%
 			}
 					
 		});
@@ -315,12 +397,8 @@
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				vm.units = event.value.properties.unit;
-				if(vm.units === "mm") {
-					vm.precision = 0;
-				} else{
-					vm.precison = 3;
-				}
+				vm.modelUnits  = event.value.properties.unit;
+				vm.units = vm.modelUnits;
 
 			}
 			
