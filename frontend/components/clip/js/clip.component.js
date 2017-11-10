@@ -51,6 +51,11 @@
 			vm.bbox = null;
 			vm.onContentHeightRequest({height: 130});
 			vm.units = "m";
+			vm.direction = false;
+		};
+
+		vm.invertDirection = function() {
+			vm.direction = !vm.direction;	
 		};
 
 		vm.updateClippingPlane = function() {
@@ -95,7 +100,9 @@
 		 */
 		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-			vm.displayDistance = distance.toFixed(vm.precision);
+
+			vm.displayDistance = parseFloat(distance.toFixed(vm.precision));
+
 			vm.displayedAxis = axis;
 			if(slider != null) {
 				vm.sliderPosition = slider;
@@ -125,7 +132,6 @@
 				}
 			}
 
-
 			return normal;
 
 		};
@@ -136,30 +142,23 @@
 		vm.updateDisplayedDistance = function(updateSlider, moveClip) {
 
 			if (vm.bbox) {
-				var min = 0;
-				var max = 0;
 
-				if(vm.displayedAxis === "X") {
-					min = vm.bbox.min[0];
-					max = vm.bbox.max[0];
-				} else if(vm.displayedAxis === "Y") {
-					min = vm.bbox.min[2];
-					max = vm.bbox.max[2];
-				} else if(vm.displayedAxis === "Z") {
-					min = vm.bbox.min[1];
-					max = vm.bbox.max[1];
-				} else {
-					return;
-				} //unknown axis, nothing would've been set. avoid infinity
+				var minMax = vm.getMinMax();
+				var max = minMax.max;
+				var min = minMax.min;
 				
 				var percentage = 1 - vm.sliderPosition/100;
 				if(!updateSlider) {
 					vm.disableWatchDistance = true;
 				}
-				vm.displayDistance = (min + (Math.abs(max - min) * percentage)).toFixed(vm.precision);
+				
+				var newDistance = parseFloat((min + (Math.abs(max - min) * percentage)).toFixed(vm.precision));
+				vm.displayDistance = newDistance;
+				
 				if(moveClip) {
 					vm.updateClippingPlane();
 				}
+
 			} else {
 				console.warn("updateDisplayedDistance - Bounding Box was not defined", vm.bbox);
 			}
@@ -174,20 +173,9 @@
 
 			if (vm.bbox) {
 
-				var min = 0;
-				var max = 0;
-				if(vm.displayedAxis === "X") {
-					min = vm.bbox.min[0];
-					max = vm.bbox.max[0];
-				} else if(vm.displayedAxis === "Y") {
-					min = vm.bbox.min[2];
-					max = vm.bbox.max[2];
-				} else if(vm.displayedAxis === "Z") {
-					min = vm.bbox.min[1];
-					max = vm.bbox.max[1];
-				} else {
-					return;
-				} //unknown axis, nothing would've been set. avoid infinity
+				var minMax = vm.getMinMax();
+				var max = minMax.max;
+				var min = minMax.min;
 				
 				var percentage = (vm.displayDistance - min) / Math.abs(max-min);
 				if(!updateDistance) {
@@ -213,6 +201,41 @@
 
 		};
 
+		vm.getMinMax = function() {
+			var min = 0;
+			var max = 0;
+
+			if (vm.bbox) {
+				if(vm.displayedAxis === "X") {
+					min = vm.bbox.min[0];
+					max = vm.bbox.max[0];
+				} else if(vm.displayedAxis === "Y") {
+					min = vm.bbox.min[2];
+					max = vm.bbox.max[2];
+				} else if(vm.displayedAxis === "Z") {
+					min = vm.bbox.min[1];
+					max = vm.bbox.max[1];
+				} 
+			}
+
+			return {
+				min: min,
+				max: max
+			};
+		};
+
+		$scope.$watch("vm.displayDistance", function () {
+
+			var minMax = vm.getMinMax();
+			
+			if (minMax.max && vm.displayDistance > minMax.max) {
+				vm.displayDistance = minMax.max;
+			}
+			if (minMax.min && vm.displayDistance < minMax.min) {
+				vm.displayDistance = minMax.min;
+			}
+					
+		});
 
 		/*
 		 * Watch for show/hide of card

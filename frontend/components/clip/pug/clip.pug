@@ -1,25 +1,39 @@
 div(layout="column", layout-align="start center", flex, layout-fill)
 	div(layout="row", flex)
-		label#clipAxislabel(flex="20") Axis:
-		md-radio-group(ng-model="vm.displayedAxis", flex="75" ,layout="row")
-			md-radio-button(ng-repeat="axis in vm.axes", value="{{axis}}", ng-disabled="!vm.visible") {{axis}}
 
-	.clipSlider(flex)
-		div(layout="column")
+		md-radio-group(
+			layout-align="center center"
+			ng-model="vm.displayedAxis"
+			layout="row")
+			
+			md-radio-button(
+				ng-repeat="axis in vm.axes"
+				value="{{axis}}"
+				ng-disabled="!vm.visible") {{axis}}
+
+		md-button.md-mini.md-fab(
+			ng-class="{ 'invertDirection' : vm.direction }"
+			ng-click="vm.invertDirection()"
+			aria-label="Invert Clip Direction")
+			md-icon.angular-material-icons compare_arrows
+
+			md-tooltip="Invert Clip Direction"
+
+	.clipSlider(flex="100")
+		div(layout="column" flex="100")
 			div(layout="row", layout-align="center center", flex="100")
+				
 				md-slider(
-					flex="70"
 					ng-model="vm.sliderPosition"
 					step="{{vm.sliderStep}}"
 					min="{{vm.sliderMin}}"
-					max="{{vm.sliderMax}}"
+					nmax="{{vm.sliderMax}}"
 					aria-label="Position"
-					ng-disabled="!vm.visible"
-				)
+					ng-disabled="!vm.visible")
+
 				div(flex, layout="row")
 					input(
-						flextype="number"
+						type="number"
 						ng-model="vm.displayDistance"
-						ng-disabled="!vm.visible"
-					)
+						ng-disabled="!vm.visible")
 					| &nbsp;{{vm.units}}

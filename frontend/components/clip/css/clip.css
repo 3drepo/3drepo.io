@@ -1,11 +1,15 @@
 clip {
   display: block;
   width: 100%;
-  padding: 20px 0 10px;
+  padding-top: 5px;
+}
+
+clip .invertDirection {
+  background-color:#FF9800 !important;
 }
 
 clip md-radio-button .md-label {
-  margin-right: 30px;
+  margin-right: 10px
 }
 
 clip #clipAxislabel {
