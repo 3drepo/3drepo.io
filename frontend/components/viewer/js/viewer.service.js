@@ -31,6 +31,10 @@
 		EventService, DocsService
 	) {
 
+		var newPinId = "newPinId";
+		var pinData = null;
+
+
 		var viewer;
 		var currentModel = {
 			model : null,
@@ -65,16 +69,29 @@
 			highlightObjects: highlightObjects,
 			getObjectsStatus: getObjectsStatus,
 			clearClippingPlanes: clearClippingPlanes, 
-			addPin: addPin,
-			removePin: removePin,
+			
 			getCurrentViewpoint: getCurrentViewpoint,
 			clearHighlights: clearHighlights,
-			changePinColours: changePinColours
+			changePinColours: changePinColours,
+
+			setPin: setPin,
+			addPin: addPin,
+			removePin: removePin,
+			newPinId: newPinId,
+			getPinData: getPinData
 		};
 	
 		return service;
 	
 		///////////////
+
+		function getPinData() {
+			return pinData;
+		}
+
+		function setPin(newPinData) {
+			pinData = newPinData.data;
+		}
 
 		// TODO: More EventService to be removed, but these functions broadcast 
 		// across multiple watchers

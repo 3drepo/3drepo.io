@@ -32,7 +32,6 @@
 				exit: "&",
 				event: "<",
 				selectedIssueLoaded: "<",
-				issueCreated: "&",
 				contentHeight: "&",
 				selectedObjects: "<",
 				modelSettings: "<",
@@ -64,7 +63,7 @@
 		 * Init
 		 */
 		vm.$onInit = function() { 
-
+			
 			vm.canEditDescription = false;
 
 			vm.savedScreenShot = null;
@@ -82,7 +81,7 @@
 			vm.textInputHasFocusFlag = false;
 			vm.submitDisabled = true;
 			vm.pinDisabled = true;
-			vm.pinData = null;
+
 			vm.showAdditional = true;
 			vm.editingDescription = false;
 			vm.clearPin = false;
@@ -524,7 +523,6 @@
 				// overwrite the original issue data itself
 				var newViewpointData = angular.copy(vm.issueData);
 				newViewpointData.viewpoint = viewpoint;
-				newViewpointData
 				IssuesService.showIssue(newViewpointData);
 
 			}
@@ -591,13 +589,6 @@
 
 		};
 
-		/**
-		 * Set the current add pin data
-		 * @param pinData
-		 */
-		vm.setPin = function (pinData) {
-			vm.pinData = pinData.data;
-		};
 
 		/**
 		 * Toggle showing of extra inputs
@@ -784,9 +775,10 @@
 				rev_id: vm.revision
 			};
 			// Pin data
-			if (vm.pinData !== null) {
-				issue.pickedPos = vm.pinData.pickedPos;
-				issue.pickedNorm = vm.pinData.pickedNorm;
+			var pinData = ViewerService.getPinData();
+			if (pinData !== null) {
+				issue.pickedPos = pinData.pickedPos;
+				issue.pickedNorm = pinData.pickedNorm;
 			}
 			// Group data
 			if (angular.isDefined(groupId)) {
@@ -797,14 +789,15 @@
 				.then(function (response) {
 					vm.data = response.data; // So that new changes are registered as updates
 					var responseIssue = response.data;
-					IssuesService.populateIssue(responseIssue);
-					vm.issueData = responseIssue;
-					
+
 					// Hide the description input if no description
 					vm.pinHidden = true;
 
 					// Notify parent of new issue
-					vm.issueCreated({issue: vm.issueData});
+					IssuesService.populateIssue(responseIssue);
+					vm.issueData = responseIssue;
+					IssuesService.addIssue(vm.issueData);
+					IssuesService.setSelectedIssue(vm.issueData, true);
 
 					// Hide some actions
 					ViewerService.pin.pinDropMode = false;
@@ -955,7 +948,7 @@
 			if (!vm.aboutToBeDestroyed) {
 				vm.setContentHeight();
 			}
-		}
+		};
 
 		/**
 		 * Delete a comment
@@ -977,6 +970,8 @@
 			});
 			vm.setContentHeight();
 		};
+
+		
 
 		/**
 		 * Toggle the editing of a comment
