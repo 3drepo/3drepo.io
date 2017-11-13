@@ -326,7 +326,11 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
+
+				var issueListItemId = "issue" + IssuesService.state.selectedIssue._id;
+
 				IssuesService.state.displayIssue = null;
+				
 				$state.go("home.account.model", 
 					{
 						account: vm.account, 
@@ -335,7 +339,14 @@
 						noSet: true
 					}, 
 					{notify: false}
-				);
+				).then(function(){
+					var element = document.getElementById(issueListItemId);
+					if (element) {
+						element.scrollIntoView(); 
+					}
+				});
+
+				
 			}
 		});
 
@@ -504,7 +515,9 @@
 		 * Exit issue editing
 		 * @param issue
 		 */
-		vm.editIssueExit = function () {
+		vm.editIssueExit = function (issue) {
+			document.getElementById("issue" + issue._id).scrollIntoView();
+			console.log(document.getElementById("issue" + issue._id));
 			vm.hideItem = true;
 		};
 
