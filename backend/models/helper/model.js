@@ -131,25 +131,33 @@ function importSuccess(account, model) {
  * @param {account} acount - User account
  * @param {model} model - Model
  * @param {errCode} errCode - Defined bouncer error code or IO response code
- * @param {corId} corId - CorrelationId (Mail will not be sent if undefined)
+ * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
+ * @param {sendMail} sendMail - Boolean to determine if a notification E-mail will be sent
  */
-function importFail(account, model, errCode, corId) {
+function importFail(account, model, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
 		setting.status = 'failed';
+		if(setting.type === 'toy' || setting.type === 'sample'){
+			setting.timestamp = undefined;
+		}
 		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified('errorReason');
 		setting.save().then( () => {				
 			ChatEvent.modelStatusChanged(null, account, model, setting);						
 		})
 
-		if (corId) {
+		if (!errMsg) {
+			errMsg = setting.errorReason.message;
+		}
+
+		if (sendMail) {
 			Mailer.sendImportError({
 				account,
 				model,
 				username: account,
-				err: convertToErrorCode(errCode).message,
-				corID: corId
+				err: errMsg,
+				corID: setting.corID
 			});
 		}
 	}).catch(err => {
@@ -215,7 +223,6 @@ function resetCorrelationId(account, model) {
 }
 
 function createAndAssignRole(modelName, account, username, data) {
-	
 
 	let project;
 	//generate model id
@@ -351,7 +358,7 @@ function createAndAssignRole(modelName, account, username, data) {
 }
 
 function importToyProject(account, username){
-	
+
 	// create a project named Sample_Project
 	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
@@ -1263,7 +1270,7 @@ function uploadFile(req){
 
 					if(size > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-						importFail(account, model, responseCodes.SIZE_LIMIT_PAY, undefined);
+						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {
 						cb(null, true);
 					}

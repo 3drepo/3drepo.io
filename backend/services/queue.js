@@ -349,6 +349,7 @@
 					let resData = JSON.parse(rep.content);
 
 					let resErrorCode = resData.value;
+					let resErrorMessage = resData.message;
 					let resDatabase = resData.database;
 					let resProject = resData.project;
 
@@ -366,7 +367,7 @@
 							}
 						} 
 						else {
-							ModelHelper.importFail(resDatabase, resProject, resErrorCode, rep.properties.correlationId);
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode, resErrorMessage, true);
 							if(defer){
 								defer.reject(rep);
 							}
