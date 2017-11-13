@@ -413,9 +413,9 @@
 
 		// This keeps the colours updated etc
 		$scope.$watch("vm.issueData", function(){
-			if (vm.issueData) {
-				IssuesService.populateIssue(vm.issueData);
-			}
+			// if (vm.issueData) {
+			// 	IssuesService.populateIssue(vm.issueData);
+			// }
 		}, true);
 
 		/**
@@ -954,7 +954,7 @@
 			if (!vm.aboutToBeDestroyed) {
 				vm.setContentHeight();
 			}
-		}
+		};
 
 		/**
 		 * Delete a comment
