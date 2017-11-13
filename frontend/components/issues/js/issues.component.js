@@ -38,7 +38,6 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
-				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			}
@@ -63,6 +62,8 @@
 		 */
 		vm.$onInit = function() {
 
+			ViewerService.setPin({data: null});
+			
 			vm.saveIssueDisabled = true;
 			vm.allIssues = [];
 			vm.issuesToShow = [];
@@ -168,6 +169,15 @@
 
 		};
 
+		vm.$onDestroy = function () {
+			vm.removeUnsavedPin();
+		};
+
+		vm.removeUnsavedPin = function() {
+			ViewerService.removePin({id: ViewerService.newPinId });
+			ViewerService.setPin({data: null});
+		};
+
 		vm.modelLoaded = function() {
 			return !!ViewerService.currentModel.model;
 		};
@@ -231,20 +241,67 @@
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			var i, length;
 
-			//vm.event = event;
+			var data,
+				position = [],
+				normal = [];
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.allIssues.length; i < length; i += 1) {
-					if (vm.allIssues[i]._id === event.value.id) {
-						vm.editIssue(vm.allIssues[i]);
+				
+				for (var i = 0; i < IssuesService.state.allIssues.length; i += 1) {
+					var iterIssue = IssuesService.state.allIssues;
+					if (iterIssue[i]._id === event.value.id) {
+						vm.editIssue(iterIssue[i]);
 						break;
 					}
 				}
+
+			} else if (event.type === EventService.EVENT.VIEWER.PICK_POINT &&
+				event.value.hasOwnProperty("id") &&
+				ViewerService.pin.pinDropMode
+			) {
+
+				vm.removeUnsavedPin();
+
+				var trans = event.value.trans;
+				position = event.value.position;
+				normal = event.value.normal;
+
+				if(trans) {
+					position = trans.inverse().multMatrixPnt(position);
+				}
+
+				data = {
+					id: ViewerService.newPinId,
+					account: vm.account,
+					model: vm.model,
+					selectedObjectId: event.value.id,
+					pickedPos: position,
+					pickedNorm: normal,
+					colours: Pin.pinColours.yellow
+
+				};
+
+				ViewerService.addPin(data);
+				ViewerService.setPin({data: data});
+
+			} else if (
+				event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE && 
+				ViewerService.pin.pinDropMode
+			) {
+
+				vm.removeUnsavedPin();
+
+			} else if (
+				event.type === EventService.EVENT.VIEWER.CLICK_PIN && 
+				ViewerService.newPinId === "newPinId"
+			) {
+				vm.removeUnsavedPin();
 			} 
 
 		});
+
+		
 
 		/**
 		 * Close the add alert
@@ -261,8 +318,7 @@
 			vm.onContentHeightRequest({height: height});
 		};
 
-		
-
+	
 		/*
 		 * Go back to issues list
 		 */
@@ -414,50 +470,26 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			var notCurrentlySelected = IssuesService.state.selectedIssue && 
-										issue && 
-										IssuesService.state.selectedIssue._id !== issue._id;
-
-			if (notCurrentlySelected) {
-				IssuesService.deselectPin(IssuesService.state.selectedIssue);
-				// Remove highlight from any multi objects
-				ViewerService.highlightObjects([]);
-			}
-
-			if (!issue && IssuesService.state.selectedIssue) {
+			if (IssuesService.state.selectedIssue) {
 				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 			}
-
+			
 			if (issue) {
 
-				IssuesService.getIssue(issue.account, issue.model, issue._id)
-					.then(function(retrievedIssue){
-						IssuesService.setSelectedIssue(retrievedIssue);
-						IssuesService.showIssue(issue);
-						$state.go("home.account.model.issue", 
-							{
-								account: vm.account, 
-								model: vm.model, 
-								revision: vm.revision,
-								issue: issue._id,
-								noSet: true
-							}, 
-							{notify: false}
-						);
-		
-						AnalyticService.sendEvent({
-							eventCategory: "Issue",
-							eventAction: "view"
-						});
-					})
-					.catch(function(error) {
-						var content = "We tried to get the selected issue but it failed. " +
-							"If this continues please message support@3drepo.io.";
-						var escapable = true;
-						DialogService.text("Error Getting Issue", content, escapable);
-						console.error(error);
-					});
+				ViewerService.highlightObjects([]);
+				$state.go("home.account.model.issue", 
+					{
+						account: vm.account, 
+						model: vm.model, 
+						revision: vm.revision,
+						issue: issue._id,
+						noSet: true
+					}, 
+					{notify: false}
+				);
 
+				IssuesService.setSelectedIssue(issue);
+				
 			} else {
 				IssuesService.resetSelectedIssue();
 			}
@@ -474,17 +506,6 @@
 		 */
 		vm.editIssueExit = function () {
 			vm.hideItem = true;
-		};
-
-		/**
-		 * New issue created so inform issues list
-		 * @param issue
-		 */
-		vm.issueCreated = function (issue) {
-
-			IssuesService.addIssue(issue);
-			IssuesService.setSelectedIssue(issue);
-
 		};
 
 	}

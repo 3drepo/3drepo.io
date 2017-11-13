@@ -15,41 +15,39 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(() => {
-	"use strict";
 
-	/**
-	 * Creates frontend API Express app 
-	 * 
-	 * @param {Object} serverConfig - Config for server instance
-	 * @returns
-	 */
-	module.exports.createApp = function (serverConfig) {
+"use strict";
 
-		const express = require("express");
-		const config = require("../config.js");
-		const pug = require("pug");
+/**
+ * Creates frontend API Express app 
+ * 
+ * @param {Object} serverConfig - Config for server instance
+ * @returns
+ */
+module.exports.createApp = function (serverConfig) {
 
-		const app = express();
+	const express = require("express");
+	const app = express();
+	const path = require("path");
 
-		const publicDir = __dirname + "/../../public";
-		app.use("/public", express.static(publicDir));
-		app.get("/public/*", function (req, res) {
-			res.status(404).send('File not found');
-		});
-		
-		app.set("views", "./pug/");
-		app.set("view_engine", "pug");
-		app.locals.pretty = true;
+	const publicDir = __dirname + "/../../public";
+	
+	app.get("/images/maintenance.svg", function(req, res){
+		res.sendfile(path.resolve(publicDir + "/images/maintenance.svg") );
+	});
 
-		//app.use(favicon("./public/images/favicon.ico"));
+	app.get("/images/3drepo-logo-white.png", function(req, res){
+		res.sendfile(path.resolve(publicDir + "/images/3drepo-logo-white.png") );
+	});
+	
+	app.set("views", "./pug/");
+	app.set("view_engine", "pug");
+	app.locals.pretty = true;
 
-		app.get("*", function (req, res) {
-			// Generate the list of files to load for the plugins
-			//const clientConfig = createClientConfig(req);
-			res.render("maintenance.pug", {});
-		});
+	app.use("/*", function(req, res){
+		res.render("maintenance.pug", {});
+	});
 
-		return app;
-	};
-})();
+	return app;
+};
+
