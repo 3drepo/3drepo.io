@@ -21,53 +21,113 @@
 	angular.module("3drepo")
 		.service("DocsService", DocsService);
 
-	DocsService.$inject = ["$q", "ClientConfigService", "APIService"];
+	DocsService.$inject = ["$q", "ClientConfigService", "APIService", "TreeService"];
 
-	function DocsService($q, ClientConfigService, APIService) {
-		var getDocs = function (account, model, metadataId) {
-			var i,
-				length,
-				data = {},
-				deferred = $q.defer(),
-				url = account + "/" + model + "/meta/" + metadataId + ".json";
+	function DocsService($q, ClientConfigService, APIService, TreeService) {
 
-			APIService.get(url)
-				.then(
-					function(json) {
-						var dataType;
-						// Set up the url for each PDF doc
-						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
-							// Get data type
-							dataType = json.data.meta[i].hasOwnProperty("mime") ? json.data.meta[i].mime : "Meta Data";
-							if (dataType === "application/pdf") {
-								dataType = "PDF";
-							}
-
-							// Add data to type group
-							if (!data.hasOwnProperty(dataType)) {
-								data[dataType] = {data: []};
-							}
-							data[dataType].data.push(json.data.meta[i]);
-
-							// Setup PDF url
-							var endpoint = account + "/" + model + "/" + json.data.meta[i]._id + ".pdf";
-							json.data.meta[i].url = ClientConfigService.apiUrl(
-								ClientConfigService.GET_API,
-								endpoint
-							);
-						}
-						deferred.resolve(data);
-					},
-					function () {
-						deferred.resolve();
-					}
-				);
-
-			return deferred.promise;
+		var docTypeHeight = 50;
+		var state = {
+			disabled: false,
+			active: false,
+			show: false,
+			updated: false,
+			docs: false,
+			allDocTypesHeight: 0
 		};
 
 		return {
-			getDocs: getDocs
+			getDocs: getDocs,
+			state : state,
+			handleObjectSelected: handleObjectSelected
 		};
+
+		///////////////////
+
+		function getDocs(account, model, metadataId) {
+			var url = account + "/" + model + "/meta/" + metadataId + ".json";
+			return APIService.get(url)
+				.then(function(json){
+					return handleDocs(account, model, metadataId, json);
+				});
+		}
+
+		function handleObjectSelected(event) {
+			
+			// Get any documents associated with an object
+			var object = event.value;
+
+			TreeService.getMap().then(function(treeMap) {
+				var metadataIds = treeMap.oIdToMetaId[object.id];
+				if(metadataIds && metadataIds.length){
+					getDocs(object.account, object.model, metadataIds[0])
+						.then(function(data){
+
+							if(!data){
+								return;
+							}
+						
+							state.docs = data;
+							state.allDocTypesHeight = 0;
+
+							// Open all doc types initially
+							for (var docType in state.docs) {
+								if (state.docs.hasOwnProperty(docType)) {
+									state.docs[docType].show = true;
+									state.allDocTypesHeight += docTypeHeight;
+								}
+							}
+
+							state.show = true;
+							state.updated = true;
+
+						})
+						.catch(function(error){
+							console.error("Error getting metadata: ", error);
+						});
+
+				} else {
+					state.show = false;
+				}
+			}
+
+		}
+
+		function handleDocs(account, model, metadataId, json) {
+			
+			var docsData = {};
+
+			var dataType;
+			// Set up the url for each PDF doc
+			for (var i = 0; i < json.data.meta.length; i += 1) {
+
+				var meta = json.data.meta[i];
+
+				// Get data type
+				dataType = meta.hasOwnProperty("mime") ? 
+					meta.mime : 
+					"Meta Data";
+
+				if (dataType === "application/pdf") {
+					dataType = "PDF";
+				}
+
+				// Add data to type group
+				if (!docsData.hasOwnProperty(dataType)) {
+					docsData[dataType] = {data: []};
+				}
+				docsData[dataType].data.push(meta);
+
+				// Setup PDF url
+				var endpoint = account + "/" + model + "/" + meta._id + ".pdf";
+				meta.url = ClientConfigService.apiUrl(
+					ClientConfigService.GET_API,
+					endpoint
+				);
+			}
+
+			return docsData;
+
+		}
+
 	}
 }());
