@@ -234,6 +234,7 @@
 
 		function resetSelectedIssue() {
 			state.selectedIssue = undefined;
+			//showIssuePins();
 		}
 
 		function isSelectedIssue(issue) {
@@ -284,7 +285,7 @@
 
 		}
 
-		function setSelectedIssue(issue) {
+		function setSelectedIssue(issue, isCorrectState) {
 
 			if (state.selectedIssue) {
 				var different = (state.selectedIssue._id !== issue._id);
@@ -294,8 +295,14 @@
 			}
 			
 			state.selectedIssue = issue;
-			showIssuePins();
-			showIssue(issue);
+
+			// If we're saving then we already have pin and
+			// highlights in place
+			if (!isCorrectState) {
+				showIssuePins();
+				showIssue(issue);
+			}
+
 		}
 
 		function populateNewIssues(newIssues) {
@@ -531,8 +538,7 @@
 					model: issue.model
 				};
 				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
-			}
-			else {
+			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}

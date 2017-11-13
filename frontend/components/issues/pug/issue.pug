@@ -287,14 +287,6 @@ md-divider
 		style="color: #9e9e9e;") {{ vm.disabledReason }}
 
 
-// Action components
-issues-pin(
-	account="vm.account"
-	model="vm.model"
-	event="vm.event"
-	set-pin="vm.setPin({data: data})"
-	clear-pin="vm.clearPin")
-
 // Whilst issue is loading
 div.heightFix(
 	ng-if="!vm.modelSettings"
