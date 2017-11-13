@@ -428,7 +428,7 @@ var UnityUtil;
 		toUnity("SetUnits",LoadingState.MODEL_LOADING, units);
 	};
 
-	UnityUtil.prototype.setViewpoint = function(pos, up, forward, account, model) {
+	UnityUtil.prototype.setViewpoint = function(pos, up, forward, lookAt, account, model) {
 		var param = {};
 		if(account && model) {
 			param.nameSpace = account + "." + model;
@@ -437,6 +437,7 @@ var UnityUtil;
 		param.position = pos;
 		param.up = up;
 		param.forward = forward;
+		param.lookAt = lookAt;
 		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 
 	};

@@ -607,13 +607,13 @@ var Viewer = {};
 			}
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model);
+		this.setCamera = function(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
+			self.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 		};
 
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
-			UnityUtil.setViewpoint(pos, up, viewDir, account, model);
+		this.updateCamera = function(pos, up, viewDir, lookAt, animate, rollerCoasterMode, account, model) {
+			UnityUtil.setViewpoint(pos, up, viewDir, lookAt, account, model);
 		};
 
 		this.reset = function() {
