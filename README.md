@@ -3,10 +3,11 @@
 
 3drepo.io is a web based front-end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the [3D Repo Bouncer](https://github.com/3drepo/3drepobouncer) library and [3D Repo GUI](https://github.com/3drepo/3drepogui) separate projects.
 
-![3drepoio_1a](https://cloud.githubusercontent.com/assets/3008807/12302435/09590660-ba1d-11e5-8bab-c95de3f788c5.jpg)
+![skanska2](https://user-images.githubusercontent.com/3008807/32048840-c75fc92e-ba42-11e7-964d-1587974dce6e.png)
 
-### Latest Release
-* [3drepo.io](https://github.com/3drepo/3drepo.io/releases/tag/latest)
+### Latest Release & API
+* Latest release: https://github.com/3drepo/3drepo.io/releases/tag/latest
+* Corresponding API docs: https://3drepo.github.io/3drepo.io/
 
 ## Licenses
 This project is Copyright of [3D Repo Ltd](http://3drepo.org), a company registered in England and Wales No. 09014101, and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org). All contributors are required to sign either the [3D Repo Individual](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or the [3D Repo Entity](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2) [Contributor License Agreement (CLA)](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
@@ -129,8 +130,6 @@ Within this file you must append to, or create, a line for the entry for example
 `127.0.0.1 localhost example.org`
 
 In the configuration file for the server, you then set hostname to `example.org` or whatever host you have redirected.
-
-You can find the API doc at https://3drepo.github.io/3drepo.io/
 
 Contact
 -------
