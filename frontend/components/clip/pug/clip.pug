@@ -1,7 +1,7 @@
-div(ng-if="vm.modelLoaded() == false", layout="column", layout-align="center center" flex, layout-fill)
+div(ng-if="!vm.bbox || !vm.units", layout="column", layout-align="center center" flex, layout-fill)
 	tdr-progress(info="vm.progressInfo" flex, layout-fill)
 
-div(ng-if="vm.modelLoaded() == true", layout="column", layout-align="start center", flex, layout-fill)
+div(ng-if="vm.bbox && vm.units", layout="column", layout-align="start center", flex, layout-fill)
 	div.axisHolder(layout="row"
 		flex
 		layout-align="space-between center")
@@ -24,7 +24,7 @@ div(ng-if="vm.modelLoaded() == true", layout="column", layout-align="start cente
 			aria-label="Invert Clip Direction")
 			md-icon.angular-material-icons compare_arrows
 
-			md-tooltip="Invert Clip Direction"
+			md-tooltip Invert Clip Direction
 	
 	md-divider 
 
@@ -41,16 +41,16 @@ div(ng-if="vm.modelLoaded() == true", layout="column", layout-align="start cente
 					ng-disabled="!vm.visible")
 
 				div(flex, layout="row")
-					input(
+					input.distanceInput(
 						ng-model="vm.displayDistance"
 						ng-disabled="!vm.visible")
 					| 
 					div 
 						button.upDownButtons.angular-material-icons(
-							ng-click="vm.increment()"
+							ng-click="vm.increment(0.001)"
 						) keyboard_arrow_up
 						button.upDownButtons.angular-material-icons(
-							ng-click="vm.decrement()"
+							ng-click="vm.decrement(0.001)"
 						) keyboard_arrow_down
 
 					md-select(

@@ -31,9 +31,9 @@
 			controllerAs: "vm"
 		});
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "EventService", "ViewerService", "ClientConfigService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "$element", "EventService", "ViewerService", "ClientConfigService"];
 
-	function ClipCtrl($scope, $timeout, EventService, ViewerService, ClientConfigService) {
+	function ClipCtrl($scope, $timeout, $element, EventService, ViewerService, ClientConfigService) {
 		var vm = this;
 
 		/*
@@ -43,8 +43,8 @@
 			vm.progressInfo = "Model loading...";
 			vm.sliderMin = 0;
 			vm.sliderMax = 100;
-			vm.sliderStep = 0.1;
-			vm.displayDistance = 0;
+			vm.sliderStep = 0.005;
+			vm.displayDistance = 0.0;
 			vm.precision = 3;
 			vm.sliderPosition = vm.sliderMin;
 			vm.axes = ["X", "Y", "Z"];
@@ -53,6 +53,37 @@
 			vm.onContentHeightRequest({height: 130});
 			vm.direction = false;
 			vm.availableUnits = ClientConfigService.units;
+			$element.bind("DOMMouseScroll mousewheel onmousewheel", vm.handleScroll);
+			$element.bind("keydown", vm.handleUpDownArrow);
+		};
+
+		vm.$onDestroy = function() {
+			vm.units = undefined;
+			vm.bbox = null;
+		};
+
+		vm.handleUpDownArrow = function(event) {
+			if (event.key) {
+				if (event.key === "ArrowUp") {
+					vm.increment(0.005);
+				} else if (event.key === "ArrowDown") {
+					vm.decrement(0.005);
+				}
+			} 
+		};
+		
+		vm.handleScroll = function(event) {
+
+			// cross-browser wheel delta
+			event = window.event || event; // old IE support
+			var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+
+			if(delta > 0) {
+				vm.decrement(0.005);
+			} else if(delta < 0) {
+				vm.increment(0.005);
+			}
+
 		};
 
 		vm.getScaler = function(targetUnit, currentUnit) {
@@ -89,23 +120,19 @@
 
 		};
 
-		vm.setPrecision = function(newUnit){
-			switch(newUnit) {
-			case "mm":
-				vm.precision = 0;
-				break;
-			case "cm":
-				vm.precision = 3;
-				break;
-			case "m":
-				vm.precision = 5;
-				break;
-			}
-		};
-
-		vm.modelLoaded = function() {
-			return !!ViewerService.currentModel.model;
-		};
+		// vm.setPrecision = function(newUnit){
+		// 	switch(newUnit) {
+		// 	case "mm":
+		// 		vm.precision = 0;
+		// 		break;
+		// 	case "cm":
+		// 		vm.precision = 3;
+		// 		break;
+		// 	case "m":
+		// 		vm.precision = 5;
+		// 		break;
+		// 	}
+		// };
 
 		vm.invertDirection = function() {
 			vm.direction = !vm.direction;
@@ -113,21 +140,21 @@
 		};
 
 		vm.updateClippingPlane = function() {
-			if(vm.bbox) {
-				var scaler = vm.getScaler(vm.modelUnits, vm.units);
-				var event = {
-					clippingPlanes:[{
-						normal: vm.getNormal(),
-						distance: vm.displayDistance * scaler,
-						clipDirection: vm.direction ? 1 : -1
-					}],
-					fromClipPanel: true
-				};
-				EventService.send(
-					EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
-					event
-				);
-			}
+			
+			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+			var event = {
+				clippingPlanes:[{
+					normal: vm.getNormal(),
+					distance: vm.displayDistance * scaler,
+					clipDirection: vm.direction ? 1 : -1
+				}],
+				fromClipPanel: true
+			};
+			EventService.send(
+				EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
+				event
+			);
+
 		};
 
 		/**
@@ -156,7 +183,7 @@
 		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
 
-			vm.displayDistance = parseFloat(distance) * vm.scaler;
+			vm.displayDistance = parseFloat(distance);
 
 			vm.displayedAxis = axis;
 			if(slider != null) {
@@ -191,13 +218,19 @@
 
 		};
 
-		vm.increment = function() {
-			vm.displayDistance += (vm.displayDistance * 0.01) * vm.scaler;
+		vm.increment = function(percentage) {
+			if (percentage === undefined) {
+				percentage = 0.01;
+			}
+			vm.displayDistance += (vm.displayDistance * percentage);
 			vm.updateDisplaySlider(false, true);
 		};
 
-		vm.decrement = function() {
-			vm.displayDistance -= (vm.displayDistance * 0.01) * vm.scaler;
+		vm.decrement = function(percentage) {
+			if (percentage === undefined) {
+				percentage = 0.01;
+			}
+			vm.displayDistance -= (vm.displayDistance * percentage);
 			vm.updateDisplaySlider(false, true);
 		};
 
@@ -206,30 +239,24 @@
 		 */
 		vm.updateDisplayedDistance = function(updateSlider, moveClip) {
 
-			if (vm.bbox) {
 
-				var minMax = vm.getMinMax();
-				var max = minMax.max;
-				var min = minMax.min;
-				
-				var percentage = 1 - vm.sliderPosition/100;
-				if(!updateSlider) {
-					vm.disableWatchDistance = true;
-				}
-				
-				var scaler = vm.getScaler(vm.units, vm.modelUnits);
-				var newDistance = parseFloat((min + (Math.abs(max - min) * percentage))) * scaler;
-
-				vm.displayDistance = newDistance;
-				
-				if(moveClip) {
-					vm.updateClippingPlane();
-				}
-
-			} else {
-				console.warn("updateDisplayedDistance - Bounding Box was not defined", vm.bbox);
+			var minMax = vm.getMinMax();
+			var max = minMax.max;
+			var min = minMax.min;
+			
+			var percentage = 1 - vm.sliderPosition/100;
+			if(!updateSlider) {
+				vm.disableWatchDistance = true;
 			}
 			
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+			var newDistance = parseFloat((min + (Math.abs(max - min) * percentage))) * scaler;
+
+			vm.displayDistance = newDistance;
+			
+			if(moveClip) {
+				vm.updateClippingPlane();
+			}
 
 		};
 
@@ -238,35 +265,30 @@
 		 */
 		vm.updateDisplaySlider = function(updateDistance, moveClip) {
 
-			if (vm.bbox) {
 
-				var minMax = vm.getMinMax();
-				var max = minMax.max;
-				var min = minMax.min;
+			var minMax = vm.getMinMax();
+			var max = minMax.max;
+			var min = minMax.min;
 
-				var scaler = vm.getScaler(vm.modelUnits, vm.units);
+			var scaler = vm.getScaler(vm.modelUnits, vm.units);
 
-				var percentage = ((vm.displayDistance *scaler) - min) / ( Math.abs(max-min));
+			var percentage = ((vm.displayDistance * scaler) - min) / ( Math.abs(max-min));
 
-				if(!updateDistance) {
-					vm.disableWatchSlider = true;
-				}
+			if(!updateDistance) {
+				vm.disableWatchSlider = true;
+			}
 
-				var value = (1.0 - percentage) * 100;
-				if(percentage > 100 || value < 0) {
-					value = 0;
-				}
-				if(percentage < 0 || value > 100) {
-					value = 100;
-				}
-				vm.sliderPosition = value;
+			var value = (1.0 - percentage) * 100;
+			if(percentage > 100 || value < 0) {
+				value = 0;
+			}
+			if(percentage < 0 || value > 100) {
+				value = 100;
+			}
+			vm.sliderPosition = value;
 
-				if(moveClip) {
-					vm.updateClippingPlane();
-				}
-
-			} else {
-				console.warn("updateDisplaySlider - Bounding Box was not defined", vm.bbox);
+			if(moveClip) {
+				vm.updateClippingPlane();
 			}
 
 		};
@@ -294,34 +316,46 @@
 			};
 		};
 
-		$scope.$watch("vm.units", function(newUnit, oldUnit){
-			if (vm.displayDistance) {
-				vm.displayDistance = vm.displayDistance * vm.getScaler(newUnit, oldUnit);
-			}
-		});
+		vm.update = function() {
+			vm.cleanDisplayDistance();
+			vm.updateDisplayedDistance();
+			vm.updateDisplaySlider(false, vm.visible);
+		};
 
 		$scope.$watch("vm.displayDistance", function () {
+			vm.update();
+		});
 
+		$scope.$watch("vm.units", function(newUnit, oldUnit){
+			vm.update();
+		});
+
+		vm.cleanDisplayDistance = function() {
 			var minMax = vm.getMinMax();
 			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+
+			if (isNaN(vm.displayDistance)) {
+				vm.displayDistance = minMax.min * scaler;
+				return;
+			}
 			
 			if (minMax.max && vm.displayDistance > minMax.max) {
 				vm.displayDistance = minMax.max * scaler;
 			}
+			
 			if (minMax.min && vm.displayDistance < minMax.min) {
 				vm.displayDistance = minMax.min * scaler;
 			}
 
-			if (minMax.max) {
-				vm.sliderStep = minMax.max * scaler * 0.01; // 1%
-			}
-					
-		});
+		};
+
+
 
 		/*
 		 * Watch for show/hide of card
 		 */
 		$scope.$watch("vm.show", function (newValue) {
+			console.log(vm.show);
 			if (angular.isDefined(newValue)) {
 				vm.visible = newValue;
 			}
@@ -332,6 +366,7 @@
 		 * Toggle the clipping plane
 		 */
 		$scope.$watch("vm.visible", function (newValue) {
+			console.log("vm.visible", vm.visible);
 			if (angular.isDefined(newValue)) {
 				if (newValue) {
 					vm.updateClippingPlane();
@@ -341,16 +376,6 @@
 			}
 		});
 
-		/*
-		 * Change the clipping plane distance
-		 */
-		$scope.$watch("vm.displayDistance", function () {
-			if(!vm.disableWatchDistance) {
-				vm.updateDisplaySlider(false, vm.visible);
-			}
-
-			vm.disableWatchDistance = false;
-		});
 
 
 		/*
@@ -387,6 +412,7 @@
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
 
 				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false);
+				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
 
@@ -399,6 +425,7 @@
 				
 				vm.bbox = event.value.bbox;
 				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 

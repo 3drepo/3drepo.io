@@ -11,10 +11,18 @@ clip .axisHolder {
 clip .axisLabel {
   padding-right: 20px;
 }
+clip .clipSlider input {
+  width: 95px;
+  margin-left: 5px
+}
 
 clip .clipSlider md-select {
   margin: 0px;
-  margin-left: 10px;
+  margin-left: 5px
+}
+
+clip .distanceInput {
+  padding: 4px;  
 }
 
 clip .upDownButtons {
