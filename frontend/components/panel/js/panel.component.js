@@ -30,7 +30,7 @@
 				position: "@",
 				keysDown: "=",
 				modelSettings: "=",
-				treeMap: "=",
+
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			},

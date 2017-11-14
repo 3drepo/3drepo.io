@@ -38,7 +38,6 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
-				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			}
@@ -63,8 +62,10 @@
 		 */
 		vm.$onInit = function() {
 
+			ViewerService.setPin({data: null});
+			
 			vm.saveIssueDisabled = true;
-			vm.issues = [];
+			vm.allIssues = [];
 			vm.issuesToShow = [];
 			vm.showProgress = true;
 			vm.progressInfo = "Loading issues";
@@ -74,9 +75,6 @@
 			vm.autoSaveComment = false;
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.savingIssue = false;
-			vm.issueDisplay = {};
-			vm.selectedIssueLoaded = false;
-			vm.displayIssue = null;
 			vm.revisionsStatus = RevisionsService.status;
 			
 
@@ -98,22 +96,21 @@
 			/*
 			* Get all the Issues
 			*/
+
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
 
-					vm.showProgress = false;
-					vm.toShow = "showIssues";
-					vm.issues = (data === "") ? [] : data;
-					vm.showAddButton = true;
+					if (data) {
 
-					// if issue id is in url then select the issue
-					var issueMatch = vm.issues.find(function(issue){
-						return issue._id === vm.issueId;
-					});
-
-					if(issueMatch){
-						vm.displayIssue = issueMatch;
+						vm.showProgress = false;
+						vm.toShow = "showIssues";
+						IssuesService.populateNewIssues(data);
+						vm.showAddButton = true;
+						
+					} else {
+						throw "Error";
 					}
+					
 
 				})
 				.catch(function(error){
@@ -162,9 +159,6 @@
 				});
 
 			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
-				.then(function(){
-					vm.setAllIssuesAssignedRolesColors();
-				})
 				.catch(function(error){
 					var content = "We had an issue getting all the issues and jobs for this model. " +
 						"If this continues please message support@3drepo.io.";
@@ -175,42 +169,17 @@
 
 		};
 
+		vm.$onDestroy = function () {
+			vm.removeUnsavedPin();
+		};
+
+		vm.removeUnsavedPin = function() {
+			ViewerService.removePin({id: ViewerService.newPinId });
+			ViewerService.setPin({data: null});
+		};
+
 		vm.modelLoaded = function() {
 			return !!ViewerService.currentModel.model;
-		};
-
-		/**
-		 * Define the assigned role colors for each issue
-		 */
-		vm.setAllIssuesAssignedRolesColors = function() {
-			var i, length;
-
-			if (vm.availableJobs !== null) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					vm.setIssueAssignedRolesColors(vm.issues[i]);
-				}
-			}
-		};
-
-		/**
-		 * Define the assigned role colors for an issue
-		 * Also set the pin colors
-		 *
-		 * @param issue
-		 */
-		vm.setIssueAssignedRolesColors = function(issue) {
-			var i, length, roleColour, pinColours = [];
-			var rgbColour;
-			issue.assignedRolesColors = [];
-
-			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-
-				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
-	
-				issue.assignedRolesColors.push(roleColour);
-				rgbColour = IssuesService.hexToRgb(roleColour);
-				pinColours.push(rgbColour);
-			}
 		};
 
 		/*
@@ -243,48 +212,96 @@
 
 		$scope.$watch(function() {
 			return RevisionsService.status;
-		}, function(newValue, oldValue) {
+		}, function() {
 			if (RevisionsService.status.data) {
 				vm.revisions = RevisionsService.status.data;
 			}
 		}, true);
 
-		$scope.$watch(function() {
-			return IssuesService.issueId;
+		$scope.$watch(function(){
+			return IssuesService.state.allIssues;
 		}, function(){
-			vm.issueId = IssuesService.issueId;
+			vm.allIssues = IssuesService.state.allIssues;
 		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.issuesToShow;
+		}, function(){
+			vm.issuesToShow = IssuesService.state.issuesToShow;
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.selectedIssue;
+		}, function(){
+			vm.selectedIssue = IssuesService.state.selectedIssue;
+		}, true);
+
 
 		/**
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			var i, length;
 
-			vm.event = event;
+			var data,
+				position = [],
+				normal = [];
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					if (vm.issues[i]._id === event.value.id) {
-						vm.editIssue(vm.issues[i]);
+				
+				for (var i = 0; i < IssuesService.state.allIssues.length; i += 1) {
+					var iterIssue = IssuesService.state.allIssues;
+					if (iterIssue[i]._id === event.value.id) {
+						vm.editIssue(iterIssue[i]);
 						break;
 					}
 				}
-			} 
-			// else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-			// 	vm.issuesReady.then(function(){
-			// 		if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-			// 			vm.canAddIssue = true;
-			// 		} 
-			// 	});
-				
-			// 	vm.subModels = event.value.subModels || [];
-			// 	vm.watchNotification();
-				
-			// } 
+			} else if (event.type === EventService.EVENT.VIEWER.PICK_POINT &&
+				event.value.hasOwnProperty("id") &&
+				ViewerService.pin.pinDropMode
+			) {
+
+				vm.removeUnsavedPin();
+
+				var trans = event.value.trans;
+				position = event.value.position;
+				normal = event.value.normal;
+
+				if(trans) {
+					position = trans.inverse().multMatrixPnt(position);
+				}
+
+				data = {
+					id: ViewerService.newPinId,
+					account: vm.account,
+					model: vm.model,
+					selectedObjectId: event.value.id,
+					pickedPos: position,
+					pickedNorm: normal,
+					colours: Pin.pinColours.yellow
+
+				};
+
+				ViewerService.addPin(data);
+				ViewerService.setPin({data: data});
+
+			} else if (
+				event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE && 
+				ViewerService.pin.pinDropMode
+			) {
+
+				vm.removeUnsavedPin();
+
+			} else if (
+				event.type === EventService.EVENT.VIEWER.CLICK_PIN && 
+				ViewerService.newPinId === "newPinId"
+			) {
+				vm.removeUnsavedPin();
+			} 
+
 		});
 
+		
 
 		/**
 		 * Close the add alert
@@ -301,6 +318,7 @@
 			vm.onContentHeightRequest({height: height});
 		};
 
+	
 		/*
 		 * Go back to issues list
 		 */
@@ -308,7 +326,11 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
-				vm.displayIssue = null;
+
+				var issueListItemId = "issue" + IssuesService.state.selectedIssue._id;
+
+				IssuesService.state.displayIssue = null;
+				
 				$state.go("home.account.model", 
 					{
 						account: vm.account, 
@@ -317,17 +339,18 @@
 						noSet: true
 					}, 
 					{notify: false}
-				);
-			}
-		});ViewerService.currentModel;
+				).then(function(){
+					var element = document.getElementById(issueListItemId);
+					if (element) {
+						element.scrollIntoView(); 
+					}
+				});
 
+				
+			}
+		});
 
 		vm.watchNotification = function() {
-
-			// TODO: Is there a reason this is here?
-			// if(!vm.revisions || !vm.subModels){
-			// 	return;
-			// }
 
 			/*
 			 * Watch for new issues
@@ -364,7 +387,7 @@
 
 			issues.forEach(function(issue) {
 				
-				var showIssue;
+				var issueShouldShow = false;
 
 				if (vm.revisions && vm.revisions.length) {
 
@@ -382,68 +405,25 @@
 						});
 					}
 
-					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					issueShouldShow = issueRevision && issueInDate;
 				} else {
-					showIssue = true;
+					issueShouldShow = true;
 				}
 
-				if(showIssue){
+				if(issueShouldShow){
 					
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-					issue.thumbnailPath = APIService.getAPIUrl(issue.thumbnail);
-
-					vm.issues.unshift(issue);
+					IssuesService.addIssue(issue);
 					
 				}
 
 			});
 
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
-
-		};
-
-		vm.updateIssue = function(issue) {
-			vm.issues.forEach(function(oldIssue, i){
-				var matchs = oldIssue._id === issue._id;
-				if(matchs){
-
-					if(issue.status === "closed"){
-						
-						vm.issues[i].justClosed = true;
-						
-						$timeout(function(){
-
-							vm.issues[i] = issue;
-							vm.issues = vm.issues.slice(0);
-							$scope.$apply();
-
-						}, 4000);
-
-					} else {
-						vm.issues[i] = issue;
-					}
-
-				}
-			});
 		};
 
 		vm.handleIssueChanged = function(issue) {
-
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-			issue.thumbnailPath = IssuesService.getThumbnailPath(issue.thumbnail);
-			issue.statusIcon = IssuesService.getStatusIcon(issue);
-			issue.issueRoleColor = IssuesService.getJobColor(issue.assigned_roles[0]);
-
-			vm.updateIssue(issue);
-			var updatedIssues = vm.issues.slice(0);
-			vm.issues = updatedIssues;
-			$scope.$apply();
-			
+			IssuesService.updateIssues(issue);
 		};
-
 
 		/*
 		* Unsubscribe notifcation on destroy
@@ -479,7 +459,7 @@
 				.then(function(data){
 
 					vm.importingBCF = false;
-					vm.issues = (data === "") ? [] : data;
+					vm.allIssues = (data === "") ? [] : data;
 
 				})
 				.catch(function(error){
@@ -500,38 +480,14 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-
-			vm.event = null; // To clear any events so they aren't registered
-			vm.onShowItem();
-
-			var notCurrentlySelected = vm.selectedIssue && issue && vm.selectedIssue._id !== issue._id;
-
-			if (notCurrentlySelected) {
-				IssuesService.deselectPin(vm.selectedIssue);
-				// Remove highlight from any multi objects
-				ViewerService.highlightObjects([]);
+			
+			if (IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 			}
-
-			if (!issue && vm.selectedIssue) {
-				IssuesService.deselectPin(vm.selectedIssue);
-			}
-
+			
 			if (issue) {
 
-				IssuesService.showIssue(issue);
-				IssuesService.getIssue(issue.account, issue.model, issue._id)
-					.then(function(retrievedIssue){
-						vm.selectedIssueLoaded = true;
-						vm.selectedIssue = retrievedIssue;
-					})
-					.catch(function(error) {
-						var content = "We tried to get the selected issue but it failed. " +
-							"If this continues please message support@3drepo.io.";
-						var escapable = true;
-						DialogService.text("Error Getting Issue", content, escapable);
-						console.error(error);
-					});
-
+				ViewerService.highlightObjects([]);
 				$state.go("home.account.model.issue", 
 					{
 						account: vm.account, 
@@ -543,48 +499,26 @@
 					{notify: false}
 				);
 
-				AnalyticService.sendEvent({
-					eventCategory: "Issue",
-					eventAction: "view"
-				});
+				IssuesService.setSelectedIssue(issue);
+				
 			} else {
-				vm.selectedIssueLoaded = true;
-				vm.selectedIssue = issue;
+				IssuesService.resetSelectedIssue();
 			}
 
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
+			vm.onShowItem();
 
-		};
-
-		/**
-		 * Select issue
-		 * @param issue
-		 */
-		vm.selectIssue = function (issue) {
-
-			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				IssuesService.deselectPin(vm.selectedIssue);
-			}
-						
-			vm.selectedIssue = issue;
 		};
 
 		/**
 		 * Exit issue editing
 		 * @param issue
 		 */
-		vm.editIssueExit = function () {
+		vm.editIssueExit = function (issue) {
+			document.getElementById("issue" + issue._id).scrollIntoView();
+			console.log(document.getElementById("issue" + issue._id));
 			vm.hideItem = true;
-		};
-
-		/**
-		 * New issue created so inform issues list
-		 * @param issue
-		 */
-		vm.issueCreated = function (issue) {
-			vm.issues.unshift(issue);
-			vm.selectedIssue = issue;
 		};
 
 	}

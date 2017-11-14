@@ -27,9 +27,16 @@
 			controllerAs: "vm"
 		});
 
-	RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService", "MeasureService"];
+	RightPanelCtrl.$inject = [
+		"$scope", "$timeout", "EventService",
+		"DocsService",  "MeasureService"
+	];
 
-	function RightPanelCtrl ($scope, $timeout, EventService, MeasureService) {
+	function RightPanelCtrl (
+		$scope, $timeout, EventService, 
+		DocsService, MeasureService
+	) {
+
 		var vm = this;
 			
 		/*
@@ -129,7 +136,12 @@
 
 			vm.metaData = !vm.metaData;
 			vm.metaBackground = vm.metaData ? vm.highlightBackground : "";
-			EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
+			DocsService.state.active = vm.metaData;
+			DocsService.state.show = false;
+
+			//EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
+			//DocsService.active = vm.metaData;
+
 		};
 
 		vm.$onDestroy = function () {

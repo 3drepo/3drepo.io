@@ -24,24 +24,39 @@
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
 		"APIService", "TreeService", "AuthService",
-		"ViewerService"
+		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
 		APIService, TreeService, AuthService,
-		ViewerService
+		ViewerService, $timeout, $filter
 	) {
 
 		var url = "",
 			config = {},
 			numIssues = 0,
 			availableJobs = [],
-			newPinId = "newPinId",
 			updatedIssue = null;
 
-
 		var initPromise = $q.defer();
+
+		var state = {
+			heights : {
+				infoHeight : 135,
+				issuesListItemHeight : 141
+			},
+			selectedIssue: null,
+			allIssues: [],
+			issuesToShow: [],
+			displayIssue: null,
+			issueDisplay: {
+				showSubModelIssues: false,
+				showClosed: false,
+				sortOldestFirst : false,
+				excludeRoles: []
+			}
+		};
 
 		var service = {
 			init : init,
@@ -81,7 +96,21 @@
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
 			canChangeStatusToClosed: canChangeStatusToClosed,
-			isOpen: isOpen
+			isOpen: isOpen,
+
+			setSelectedIssue: setSelectedIssue,
+			populateIssue: populateIssue,
+			populateNewIssues: populateNewIssues,
+			updateIssues: updateIssues,
+			addIssue: addIssue,
+			setupIssuesToShow: setupIssuesToShow,
+			getDisplayIssue: getDisplayIssue,
+			resetSelectedIssue: resetSelectedIssue,
+			createBlankIssue: createBlankIssue,
+			isSelectedIssue: isSelectedIssue,
+			showIssuePins: showIssuePins,
+
+			state: state
 			
 		};
 
@@ -89,8 +118,261 @@
 
 		/////////////
 
+		function createBlankIssue() {
+			return {
+				priority: "none",
+				status: "open",
+				assigned_roles: [],
+				topic_type: "for_information",
+				viewpoint: {}
+			};
+		}
+
+		function getDisplayIssue() {
+			if (state.displayIssue && state.allIssues.length > 0){
+
+				var issueToDisplay = state.allIssues.find(function(issue){
+					return issue._id === state.displayIssue;
+				});
+				
+				return issueToDisplay;
+					
+			}
+			return false;
+		}
+
+		// Helper function for searching strings
+		function stringSearch(superString, subString) {
+			if(!superString){
+				return false;
+			}
+
+			return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+		}
+
+		function setupIssuesToShow(model, filterText) {
+			state.issuesToShow = [];
+
+			if (state.allIssues.length > 0) {
+
+				// Sort
+				state.issuesToShow = state.allIssues.slice();
+				if (state.issueDisplay.sortOldestFirst) {
+					state.issuesToShow.sort(function(a, b){
+						return a.created - b.created;
+					});
+				} else {
+					state.issuesToShow.sort(function(a, b){
+						return b.created - a.created;
+					});
+				}
+				
+				// TODO: There is certainly a better way of doing this, but I don't want to
+				// dig into it right before release
+
+				// Filter text
+				var someText = angular.isDefined(filterText) && filterText !== "";
+				if (someText) {
+
+					// TODO: do we need $filter?
+
+					state.issuesToShow = ($filter("filter")(state.issuesToShow, function(issue) {
+						// Required custom filter due to the fact that Angular
+						// does not allow compound OR filters
+						var i;
+
+						// Search the title
+						var show = stringSearch(issue.title, filterText);
+						show = show || stringSearch(issue.timeStamp, filterText);
+						show = show || stringSearch(issue.owner, filterText);
+
+						// Search the list of assigned issues
+						if (!show && issue.hasOwnProperty("assigned_roles")) {
+							i = 0;
+							while(!show && (i < issue.assigned_roles.length)) {
+								show = show || stringSearch(issue.assigned_roles[i], filterText);
+								i += 1;
+							}
+						}
+
+						// Search the comments
+						if (!show && issue.hasOwnProperty("comments")) {
+							i = 0;
+
+							while(!show && (i < issue.comments.length)) {
+								show = show || stringSearch(issue.comments[i].comment, filterText);
+								show = show || stringSearch(issue.comments[i].owner, filterText);
+								i += 1;
+							}
+						}
+
+						return show;
+					}));
+				} 
+
+				// Closed
+				for (var i = (state.issuesToShow.length - 1); i >= 0; i -= 1) {
+
+					if (!state.issueDisplay.showClosed && (state.issuesToShow[i].status === "closed")) {
+						state.issuesToShow.splice(i, 1);
+					}
+				}
+
+				// Sub models
+				state.issuesToShow = state.issuesToShow.filter(function (issue) {
+					return state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+				});
+
+				//Roles Filter
+				state.issuesToShow = state.issuesToShow.filter(function(issue){
+					return state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
+				});
+			
+			}
+
+		}
+
+		function resetSelectedIssue() {
+			state.selectedIssue = undefined;
+			//showIssuePins();
+		}
+
+		function isSelectedIssue(issue) {
+			//console.log(state.selectedIssue);
+			if (!state.selectedIssue || !state.selectedIssue._id) {
+				return false;
+			} else {
+				return issue._id === state.selectedIssue._id;
+			}
+		}
+
+		function showIssuePins() {
+
+			// TODO: This is still inefficent and unclean
+			state.allIssues.forEach(function(issue) {
+				var show = state.issuesToShow.find(function(shownIssue){
+					return issue._id === shownIssue._id;
+				});
+
+				// Check that there is a position for the pin
+				var pinPosition = issue.position && issue.position.length;
+
+				if (show !== undefined && pinPosition) {
+
+					var pinColor = Pin.pinColours.blue;
+					var isSelectedPin = state.selectedIssue && 
+										issue._id === state.selectedIssue._id;
+
+					if (isSelectedPin) {
+						pinColor = Pin.pinColours.yellow;
+					}
+
+					ViewerService.addPin({
+						id: issue._id,
+						account: issue.account,
+						model: issue.model,
+						pickedPos: issue.position,
+						pickedNorm: issue.norm,
+						colours: pinColor,
+						viewpoint: issue.viewpoint
+					});
+
+				} else {
+					// Remove pin
+					ViewerService.removePin({ id: issue._id });
+				}
+			});
+
+		}
+
+		function setSelectedIssue(issue, isCorrectState) {
+
+			if (state.selectedIssue) {
+				var different = (state.selectedIssue._id !== issue._id);
+				if (different) {
+					deselectPin(state.selectedIssue);
+				}
+			}
+			
+			state.selectedIssue = issue;
+
+			// If we're saving then we already have pin and
+			// highlights in place
+			if (!isCorrectState) {
+				showIssuePins();
+				showIssue(issue);
+			}
+
+		}
+
+		function populateNewIssues(newIssues) {
+			newIssues.forEach(populateIssue);
+			state.allIssues = newIssues;
+		}
+
+		function addIssue(issue) {
+			populateIssue(issue);
+			state.allIssues.unshift(issue);
+		}
+
+		function updateIssues(issue) {
+
+			populateIssue(issue);
+
+			state.allIssues.forEach(function(oldIssue, i){
+				var matchs = oldIssue._id === issue._id;
+				if(matchs){
+
+					if(issue.status === "closed"){
+						
+						state.allIssues[i].justClosed = true;
+
+						$timeout(function(){
+
+							state.allIssues[i] = issue;
+
+						}, 4000);
+
+					} else {
+						state.allIssues[i] = issue;
+					}
+
+				}
+			});
+		}
+
 		function init() {
 			return initPromise.promise;
+		}
+
+		function populateIssue(issue) {
+			
+			if (issue) {
+				issue.title = generateTitle(issue);
+			}
+			
+			if (issue.created) {
+				issue.timeStamp = getPrettyTime(issue.created);
+			}
+			
+			if (issue.thumbnail) {
+				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
+			}
+
+			if (issue) {
+				issue.statusIcon = getStatusIcon(issue);
+			}
+			
+			if (issue.assigned_roles[0]) {
+				issue.issueRoleColor = getJobColor(issue.assigned_roles[0]);
+			}
+			
+			if (!issue.descriptionThumbnail) {
+				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
+					issue.descriptionThumbnail = APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+				}
+			}
+
 		}
 
 		function userJobMatchesCreator(userJob, issueData) {
@@ -222,48 +504,44 @@
 		// }
 
 		function deselectPin(issue) {
-			var pinData;
-
 			// Issue with position means pin
-			if (issue.position.length > 0) {
-				pinData = {
+			if (issue.position.length > 0 && issue._id) {
+				ViewerService.changePinColours({
 					id: issue._id,
 					colours: Pin.pinColours.blue
-				};
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, pinData);
+				});
 			}
 		}
 
 		function showIssue(issue) {
 			var issueData;
 				
-			// Highlight pin, move camera and setup clipping plane
-			issueData = {
-				id: issue._id,
-				colours: Pin.pinColours.yellow
-			};
-			
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, issueData);
+			showIssuePins();
 
-			// Set the camera position
-			issueData = {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				model: issue.model
-			};
+			if(issue.viewpoint.position.length > 0) {
+				// Set the camera position
+				issueData = {
+					position : issue.viewpoint.position,
+					view_dir : issue.viewpoint.view_dir,
+					up: issue.viewpoint.up,
+					account: issue.account,
+					model: issue.model
+				};
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
+				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
 
-			// Set the clipping planes
-			issueData = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			};
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				// Set the clipping planes
+				issueData = {
+					clippingPlanes: issue.viewpoint.clippingPlanes,
+					fromClipPanel: false,
+					account: issue.account,
+					model: issue.model
+				};
+				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+			} else {
+				//This issue does not have a viewpoint, go to default viewpoint
+				ViewerService.goToExtent();
+			}
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
@@ -284,52 +562,47 @@
 
 			APIService.get(groupUrl)
 				.then(function (response) {
-
-					TreeService.cachedTree
-						.then(function(tree) {
-							handleTree(response, tree);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting the tree: ", error);
-						});
-				
+					handleTree(response);
 				})
 				.catch(function(error){
 					console.error("There was a problem getting the highlights: ", error);
 				});
 		}
 
-		function handleTree(response, tree) {
+		function handleTree(response) {
 
 			var ids = [];
-			response.data.objects.forEach(function(obj){
-				var key = obj.account + "@" +  obj.model;
-				if(!ids[key]){
-					ids[key] = [];
-				}	
+			TreeService.getMap()
+				.then(function(treeMap){
+					response.data.objects.forEach(function(obj){
+						var key = obj.account + "@" +  obj.model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
 
-				var treeMap = TreeService.getMap(tree.nodes);
-				ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-			});
+					});
 
-			for(var key in ids) {
+					for(var key in ids) {
 
-				var vals = key.split("@");
-				var account = vals[0];
-				var model = vals[1];
+						var vals = key.split("@");
+						var account = vals[0];
+						var model = vals[1];
 
-				var treeData = {
-					source: "tree",
-					account: account,
-					model: model,
-					ids: ids[key],
-					colour: response.data.colour,
-					multi: true
-				
-				};
-				ViewerService.highlightObjects(treeData);
-			}
+						var treeData = {
+							source: "tree",
+							account: account,
+							model: model,
+							ids: ids[key],
+							colour: response.data.colour,
+							multi: true					
+						};
+						ViewerService.highlightObjects(treeData);
+					}
+
+
+				});
 		}
 
 		// TODO: Internationalise and make globally accessible
@@ -421,15 +694,12 @@
 			}
 
 			APIService.get(endpoint).then(
-				function(issuesData) {
-					deferred.resolve(issuesData.data);
-					for (var i = 0; i < issuesData.data.length; i ++) {
-						issuesData.data[i].timeStamp = getPrettyTime(issuesData.data[i].created);
-						issuesData.data[i].title = generateTitle(issuesData.data[i]);
-						if (issuesData.data[i].thumbnail) {
-							issuesData.data[i].thumbnailPath = APIService.getAPIUrl(issuesData.data[i].thumbnail);
-						}
+				function(response) {
+					var issuesData = response.data;
+					for (var i = 0; i < response.data.length; i ++) {
+						populateIssue(issuesData[i]);
 					}
+					deferred.resolve(response.data);
 				},
 				function() {
 					deferred.resolve([]);
@@ -622,15 +892,25 @@
 		}
 
 		function getJobColor(id) {
-			var i, length,
-				roleColor = null;
 
-			for (i = 0, length = availableJobs.length; i < length; i += 1) {
-				if (availableJobs[i]._id === id && availableJobs[i].color) {
-					roleColor = availableJobs[i].color;
-					break;
-				}
+			var roleColor = "#ffffff";
+			var found = false;
+
+			if (id) {
+				for (var i = 0; i < availableJobs.length; i ++) {
+					var job = availableJobs[i];
+					if (job._id === id && job.color) {
+						roleColor = job.color;
+						found = true;
+						break;
+					}
+				}	
 			}
+			
+			if (!found) {
+				console.debug("Job color not found for", id);
+			}
+
 			return roleColor;
 		}
 

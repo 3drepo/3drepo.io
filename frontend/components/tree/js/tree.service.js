@@ -24,15 +24,14 @@
 	TreeService.$inject = ["$q", "APIService"];
 
 	function TreeService($q, APIService) {
-		var cachedTreeDefer = $q.defer();
-		var cachedTree = cachedTreeDefer.promise;
+		var treeReady;
+		var treeMap = null;
 		var baseURL;
 
 		var service = {
 			init: init,
 			search: search,
-			getMap: getMap,
-			cachedTree: cachedTree
+			getMap: getMap
 		};
 
 
@@ -56,8 +55,8 @@
 		}
 
 		function init(account, model, branch, revision, setting) {
-
-
+			var cachedTreeDefer = $q.defer();
+			treeMap = null;
 			branch = branch ? branch : "master";
 			//revision = revision ? revision : "head";
 
@@ -67,12 +66,10 @@
 				baseURL = account + "/" + model + "/revision/" + revision + "/";
 			}
 
-			var deferred = $q.defer();
 			var	url = baseURL + "fulltree.json";
-			getTrees(url, setting, deferred);
+			getTrees(url, setting, cachedTreeDefer);
 			
-			cachedTreeDefer.resolve(deferred.promise);
-			return deferred.promise;
+			return treeReady = cachedTreeDefer.promise;
 
 		}
 
@@ -238,42 +235,50 @@
 			return APIService.get(url);
 		}
 
-		function getMap(treeItem){
+		function genMap(leaf, items){
 
-			// tree item format: { _id: string, shared_id: string, children: [treeItem]}
-
-			var uidToSharedId = {};
-			var sharedIdToUid = {};
-			var oIdToMetaId = {};
-
-			function genMap(leaf){
-
-				var leafId = leaf._id;
-				var sharedId = leaf.shared_id;
-
-				if(leaf){
-					
-					if(leaf.children){
-						leaf.children.forEach(genMap);
-					}
-
-					uidToSharedId[leafId] = sharedId;
-					sharedIdToUid[sharedId] = leafId;
-
-					if(leaf.meta){
-						oIdToMetaId[leafId] = leaf.meta;
-					}
-
+			var leafId = leaf._id;
+			var sharedId = leaf.shared_id;
+			var subTreePromises  = [];
+			if(leaf){
+				
+				if(leaf.children){
+					leaf.children.forEach(function(child){
+						subTreePromises.push(genMap(child, items));
+					});
+				}
+				items.uidToSharedId[leafId] = sharedId;
+				items.sharedIdToUid[sharedId] = leafId;
+				if(leaf.meta){
+					items.oIdToMetaId[leafId] = leaf.meta;
 				}
 			}
 
-			genMap(treeItem);
+			return Promise.all(subTreePromises).then(function(){
+					return items;
+				}
+			)
+		}
 
-			return {
-				uidToSharedId: uidToSharedId,
-				sharedIdToUid: sharedIdToUid,
-				oIdToMetaId: oIdToMetaId
-			};
+		function getMap(){
+			//only do this once!
+			if(treeMap)
+			{
+				return Promise.resolve(treeMap);
+			}
+			else
+			{
+				treeMap = {
+					uidToSharedId: {},
+					sharedIdToUid: {},
+					oIdToMetaId: {}
+				};
+				return treeReady.then(function(tree) {
+					genMap(tree.nodes, treeMap);
+				});
+
+			}
+
 
 		}
 

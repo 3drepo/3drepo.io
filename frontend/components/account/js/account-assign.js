@@ -63,7 +63,7 @@
 
 			vm.teamspacePermissions = {
 
-				teamspace_admin : "Admin",
+				teamspace_admin : "Admin"
 				// assign_licence	: "Assign Licence",
 				// revoke_licence	: "Revoke Licence",
 				// create_project	: "Create Project",
@@ -214,13 +214,14 @@
 		};
 
 		vm.userHasPermissions = function(user, permission) {
-
 			var hasPermissions = false;
-			vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
-				if (permissionUser.user === user.user) {
-					hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
-				} 
-			});
+			if(vm.selectedTeamspace.teamspacePermissions) {
+				vm.selectedTeamspace.teamspacePermissions.forEach(function(permissionUser) {
+					if (permissionUser.user === user.user) {
+						hasPermissions = permissionUser.permissions.indexOf(permission) !== -1;
+					} 
+				});
+			}
 			
 			return hasPermissions;
 		};
@@ -271,9 +272,12 @@
 		
 		});
 
-		vm.setPermissionTemplates = function(teamspace){
-
+		vm.setPermissionTemplates = function(teamspace, model){
+			
 			var permissionUrl = teamspace.account + "/permission-templates";
+			if(model) {
+				permissionUrl = teamspace.account + "/" + model + "/permission-templates" ;
+			}
 
 			return APIService.get(permissionUrl)
 				.then(function(response) {
@@ -407,6 +411,8 @@
 				if (vm.fromURL.modelSelected && vm.fromURL.modelSelected) {
 					vm.modelSelected = vm.fromURL.modelSelected;
 					delete vm.fromURL.modelSelected;
+					vm.fromURL = {};
+					vm.isFromUrl = false;
 				}
 
 			} 
@@ -503,7 +509,7 @@
 		};
 
 		// MODELS
-		
+
 		vm.isProjectAdmin = function(user) {
 
 			var userObj;
@@ -511,6 +517,10 @@
 				userObj = {user: user};
 			} else {
 				userObj = user;
+			}
+
+			if (user.user === vm.selectedTeamspace.account) {
+				return true;
 			}
 
 			return vm.userHasProjectPermissions(userObj, "admin_project");
@@ -524,6 +534,10 @@
 				userObj = {user: user};
 			} else {
 				userObj = user;
+			}
+			
+			if (user.user === vm.selectedTeamspace.account) {
+				return true;
 			}
 
 			return vm.userHasPermissions(userObj, "teamspace_admin");
@@ -580,53 +594,55 @@
 			vm.resetSelectedModel();
 			
 			if (vm.teamspaceSelected && vm.projectSelected && vm.modelSelected) {
-
+			
 				vm.selectedModel = vm.models.find(function(model){
 					return model.model ===  vm.modelSelected;
 				});
 
-				return $q(function(resolve, reject) {
+				return vm.setPermissionTemplates(vm.teamspaceSelected, vm.modelSelected).then(function(){
+					return $q(function(resolve, reject) {
 
-					var endpoint = vm.selectedTeamspace.account + "/" + 
-									vm.modelSelected +  "/permissions";
+						var endpoint = vm.selectedTeamspace.account + "/" + 
+										vm.modelSelected +  "/permissions";
 
-					APIService.get(endpoint)
-						.then(function(response){
+						APIService.get(endpoint)
+							.then(function(response){
 
-							var users = response.data;
+								var users = response.data;
 
-							// Add the teamspace admin if they don't appear in the list
-							if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
-								users.push({
-									permissions: ["admin"],
-									user : vm.account
-								});
-							}
-							
-							users.forEach(function(user){
-
-								// If its the teamspace then we can disable 
-								// and assign admin role
-								if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
-									vm.selectedRole[user.user] = "admin";
-								} else {
-									vm.selectedRole[user.user] = user.permission || "unassigned";
+								// Add the teamspace admin if they don't appear in the list
+								if (vm.selectedTeamspace.account === vm.account && users.length === 0) {
+									users.push({
+										permissions: ["admin"],
+										user : vm.account
+									});
 								}
+							
+								users.forEach(function(user){
+		
+									// If its the teamspace then we can disable 
+									// and assign admin role
+									if (user.user === vm.account ||(vm.isTeamspaceAdmin(user) || vm.isProjectAdmin(user)) ) {
+										vm.selectedRole[user.user] = "admin";
+									} else {
+										vm.selectedRole[user.user] = user.permission || "unassigned";
+									}
 								
-							});
-							vm.modelReady = true;
+								});
+								vm.modelReady = true;
 
 	
-							resolve();
-						})
-						.catch(function(error){
-							var title = "Issue Retrieving Model Permissions";
-							vm.showError(title, error);
+								resolve();
+							})
+							.catch(function(error){
+								var title = "Issue Retrieving Model Permissions";
+								vm.showError(title, error);
 
-							reject(error);
-						});	
+								reject(error);
+							});		
 					
-				});		
+					});		
+				});
 				
 			}
 			
