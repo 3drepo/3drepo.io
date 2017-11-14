@@ -28,7 +28,8 @@ module.exports.session = function(config) {
 
 	return expressSession({
 		secret: config.cookie.secret,
-		resave: false,
+		resave: true,
+		rolling: true,
 		saveUninitialized: false,
 		cookie: {
 			maxAge: config.cookie.maxAge,
