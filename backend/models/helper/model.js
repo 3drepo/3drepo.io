@@ -466,37 +466,37 @@ function createFederatedModel(account, model, subModels){
 			subProjects: []
 		};
 
+		let error;
+
 		let addSubModels = [];
 
-		let files = function(data){
-			return [
-				{desc: 'json file', type: 'file', path: data.jsonFilename},
-				{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
-			];
-		};
+		subModels.forEach(subModel => {
+
+			if(subModel.database !== account){
+				//return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
+				error = responseCodes.FED_MODEL_IN_OTHER_DB;
+			}
+
+			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+				if(setting && setting.federate){
+					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+
+				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
+					federatedJSON.subProjects.push({
+						database: subModel.database,
+						project: subModel.model
+					});
+				}
+			}));
+
+		});
+
+		if (error) {
+			return Promise.reject(error);
+		}
 
 		if(subModels.length === 0) {
 			return Promise.resolve();
-		} else {
-			subModels.forEach(subModel => {
-
-				if(subModel.database !== account){
-					return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
-				}
-
-				addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-					if(setting && setting.federate){
-						return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
-
-					} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-						federatedJSON.subProjects.push({
-							database: subModel.database,
-							project: subModel.model
-						});
-					}
-				}));
-
-			});
 		}
 
 		return Promise.all(addSubModels).then(() => {
