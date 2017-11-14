@@ -398,6 +398,7 @@
 					var title = "Error Saving Federation";
 					var action = "saving the federation";
 					vm.errorDialog(title, action, error);
+					vm.cancelFederationChanges();
 					vm.federationsSaving[currentFederation] = false;
 				});
 
@@ -514,8 +515,7 @@
 			);
 		};
 
-		vm.closeFederationDialog = function() {
-			
+		vm.cancelFederationChanges = function() {
 			if (vm.originalFederationData) {
 				Object.keys(vm.federationData).forEach(function(key){
 					if (vm.federationData[key] !== vm.originalFederationData[key]) {
@@ -523,6 +523,11 @@
 					}
 				});
 			}
+		};
+
+		vm.closeFederationDialog = function() {
+			
+			vm.cancelFederationChanges();
 			
 			vm.isSaving = false;
 			DialogService.closeDialog();
