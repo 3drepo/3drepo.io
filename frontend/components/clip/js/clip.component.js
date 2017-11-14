@@ -260,6 +260,22 @@
 
 		};
 
+		vm.unitShouldShow = function(unit) {
+			return vm.handleFt(unit.value, vm.modelUnits) || 
+					vm.handleMetric(unit.value, vm.modelUnits);
+		};
+
+		vm.handleMetric = function(unit){
+			var metric = ["cm", "mm", "m"];
+			var isMetric = metric.indexOf(unit) !== -1;
+			return unit !== "ft" && isMetric;
+		};
+
+		vm.handleFt = function(unit) {
+			var notMetric = !vm.handleMetric(vm.modelUnits);
+			return unit === "ft" && notMetric;
+		};
+
 		/**
 		 * Update display slider based on current internal distance
 		 */
@@ -404,6 +420,7 @@
 		vm.initClip = function(modelUnits) {
 			vm.modelUnits  = modelUnits;
 			vm.units = modelUnits;
+			console.log(vm.units);
 			vm.updateDisplayedDistance(true, vm.visible);
 		};
 

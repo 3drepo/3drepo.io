@@ -60,6 +60,7 @@ div(ng-if="vm.bbox && vm.units", layout="column", layout-align="start center", f
 						ng-required="true")
 
 						md-option(
+							ng-if="vm.unitShouldShow(unit)"
 							ng-disabled="unit.value === 'ft'"
 							ng-repeat="unit in vm.availableUnits" 
 							value="{{unit.value}}") {{unit.value}}
