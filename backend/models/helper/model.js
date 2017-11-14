@@ -108,9 +108,32 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
-function importSuccess(account, model) {
+function importSuccess(account, model, sharedSpacePath) {
 	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
+			if (sharedSpacePath) {
+				let files = function(filePath, fileDir, jsonFile){
+					return [
+						{desc: 'tmp model file', type: 'file', path: filePath},
+						{desc: 'json file', type: 'file', path: jsonFile},
+						{desc: 'tmp dir', type: 'dir', path: fileDir}
+					];
+				};
+
+				let tmpDir = `${sharedSpacePath}/${setting.corID}`;
+				let tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
+				fs.stat(tmpModelFile, function(err, stat) {
+					let tmpJsonFile;
+					if (err) {
+						tmpJsonFile = `${tmpDir}/obj.json`;
+					} else {
+						let tmpModelFileData = require(tmpModelFile);
+						tmpJsonFile = tmpModelFileData.file;
+					}
+
+					_deleteFiles(files(tmpModelFile, tmpDir, tmpJsonFile));
+				});
+			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
 			setting.errorReason = undefined;
@@ -443,8 +466,6 @@ function createFederatedModel(account, model, subModels){
 			subProjects: []
 		};
 
-		let error;
-
 		let addSubModels = [];
 
 		let files = function(data){
@@ -454,48 +475,32 @@ function createFederatedModel(account, model, subModels){
 			];
 		};
 
-		subModels.forEach(subModel => {
-
-			if(subModel.database !== account){
-				error = responseCodes.FED_MODEL_IN_OTHER_DB;
-			}
-
-			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-				if(setting && setting.federate){
-					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
-
-				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-					federatedJSON.subProjects.push({
-						database: subModel.database,
-						project: subModel.model
-					});
-				}
-			}));
-
-		});
-
-		if(error){
-			return Promise.reject(error);
-		}
-
 		if(subModels.length === 0) {
 			return Promise.resolve();
+		} else {
+			subModels.forEach(subModel => {
+
+				if(subModel.database !== account){
+					return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
+				}
+
+				addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+					if(setting && setting.federate){
+						return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+
+					} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
+						federatedJSON.subProjects.push({
+							database: subModel.database,
+							project: subModel.model
+						});
+					}
+				}));
+
+			});
 		}
+
 		return Promise.all(addSubModels).then(() => {
-			//return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-			// cclw05 - this is a temporary workaround!
-			// cclw05 - genFed needs to be merged with importModel
-			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-			//return Promise.resolve();
-
-		}).then(data => {
-
-			resetCorrelationId(account, model);
-
-			_deleteFiles(files(data));
-
-			return;
-
+			importQueue.createFederatedModel(correlationId, account, federatedJSON);
 		}).catch(err => {
 			//catch here to provide custom error message
 			if(err.errCode){
@@ -1324,14 +1329,6 @@ function _deleteFiles(files){
  */
 function _handleUpload(correlationId, account, model, username, file, data){
 	
-	let files = function(filePath, fileDir, jsonFile){
-		return [
-			{desc: 'tmp model file', type: 'file', path: filePath},
-			{desc: 'json file', type: 'file', path: jsonFile},
-			{desc: 'tmp dir', type: 'dir', path: fileDir}
-		];
-	};
-
 	importQueue.importFile(
 		correlationId,
 		file.path,
@@ -1349,8 +1346,6 @@ function _handleUpload(correlationId, account, model, username, file, data){
 			model,
 			username
 		});
-
-		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
 
 	}).catch(err => {
 		systemLogger.logError(`Failed to import model:`, err);
