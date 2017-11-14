@@ -319,9 +319,9 @@ describe('Federated Model', function () {
 
 		}, 1000);
 
-		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
+		/*q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
-		}).then(() => {
+		}).then(() => {*/
 			agent.post(`/${username}/model`)
 			.send({ 
 				modelName: "dupfed",
@@ -340,7 +340,7 @@ describe('Federated Model', function () {
 				console
 				done(err);
 			});
-		});
+		//});
 
 	});
 
