@@ -240,7 +240,8 @@ describe("Viewer page", function() {
                         expect(element(by.id("commentThumbnail")).isDisplayed()).to.eventually.equal(true);
                         expect(element(by.id("submitCommentButton")).isDisplayed()).to.eventually.equal(true);
                         element(by.id("submitCommentButton")).click();
-                        expect(element.all(by.className("issueComment")).count()).to.eventually.greaterThan(1);
+                        browser.sleep(1000);
+                        expect(element.all(by.className("issueComment")).count()).to.eventually.greaterThan(0);
              
                     });
  

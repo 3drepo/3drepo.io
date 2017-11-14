@@ -51,7 +51,7 @@ div.heightFix(
 		// Info
 		.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 			div(flex="10")
-				md-icon.angular-material-icons#issueStatus(
+				md-icon.angular-material-icons#issueStatusIcon(
 					style="color:{{vm.issueData.statusIcon.colour}}") {{vm.issueData.statusIcon.icon}}
 
 			.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
