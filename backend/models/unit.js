@@ -1,6 +1,8 @@
+"use strict";
+
 module.exports = [
-	{value: 'cm', name: 'Centimetres'},
-	{value: 'm', name: 'Metres'},
-	{value: 'ft', name: 'Feet and inches'},
-	{value: 'mm', name: 'Millimetres'}
+	{value: "ft", name: "Feet and inches"},
+	{value: "mm", name: "Millimetres"},
+	{value: "cm", name: "Centimetres"},
+	{value: "m", name: "Metres"},
 ];
