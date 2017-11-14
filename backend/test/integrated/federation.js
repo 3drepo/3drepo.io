@@ -436,8 +436,8 @@ describe('Federated Model', function () {
 
 		}, 1000);
 
-		systemLogger.logInfo(`TTT1 ${fedModelId}`);
-		agent.put(`/${username}/${fedModelId}`)
+		//agent.put(`/${username}/${fedModelId}`)
+		agent.post(`/${username}/${fedModelId}`)
 		.send({ 
 			desc, 
 			type, 
