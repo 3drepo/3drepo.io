@@ -194,7 +194,7 @@ describe("Viewer page", function() {
                     issuesButton.click();
                     expect(element(by.id("issuesPanel")).isDisplayed()).to.eventually.equal(true);
 
-                    const issues = element.all(by.tagName("issues-list-item"));
+                    const issues = element.all(by.className("issueListItem"));
                     expect(issues.count()).to.eventually.be.greaterThan(0);
 
                     issues.first().click();
