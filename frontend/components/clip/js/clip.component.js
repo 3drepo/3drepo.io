@@ -383,8 +383,6 @@
 
 		};
 
-
-
 		/*
 		 * Watch for show/hide of card
 		 */
@@ -394,7 +392,6 @@
 				vm.visible = newValue;
 			}
 		});
-
 
 		/*
 		 * Toggle the clipping plane
@@ -409,8 +406,6 @@
 				}
 			}
 		});
-
-
 
 		/*
 		 * Change the clipping plane axis
