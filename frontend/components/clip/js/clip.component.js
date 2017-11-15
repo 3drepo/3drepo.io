@@ -219,31 +219,27 @@
 		};
 
 		vm.increment = function(percentage) {
-			if (percentage === undefined) {
-				percentage = 0.01;
-			}
-			vm.displayDistance += (vm.displayDistance * percentage);
-			vm.cleanDisplayDistance();
-			vm.updateDisplaySlider(false, true);
+			vm.updateDistance( -(vm.displayDistance * percentage) );
+
 		};
 
 		vm.decrement = function(percentage) {
-			if (percentage === undefined) {
-				percentage = 0.01;
-			}
-			vm.displayDistance -= (vm.displayDistance * percentage);
-			vm.cleanDisplayDistance();
-			vm.updateDisplaySlider(false, true);
+			vm.updateDistance( (vm.displayDistance * percentage) );
 		};
 
 		vm.decrementDiscrete = function() {
-			vm.displayDistance -= 1.0;
-			vm.cleanDisplayDistance();
+			vm.updateDistance(-1);
 		};
 
 		vm.incrementDiscrete = function() {
-			vm.displayDistance += 1.0;
+			vm.updateDistance(1);
+		};
+
+		vm.updateDistance = function(amount) {
+			console.log(vm.displayDistance, amount);
+			vm.displayDistance += amount;
 			vm.cleanDisplayDistance();
+			vm.updateDisplaySlider(false, true);
 		};
 
 		/**
@@ -356,27 +352,25 @@
 
 		vm.cleanDisplayDistance = function() {
 			var minMax = vm.getMinMax();
-			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
 
 			var scaledMin = minMax.min * scaler;
 			var scaledMax = minMax.max * scaler;
 
-			//console.log(vm.displayDistance);
-
 			if (isNaN(vm.displayDistance) && scaledMin) {
-				console.log("cleanDisplayDistance - isNaN");
+				//console.log("cleanDisplayDistance - isNaN");
 				vm.displayDistance = scaledMin;
 				return;
 			}
 			
 			if (minMax.max && vm.displayDistance > scaledMax) {
-				console.log(vm.displayDistance, "cleanDisplayDistance - is more than scaled max!");
+				//console.log(vm.displayDistance, "cleanDisplayDistance - is more than scaled max!", scaledMax, scaler);
 				vm.displayDistance = scaledMax;
 				return;
 			}
-			
+		
 			if (minMax.min && vm.displayDistance < scaledMin) {
-				console.log("cleanDisplayDistance - is less than min!");
+				//console.log(vm.displayDistance, "cleanDisplayDistance - is less than min!", scaledMin, scaler);
 				vm.displayDistance = scaledMin;
 				return;
 			}
