@@ -277,6 +277,7 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
+		/*
 		//fake a response from bouncer;
 		setTimeout(function(){
 		
@@ -317,7 +318,7 @@ describe('Federated Model', function () {
 				done(err);
 			});
 
-		}, 1000);
+		}, 1000);*/
 
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
@@ -410,6 +411,7 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
+		/*
 		//fake a response from bouncer;
 		setTimeout(function(){
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
@@ -434,7 +436,7 @@ describe('Federated Model', function () {
 				done(err);
 			});
 
-		}, 1000);
+		}, 1000);*/
 
 		agent.put(`/${username}/${fedModelId}`)
 		.send({ 
