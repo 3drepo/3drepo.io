@@ -647,7 +647,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getIdToMeshes = [];
+		let refPromises = [];
 
 		refs.forEach(ref => {
 
@@ -659,12 +659,11 @@ function getIdToMeshes(account, model, branch, rev, username){
 				refRev = utils.uuidToString(ref._rid);
 			}
 
-			getIdToMeshes.push(
+			refPromises.push(
 				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
 					return Promise.resolve({
 						idToMeshes: obj.idToMeshes,
-						owner: ref.owner,
-						model: ref.project
+						key: ref.owner + "@" + ref.project
 					})
 				}).catch(err => {
 					return Promise.resolve();
@@ -672,7 +671,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 			);
 		});
 
-		return Promise.all(getIdToMeshes);
+		return Promise.all(refPromises);
 
 	}).then(_subIdToMeshes => {
 
@@ -683,21 +682,17 @@ function getIdToMeshes(account, model, branch, rev, username){
 		let idToMeshes = {};
 
 		if(buf){
-			console.log(buf);
 			idToMeshes = JSON.parse(buf);
 		}
 
-		if(subIdToMeshes.length > 0)
-		{
-			idToMeshes.subModels = [];
-		}
 		subIdToMeshes.forEach(subIdToMeshes => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
 			if (subIdToMeshes && subIdToMeshes.idToMeshes)
 			{
-				idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
 			}
 		});
 

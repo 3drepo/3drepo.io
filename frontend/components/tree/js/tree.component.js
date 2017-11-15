@@ -130,9 +130,14 @@
 		 * @param {Array} nodes Array to push the nodes to
 		 */
 		function traverseNodeAndPushId(node, nodes, idToMeshes){
+			var key = getAccountModelKey(node.account, node.project);			
 			var meshes = idToMeshes[node._id];
+			if(idToMeshes[key])
+			{
+				//the node is within a sub model
+				meshes = idToMeshes[key][node._id];
+			}
 			if(meshes) {
-				var key = getAccountModelKey(node.account, node.project);
 				if(!nodes[key]) {
 					nodes[key] = meshes;
 				}
