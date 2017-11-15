@@ -101,6 +101,7 @@
 
 			vm.actions = {
 				screen_shot: {
+					id: "screenshot",
 					icon: "camera_alt", 
 					label: "Screen shot", 
 					disabled: function() { 
@@ -116,6 +117,7 @@
 					selected: false
 				},
 				pin: {
+					id: "pin",
 					icon: "place", 
 					label: "Pin", 
 					disabled: function() { 
