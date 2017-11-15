@@ -167,33 +167,6 @@ describe('Implied permission::', function () {
 			const modelName = 'fedmodel123';
 			let corId, appId;
 
-			/*
-			//fake a response from bouncer;
-			setTimeout(function(){
-				q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-					expect(info.messageCount).to.equal(1);
-					return q.channel.get(q.workerQName);
-				}).then(res => {
-					corId = res.properties.correlationId;
-					appId = res.properties.appId;
-					return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-				}).then(() => {
-					//send fake job done message to the queue;
-					return q.channel.publish(
-						q.callbackQName,
-						appId,
-						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
-						{
-							correlationId: corId, 
-							persistent: true 
-						}
-					);
-				}).catch(err => {
-					done(err);
-				});
-
-			}, 1000);*/
-
 			agent
 			.post(`/${sharedTeamspace}/model`)
 			.send(Object.assign({
@@ -473,33 +446,6 @@ describe('Implied permission::', function () {
 			const modelName = 'fedmodel123';
 			const q = require('../../services/queue');
 			let corId, appId;
-
-			/*
-			//fake a response from bouncer;
-			setTimeout(function(){
-				q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-					expect(info.messageCount).to.equal(1);
-					return q.channel.get(q.workerQName);
-				}).then(res => {
-					corId = res.properties.correlationId;
-					appId = res.properties.appId;
-					return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-				}).then(() => {
-					//send fake job done message to the queue;
-					return q.channel.publish(
-						q.callbackQName,
-						appId,
-						new Buffer(JSON.stringify({ value: 0, database: username, project: modelName })), 
-						{
-							correlationId: corId, 
-							persistent: true 
-						}
-					);
-				}).catch(err => {
-					done(err);
-				});
-
-			}, 1000);*/
 
 			agent
 			.post(`/${sharedTeamspace}/model`)
