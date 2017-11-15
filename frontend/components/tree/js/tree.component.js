@@ -120,18 +120,6 @@
 			vm.nodesToShow[0].children[0].selected = false;
 		}
 
-		/**
-		 * traverse children of a node recursively
-		 * @param {Object} node
-		 * @param {Function} callback
-		 */
-		function traverseNode(node, callback){
-			callback(node);
-			node.children && node.children.forEach(function(child){
-				traverseNode(child, callback);
-			});
-		}
-
 		function getAccountModelKey(account, model) {
 			return account + "@" + model;
 		}
@@ -141,17 +129,25 @@
 		 * @param {Object} node
 		 * @param {Array} nodes Array to push the nodes to
 		 */
-		function traverseNodeAndPushId(node, nodes){
-			traverseNode(node, function(node){
-				if (!node.children && ((node.type || "mesh") === "mesh")) {
-					var key = getAccountModelKey(node.account, node.project);
-					if(!nodes[key]){
-						nodes[key] = [];
-					}
-
-					nodes[key].push(node._id);
+		function traverseNodeAndPushId(node, nodes, idToMeshes){
+			var meshes = idToMeshes[node._id];
+			if(meshes) {
+				var key = getAccountModelKey(node.account, node.project);
+				if(!nodes[key]) {
+					nodes[key] = meshes;
 				}
-			});
+				else {
+					nodes[key].concat(meshes);
+				}
+			}
+			else
+			{
+				//This should only happen in federations.
+				//Traverse down the tree to find submodel nodes
+				node.children && node.children.forEach(function(child){
+					traverseNodeAndPushId(child, nodes, idToMeshes);
+				});
+			}
 		}
 
 		function getVisibleArray(account, model){
@@ -615,15 +611,17 @@
 		var toggleNode = function (node) {
 			var childNodes = [];
 
-			traverseNodeAndPushId(node, childNodes);
-			
-			for (var key in childNodes){
+			TreeService.getMap().then(function(treeMap) {
+				traverseNodeAndPushId(node, childNodes, treeMap.idToMeshes);
+				for (var key in childNodes){
 
-				var vals = key.split("@");
-				var account = vals[0];
-				var model = vals[1];
-				ViewerService.switchObjectVisibility(account, model, childNodes[key], node.toggleState != "invisible");
-			}
+					var vals = key.split("@");
+					var account = vals[0];
+					var model = vals[1];
+					ViewerService.switchObjectVisibility(account, model, childNodes[key], node.toggleState != "invisible");
+				}
+			});
+
 
 		};
 
@@ -739,34 +737,36 @@
 				vm.currentSelectedNodes.push(node);
 			}
 
-			var map = [];
-
-			traverseNodeAndPushId(node, map);
-
-			// Select the parent node in the group for cards and viewer
-			EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
-				source: "tree",
-				account: node.account,
-				model: node.project,
-				id: node._id,
-				name: node.name,
-				noHighlight : true
-			});
-			for(var key in map) {
-				var vals = key.split("@");
-				var account = vals[0];
-				var model = vals[1];
+			TreeService.getMap().then(function(treeMap) {
+				var map = [];
+				traverseNodeAndPushId(node, map, treeMap.idToMeshes);
 			
-				// Separately highlight the children
-				// but only for multipart meshes
-				ViewerService.highlightObjects({
+				// Select the parent node in the group for cards and viewer
+				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
-					account: account,
-					model: model,
-					ids: map[key],
-					multi: true
+					account: node.account,
+					model: node.project,
+					id: node._id,
+					name: node.name,
+					noHighlight : true
 				});
-			}
+
+				for(var key in map) {
+					var vals = key.split("@");
+					var account = vals[0];
+					var model = vals[1];
+			
+					// Separately highlight the children
+					// but only for multipart meshes
+					ViewerService.highlightObjects({
+						source: "tree",
+						account: account,
+						model: model,
+						ids: map[key],
+						multi: true
+					});
+				}
+			});
 		};
 
 		vm.filterItemSelected = function (item) {

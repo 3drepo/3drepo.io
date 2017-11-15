@@ -26,6 +26,7 @@
 	function TreeService($q, APIService) {
 		var treeReady;
 		var treeMap = null;
+		var idToMeshes;
 		var baseURL;
 
 		var service = {
@@ -68,9 +69,23 @@
 
 			var	url = baseURL + "fulltree.json";
 			getTrees(url, setting, cachedTreeDefer);
+			getIdToMeshes();
 			
 			return treeReady = cachedTreeDefer.promise;
 
+		}
+
+		function getIdToMeshes() {
+			var url = baseURL + "idToMeshes.json";
+			APIService.get(url, {
+				headers: {
+					"Content-Type": "application/json"
+				}
+			}).then(function(json) {
+				idToMeshes = json.data.idToMeshes;
+			}).catch(function(error){
+				console.error("Failed to get Id to Meshes:", error);
+			});
 		}
 
 		function getTrees(url, setting, deferred) {
@@ -271,10 +286,11 @@
 				treeMap = {
 					uidToSharedId: {},
 					sharedIdToUid: {},
-					oIdToMetaId: {}
+					oIdToMetaId: {},
 				};
 				return treeReady.then(function(tree) {
 					genMap(tree.nodes, treeMap);
+					treeMap.idToMeshes = idToMeshes;
 				});
 
 			}

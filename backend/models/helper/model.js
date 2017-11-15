@@ -609,6 +609,103 @@ function getIdMap(account, model, branch, rev, username){
 	});
 }
 
+function getIdToMeshes(account, model, branch, rev, username){
+	'use strict'	
+	let subIdToMeshes;
+		let revId, idToMeshesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getIdToMeshes = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getIdToMeshes.push(
+				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToMeshes: obj.idToMeshes,
+						owner: ref.owner,
+						model: ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(getIdToMeshes);
+
+	}).then(_subIdToMeshes => {
+
+		subIdToMeshes = _subIdToMeshes;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+
+	}).then(buf => {
+		let idToMeshes = {};
+
+		if(buf){
+			console.log(buf);
+			idToMeshes = JSON.parse(buf);
+		}
+
+		if(subIdToMeshes.length > 0)
+		{
+			idToMeshes.subModels = [];
+		}
+		subIdToMeshes.forEach(subIdToMeshes => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdToMeshes && subIdToMeshes.idToMeshes)
+			{
+				idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+			}
+		});
+
+		return Promise.resolve({idToMeshes, status});
+
+	});
+}
+
 
 function getModelProperties(account, model, branch, rev, username){
 	
@@ -1666,6 +1763,7 @@ module.exports = {
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
+	getIdToMeshes,
 	getModelProperties,
 	getTreePath,
 	getUnityAssets,
