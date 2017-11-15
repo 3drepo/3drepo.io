@@ -51,7 +51,7 @@ div.heightFix(
 		// Info
 		.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 			div(flex="10")
-				md-icon.angular-material-icons#issueStatus(
+				md-icon.angular-material-icons#issueStatusIcon(
 					style="color:{{vm.issueData.statusIcon.colour}}") {{vm.issueData.statusIcon.icon}}
 
 			.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
@@ -64,6 +64,7 @@ div.heightFix(
 				md-input-container.issueItemStatus(flex)
 					label Priority
 					md-select(
+						id="issuePriority"
 						ng-model="vm.issueData.priority"
 						ng-change="vm.statusChange()"
 						ng-disabled="!vm.canChangePriority()")
@@ -73,6 +74,7 @@ div.heightFix(
 				md-input-container.issueItemStatus(flex)
 					label Status
 					md-select(
+						id="issueStatus"
 						ng-model="vm.issueData.status"
 						ng-change="vm.statusChange()"
 						ng-disabled="!vm.canChangeStatus()")
@@ -86,6 +88,7 @@ div.heightFix(
 				md-input-container(flex)
 					label Assign
 					md-select(
+						id="issueAssign"
 						ng-model="vm.issueData.assigned_roles[0]"
 						ng-change="vm.statusChange()"
 						ng-disabled="!vm.canChangeAssigned()")
@@ -95,10 +98,11 @@ div.heightFix(
 				md-input-container(flex)
 					label Type
 					md-select(
+						id="issueType"
 						ng-model="vm.issueData.topic_type"
 						ng-change="vm.statusChange()"
 						ng-disabled="!vm.canChangeType()")
-
+						
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
@@ -241,7 +245,7 @@ md-divider
 .issueItemContainer#issueFooterButtons(layout="column")
 
 	.issueThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
-		img.issueThumbnailImage(ng-src="{{vm.commentThumbnail}}")
+		img.issueThumbnailImage(id="commentThumbnail" ng-src="{{vm.commentThumbnail}}")
 	
 	div(layout="row")
 		// New comment
@@ -252,6 +256,7 @@ md-divider
 			textarea(
 				flex="100"
 				placeholder="{{vm.getCommentPlaceholderText()}}"
+				id="newCommentInput"
 				aria-label="New Comment"
 				ng-model="vm.comment"
 				ng-change="vm.commentChange()"
@@ -259,11 +264,12 @@ md-divider
 				ng-blur="vm.textInputHasFocus(false)"
 				ng-disabled="!vm.checkCanComment()"
 				ng-required="true")
-
-
+				
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
+
 				ng-repeat="(action, actionData) in vm.actions"
+				id="{{actionData.id + 'CommentButton'}}"
 				aria-label="{{action}}"
 				ng-click="vm.doAction($event, action)"
 				ng-if="actionData.visible()"
@@ -275,7 +281,12 @@ md-divider
 		div(flex="100" ng-if="!vm.data")
 
 		div(layout="row" layout-align="end center")
-			md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="vm.submitDisabled", ng-click="vm.submit()" ng-if="!vm.saving")
+			md-button.md-fab.md-mini(
+				id="submitCommentButton"
+				aria-label="Submit"
+				ng-disabled="vm.submitDisabled"
+				ng-click="vm.submit()"
+				ng-if="!vm.saving")
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")

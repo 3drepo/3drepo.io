@@ -6,14 +6,14 @@ export let config: Config = {
   framework: "mocha",
   mochaOpts: {
     reporter: "spec",
-    slow: 3000
+    slow: 3000,
+    bail: true
   },
   capabilities: {
     'browserName': 'chrome',
     chromeOptions: {
       args: [
-        "--headless", 
-        "--disable-gpu", 
+        "--headless",
         "--start-maximized", 
         "--window-size=1920x1080"
       ]

@@ -60,7 +60,7 @@ home #homeLogo img {
     user-select: none;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 600px) {
     home .homeUserContent {
         margin-bottom: 80px;
         margin-top: 0px !important;

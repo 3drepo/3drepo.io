@@ -219,18 +219,26 @@
 		};
 
 		vm.increment = function(percentage) {
-			if (percentage === undefined) {
-				percentage = 0.01;
-			}
-			vm.displayDistance += (vm.displayDistance * percentage);
-			vm.updateDisplaySlider(false, true);
+			vm.updateDistance( -(vm.displayDistance * percentage) );
+
 		};
 
 		vm.decrement = function(percentage) {
-			if (percentage === undefined) {
-				percentage = 0.01;
-			}
-			vm.displayDistance -= (vm.displayDistance * percentage);
+			vm.updateDistance( (vm.displayDistance * percentage) );
+		};
+
+		vm.decrementDiscrete = function() {
+			vm.updateDistance(-1);
+		};
+
+		vm.incrementDiscrete = function() {
+			vm.updateDistance(1);
+		};
+
+		vm.updateDistance = function(amount) {
+			console.log(vm.displayDistance, amount);
+			vm.displayDistance += amount;
+			vm.cleanDisplayDistance();
 			vm.updateDisplaySlider(false, true);
 		};
 
@@ -238,7 +246,6 @@
 		 * Update displayed Distance based on slider position and axis
 		 */
 		vm.updateDisplayedDistance = function(updateSlider, moveClip) {
-
 
 			var minMax = vm.getMinMax();
 			var max = minMax.max;
@@ -252,12 +259,13 @@
 			var scaler = vm.getScaler(vm.units, vm.modelUnits);
 			var newDistance = parseFloat((min + (Math.abs(max - min) * percentage))) * scaler;
 
-			vm.displayDistance = newDistance;
-			
-			if(moveClip) {
-				vm.updateClippingPlane();
+			if (!isNaN(newDistance)) {
+				vm.displayDistance = newDistance;
+				if(moveClip) {
+					vm.updateClippingPlane();
+				}
 			}
-
+			
 		};
 
 		vm.unitShouldShow = function(unit) {
@@ -280,7 +288,6 @@
 		 * Update display slider based on current internal distance
 		 */
 		vm.updateDisplaySlider = function(updateDistance, moveClip) {
-
 
 			var minMax = vm.getMinMax();
 			var max = minMax.max;
@@ -332,40 +339,43 @@
 			};
 		};
 
-		vm.update = function() {
-			vm.cleanDisplayDistance();
-			vm.updateDisplayedDistance();
-			vm.updateDisplaySlider(false, vm.visible);
-		};
-
 		$scope.$watch("vm.displayDistance", function () {
-			vm.update();
+			vm.updateDisplaySlider(false, vm.visible);
 		});
 
-		$scope.$watch("vm.units", function(newUnit, oldUnit){
-			vm.update();
+		$scope.$watch("vm.units", function(newUnits, oldUnits){
+			if (newUnits && oldUnits) {
+				var scaler = vm.getScaler(newUnits, oldUnits);
+				vm.displayDistance = vm.displayDistance * scaler;
+			}
 		});
 
 		vm.cleanDisplayDistance = function() {
 			var minMax = vm.getMinMax();
-			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
 
-			if (isNaN(vm.displayDistance)) {
-				vm.displayDistance = minMax.min * scaler;
+			var scaledMin = minMax.min * scaler;
+			var scaledMax = minMax.max * scaler;
+
+			if (isNaN(vm.displayDistance) && scaledMin) {
+				//console.log("cleanDisplayDistance - isNaN");
+				vm.displayDistance = scaledMin;
 				return;
 			}
 			
-			if (minMax.max && vm.displayDistance > minMax.max) {
-				vm.displayDistance = minMax.max * scaler;
+			if (minMax.max && vm.displayDistance > scaledMax) {
+				//console.log(vm.displayDistance, "cleanDisplayDistance - is more than scaled max!", scaledMax, scaler);
+				vm.displayDistance = scaledMax;
+				return;
 			}
-			
-			if (minMax.min && vm.displayDistance < minMax.min) {
-				vm.displayDistance = minMax.min * scaler;
+		
+			if (minMax.min && vm.displayDistance < scaledMin) {
+				//console.log(vm.displayDistance, "cleanDisplayDistance - is less than min!", scaledMin, scaler);
+				vm.displayDistance = scaledMin;
+				return;
 			}
 
 		};
-
-
 
 		/*
 		 * Watch for show/hide of card
@@ -376,7 +386,6 @@
 				vm.visible = newValue;
 			}
 		});
-
 
 		/*
 		 * Toggle the clipping plane
@@ -391,8 +400,6 @@
 				}
 			}
 		});
-
-
 
 		/*
 		 * Change the clipping plane axis

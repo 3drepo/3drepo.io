@@ -326,10 +326,6 @@ issue #issueTitleInput {
 issue #issueTitle {
   margin: 10px 0;
 }
-/*
-issue #issueStatus {
-  margin: 10px 0 0;
-}*/
 
 issue .issueItemStatus {
   margin-right: 5px;

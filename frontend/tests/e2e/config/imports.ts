@@ -13,5 +13,5 @@ export { }
 export { USER } from "./user";
 export { expect };
 export { env };
-export { ElementFinder, browser, by, element } from "protractor";
-export { login, logout, hasClass } from "./helpers";
+export { ElementFinder, browser, by, element, ExpectedConditions } from "protractor";
+export { login, logout, hasClass, clickElement } from "./helpers";

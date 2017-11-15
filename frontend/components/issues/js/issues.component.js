@@ -326,9 +326,12 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
+				var issueListItemId;
 
-				var issueListItemId = "issue" + IssuesService.state.selectedIssue._id;
-
+				if (IssuesService.state.selectedIssue && IssuesService.state.selectedIssue._id) {
+					issueListItemId = "issue" + IssuesService.state.selectedIssue._id;
+				}	
+				
 				IssuesService.state.displayIssue = null;
 				
 				$state.go("home.account.model", 
@@ -341,7 +344,7 @@
 					{notify: false}
 				).then(function(){
 					var element = document.getElementById(issueListItemId);
-					if (element) {
+					if (element && element.scrollIntoView) {
 						element.scrollIntoView(); 
 					}
 				});

@@ -116,11 +116,13 @@ var Viewer = {};
 
 			self.loadingDiv = document.createElement("div");
 			self.loadingDivText = document.createElement("p");
-			self.loadingDiv.appendChild(self.loadingDivText);
-
+			
 			self.loadingDivText.innerHTML = "";
+
 			self.loadingDiv.className += "loadingViewer";
 			self.loadingDivText.className += "loadingViewerText";
+
+			self.loadingDiv.appendChild(self.loadingDivText);
 
 			var canvas = document.createElement("canvas");
 			canvas.className = "emscripten";
@@ -177,6 +179,7 @@ var Viewer = {};
 				// Set option param from viewerDirective
 				self.options = options;
 
+				self.loadingDivText.style.display = "inherit";
 				self.loadingDivText.innerHTML = "Loading Viewer...";
 				document.body.style.cursor = "wait";
 
@@ -221,7 +224,7 @@ var Viewer = {};
 
 				UnityUtil.onReady().then(function() {
 					self.initialized = true;
-					self.loadingDivText.innerHTML = "";
+					self.loadingDivText.style.display = "none";
 					callback(Viewer.EVENT.UNITY_READY, {
 						name: self.name,
 						model: self.modelString
@@ -229,6 +232,7 @@ var Viewer = {};
 					resolve();
 				}).catch(function(error){
 					self.loadingDivText.innerHTML = "Loading Viewer Failed!";
+					self.loadingDivText.style.display = "inherit";
 					console.error("UnityUtil.onReady failed: ", error);
 					reject(error);
 				});
@@ -620,7 +624,7 @@ var Viewer = {};
 			self.setMultiSelectMode(false);
 			self.setMeasureMode(false);
 			self.setPinDropMode(false);
-			self.loadingDivText.innerHTML = "";
+			self.loadingDivText.style.display = "none";
 			UnityUtil.reset();	
 		};
 
@@ -635,14 +639,13 @@ var Viewer = {};
 			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
-			//self.loadingDivText.innerHTML = ""; //This could be set to Loading Model
+			self.loadingDivText.style.display = "none";
 			document.body.style.cursor = "wait";
 
 			callback(Viewer.EVENT.START_LOADING);
 			return UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
 				.then(function(bbox){
 					document.body.style.cursor = "initial";
-					self.loadingDivText.innerHTML = "";
 					callback(Viewer.EVENT.MODEL_LOADED);
 					callback(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch(function(error){
