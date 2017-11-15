@@ -474,6 +474,7 @@ describe('Implied permission::', function () {
 			const q = require('../../services/queue');
 			let corId, appId;
 
+			/*
 			//fake a response from bouncer;
 			setTimeout(function(){
 				q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
@@ -498,7 +499,7 @@ describe('Implied permission::', function () {
 					done(err);
 				});
 
-			}, 1000);
+			}, 1000);*/
 
 			agent
 			.post(`/${sharedTeamspace}/model`)
