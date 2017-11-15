@@ -204,6 +204,28 @@ describe('Revision', function () {
 		});
 	});	
 
+	//IdToMeshes
+	it('get idToMeshes by revision id should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/idToMeshes.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get idToMeshes by non existing revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/000/idToMeshes.json`)
+		.expect(400, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get idToMeshes of head of master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/idToMeshes.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});	
+
 	//treePath
 	it('get treePath by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/tree_path.json`)
