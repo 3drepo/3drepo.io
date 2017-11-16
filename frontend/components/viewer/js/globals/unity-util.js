@@ -337,6 +337,10 @@ var UnityUtil;
 		if(color) {
 			params.color = color;
 		}
+		else
+		{
+			params.color = [1,1,0];
+		}
 
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	};
