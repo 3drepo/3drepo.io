@@ -38,7 +38,6 @@ define(["require", "exports"], function (require, exports) {
             var cachedTreeDefer = this.$q.defer();
             this.treeMap = null;
             branch = branch ? branch : "master";
-            console.log("HELLO FROM TREE SERVICE 10");
             //revision = revision ? revision : "head";
             if (!revision) {
                 this.baseURL = account + "/" + model + "/revision/master/head/";

@@ -34,11 +34,11 @@
     "font-awesome": "^4.7.0",
     "material-design-icons": "^3.0.1",
     "socket.io-client": "^2.0.4",
-    "streamqueue": "^1.1.1",
-    "sw-precache": "^5.2.0",
-    "tslint": "^5.8.0"
+    "sw-precache": "^5.2.0"
   },
   "devDependencies": {
+    "@types/angular": "^1.6.39",
+    "@types/angular-material": "^1.1.56",
     "@types/chai": "^4.0.4",
     "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^2.2.43",
@@ -56,14 +56,16 @@
     "gulp-rename": "^1.2.2",
     "gulp-size": "^2.1.0",
     "gulp-sourcemaps": "^2.6.0",
+    "gulp-typescript": "^3.2.3",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
-    "merge-stream": "^1.0.1",
     "mocha": "^4.0.1",
     "protractor": "^5.1.2",
+    "tslint": "^5.8.0",
     "typescript": "^2.6.1",
     "webpack": "^3.0.0",
-    "webpack-stream": "^4.0.0"
+    "webpack-stream": "^4.0.0",
+    "streamqueue": "^1.1.1"
   }
 }
