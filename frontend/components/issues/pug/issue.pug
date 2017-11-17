@@ -262,7 +262,7 @@ md-divider
 				ng-change="vm.commentChange()"
 				ng-focus="vm.textInputHasFocus(true)"
 				ng-blur="vm.textInputHasFocus(false)"
-				ng-disabled="!vm.checkCanComment()"
+				ng-disabled="!vm.checkCanComment() || vm.issueFailedToLoad"
 				ng-required="true")
 				
 		div(layout="row" layout-align="start center")
@@ -284,7 +284,7 @@ md-divider
 			md-button.md-fab.md-mini(
 				id="submitCommentButton"
 				aria-label="Submit"
-				ng-disabled="vm.submitDisabled"
+				ng-disabled="vm.submitDisabled || vm.issueFailedToLoad"
 				ng-click="vm.submit()"
 				ng-if="!vm.saving")
 				md-tooltip(md-direction="bottom") Submit
@@ -300,7 +300,7 @@ md-divider
 
 // Whilst issue is loading
 div.heightFix(
-	ng-if="!vm.modelSettings"
+	ng-if="!vm.modelSettings || !vm.issueData"
 	flex
 	layout="column"
 	layout-fill
@@ -308,3 +308,17 @@ div.heightFix(
 	tdr-focus="true")
 
 	tdr-progress(info="vm.issueProgressInfo")
+
+div.heightFix(
+	ng-if="vm.issueFailedToLoad"
+	flex
+	layout="column"
+	layout-fill
+	tabindex="0"
+	tdr-focus="true")
+
+	div(
+		layout="column"
+		flex 
+		layout-align="center center")
+			h3 Issue Failed to Load

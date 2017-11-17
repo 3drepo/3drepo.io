@@ -65,6 +65,7 @@
 		vm.$onInit = function() { 
 			
 			vm.canEditDescription = false;
+			vm.issueFailedToLoad = false;
 
 			vm.savedScreenShot = null;
 			vm.editingCommentIndex = null;
@@ -199,50 +200,67 @@
 			}
 		});
 
+		vm.setEditIssueData = function(newIssueData) {
+			vm.issueData = newIssueData;
+
+			vm.issueData.comments = vm.issueData.comments || [];
+
+			if (!vm.issueData.name) {
+				vm.disabledReason = vm.reasonTitleText;
+			}
+
+			vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
+			vm.issueData.comments.forEach(function(comment){
+				if(comment.owner !== AuthService.getUsername()){
+					comment.sealed = true;
+				}
+			});
+
+			// Old issues
+			vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
+			vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
+			vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
+			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
+
+			vm.checkCanComment();
+			vm.convertCommentTopicType();
+
+			// Can edit description if no comments
+			vm.canEditDescription = vm.checkCanEditDesc();
+
+			IssuesService.populateIssue(vm.issueData);
+			vm.setContentHeight();
+		};
+
 		$scope.$watch("vm.data", function() {
 
 			// Data
-
 			if (vm.data && vm.statuses && vm.statuses.length) {
+				vm.issueFailedToLoad = false;
+				vm.issueData = null;
 
-				vm.startNotification();
-
-				vm.issueData = angular.copy(vm.data);
-
-				vm.issueData.comments = vm.issueData.comments || [];
-
-				if (!vm.issueData.name) {
-					vm.disabledReason = vm.reasonTitleText;
-				}
-
-				vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
-				vm.issueData.comments.forEach(function(comment){
-					if(comment.owner !== AuthService.getUsername()){
-						comment.sealed = true;
-					}
-				});
-
-				// Old issues
-				vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
-				vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
-				vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
-				vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
-
-				vm.checkCanComment();
-				vm.convertCommentTopicType();
-
-				// Can edit description if no comments
-				vm.canEditDescription = vm.checkCanEditDesc();
+				IssuesService.getIssue(vm.account, vm.model, vm.data._id)
+					.then(function(fetchedIssue){
+						vm.setEditIssueData(fetchedIssue);
+						vm.startNotification();
+						vm.issueFailedToLoad = false;
+					})
+					.catch(function(error){
+						vm.issueFailedToLoad = true;
+						console.error(error);
+					});
+				
+				//vm.setEditIssueData(vm.data);
+				
 				
 			} else {
 
 				vm.issueData = IssuesService.createBlankIssue();
+				IssuesService.populateIssue(vm.issueData);
+				vm.setContentHeight();
 
 			}
-							
-			IssuesService.populateIssue(vm.issueData);
-			vm.setContentHeight();
-	
+
 		});
 
 		vm.checkCanEditDesc = function() {

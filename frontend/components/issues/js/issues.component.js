@@ -520,7 +520,6 @@
 		 */
 		vm.editIssueExit = function (issue) {
 			document.getElementById("issue" + issue._id).scrollIntoView();
-			console.log(document.getElementById("issue" + issue._id));
 			vm.hideItem = true;
 		};
 

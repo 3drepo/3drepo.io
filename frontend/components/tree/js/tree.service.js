@@ -56,7 +56,7 @@
 		}
 
 		function init(account, model, branch, revision, setting) {
-			var cachedTreeDefer = $q.defer();
+			treeReady = $q.defer();
 			treeMap = null;
 			branch = branch ? branch : "master";
 			//revision = revision ? revision : "head";
@@ -68,10 +68,10 @@
 			}
 
 			var	url = baseURL + "fulltree.json";
-			getTrees(url, setting, cachedTreeDefer);
+			getTrees(url, setting);
 			getIdToMeshes();
 			
-			return treeReady = cachedTreeDefer.promise;
+			return treeReady.promise;
 
 		}
 
@@ -88,7 +88,7 @@
 			});
 		}
 
-		function getTrees(url, setting, deferred) {
+		function getTrees(url, setting) {
 
 			APIService.get(url, {
 				headers: {
@@ -166,7 +166,7 @@
 							mainTree.subTreesById = subTreesById;
 
 							Promise.all(getSubTrees).then(function(){
-								deferred.resolve(mainTree);
+								return treeReady.resolve(mainTree);
 							});
 
 						});
@@ -186,8 +186,8 @@
 				headers: {
 					"Content-Type": "application/json"
 				}
-			}).
-				then(function(response){
+			})
+				.then(function(response){
 					return response.data;
 				});
 
@@ -269,28 +269,28 @@
 				}
 			}
 
+
+
 			return Promise.all(subTreePromises).then(function(){
-					return items;
-				}
-			)
+				return items;
+			});
+
 		}
 
 		function getMap(){
 			//only do this once!
-			if(treeMap)
-			{
+			if(treeMap) {
 				return Promise.resolve(treeMap);
-			}
-			else
-			{
+			} else {
 				treeMap = {
 					uidToSharedId: {},
 					sharedIdToUid: {},
-					oIdToMetaId: {},
+					oIdToMetaId: {}
 				};
-				return treeReady.then(function(tree) {
-					genMap(tree.nodes, treeMap);
+
+				return treeReady.promise.then(function(tree) {
 					treeMap.idToMeshes = idToMeshes;
+					return genMap(tree.nodes, treeMap);
 				});
 
 			}
