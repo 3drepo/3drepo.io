@@ -181,9 +181,15 @@
 		 * This is called when we know the bounding box of our model
 		 */
 		vm.setDisplayValues = function(axis, distance, moveClip, direction, slider) {
-			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
 			var scaler = vm.getScaler(vm.units, vm.modelUnits);
-			vm.displayDistance = parseFloat(distance) * scaler;
+			var newDistance = parseFloat(distance) * scaler;
+			
+			//We only want to disable watch if the value is going to change.
+			//Otherwise we might be ignoring the next update.
+			vm.disableWatchAxis = vm.displayedAxis != axis;
+			vm.disableWatchSlider = vm.disableWatchDistance = vm.displayedDistance != newDistance;
+			
+			vm.displayDistance = newDistance;
 			vm.direction = direction;
 
 			vm.displayedAxis = axis;
@@ -429,6 +435,7 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
+				console.log("Clip plane broadcast.");
 				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false, event.value.clipDirection === 1);
 				vm.updateDisplayedDistance(true, vm.visible);
 
@@ -440,7 +447,7 @@
 				}
 
 			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
-				
+				console.log("bboxReady broadcast");
 				vm.bbox = event.value.bbox;
 				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0, vm.direction);
 				vm.updateDisplayedDistance(true, vm.visible);
