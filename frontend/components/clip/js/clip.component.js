@@ -180,10 +180,12 @@
 		 * Initialise display values
 		 * This is called when we know the bounding box of our model
 		 */
-		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
+		vm.setDisplayValues = function(axis, distance, moveClip, direction, slider) {
 			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-
-			vm.displayDistance = parseFloat(distance);
+			console.log("clip direction:" , direction);
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+			vm.displayDistance = parseFloat(distance) * scaler;
+			vm.direction = direction;
 
 			vm.displayedAxis = axis;
 			if(slider != null) {
@@ -434,8 +436,8 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-
-				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false);
+				console.log(event.value);
+				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false, event.value.clipDirection === 1);
 				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
@@ -448,7 +450,7 @@
 			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
 				
 				vm.bbox = event.value.bbox;
-				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0, vm.direction);
 				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
