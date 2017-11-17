@@ -435,7 +435,6 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-				console.log("Clip plane broadcast.");
 				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false, event.value.clipDirection === 1);
 				vm.updateDisplayedDistance(true, vm.visible);
 
@@ -447,7 +446,6 @@
 				}
 
 			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
-				console.log("bboxReady broadcast");
 				vm.bbox = event.value.bbox;
 				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0, vm.direction);
 				vm.updateDisplayedDistance(true, vm.visible);
