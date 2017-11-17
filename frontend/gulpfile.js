@@ -20,6 +20,7 @@ const ts = require('gulp-typescript');
 const tsConfig = {
   typescript: require("typescript"),
   module: "amd",
+  lib: ["es2015", "dom"],
   sourceMap: true
 };
 
@@ -257,7 +258,9 @@ gulp.task('watch', function() {
   watches = {
     "index" : [ ["./index.html"], ['index'] ],
     "entry" :[ ["./entry.js"], ['javascript-dev'] ],
-    "js" : [ allJs, ['javascript-dev'] ],
+    "typescript-globals": [["./globals/*.ts"], ["typescript-globals"] ],
+    "typescript-components": [["./components/**/*.ts"], ["typescript-components"] ],
+    "js" : [ ["./components/**/*.js", "./bootstrap.js", "./entry.js", "./entry-ts-components.js"], ['javascript-dev'] ],
     "css" : [ allCss, ['css'] ],
     "pug" : [ allPug, ['pug'] ],
     "icons" : [ icons, ['icons'] ],

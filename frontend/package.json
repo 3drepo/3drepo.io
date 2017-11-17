@@ -24,7 +24,6 @@
   "author": "3D Repo",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@types/es6-promise": "^0.0.33",
     "angular": "^1.6.5",
     "angular-animate": "^1.6.5",
     "angular-aria": "^1.6.5",
@@ -36,7 +35,8 @@
     "material-design-icons": "^3.0.1",
     "socket.io-client": "^2.0.4",
     "streamqueue": "^1.1.1",
-    "sw-precache": "^5.2.0"
+    "sw-precache": "^5.2.0",
+    "tslint": "^5.8.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
