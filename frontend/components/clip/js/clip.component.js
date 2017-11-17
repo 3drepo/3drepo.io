@@ -237,7 +237,8 @@
 		};
 
 		vm.updateDistance = function(amount) {
-			vm.displayDistance += amount;
+			//ensure display distance is a float
+			vm.displayDistance = parseFloat(vm.displayDistance) + amount;
 			vm.cleanDisplayDistance();
 			vm.updateDisplaySlider(false, true);
 		};
