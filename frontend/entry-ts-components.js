@@ -9,3 +9,4 @@ require("./_built/amd/components/utils/js/tdr-focus.component.js");
 require("./_built/amd/components/utils/js/utils.filter.js");
 
 require("./_built/amd/components/tree/js/tree.component.js");
+require("./_built/amd/components/tree/js/tree.service.js");

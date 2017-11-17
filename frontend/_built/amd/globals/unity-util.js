@@ -266,6 +266,9 @@ define(["require", "exports"], function (require, exports) {
             if (color) {
                 params.color = color;
             }
+            else {
+                params.color = [1, 1, 0];
+            }
             UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
         };
         ;

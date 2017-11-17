@@ -130,8 +130,8 @@ gulp.task('manifest-icons', function() {
     .pipe(gulp.dest('./../public/manifest-icons/'));
 });
 
-gulp.task('service-workers', function(callback) {
 
+const sw = function(callback, verbose) {
   var swPrecache = require('sw-precache');
   var serviceWorkerName = "service-worker";
   console.log("Service workers");
@@ -147,9 +147,16 @@ gulp.task('service-workers', function(callback) {
       `${dir}/unity/**/*.{js,html,data,mem,css,png,jpg}`,
     ],
     stripPrefix: `${dir}`,
-    verbose: true,
+    verbose: false,
   }, callback);
+}
 
+gulp.task('service-workers', function(callback) {
+  sw(callback, true)
+});
+
+gulp.task('service-workers-dev', function(callback) {
+  sw(callback, false)
 });
 
 // JavaScript
@@ -174,7 +181,7 @@ gulp.task("typescript-globals", function() {
 
 });
 
-gulp.task("amd-components", ["typescript-components"], function(){
+gulp.task("amd-components", function(){
 
   // CREATE COMPONENTS (FROM TS COMPILED AMD)
   return gulp.src(["./entry-ts-components.js"])
@@ -189,7 +196,10 @@ gulp.task("amd-components", ["typescript-components"], function(){
 
 });
 
-gulp.task("amd-dependencies", ["typescript-globals"], function(){
+gulp.task("tsc-amd-components", ["typescript-components", "amd-components"]);
+
+
+gulp.task("amd-dependencies", function(){
 
     // CREATE DEPENDENCIES 
     return gulp.src(['./entry.js'])
@@ -204,19 +214,11 @@ gulp.task("amd-dependencies", ["typescript-globals"], function(){
 
 });
 
-// gulp.task('javascript-dev', function() {
+gulp.task("tsc-amd-dependencies", ["typescript-globals", "amd-dependencies"]);
 
-//   var js = getJavaScript();
+
+gulp.task('javascript-build', function(){
   
-//     return merge({ objectMode: true }, js.dependencies, js.components)
-//           .pipe(concat("three_d_repo.min.js"))
-//           .pipe(gulp.dest("./../public/dist/"))
-//           .pipe(livereload())
-
-// });
-
-gulp.task('javascript', ["amd-dependencies", "amd-components"], function() {
-
   const jsOrder = [
     '_built/dependencies.js',
     'components/entry/js/entry.js',
@@ -237,13 +239,44 @@ gulp.task('javascript', ["amd-dependencies", "amd-components"], function() {
           .pipe(print())
           .pipe(sourcemaps.init())
           .pipe(concat("three_d_repo.min.js"))
-          //.pipe(uglify({mangle: false})) // Mangle causes error for some reason
-           // .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+          .pipe(uglify({mangle: false})) // Mangle causes error for some reason
+            .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
           .pipe(size())
           .pipe(sourcemaps.write('./maps'))
           .pipe(gulp.dest("./../public/dist/"))
-
+    
 });
+
+gulp.task('javascript-build-dev', function(){
+
+  const jsOrder = [
+    '_built/dependencies.js',
+    'components/entry/js/entry.js',
+    '_built/ts-components.js',
+    'components/**/*.js',
+    'bootstrap.js'
+  ];
+
+  const js = [
+    '_built/dependencies.js',
+    '_built/ts-components.js',
+    'components/**/*.js',
+    'bootstrap.js'
+  ];
+
+  return gulp.src(js)
+          .pipe(order(jsOrder, { base: './' }))
+          .pipe(sourcemaps.init())
+          .pipe(concat("three_d_repo.min.js"))
+          .pipe(sourcemaps.write('./maps'))
+          .pipe(gulp.dest("./../public/dist/"))
+          .pipe(livereload())
+  
+});
+  
+gulp.task('javascript', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build"]);
+
+gulp.task('javascript-dev', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev"]);
 
 
 // Watch for changes and live reload in development
@@ -258,9 +291,14 @@ gulp.task('watch', function() {
   watches = {
     "index" : [ ["./index.html"], ['index'] ],
     "entry" :[ ["./entry.js"], ['javascript-dev'] ],
-    "typescript-globals": [["./globals/*.ts"], ["typescript-globals"] ],
-    "typescript-components": [["./components/**/*.ts"], ["typescript-components"] ],
-    "js" : [ ["./components/**/*.js", "./bootstrap.js", "./entry.js", "./entry-ts-components.js"], ['javascript-dev'] ],
+
+    "typescript-globals": [ ["./globals/*.ts"], ["typescript-globals"] ],
+    "typescript-components": [ ["./components/**/*.ts"], ["typescript-components"] ],
+
+    "amd-deps" : [ ['./entry.js', "./_built/amd/globals/*.js"], ["amd-dependencies"]],
+    "amd-components" : [ ['./entry-ts-components.js', "./_built/amd/components/**/*.js"], ["amd-components"]],
+
+    "js" : [ ["./_built/dependencies.js", "./_built/ts-components.js", "./components/**/*.js", "./bootstrap.js", ], ['javascript-build-dev'] ],
     "css" : [ allCss, ['css'] ],
     "pug" : [ allPug, ['pug'] ],
     "icons" : [ icons, ['icons'] ],
@@ -280,7 +318,7 @@ gulp.task('watch', function() {
 
 const registerTasksWithSW = function(task){
   gulp.task(task + "SW", [task], function() {
-    gulp.start("service-workers")
+    gulp.start("service-workers-dev")
   });
 }
 

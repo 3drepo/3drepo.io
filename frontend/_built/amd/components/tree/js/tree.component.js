@@ -506,10 +506,10 @@ define(["require", "exports"], function (require, exports) {
             //toggle parent
             path = node.path.split("__");
             path.splice(path.length - 1, 1);
-            for (var i_1 = 0, nodesLength_1 = this.nodesToShow.length; i_1 < nodesLength_1; i_1 += 1) {
+            for (var i = 0, nodesLength_1 = this.nodesToShow.length; i < nodesLength_1; i += 1) {
                 // 	// Get node parent
-                if (this.nodesToShow[i_1]._id === path[path.length - 1]) {
-                    lastParent = this.nodesToShow[i_1];
+                if (this.nodesToShow[i]._id === path[path.length - 1]) {
+                    lastParent = this.nodesToShow[i];
                     hasParent = true;
                 }
                 else if (lastParent.parent) {
@@ -521,9 +521,9 @@ define(["require", "exports"], function (require, exports) {
             }
             // Set the toggle state of the nodes above
             if (hasParent) {
-                for (var i_2 = (path.length - 1); i_2 >= 0; i_2 -= 1) {
+                for (var i = (path.length - 1); i >= 0; i -= 1) {
                     for (var j = 0, nodesLength_2 = this.nodesToShow.length; j < nodesLength_2; j += 1) {
-                        if (this.nodesToShow[j]._id === path[i_2]) {
+                        if (this.nodesToShow[j]._id === path[i]) {
                             numInvisible = this.nodesToShow[j].children.reduce(function (total, child) {
                                 return child.toggleState === "invisible" ? total + 1 : total;
                             }, 0);
