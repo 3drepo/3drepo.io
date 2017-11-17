@@ -24,6 +24,7 @@
 	EventService.$inject = ["$timeout"];
 
 	function EventService ($timeout) {
+
 		var EVENT = {
 			AUTO_META_DATA: "EVENT_AUTO_META_DATA",
 			FILTER: "EVENT_FILTER",
@@ -60,6 +61,7 @@
 
 			// Specific to the javascript viewer
 			// populated by the viewer.js script
+			
 			VIEWER: Viewer.EVENT,
 
 			// Ready signals
@@ -90,6 +92,8 @@
 
 		var currentEvent = {};
 		var currentError = {};
+
+		console.log("EVENT.VIEWER", addEventListener);
 
 		var send = function (type, value) {
 			var stack = (new Error()).stack;
