@@ -18,6 +18,7 @@
 function formatBytes() {
 
 	return (input, referenceValue) => {
+		
 		let bytesInMB: number = 1048576;
 		let bytesInGB: number = 1073741824;
 		let factor: number;
