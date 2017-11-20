@@ -206,7 +206,6 @@ export class UnityUtil {
 
 	static currentPointInfo(pointInfo) {
 		var point = JSON.parse(pointInfo);
-		console.log(UnityUtil.viewer);
 		if (UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
 		}
@@ -240,7 +239,6 @@ export class UnityUtil {
 
 	static pickPointAlert(pointInfo) {
 		var point = JSON.parse(pointInfo);
-		console.log("pickPointAlert", UnityUtil.viewer.pickPoint)
 		if(UnityUtil.viewer.pickPoint) {
 			UnityUtil.viewer.pickPoint(point);
 		}

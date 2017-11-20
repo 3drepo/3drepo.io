@@ -1,3 +1,5 @@
+import { IScope, ITimeoutService } from "angular";
+
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -17,16 +19,6 @@
 
 class TreeController implements ng.IController {
 	
-	static $inject: string[] = [
-		"$scope", 
-		"$timeout", 
-
-		"TreeService", 
-		"EventService",
-		"MultiSelectService", 
-		"ViewerService"
-	];
-
 	promise;
 	currentSelectedNodes;
 	highlightSelectedViewerObject: boolean;
@@ -55,10 +47,21 @@ class TreeController implements ng.IController {
 	infiniteItemsTree;
 	infiniteItemsFilter;
 	onContentHeightRequest;
+
+	static $inject: string[] = [
+		"$scope", 
+		"$timeout", 
+
+		"TreeService", 
+		"EventService",
+		"MultiSelectService", 
+		"ViewerService"
+	];
 		
 	constructor(
-		private $scope, 
-		private $timeout, 
+		private $scope: IScope,
+		private $timeout: ITimeoutService, 
+
 		private TreeService, 
 		private EventService, 
 		private MultiSelectService, 
@@ -94,7 +97,7 @@ class TreeController implements ng.IController {
 	};
 
 	watchers() {
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 			
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 	

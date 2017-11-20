@@ -1,3 +1,5 @@
+import { IQService } from "angular";
+
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -28,7 +30,7 @@ export class TreeService {
 	baseURL;
 
 	constructor(
-		private $q, 
+		private $q: IQService, 
 		private APIService
 	) {}
 		
@@ -48,7 +50,7 @@ export class TreeService {
 	}
 
 	init(account, model, branch, revision, setting) {
-		treeReady = $q.defer();
+		this.treeReady = this.$q.defer();
 		this.treeMap = null;
 		branch = branch ? branch : "master";
 
@@ -278,7 +280,7 @@ export class TreeService {
 				sharedIdToUid: {},
 				oIdToMetaId: {},
 			};
-			return this.treeReady.then((tree) => {	
+			return this.treeReady.promise.then((tree) => {	
 				this.treeMap.idToMeshes = this.idToMeshes;
 				return this.genMap(tree.nodes, this.treeMap);
 			});

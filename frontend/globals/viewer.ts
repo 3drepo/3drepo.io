@@ -109,7 +109,6 @@ export class Viewer {
 
 		this.callback = callback;
 		this.errCallback = errCallback;
-		console.log(this.callback, this.errCallback)
 
 		UnityUtil.init(errCallback);
 
@@ -290,8 +289,7 @@ export class Viewer {
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
-				console.log("loadingDivText to none in onReady")
-				//this.loadingDivText.style.display = "none";
+				this.loadingDivText.style.display = "none";
 				this.callback(Viewer.EVENT.UNITY_READY, {
 					name: this.name,
 					model: this.modelString
@@ -300,7 +298,7 @@ export class Viewer {
 			}).catch((error) => {
 				this.loadingDivText.innerHTML = "Loading Viewer Failed!";
 				this.loadingDivText.style.display = "block";
-				console.error("UnityUtil.onReady failed= ", error);
+				console.error("UnityUtil.onReady failed: ", error);
 				reject(error);
 			});
 			
@@ -344,8 +342,6 @@ export class Viewer {
 	pickPointEvent(pointInfo) {
 
 		//User clicked a mesh
-		console.log(this.callback);
-
 		this.callback(Viewer.EVENT.PICK_POINT, {
 			id : pointInfo.id,
 			position: pointInfo.position,

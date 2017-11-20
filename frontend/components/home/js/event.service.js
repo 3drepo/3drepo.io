@@ -93,7 +93,6 @@
 		var currentEvent = {};
 		var currentError = {};
 
-		console.log("EVENT.VIEWER", addEventListener);
 
 		var send = function (type, value) {
 			var stack = (new Error()).stack;

@@ -79,8 +79,7 @@ class ViewerController implements ng.IController {
 
 		this.pointerEvents = "auto";
 		this.measureMode = false;
-		
-		console.log("loadingDivText viewer.component init")
+
 		this.viewer = this.ViewerService.getViewer();
 		
 	}

@@ -1,4 +1,5 @@
 import { UnityUtil } from "../../../_built/amd/globals/unity-util";
+import { IQService } from "angular";
 
 /**
  *  Copyright (C) 2017 3D Repo Ltd
@@ -41,7 +42,7 @@ export class ViewerService {
 	];
 
 	constructor(
-		public $q: any, 
+		public $q: IQService, 
 		
 		public ClientConfigService: any, 
 		public APIService: any, 
@@ -269,8 +270,6 @@ export class ViewerService {
 
 	getViewer() {
 
-		console.log(this.EventService);
-		
 		if (this.viewer === undefined) {
 
 			this.viewer = new Viewer(

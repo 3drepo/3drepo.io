@@ -18,10 +18,11 @@
 function formatBytes() {
 
 	return (input, referenceValue) => {
-		let bytesInMB = 1048576,
-		bytesInGB = 1073741824,
-		factor,
-		units;
+		let bytesInMB: number = 1048576;
+		let bytesInGB: number = 1073741824;
+		let factor: number;
+
+		let units: string;
 
 		// referenceValue is used for consistency of units
 		if (referenceValue !== undefined || referenceValue !== null) {
@@ -49,8 +50,8 @@ function formatBytes() {
 
 function invoiceDate() {
 	return (input) => {
-		let date = new Date(input),
-		invoiceDate;
+		let date: Date = new Date(input);
+		let invoiceDate: string;
 
 		invoiceDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
 			((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
@@ -64,8 +65,8 @@ function invoiceDate() {
 
 function prettyDate() {
 	return (input, showSeconds) => {
-		let date = new Date(input),
-		modelDate;
+		let date: Date = new Date(input);
+		let modelDate: string;
 
 		modelDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
 			((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
