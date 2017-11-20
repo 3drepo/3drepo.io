@@ -65,16 +65,18 @@
 			
 		};
 
+		vm.isDefined = function(variable){
+			return variable !== undefined && variable !== null;
+		};
+
 		/*
 		 * Watch type on contentData to create content and tool bar options
 		 */
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (newValue) {
 				angular.element(function(){
-					createCardContent();
-					createToolbarOptions();
-					createFilter();
-					//createAdd();
+					vm.createToolbarOptions();
+					vm.createFilter();
 					vm.statusIcon = vm.contentData.icon;
 				});
 			}
@@ -84,7 +86,7 @@
 		 * Watch show on contentData to toggle elements off
 		 */
 		$scope.$watch("vm.contentData.show", function (newValue) {
-			if ((angular.isDefined(newValue) && !newValue)) {
+			if ((vm.isDefined(newValue) && !newValue)) {
 				vm.hideItem();
 			}
 		});
@@ -93,8 +95,8 @@
 		 * Change toolbar options when toggling add functionality
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				toggleAdd(newValue);
+			if (vm.isDefined(newValue)) {
+				vm.toggleAdd(newValue);
 			}
 		});
 
@@ -102,7 +104,7 @@
 		 * Watch for card in edit mode
 		 */
 		$scope.$watch("vm.showEdit", function (newValue) {
-			if (angular.isDefined(newValue)) {
+			if (vm.isDefined(newValue)) {
 				EventService.send(
 					EventService.EVENT.PANEL_CARD_EDIT_MODE, 
 					{
@@ -121,7 +123,7 @@
 				event.type === EventService.EVENT.TOGGLE_ISSUE_ADD &&
 				vm.contentData.type === "issues"
 			) {
-				toggleAdd(event.value.on);
+				vm.toggleAdd(event.value.on);
 				// Reset option highlight if the issue add is cancelled
 				if (!event.value.on) {
 					vm.contentData.options[vm.currentHighlightedOptionIndex].color = "";
@@ -136,16 +138,14 @@
 				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
 				}
-			} else if ((event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) && (vm.contentData.type === "issues")) {
-				highlightOption(event.value);
-			}
+			} 
 		});
 
 		/*
 		 * Watch for content item to hide itself
 		 */
 		$scope.$watch("vm.hideSelectedItem", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
+			if (vm.isDefined(newValue) && newValue) {
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});
@@ -179,111 +179,21 @@
 		};
 
 		/**
-		 * Create the card content
-		 */
-		function createCardContent () {
-			var content = angular.element($element[0].querySelector("#content")),
-				contentItem,
-				element;
-
-			// TODO: We shouldn't use string concat and angular.element
-			// definite antipattern
-
-			element =
-				"<" + vm.contentData.type + " " +
-				"show='vm.contentData.show' " +
-				"on-content-height-request='vm.onContentHeightRequest(height)' " +
-				"on-show-item='vm.showItem()' " +
-				"hide-item='vm.hideSelectedItem' " +
-				"show-edit='vm.showEdit' " +
-				"account='vm.account' " +
-				"model='vm.model' " +
-				"branch='vm.branch' " +
-				"model-settings='vm.modelSettings' " +
-				"revision='vm.revision' " +
-				"keys-down='vm.keysDown' " +
-				"selected-objects='vm.selectedObjects' " +
-				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
-
-			// Only add attributes when needed
-			if (vm.contentData.hasOwnProperty("options")) {
-				for (var i = 0; i < vm.contentData.options.length; i += 1) {
-					switch (vm.contentData.options[i].type) {
-					case "filter":
-						element += "filter-text='vm.filterText' ";
-						break;
-					case "visible":
-						element += "visible='vm.visible' ";
-						break;
-					case "menu":
-						element += "selected-menu-option='vm.selectedMenuOption' ";
-						break;
-					}
-				}
-			}
-			
-			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
-				element += "show-add='vm.showAdd' can-add='vm.canAdd'";
-			}
-
-			element += "></" + vm.contentData.type + ">";
-
-			contentItem = angular.element(element);
-			content.append(contentItem);
-			$compile(contentItem)($scope);
-		}
-		
-
-		/**
 		 * Create the tool bar options
 		 */
-		function createToolbarOptions () {
+		vm.createToolbarOptions = function() {
 
 			// TODO: We shouldn't use string concat and angular.element
 			// definite antipattern
 						
-			var i, length,
-				option, optionElement,
-				optionType, isMenuOrFilter;
+			var option, optionElement;
+			var optionData = vm.contentData.options;
 
 			if (vm.contentData.hasOwnProperty("options")) {
-				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
 
-					optionType = vm.contentData.options[i].type;
-					option = null;
-					optionElement = "<panel-card-option-" + optionType;
-					optionElement += " id='panal_card_option_" + optionType + "'";
-					
-					isMenuOrFilter = optionType === "menu" || optionType === "filter";
-
-					if(isMenuOrFilter){
-						optionElement += " ng-if='!vm.hideMenuButton'";
-					} else {
-						optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
-					}
-
-					vm.contentData.options[i].color = "";
-					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
-
-					switch (optionType) {
-					case "filter":
-						optionElement += " show-filter='vm.showFilter'";
-						break;
-
-					case "visible":
-						optionElement += " visible='vm.visible'";
-						break;
-
-					case "menu":
-						optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
-						break;
-
-					case "close":
-						optionElement += "show='vm.contentData.show'";
-						break;
-					}
-
-					optionElement += "><panel-card-option-" + optionType + ">";
+				optionData.forEach(function(op, i) {
+					var optionType = op.type;
+					optionElement = vm.getOptionElement(optionType, i);
 					option = angular.element(optionElement);
 
 					// Create the element
@@ -291,26 +201,68 @@
 						vm.options.prepend(option);
 						$compile(option)($scope);
 					}
-				}
+				});
+
 			}
-		}
+
+		};
+
+		vm.getOptionElement = function(optionType, i) {
+
+			var optionElement = "<panel-card-option-" + optionType;
+			optionElement += " id='panal_card_option_" + optionType + "'";
+			
+			var isMenuOrFilter = optionType === "menu" || optionType === "filter";
+
+			if(isMenuOrFilter){
+				optionElement += " ng-if='!vm.hideMenuButton'";
+			} else {
+				optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+			}
+
+			vm.contentData.options[i].color = "";
+
+			optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
+			optionElement += vm.getOptionSpecificData(optionType);
+			optionElement += "><panel-card-option-" + optionType + ">";
+
+			return optionElement;
+		};
+
+		vm.getOptionSpecificData = function(optionType) {
+
+			switch (optionType) {
+			case "filter":
+				return " show-filter='vm.showFilter'";
+
+			case "visible":
+				return " visible='vm.visible'";
+
+			case "menu":
+				return "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
+
+			case "close":
+				return "show='vm.contentData.show'";
+			}
+
+		};
 
 		/**
 		 * Add tool bar options
 		 */
-		function showToolbarOptions (addOptions, show) {
+		vm.showToolbarOptions = function(addOptions, show) {
 			var i, length;
 			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
 				if (addOptions.indexOf(vm.contentData.options[i].type) !== -1) {
 					vm.contentData.options[i].visible = show;
 				}
 			}
-		}
+		};
 
 		/**
 		 * Create the filter element
 		 */
-		function createFilter () {
+		vm.createFilter = function() {
 
 			// TODO: We shouldn't use string concat and angular.element
 			// definite antipattern
@@ -330,51 +282,29 @@
 					}
 				}
 			}
-		}
+		};
 
 		/**
 		 * Handle adding content
 		 *
 		 * @param {Boolean} on
 		 */
-		function toggleAdd (on) {
+		vm.toggleAdd = function(on) {
 			if (on) {
 				if (vm.contentData.type === "issues") {
-					showToolbarOptions(["filter", "menu"], false);
+					vm.showToolbarOptions(["filter", "menu"], false);
 					//showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
+				
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
 			} else {
 				if (vm.contentData.type === "issues") {
 					//showToolbarOptions(["pin", "scribble", "erase"], false);
-					showToolbarOptions(["filter", "menu"], true);
+					vm.showToolbarOptions(["filter", "menu"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});
 			}
-		}
+		};
 
-		/**
-		 * Highlight a toolbar option
-		 * @param option
-		 */
-		function highlightOption (option) {
-			var i, length;
-
-			if (vm.contentData.hasOwnProperty("options")) {
-				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-					if (vm.contentData.options[i].type === option) {
-						if ((vm.currentHighlightedOptionIndex !== -1) && (vm.currentHighlightedOptionIndex !== i)) {
-							vm.contentData.options[vm.currentHighlightedOptionIndex].color = "";
-							vm.currentHighlightedOptionIndex = i;
-							vm.contentData.options[i].color = "#FF9800";
-						} else {
-							vm.currentHighlightedOptionIndex = i;
-							vm.contentData.options[i].color = "#FF9800";
-						}
-						break;
-					}
-				}
-			}
-		}
 	}
 }());
