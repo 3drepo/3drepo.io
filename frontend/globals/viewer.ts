@@ -94,8 +94,7 @@ export class Viewer {
 		name: string, 
 		element: HTMLElement, 
 		callback: any, 
-		errCallback: any,
-		str: string
+		errCallback: any
 	) {
 		
 		// If not given the tag by the manager create here

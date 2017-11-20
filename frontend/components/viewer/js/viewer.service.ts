@@ -276,8 +276,7 @@ export class ViewerService {
 				"viewer",
 				document.getElementById("viewer"), 
 				this.EventService.send, 
-				function(){},
-				"hello"
+				function(){}
 			);
 
 			this.viewer.setUnity();
