@@ -131,25 +131,33 @@ function importSuccess(account, model) {
  * @param {account} acount - User account
  * @param {model} model - Model
  * @param {errCode} errCode - Defined bouncer error code or IO response code
- * @param {corId} corId - CorrelationId (Mail will not be sent if undefined)
+ * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
+ * @param {sendMail} sendMail - Boolean to determine if a notification E-mail will be sent
  */
-function importFail(account, model, errCode, corId) {
+function importFail(account, model, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
 		setting.status = 'failed';
+		if(setting.type === 'toy' || setting.type === 'sample'){
+			setting.timestamp = undefined;
+		}
 		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified('errorReason');
 		setting.save().then( () => {				
 			ChatEvent.modelStatusChanged(null, account, model, setting);						
 		})
 
-		if (corId) {
+		if (!errMsg) {
+			errMsg = setting.errorReason.message;
+		}
+
+		if (sendMail) {
 			Mailer.sendImportError({
 				account,
 				model,
 				username: account,
-				err: convertToErrorCode(errCode).message,
-				corID: corId
+				err: errMsg,
+				corID: setting.corID
 			});
 		}
 	}).catch(err => {
@@ -215,7 +223,6 @@ function resetCorrelationId(account, model) {
 }
 
 function createAndAssignRole(modelName, account, username, data) {
-	
 
 	let project;
 	//generate model id
@@ -351,7 +358,7 @@ function createAndAssignRole(modelName, account, username, data) {
 }
 
 function importToyProject(account, username){
-	
+
 	// create a project named Sample_Project
 	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
@@ -598,6 +605,98 @@ function getIdMap(account, model, branch, rev, username){
 		});
 
 		return Promise.resolve({idMaps, status});
+
+	});
+}
+
+function getIdToMeshes(account, model, branch, rev, username){
+	'use strict'	
+	let subIdToMeshes;
+		let revId, idToMeshesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let refPromises = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			refPromises.push(
+				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToMeshes: obj.idToMeshes,
+						key: ref.owner + "@" + ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(refPromises);
+
+	}).then(_subIdToMeshes => {
+
+		subIdToMeshes = _subIdToMeshes;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+
+	}).then(buf => {
+		let idToMeshes = {};
+
+		if(buf){
+			idToMeshes = JSON.parse(buf);
+		}
+
+		subIdToMeshes.forEach(subIdToMeshes => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdToMeshes && subIdToMeshes.idToMeshes)
+			{
+			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
+			}
+		});
+
+		return Promise.resolve({idToMeshes, status});
 
 	});
 }
@@ -1263,7 +1362,7 @@ function uploadFile(req){
 
 					if(size > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-						importFail(account, model, responseCodes.SIZE_LIMIT_PAY, undefined);
+						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {
 						cb(null, true);
 					}
@@ -1659,6 +1758,7 @@ module.exports = {
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
+	getIdToMeshes,
 	getModelProperties,
 	getTreePath,
 	getUnityAssets,

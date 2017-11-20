@@ -32,7 +32,6 @@
 				exit: "&",
 				event: "<",
 				selectedIssueLoaded: "<",
-				issueCreated: "&",
 				contentHeight: "&",
 				selectedObjects: "<",
 				modelSettings: "<",
@@ -64,8 +63,9 @@
 		 * Init
 		 */
 		vm.$onInit = function() { 
-
+			
 			vm.canEditDescription = false;
+			vm.issueFailedToLoad = false;
 
 			vm.savedScreenShot = null;
 			vm.editingCommentIndex = null;
@@ -82,7 +82,7 @@
 			vm.textInputHasFocusFlag = false;
 			vm.submitDisabled = true;
 			vm.pinDisabled = true;
-			vm.pinData = null;
+
 			vm.showAdditional = true;
 			vm.editingDescription = false;
 			vm.clearPin = false;
@@ -102,6 +102,7 @@
 
 			vm.actions = {
 				screen_shot: {
+					id: "screenshot",
 					icon: "camera_alt", 
 					label: "Screen shot", 
 					disabled: function() { 
@@ -117,6 +118,7 @@
 					selected: false
 				},
 				pin: {
+					id: "pin",
 					icon: "place", 
 					label: "Pin", 
 					disabled: function() { 
@@ -198,50 +200,68 @@
 			}
 		});
 
+		vm.setEditIssueData = function(newIssueData) {
+
+			vm.issueData = newIssueData;
+
+			vm.issueData.comments = vm.issueData.comments || [];
+
+			if (!vm.issueData.name) {
+				vm.disabledReason = vm.reasonTitleText;
+			}
+
+			vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
+			vm.issueData.comments.forEach(function(comment){
+				if(comment.owner !== AuthService.getUsername()){
+					comment.sealed = true;
+				}
+			});
+
+			// Old issues
+			vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
+			vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
+			vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
+			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
+
+			vm.checkCanComment();
+			vm.convertCommentTopicType();
+
+			// Can edit description if no comments
+			vm.canEditDescription = vm.checkCanEditDesc();
+
+			IssuesService.populateIssue(vm.issueData);
+			vm.setContentHeight();
+		};
+
 		$scope.$watch("vm.data", function() {
 
 			// Data
-
 			if (vm.data && vm.statuses && vm.statuses.length) {
+				vm.issueFailedToLoad = false;
+				vm.issueData = null;
 
-				vm.startNotification();
-
-				vm.issueData = angular.copy(vm.data);
-
-				vm.issueData.comments = vm.issueData.comments || [];
-
-				if (!vm.issueData.name) {
-					vm.disabledReason = vm.reasonTitleText;
-				}
-
-				vm.issueData.thumbnailPath = APIService.getAPIUrl(vm.issueData.thumbnail);
-				vm.issueData.comments.forEach(function(comment){
-					if(comment.owner !== AuthService.getUsername()){
-						comment.sealed = true;
-					}
-				});
-
-				// Old issues
-				vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
-				vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
-				vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
-				vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
-
-				vm.checkCanComment();
-				vm.convertCommentTopicType();
-
-				// Can edit description if no comments
-				vm.canEditDescription = vm.checkCanEditDesc();
+				IssuesService.getIssue(vm.account, vm.model, vm.data._id)
+					.then(function(fetchedIssue){
+						vm.setEditIssueData(fetchedIssue);
+						vm.startNotification();
+						vm.issueFailedToLoad = false;
+					})
+					.catch(function(error){
+						vm.issueFailedToLoad = true;
+						console.error(error);
+					});
+				
+				//vm.setEditIssueData(vm.data);
+				
 				
 			} else {
-
-				vm.issueData = IssuesService.createBlankIssue();
+				var creatorRole = vm.userJob._id;
+				vm.issueData = IssuesService.createBlankIssue(creatorRole);
+				IssuesService.populateIssue(vm.issueData);
+				vm.setContentHeight();
 
 			}
-							
-			IssuesService.populateIssue(vm.issueData);
-			vm.setContentHeight();
-	
+
 		});
 
 		vm.checkCanEditDesc = function() {
@@ -590,13 +610,6 @@
 
 		};
 
-		/**
-		 * Set the current add pin data
-		 * @param pinData
-		 */
-		vm.setPin = function (pinData) {
-			vm.pinData = pinData.data;
-		};
 
 		/**
 		 * Toggle showing of extra inputs
@@ -783,9 +796,10 @@
 				rev_id: vm.revision
 			};
 			// Pin data
-			if (vm.pinData !== null) {
-				issue.pickedPos = vm.pinData.pickedPos;
-				issue.pickedNorm = vm.pinData.pickedNorm;
+			var pinData = ViewerService.getPinData();
+			if (pinData !== null) {
+				issue.pickedPos = pinData.pickedPos;
+				issue.pickedNorm = pinData.pickedNorm;
 			}
 			// Group data
 			if (angular.isDefined(groupId)) {
@@ -796,14 +810,15 @@
 				.then(function (response) {
 					vm.data = response.data; // So that new changes are registered as updates
 					var responseIssue = response.data;
-					IssuesService.populateIssue(responseIssue);
-					vm.issueData = responseIssue;
-					
+
 					// Hide the description input if no description
 					vm.pinHidden = true;
 
 					// Notify parent of new issue
-					vm.issueCreated({issue: vm.issueData});
+					IssuesService.populateIssue(responseIssue);
+					vm.issueData = responseIssue;
+					IssuesService.addIssue(vm.issueData);
+					IssuesService.setSelectedIssue(vm.issueData, true);
 
 					// Hide some actions
 					ViewerService.pin.pinDropMode = false;
@@ -976,6 +991,8 @@
 			});
 			vm.setContentHeight();
 		};
+
+		
 
 		/**
 		 * Toggle the editing of a comment

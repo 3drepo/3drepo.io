@@ -23,13 +23,17 @@
 
 	ViewerService.$inject = [
 		"ClientConfigService", "$q", "APIService", "DialogService", 
-		"EventService"
+		"EventService", "DocsService"
 	];
 
 	function ViewerService(
 		ClientConfigService, $q, APIService, DialogService, 
-		EventService
+		EventService, DocsService
 	) {
+
+		var newPinId = "newPinId";
+		var pinData = null;
+
 
 		var viewer;
 		var currentModel = {
@@ -37,12 +41,14 @@
 			promise : null
 		};
 
+		var pin = {
+			pinDropMode : false
+		};
+
 		var initialised = $q.defer();
 			
 		var service = {
-			pin : {
-				pinDropMode : false
-			},
+			pin : pin,
 			initViewer : initViewer,
 			getViewer : getViewer,
 			loadViewerModel : loadViewerModel,
@@ -63,16 +69,29 @@
 			highlightObjects: highlightObjects,
 			getObjectsStatus: getObjectsStatus,
 			clearClippingPlanes: clearClippingPlanes, 
-			addPin: addPin,
-			removePin: removePin,
+			
 			getCurrentViewpoint: getCurrentViewpoint,
 			clearHighlights: clearHighlights,
-			changePinColours: changePinColours
+			changePinColours: changePinColours,
+
+			setPin: setPin,
+			addPin: addPin,
+			removePin: removePin,
+			newPinId: newPinId,
+			getPinData: getPinData
 		};
 	
 		return service;
 	
 		///////////////
+
+		function getPinData() {
+			return pinData;
+		}
+
+		function setPin(newPinData) {
+			pinData = newPinData.data;
+		}
 
 		// TODO: More EventService to be removed, but these functions broadcast 
 		// across multiple watchers
@@ -85,9 +104,10 @@
 				
 				case EventService.EVENT.MODEL_SETTINGS_READY:
 					if (event.value.account === account && event.value.model === model) {
-						viewer.updateSettings(event.value.settings);
+						viewer.updateSettings(event.value);
 						//mapTile && mapTile.updateSettings(event.value.settings);
 					}
+
 					break;
 
 				case EventService.EVENT.VIEWER.CLICK_PIN:
@@ -109,7 +129,15 @@
 					break;
 
 				case EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
+					DocsService.state.show = false;
 					viewer.clearHighlights();
+					break;
+	
+				case EventService.EVENT.VIEWER.OBJECT_SELECTED:
+					var valid = DocsService.state.active && !pin.pinDropMode;
+					if (valid) {
+						DocsService.handleObjectSelected(event);
+					}
 					break;
 
 				case EventService.EVENT.VIEWER.SET_CAMERA:

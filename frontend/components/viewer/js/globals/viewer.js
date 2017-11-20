@@ -116,11 +116,13 @@ var Viewer = {};
 
 			self.loadingDiv = document.createElement("div");
 			self.loadingDivText = document.createElement("p");
-			self.loadingDiv.appendChild(self.loadingDivText);
-
+			
 			self.loadingDivText.innerHTML = "";
+
 			self.loadingDiv.className += "loadingViewer";
 			self.loadingDivText.className += "loadingViewerText";
+
+			self.loadingDiv.appendChild(self.loadingDivText);
 
 			var canvas = document.createElement("canvas");
 			canvas.className = "emscripten";
@@ -177,6 +179,7 @@ var Viewer = {};
 				// Set option param from viewerDirective
 				self.options = options;
 
+				self.loadingDivText.style.display = "inherit";
 				self.loadingDivText.innerHTML = "Loading Viewer...";
 				document.body.style.cursor = "wait";
 
@@ -221,7 +224,7 @@ var Viewer = {};
 
 				UnityUtil.onReady().then(function() {
 					self.initialized = true;
-					self.loadingDivText.innerHTML = "";
+					self.loadingDivText.style.display = "none";
 					callback(Viewer.EVENT.UNITY_READY, {
 						name: self.name,
 						model: self.modelString
@@ -229,6 +232,7 @@ var Viewer = {};
 					resolve();
 				}).catch(function(error){
 					self.loadingDivText.innerHTML = "Loading Viewer Failed!";
+					self.loadingDivText.style.display = "inherit";
 					console.error("UnityUtil.onReady failed: ", error);
 					reject(error);
 				});
@@ -517,49 +521,8 @@ var Viewer = {};
 
 		this.applySettings = function() {
 			if (self.settings) {
-				if (self.settings.hasOwnProperty("start_all")) {
-					self.defaultShowAll = self.settings.start_all;
-				}
-
-				if (self.settings.hasOwnProperty("speed")) {
-					self.setSpeed(self.settings.speed);
-				}
-
-				if (self.settings.hasOwnProperty("unit")) {
-					self.setUnits(self.settings.unit);
-				}
-
-				if (self.settings.hasOwnProperty("avatarHeight")) {
-					self.changeAvatarHeight(self.settings.avatarHeight);
-				}
-
-				if (self.settings.hasOwnProperty("defaultNavMode")) {
-					self.defaultNavMode = self.settings.defaultNavMode;
-				}
-
-				if (self.settings.hasOwnProperty("pinSize")) {
-					self.pinSize = self.settings.pinSize;
-					self.pinSizeFromSettings = true; // Stop the auto-calculation
-				}
-
-				if (self.settings.hasOwnProperty("visibilityLimit")) {
-					self.nav.setAttribute("visibilityLimit", self.settings.visibilityLimit);
-				}
-
-				if (self.settings.hasOwnProperty("zFar")) {
-					self.currentViewpoint._xmlNode.setAttribute("zFar", self.settings.zFar);
-				}
-
-				if (self.settings.hasOwnProperty("zNear")) {
-					self.currentViewpoint._xmlNode.setAttribute("zNear", self.settings.zNear);
-				}
-
-				if (self.settings.hasOwnProperty("background")) {
-					self.createBackground(self.settings.background);
-				}
-
-				if (self.settings.hasOwnProperty("ambientLight")) {
-					self.setAmbientLight(self.settings.ambientLight);
+				if (self.settings.properties && self.settings.properties.unit) {
+					self.setUnits(self.settings.properties.unit);
 				}
 			}
 		};
@@ -607,20 +570,20 @@ var Viewer = {};
 			}
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model);
+		this.setCamera = function(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
+			self.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 		};
 
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, model) {
-			UnityUtil.setViewpoint(pos, up, viewDir, account, model);
+		this.updateCamera = function(pos, up, viewDir, lookAt, animate, rollerCoasterMode, account, model) {
+			UnityUtil.setViewpoint(pos, up, viewDir, lookAt, account, model);
 		};
 
 		this.reset = function() {
 			self.setMultiSelectMode(false);
 			self.setMeasureMode(false);
 			self.setPinDropMode(false);
-			self.loadingDivText.innerHTML = "";
+			self.loadingDivText.style.display = "none";
 			UnityUtil.reset();	
 		};
 
@@ -635,14 +598,13 @@ var Viewer = {};
 			self.model = model;
 			self.branch = branch;
 			self.revision = revision;
-			//self.loadingDivText.innerHTML = ""; //This could be set to Loading Model
+			self.loadingDivText.style.display = "none";
 			document.body.style.cursor = "wait";
 
 			callback(Viewer.EVENT.START_LOADING);
 			return UnityUtil.loadModel(self.account, self.model,self.branch, self.revision)
 				.then(function(bbox){
 					document.body.style.cursor = "initial";
-					self.loadingDivText.innerHTML = "";
 					callback(Viewer.EVENT.MODEL_LOADED);
 					callback(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch(function(error){

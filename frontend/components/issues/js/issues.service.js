@@ -118,8 +118,9 @@
 
 		/////////////
 
-		function createBlankIssue() {
+		function createBlankIssue(creatorRole) {
 			return {
+				creator_role: creatorRole,
 				priority: "none",
 				status: "open",
 				assigned_roles: [],
@@ -234,6 +235,7 @@
 
 		function resetSelectedIssue() {
 			state.selectedIssue = undefined;
+			//showIssuePins();
 		}
 
 		function isSelectedIssue(issue) {
@@ -284,7 +286,7 @@
 
 		}
 
-		function setSelectedIssue(issue) {
+		function setSelectedIssue(issue, isCorrectState) {
 
 			if (state.selectedIssue) {
 				var different = (state.selectedIssue._id !== issue._id);
@@ -294,8 +296,14 @@
 			}
 			
 			state.selectedIssue = issue;
-			showIssuePins();
-			showIssue(issue);
+
+			// If we're saving then we already have pin and
+			// highlights in place
+			if (!isCorrectState) {
+				showIssuePins();
+				showIssue(issue);
+			}
+
 		}
 
 		function populateNewIssues(newIssues) {
@@ -369,6 +377,7 @@
 		}
 
 		function userJobMatchesCreator(userJob, issueData) {
+
 			return (userJob._id && 
 				issueData.creator_role && 
 				userJob._id === issueData.creator_role);
@@ -398,13 +407,15 @@
 		}
 
 		function canChangePriority(issueData, userJob, permissions) {
-			return isAdmin(permissions) || 
-				(userJobMatchesCreator(userJob, issueData) &&
-				!isViewer(permissions));
+
+			var notViewer = !isViewer(permissions);
+			var matches = userJobMatchesCreator(userJob, issueData);
+
+			return isAdmin(permissions) || (matches && notViewer);
 		}
 
 		function canChangeStatusToClosed(issueData, userJob, permissions) {
-
+			
 			var jobOwner = (userJobMatchesCreator(userJob, issueData) &&
 							!isViewer(permissions));
 
@@ -436,7 +447,10 @@
 		}
 
 		function isOpen(issueData) {
-			return issueData.status !== "closed";
+			if (issueData) {
+				return issueData.status !== "closed";
+			}
+			return false;
 		}
 
 		function canComment(issueData, userJob, permissions) {
@@ -511,25 +525,30 @@
 				
 			showIssuePins();
 
-			// Set the camera position
-			issueData = {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up,
-				account: issue.account,
-				model: issue.model
-			};
+			if(issue.viewpoint.position.length > 0) {
+				// Set the camera position
+				issueData = {
+					position : issue.viewpoint.position,
+					view_dir : issue.viewpoint.view_dir,
+					up: issue.viewpoint.up,
+					account: issue.account,
+					model: issue.model
+				};
 
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
+				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
 
-			// Set the clipping planes
-			issueData = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			};
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				// Set the clipping planes
+				issueData = {
+					clippingPlanes: issue.viewpoint.clippingPlanes,
+					fromClipPanel: false,
+					account: issue.account,
+					model: issue.model
+				};
+				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+			} else {
+				//This issue does not have a viewpoint, go to default viewpoint
+				ViewerService.goToExtent();
+			}
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
