@@ -201,6 +201,7 @@
 		});
 
 		vm.setEditIssueData = function(newIssueData) {
+
 			vm.issueData = newIssueData;
 
 			vm.issueData.comments = vm.issueData.comments || [];
@@ -254,8 +255,8 @@
 				
 				
 			} else {
-
-				vm.issueData = IssuesService.createBlankIssue();
+				var creatorRole = vm.userJob._id;
+				vm.issueData = IssuesService.createBlankIssue(creatorRole);
 				IssuesService.populateIssue(vm.issueData);
 				vm.setContentHeight();
 

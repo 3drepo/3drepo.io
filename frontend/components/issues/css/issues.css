@@ -184,6 +184,7 @@ issues-list .issueListItem div:first-child {
 issues-list #issuesListItemContent {
   padding: 10px;
   padding-right: 40px;
+  overflow: hidden;  
 }
 
 issues-list #issuesListItemTitle {
