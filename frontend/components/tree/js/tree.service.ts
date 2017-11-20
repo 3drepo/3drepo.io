@@ -48,7 +48,7 @@ export class TreeService {
 	}
 
 	init(account, model, branch, revision, setting) {
-		var cachedTreeDefer = this.$q.defer();
+		treeReady = $q.defer();
 		this.treeMap = null;
 		branch = branch ? branch : "master";
 
@@ -61,11 +61,10 @@ export class TreeService {
 		}
 
 		var	url = this.baseURL + "fulltree.json";
-		this.getTrees(url, setting, cachedTreeDefer);
+		this.getTrees(url, setting);
 		this.getIdToMeshes();
-		this.treeReady = cachedTreeDefer.promise
-		
-		return this.treeReady;
+
+		return this.treeReady.promise;;
 
 	}
 
@@ -82,7 +81,7 @@ export class TreeService {
 		});
 	}
 
-	getTrees(url, setting, deferred) {
+	getTrees(url, setting) {
 
 		this.APIService.get(url, {
 			headers: {
@@ -160,7 +159,7 @@ export class TreeService {
 						mainTree.subTreesById = subTreesById;
 
 						Promise.all(getSubTrees).then(() => {
-							deferred.resolve(mainTree);
+							return this.treeReady.resolve(mainTree);
 						});
 
 					});
@@ -279,9 +278,9 @@ export class TreeService {
 				sharedIdToUid: {},
 				oIdToMetaId: {},
 			};
-			return this.treeReady.then((tree) => {
-				this.genMap(tree.nodes, this.treeMap);
+			return this.treeReady.then((tree) => {	
 				this.treeMap.idToMeshes = this.idToMeshes;
+				return this.genMap(tree.nodes, this.treeMap);
 			});
 
 		}

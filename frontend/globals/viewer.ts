@@ -113,6 +113,39 @@ export class Viewer {
 
 		UnityUtil.init(errCallback);
 
+		this.unityLoaderReady = false;
+		
+		this.viewer = document.createElement("div");
+		this.viewer.className = "viewer";
+
+		this.loadingDiv = document.createElement("div");
+		this.loadingDivText = document.createElement("p");
+		
+		this.loadingDivText.innerHTML = "";
+
+		this.loadingDiv.className += "loadingViewer";
+		this.loadingDivText.className += "loadingViewerText";
+
+		this.loadingDiv.appendChild(this.loadingDivText);
+
+		var canvas = document.createElement("canvas");
+		canvas.className = "emscripten";
+		canvas.setAttribute("id", "canvas");
+		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
+		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+
+		canvas.onmousedown = () =>{
+			return false;
+		};
+	
+		canvas.style["pointer-events"] = "all";
+		
+		this.element.appendChild(this.viewer);
+		this.viewer.appendChild(canvas);
+		this.viewer.appendChild(this.loadingDiv);
+
+		this.unityLoaderScript = document.createElement("script");
+
 	}
 
 	pickObject = {};
@@ -175,11 +208,7 @@ export class Viewer {
 
 	options;
 	Module;
-	scene;
-	bground;
 	currentNavMode;
-	environ;
-	light;
 	plugins;
 	broadcastClippingPlane;
 	settings;
@@ -207,43 +236,6 @@ export class Viewer {
 
 	setHandle(handle) {
 		this.handle = handle;
-	};
-
-	prepareViewer() {
-		
-		this.unityLoaderReady = false;
-
-		this.viewer = document.createElement("div");
-		this.viewer.className = "viewer";
-
-		this.loadingDiv = document.createElement("div");
-		this.loadingDivText = document.createElement("p");
-		
-		this.loadingDivText.innerHTML = "";
-
-		this.loadingDiv.className += "loadingViewer";
-		this.loadingDivText.className += "loadingViewerText";
-
-		this.loadingDiv.appendChild(this.loadingDivText);
-
-		var canvas = document.createElement("canvas");
-		canvas.className = "emscripten";
-		canvas.setAttribute("id", "canvas");
-		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
-
-		canvas.onmousedown = () =>{
-			return false;
-		};
-	
-		canvas.style["pointer-events"] = "all";
-		
-		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(canvas);
-		this.viewer.appendChild(this.loadingDiv);
-
-		this.unityLoaderScript = document.createElement("script");
-		
 	};
 
 	insertUnityLoader() {
@@ -277,34 +269,14 @@ export class Viewer {
 
 			// Set option param from viewerDirective
 			this.options = options;
-
-			this.loadingDivText.style.display = "inherit";
+			this.loadingDivText.style.display = "block";
 			this.loadingDivText.innerHTML = "Loading Viewer...";
 			document.body.style.cursor = "wait";
 
 			//Shouldn't need this, but for something it is not being recognised from unitySettings!
 			Module.errorhandler = UnityUtil.onError;
 
-			this.scene = document.createElement("Scene");
-			this.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-			this.viewer.appendChild(this.scene);
-
-	
-			this.bground = null;
 			this.currentNavMode = null;
-
-			this.createBackground({});
-
-			this.environ = document.createElement("environment");
-			this.environ.setAttribute("frustumCulling", "true");
-			this.environ.setAttribute("smallFeatureCulling", "true");
-			this.environ.setAttribute("smallFeatureThreshold", 5);
-			this.environ.setAttribute("occlusionCulling", "true");
-			this.environ.setAttribute("sorttrans", "true");
-			this.environ.setAttribute("gammaCorrectionDefault", "linear");
-			this.scene.appendChild(this.environ);
-
-			this.setAmbientLight({});
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -313,14 +285,13 @@ export class Viewer {
 				});
 			}
 
-			
-
 			UnityUtil.setAPIHost(options.getAPI); 
 			this.setNavMode(this.defaultNavMode, false);
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
-				this.loadingDivText.style.display = "none";
+				console.log("loadingDivText to none in onReady")
+				//this.loadingDivText.style.display = "none";
 				this.callback(Viewer.EVENT.UNITY_READY, {
 					name: this.name,
 					model: this.modelString
@@ -328,7 +299,7 @@ export class Viewer {
 				resolve();
 			}).catch((error) => {
 				this.loadingDivText.innerHTML = "Loading Viewer Failed!";
-				this.loadingDivText.style.display = "inherit";
+				this.loadingDivText.style.display = "block";
 				console.error("UnityUtil.onReady failed= ", error);
 				reject(error);
 			});
@@ -349,102 +320,9 @@ export class Viewer {
 		UnityUtil.resetCamera();
 	};
 
-	setAmbientLight(lightDescription: Object) {
-		if (this.light) {
-			var i = 0;
-			var attributeNames = [];
-
-			for(i = 0; i < this.light.attributes.length; i++) {
-				attributeNames.push(this.light.attributes[i].name);
-			}
-
-			for(i = 0; i < attributeNames.length; i++) {
-				this.light.removeAttribute(attributeNames[i]);
-			}
-		} else {
-			this.light = document.createElement("directionallight");
-			this.scene.appendChild(this.light);
-		}
-
-		if (Object.keys(lightDescription).length === 0) {
-			//this.light.setAttribute("intensity", "0.5");
-			this.light.setAttribute("color", "0.714, 0.910, 0.953");
-			this.light.setAttribute("direction", "0, -0.9323, -0.362");
-			this.light.setAttribute("global", "true");
-			this.light.setAttribute("ambientIntensity", "0.8");
-			this.light.setAttribute("shadowIntensity", 0.0);
-		} else {
-			for (var attr in lightDescription) {
-				if (lightDescription.hasOwnProperty(attr)) {
-					this.light.setAttribute(attr, lightDescription[attr]);
-				}
-			}
-		}
-
-	};
-
-	createBackground(colourDescription: Object) {
-		if (this.bground) {
-			var i = 0;
-			var attributeNames = [];
-
-			for(i = 0; i < this.bground.attributes.length; i++) {
-				attributeNames.push(this.bground.attributes[i].name);
-			}
-
-			for(i = 0; i < attributeNames.length; i++) {
-				this.bground.removeAttribute(attributeNames[i]);
-			}
-		} else {
-			this.bground = document.createElement("background");
-			this.scene.appendChild(this.bground);
-		}
-
-		if (Object.keys(colourDescription).length === 0) {
-			
-			this.bground.setAttribute("DEF", this.name + "_bground");
-			this.bground.setAttribute("skyangle", "0.9 1.5 1.57");
-			this.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
-			this.bground.setAttribute("groundangle", "0.9 1.5 1.57");
-			this.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
-			this.bground.textContent = " ";
-
-		} else {
-			this.bground.setAttribute("DEF", this.name + "_bground");
-
-			for (var attr in colourDescription) {
-				if (colourDescription.hasOwnProperty(attr)) {
-					this.bground.setAttribute(attr, colourDescription[attr]);
-				}
-			}
-		}
-
-	};
-
 	setUnity() {
 		UnityUtil.viewer = this;
 	}
-
-	// switchDebug() {
-	// 	this.getViewArea()._visDbgBuf = !this.getViewArea()._visDbgBuf;
-	// };
-
-	// showStats() {
-	// 	this.runtime.canvas.stateViewer.display();
-	// };
-
-	// getViewArea() {
-	// 	return this.runtime.canvas.doc._viewarea;
-	// };
-
-	// getViewMatrix() {
-	// 	return this.getViewArea().getViewMatrix();
-	// };
-
-
-	// getProjectionMatrix() {
-	// 	return this.getViewArea().getProjectionMatrix();
-	// };
 
 	getScreenshot(promise) {
 		UnityUtil.requestScreenShot(promise);
@@ -452,8 +330,6 @@ export class Viewer {
 
 	pickPoint(x, y, fireEvent) {
 		fireEvent = (typeof fireEvent === undefined) ? false : fireEvent;
-
-		//this.getViewArea()._doc.ctx.pickValue(this.getViewArea(), x,y);
 
 		if (fireEvent) {
 			// Simulate a mouse down pick point
@@ -557,9 +433,6 @@ export class Viewer {
 
 	applySettings() {
 		if (this.settings) {
-			if (this.settings.hasOwnProperty("start_all")) {
-				this.defaultShowAll = this.settings.start_all;
-			}
 
 			if (this.settings.hasOwnProperty("speed")) {
 				this.setSpeed(this.settings.speed);
@@ -582,25 +455,6 @@ export class Viewer {
 				this.pinSizeFromSettings = true; // Stop the auto-calculation
 			}
 
-			if (this.settings.hasOwnProperty("visibilityLimit")) {
-				this.nav.setAttribute("visibilityLimit", this.settings.visibilityLimit);
-			}
-
-			if (this.settings.hasOwnProperty("zFar")) {
-				this.currentViewpoint._xmlNode.setAttribute("zFar", this.settings.zFar);
-			}
-
-			if (this.settings.hasOwnProperty("zNear")) {
-				this.currentViewpoint._xmlNode.setAttribute("zNear", this.settings.zNear);
-			}
-
-			if (this.settings.hasOwnProperty("background")) {
-				this.createBackground(this.settings.background);
-			}
-
-			if (this.settings.hasOwnProperty("ambientLight")) {
-				this.setAmbientLight(this.settings.ambientLight);
-			}
 		}
 	};
 
@@ -661,35 +515,30 @@ export class Viewer {
 
 	loadModel(account, model, branch, revision) {
 
-		this.account = account;
-		this.model = model;
-		this.branch = branch;
-		this.revision = revision;
-		this.loadingDivText.style.display = "none";
-		document.body.style.cursor = "wait";
-
-		this.callback(Viewer.EVENT.START_LOADING);
-
-		return UnityUtil.loadModel(this.account, this.model,this.branch, this.revision)
-			.then((bbox) => {
-				document.body.style.cursor = "initial";
-				this.callback(Viewer.EVENT.MODEL_LOADED);
-				this.callback(Viewer.EVENT.BBOX_READY, bbox);
-			}).catch((error) => {
-				document.body.style.cursor = "initial";
-				if (error !== "cancel") {
-					console.error("Unity error loading model= ", error);						
-				}
-			});
+		return UnityUtil.onReady().then(()=> {
+			this.account = account;
+			this.model = model;
+			this.branch = branch;
+			this.revision = revision;
+			this.loadingDivText.style.display = "none";
+			document.body.style.cursor = "wait";
+	
+			this.callback(Viewer.EVENT.START_LOADING);
+	
+			return UnityUtil.loadModel(this.account, this.model,this.branch, this.revision)
+				.then((bbox) => {
+					document.body.style.cursor = "initial";
+					this.callback(Viewer.EVENT.MODEL_LOADED);
+					this.callback(Viewer.EVENT.BBOX_READY, bbox);
+				}).catch((error) => {
+					document.body.style.cursor = "initial";
+					if (error !== "cancel") {
+						console.error("Unity error loading model= ", error);						
+					}
+				});
+		})
+		
 	};
-
-	getScene() {
-		return this.scene;
-	};
-
-	// getCurrentViewpoint() {
-	// 	return this.getViewArea()._scene.getViewpoint()._xmlNode;
-	// };
 
 	getCurrentViewpointInfo(account, model, promise) {
 		UnityUtil.requestViewpoint(account, model, promise);
