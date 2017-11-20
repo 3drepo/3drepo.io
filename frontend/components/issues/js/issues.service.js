@@ -443,7 +443,10 @@
 		}
 
 		function isOpen(issueData) {
-			return issueData.status !== "closed";
+			if (issueData) {
+				return issueData.status !== "closed";
+			}
+			return false;
 		}
 
 		function canComment(issueData, userJob, permissions) {

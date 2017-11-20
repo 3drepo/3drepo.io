@@ -180,10 +180,17 @@
 		 * Initialise display values
 		 * This is called when we know the bounding box of our model
 		 */
-		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
-			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-
-			vm.displayDistance = parseFloat(distance);
+		vm.setDisplayValues = function(axis, distance, moveClip, direction, slider) {
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+			var newDistance = parseFloat(distance) * scaler;
+			
+			//We only want to disable watch if the value is going to change.
+			//Otherwise we might be ignoring the next update.
+			vm.disableWatchAxis = vm.displayedAxis != axis;
+			vm.disableWatchSlider = vm.disableWatchDistance = vm.displayedDistance != newDistance;
+			
+			vm.displayDistance = newDistance;
+			vm.direction = direction;
 
 			vm.displayedAxis = axis;
 			if(slider != null) {
@@ -236,8 +243,8 @@
 		};
 
 		vm.updateDistance = function(amount) {
-			console.log(vm.displayDistance, amount);
-			vm.displayDistance += amount;
+			//ensure display distance is a float
+			vm.displayDistance = parseFloat(vm.displayDistance) + amount;
 			vm.cleanDisplayDistance();
 			vm.updateDisplaySlider(false, true);
 		};
@@ -358,19 +365,16 @@
 			var scaledMax = minMax.max * scaler;
 
 			if (isNaN(vm.displayDistance) && scaledMin) {
-				//console.log("cleanDisplayDistance - isNaN");
 				vm.displayDistance = scaledMin;
 				return;
 			}
 			
 			if (minMax.max && vm.displayDistance > scaledMax) {
-				//console.log(vm.displayDistance, "cleanDisplayDistance - is more than scaled max!", scaledMax, scaler);
 				vm.displayDistance = scaledMax;
 				return;
 			}
 		
 			if (minMax.min && vm.displayDistance < scaledMin) {
-				//console.log(vm.displayDistance, "cleanDisplayDistance - is less than min!", scaledMin, scaler);
 				vm.displayDistance = scaledMin;
 				return;
 			}
@@ -381,7 +385,6 @@
 		 * Watch for show/hide of card
 		 */
 		$scope.$watch("vm.show", function (newValue) {
-			console.log(vm.show);
 			if (angular.isDefined(newValue)) {
 				vm.visible = newValue;
 			}
@@ -391,7 +394,6 @@
 		 * Toggle the clipping plane
 		 */
 		$scope.$watch("vm.visible", function (newValue) {
-			console.log("vm.visible", vm.visible);
 			if (angular.isDefined(newValue)) {
 				if (newValue) {
 					vm.updateClippingPlane();
@@ -427,15 +429,13 @@
 		vm.initClip = function(modelUnits) {
 			vm.modelUnits  = modelUnits;
 			vm.units = modelUnits;
-			console.log(vm.units);
 			vm.updateDisplayedDistance(true, vm.visible);
 		};
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-
-				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false);
+				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false, event.value.clipDirection === 1);
 				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
@@ -446,9 +446,8 @@
 				}
 
 			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
-				
 				vm.bbox = event.value.bbox;
-				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0, vm.direction);
 				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
