@@ -40,9 +40,9 @@
 			controllerAs: "vm"
 		});
 
-	PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+	PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService", "PanelService"];
 
-	function PanelCardCtrl($scope, $element, $compile, EventService) {
+	function PanelCardCtrl($scope, $element, $compile, EventService, PanelService) {
 
 		var vm = this;
 
@@ -76,7 +76,6 @@
 			if (newValue) {
 				angular.element(function(){
 					vm.createToolbarOptions();
-					vm.createFilter();
 					vm.statusIcon = vm.contentData.icon;
 				});
 			}
@@ -105,40 +104,13 @@
 		 */
 		$scope.$watch("vm.showEdit", function (newValue) {
 			if (vm.isDefined(newValue)) {
-				EventService.send(
+				PanelService.handlePanelEvent(
+					vm.contentData.type, 
 					EventService.EVENT.PANEL_CARD_EDIT_MODE, 
-					{
-						on: newValue, 
-						type: vm.contentData.type
-					}
-				);
+					{on: true}
+				);	
+				vm.hideItem();
 			}
-		});
-
-		/*
-		 * Set up event watching
-		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if (
-				event.type === EventService.EVENT.TOGGLE_ISSUE_ADD &&
-				vm.contentData.type === "issues"
-			) {
-				vm.toggleAdd(event.value.on);
-				// Reset option highlight if the issue add is cancelled
-				if (!event.value.on) {
-					vm.contentData.options[vm.currentHighlightedOptionIndex].color = "";
-					vm.currentHighlightedOptionIndex = -1;
-				}
-			} else if (
-				event.type === EventService.EVENT.PANEL_CARD_ADD_MODE ||
-				event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE
-			) {
-
-				// Only one card can be in modify mode at a time
-				if (event.value.on && (event.value.type !== vm.contentData.type)) {
-					vm.hideItem();
-				}
-			} 
 		});
 
 		/*
@@ -149,6 +121,13 @@
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});
+
+		vm.hasFilter = function() {
+			var filter = vm.contentData.options.find(function(item){
+				return item.type === "filter";
+			});
+			return filter !== undefined;
+		};
 
 		/**
 		 * A content item is requesting a height change
@@ -247,62 +226,35 @@
 
 		};
 
-		/**
-		 * Add tool bar options
-		 */
 		vm.showToolbarOptions = function(addOptions, show) {
-			var i, length;
-			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+			for (var i = 0; i < vm.contentData.options.length; i += 1) {
 				if (addOptions.indexOf(vm.contentData.options[i].type) !== -1) {
 					vm.contentData.options[i].visible = show;
 				}
 			}
 		};
 
-		/**
-		 * Create the filter element
-		 */
-		vm.createFilter = function() {
-
-			// TODO: We shouldn't use string concat and angular.element
-			// definite antipattern
-
-			var i, length,
-				filterContainer = angular.element($element[0].querySelector("#filterContainer")),
-				filter;
-			if (vm.contentData.hasOwnProperty("options")) {
-				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-					if (vm.contentData.options[i].type === "filter") {
-						filter = angular.element(
-							"<panel-card-filter show-filter='vm.showFilter' filter-text='vm.filterText'></panel-card-filter>"
-						);
-						filterContainer.append(filter);
-						$compile(filter)($scope);
-						break;
-					}
-				}
-			}
-		};
-
-		/**
-		 * Handle adding content
-		 *
-		 * @param {Boolean} on
-		 */
 		vm.toggleAdd = function(on) {
 			if (on) {
 				if (vm.contentData.type === "issues") {
 					vm.showToolbarOptions(["filter", "menu"], false);
-					//showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
-				
-				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
+				vm.hideItem();
+				PanelService.handlePanelEvent(
+					vm.contentData.type, 
+					EventService.EVENT.PANEL_CARD_ADD_MODE, 
+					{on: true}
+				);	
 			} else {
 				if (vm.contentData.type === "issues") {
-					//showToolbarOptions(["pin", "scribble", "erase"], false);
 					vm.showToolbarOptions(["filter", "menu"], true);
 				}
-				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});
+				vm.hideItem();
+				PanelService.handlePanelEvent(
+					vm.contentData.type, 
+					EventService.EVENT.PANEL_CARD_ADD_MODE, 
+					{on: false}
+				);
 			}
 		};
 

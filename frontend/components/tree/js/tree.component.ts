@@ -1,4 +1,5 @@
 import { IScope, ITimeoutService } from "angular";
+import { TreeService } from "./tree.service";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -70,7 +71,6 @@ class TreeController implements ng.IController {
 		const vm = this;
 		this.promise = null,
 		this.currentSelectedNodes = [],
-		this.highlightSelectedViewerObject = true,
 		this.clickedHidden = {}, // Nodes that have actually been clicked to hide
 		this.clickedShown = {}; // Nodes that have actually been clicked to show
 	}
@@ -101,7 +101,7 @@ class TreeController implements ng.IController {
 			
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 	
-				if ((event.value.source !== "tree") && this.highlightSelectedViewerObject) {
+				if ((event.value.source !== "tree") && this.TreeService.highlightSelectedViewerObject) {
 					let objectID = event.value.id;
 	
 					if (objectID && this.idToPath) {
@@ -128,12 +128,7 @@ class TreeController implements ng.IController {
 					this.currentFilterItemSelected.class = "";
 					this.currentFilterItemSelected = null;
 				}
-			} else if  (event.type === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
-						event.type === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
-			) {
-				// If another card is in modify mode don't show a node if an object is clicked in the viewer
-				this.highlightSelectedViewerObject = !event.value.on;
-			}  else if (event.type === this.EventService.EVENT.TREE_READY){
+			} else if (event.type === this.EventService.EVENT.TREE_READY){
 				/*
 				* Get all the tree nodes
 				*/

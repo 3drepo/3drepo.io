@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.service("PanelService", PanelService);
 
-	PanelService.$inject = [];
+	PanelService.$inject = ["EventService", "TreeService"];
 
-	function PanelService() {
+	function PanelService(EventService, TreeService) {
 		
 		var issuesPanelCard = {
 			left: [],
@@ -154,7 +154,8 @@
 		var service = {
 
 			issuesPanelCard : issuesPanelCard,
-			hideSubModels: hideSubModels
+			hideSubModels: hideSubModels,
+			handlePanelEvent: handlePanelEvent
 
 		};
 	
@@ -171,6 +172,19 @@
 					}
 				});
 
+		}
+
+		function handlePanelEvent(panelType, event, eventData){
+
+			if  (event === EventService.EVENT.PANEL_CARD_ADD_MODE ||
+				event === EventService.EVENT.PANEL_CARD_EDIT_MODE
+			) {
+				if (panelType === "tree") {
+					// If another card is in modify mode don't show a node if an object is clicked in the viewer
+					TreeService.setHighlightSelected(!eventData.on);
+				}
+			} 
+			
 		}
 
 	}

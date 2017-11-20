@@ -28,12 +28,19 @@ export class TreeService {
 	treeMap = null;
 	idToMeshes;
 	baseURL;
+	public highlightSelectedViewerObject = false;
 
 	constructor(
 		private $q: IQService, 
 		private APIService
 	) {}
-		
+
+
+	setHighlightSelected(value) {
+		this.highlightSelectedViewerObject = value;
+	}
+
+
 	genIdToObjRef(tree, map){
 		
 		if(!map){

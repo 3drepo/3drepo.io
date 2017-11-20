@@ -9,6 +9,10 @@ div(layout="column", class="md-whiteframe-1dp")
 				h2
 					span {{vm.contentData.title}}
 			#filterContainer(flex)
+				panel-card-filter(
+					ng-if="vm.hasFilter()"
+					show-filter='vm.showFilter' 
+					filter-text='vm.filterText')
 			div(flex, ng-if="!vm.showFilter")
 
 			// Options
