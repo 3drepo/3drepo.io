@@ -722,9 +722,11 @@
 		};
 
 		function handleObjects (viewpoint, objectInfo, screenShotPromise) {
+
+			//TODO - clean up repeated code below
 			if (vm.savedScreenShot !== null) {
 
-				if (objectInfo.highlightedNodes.length > 0) {
+				if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 					// Create a group of selected objects
 					vm.createGroup(viewpoint, vm.savedScreenShot, objectInfo);
 				} else {
@@ -736,7 +738,7 @@
 				ViewerService.getScreenshot(screenShotPromise);
 
 				screenShotPromise.promise.then(function (screenShot) {
-					if (objectInfo.highlightedNodes.length > 0) {
+					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 						vm.createGroup(viewpoint, screenShot, objectInfo);
 					} else {
 						vm.doSaveIssue(viewpoint, screenShot);
@@ -753,7 +755,8 @@
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
-				objects: objectInfo.highlightedNodes
+				objects: objectInfo.highlightedNodes,
+				hiddenObjects: objectInfo.hiddenNodes
 			};
 
 			APIService.post(vm.account + "/" + vm.model + "/groups", groupData)
@@ -762,6 +765,7 @@
 				}).catch(function(error){
 					console.error(error);
 				});
+		
 		};
 
 

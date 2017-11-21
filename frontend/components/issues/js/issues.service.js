@@ -579,23 +579,19 @@
 		function handleTree(response) {
 
 			var ids = [];
+			var objectIdsToShow = [];
+			var objectIdsToHide = [];
 			TreeService.getMap()
 				.then(function(treeMap){
 					response.data.objects.forEach(function(obj){
-						var key = obj.account + "@" +  obj.model;
+						var account = obj.account;
+						var model = obj.model;
+						var key = account + "@" + model;
 						if(!ids[key]){
 							ids[key] = [];
 						}	
 
 						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-
-					});
-
-					for(var key in ids) {
-
-						var vals = key.split("@");
-						var account = vals[0];
-						var model = vals[1];
 
 						var treeData = {
 							source: "tree",
@@ -606,8 +602,51 @@
 							multi: true					
 						};
 						ViewerService.highlightObjects(treeData);
-					}
+					});
 
+					var objectsPromise = $q.defer();
+					var objectsAccount;
+					var objectsModel;
+
+					ViewerService.getObjectsStatus({
+						promise: objectsPromise,
+						account: objectsAccount,
+						model: objectsModel
+					});
+
+					// show currently hidden nodes
+					objectsPromise.promise
+						.then(function(objectInfo) {
+							objectInfo.hiddenNodes.forEach(function(obj){
+								var account = obj.account;
+								var model = obj.model;
+								var key = account + "@" + model;
+								
+								if (!objectIdsToShow[key]) {
+									objectIdsToShow[key] = [];
+								}
+
+								objectIdsToShow[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+								
+								ViewerService.switchObjectVisibility(account, model, objectIdsToShow[key], true);
+							});
+						})
+						.catch(function(error) {
+							console.error(error);
+						});
+
+					response.data.hiddenObjects.forEach(function(obj){
+						var account = obj.account;
+						var model = obj.model;
+						var key = account + "@" + model;
+						if(!objectIdsToHide[key]){
+							objectIdsToHide[key] = [];
+						}	
+
+						objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+
+						ViewerService.switchObjectVisibility(account, model, objectIdsToHide[key], false);
+					});
 
 				});
 		}

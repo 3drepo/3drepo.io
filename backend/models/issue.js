@@ -123,6 +123,7 @@ let schema = Schema({
 		far : Number,
 		near : Number,
 		clippingPlanes : [Schema.Types.Mixed ],
+		group_id: Object,
 		screenshot: {
 			flag: Number, 
 			content: Object,

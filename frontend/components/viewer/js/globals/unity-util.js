@@ -307,7 +307,7 @@ var UnityUtil;
 	UnityUtil.prototype.getObjectsStatus = function(account, model, promise) {
 		var nameSpace = "";
 		if(account && model) {
-			nameSpace = account + "."  + model;
+			nameSpace = account + "." + model;
 		}
 		if(objectStatusPromise) {
 			objectStatusPromise.then(function(){
