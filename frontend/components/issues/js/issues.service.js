@@ -630,23 +630,23 @@
 								
 								ViewerService.switchObjectVisibility(account, model, objectIdsToShow[key], true);
 							});
+							
+							response.data.hiddenObjects.forEach(function(obj){
+								var account = obj.account;
+								var model = obj.model;
+								var key = account + "@" + model;
+								if(!objectIdsToHide[key]){
+									objectIdsToHide[key] = [];
+								}	
+
+								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+
+								ViewerService.switchObjectVisibility(account, model, objectIdsToHide[key], false);
+							});
 						})
 						.catch(function(error) {
 							console.error(error);
 						});
-
-					response.data.hiddenObjects.forEach(function(obj){
-						var account = obj.account;
-						var model = obj.model;
-						var key = account + "@" + model;
-						if(!objectIdsToHide[key]){
-							objectIdsToHide[key] = [];
-						}	
-
-						objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-
-						ViewerService.switchObjectVisibility(account, model, objectIdsToHide[key], false);
-					});
 
 				});
 		}
