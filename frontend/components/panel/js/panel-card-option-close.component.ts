@@ -15,27 +15,30 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class PanelCardOptionCloseController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("panelCardOptionFilter", {
-			restrict: "E",
-			templateUrl: "templates/panel-card-option-filter.html",
-			bindings: {
-				showFilter: "="
-			},
-			controller: PanelCardOptionFilterCtrl,
-			controllerAs: "vm"
-		});
+	public static $inject: string[] = [];
 
+	public show;
 
-	function PanelCardOptionFilterCtrl() {
-		var vm = this;
+	constructor() {}
 
-		vm.toggleFilter = function (event) {
-			event.stopPropagation();
-			vm.showFilter = !vm.showFilter;
-		};
+	public hide() {
+		this.show = false;
 	}
-}());
+
+}
+
+export const PanelCardOptionCloseComponent: ng.IComponentOptions = {
+	bindings: {
+		menu: "=",
+		selectedCloseOption: "=",
+	},
+	controller: PanelCardOptionCloseController,
+	controllerAs: "vm",
+	templateUrl: "templates/panel-card-option-close.html",
+};
+
+export const PanelCardOptionCloseComponentModule = angular
+	.module("3drepo")
+	.component("panelCardOptionClose", PanelCardOptionCloseComponent);

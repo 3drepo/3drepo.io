@@ -1,0 +1,8 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "indent": [true, "tabs"],
+        "jsdoc-format": false,
+        "prefer-for-of": false
+    }
+}

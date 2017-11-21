@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
+// Inspired by Mark Rajcok"a answer - http://stackoverflow.com/a/14837021/782358
 
 function tdrFocus($timeout) {
 	return {
-		scope: { trigger: "@tdrFocus" },
-		link: function(scope, element) {
-			scope.$watch("trigger", function(value) {
+		link: (scope, element) => {
+			scope.$watch("trigger", (value) => {
 				if (value.toString() === "true") {
-					$timeout(function() {
+					$timeout(() => {
 						element[0].focus();
 					});
 				}
 			});
-		}
+		},
+		scope: { trigger: "@tdrFocus" },
 	};
 }
 
 export const TdrFocusModule = angular
-	.module('3drepo')
+	.module("3drepo")
 	.directive("tdrFocus", ["$timeout", tdrFocus]);

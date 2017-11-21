@@ -22,33 +22,32 @@ declare const Viewer: any;
 
 export class ViewerService {
 
-	newPinId: string;
-	pinData: object;
-	viewer: any;
-	currentModel: any;
-	pin: any;
-	initialised: any;
+	public static $inject: string[] = [
+		"$q",
 
-	Viewer: any;
-
-	static $inject: string[] = [
-		"$q", 
-
-		"ClientConfigService", 
-		"APIService", 
-		"DialogService", 
-		"EventService", 
-		"DocsService"
+		"ClientConfigService",
+		"APIService",
+		"DialogService",
+		"EventService",
+		"DocsService",
 	];
 
+	private newPinId: string;
+	private pinData: object;
+	private viewer: any;
+	private currentModel: any;
+	private pin: any;
+	private initialised: any;
+	private Viewer: any;
+
 	constructor(
-		public $q: IQService, 
-		
-		public ClientConfigService: any, 
-		public APIService: any, 
-		public DialogService: any, 
-		public EventService: any, 
-		public DocsService: any
+		public $q: IQService,
+
+		public ClientConfigService: any,
+		public APIService: any,
+		public DialogService: any,
+		public EventService: any,
+		public DocsService: any,
 
 	) {
 		this.newPinId = "newPinId";
@@ -57,37 +56,37 @@ export class ViewerService {
 
 		this.currentModel = {
 			model : null,
-			promise : null
-		}
+			promise : null,
+		};
 
 		this.pin = {
-			pinDropMode : false
-		}
+			pinDropMode : false,
+		};
 
-		this.initialised = $q.defer()
+		this.initialised = $q.defer();
 	}
 
-	getPinData() {
+	public getPinData() {
 		return this.pinData;
 	}
 
-	setPin(newPinData) {
+	public setPin(newPinData) {
 		this.pinData = newPinData.data;
 	}
 
-	// TODO: More EventService to be removed, but these functions broadcast 
+	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
-	handleEvent(event, account, model) {
+	public handleEvent(event, account, model) {
 
 		this.initialised.promise.then(() => {
 
-			switch(event.type) {
-			
+			switch (event.type) {
+
 			case this.EventService.EVENT.MODEL_SETTINGS_READY:
 				if (event.value.account === account && event.value.model === model) {
 					this.viewer.updateSettings(event.value.settings);
-					//mapTile && mapTile.updateSettings(event.value.settings);
+					// mapTile && mapTile.updateSettings(event.value.settings);
 				}
 				break;
 
@@ -98,14 +97,14 @@ export class ViewerService {
 			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
 				this.viewer.changePinColours(
 					event.value.id,
-					event.value.colours
+					event.value.colours,
 				);
 				break;
 
 			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
 				this.viewer.updateClippingPlanes(
 					event.value.clippingPlanes, event.value.fromClipPanel,
-					event.value.account, event.value.model
+					event.value.account, event.value.model,
 				);
 				break;
 
@@ -115,7 +114,7 @@ export class ViewerService {
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				var valid = this.DocsService.state.active && !this.pin.pinDropMode;
+				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
 				if (valid) {
 					this.DocsService.handleObjectSelected(event);
 				}
@@ -131,7 +130,7 @@ export class ViewerService {
 						event.value.animate !== undefined ? event.value.animate : true,
 						event.value.rollerCoasterMode,
 						event.value.account,
-						event.value.model
+						event.value.model,
 					);
 				}).catch((error) => {
 					this.handleUnityError("Setting the camera errored because model failed to load: " + error);
@@ -139,32 +138,32 @@ export class ViewerService {
 				break;
 
 			}
-			
+
 		});
 
 	}
-	
-	changePinColours(params) {
+
+	public changePinColours(params) {
 		this.viewer.changePinColours(
 			params.id,
-			params.colours
+			params.colours,
 		);
 	}
 
-	clearHighlights() {
+	public clearHighlights() {
 		this.viewer.clearHighlights();
 	}
 
-	getCurrentViewpoint(params) {
+	public getCurrentViewpoint(params) {
 		// Note the Info suffix
 		this.viewer.getCurrentViewpointInfo(
-			params.account, 
-			params.model, 
-			params.promise
+			params.account,
+			params.model,
+			params.promise,
 		);
 	}
 
-	addPin(params) {
+	public addPin(params) {
 		this.initialised.promise.then(() => {
 			this.viewer.addPin(
 				params.account,
@@ -173,32 +172,32 @@ export class ViewerService {
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,
-				params.viewpoint
+				params.viewpoint,
 			);
 		});
 	}
 
-	removePin(params) {
+	public removePin(params) {
 		this.initialised.promise.then(() => {
 			this.viewer.removePin(
-				params.id
+				params.id,
 			);
 		});
 	}
 
-	clearClippingPlanes() {
+	public clearClippingPlanes() {
 		this.viewer.clearClippingPlanes();
 	}
 
-	getObjectsStatus(params) {
+	public getObjectsStatus(params) {
 		this.viewer.getObjectsStatus(
 			params.account,
 			params.model,
-			params.promise
+			params.promise,
 		);
 	}
 
-	highlightObjects(params) {
+	public highlightObjects(params) {
 
 		this.viewer.highlightObjects(
 			params.account,
@@ -206,19 +205,19 @@ export class ViewerService {
 			params.id ? [params.id] : params.ids,
 			params.zoom,
 			params.colour,
-			params.multi
+			params.multi,
 		);
 	}
 
-	setMultiSelectMode(value) {
+	public setMultiSelectMode(value) {
 		this.viewer.setMultiSelectMode(value);
 	}
 
-	switchObjectVisibility(account, model, ids, visibility){
+	public switchObjectVisibility(account, model, ids, visibility) {
 		this.viewer.switchObjectVisibility(account, model, ids, visibility);
 	}
 
-	handleUnityError(message) {
+	public handleUnityError(message: string) {
 
 		this.DialogService.html("Unity Error", message, true)
 			.then(() => {
@@ -226,73 +225,69 @@ export class ViewerService {
 			}, () => {
 				console.error("Unity errorered and user canceled reload", message);
 			});
-	
+
 	}
 
-	getModelInfo(account, model) {
-		
-		var url = account + "/" + model + ".json";
-
+	public getModelInfo(account: string, model: string) {
+		const url = account + "/" + model + ".json";
 		return this.APIService.get(url);
 	}
 
-	reset() {
+	public reset() {
 		if (this.viewer) {
 			this.disableMeasure();
 			this.viewer.reset();
 		}
 	}
-	
-	
 
-	getScreenshot(promise) {
+	public getScreenshot(promise) {
 		if (promise) {
 			this.viewer.getScreenshot(promise);
 		}
 	}
 
-	goToExtent() {
+	public goToExtent() {
 		this.viewer.showAll();
 	}
 
-	setNavMode(mode) {
+	public setNavMode(mode) {
 		this.viewer.setNavMode(mode);
 	}
 
-	unityInserted(): boolean {
+	public unityInserted(): boolean {
 		if (this.viewer === undefined) {
 			return false;
 		} else {
 			return this.viewer.unityScriptInserted;
 		}
-		
+
 	}
 
-	getViewer() {
+	public getViewer() {
 
 		if (this.viewer === undefined) {
 
 			this.viewer = new Viewer(
 				"viewer",
-				document.getElementById("viewer"), 
-				this.EventService.send, 
-				function(){}
+				document.getElementById("viewer"),
+				this.EventService.send,
+				() => {},
 			);
 
 			this.viewer.setUnity();
-			
-		} 
+
+		}
 
 		return this.viewer;
 	}
 
-	initViewer() {
+	public initViewer() {
 
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else {
 			return this.viewer.insertUnityLoader()
-				.then(() => { this.callInit() })
+				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error("Error inserting Unity script: ", error);
 				});
@@ -300,45 +295,45 @@ export class ViewerService {
 
 	}
 
-	activateMeasure() {
+	public activateMeasure() {
 		this.viewer.setMeasureMode(true);
 	}
 
-	disableMeasure() {
+	public disableMeasure() {
 		this.viewer.setMeasureMode(false);
 	}
 
-	callInit() {
+	public callInit() {
 
 		return this.getViewer()
 			.init({
-				showAll : true,
 				getAPI: {
-					hostNames: this.ClientConfigService.apiUrls["all"]
-				}
+					hostNames: this.ClientConfigService.apiUrls.all,
+				},
+				showAll : true,
 			})
 			.catch((error) => {
 				console.error("Error creating Viewer Directive: ", error);
 			});
-		
+
 	}
 
-	loadViewerModel(account, model, branch, revision) {
-		
+	public loadViewerModel(account, model, branch, revision) {
+
 		if (!account || !model) {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
 		} else {
 			this.currentModel.promise = this.viewer.loadModel(
-				account, 
-				model, 
-				branch, 
-				revision
+				account,
+				model,
+				branch,
+				revision,
 			)
 				.then(() => {
 					// Set the current model in the viewer
 					this.currentModel.model = model;
 					this.initialised.resolve();
-					this.fetchModelProperties(account, model, branch, revision);	
+					this.fetchModelProperties(account, model, branch, revision);
 				})
 				.catch((error) => {
 					console.error("Error loading model: ", error);
@@ -347,20 +342,20 @@ export class ViewerService {
 
 	}
 
-	fetchModelProperties(account, model, branch, revision) {
-		
+	public fetchModelProperties(account, model, branch, revision) {
+
 		if (account && model) {
 
-			if(!branch) {
+			if (!branch) {
 				branch = !revision ? "master" : "";
 			}
-				
-			if(!revision || branch === "master") {
-				//revision is master/head 
+
+			if (!revision || branch === "master") {
+				// revision is master/head
 				revision = branch + "/head";
 			}
-				
-			var url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
+
+			const url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
 
 			this.APIService.get(url)
 				.then((response) => {
@@ -373,7 +368,7 @@ export class ViewerService {
 					if (response.data && response.data.properties) {
 						this.viewer.applyModelProperties(account, model, response.data.properties);
 					} else {
-						var message = "No data properties returned. This was the response:";
+						const message = "No data properties returned. This was the response:";
 						console.error(message, response);
 					}
 				})
@@ -385,12 +380,10 @@ export class ViewerService {
 			console.error("Account and model were not set correctly " +
 			"for model property fetching: ", account, model);
 		}
-		
 	}
-	
-	
+
 }
 
 export const ViewerServiceModule = angular
-	.module('3drepo')
-	.service('ViewerService', ViewerService);
+	.module("3drepo")
+	.service("ViewerService", ViewerService);

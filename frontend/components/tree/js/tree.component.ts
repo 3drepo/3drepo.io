@@ -1,6 +1,4 @@
 import { IScope, ITimeoutService } from "angular";
-import { TreeService } from "./tree.service";
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -19,66 +17,62 @@ import { TreeService } from "./tree.service";
  */
 
 class TreeController implements ng.IController {
-	
-	promise;
-	currentSelectedNodes;
-	highlightSelectedViewerObject: boolean;
-	clickedHidden;
-	clickedShown;
-	lastParentWithName = null;
-	
-	nodes;
-	allNodes;
-	nodesToShow;
-	showNodes;
-	showTree;
-	showFilterList;
-	currentFilterItemSelected;
-	viewerSelectedObject;
-	showProgress;
-	progressInfo;
-	visible;
-	invisible;
-	subTreesById;
-	idToPath;
-	subModelIdToPath;
-	filterItemsFound;
-	topIndex;
-	toggledNode;
-	infiniteItemsTree;
-	infiniteItemsFilter;
-	onContentHeightRequest;
 
-	static $inject: string[] = [
-		"$scope", 
-		"$timeout", 
+	public static $inject: string[] = [
+		"$scope",
+		"$timeout",
 
-		"TreeService", 
+		"TreeService",
 		"EventService",
-		"MultiSelectService", 
-		"ViewerService"
+		"MultiSelectService",
+		"ViewerService",
 	];
-		
+
+	private promise;
+	private currentSelectedNodes;
+	private highlightSelectedViewerObject: boolean;
+	private clickedHidden;
+	private clickedShown;
+	private lastParentWithName = null;
+	private nodes;
+	private allNodes;
+	private nodesToShow;
+	private showNodes;
+	private showTree;
+	private showFilterList;
+	private currentFilterItemSelected;
+	private viewerSelectedObject;
+	private showProgress;
+	private progressInfo;
+	private visible;
+	private invisible;
+	private subTreesById;
+	private idToPath;
+	private subModelIdToPath;
+	private filterItemsFound;
+	private topIndex;
+	private toggledNode;
+	private infiniteItemsTree;
+	private infiniteItemsFilter;
+	private onContentHeightRequest;
+
 	constructor(
 		private $scope: IScope,
-		private $timeout: ITimeoutService, 
+		private $timeout: ITimeoutService,
 
-		private TreeService, 
-		private EventService, 
-		private MultiSelectService, 
-		private ViewerService
+		private TreeService,
+		private EventService,
+		private MultiSelectService,
+		private ViewerService,
 	) {
-		const vm = this;
+
 		this.promise = null,
 		this.currentSelectedNodes = [],
 		this.clickedHidden = {}, // Nodes that have actually been clicked to hide
 		this.clickedShown = {}; // Nodes that have actually been clicked to show
 	}
-	
-	/*
-	* Init
-	*/
-	$onInit() {
+
+	public $onInit() {
 
 		this.nodes = [];
 		this.showNodes = true;
@@ -94,45 +88,47 @@ class TreeController implements ng.IController {
 		this.currentSelectedNodes = [];
 		this.watchers();
 
-	};
+	}
 
-	watchers() {
+	public watchers() {
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-			
+
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-	
+
 				if ((event.value.source !== "tree") && this.TreeService.highlightSelectedViewerObject) {
-					let objectID = event.value.id;
-	
+					const objectID = event.value.id;
+
 					if (objectID && this.idToPath) {
-						let path = this.getPath(objectID);
+						const path = this.getPath(objectID);
 						if (!path) {
 							console.error("Couldn't find the object path");
 						} else {
 							this.initNodesToShow();
 							this.lastParentWithName = null;
 							this.expandToSelection(path, 0, undefined);
-							//all these init and expanding unselects the selected, so let's select them again
-							//FIXME: ugly as hell but this is the easiest solution until we refactor this.
+							// all these init and expanding unselects the selected, so let's select them again
+							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.currentSelectedNodes.forEach((selectedNode) => {
 								selectedNode.selected = true;
 							});
-							this.lastParentWithName && this.selectNode(this.lastParentWithName);
+							if (this.lastParentWithName ) {
+								this.selectNode(this.lastParentWithName);
+							}
 						}
 					}
 				}
-	
+
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.clearCurrentlySelected();
 				if (this.currentFilterItemSelected !== null) {
 					this.currentFilterItemSelected.class = "";
 					this.currentFilterItemSelected = null;
 				}
-			} else if (event.type === this.EventService.EVENT.TREE_READY){
+			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 				/*
 				* Get all the tree nodes
 				*/
-	
+
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.nodes = this.allNodes;
@@ -140,9 +136,9 @@ class TreeController implements ng.IController {
 				this.showProgress = false;
 				this.subTreesById = event.value.subTreesById;
 				this.idToPath = event.value.idToPath;
-				
+
 				this.subModelIdToPath = event.value.subModelIdToPath;
-	
+
 				this.initNodesToShow();
 				this.expandFirstNode();
 				this.setupInfiniteScroll();
@@ -152,7 +148,7 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
 			const noFilterItemsFoundHeight = 82;
-	
+
 			if (this.isDefined(newValue)) {
 				if (newValue.toString() === "") {
 					this.showTree = true;
@@ -165,7 +161,7 @@ class TreeController implements ng.IController {
 					this.showFilterList = false;
 					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
-	
+
 					this.TreeService.search(newValue)
 						.then((json) => {
 							this.showFilterList = true;
@@ -198,14 +194,15 @@ class TreeController implements ng.IController {
 	 *
 	 * @param {Array} nodesToShow
 	 */
-	setContentHeight(nodesToShow) {
-		let i, length,
-			height = 0,
-			nodeMinHeight = 42,
-			maxStringLength = 35, maxStringLengthForLevel = 0,
-			lineHeight = 18, levelOffset = 2;
+	public setContentHeight(nodesToShow) {
+		let height = 0;
+		let maxStringLengthForLevel = 0;
+		const lineHeight = 18;
+		const levelOffset = 2;
+		const nodeMinHeight = 42;
+		const maxStringLength = 35;
 
-		for (i = 0, length = nodesToShow.length; i < length ; i += 1) {
+		for (let i = 0; i < nodesToShow.length ; i ++) {
 			maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 			if (nodesToShow[i].hasOwnProperty("name")) {
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
@@ -213,13 +210,13 @@ class TreeController implements ng.IController {
 				height += nodeMinHeight + lineHeight;
 			}
 		}
-		this.onContentHeightRequest({height: height});
+		this.onContentHeightRequest({height});
 	}
 
 	/**
 	 * Initialise the tree nodes to show to the first node
 	 */
-	initNodesToShow() {
+	public initNodesToShow() {
 		this.nodesToShow = [this.allNodes[0]];
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].expanded = false;
@@ -235,7 +232,7 @@ class TreeController implements ng.IController {
 	/**
 	 * Show the first set of children using the expand function but deselect the child used for this
 	 */
-	expandFirstNode () {
+	public expandFirstNode() {
 		this.expandToSelection(this.nodesToShow[0].children[0].path.split("__"), 0, true);
 		this.nodesToShow[0].children[0].selected = false;
 	}
@@ -245,14 +242,16 @@ class TreeController implements ng.IController {
 	 * @param {Object} node
 	 * @param {Function} callback
 	 */
-	traverseNode(node, callback){
+	public traverseNode(node, callback) {
 		callback(node);
-		node.children && node.children.forEach((child) => {
-			this.traverseNode(child, callback);
-		});
+		if (node.children) {
+			node.children.forEach((child) => {
+				this.traverseNode(child, callback);
+			});
+		}
 	}
 
-	getAccountModelKey(account, model) {
+	public getAccountModelKey(account, model) {
 		return account + "@" + model;
 	}
 
@@ -261,31 +260,31 @@ class TreeController implements ng.IController {
 	 * @param {Object} node
 	 * @param {Array} nodes Array to push the nodes to
 	 */
-	traverseNodeAndPushId(node, nodes){
-		this.traverseNode(node, (node) => {
-			if (!node.children && ((node.type || "mesh") === "mesh")) {
-				let key = this.getAccountModelKey(node.account, node.project);
-				if(!nodes[key]){
+	public traverseNodeAndPushId(node, nodes) {
+		this.traverseNode(node, (n) => {
+			if (!n.children && ((n.type || "mesh") === "mesh")) {
+				const key = this.getAccountModelKey(n.account, n.model || n.project); // TODO: Remove project from backend
+				if (!nodes[key]) {
 					nodes[key] = [];
 				}
 
-				nodes[key].push(node._id);
+				nodes[key].push(n._id);
 			}
 		});
 	}
 
-	getVisibleArray(account, model){
-		let key = this.getAccountModelKey(account, model);
-		if(!this.visible[key]){
+	public getVisibleArray(account, model) {
+		const key = this.getAccountModelKey(account, model);
+		if (!this.visible[key]) {
 			this.visible[key] = new Set();
 		}
 
 		return this.visible[key];
 	}
 
-	getInvisibleArray(account, model){
-		let key = this.getAccountModelKey(account, model);
-		if(!this.invisible[key]){
+	public getInvisibleArray(account, model) {
+		const key = this.getAccountModelKey(account, model);
+		if (!this.invisible[key]) {
 			this.invisible[key] = new Set();
 		}
 
@@ -297,9 +296,11 @@ class TreeController implements ng.IController {
 	 * @param {Object} node Node to change the visibility for
 	 * @param {String} visibility Visibility to change to
 	 */
-	setToggleState(node, visibility) {
-		let visible = this.getVisibleArray(node.account, node.project);
-		let invisible = this.getInvisibleArray(node.account, node.project);
+	public setToggleState(node, visibility) {
+
+		const modelId = node.model || node.project; // TODO: Remove project from backend
+		const visible = this.getVisibleArray(node.account, modelId);
+		const invisible = this.getInvisibleArray(node.account, modelId);
 
 		if (!node.children && ((node.type || "mesh") === "mesh")) {
 			if (visibility === "invisible") {
@@ -322,15 +323,15 @@ class TreeController implements ng.IController {
 		}
 
 		node.toggleState = visibility;
-	};
+	}
 
 	/*
 	* See if id in each ids is a sub string of path
 	*/
-	matchPath(ids, path) {
+	public matchPath(ids, path) {
 
-		for(let i=0; i<ids.length; i++){
-			if(path.indexOf(ids[i]) !== -1){
+		for (let i = 0; i < ids.length; i++) {
+			if (path.indexOf(ids[i]) !== -1) {
 				return true;
 			}
 		}
@@ -338,7 +339,7 @@ class TreeController implements ng.IController {
 		return false;
 	}
 
-	isDefined(value) {
+	public isDefined(value) {
 		return value !== undefined && value !== null;
 	}
 
@@ -347,7 +348,7 @@ class TreeController implements ng.IController {
 	 * @param event
 	 * @param _id
 	 */
-	expand(event, _id) {
+	public expand(event, _id) {
 		let i, length,
 			j, jLength,
 			numChildren = 0,
@@ -364,17 +365,17 @@ class TreeController implements ng.IController {
 				break;
 			}
 		}
-		let _ids = [_id];
+		const _ids = [_id];
 		// Found
 		if (index !== -1) {
 			if (this.nodesToShow[index].hasChildren) {
 				if (this.nodesToShow[index].expanded) {
 					// Collapse
 
-					//if the target itself contains subModelTree
-					if(this.nodesToShow[index].hasSubModelTree){
-						//node containing sub model tree must have only one child
-						let subModelNode = this.subTreesById[this.nodesToShow[index].children[0]._id];
+					// if the target itself contains subModelTree
+					if (this.nodesToShow[index].hasSubModelTree) {
+						// node containing sub model tree must have only one child
+						const subModelNode = this.subTreesById[this.nodesToShow[index].children[0]._id];
 						_ids.push(subModelNode._id);
 					}
 
@@ -382,8 +383,8 @@ class TreeController implements ng.IController {
 
 						if (this.isDefined(this.nodesToShow[index + 1]) && this.matchPath(_ids, this.nodesToShow[index + 1].path)) {
 
-							if(this.nodesToShow[index + 1].hasSubModelTree){
-								let subModelNode = this.subTreesById[this.nodesToShow[index + 1].children[0]._id];
+							if (this.nodesToShow[index + 1].hasSubModelTree) {
+								const subModelNode = this.subTreesById[this.nodesToShow[index + 1].children[0]._id];
 								_ids.push(subModelNode._id);
 							}
 
@@ -434,10 +435,10 @@ class TreeController implements ng.IController {
 							}
 						}
 
-						if(this.nodesToShow[index].children[i].hasOwnProperty("name")){
+						if (this.nodesToShow[index].children[i].hasOwnProperty("name")) {
 							this.nodesToShow.splice(index + i + 1, 0, this.nodesToShow[index].children[i]);
 						}
-						
+
 					}
 
 					// Redraw the tree if needed
@@ -455,7 +456,7 @@ class TreeController implements ng.IController {
 		}
 
 		this.setContentHeight(this.nodesToShow);
-	};
+	}
 
 	/**
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
@@ -463,9 +464,7 @@ class TreeController implements ng.IController {
 	 * @param level
 	 */
 
-
-
-	expandToSelection(path, level, noHighlight) {
+	public expandToSelection(path, level, noHighlight) {
 		let i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 		// Force a redraw of the tree to get round the display problem
@@ -494,13 +493,13 @@ class TreeController implements ng.IController {
 
 						if (this.nodesToShow[i].children[j].hasOwnProperty("name")) {
 							this.nodesToShow[i].children[j].selected = true;
-							if(!noHighlight) {
+							if (!noHighlight) {
 								this.selectNode(this.nodesToShow[i].children[j]);
 							}
 							this.lastParentWithName = null;
 							selectedIndex = i + j + 1;
 
-						} else if(!noHighlight){
+						} else if (!noHighlight) {
 							// If the selected mesh doesn't have a name highlight the parent in the tree
 							// highlight the parent in the viewer
 
@@ -539,15 +538,14 @@ class TreeController implements ng.IController {
 
 					}
 
-
 					this.nodesToShow[i].children[j].level = level + 1;
 
-					if(this.nodesToShow[i].hasChildren && this.nodesToShow[i].children[j].hasOwnProperty("name")){
+					if (this.nodesToShow[i].hasChildren && this.nodesToShow[i].children[j].hasOwnProperty("name")) {
 
 						this.nodesToShow.splice(i + childWithNameCount + 1, 0, this.nodesToShow[i].children[j]);
 						childWithNameCount++;
 					}
-					
+
 				}
 			}
 		}
@@ -567,48 +565,51 @@ class TreeController implements ng.IController {
 			});
 
 			this.$timeout(() => {
-				let el = document.getElementById(selectedId);
-				el && el.scrollIntoView();
+				const el = document.getElementById(selectedId);
+				if (el) {
+					el.scrollIntoView();
+				}
 			});
 
 		}
 	}
 
-	getPath(objectID) {
-		
+	public getPath(objectID) {
+
 		let path;
-		if(this.idToPath[objectID]){
+		if (this.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
 			path = this.idToPath[objectID].split("__");
 		} else if (this.subModelIdToPath[objectID]) {
 			// Else check the submodel for the id for the path
 			path = this.subModelIdToPath[objectID].split("__");
-			let parentPath = this.subTreesById[path[0]].parent.path.split("__");
+			const parentPath = this.subTreesById[path[0]].parent.path.split("__");
 			path = parentPath.concat(path);
 		}
 
 		return path;
 
-	};
+	}
 
-	toggleTreeNode(node) {
-		let nodesLength,
-			path,
-			hasParent,
-			lastParent = node,
-			nodeToggleState = "visible",
-			numInvisible = 0,
-			numParentInvisible = 0;
+	public toggleTreeNode(node) {
+
+		let path;
+		let hasParent;
+		let lastParent = node;
+		let	nodeToggleState = "visible";
+		let	numInvisible = 0;
+		let	numParentInvisible = 0;
 
 		this.toggledNode = node;
 
-		//toggle yourself
+		// toggle yourself
 		this.setToggleState(node, (node.toggleState === "visible") ? "invisible" : "visible");
 		nodeToggleState = node.toggleState;
+
 		this.updateClickedHidden(node);
 		this.updateClickedShown(node);
 
-		let stack = [node];
+		const stack = [node];
 		let head = null;
 
 		while (stack.length > 0) {
@@ -619,27 +620,27 @@ class TreeController implements ng.IController {
 			}
 
 			if (head.children) {
-				for(let i = 0; i < head.children.length; i++) {
+				for (let i = 0; i < head.children.length; i++) {
 					stack.push(head.children[i]);
 				}
 			}
 		}
 
-		//a__b .. c__d
-		//toggle parent
+		// a__b .. c__d
+		// toggle parent
 		path = node.path.split("__");
 		path.splice(path.length - 1, 1);
 
-		for (let i = 0, nodesLength = this.nodesToShow.length; i < nodesLength; i += 1) {
-		// 	// Get node parent
+		for (let i = 0; i < this.nodesToShow.length; i++) {
+			// Get node parent
 			if (this.nodesToShow[i]._id === path[path.length - 1]) {
 
 				lastParent = this.nodesToShow[i];
 				hasParent = true;
 
-			} else if(lastParent.parent){
+			} else if (lastParent.parent) {
 
-				//Get node parent and reconstruct the path in case it is a fed model
+				// Get node parent and reconstruct the path in case it is a fed model
 				lastParent = lastParent.parent;
 				path = lastParent.path.split("__").concat(path);
 				hasParent = true;
@@ -652,12 +653,12 @@ class TreeController implements ng.IController {
 				for (let j = 0, nodesLength = this.nodesToShow.length; j < nodesLength; j += 1) {
 					if (this.nodesToShow[j]._id === path[i]) {
 						numInvisible = this.nodesToShow[j].children.reduce(
-							function (total, child) {
+							(total, child) => {
 								return child.toggleState === "invisible" ? total + 1 : total;
 							},
 							0);
 						numParentInvisible = this.nodesToShow[j].children.reduce(
-							function (total, child) {
+							(total, child) => {
 								return child.toggleState === "parentOfInvisible" ? total + 1 : total;
 							},
 							0);
@@ -675,32 +676,38 @@ class TreeController implements ng.IController {
 		}
 
 		this.toggleNode(node);
-	};
+	}
 
-	toggleNode(node) {
-		let childNodes = [];
+	public toggleNode(node) {
+		const childNodes = [];
 
 		this.traverseNodeAndPushId(node, childNodes);
-		
-		for (let key in childNodes){
 
-			let vals = key.split("@");
-			let account = vals[0];
-			let model = vals[1];
-			this.ViewerService.switchObjectVisibility(account, model, childNodes[key], node.toggleState != "invisible");
+		for (const key in childNodes) {
+			if (key) {
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+				this.ViewerService.switchObjectVisibility(
+					account,
+					model,
+					childNodes[key],
+					node.toggleState !== "invisible",
+				);
+			}
 		}
 
-	};
+	}
 
-	setupInfiniteScroll() {
+	public setupInfiniteScroll() {
 		// Infinite items
 		this.infiniteItemsTree = {
 			numLoaded_: 0,
 			toLoad_: 0,
 
-			getItemAtIndex: function (index) {
+			getItemAtIndex(index) {
 				if (index > this.numLoaded_) {
-					this.fetchMoreItems_(index);
+					this.fetchMoreItems(index);
 					return null;
 				}
 
@@ -711,25 +718,25 @@ class TreeController implements ng.IController {
 				}
 			},
 
-			getLength: function () {
+			getLength() {
 				return this.numLoaded_ + 5;
 			},
 
-			fetchMoreItems_: function (index) {
+			fetchMoreItems(index) {
 				if (this.toLoad_ < index) {
 					this.toLoad_ += 500;
-					this.$timeout(function() {}, 300).then(() => {
+					this.$timeout(() => {}, 300).then(() => {
 						this.numLoaded_ = this.toLoad_;
 					});
 				}
-			}
+			},
 		};
 	}
 
 	/**
 	 * Unselect all selected items and clear the array
 	 */
-	clearCurrentlySelected(){
+	public clearCurrentlySelected() {
 		this.currentSelectedNodes.forEach((selectedNode) => {
 			selectedNode.selected = false;
 		});
@@ -740,64 +747,68 @@ class TreeController implements ng.IController {
 	 *
 	 * @param node
 	 */
-	selectNode(node) {
+	public selectNode(node) {
 
-		let sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
+		const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
 			return element._id === node._id;
 		});
 
-		if(this.MultiSelectService.isMultiMode()) {
-			if(sameNodeIndex > -1)
-			{
-				//Multiselect mode and we selected the same node - unselect it
+		if (this.MultiSelectService.isMultiMode()) {
+			if (sameNodeIndex > -1) {
+				// Multiselect mode and we selected the same node - unselect it
 				this.currentSelectedNodes[sameNodeIndex].selected = false;
-				this.currentSelectedNodes.splice(sameNodeIndex, 1);				
-			}
-			else{
+				this.currentSelectedNodes.splice(sameNodeIndex, 1);
+			} else {
 				node.selected = true;
 				this.currentSelectedNodes.push(node);
 			}
-		}
-		else{
-			//If it is not multiselect mode, remove all highlights.
+		} else {
+			// If it is not multiselect mode, remove all highlights.
 			this.ViewerService.clearHighlights();
 			this.clearCurrentlySelected();
 			node.selected = true;
 			this.currentSelectedNodes.push(node);
 		}
 
-		let map = [];
+		const map = [];
 
 		this.traverseNodeAndPushId(node, map);
 
-		// Select the parent node in the group for cards and viewer
-		this.EventService.send(this.EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+		const objectToHighlight =  {
 			source: "tree",
 			account: node.account,
-			model: node.project,
+			model: node.model || node.project, // TODO: Remove project from backend
 			id: node._id,
 			name: node.name,
-			noHighlight : true
-		});
+			noHighlight : true,
+		};
 
-		for(let key in map) {
-			let vals = key.split("@");
-			let account = vals[0];
-			let model = vals[1];
-		
-			// Separately highlight the children
-			// but only for multipart meshes
-			this.ViewerService.highlightObjects({
-				source: "tree",
-				account: account,
-				model: model,
-				ids: map[key],
-				multi: true
-			});
+		// Select the parent node in the group for cards and viewer
+		this.EventService.send(
+			this.EventService.EVENT.VIEWER.OBJECT_SELECTED,
+			objectToHighlight,
+		);
+
+		for (const key in map) {
+			if (key) {
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				// Separately highlight the children
+				// but only for multipart meshes
+				this.ViewerService.highlightObjects({
+					source: "tree",
+					account,
+					model,
+					ids: map[key],
+					multi: true,
+				});
+			}
 		}
-	};
+	}
 
-	filterItemSelected(item) {
+	public filterItemSelected(item) {
 		if (this.currentFilterItemSelected === null) {
 			this.nodes[item.index].class = "treeNodeSelected";
 			this.currentFilterItemSelected = item;
@@ -810,22 +821,27 @@ class TreeController implements ng.IController {
 			this.currentFilterItemSelected = item;
 		}
 
-		let selectedNode = this.nodes[item.index];
+		const selectedNode = this.nodes[item.index];
 
-		this.selectNode(selectedNode);
-	};
+		if (selectedNode) {
+			console.log(selectedNode);
+			// TODO: This throws a unity error when filtering
+			this.selectNode(selectedNode);
+		}
 
-	toggleFilterNode(item) {
+	}
+
+	public toggleFilterNode(item) {
 		this.setToggleState(item, (item.toggleState === "visible") ? "invisible" : "visible");
 		item.path = item._id;
 		this.toggleNode(item);
-	};
+	}
 
-	setupInfiniteItemsFilter() {
+	public setupInfiniteItemsFilter() {
 		this.infiniteItemsFilter = {
 			numLoaded_: 0,
 			toLoad_: 0,
-			getItemAtIndex: function (index) {
+			getItemAtIndex(index) {
 				if (index > this.numLoaded_) {
 					this.fetchMoreItems_(index);
 					return null;
@@ -837,26 +853,21 @@ class TreeController implements ng.IController {
 					return null;
 				}
 			},
-			getLength: function () {
+			getLength() {
 				return this.numLoaded_ + 5;
 			},
-			fetchMoreItems_: function (index) {
+			fetchMoreItems_(index) {
 				if (this.toLoad_ < index) {
 					this.toLoad_ += 20;
 					this.$timeout(() => {}, 300).then(() => {
 						this.numLoaded_ = this.toLoad_;
 					});
 				}
-			}
+			},
 		};
 	}
 
-	/**
-	 * If a node was clicked to hide, add it to a list of similar nodes
-	 *
-	 * @param {Object} node
-	 */
-	updateClickedHidden (node) {
+	public updateClickedHidden(node) {
 		if (node.toggleState === "invisible") {
 			this.clickedHidden[node._id] = node;
 		} else {
@@ -864,12 +875,7 @@ class TreeController implements ng.IController {
 		}
 	}
 
-	/**
-	 * If a node was clicked to show, add it to a list of similar nodes
-	 *
-	 * @param {Object} node
-	 */
-	updateClickedShown (node) {
+	public updateClickedShown(node) {
 		if (node.toggleState === "visible") {
 			this.clickedShown[node._id] = node;
 		} else {
@@ -880,19 +886,19 @@ class TreeController implements ng.IController {
 }
 
 export const TreeComponent: ng.IComponentOptions = {
-	templateUrl: "templates/tree.html",
 	bindings: {
 		account:  "=",
-		model:  "=",
 		branch:   "=",
-		revision: "=",
 		filterText: "=",
-		onContentHeightRequest: "&"
+		model:  "=",
+		onContentHeightRequest: "&",
+		revision: "=",
 	},
 	controller: TreeController,
-	controllerAs: "vm"
-}
+	controllerAs: "vm",
+	templateUrl: "templates/tree.html",
+};
 
 export const TreeComponentModule = angular
-	.module('3drepo')
-	.component('tree', TreeComponent);
+	.module("3drepo")
+	.component("tree", TreeComponent);

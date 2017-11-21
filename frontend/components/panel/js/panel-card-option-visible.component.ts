@@ -15,29 +15,32 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class PanelCardOptionVisibleController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("panelCardOptionVisible", {
-			restrict: "E",
-			templateUrl: "templates/panel-card-option-visible.html",
-			bindings: {
-				visible: "="
-			},
-			controller: PanelCardOptionVisibleCtrl,
-			controllerAs: "vm"
-		});
+	private visible;
+	private icon;
 
-	function PanelCardOptionVisibleCtrl() {
-		var vm = this;
-
-		vm.icon = "visibility";
-
-		vm.toggleVisible = function (event) {
-			event.stopPropagation();
-			vm.visible = !vm.visible;
-			vm.icon = vm.visible ? "visibility" : "visibility_off";
-		};
+	constructor() {
+		this.icon = "visibility";
 	}
-}());
+
+	public toggleVisible(event) {
+		event.stopPropagation();
+		this.visible = !this.visible;
+		this.icon = this.visible ? "visibility" : "visibility_off";
+	}
+
+}
+
+export const PanelCardOptionVisibleComponent: ng.IComponentOptions = {
+	bindings: {
+		visible: "=",
+	},
+	controller: PanelCardOptionVisibleController,
+	controllerAs: "vm",
+	templateUrl: "templates/panel-card-option-visible.html",
+};
+
+export const PanelCardOptionVisibleComponentModule = angular
+	.module("3drepo")
+	.component("panelCardOptionVisible", PanelCardOptionVisibleComponent);

@@ -17,63 +17,56 @@ import { IController } from "angular";
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class ViewerController implements ng.IController {
-	
-	account: any;
-	model: any;
-	branch: string;
-	revision: string;
-	pointerEvents: string;
-	measureMode: boolean;
-	viewer: any;
 
-	static $inject: string[] = [
-		"$scope", 
-		"$q", 
-		"$element", 
-		"$timeout", 
-		
-		"ClientConfigService", 
-		"EventService", 
-		"ViewerService"
+	public static $inject: string[] = [
+		"$scope",
+		"$q",
+		"$element",
+		"$timeout",
+
+		"ClientConfigService",
+		"EventService",
+		"ViewerService",
 	];
 
-	constructor(
-		private $scope: ng.IScope, 
-		private $q: ng.IQProvider, 
-		private $element: ng.IRootElementService, 
-		private $timeout: ng.ITimeoutService, 
+	private account: any;
+	private model: any;
+	private branch: string;
+	private revision: string;
+	private pointerEvents: string;
+	private measureMode: boolean;
+	private viewer: any;
 
-		private ClientConfigService, 
-		private EventService, 
-		private ViewerService
+	constructor(
+		private $scope: ng.IScope,
+		private $q: ng.IQProvider,
+		private $element: ng.IRootElementService,
+		private $timeout: ng.ITimeoutService,
+
+		private ClientConfigService,
+		private EventService,
+		private ViewerService,
 	) {
-		var vm = this;
-	
+
 		$scope.$watch(() => {
 			return ViewerService.pin;
 		}, () => {
-
 			this.viewer.setPinDropMode(ViewerService.pin.pinDropMode);
-			
 		}, true);
 
-
 		$scope.$watch(EventService.currentEvent, (event: any) => {
+			const validEvent = event !== undefined && event.type !== undefined;
 
-			var validEvent = event !== undefined && event.type !== undefined;
-			
 			if (validEvent && ViewerService.initialised) {
 				ViewerService.handleEvent(event, this.account, this.model);
 			}
-
 		});
-	
+
 	}
 
-	$onInit() {
-		
+	public $onInit() {
+
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
 
@@ -81,10 +74,10 @@ class ViewerController implements ng.IController {
 		this.measureMode = false;
 
 		this.viewer = this.ViewerService.getViewer();
-		
+
 	}
 
-	$onDestroy() {
+	public $onDestroy() {
 		this.$element.on("$destroy", () => {
 			this.viewer.reset(); // Remove events watch
 		});
@@ -95,15 +88,14 @@ class ViewerController implements ng.IController {
 export const ViewerComponent: ng.IComponentOptions = {
 		bindings: {
 			account: "<",
-			model: "<",
 			branch: "<",
-			revision: "<"
+			model: "<",
+			revision: "<",
 		},
+		controller: ViewerController,
 		controllerAs: "vm",
-		controller: ViewerController
 };
 
-
 export const ViewerComponentModule = angular
-	.module('3drepo')
-	.component('viewer', ViewerComponent);
+	.module("3drepo")
+	.component("viewer", ViewerComponent);

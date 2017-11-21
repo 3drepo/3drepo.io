@@ -26,7 +26,6 @@ div(layout="column", class="md-whiteframe-1dp")
 			issues(
 				ng-if="vm.contentData.type === 'issues'"
 				show-add='vm.showAdd'
-				can-add='vm.canAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'
@@ -47,7 +46,6 @@ div(layout="column", class="md-whiteframe-1dp")
 			docs(
 				ng-if="vm.contentData.type === 'docs'"
 				show-add='vm.showAdd'
-				can-add='vm.canAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'
@@ -65,7 +63,6 @@ div(layout="column", class="md-whiteframe-1dp")
 			clip(
 				ng-if="vm.contentData.type === 'clip'"
 				show-add='vm.showAdd'
-				can-add='vm.canAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'
@@ -85,7 +82,6 @@ div(layout="column", class="md-whiteframe-1dp")
 			tree(
 				ng-if="vm.contentData.type === 'tree'"
 				show-add='vm.showAdd'
-				can-add='vm.canAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'

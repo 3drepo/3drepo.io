@@ -61,7 +61,7 @@
 				vm.screenShotUse = vm.screenShot;
 			} else {
 				$element.ready(function() {
-                	
+              	
 					// Get scribble canvas
 					scribbleCanvas = document.getElementById("scribbleCanvas");
 					scribbleCanvasContext = scribbleCanvas.getContext("2d");
