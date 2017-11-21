@@ -521,49 +521,8 @@ var Viewer = {};
 
 		this.applySettings = function() {
 			if (self.settings) {
-				if (self.settings.hasOwnProperty("start_all")) {
-					self.defaultShowAll = self.settings.start_all;
-				}
-
-				if (self.settings.hasOwnProperty("speed")) {
-					self.setSpeed(self.settings.speed);
-				}
-
-				if (self.settings.hasOwnProperty("unit")) {
-					self.setUnits(self.settings.unit);
-				}
-
-				if (self.settings.hasOwnProperty("avatarHeight")) {
-					self.changeAvatarHeight(self.settings.avatarHeight);
-				}
-
-				if (self.settings.hasOwnProperty("defaultNavMode")) {
-					self.defaultNavMode = self.settings.defaultNavMode;
-				}
-
-				if (self.settings.hasOwnProperty("pinSize")) {
-					self.pinSize = self.settings.pinSize;
-					self.pinSizeFromSettings = true; // Stop the auto-calculation
-				}
-
-				if (self.settings.hasOwnProperty("visibilityLimit")) {
-					self.nav.setAttribute("visibilityLimit", self.settings.visibilityLimit);
-				}
-
-				if (self.settings.hasOwnProperty("zFar")) {
-					self.currentViewpoint._xmlNode.setAttribute("zFar", self.settings.zFar);
-				}
-
-				if (self.settings.hasOwnProperty("zNear")) {
-					self.currentViewpoint._xmlNode.setAttribute("zNear", self.settings.zNear);
-				}
-
-				if (self.settings.hasOwnProperty("background")) {
-					self.createBackground(self.settings.background);
-				}
-
-				if (self.settings.hasOwnProperty("ambientLight")) {
-					self.setAmbientLight(self.settings.ambientLight);
+				if (self.settings.properties && self.settings.properties.unit) {
+					self.setUnits(self.settings.properties.unit);
 				}
 			}
 		};

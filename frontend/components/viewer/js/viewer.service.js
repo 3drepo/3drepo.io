@@ -104,9 +104,10 @@
 				
 				case EventService.EVENT.MODEL_SETTINGS_READY:
 					if (event.value.account === account && event.value.model === model) {
-						viewer.updateSettings(event.value.settings);
+						viewer.updateSettings(event.value);
 						//mapTile && mapTile.updateSettings(event.value.settings);
 					}
+
 					break;
 
 				case EventService.EVENT.VIEWER.CLICK_PIN:

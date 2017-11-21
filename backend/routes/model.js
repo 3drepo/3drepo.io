@@ -177,6 +177,8 @@ function getModelSetting(req, res, next){
 		whitelist.forEach(key => {
 			resObj[key] = setting[key];
 		});
+		resObj.model = setting._id;
+		resObj.account = req.params.account;
 
 		resObj.headRevisions = {};
 

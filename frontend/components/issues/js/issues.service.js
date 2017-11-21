@@ -118,8 +118,9 @@
 
 		/////////////
 
-		function createBlankIssue() {
+		function createBlankIssue(creatorRole) {
 			return {
+				creator_role: creatorRole,
 				priority: "none",
 				status: "open",
 				assigned_roles: [],
@@ -376,6 +377,7 @@
 		}
 
 		function userJobMatchesCreator(userJob, issueData) {
+
 			return (userJob._id && 
 				issueData.creator_role && 
 				userJob._id === issueData.creator_role);
@@ -405,13 +407,15 @@
 		}
 
 		function canChangePriority(issueData, userJob, permissions) {
-			return isAdmin(permissions) || 
-				(userJobMatchesCreator(userJob, issueData) &&
-				!isViewer(permissions));
+
+			var notViewer = !isViewer(permissions);
+			var matches = userJobMatchesCreator(userJob, issueData);
+
+			return isAdmin(permissions) || (matches && notViewer);
 		}
 
 		function canChangeStatusToClosed(issueData, userJob, permissions) {
-
+			
 			var jobOwner = (userJobMatchesCreator(userJob, issueData) &&
 							!isViewer(permissions));
 
@@ -443,7 +447,10 @@
 		}
 
 		function isOpen(issueData) {
-			return issueData.status !== "closed";
+			if (issueData) {
+				return issueData.status !== "closed";
+			}
+			return false;
 		}
 
 		function canComment(issueData, userJob, permissions) {
