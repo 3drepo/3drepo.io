@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2015 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class TdrProgressController implements ng.IController {
+	constructor() {
+		const vm = this;
+	}
+}
 
-	angular.module("3drepo")
+export const TdrProgress: ng.IComponentOptions = {
+	bindings: {
+		info: "=",
+	},
+	controller: TdrProgressController,
+	controllerAs: "vm",
+	templateUrl: "templates/tdr-progress.html",
+};
 
-		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
-		.directive("tdrFocus", ["$timeout", function($timeout) {
-			return {
-				scope: { trigger: "@tdrFocus" },
-				link: function(scope, element) {
-					scope.$watch("trigger", function(value) {
-						if (value.toString() === "true") {
-							$timeout(function() {
-								element[0].focus();
-							});
-						}
-					});
-				}
-			};
-		}]);
-}());
+export const TdrProgressModule = angular
+	.module("3drepo")
+	.component("tdrProgress", TdrProgress);
