@@ -557,7 +557,7 @@
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
-			if (issue.hasOwnProperty("group_id")) {
+			if ((issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) || issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
 				
@@ -565,7 +565,8 @@
 		}
 
 		function showMultiIds(issue) {
-			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
+			var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
+			var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
 
 			APIService.get(groupUrl)
 				.then(function (response) {
