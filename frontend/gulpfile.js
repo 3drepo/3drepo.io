@@ -312,45 +312,17 @@ gulp.task('watch', function() {
 
   livereload.listen({host: 'localhost', port: '35729', start: true })
 
-  // Because gulp is annoying and only allows paralell execution
-  // of tasks, we need to setup a dependency order using a task
-  // registration. Sigh.
+  // WATCHERS
 
-  const watches = {
-    "index" : [ ["./index.html"], ['index'] ],
-    "entry" :[ ["./entry.js"], ['javascript-dev'] ],
-
-    "typescript-globals": [ ["./globals/*.ts"], ["typescript-globals"] ],
-    "typescript-components": [ ["./components/**/*.ts"], ["typescript-components"] ],
-
-    "amd-deps" : [ ['./entry.js', "./_built/amd/globals/*.js"], ["amd-dependencies"]],
-    "amd-components" : [ ['./entry-ts-components.js', "./_built/amd/components/**/*.js"], ["amd-components"]],
-
-    "js" : [ ["./_built/dependencies.js", "./_built/ts-components.js", "./components/**/*.js", "./bootstrap.js", ], ['javascript-build-dev'] ],
-    "css" : [ allCss, ['css'] ],
-    "pug" : [ allPug, ['pug'] ],
-    "icons" : [ icons, ['icons'] ],
-    "manifest" : [ ["./manifest.json"], ['manifest-file'] ],
-    "manifest-icons" : [ ["./manifest-icons/**.png"], ['manifest-icons'] ]
-  };
-
-  for (let key in watches) {
-    let taskData = watches[key];
-    let files = taskData[0];
-    let task = taskData[1][0]
-    registerTasksWithSW(task);
-    watchSWTask(files, task)
-  }
+  gulp.watch(["./index.html"], ["index", "service-workers-dev"])
+  gulp.watch(["./entry.js", "./globals/*.ts", "./components/**/{*.ts, *.js}", "./bootstrap.js"], ["javascript-dev", "service-workers-dev"])
+  gulp.watch([allCss], ["css", "service-workers-dev"])
+  gulp.watch([allPug], ["pug", "service-workers-dev"])
+  gulp.watch([icons], ["icons", "service-workers-dev"])
+  gulp.watch(["./manifest.json"], ['manifest-file', "service-workers-dev"])
+  gulp.watch(["./manifest-icons/**.png"], ['manifest-icons', "service-workers-dev"])
 
 });
-
-const registerTasksWithSW = function(task){
-  gulp.task(task + "SW", gulp.series(task, "service-workers-dev"));
-}
-
-const watchSWTask = function(files, task){
-  gulp.watch(files, gulp.series(task + "SW"));
-};
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
