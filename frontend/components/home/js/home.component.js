@@ -190,6 +190,7 @@
 
 			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
+			console.log(vm.loggedIn);
 			vm.loggedIn = AuthService.isLoggedIn();
 
 			if ( (newState && change) || (newState && vm.firstState)) {
@@ -269,7 +270,7 @@
 				"templates/register-request.html"
 			];
 
-			TemplateService.precache(preCacheTemplates)
+			TemplateService.precache(preCacheTemplates);
 
 		};
 

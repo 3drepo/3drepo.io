@@ -54,14 +54,27 @@ login .welcome {
   margin: 0px;
 }
 
-login .loginBox {
+login .inputContainer {
+  margin-top: 5px;
+}
+
+/* login .loginBox {
   margin-bottom: 15px;
+} */
+
+login .password {
+  margin-bottom: 0;
+}
+
+login .forgotPassword {
+  margin: 10px;
 }
 
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
   margin: 10px 0 0;
+  text-align: center;
 }
 
 login .loginError {
@@ -69,11 +82,18 @@ login .loginError {
   margin: 5px 0 5px;
   font-weight: normal;
   margin-bottom: 16px;
+  text-align: center;
 }
 
 login .loginLinks {
   font-size: 14px;
   margin: 5px 0;
+  color: #2945b5;
+  text-decoration: none;
+}
+
+login md-button .loginLinks {
+  text-decoration: none;
 }
 
 login #loginHiddenInputs {
@@ -82,8 +102,24 @@ login #loginHiddenInputs {
   opacity: 0;
 }
 
-login .loginLinks {
-  color: #2945b5;
+login .bottomLinks {
+  padding-top: 10px;
+  text-align: center;
+  margin: auto;
+}
+
+login .loginVersion {
+  color: gainsboro;
+}
+
+login #loginVersin {
+  text-align: center;
+}
+
+login .loginSpacing {
+  padding-left: 10px;
+  padding-right: 10px;
+  color: gainsboro;
 }
 
 /*login md-progress-circular {
