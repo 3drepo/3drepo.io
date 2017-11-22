@@ -46,7 +46,8 @@
     "@types/protractor": "^4.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "gulp": "^3.9.1",
+    "del": "^3.0.0",
+    "gulp": "gulpjs/gulp.git#4.0",
     "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
     "gulp-livereload": "^3.8.1",
@@ -62,10 +63,10 @@
     "gulp-watch": "^4.3.11",
     "mocha": "^4.0.1",
     "protractor": "^5.1.2",
+    "streamqueue": "^1.1.1",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1",
     "webpack": "^3.0.0",
-    "webpack-stream": "^4.0.0",
-    "streamqueue": "^1.1.1"
+    "webpack-stream": "^4.0.0"
   }
 }
