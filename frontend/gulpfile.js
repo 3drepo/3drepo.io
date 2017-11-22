@@ -274,9 +274,13 @@ gulp.task('javascript-build-dev', function(){
   
 });
   
-gulp.task('javascript', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build"]);
+gulp.task('javascript', ["tsc-amd-dependencies", "tsc-amd-components"], function(){
+  gulp.start("javascript-build");
+});
 
-gulp.task('javascript-dev', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev"]);
+gulp.task('javascript-dev', ["tsc-amd-dependencies", "tsc-amd-components"], function(){
+  gulp.start("javascript-build-dev");
+});
 
 
 // Watch for changes and live reload in development

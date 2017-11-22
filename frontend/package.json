@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
-    "wdm": "webdriver-manager",
+    "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",
     "e2e:ie": "protractor ./tests/e2e/built/ie/ie-config.js --specs ./tests/e2e/built/ie/ie.js",
