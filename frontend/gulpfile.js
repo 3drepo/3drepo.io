@@ -55,14 +55,15 @@ function swallowError (error) {
   this.emit('end')
 }
 
-gulp.task('index', function(){
+gulp.task('index', function(done){
     return gulp.src('./index.html')
           .on('error', swallowError)
           .pipe(gulp.dest('./../public/'))
           .pipe(livereload())
+          .on("end", done);
 })
 
-gulp.task('pug', function(){
+gulp.task('pug', function(done){
 
   return gulp.src(allPug)
         // .pipe(print())
@@ -71,10 +72,11 @@ gulp.task('pug', function(){
         .on('error', swallowError)
         .pipe(gulp.dest("./../public/templates/"))
         .pipe(livereload())
+        .on("end", done);
   
 });
 
-gulp.task('css', function() {
+gulp.task('css', function(done) {
 
   return gulp.src(allCss)
          //.pipe(print())
@@ -83,57 +85,66 @@ gulp.task('css', function() {
          .on('error', swallowError)
          .pipe(gulp.dest("./../public/dist/"))
          .pipe(livereload())
+         .on("end", done);
 
 });
 
-gulp.task('clean', function(){
-  return del('./_built');
+gulp.task('clean', function(done){
+  return del('./_built')
+    .on("end", done); 
 })
 
-gulp.task('icons', function () {
+gulp.task('icons', function (done) {
   return gulp.src('./icons/*.svg')
     .on('error', swallowError)
     //.pipe(print())
     .pipe(gulp.dest('./../public/icons/'))
     .pipe(livereload())
+    .on("end", done);
 });
 
-gulp.task('images', function() {
+gulp.task('images', function(done) {
   return gulp.src(allImages)
         .on('error', swallowError)
         .pipe(gulp.dest('./../public/images/'))
         .pipe(livereload())
+        .on("end", done);
 });
 
-gulp.task('fonts', function() {
+gulp.task('fonts', function(done) {
   return gulp.src(allFonts)
         .on('error', swallowError)
         .pipe(gulp.dest('./../public/fonts/'))
         .pipe(livereload())
+        .on("end", done);
 });
 
-gulp.task('unity', function() {
+gulp.task('unity', function(done) {
   return gulp.src("./unity/**")
         .on('error', swallowError)  
-        .pipe(gulp.dest('./../public/unity/'));
+        .pipe(gulp.dest('./../public/unity/'))
+        .on("end", done);
 });
 
-gulp.task('custom', function() {
+gulp.task('custom', function(done) {
   return gulp.src("./custom/**")
         .on('error', swallowError)  
-        .pipe(gulp.dest('./../public/custom/'));
+        .pipe(gulp.dest('./../public/custom/'))
+        .on("end", done);
 });
 
-gulp.task('manifest-file', function() {
+gulp.task('manifest-file', function(done) {
   return gulp.src("./manifest.json")
     .on('error', swallowError)
-    .pipe(gulp.dest('./../public/'));
+    .pipe(gulp.dest('./../public/'))
+    .on("end", done);
 });
 
-gulp.task('manifest-icons', function() {
+gulp.task('manifest-icons', function(done) {
   return gulp.src("./manifest-icons/**.png")
     .on('error', swallowError)
-    .pipe(gulp.dest('./../public/manifest-icons/'));
+    .pipe(gulp.dest('./../public/manifest-icons/'))
+    .on("end", done);
 });
 
 
@@ -171,17 +182,18 @@ gulp.task('service-workers-dev', function(callback) {
 
 // BUILD COMPONENTS
 
-gulp.task("typescript-components", function(){
+gulp.task("typescript-components", function(done){
    
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['components/**/*.ts'])
     .pipe(ts(tsConfig))
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('./_built/amd/components/'))
+    .on("end", done)
 
 })
 
-gulp.task("amd-components", function(){
+gulp.task("amd-components", function(done){
 
   // CREATE COMPONENTS (FROM TS COMPILED AMD)
   return gulp.src(["./entry-ts-components.js"])
@@ -193,23 +205,25 @@ gulp.task("amd-components", function(){
     }, require('webpack')))
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('./_built/'))
+    .on("end", done)
 
 });
 
 gulp.task("tsc-amd-components", gulp.series("typescript-components", "amd-components"))
 // BUILD DEPENDENCIES
 
-gulp.task("typescript-globals", function() {
+gulp.task("typescript-globals", function(done) {
   
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['globals/*.ts'])
     .pipe(ts(tsConfig))
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('./_built/amd/globals/'))
+    .on("end", done)
 
 });
 
-gulp.task("amd-dependencies", function(){
+gulp.task("amd-dependencies", function(done){
 
     // CREATE DEPENDENCIES 
     return gulp.src(['./entry.js'])
@@ -221,12 +235,13 @@ gulp.task("amd-dependencies", function(){
       }, require('webpack')))
       .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
       .pipe(gulp.dest('./_built/'))
+      .on("end", done)
 
 });
 
 gulp.task("tsc-amd-dependencies", gulp.series("typescript-globals", "amd-dependencies"));
 
-gulp.task('javascript-build', function(){
+gulp.task('javascript-build', function(done){
   
   const jsOrder = [
     '_built/dependencies.js',
@@ -253,10 +268,11 @@ gulp.task('javascript-build', function(){
           .pipe(size())
           .pipe(sourcemaps.write('./maps'))
           .pipe(gulp.dest("./../public/dist/"))
+          .on("end", done)
     
 });
 
-gulp.task('javascript-build-dev', function(){
+gulp.task('javascript-build-dev', function(done){
 
   const jsOrder = [
     '_built/dependencies.js',
@@ -280,6 +296,7 @@ gulp.task('javascript-build-dev', function(){
           .pipe(sourcemaps.write('./maps'))
           .pipe(gulp.dest("./../public/dist/"))
           .pipe(livereload())
+          .on("end", done)
   
 });
 
