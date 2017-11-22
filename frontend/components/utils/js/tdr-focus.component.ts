@@ -15,24 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
 
-	angular.module("3drepo")
-
-		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
-		.directive("tdrFocus", ["$timeout", function($timeout) {
-			return {
-				scope: { trigger: "@tdrFocus" },
-				link: function(scope, element) {
-					scope.$watch("trigger", function(value) {
-						if (value.toString() === "true") {
-							$timeout(function() {
-								element[0].focus();
-							});
-						}
+function tdrFocus($timeout) {
+	return {
+		scope: { trigger: "@tdrFocus" },
+		link: function(scope, element) {
+			scope.$watch("trigger", function(value) {
+				if (value.toString() === "true") {
+					$timeout(function() {
+						element[0].focus();
 					});
 				}
-			};
-		}]);
-}());
+			});
+		}
+	};
+}
+
+export const TdrFocusModule = angular
+	.module('3drepo')
+	.directive("tdrFocus", ["$timeout", tdrFocus]);

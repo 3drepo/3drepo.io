@@ -1,5 +1,7 @@
 node_modules
 
+frontend/_built/
+
 *.bak
 *.swp
 /*.log

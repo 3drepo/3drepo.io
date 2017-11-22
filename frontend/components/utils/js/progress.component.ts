@@ -15,24 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.component("tdrProgress", {
-			restrict: "EA",
-			templateUrl: "templates/tdr-progress.html",
-			bindings: {
-				info: "="
-			},
-			controller: TdrProgressCtrl,
-			controllerAs: "vm"
-		});
-
-	TdrProgressCtrl.$inject = ["$scope"];
-
-	function TdrProgressCtrl($scope) {
+class TdrProgressController implements ng.IController {
+	constructor() {
 		var vm = this;
 	}
+}
 
-}());
+export const TdrProgress: ng.IComponentOptions = {
+	templateUrl: "templates/tdr-progress.html",
+	bindings: {
+		info: "="
+	},
+	controller: TdrProgressController,
+	controllerAs: "vm"
+}
+
+export const TdrProgressModule = angular
+	.module('3drepo')
+	.component('tdrProgress', TdrProgress);
