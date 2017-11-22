@@ -17,24 +17,24 @@
 
 export class MultiSelectService {
 
-	keys = {
-		cmdKey : 91,
-		ctrlKey : 17,
-		escKey : 27
-	};
-
-	isMac = (navigator.platform.indexOf("Mac") !== -1);
-	multiMode = false;
-
-	static $inject: string[] = [	
-		"ViewerService"
+	public static $inject: string[] = [
+		"ViewerService",
 	];
 
+	private keys = {
+		cmdKey : 91,
+		ctrlKey : 17,
+		escKey : 27,
+	};
+
+	private isMac = (navigator.platform.indexOf("Mac") !== -1);
+	private multiMode = false;
+
 	constructor(
-		public ViewerService: any, 
+		public ViewerService: any,
 	) {}
 
-	handleKeysDown(keysDown) {
+	public handleKeysDown(keysDown: any[]) {
 
 		if (this.ViewerService.pin.pinDropMode) {
 			return;
@@ -53,51 +53,51 @@ export class MultiSelectService {
 			this.unhighlightAll();
 
 		}
-			
+
 	}
 
-	isMultiMode() {
+	public isMultiMode() {
 		return this.multiMode;
 	}
 
-	multiSelectEnabled() {
+	public multiSelectEnabled() {
 		this.multiMode = true;
 		this.ViewerService.setMultiSelectMode(true);
 	}
 
-	multiSelectDisabled() {
+	public multiSelectDisabled() {
 		this.multiMode = false;
 		this.ViewerService.setMultiSelectMode(false);
 	}
 
-	unhighlightAll() {
-		this.ViewerService.highlightObjects([]);			
+	public unhighlightAll() {
+		this.ViewerService.highlightObjects([]);
 	}
 
-	disableMultiSelect() {
+	public disableMultiSelect() {
 		this.ViewerService.setMultiSelectMode(false);
 	}
 
-	isCmd(keysDown) {
+	public isCmd(keysDown: any[]) {
 		return this.isMac && keysDown.indexOf(this.keys.cmdKey) !== -1;
 	}
 
-	isCtrlKey(keysDown) {
+	public isCtrlKey(keysDown: any[]) {
 		return !this.isMac && keysDown.indexOf(this.keys.ctrlKey) !== -1;
 	}
 
-	isMultiSelectDown(keysDown) {
+	public isMultiSelectDown(keysDown: any[]) {
 		return this.isCmd(keysDown) || this.isCtrlKey(keysDown);
 	}
 
-	isOtherKey(keysDown) {
-		var macOtherKey = this.isMac && keysDown.indexOf(this.keys.cmdKey) === -1;
-		var otherKey = !this.isMac && keysDown.indexOf(this.keys.ctrlKey) === -1;
+	public isOtherKey(keysDown: any[]) {
+		const macOtherKey = this.isMac && keysDown.indexOf(this.keys.cmdKey) === -1;
+		const otherKey = !this.isMac && keysDown.indexOf(this.keys.ctrlKey) === -1;
 		return macOtherKey || otherKey;
 	}
 
-	isEscapeKey(keysDown) {
-		keysDown.indexOf(this.keys.escKey) !== -1;
+	public isEscapeKey(keysDown: any[]) {
+		return keysDown.indexOf(this.keys.escKey) !== -1;
 	}
 
 }

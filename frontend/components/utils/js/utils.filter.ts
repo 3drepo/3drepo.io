@@ -17,10 +17,10 @@
 
 function formatBytes() {
 
-	return (input, referenceValue) => {
-		
-		let bytesInMB: number = 1048576;
-		let bytesInGB: number = 1073741824;
+	return (input: number, referenceValue: number) => {
+
+		const bytesInMB: number = 1048576;
+		const bytesInGB: number = 1073741824;
 		let factor: number;
 
 		let units: string;
@@ -43,30 +43,30 @@ function formatBytes() {
 				units = " MB";
 			}
 		}
-		
+
 		return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
-	}
-	
-};
+	};
+
+}
 
 function invoiceDate() {
 	return (input) => {
-		let date: Date = new Date(input);
-		let invoiceDate: string;
+		const date: Date = new Date(input);
+		let invoiceDateStr: string;
 
-		invoiceDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+		invoiceDateStr = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
 			((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
 			date.getFullYear() + " " +
 			(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
 			(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 
-		return invoiceDate;
-	}
-};
+		return invoiceDateStr;
+	};
+}
 
 function prettyDate() {
 	return (input, showSeconds) => {
-		let date: Date = new Date(input);
+		const date: Date = new Date(input);
 		let modelDate: string;
 
 		modelDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
@@ -80,16 +80,15 @@ function prettyDate() {
 		}
 
 		return modelDate;
-	}
-};
+	};
+}
 
 function prettyGMTDate() {
 	return (input) => {
 		const date = new Date(input);
 		return date.toISOString().substr(0,10);
-	}
-	
-};
+	};
+}
 
 function revisionDate() {
 	return (input) => {
@@ -98,24 +97,21 @@ function revisionDate() {
 };
 
 export const FormatBytesModule = angular
-	.module('3drepo')
-	.filter('formatBytes', formatBytes);
+	.module("3drepo")
+	.filter("formatBytes", formatBytes);
 
 export const InvoiceDateModule = angular
-	.module('3drepo')
-	.filter('invoiceDate', invoiceDate);
+	.module("3drepo")
+	.filter("invoiceDate", invoiceDate);
 
 export const PrettyDateModule = angular
-	.module('3drepo')
-	.filter('prettyDate', prettyDate);
+	.module("3drepo")
+	.filter("prettyDate", prettyDate);
 
 export const PrettyGMTDate = angular
-	.module('3drepo')
-	.filter('prettyGMTDate', prettyGMTDate);
+	.module("3drepo")
+	.filter("prettyGMTDate", prettyGMTDate);
 
 export const RevisionDateModule = angular
-	.module('3drepo')
-	.filter('revisionDate', revisionDate);
-	
-	
-
+	.module("3drepo")
+	.filter("revisionDate", revisionDate);

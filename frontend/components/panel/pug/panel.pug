@@ -1,7 +1,6 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
 		div(ng-repeat="contentItem in vm.contentItems")
-
 			panel-card(
 				id="{{contentItem.type + 'Panel'}}"
 				account="vm.account"
@@ -28,7 +27,7 @@ div(ng-show="vm.showPanel")
 		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems", layout="column", layout-align="start center")
 			md-button.md-fab.md-primary.md-mini(
 				id="{{contentItem.type + 'LeftButton'}}"
-				ng-click="vm.buttonClick(contentItem.type)"
+				ng-click="vm.togglePanel(contentItem.type)"
 				aria-label="{{contentItem.title}}")
 
 				md-tooltip(ng-if="contentItem.show" md-direction="right") Close

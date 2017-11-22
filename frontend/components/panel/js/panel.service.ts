@@ -15,23 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+export class PanelService {
 
-	angular.module("3drepo")
-		.service("PanelService", PanelService);
+	public static $inject: string[] = [
+		"EventService",
+		"TreeService",
+	];
 
-	PanelService.$inject = [];
+	private issuesPanelCard: any;
 
-	function PanelService() {
-		
-		var issuesPanelCard = {
+	constructor(
+		private EventService: any,
+		private TreeService: any,
+	) {
+		this.issuesPanelCard = {
 			left: [],
-			right: []
+			right: [],
 		};
-		
 
-		issuesPanelCard.left.push({
+		this.issuesPanelCard.left.push({
 			type: "issues",
 			title: "Issues",
 			show: true,
@@ -53,7 +55,7 @@
 					selected: false,
 					noToggle: true,
 					icon: "fa-cloud-download",
-					divider: true
+					divider: true,
 				},
 				{
 					hidden: false,
@@ -87,7 +89,7 @@
 					hidden: false,
 					upperDivider: true,
 					label: "Created by: "
-				}
+				},
 			],
 			minHeight: 260,
 			fixedHeight: false,
@@ -96,12 +98,12 @@
 				{type: "filter", visible: true},
 				{type: "pin", visible: false},
 				{type: "erase", visible: false},
-				{type: "scribble", visible: false}
+				{type: "scribble", visible: false},
 			],
-			add: true
+			add: true,
 		});
 
-		issuesPanelCard.left.push({
+		this.issuesPanelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			show: false,
@@ -110,11 +112,11 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "filter", visible: true}
-			]
+				{type: "filter", visible: true},
+			],
 		});
 
-		issuesPanelCard.left.push({
+		this.issuesPanelCard.left.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
@@ -122,11 +124,11 @@
 			icon: "crop_original",
 			fixedHeight: true,
 			options: [
-				{type: "visible", visible: true}
-			]
+				{type: "visible", visible: true},
+			],
 		});
 
-		issuesPanelCard.right.push({
+		this.issuesPanelCard.right.push({
 			type: "docs",
 			title: "Meta Data",
 			show: false,
@@ -135,11 +137,11 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "close", visible: true}
-			]
+				{type: "close", visible: true},
+			],
 		});
 
-		issuesPanelCard.right.push({
+		this.issuesPanelCard.right.push({
 			type: "building",
 			title: "Building",
 			show: false,
@@ -147,31 +149,36 @@
 			icon: "fa-cubes",
 			fixedHeight: true,
 			options: [
-			]
+			],
 		});
+	}
 
+	public hideSubModels(issuesCardIndex, hide) {
 
-		var service = {
+		this.issuesPanelCard.left[issuesCardIndex].menu
+			.forEach((item) => {
+				if (item.value === "showSubModels") {
+					item.hidden = hide;
+				}
+			});
 
-			issuesPanelCard : issuesPanelCard,
-			hideSubModels: hideSubModels
+	}
 
-		};
-	
-		return service;
-	
-		///////////////
+	public handlePanelEvent(panelType, event, eventData) {
 
-		function hideSubModels(issuesCardIndex, hide) {
-			
-			issuesPanelCard.left[issuesCardIndex].menu
-				.forEach(function(item){
-					if(item.value === "showSubModels") {
-						item.hidden = hide;
-					}
-				});
-
+		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
+			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
+		) {
+			if (panelType === "tree") {
+				// If another card is in modify mode don't show a node if an object is clicked in the viewer
+				this.TreeService.setHighlightSelected(!eventData.on);
+			}
 		}
 
 	}
-}());
+
+}
+
+export const PanelServiceModule = angular
+	.module("3drepo")
+	.service("PanelService", PanelService);

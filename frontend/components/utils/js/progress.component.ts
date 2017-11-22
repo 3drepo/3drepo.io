@@ -17,19 +17,19 @@
 
 class TdrProgressController implements ng.IController {
 	constructor() {
-		var vm = this;
+		const vm = this;
 	}
 }
 
 export const TdrProgress: ng.IComponentOptions = {
-	templateUrl: "templates/tdr-progress.html",
 	bindings: {
-		info: "="
+		info: "=",
 	},
 	controller: TdrProgressController,
-	controllerAs: "vm"
-}
+	controllerAs: "vm",
+	templateUrl: "templates/tdr-progress.html",
+};
 
 export const TdrProgressModule = angular
-	.module('3drepo')
-	.component('tdrProgress', TdrProgress);
+	.module("3drepo")
+	.component("tdrProgress", TdrProgress);

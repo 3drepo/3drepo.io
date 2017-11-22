@@ -15,6 +15,8 @@ const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
 
+const del = require('del');
+
 const ts = require('gulp-typescript');
 
 const tsConfig = {
@@ -83,6 +85,10 @@ gulp.task('css', function() {
          .pipe(livereload())
 
 });
+
+gulp.task('clean', function(){
+  return del('./_built');
+})
 
 gulp.task('icons', function () {
   return gulp.src('./icons/*.svg')
@@ -163,23 +169,17 @@ gulp.task('service-workers-dev', function(callback) {
 // We have one dev task and one production task because the time taken to do 
 // minifcation + source maps is so long
 
+// BUILD COMPONENTS
+
 gulp.task("typescript-components", function(){
    
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['components/**/*.ts'])
-  .pipe(ts(tsConfig))
-  .pipe(gulp.dest('./_built/amd/components/'))
+    .pipe(ts(tsConfig))
+    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+    .pipe(gulp.dest('./_built/amd/components/'))
 
 })
-
-gulp.task("typescript-globals", function() {
-  
-  // COMPILE TYPESCRIPT TO AMD
-  return gulp.src(['globals/*.ts'])
-    .pipe(ts(tsConfig))
-    .pipe(gulp.dest('./_built/amd/globals/'))
-
-});
 
 gulp.task("amd-components", function(){
 
@@ -192,12 +192,22 @@ gulp.task("amd-components", function(){
       },
     }, require('webpack')))
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
-    .pipe(gulp.dest('_built/'))
+    .pipe(gulp.dest('./_built/'))
 
 });
 
-gulp.task("tsc-amd-components", ["typescript-components", "amd-components"]);
+gulp.task("tsc-amd-components", gulp.series("typescript-components", "amd-components"))
+// BUILD DEPENDENCIES
 
+gulp.task("typescript-globals", function() {
+  
+  // COMPILE TYPESCRIPT TO AMD
+  return gulp.src(['globals/*.ts'])
+    .pipe(ts(tsConfig))
+    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+    .pipe(gulp.dest('./_built/amd/globals/'))
+
+});
 
 gulp.task("amd-dependencies", function(){
 
@@ -210,12 +220,11 @@ gulp.task("amd-dependencies", function(){
         },
       }, require('webpack')))
       .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
-      .pipe(gulp.dest('_built/'))
+      .pipe(gulp.dest('./_built/'))
 
 });
 
-gulp.task("tsc-amd-dependencies", ["typescript-globals", "amd-dependencies"]);
-
+gulp.task("tsc-amd-dependencies", gulp.series("typescript-globals", "amd-dependencies"));
 
 gulp.task('javascript-build', function(){
   
@@ -273,10 +282,10 @@ gulp.task('javascript-build-dev', function(){
           .pipe(livereload())
   
 });
-  
-gulp.task('javascript', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build"]);
 
-gulp.task('javascript-dev', ["tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev"]);
+gulp.task('javascript', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build" ));
+
+gulp.task('javascript-dev', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev" ))
 
 
 // Watch for changes and live reload in development
@@ -288,7 +297,7 @@ gulp.task('watch', function() {
   // of tasks, we need to setup a dependency order using a task
   // registration. Sigh.
 
-  watches = {
+  const watches = {
     "index" : [ ["./index.html"], ['index'] ],
     "entry" :[ ["./entry.js"], ['javascript-dev'] ],
 
@@ -303,7 +312,7 @@ gulp.task('watch', function() {
     "pug" : [ allPug, ['pug'] ],
     "icons" : [ icons, ['icons'] ],
     "manifest" : [ ["./manifest.json"], ['manifest-file'] ],
-    "mainfest-icons" : [ ["./manifest-icons/**.png"], ['manifest-icons'] ]
+    "manifest-icons" : [ ["./manifest-icons/**.png"], ['manifest-icons'] ]
   };
 
   for (let key in watches) {
@@ -311,45 +320,36 @@ gulp.task('watch', function() {
     let files = taskData[0];
     let task = taskData[1][0]
     registerTasksWithSW(task);
-    watchTask(files, task)
+    watchSWTask(files, task)
   }
 
 });
 
 const registerTasksWithSW = function(task){
-  gulp.task(task + "SW", [task], function() {
-    gulp.start("service-workers-dev")
-  });
+  gulp.task(task + "SW", gulp.series(task, "service-workers-dev"));
 }
 
-const watchTask = function(files, task){
-  gulp.watch(files, [task + "SW"]);
+const watchSWTask = function(files, task){
+  gulp.watch(files, gulp.series(task + "SW"));
 };
-
-gulp.task('clean', function() {
-  return gulp.src('dist/*').pipe(rm());
-});
-
-gulp.task('concat', ['clean'], function() {
-  return gulp.src('app/**/*.js').pipe(concat('main.js')).pipe(gulp.dest('dist'));
-});
 
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
-gulp.task('build', [
-  'index', 
-  'pug', 
-  'javascript',
-  'css', 
-  'icons', 
-  'fonts', 
-  'images', 
-  'unity', 
-  'custom',
-  'manifest-icons', 
-  'manifest-file'
-], function () {
-  console.log("None service worker tasks finished")
-  gulp.start('service-workers');
-});
+gulp.task('build', gulp.series(
+  gulp.parallel(
+    'index', 
+    'pug', 
+    'javascript',
+    'css', 
+    'icons', 
+    'fonts', 
+    'images', 
+    'unity', 
+    'custom',
+    'manifest-icons', 
+    'manifest-file'
+  ),
+  'service-workers'
+  )
+);
 
