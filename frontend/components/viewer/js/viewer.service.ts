@@ -85,7 +85,7 @@ export class ViewerService {
 
 			case this.EventService.EVENT.MODEL_SETTINGS_READY:
 				if (event.value.account === account && event.value.model === model) {
-					this.viewer.updateSettings(event.value.settings);
+					this.viewer.updateSettings(event.value);
 					// mapTile && mapTile.updateSettings(event.value.settings);
 				}
 				break;

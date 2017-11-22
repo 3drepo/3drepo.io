@@ -419,28 +419,9 @@ export class Viewer {
 
 	public applySettings() {
 		if (this.settings) {
-
-			if (this.settings.hasOwnProperty("speed")) {
-				this.setSpeed(this.settings.speed);
+			if (this.settings.properties && this.settings.properties.unit) {
+				this.setUnits(this.settings.properties.unit);
 			}
-
-			if (this.settings.hasOwnProperty("unit")) {
-				this.setUnits(this.settings.unit);
-			}
-
-			if (this.settings.hasOwnProperty("avatarHeight")) {
-				this.changeAvatarHeight(this.settings.avatarHeight);
-			}
-
-			if (this.settings.hasOwnProperty("defaultNavMode")) {
-				this.defaultNavMode = this.settings.defaultNavMode;
-			}
-
-			if (this.settings.hasOwnProperty("pinSize")) {
-				this.pinSize = this.settings.pinSize;
-				this.pinSizeFromSettings = true; // Stop the auto-calculation
-			}
-
 		}
 	}
 
