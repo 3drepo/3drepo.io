@@ -306,7 +306,7 @@ export class UnityUtil {
 	public static getObjectsStatus(account, model, promise) {
 		let nameSpace = "";
 		if (account && model) {
-			nameSpace = account + "."  + model;
+			nameSpace = account + "." + model;
 		}
 		if (UnityUtil.objectStatusPromise) {
 			UnityUtil.objectStatusPromise.then(() => {

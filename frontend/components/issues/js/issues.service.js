@@ -592,6 +592,13 @@
 						}	
 
 						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+					});
+
+					for (var key in ids) {
+
+						var vals = key.split("@");
+						var account = vals[0];
+						var model = vals[1];
 
 						var treeData = {
 							source: "tree",
@@ -602,7 +609,7 @@
 							multi: true					
 						};
 						ViewerService.highlightObjects(treeData);
-					});
+					}
 
 					var objectsPromise = $q.defer();
 					var objectsAccount;
@@ -642,6 +649,16 @@
 								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
 								ViewerService.switchObjectVisibility(account, model, objectIdsToHide[key], false);
+
+								var node = {
+									_id: treeMap.sharedIdToUid[obj.shared_id],
+									name: "unknown",
+									account: account,
+									model: model
+								};
+				
+								// Trigger EventService.EVENT.STATE_CHANGED?
+								EventService.send(EventService.EVENT.STATE_CHANGED, node);
 							});
 						})
 						.catch(function(error) {
@@ -649,6 +666,7 @@
 						});
 
 				});
+			
 		}
 
 		// TODO: Internationalise and make globally accessible
