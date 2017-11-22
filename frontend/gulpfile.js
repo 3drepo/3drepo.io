@@ -90,8 +90,10 @@ gulp.task('css', function(done) {
 });
 
 gulp.task('clean', function(done){
-  return del('./_built')
-    .on("end", done); 
+  return del('./_built').then(function(){
+    done();
+  })
+   
 })
 
 gulp.task('icons', function (done) {
