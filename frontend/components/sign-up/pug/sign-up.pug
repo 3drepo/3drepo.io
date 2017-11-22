@@ -86,5 +86,7 @@
 							md-progress-circular(ng-if="vm.registering" md-mode="indeterminate", md-diameter="20")
 
 					div.bottom-links
-						a.registerLinks(target="_blank", rel="noopener", href="http://3drepo.org/pricing/") Pricing
-						a.registerLinks(href="" ng-click="vm.goToLoginPage()") Log in
+						md-button
+							a.registerLinks(target="_blank", rel="noopener", href="http://3drepo.org/pricing/") Pricing
+						md-button
+							a.registerLinks(href="" ng-click="vm.goToLoginPage()") Log in
