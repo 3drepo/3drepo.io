@@ -143,6 +143,11 @@ class TreeController implements ng.IController {
 				this.expandFirstNode();
 				this.setupInfiniteScroll();
 				this.setContentHeight(this.nodesToShow);
+			} else if (event.type === this.EventService.EVENT.STATE_CHANGED) {
+				// TODO
+				//event.value.path = vm.getPath(event.value._id);
+				//event.value.path = "__" + event.value._id;
+				//vm.toggleTreeNode(event.value);
 			}
 		});
 
