@@ -277,11 +277,11 @@ gulp.task('javascript-build-dev', function(){
 });
   
 gulp.task('javascript', ["tsc-amd-dependencies", "tsc-amd-components"], function(){
-  gulp.start("javascript-build");
+  return gulp.start("javascript-build");
 });
 
 gulp.task('javascript-dev', ["tsc-amd-dependencies", "tsc-amd-components"], function(){
-  gulp.start("javascript-build-dev");
+  return gulp.start("javascript-build-dev");
 });
 
 
