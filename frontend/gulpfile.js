@@ -168,6 +168,7 @@ gulp.task("typescript-components", function(){
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['components/**/*.ts'])
   .pipe(ts(tsConfig))
+  .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
   .pipe(gulp.dest('./_built/amd/components/'))
 
 })
@@ -177,6 +178,7 @@ gulp.task("typescript-globals", function() {
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['globals/*.ts'])
     .pipe(ts(tsConfig))
+    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('./_built/amd/globals/'))
 
 });
