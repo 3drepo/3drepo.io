@@ -204,27 +204,27 @@ class PanelCardController implements ng.IController {
 
 	public getOptionElement(optionType, i) {
 
-		let optionElement = "<panel-card-option-" + optionType;
-		optionElement += " id='panal_card_option_" + optionType + "'";
+		let optionElement = `<panel-card-option-${optionType}
+							id='panel-card-option-${optionType}"`;
 
 		const isMenuOrFilter = optionType === "menu" || optionType === "filter";
 
 		if (isMenuOrFilter) {
-			optionElement += " ng-if='!vm.hideMenuButton'";
+			optionElement += ` ng-if='!vm.hideMenuButton' `;
 		} else {
-			optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+			optionElement += ` ng-if='vm.contentData.options[${i}].visible'`;
 		}
 
 		this.contentData.options[i].color = "";
 
-		optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
-		optionElement += this.getOptionSpecificData(optionType);
-		optionElement += "><panel-card-option-" + optionType + ">";
+		const options = this.getOptionSpecificAttrs(optionType);
+		optionElement += ` style='color:{{vm.contentData.options[${i}].color}}'
+						   ${options} ><panel-card-option-${optionType}>`;
 
 		return optionElement;
 	}
 
-	public getOptionSpecificData(optionType) {
+	public getOptionSpecificAttrs(optionType) {
 
 		switch (optionType) {
 		case "filter":
