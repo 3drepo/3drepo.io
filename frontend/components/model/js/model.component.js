@@ -110,6 +110,7 @@
 
 			if (!ViewerService.currentModel.model) {
 				console.debug("Initiating Viewer");
+
 				ViewerService.initViewer()
 					.then(function(){
 						ViewerService.loadViewerModel(
@@ -119,6 +120,7 @@
 							vm.revision
 						);	
 					});
+				
 			} else {
 				// Load the model
 				ViewerService.loadViewerModel(

@@ -43,13 +43,11 @@
 		function activateMeasure () {
 			service.state.active = true;
 			ViewerService.activateMeasure();
-			UnityUtil.enableMeasuringTool();
 		}
 
 		function deactivateMeasure () {
 			service.state.active = false;
 			ViewerService.disableMeasure();
-			UnityUtil.disableMeasuringTool();
 		}
 
 		function setDisabled(disabled) {

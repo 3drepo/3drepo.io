@@ -1,5 +1,9 @@
 node_modules
 
+!frontend/_built/empty
+frontend/_built/*
+
+
 *.bak
 *.swp
 /*.log
