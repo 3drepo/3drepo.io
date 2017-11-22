@@ -42,7 +42,7 @@ describe("Sign up page ", () => {
 
       it("with a Pricing link", () => {
         expect(checkbox.all(by.css(".pricing")).count()).to.eventually.equal(1);
-        expect(checkbox.all(by.linkText("Pricing")).first().isDisplayed()).to.eventually.equal(true);
+        expect(checkbox.all(by.css(".pricing")).first().isDisplayed()).to.eventually.equal(true);
       });
 
       it("trying to login without any field filled in fails", () => {
