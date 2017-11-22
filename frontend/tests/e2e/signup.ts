@@ -36,12 +36,12 @@ describe("Sign up page ", () => {
       });
 
       it("with a Log in link", () => {
-        expect(checkbox.all(by.linkText("Log in")).count()).to.eventually.equal(1);
-        expect(checkbox.all(by.linkText("Log in")).first().isDisplayed()).to.eventually.equal(true);
+        expect(checkbox.all(by.css(".logIn")).count()).to.eventually.equal(1);
+        expect(checkbox.all(by.css(".logIn")).first().isDisplayed()).to.eventually.equal(true);
       });
 
       it("with a Pricing link", () => {
-        expect(checkbox.all(by.linkText("Pricing")).count()).to.eventually.equal(1);
+        expect(checkbox.all(by.css(".pricing")).count()).to.eventually.equal(1);
         expect(checkbox.all(by.linkText("Pricing")).first().isDisplayed()).to.eventually.equal(true);
       });
 

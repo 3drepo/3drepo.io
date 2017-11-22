@@ -58,11 +58,13 @@
 					md-divider
 
 					div.bottomLinks(layout="row", layout-align="center center", flex="none")
-						md-button
-							a.loginLinks(href="/signUp") Sign up 
+						a.loginLinks(href="/signUp") 
+							md-button Sign up 
+
 						span.loginSpacing | 
-						md-button
-							a.loginLinks(href="http://3drepo.org/pricing/") Pricing
+						
+						a.loginLinks(href="http://3drepo.org/pricing/") 
+							md-button Pricing
 					h2.md-subhead#loginVersion Version: 
 						a.loginVersion(href="https://github.com/3drepo/3drepo.io/releases/latest") {{vm.version}}
 						md-tooltip(md-direction="bottom") Release Notes
