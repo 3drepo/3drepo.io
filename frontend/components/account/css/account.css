@@ -453,6 +453,11 @@ account-menu #accountMenuContent md-menu-item > .md-button {
   max-width: 300px;
 }
 
+#federationDialog .federationDialogError {
+  text-align: center;
+  color: #F44336;
+}
+
 /** Delete Dialog *********************************************************************************************/
 .deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
