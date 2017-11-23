@@ -775,19 +775,13 @@ class TreeController implements ng.IController {
 		this.traverseNodeAndPushId(node, map);
 
 		const objectToHighlight =  {
-			source: "tree",
 			account: node.account,
-			model: node.model || node.project, // TODO: Remove project from backend
 			id: node._id,
+			model: node.model || node.project, // TODO: Remove project from backend
 			name: node.name,
 			noHighlight : true,
+			source: "tree",
 		};
-
-		// Select the parent node in the group for cards and viewer
-		this.EventService.send(
-			this.EventService.EVENT.VIEWER.OBJECT_SELECTED,
-			objectToHighlight,
-		);
 
 		for (const key in map) {
 			if (key) {
@@ -798,11 +792,11 @@ class TreeController implements ng.IController {
 				// Separately highlight the children
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
-					source: "tree",
 					account,
-					model,
 					ids: map[key],
+					model,
 					multi: true,
+					source: "tree",
 				});
 			}
 		}

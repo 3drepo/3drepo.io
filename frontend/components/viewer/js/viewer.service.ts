@@ -1,5 +1,5 @@
-import { UnityUtil } from "../../../_built/amd/globals/unity-util";
 import { IQService } from "angular";
+import { UnityUtil } from "../../../_built/amd/globals/unity-util";
 
 /**
  *  Copyright (C) 2017 3D Repo Ltd
