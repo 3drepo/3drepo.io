@@ -85,10 +85,10 @@ export class UnityUtil {
 
 	static onError(err, url, line) {
 		var conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " + 
-					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " + 
-					"reduce your memory usage and try again. " + 
-					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " + 
-					"<br><br> <code>Error " + err + " occured at line " + line + 
+					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " +
+					"reduce your memory usage and try again. " +
+					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " +
+					"<br><br> <code>Error " + err + " occured at line " + line +
 					"</code> <br><br> Click ok to refresh this page. <md-container>";
 
 		var reload = false;
@@ -96,35 +96,34 @@ export class UnityUtil {
 			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
 			reload = true;
 		}
-		
+
 		UnityUtil.userAlert(conf, reload);
 
 		return true;
 	};
 
-	static onLoaded() {
+	public static onLoaded() {
 		if(!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = {resolve: resolve, reject: reject};
 			});
 		}
 		return UnityUtil.loadedPromise;
-		
-	};
 
-	static onLoading() {
+	}
+
+	public static onLoading() {
 		if(!UnityUtil.loadingPromise) {
 			UnityUtil.loadingPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadingResolve = {resolve, reject: reject};
+				UnityUtil.loadingResolve = {resolve, reject};
 			});
 		}
 		return UnityUtil.loadingPromise;
-		
-	};
 
+	}
 
 	public static onReady() {
-	
+
 		if(!UnityUtil.readyPromise) {
 			UnityUtil.readyPromise	= new Promise((resolve, reject) => {
 				UnityUtil.readyResolve = {resolve, reject};
@@ -133,13 +132,13 @@ export class UnityUtil {
 
 		return UnityUtil.readyPromise;
 
-	};
+	}
 
 	public static userAlert(message, reload) {
 
-		let prefix = "" + "Unity Error: ";
+		const prefix = "" + "Unity Error: ";
 
-		var fullMessage = prefix + message;
+		const fullMessage = prefix + message;
 
 		if (!UnityUtil.unityHasErrored) {
 
@@ -148,11 +147,11 @@ export class UnityUtil {
 			UnityUtil.unityHasErrored = true;
 			UnityUtil.errorCallback({
 				message : fullMessage,
-				reload : reload
+				reload
 			});
 		}
 
-	};
+	}
 
 	public static toUnity(methodName, requireStatus, params) {
 
@@ -208,7 +207,7 @@ export class UnityUtil {
 
 	public static loaded(bboxStr) {
 		const res = {
-			bbox: JSON.parse(bboxStr)
+			bbox: JSON.parse(bboxStr),
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
@@ -232,14 +231,14 @@ export class UnityUtil {
 	}
 
 	public static pickPointAlert(pointInfo) {
-		let point = JSON.parse(pointInfo);
-		if(UnityUtil.viewer.pickPoint) {
-			UnityUtil.viewer.pickPoint(point);
+		const point = JSON.parse(pointInfo);
+		if (UnityUtil.viewer.pickPointEvent) {
+			UnityUtil.viewer.pickPointEvent(point);
 		}
 	}
 
 	public static screenshotReady(screenshot) {
-		let ssJSON = JSON.parse(screenshot);
+		const ssJSON = JSON.parse(screenshot);
 
 		UnityUtil.screenshotPromises.forEach((promise) => {
 			promise.resolve(ssJSON.ssBytes);
@@ -249,7 +248,7 @@ export class UnityUtil {
 	}
 
 	public static viewpointReturned(vpInfo) {
-		if(UnityUtil.vpPromise != null) {
+		if (UnityUtil.vpPromise != null) {
 			const viewpoint = JSON.parse(vpInfo);
 			UnityUtil.vpPromise.resolve(viewpoint);
 			UnityUtil.vpPromise = null;
@@ -261,9 +260,9 @@ export class UnityUtil {
 	 */
 
 	public static centreToPoint(model, id) {
-		let params = {
+		const params = {
 			model,
-			meshID: id
+			meshID: id,
 		};
 
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
@@ -272,7 +271,7 @@ export class UnityUtil {
 	public static changePinColour(id, colour) {
 		const params =  {
 			color : colour,
-			pinName : id
+			pinName : id,
 		};
 		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -285,7 +284,7 @@ export class UnityUtil {
 		UnityUtil.toUnity("DisableClip", undefined, undefined);
 	}
 
-	public static disableMeasuringTool(){
+	public static disableMeasuringTool() {
 		UnityUtil.toUnity("StopMeasuringTool", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
@@ -294,7 +293,7 @@ export class UnityUtil {
 			id,
 			position,
 			normal,
-			color : colour
+			color : colour,
 		};
 		UnityUtil.toUnity("DropPin", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -331,7 +330,7 @@ export class UnityUtil {
 			database : account,
 			model,
 			ids : idArr,
-			toggle : toggleMode
+			toggle : toggleMode,
 		};
 
 		if (color) {

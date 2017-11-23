@@ -818,7 +818,6 @@ class TreeController implements ng.IController {
 		const selectedNode = this.nodes[item.index];
 
 		if (selectedNode) {
-			console.log(selectedNode);
 			// TODO: This throws a unity error when filtering
 			this.selectNode(selectedNode);
 		}

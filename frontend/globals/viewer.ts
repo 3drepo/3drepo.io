@@ -321,19 +321,6 @@ export class Viewer {
 		UnityUtil.requestScreenShot(promise);
 	}
 
-	public pickPoint(x, y, fireEvent) {
-		fireEvent = (!fireEvent) ? false : fireEvent;
-
-		if (fireEvent) {
-			// Simulate a mouse down pick point
-			this.mouseDownPickPoint();
-		}
-	}
-
-	public mouseDownPickPoint() {
-		UnityUtil.getPointInfo();
-	}
-
 	public pickPointEvent(pointInfo) {
 
 		// User clicked a mesh
@@ -342,6 +329,7 @@ export class Viewer {
 			normal : pointInfo.normal,
 			position: pointInfo.position,
 			screenPos : pointInfo.mousePos,
+			selectColour : Pin.pinColours.yellow,
 		});
 
 	}
@@ -352,7 +340,6 @@ export class Viewer {
 			if (pointInfo.id) {
 				if (pointInfo.pin) {
 					// User clicked a pin
-					console.log(Viewer.EVENT.CLICK_PIN, this.callback);
 					this.callback(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id,
 					});

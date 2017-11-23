@@ -205,7 +205,7 @@ class PanelCardController implements ng.IController {
 	public getOptionElement(optionType, i) {
 
 		let optionElement = `<panel-card-option-${optionType}
-							id='panel-card-option-${optionType}"`;
+							id='panel-card-option-${optionType}'`;
 
 		const isMenuOrFilter = optionType === "menu" || optionType === "filter";
 

@@ -137,10 +137,59 @@ export class ViewerService {
 				});
 				break;
 
+			case this.EventService.EVENT.VIEWER.PICK_POINT:
+
+				if (
+					event.value.hasOwnProperty("id") &&
+					this.pin.pinDropMode
+				) {
+
+					this.removeUnsavedPin();
+
+					const trans = event.value.trans;
+					let position = event.value.position;
+					const normal = event.value.normal;
+
+					if (trans) {
+						position = trans.inverse().multMatrixPnt(position);
+					}
+
+					const data = {
+						account,
+						colours: event.value.selectColour,
+						id: this.newPinId,
+						model,
+						pickedNorm: normal,
+						pickedPos: position,
+						selectedObjectId: event.value.id,
+					};
+
+					this.addPin(data);
+					this.setPin({data});
+				}
+				break;
+
+			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
+				if (this.pin.pinDropMode) {
+					this.removeUnsavedPin();
+				}
+				break;
+
+			case this.EventService.EVENT.VIEWER.CLICK_PIN:
+				if (this.newPinId === "newPinId") {
+					this.removeUnsavedPin();
+				}
+				break;
+
 			}
 
 		});
 
+	}
+
+	public removeUnsavedPin() {
+		this.removePin({id: this.newPinId });
+		this.setPin({data: null});
 	}
 
 	public changePinColours(params) {
@@ -197,7 +246,7 @@ export class ViewerService {
 		);
 	}
 
-	public highlightObjects(params) {
+	public highlightObjects(params)  {
 
 		this.viewer.highlightObjects(
 			params.account,
@@ -209,15 +258,15 @@ export class ViewerService {
 		);
 	}
 
-	public setMultiSelectMode(value) {
+	public setMultiSelectMode(value)  {
 		this.viewer.setMultiSelectMode(value);
 	}
 
-	public switchObjectVisibility(account, model, ids, visibility) {
+	public switchObjectVisibility(account, model, ids, visibility)  {
 		this.viewer.switchObjectVisibility(account, model, ids, visibility);
 	}
 
-	public handleUnityError(message: string) {
+	public handleUnityError(message: string)  {
 
 		this.DialogService.html("Unity Error", message, true)
 			.then(() => {
@@ -228,7 +277,7 @@ export class ViewerService {
 
 	}
 
-	public getModelInfo(account: string, model: string) {
+	public getModelInfo(account: string, model: string)  {
 		const url = account + "/" + model + ".json";
 		return this.APIService.get(url);
 	}

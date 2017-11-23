@@ -151,6 +151,7 @@
 			$scope.$on("$destroy", function(){
 				window.removeEventListener("beforeunload", refreshHandler);
 				window.removeEventListener("popstate", popStateHandler);
+				ViewerService.removeUnsavedPin();
 			});
 
 		};
