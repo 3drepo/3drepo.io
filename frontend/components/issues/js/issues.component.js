@@ -242,10 +242,6 @@
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
 
-			var data,
-				position = [],
-				normal = [];
-
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				
 				for (var i = 0; i < IssuesService.state.allIssues.length; i += 1) {
@@ -256,52 +252,10 @@
 					}
 				}
 
-			} else if (event.type === EventService.EVENT.VIEWER.PICK_POINT &&
-				event.value.hasOwnProperty("id") &&
-				ViewerService.pin.pinDropMode
-			) {
-
-				vm.removeUnsavedPin();
-
-				var trans = event.value.trans;
-				position = event.value.position;
-				normal = event.value.normal;
-
-				if(trans) {
-					position = trans.inverse().multMatrixPnt(position);
-				}
-
-				data = {
-					id: ViewerService.newPinId,
-					account: vm.account,
-					model: vm.model,
-					selectedObjectId: event.value.id,
-					pickedPos: position,
-					pickedNorm: normal,
-					colours: Pin.pinColours.yellow
-
-				};
-
-				ViewerService.addPin(data);
-				ViewerService.setPin({data: data});
-
-			} else if (
-				event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE && 
-				ViewerService.pin.pinDropMode
-			) {
-
-				vm.removeUnsavedPin();
-
-			} else if (
-				event.type === EventService.EVENT.VIEWER.CLICK_PIN && 
-				ViewerService.newPinId === "newPinId"
-			) {
-				vm.removeUnsavedPin();
 			} 
 
 		});
 
-		
 
 		/**
 		 * Close the add alert
