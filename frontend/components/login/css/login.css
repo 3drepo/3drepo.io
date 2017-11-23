@@ -2,6 +2,10 @@ login .homeUserContent {
   z-index: 2;
 }
 
+login .loginContainer {
+  overflow: hidden;
+}
+
 @media (max-width: 960px) {
   login .homeUserContent {
     margin-top: 8vh;
@@ -11,6 +15,10 @@ login .homeUserContent {
 login .loginProgress {
   width: 25px;
   height: 25px;
+}
+
+login .username {
+  margin-bottom: 0px;
 }
 
 login md-progress-circular {
@@ -43,6 +51,7 @@ login .homeUserContent md-content {
 
 login .loginButton {
   width: 100% !important;
+  margin-top: 15px;
 }
 
 login .homeUserContent md-toolbar {
@@ -54,27 +63,52 @@ login .welcome {
   margin: 0px;
 }
 
-login .loginBox {
+login .inputContainer {
+  margin-top: 5px;
+}
+
+/* login .loginBox {
   margin-bottom: 15px;
+} */
+
+login .password {
+  margin-bottom: 0;
+}
+
+login .forgotPassword {
+  margin: 10px;
 }
 
 login #loginVersion{
-  color: rgba(0, 0, 0 , 0.3);
+  color: rgba(0, 0, 0, 0.3);
   font-size: 14px;
   margin: 10px 0 0;
+  text-align: center;
+}
+
+login .loginVersion {
+  color: rgba(0,0,0,.3);
 }
 
 login .loginError {
   color: #e44539 !important;
-  margin: 5px 0 5px;
   font-weight: normal;
-  margin-bottom: 16px;
+  text-align: center;
+  margin: 0px;
 }
 
 login .loginLinks {
   font-size: 14px;
   margin: 5px 0;
+  color: #2a5cb6;
+  text-decoration: none;
 }
+
+login md-button .loginLinks {
+  text-decoration: none;
+}
+
+login
 
 login #loginHiddenInputs {
   position: absolute;
@@ -82,8 +116,20 @@ login #loginHiddenInputs {
   opacity: 0;
 }
 
-login .loginLinks {
-  color: #2945b5;
+login .bottomLinks {
+  padding-top: 10px;
+  text-align: center;
+  margin: auto;
+}
+
+login #loginVersin {
+  text-align: center;
+}
+
+login .loginSpacing {
+  padding-left: 10px;
+  padding-right: 10px;
+  color: gainsboro;
 }
 
 /*login md-progress-circular {

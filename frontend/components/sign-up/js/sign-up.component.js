@@ -295,6 +295,9 @@
 					console.error(response);
 					vm.registering = false;
 					vm.registerErrorMessage = response.data.message;
+					if (vm.useReCAPTCHA) {
+						grecaptcha.reset(); // reset reCaptcha
+					}get;
 				});
 		}
 
