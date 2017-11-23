@@ -308,20 +308,44 @@
 			vm.addButtonType = (vm.addButtonType === "add") ? "clear" : "add";	
 		};
 
-		// FEDERATIONS
+		vm.checkFederationSaveDisabled = function() {
+			var empty = vm.federationData.subModels === undefined ||
+						vm.federationData.subModels.length === 0;
 
+			if (empty) {
+				vm.federationErrorMessage = "Federation can't be empty";
+				vm.federationSaveDisabled = true;
+			} else if (vm.isDuplicateName()) {
+				vm.federationErrorMessage = "Federation name taken";
+				vm.federationSaveDisabled = true;
+			} else {
+				vm.federationErrorMessage = "";
+				vm.federationSaveDisabled = false;
+			}
+
+		};
+		
 		vm.isDuplicateName = function() {
+
+			// If we're editing then the name will always be the same
+			// which is fine
+			if (vm.federationData._isEdit) {
+				return false;
+			}
+
 			var teamspaceName = vm.federationData.teamspace;
 			var projectName = vm.federationData.project;
 			var fedName = vm.federationData.name;
 			var duplicate = AccountService.isDuplicateFederation(vm.accounts, teamspaceName, projectName, fedName);
 			if (duplicate) {
-				vm.errorMessage = "Federation already with this name!";
+				vm.federationErrorMessage = "Federation already with this name!";
 			} else {
-				vm.errorMessage = "";
+				vm.federationErrorMessage = "";
 			}
 			return duplicate;
 		};
+
+		// FEDERATIONS
 
 		/**
 		 * Save a federationt to a project
@@ -350,7 +374,7 @@
 					
 					if(response.status !== 200 && response.status !== 201){
 
-						vm.errorMessage = response.data.message;
+						vm.federationErrorMessage = response.data.message;
 
 						$mdDialog.show(
 							$mdDialog.alert()
@@ -363,7 +387,7 @@
 
 					} else {
 
-						vm.errorMessage = "";
+						vm.federationErrorMessage = "";
 						vm.showInfo = false;
 						vm.federationData.teamspace = teamspaceName;
 						vm.federationData.project = projectName;
@@ -454,6 +478,7 @@
 		 */
 		vm.removeFromFederation = function (modelId) {
 			AccountService.removeFromFederation(vm.federationData, modelId);
+			vm.checkFederationSaveDisabled();
 		};
 
 
@@ -474,6 +499,8 @@
 			});
 
 			models[modelIndex].federate = true;
+
+			vm.checkFederationSaveDisabled();
 
 		};
 
@@ -503,7 +530,7 @@
 				type: "",
 				subModels: []
 			};
-			vm.errorMessage = "";
+			vm.federationErrorMessage = "";
 			DialogService.showDialog(
 				"federation-dialog.html", 
 				$scope, 
@@ -535,6 +562,14 @@
 
 
 		// MODELS
+
+		$scope.$watch("vm.federationData.name", function(newValue) {
+
+			if (newValue) {
+				vm.checkFederationSaveDisabled();
+			}
+
+		}, true);
 
 		$scope.$watch("vm.newModelData", function(newValue) {
 
@@ -1096,7 +1131,7 @@
 
 						vm.projectData.errorMessage = "";
 						vm.resetViewableCache();
-						vm.errorMessage = "";
+						vm.federationErrorMessage = "";
 						delete vm.newProjectTeamspace;
 						delete vm.newProjectName;
 						vm.addButtons = false;
