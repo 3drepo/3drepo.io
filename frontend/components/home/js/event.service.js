@@ -19,11 +19,12 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("EventService", EventService);
+		.service("EventService", EventService);
 
 	EventService.$inject = ["$timeout"];
 
 	function EventService ($timeout) {
+
 		var EVENT = {
 			AUTO_META_DATA: "EVENT_AUTO_META_DATA",
 			FILTER: "EVENT_FILTER",
@@ -32,9 +33,9 @@
 			GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
 			ISSUE_AREA_PNG: "EVENT_ISSUE_AREA_PNG",
 			MEASURE_MODE: "EVENT_MEASURE_MODE",
+			MEASURE_MODE_BUTTON: "MEASURE_MODE_BUTTON",
 			MULTI_SELECT_MODE: "EVENT_MULTI_SELECT_MODE",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
-			PIN_DROP_MODE: "EVENT_PIN_DROP_MODE",
 			PIN_SELECTED: "EVENT_PIN_SELECTED",
 			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
 			PANEL_CARD_ADD_MODE: "EVENT_PANEL_CARD_ADD_MODE",
@@ -44,7 +45,6 @@
 			UPDATE_CLIPPING_PLANES: "EVENT_UPDATE_CLIPPING_PLANES",
 			SET_SUBMODEL_TRANS_INFO: "EVENT_SET_SUBMODEL_TRANS_INFO",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
-			SHOW_TEAMSPACES: "EVENT_SHOW_TEAMSPACES",
 			SHOW_QR_CODE_READER: "EVENT_SHOW_QR_CODE_READER",
 			TOGGLE_ELEMENTS: "EVENT_TOGGLE_ELEMENTS",
 			TOGGLE_HELP: "EVENT_TOGGLE_HELP",
@@ -61,6 +61,7 @@
 
 			// Specific to the javascript viewer
 			// populated by the viewer.js script
+			
 			VIEWER: Viewer.EVENT,
 
 			// Ready signals
@@ -91,6 +92,7 @@
 
 		var currentEvent = {};
 		var currentError = {};
+
 
 		var send = function (type, value) {
 			var stack = (new Error()).stack;

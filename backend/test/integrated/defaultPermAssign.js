@@ -20,7 +20,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 const log_iface = require("../../logger.js");
 const systemLogger = log_iface.systemLogger;
@@ -86,8 +86,11 @@ describe('Default permission assignment', function () {
 
 	it('user should be able to create model', function(done){
 
-		agent.post(`/${username}/model1`)
-		.send({unit: 'm'})
+		agent.post(`/${username}/model`)
+		.send({
+			modelName: "model1",
+			unit: 'm'
+		})
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);

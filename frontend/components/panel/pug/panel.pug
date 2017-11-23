@@ -1,15 +1,14 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
 		div(ng-repeat="contentItem in vm.contentItems")
-
 			panel-card(
+				id="{{contentItem.type + 'Panel'}}"
 				account="vm.account"
 				model="vm.model"
 				branch="vm.branch"
 				revision="vm.revision"
 				position="vm.position"
 				model-settings="vm.modelSettings"
-				tree-map="vm.treeMap"
 				content-data='contentItem'
 				ng-show='contentItem.show'
 				on-height-request="vm.heightRequest(contentItem, height)"
@@ -23,10 +22,14 @@ div(ng-show="vm.showPanel")
 		hide-xs
 		hide-sm
 		ng-class="{ active : vm.activate }"
-		ng-if="vm.position==='left'")
+		ng-if="vm.position === 'left'")
 
 		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems", layout="column", layout-align="start center")
-			md-button.md-fab.md-primary.md-mini(ng-click="vm.buttonClick(contentItem.type)", aria-label="{{contentItem.title}}")
+			md-button.md-fab.md-primary.md-mini(
+				id="{{contentItem.type + 'LeftButton'}}"
+				ng-click="vm.togglePanel(contentItem.type)"
+				aria-label="{{contentItem.title}}")
+
 				md-tooltip(ng-if="contentItem.show" md-direction="right") Close
 				md-tooltip(ng-if="!contentItem.show" md-direction="right") Show
 				md-icon.angular-material-icons {{contentItem.icon}}

@@ -16,25 +16,35 @@
  */
 
 var hostname   = "127.0.0.1";
-var http_port  = 80;
+var http_port  = 8080;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
+	port: 8080,
 	cookie: {
 		secret: "a",
-		parser_secret : "b"
+		parser_secret : "b",
+		maxAge: 1000 * 60 * 60
 	},
 	servers: [
 		{
 			service: "api",
 			subdirectory: "api",
+			port: http_port,
 			public_port: http_port,
 			public_protocol: "http"
 		},
 		{
 			service: "frontend",
-			template:   "frontend.pug"
+			public_port: http_port,
+			http_port: http_port
+		},
+		{
+			service: "frontend",
+			subdomain: "test",
+			public_port: http_port,
+			http_port: http_port
 		},
 		{
 			service: "chat",
@@ -43,8 +53,18 @@ module.exports = {
 			subdirectory: 'chat'
 		}
 	],
+	customLogins: {
+		test: {	
+			loginMessage: "Test",
+			css: "custom/test/css/test.css",
+			topLogo: "custom/test/images/test_logo.png",
+			topLogoLink: "example.com",
+			backgroundImage: "custom/test/images/test_background.png"
+		}
+	},
 	js_debug_level: 'debug',
 	logfile: {
+		silent: true,
 		filename: './3drepo.log',
 		console_level: 'info',
 		file_level: 'debug'
@@ -55,36 +75,21 @@ module.exports = {
 		username: 'admintesting',
 		password: 'admintesting'
 	},
-	// ssl: {
-	// 	key: "my_key.pem",
-	// 	cert:"my_server.crt",
-	// 	ca: "my_server.ca"
-	// },
-	os: {
-		keys: {
-			'property': '<your key>',
-			'place': '<your key>',
-			'map': '<your key>'
-		},
-		endpoints:{
-			bbox: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox',
-			radius: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/radius',
-			dimensions: params => { return `https://api2.ordnancesurvey.co.uk/insights/beta/properties/${params.uprn}/dimensions` },
-			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
-		}
-	},
-	// cn_queue: {
-	// 	host: "amqp://localhost:5672",
-	// 	worker_queue: "jobq",
-	// 	callback_queue: "callbackq",
-	// 	upload_dir: "uploads",
-	// 	shared_storage: "D:/sharedSpace/"
-	// },
 	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
+		unitySettings: {
+        TOTAL_MEMORY: 2130706432 / 10,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 	auth: {
 		captcha: false,
 		register: true
@@ -118,5 +123,21 @@ module.exports = {
 			skipChecking: true
 		}
 	},
-	bcf_dir: '/tmp'
+	bcf_dir: '/tmp',
+	legal: [
+		{title: "Terms & Conditions", type: "agreeTo", page: "terms", path: "pug/legal/terms.pug"},
+		{title: "Privacy", type: "haveRead", page: "privacy", path: "pug/legal/privacy.pug"},
+		{title: "Cookies", type: "haveRead", page: "cookies", path: "pug/legal/cookies.pug"}
+	],
+	userNotice: false,
+	unitySettings: {
+        TOTAL_MEMORY: 2130706432 / 10,
+        compatibilitycheck: null,
+        backgroundColor: "#222C36",
+        splashStyle: "Light",
+        dataUrl: "unity/Release/unity.data",
+        codeUrl: "unity/Release/unity.js",
+        asmUrl: "unity/Release/unity.asm.js",
+        memUrl: "unity/Release/unity.mem"
+    },
 }

@@ -20,7 +20,7 @@
 let request = require('supertest');
 let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
@@ -60,8 +60,8 @@ describe('Uploading a model', function () {
 				},
 				function(done){
 					//create a model
-					agent.post(`/${username}/${model}`)
-					.send({ type, desc, unit })
+					agent.post(`/${username}/model`)
+					.send({ type, desc, unit, modelName: model })
 					.expect(200, function(err, res){
 						modelId = res.body.model;
 						done(err);

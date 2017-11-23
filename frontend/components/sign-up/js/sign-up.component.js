@@ -27,15 +27,10 @@
 			controllerAs: "vm"
 		});
 
-	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "UtilsService", "AuthService", "$window"];
+	SignUpCtrl.$inject = ["$scope", "$mdDialog", "$location", "ClientConfigService", "APIService", "AuthService", "$window"];
 
-	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, UtilsService, AuthService, $window) {
-		var vm = this,
-			enterKey = 13,
-			promise,
-			agreeToText = "",
-			haveReadText = "",
-			legalItem;
+	function SignUpCtrl($scope, $mdDialog, $location, ClientConfigService, APIService, AuthService, $window) {
+		var vm = this;
 
 		/*
 		 * Init
@@ -47,6 +42,10 @@
 					vm.goToLoginPage();
 				}
 			});
+			
+			vm.enterKey = 13,
+			vm.agreeToText = "",
+			vm.haveReadText = "";
 
 			vm.buttonLabel = "Sign Up!";
 			vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
@@ -55,7 +54,7 @@
 			vm.captchaKey = ClientConfigService.captcha_client_key;
 
 			vm.tcAgreed = false;
-			vm.useReCapthca = false;
+			vm.useReCAPTCHA = false;
 			vm.registering = false;
 			vm.showLegalText = false;
 
@@ -84,44 +83,65 @@
 			vm.countries.unshift(vm.countries.splice(gbIndex,1)[0]);
 
 			/*
-			* AuthService stuff
+			* Recapcha
 			*/
-			if (ClientConfigService.hasOwnProperty("auth")) {
-				if (ClientConfigService.auth.hasOwnProperty("captcha") && (ClientConfigService.auth.captcha)) {
-					vm.useReCapthca = true;
+
+			
+			var reCaptchaExists = ClientConfigService.auth.hasOwnProperty("captcha") && 
+									(ClientConfigService.auth.captcha);
+			
+			if (reCaptchaExists) {
+				if (ClientConfigService.captcha_client_key) {
 					vm.captchaKey = ClientConfigService.captcha_client_key;
+					vm.useReCAPTCHA = true;
+				} else {
+					console.debug("Captcha key is not set in config");
 				}
+				
+			} else {
+				console.debug("Captcha is not set in config");
 			}
+			
 
 			// Legal text
 			if (angular.isDefined(ClientConfigService.legal)) {
 				vm.showLegalText = true;
 				vm.legalText = "";
-				for (legalItem in ClientConfigService.legal) {
-					if (ClientConfigService.legal.hasOwnProperty(legalItem)) {
-						if (ClientConfigService.legal[legalItem].type === "agreeTo") {
-							if (agreeToText === "") {
-								agreeToText = "I agree to the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]);
-							} else {
-								agreeToText += " and the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]);
-							}
-						} else if (ClientConfigService.legal[legalItem].type === "haveRead") {
-							if (haveReadText === "") {
-								haveReadText = "I have read the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]) + " policy";
-							} else {
-								haveReadText += " and the " + getLegalTextFromLegalItem(ClientConfigService.legal[legalItem]) + " policy";
-							}
-						}
-					}
+				for (var legalItem in ClientConfigService.legal) {
+					vm.handleLegalItem(legalItem);
 				}
 
-				vm.legalText = agreeToText;
+				vm.legalText = vm.agreeToText;
 				if (vm.legalText !== "") {
 					vm.legalText += " and ";
 				}
-				vm.legalText += haveReadText;
+				vm.legalText += vm.haveReadText;
 				if (vm.legalText !== "") {
 					vm.legalText += ".";
+				}
+			}
+
+		};
+
+		vm.handleLegalItem = function(legalItem) {
+
+			if (ClientConfigService.legal.hasOwnProperty(legalItem)) {
+				
+				var legal = ClientConfigService.legal[legalItem];
+				var legalText = getLegalText(legal);
+
+				if (legal.type === "agreeTo") {
+					if (vm.agreeToText === "") {
+						vm.agreeToText = "I agree to the " + legalText;
+					} else {
+						vm.agreeToText += " and the " + legalText;
+					}
+				} else if (legal.type === "haveRead") {
+					if (vm.haveReadText === "") {
+						vm.haveReadText = "I have read the " + legalText + " policy";
+					} else {
+						vm.haveReadText += " and the " + legalText + " policy";
+					}
 				}
 			}
 
@@ -156,7 +176,7 @@
 		 */
 		vm.register = function(event) {
 			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
+				if (event.which === vm.enterKey) {
 					doRegister();
 				}
 			} else {
@@ -179,8 +199,8 @@
 			});
 		};
 
-		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
+		vm.showPage = function () {
+			$location.path("/registerRequest");
 		};
 
 		/**
@@ -201,68 +221,89 @@
 		 * Do the user registration
 		 */
 		function doRegister() {
-			var data,
-				doRegister = true,
-				allowedFormat = new RegExp(ClientConfigService.usernameRegExp); // English letters, numbers, underscore, not starting with number
+			var	allowRegister = true,
+				allowedFormat = new RegExp(ClientConfigService.usernameRegExp), // English letters, numbers, underscore, not starting with number
+				allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
-			if ((angular.isDefined(vm.newUser.username)) &&
-				(angular.isDefined(vm.newUser.email)) &&
-				(angular.isDefined(vm.newUser.password)) &&
-				(angular.isDefined(vm.newUser.firstName)) &&
-				(angular.isDefined(vm.newUser.lastName)) &&
-				(angular.isDefined(vm.newUser.company)) &&
-				(angular.isDefined(vm.newUser.jobTitle)) &&
-				(vm.newUser.jobTitle !== "Other" || angular.isDefined(vm.newUser.otherJobTitle)) &&
-				(angular.isDefined(vm.newUser.country)) 
+			if (
+				(!angular.isDefined(vm.newUser.username)) ||
+				(!angular.isDefined(vm.newUser.email)) ||
+				(!angular.isDefined(vm.newUser.password)) ||
+				(!angular.isDefined(vm.newUser.firstName)) ||
+				(!angular.isDefined(vm.newUser.lastName)) ||
+				(!angular.isDefined(vm.newUser.company)) ||
+				(!angular.isDefined(vm.newUser.jobTitle)) ||
+				(vm.newUser.jobTitle === "Other" && !angular.isDefined(vm.newUser.otherJobTitle)) ||
+				(!angular.isDefined(vm.newUser.country))
 
 			) {
-				if (allowedFormat.test(vm.newUser.username)) {
-					if (vm.showLegalText) {
-						doRegister = vm.newUser.tcAgreed;
-					}
-
-					if (doRegister) {
-
-						data = {
-							email: vm.newUser.email,
-							password: vm.newUser.password,
-							firstName: vm.newUser.firstName,
-							lastName: vm.newUser.lastName,
-							company: vm.newUser.company,
-							jobTitle: vm.newUser.jobTitle === "Other" ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
-							countryCode: vm.newUser.country,
-							phoneNo: vm.newUser.phoneNo
-						};
-
-						if (vm.useReCapthca) {
-							data.captcha = vm.reCaptchaResponse;
-						}
-						vm.registering = true;
-						promise = UtilsService.doPost(data, vm.newUser.username);
-						promise.then(function (response) {
-							if (response.status === 200) {
-								vm.showPage("registerRequest");
-							} else {
-								vm.registerErrorMessage = UtilsService.getErrorMessage(response.data);
-							}
-							vm.registering = false;
-							if (vm.useReCapthca) {
-								grecaptcha.reset(); // reset reCaptcha
-							}
-						});
-					} else {
-						vm.registerErrorMessage = "You must agree to the terms and conditions";
-					}
-				} else {
-					vm.registerErrorMessage = "Username not allowed";
-				}
-			} else {
-				vm.registerErrorMessage = "Please fill all fields";
+				vm.registerErrorMessage = "Please fill all required fields";
+				return;
 			}
+
+			if (!allowedFormat.test(vm.newUser.username)) {
+				vm.registerErrorMessage = "Username not allowed: English letters, numbers, underscore allowed only, and must not start 	 with number";
+				return;
+			}
+
+			if ( vm.newUser.phoneNo && !allowedPhone.test(vm.newUser.phoneNo) ) {
+				vm.registerErrorMessage = "Phone number can be blank, or made of numbers and +- characters only";
+				return;
+			}
+		
+			if (vm.showLegalText) {
+				allowRegister = vm.newUser.tcAgreed;
+			}
+
+			if (allowRegister) {
+				sendRegistration();
+			} else {
+				vm.registerErrorMessage = "You must agree to the terms and conditions";
+			}
+	
 		}
 
-		function getLegalTextFromLegalItem (legalItem) {
-			return "<a target='_blank' href='/" + legalItem.page + "'>" + legalItem.title + "</a>";
+		function sendRegistration() {
+			var data = {
+				email: vm.newUser.email,
+				password: vm.newUser.password,
+				firstName: vm.newUser.firstName,
+				lastName: vm.newUser.lastName,
+				company: vm.newUser.company,
+				jobTitle: vm.newUser.jobTitle === "Other" ? vm.newUser.otherJobTitle : vm.newUser.jobTitle,
+				countryCode: vm.newUser.country,
+				phoneNo: vm.newUser.phoneNo
+			};
+
+			if (vm.useReCAPTCHA) {
+				data.captcha = vm.reCaptchaResponse;
+			}
+			vm.registering = true;
+			APIService.post(vm.newUser.username, data)
+				.then(function (response) {
+					if (response.status === 200) {
+						vm.showPage("registerRequest");
+					} else {
+						vm.registerErrorMessage = APIService.getErrorMessage(response.data);
+					}
+					vm.registering = false;
+					if (vm.useReCAPTCHA) {
+						grecaptcha.reset(); // reset reCaptcha
+					}
+				})
+				.catch(function(response){
+					console.error(response);
+					vm.registering = false;
+					vm.registerErrorMessage = response.data.message;
+					if (vm.useReCAPTCHA) {
+						grecaptcha.reset(); // reset reCaptcha
+					}get;
+				});
+		}
+
+		function getLegalText(legalItem) {
+			return "<a target='_blank' href='/" + legalItem.page + "'>" 
+			+ legalItem.title + "</a>";
 		}
 	}
 }());

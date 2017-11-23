@@ -20,7 +20,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 const log_iface = require("../../logger.js");
 const systemLogger = log_iface.systemLogger;
@@ -77,7 +77,6 @@ describe('Projects', function () {
 			callback => {
 				agent.get(`/${username}.json`)
 				.expect(200, function(err, res){
-
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
 

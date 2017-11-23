@@ -9,6 +9,11 @@ div(layout="column", class="md-whiteframe-1dp")
 				h2
 					span {{vm.contentData.title}}
 			#filterContainer(flex)
+				panel-card-filter(
+					ng-if="vm.hasFilter()"
+					show-filter='vm.showFilter' 
+					filter-text='vm.filterText')
+			div(flex, ng-if="!vm.showFilter")
 
 			// Options
 			#options(layout="row")
@@ -18,6 +23,80 @@ div(layout="column", class="md-whiteframe-1dp")
 	#panelCardContainer
 		// Content
 		md-content(id="content", style="height:{{vm.contentData.height}}px")
+			issues(
+				ng-if="vm.contentData.type === 'issues'"
+				show-add='vm.showAdd'
+				show='vm.contentData.show'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				show-edit='vm.showEdit'
+				account='vm.account'
+				model='vm.model'
+				branch='vm.branch'
+				model-settings='vm.modelSettings'
+				revision='vm.revision'
+				keys-down='vm.keysDown'
+				selected-objects='vm.selectedObjects' 
+				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
+				
+				filter-text='vm.filterText'
+				selected-menu-option='vm.selectedMenuOption')
+			
+			docs(
+				ng-if="vm.contentData.type === 'docs'"
+				show-add='vm.showAdd'
+				show='vm.contentData.show'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				show-edit='vm.showEdit'
+				account='vm.account'
+				model='vm.model'
+				branch='vm.branch'
+				model-settings='vm.modelSettings'
+				revision='vm.revision'
+				keys-down='vm.keysDown'
+				selected-objects='vm.selectedObjects' 
+				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})')
+
+			clip(
+				ng-if="vm.contentData.type === 'clip'"
+				show-add='vm.showAdd'
+				show='vm.contentData.show'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				show-edit='vm.showEdit'
+				account='vm.account'
+				model='vm.model'
+				branch='vm.branch'
+				model-settings='vm.modelSettings'
+				revision='vm.revision'
+				keys-down='vm.keysDown'
+				selected-objects='vm.selectedObjects' 
+				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
+				
+				visible='vm.visible')
+
+			tree(
+				ng-if="vm.contentData.type === 'tree'"
+				show-add='vm.showAdd'
+				show='vm.contentData.show'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				show-edit='vm.showEdit'
+				account='vm.account'
+				model='vm.model'
+				branch='vm.branch'
+				model-settings='vm.modelSettings'
+				revision='vm.revision'
+				keys-down='vm.keysDown'
+				selected-objects='vm.selectedObjects' 
+				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
+
+				filter-text='vm.filterText')
 
 
 

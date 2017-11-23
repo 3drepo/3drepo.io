@@ -25,9 +25,9 @@
 
 	const amqp = require("amqplib");
 	const fs = require("fs.extra");
-	const uuid = require("node-uuid");
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
+	const Mailer = require('../mailer/mailer');
 
 	function ImportQueue() {}
 
@@ -78,7 +78,7 @@
 				this.callbackQName = options.callback_queue;
 				this.workerQName = options.worker_queue;
 				this.modelQName = options.model_queue;
-				this.deferedObjs = {};
+				this.deferedObjs = {}; //cclw05 - should be deferred?
 				this.eventExchange = options.event_exchange;
 
 				return this._consumeCallbackQueue();
@@ -99,8 +99,8 @@
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	ImportQueue.prototype.importFile = function (filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
-		let corID = uuid.v1();
+	ImportQueue.prototype.importFile = function (correlationId, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
+		let corID = correlationId;
 
 		let newPath;
 		let newFileDir;
@@ -140,14 +140,6 @@
 			.then(() => {
 				let msg = `import -f ${jsonFilename}`;
 				return this._dispatchWork(corID, msg, true);
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					this.deferedObjs[corID] = {
-						resolve: () => resolve({ corID, newPath, newFileDir, jsonFilename }),
-						reject: errCode => reject({ corID, errCode, newPath, newFileDir, jsonFilename })
-					};
-				});
 			});
 	};
 
@@ -156,10 +148,11 @@
 	 * @param {account} account - username
 	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
 	 *******************************************************************************/
-	ImportQueue.prototype.createFederatedModel = function (account, defObj) {
-		let corID = uuid.v1();
+	ImportQueue.prototype.createFederatedModel = function (correlationId, account, defObj) {
+		let corID = correlationId;
 		let newFileDir = this.sharedSpacePath + "/" + corID;
 		let filename = `${newFileDir}/obj.json`;
+		//let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
 
 		return new Promise((resolve, reject) => {
 			fs.mkdir(this.sharedSpacePath, function (err) {
@@ -196,15 +189,6 @@
 		.then(() => {
 			let msg = `genFed ${filename} ${account}`;
 			return this._dispatchWork(corID, msg);
-		})
-		.then(() => {
-			return new Promise((resolve, reject) => {
-				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, newFileDir, jsonFilename: filename}),
-					reject: errCode => reject({ corID, errCode, newFileDir, jsonFilename: filename })
-				};
-			});
-
 		});
 
 	};
@@ -216,21 +200,13 @@
 	 * @param {string} model - model id
 	 * @param {string} modeDirName - the dir name of the model database dump staying in 
 	 *******************************************************************************/
-	ImportQueue.prototype.importToyModel = function (database, model, options) {
-		let corID = uuid.v1();
+	ImportQueue.prototype.importToyModel = function (correlationId, database, model, options) {
+		let corID = correlationId;
 
 		const skip = options.skip && JSON.stringify(options.skip) || '';
 		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
-		return this._dispatchWork(corID, msg).then(() => {
-
-			return new Promise((resolve, reject) => {
-				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, database, model}),
-					reject: (errCode, message, rep) => reject({ corID, errCode, database, model, message, appId: rep.properties.appId })
-				};
-			});
-		});
+		return this._dispatchWork(corID, msg);
 	};
 
 	/*******************************************************************************
@@ -308,6 +284,14 @@
 							corID: corID.toString()
 						}
 					);
+					this.logger.logInfo("No consumer in queue. Sending email alert...");
+
+					Mailer.sendNoConsumerAlert().then(() => {
+						this.logger.logInfo("Email sent.");
+					}).catch(err =>{
+						this.logger.logInfo("Failed to send email:", err);
+					});
+
 				}
 
 				return Promise.resolve(() => {});
@@ -340,25 +324,31 @@
 				return this.channel.consume(queue, function (rep) {
 
 					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
+					
+					let ModelHelper = require("../models/helper/model");
 
 					let defer = self.deferedObjs[rep.properties.correlationId];
 
 					let resData = JSON.parse(rep.content);
 
-					let resErrorCode = parseInt(resData.value);
-
+					let resErrorCode = resData.value;
 					let resErrorMessage = resData.message;
+					let resDatabase = resData.database;
+					let resProject = resData.project;
 
-					if (defer && resErrorCode === 0) {
-						defer.resolve(rep);
-					} else if (defer) {
-						defer.reject(resErrorCode, resErrorMessage, rep);
+					let status = resData.status;
+
+					if ("processing" === status) {
+						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
-						self.logger.logError("Job done but cannot find corresponding defer object with cor id " + rep.properties.correlationId);
+						if (resErrorCode === 0) {
+							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
+						} 
+						else {
+							ModelHelper.importFail(resDatabase, resProject, resErrorCode, resErrorMessage, true);
+						}
+						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
-
-					defer && delete self.deferedObjs[rep.properties.correlationId];
-
 				}, { noAck: true });
 			});
 	};

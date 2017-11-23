@@ -10,7 +10,7 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Model name
-					input(type="text", ng-model="vm.modelName", disabled)
+					input(type="text", ng-model="vm.modelName")
 				md-input-container(flex)
 
 			div(layout="row")
@@ -23,6 +23,13 @@
 				md-input-container(flex)
 					label Model code
 					input(type="text", ng-model="vm.code", maxlength=5)
+				md-input-container(flex)
+
+			div(layout="row")
+				md-input-container(flex)
+					label 4D Sequence Tag
+					input(type="text", ng-model="vm.fourDSequenceTag")
+					
 				md-input-container(flex)
 
 			div(layout="row")

@@ -1,25 +1,32 @@
 div(layout="row", layout-align="start center", flex)
 	md-list-item.model-indent(
-		flex, 
-		ng-click="vm.goToModel()",
-		layout="row",
-		layout-align="start center",
-		layout-fill,
-		ng-disabled="vm.model.uploading || vm.model.processing")
+		flex
+		ng-click="vm.goToModel()"
+		layout="row"
+		layout-align="start center"
+		layout-fill
+		ng-disabled="vm.isProcessing()")
 			md-button.md-icon-button(aria-label="Dashboard")
 				md-icon.angular-material-icons dashboard
 			p.modelName.md-list-item-text(flex="100") {{vm.model.name}}
 
 	.modelRight(layout="row", layout-align="start center")
 		.modelUploadInfo(layout="row", layout-align="start center")
-			p.modelUploadFilename {{vm.uploadFileName}}
-			p.modelUploadInfo() {{vm.fileUploadInfo}}
-			md-progress-circular.modelUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.model.uploading || vm.model.processing")
+			p.modelUploadFilename(ng-if="!vm.isMobileDevice") {{vm.uploadFileName}}
+			p.modelUploadInfo(ng-if="!vm.isMobileDevice") {{vm.fileUploadInfo}}
+			md-progress-circular.modelUploadIcon(
+				md-mode="indeterminate"
+				md-diameter="15"
+				ng-if="vm.isProcessing()")
 
-		p.modelTimestamp {{vm.model.timestampPretty}}
+		p.modelTimestamp(ng-if="!vm.isMobileDevice") {{vm.model.timestampPretty}}
 
 		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
-			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)", ng-disabled="vm.model.uploading || vm.model.processing")
+			md-button.md-icon-button(
+				aria-label="More"
+				ng-click="$mdOpenMenu($event)"
+				ng-disabled="vm.isProcessing()")
+
 				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 			md-menu-content(width="3")
 				md-menu-item(ng-repeat="(key, value) in vm.modelOptions", ng-if="!value.hidden")

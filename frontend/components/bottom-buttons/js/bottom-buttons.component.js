@@ -27,128 +27,62 @@
 			controllerAs: "vm"
 		});
 
-	BottomButtonsCtrl.$inject = ["EventService"];
+	BottomButtonsCtrl.$inject = ["ViewerService"];
 
-	function BottomButtonsCtrl (EventService) {
-		var vm = this,
-			measureMode = false;
+	function BottomButtonsCtrl (ViewerService) {
+		var vm = this;
 
-		vm.showButtons = true;
-		vm.fullScreen = false;
-		vm.showViewingOptionButtons = false;
+		vm.$onInit = function() {
+			vm.showButtons = true;
+			vm.showViewingOptionButtons = false;
 
-		vm.toggleElements = function () {
-			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
-			vm.showButtons = !vm.showButtons;
+			vm.viewingOptions = {
+				"Helicopter" : { 
+					mode: Viewer.NAV_MODES.HELICOPTER
+				},
+				"Turntable" : {
+					mode: Viewer.NAV_MODES.TURNTABLE
+				}
+			};
+
+			document.addEventListener("click", function(event) {
+				// If the click is on the scene somewhere, hide the buttons
+				var valid = event && event.target && event.target.classList;
+				if (valid && event.target.classList.contains("emscripten")) {
+					vm.showViewingOptionButtons = false;
+				} 
+			}, false);
+
+			vm.selectedViewingOptionIndex = 1;
+			
+			vm.leftButtons = [];
+			vm.leftButtons.push({
+				label: "Extent",
+				icon: "fa fa-home",
+				click: vm.extent
+			});
+
+			vm.selectedMode = "Turntable";
+			vm.setViewingOption(vm.selectedMode);
+
 		};
 
-		var setViewingOption = function (index) {
-			if (angular.isDefined(index)) {
+		vm.extent = function () {
+			ViewerService.goToExtent();
+		};
+
+		vm.setViewingOption = function (type) {
+			
+			if (type !== undefined) {
 				// Set the viewing mode
-
-				EventService.send(EventService.EVENT.VIEWER.SET_NAV_MODE,
-					{mode: vm.viewingOptions[index].mode});
-
-				// Set up the new current selected option button
-				vm.selectedViewingOptionIndex = index;
-				vm.rightButtons[0] = vm.viewingOptions[index];
-
+				vm.selectedMode = type;
+				ViewerService.setNavMode(vm.viewingOptions[type].mode);
 				vm.showViewingOptionButtons = false;
 			} else {
 				vm.showViewingOptionButtons = !vm.showViewingOptionButtons;
 			}
+			
 		};
-
-
-		var home = function () {
-			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
-		};
-
-		var toggleHelp = function () {
-			EventService.send(EventService.EVENT.TOGGLE_HELP);
-		};
-
-		var enterFullScreen = function () {
-			EventService.send(EventService.VIEWER.SWITCH_FULLSCREEN);
-			vm.fullScreen = true;
-		};
-
-		var exitFullScreen = function() {
-			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && vm.fullScreen) {
-				vm.fullScreen = false;
-			}
-		};
-		document.addEventListener("webkitfullscreenchange", exitFullScreen, false);
-		document.addEventListener("mozfullscreenchange", exitFullScreen, false);
-		document.addEventListener("fullscreenchange", exitFullScreen, false);
-		document.addEventListener("MSFullscreenChange", exitFullScreen, false);
-
-		// This is pretty horrible 
-		document.addEventListener("click", function(event) {
-			if (!event.target.classList.contains("ignoreClick")) {
-				vm.showViewingOptionButtons = false;
-			} 
-		}, false);
-
-		var enterOculusDisplay = function () {
-			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
-		};
-
-		/**
-		 * Enter pinakin mode
-		 */
-		var setMeasureMode = function () {
-			measureMode = !measureMode;
-			EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
-		};
-
-		vm.viewingOptions = [
-			/*			{
-				mode: VIEWER_NAV_MODES.WALK,
-				label: "Walk",
-				icon: "fa fa-child",
-				click: setViewingOption,
-				iconClass: "bottomButtonIconWalk"
-			},*/
-			{
-				mode: Viewer.NAV_MODES.HELICOPTER,
-				label: "Helicopter",
-				icon: "../icons/helicopter.svg",
-				click: setViewingOption,
-				iconClass: "bottomButtonIconHelicopter"
-			},
-			{
-				mode: Viewer.NAV_MODES.TURNTABLE,
-				label: "Turntable",
-				icon: "../icons/turntable.svg",
-				click: setViewingOption
-			}
-		];
 		
-		vm.selectedViewingOptionIndex = 1;
-
-		vm.leftButtons = [];
-		vm.leftButtons.push({
-			label: "Home",
-			icon: "fa fa-home",
-			click: home
-		});
-
-		vm.rightButtons = [];
-		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
-		setViewingOption(1);
-		/*
-		vm.rightButtons.push({
-			label: "Help",
-			icon: "fa fa-question",
-			click: toggleHelp
-		});
-		vm.rightButtons.push({
-			label: "VR",
-			icon: "icon icon_cardboard",
-			click: enterOculusDisplay,
-			iconClass: "bottomButtonIconCardboard"
-		});
-		 */
 	}
 }());

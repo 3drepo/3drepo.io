@@ -20,7 +20,7 @@
 let request = require('supertest');
 let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
@@ -36,7 +36,6 @@ let unit = 'm';
 
 describe('Federated Model', function () {
 
-	let User = require('../../models/user');
 	let server;
 	let agent;
 	let username = 'fed';
@@ -87,34 +86,9 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
-		//fake a response from bouncer;
-		setTimeout(function(){
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-			}).then(res => {
-				corId = res.properties.correlationId;
-				appId = res.properties.appId;
-				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-			}).then(() => {
-				//send fake job done message to the queue;
-				return q.channel.publish(
-					q.callbackQName,
-					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
-					{
-						correlationId: corId, 
-						persistent: true 
-					}
-				);
-			}).catch(err => {
-				done(err);
-			});
-
-		}, 1000);
-
-		agent.post(`/${username}/${fedModelName}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName : `${fedModelName}`,
 			desc, 
 			type,
 			unit,
@@ -154,8 +128,8 @@ describe('Federated Model', function () {
 				done(err);
 			})
 
-			
 		});
+
 	});
 
 
@@ -163,8 +137,9 @@ describe('Federated Model', function () {
 		let emptyFed = 'emptyFed';
 		let emptyFedId;
 
-		agent.post(`/${username}/${emptyFed}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: emptyFed,
 			desc, 
 			type, 
 			unit,
@@ -208,8 +183,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation using existing model name (fed or model)', function(done){
 
-		agent.post(`/${username}/${subModels[0]}`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: subModels[0],
 			desc, 
 			type, 
 			unit,
@@ -228,9 +204,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation using invalid model name', function(done){
 
-
-		agent.post(`/${username}/a%20c`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "错误",
 			desc, 
 			type, 
 			subModels:[{
@@ -250,8 +226,9 @@ describe('Federated Model', function () {
 
 	it('should fail if create federation from models in a different database', function(done){
 
-		agent.post(`/${username}/badfed`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "badfed",
 			desc, 
 			type, 
 			unit,
@@ -275,53 +252,12 @@ describe('Federated Model', function () {
 		let q = require('../../services/queue');
 		let corId, appId;
 
-		//fake a response from bouncer;
-		setTimeout(function(){
-		
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-
-			}).then(res => {
-				
-				corId = res.properties.correlationId;
-				appId = res.properties.appId;
-
-				let json = fs.readFileSync(config.cn_queue.shared_storage + '/' + corId + '/obj.json', {
-					encoding: 'utf8'
-				});
-
-				json = JSON.parse(json);
-			
-				//check the request json file
-
-				expect(json.subProjects.length).to.equal(1);
-
-				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-
-			}).then(() => {
-				//send fake job done message to the queue;
-				return q.channel.publish(
-					q.callbackQName,
-					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
-					{
-						correlationId: corId, 
-						persistent: true 
-					}
-				);
-			}).catch(err => {
-				done(err);
-			});
-
-		}, 1000);
-
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {
-			agent.post(`/${username}/dupfed`)
+			agent.post(`/${username}/model`)
 			.send({ 
+				modelName: "dupfed",
 				desc, 
 				type, 
 				unit,
@@ -343,8 +279,9 @@ describe('Federated Model', function () {
 
 
 	it('should fail if create fed of fed', function(done){
-		agent.post(`/${username}/fedfed`)
+		agent.post(`/${username}/model`)
 		.send({ 
+			modelName: "fedfed",
 			desc, 
 			type, 
 			unit,
@@ -383,7 +320,7 @@ describe('Federated Model', function () {
 
 	it('update should fail if model does not exist', function(done){
 		agent.put(`/${username}/nonexistmodel`)
-		.send({ 
+		.send({
 			desc, 
 			type, 
 			unit,
@@ -400,37 +337,11 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('update should success if model is a federation', function(done){
+	it('update should succeed if model is a federation', function(done){
 		this.timeout(5000);
 
 		let q = require('../../services/queue');
 		let corId, appId;
-
-		//fake a response from bouncer;
-		setTimeout(function(){
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-			}).then(res => {
-				corId = res.properties.correlationId;
-				appId = res.properties.appId;
-				return q.channel.assertExchange(q.callbackQName, 'direct', { durable: true });
-			}).then(() => {
-				//send fake job done message to the queue;
-				return q.channel.publish(
-					q.callbackQName,
-					appId,
-					new Buffer(JSON.stringify({ value: 0})), 
-					{
-						correlationId: corId, 
-						persistent: true 
-					}
-				);
-			}).catch(err => {
-				done(err);
-			});
-
-		}, 1000);
 
 		agent.put(`/${username}/${fedModelId}`)
 		.send({ 

@@ -3,8 +3,8 @@
 	layout-align="center"
 	flex)
 	
-	md-content.md-whiteframe(
-		aria-label="Registered"
+	md-content.loginContainer.md-whiteframe-2dp(
+		aria-label="Log in"
 		flex-xl="15"
 		flex-lg="20"
 		flex-md="30"
@@ -17,7 +17,7 @@
 
 		.userContent(layout="column")
 			div.loginBox.loadingBox(layout="row")
-				h3.welcome Welcome to 3D Repo!
+				h3.welcome {{vm.loginMessage}}!
 
 			// Behaviour if we provide a notice to the user
 			span(ng-if="vm.userNotice") 
@@ -29,8 +29,8 @@
 			div.loginBox(layout="row")
 				// Login
 				div(layout="column", flex)
-					div
-						md-input-container.md-block
+					div.inputContainer
+						md-input-container.md-block.username
 							label Username
 							input(type='text', ng-model='vm.user.username', ng-required, tdr-focus="true", ng-keypress="vm.login($event)")
 
@@ -39,17 +39,32 @@
 							input(type='text')
 							input(type='password')
 
-						md-input-container.md-block
+						md-input-container.md-block.password
 							label Password
 							input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
 
-					div(layout="row", layout-align="start" flex="none")
+					h4.loginError {{vm.errorMessage}}
+
+					div(layout="row", flex="none", layout-align="center")
 						md-button.md-accent.md-raised.loginButton(
-							ng-click="vm.login()"
-						) Log In
-					h3.loginError {{vm.errorMessage}}
-					div(layout="row", layout-align="start center", flex="none")
+							ng-disabled="vm.loggingIn"
+							ng-click="vm.login()") 
+							span(ng-if="!vm.loggingIn") Log In
+							md-progress-circular(ng-if="vm.loggingIn").loginProgress
+								
+					
+					div.forgotPassword(layout="row", layout-align="center center", flex="none")
 						a.loginLinks(href="passwordForgot") Forgot password?
-					div(layout="row", layout-align="start center", flex="none")
-						a.loginLinks(href="http://3drepo.org/pricing/") Sign up
-					h2.md-subhead#loginVersion Version: {{vm.version}}
+					md-divider
+
+					div.bottomLinks(layout="row", layout-align="center center", flex="none")
+						a.loginLinks(href="/signUp") 
+							md-button Sign up 
+
+						span.loginSpacing | 
+						
+						a.loginLinks(href="http://3drepo.org/pricing/") 
+							md-button Pricing
+					h2.md-subhead#loginVersion Version: 
+						a.loginVersion(href="https://github.com/3drepo/3drepo.io/releases/latest") {{vm.version}}
+						md-tooltip(md-direction="bottom") Release Notes

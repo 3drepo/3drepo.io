@@ -21,7 +21,7 @@
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
-	const utils = require('./utils');
+	const utils = require("./utils");
 
 	/**
 	 * List of response and error codes
@@ -75,6 +75,7 @@
 		ROOT_NODE_NOT_FOUND: { message: "No root node found for revision", status: 500 },
 
 		ISSUE_NOT_FOUND: { message: "Issue not found", status: 404 },
+		
 
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
@@ -110,11 +111,11 @@
 		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
-		MODEL_EXIST: { message: "Model already exists", status: 400 },
+		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 
-		SIZE_LIMIT_PAY: { message: "Ran of out database space. Please pay for more space.", status: 400 },
+		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
 
 		FILE_FORMAT_NOT_SUPPORTED: { message: "Format not supported", status: 400 },
@@ -125,6 +126,9 @@
 		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 		BLACKLISTED_MODEL_NAME: { message: "Model name reserved", status: 400 },
+
+		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
+		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
@@ -205,6 +209,7 @@
 		MODEL_NAME_TOO_LONG: { message: "Model name cannot be longer than 60 characters", status: 400 },
 		ISSUE_SYSTEM_COMMENT: { message: "Can't edit or remove system comment", status: 400 },
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
+		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
 
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
@@ -217,20 +222,23 @@
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
+		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
 
-		JOB_NOT_FOUND:{ message: 'Job not found', status: 404},
-		DUP_JOB: {message: 'Duplicate job id', status: 400},
-		JOB_ASSIGNED: {message: 'Cannot remove assigned job', status: 400},
-		JOB_ID_VALID: { message: 'Invalid job ID', status: 400},
-		DUP_PERM_TEMPLATE: {message: 'Duplicate template ID', status: 400},
-		PERM_NOT_FOUND: {message: 'Permission template not found', status: 404},
-		INVALID_PERM: {message: 'Invalid permission', status: 400},
+		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
+		DUP_JOB: {message: "Duplicate job id", status: 400},
+		JOB_ASSIGNED: {message: "Cannot remove assigned job", status: 400},
+		JOB_ID_VALID: { message: "Invalid job ID", status: 400},
+		DUP_PERM_TEMPLATE: {message: "Duplicate template ID", status: 400},
+		PERM_NOT_FOUND: {message: "Permission template not found", status: 404},
+		INVALID_PERM: {message: "Invalid permission", status: 400},
 		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
-		DUP_ACCOUNT_PERM: { message: 'Duplicate account permission', status: 400},
-		ACCOUNT_PERM_NOT_FOUND: { message: 'Account permission not found', status: 404},
-		ACCOUNT_PERM_EMPTY: { message: 'Cannot add empty permissions', status: 404},
-		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: 'Admin permission template cannot be changed or deleted', status: 400}
+		DUP_ACCOUNT_PERM: { message: "Duplicate account permission", status: 400},
+		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404},
+		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
+		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
 
+		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
+		
 	};
 
 
@@ -324,6 +332,7 @@
 			return {
 				value: 4000,
 				message: "Internal Error",
+				system_message: message,
 				status: 500
 			};
 		}
@@ -353,7 +362,7 @@
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
 		
 		resCode = utils.mongoErrorToResCode(resCode);
-		
+
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				req[C.REQ_REPO].logger.logError(resCode.stack);
@@ -381,7 +390,10 @@
 
 			length = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), { httpCode: resCode.status, contentLength: length });
+			req[C.REQ_REPO].logger.logError(
+				JSON.stringify(responseObject), 
+				{ httpCode: resCode.status, contentLength: length }
+			);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -389,17 +401,24 @@
 		} else {
 
 			if (Buffer.isBuffer(extraInfo)) {
+
 				res.status(resCode.status);
 
-				var contentType = mimeTypes[format || req.params.format];
-
+				let reqFormat;
+				
+				if (req && req.params && req.params.format) {
+					reqFormat = req.params.format;
+				}
+		
+				const contentType = mimeTypes[format || req.params.format];
+				
 				if (contentType) {
 					res.setHeader("Content-Type", contentType);
 				} else {
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
 				}
-
+		
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
 
@@ -425,14 +444,20 @@
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
+		
+		if (customHeaders) {
+			res.writeHead(responseCodes.OK.status, customHeaders);
+		}
 
-		customHeaders && res.writeHead(responseCodes.OK.status, customHeaders);
-		readStream.on('end', () => {
+		readStream.on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { httpCode: responseCodes.OK.status, contentLength: length });
+			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { 
+				httpCode: responseCodes.OK.status, 
+				contentLength: length 
+			});
 		});
 
-		readStream.on('data', data => {
+		readStream.on("data", data => {
 			res.write(data);
 			length += data.length;
 		});

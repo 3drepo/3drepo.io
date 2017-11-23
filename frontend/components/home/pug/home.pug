@@ -1,10 +1,12 @@
 div.homeContainer(
+	ng-style="{ 'background-image': 'url({{vm.backgroundImage}})' }"
 	layout="column"
 	flex="100"
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
 
 	viewer(
+		id="viewer"
 		ng-if="!vm.isMobileDevice && !vm.isLegalPage"
 		hide-xs
 		hide-sm
@@ -22,7 +24,7 @@ div.homeContainer(
 
 		div.homeTopBar
 		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
-			img(src="/images/3drepo-logo-white.png", alt="3D Repo Logo (White)" ng-click="vm.home()")
+			img(ng-src="{{vm.topLogo}}", alt="3D Repo Logo (White)" ng-click="vm.home()")
 
 		account-dir(
 			flex="100"
@@ -31,6 +33,7 @@ div.homeContainer(
 			state='vm.state'
 			query='vm.query'
 			ng-if="vm.loggedIn"
+			is-mobile-device="vm.isMobileDevice"
 			keys-down="vm.keysDown")
 
 	#homeLegalContainer(
@@ -44,12 +47,15 @@ div.homeContainer(
 		
 
 	#homeLoggedOut(
-		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage")
+		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage && !vm.state.model")
 		
-		login(ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
+		login(
+			login-message="vm.loginMessage"
+			ng-if="!vm.loggedIn && !vm.isLoggedOutPage")
 		
 		sign-up(ng-if="vm.page === 'sign-up'")
 		password-forgot(ng-if="vm.page === 'password-forgot'")
+		password-change(ng-if="vm.page === 'password-change'", token="vm.query.token", username="vm.query.username")
 		register-request(ng-if="vm.page === 'register-request'")
 		register-verify(ng-if="vm.page === 'register-verify'")
 

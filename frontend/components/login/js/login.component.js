@@ -22,14 +22,16 @@
 		.component("login", {
 			restrict: "EA",
 			templateUrl: "templates/login.html",
-			bindings: {},
+			bindings: {
+				loginMessage : "<" 
+			},
 			controller: LoginCtrl,
 			controllerAs: "vm"
 		});
 
-	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "UtilsService"];
+	LoginCtrl.$inject = ["$scope", "$location", "AuthService", "EventService", "ClientConfigService", "APIService"];
 
-	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, UtilsService) {
+	function LoginCtrl($scope, $location, AuthService, EventService, ClientConfigService, APIService) {
 		var vm = this;
 
 		/*
@@ -38,6 +40,25 @@
 		vm.$onInit = function() {
 			vm.version = ClientConfigService.VERSION;
 			vm.userNotice = ClientConfigService.userNotice;
+			vm.loggingIn = false;
+
+			// Set a custom login message if there is one
+			if (!vm.loginMessage) {
+				vm.loginMessage = "Welcome to 3D Repo";
+			}
+			
+		};
+
+		vm.handleLogin = function() {
+			vm.errorMessage = "";
+			vm.loggingIn = true;
+			AuthService.login(vm.user.username, vm.user.password)
+				.then(function(){
+					vm.loggingIn = false;
+				})
+				.catch(function(){
+					vm.loggingIn = false;
+				});
 		};
 
 		/**
@@ -50,14 +71,11 @@
 
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
-					AuthService.login(vm.user.username, vm.user.password);
+					vm.handleLogin();
 				}
 			} else {
 				if (vm.user && vm.user.username && vm.user.password) {
-					vm.errorMessage = "";
-					AuthService.login(vm.user.username, vm.user.password).then(function(response){
-						//console.log(response);
-					});
+					vm.handleLogin();
 				} else {
 
 					vm.errorMessage = "Username and/or password not provided";
@@ -85,7 +103,7 @@
 					if (event.value.error.status === 500) {
 						vm.errorMessage = "There is currently a problem with the system. Please try again later.";
 					} else {
-						vm.errorMessage = UtilsService.getErrorMessage(event.value.error);
+						vm.errorMessage = APIService.getErrorMessage(event.value.error);
 					}
 				}
 			}

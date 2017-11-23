@@ -32,9 +32,9 @@
 			}
 		);
 
-	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService"];
+	IssuesScreenShotCtrl.$inject = ["DialogService", "$q", "$timeout", "$element", "APIService", "EventService", "ViewerService"];
 
-	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
+	function IssuesScreenShotCtrl (DialogService, $q, $timeout, $element, APIService, EventService, ViewerService) {
 		var vm = this,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
@@ -61,7 +61,7 @@
 				vm.screenShotUse = vm.screenShot;
 			} else {
 				$element.ready(function() {
-                	
+              	
 					// Get scribble canvas
 					scribbleCanvas = document.getElementById("scribbleCanvas");
 					scribbleCanvasContext = scribbleCanvas.getContext("2d");
@@ -82,7 +82,7 @@
 					vm.actionsPointerEvents = "auto";
 
 					// Get the screen shot
-					EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: screenShotPromise});
+					ViewerService.getScreenshot(screenShotPromise);
 					
 					screenShotPromise.promise.then(function(screenShot) {
 						vm.screenShotUse = screenShot;
@@ -105,7 +105,7 @@
 		};
 
 		vm.closeDialog = function () {
-			UtilsService.closeDialog();
+			DialogService.closeDialog();
 		};
 
 		/**

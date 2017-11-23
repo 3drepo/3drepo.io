@@ -29,6 +29,7 @@
 				federation: "=",
 				project: "=",
 				federationData: "=",
+				originalFederationData: "=",
 				federationIndex: "=",
 				onShowPage: "&",
 				quota: "=",
@@ -38,15 +39,27 @@
 				federationsSaving: "=",
 				saveFederation: "=",
 				addToFederation: "=",
-				isSaving: "="
+				isDuplicateName: "=",
+				checkFederationSaveDisabled: "=",
+				federationSaveDisabled: "=",
+				isSaving: "=",
+				federationErrorMessage: "="
 			},
 			controller: AccountFederationsCtrl,
 			controllerAs: "vm"
 		});
 
-	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "ClientConfigService", "AuthService", "AnalyticService", "AccountService"];
+	AccountFederationsCtrl.$inject = [
+		"$scope", "$location", "$timeout", "APIService", 
+		"ClientConfigService", "AuthService", "AnalyticService", 
+		"AccountService", "DialogService"
+	];
 
-	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService, ClientConfigService, AuthService, AnalyticService, AccountService) {
+	function AccountFederationsCtrl (
+		$scope, $location, $timeout, APIService, 
+		ClientConfigService, AuthService, AnalyticService, 
+		AccountService, DialogService
+	) {
 		var vm = this;
 
 		vm.$onInit = function() {
@@ -62,6 +75,23 @@
 			return projects;
 		};
 
+		vm.closeDialog = function() {
+			DialogService.closeDialog();
+		};
+
+		vm.closeFederationDialog = function() {
+			
+			if (vm.originalFederationData) {
+				Object.keys(vm.federationData).forEach(function(key){
+					if (vm.federationData[key] !== vm.originalFederationData[key]) {
+						vm.federationData[key] = vm.originalFederationData[key];
+					}
+				});
+			}
+			
+			vm.isSaving = false;
+			DialogService.closeDialog();
+		};
 
 		vm.showMenu = function(model, account){
 			
@@ -165,17 +195,9 @@
 		 */
 		vm.removeFromFederation = function (modelName) {
 			AccountService.removeFromFederation(vm.federationData, modelName);
+			vm.checkFederationSaveDisabled();
 		};
 
-
-		/**
-		 * Close the federation dialog
-		 *
-		 */
-		vm.closeDialog = function () {
-			vm.isSaving = false;
-			UtilsService.closeDialog();
-		};
 
 
 		/**
@@ -188,8 +210,8 @@
 
 		vm.viewFederation = function (event, account, project, model) {
 
-			if (!model.hasOwnProperty("subModels")) {
-				setupEditFederation(event, model);
+			if (!model.hasOwnProperty("subModels") || model.subModels.length === 0) {
+				setupEditFederation(event, account, project, model);
 			} else {
 
 				$location.path("/" + account.name + "/" + model.model, "_self").search({});
@@ -237,48 +259,47 @@
 		 */
 		vm.deleteModel = function () {
 
-			var promise = UtilsService.doDelete({}, vm.currentAccount.name + "/" + vm.modelToDelete.model);
+			var deleteUrl = vm.currentAccount.name + "/" + vm.modelToDelete.model;
+			APIService.delete(deleteUrl, {})
+				.then(function (response) {
 
-			promise.then(function (response) {
+					if (response.status === 200) {
+						var account = vm.currentAccount;
+						if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
+							AccountService.removeModelByProjectName(
+								vm.accounts, 
+								account.name, 
+								vm.projectToDeleteFrom.name, 
+								response.data.model
+							);
+						} 
 
-				if (response.status === 200) {
-					var account = vm.currentAccount;
-					if (vm.projectToDeleteFrom && vm.projectToDeleteFrom.name) {
-						AccountService.removeModelByProjectName(
-							vm.accounts, 
-							account.name, 
-							vm.projectToDeleteFrom.name, 
-							response.data.model
-						);
-					} 
-					// else {
+						vm.addButtons = false;
+						vm.addButtonType = "add";
+						vm.isSaving = false;
+						DialogService.closeDialog();
 						
-					// 	for (var j = 0; j < account.fedModels.length; j++) { 
-					// 		if (account.fedModels[j].model === response.data.model) {
-					// 			account.fedModels.splice(j, 1);
-					// 			break;
-					// 		}
-					// 	}
-					// }
-					
-					vm.addButtons = false;
-					vm.addButtonType = "add";
-					vm.closeDialog();
-					
-					AnalyticService.sendEvent({
-						eventCategory: "Model",
-						eventAction: "delete",
-						eventLabel: "federation"
-					});
+						AnalyticService.sendEvent({
+							eventCategory: "Model",
+							eventAction: "delete",
+							eventLabel: "federation"
+						});
 
-				} else {
+					} else {
+						vm.deleteError = "Error deleting federation";
+						if (response.data.message) {
+							vm.deleteError = response.data.message;
+						} 
+					}
+
+				})
+				.catch(function(response){
 					vm.deleteError = "Error deleting federation";
 					if (response.data.message) {
 						vm.deleteError = response.data.message;
 					} 
-				}
+				});
 
-			});
 		};
 
 		/**
@@ -298,12 +319,17 @@
 				vm.federationData.project = "default";
 			}
 			vm.federationData._isEdit = true;
-			UtilsService.showDialog("federation-dialog.html", $scope, event, true);
+
+			vm.originalFederationData = angular.copy(vm.federationData);
+			DialogService.showDialog("federation-dialog.html", $scope, event, true);
 		}
 
 		function setupSetting(event, teamspace, project, federation){
-			$location.search("proj", federation.name);
+			$location.search("modelName", federation.name);
+			$location.search("modelId", federation.model);
+			$location.search("targetProj", project.name);
 			$location.search("targetAcct", teamspace.account);
+			$location.search("page", "modelsetting");
 
 			vm.onShowPage({page: "modelsetting", callingPage: "teamspaces"});
 		}
@@ -322,7 +348,7 @@
 			vm.deleteName = model.name;
 			vm.projectToDeleteFrom = project;
 			vm.currentAccount = account;
-			UtilsService.showDialog("delete-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
+			DialogService.showDialog("delete-dialog.html", $scope, event, true, null, false, vm.dialogCloseToId);
 		}
 
 		/**

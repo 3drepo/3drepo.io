@@ -35,9 +35,9 @@
 			controllerAs: "vm"
 		});
 
-	AccountInfoCtrl.$inject = ["$location", "$scope", "$element", "ClientConfigService", "UtilsService"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "$element", "$mdDialog", "ClientConfigService", "APIService"];
 
-	function AccountInfoCtrl ($location, $scope, $element, ClientConfigService, UtilsService) {
+	function AccountInfoCtrl ($location, $scope, $element, $mdDialog, ClientConfigService, APIService) {
 		var vm = this;
 		
 		/*
@@ -48,8 +48,8 @@
 				teamspaces: {label: "Teamspaces"},
 				profile: {label: "Profile"},
 				billing: {label: "Billing"},
-				licenses: {label: "Licenses"},
-				assign: {label: "Assign Permissons" }
+				licenses: {label: "Licences & Jobs"},
+				assign: {label: "Assign Permissions" }
 			};
 			vm.imageLoaded = false;
 			vm.registerUrlCallback();
@@ -67,8 +67,9 @@
 
 
 		function getAvatarUrl(){
-			//var date = "?" + new Date().valueOf();
-			var endpoint = vm.username + "/avatar";
+			// Date required to trigger change (otherwise URL is the same	)
+			var date = "?" + new Date().valueOf();
+			var endpoint = vm.username + "/avatar" + date;
 			return ClientConfigService
 				.apiUrl(ClientConfigService.GET_API, endpoint);
 		}
@@ -107,28 +108,47 @@
 				var maxSize = 1024 * 100;
 				if (size < maxSize) {
 					formData.append("file", file.files[0]);
-
-					UtilsService.doPost(formData, vm.username + "/avatar", {"Content-Type": undefined})
-						.then(function(res){
-							vm.uploadingAvatar = false;
-							
-							if(res.status === 200){
-								vm.avatarUrl = getAvatarUrl();
-							} else {
-								console.error("Upload avatar error", res.data);
-							}
-						});
-
-					$scope.$apply();
-
+					vm.postAvatar(formData);
 				} else {
-					console.error("Upload avatar error: File is too big!");
+
+					vm.uploadError("Upload avatar error: File is too big!");
 				}
 				
 
 			});
 		};
 
+		vm.postAvatar = function(formData) {
+
+			APIService.post(vm.username + "/avatar", formData, {"Content-Type": undefined})
+				.then(function(res){
+					vm.uploadingAvatar = false;
+					
+					if(res.status === 200){
+						
+						vm.avatarUrl = getAvatarUrl();
+						//$scope.$apply();
+
+
+					} else {
+						vm.uploadError("Upload avatar error", res.data);
+					}
+				});
+
+		};
+
+		vm.uploadError = function(content, error) {
+			vm.uploadingAvatar = false;
+			console.error(content, error);
+			$mdDialog.show(
+				$mdDialog.alert()
+					.clickOutsideToClose(true)
+					.title("Upload Avatar Error")
+					.content(content)
+					.ariaLabel("Upload Avatar Error")
+					.ok("OK")
+			);
+		};
 
 	}
 }());

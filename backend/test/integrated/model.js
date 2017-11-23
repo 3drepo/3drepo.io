@@ -20,7 +20,7 @@
 let request = require('supertest');
 let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
@@ -84,10 +84,9 @@ describe('Model', function () {
 		async.series([
 			callback => {
 
-				agent.post(`/${username}/${model}`)
-				.send({ desc, type, unit, code, project })
+				agent.post(`/${username}/model`)
+				.send({ modelName: model, desc, type, unit, code, project })
 				.expect(200, function(err ,res) {
-					console.log(res.body);
 					expect(res.body.name).to.equal(model);
 					modelId = res.body.model;
 					callback(err);
@@ -111,8 +110,6 @@ describe('Model', function () {
 
 					const account = res.body.accounts.find(account => account.account === username);
 					expect(account).to.exist;
-
-					console.log(account);
 
 					const pg = account.projects.find(pg => pg.name === project);
 					expect(pg).to.exist;
@@ -148,8 +145,8 @@ describe('Model', function () {
 
 	it('should fail if project supplied is not found', function(done){
 
-		agent.post(`/${username}/model2`)
-		.send({ desc, type, unit, code, project: 'noexist' })
+		agent.post(`/${username}/model`)
+		.send({ modelName: "model2", desc, type, unit, code, project: 'noexist' })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);
@@ -159,8 +156,8 @@ describe('Model', function () {
 
 	it('should fail if no unit specified', function(done){
 
-		agent.post(`/${username}/model3`)
-		.send({ desc, type })
+		agent.post(`/${username}/model`)
+		.send({ desc, type, modelName: "model3" })
 		.expect(400, function(err ,res) {
 
 			expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
@@ -270,8 +267,8 @@ describe('Model', function () {
 
 		let model = 'project7';
 		
-		agent.post(`/${username}/${model}`)
-		.send({ desc, type, unit })
+		agent.post(`/${username}/model`)
+		.send({ desc, type, unit, modelName: model })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 			done(err);
@@ -295,8 +292,8 @@ describe('Model', function () {
 				return done();
 			}
 
-			agent.post(`/${username}/${modelName}`)
-			.send({ desc, type, unit })
+			agent.post(`/${username}/model`)
+			.send({ desc, type, unit, modelName: modelName })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_MODEL_NAME.value);
 				done(err);
@@ -307,12 +304,13 @@ describe('Model', function () {
 
 
 
-	it('should return error message if model name contains spaces', function(done){
+	it('should succeed if model name contains spaces', function(done){
 
-		agent.post('/' + username + '/you%20are%20genius')
-		.send({ desc, type, unit })
-		.expect(400, function(err ,res) {
-			expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
+		let spacedName = 'you are genius';
+		agent.post(`/${username}/model`)
+		.send({ desc, type, unit, modelName: spacedName })
+		.expect(200, function(err ,res) {
+			expect(res.body.name).to.equal(spacedName);
 			done(err);
 		});
 	});
@@ -320,8 +318,8 @@ describe('Model', function () {
 
 	it('should return error if creating a model in a database that doesn\'t exists or not authorized for', function(done){
 
-		agent.post(`/${username}_someonelese/${model}`)
-		.send({ desc, type, unit })
+		agent.post(`/${username}_someonelese/model`)
+		.send({ modelName: "testmodel", desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
 		});
@@ -346,7 +344,7 @@ describe('Model', function () {
 			], done);
 		});
 
-		it('should success and get the latest file', function(done){
+		it('should succeed and get the latest file', function(done){
 			agent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res){
 
 				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
@@ -382,7 +380,7 @@ describe('Model', function () {
 		});
 
 
-		it('should success', function(done){
+		it('should succeed', function(done){
 			agent.delete(`/${username}/${model}`).expect(200, done);
 		});
 

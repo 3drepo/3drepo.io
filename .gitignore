@@ -1,11 +1,20 @@
 node_modules
 
+!frontend/_built/empty
+frontend/_built/*
+
+
 *.bak
 *.swp
 /*.log
 config/*
 !config/test/
+frontend/custom/*
+frontend/custom/test
 
+frontend/tests/e2e/built
+
+yarn-error.log
 bower_components
 
 certs
@@ -64,6 +73,8 @@ pug/legal
 
 uploads/
 backend/uploads/
+backend/coverage
+backend/.nyc_output
 backend/mongodb-prebuilt-*
 backend/3drepo.log
 npm-debug.log.*

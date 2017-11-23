@@ -16,101 +16,99 @@
  */
 
 
-(() => {
-	"use strict";
 
-	const _ = require('lodash');
-	const C	= require("../constants");
-	const getPermissionsAdapter = require('./getPermissionsAdapter');
-	const responseCodes = require('../response_codes');
+"use strict";
 
-	//logic to check permissions
-	function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions){
+const _ = require("lodash");
+const C	= require("../constants");
+const getPermissionsAdapter = require("./getPermissionsAdapter");
+const responseCodes = require("../response_codes");
 
-		let getPermPromises = [];
+//logic to check permissions
+function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions){
 
-		getPermPromises.push(getPermissions(account).accountLevel(username));
+	let getPermPromises = [];
 
-		// check what kind of permissions is requested before making db calls to save unnecessary db calls
+	getPermPromises.push(getPermissions(account).accountLevel(username));
 
-		const flattenRequiredPerms = requiredPerms['$or'] ? _.flatten(requiredPerms['$or']) : _.flatten(requiredPerms);
+	// check what kind of permissions is requested before making db calls to save unnecessary db calls
 
-		if(_.intersection(C.PROJECT_PERM_LIST, flattenRequiredPerms).length > 0){
-			getPermPromises.push(getPermissions(account).projectLevel(username, project));
+	const flattenRequiredPerms = requiredPerms["$or"] ? _.flatten(requiredPerms["$or"]) : _.flatten(requiredPerms);
+
+	if(_.intersection(C.PROJECT_PERM_LIST, flattenRequiredPerms).length > 0){
+		getPermPromises.push(getPermissions(account).projectLevel(username, project));
+	}
+
+	if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0){
+
+		getPermPromises.push(getPermissions(account).modelLevel(username, model));
+
+	}
+
+	return Promise.all(getPermPromises).then(userPermissions => {
+		
+		userPermissions = _.flatten(userPermissions);
+
+		//add implied and inherited permissions
+		let impliedPerms = [];
+
+		["account", "project", "model"].forEach(
+			level => {
+				impliedPerms = impliedPerms.concat(_.flatten(userPermissions.map(p => _.get(C.IMPLIED_PERM, `${p}.${level}`) || p)));
+			}
+		);
+
+		userPermissions = _.unique(impliedPerms);
+
+		function hasRequiredPermissions(perms) {
+			return _.difference(perms, userPermissions).length === 0;
 		}
 
-		if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0){
-
-			getPermPromises.push(getPermissions(account).modelLevel(username, model));
-
+		//if it contains or relationship
+		if(Array.isArray(requiredPerms["$or"])){
+			return { granted: requiredPerms["$or"].some(hasRequiredPermissions), userPermissions };
 		}
 
-		return Promise.all(getPermPromises).then(userPermissions => {
-			
-			userPermissions = _.flatten(userPermissions);
+		//return true if user has the requested permissions
+		return { granted: hasRequiredPermissions(requiredPerms), userPermissions };
+	});
+}
 
-			//add implied and inherited permissions
-			let impliedPerms = [];
+//function that returns a middleware function for checking permissions
+function checkPermissions(permsRequest){
 
-			['account', 'project', 'model'].forEach(
-				level => {
-					impliedPerms = impliedPerms.concat(_.flatten(userPermissions.map(p => _.get(C.IMPLIED_PERM, `${p}.${level}`) || p)));
-				}
-			);
+	return function(req, res, next){
+		let checkLogin = Promise.resolve();
 
-			userPermissions = _.unique(impliedPerms);
+		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+			checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
+		}
 
-			function hasRequiredPermissions(perms) {
-				return _.difference(perms, userPermissions).length === 0;
+		checkLogin.then(() => {
+
+			const username = req.session.user.username;
+			const account = req.params.account;
+			const model = req.params.model;
+			const project = req.params.project;
+
+			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
+
+		}).then(data => {
+
+			if (data.userPermissions) {
+				req.session.user.permissions = data.userPermissions;
 			}
 
-			//if it contains or relationship
-			if(Array.isArray(requiredPerms['$or'])){
-				return { granted: requiredPerms['$or'].some(hasRequiredPermissions), userPermissions };
+			if(data.granted){
+				next();
+			} else {
+				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 
-			//return true if user has the requested permissions
-			return { granted: hasRequiredPermissions(requiredPerms), userPermissions };
+		}).catch(err => {
+			next(err);
 		});
-	}
+	};
 
-	//function that returns a middleware function for checking permissions
-	function checkPermissions(permsRequest){
-
-		return function(req, res, next){
-			let checkLogin = Promise.resolve();
-
-			if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-				checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
-			}
-
-			checkLogin.then(() => {
-
-				const username = req.session.user.username;
-				const account = req.params.account;
-				const model = req.params.model;
-				const project = req.params.project;
-
-				return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
-
-			}).then(data => {
-
-				if (data.userPermissions) {
-					req.session.user.permissions = data.userPermissions;
-				}
-
-				if(data.granted){
-					next();
-				} else {
-					return Promise.reject(responseCodes.NOT_AUTHORIZED);
-				}
-
-			}).catch(err => {
-				next(err);
-			});
-		};
-
-	}
-	module.exports = { checkPermissions, checkPermissionsHelper};
-
-})();
+}
+module.exports = { checkPermissions, checkPermissionsHelper};

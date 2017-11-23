@@ -1,4 +1,4 @@
-account-menu
+account-menu(account="vm.account")
 div#accountHolder(
 	layout="row"
 	flex="100"
@@ -9,7 +9,7 @@ div#accountHolder(
 		layout="row"
 		layout-xs="column"
 		layout-sm="column")
-
+		
 		account-info(
 			flex-xs="85"
 			flex-sm="85"
@@ -28,6 +28,7 @@ div#accountHolder(
 		#accountItem(flex="100")
 
 			account-teamspaces(
+				is-mobile-device="vm.isMobileDevice"
 				loading="vm.loadingAccount"
 				ng-show="vm.itemToShow === 'teamspaces'"
 				account="vm.account"
@@ -64,6 +65,7 @@ div#accountHolder(
 			account-modelsetting(
 				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
 				account="vm.account"
+				accounts="vm.accounts"
 				model="vm.model"
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)"

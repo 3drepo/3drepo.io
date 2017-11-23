@@ -38,15 +38,23 @@
 				onShowItem : "&",
 				hideItem: "=",
 				keysDown: "=",
-				treeMap: "=",
 				selectedObjects: "=",
 				setInitialSelectedObjects: "&"
 			}
 		});
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService", "AuthService", "UtilsService", "NotificationService", "RevisionsService", "ClientConfigService", "AnalyticService", "$state", "$q"];
+	IssuesCtrl.$inject = [
+		"$scope", "$timeout", "IssuesService", "EventService", "AuthService", 
+		"APIService", "NotificationService", "RevisionsService", "ClientConfigService", 
+		"AnalyticService", "$state", "$q", "DialogService", "ViewerService"
+	];
 
-	function IssuesCtrl($scope, $timeout, IssuesService, EventService, AuthService, UtilsService, NotificationService, RevisionsService, ClientConfigService, AnalyticService, $state, $q) {
+	function IssuesCtrl(
+		$scope, $timeout, IssuesService, EventService, AuthService, 
+		APIService, NotificationService, RevisionsService, ClientConfigService, 
+		AnalyticService, $state, $q, DialogService, ViewerService
+	) {
+
 		var vm = this;
 
 		/*
@@ -54,8 +62,10 @@
 		 */
 		vm.$onInit = function() {
 
+			ViewerService.setPin({data: null});
+			
 			vm.saveIssueDisabled = true;
-			vm.issues = [];
+			vm.allIssues = [];
 			vm.issuesToShow = [];
 			vm.showProgress = true;
 			vm.progressInfo = "Loading issues";
@@ -65,38 +75,50 @@
 			vm.autoSaveComment = false;
 			vm.onContentHeightRequest({height: 70}); // To show the loading progress
 			vm.savingIssue = false;
-			vm.issueDisplay = {};
-			vm.selectedIssueLoaded = false;
-
-			vm.modelLoaded = false;
+			vm.revisionsStatus = RevisionsService.status;
+			
 
 			/*
 			* Get the user roles for the model
 			*/
-			IssuesService.getUserJobFormodel(vm.account, vm.model).then(function (data) {
-				vm.modelUserJob = data;
-			});
+			IssuesService.getUserJobForModel(vm.account, vm.model)
+				.then(function (data) {
+					vm.modelUserJob = data;
+				})
+				.catch(function(error){
+					var content = "We tried to get the user job for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting User Job", content, escapable);
+					console.error(error);
+				});
 
 			/*
 			* Get all the Issues
 			*/
+
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
 
-					vm.showProgress = false;
-					vm.toShow = "showIssues";
-					vm.issues = (data === "") ? [] : data;
-					vm.showAddButton = true;
+					if (data) {
 
-
-					// if issue id is in url then select the issue
-					var issue = vm.issues.find(function(issue){
-						return issue._id === vm.issueId;
-					});
-
-					if(issue){
-						vm.displayIssue = issue;
+						vm.showProgress = false;
+						vm.toShow = "showIssues";
+						IssuesService.populateNewIssues(data);
+						vm.showAddButton = true;
+						
+					} else {
+						throw "Error";
 					}
+					
+
+				})
+				.catch(function(error){
+					var content = "We tried to get the issues for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Issues", content, escapable);
+					console.error(error);
 				});
 
 					
@@ -127,52 +149,38 @@
 						menu: menu
 					});
 
+				})
+				.catch(function(error){
+					var content = "We tried to get the jobs for this model but it failed. " +
+					"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Jobs", content, escapable);
+					console.error(error);
 				});
 
-			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs]).then(function(){
-				setAllIssuesAssignedRolesColors();
-				EventService.send(EventService.EVENT.ISSUES_READY, true);
-				// Check if the model has loaded
-				EventService.send(EventService.EVENT.VIEWER.CHECK_MODEL_LOADED);
-			});
+			vm.issuesReady = $q.all([vm.getIssues, vm.getJobs])
+				.catch(function(error){
+					var content = "We had an issue getting all the issues and jobs for this model. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting Model Issues and Jobs", content, escapable);
+					console.error(error);
+				});
 
 		};
 
+		vm.$onDestroy = function () {
+			vm.removeUnsavedPin();
+		};
 
-		/**
-		 * Define the assigned role colors for each issue
-		 */
-		function setAllIssuesAssignedRolesColors () {
-			var i, length;
+		vm.removeUnsavedPin = function() {
+			ViewerService.removePin({id: ViewerService.newPinId });
+			ViewerService.setPin({data: null});
+		};
 
-			if (vm.availableJobs !== null) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					setIssueAssignedRolesColors(vm.issues[i]);
-				}
-			}
-		}
-
-		/**
-		 * Define the assigned role colors for an issue
-		 * Also set the pin colors
-		 *
-		 * @param issue
-		 */
-		function setIssueAssignedRolesColors (issue) {
-			var i, length, roleColour, pinColours = [];
-			var rgbColour;
-			issue.assignedRolesColors = [];
-
-			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-
-				roleColour = IssuesService.getJobColor(issue.assigned_roles[i]);
-	
-				issue.assignedRolesColors.push(roleColour);
-				rgbColour = IssuesService.hexToRgb(roleColour);
-				pinColours.push(rgbColour);
-			}
-		}
-
+		vm.modelLoaded = function() {
+			return !!ViewerService.currentModel.model;
+		};
 
 		/*
 		 * New issue must have type and non-empty title
@@ -181,44 +189,71 @@
 			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
+		$scope.$watch("vm.modelSettings", function() {
+			if (vm.modelSettings) {
+
+				vm.issuesReady.then(function(){
+					var hasPerm = AuthService.hasPermission(
+						ClientConfigService.permissions.PERM_CREATE_ISSUE, 
+						vm.modelSettings.permissions
+					);
+	
+					if(hasPerm) {
+						vm.canAddIssue = true;
+					} 
+				});
+								
+				vm.subModels = vm.modelSettings.subModels || [];
+				vm.watchNotification();
+				
+			}
+		});
+
+
+		$scope.$watch(function() {
+			return RevisionsService.status;
+		}, function() {
+			if (RevisionsService.status.data) {
+				vm.revisions = RevisionsService.status.data;
+			}
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.allIssues;
+		}, function(){
+			vm.allIssues = IssuesService.state.allIssues;
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.issuesToShow;
+		}, function(){
+			vm.issuesToShow = IssuesService.state.issuesToShow;
+		}, true);
+
+		$scope.$watch(function(){
+			return IssuesService.state.selectedIssue;
+		}, function(){
+			vm.selectedIssue = IssuesService.state.selectedIssue;
+		}, true);
+
+
 		/**
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			var i, length;
-
-			vm.event = event;
 
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issues.length; i < length; i += 1) {
-					if (vm.issues[i]._id === event.value.id) {
-						vm.editIssue(vm.issues[i]);
+				
+				for (var i = 0; i < IssuesService.state.allIssues.length; i += 1) {
+					var iterIssue = IssuesService.state.allIssues;
+					if (iterIssue[i]._id === event.value.id) {
+						vm.editIssue(iterIssue[i]);
 						break;
 					}
 				}
-			} else if (event.type === EventService.EVENT.VIEWER.MODEL_LOADED) {
 
-				vm.modelLoaded = true;
-				
-			} else if (event.type === EventService.EVENT.REVISIONS_LIST_READY){
-				vm.revisions = event.value;
-				watchNotification();
-			} else if (event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
+			} 
 
-				//console.log("Disabled - MODEL_SETTINGS_READY in issues.component.js");
-				vm.issuesReady.then(function(){
-					//console.log("Disabled - canAddUse before permission check in issues.component.js");
-					if(AuthService.hasPermission(ClientConfigService.permissions.PERM_CREATE_ISSUE, event.value.permissions)){
-						vm.canAddIssue = true;
-						//console.log("Disabled - canAddUse set to true in issues.component.js");
-					} 
-				});
-				
-				vm.subModels = event.value.subModels || [];
-				watchNotification();
-			} else if (event.type === EventService.EVENT.SELECT_ISSUE){
-				vm.issueId = event.value;
-			}
 		});
 
 
@@ -237,6 +272,7 @@
 			vm.onContentHeightRequest({height: height});
 		};
 
+	
 		/*
 		 * Go back to issues list
 		 */
@@ -244,7 +280,14 @@
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.showAddButton = true;
-				vm.displayIssue = null;
+				var issueListItemId;
+
+				if (IssuesService.state.selectedIssue && IssuesService.state.selectedIssue._id) {
+					issueListItemId = "issue" + IssuesService.state.selectedIssue._id;
+				}	
+				
+				IssuesService.state.displayIssue = null;
+				
 				$state.go("home.account.model", 
 					{
 						account: vm.account, 
@@ -253,26 +296,28 @@
 						noSet: true
 					}, 
 					{notify: false}
-				);
+				).then(function(){
+					var element = document.getElementById(issueListItemId);
+					if (element && element.scrollIntoView) {
+						element.scrollIntoView(); 
+					}
+				});
+
+				
 			}
 		});
 
-
-		function watchNotification() {
-
-			if(!vm.revisions || !vm.subModels){
-				return;
-			}
+		vm.watchNotification = function() {
 
 			/*
 			 * Watch for new issues
 			 */
-			NotificationService.subscribe.newIssues(vm.account, vm.model, newIssueListener);
+			NotificationService.subscribe.newIssues(vm.account, vm.model, vm.newIssueListener);
 
 			/*
 			 * Watch for status changes for all issues
-			 */
-			NotificationService.subscribe.issueChanged(vm.account, vm.model, issueChangedListener);
+			 */ 	
+			NotificationService.subscribe.issueChanged(vm.account, vm.model, vm.handleIssueChanged);
 
 			// Do the same for all subModels
 			if(vm.subModels){
@@ -282,30 +327,26 @@
 						subModel.database, 
 						subModel.model, 
 						function(issues){ 
-							newIssueListener(issues, submodel); 
+							vm.newIssueListener(issues, submodel); 
 						}
 					);
 					NotificationService.subscribe.issueChanged(
 						subModel.database,
 						subModel.model, 
-						issueChangedListener
+						vm.handleIssueChanged
 					);
 				});
 			}
 
-		}
+		};
 
-		function newIssueListener(issues, submodel) {
+		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
+				
+				var issueShouldShow = false;
 
-				var showIssue;
-
-				if(submodel){
-					
-					showIssue = true;
-
-				} else {
+				if (vm.revisions && vm.revisions.length) {
 
 					var issueRevision = vm.revisions.find(function(rev){
 						return rev._id === issue.rev_id;
@@ -321,58 +362,25 @@
 						});
 					}
 
-					showIssue = issueRevision && new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+					issueShouldShow = issueRevision && issueInDate;
+				} else {
+					issueShouldShow = true;
 				}
 
-				if(showIssue){
+				if(issueShouldShow){
 					
-					issue.title = IssuesService.generateTitle(issue);
-					issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-					issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-					vm.issues.unshift(issue);
+					IssuesService.addIssue(issue);
 					
 				}
 
 			});
 
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
+		};
 
-		}
-
-		function issueChangedListener(issue) {
-
-			issue.title = IssuesService.generateTitle(issue);
-			issue.timeStamp = IssuesService.getPrettyTime(issue.created);
-			issue.thumbnailPath = UtilsService.getServerUrl(issue.thumbnail);
-
-			vm.issues.find(function(oldIssue, i){
-				if(oldIssue._id === issue._id){
-
-
-					if(issue.status === "closed"){
-						
-						vm.issues[i].justClosed = true;
-						
-						$timeout(function(){
-
-							vm.issues[i] = issue;
-							vm.issues = vm.issues.slice(0);
-
-						}, 4000);
-
-					} else {
-						vm.issues[i] = issue;
-					}
-				}
-			});
-
-			vm.issues = vm.issues.slice(0);
-			$scope.$apply();
-			
-		}
-
+		vm.handleIssueChanged = function(issue) {
+			IssuesService.updateIssues(issue);
+		};
 
 		/*
 		* Unsubscribe notifcation on destroy
@@ -401,20 +409,26 @@
 
 			vm.importingBCF = true;
 
-			IssuesService.importBcf(vm.account, vm.model, vm.revision, file).then(function(){
+			IssuesService.importBcf(vm.account, vm.model, vm.revision, file)
+				.then(function(){
+					return IssuesService.getIssues(vm.account, vm.model, vm.revision);
+				})
+				.then(function(data){
 
-				return IssuesService.getIssues(vm.account, vm.model, vm.revision);
+					vm.importingBCF = false;
+					vm.allIssues = (data === "") ? [] : data;
 
-			}).then(function(data){
+				})
+				.catch(function(error){
 
-				vm.importingBCF = false;
-				vm.issues = (data === "") ? [] : data;
-
-			}).catch(function(err){
-
-				vm.importingBCF = false;
+					vm.importingBCF = false;
+					var content = "We tried to get import BCF but it failed. " +
+						"If this continues please message support@3drepo.io.";
+					var escapable = true;
+					DialogService.text("Error Getting User Job", content, escapable);
+					console.error(error);
 				
-			});
+				});
 
 		};
 
@@ -423,27 +437,14 @@
 		 * @param issue
 		 */
 		vm.editIssue = function (issue) {
-
-			vm.event = null; // To clear any events so they aren't registered
-			vm.onShowItem();
-
-			if (vm.selectedIssue && (!issue || (issue && vm.selectedIssue._id != issue._id))) {
-				IssuesService.deselectPin(vm.selectedIssue);
-				// Remove highlight from any multi objects
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+			
+			if (IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
 			}
+			
+			if (issue) {
 
-			if(issue) {
-
-				IssuesService.showIssue(issue);
-				IssuesService.getIssue(issue.account, issue.model, issue._id).then(function(issue){
-					
-					vm.selectedIssueLoaded = true;
-					vm.selectedIssue = issue;
-				}).catch(function(error) {
-					console.error(error);
-				});
-
+				ViewerService.highlightObjects([]);
 				$state.go("home.account.model.issue", 
 					{
 						account: vm.account, 
@@ -455,29 +456,16 @@
 					{notify: false}
 				);
 
-				AnalyticService.sendEvent({
-					eventCategory: "Issue",
-					eventAction: "view"
-				});
+				IssuesService.setSelectedIssue(issue);
+				
 			} else {
-				vm.selectedIssueLoaded = true;
-				vm.selectedIssue = issue;
+				IssuesService.resetSelectedIssue();
 			}
 
 			vm.toShow = "showIssue";
 			vm.showAddButton = false;
+			vm.onShowItem();
 
-		};
-
-		/**
-		 * Select issue
-		 * @param issue
-		 */
-		vm.selectIssue = function (issue) {
-			if (vm.selectedIssue && (vm.selectedIssue._id !== issue._id)) {
-				IssuesService.deselectPin(vm.selectedIssue);
-			}
-			vm.selectedIssue = issue;
 		};
 
 		/**
@@ -485,16 +473,8 @@
 		 * @param issue
 		 */
 		vm.editIssueExit = function (issue) {
+			document.getElementById("issue" + issue._id).scrollIntoView();
 			vm.hideItem = true;
-		};
-
-		/**
-		 * New issue created so inform issues list
-		 * @param issue
-		 */
-		vm.issueCreated = function (issue) {
-			vm.issues.unshift(issue);
-			vm.selectedIssue = issue;
 		};
 
 	}

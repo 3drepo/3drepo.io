@@ -9,25 +9,25 @@ md-content(layout-margin)
 	div(ng-switch="vm.toShow")
 		div(ng-switch-when="0")
 			.cardInfo
-				p You do not currently have any licenses. A minimum of two is required to add team members.
+				p You do not currently have any licences. A minimum of two is required to add team members.
 				br
 				p
 					| Please go to the
 					=" "
 					a(href="", ng-click="vm.goToPage('billing')") Billing Page
 					=" "
-					| to add licenses.
+					| to add licences.
 
 		div(ng-switch-when="1")
 			.cardInfo
-				p You currently have one license. A minimum of two is required to add team members.
+				p You currently have one licence. A minimum of two is required to add team members.
 				br
 				p
 					| Please go to the
 					=" "
 					a(href="", ng-click="vm.goToPage('billing')") Billing Page
 					=" "
-					| to add licenses.
+					| to add licences.
 
 		div(ng-switch-when="1+")
 			#model(layout="row", layout-align="start center")
@@ -38,14 +38,14 @@ md-content(layout-margin)
 
 			div(ng-if="vm.noLicensesAssigned")
 				.cardInfo
-					p You do not have any licenses assigned to other users. You currently have {{vm.numSubscriptions - 1}} license(s) unassigned.
+					p You do not have any licences assigned to other users. You currently have {{vm.numSubscriptions - 1}} license(s) unassigned.
 					br
 					p
 						| Please go to the
 						=" "
-						a(href="", ng-click="vm.goToPage('licenses')") Licenses Page
+						a(href="", ng-click="vm.goToPage('licenses')") Licences Page
 						=" "
-						| to assign a license.
+						| to assign a licences.
 
 			div(ng-if="!vm.noLicensesAssigned")
 				md-autocomplete(

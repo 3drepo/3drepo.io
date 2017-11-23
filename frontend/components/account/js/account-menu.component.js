@@ -22,17 +22,19 @@
 		.component("accountMenu", {
 			restrict: "EA",
 			templateUrl: "templates/account-menu.html",
-			bindings: {
-				account: "="
-			},
 			controller: AccountMenuCtrl,
 			controllerAs: "vm"
 		});
 
-	AccountMenuCtrl.$inject = ["AuthService", "EventService"];
+	AccountMenuCtrl.$inject = ["AuthService", "$location", "ViewerService"];
 
-	function AccountMenuCtrl (AuthService, EventService) {
+	function AccountMenuCtrl (AuthService, $location, ViewerService) {
 		var vm = this;
+
+
+		vm.$onInit = function() {
+			vm.userAccount = AuthService.getUsername();
+		};
 		
 		/**
 		 * Open menu
@@ -48,8 +50,8 @@
 		 * Show user models
 		 */
 		vm.showTeamspaces = function () {
-			UnityUtil.reset();
-			EventService.send(EventService.EVENT.SHOW_TEAMSPACES);
+			ViewerService.reset();
+			$location.path(AuthService.getUsername());
 		};
 
 		/**
@@ -57,7 +59,7 @@
 		 */
 		vm.logout = function () {
 			AuthService.logout();
-			UnityUtil.reset();
+			ViewerService.reset();
 		};
 
 		vm.openUserManual = function(){

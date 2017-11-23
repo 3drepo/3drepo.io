@@ -9,7 +9,10 @@ md-dialog.newModelDialog(aria-label="New model")
 		div(layout="column")
 
 			md-input-container
-				input(placeholder="Revision name (optional)", ng-model="vm.tag")
+				input(
+					placeholder="Revision name (optional)"
+					maxlength=120
+					ng-model="vm.tag")
 				.inputHint Letters, numbers and underscore only
 
 			md-input-container
@@ -22,6 +25,10 @@ md-dialog.newModelDialog(aria-label="New model")
 				md-button.md-raised.md-accent(
 					ng-disabled="vm.uploadButtonDisabled", 
 					ng-click="vm.uploadFile()") Upload
+
+				md-progress-circular.uploadProgress(ng-if="vm.uploading")
+
+				
 
 			#modelDialogFilenameContainer(layout="row", ng-if="vm.modelToUpload")
 				p#modelDialogFilenameIntro Selected file

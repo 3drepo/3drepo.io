@@ -26,30 +26,25 @@
 				state: "=",
 				query: "=",
 				account: "=",
-				keysDown: "="
+				keysDown: "=",
+				isMobileDevice: "<"
 			},
 			controller: AccountCtrl,
 			controllerAs: "vm"
 		});
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "UtilsService"];
+	AccountCtrl.$inject = ["DialogService", "$scope", "$injector", "$location", "$timeout", "AccountService", "AuthService", "APIService"];
 
-	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, AuthService, UtilsService) {
+	function AccountCtrl(DialogService, $scope, $injector, $location, $timeout, AccountService, AuthService, APIService) {
 		var vm = this;
 
 		vm.$onInit = function() {
+			console.log("isMobileDevice", vm.isMobileDevice);
 			vm.accountInitialised = false;
 			vm.userInfoPromise = null;
 			vm.loadingAccount = true;
 
 			vm.initUserData();
-
-			window.addEventListener("storage", loginStatusListener, false);
-			// Set the logged in status to the account name just once
-			if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
-				localStorage.setItem("tdrLoggedIn", vm.account);
-			}
-
 		};
 
 
@@ -99,14 +94,14 @@
 		};
 
 		vm.initBillings = function() {
-			return UtilsService.doGet(vm.account + "/invoices")
+			return APIService.get(vm.account + "/invoices")
 				.then(function (response) {
 					vm.billings = response.data;
 				});
 		};
 
 		vm.initPlans = function() {
-			return UtilsService.doGet("plans")
+			return APIService.get("plans")
 				.then(function (response) {
 					if (response.status === 200) {
 						vm.plans = response.data;
@@ -115,10 +110,14 @@
 		};
 
 		vm.initSubscriptions = function() {
-			return UtilsService.doGet(vm.account + "/subscriptions")
+			return APIService.get(vm.account + "/subscriptions")
 				.then(function (response) {
 					vm.subscriptions = response.data;
 				});
+		};
+
+		vm.capitalizeFirstLetter = function(string) {
+			return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
 		};
 
 		vm.handleStateChange = function(type, oldValue, newValue) {
@@ -130,7 +129,7 @@
 				// Go to the correct "page"
 				if (vm.query.hasOwnProperty("page")) {
 					// Check that there is a directive for that "page"
-					var page = UtilsService.capitalizeFirstLetter(vm.query.page);
+					var page = vm.capitalizeFirstLetter(vm.query.page);
 					var directiveExists = "account" + page + "Directive";
 					if ($injector.has(directiveExists)) {
 						vm.itemToShow = vm.query.page;
@@ -156,8 +155,8 @@
 							
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
-							UtilsService.showDialog("paypal-dialog.html", $scope);
-							UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute")
+							DialogService.showDialog("paypal-dialog.html", $scope);
+							APIService.post("payment/paypal/execute", {token: ($location.search()).token})
 								.then(function (response) {
 									if (response.status !== 200) {
 										console.error("PayPal error", response);
@@ -168,7 +167,7 @@
 									$location.search("token", null);
 
 									$timeout(function () {
-										UtilsService.closeDialog();
+										DialogService.closeDialog();
 										//initDirectiveData();
 									}, 2000);
 
@@ -227,22 +226,11 @@
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage, data) {
-			UnityUtil.reset();
+
 			vm.itemToShow = page;
 			vm.callingPage = callingPage;
 			vm.data = data;
 		};
-
-		/**
-		 * Event listener for change in local storage login status
-		 *
-		 * @param event
-		 */
-		function loginStatusListener (event) {
-			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
-				AuthService.logout();
-			}
-		}
 
 		vm.getUserInfo = function() {
 
@@ -254,6 +242,7 @@
 					.then(function(response) {
 
 						if (response.data) {
+			
 							vm.accounts = response.data.accounts;
 							vm.username = vm.account;
 							vm.firstName = response.data.firstName;

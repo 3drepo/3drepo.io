@@ -1,6 +1,8 @@
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 10px 10px 10px 10px
+    margin: 10px 10px 10px 10px;
+    text-decoration: none;
+    color: #2945b5;
 }
 
 sign-up {
@@ -61,6 +63,7 @@ sign-up #loginPricing {
 }
 
 sign-up .registerError {
+    max-width: 400px;
     color: #e44539 !important;
     margin: 20px 20px 5px;
     font-weight: normal;

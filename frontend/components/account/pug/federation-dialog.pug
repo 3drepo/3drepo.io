@@ -1,7 +1,13 @@
-md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50")
+md-dialog#federationDialog(
+	aria-label="Federation", 
+	flex="70"
+	flex-gt-md="60"
+	flex-gt-lg="50")
+
 	md-toolbar
 		.md-toolbar-tools
-			h2 Federation
+			h2(ng-if="vm.federationData._isEdit") Edit Federation
+			h2(ng-if="!vm.federationData._isEdit") New Federation
 			span(flex)
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
@@ -10,13 +16,23 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 
 			md-input-container()
 				md-select(
-					placeholder="Teamspace", 
+					placeholder="Teamspace"
 					tdr-focus="true"
 					ng-model="vm.federationData.teamspace" 
 					ng-disabled="vm.federationData.teamspace && vm.federationData._isEdit")
+
 					md-option(
+						required
 						ng-repeat="teamspace in vm.accounts"
+						ng-if="vm.federationData.teamspace && vm.federationData._isEdit"
 						ng-selected="vm.federationData.teamspace === teamspace.name"
+						value="{{teamspace.name}}") {{teamspace.name}}
+					
+					md-option(
+						ng-if="!vm.federationData._isEdit && vm.hasProjectWithPermission(teamspace, 'create_federation')"
+						required
+						ng-repeat="teamspace in vm.accounts"
+						ng-selected="teamspace.name === vm.account"
 						value="{{teamspace.name}}") {{teamspace.name}}
 
 			md-input-container()
@@ -24,8 +40,11 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 					placeholder="Project",
 					ng-model="vm.federationData.project"
 					ng-disabled="vm.federationData.project === 'default' || (vm.federationData.project && vm.federationData._isEdit)")
+					
 					md-option(
+						required
 						ng-repeat="project in vm.getProjects(vm.federationData.teamspace)"
+						ng-if="project.permissions.indexOf('create_federation') !== -1"
 						ng-selected="vm.federationData.project === project.name"
 						value="{{project.name}}") {{project.name}}
 
@@ -36,19 +55,20 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(layout="row", flex)
 					md-input-container(flex="50")
 						input(
-						placeholder="{{vm.federationData.name || 'Federation name'}} "
-						value="{{vm.federationData.name}}"
-						tdr-focus="true"
-						ng-disabled="vm.federationData.name && vm.federationData._isEdit"
-						ng-model="vm.federationData.name"
-						ng-pattern="vm.modelRegExp" 
-						maxlength=20)
+							required
+							placeholder="{{vm.federationData.name || 'Federation name (required)'}} "
+							value="{{vm.federationData.name}}"
+							tdr-focus="true"
+							ng-disabled="vm.federationData.name && vm.federationData._isEdit"
+							ng-model="vm.federationData.name")
 						.inputHint(ng-if="!vm.federationData.name") Letters, numbers, hyphen and underscore only
 				
 				div( layout="row", flex)
 					md-input-container(flex="50")
 						label Unit
-						md-select(ng-model="vm.federationData.unit")
+						md-select(
+							ng-disabled="vm.federationData._isEdit"
+							ng-model="vm.federationData.unit")
 							md-option(
 								ng-repeat="unit in vm.units", 
 								value="{{unit.value}}"
@@ -105,12 +125,14 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 
 					md-divider
 
+					p.federationDialogError(ng-if="vm.federationErrorMessage") {{vm.federationErrorMessage}}
+
 					// Save/Cancel
 					#federationSave(layout="row", layout-align="start center")
 						md-button.md-raised.md-accent(
-							ng-disabled="vm.isDuplicateName()", 
+							ng-disabled="vm.federationSaveDisabled", 
 							ng-click="vm.saveFederation(vm.federationData.teamspace, vm.federationData.project)") Save 
 							md-progress-circular.isSavingProgress(ng-if="vm.isSaving")
-						md-button.md-accent(ng-click="vm.closeDialog()") Cancel
+						md-button.md-accent(ng-click="vm.closeFederationDialog()") Cancel
 
-					p.modelDialogError(ng-if="vm.errorMessage") {{vm.errorMessage}}
+					

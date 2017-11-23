@@ -30,14 +30,10 @@
 			controllerAs: "vm"
 		});
 
-	PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
+	PasswordChangeCtrl.$inject = ["$scope", "APIService", "StateManager"];
 
-	function PasswordChangeCtrl ($scope, UtilsService, EventService) {
-		var vm = this,
-			enterKey = 13,
-			promise,
-			messageColour = "rgba(0, 0, 0, 0.7)",
-			messageErrorColour = "#F44336";
+	function PasswordChangeCtrl ($scope, APIService, StateManager) {
+		var vm = this;
         
 		/*
          * Init
@@ -45,6 +41,11 @@
 		vm.$onInit = function() {
 			vm.passwordChanged = false;
 			vm.showProgress = false;
+			vm.enterKey = 13,
+			vm.promise,
+			vm.messageColour = "rgba(0, 0, 0, 0.7)",
+			vm.messageErrorColour = "#F44336";
+			vm.buttonDisabled = true;
 		};
 
 		/*
@@ -52,6 +53,25 @@
          */
 		$scope.$watch("vm.newPassword", function () {
 			vm.message = "";
+			if (vm.newPassword && vm.newPassword !== "") {
+				vm.buttonDisabled = false;
+			}
+		});
+
+		$scope.$watch("vm.token", function () {
+			if (!vm.token) {
+				vm.messageColor = vm.messageErrorColour;
+				vm.showProgress = false;
+				vm.message = "Token is missing as URL parameter for password change!";
+			}
+		});
+
+		$scope.$watch("vm.username", function () {
+			if (!vm.username) {
+				vm.messageColor = vm.messageErrorColour;
+				vm.showProgress = false;
+				vm.message = "Username is missing as URL parameter for password change!";
+			}
 		});
 
 		/**
@@ -59,7 +79,7 @@
          */
 		vm.passwordChange = function (event) {
 			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
+				if (event.which === vm.enterKey) {
 					doPasswordChange();
 				}
 			} else {
@@ -71,41 +91,59 @@
          * Take the user back to the login page
          */
 		vm.goToLoginPage = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			StateManager.goHome();
 		};
 
 		/**
          * Do password change
          */
 		function doPasswordChange() {
-			if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-				if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
-					vm.messageColor = messageColour;
+			if (vm.username && vm.token) {
+				if (vm.newPassword && vm.newPassword !== "") {
+					
+					vm.messageColor = vm.messageColour;
 					vm.message = "Please wait...";
 					vm.showProgress = true;
-					promise = UtilsService.doPut(
+					vm.buttonDisabled = true;
+					APIService.put(
+						vm.username + "/password", 
 						{
 							token: vm.token,
 							newPassword: vm.newPassword
-						},
-						vm.username + "/password"
-					);
-					promise.then(function (response) {
-						vm.showProgress = false;
-						if (response.status === 400) {
-							vm.messageColor = messageErrorColour;
+						})
+						.then(function (response) {
+							
+							vm.showProgress = false;
+							if (response.status === 400) {
+								vm.buttonDisabled = false;
+								vm.messageColor = vm.messageErrorColour;
+								vm.message = "Error changing password: " + response.data.message;
+							} else {
+								vm.buttonDisabled = true;
+								vm.passwordChanged = true;
+								vm.showProgress = false;
+								vm.messageColor = vm.messageColour;
+								vm.message = "Your password has been reset. Please go to the login page.";
+							}
+						})
+						.catch(function(error){
+							vm.buttonDisabled = false;
+							vm.showProgress = false;
+							vm.messageColor = vm.messageErrorColour;
 							vm.message = "Error changing password";
-						} else {
-							vm.passwordChanged = true;
-							vm.messageColor = messageColour;
-							vm.message = "Your password has been reset. Please go to the login page.";
-						}
-					});
+							if (error.data.message) {
+								vm.message += ": " + error.data.message;
+							}
+						});
+
 				} else {
-					vm.messageColor = messageErrorColour;
+					vm.messageColor = vm.messageErrorColour;
 					vm.message = "A new password must be entered";
+					vm.buttonDisabled = true;
 				}
 			}
+			vm.buttonDisabled = true;
+			vm.message = "Token or username is missing!";
 		}
 	}
 }());

@@ -20,7 +20,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing'}) }
+	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
 const log_iface = require("../../logger.js");
 const systemLogger = log_iface.systemLogger;
@@ -158,8 +158,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 
 		agentNoPermission
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(401, function(err, res){
 			done(err);
 		});
@@ -172,8 +172,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 
 		agentNoPermission
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName, subModels: [] }, modelDetail))
 		.expect(401, function(err, res){
 			done(err);
 		});
@@ -200,8 +200,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model001';
 		
 		agentCanCreateModel
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);
@@ -214,7 +214,7 @@ describe('Project Permissions::', function () {
 		.expect(200, function(err, res){
 			expect(err).to.be.null;
 			const perm = res.body.find(p => p.user === userCanCreateModel.username);
-			expect(perm).to.exists;
+			expect(perm).to.exist;
 			expect(perm.permission).to.equal('admin');
 			done();
 		});
@@ -226,8 +226,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel001';
 		
 		agentCanCreateModel
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ modelName: modelName, subModels: [] }, modelDetail))
 		.expect(401, done);
 	});
 
@@ -238,7 +238,7 @@ describe('Project Permissions::', function () {
 		.expect(200, function(err, res){
 
 			expect(err).to.be.null;
-			expect(res.body.permissions).to.exists;
+			expect(res.body.permissions).to.exist;
 
 			let permissions = res.body.permissions;
 
@@ -265,12 +265,12 @@ describe('Project Permissions::', function () {
 				.expect(200, function(err, res){
 
 					expect(err).to.be.null;
-					expect(res.body.permissions).to.exists;
+					expect(res.body.permissions).to.exist;
 
 					permissions = res.body.permissions;
 
 					const userPerm = permissions.find(p => p.user === userCanCreateModel.username);
-					expect(userPerm).to.exists;
+					expect(userPerm).to.exist;
 
 					userPerm.permissions = [];
 					callback(err);
@@ -307,8 +307,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel002';
 		
 		agentCanCreateFed
-		.post(`/${teamspace}/${modelName}`)
-		.send(Object.assign({ subModels: [] }, modelDetail))
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ subModels: [], modelName: modelName }, modelDetail))
 		.expect(200, done);
 
 	});
@@ -318,8 +318,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'fedmodel002';
 		
 		agentCanCreateFed
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({ modelName: modelName }, modelDetail))
 		.expect(401, done);
 
 	});
@@ -350,8 +350,8 @@ describe('Project Permissions::', function () {
 		const modelName = 'model002';
 		
 		agentProjectAdmin
-		.post(`/${teamspace}/${modelName}`)
-		.send(modelDetail)
+		.post(`/${teamspace}/model`)
+		.send(Object.assign({modelName: modelName}, modelDetail))
 		.expect(200, function(err, res){
 			modelId = res.body.model;
 			done(err);

@@ -6,7 +6,9 @@
 	md-list#accountList.tree-branch(flex)
 		// Accounts
 		div(ng-repeat="account in vm.accounts")
-			div(layout="column", layout-align="space-between")
+			div(ng-if="vm.hasViewableProject(account)"
+				layout="column", layout-align="space-between")
+
 				md-list-item.tree-node(flex)
 					.account(layout="row", layout-align="start center", md-ink-ripple, flex, ng-click="vm.toggleProjects(account.projects)")
 						md-button.md-icon-button(aria-label="Folder")
@@ -19,12 +21,16 @@
 				div( layout="column")
 					// Project
 					
-					div(ng-show="vm.shouldShow(account.projects, 'projects')")
+					div(ng-show="vm.shouldShow(account.projects, 'projects', account.account)")
 						p.no-federations(ng-show="account.projects.length === 0") No projects created
 
-						md-list.tree-branch(ng-repeat="project in account.projects")
+						md-list.tree-branch(
+							ng-if="vm.hasViewableModel(project)"
+							ng-repeat="project in account.projects | orderBy:'name'")
 
-							div(ng-click="vm.toggleProject(project)" layout="row")
+							div(ng-click="vm.toggleProject(project)" 
+								layout="row")
+
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
 										md-icon.angular-material-icons(ng-show="vm.shouldShow(project)") folder_open
@@ -48,9 +54,11 @@
 													md-icon.angular-material-icons(
 														md-menu-align-target, 
 														style="color:{{value.color}}") {{value.icon}}
+							
+
 
 							// Project Models and Federations
-							md-list.tree-branch(ng-show="vm.shouldShow(project)")
+							md-list.tree-branch(ng-show="vm.shouldShow(project, 'project', account.account)")
 
 								div(ng-click="vm.toggleModels(project)")
 									md-list-item.tree-node(flex)
@@ -59,11 +67,13 @@
 											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'models')") folder
 										p Models
 								
-								div(ng-show="vm.shouldShow(project, 'models')")
+								div(ng-show="vm.shouldShow(project, 'models', account.account)")
 									div(ng-repeat="model in vm.getIndividualModels(project.models)"
+										ng-if="model.permissions.length"
 										ng-show="model.name")
 								
 										account-model(
+											is-mobile-device="vm.isMobileDevice"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
@@ -87,10 +97,12 @@
 											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'federations')") folder
 										p Federations
 									
-								div(ng-show="vm.shouldShow(project, 'federations')")
+								div(ng-show="vm.shouldShow(project, 'federations', account.account)")
 
 									div(ng-repeat="federation in vm.getFederations(project.models)"
-										ng-show="federation.name")
+										ng-show="federation.name"
+										ng-if="federation.permissions.length"
+										)
 										
 										account-federations(											
 											federation="federation"
@@ -99,6 +111,7 @@
 											account="account"
 											is-saving="vm.isSaving"
 											federation-data="vm.federationData"
+											original-federation-data="vm.originalFederationData"
 											setup-federation-data="vm.setupFederationData"
 											get-potential-federation-models="vm.getPotentialFederationModels"
 											is-default-federation="false"
@@ -106,6 +119,10 @@
 											save-federation="vm.saveFederation"
 											on-show-page="vm.showPage(page, callingPage)"
 											accounts="vm.accounts"
+											check-federation-save-disabled="vm.checkFederationSaveDisabled"
+											is-duplicate-name="vm.isDuplicateName"
+											federation-save-disabled="vm.federationSaveDisabled"
+											federation-error-message="vm.federationErrorMessage"
 											subscriptions="vm.subscriptions")
 
 									p.no-federations(
@@ -136,6 +153,7 @@
 										ng-repeat="model in account.models")
 
 										account-model(
+											is-mobile-device="vm.isMobileDevice"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
@@ -167,6 +185,7 @@
 										project="project"
 										account="account"
 										federation-data="vm.federationData"
+										original-federation-data="vm.originalFederationData"
 										setup-federation-data="vm.setupFederationData"
 										get-potential-federation-models="vm.getPotentialFederationModels"
 										add-to-federation="vm.addToFederation"
@@ -180,12 +199,13 @@
 md-divider
 
 div(layout="row" flex layout-align="end center")
-	#floating-button(layout="column" ng-show="vm.addButtons" ng-init="vm.addEscape()")
-		md-button(layout="row" ng-click="vm.newModel($event, vm.accounts)") Add Model
-		md-button(layout="row" ng-click="vm.setupNewFederation($event, vm.accounts)") Add Federation 
-		md-button(layout="row" ng-click="vm.newProject($event,  vm.accounts)") Add Project
+	#floating-button(layout="column" ng-show="vm.addButtons")
+		md-button(id="addModel" layout="row" ng-click="vm.newModel($event, vm.accounts)") Add Model
+		md-button(id="addFederation" layout="row" ng-click="vm.setupNewFederation($event, vm.accounts)") Add Federation 
+		md-button(id="addProject" layout="row" ng-click="vm.newProject($event,  vm.accounts)") Add Project
 div(layout="row" flex layout-align="end center")
-	md-button.md-accent.md-fab.md-mini(aria-label="Add", ng-click="vm.addButtonsToggle()")
+	span.addHint(ng-show="!vm.addButtons") Add projects, models & federations
+	md-button.md-accent.md-fab.md-mini(id="addButtons" aria-label="Add", ng-click="vm.addButtonsToggle()")
 		md-icon.angular-material-icons {{vm.addButtonType}}
 
 

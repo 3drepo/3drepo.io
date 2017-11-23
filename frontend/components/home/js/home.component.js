@@ -34,16 +34,17 @@
 
 	HomeCtrl.$inject = [
 		"$scope", "$http", "$templateCache", "$element", "$interval", 
-		"$timeout", "$compile", "$mdDialog", "$window",
-		"AuthService", "StateManager", "EventService", "UtilsService", 
-		"ClientConfigService", "$location", "SWService", "AnalyticService"
+		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
+		"StateManager", "EventService", "APIService", "ClientConfigService", 
+		"$location", "SWService", "AnalyticService", "ViewerService", 
+		"$document", "TemplateService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
-		EventService, UtilsService, ClientConfigService, $location,
-		SWService, AnalyticService
+		EventService, APIService, ClientConfigService, $location,
+		SWService, AnalyticService, ViewerService, $document, TemplateService
 	) {
 
 		var vm = this;
@@ -53,30 +54,38 @@
 		 */
 		vm.$onInit = function() {
 
-			// TODO: this is a bit of a hack, it would be nice to 
-			// include this in the StateManager
-			if (hasTrailingSlash()) {
-				removeTrailingSlash();
-			}
+			vm.handlePaths();
 
+			vm.setLoginPage();
+			
 			AnalyticService.init();
 			SWService.init();
-
+			
+			vm.initKeyWatchers();
 			vm.precacheTeamspaceTemplate();
+
+			// Pages to not attempt a interval triggered logout from
+
+			vm.doNotLogout = AuthService.doNotLogout;
+			vm.legalPages = AuthService.legalPages;
+			vm.loggedOutPages = AuthService.loggedOutPages;
 
 			vm.loggedIn = false;
 			vm.loginPage = true;
 			vm.isLoggedOutPage = false;
 			
-			vm.state = StateManager.state;
-			vm.query = StateManager.query;
 			vm.functions = StateManager.functions;
 			vm.pointerEvents = "inherit";
 			vm.goToAccount = false;
 			vm.goToUserPage = false;
 			vm.keysDown = [];
+			vm.firstState = true;
 
-			vm.isMobileFlag = true;
+			// Required for everything to work
+			vm.state = StateManager.state;
+			vm.query = StateManager.query;
+
+			vm.isMobileDevice = true;
 
 			vm.legalDisplays = [];
 			if (angular.isDefined(ClientConfigService.legal)) {
@@ -85,88 +94,163 @@
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-			// Pages to not attempt a interval triggered logout from
-			vm.doNotLogout = [
-				"/terms", 
-				"/privacy",
-				"/signUp", 
-				"/passwordForgot", 
-				"/registerRequest", 
-				"/registerVerify"
-			];
+			vm.isMobileDevice = vm.isMobile();
 
+		};
 
-			vm.legalPages = [
-				"terms", 
-				"privacy",
-				"cookies"
-			];
+		vm.getSubdomain = function() {
+			var host = $location.host();
+			if (host.indexOf(".") < 0) {
+				return "";
+			} 
+			return host.split(".")[0];
+		};
 
-			vm.loggedOutPages = [
-				"sign-up",
-				"password-forgot",
-				"register-request",
-				"register-verify"
-			];
+		vm.setLoginPage = function() {
 
-			$timeout(function () {
+			if (ClientConfigService.customLogins !== undefined) {
+			
+				var sub = vm.getSubdomain();
+				var custom = ClientConfigService.customLogins[sub];
 
-				/*
-				* Watch the state to handle moving to and from the login page
-				*/
-				$scope.$watch("vm.state", function (oldState, newState) {
-
-					var change = JSON.stringify(oldState) === JSON.stringify(newState);
-
-					// Determine whether to show the Login directive or 
-					// logged in content directives
-					if (newState.loggedIn !== undefined) {
-						vm.loggedIn = newState.loggedIn;
+				if (sub && custom) {
+					if (
+						custom.loginMessage
+					) {
+						vm.loginMessage = custom.loginMessage;
 					}
+					if (
+						custom.backgroundImage &&
+						typeof custom.backgroundImage === "string"
+					) {
+						vm.backgroundImage = custom.backgroundImage;
+					}
+					if (
+						custom.topLogo &&
+						typeof custom.topLogo === "string"
+					) {
+						vm.topLogo = custom.topLogo;
+					}
+					if (
+						custom.css
+					) {
+						var link = document.createElement("link");
+						link.setAttribute("rel", "stylesheet");
+						link.setAttribute("type", "text/css");
+						link.setAttribute("href", custom.css);
+						document.getElementsByTagName("head")[0].appendChild(link);
+					}
+				} 
 
-					if (newState && change) {
-						// If it's a legal page
-						var legal = vm.pageCheck(newState, vm.legalPages);
-						var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+			}
 
-						if (legal) {
-
-							vm.isLegalPage = true;
-							vm.isLoggedOutPage = false;
-
-							vm.legalPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-						} else if (loggedOut) {
-
-							// If its a logged out page which isnt login
-
-							vm.isLegalPage = false;
-							vm.isLoggedOutPage = true;
-
-							vm.loggedOutPages.forEach(function(page){
-								vm.setPage(newState, page);
-							});
-
-						}
-					}			
-				}, true);
-			});
-
-			vm.isMobileFlag = vm.isMobile();
-
-			if (angular.isDefined(vm.account) && angular.isDefined(vm.password)) {
-				AuthService.login(vm.account, vm.password);
+			if (!vm.topLogo) {
+				vm.topLogo = "/images/3drepo-logo-white.png";
+			}
+			if (!vm.backgroundImage) {
+				vm.backgroundImage = "/images/viewer_background.png";
 			}
 
 		};
+
+		vm.handlePaths = function() {
+			
+			// TODO: this is a bit of a hack, it would be nice to 
+			// include this in the StateManager
+			if (hasTrailingSlash()) {
+				removeTrailingSlash();
+			}
+
+			// If it's a logged in page just redirect to the
+			// users teamspace page
+			AuthService.authPromise.then(function(){
+				if (
+					AuthService.loggedOutPage() && 
+					AuthService.getUsername()
+				) {
+					$location.path("/" + AuthService.getUsername());
+				}
+			});	
+
+		};
+
+		$scope.$watch(function(){
+			return $location.path();
+		}, function() {
+
+			vm.handlePaths();
+			
+		});
+
+
+		/*
+		* Watch the state to handle moving to and from the login page
+		*/
+		$scope.$watch("vm.state", function (oldState, newState) {
+
+			var change = JSON.stringify(oldState) !== JSON.stringify(newState);
+
+			console.log(vm.loggedIn);
+			vm.loggedIn = AuthService.isLoggedIn();
+
+			if ( (newState && change) || (newState && vm.firstState)) {
+
+				// If it's a legal page
+				var legal = vm.pageCheck(newState, vm.legalPages);
+				var loggedOut = vm.pageCheck(newState, vm.loggedOutPages);
+
+				if (legal) {
+
+					vm.isLegalPage = true;
+					vm.isLoggedOutPage = false;
+
+					vm.legalPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+				} else if (loggedOut && !newState.loggedIn) {
+
+					// If its a logged out page which isnt login
+					
+					vm.isLegalPage = false;
+					vm.isLoggedOutPage = true;
+
+					vm.loggedOutPages.forEach(function(page){
+						vm.setPage(newState, page);
+					});
+
+					
+				} else if (
+					AuthService.getUsername() && 
+					newState.account !== AuthService.getUsername() && 
+					!newState.model
+				) {
+					// If it's some other random page that doesn't match 
+					// anything sensible like legal, logged out pages, or account
+					vm.isLoggedOutPage = false;
+					vm.page = "";
+					$location.search({}); // Reset query parameters
+					$location.path("/" + AuthService.getUsername());
+				} else if (
+					!AuthService.getUsername() &&
+					!legal &&
+					!loggedOut
+				) {
+
+					// Login page or none existant page
+					
+					vm.isLoggedOutPage = false;
+					vm.page = "";
+				}
+
+			}
+		}, true);
 
 		vm.pageCheck = function(state, pages) {
 			return pages.filter(function(page) { 
 				return state[page] === true;
 			}).length;
-		}
+		};
 
 		vm.setPage = function(state, page) {
 			if(state[page] === true) {
@@ -182,14 +266,11 @@
 			var preCacheTemplates = [
 				"templates/account-teamspaces.html",
 				"templates/account-info.html",
-				"templates/sign-up.html"
+				"templates/sign-up.html",
+				"templates/register-request.html"
 			];
 
-			preCacheTemplates.forEach(function(templatePath){
-				$http.get(templatePath).then(function(response) {
-					$templateCache.put(templatePath, response.data);
-				});
-			});
+			TemplateService.precache(preCacheTemplates);
 
 		};
 
@@ -245,10 +326,12 @@
 
 		vm.logout = function () {
 			AuthService.logout();
+			ViewerService.reset();
 		};
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+			ViewerService.reset();
+			StateManager.goHome();
 		};
 
 		/**
@@ -266,13 +349,14 @@
 				if (event.type === EventService.EVENT.USER_LOGGED_IN) {
 					if (!event.value.error) {
 						if(!event.value.initialiser) {
-							StateManager.setStateVar("loggedIn", true);
+							
 							EventService.send(EventService.EVENT.UPDATE_STATE);
 
 							if(!StateManager.state.account){
+								
 								var username = AuthService.getUsername();
 								if (!username) {
-									console.error("Username is not defined for statemanager!")
+									console.error("Username is not defined for statemanager!");
 								}
 								EventService.send(EventService.EVENT.SET_STATE, { 
 									account: username
@@ -295,61 +379,39 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 					}
 
-				} else if (event.type === EventService.EVENT.SHOW_TEAMSPACES) {
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-					$location.path(AuthService.getUsername());
-				} else if (event.type === EventService.EVENT.GO_HOME) {
-
-					//EventService.send(EventService.EVENT.CLEAR_STATE);
-
-					// TODO: Do this properly using state manager
-					
-					if (AuthService.isLoggedIn()) {
-						$location.path(AuthService.getUsername());
-						//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
-					} else {
-						$location.path("");
-					}
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "inherit";
 				}
 			}
 		});
 
+		vm.initKeyWatchers = function() {
 
-		/**
-		 * Keep a list of keys held down
-		 * For changes to be registered by directives and especially components the list needs to be recreated
-		 *
-		 * @param event
-		 */
-		vm.keyAction = function (event) {
-			var i, tmp;
-			// Update list, but avoid repeat
-			if (event.type === "keydown") {
+			$document.bind("keydown", function(event) {
 				if (vm.keysDown.indexOf(event.which) === -1) {
-					// Recreate list so that it changes are registered in components
-					tmp = vm.keysDown;
-					delete vm.keysDown;
 					
-					vm.keysDown = angular.copy(tmp);
 					vm.keysDown.push(event.which);
+					
+					// Recreate list so that it changes are registered in components
+					vm.keysDown = vm.keysDown.slice();
 
 				}
-			} else if (event.type === "keyup") {
+			});
+
+			$document.bind("keyup", function(event) {
 				// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+				for (var i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
 					if (vm.keysDown[i] === event.which) {
 						vm.keysDown.splice(i, 1);
 					}
 				}
+				
 				// Recreate list so that it changes are registered in components
-				tmp = vm.keysDown;
-				delete vm.keysDown;
-				vm.keysDown = angular.copy(tmp);
-			}
-		};
+				vm.keysDown = vm.keysDown.slice();
+			});
 
+
+		};
 
 		/**
 		 * Close the dialog

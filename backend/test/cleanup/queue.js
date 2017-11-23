@@ -9,7 +9,6 @@ if(config.cn_queue){
 
 	q.connect(config.cn_queue.host, {
 
-
 		shared_storage: config.cn_queue.shared_storage,
 		logger: systemLogger,
 		callback_queue: config.cn_queue.callback_queue,
@@ -33,16 +32,16 @@ if(config.cn_queue){
 
 	}).then(() => {
 
-		console.log('Queue purged.')
+		systemLogger.logInfo('Queue purged.')
 		process.exit(0);
 		
 	}).catch(err => {
-		console.log(err);
+		systemLogger.logError(err);
 		process.exit(-1);
 	});
 
 } else {
-	console.log('No queue config found');
+	systemLogger.logError('No queue config found');
 	process.exit(0);
 }
 

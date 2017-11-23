@@ -1,41 +1,46 @@
 language: node_js
+
 git:
   submodules: false
   depth: 1
+
 node_js:
-    - "6.11.2"
-env:
-  - CXX=g++-4.8
-sudo: required
+    - "6.11.3"
+
+sudo: false
 dist: trusty
+
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
+   sources:
+      - mongodb-3.2-precise
+  chrome: stable
+  hosts:
+    - test.127.0.0.1
+
 before_install:
+    - mongo --version
     - mkdir -p submodules
     - cd submodules
     - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
     - cd ..
-    - sudo apt-get install graphicsmagick
-    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-    - echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-    - sudo apt-get update
-    - sudo apt-get install -y mongodb-org
+    - sudo apt-get install -y graphicsmagick 
     - mongod --version
-    - sudo service mongod start
     - until nc -z localhost 27017; do sleep 1; done
-    - test_ver=`git submodule status | grep tests | cut -f 2 -d '-' | cut -f 1 -d ' '`
+    - test_ver=`cat backend/test/testDBVersion`
     - cd submodules/tests
     - git checkout $test_ver
     - git status
-    - cd backend
-    - mongorestore
-    - cd ../../../backend
+    - cd backend && mongorestore
+    - cd ./../../../
+    - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
 
-install: yarn install
+install:
+    - cd ./backend 
+    - yarn install
+    - cd ./../frontend 
+    - yarn install
+    - yarn run gulp build
 
 cache:
   yarn: true
@@ -44,9 +49,19 @@ cache:
 
 services:
   - rabbitmq
+  - mongodb
+  
 script:
+    - yarn run wdm:update
+    - yarn run wdm:start > /dev/null 2>&1 &
+    - cd ./../backend 
     - yarn run test
+    - cd ./../ 
+    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
+    - cd ./frontend
+    - yarn run e2e
+
 notifications:
     email: 
         recipients:
-            - team@3drepo.org
+            - devOps@3drepo.org

@@ -27,9 +27,16 @@
 			controllerAs: "vm"
 		});
 
-	RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService"];
+	RightPanelCtrl.$inject = [
+		"$scope", "$timeout", "EventService",
+		"DocsService",  "MeasureService"
+	];
 
-	function RightPanelCtrl ($scope, $timeout, EventService) {
+	function RightPanelCtrl (
+		$scope, $timeout, EventService, 
+		DocsService, MeasureService
+	) {
+
 		var vm = this;
 			
 		/*
@@ -38,40 +45,21 @@
 		vm.$onInit = function() {
 
 			vm.highlightBackground = "#FF9800";
-			
-			vm.addIssueMode = null;
-			vm.measureMode = false;
+			vm.measureActive = false;
+			vm.measureDisabled = false;
+
 			vm.metaData = false;
 			vm.showPanel = true;
-			vm.issueButtons = {
-				// "scribble": {
-				//     label: "Scribble",
-				//     icon: "border_color",
-				//     background: ""
-				// },
-				// "erase": {
-				//     label: "Erase",
-				//     faIcon: "fa fa-eraser",
-				//     background: ""
-				// },
-				// "pin": {
-				//     label: "Pin",
-				//     icon: "pin_drop",
-				//     background: ""
-				// }
-			};
+			
 			vm.measureBackground = "";
 			vm.metaBackground = "";
-			// $timeout(function () {
-			// 	EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
-			// });
 
 		};
 
 		vm.disableOtherModes = function(setMode) {
 			if (setMode === "meta") {
 
-				if (vm.measureMode) {
+				if (vm.measureActive) {
 					vm.toggleMeasure();
 				} 
 
@@ -81,80 +69,60 @@
 
 			} else if (setMode === "measure") {
 
-
-				if (!vm.measureMode) {
+				if (!vm.measureActive) {
 					vm.toggleMeasure();
 				} 
 
 			}
 		};
 
+		$scope.$watch(function(){
+			return MeasureService;
+		}, function(){
+
+			if (vm.measureActive !== MeasureService.state.active ) {
+				vm.measureActive = MeasureService.state.active;
+
+				// Clear the background of measure tooltip
+				if (!vm.measureActive) {
+					vm.measureBackground = "";
+				} else {
+					vm.measureBackground = vm.highlightBackground;
+				}
+			}
+
+			if (vm.measureDisabled !== MeasureService.state.disabled ) {
+				vm.measureDisabled = MeasureService.state.disabled;
+				if (vm.measureDisabled) {
+					vm.measureBackground = "";
+					vm.measureActive = false;
+				}
+			}
+			
+		}, true);
 
 		/*
          * Setup event watch
          */
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
-				if (vm.addIssueMode !== null) {
-					vm.issueButtons[vm.addIssueMode].background = "";
-					vm.addIssueMode = null;
-				}
-			} else if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
-				if (vm.addIssueMode !== event.value) {
-					vm.issueButtons[vm.addIssueMode].background = "";
-					vm.addIssueMode = event.value;
-					vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
-				}
-			} else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+			if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
 				vm.showPanel = !vm.showPanel;
-			}
+			} 
 		});
 
-		/**
-         * Set up adding an issue with scribble
-         */
-		vm.issueButtonClick = function (buttonType) {
-			
-			// Turn off measure mode
-			if (vm.measureMode) {
-				vm.measureMode = false;
-				vm.measureBackground = "";
-				EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
-			}
-
-			if (vm.addIssueMode === null) {
-				vm.addIssueMode = buttonType;
-				vm.issueButtons[buttonType].background = vm.highlightBackground;
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
-			} else if (vm.addIssueMode === buttonType) {
-				vm.addIssueMode = null;
-				vm.issueButtons[buttonType].background = "";
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
-			} else {
-				vm.issueButtons[vm.addIssueMode].background = "";
-				vm.addIssueMode = buttonType;
-				vm.issueButtons[vm.addIssueMode].background = vm.highlightBackground;
-				EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
-			}
-		};
 
 		/**
          * Toggle measuring tool
          */
 		vm.toggleMeasure = function () {
 
-			if (!vm.measureMode && vm.metaData) {
+			// If not measure mode and metadata enabled
+			if (!vm.measureActive && vm.metaData) {
 				vm.toggleAutoMetaData();
 			}
 
-			//Turn off issue mode
-			if (vm.addIssueMode !== null) {
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
-			}
-
-			vm.measureMode = !vm.measureMode;
-			vm.measureBackground = vm.measureMode ? vm.highlightBackground : "";
-			EventService.send(EventService.EVENT.MEASURE_MODE, vm.measureMode);
+			MeasureService.toggleMeasure();
+			
 		};
 
 		/**
@@ -162,13 +130,25 @@
          */
 		vm.toggleAutoMetaData = function () {
 
-			if (vm.measureMode && !vm.metaData) {
+			if (vm.measureActive && !vm.metaData) {
 				vm.toggleMeasure();
 			}
 
 			vm.metaData = !vm.metaData;
 			vm.metaBackground = vm.metaData ? vm.highlightBackground : "";
-			EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
+			DocsService.state.active = vm.metaData;
+			DocsService.state.show = false;
+
+			//EventService.send(EventService.EVENT.AUTO_META_DATA, vm.metaData);
+			//DocsService.active = vm.metaData;
+
 		};
+
+		vm.$onDestroy = function () {
+			vm.metaBackground = "";
+			vm.measureBackground = "";
+			MeasureService.deactivateMeasure();
+		};
+
 	}
 }());

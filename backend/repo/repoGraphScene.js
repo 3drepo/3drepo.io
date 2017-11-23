@@ -17,8 +17,11 @@
 
 // Corresponds to repoGraphScene in C++ definition of 3D Repo
 
+"use strict";
+
 // var mongodb = require('mongodb');
 // var assert = require('assert');
+
 var UUID = require('node-uuid');
 var C = require('../constants');
 var repoNodeMesh = require('./repoNodeMesh');
@@ -26,6 +29,7 @@ var repoNodeTransformation = require('./repoNodeTransformation');
 var repoNodeMaterial = require('./repoNodeMaterial');
 var repoNodeCamera = require('./repoNodeCamera');
 var repoNodeMeta   = require('./repoNodeMeta');
+const systemLogger = require("../logger.js").systemLogger;
 
 // Documentation
 // http://mongodb.github.com/node-mongodb-native/contents.html
@@ -36,7 +40,6 @@ var repoNodeMeta   = require('./repoNodeMeta');
  * @param {Array} bsonArray
  */
 var repoGraphScene = function(logger) {
-	"use strict";
 
 	var self = this instanceof repoGraphScene ? this : Object.create(repoGraphScene.prototype);
 
@@ -46,7 +49,6 @@ var repoGraphScene = function(logger) {
 };
 
 repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
-	'use strict';
 
 	var rootNode;
 
@@ -128,7 +130,7 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 						scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
 						break;
 					default :
-						console.log('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						systemLogger.logError("Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
 				let sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
@@ -224,6 +226,6 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 };
 
 module.exports = function(logger) {
-	 return new repoGraphScene(logger);
+	return new repoGraphScene(logger);
 };
 

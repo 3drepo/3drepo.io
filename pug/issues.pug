@@ -1,6 +1,11 @@
 doctype html
 html(lang="en" ng-app="3drepo").ng-scope
 	script(type="text/javascript", src="/config.js")
+	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+	style.
+		html, body {
+				font-family: Roboto, sans-serif;
+		}
 	head
 		each issueTypeIssues, issueType in issues
 			if issueType === "open" && issueTypeIssues.length > 0
@@ -21,7 +26,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 					tr
 						td(colspan=2)
 							b Assigned:
-							span [#{issue.assigned_roles.join(",")}] 
+							span [#{issue.assigned_roles.join(", ")}] 
 
 							b Priority: 
 							span #{issue.priority} 

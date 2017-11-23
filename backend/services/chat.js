@@ -78,7 +78,7 @@ module.exports.createApp = function (server, serverConfig){
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
 
-			console.log("consumeEventMessage --- ", msg);
+			//console.log("consumeEventMessage --- ", msg);
 
 			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message
@@ -135,11 +135,11 @@ module.exports.createApp = function (server, serverConfig){
 						socket.join(`${data.account}${modelNameSpace}`);
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
 
-						systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, { 
-							username, 
-							account: data.account, 
-							model: data.model 
-						});
+						// systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, { 
+						// 	username, 
+						// 	account: data.account, 
+						// 	model: data.model 
+						// });
 						
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});

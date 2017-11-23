@@ -14,69 +14,73 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var ModelFactory = require('../factory/modelFactory');
-var ModelSetting = require('../modelSetting');
-var User = require('../user');
-var responseCodes = require('../../response_codes');
-var importQueue = require('../../services/queue');
-var C = require('../../constants');
-var Mailer = require('../../mailer/mailer');
-var systemLogger = require("../../logger.js").systemLogger;
-var config = require('../../config');
-var History = require('../history');
-var Scene = require('../scene');
-var Ref = require('../ref');
-var utils = require("../../utils");
-var stash = require('./stash');
-var Ref = require('../ref');
-var middlewares = require('../../middlewares/middlewares');
-var C = require("../../constants");
-var multer = require("multer");
-var fs = require('fs');
-var ChatEvent = require('../chatEvent');
-var Project = require('../project');
+
+"use strict";
+
+const ModelFactory = require('../factory/modelFactory');
+const ModelSetting = require('../modelSetting');
+const User = require('../user');
+const responseCodes = require('../../response_codes');
+const importQueue = require('../../services/queue');
+const C = require('../../constants');
+const Mailer = require('../../mailer/mailer');
+const systemLogger = require("../../logger.js").systemLogger;
+const config = require('../../config');
+const History = require('../history');
+const Scene = require('../scene');
+const Ref = require('../ref');
+const utils = require("../../utils");
+const stash = require('./stash');
+const middlewares = require('../../middlewares/middlewares');
+const multer = require("multer");
+const fs = require('fs');
+const ChatEvent = require('../chatEvent');
+const Project = require('../project');
 const stream = require('stream');
-var _ = require('lodash');
+const _ = require('lodash');
+const uuid = require("node-uuid");
 
 /*******************************************************************************
- * Converts error code from repobouncerclient to a response error object
+ * Converts error code from repobouncerclient to a response error object.
+ * Uncaught error codes that are valid responseCodes will be returned,
+ * otherwise FILE_IMPORT_UNKNOWN_ERR is returned.
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
 
-    var errObj;
+	let errObj;
 
-    switch (bouncerErrorCode) {
-        case 0:
-            errObj = responseCodes.OK;
-            break;
-        case 1:
-            errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
-            break;
-        case 2:
-            errObj = responseCodes.NOT_AUTHORIZED;
-            break;
-        case 3:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-            break;
-        case 4:
-        	errObj = errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-        	break;
-        case 5:
-            errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
+	switch (bouncerErrorCode) {
+		case 0:
+			errObj = responseCodes.OK;
 			break;
-        case 6:
-            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+		case 1:
+			errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
 			break;
-        case 7:
-            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-            break;
-        case 8:
-        	errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-        	break;
-        case 9:
-        	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
-        	break;
+		case 2:
+			errObj = responseCodes.NOT_AUTHORIZED;
+			break;
+		case 3:
+			errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+			break;
+		case 4:
+			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			break;
+		case 5:
+			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
+			break;
+		case 6:
+			errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+		case 7:
+			errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
+			break;
+		case 8:
+			errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+			break;
+		case 9:
+			errObj = responseCodes.REPOERR_FED_GEN_FAIL;
+			break;
 		case 10:
 			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
 			break;
@@ -96,17 +100,152 @@ function convertToErrorCode(bouncerErrorCode){
 			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
 			break;
 		default:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-            break;
+			errObj = (bouncerErrorCode) ? bouncerErrorCode : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+			break;
 
-    }
-    
-    return Object.assign({bouncerErrorCode}, errObj);
+	}
+	
+	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+function importSuccess(account, model, sharedSpacePath) {
+	setStatus(account, model, 'ok').then(setting => {
+		if (setting) {
+			if (sharedSpacePath) {
+				let files = function(filePath, fileDir, jsonFile){
+					return [
+						{desc: 'tmp model file', type: 'file', path: filePath},
+						{desc: 'json file', type: 'file', path: jsonFile},
+						{desc: 'tmp dir', type: 'dir', path: fileDir}
+					];
+				};
+
+				let tmpDir = `${sharedSpacePath}/${setting.corID}`;
+				let tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
+				fs.stat(tmpModelFile, function(err, stat) {
+					let tmpJsonFile;
+					if (err) {
+						tmpJsonFile = `${tmpDir}/obj.json`;
+					} else {
+						let tmpModelFileData = require(tmpModelFile);
+						tmpJsonFile = tmpModelFileData.file;
+					}
+
+					_deleteFiles(files(tmpModelFile, tmpDir, tmpJsonFile));
+				});
+			}
+			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
+			setting.corID = undefined;
+			setting.errorReason = undefined;
+			if(setting.type === 'toy' || setting.type === 'sample'){
+				setting.timestamp = new Date();
+			}
+			setting.markModified('errorReason');
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+			setting.save();
+		}
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke importSuccess:`, err);
+	});
+}
+
+/**
+ * Sets failed status, error code, chat event, and E-mail upon import failure
+ * @param {account} acount - User account
+ * @param {model} model - Model
+ * @param {errCode} errCode - Defined bouncer error code or IO response code
+ * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
+ * @param {sendMail} sendMail - Boolean to determine if a notification E-mail will be sent
+ */
+function importFail(account, model, errCode, errMsg, sendMail) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		//mark model failed
+		setting.status = 'failed';
+		if(setting.type === 'toy' || setting.type === 'sample'){
+			setting.timestamp = undefined;
+		}
+		setting.errorReason = convertToErrorCode(errCode);
+		setting.markModified('errorReason');
+		setting.save().then( () => {				
+			ChatEvent.modelStatusChanged(null, account, model, setting);						
+		})
+
+		if (!errMsg) {
+			errMsg = setting.errorReason.message;
+		}
+
+		if (sendMail) {
+			Mailer.sendImportError({
+				account,
+				model,
+				username: account,
+				err: errMsg,
+				corID: setting.corID
+			});
+		}
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke importFail:`, err);
+	});
+}
+
+/**
+ * Create correlation ID, store it in model setting, and return it
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
+function setStatus(account, model, status) {
+	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+	return ModelSetting.findById({account, model}, model).then(setting => {
+		setting.status = status;
+		systemLogger.logInfo(`Model status changed to ${status}`);
+		return setting.save();
+	}).catch(err => {
+		systemLogger.logError(`Failed to invoke setStatus:`, err);
+	});
+}
+
+/**
+ * Create correlation ID, store it in model setting, and return it
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
+function createCorrelationId(account, model) {
+	let correlationId = uuid.v1();
+
+	// store corID
+	return ModelSetting.findById({account, model}, model).then(setting => {
+		setting = setting || ModelSetting.createInstance({
+			account: account,
+			model: model
+		});
+
+		setting._id = model;
+		setting.corID = correlationId;
+		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+		return setting.save().then(() => {
+			return correlationId;
+		});;
+	}).catch(err => {
+		systemLogger.logError(`Failed to createCorrelationId:`, err);
+	});
+}
+
+/**
+ * Clear correlation ID from model setting when processing returns
+ * @param {account} account - User account
+ * @param {model} model - Model
+ */
+function resetCorrelationId(account, model) {
+	ModelSetting.findById({account, model}, model).then(setting => {
+		setting.corID = undefined;
+		systemLogger.logInfo(`Correlation ID reset`);
+		setting.save();
+	}).catch(err => {
+		systemLogger.logError(`Failed to resetCorrelationId:`, err);
+	});
+}
 
 function createAndAssignRole(modelName, account, username, data) {
-	'use strict';
 
 	let project;
 	//generate model id
@@ -183,7 +322,6 @@ function createAndAssignRole(modelName, account, username, data) {
 			setting.timestamp = new Date();
 		}
 
-
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
@@ -243,7 +381,7 @@ function createAndAssignRole(modelName, account, username, data) {
 }
 
 function importToyProject(account, username){
-	'use strict';
+
 	// create a project named Sample_Project
 	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
@@ -260,6 +398,9 @@ function importToyProject(account, username){
 			const subModels = models.map(m => {
 				
 				m = m.toObject();
+				
+				importSuccess(account, m._id);
+
 				return {
 					model: m._id,
 					database: account
@@ -272,17 +413,17 @@ function importToyProject(account, username){
 	}).catch(err => {
 
 		Mailer.sendImportError({
- 			account,
- 			username,
- 			err: err.message
- 		});
+			account,
+			username,
+			err: err.message
+		});
 
 		return Promise.reject(err);
 	});
 }
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip){
-	'use strict';
+	
 
 	let model;
 	let desc = '';
@@ -303,92 +444,271 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	}).catch(err => {
 
 		Mailer.sendImportError({
- 			account,
- 			model,
- 			username,
- 			err: err.message,
- 			corID: err.corID,
- 			appId: err.appId
- 		});
+			account,
+			model,
+			username,
+			err: err.message,
+			corID: err.corID,
+			appId: err.appId
+		});
 
 		return Promise.reject(err);
 	});
 }
 
 function createFederatedModel(account, model, subModels){
-	'use strict';
 
-	let federatedJSON = {
-		database: account,
-		project: model,
-		subProjects: []
-	};
+	return createCorrelationId(account, model).then(correlationId => {
 
-	let error;
+		let federatedJSON = {
+			database: account,
+			project: model,
+			subProjects: []
+		};
 
-	let addSubModels = [];
+		let error;
 
-	let files = function(data){
-		return [
-			{desc: 'json file', type: 'file', path: data.jsonFilename},
-			{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
-		];
-	};
+		let addSubModels = [];
 
-	subModels.forEach(subModel => {
+		subModels.forEach(subModel => {
 
-		if(subModel.database !== account){
-			error = responseCodes.FED_MODEL_IN_OTHER_DB;
-		}
-
-		addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-			if(setting && setting.federate){
-				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
-
-			} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-				federatedJSON.subProjects.push({
-					database: subModel.database,
-					project: subModel.model
-				});
+			if(subModel.database !== account){
+				//return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
+				error = responseCodes.FED_MODEL_IN_OTHER_DB;
 			}
-		}));
 
-	});
+			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+				if(setting && setting.federate){
+					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
-	if(error){
-		return Promise.reject(error);
-	}
+				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
+					federatedJSON.subProjects.push({
+						database: subModel.database,
+						project: subModel.model
+					});
+				}
+			}));
 
-	if(subModels.length === 0) {
-		return Promise.resolve();
-	}
+		});
 
-	//console.log(federatedJSON);
-	return Promise.all(addSubModels).then(() => {
-
-		return importQueue.createFederatedModel(account, federatedJSON);
-
-	}).then(data => {
-
-
-		_deleteFiles(files(data));
-
-		return;
-
-	}).catch(err => {
-		//catch here to provide custom error message
-		if(err.errCode){
-			return Promise.reject(convertToErrorCode(err.errCode));
+		if (error) {
+			return Promise.reject(error);
 		}
-		return Promise.reject(err);
+
+		if(subModels.length === 0) {
+			return Promise.resolve();
+		}
+
+		return Promise.all(addSubModels).then(() => {
+			importQueue.createFederatedModel(correlationId, account, federatedJSON);
+		}).catch(err => {
+			//catch here to provide custom error message
+			if(err.errCode){
+				return Promise.reject(convertToErrorCode(err.errCode));
+			}
+			return Promise.reject(err);
+
+		});
 
 	});
-
 }
 
-function getModelProperties(account, model, branch, rev, username){
-	'use strict';
+function getIdMap(account, model, branch, rev, username){
+	'use strict'	
+	let subIdMaps;
+	let revId, idMapsFileName;
+	let getHistory, history;
+	let status;
 
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getIdMaps = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getIdMaps.push(
+				getIdMap(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idMap: obj.idMaps.idMap,
+						owner: ref.owner,
+						model: ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(getIdMaps);
+
+	}).then(_subIdMaps => {
+
+		subIdMaps = _subIdMaps;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idMapsFileName);
+
+	}).then(buf => {
+		let idMaps = {};
+
+		if(buf){
+			idMaps = JSON.parse(buf);
+		}
+
+		if (!idMaps.idMap)
+		{
+			idMaps.idMap = [];
+		}
+
+		if(subIdMaps.length > 0)
+		{
+			idMaps.subModels = [];
+		}
+		subIdMaps.forEach(subIdMap => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdMap && subIdMap.idMap)
+			{
+				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
+			}
+		});
+
+		return Promise.resolve({idMaps, status});
+
+	});
+}
+
+function getIdToMeshes(account, model, branch, rev, username){
+	'use strict'	
+	let subIdToMeshes;
+		let revId, idToMeshesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let refPromises = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			refPromises.push(
+				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToMeshes: obj.idToMeshes,
+						key: ref.owner + "@" + ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(refPromises);
+
+	}).then(_subIdToMeshes => {
+
+		subIdToMeshes = _subIdToMeshes;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+
+	}).then(buf => {
+		let idToMeshes = {};
+
+		if(buf){
+			idToMeshes = JSON.parse(buf);
+		}
+
+		subIdToMeshes.forEach(subIdToMeshes => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdToMeshes && subIdToMeshes.idToMeshes)
+			{
+			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
+			}
+		});
+
+		return Promise.resolve({idToMeshes, status});
+
+	});
+}
+
+
+function getModelProperties(account, model, branch, rev, username){
+	
 	let subProperties;
 	let revId, modelPropertiesFileName;
 	let getHistory, history;
@@ -487,8 +807,110 @@ function getModelProperties(account, model, branch, rev, username){
 	});
 }
 
+function getTreePath(account, model, branch, rev, username){
+	'use strict'	
+	let subTreePaths;
+	let revId, treePathsFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTreePaths = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getTreePaths.push(
+				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToPath: obj.treePaths.idToPath,
+						owner: ref.owner,
+						model: ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(getTreePaths);
+
+	}).then(_subTreePaths => {
+
+		subTreePaths = _subTreePaths;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', treePathsFileName);
+
+	}).then(buf => {
+		let treePaths = {};
+
+		if(buf){
+			treePaths = JSON.parse(buf);
+		}
+
+		if (!treePaths.idToPath)
+		{
+			treePaths.idToPath = [];
+		}
+
+		if(subTreePaths.length > 0)
+		{
+			treePaths.subModels = [];
+		}
+		subTreePaths.forEach(subTreePath => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subTreePath && subTreePath.idToPath)
+			{
+				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
+			}
+		});
+
+		return Promise.resolve({treePaths, status});
+
+	});
+}
+
+
 function getUnityAssets(account, model, branch, rev, username){
-	'use strict';
+	
 
 	let subAssets;
 	let revId, assetsFileName;
@@ -509,10 +931,10 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = 'NOT_FOUND';
-			return Promise.resolve([]);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
 			status = 'NO_ACCESS';
-			return Promise.resolve([]);
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
@@ -544,7 +966,9 @@ function getUnityAssets(account, model, branch, rev, username){
 						models: obj.models,
 						owner: ref.owner,
 						model: ref.project
-					});
+					})
+				}).catch(err => {
+					return Promise.resolve();
 				})
 			);
 		});
@@ -569,7 +993,7 @@ function getUnityAssets(account, model, branch, rev, username){
 		}
 
 		subAssets.forEach(subAsset => {
-			if (subAsset.models)
+			if (subAsset && subAsset.models)
 			{
 				models = models.concat(subAsset.models);
 			}
@@ -581,7 +1005,7 @@ function getUnityAssets(account, model, branch, rev, username){
 }
 
 function getUnityBundle(account, model, uid){
-	'use strict';
+	
 
 	let bundleFileName;
 
@@ -602,7 +1026,7 @@ function getUnityBundle(account, model, uid){
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
 function getFullTree_noSubTree(account, model, branch, rev){
-	'use strict';
+	
 
 	let getHistory;
 	let history;
@@ -694,7 +1118,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 					pass.write(",");
 				}
 
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}"}`);
+				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
 
 				if(refIndex+1 < refs.length){
 					eachRef(refIndex+1);
@@ -727,159 +1151,8 @@ function getFullTree_noSubTree(account, model, branch, rev){
 	return {readStreamPromise, outputingPromise};
 }
 
-// more efficient, no json parsing, no idToPath generation for fed model, but only support 1 level of fed
-// function getFullTree(account, model, branch, rev, username, out){
-// 	'use strict';
-
-// 	let getHistory;
-// 	let history;
-// 	//let trees = {};
-// 	out.write("{");
-
-// 	if(rev && utils.isUUID(rev)){
-
-// 		getHistory = History.findByUID({ account, model }, rev);
-
-// 	} else if (rev && !utils.isUUID(rev)) {
-
-// 		getHistory = History.findByTag({ account, model }, rev);
-
-// 	} else if (branch) {
-
-// 		getHistory = History.findByBranch({ account, model }, branch);
-// 	}
-
-// 	return getHistory.then(_history => {
-
-// 		history = _history;
-
-// 		if(!history){
-// 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-// 		}
-
-// 		let revId = utils.uuidToString(history._id);
-// 		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
-
-// 		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-// 		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
-
-// 	}).then(rs => {
-
-// 		//trees.mainTree = buf.toString();
-
-// 		return new Promise(function(resolve, reject){
-
-// 			out.write('"mainTree": ');
-
-// 			rs.on('data', d => out.write(d));
-// 			rs.on('end', ()=> resolve());
-// 			rs.on('error', err => reject(err));
-
-// 		});
-
-// 	}).then(() => {
-// 		let filter = {
-// 			type: "ref",
-// 			_id: { $in: history.current }
-// 		};
-
-// 		return Ref.find({ account, model }, filter);
-
-// 	}).then(refs => {
-
-// 		//for all refs get their tree
-// 		out.write(', "subTrees":[');
-
-// 		return new Promise((resolve, reject) => {
-
-// 			function eachRef(refIndex){
-
-// 				const ref = refs[refIndex];
-// 				//write buffer
-// 				//done
-// 				let getRefId;
-
-// 				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
-
-// 					getRefId = History.findByBranch({ account: ref.owner, model: ref.project }, C.MASTER_BRANCH_NAME).then(_history => {
-// 						return _history ? utils.uuidToString(_history._id) : null;
-// 					});
-
-// 				} else {
-// 					getRefId = Promise.resolve(utils.uuidToString(ref._rid));
-// 				}
-
-// 				let status;
-// 				middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then(granted => {
-
-// 					if(!granted){
-// 						status = 'NO_ACCESS';
-// 						return;
-// 					}
-
-// 					return getRefId.then(revId => {
-
-// 						if(!revId){
-// 							status = 'NOT_FOUND';
-// 							return;
-// 						}
-
-// 						let treeFileName = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-// 						//return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName);
-// 						return stash.findStashByFilename({ account: ref.owner, model: ref.project }, 'json_mpc', treeFileName, true);
-// 					});
-
-// 				}).then(rs => {
-
-// 					return new Promise(function(_resolve, _reject){
-
-// 						if(refIndex > 0){
-// 							out.write(",");
-// 						}
-
-// 						let statusString = status && `"status": "${status}" ,` || '';
-
-// 						out.write(`{ ${statusString} "_id": "${utils.uuidToString(ref._id)}", "buf": `);
-
-// 						rs.on('data', d => out.write(d));
-// 						rs.on('end', () => {
-// 							out.write('}');
-// 							_resolve();
-// 						});
-// 						rs.on('error', err => _reject(err));
-
-// 					});
-
-// 				}).then(() => {
-// 					if(refIndex+1 < refs.length){
-// 						eachRef(refIndex+1);
-// 					} else {
-// 						resolve();
-// 					}
-// 				}).catch(err => {
-// 					reject(err);
-// 				});
-// 			}
-
-// 			if(refs.length){
-// 				eachRef(0);
-// 			} else {
-// 				resolve();
-// 			}
-// 		});
-
-
-// 	}).then(() => {
-
-// 		out.write(']');
-// 		out.write("}");
-// 		out.end();
-
-// 	});
-// }
-
 function searchTree(account, model, branch, rev, searchString, username){
-	'use strict';
+	
 
 	let items = [];
 
@@ -968,12 +1241,11 @@ function searchTree(account, model, branch, rev, searchString, username){
 }
 
 function listSubModels(account, model, branch){
-	'use strict';
+	
 
 	let subModels = [];
 
 	return History.findByBranch({ account, model }, branch).then(history => {
-
 
 		if(history){
 			let filter = {
@@ -986,18 +1258,20 @@ function listSubModels(account, model, branch){
 			return [];
 		}
 
-
 	}).then(refs => {
-
 
 		const proms = refs.map(ref => 
 
-			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(model => {
-				subModels.push({
-					database: ref.owner,
-					model: ref.project,
-					name: model.name
-				});
+			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
+				// TODO: Why would this return null?
+				if (subModel) {
+					subModels.push({
+						database: ref.owner,
+						model: ref.project,
+						name: subModel.name
+					});
+				}
+				
 			})
 
 		);
@@ -1009,8 +1283,7 @@ function listSubModels(account, model, branch){
 
 
 function downloadLatest(account, model){
-	'use strict';
-
+	
 	let bucket =  stash.getGridFSBucket(account, `${model}.history`);
 
 	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
@@ -1039,8 +1312,7 @@ function downloadLatest(account, model){
 
 
 function uploadFile(req){
-	'use strict';
-
+	
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -1095,6 +1367,7 @@ function uploadFile(req){
 
 					if(size > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {
 						cb(null, true);
 					}
@@ -1122,8 +1395,7 @@ function uploadFile(req){
 }
 
 function _deleteFiles(files){
-	'use strict';
-
+	
 	files.forEach(file => {
 
 		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
@@ -1144,19 +1416,13 @@ function _deleteFiles(files){
 	});
 }
 
-function _handleUpload(account, model, username, file, data){
-	'use strict';
-
-
-	let files = function(filePath, fileDir, jsonFile){
-		return [
-			{desc: 'tmp model file', type: 'file', path: filePath},
-			{desc: 'json file', type: 'file', path: jsonFile},
-			{desc: 'tmp dir', type: 'dir', path: fileDir}
-		];
-	};
-
-	return importQueue.importFile(
+/**
+ * Called by importModel to perform model upload
+ */
+function _handleUpload(correlationId, account, model, username, file, data){
+	
+	importQueue.importFile(
+		correlationId,
 		file.path,
 		file.originalname,
 		account,
@@ -1167,112 +1433,51 @@ function _handleUpload(account, model, username, file, data){
 		data.desc
 	).then(obj => {
 
-		let corID = obj.corID;
-
-		systemLogger.logInfo(`Job ${corID} imported without error`,{
+		systemLogger.logInfo(`Job ${correlationId} imported without error`,{
 			account,
 			model,
 			username
 		});
 
-		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
-		return Promise.resolve(obj);
-
 	}).catch(err => {
-		_deleteFiles(files(err.newPath, err.newFileDir, err.jsonFilename));
-		return err.errCode ? Promise.reject(convertToErrorCode(err.errCode)) : Promise.reject(err);
+		systemLogger.logError(`Failed to import model:`, err);
 	});
 
 }
 
 function importModel(account, model, username, modelSetting, source, data){
-	'use strict';
 
 	if(!modelSetting){
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'processing' });
-
-	modelSetting.status = 'processing';
-
 	return modelSetting.save().then(() => {
+		return createCorrelationId(account, model).then(correlationId => {
+			return setStatus(account, model, 'queued').then(setting => {
 
-		if (source.type === 'upload'){
-			return _handleUpload(account, model, username, source.file, data);
+				modelSetting = setting;
 
-		} else if (source.type === 'toy'){
+				if (source.type === 'upload'){
+					return _handleUpload(correlationId, account, model, username, source.file, data);
 
-			return importQueue.importToyModel(account, model, source).then(obj => {
-				let corID = obj.corID;
-				systemLogger.logInfo(`Job ${corID} imported without error`,{account, model, username});
+				} else if (source.type === 'toy'){
+
+					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+						return modelSetting;
+					});
+				}
+
 			});
-		}
-
-	}).then(() => {
-
-		modelSetting.status = 'ok';
-		modelSetting.errorReason = undefined;
-
-		//moved to bouncer - toy doesn't use bouncer so this needs to be done.
-		if(source.type === 'toy'){
-			modelSetting.timestamp = new Date();
-		}
-		modelSetting.markModified('errorReason');
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-		return modelSetting.save();
-
-	}).then(() => {
-
-		systemLogger.logInfo(`Model from source ${source.type} has imported successfully`, {
-			account,
-			model,
-			username
 		});
-
-		return modelSetting;
-
 	}).catch(err => {
-
-		// import failed for some reason(s)...
-		//mark model failed
-
-		systemLogger.logError(`Error while importing model from source ${source.type}`, {
-			stack : err.stack,
-			err: err,
-			account,
-			model,
-			username
-		});
-
-		//moved to bouncer
-		// const partialOKCodes = [
-		// 	responseCodes.FILE_IMPORT_MISSING_TEXTURES.value,
-		// 	responseCodes.FILE_IMPORT_MISSING_NODES.value,
-		// 	responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES.value
-		// ];
-
-		// if(err && err.bouncerErrorCode && partialOKCodes.indexOf(err.value) !== -1){
-		// 	modelSetting.timestamp = new Date();
-		// }
-
-		modelSetting.status = 'failed';
-		modelSetting.errorReason = err;
-		modelSetting.markModified('errorReason');
-		modelSetting.save();
-
-		ChatEvent.modelStatusChanged(null, account, model, modelSetting);
-
-
-		return Promise.reject(err);
-
+		systemLogger.logError(`Failed to importModel:`, err);
 	});
+
 }
 
 function removeModel(account, model, forceRemove){
-	'use strict';
+	
 
 	let setting;
 	return ModelSetting.findById({account, model}, model).then(_setting => {
@@ -1291,7 +1496,7 @@ function removeModel(account, model, forceRemove){
 
 		settings.forEach(modelSetting => {
 			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				if(subModels.find(subModel => subModel.model === model)){
+				if(subModels.find(subModel => subModel.model === model)) {
 					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
 				}
 			}));
@@ -1324,12 +1529,15 @@ function removeModel(account, model, forceRemove){
 
 		//remove model from all project
 		return Project.removeModel(account, model);
+	/*}).catch(err => {
+		systemLogger.logError(`Failed to removeModel:`, err);
+		return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});*/
 	});
 
 }
 
 function getModelPermission(username, setting, account){
-	'use strict';
+	
 
 	if(!setting){
 		return Promise.resolve([]);
@@ -1360,7 +1568,7 @@ function getModelPermission(username, setting, account){
 
 		if(project && project.permissions){
 			permissions = permissions.concat(
-				 _.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
+				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
 			);
 		}
 
@@ -1378,11 +1586,119 @@ function getModelPermission(username, setting, account){
 		}
 
 		return _.uniq(permissions);
+	}).catch(err => {
+		systemLogger.logError(`Failed to getModelPermission:`, err);
 	});
 }
 
+function getAllIdsWith4DSequenceTag(account, model, branch, rev){
+	//Get sequence tag then call the generic getAllIdsWithMetadataField
+	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
+		if(!settings)
+		{
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+		if(!settings.fourDSequenceTag)
+		{
+			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
+		}
+		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
+
+	});
+}
+
+function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
+	//Get the revision object to find all relevant IDs
+	let getHistory;
+	let history;
+	let fullFieldName = "metadata." + fieldName;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+	return getHistory.then(_history => {
+		history = _history;
+		if(!history){
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+		//Check for submodel references
+		let revId = utils.uuidToString(history._id);
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+		return Ref.find({ account, model }, filter);
+	}).then(refs =>{
+
+		//for all refs get their tree
+		let getMeta = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username).then(obj => {
+					return Promise.resolve({
+						data: obj.data,
+						account: ref.owner,
+						model: ref.project
+					});
+				})
+			);
+		});
+
+		return Promise.all(getMeta);
+
+	}).then(_subMeta => {
+
+		let match = {
+			_id: {"$in": history.current},
+		}
+		match[fullFieldName] =  {"$exists" : true};
+
+		let projection = {
+			parents: 1
+		};
+		projection[fullFieldName] = 1;
+
+		return Scene.find({account, model}, match, projection).then(obj => {
+			if(obj){
+				//rename fieldName to "value"
+				let parsedObj = {data: obj};
+				if(obj.length > 0)
+				{
+					const objStr = JSON.stringify(obj);
+					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
+				}
+				if(_subMeta.length > 0){
+					parsedObj.subModels = _subMeta;
+				}
+				return parsedObj;
+			} else {
+				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			}
+		});
+
+	});
+
+
+
+
+}
+
 function getMetadata(account, model, id){
-	'use strict';
+	
 
 	let projection = {
 		shared_id: 0,
@@ -1402,9 +1718,23 @@ function getMetadata(account, model, id){
 
 }
 
-var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
-var modelNameRegExp = /^[a-zA-Z0-9_\-]{3,20}$/;
-var acceptedFormat = [
+function isUserAdmin(account, model, user)
+{
+	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	//find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  //This model belongs to a project
+			&& project.permissions.length > 0 //This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
+			);
+	});
+}
+
+const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
+const acceptedFormat = [
 	'x','obj','3ds','md3','md2','ply',
 	'mdl','ase','hmp','smd','mdc','md5',
 	'stl','lxo','nff','raw','off','ac',
@@ -1419,10 +1749,13 @@ module.exports = {
 	createAndAssignRole,
 	importToyModel,
 	importToyProject,
+	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
-	// getFullTree,
+	getIdMap,
+	getIdToMeshes,
 	getModelProperties,
+	getTreePath,
 	getUnityAssets,
 	getUnityBundle,
 	searchTree,
@@ -1435,5 +1768,11 @@ module.exports = {
 	removeModel,
 	getModelPermission,
 	getMetadata,
-	getFullTree_noSubTree
+	getFullTree_noSubTree,
+	resetCorrelationId,
+   	getAllIdsWith4DSequenceTag,
+	getAllIdsWithMetadataField,
+	setStatus,
+	importSuccess,
+	importFail
 };

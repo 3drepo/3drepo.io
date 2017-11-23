@@ -1,118 +1,175 @@
 .homeUserContent.userContentNoMargin
-	md-content.md-whiteframe-1dp(aria-label="Licenses", flex)
+	md-content.md-whiteframe-1dp(aria-label="Licences", flex)
 		md-toolbar
 			.md-toolbar-tools
-				h2 Licenses
+				h2 Licences & Jobs
 
-		.userContent
-			div(ng-switch="vm.toShow")
-				div(ng-switch-when="0")
-					.cardInfo
-						p You do not currently have any licenses.
-						br
-						p
-							| Please go to the
-							=" "
-							a(href="", ng-click="vm.goToBillingPage()") Billing Page
-							=" "
-							| to add licenses.
+		md-tabs(md-dynamic-height, md-border-bottom, ng-if="true") 
 
-				div(ng-switch-when="0+")
-					#accountLicensesAdd(layout="row")
-						div(flex="50", layout="column")
-							p Assign a license
-							md-input-container
-								label Username
-								input(
-								type="text"
-								ng-model="vm.newLicenseAssignee"
-								tdr-focus="true"
-								ng-disabled="vm.allLicensesAssigned"
-								ng-keypress="vm.assignLicense($event)")
-						div(flex="50", layout="column", layout-align="end start")
-							md-button.md-raised.md-accent.assignButton(
-								layout="column"
-								ng-click="vm.assignLicense()"
-								ng-disabled="vm.addDisabled") Assign
-							//div(layout="column")
-								p {{vm.addMessage}}
+			md-tab(label="Licences")
+				.userContent
+					div.loadingText(
+						layout-align="center center"
+						flex="100"
+						ng-if="vm.toShow === undefined") 
 
-					p#errorMessage(ng-if="vm.allLicensesAssigned") All licenses have been assigned
+						md-progress-circular
+						h3 Loading Licences...
 
+					div(ng-switch="vm.toShow")
 
-					md-divider
+						div(ng-switch-when="0")
+							.cardInfo
+								p You do not currently have any licences.
+								br
+								p
+									| Please go to the
+									=" "
+									a(href="", ng-click="vm.goToBillingPage()") Billing Page
+									=" "
+									| to add licences.
 
-					// Assigned
-					md-content#accountLicensesList
-						section
-							md-subheader
-								div Licenses ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
-						md-list-item(ng-repeat="license in vm.licenses", layout="row", layout-align="space-between", flex)
-							div(layout="row", layout-align="start center", flex)
-								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-								.md-list-item-text(flex="50")
-									p {{license.user}}
-								.md-list-item(flex=25)
-									md-select.selectJob(ng-change="vm.assignJob($index)" ng-model="license.job" aria-label="job" placeholder="Select a job")
-										md-option(value="") Unassign
-										md-option(ng-repeat="job in vm.jobs", value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
+						div(ng-switch-when="0+")
+							#accountLicensesAdd(layout="row")
+								div(flex="50", layout="column")
+									p Assign a licence
+									md-input-container
+										label Username
+										input(
+										type="text"
+										ng-model="vm.newLicenseAssignee"
+										tdr-focus="true"
+										ng-disabled="vm.allLicensesAssigned"
+										ng-keypress="vm.assignLicense($event)")
+								div(flex="50", layout="column", layout-align="end start")
+									md-button.md-raised.md-accent.assignButton(
+										layout="column"
+										ng-click="vm.assignLicense()"
+										ng-disabled="vm.addDisabled") Assign
+									//div(layout="column")
+										p {{vm.addMessage}}
+
+							p#errorMessage(ng-if="vm.allLicensesAssigned") All licences have been assigned
 
 
-							div(layout="row", layout-align="end center")
-								p#accountLicenseMessage {{license.deleteMessage}}
-								md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-style="{'visibility': license.showRemove ? 'visible' : 'hidden'}")
-									md-icon.angular-material-icons remove_circle
+							md-divider
 
-						// Unassigned
-						md-list#accountLicensesUnassigned
-							md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
-								div(layout="row", layout-align="start center", flex="50")
-									md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-									.md-list-item-text
-										p Unassigned
-								md-button.md-icon-button(aria-label="Remove", flex="30", layout-align="end start")
-									md-icon.angular-material-icons(layout-align="start start") remove_circle
+							// Assigned
+							md-content#accountLicensesList
+								section
+									md-subheader
+										div Licences ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
+								
+								md-list-item(
+									ng-repeat="license in vm.licenses"
+									layout="row"
+									layout-align="space-between"
+									flex)
 
-					md-divider
-						
-					// Add a job
+									div(layout="row", layout-align="start center", flex)
+										md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
+										.md-list-item-text(flex="50")
+											p {{license.user}}
+										.md-list-item(layout="row" flex="35")
+											
+											md-select.selectJob(
+												flex
+												ng-change="vm.assignJob($index)" 
+												ng-model="license.job" 
+												aria-label="job" 
+												placeholder="Select a job")
+												md-option(value="") Unassign
+												md-option(
+													ng-repeat="job in vm.jobs"
+													value="{{job._id}}") {{job._id ? job._id : 'Unassign'}}
+
+
+									div(layout="row", layout-align="end center")
+										p#accountLicenseMessage {{license.deleteMessage}}
+										md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-style="{'visibility': license.showRemove ? 'visible' : 'hidden'}")
+											md-icon.angular-material-icons remove_circle
+
+								// Unassigned
+								md-list#accountLicensesUnassigned
+									md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+										div(layout="row", layout-align="start center", flex="50")
+											md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
+											.md-list-item-text
+												p Unassigned
+										md-button.md-icon-button(aria-label="Remove", flex="30", layout-align="end start")
+											md-icon.angular-material-icons(layout-align="start start") remove_circle
+								
+
+								div(ng-if="vm.allLicensesAssigned")
+									md-divider
+									p#accountLicensesBillingPage
+										| To add more licences please go to the
+										=" "
+										a(href="", ng-click="vm.goToBillingPage()") Billing Page
+			// Add a job
+			md-tab(label="Jobs")
+				.userContent
 					md-content#accountJobList
-						p Add a job
+						md-subheader Add a job
 						div(layout="row")
 							.md-list-item(flex="50")
 								md-input-container
-									label Job
+									label Job Title
 									input(
+										id="addJobInput"
 										flex
 										type="text"
 										ng-model="vm.newJob")
 							.md-list-item(flex="50")
-								md-button.md-raised.md-accent(ng-click="vm.addJob()") Add
+								md-button.md-raised.md-accent(
+									id="addJob"
+									ng-click="vm.addJob()") Add
 						div(layout="row" ng-if="vm.addJobMessage")
 							p {{vm.addJobMessage}}
+						
+						md-divider
 
 						section(ng-if='vm.jobs.length')
-							md-subheader
-								div Jobs
 
-						md-list-item(ng-repeat="job in vm.jobs", layout="row", layout-align="space-between", flex="100")
-							div(layout="row", flex="50")
-								div#jobIcon(layout-align="start center")
-									md-icon.angular-material-icons.licenseIcon(aria-label="Job") work
-								.md-list-item-text(flex="50")
-									p {{job._id}}
+							md-list-item(layout="row", layout-align="space-between", flex="100")
+								div(layout="row", flex="50")
+									p.jobTableText Job Title
 
-							div(layout="column", layout-align="end center")
-								md-button.md-icon-button.md-accent(ng-click="vm.removeJob($index)", aria-label="Close dialog")
-									md-icon.angular-material-icons remove_circle
+								div(layout="column", layout-align="end center" flex="30")
+									p.jobTableText Colour
 
-						p#accountLicenseMessage {{vm.deleteJobMessage}}
+								div(layout="column", layout-align="end center" flex="20")
+									p.jobTableText Remove
+
+							md-list-item(ng-repeat="job in vm.jobs", layout="row", layout-align="space-between", flex="100")
+								
+								div(layout="row", flex="50")
+									div#jobIcon(layout-align="start center")
+										md-icon.angular-material-icons.licenseIcon(aria-label="Job") work
+									.md-list-item-text(flex="50")
+										p {{job._id}}
+								
+								div(layout="row", layout-align="center center" flex="30")
+									
+									div(layout="row" flex-margin)
+										div(class="colorBox" ng-style="{ 'background-color' : job.color }" flex)
+									
+									md-select(
+										class="colorOption" 
+										placeholder="Pick a color" 
+										ng-change="vm.updateJob(job)"
+										ng-model="job.color")
+
+										md-option(
+											class="colorOption"
+											ng-repeat="color in vm.jobColors"
+											value="{{color}}"
+											ng-style="{ 'background-color' : color }"
+										) {{color}}
+
+								div(layout="column", layout-align="center center" flex="20")
+									md-button.md-icon-button.md-accent(ng-click="vm.removeJob($index)", aria-label="Close dialog")
+										md-icon.angular-material-icons remove_circle
+							
 						br
 						
-
-						div(ng-if="vm.allLicensesAssigned")
-							md-divider
-							p#accountLicensesBillingPage
-								| To add more licenses please go to the
-								=" "
-								a(href="", ng-click="vm.goToBillingPage()") Billing Page

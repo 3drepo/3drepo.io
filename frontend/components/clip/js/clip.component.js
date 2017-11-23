@@ -31,43 +31,130 @@
 			controllerAs: "vm"
 		});
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "$element", "EventService", "ViewerService", "ClientConfigService"];
 
-	function ClipCtrl($scope, $timeout, EventService) {
+	function ClipCtrl($scope, $timeout, $element, EventService, ViewerService, ClientConfigService) {
 		var vm = this;
 
 		/*
 		 * Init
 		 */
 		vm.$onInit = function() {
+			vm.progressInfo = "Model loading...";
 			vm.sliderMin = 0;
 			vm.sliderMax = 100;
-			vm.sliderStep = 0.1;
-			vm.displayDistance = 0;
+			vm.sliderStep = 0.005;
+			vm.displayDistance = 0.0;
 			vm.precision = 3;
 			vm.sliderPosition = vm.sliderMin;
 			vm.axes = ["X", "Y", "Z"];
 			vm.visible = false;
 			vm.bbox = null;
 			vm.onContentHeightRequest({height: 130});
-			vm.units = "m";
+			vm.direction = false;
+			vm.availableUnits = ClientConfigService.units;
+			$element.bind("DOMMouseScroll mousewheel onmousewheel", vm.handleScroll);
+			$element.bind("keydown", vm.handleUpDownArrow);
+		};
+
+		vm.$onDestroy = function() {
+			vm.units = undefined;
+			vm.bbox = null;
+		};
+
+		vm.handleUpDownArrow = function(event) {
+			if (event.key) {
+				if (event.key === "ArrowUp") {
+					vm.increment(0.005);
+				} else if (event.key === "ArrowDown") {
+					vm.decrement(0.005);
+				}
+			} 
+		};
+		
+		vm.handleScroll = function(event) {
+
+			// cross-browser wheel delta
+			event = window.event || event; // old IE support
+			var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+
+			if(delta > 0) {
+				vm.decrement(0.005);
+			} else if(delta < 0) {
+				vm.increment(0.005);
+			}
+
+		};
+
+		vm.getScaler = function(targetUnit, currentUnit) {
+			var scaler = 1;
+			
+			switch(targetUnit) {
+			case "mm":
+				if (currentUnit == "cm") {
+					scaler = 10;
+				}
+				if (currentUnit == "m") {
+					scaler = 1000;
+				}
+				break;
+			case "cm":
+				if (currentUnit == "mm") {
+					scaler = 0.1;
+				}
+				if (currentUnit == "m") {
+					scaler = 100;
+				}
+				break;
+			case "m":
+				if (currentUnit == "mm") {
+					scaler = 0.001;
+				}
+				if (currentUnit == "cm") {
+					scaler = 0.01;
+				}
+				break;
+			}
+			
+			return scaler;
+
+		};
+
+		// vm.setPrecision = function(newUnit){
+		// 	switch(newUnit) {
+		// 	case "mm":
+		// 		vm.precision = 0;
+		// 		break;
+		// 	case "cm":
+		// 		vm.precision = 3;
+		// 		break;
+		// 	case "m":
+		// 		vm.precision = 5;
+		// 		break;
+		// 	}
+		// };
+
+		vm.invertDirection = function() {
+			vm.direction = !vm.direction;
+			vm.updateClippingPlane();
 		};
 
 		vm.updateClippingPlane = function() {
-			if(vm.bbox) {
-				var event = {
-					clippingPlanes:[{
-						normal: vm.getNormal(),
-						distance: vm.displayDistance,
-						clipDirection: -1
-					}],
-					fromClipPanel: true
-				};
-				EventService.send(
-					EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
-					event
-				);
-			}
+			
+			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+			var event = {
+				clippingPlanes:[{
+					normal: vm.getNormal(),
+					distance: vm.displayDistance * scaler,
+					clipDirection: vm.direction ? 1 : -1
+				}],
+				fromClipPanel: true
+			};
+			EventService.send(
+				EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
+				event
+			);
+
 		};
 
 		/**
@@ -93,9 +180,18 @@
 		 * Initialise display values
 		 * This is called when we know the bounding box of our model
 		 */
-		vm.setDisplayValues = function(axis, distance, moveClip, slider) {
-			vm.disableWatchDistance = vm.disableWatchAxis = vm.disableWatchSlider = true;
-			vm.displayDistance = distance.toFixed(vm.precision);
+		vm.setDisplayValues = function(axis, distance, moveClip, direction, slider) {
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+			var newDistance = parseFloat(distance) * scaler;
+			
+			//We only want to disable watch if the value is going to change.
+			//Otherwise we might be ignoring the next update.
+			vm.disableWatchAxis = vm.displayedAxis != axis;
+			vm.disableWatchSlider = vm.disableWatchDistance = vm.displayedDistance != newDistance;
+			
+			vm.displayDistance = newDistance;
+			vm.direction = direction;
+
 			vm.displayedAxis = axis;
 			if(slider != null) {
 				vm.sliderPosition = slider;
@@ -125,9 +221,32 @@
 				}
 			}
 
-
 			return normal;
 
+		};
+
+		vm.increment = function(percentage) {
+			vm.updateDistance( -(vm.displayDistance * percentage) );
+
+		};
+
+		vm.decrement = function(percentage) {
+			vm.updateDistance( (vm.displayDistance * percentage) );
+		};
+
+		vm.decrementDiscrete = function() {
+			vm.updateDistance(-1);
+		};
+
+		vm.incrementDiscrete = function() {
+			vm.updateDistance(1);
+		};
+
+		vm.updateDistance = function(amount) {
+			//ensure display distance is a float
+			vm.displayDistance = parseFloat(vm.displayDistance) + amount;
+			vm.cleanDisplayDistance();
+			vm.updateDisplaySlider(false, true);
 		};
 
 		/**
@@ -135,36 +254,41 @@
 		 */
 		vm.updateDisplayedDistance = function(updateSlider, moveClip) {
 
-			if (vm.bbox) {
-				var min = 0;
-				var max = 0;
+			var minMax = vm.getMinMax();
+			var max = minMax.max;
+			var min = minMax.min;
+			
+			var percentage = 1 - vm.sliderPosition/100;
+			if(!updateSlider) {
+				vm.disableWatchDistance = true;
+			}
+			
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+			var newDistance = parseFloat((min + (Math.abs(max - min) * percentage))) * scaler;
 
-				if(vm.displayedAxis === "X") {
-					min = vm.bbox.min[0];
-					max = vm.bbox.max[0];
-				} else if(vm.displayedAxis === "Y") {
-					min = vm.bbox.min[2];
-					max = vm.bbox.max[2];
-				} else if(vm.displayedAxis === "Z") {
-					min = vm.bbox.min[1];
-					max = vm.bbox.max[1];
-				} else {
-					return;
-				} //unknown axis, nothing would've been set. avoid infinity
-				
-				var percentage = 1 - vm.sliderPosition/100;
-				if(!updateSlider) {
-					vm.disableWatchDistance = true;
-				}
-				vm.displayDistance = (min + (Math.abs(max - min) * percentage)).toFixed(vm.precision);
+			if (!isNaN(newDistance)) {
+				vm.displayDistance = newDistance;
 				if(moveClip) {
 					vm.updateClippingPlane();
 				}
-			} else {
-				console.warn("updateDisplayedDistance - Bounding Box was not defined", vm.bbox);
 			}
 			
+		};
 
+		vm.unitShouldShow = function(unit) {
+			return vm.handleFt(unit.value, vm.modelUnits) || 
+					vm.handleMetric(unit.value, vm.modelUnits);
+		};
+
+		vm.handleMetric = function(unit){
+			var metric = ["cm", "mm", "m"];
+			var isMetric = metric.indexOf(unit) !== -1;
+			return unit !== "ft" && isMetric;
+		};
+
+		vm.handleFt = function(unit) {
+			var notMetric = !vm.handleMetric(vm.modelUnits);
+			return unit === "ft" && notMetric;
 		};
 
 		/**
@@ -172,10 +296,38 @@
 		 */
 		vm.updateDisplaySlider = function(updateDistance, moveClip) {
 
-			if (vm.bbox) {
+			var minMax = vm.getMinMax();
+			var max = minMax.max;
+			var min = minMax.min;
 
-				var min = 0;
-				var max = 0;
+			var scaler = vm.getScaler(vm.modelUnits, vm.units);
+
+			var percentage = ((vm.displayDistance * scaler) - min) / ( Math.abs(max-min));
+
+			if(!updateDistance) {
+				vm.disableWatchSlider = true;
+			}
+
+			var value = (1.0 - percentage) * 100;
+			if(percentage > 100 || value < 0) {
+				value = 0;
+			}
+			if(percentage < 0 || value > 100) {
+				value = 100;
+			}
+			vm.sliderPosition = value;
+
+			if(moveClip) {
+				vm.updateClippingPlane();
+			}
+
+		};
+
+		vm.getMinMax = function() {
+			var min = 0;
+			var max = 0;
+
+			if (vm.bbox) {
 				if(vm.displayedAxis === "X") {
 					min = vm.bbox.min[0];
 					max = vm.bbox.max[0];
@@ -185,34 +337,49 @@
 				} else if(vm.displayedAxis === "Z") {
 					min = vm.bbox.min[1];
 					max = vm.bbox.max[1];
-				} else {
-					return;
-				} //unknown axis, nothing would've been set. avoid infinity
-				
-				var percentage = (vm.displayDistance - min) / Math.abs(max-min);
-				if(!updateDistance) {
-					vm.disableWatchSlider = true;
-				}
+				} 
+			}
 
-				var value = (1.0 - percentage) * 100;
-				if(percentage > 100 || value < 0) {
-					value = 0;
-				}
-				if(percentage < 0 || value > 100) {
-					value = 100;
-				}
-				vm.sliderPosition = value;
+			return {
+				min: min,
+				max: max
+			};
+		};
 
-				if(moveClip) {
-					vm.updateClippingPlane();
-				}
+		$scope.$watch("vm.displayDistance", function () {
+			vm.updateDisplaySlider(false, vm.visible);
+		});
 
-			} else {
-				console.warn("updateDisplaySlider - Bounding Box was not defined", vm.bbox);
+		$scope.$watch("vm.units", function(newUnits, oldUnits){
+			if (newUnits && oldUnits) {
+				var scaler = vm.getScaler(newUnits, oldUnits);
+				vm.displayDistance = vm.displayDistance * scaler;
+			}
+		});
+
+		vm.cleanDisplayDistance = function() {
+			var minMax = vm.getMinMax();
+			var scaler = vm.getScaler(vm.units, vm.modelUnits);
+
+			var scaledMin = minMax.min * scaler;
+			var scaledMax = minMax.max * scaler;
+
+			if (isNaN(vm.displayDistance) && scaledMin) {
+				vm.displayDistance = scaledMin;
+				return;
+			}
+			
+			if (minMax.max && vm.displayDistance > scaledMax) {
+				vm.displayDistance = scaledMax;
+				return;
+			}
+		
+			if (minMax.min && vm.displayDistance < scaledMin) {
+				vm.displayDistance = scaledMin;
+				return;
 			}
 
 		};
-
 
 		/*
 		 * Watch for show/hide of card
@@ -223,7 +390,6 @@
 			}
 		});
 
-
 		/*
 		 * Toggle the clipping plane
 		 */
@@ -232,22 +398,10 @@
 				if (newValue) {
 					vm.updateClippingPlane();
 				} else {
-					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+					ViewerService.clearClippingPlanes();
 				}
 			}
 		});
-
-		/*
-		 * Change the clipping plane distance
-		 */
-		$scope.$watch("vm.displayDistance", function () {
-			if(!vm.disableWatchDistance) {
-				vm.updateDisplaySlider(false, vm.visible);
-			}
-
-			vm.disableWatchDistance = false;
-		});
-
 
 		/*
 		 * Change the clipping plane axis
@@ -272,11 +426,17 @@
 
 		});
 
+		vm.initClip = function(modelUnits) {
+			vm.modelUnits  = modelUnits;
+			vm.units = modelUnits;
+			vm.updateDisplayedDistance(true, vm.visible);
+		};
+
 		$scope.$watch(EventService.currentEvent, function (event) {
 
 			if (event.type === EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST) {
-
-				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false);
+				vm.setDisplayValues(vm.determineAxis(event.value.normal), event.value.distance, false, event.value.clipDirection === 1);
+				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO) {
 
@@ -286,21 +446,14 @@
 				}
 
 			} else if(event.type === EventService.EVENT.VIEWER.BBOX_READY) {
-				
 				vm.bbox = event.value.bbox;
-				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0);
+				vm.setDisplayValues("X", vm.bbox.max[0], vm.visible, 0, vm.direction);
+				vm.updateDisplayedDistance(true, vm.visible);
 
 			} else if(event.type === EventService.EVENT.MODEL_SETTINGS_READY) {
 
-				vm.units = event.value.settings.unit;
-				if(vm.units === "mm")
-				{
-					vm.precision = 0;
-				}
-				else{
-					vm.precison = 3;
-				}
-
+				vm.initClip(event.value.properties.unit);
+				
 			}
 			
 		});
