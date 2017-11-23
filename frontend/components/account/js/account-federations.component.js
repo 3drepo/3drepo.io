@@ -39,7 +39,11 @@
 				federationsSaving: "=",
 				saveFederation: "=",
 				addToFederation: "=",
-				isSaving: "="
+				isDuplicateName: "=",
+				checkFederationSaveDisabled: "=",
+				federationSaveDisabled: "=",
+				isSaving: "=",
+				federationErrorMessage: "="
 			},
 			controller: AccountFederationsCtrl,
 			controllerAs: "vm"
@@ -191,7 +195,9 @@
 		 */
 		vm.removeFromFederation = function (modelName) {
 			AccountService.removeFromFederation(vm.federationData, modelName);
+			vm.checkFederationSaveDisabled();
 		};
+
 
 
 		/**
