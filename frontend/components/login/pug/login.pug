@@ -3,8 +3,8 @@
 	layout-align="center"
 	flex)
 	
-	md-content.md-whiteframe-2dp(
-		aria-label="Registered"
+	md-content.loginContainer.md-whiteframe-2dp(
+		aria-label="Log in"
 		flex-xl="15"
 		flex-lg="20"
 		flex-md="30"
@@ -30,7 +30,7 @@
 				// Login
 				div(layout="column", flex)
 					div.inputContainer
-						md-input-container.md-block
+						md-input-container.md-block.username
 							label Username
 							input(type='text', ng-model='vm.user.username', ng-required, tdr-focus="true", ng-keypress="vm.login($event)")
 
