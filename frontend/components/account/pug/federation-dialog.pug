@@ -125,6 +125,8 @@ md-dialog#federationDialog(
 
 					md-divider
 
+					p.federationDialogError(ng-if="vm.federationErrorMessage") {{vm.federationErrorMessage}}
+
 					// Save/Cancel
 					#federationSave(layout="row", layout-align="start center")
 						md-button.md-raised.md-accent(
@@ -133,4 +135,4 @@ md-dialog#federationDialog(
 							md-progress-circular.isSavingProgress(ng-if="vm.isSaving")
 						md-button.md-accent(ng-click="vm.closeFederationDialog()") Cancel
 
-					p.modelDialogError(ng-if="vm.federationErrorMessage") {{vm.federationErrorMessage}}
+					
