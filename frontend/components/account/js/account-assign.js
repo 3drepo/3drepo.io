@@ -63,7 +63,7 @@
 
 			vm.teamspacePermissions = {
 
-				teamspace_admin : "Admin",
+				teamspace_admin : "Admin"
 				// assign_licence	: "Assign Licence",
 				// revoke_licence	: "Revoke Licence",
 				// create_project	: "Create Project",
@@ -509,7 +509,7 @@
 		};
 
 		// MODELS
-		
+
 		vm.isProjectAdmin = function(user) {
 
 			var userObj;
@@ -517,6 +517,10 @@
 				userObj = {user: user};
 			} else {
 				userObj = user;
+			}
+
+			if (user.user === vm.selectedTeamspace.account) {
+				return true;
 			}
 
 			return vm.userHasProjectPermissions(userObj, "admin_project");
@@ -530,6 +534,10 @@
 				userObj = {user: user};
 			} else {
 				userObj = user;
+			}
+			
+			if (user.user === vm.selectedTeamspace.account) {
+				return true;
 			}
 
 			return vm.userHasPermissions(userObj, "teamspace_admin");

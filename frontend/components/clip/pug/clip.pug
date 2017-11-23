@@ -41,16 +41,19 @@ div(ng-if="vm.bbox && vm.units", layout="column", layout-align="start center", f
 					ng-disabled="!vm.visible")
 
 				div(flex, layout="row")
+					
 					input.distanceInput(
+						ng-submit="vm.update()"
 						ng-model="vm.displayDistance"
 						ng-disabled="!vm.visible")
-					| 
+					|
+
 					div 
 						button.upDownButtons.angular-material-icons(
-							ng-click="vm.increment(0.001)"
+							ng-click="vm.incrementDiscrete()"
 						) keyboard_arrow_up
 						button.upDownButtons.angular-material-icons(
-							ng-click="vm.decrement(0.001)"
+							ng-click="vm.decrementDiscrete(0.001)"
 						) keyboard_arrow_down
 
 					md-select(

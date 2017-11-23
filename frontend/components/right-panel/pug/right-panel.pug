@@ -4,10 +4,11 @@
 
 		// META DATA TOOL
 		md-button.md-accent.md-fab.md-mini(
+			id="metadataButton"
 			aria-label="Meta"
 			ng-click="vm.toggleAutoMetaData()"
 			ng-disabled="vm.measureDisabled"
-			style="background:{{vm.metaBackground}}")
+			style="background-color:{{vm.metaBackground}}")
 
 			md-tooltip(ng-if="vm.metaData" md-direction="left") Disable
 			md-tooltip(ng-if="!vm.metaData" md-direction="left") Enable
@@ -16,10 +17,11 @@
 		
 		// MEASURE TOOL
 		md-button.md-accent.md-fab.md-mini(
+			id="measureButton"
 			aria-label="Measure"
 			ng-click="vm.toggleMeasure()"
 			ng-disabled="vm.measureDisabled"
-			style="background:{{vm.measureBackground}}")
+			style="background-color:{{vm.measureBackground}}")
 			
 			md-tooltip(md-direction="left") Measure
 			md-icon.angular-material-icons straighten

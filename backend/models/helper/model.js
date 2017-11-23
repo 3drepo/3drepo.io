@@ -108,9 +108,32 @@ function convertToErrorCode(bouncerErrorCode){
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
-function importSuccess(account, model) {
+function importSuccess(account, model, sharedSpacePath) {
 	setStatus(account, model, 'ok').then(setting => {
 		if (setting) {
+			if (sharedSpacePath) {
+				let files = function(filePath, fileDir, jsonFile){
+					return [
+						{desc: 'tmp model file', type: 'file', path: filePath},
+						{desc: 'json file', type: 'file', path: jsonFile},
+						{desc: 'tmp dir', type: 'dir', path: fileDir}
+					];
+				};
+
+				let tmpDir = `${sharedSpacePath}/${setting.corID}`;
+				let tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
+				fs.stat(tmpModelFile, function(err, stat) {
+					let tmpJsonFile;
+					if (err) {
+						tmpJsonFile = `${tmpDir}/obj.json`;
+					} else {
+						let tmpModelFileData = require(tmpModelFile);
+						tmpJsonFile = tmpModelFileData.file;
+					}
+
+					_deleteFiles(files(tmpModelFile, tmpDir, tmpJsonFile));
+				});
+			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
 			setting.errorReason = undefined;
@@ -447,16 +470,10 @@ function createFederatedModel(account, model, subModels){
 
 		let addSubModels = [];
 
-		let files = function(data){
-			return [
-				{desc: 'json file', type: 'file', path: data.jsonFilename},
-				{desc: 'tmp dir', type: 'dir', path: data.newFileDir}
-			];
-		};
-
 		subModels.forEach(subModel => {
 
 			if(subModel.database !== account){
+				//return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
 				error = responseCodes.FED_MODEL_IN_OTHER_DB;
 			}
 
@@ -474,28 +491,16 @@ function createFederatedModel(account, model, subModels){
 
 		});
 
-		if(error){
+		if (error) {
 			return Promise.reject(error);
 		}
 
 		if(subModels.length === 0) {
 			return Promise.resolve();
 		}
+
 		return Promise.all(addSubModels).then(() => {
-			//return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-			// cclw05 - this is a temporary workaround!
-			// cclw05 - genFed needs to be merged with importModel
-			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-			//return Promise.resolve();
-
-		}).then(data => {
-
-			resetCorrelationId(account, model);
-
-			_deleteFiles(files(data));
-
-			return;
-
+			importQueue.createFederatedModel(correlationId, account, federatedJSON);
 		}).catch(err => {
 			//catch here to provide custom error message
 			if(err.errCode){
@@ -605,6 +610,98 @@ function getIdMap(account, model, branch, rev, username){
 		});
 
 		return Promise.resolve({idMaps, status});
+
+	});
+}
+
+function getIdToMeshes(account, model, branch, rev, username){
+	'use strict'	
+	let subIdToMeshes;
+		let revId, idToMeshesFileName;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let refPromises = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			refPromises.push(
+				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						idToMeshes: obj.idToMeshes,
+						key: ref.owner + "@" + ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(refPromises);
+
+	}).then(_subIdToMeshes => {
+
+		subIdToMeshes = _subIdToMeshes;
+		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+
+	}).then(buf => {
+		let idToMeshes = {};
+
+		if(buf){
+			idToMeshes = JSON.parse(buf);
+		}
+
+		subIdToMeshes.forEach(subIdToMeshes => {
+			// Model properties hidden nodes
+			// For a federation concatenate all together in a
+			// single array
+			if (subIdToMeshes && subIdToMeshes.idToMeshes)
+			{
+			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
+				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
+			}
+		});
+
+		return Promise.resolve({idToMeshes, status});
 
 	});
 }
@@ -1324,14 +1421,6 @@ function _deleteFiles(files){
  */
 function _handleUpload(correlationId, account, model, username, file, data){
 	
-	let files = function(filePath, fileDir, jsonFile){
-		return [
-			{desc: 'tmp model file', type: 'file', path: filePath},
-			{desc: 'json file', type: 'file', path: jsonFile},
-			{desc: 'tmp dir', type: 'dir', path: fileDir}
-		];
-	};
-
 	importQueue.importFile(
 		correlationId,
 		file.path,
@@ -1349,8 +1438,6 @@ function _handleUpload(correlationId, account, model, username, file, data){
 			model,
 			username
 		});
-
-		_deleteFiles(files(obj.newPath, obj.newFileDir, obj.jsonFilename));
 
 	}).catch(err => {
 		systemLogger.logError(`Failed to import model:`, err);
@@ -1666,6 +1753,7 @@ module.exports = {
 	createFederatedModel,
 	listSubModels,
 	getIdMap,
+	getIdToMeshes,
 	getModelProperties,
 	getTreePath,
 	getUnityAssets,

@@ -72,12 +72,14 @@ router.get("/:model/userJobForModel.json", middlewares.hasReadAccessToModel, get
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 router.get("/:model/revision/master/head/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
+router.get("/:model/revision/master/head/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
+router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
@@ -175,6 +177,8 @@ function getModelSetting(req, res, next){
 		whitelist.forEach(key => {
 			resObj[key] = setting[key];
 		});
+		resObj.model = setting._id;
+		resObj.account = req.params.account;
 
 		resObj.headRevisions = {};
 
@@ -295,6 +299,26 @@ function getIdMap(req, res, next){
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
+
+function getIdToMeshes(req, res, next){
+	
+
+	let model = req.params.model;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ModelHelpers.getIdToMeshes(account, model, branch, req.params.rev, username).then(idToMeshes => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idToMeshes);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 
 function getModelTree(req, res, next){
 	

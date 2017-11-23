@@ -1,6 +1,8 @@
 sign-up .registerLinks {
     font-size: 14px;
-    margin: 10px 10px 10px 10px
+    margin: 10px 10px 10px 10px;
+    text-decoration: none;
+    color: #2945b5;
 }
 
 sign-up {

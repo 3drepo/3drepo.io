@@ -184,6 +184,7 @@ issues-list .issueListItem div:first-child {
 issues-list #issuesListItemContent {
   padding: 10px;
   padding-right: 40px;
+  overflow: hidden;  
 }
 
 issues-list #issuesListItemTitle {
@@ -326,10 +327,6 @@ issue #issueTitleInput {
 issue #issueTitle {
   margin: 10px 0;
 }
-/*
-issue #issueStatus {
-  margin: 10px 0 0;
-}*/
 
 issue .issueItemStatus {
   margin-right: 5px;

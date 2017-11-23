@@ -140,14 +140,6 @@
 			.then(() => {
 				let msg = `import -f ${jsonFilename}`;
 				return this._dispatchWork(corID, msg, true);
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					this.deferedObjs[corID] = {
-						resolve: () => resolve({ corID, newPath, newFileDir, jsonFilename }),
-						reject: errCode => reject({ corID, errCode, newPath, newFileDir, jsonFilename })
-					};
-				});
 			});
 	};
 
@@ -197,15 +189,6 @@
 		.then(() => {
 			let msg = `genFed ${filename} ${account}`;
 			return this._dispatchWork(corID, msg);
-		})
-		.then(() => {
-			return new Promise((resolve, reject) => {
-				this.deferedObjs[corID] = {
-					resolve: () => resolve({corID, newFileDir, jsonFilename: filename}),
-					reject: errCode => reject({ corID, errCode, newFileDir, jsonFilename: filename })
-				};
-			});
-
 		});
 
 	};
@@ -359,18 +342,10 @@
 						ModelHelper.setStatus(resDatabase, resProject, 'processing');
 					} else {
 						if (resErrorCode === 0) {
-							ModelHelper.importSuccess(resDatabase, resProject);
-							// cclw05 - this is a temporary workaround!
-							// cclw05 - genFed needs to be merged with importModel
-							if(defer) {
-								defer.resolve(rep);
-							}
+							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
 						} 
 						else {
 							ModelHelper.importFail(resDatabase, resProject, resErrorCode, resErrorMessage, true);
-							if(defer){
-								defer.reject(rep);
-							}
 						}
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}

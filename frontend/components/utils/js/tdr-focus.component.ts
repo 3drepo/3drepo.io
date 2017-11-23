@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2015 3D Repo Ltd
+ *  Copyright (C) 2016 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+// Inspired by Mark Rajcok"a answer - http://stackoverflow.com/a/14837021/782358
 
-	angular.module("3drepo")
-		.component("tdrProgress", {
-			restrict: "EA",
-			templateUrl: "templates/tdr-progress.html",
-			bindings: {
-				info: "="
-			},
-			controller: TdrProgressCtrl,
-			controllerAs: "vm"
-		});
+function tdrFocus($timeout) {
+	return {
+		link: (scope, element) => {
+			scope.$watch("trigger", (value) => {
+				if (value.toString() === "true") {
+					$timeout(() => {
+						element[0].focus();
+					});
+				}
+			});
+		},
+		scope: { trigger: "@tdrFocus" },
+	};
+}
 
-	TdrProgressCtrl.$inject = ["$scope"];
-
-	function TdrProgressCtrl($scope) {
-		var vm = this;
-	}
-
-}());
+export const TdrFocusModule = angular
+	.module("3drepo")
+	.directive("tdrFocus", ["$timeout", tdrFocus]);

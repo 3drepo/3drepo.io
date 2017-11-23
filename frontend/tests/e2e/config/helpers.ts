@@ -1,4 +1,4 @@
-import { ElementFinder, browser, by, element } from "protractor";
+import { ElementFinder, browser, by, element, ExpectedConditions } from "protractor";
 import { USER } from "./user";
 import * as env from "./environment";
 
@@ -24,4 +24,18 @@ export function hasClass(element, cls) {
     return element.getAttribute('class').then((classes) => {
         return classes.split(' ').indexOf(cls) !== -1;
     });
+};
+
+export function clickElement(element, sizePromise) { 
+    
+    return sizePromise.then( (size) => {
+        
+        const pos = {x: size.width / 2, y: size.height / 2};
+        console.log("Clicking at position: ", pos)
+        return browser.actions()
+            .mouseMove(element)
+            .mouseDown()
+            .mouseUp()
+            .perform();
+    }) ;
 };
