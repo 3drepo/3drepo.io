@@ -23,5 +23,12 @@ require("./_built/amd/components/panel/js/panel.component.js");
 require("./_built/amd/components/panel/js/panel.service.js");
 
 require("./_built/amd/components/terms/js/terms.component.js");
+
 require("./_built/amd/components/sign-up/js/sign-up.component.js");
+
 require("./_built/amd/components/right-panel/js/right-panel.component.js");
+
+require("./_built/amd/components/revisions/js/revisions.component.js");
+require("./_built/amd/components/revisions/js/revisions.service.js");
+
+require("./_built/amd/components/register-verify/js/register-verify.component.js");
