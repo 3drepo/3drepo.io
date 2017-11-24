@@ -46,7 +46,7 @@ class PasswordForgotController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watchGroup(["vm.username", "this.email"], () => {
+		this.$scope.$watchGroup(["vm.username", "vm.email"], () => {
 			this.message = "";
 			if (this.username && this.email) {
 				this.buttonDisabled = false;
