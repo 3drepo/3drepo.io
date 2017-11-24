@@ -15,25 +15,31 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class PrivacyController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("privacy", {
-			restrict: "E",
-			bindings: {},
-			templateUrl: "templates/privacy.html",
-			controller: PrivacyCtrl,
-			controllerAs: "vm"
-		});
+	public static $inject: string[] = [
+		"StateManager",
+	];
 
-	PrivacyCtrl.$inject = ["StateManager"];
+	constructor(
+		private StateManager: any,
+	) {}
 
-	function PrivacyCtrl (StateManager) {
-		var vm = this;
+	public $onInit() {}
 
-		vm.home = function () {
-			StateManager.goHome();
-		};
+	public home() {
+		this.StateManager.goHome();
 	}
-}());
+
+}
+
+export const PrivacyComponent: ng.IComponentOptions = {
+	bindings: {},
+	controller: PrivacyController,
+	controllerAs: "vm",
+	templateUrl: "templates/privacy.html",
+};
+
+export const PrivacyComponentModule = angular
+	.module("3drepo")
+	.component("privacy", PrivacyComponent);

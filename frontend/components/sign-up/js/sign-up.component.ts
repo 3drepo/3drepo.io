@@ -159,7 +159,7 @@ class SignupController implements ng.IController {
 		/*
 		* Watch changes to register fields to clear warning message
 		*/
-		this.$scope.$watch("this.newUser", (newValue) =>  {
+		this.$scope.$watch("vm.newUser", (newValue) =>  {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
