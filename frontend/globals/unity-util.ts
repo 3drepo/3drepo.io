@@ -280,6 +280,99 @@ export class UnityUtil {
 		UnityUtil.toUnity("ClearHighlighting", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
+
+	/**
+	* Enable diff tool
+	* This starts the diff tool in diff mode
+	*/
+	public static diffToolEnableWithDiffMode() {
+		UnityUtil.toUnity("DiffToolStartDiffMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	* Enable diff tool
+	* This starts the diff tool in clash mode
+	*/
+	public static diffToolEnableWithClashMode() {
+		UnityUtil.toUnity("DiffToolStartClashMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+        * Load comparator model for diff tool
+	 */
+	public static diffToolLoadComparator(account, model, revision) {
+		/*		UnityUtil.loadedPromise = null;
+		UnityUtil.loadedResolve = null;
+		UnityUtil.loadingPromise = null;
+		UnityUtil.loadingResolve = null;
+		UnityUtil.loadedFlag  = false;
+		 */
+		const params: any = {
+			database : account,
+			model,
+		};
+
+		if (revision !== "head") {
+			params.revID = revision;
+		}
+
+		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		//		return UnityUtil.onLoaded();
+	}
+
+	/**
+        * Visualise the difference view
+        * i.e. models will be rendered in greyscale, detailing the difference/clash
+        */
+        public static diffToolDiffView()
+        {
+        	UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
+	}
+
+	/**
+        * Only show the base model
+        * i.e. It will show only the original model, not the comparator nor the diff view
+        */
+	public static diffToolShowBaseModel()
+	{
+        	UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
+	}
+
+	/**
+        * Only show the comparator model
+        * i.e. Only show the model you are trying to compare with, not the base model
+        */
+	public static diffToolShowComparatorModel()
+	{
+        	UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
+	}
+
+
+        /**
+        * Compare transparent objects as if they are opaque objects
+        */
+        public static diffToolRenderTransAsOpaque()
+        {
+        	UnityUtil.toUnity("DiffToolRenderTransAsOpaque", undefined, undefined);
+        }
+
+        /**
+        * Ignore semi-transparent objects in diff
+        */
+        public static diffToolRenderTransAsInvisible()
+        {
+        	UnityUtil.toUnity("DiffToolRenderTransAsInvisible", undefined, undefined);
+        }
+
+	/**
+        * Compare transparent objects as of normal
+        */
+        public static diffToolRenderTransAsDefault()
+        {
+        	UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
+        }
+
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity("DisableClip", undefined, undefined);
 	}
@@ -354,9 +447,6 @@ export class UnityUtil {
 	}
 
 	public static loadModel(account, model, branch, revision) {
-
-		// console.log("pin - loadModel");
-
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
 
@@ -376,6 +466,7 @@ export class UnityUtil {
 		}
 
 		UnityUtil.onLoading();
+		console.log(params);
 		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoaded();
