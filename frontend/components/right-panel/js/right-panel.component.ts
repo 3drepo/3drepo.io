@@ -53,32 +53,14 @@ class RightPanelController implements ng.IController {
 		this.measureBackground = "";
 		this.metaBackground = "";
 
+		this.watchers();
+
 	}
 
 	public $onDestroy() {
 		this.metaBackground = "";
 		this.measureBackground = "";
 		this.MeasureService.deactivateMeasure();
-	}
-
-	public disableOtherModes(setMode) {
-		if (setMode === "meta") {
-
-			if (this.measureActive) {
-				this.toggleMeasure();
-			}
-
-			if (!this.metaData) {
-				this.toggleAutoMetaData();
-			}
-
-		} else if (setMode === "measure") {
-
-			if (!this.measureActive) {
-				this.toggleMeasure();
-			}
-
-		}
 	}
 
 	public watchers() {
@@ -108,9 +90,6 @@ class RightPanelController implements ng.IController {
 
 		}, true);
 
-		/*
-		 * Setup event watch
-		 */
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 			if (event.type === this.EventService.EVENT.TOGGLE_ELEMENTS) {
 				this.showPanel = !this.showPanel;
@@ -119,9 +98,26 @@ class RightPanelController implements ng.IController {
 
 	}
 
-	/**
-	 * Toggle measuring tool
-	 */
+	public disableOtherModes(setMode) {
+		if (setMode === "meta") {
+
+			if (this.measureActive) {
+				this.toggleMeasure();
+			}
+
+			if (!this.metaData) {
+				this.toggleAutoMetaData();
+			}
+
+		} else if (setMode === "measure") {
+
+			if (!this.measureActive) {
+				this.toggleMeasure();
+			}
+
+		}
+	}
+
 	public toggleMeasure() {
 
 		// If not measure mode and metadata enabled
@@ -133,9 +129,6 @@ class RightPanelController implements ng.IController {
 
 	}
 
-	/**
-	 * Toggle meta data auto display
-	 */
 	public toggleAutoMetaData() {
 
 		if (this.measureActive && !this.metaData) {
