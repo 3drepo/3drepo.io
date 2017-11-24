@@ -15,25 +15,31 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class PaymentController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("payment", {
-			restrict: "E",
-			bindings: {},
-			templateUrl: "templates/payment.html",
-			controller: paymentCtrl,
-			controllerAs: "vm"
-		});
+	public static $inject: string[] = [
+		"StateManager",
+	];
 
-	paymentCtrl.$inject = ["StateManager"];
+	constructor(
+		private StateManager: any,
+	) {}
 
-	function paymentCtrl (StateManager) {
-		var vm = this;
+	public $onInit() {}
 
-		vm.goToLoginPage = function () {
-			StateManager.goHome();
-		};
+	public goToLoginPage() {
+		this.StateManager.goHome();
 	}
-}());
+
+}
+
+export const PaymentComponent: ng.IComponentOptions = {
+	bindings: {},
+	controller: PaymentController,
+	controllerAs: "vm",
+	templateUrl: "templates/payment.html",
+};
+
+export const PaymentComponentModule = angular
+	.module("3drepo")
+	.component("payment", PaymentComponent);
