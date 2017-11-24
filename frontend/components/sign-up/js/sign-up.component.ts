@@ -65,6 +65,8 @@ class SignupController implements ng.IController {
 			if (response.data.username) {
 				this.goToLoginPage();
 			}
+		}).catch((response) => {
+			console.debug("User is not logged in");
 		});
 
 		this.enterKey = 13,
@@ -207,21 +209,6 @@ class SignupController implements ng.IController {
 		} else {
 			this.doRegister();
 		}
-	}
-
-	public showTC() {
-		this.legalTitle = "Terms and Conditions";
-		this.legalText = "termsAndConditions";
-		this.$mdDialog.show({
-			clickOutsideToClose: true,
-			fullscreen: true,
-			onRemoving: this.removeDialog,
-			parent: angular.element(document.body),
-			preserveScope: true,
-			scope: this.$scope,
-			targetEvent: event,
-			templateUrl: "templates/legal-dialog.html",
-		});
 	}
 
 	public showPage() {
