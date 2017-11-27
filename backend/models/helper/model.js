@@ -561,6 +561,7 @@ function getAllMeshes(account, model, branch, rev, username){
 			refMeshesPromises.push(
 				getAllMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
 					return Promise.resolve({
+						meshes: obj.results.meshes,
 						owner: ref.owner,
 						model: ref.project
 					})
