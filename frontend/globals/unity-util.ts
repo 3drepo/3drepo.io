@@ -315,7 +315,8 @@ export class UnityUtil {
 	}
 
 	/**
-        * Load comparator model for diff tool
+	 * Load comparator model for diff tool
+	 * This returns a promise which will be resolved when the comparator model is loaded
 	 */
 	public static diffToolLoadComparator(account, model, revision) {
 
@@ -336,6 +337,20 @@ export class UnityUtil {
 			});
 		}
 		return UnityUtil.loadComparatorPromise;
+	}
+
+	/**
+	 * Set an existing submodel/model as a comparator model
+	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
+	 */
+	public static diffToolSetAsComparator(account, model) {
+		const params: any = {
+			database : account,
+			model,
+		};
+
+		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		
 	}
 
 	/**
