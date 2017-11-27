@@ -14,10 +14,26 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			flex
 			ng-class="{treeNodeSelected: item.selected}")
 				// Expand/collapse
-				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand($event, item._id)", ng-if="!item.status")
-					md-icon.angular-material-icons(ng-if="!item.expanded && item.hasChildren") add_box
-					md-icon.angular-material-icons(ng-if="!item.expanded && !item.hasChildren") remove
-					md-icon.angular-material-icons(ng-if="item.expanded") indeterminate_check_box
+				md-button.md-icon-button.md-primary.expandButton.clickToExpand(
+					aria-label="Toggle Expand"
+					ng-click="vm.expand($event, item._id)"
+					ng-if="!item.status && !item.expanded && item.hasChildren")
+
+					md-icon.angular-material-icons add_box
+
+				md-button.md-icon-button.md-primary.expandButton.clickToCollapse(
+					aria-label="Toggle Expand"
+					ng-click="vm.expand($event, item._id)"
+					ng-if="!item.status && item.expanded")
+					
+					md-icon.angular-material-icons indeterminate_check_box
+
+				md-button.md-icon-button.md-primary.expandButton.clickNoEvent(
+					aria-label="Toggle Expand"
+					ng-click="vm.expand($event, item._id)"
+					ng-if="!item.status && !item.expanded && !item.hasChildren")
+
+					md-icon.angular-material-icons remove
 
 				md-button.md-icon-button.noAccessButton(aria-label="Status", ng-if="item.status")
 					md-icon.angular-material-icons(ng-if="item.status==='NO_ACCESS'") do_not_disturb

@@ -315,7 +315,7 @@ gulp.task('watch', function() {
   // WATCHERS
 
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./entry.js", "./globals/*.ts", "./components/**/*.{ts,js}", "./bootstrap.js"], gulp.series(["javascript-dev", "service-workers-dev"]))
+  gulp.watch(["./entry.js", "./entry-ts-components.js", "./globals/*.ts", "./components/**/*.{ts,js}", "./bootstrap.js"], gulp.series(["javascript-dev", "service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
