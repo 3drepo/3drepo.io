@@ -43,6 +43,9 @@ export class UnityUtil {
 	static loadingPromise;
 	static loadingResolve;
 
+	static loadComparatorPromise;
+	static loadComparatorResolve;
+
 	static unityHasErrored = false;
 
 	static screenshotPromises = [];
@@ -205,6 +208,12 @@ export class UnityUtil {
 		}
 	}
 
+	public static comparatorLoaded(){
+		UnityUtil.loadComparatorResolve.resolve();
+		UnityUtil.loadComparatorPromise = null;
+		UnityUtil.loadComparatorResolve = null;
+	}
+
 	public static loaded(bboxStr) {
 		const res = {
 			bbox: JSON.parse(bboxStr),
@@ -282,6 +291,14 @@ export class UnityUtil {
 
 
 	/**
+	* Disable diff tool
+	* This also unloads the comparator models
+	*/
+	public static diffToolDisableAndClear() {
+		UnityUtil.toUnity("DiffToolDisable", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
 	* Enable diff tool
 	* This starts the diff tool in diff mode
 	*/
@@ -301,12 +318,7 @@ export class UnityUtil {
         * Load comparator model for diff tool
 	 */
 	public static diffToolLoadComparator(account, model, revision) {
-		/*		UnityUtil.loadedPromise = null;
-		UnityUtil.loadedResolve = null;
-		UnityUtil.loadingPromise = null;
-		UnityUtil.loadingResolve = null;
-		UnityUtil.loadedFlag  = false;
-		 */
+
 		const params: any = {
 			database : account,
 			model,
@@ -318,7 +330,12 @@ export class UnityUtil {
 
 		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
-		//		return UnityUtil.onLoaded();
+		if(!UnityUtil.loadComparatorPromise) {
+			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
+				UnityUtil.loadComparatorResolve = {resolve, reject};
+			});
+		}
+		return UnityUtil.loadComparatorPromise;
 	}
 
 	/**
@@ -466,7 +483,6 @@ export class UnityUtil {
 		}
 
 		UnityUtil.onLoading();
-		console.log(params);
 		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoaded();
