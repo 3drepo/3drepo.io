@@ -27,6 +27,7 @@ const Mailer = require('../../mailer/mailer');
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require('../../config');
 const History = require('../history');
+const Mesh = require('../mesh');
 const Scene = require('../scene');
 const Ref = require('../ref');
 const utils = require("../../utils");
@@ -506,6 +507,100 @@ function createFederatedModel(account, model, subModels){
 		});
 
 	});
+}
+
+function getAllMeshes(account, model, branch, rev, username){
+	'use strict'
+
+	let subModelMeshes;
+	let revId;
+	let getHistory, history;
+	let status;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, model }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, model }, rev);
+	} else if (branch) {
+		getHistory = History.findByBranch({ account, model }, branch);
+	}
+
+	return getHistory.then(_history => {
+		history = _history;
+		return middlewares.hasReadAccessToModelHelper(username, account, model);
+	}).then(granted => {
+		if(!history){
+			status = 'NOT_FOUND';
+			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		} else if (!granted) {
+			status = 'NO_ACCESS';
+			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
+		} else {
+			revId = utils.uuidToString(history._id);
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+	}).then(refs => {
+
+		//for all refs get their tree
+		let refMeshesPromises = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			refMeshesPromises.push(
+				getAllMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
+					return Promise.resolve({
+						owner: ref.owner,
+						model: ref.project
+					})
+				}).catch(err => {
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(refMeshesPromises);
+
+	}).then(refMeshes => {
+
+		subModelMeshes = refMeshes;
+		return Mesh.getMeshes(account, model, history);
+	}).then(meshes => {
+		let results = {};
+	       	if(meshes) {
+			results.meshes = meshes;
+		}
+		else {
+			results.meshes = [];
+		}
+
+
+		if(subModelMeshes.length > 0)
+		{
+			results.subModels = [];
+		}
+		subModelMeshes.forEach(subMeshes => {
+			if (subMeshes && subMeshes.meshes)
+			{
+				results.subModels.push({meshes: subMeshes.meshes, account: subMeshes.owner, model: subMeshes.model});
+			}
+		});
+
+		return Promise.resolve({results, status});
+
+	});
+	
 }
 
 function getIdMap(account, model, branch, rev, username){
@@ -1757,6 +1852,7 @@ module.exports = {
 	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
+	getAllMeshes,
 	getIdMap,
 	getIdToMeshes,
 	getModelProperties,
