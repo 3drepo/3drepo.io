@@ -226,6 +226,30 @@ describe('Revision', function () {
 		});
 	});	
 
+	//meshes
+	it('get all meshes by revision id should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/meshes.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get meshes by non existing revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/000/meshes.json`)
+		.expect(400, function(err, res){
+			done(err);
+		});
+	});
+
+	it('get meshes of head of master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/meshes.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});	
+
+
+
 	//treePath
 	it('get treePath by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/tree_path.json`)
