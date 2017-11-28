@@ -1,0 +1,74 @@
+div(
+	layout="column" 
+	layout-fill)
+
+	div.topContainer(
+		layout-align="center center")
+
+		md-tabs.md-border-bottom.md-autoselect(
+			md-center-tabs="true"
+			layout-align="center center"
+			md-selected="selectedIndex")
+			
+			md-tab(
+				ng-repeat="compareType in vm.compareTypes"
+				label="{{compareType.label}}")
+
+				md-content(
+					layout-fill)
+					div.topBorder(layout="row" layout-align="center center")
+
+						md-button.modelType(
+							ng-click="vm.setModelType('base')"
+							ng-style="{ color: vm.getColor('base') }") Base model
+
+						md-button.modelType(
+							ng-click="vm.setModelType('target')"
+							ng-style="{ color: vm.getColor('target') }") Target model
+
+					#modelsList.topBorder
+
+						div(ng-if="compareType.type === 'diff' && compareType.models.length < 2")
+							h3.selfDiffWarning Model can't diff with itself! Try clashing with a revision.
+
+						div(
+							ng-repeat="model in compareType.models") 
+							div.md-padding.compareModel(layout="row", layout-align="start center")
+								div.modelSides.compareVisibility
+									md-icon.angular-material-icons visibility
+								div(flex layout="column")
+									h5.modelText {{model.name}}
+									span.revisionText Revision
+									span.revisionText {{model.selectedRevision}}
+								div.modelSides(
+									layout-align="end center")
+									md-menu
+										md-button(ng-click="$mdOpenMenu($event)")
+											md-icon.angular-material-icons expand_more
+										md-menu-content
+											md-menu-item(ng-repeat="revision in model.revisions")
+												md-button(ng-click="vm.setRevision(model, revision)")
+													span {{revision.name}} 
+													span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
+
+								
+
+
+	div.bottomContainer(
+		md-padding)
+
+		div(layout="row")
+			md-slider.bottomSlider(
+				flex="70"
+				md-padding
+				md-discrete
+				ng-model="vm.compareSlider"
+				step="1"
+				min="1"
+				max="3"
+				aria-label="Position")
+
+			md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
+				ng-click="vm.compare()")
+				md-icon.angular-material-icons compare
+		

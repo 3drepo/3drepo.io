@@ -19,43 +19,43 @@ declare var SendMessage;
 
 export class UnityUtil {
 
-	static errorCallback: any;
+	public static errorCallback: any;
 	public static viewer: any;
 
-	static init(
-		errorCallback: any
+	public static init(
+		errorCallback: any,
 	) {
 		errorCallback = errorCallback;
 	}
 	
-	static LoadingState = { 
-		VIEWER_READY : 1,  //Viewer has been loaded
-		MODEL_LOADING : 2, //model information has been fetched, world offset determined, model starts loading
-		MODEL_LOADED : 3 //Models
+	public static LoadingState = {
+		VIEWER_READY : 1,  // Viewer has been loaded
+		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
+		MODEL_LOADED : 3, // Models
 	};
 
-	static readyPromise;
-	static readyResolve;
-	
-	static loadedPromise;
-	static loadedResolve;
+	public static readyPromise;
+	public static readyResolve;
 
-	static loadingPromise;
-	static loadingResolve;
+	public static loadedPromise;
+	public static loadedResolve;
 
-	static unityHasErrored = false;
+	public static loadingPromise;
+	public static loadingResolve;
 
-	static screenshotPromises = [];
-	static vpPromise = null;
-	static objectStatusPromise = null;
-	static loadedFlag = false;
-	static UNITY_GAME_OBJECT = "WebGLInterface";
+	public static unityHasErrored = false;
 
-	static SendMessage_vss;
-	static SendMessage_vssn;
-	static SendMessage_vsss;
-	
-	static _SendMessage(gameObject, func, param) {
+	public static screenshotPromises = [];
+	public static vpPromise = null;
+	public static objectStatusPromise = null;
+	public static loadedFlag = false;
+	public static UNITY_GAME_OBJECT = "WebGLInterface";
+
+	public static SendMessage_vss;
+	public static SendMessage_vssn;
+	public static SendMessage_vsss;
+
+	public static _SendMessage(gameObject, func, param) {
 
 		if (param === undefined) {
 
@@ -79,33 +79,33 @@ export class UnityUtil {
 			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
-			throw "" + param + " is does not have a type which is supported by SendMessage.";
+			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
 		}
-	};
+	}
 
-	static onError(err, url, line) {
-		var conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " + 
+	public static onError(err, url, line) {
+		const conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " +
 					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " +
 					"reduce your memory usage and try again. " +
 					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " +
 					"<br><br> <code>Error " + err + " occured at line " + line +
 					"</code> <br><br> Click ok to refresh this page. <md-container>";
 
-		var reload = false;
+		let reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
-			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
+			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
 			reload = true;
 		}
 
 		UnityUtil.userAlert(conf, reload);
 
 		return true;
-	};
+	}
 
 	public static onLoaded() {
-		if(!UnityUtil.loadedPromise) {
+		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadedResolve = {resolve: resolve, reject: reject};
+				UnityUtil.loadedResolve = {resolve, reject};
 			});
 		}
 		return UnityUtil.loadedPromise;
@@ -113,7 +113,7 @@ export class UnityUtil {
 	}
 
 	public static onLoading() {
-		if(!UnityUtil.loadingPromise) {
+		if (!UnityUtil.loadingPromise) {
 			UnityUtil.loadingPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadingResolve = {resolve, reject};
 			});
@@ -124,7 +124,7 @@ export class UnityUtil {
 
 	public static onReady() {
 
-		if(!UnityUtil.readyPromise) {
+		if (!UnityUtil.readyPromise) {
 			UnityUtil.readyPromise	= new Promise((resolve, reject) => {
 				UnityUtil.readyResolve = {resolve, reject};
 			});
@@ -147,7 +147,7 @@ export class UnityUtil {
 			UnityUtil.unityHasErrored = true;
 			UnityUtil.errorCallback({
 				message : fullMessage,
-				reload
+				reload,
 			});
 		}
 
@@ -155,7 +155,7 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
-		if(requireStatus == UnityUtil.LoadingState.MODEL_LOADED) {
+		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
@@ -165,7 +165,7 @@ export class UnityUtil {
 					UnityUtil.userAlert(error, true);
 				}
 			});
-		} else if(requireStatus == UnityUtil.LoadingState.MODEL_LOADING) {
+		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
 			// Requires model to be loading
 			UnityUtil.onLoading().then(() => {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
@@ -280,7 +280,6 @@ export class UnityUtil {
 		UnityUtil.toUnity("ClearHighlighting", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
-
 	/**
 	* Enable diff tool
 	* This starts the diff tool in diff mode
@@ -318,60 +317,53 @@ export class UnityUtil {
 
 		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
-		//		return UnityUtil.onLoaded();
+		return UnityUtil.onLoaded();
 	}
 
 	/**
-        * Visualise the difference view
-        * i.e. models will be rendered in greyscale, detailing the difference/clash
-        */
-        public static diffToolDiffView()
-        {
-        	UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
+	* Visualise the difference view
+	* i.e. models will be rendered in greyscale, detailing the difference/clash
+	*/
+	public static diffToolDiffView() {
+		UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
 	}
 
 	/**
-        * Only show the base model
-        * i.e. It will show only the original model, not the comparator nor the diff view
-        */
-	public static diffToolShowBaseModel()
-	{
-        	UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
+	* Only show the base model
+	* i.e. It will show only the original model, not the comparator nor the diff view
+	*/
+	public static diffToolShowBaseModel() {
+		UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
 	}
 
 	/**
-        * Only show the comparator model
-        * i.e. Only show the model you are trying to compare with, not the base model
-        */
-	public static diffToolShowComparatorModel()
-	{
-        	UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
+	* Only show the comparator model
+	* i.e. Only show the model you are trying to compare with, not the base model
+	*/
+	public static diffToolShowComparatorModel() {
+		UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
 	}
 
-
-        /**
-        * Compare transparent objects as if they are opaque objects
-        */
-        public static diffToolRenderTransAsOpaque()
-        {
-        	UnityUtil.toUnity("DiffToolRenderTransAsOpaque", undefined, undefined);
-        }
-
-        /**
-        * Ignore semi-transparent objects in diff
-        */
-        public static diffToolRenderTransAsInvisible()
-        {
-        	UnityUtil.toUnity("DiffToolRenderTransAsInvisible", undefined, undefined);
-        }
+	/**
+	* Compare transparent objects as if they are opaque objects
+	*/
+	public static diffToolRenderTransAsOpaque() {
+		UnityUtil.toUnity("DiffToolRenderTransAsOpaque", undefined, undefined);
+	}
 
 	/**
-        * Compare transparent objects as of normal
-        */
-        public static diffToolRenderTransAsDefault()
-        {
-        	UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
-        }
+	* Ignore semi-transparent objects in diff
+	*/
+	public static diffToolRenderTransAsInvisible() {
+		UnityUtil.toUnity("DiffToolRenderTransAsInvisible", undefined, undefined);
+	}
+
+	/**
+	* Compare transparent objects as of normal
+	*/
+	public static diffToolRenderTransAsDefault() {
+		UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
+	}
 
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity("DisableClip", undefined, undefined);

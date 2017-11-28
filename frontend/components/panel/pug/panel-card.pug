@@ -98,7 +98,11 @@ div(layout="column", class="md-whiteframe-1dp")
 
 				filter-text='vm.filterText')
 
-
+			compare(
+				model-settings='vm.modelSettings'
+				account='vm.account'
+				model='vm.model'
+				ng-if="vm.contentData.type === 'compare'")
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")
