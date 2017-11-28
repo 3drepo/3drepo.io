@@ -22,12 +22,6 @@ export class UnityUtil {
 	public static errorCallback: any;
 	public static viewer: any;
 
-	public static init(
-		errorCallback: any,
-	) {
-		errorCallback = errorCallback;
-	}
-	
 	public static LoadingState = {
 		VIEWER_READY : 1,  // Viewer has been loaded
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
@@ -43,6 +37,9 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
+	public static loadComparatorPromise;
+	public static loadComparatorResolve;
+
 	public static unityHasErrored = false;
 
 	public static screenshotPromises = [];
@@ -54,6 +51,12 @@ export class UnityUtil {
 	public static SendMessage_vss;
 	public static SendMessage_vssn;
 	public static SendMessage_vsss;
+
+	public static init(
+		errorCallback: any,
+	) {
+		errorCallback = errorCallback;
+	}
 
 	public static _SendMessage(gameObject, func, param) {
 
@@ -205,6 +208,12 @@ export class UnityUtil {
 		}
 	}
 
+	public static comparatorLoaded() {
+		UnityUtil.loadComparatorResolve.resolve();
+		UnityUtil.loadComparatorPromise = null;
+		UnityUtil.loadComparatorResolve = null;
+	}
+
 	public static loaded(bboxStr) {
 		const res = {
 			bbox: JSON.parse(bboxStr),
@@ -281,6 +290,14 @@ export class UnityUtil {
 	}
 
 	/**
+	* Disable diff tool
+	* This also unloads the comparator models
+	*/
+	public static diffToolDisableAndClear() {
+		UnityUtil.toUnity("DiffToolDisable", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
 	* Enable diff tool
 	* This starts the diff tool in diff mode
 	*/
@@ -297,15 +314,11 @@ export class UnityUtil {
 	}
 
 	/**
-        * Load comparator model for diff tool
+	 * Load comparator model for diff tool
+	 * This returns a promise which will be resolved when the comparator model is loaded
 	 */
 	public static diffToolLoadComparator(account, model, revision) {
-		/*		UnityUtil.loadedPromise = null;
-		UnityUtil.loadedResolve = null;
-		UnityUtil.loadingPromise = null;
-		UnityUtil.loadingResolve = null;
-		UnityUtil.loadedFlag  = false;
-		 */
+
 		const params: any = {
 			database : account,
 			model,
@@ -317,23 +330,26 @@ export class UnityUtil {
 
 		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
-		return UnityUtil.onLoaded();
+		if (!UnityUtil.loadComparatorPromise) {
+			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
+				UnityUtil.loadComparatorResolve = {resolve, reject};
+			});
+		}
+		return UnityUtil.loadComparatorPromise;
 	}
 
 	/**
-	* Visualise the difference view
-	* i.e. models will be rendered in greyscale, detailing the difference/clash
-	*/
-	public static diffToolDiffView() {
-		UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
-	}
+	 * Set an existing submodel/model as a comparator model
+	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
+	 */
+	public static diffToolSetAsComparator(account, model) {
+		const params: any = {
+			database : account,
+			model,
+		};
 
-	/**
-	* Only show the base model
-	* i.e. It will show only the original model, not the comparator nor the diff view
-	*/
-	public static diffToolShowBaseModel() {
-		UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
+		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
 	}
 
 	/**
@@ -458,7 +474,6 @@ export class UnityUtil {
 		}
 
 		UnityUtil.onLoading();
-		console.log(params);
 		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoaded();
