@@ -23,13 +23,13 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"APIService", "TreeService", "AuthService",
+		"APIService", "TreeService", "AuthService", "MultiSelectService",
 		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		APIService, TreeService, AuthService,
+		APIService, TreeService, AuthService, MultiSelectService,
 		ViewerService, $timeout, $filter
 	) {
 
@@ -584,34 +584,6 @@
 			var objectIdsToHide = [];
 			TreeService.getMap()
 				.then(function(treeMap){
-					response.data.objects.forEach(function(obj){
-						var account = obj.account;
-						var model = obj.model;
-						var key = account + "@" + model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-
-						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-					});
-
-					for (var key in ids) {
-
-						var vals = key.split("@");
-						var account = vals[0];
-						var model = vals[1];
-
-						var treeData = {
-							source: "tree",
-							account: account,
-							model: model,
-							ids: ids[key],
-							colour: response.data.colour,
-							multi: true					
-						};
-						ViewerService.highlightObjects(treeData);
-					}
-
 					var objectsPromise = $q.defer();
 					var objectsAccount;
 					var objectsModel;
@@ -625,19 +597,7 @@
 					// show currently hidden nodes
 					objectsPromise.promise
 						.then(function(objectInfo) {
-							objectInfo.hiddenNodes.forEach(function(obj){
-								var account = obj.account;
-								var model = obj.model;
-								var key = account + "@" + model;
-								
-								if (!objectIdsToShow[key]) {
-									objectIdsToShow[key] = [];
-								}
-
-								objectIdsToShow[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-								
-								ViewerService.switchObjectVisibility(account, model, objectIdsToShow[key], true);
-							});
+							TreeService.resetHidden();
 							
 							response.data.hiddenObjects.forEach(function(obj){
 								var account = obj.account;
@@ -649,25 +609,35 @@
 
 								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-								ViewerService.switchObjectVisibility(account, model, objectIdsToHide[key], false);
-
-								var node = {
-									_id: treeMap.sharedIdToUid[obj.shared_id],
-									name: "unknown",
-									account: account,
-									model: model
-								};
-				
-								// Trigger EventService.EVENT.STATE_CHANGED?
-								EventService.send(EventService.EVENT.STATE_CHANGED, node);
 							});
-						})
-						.catch(function(error) {
-							console.error(error);
-						});
 
-				});
+							for (var key in objectIdsToHide) {
+
+								objectIdsToHide[key].forEach((obj) => {
+									TreeService.toggleTreeNodeByUid(obj);
+								});
+							}
+					
+							response.data.objects.forEach(function(obj){
+								const account = obj.account;
+								const model = obj.model;
+								const key = account + "@" + model;
+								if(!ids[key]){
+									ids[key] = [];
+								}	
+
+								ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+							});
+
+							TreeService.setHighlightMap(ids);
+
+					});
 			
+				})
+				.catch(function(error) {
+					console.error(error);
+				});
+
 		}
 
 		// TODO: Internationalise and make globally accessible

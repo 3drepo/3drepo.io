@@ -194,19 +194,9 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch(() => {return this.TreeService.state},
 			(state) => {
-				// Update state variables
-				this.currentSelectedNodes = state.currentSelectedNodes;
-				this.clickedHidden = state.clickedHidden;
-				this.clickedShown = state.clickedShown;
-				this.lastParentWithName = state.lastParentWithName;
-				this.nodesToShow = state.nodesToShow;
-				this.showNodes = state.showNodes;
-				this.visible = state.visible;
-				this.invisible = state.invisible;
-				this.toggledNode = state.toggledNode;
-				this.subTreesById = state.subTreesById;
-				this.idToPath = state.idToPath;
-				this.subModelIdToPath = state.subModelIdToPath;
+				if (state) {
+					angular.extend(this, state);
+				}
 			},
 		true);
 		
@@ -235,11 +225,25 @@ class TreeController implements ng.IController {
 				}
 			});
 		
-		this.$scope.$watch(() => {return this.TreeService.visibilityMap},
-			(visibilityMap) => {
+		this.$scope.$watch(() => {return this.clickedHidden},
+			(clickedHidden) => {
+
+				let objectIdsToHide = [];
+
+				for (const id in clickedHidden) {
+					const account = clickedHidden[id].account;
+					const model = clickedHidden[id].project;
+					const key = account + "@" + model;
+
+					if (!objectIdsToHide[key]) {
+						objectIdsToHide[key] = [];
+					}
+
+					objectIdsToHide[key].push(id);
+				}
 
 				// Update viewer object visibility
-				for (const key in visibilityMap) {
+				for (const key in objectIdsToHide) {
 					if (key) {
 						const vals = key.split("@");
 						const account = vals[0];
@@ -248,12 +252,48 @@ class TreeController implements ng.IController {
 						this.ViewerService.switchObjectVisibility(
 							account,
 							model,
-							visibilityMap[key],
-							this.toggledNode.toggleState !== "invisible",
+							objectIdsToHide[key],
+							false
 						);
 					}
 				}
-			});
+			},
+		true);
+		
+		this.$scope.$watch(() => {return this.clickedShown},
+			(clickedShown) => {
+
+				let objectIdsToShow = [];
+
+				for (const id in clickedShown) {
+					const account = clickedShown[id].account;
+					const model = clickedShown[id].project;
+					const key = account + "@" + model;
+
+					if (!objectIdsToShow[key]) {
+						objectIdsToShow[key] = [];
+					}
+
+					objectIdsToShow[key].push(id);
+				}
+
+				// Update viewer object visibility
+				for (const key in objectIdsToShow) {
+					if (key) {
+						const vals = key.split("@");
+						const account = vals[0];
+						const model = vals[1];
+
+						this.ViewerService.switchObjectVisibility(
+							account,
+							model,
+							objectIdsToShow[key],
+							true
+						);
+					}
+				}
+			},
+		true);
 		
 		this.$scope.$watch(() => {return this.TreeService.selectionData},
 			(selectionData) => {

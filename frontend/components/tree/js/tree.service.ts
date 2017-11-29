@@ -26,7 +26,6 @@ export class TreeService {
 
 	public highlightSelectedViewerObject = false;
 	public highlightMap;
-	public visibilityMap;
 	public selectionData;
 
 	private state;
@@ -832,10 +831,7 @@ export class TreeService {
 	}
 
 	public toggleTreeNodeByUid(uid) {
-		const path = this.getPath(uid);
-		const selectionData = this.expandToSelection(path, 0, undefined);
-		const node = this.state.nodesToShow[selectionData.selectedIndex];;
-		//this.setToggleState(node, "invisible");
+		const node = this.getNodeByUid(uid);
 		this.toggleTreeNode(node);
 	}
 
@@ -844,7 +840,19 @@ export class TreeService {
 
 		this.traverseNodeAndPushId(node, childNodes);
 
-		this.visibilityMap = childNodes;
+		for (const key in childNodes) {
+			childNodes[key].forEach((uid) => {
+				const node = this.getNodeByUid(uid);
+				this.updateClickedHidden(node);
+				this.updateClickedShown(node);
+			});
+		}
+	}
+
+	public resetHidden() {
+		for (const id in this.state.clickedHidden) {
+			this.toggleTreeNodeByUid(id);
+		}
 	}
 
 	/**
@@ -924,6 +932,13 @@ export class TreeService {
 		} else {
 			delete this.state.clickedShown[node._id];
 		}
+	}
+
+	public getNodeByUid(uid) {
+		const node = this.state.nodesToShow.find((node) => {
+			return node._id === uid;
+		});
+		return node;
 	}
 
 }
