@@ -94,9 +94,22 @@ div(
 					ng-model="vm.compareState"
 					layout-align="center center")
 
-					md-radio-button(value="base" ng-click="vm.changeCompareState('base')" ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
-					md-radio-button(value="compare" ng-click="vm.changeCompareState('compare')" ng-disabled="!vm.canChangeCompareState") Compare
-					md-radio-button(value="target" ng-click="vm.changeCompareState('target')" ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
+					md-radio-button(
+						value="base" 
+						ng-click="vm.changeCompareState('base')" 
+						ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
+					
+					
+					md-radio-button(
+						value="compare" 
+						ng-click="vm.changeCompareState('compare')" 
+						ng-disabled="!vm.canChangeCompareState") Compare
+					
+					
+					md-radio-button(
+						value="target"
+						ng-click="vm.changeCompareState('target')"
+						ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
 					
 				md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
 					style="background-color: {{vm.getButtonColor()}}"

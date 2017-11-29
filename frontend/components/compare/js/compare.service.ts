@@ -252,18 +252,18 @@ export class CompareService {
 
 		if (this.state.mode === "diff") {
 
-			this.state.compareState = "compare";
 			this.ViewerService.diffToolEnableWithDiffMode();
+			this.changeCompareState("compare");
 
 		} else if (this.state.mode === "clash") {
-
-			this.state.compareState = "compare";
 
 			if (this.state.isFed) {
 				this.ViewerService.diffToolEnableWithClashMode();
 			} else {
 				this.ViewerService.diffToolShowBaseModel();
 			}
+
+			this.changeCompareState("compare");
 
 		}
 	}
