@@ -321,6 +321,34 @@ export class Viewer {
 		UnityUtil.requestScreenShot(promise);
 	}
 
+	public diffToolLoadComparator(account: string, model: string, revision: string) {
+		return UnityUtil.diffToolLoadComparator(account, model, revision);
+	}
+
+	public diffToolEnableWithDiffMode() {
+		UnityUtil.diffToolEnableWithDiffMode();
+	}
+
+	public diffToolEnableWithClashMode() {
+		UnityUtil.diffToolEnableWithClashMode();
+	}
+
+	public diffToolDisableAndClear() {
+		UnityUtil.diffToolDisableAndClear();
+	}
+
+	public diffToolShowBaseModel() {
+		UnityUtil.diffToolShowBaseModel();
+	}
+
+	public diffToolShowComparatorModel() {
+		UnityUtil.diffToolShowComparatorModel();
+	}
+
+	public diffToolDiffView() {
+		UnityUtil.diffToolDiffView();
+	}
+
 	public pickPointEvent(pointInfo) {
 
 		// User clicked a mesh

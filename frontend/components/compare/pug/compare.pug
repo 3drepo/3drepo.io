@@ -6,69 +6,100 @@ div(
 		layout-align="center center")
 
 		md-tabs.md-border-bottom.md-autoselect(
+			layout-fill
 			md-center-tabs="true"
 			layout-align="center center"
-			md-selected="selectedIndex")
+			md-selected="0")
 			
 			md-tab(
+				ng-click="vm.setMode(compareType)"
 				ng-repeat="compareType in vm.compareTypes"
 				label="{{compareType.label}}")
 
-				md-content(
-					layout-fill)
-					div.topBorder(layout="row" layout-align="center center")
+				md-content(layout-fill)
 
-						md-button.modelType(
+					div.topBorder.modelTypeSelection(
+						ng-if="!vm.isModelClash(compareType.type)"
+						layout="row"
+						layout-align="center center")
+
+						div.modelType(
 							ng-click="vm.setModelType('base')"
-							ng-style="{ color: vm.getColor('base') }") Base model
+							flex="100"
+							layout-align="center center"
+							ng-style="{ background: vm.getColor('base', 'background'), color: vm.getColor('base', 'color') }")
+							span Base model
 
-						md-button.modelType(
+						div.modelType(
 							ng-click="vm.setModelType('target')"
-							ng-style="{ color: vm.getColor('target') }") Target model
+							flex="100"
+							layout-align="center center"
+							ng-style="{ background: vm.getColor('target', 'background'), color: vm.getColor('target', 'color') }")
+							span Target model
 
 					#modelsList.topBorder
 
-						div(ng-if="compareType.type === 'diff' && compareType.models.length < 2")
-							h3.selfDiffWarning Model can't diff with itself! Try clashing with a revision.
+						div(ng-if="vm.isModelClash(compareType.type)")
+							h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
 
-						div(
+						div(ng-if="vm.loadingComparision")
+							tdr-progress(
+								info="vm.loadingInfo"
+								flex
+								layout-fill)
+
+						div(ng-if="!vm.loadingComparision"
 							ng-repeat="model in compareType.models") 
+
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 								div.modelSides.compareVisibility
 									md-icon.angular-material-icons visibility
-								div(flex layout="column")
-									h5.modelText {{model.name}}
-									span.revisionText Revision
-									span.revisionText {{model.selectedRevision}}
-								div.modelSides(
-									layout-align="end center")
-									md-menu
-										md-button(ng-click="$mdOpenMenu($event)")
-											md-icon.angular-material-icons expand_more
-										md-menu-content
-											md-menu-item(ng-repeat="revision in model.revisions")
-												md-button(ng-click="vm.setRevision(model, revision)")
-													span {{revision.name}} 
-													span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
 
+								div(ng-if="vm.modelType === 'base'" flex layout="column")
+									h5.modelText {{model.name}}
+									span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
+									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+								
+								md-menu(
+									flex
+									md-offset="300 20"
+									layout="column" 
+									ng-if="vm.modelType === 'target'")
+
+									div(flex ng-click="$mdOpenMenu($event)" layout="row")
+										div(flex layout="column")
+											h5.modelText {{model.name}}
+											span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+										md-icon.angular-material-icons expand_more
+									md-menu-content
+										md-menu-item(
+											ng-repeat="revision in model.revisions")
+
+											md-button(ng-click="vm.setRevision(model, revision)")
+												span {{revision.tag || revision.name}} 
+												span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
+							md-divider
 								
 
+		div.bottomContainer(
+			md-padding)
 
-	div.bottomContainer(
-		md-padding)
+			div(layout="row")
+				md-radio-group.compareState(
+					layout="row"
+					layout-align="center center"
+					ng-model="vm.compareState")
 
-		div(layout="row")
-			md-slider.bottomSlider(
-				flex="70"
-				md-padding
-				md-discrete
-				ng-model="vm.compareSlider"
-				step="1"
-				min="1"
-				max="3"
-				aria-label="Position")
-
-			md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
-				ng-click="vm.compare()")
-				md-icon.angular-material-icons compare
-		
+					md-radio-button(value="base" ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
+					md-radio-button(value="compare" ng-disabled="!vm.canChangeCompareState") Compare
+					md-radio-button(value="target" ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
+					
+				md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
+					style="background-color: {{vm.getButtonColor()}}"
+					ng-disabled="!vm.canCompare()"
+					ng-click="vm.compare()")
+					md-icon.angular-material-icons compare
+					md-tooltip(ng-if="!vm.compareEnabled" md-direction="top") Compare with {{vm.compareTypes[vm.mode].label}}
+					md-tooltip(ng-if="vm.compareEnabled" md-direction="top") Disable {{vm.compareTypes[vm.mode].label}}
+	

@@ -60,6 +60,8 @@ export class UnityUtil {
 
 	public static _SendMessage(gameObject, func, param) {
 
+		// console.log("_SendMessage", param, func);
+
 		if (param === undefined) {
 
 			if (!UnityUtil.SendMessage_vss) {
@@ -209,6 +211,7 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
+		console.log("comparatorLoaded");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
@@ -290,6 +293,14 @@ export class UnityUtil {
 	}
 
 	/**
+	* Visualise the difference view
+	* i.e. models will be rendered in greyscale, detailing the difference/clash
+	*/
+	public static diffToolDiffView() {
+		UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
+	}
+
+	/**
 	* Disable diff tool
 	* This also unloads the comparator models
 	*/
@@ -358,6 +369,14 @@ export class UnityUtil {
 	*/
 	public static diffToolShowComparatorModel() {
 		UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
+	}
+
+	/**
+	* Only show the base model
+	* i.e. It will show only the original model, not the comparator nor the diff view
+	*/
+	public static diffToolShowBaseModel() {
+		UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
 	}
 
 	/**
