@@ -22,6 +22,7 @@ class CompareController implements ng.IController {
 		"$filter",
 		"ViewerService",
 		"RevisionsService",
+		"CompareService",
 	];
 
 	private mode: string;
@@ -38,315 +39,107 @@ class CompareController implements ng.IController {
 	private canChangeCompareState: boolean;
 
 	constructor(
-		private $scope: ng.IScope,
+		private $scope: any,
 		private $filter: any,
 		private ViewerService: any,
 		private RevisionsService: any,
+		private CompareService: any,
 	) {}
 
 	public $onInit() {
-		this.compareTypes = {
-			diff : {
-				label: "3D Diff",
-				models: [],
-				type: "diff",
-			},
-			clash : {
-				label: "3D Clash",
-				models: [],
-				type: "clash",
-			},
-		};
+		this.loadingInfo = "Loading comparision models...";
+		this.compareTypes = this.CompareService.state.compareTypes;
+		this.mode = this.CompareService.mode;
+		this.modelType = this.CompareService.modelType;
 
 		this.loadingInfo = "Loading comparision models...";
-		this.mode = "diff";
-		this.modelType = "base";
+
 		this.watchers();
 	}
 
-	public setMode(mode: any) {
-		console.log(mode);
-		this.mode = mode.type;
-	}
-
-	public setModelType(type: string) {
-		this.modelType = type;
-	}
-
-	public getColor(type: string, prop: string) {
-		if (prop === "background") {
-			if (type === this.modelType) {
-				return "white";
-			}
-			return "white";
-		} else if (prop === "color") {
-			if (type === this.modelType) {
-				return "black";
-			}
-			return "grey";
-		}
-	}
-
-	public isModelClash(type) {
-		return type === "clash" && !this.isFed;
-	}
-
-	public setRevision(model, revision) {
-
-		model.selectedRevision = revision._id;
-		model.selectedRevisionTag = revision.tag || revision.name;
-
-		if (this.compareEnabled) {
-			this.compareEnabled = false;
-		}
-	}
-
-	public getCompareModelData(modelSettings: any, revisions: any[]) {
-		const headRevision = modelSettings.headRevisions.master;
-
-		console.log("headREvision", headRevision);
-		console.log(revisions);
-		const headRevisionObj = revisions.find((r) => {
-			return r._id === headRevision;
-		});
-		const headRevisionTag = headRevisionObj.tag || headRevisionObj.name;
-
-		const revisionToUse = revisions[1] || revisions[0];
-
-		return {
-			account: modelSettings.account,
-			headRevision,
-			headRevisionTag,
-			model: modelSettings.model,
-			name: modelSettings.name,
-			revisions,
-			selectedRevision: revisionToUse.name,
-			selectedRevisionTag: revisionToUse.tag || revisionToUse.name,
-			visible: true,
-		};
-	}
-
-	public addModelsForModelCompare() {
-		this.RevisionsService.listAll(this.account, this.model).then((revisions) => {
-			this.compareTypes.diff.models = [
-				this.getCompareModelData(this.modelSettings, revisions),
-			];
-		});
-	}
-
-	public getSettings(model) {
-		return this.ViewerService.getModelInfo(
-			model.database,
-			model.model,
-		);
-	}
-
-	public addModelsForFederationCompare() {
-
-		for (const type in this.compareTypes) {
-			if (this.compareTypes.hasOwnProperty(type)) {
-
-				this.compareTypes[type].models = [];
-				let numModels = 0;
-
-				this.modelSettings.subModels.forEach((model, i) => {
-					if (model.database && model.model) {
-						this.RevisionsService.listAll(model.database, model.model)
-							.then((revisions) => {
-								this.getSettings(model).then((response) => {
-									const settings = response.data;
-									const modelData = this.getCompareModelData(settings, revisions);
-									this.compareTypes[type].models[numModels] = modelData;
-									numModels++;
-								});
-							})
-							.catch((error) => {
-								console.error(error);
-							});
-					} else {
-						console.error("Sub model data doesn't contain database and model ID: ", model);
-					}
-
-				});
-
-			}
-		}
+	public $onDestroy() {
+		this.ViewerService.diffToolDisableAndClear();
 	}
 
 	public watchers() {
 
-		this.$scope.$watch("vm.mode", () => {
-			if (this.compareEnabled) {
-				if (this.mode === "diff") {
-					this.compareState = "compare";
-					this.ViewerService.diffToolEnableWithDiffMode();
-				} else if (this.mode === "clash") {
+		this.$scope.$watch(() => {
+			return this.CompareService.state;
+		}, (state) => {
 
-					if (this.isFed) {
-						this.compareState = "compare";
-						this.ViewerService.diffToolEnableWithClash();
-					} else {
-						this.compareState = "compare";
-						this.ViewerService.diffToolShowBaseModel();
-					}
-					
-				}
+			if (state) {
+				angular.extend(this, state);
 			}
-		});
+
+		}, true);
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				console.log(this.modelSettings);
-				this.isFed = this.modelSettings.federate;
-
-				if (this.isFed) {
-					this.addModelsForFederationCompare();
-				} else {
-					this.addModelsForModelCompare();
-				}
+				this.modelSettingsReady();
 			}
 		});
 
-		this.$scope.$watch("vm.compareState", () => {
+	}
 
-			switch (this.compareState) {
-			case "base":
-				this.ViewerService.diffToolShowBaseModel();
-				break;
+	public modelSettingsReady() {
 
-			case "compare":
-				this.ViewerService.diffToolDiffView();
-				break;
+		console.log("modelSettingsReady", this.modelSettings.federate);
 
-			case "target":
-				this.ViewerService.diffToolShowComparatorModel();
-				break;
-			}
+		this.CompareService.state.isFed = this.modelSettings.federate;
 
-		});
+		if (this.CompareService.state.isFed) {
+
+			console.log("isFederation");
+			this.CompareService.addModelsForFederationCompare(
+				this.modelSettings,
+			);
+
+		} else {
+
+			this.CompareService.addModelsForModelCompare(
+				this.account,
+				this.model,
+				this.modelSettings,
+			);
+
+		}
 
 	}
 
-	public prettyTimestamp(timestamp) {
-		return this.$filter("prettyDate")(timestamp, {showSeconds: false});
-	}
-
-	public canCompare() {
-		const loaded = !!this.ViewerService.currentModel.model;
-		const notModelClash = !this.isModelClash(this.mode);
-		return loaded && !this.loadingComparision && notModelClash;
-	}
-
-	public modelsLoaded() {
-		this.loadingComparision = false;
-		this.canChangeCompareState = true;
-		this.compareState = "compare";
-		this.compareEnabled = true;
-	}
-
-	public loadModels() {
-		const allModels = [];
-		this.compareTypes.diff.models.forEach((model) => {
-
-			this.loadingComparision = true;
-			const loadModel = this.ViewerService.diffToolLoadComparator(model.account, model.model, model.selectedRevision)
-				.then(() => {
-					console.log("diffToolLoadComparator");
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-
-			allModels.push(loadModel);
-
-		});
-
-		return Promise.all(allModels);
+	public getModelTypeStyle(type: string, prop: string) {
+		return this.CompareService.getModelTypeStyle(type, prop);
 	}
 
 	public getButtonColor() {
-		if (!this.canCompare()) {
-			return "";
-		} else {
-			return this.compareEnabled ? "#FF9800" : "rgb(6,86,60)";
-		}
+		return this.CompareService.getButtonColor();
 	}
 
-	public diffModel() {
-
-		this.ViewerService.diffToolDisableAndClear();
-
-		const model = this.compareTypes.diff.models.find((m) => {
-			return m.model === this.model;
-		});
-		const revision = model.selectedRevision;
-		console.log("Compare", this.account, this.model, revision);
-		this.loadingComparision = true;
-		this.ViewerService.diffToolLoadComparator(this.account, this.model, revision)
-			.then(() => {
-				this.ViewerService.diffToolEnableWithDiffMode();
-				this.modelsLoaded();
-				console.log("diffToolLoadComparator");
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+	public compareInNewMode(mode: string) {
+		this.CompareService.compareInNewMode(mode);
 	}
 
-	public diffFed() {
-
-		this.ViewerService.diffToolDisableAndClear();
-		console.log("diffFed");
-
-		this.loadModels().then(() => {
-			this.ViewerService.diffToolEnableWithDiffMode();
-			this.modelsLoaded();
-		});
-
+	public setModelType(type: string) {
+		this.CompareService.setModelType(type);
 	}
 
-	public clashFed() {
+	public setRevision(model: string, revision: string) {
+		this.CompareService.setRevision(model, revision);
+	}
 
-		this.ViewerService.diffToolDisableAndClear();
-		console.log("clashFed");
+	public canCompare() {
+		return this.CompareService.canCompare();
+	}
 
-		this.loadModels().then(() => {
-			this.ViewerService.diffToolEnableWithClashMode();
-			this.modelsLoaded();
-		});
+	public isModelClash(type: string) {
+		return this.CompareService.isModelClash();
+	}
+
+	public changeCompareState(compareState: string) {
+		this.CompareService.changeCompareState(compareState);
 	}
 
 	public compare() {
-
-		if (this.compareEnabled) {
-			this.disableComparision();
-		} else {
-			this.performComparision();
-		}
-
-	}
-
-	public disableComparision() {
-		this.compareEnabled = false;
-		this.canChangeCompareState = false;
-		this.ViewerService.diffToolDisableAndClear();
-	}
-
-	public performComparision() {
-
-		this.canChangeCompareState = false;
-
-		if (this.mode === "clash") {
-			if (this.isFed === true) {
-				this.clashFed();
-			}
-		} else if (this.mode === "diff") {
-			if (this.isFed === false) {
-				this.diffModel();
-			} else {
-				this.diffFed();
-			}
-		}
+		this.CompareService.compare(this.account, this.model);
 	}
 
 }

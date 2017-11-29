@@ -12,7 +12,7 @@ div(
 			md-selected="0")
 			
 			md-tab(
-				ng-click="vm.setMode(compareType)"
+				ng-click="vm.compareInNewMode(compareType)"
 				ng-repeat="compareType in vm.compareTypes"
 				label="{{compareType.label}}")
 
@@ -27,14 +27,14 @@ div(
 							ng-click="vm.setModelType('base')"
 							flex="100"
 							layout-align="center center"
-							ng-style="{ background: vm.getColor('base', 'background'), color: vm.getColor('base', 'color') }")
+							ng-style="{ background: vm.getModelTypeStyle('base', 'background'), color: vm.getModelTypeStyle('base', 'color') }")
 							span Base model
 
 						div.modelType(
 							ng-click="vm.setModelType('target')"
 							flex="100"
 							layout-align="center center"
-							ng-style="{ background: vm.getColor('target', 'background'), color: vm.getColor('target', 'color') }")
+							ng-style="{ background: vm.getModelTypeStyle('target', 'background'), color: vm.getModelTypeStyle('target', 'color') }")
 							span Target model
 
 					#modelsList.topBorder
@@ -88,12 +88,12 @@ div(
 			div(layout="row")
 				md-radio-group.compareState(
 					layout="row"
-					layout-align="center center"
-					ng-model="vm.compareState")
+					ng-model="vm.compareState"
+					layout-align="center center")
 
-					md-radio-button(value="base" ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
-					md-radio-button(value="compare" ng-disabled="!vm.canChangeCompareState") Compare
-					md-radio-button(value="target" ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
+					md-radio-button(value="base" ng-click="vm.changeCompareState('base')" ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
+					md-radio-button(value="compare" ng-click="vm.changeCompareState('compare')" ng-disabled="!vm.canChangeCompareState") Compare
+					md-radio-button(value="target" ng-click="vm.changeCompareState('target')" ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
 					
 				md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
 					style="background-color: {{vm.getButtonColor()}}"
