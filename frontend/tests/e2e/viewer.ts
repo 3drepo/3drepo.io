@@ -342,11 +342,11 @@ describe("Viewer page", function() {
 				});
 
 				it("has a diff compare tab", () => {
-					expect(element(by.id("diffCompareTab")).isDisplayed()).to.eventually.equal(true);
+					expect(element(by.id("diffCompareTab")).isPresent()).to.eventually.equal(true);
 				});
 
 				it("has a clash compare tab", () => {
-					expect(element(by.id("clashCompareTab")).isDisplayed()).to.eventually.equal(true);
+					expect(element(by.id("clashCompareTab")).isPresent()).to.eventually.equal(true);
 				});
 
 				it("has a the bottom container", () => {
