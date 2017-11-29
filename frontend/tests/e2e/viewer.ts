@@ -358,8 +358,9 @@ describe("Viewer page", function() {
 				});
 
 				it("responds to tab changing correctly", () => {
-					const clash = element(by.id("clashCompareTab"));
-					clash.click();
+					const clash = element(by.tagName("md-tab-item"));
+					clash.get(1).click();
+
 					const compare = element(by.tagName("compare"));
 					const active = compare.all(by.css(".md-active"));
 					expect(active.count()).to.eventually.equal(1);
