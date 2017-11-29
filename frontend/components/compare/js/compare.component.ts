@@ -83,13 +83,10 @@ class CompareController implements ng.IController {
 
 	public modelSettingsReady() {
 
-		console.log("modelSettingsReady", this.modelSettings.federate);
-
 		this.CompareService.state.isFed = this.modelSettings.federate;
 
 		if (this.CompareService.state.isFed) {
 
-			console.log("isFederation");
 			this.CompareService.addModelsForFederationCompare(
 				this.modelSettings,
 			);

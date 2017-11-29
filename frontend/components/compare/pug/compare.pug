@@ -6,12 +6,14 @@ div(
 		layout-align="center center")
 
 		md-tabs.md-border-bottom.md-autoselect(
+			id="compareTabs"
 			layout-fill
 			md-center-tabs="true"
 			layout-align="center center"
 			md-selected="0")
 			
 			md-tab(
+				id="{{compareType.type + 'CompareTab'}}"
 				ng-click="vm.compareInNewMode(compareType)"
 				ng-repeat="compareType in vm.compareTypes"
 				label="{{compareType.label}}")
@@ -19,6 +21,7 @@ div(
 				md-content(layout-fill)
 
 					div.topBorder.modelTypeSelection(
+						id="{{compareType.type + 'ModelTypeSection'}}"
 						ng-if="!vm.isModelClash(compareType.type)"
 						layout="row"
 						layout-align="center center")

@@ -133,8 +133,6 @@ export class CompareService {
 
 	public addModelsForFederationCompare(modelSettings: any) {
 
-		console.log("addModelsForFederationCompare", this.state.compareTypes);
-
 		for (const type in this.state.compareTypes) {
 			if (this.state.compareTypes.hasOwnProperty(type)) {
 
@@ -212,9 +210,6 @@ export class CompareService {
 				model.model,
 				model.selectedRevision,
 			)
-				.then(() => {
-					console.log("diffToolLoadComparator");
-				})
 				.catch((error) => {
 					console.error(error);
 				});

@@ -18,76 +18,76 @@ describe("Viewer page", function() {
 
 	describe("should load the model page elements ", () => {
 
-		// it("with the 3D Repo logo", () => {
-		// 	expect(element(by.id("homeLogo")).isDisplayed()).to.eventually.equal(true);
-		// });
+		it("with the 3D Repo logo", () => {
+			expect(element(by.id("homeLogo")).isDisplayed()).to.eventually.equal(true);
+		});
 
-		// describe("with the left bottom buttons", () => {
+		describe("with the left bottom buttons", () => {
 
-		// 	it("visible", () => {
-		// 		expect(element(by.id("leftButtons")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("visible", () => {
+				expect(element(by.id("leftButtons")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
-		// describe("with the legal links", () => {
+		describe("with the legal links", () => {
 
-		// 	it("visible", () => {
-		// 		expect(element(by.id("legalLinks")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("visible", () => {
+				expect(element(by.id("legalLinks")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
-		// describe("with the account menu", () => {
+		describe("with the account menu", () => {
 
-		// 	it("visible", () => {
-		// 		expect(element(by.tagName("account-menu")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("visible", () => {
+				expect(element(by.tagName("account-menu")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
-		// describe("with the right bottom buttons", () => {
+		describe("with the right bottom buttons", () => {
 
-		// 	it("visible", () => {
-		// 		expect(element(by.id("rightButtons")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("visible", () => {
+				expect(element(by.id("rightButtons")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
-		// describe("left side buttons", () => {
-		// 	it("visible", () => {
-		// 		expect(element(by.id("issuesLeftButton")).isDisplayed()).to.eventually.equal(true);
-		// 		expect(element(by.id("treeLeftButton")).isDisplayed()).to.eventually.equal(true);
-		// 		expect(element(by.id("clipLeftButton")).isDisplayed()).to.eventually.equal(true);
-		// 	});
-		// });
+		describe("left side buttons", () => {
+			it("visible", () => {
+				expect(element(by.id("issuesLeftButton")).isDisplayed()).to.eventually.equal(true);
+				expect(element(by.id("treeLeftButton")).isDisplayed()).to.eventually.equal(true);
+				expect(element(by.id("clipLeftButton")).isDisplayed()).to.eventually.equal(true);
+			});
+		});
 
-		// describe("right side buttons", () => {
-		// 	it("with a visible metadata button", () => {
-		// 		expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+		describe("right side buttons", () => {
+			it("with a visible metadata button", () => {
+				expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// 	it("with a visible measure button", () => {
-		// 		expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
-		// 	});
-		// });
+			it("with a visible measure button", () => {
+				expect(element(by.id("metadataButton")).isDisplayed()).to.eventually.equal(true);
+			});
+		});
 
-		// describe("viewer", () => {
+		describe("viewer", () => {
 
-		// 	it("visible", () => {
-		// 		expect(element(by.tagName("viewer")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("visible", () => {
+				expect(element(by.tagName("viewer")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
-		// describe("loading text", () => {
+		describe("loading text", () => {
 
-		// 	it("to exist", () => {
-		// 		expect(element(by.className("loadingViewer")).isDisplayed()).to.eventually.equal(true);
-		// 		expect(element(by.className("loadingViewerText")).isDisplayed()).to.eventually.equal(true);
-		// 	});
+			it("to exist", () => {
+				expect(element(by.className("loadingViewer")).isDisplayed()).to.eventually.equal(true);
+				expect(element(by.className("loadingViewerText")).isDisplayed()).to.eventually.equal(true);
+			});
 
-		// });
+		});
 
 		describe("with the model loaded", () => {
 
@@ -142,6 +142,18 @@ describe("Viewer page", function() {
 					expect(element(by.id("clipPanel")).isDisplayed()).to.eventually.equal(true);
 					clipButton.click();
 					expect(element(by.id("clipPanel")).isDisplayed()).to.eventually.equal(false);
+
+				});
+
+				it("and clicking the compare button should hide and show compare panel", () => {
+
+					const compareButton = element(by.id("compareLeftButton"));
+
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(false);
+					compareButton.click();
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(true);
+					compareButton.click();
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(false);
 
 				});
 
@@ -312,6 +324,53 @@ describe("Viewer page", function() {
 					expect(element(by.id("clipPanel")).isDisplayed()).to.eventually.equal(true);
 					clipButton.click();
 					expect(element(by.id("clipPanel")).isDisplayed()).to.eventually.equal(false);
+				});
+
+			});
+
+			describe("with an compare panel that", () => {
+
+				it("opens", () => {
+					const compareButton = element(by.id("compareLeftButton"));
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(false);
+					compareButton.click();
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("has tabs holder", () => {
+					expect(element(by.id("compareTabs")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("has a diff compare tab", () => {
+					expect(element(by.id("diffCompareTab")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("has a clash compare tab", () => {
+					expect(element(by.id("clashCompareTab")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("has a the bottom container", () => {
+					expect(element(by.css(".bottomContainer")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("has a the compare button", () => {
+					expect(element(by.css(".compareButton")).isDisplayed()).to.eventually.equal(true);
+				});
+
+				it("responds to tab changing correctly", () => {
+					const clash = element(by.id("clashCompareTab"));
+					clash.click();
+					const compare = element(by.tagName("compare"));
+					const active = compare.all(by.css(".md-active"));
+					expect(active.count()).to.eventually.equal(1);
+					expect(active.first().getText()).to.eventually.equal("3D Clash");
+				});
+
+				it("closes", () => {
+					const compareButton = element(by.id("compareLeftButton"));
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(true);
+					compareButton.click();
+					expect(element(by.id("comparePanel")).isDisplayed()).to.eventually.equal(false);
 				});
 
 			});
