@@ -15,25 +15,28 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class TermsController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("privacy", {
-			restrict: "E",
-			bindings: {},
-			templateUrl: "templates/privacy.html",
-			controller: PrivacyCtrl,
-			controllerAs: "vm"
-		});
+	public static $inject: string[] = [
+		"StateManager",
+	];
 
-	PrivacyCtrl.$inject = ["StateManager"];
+	constructor(private StateManager) {}
 
-	function PrivacyCtrl (StateManager) {
-		var vm = this;
+	public $onInit() {}
 
-		vm.home = function () {
-			StateManager.goHome();
-		};
+	public home() {
+		this.StateManager.goHome();
 	}
-}());
+}
+
+export const TermsComponent: ng.IComponentOptions = {
+	bindings: {},
+	controller: TermsController,
+	controllerAs: "vm",
+	templateUrl: "templates/terms.html",
+};
+
+export const TermsComponentModule = angular
+	.module("3drepo")
+	.component("terms", TermsComponent);

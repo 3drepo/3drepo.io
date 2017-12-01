@@ -86,15 +86,15 @@ function prettyDate() {
 function prettyGMTDate() {
 	return (input) => {
 		const date = new Date(input);
-		return date.toISOString().substr(0,10);
+		return date.toISOString().substr(0, 10);
 	};
 }
 
 function revisionDate() {
 	return (input) => {
 		return new Date(Date.parse(input)).toLocaleString();
-	}
-};
+	};
+}
 
 export const FormatBytesModule = angular
 	.module("3drepo")
