@@ -9,6 +9,8 @@
 	function SWService(DialogService) {
 
 		var path = "/"; //"/service-workers/";
+		var newVersionDialogOpen = false;
+		var sw = "service-worker"; // The name of the service worker
 
 		var service = {
 			init : init
@@ -21,64 +23,85 @@
 		function init() {
 			if ("serviceWorker" in navigator) {
 
-				console.debug("ServiceWorker in navigator");
-
-				var serviceWorkers = [
-					"service-worker"
-					//"google-analytics"
-				];
-
-				serviceWorkers.forEach(registerSW);
+				registerSW(sw);
 
 			}		
+		}
+
+		function debugSW(message) {
+			console.debug("ServiceWorker (" + sw + ") - " + message);
 		}
 
 		function registerSW(sw)  {
 		
 			var swPath = path + sw + ".js";
-			console.debug("ServiceWorker path: ", swPath);
-			var newVersionDialogOpen = false;
+			debugSW("path: " + swPath);
 
 			navigator.serviceWorker.register(swPath).then(function(registration) {
+				
 				// Registration was successful
-				console.debug("ServiceWorker (" + sw + ") registration successful with scope: ", registration.scope);
-
-				// updatefound is fired if service-worker.js changes.
+				debugSW("registration successful: " + registration);
+		
 				registration.onupdatefound = function() {
-					// The updatefound event implies that registration.installing is set; see
-					// https://slightlyoff.github.io/ServiceWorker/spec/service_worker/index.html#service-worker-container-updatefound-event
-					registration.installing.onstatechange = function() {
-
-						if (!newVersionDialogOpen) {
-							newVersionDialogOpen = true;
-							setTimeout(function(){
-								var title = "Update Available";
-								var content = "A new version of 3D Repo is available! We will now reload the page.";
-								DialogService.text(title, content, false).then(function(){
-									location.reload();
-								});
-							}, 1000);
-						}
-							
-					};
+					debugSW("onupdatefound fired" + registration);
+					handleSWRegistration(registration);
 				};
-
 				
 				if (typeof registration.update == "function") {
-					console.debug("Updating Service Worker...");
+					debugSW("updating Service Worker...");
 					registration.update();
 				}
 				
 			}, function(err) {
 				// registration failed :(
-				console.debug("ServiceWorker (" + sw + ") registration failed: ", err);
+				debugSW("registration failed: " + err);
 			});
 
 		}
-		
 
+		function handleSWRegistration(registration) {
+			
+			debugSW("calling handleSWRegistration asdas");
+
+			if (registration.waiting) {
+				debugSW("waiting " + registration.waiting);
+				registration.waiting.onstatechange = onStateChange("waiting");
+			}
 		
+			if (registration.installing) {
+				debugSW("installing " + registration.installing);
+				registration.installing.onstatechange = onStateChange("installing");
+			}
+		
+			if (registration.active) {
+				debugSW("active " + registration.active);
+				registration.active.onstatechange = onStateChange("active");
+			}
+		}
+	
+		function onStateChange(from) {
+			return function(event) {
+				debugSW("statechange " + from + " to " + event.target.state);
+				if (from === "installing" && event.target.state === "activated") {
+					showDialog();
+				}
+			};
+		}
+	
+		function showDialog() {
+	
+			if (!newVersionDialogOpen) {
+				newVersionDialogOpen = true;
+				setTimeout(function(){
+					DialogService.newUpdate();
+				}, 500);
+			}
+	
+		}
+	
 	}
+	
+
 	
 }());
 
