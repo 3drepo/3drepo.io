@@ -22,6 +22,7 @@ export class TreeService {
 	public static $inject: string[] = [
 		"$q",
 		"APIService",
+		"EventService",
 	];
 
 	public highlightSelectedViewerObject = false;
@@ -38,6 +39,7 @@ export class TreeService {
 	constructor(
 		private $q: IQService,
 		private APIService,
+		private EventService,
 	) {
 		this.state = {};
 		this.state.currentSelectedNodes = [];
@@ -420,7 +422,7 @@ export class TreeService {
 		}
 	}
 
-	private getAccountModelKey(account, model) {
+	public getAccountModelKey(account, model) {
 		return account + "@" + model;
 	}
 
@@ -429,17 +431,27 @@ export class TreeService {
 	 * @param {Object} node
 	 * @param {Array} nodes Array to push the nodes to
 	 */
-	public traverseNodeAndPushId(node, nodes) {
-		this.traverseNode(node, (n) => {
-			if (!n.children && ((n.type || "mesh") === "mesh")) {
-				const key = this.getAccountModelKey(n.account, n.model || n.project); // TODO: Remove project from backend
-				if (!nodes[key]) {
-					nodes[key] = [];
-				}
-
-				nodes[key].push(n._id);
+	public traverseNodeAndPushId(node, nodes, idToMeshes) {
+		const key = this.getAccountModelKey(node.account, node.project);
+		let meshes = idToMeshes[node._id];
+		if (idToMeshes[key]) {
+			//the node is within a sub model
+			meshes = idToMeshes[key][node._id];
+		}
+		if (meshes) {
+			if (!nodes[key]) {
+				nodes[key] = meshes;
 			}
-		});
+			else {
+				nodes[key].concat(meshes);
+			}
+		} else if (node.children) {
+			//This should only happen in federations.
+			//Traverse down the tree to find submodel nodes
+			node.children.forEach((child) => {
+				this.traverseNodeAndPushId(child, nodes, idToMeshes);
+			});
+		}
 	}
 
 	public getVisibleArray(account, model) {
@@ -717,7 +729,7 @@ export class TreeService {
 		};
 
 		if (level < (path.length - 2)) {
-			this.TreeService.expandToSelection(path, (level + 1), undefined);
+			this.expandToSelection(path, (level + 1), undefined);
 		} else if (level === (path.length - 2)) {
 			// Trigger tree redraw
 			this.selectionData = selectionData;
@@ -836,17 +848,25 @@ export class TreeService {
 	}
 
 	public toggleNode(node) {
-		const childNodes = [];
+		const childNodes = {};
 
-		this.traverseNodeAndPushId(node, childNodes);
+		// this.traverseNodeAndPushId(node, childNodes);
 
-		for (const key in childNodes) {
-			childNodes[key].forEach((uid) => {
-				const node = this.getNodeByUid(uid);
-				this.updateClickedHidden(node);
-				this.updateClickedShown(node);
-			});
-		}
+		this.getMap().then((treeMap) => {
+			this.traverseNodeAndPushId(node, childNodes, treeMap.idToMeshes);
+			for (const key in childNodes) {
+				if (key) {
+					childNodes[key].forEach((uid) => {
+						const uidNode = this.getNodeByUid(uid);
+						if (uidNode) {
+							this.updateClickedHidden(uidNode);
+							this.updateClickedShown(uidNode);
+						}
+					});
+				}
+			}
+		});
+
 	}
 
 	public resetHidden() {
@@ -896,20 +916,24 @@ export class TreeService {
 			this.state.currentSelectedNodes.push(node);
 		}
 
-		const map = [];
 
-		this.traverseNodeAndPushId(node, map);
+		this.getMap().then((treeMap) => {
+			const map = {};
+			this.traverseNodeAndPushId(node, map, treeMap.idToMeshes);
 
-		const objectToHighlight =  {
-			account: node.account,
-			id: node._id,
-			model: node.model || node.project, // TODO: Remove project from backend
-			name: node.name,
-			noHighlight : true,
-			source: "tree",
-		};
+			// Select the parent node in the group for cards and viewer
+			this.EventService.send(this.EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+				source: "tree",
+				account: node.account,
+				model: node.project,
+				id: node._id,
+				name: node.name,
+				noHighlight : true
+			});
 
-		this.highlightMap = map;
+			this.highlightMap = map;
+		});
+
 	}
 
 	public toggleFilterNode(item) {
