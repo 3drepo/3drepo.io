@@ -25,6 +25,9 @@
 	function NotificationService(ClientConfigService, $injector, DialogService){
 		
 
+		var dialogOpen = false;
+		var lastDialogOpen;
+
 		if(!ClientConfigService.chatHost || !ClientConfigService.chatPath){
 			console.error("Chat server settings missing");
 			return;
@@ -57,17 +60,34 @@
 			addSocketIdToHeader(socket.id);
 		});
 
+
+
 		socket.on("disconnect", function(){
+
+			console.error("The websocket for the notification service was disconnected");
+
 			var content = "Your connection to the 3D Repo's notification service has dropped. " + 
 			"3D Repo may not behave as expected when commenting and changing issues. Try refreshing the page" +
 			" to reconnect.";
 
-			// Stops it from appearing upon referesh
-			setTimeout(function(){
-				DialogService.text("Notification Service Disconnected", content, true);
-			}, 1500);
+			var thirtySeconds = 30 * 1000; /* ms */
+			var lessThanThirtySeconds = true;
+
+			if (lastDialogOpen !== undefined) {
+				lessThanThirtySeconds = ((new Date) - lastDialogOpen) > thirtySeconds;
+				console.debug("Not showing user connection error dialog as it's been less than 30 seconds");
+			}
 			
-			console.error("The websocket for the notification service was disconnected");
+			// Stops it from appearing upon referesh
+			if (dialogOpen === false && lessThanThirtySeconds) {
+				dialogOpen = true;
+				lastDialogOpen = Date.now();
+				DialogService.text("Notification Service Disconnected", content, true).then(function(){
+					dialogOpen = false;
+				});
+			}
+			
+			
 		});
 
 		socket.on("reconnect", function(){
