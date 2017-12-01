@@ -103,6 +103,10 @@ class CompareController implements ng.IController {
 
 	}
 
+	public toggleModelVisibility(model) {
+		this.CompareService.toggleModelVisibility(model);
+	}
+
 	public getModelTypeStyle(type: string, prop: string) {
 		return this.CompareService.getModelTypeStyle(type, prop);
 	}
@@ -128,7 +132,7 @@ class CompareController implements ng.IController {
 	}
 
 	public isModelClash(type: string) {
-		return this.CompareService.isModelClash();
+		return this.CompareService.isModelClash(type);
 	}
 
 	public changeCompareState(compareState: string) {

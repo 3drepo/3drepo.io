@@ -204,17 +204,20 @@ export class CompareService {
 		const allModels = [];
 		this.state.compareTypes.diff.models.forEach((model) => {
 
-			this.state.loadingComparision = true;
-			const loadModel = this.ViewerService.diffToolLoadComparator(
-				model.account,
-				model.model,
-				model.selectedRevision,
-			)
-				.catch((error) => {
-					console.error(error);
-				});
+			if (model.visible === true) {
 
-			allModels.push(loadModel);
+				this.state.loadingComparision = true;
+				const loadModel = this.ViewerService.diffToolLoadComparator(
+					model.account,
+					model.model,
+					model.selectedRevision,
+				)
+					.catch((error) => {
+						console.error(error);
+					});
+
+				allModels.push(loadModel);
+			}
 
 		});
 
@@ -336,6 +339,15 @@ export class CompareService {
 			this.modelsLoaded();
 		});
 
+	}
+
+	public toggleModelVisibility(model) {
+		if (this.state.modelType === "target") {
+			model.visible = !model.visible;
+		} else if (this.state.modelType === "base") {
+			//TODO: Handle base type
+		}
+		this.disableComparision();
 	}
 
 }

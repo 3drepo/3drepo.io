@@ -55,8 +55,11 @@ div(
 							ng-repeat="model in compareType.models") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
-								div.modelSides.compareVisibility
-									md-icon.angular-material-icons visibility
+
+								md-button.modelSides.compareVisibility(ng-click="vm.toggleModelVisibility(model)")
+									md-icon.angular-material-icons(ng-if="model.visible") visibility
+									md-icon.angular-material-icons(ng-if="!model.visible") visibility_off
+									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
 
 								div(ng-if="vm.modelType === 'base'" flex layout="column")
 									h5.modelText {{model.name}}
@@ -75,6 +78,7 @@ div(
 											span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
 											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
 										md-icon.angular-material-icons expand_more
+										md-tooltip(md-direction="right") Change Revision
 									md-menu-content
 										md-menu-item(
 											ng-repeat="revision in model.revisions")

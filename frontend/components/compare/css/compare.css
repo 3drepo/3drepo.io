@@ -31,6 +31,7 @@ compare .compareButton {
 
 compare .compareVisibility {
     margin-right: 15px;
+    min-width: initial;
 }
 
 compare .compareModel:hover {

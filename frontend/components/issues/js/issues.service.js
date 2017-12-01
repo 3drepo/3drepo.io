@@ -560,7 +560,7 @@
 			if (issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
-				
+		
 			}
 		}
 
