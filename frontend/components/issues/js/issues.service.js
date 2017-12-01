@@ -613,15 +613,15 @@
 
 							for (var key in objectIdsToHide) {
 
-								objectIdsToHide[key].forEach((obj) => {
+								objectIdsToHide[key].forEach(function(obj) {
 									TreeService.toggleTreeNodeByUid(obj);
 								});
 							}
 					
 							response.data.objects.forEach(function(obj){
-								const account = obj.account;
-								const model = obj.model;
-								const key = account + "@" + model;
+								var account = obj.account;
+								var model = obj.model;
+								var key = account + "@" + model;
 								if(!ids[key]){
 									ids[key] = [];
 								}	
