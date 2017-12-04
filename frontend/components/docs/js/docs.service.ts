@@ -54,45 +54,55 @@ export class DocsService {
 			});
 	}
 
+	public updateDocs(account, model, id) {
+		this.getDocs(account, model, id)
+			.then((data) => {
+
+				console.log("DOCS - ", data)
+
+				if (!data) {
+					return;
+				}
+
+				this.state.docs = data;
+				this.state.allDocTypesHeight = 0;
+
+				// Open all doc types initially
+				for (const docType in this.state.docs) {
+					if (this.state.docs.hasOwnProperty(docType)) {
+						this.state.docs[docType].show = true;
+						this.state.allDocTypesHeight += this.docTypeHeight;
+					}
+				}
+
+				this.state.show = true;
+				this.state.updated = true;
+
+			})
+			.catch((error) => {
+				console.error("Error getting metadata: ", error);
+			});
+	}
+
 	public handleObjectSelected(event) {
 
 		// Get any documents associated with an object
 		const object = event.value;
 
-		this.TreeService.getMap().then((treeMap) => {
-			const metadataIds = treeMap.oIdToMetaId[object.id];
-			if (metadataIds && metadataIds.length) {
-				this.getDocs(object.account, object.model, metadataIds[0])
-					.then((data) => {
+		this.TreeService.getMap()
+			.then((treeMap) => {
+				const metadataIds = treeMap.oIdToMetaId[object.id];
+				if (metadataIds && metadataIds.length) {
 
-						console.log("DOCS - ", data)
+					this.updateDocs(
+						object.account,
+						object.model,
+						metadataIds[0],
+					);
 
-						if (!data) {
-							return;
-						}
-
-						this.state.docs = data;
-						this.state.allDocTypesHeight = 0;
-
-						// Open all doc types initially
-						for (const docType in this.state.docs) {
-							if (this.state.docs.hasOwnProperty(docType)) {
-								this.state.docs[docType].show = true;
-								this.state.allDocTypesHeight += this.docTypeHeight;
-							}
-						}
-
-						this.state.show = true;
-						this.state.updated = true;
-
-					})
-					.catch((error) => {
-						console.error("Error getting metadata: ", error);
-					});
-
-			} else {
-				this.state.show = false;
-			}
+				} else {
+					this.state.show = false;
+				}
 		});
 
 	}
