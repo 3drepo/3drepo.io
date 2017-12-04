@@ -96,9 +96,6 @@ export class PanelService {
 			options: [
 				{type: "menu", visible: true},
 				{type: "filter", visible: true},
-				{type: "pin", visible: false},
-				{type: "erase", visible: false},
-				{type: "scribble", visible: false},
 			],
 			add: true,
 		});
@@ -112,7 +109,35 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
+				{type: "menu", visible: true},
 				{type: "filter", visible: true},
+			],
+			menu: [
+				{
+					hidden: false,
+					value: "showAll",
+					label: "Show All",
+					selected: false,
+					noToggle: true,
+					icon: "fa-eye",
+				},
+				{
+					hidden: false,
+					value: "hideIfc",
+					label: "Hide IFC spaces",
+					selected: false,
+					toggle: true,
+					keepCheckSpace: true,
+					icon: "fa-home",
+				},
+				{
+					hidden: false,
+					value: "isolate",
+					label: "Isolate Selected",
+					selected: false,
+					noToggle: true,
+					icon: "fa-scissors",
+				},
 			],
 		});
 
