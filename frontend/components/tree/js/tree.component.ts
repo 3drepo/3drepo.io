@@ -1,4 +1,5 @@
 import { IScope, ITimeoutService } from "angular";
+//import { TreeService } from "./tree.service";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -29,32 +30,31 @@ class TreeController implements ng.IController {
 	];
 
 	private promise;
-	private currentSelectedNodes;
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
 	private clickedShown;
 	private lastParentWithName = null;
-	private nodes;
+	private nodes; // in pug
 	private allNodes;
-	private nodesToShow;
-	private showNodes;
-	private showTree;
-	private showFilterList;
+	private nodesToShow; // in pug
+	private showNodes; // in pug
+	private showTree; // in pug
+	private showFilterList; // in pug
 	private currentFilterItemSelected = null;
 	private viewerSelectedObject;
-	private showProgress;
-	private progressInfo;
+	private showProgress; // in pug
+	private progressInfo; // in pug
 	private visible;
 	private invisible;
-	private subTreesById;
 	private idToPath;
-	private subModelIdToPath;
-	private filterItemsFound;
-	private topIndex;
-	private toggledNode;
+	private filterItemsFound; // in pug
+	private topIndex; // in pug
 	private infiniteItemsTree;
-	private infiniteItemsFilter;
+	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
+
+	private currentSelectedId;
+	private currentSelectedIndex;
 
 	constructor(
 		private $scope: IScope,
@@ -67,8 +67,7 @@ class TreeController implements ng.IController {
 	) {
 
 		this.promise = null,
-		this.highlightSelectedViewerObject = true
-		//this.currentSelectedNodes = [],
+		this.highlightSelectedViewerObject = true;
 	}
 
 	public $onInit() {
@@ -84,7 +83,6 @@ class TreeController implements ng.IController {
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.TreeService.resetVisible();
 		this.TreeService.resetInvisible();
-		//this.currentSelectedNodes = [];
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.watchers();
@@ -106,7 +104,7 @@ class TreeController implements ng.IController {
 						} else {
 							this.initNodesToShow();
 							this.TreeService.resetLastParentWithName();
-							this.TreeService.expandToSelection(path, 0, undefined);
+							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
 							// all these init and expanding unselects the selected, so let's select them again
 							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
@@ -132,6 +130,7 @@ class TreeController implements ng.IController {
 
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
+				this.TreeService.setAllNodes(this.allNodes);
 				this.nodes = this.allNodes;
 				this.showTree = true;
 				this.showProgress = false;
@@ -143,12 +142,7 @@ class TreeController implements ng.IController {
 				this.initNodesToShow();
 				this.TreeService.expandFirstNode();
 				this.setupInfiniteScroll();
-				this.setContentHeight(this.TreeService.getNodesToShow());
-			} else if (event.type === this.EventService.EVENT.STATE_CHANGED) {
-				// TODO
-				//event.value.path = vm.getPath(event.value._id);
-				//event.value.path = "__" + event.value._id;
-				//vm.toggleTreeNode(event.value);
+				this.setContentHeight(this.fetchNodesToShow());
 			}
 		});
 
@@ -160,7 +154,7 @@ class TreeController implements ng.IController {
 					this.showTree = true;
 					this.showFilterList = false;
 					this.showProgress = false;
-					this.nodes = this.TreeService.getNodesToShow();
+					this.nodes = this.fetchNodesToShow();
 					this.setContentHeight(this.nodes);
 				} else {
 					this.showTree = false;
@@ -192,116 +186,18 @@ class TreeController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => {return this.TreeService.state},
+		//TODO - check for better way to sync state between component and service
+		this.$scope.$watchCollection(() => {return this.TreeService.state},
 			(state) => {
 				if (state) {
 					angular.extend(this, state);
 				}
-			},
-		true);
-		
-		this.$scope.$watch(() => {return this.TreeService.highlightMap},
-			(highlightMap) => {
-
-				// Update viewer highlights
-				this.ViewerService.clearHighlights();
-
-				for (const key in highlightMap) {
-					if (key) {
-						const vals = key.split("@");
-						const account = vals[0];
-						const model = vals[1];
-
-						// Separately highlight the children
-						// but only for multipart meshes
-						this.ViewerService.highlightObjects({
-							account,
-							ids: highlightMap[key],
-							model,
-							multi: true,
-							source: "tree",
-						});
-					}
-				}
 			});
-		
-		this.$scope.$watch(() => {return this.clickedHidden},
-			(clickedHidden) => {
 
-				let objectIdsToHide = [];
-
-				for (const id in clickedHidden) {
-					const account = clickedHidden[id].account;
-					const model = clickedHidden[id].project;
-					const key = account + "@" + model;
-
-					if (!objectIdsToHide[key]) {
-						objectIdsToHide[key] = [];
-					}
-
-					objectIdsToHide[key].push(id);
-				}
-
-				// Update viewer object visibility
-				for (const key in objectIdsToHide) {
-					if (key) {
-						const vals = key.split("@");
-						const account = vals[0];
-						const model = vals[1];
-
-						this.ViewerService.switchObjectVisibility(
-							account,
-							model,
-							objectIdsToHide[key],
-							false
-						);
-					}
-				}
-			},
-		true);
-		
-		this.$scope.$watch(() => {return this.clickedShown},
-			(clickedShown) => {
-
-				let objectIdsToShow = [];
-
-				for (const id in clickedShown) {
-					const account = clickedShown[id].account;
-					const model = clickedShown[id].project;
-					const key = account + "@" + model;
-
-					if (!objectIdsToShow[key]) {
-						objectIdsToShow[key] = [];
-					}
-
-					objectIdsToShow[key].push(id);
-				}
-
-				// Update viewer object visibility
-				for (const key in objectIdsToShow) {
-					if (key) {
-						const vals = key.split("@");
-						const account = vals[0];
-						const model = vals[1];
-
-						this.ViewerService.switchObjectVisibility(
-							account,
-							model,
-							objectIdsToShow[key],
-							true
-						);
-					}
-				}
-			},
-		true);
-		
 		this.$scope.$watch(() => {return this.TreeService.selectionData},
 			(selectionData) => {
 				if (selectionData) {
-					let selectedIndex = selectionData.selectedIndex;
-					let selectedId = selectionData.selectedId;
-				
-					this.setContentHeight(this.TreeService.getNodesToShow());
+					this.setContentHeight(this.fetchNodesToShow());
 					this.TreeService.setShowNodes(true);
 					this.$timeout(() => {
 						// Redraw the tree
@@ -310,17 +206,106 @@ class TreeController implements ng.IController {
 
 						// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 						this.$scope.$broadcast("$md-resize");
-						this.topIndex = selectedIndex;
+						this.topIndex = selectionData.selectedIndex;
 					});
 
 					this.$timeout(() => {
-						const el = document.getElementById(selectedId);
+						const el = document.getElementById(selectionData.selectedId);
 						if (el) {
 							el.scrollIntoView();
 						}
 					});
 				}
 			});
+
+		//TODO - interval for redrawing highlights and object visibility is not ideal
+		let lastViewerUpdateTime = Date.now();
+		setInterval(() => {
+
+			if (this.TreeService.highlightMapUpdateTime) {
+				if (lastViewerUpdateTime < this.TreeService.highlightMapUpdateTime) {
+					this.handleSelection(this.TreeService.highlightMap);
+				}
+			}
+
+			if (this.TreeService.visibilityUpdateTime) {
+				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
+					this.handleVisibility(this.TreeService.getClickedHidden(), false);
+					this.handleVisibility(this.TreeService.getClickedShown(), true);
+				}
+			}
+
+			lastViewerUpdateTime = this.TreeService.highlightMapUpdateTime;
+
+		}, 300);
+
+	}
+
+	/**
+	 * Handle visibility changes from tree service to viewer service
+	 */
+	public handleVisibility(clickedIds, visible) {
+		const objectIds = [];
+
+		for (const id in clickedIds) {
+			if (id) {
+				const account = clickedIds[id].account;
+				const model = clickedIds[id].project;
+				const key = account + "@" + model;
+
+				if (!objectIds[key]) {
+					objectIds[key] = [];
+				}
+
+				objectIds[key].push(id);
+			}
+		}
+
+		// Update viewer object visibility
+		for (const key in objectIds) {
+			if (key) {
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				this.ViewerService.switchObjectVisibility(
+					account,
+					model,
+					objectIds[key],
+					visible,
+				);
+			}
+		}
+	}
+
+	/**
+	 * Handle highlight changes from tree service to viewer service
+	 */
+	public handleSelection(highlightMap) {
+		// Update viewer highlights
+		this.ViewerService.clearHighlights();
+
+		for (const key in highlightMap) {
+			if (key) {
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				// Separately highlight the children
+				// but only for multipart meshes
+				this.ViewerService.highlightObjects({
+					account,
+					ids: highlightMap[key],
+					model,
+					multi: true,
+					source: "tree",
+				});
+			}
+		}
+
+		// Reset highlight map to prevent extra triggers of handleSelection
+		// (currently not needed as a timestamp is used to check sync)
+		// this.TreeService.resetHighlightMap();
 	}
 
 	/**
@@ -356,13 +341,22 @@ class TreeController implements ng.IController {
 	}
 
 	/**
+	 * Fetch nodesToShow from tree service and update nodesToShow in tree component.
+	 * Returns this.nodesToShow.
+	 */
+	public fetchNodesToShow() {
+		this.nodesToShow = this.TreeService.getNodesToShow();
+		return this.nodesToShow;
+	}
+
+	/**
 	 * Expand a node to show its children.
 	 * @param event
 	 * @param _id
 	 */
 	public expand(event, _id) {
 		this.TreeService.expand(event, _id);
-		
+
 		// Redraw the tree if needed
 		if (!this.TreeService.isShowNodes()) {
 			this.$timeout(() => {
@@ -372,8 +366,8 @@ class TreeController implements ng.IController {
 				this.$scope.$broadcast("$md-resize");
 			});
 		}
-		
-		this.setContentHeight(this.TreeService.getNodesToShow());
+
+		this.setContentHeight(this.fetchNodesToShow());
 	}
 
 	public toggleTreeNode(node) {
@@ -392,8 +386,9 @@ class TreeController implements ng.IController {
 					return null;
 				}
 
-				if (index < this.nodesToShow.length) {
-					return this.nodesToShow[index];
+				const nodesToShow = this.fetchNodesToShow();
+				if (index < nodesToShow.length) {
+					return nodesToShow[index];
 				} else {
 					return null;
 				}
@@ -420,7 +415,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node);
+		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode());
 	}
 
 	public filterItemSelected(item) {

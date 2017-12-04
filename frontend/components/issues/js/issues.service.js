@@ -614,10 +614,12 @@
 							for (var key in objectIdsToHide) {
 
 								objectIdsToHide[key].forEach(function(obj) {
-									TreeService.toggleTreeNodeByUid(obj);
+									TreeService.toggleTreeNodeById(obj);
 								});
 							}
-					
+							
+							TreeService.clearCurrentlySelected();
+
 							response.data.objects.forEach(function(obj){
 								var account = obj.account;
 								var model = obj.model;
@@ -627,9 +629,8 @@
 								}	
 
 								ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+								TreeService.expandToSelection(TreeService.getPath(treeMap.sharedIdToUid[obj.shared_id]), 0, undefined, true);
 							});
-
-							TreeService.setHighlightMap(ids);
 
 					});
 			
