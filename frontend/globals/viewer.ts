@@ -232,7 +232,8 @@ export class Viewer {
 
 	public insertUnityLoader() {
 		return new Promise((resolve, reject) => {
-			this.unityLoaderScript.async = true;
+			this.unityLoaderScript.setAttribute("defer", "");
+			this.unityLoaderScript.setAttribute("async", "");
 			this.unityLoaderScript.addEventListener ("load", () => {
 				console.debug("Loaded UnityLoader.js succesfully");
 				resolve();
@@ -266,7 +267,7 @@ export class Viewer {
 			document.body.style.cursor = "wait";
 
 			// Shouldn't need this, but for something it is not being recognised from unitySettings!
-			Module.errorhandler = UnityUtil.onError;
+			Module.errorhandler = UnityUtil.onUnityError;
 
 			this.currentNavMode = null;
 
@@ -476,8 +477,8 @@ export class Viewer {
 
 			this.callback(Viewer.EVENT.START_LOADING);
 
-			return UnityUtil.loadModel(this.account, this.model, this.branch, this.revision)
-				.then((bbox) => {
+			UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
+			UnityUtil.onLoaded().then((bbox) => {
 					document.body.style.cursor = "initial";
 					this.callback(Viewer.EVENT.MODEL_LOADED);
 					this.callback(Viewer.EVENT.BBOX_READY, bbox);
@@ -487,6 +488,9 @@ export class Viewer {
 						console.error("Unity error loading model= ", error);
 					}
 				});
+
+			return UnityUtil.onLoading();
+
 		});
 
 	}
