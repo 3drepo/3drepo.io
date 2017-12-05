@@ -200,7 +200,6 @@ class ClipController implements ng.IController {
 
 		// cross-browser wheel delta
 		const delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
-		console.log(delta);
 
 		if (delta > 0) {
 			this.decrement(0.005);
