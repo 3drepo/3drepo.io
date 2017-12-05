@@ -450,7 +450,8 @@ export class TreeService {
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
 	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
-		const key = this.getAccountModelKey(node.account, node.project);
+		const model = node.model || node.project;
+		const key = this.getAccountModelKey(node.account, model);
 		let meshes = idToMeshes[node._id];
 		if (idToMeshes[key]) {
 			// the node is within a sub model
@@ -541,12 +542,10 @@ export class TreeService {
 
 	/**
 	 * Expand a node to show its children.
-	 * @param event
-	 * @param _id
 	 */
 	public expand(event, _id) {
+
 		let i;
-		let length;
 		let j;
 		let jLength;
 		let numChildren = 0;
@@ -557,102 +556,114 @@ export class TreeService {
 		event.stopPropagation();
 
 		// Find node index
-		for (i = 0, length = this.nodesToShow.length; i < length; i += 1) {
+		for (i = 0; i < this.nodesToShow.length; i += 1) {
 			if (this.nodesToShow[i]._id === _id) {
 				index = i;
 				break;
 			}
 		}
-		const _ids = [_id];
-		// Found
-		if (index !== -1) {
-			if (this.nodesToShow[index].hasChildren) {
-				if (this.nodesToShow[index].expanded) {
-					// Collapse
 
-					// if the target itself contains subModelTree
-					if (this.nodesToShow[index].hasSubModelTree) {
-						// node containing sub model tree must have only one child
+		const _ids = [_id];
+		const nodeToExpand = this.nodesToShow[index];
+
+		if (index === -1 || !nodeToExpand.hasChildren) {
+			return;
+		}
+
+		if (nodeToExpand.expanded) {
+			// Collapse
+
+			// if the target itself contains subModelTree
+			if (nodeToExpand.hasSubModelTree) {
+				// node containing sub model tree must have only one child
+				// TODO - do we still need getSubTreesById?
+				const subTreesById = this.getSubTreesById();
+				const subModelNode = subTreesById[nodeToExpand.children[0]._id];
+				_ids.push(subModelNode._id);
+			}
+
+			while (!endOfSplice) {
+
+				if (
+					this.isDefined(this.nodesToShow[index + 1]) &&
+					this.matchPath(_ids, this.nodesToShow[index + 1].path)
+				) {
+
+					if (this.nodesToShow[index + 1].hasSubModelTree) {
 						// TODO - do we still need getSubTreesById?
 						const subTreesById = this.getSubTreesById();
-						const subModelNode = subTreesById[this.nodesToShow[index].children[0]._id];
+						const subModelNode = subTreesById[this.nodesToShow[index + 1].children[0]._id];
 						_ids.push(subModelNode._id);
 					}
 
-					while (!endOfSplice) {
+					this.nodesToShow.splice(index + 1, 1);
 
-						if (this.isDefined(this.nodesToShow[index + 1]) && this.matchPath(_ids, this.nodesToShow[index + 1].path)) {
-
-							if (this.nodesToShow[index + 1].hasSubModelTree) {
-								// TODO - do we still need getSubTreesById?
-								const subTreesById = this.getSubTreesById();
-								const subModelNode = subTreesById[this.nodesToShow[index + 1].children[0]._id];
-								_ids.push(subModelNode._id);
-							}
-
-							this.nodesToShow.splice(index + 1, 1);
-
-						} else {
-							endOfSplice = true;
-						}
-					}
 				} else {
-					// Expand
-					numChildren = this.nodesToShow[index].children.length;
+					endOfSplice = true;
+				}
 
-					// If the node has a large number of children then force a redraw of the tree to get round the display problem
-					if (numChildren >= numChildrenToForceRedraw) {
-						this.state.showNodes = false;
-					}
+			}
 
-					for (i = 0; i < numChildren; i += 1) {
-						// For federation - handle node of model that cannot be viewed or has been deleted
-						// That node will be below level 0 only
-						if ((this.nodesToShow[index].level === 0) &&
-							this.nodesToShow[index].children[i].hasOwnProperty("children") &&
-							this.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
+		} else {
+			// Expand
+			numChildren = nodeToExpand.children.length;
 
-							this.nodesToShow[index].children[i].status = this.nodesToShow[index].children[i].children[0].status;
+			// If the node has a large number of children then force a redraw of the tree to get round the display problem
+			if (numChildren >= numChildrenToForceRedraw) {
+				this.state.showNodes = false;
+			}
 
-						} else {
-							// Normal tree node
-							this.nodesToShow[index].children[i].expanded = false;
+			for (i = 0; i < numChildren; i += 1) {
+				// For federation - handle node of model that cannot be viewed or has been deleted
+				// That node will be below level 0 only
+				if (
+					(nodeToExpand.level === 0) &&
+					nodeToExpand.children[i].hasOwnProperty("children") &&
+					nodeToExpand.children[i].children[0].hasOwnProperty("status")
+				) {
 
-							// If the child node does not have a toggleState set it to visible
-							if (!this.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
-								this.setToggleState(this.nodesToShow[index].children[i], "visible");
-							}
+					nodeToExpand.children[i].status = nodeToExpand.children[i].children[0].status;
 
-						}
+				} else {
 
-						// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
-						this.nodesToShow[index].children[i].level = this.nodesToShow[index].level + 1;
-						this.nodesToShow[index].children[i].hasChildren = false;
+					// Normal tree node
+					nodeToExpand.children[i].expanded = false;
 
-						const hasChildrenProp = ("children" in this.nodesToShow[index].children[i]);
-						const hasChildrenLen = hasChildrenProp && (this.nodesToShow[index].children[i].children.length > 0);
-
-						if (hasChildrenLen) {
-
-							for (j = 0, jLength = this.nodesToShow[index].children[i].children.length; j < jLength; j++) {
-								if (this.nodesToShow[index].children[i].children[j].hasOwnProperty("name")) {
-									this.nodesToShow[index].children[i].hasChildren = true;
-									break;
-								}
-							}
-
-						}
-
-						if (this.nodesToShow[index].children[i].hasOwnProperty("name")) {
-							this.nodesToShow.splice(index + i + 1, 0, this.nodesToShow[index].children[i]);
-						}
-
+					// If the child node does not have a toggleState set it to visible
+					if (!nodeToExpand.children[i].hasOwnProperty("toggleState")) {
+						this.setToggleState(nodeToExpand.children[i], "visible");
 					}
 
 				}
-				this.nodesToShow[index].expanded = !this.nodesToShow[index].expanded;
+
+				// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
+				nodeToExpand.children[i].level = nodeToExpand.level + 1;
+				nodeToExpand.children[i].hasChildren = false;
+
+				const hasChildrenProp = ("children" in nodeToExpand.children[i]);
+				const hasChildrenLen = hasChildrenProp && (nodeToExpand.children[i].children.length > 0);
+
+				if (hasChildrenLen) {
+
+					for (j = 0, jLength = nodeToExpand.children[i].children.length; j < jLength; j++) {
+						if (nodeToExpand.children[i].children[j].hasOwnProperty("name")) {
+							nodeToExpand.children[i].hasChildren = true;
+							break;
+						}
+					}
+
+				}
+
+				if (nodeToExpand.children[i].hasOwnProperty("name")) {
+					this.nodesToShow.splice(index + i + 1, 0, nodeToExpand.children[i]);
+				}
+
 			}
+
 		}
+
+		nodeToExpand.expanded = !nodeToExpand.expanded;
+
 	}
 
 	/**

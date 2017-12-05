@@ -1,5 +1,5 @@
 import { IScope, ITimeoutService } from "angular";
-//import { TreeService } from "./tree.service";
+// import { TreeService } from "./tree.service";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -49,7 +49,6 @@ class TreeController implements ng.IController {
 	private idToPath;
 	private filterItemsFound; // in pug
 	private topIndex; // in pug
-	private infiniteItemsTree;
 	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
 
@@ -141,7 +140,7 @@ class TreeController implements ng.IController {
 
 				this.initNodesToShow();
 				this.TreeService.expandFirstNode();
-				this.setupInfiniteScroll();
+				this.setupInfiniteItemsFilter();
 				this.setContentHeight(this.fetchNodesToShow());
 			}
 		});
@@ -186,15 +185,15 @@ class TreeController implements ng.IController {
 			}
 		});
 
-		//TODO - check for better way to sync state between component and service
-		this.$scope.$watchCollection(() => {return this.TreeService.state},
+		// TODO - check for better way to sync state between component and service
+		this.$scope.$watchCollection(() => this.TreeService.state,
 			(state) => {
 				if (state) {
 					angular.extend(this, state);
 				}
 			});
 
-		this.$scope.$watch(() => {return this.TreeService.selectionData},
+		this.$scope.$watch(() => this.TreeService.selectionData,
 			(selectionData) => {
 				if (selectionData) {
 					this.setContentHeight(this.fetchNodesToShow());
@@ -218,7 +217,7 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		//TODO - interval for redrawing highlights and object visibility is not ideal
+		// TODO - interval for redrawing highlights and object visibility is not ideal
 		let lastViewerUpdateTime = Date.now();
 		setInterval(() => {
 
@@ -250,7 +249,7 @@ class TreeController implements ng.IController {
 		for (const id in clickedIds) {
 			if (id) {
 				const account = clickedIds[id].account;
-				const model = clickedIds[id].project;
+				const model = clickedIds[id].model || clickedIds[id].project; // TODO: Kill .project from backend
 				const key = account + "@" + model;
 
 				if (!objectIds[key]) {
@@ -287,6 +286,7 @@ class TreeController implements ng.IController {
 
 		for (const key in highlightMap) {
 			if (key) {
+
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
@@ -351,63 +351,67 @@ class TreeController implements ng.IController {
 
 	/**
 	 * Expand a node to show its children.
-	 * @param event
-	 * @param _id
 	 */
-	public expand(event, _id) {
-		this.TreeService.expand(event, _id);
+	public expand(event, id) {
 
-		// Redraw the tree if needed
-		if (!this.TreeService.isShowNodes()) {
-			this.$timeout(() => {
+		// rAF fixes flickering as expand is computationally expensive
+		requestAnimationFrame(() => {
+
+			this.TreeService.expand(event, id);
+
+			// Redraw the tree if needed
+			if (!this.TreeService.isShowNodes()) {
+
 				this.TreeService.setShowNodes(true);
 				// Resize virtual repeater
 				// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 				this.$scope.$broadcast("$md-resize");
-			});
-		}
 
-		this.setContentHeight(this.fetchNodesToShow());
+			}
+
+			this.setContentHeight(this.fetchNodesToShow());
+
+		});
 	}
 
 	public toggleTreeNode(node) {
 		this.TreeService.toggleTreeNode(node);
 	}
 
-	public setupInfiniteScroll() {
-		// Infinite items
-		this.infiniteItemsTree = {
-			numLoaded_: 0,
-			toLoad_: 0,
+	// public setupInfiniteScroll() {
+	// 	//Infinite items
+	// 	this.infiniteItemsTree = {
+	// 		numLoaded_: 0,
+	// 		toLoad_: 0,
 
-			getItemAtIndex(index) {
-				if (index > this.numLoaded_) {
-					this.fetchMoreItems(index);
-					return null;
-				}
+	// 		getItemAtIndex(index) {
+	// 			if (index > this.numLoaded_) {
+	// 				this.fetchMoreItems(index);
+	// 				return null;
+	// 			}
 
-				const nodesToShow = this.fetchNodesToShow();
-				if (index < nodesToShow.length) {
-					return nodesToShow[index];
-				} else {
-					return null;
-				}
-			},
+	// 			const nodesToShow = this.fetchNodesToShow();
+	// 			if (index < nodesToShow.length) {
+	// 				return nodesToShow[index];
+	// 			} else {
+	// 				return null;
+	// 			}
+	// 		},
 
-			getLength() {
-				return this.numLoaded_ + 5;
-			},
+	// 		getLength() {
+	// 			return this.numLoaded_ + 5;
+	// 		},
 
-			fetchMoreItems(index) {
-				if (this.toLoad_ < index) {
-					this.toLoad_ += 500;
-					this.$timeout(() => {}, 300).then(() => {
-						this.numLoaded_ = this.toLoad_;
-					});
-				}
-			},
-		};
-	}
+	// 		fetchMoreItems(index) {
+	// 			if (this.toLoad_ < index) {
+	// 				this.toLoad_ += 500;
+	// 				this.$timeout(() => {}, 300).then(() => {
+	// 					this.numLoaded_ = this.toLoad_;
+	// 				});
+	// 			}
+	// 		},
+	// 	};
+	// }
 
 	/**
 	 * Selected a node in the tree
@@ -419,6 +423,7 @@ class TreeController implements ng.IController {
 	}
 
 	public filterItemSelected(item) {
+
 		if (this.currentFilterItemSelected === null) {
 			this.nodes[item.index].class = "treeNodeSelected";
 			this.currentFilterItemSelected = item;

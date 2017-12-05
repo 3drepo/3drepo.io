@@ -87,6 +87,7 @@ tree .parentOfInvisible {
 /** Tree filter list **************************************************************************************************/
 tree .filterNode {
   height: 41px;
+  cursor: pointer !important;
 }
 
 tree .filterNode div {
