@@ -10,19 +10,46 @@ md-content#issueScreenShotContent(layout="row", layout-align="center center")
 	img#issueScreenShotImage(ng-src="{{vm.screenShotUse}}")
 	div(ng-if="!vm.screenShot")
 		canvas#scribbleCanvas
-		#issueScreenShotActions(layout="row", style="pointer-events:{{vm.actionsPointerEvents}}")
+		#issueScreenShotActions(
+			layout-align="center center"
+			layout="row", 
+			style="pointer-events:{{vm.actionsPointerEvents}}")
+
+			md-container.colorContainer
+				md-select(
+					ng-selected="vm.penCol"
+					ng-disabled="vm.isEraseMode"
+					ng-model="vm.penCol")
+
+					md-option(
+						value="{{value.color}}"
+						ng-repeat="(key, value) in vm.penColors") {{value.label}}
+
+			div.sizeContainer(layout="row" flex layout-align="center center")
+				md-slider(
+					layout-align="center center"
+					md-discrete
+					ng-model="vm.penIndicatorSize" 
+					step="3" 
+					min="2" 
+					max="56"
+					ng-change="vm.changePenSize()")
+
 			md-button.md-icon-button(
-			ng-repeat="action in vm.actions"
-			aria-label="{{action.icon}}"
-			ng-click="vm.doAction($index)")
-				md-tooltip(md-direction="bottom") {{action.label}}
-				md-icon.angular-material-icons(
-				ng-if="action.icon.indexOf('fa fa-') === -1"
-				style="color:{{action.color}}") {{action.icon}}
-				md-icon#issueScreenShotFAIcon(
-				ng-if="action.icon.indexOf('fa fa-') !== -1"
-				class="fa fa-eraser"
-				style="color:{{action.color}}")
+				ng-repeat="action in vm.actions"
+				aria-label="{{action.icon}}"
+				ng-click="vm.doAction($index)")
+
+					md-tooltip(md-direction="bottom") {{action.label}}
+
+					md-icon.angular-material-icons(
+						ng-if="action.icon.indexOf('fa fa-') === -1"
+						style="color:{{action.color}}") {{action.icon}}
+					md-icon#issueScreenShotFAIcon(
+						ng-if="action.icon.indexOf('fa fa-') !== -1"
+						class="fa fa-eraser"
+						style="color:{{action.color}}")
+
 			md-button.md-fab.md-mini(
 				id="saveCommentScreenshot"
 				ng-click="vm.saveScreenshot()")
@@ -30,4 +57,8 @@ md-content#issueScreenShotContent(layout="row", layout-align="center center")
 				md-icon.angular-material-icons(aria-label="Save") save
 
 canvas#screenShotCanvas
-md-icon#issueScreenShotPenIndicator(class="fa fa-circle-thin", ng-show="vm.showPenIndicator")
+md-icon#issueScreenShotPenIndicator(
+	width="{{vm.penIndicatorSize + 'px'}}"
+	height="{{vm.penIndicatorSize + 'px'}}"
+	class="fa fa-circle-thin"
+	ng-show="vm.showPenIndicator")
