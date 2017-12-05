@@ -78,7 +78,7 @@ export class TreeService {
 		this.highlightMap = value;
 	}
 
-	public genIdToObjRef(tree, map) {
+	public genIdToObjRef(tree: any, map: any) {
 
 		if (!map) {
 			map = {};
@@ -95,7 +95,7 @@ export class TreeService {
 		return map;
 	}
 
-	public init(account, model, branch, revision, setting) {
+	public init(account: string, model: string, branch: string, revision: string, setting: any) {
 		this.treeReady = this.$q.defer();
 		this.treeMap = null;
 		branch = branch ? branch : "master";
@@ -129,7 +129,7 @@ export class TreeService {
 		});
 	}
 
-	public getTrees(url, setting) {
+	public getTrees(url: string, setting: any) {
 
 		this.APIService.get(url, {
 			headers: {
@@ -170,7 +170,7 @@ export class TreeService {
 				this.getIdToPath()
 					.then((idToPath) => {
 
-						const getSubTrees = [];
+						const awaitedSubTrees = [];
 
 						if (idToPath && idToPath.treePaths) {
 
@@ -197,7 +197,7 @@ export class TreeService {
 										subtree,
 										mainTree,
 										subTreesById,
-										getSubTrees,
+										awaitedSubTrees,
 									);
 								});
 							}
@@ -206,7 +206,7 @@ export class TreeService {
 
 						mainTree.subTreesById = subTreesById;
 
-						Promise.all(getSubTrees).then(() => {
+						Promise.all(awaitedSubTrees).then(() => {
 							return this.treeReady.resolve(mainTree);
 						});
 
@@ -234,7 +234,7 @@ export class TreeService {
 
 	}
 
-	public handleSubTree(subtree, mainTree, subTreesById, getSubTrees) {
+	public handleSubTree(subtree: any, mainTree: any, subTreesById: any, awaitedSubTrees: any[]) {
 
 		const treeId = subtree._id;
 		const idToObjRef = this.genIdToObjRef(mainTree.nodes, undefined);
@@ -266,13 +266,13 @@ export class TreeService {
 					console.warn("Subtree issue: ", res);
 				});
 
-			getSubTrees.push(getSubTree);
+			awaitedSubTrees.push(getSubTree);
 
 		}
 
 	}
 
-	public attachStatus(res, tree, idToObjRef) {
+	public attachStatus(res: any, tree: any, idToObjRef: any) {
 		if (res.status === 401) {
 			tree.status = "NO_ACCESS";
 		}
@@ -286,12 +286,12 @@ export class TreeService {
 		}
 	}
 
-	public search(searchString) {
-		const url = this.baseURL + "searchtree.json?searchString=" + searchString;
+	public search(searchString: string) {
+		const url = `${this.baseURL}searchtree.json?searchString=${searchString}`;
 		return this.APIService.get(url);
 	}
 
-	public genMap(leaf, items) {
+	public genMap(leaf: any, items: any) {
 
 		const leafId = leaf._id;
 		const sharedId = leaf.shared_id;
@@ -403,8 +403,6 @@ export class TreeService {
 		this.subModelIdToPath = value;
 	}
 
-	// Following functions are from tree.component.ts
-
 	/**
 	 * Initialise the tree nodes to show to the first node
 	 */
@@ -435,7 +433,7 @@ export class TreeService {
 	 * @param {Object} node
 	 * @param {Function} callback
 	 */
-	public traverseNode(node, callback) {
+	public traverseNode(node: any, callback) {
 		callback(node);
 		if (node.children) {
 			node.children.forEach((child) => {
@@ -444,16 +442,14 @@ export class TreeService {
 		}
 	}
 
-	public getAccountModelKey(account, model) {
+	public getAccountModelKey(account: string, model: string) {
 		return account + "@" + model;
 	}
 
 	/**
 	 * Add all child id of a node recursively, the parent node's id will also be added.
-	 * @param {Object} node
-	 * @param {Array} nodes Array to push the nodes to
 	 */
-	public traverseNodeAndPushId(node, nodes, idToMeshes) {
+	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
 		const key = this.getAccountModelKey(node.account, node.project);
 		let meshes = idToMeshes[node._id];
 		if (idToMeshes[key]) {
@@ -463,8 +459,7 @@ export class TreeService {
 		if (meshes) {
 			if (!nodes[key]) {
 				nodes[key] = meshes;
-			}
-			else {
+			} else {
 				nodes[key] = nodes[key].concat(meshes);
 			}
 		} else if (node.children) {
@@ -476,7 +471,7 @@ export class TreeService {
 		}
 	}
 
-	public getVisibleArray(account, model) {
+	public getVisibleArray(account: string, model: string) {
 		const key = this.getAccountModelKey(account, model);
 		if (!this.state.visible[key]) {
 			this.state.visible[key] = new Set();
@@ -485,7 +480,7 @@ export class TreeService {
 		return this.state.visible[key];
 	}
 
-	public getInvisibleArray(account, model) {
+	public getInvisibleArray(account: string, model: string) {
 		const key = this.getAccountModelKey(account, model);
 		if (!this.state.invisible[key]) {
 			this.state.invisible[key] = new Set();
@@ -496,10 +491,8 @@ export class TreeService {
 
 	/**
 	 * Set the toggle state of a node
-	 * @param {Object} node Node to change the visibility for
-	 * @param {String} visibility Visibility to change to
 	 */
-	public setToggleState(node, visibility) {
+	public setToggleState(node: any, visibility: string) {
 
 		const modelId = node.model || node.project; // TODO: Remove project from backend
 		const visible = this.getVisibleArray(node.account, modelId);
@@ -559,7 +552,7 @@ export class TreeService {
 		let numChildren = 0;
 		let index = -1;
 		let endOfSplice = false;
-		let numChildrenToForceRedraw = 3;
+		const numChildrenToForceRedraw = 3;
 
 		event.stopPropagation();
 
@@ -635,13 +628,19 @@ export class TreeService {
 						// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
 						this.nodesToShow[index].children[i].level = this.nodesToShow[index].level + 1;
 						this.nodesToShow[index].children[i].hasChildren = false;
-						if (("children" in this.nodesToShow[index].children[i]) && (this.nodesToShow[index].children[i].children.length > 0)) {
+
+						const hasChildrenProp = ("children" in this.nodesToShow[index].children[i]);
+						const hasChildrenLen = hasChildrenProp && (this.nodesToShow[index].children[i].children.length > 0);
+
+						if (hasChildrenLen) {
+
 							for (j = 0, jLength = this.nodesToShow[index].children[i].children.length; j < jLength; j++) {
 								if (this.nodesToShow[index].children[i].children[j].hasOwnProperty("name")) {
 									this.nodesToShow[index].children[i].hasChildren = true;
 									break;
 								}
 							}
+
 						}
 
 						if (this.nodesToShow[index].children[i].hasOwnProperty("name")) {
@@ -658,8 +657,6 @@ export class TreeService {
 
 	/**
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
-	 * @param path
-	 * @param level
 	 */
 	public expandToSelection(path, level, noHighlight, multi) {
 		let i;
@@ -753,9 +750,9 @@ export class TreeService {
 			}
 		}
 
-		let selectionData = {
-			selectedIndex: selectedIndex,
-			selectedId: selectedId
+		const selectionData = {
+			selectedIndex,
+			selectedId,
 		};
 
 		if (level < (path.length - 2)) {
@@ -919,11 +916,9 @@ export class TreeService {
 
 	/**
 	 * Selected a node in the tree
-	 *
-	 * @param node
 	 */
-	public selectNode(node, multi) {
-		const t0 = performance.now()
+	public selectNode(node: any, multi: boolean) {
+
 		const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
 			return element._id === node._id;
 		});
@@ -938,16 +933,14 @@ export class TreeService {
 				this.currentSelectedNodes.push(node);
 			}
 		} else {
-			// If it is not multiselect mode, remove all highlights.
-			// TODO
-			// this.ViewerService.clearHighlights();
+			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
 			node.selected = true;
 			this.currentSelectedNodes.push(node);
 		}
 
 		this.getMap().then((treeMap) => {
-			let map = {};
+			const map = {};
 			this.currentSelectedNodes.forEach((n) => {
 				this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
 			});
