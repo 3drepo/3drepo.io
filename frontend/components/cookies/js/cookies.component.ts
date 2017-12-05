@@ -15,25 +15,31 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
-	"use strict";
+class CookiesController implements ng.IController {
 
-	angular.module("3drepo")
-		.component("cookies", {
-			restrict: "E",
-			bindings: {},
-			templateUrl: "templates/cookies.html",
-			controller: CookiesCtrl,
-			controllerAs: "vm"
-		});
+	public static $inject: string[] = [
+		"StateManager",
+	];
 
-	CookiesCtrl.$inject = ["StateManager"];
+	constructor(
+		private StateManager: any,
+	) {}
 
-	function CookiesCtrl (StateManager) {
-		var vm = this;
+	public $onInit() {}
 
-		vm.home = function () {
-			StateManager.goHome();
-		};
+	public home() {
+		this.StateManager.goHome();
 	}
-}());
+
+}
+
+export const CookiesComponent: ng.IComponentOptions = {
+	bindings: {},
+	controller: CookiesController,
+	controllerAs: "vm",
+	templateUrl: "templates/cookies.html",
+};
+
+export const CookiesComponentModule = angular
+	.module("3drepo")
+	.component("cookies", CookiesComponent);

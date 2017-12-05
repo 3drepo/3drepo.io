@@ -52,10 +52,10 @@ export class UnityUtil {
 	static UNITY_GAME_OBJECT = "WebGLInterface";
 
 	static SendMessage_vss;
-	static SendMessage_vssn;
-	static SendMessage_vsss;
+	public static SendMessage_vssn;
+	public static SendMessage_vsss;
 	
-	static _SendMessage(gameObject, func, param) {
+	public static _SendMessage(gameObject, func, param) {
 
 		if (param === undefined) {
 
@@ -79,19 +79,19 @@ export class UnityUtil {
 			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
-			throw "" + param + " is does not have a type which is supported by SendMessage.";
+			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
 		}
 	};
 
-	static onError(err, url, line) {
-		var conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " + 
+	public static onError(err, url, line) {
+		let conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " +
 					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " +
 					"reduce your memory usage and try again. " +
 					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " +
 					"<br><br> <code>Error " + err + " occured at line " + line +
 					"</code> <br><br> Click ok to refresh this page. <md-container>";
 
-		var reload = false;
+		let reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
 			reload = true;
@@ -100,12 +100,12 @@ export class UnityUtil {
 		UnityUtil.userAlert(conf, reload);
 
 		return true;
-	};
+	}
 
 	public static onLoaded() {
-		if(!UnityUtil.loadedPromise) {
+		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadedResolve = {resolve: resolve, reject: reject};
+				UnityUtil.loadedResolve = {resolve, reject};
 			});
 		}
 		return UnityUtil.loadedPromise;
@@ -113,7 +113,7 @@ export class UnityUtil {
 	}
 
 	public static onLoading() {
-		if(!UnityUtil.loadingPromise) {
+		if (!UnityUtil.loadingPromise) {
 			UnityUtil.loadingPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadingResolve = {resolve, reject};
 			});
@@ -124,7 +124,7 @@ export class UnityUtil {
 
 	public static onReady() {
 
-		if(!UnityUtil.readyPromise) {
+		if (!UnityUtil.readyPromise) {
 			UnityUtil.readyPromise	= new Promise((resolve, reject) => {
 				UnityUtil.readyResolve = {resolve, reject};
 			});
@@ -147,7 +147,7 @@ export class UnityUtil {
 			UnityUtil.unityHasErrored = true;
 			UnityUtil.errorCallback({
 				message : fullMessage,
-				reload
+				reload,
 			});
 		}
 
@@ -155,7 +155,7 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
-		if(requireStatus == UnityUtil.LoadingState.MODEL_LOADED) {
+		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
@@ -165,7 +165,7 @@ export class UnityUtil {
 					UnityUtil.userAlert(error, true);
 				}
 			});
-		} else if(requireStatus == UnityUtil.LoadingState.MODEL_LOADING) {
+		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
 			// Requires model to be loading
 			UnityUtil.onLoading().then(() => {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);

@@ -69,26 +69,3 @@ docs .docsListBackground1 {
 docs .docsListBackground2 {
   background: rgb(250,250,250);
 }
-
-/** Docs Dialog *******************************************************************************************************/
-.docsDialog {
-  min-width: 850px;
-  min-height: 664px;
-  overflow: hidden;
-}
-
-.docsDialog .docIcon {
-  margin-top: 22px;
-  margin-right: 10px;
-}
-
-.docsDialog .documentContainer {
-  position: absolute;
-  top: 64px;
-}
-
-.docsDialog iframe {
-  border-style: none;
-  min-width: 850px;
-  min-height: 600px;
-}
