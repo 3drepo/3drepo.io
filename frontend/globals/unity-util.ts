@@ -20,10 +20,10 @@ declare var SendMessage;
 export class UnityUtil {
 
 	public static errorCallback: any;
-	public static LoadingState = { 
+	public static LoadingState = {
 		VIEWER_READY : 1,  // Viewer has been loaded
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
-		MODEL_LOADED : 3 // Models
+		MODEL_LOADED : 3, // Models
 	};
 
 	public static readyPromise;
@@ -79,6 +79,7 @@ export class UnityUtil {
 			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
+
 			throw Error(`${param} is does not have a type which is supported by SendMessage.`);
 		}
 	}
@@ -103,6 +104,7 @@ export class UnityUtil {
 	}
 
 	public static onLoaded() {
+
 		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = {resolve, reject};
