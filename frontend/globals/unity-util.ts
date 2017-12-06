@@ -19,42 +19,49 @@ declare var SendMessage;
 
 export class UnityUtil {
 
-	static errorCallback: any;
-	public static viewer: any;
-
-	static init(
-		errorCallback: any
-	) {
-		errorCallback = errorCallback;
-	}
-	
-	static LoadingState = { 
+	public static errorCallback: any;
+	public static LoadingState = { 
 		VIEWER_READY : 1,  //Viewer has been loaded
 		MODEL_LOADING : 2, //model information has been fetched, world offset determined, model starts loading
 		MODEL_LOADED : 3 //Models
 	};
 
-	static readyPromise;
-	static readyResolve;
-	
-	static loadedPromise;
-	static loadedResolve;
+	public static readyPromise;
+	public static readyResolve;
 
-	static loadingPromise;
-	static loadingResolve;
+	public static loadedPromise;
+	public static loadedResolve;
 
-	static unityHasErrored = false;
+	public static loadingPromise;
+	public static loadingResolve;
 
-	static screenshotPromises = [];
-	static vpPromise = null;
-	static objectStatusPromise = null;
-	static loadedFlag = false;
-	static UNITY_GAME_OBJECT = "WebGLInterface";
+	public static unityHasErrored = false;
 
+<<<<<<< HEAD
 	static SendMessage_vss;
 	public static SendMessage_vssn;
 	public static SendMessage_vsss;
 	
+=======
+	public static screenshotPromises = [];
+	public static vpPromise = null;
+	public static objectStatusPromise = null;
+	public static loadedFlag = false;
+	public static UNITY_GAME_OBJECT = "WebGLInterface";
+
+	public static SendMessage_vss;
+	public static SendMessage_vssn;
+	public static SendMessage_vsss;
+
+	public static viewer: any;
+
+	public static init(
+		errorCallback: any,
+	) {
+		errorCallback = errorCallback;
+	}
+
+>>>>>>> ISSUE_623
 	public static _SendMessage(gameObject, func, param) {
 
 		if (param === undefined) {
@@ -79,10 +86,15 @@ export class UnityUtil {
 			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
+<<<<<<< HEAD
 			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
+=======
+			throw Error(`${param} is does not have a type which is supported by SendMessage.`);
+>>>>>>> ISSUE_623
 		}
-	};
+	}
 
+<<<<<<< HEAD
 	public static onError(err, url, line) {
 		let conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " +
 					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " +
@@ -90,10 +102,19 @@ export class UnityUtil {
 					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " +
 					"<br><br> <code>Error " + err + " occured at line " + line +
 					"</code> <br><br> Click ok to refresh this page. <md-container>";
+=======
+	public static onUnityError(err, url, line) {
+		const conf = `Your browser has failed to load 3D Repo. This may due to insufficient memory.
+					Please ensure you are using a 64bit web browser (Chrome or FireFox for best results),
+					reduce your memory usage and try again.
+					If you are unable to resolve this problem, please contact support@3drepo.org referencing the following:
+					<br><br> <code>Error ${err} occured at line ${line}
+					</code> <br><br> Click ok to refresh this page. <md-container>`;
+>>>>>>> ISSUE_623
 
 		let reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
-			err.indexOf("Unity") != -1 || err.indexOf("unity") != -1) {
+			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
 			reload = true;
 		}
 
@@ -103,6 +124,10 @@ export class UnityUtil {
 	}
 
 	public static onLoaded() {
+<<<<<<< HEAD
+=======
+
+>>>>>>> ISSUE_623
 		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = {resolve, reject};
@@ -305,7 +330,7 @@ export class UnityUtil {
 	public static getObjectsStatus(account, model, promise) {
 		let nameSpace = "";
 		if (account && model) {
-			nameSpace = account + "."  + model;
+			nameSpace = account + "." + model;
 		}
 		if (UnityUtil.objectStatusPromise) {
 			UnityUtil.objectStatusPromise.then(() => {
@@ -355,8 +380,6 @@ export class UnityUtil {
 
 	public static loadModel(account, model, branch, revision) {
 
-		// console.log("pin - loadModel");
-
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
 
@@ -375,10 +398,10 @@ export class UnityUtil {
 			params.revID = revision;
 		}
 
-		UnityUtil.onLoading();
+		UnityUtil.onLoaded();
 		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
-		return UnityUtil.onLoaded();
+		return UnityUtil.onLoading();
 
 	}
 
