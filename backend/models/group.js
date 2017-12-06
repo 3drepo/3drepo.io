@@ -29,6 +29,12 @@ var responseCodes = require('../response_codes.js');
 var groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
+	hiddenObjects: [{
+		_id : false,
+		shared_id: Object,
+		account: String,
+		model: String
+	}],
 	objects: [{
 		_id : false,
 		shared_id: Object,
@@ -55,27 +61,35 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
+	let hiddenObjects = [];
+
+	data.hiddenObjects.forEach(obj =>{
+		hiddenObjects.push(obj.id);
+	});
+
 	let objects = [];
 
 	data.objects.forEach(obj =>{
 		objects.push(obj.id);
 	});
 
-	if(!objects){
+	if(!hiddenObjects && !objects){
 		return Promise.resolve();
 	}
 
 	let currentObjects = [];
 
+	this.hiddenObjects.forEach(obj => {
+		currentObjects.push(utils.uuidToString(obj.id));
+	});
+
 	this.objects.forEach(obj => {
 		currentObjects.push(utils.uuidToString(obj.id));
 	});
 
-
 	let newObjects = _.difference(objects, currentObjects);
 
 	let addPromises = [];
-
 
 	newObjects.forEach(id => {
 
@@ -116,11 +130,16 @@ groupSchema.methods.updateAttrs = function(data){
 
 	}).then(() => {
 
+		data.hiddenObjects.forEach(obj => {
+			obj.id = utils.stringToUUID(obj.id);
+		});
+
 		data.objects.forEach(obj => {
 			obj.id = utils.stringToUUID(obj.id);
 		});
 
 		this.name = data.name || this.name;
+		this.hiddenObjects = data.hiddenObjects || this.hiddenObjects;
 		this.objects = data.objects || this.objects;
 		this.color = data.color || this.color;
 
@@ -128,12 +147,6 @@ groupSchema.methods.updateAttrs = function(data){
 		return this.save();
 
 	});
-
-
-
-
-
-
 
 };
 
@@ -157,6 +170,9 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+	/*cleaned.hiddenObjects.forEach(obj => {
+		obj.shared_id && (obj.shared_id = utils.uuidToString(obj.shared_id));
+	});*/
 	cleaned.objects.forEach(object => {
 		//object.id = utils.uuidToString(object.id);
 		object.shared_id && (object.shared_id = utils.uuidToString(object.shared_id));
@@ -176,6 +192,15 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 		}
 
 		let removePromises = [];
+
+		group.hiddenObjects.forEach(obj => removePromises.push(
+			Mesh.removeGroup(
+				obj.account,
+				obj.model,
+				utils.uuidToString(obj.id),
+				id
+			)
+		));
 
 		group.objects.forEach(obj => removePromises.push(
 			Mesh.removeGroup(
