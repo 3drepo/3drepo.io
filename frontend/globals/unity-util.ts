@@ -37,9 +37,6 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
-	public static loadComparatorPromise;
-	public static loadComparatorResolve;
-
 	public static unityHasErrored = false;
 
 	public static screenshotPromises = [];
@@ -59,8 +56,6 @@ export class UnityUtil {
 	}
 
 	public static _SendMessage(gameObject, func, param) {
-
-		// console.log("_SendMessage", param, func);
 
 		if (param === undefined) {
 
@@ -88,13 +83,13 @@ export class UnityUtil {
 		}
 	}
 
-	public static onError(err, url, line) {
-		const conf = "Your browser has failed to load 3D Repo. This may due to insufficient memory. " +
-					"Please ensure you are using a 64bit web browser (Chrome or FireFox for best results), " +
-					"reduce your memory usage and try again. " +
-					"If you are unable to resolve this problem, please contact support@3drepo.org referencing the following: " +
-					"<br><br> <code>Error " + err + " occured at line " + line +
-					"</code> <br><br> Click ok to refresh this page. <md-container>";
+	public static onUnityError(err, url, line) {
+		const conf = `Your browser has failed to load 3D Repo. This may due to insufficient memory.
+					Please ensure you are using a 64bit web browser (Chrome or FireFox for best results),
+					reduce your memory usage and try again.
+					If you are unable to resolve this problem, please contact support@3drepo.org referencing the following:
+					<br><br> <code>Error ${err} occured at line ${line}
+					</code> <br><br> Click ok to refresh this page. <md-container>`;
 
 		let reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
@@ -425,7 +420,7 @@ export class UnityUtil {
 	public static getObjectsStatus(account, model, promise) {
 		let nameSpace = "";
 		if (account && model) {
-			nameSpace = account + "."  + model;
+			nameSpace = account + "." + model;
 		}
 		if (UnityUtil.objectStatusPromise) {
 			UnityUtil.objectStatusPromise.then(() => {
@@ -492,10 +487,10 @@ export class UnityUtil {
 			params.revID = revision;
 		}
 
-		UnityUtil.onLoading();
+		UnityUtil.onLoaded();
 		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
-		return UnityUtil.onLoaded();
+		return UnityUtil.onLoading();
 
 	}
 
