@@ -620,8 +620,8 @@
 							
 							TreeService.clearCurrentlySelected();
 
-							for (let i = 0; i < response.data.objects.length; i++) {
-								const obj = response.data.objects[i];
+							for (var i = 0; i < response.data.objects.length; i++) {
+								var obj = response.data.objects[i];
 								var account = obj.account;
 								var model = obj.model;
 								var key = account + "@" + model;
