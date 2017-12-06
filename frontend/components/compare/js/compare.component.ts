@@ -147,9 +147,9 @@ class CompareController implements ng.IController {
 
 export const CompareComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
-		model: "=",
-		modelSettings: "=",
+		account: "<",
+		model: "<",
+		modelSettings: "<",
 	},
 	controller: CompareController,
 	controllerAs: "vm",
