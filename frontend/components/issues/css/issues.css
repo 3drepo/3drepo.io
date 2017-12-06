@@ -475,15 +475,58 @@ issue #issueRoleIndicator {
   overflow: hidden;
 }
 
+#issueScreenShotDialog #issueScreenShotPenIndicator {
+  min-height: 1px !important;
+  min-width: 1px !important;
+  height: initial;
+  width: initial;
+}
+
+issues-screen-shot .sizeContainer {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+issues-screen-shot .sizeContainer .md-errors-spacer {
+  min-height: 0px !important;
+  height: 0px;
+}
+
+issues-screen-shot .size input {
+  text-align: center;
+  color: black;
+}
+
+
+issues-screen-shot .colorContainer {
+  width: 60px;
+  display: inline-block;
+  margin-right: 30px;
+}
+
+
+issues-screen-shot .colorContainer md-select {
+  margin: 0px;
+}
+
+issues-screen-shot .colorContainer .penColor {
+  width: 83px;
+}
+
+issues-screen-shot .colorContainer md-select-value span {
+  min-height: 19px;
+}
+
 issues-screen-shot #issueScreenShotActions {
   position: absolute;
-  bottom: 5px;
+  padding-left: 40px;
+  bottom: 50px;
   display: block;
-  width: 176px;
+  width: 450px;
   left: 0;
   right: 0;
   margin: auto;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 4px;
 }
 
@@ -493,7 +536,7 @@ issues-screen-shot #issueScreenShotFAIcon {
 
 issues-screen-shot #issueScreenShotContent {
   overflow: hidden;
-  height: calc(100% - 40px);
+  height: 100%;
 }
 
 issues-screen-shot #scribbleCanvas {
@@ -505,6 +548,10 @@ issues-screen-shot #scribbleCanvas {
 issues-screen-shot #issueScreenShotImage {
   max-width: 100%;
   max-height: 100%;
+  margin: 0px;
+  padding: 0px;
+  position: absolute;
+  top: 0;
 }
 
 issues-screen-shot #issueScreenShotPenIndicator {

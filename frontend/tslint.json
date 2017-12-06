@@ -4,6 +4,7 @@
         "indent": [true, "tabs"],
         "jsdoc-format": false,
         "prefer-for-of": false,
-        "no-console": [true, "log", "error"]
+        "no-console": [true, "log", "error"],
+        "object-literal-sort-keys": false
     }
 }

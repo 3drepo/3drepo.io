@@ -123,6 +123,7 @@ let schema = Schema({
 		far : Number,
 		near : Number,
 		clippingPlanes : [Schema.Types.Mixed ],
+		group_id: Object,
 		screenshot: {
 			flag: Number, 
 			content: Object,
@@ -637,6 +638,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
+			data.viewpoint.group_id = data.group_id;
 			
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer(data.viewpoint.scribble, "base64"),
