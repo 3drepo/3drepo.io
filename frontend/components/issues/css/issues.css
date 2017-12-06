@@ -504,6 +504,19 @@ issues-screen-shot .colorContainer {
   margin-right: 30px;
 }
 
+
+issues-screen-shot .colorContainer md-select {
+  margin: 0px;
+}
+
+issues-screen-shot .colorContainer .penColor {
+  width: 83px;
+}
+
+issues-screen-shot .colorContainer md-select-value span {
+  min-height: 19px;
+}
+
 issues-screen-shot #issueScreenShotActions {
   position: absolute;
   padding-left: 40px;

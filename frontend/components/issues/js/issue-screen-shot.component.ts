@@ -58,7 +58,7 @@ class IssueScreenshotController implements ng.IController {
 	private actions;
 	private showPenIndicator;
 
-	private currentActionIndex;
+	private currentAction;
 	private actionsPointerEvents;
 
 	private isEraseMode: boolean;
@@ -110,6 +110,10 @@ class IssueScreenshotController implements ng.IController {
 				color: "#004edd",
 				label:  "Blue",
 			},
+			eraser : {
+				color: "rgba(0, 0, 0, 1)",
+				label: "Eraser",
+			},
 		};
 
 		if (typeof this.screenShot !== "undefined") {
@@ -144,12 +148,12 @@ class IssueScreenshotController implements ng.IController {
 				});
 
 				// Set up action buttons
-				this.actions = [
-					{icon: "border_color", action: "draw", label: "Draw", color: this.highlightBackground},
-					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""},
-				];
+				this.actions = {
+					draw : {icon: "border_color", action: "draw", label: "Draw", color: this.highlightBackground},
+					erase : {icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""},
+				};
 
-				this.currentActionIndex = 0;
+				this.currentAction = "draw";
 			});
 
 		}
@@ -245,11 +249,12 @@ class IssueScreenshotController implements ng.IController {
 	}
 
 	public updateImage(canvas) {
-		const context = canvas.getContext("2d");
 
-		if (!this.mouseDragging) {
+		if (this.currentAction === "" || !this.mouseDragging) {
 			return;
 		}
+
+		const context = canvas.getContext("2d");
 
 		if (this.lastMouseDragX < 0 || this.lastMouseDragY < 0) {
 			this.lastMouseDragX = this.mouseDragX;
@@ -284,20 +289,22 @@ class IssueScreenshotController implements ng.IController {
 		this.penCol = "#DD0000";
 	}
 
-	public doAction(index) {
-		if (this.currentActionIndex === null) {
-			this.currentActionIndex = index;
-			this.actions[this.currentActionIndex].color = this.highlightBackground;
-		} else if (this.currentActionIndex === index) {
-			this.actions[this.currentActionIndex].color = "";
-			this.currentActionIndex = null;
-		} else {
-			this.actions[this.currentActionIndex].color = "";
-			this.currentActionIndex = index;
-			this.actions[this.currentActionIndex].color = this.highlightBackground;
+	public doAction(action) {
+
+		const disableAction = action === this.currentAction;
+		if (disableAction) {
+			action = "";
 		}
 
-		switch (this.actions[this.currentActionIndex].action) {
+		for (const actionKey in this.actions) {
+			if (action !== actionKey) {
+				this.actions[actionKey].color = "";
+			} else if (action === actionKey) {
+				this.actions[actionKey].color = this.highlightBackground;
+			}
+		}
+
+		switch (action) {
 		case "draw":
 			this.setupScribble();
 			break;
@@ -306,6 +313,8 @@ class IssueScreenshotController implements ng.IController {
 			this.setupErase();
 			break;
 		}
+
+		this.currentAction = action;
 	}
 
 	public saveScreenshot() {
@@ -333,8 +342,6 @@ class IssueScreenshotController implements ng.IController {
 
 		const positionLeft = x - width / 2;
 		const positionTop = (y - height / 2) + 50;
-
-		console.log(positionLeft, positionTop);
 
 		this.penIndicator.css("left", positionLeft + "px");
 		this.penIndicator.css("top", positionTop + "px");
