@@ -582,21 +582,22 @@ export class TreeService {
 				_ids.push(subModelNode._id);
 			}
 
+			const next = index + 1;
 			while (!endOfSplice) {
 
 				if (
-					this.isDefined(this.nodesToShow[index + 1]) &&
-					this.matchPath(_ids, this.nodesToShow[index + 1].path)
+					this.isDefined(this.nodesToShow[next]) &&
+					this.matchPath(_ids, this.nodesToShow[next].path)
 				) {
 
-					if (this.nodesToShow[index + 1].hasSubModelTree) {
+					if (this.nodesToShow[next].hasSubModelTree) {
 						// TODO - do we still need getSubTreesById?
 						const subTreesById = this.getSubTreesById();
-						const subModelNode = subTreesById[this.nodesToShow[index + 1].children[0]._id];
+						const subModelNode = subTreesById[this.nodesToShow[next].children[0]._id];
 						_ids.push(subModelNode._id);
 					}
 
-					this.nodesToShow.splice(index + 1, 1);
+					this.nodesToShow.splice(next, 1);
 
 				} else {
 					endOfSplice = true;

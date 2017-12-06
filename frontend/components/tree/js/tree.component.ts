@@ -358,60 +358,21 @@ class TreeController implements ng.IController {
 		requestAnimationFrame(() => {
 
 			this.TreeService.expand(event, id);
-
 			// Redraw the tree if needed
 			if (!this.TreeService.isShowNodes()) {
-
-				this.TreeService.setShowNodes(true);
-				// Resize virtual repeater
-				// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
-				this.$scope.$broadcast("$md-resize");
-
+				this.$timeout(() => {
+					this.TreeService.setShowNodes(true);
+				});
 			}
 
 			this.setContentHeight(this.fetchNodesToShow());
-
 		});
+
 	}
 
 	public toggleTreeNode(node) {
 		this.TreeService.toggleTreeNode(node);
 	}
-
-	// public setupInfiniteScroll() {
-	// 	//Infinite items
-	// 	this.infiniteItemsTree = {
-	// 		numLoaded_: 0,
-	// 		toLoad_: 0,
-
-	// 		getItemAtIndex(index) {
-	// 			if (index > this.numLoaded_) {
-	// 				this.fetchMoreItems(index);
-	// 				return null;
-	// 			}
-
-	// 			const nodesToShow = this.fetchNodesToShow();
-	// 			if (index < nodesToShow.length) {
-	// 				return nodesToShow[index];
-	// 			} else {
-	// 				return null;
-	// 			}
-	// 		},
-
-	// 		getLength() {
-	// 			return this.numLoaded_ + 5;
-	// 		},
-
-	// 		fetchMoreItems(index) {
-	// 			if (this.toLoad_ < index) {
-	// 				this.toLoad_ += 500;
-	// 				this.$timeout(() => {}, 300).then(() => {
-	// 					this.numLoaded_ = this.toLoad_;
-	// 				});
-	// 			}
-	// 		},
-	// 	};
-	// }
 
 	/**
 	 * Selected a node in the tree

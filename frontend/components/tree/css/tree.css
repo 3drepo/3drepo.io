@@ -97,3 +97,9 @@ tree .filterNode div {
 tree .filterListNodeName {
   margin-left: 15px !important;
 }
+
+
+tree .virtual-repeat-full-height {
+  height: 100%;
+  position: initial;
+}
