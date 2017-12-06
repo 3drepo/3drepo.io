@@ -108,10 +108,6 @@ export class PanelService {
 			icon: "device_hub",
 			minHeight: 80,
 			fixedHeight: false,
-			options: [
-				{type: "menu", visible: true},
-				{type: "filter", visible: true},
-			],
 			menu: [
 				{
 					hidden: false,
@@ -125,7 +121,7 @@ export class PanelService {
 					hidden: false,
 					value: "hideIfc",
 					label: "Hide IFC spaces",
-					selected: false,
+					selected: true,
 					toggle: true,
 					keepCheckSpace: true,
 					icon: "fa-home",
@@ -138,6 +134,10 @@ export class PanelService {
 					noToggle: true,
 					icon: "fa-scissors",
 				},
+			],
+			options: [
+				{type: "menu", visible: true},
+				{type: "filter", visible: true},
 			],
 		});
 
