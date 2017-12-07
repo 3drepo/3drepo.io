@@ -102,10 +102,15 @@
 
 					if (data) {
 
-						vm.showProgress = false;
-						vm.toShow = "showIssues";
 						IssuesService.populateNewIssues(data);
-						vm.showAddButton = true;
+
+						setTimeout(function(){
+							requestAnimationFrame(function(){
+								vm.toShow = "showIssues";
+								vm.showAddButton = true;
+								vm.showProgress = false;
+							});
+						}, 1000);
 						
 					} else {
 						throw "Error";
@@ -438,33 +443,37 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			if (IssuesService.state.selectedIssue) {
-				IssuesService.deselectPin(IssuesService.state.selectedIssue);
-			}
-			
-			if (issue) {
+			requestAnimationFrame(function() {
 
-				ViewerService.highlightObjects([]);
-				$state.go("home.account.model.issue", 
-					{
-						account: vm.account, 
-						model: vm.model, 
-						revision: vm.revision,
-						issue: issue._id,
-						noSet: true
-					}, 
-					{notify: false}
-				);
-
-				IssuesService.setSelectedIssue(issue);
+				if (IssuesService.state.selectedIssue) {
+					IssuesService.deselectPin(IssuesService.state.selectedIssue);
+				}
 				
-			} else {
-				IssuesService.resetSelectedIssue();
-			}
+				if (issue) {
 
-			vm.toShow = "showIssue";
-			vm.showAddButton = false;
-			vm.onShowItem();
+					ViewerService.highlightObjects([]);
+					$state.go("home.account.model.issue", 
+						{
+							account: vm.account, 
+							model: vm.model, 
+							revision: vm.revision,
+							issue: issue._id,
+							noSet: true
+						}, 
+						{notify: false}
+					);
+
+					IssuesService.setSelectedIssue(issue);
+					
+				} else {
+					IssuesService.resetSelectedIssue();
+				}
+
+				vm.toShow = "showIssue";
+				vm.showAddButton = false;
+				vm.onShowItem();
+
+			});
 
 		};
 

@@ -30,6 +30,10 @@
 	) {
 
 		var expiredDialogOpen = false;
+		var disconnectedDialogOpen = false;
+		var disconnectDialogLastOpen;
+		var muteNotifications = false;
+		var thirtySeconds = 30 * 1000; /* ms */
 
 		var service = {
 			text: text,
@@ -37,13 +41,67 @@
 			showDialog: showDialog,
 			closeDialog: closeDialog,
 			sessionExpired: sessionExpired,
-			newUpdate: newUpdate
+			newUpdate: newUpdate,
+			disconnected: disconnected
 		};
 
 		return service;
 
 		////////
 
+		function disconnected() {
+
+			var greaterThanThirtySeconds = true;
+
+			if (disconnectDialogLastOpen !== undefined) {
+				greaterThanThirtySeconds = ((Date.now()) - disconnectDialogLastOpen) > thirtySeconds;
+			}
+
+			if (greaterThanThirtySeconds === false) {
+				console.log("Notifications - greaterThanThirtySeconds", greaterThanThirtySeconds);
+				return;
+			}
+
+			if (muteNotifications === true) {
+				console.log("Notifications - muteNotifications", muteNotifications);
+				return;
+			}
+
+			if (disconnectedDialogOpen === true) {
+				console.debug("Notifications - Disconnect dialog currently open");
+				return;
+			}
+
+			var title = "Notification Service Disconnected";
+			var content = "Your connection to the 3D Repo's notification service has dropped. " + 
+			"3D Repo may not behave as expected when commenting and changing issues. Try refreshing the page" +
+			" to reconnect.";
+			var escapable = true;
+
+			// Opening the dialog
+			disconnectedDialogOpen = true;
+			disconnectDialogLastOpen = Date.now();
+
+			return $mdDialog.show( 
+				$mdDialog.confirm()
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
+					.title(title)
+					.htmlContent(content)
+					.ariaLabel(title)
+					.ok("Continue")
+					.cancel("Mute Notifications")
+			)
+				.then(function(){
+					disconnectedDialogOpen = false;
+				})
+				.catch(function(){
+					console.log("Notifications - Muting notifications");
+					disconnectedDialogOpen = false;
+					muteNotifications = true;
+				}); 
+
+		}
 
 		function showDialog(
 			dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo

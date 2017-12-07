@@ -66,7 +66,7 @@ class RightPanelController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch(() => {
-			return this.MeasureService;
+			return this.MeasureService.state;
 		}, () => {
 
 			if (this.measureActive !== this.MeasureService.state.active ) {

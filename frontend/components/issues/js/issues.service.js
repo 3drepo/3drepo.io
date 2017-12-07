@@ -23,13 +23,13 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"APIService", "TreeService", "AuthService",
+		"APIService", "TreeService", "AuthService", "MultiSelectService",
 		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		APIService, TreeService, AuthService,
+		APIService, TreeService, AuthService, MultiSelectService,
 		ViewerService, $timeout, $filter
 	) {
 
@@ -530,6 +530,7 @@
 				issueData = {
 					position : issue.viewpoint.position,
 					view_dir : issue.viewpoint.view_dir,
+					look_at : issue.viewpoint.look_at,
 					up: issue.viewpoint.up,
 					account: issue.account,
 					model: issue.model
@@ -557,7 +558,7 @@
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
-			if (issue.hasOwnProperty("group_id")) {
+			if ((issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) || issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
 				
@@ -565,7 +566,8 @@
 		}
 
 		function showMultiIds(issue) {
-			var groupUrl = issue.account + "/" + issue.model + "/groups/" + issue.group_id;
+			var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
+			var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
 
 			APIService.get(groupUrl)
 				.then(function (response) {
@@ -579,37 +581,70 @@
 		function handleTree(response) {
 
 			var ids = [];
+			var objectIdsToHide = [];
 			TreeService.getMap()
 				.then(function(treeMap){
-					response.data.objects.forEach(function(obj){
-						var key = obj.account + "@" +  obj.model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
+					var objectsPromise = $q.defer();
+					var objectsAccount;
+					var objectsModel;
 
-						ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-
+					ViewerService.getObjectsStatus({
+						promise: objectsPromise,
+						account: objectsAccount,
+						model: objectsModel
 					});
 
-					for(var key in ids) {
+					// show currently hidden nodes
+					objectsPromise.promise
+						.then(function() {
+							TreeService.resetHidden();
+							
+							response.data.hiddenObjects.forEach(function(obj){
+								var account = obj.account;
+								var model = obj.model;
+								var key = account + "@" + model;
+								if(!objectIdsToHide[key]){
+									objectIdsToHide[key] = [];
+								}	
 
-						var vals = key.split("@");
-						var account = vals[0];
-						var model = vals[1];
+								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-						var treeData = {
-							source: "tree",
-							account: account,
-							model: model,
-							ids: ids[key],
-							colour: response.data.colour,
-							multi: true					
-						};
-						ViewerService.highlightObjects(treeData);
-					}
+							});
 
+							for (var ns in objectIdsToHide) {
 
+								objectIdsToHide[ns].forEach(function(obj) {
+									TreeService.toggleTreeNodeById(obj);
+								});
+							}
+							
+							TreeService.clearCurrentlySelected();
+
+							for (var i = 0; i < response.data.objects.length; i++) {
+								var obj = response.data.objects[i];
+								var account = obj.account;
+								var model = obj.model;
+								var key = account + "@" + model;
+								if(!ids[key]){
+									ids[key] = [];
+								}	
+
+								ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+								if (i < response.data.objects.length - 1) {
+									TreeService.selectNode(TreeService.getNodeById(treeMap.sharedIdToUid[obj.shared_id]), true);
+								} else {
+									// Only call expandToSelection for last selected node to improve performance
+									TreeService.expandToSelection(TreeService.getPath(treeMap.sharedIdToUid[obj.shared_id]), 0, undefined, true);
+								}
+							}
+
+						});
+			
+				})
+				.catch(function(error) {
+					console.error(error);
 				});
+
 		}
 
 		// TODO: Internationalise and make globally accessible

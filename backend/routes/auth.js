@@ -39,6 +39,8 @@ router.post("/logout", logout);
 
 router.get("/login", checkLogin);
 
+router.get("/version", printVersion);
+
 router.post('/contact', contact);
 
 router.get("/:account.json", middlewares.loggedIn, listInfo);
@@ -433,6 +435,12 @@ function contact(req, res, next){
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 
+}
+
+function printVersion(req, res, next){
+	let responsePlace = utils.APIInfo(req);
+	const versionInfo = require("../VERSION");
+	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, versionInfo);
 }
 
 module.exports = router;

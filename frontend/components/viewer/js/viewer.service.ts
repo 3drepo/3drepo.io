@@ -121,20 +121,16 @@ export class ViewerService {
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
-				this.currentModel.promise.then(() => {
-					this.viewer.setCamera(
-						event.value.position,
-						event.value.view_dir,
-						event.value.up,
-						event.value.look_at,
-						event.value.animate !== undefined ? event.value.animate : true,
-						event.value.rollerCoasterMode,
-						event.value.account,
-						event.value.model,
-					);
-				}).catch((error) => {
-					this.handleUnityError("Setting the camera errored because model failed to load: " + error);
-				});
+				this.viewer.setCamera(
+					event.value.position,
+					event.value.view_dir,
+					event.value.up,
+					event.value.look_at,
+					event.value.animate !== undefined ? event.value.animate : true,
+					event.value.rollerCoasterMode,
+					event.value.account,
+					event.value.model,
+				);
 				break;
 
 			case this.EventService.EVENT.VIEWER.PICK_POINT:
@@ -382,7 +378,6 @@ export class ViewerService {
 					// Set the current model in the viewer
 					this.currentModel.model = model;
 					this.initialised.resolve();
-					this.fetchModelProperties(account, model, branch, revision);
 				})
 				.catch((error) => {
 					console.error("Error loading model: ", error);

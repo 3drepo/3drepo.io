@@ -600,7 +600,7 @@
 
 			case "screen_shot":
 
-					// There is no concept of selected in screenshot as there will be a popup once you click the button
+				// There is no concept of selected in screenshot as there will be a popup once you click the button
 				vm.actions[action].selected = false;
 
 				delete vm.screenShot; // Remove any clicked on screen shot
@@ -723,9 +723,11 @@
 		};
 
 		function handleObjects (viewpoint, objectInfo, screenShotPromise) {
+
+			//TODO - clean up repeated code below
 			if (vm.savedScreenShot !== null) {
 
-				if (objectInfo.highlightedNodes.length > 0) {
+				if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 					// Create a group of selected objects
 					vm.createGroup(viewpoint, vm.savedScreenShot, objectInfo);
 				} else {
@@ -737,7 +739,7 @@
 				ViewerService.getScreenshot(screenShotPromise);
 
 				screenShotPromise.promise.then(function (screenShot) {
-					if (objectInfo.highlightedNodes.length > 0) {
+					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 						vm.createGroup(viewpoint, screenShot, objectInfo);
 					} else {
 						vm.doSaveIssue(viewpoint, screenShot);
@@ -754,7 +756,8 @@
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
-				objects: objectInfo.highlightedNodes
+				objects: objectInfo.highlightedNodes,
+				hiddenObjects: objectInfo.hiddenNodes
 			};
 
 			APIService.post(vm.account + "/" + vm.model + "/groups", groupData)
@@ -763,6 +766,7 @@
 				}).catch(function(error){
 					console.error(error);
 				});
+		
 		};
 
 
@@ -861,36 +865,66 @@
 		};
 
 		vm.saveComment = function() {
-			var	viewpointPromise = $q.defer();
+			var viewpointPromise = $q.defer();
+			var objectsPromise = $q.defer();
 
-			if (angular.isDefined(vm.commentThumbnail)) {
-				IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
-					.then(function (response) {
-						vm.saving = false;
-						vm.canEditDescription = vm.checkCanEditDesc();
-						vm.afterNewComment(response.data.issue);
-					})
-					.catch(function(error){
-						vm.errorSavingComment(error);
-					});
-				
-			} else {
+			//Get selected objects
+			ViewerService.getObjectsStatus({
+				promise: objectsPromise, 
+				account: vm.account, 
+				model: vm.model
+			});
 
-				ViewerService.getCurrentViewpoint(
-					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
-				);
+			objectsPromise.promise.then(function(objectInfo) {
+				var groupData = {
+					name: vm.issueData.name, 
+					color: [255, 0, 0], 
+					objects: objectInfo.highlightedNodes,
+					hiddenObjects: objectInfo.hiddenNodes
+				};
+
+				APIService.post(vm.account + "/" + vm.model + "/groups", groupData).then(function (groupResponse) {
+					if (angular.isDefined(vm.commentThumbnail)) {
+						vm.commentViewpoint.group_id = groupResponse.data._id;
+						IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
+							.then(function (response) {
+								vm.saving = false;
+								vm.canEditDescription = vm.checkCanEditDesc();
+								vm.afterNewComment(response.data.issue);
+							})
+							.catch(function(error){
+								vm.errorSavingComment(error);
+							});
 				
-				viewpointPromise.promise.then(function (viewpoint) {
-					IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
-						.then(function (response) {
-							vm.saving = false;
-							vm.afterNewComment(response.data.issue);
+					} else {
+
+						ViewerService.getCurrentViewpoint(
+							{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
+						);
+				
+						viewpointPromise.promise.then(function (viewpoint) {
+							viewpoint.group_id = groupResponse.data._id;
+							IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
+								.then(function (response) {
+									vm.saving = false;
+									vm.afterNewComment(response.data.issue);
+								})
+								.catch(function(error){
+									vm.errorSavingComment(error);
+								});
 						})
-						.catch(function(error){
-							vm.errorSavingComment(error);
-						});
+							.catch(function(error) {
+								console.error(error);
+							});
+					}
+				})
+					.catch(function(error) {
+						console(error);
+					});
+			})
+				.catch(function(error) {
+					console.error(error);
 				});
-			}
 
 			AnalyticService.sendEvent({
 				eventCategory: "Issue",

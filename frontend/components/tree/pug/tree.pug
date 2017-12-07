@@ -3,7 +3,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 // Tree
 .virtualRepeatInfiniteScroll(ng-show="vm.showTree")
-	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex", ng-show="vm.showNodes")
+	md-virtual-repeat-container.vertical-container.virtual-repeat-full-height(md-top-index="vm.topIndex", ng-show="vm.showNodes")
 
 		.treeNodes.repeated-item(id="{{item._id}}" md-virtual-repeat="item in vm.nodesToShow")
 			.treeNode(
@@ -57,8 +57,15 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 		.treeNodes.filterNode.repeated-item(md-virtual-repeat="item in vm.nodes")
 			// Name
 			div(layout="row", layout-align="start center", flex)
-				div(flex, layout="row", layout-align="start center")
-					p.filterListNodeName(ng-click="vm.filterItemSelected(item)", ng-class="item.class") {{item.name}}
+				div(
+					flex, 
+					layout="row", 
+					layout-align="start center"
+					ng-class="item.class"
+					ng-click="vm.filterItemSelected(item)")
+
+					p.filterListNodeName {{item.name}}
+
 				// Toggle visibility
 				//md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
 					md-icon.angular-material-icons(aria-label="Visible", ng-if="item.toggleState==='visible'") visibility
