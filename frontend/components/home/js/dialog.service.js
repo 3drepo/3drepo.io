@@ -40,8 +40,9 @@
 			html: html,
 			showDialog: showDialog,
 			closeDialog: closeDialog,
-			disconnected: disconnected,
-			sessionExpired: sessionExpired
+			sessionExpired: sessionExpired,
+			newUpdate: newUpdate,
+			disconnected: disconnected
 		};
 
 		return service;
@@ -207,6 +208,37 @@
 				return Promise.resolve();
 			}
 
+		}
+
+		function newUpdate() {
+
+			var title = "Update Available";
+			var content = "A new version of 3D Repo is available! <br> <br> " +
+				"Please reload the page for the latest version. See the latest changelog " +
+				"<a href='https://github.com/3drepo/3drepo.io/releases/latest'>here</a>.";
+			var escapable = false;
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
+			return $mdDialog.show( 
+				$mdDialog.confirm()
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
+					.title(title)
+					.htmlContent(content)
+					.ariaLabel(title)
+					.ok("Reload")
+					.cancel("I'll reload in a moment")
+			)
+				.then(function(){
+					window.location.reload();
+				})
+				.catch(function(){
+					console.log("User didn't reload");
+				});
+		
 		}
 
 	}	
