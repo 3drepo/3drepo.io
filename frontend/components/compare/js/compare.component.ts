@@ -20,9 +20,12 @@ class CompareController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$filter",
+		"$q",
+
 		"ViewerService",
 		"RevisionsService",
 		"CompareService",
+		"TreeService",
 	];
 
 	private mode: string;
@@ -37,13 +40,18 @@ class CompareController implements ng.IController {
 	private isFed: boolean;
 	private compareState: string;
 	private canChangeCompareState: boolean;
+	private models: any[];
+	private modelsReady;
 
 	constructor(
 		private $scope: any,
 		private $filter: any,
+		private $q: any,
+
 		private ViewerService: any,
 		private RevisionsService: any,
 		private CompareService: any,
+		private TreeService: any,
 	) {}
 
 	public $onInit() {
@@ -51,8 +59,8 @@ class CompareController implements ng.IController {
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
 		this.modelType = this.CompareService.modelType;
-
-		this.loadingInfo = "Loading comparision models...";
+		this.modelsReady = this.$q.defer();
+		this.models = [];
 
 		this.watchers();
 	}
@@ -75,9 +83,42 @@ class CompareController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				this.modelSettingsReady();
+				this.modelsReady.resolve(this.modelSettingsReady());
 			}
 		});
+
+		this.$scope.$watch(() => {
+			return this.TreeService.visibilityUpdateTime;
+		}, () => {
+			this.modelsReady.promise.then(() => {
+				const models = this.TreeService.getNodesToShow();
+				models.forEach(this.compareToTreeState.bind(this));
+			});
+		});
+
+	}
+
+	public compareToTreeState(shownModel: any) {
+		if (shownModel.level !== 1) {
+			return;
+		}
+
+		for (const type in this.compareTypes) {
+
+			if (!type) {
+				continue;
+			}
+
+			const baseModels = this.compareTypes[type].baseModels;
+			for (let j = 0; j < baseModels.length; j++) {
+				const model = baseModels[j];
+				if (shownModel.name === model.account + ":" + model.name) {
+					model.visible = (shownModel.toggleState === "visible");
+					break;
+				}
+			}
+
+		}
 
 	}
 
@@ -85,26 +126,28 @@ class CompareController implements ng.IController {
 
 		this.CompareService.state.isFed = this.modelSettings.federate;
 
+		const modelsReady = [];
+
 		if (this.CompareService.state.isFed) {
 
-			this.CompareService.addModelsForFederationCompare(
+			modelsReady.push(this.CompareService.addModelsForFederationCompare(
 				this.modelSettings,
-			);
+			));
 
 		} else {
 
-			this.CompareService.addModelsForModelCompare(
+			modelsReady.push(this.CompareService.addModelsForModelCompare(
 				this.account,
 				this.model,
 				this.modelSettings,
-			);
+			));
 
 		}
-
+		return Promise.all(modelsReady);
 	}
 
 	public toggleModelVisibility(model) {
-		this.CompareService.toggleModelVisibility(model);
+		this.CompareService.toggleModelVisibility(model); ,
 	}
 
 	public getModelTypeStyle(type: string, prop: string) {
@@ -145,7 +188,7 @@ class CompareController implements ng.IController {
 
 }
 
-export const CompareComponent: ng.IComponentOptions = {
+public export const CompareComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
@@ -156,6 +199,6 @@ export const CompareComponent: ng.IComponentOptions = {
 	templateUrl: "templates/compare.html",
 };
 
-export const CompareComponentModule = angular
+public export const CompareComponentModule = angular
 	.module("3drepo")
 	.component("compare", CompareComponent);
