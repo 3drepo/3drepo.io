@@ -378,7 +378,6 @@ export class ViewerService {
 					// Set the current model in the viewer
 					this.currentModel.model = model;
 					this.initialised.resolve();
-					this.fetchModelProperties(account, model, branch, revision);
 				})
 				.catch((error) => {
 					console.error("Error loading model: ", error);

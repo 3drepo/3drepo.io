@@ -600,7 +600,7 @@
 
 			case "screen_shot":
 
-					// There is no concept of selected in screenshot as there will be a popup once you click the button
+				// There is no concept of selected in screenshot as there will be a popup once you click the button
 				vm.actions[action].selected = false;
 
 				delete vm.screenShot; // Remove any clicked on screen shot
@@ -913,18 +913,18 @@
 									vm.errorSavingComment(error);
 								});
 						})
-						.catch(function(error) {
-							console.error(error);
-						});
+							.catch(function(error) {
+								console.error(error);
+							});
 					}
 				})
-				.catch(function(error) {
-					console(error);
-				});
+					.catch(function(error) {
+						console(error);
+					});
 			})
-			.catch(function(error) {
-				console.error(error);
-			});
+				.catch(function(error) {
+					console.error(error);
+				});
 
 			AnalyticService.sendEvent({
 				eventCategory: "Issue",
