@@ -147,7 +147,7 @@ class CompareController implements ng.IController {
 	}
 
 	public toggleModelVisibility(model) {
-		this.CompareService.toggleModelVisibility(model); ,
+		this.CompareService.toggleModelVisibility(model);
 	}
 
 	public getModelTypeStyle(type: string, prop: string) {
@@ -188,7 +188,7 @@ class CompareController implements ng.IController {
 
 }
 
-public export const CompareComponent: ng.IComponentOptions = {
+export const CompareComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
@@ -199,6 +199,6 @@ public export const CompareComponent: ng.IComponentOptions = {
 	templateUrl: "templates/compare.html",
 };
 
-public export const CompareComponentModule = angular
+export const CompareComponentModule = angular
 	.module("3drepo")
 	.component("compare", CompareComponent);
