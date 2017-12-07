@@ -37,6 +37,10 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
+	//Diff
+	public static loadComparatorResolve;
+	public static loadComparatorPromise;
+
 	public static unityHasErrored = false;
 
 	public static screenshotPromises = [];
@@ -155,6 +159,8 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
+		console.log(methodName, requireStatus, params);
+
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -206,7 +212,7 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
-		console.log("comparatorLoaded");
+		console.log("comparatorLoaded - resolve")
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
@@ -271,7 +277,6 @@ export class UnityUtil {
 			model,
 			meshID: id,
 		};
-
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
@@ -280,6 +285,7 @@ export class UnityUtil {
 			color : colour,
 			pinName : id,
 		};
+
 		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
@@ -333,7 +339,6 @@ export class UnityUtil {
 		if (revision !== "head") {
 			params.revID = revision;
 		}
-
 		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		if (!UnityUtil.loadComparatorPromise) {
@@ -353,7 +358,6 @@ export class UnityUtil {
 			database : account,
 			model,
 		};
-
 		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 	}

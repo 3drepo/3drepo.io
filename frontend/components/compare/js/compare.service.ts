@@ -19,33 +19,46 @@ export class CompareService {
 
 	public static $inject: string[] = [
 		"$filter",
+		"$q",
+
 		"RevisionsService",
 		"ViewerService",
 	];
 
 	public state: any;
+	private readyDefer: any;
+	private settingsPromises: any[];
 
 	constructor(
 		private $filter: any,
+		private $q: any,
+
 		private RevisionsService: any,
 		private ViewerService: any,
 	) {
+
+		this.settingsPromises = [];
+		this.readyDefer = $q.defer();
+
 		this.state = {};
 		this.state.compareTypes = {
 			diff : {
 				label: "3D Diff",
-				models: [],
+				baseModels: [],
+				targetModels: [],
 				type: "diff",
 			},
 			clash : {
 				label: "3D Clash",
-				models: [],
+				baseModels: [],
+				targetModels: [],
 				type: "clash",
 			},
 		};
 
 		this.state.mode = "diff";
 		this.state.modelType = "base";
+		this.state.ready = this.readyDefer.promise;
 	}
 
 	public $onInit() {}
@@ -117,11 +130,13 @@ export class CompareService {
 	}
 
 	public addModelsForModelCompare(account: string, model: string, modelSettings: any) {
-		this.RevisionsService.listAll(account, model).then((revisions) => {
-			this.state.compareTypes.diff.models = [
-				this.getCompareModelData(modelSettings, revisions),
-			];
+		return this.RevisionsService.listAll(account, model).then((revisions) => {
+
+			this.state.compareTypes.diff.targetModels = [ this.getCompareModelData(modelSettings, revisions) ];
+			this.state.compareTypes.diff.baseModels = [ this.getCompareModelData(modelSettings, revisions) ];
+
 		});
+
 	}
 
 	public getSettings(model: any) {
@@ -133,34 +148,47 @@ export class CompareService {
 
 	public addModelsForFederationCompare(modelSettings: any) {
 
+		const promises = [];
+
 		for (const type in this.state.compareTypes) {
-			if (this.state.compareTypes.hasOwnProperty(type)) {
 
-				this.state.compareTypes[type].models = [];
-				let numModels = 0;
-
-				modelSettings.subModels.forEach((model, i) => {
-					if (model.database && model.model) {
-						this.RevisionsService.listAll(model.database, model.model)
-							.then((revisions) => {
-								this.getSettings(model).then((response) => {
-									const settings = response.data;
-									const modelData = this.getCompareModelData(settings, revisions);
-									this.state.compareTypes[type].models[numModels] = modelData;
-									numModels++;
-								});
-							})
-							.catch((error) => {
-								console.error(error);
-							});
-					} else {
-						console.error("Sub model data doesn't contain database and model ID: ", model);
-					}
-
-				});
-
+			if (!this.state.compareTypes.hasOwnProperty(type)) {
+				continue;
 			}
+
+			this.state.compareTypes[type].baseModels = [];
+			this.state.compareTypes[type].targetModels = [];
+
+			modelSettings.subModels.forEach((model, i) => {
+
+				if (model.database && model.model) {
+
+					const revisionPromise = this.getRevisionModels(model, type, i);
+					promises.push(revisionPromise);
+
+				} else {
+					console.error("Sub model data doesn't contain database and model ID: ", model);
+				}
+
+			});
+
 		}
+
+		return Promise.all(promises);
+	}
+
+	public getRevisionModels(model, type, i) {
+		return this.RevisionsService.listAll(model.database, model.model)
+			.then((revisions) => {
+				return this.getSettings(model).then((response) => {
+					const settings = response.data;
+					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions);
+					this.state.compareTypes[type].baseModels[i] = this.getCompareModelData(settings, revisions);
+				});
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	}
 
 	public changeCompareState(newCompareState: string) {
@@ -202,8 +230,8 @@ export class CompareService {
 
 	public loadModels() {
 		const allModels = [];
-		this.state.compareTypes.diff.models.forEach((model) => {
-
+		this.state.compareTypes.diff.targetModels.forEach((model) => {
+			console.log("loadModels - model: ", model);
 			if (model.visible === true) {
 
 				this.state.loadingComparision = true;
@@ -220,6 +248,8 @@ export class CompareService {
 			}
 
 		});
+
+		console.log("loadModels - allModels", allModels);
 
 		return Promise.all(allModels);
 	}
@@ -303,7 +333,7 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		const modelToDiff = this.state.compareTypes.diff.models.find((m) => {
+		const modelToDiff = this.state.compareTypes.diff.baseModels.find((m) => {
 			return m.model === model;
 		});
 		const revision = modelToDiff.selectedRevision;
@@ -315,18 +345,25 @@ export class CompareService {
 				this.modelsLoaded();
 			})
 			.catch((error) => {
+				this.modelsLoaded();
 				console.error(error);
 			});
 	}
 
 	public diffFed() {
-
+		console.log("diffFed - start")
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels().then(() => {
-			this.ViewerService.diffToolEnableWithDiffMode();
-			this.modelsLoaded();
-		});
+		this.loadModels()
+			.then(() => {
+				console.log("diffFed - loadModels.then");
+				this.ViewerService.diffToolEnableWithDiffMode();
+				this.modelsLoaded();
+			})
+			.catch((error) => {
+				this.modelsLoaded();
+				console.error(error);
+			});
 
 	}
 
@@ -334,10 +371,15 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels().then(() => {
-			this.ViewerService.diffToolEnableWithClashMode();
-			this.modelsLoaded();
-		});
+		this.loadModels()
+			.then(() => {
+				this.ViewerService.diffToolEnableWithClashMode();
+				this.modelsLoaded();
+			})
+			.catch((error) => {
+				this.modelsLoaded();
+				console.error(error);
+			});
 
 	}
 
@@ -345,7 +387,7 @@ export class CompareService {
 		if (this.state.modelType === "target") {
 			model.visible = !model.visible;
 		} else if (this.state.modelType === "base") {
-			//TODO: Handle base type
+			// TODO: Handle base type
 		}
 		this.disableComparision();
 	}
