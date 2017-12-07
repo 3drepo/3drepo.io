@@ -530,6 +530,7 @@
 				issueData = {
 					position : issue.viewpoint.position,
 					view_dir : issue.viewpoint.view_dir,
+					look_at : issue.viewpoint.look_at,
 					up: issue.viewpoint.up,
 					account: issue.account,
 					model: issue.model
@@ -580,7 +581,6 @@
 		function handleTree(response) {
 
 			var ids = [];
-			var objectIdsToShow = [];
 			var objectIdsToHide = [];
 			TreeService.getMap()
 				.then(function(treeMap){
@@ -596,7 +596,7 @@
 
 					// show currently hidden nodes
 					objectsPromise.promise
-						.then(function(objectInfo) {
+						.then(function() {
 							TreeService.resetHidden();
 							
 							response.data.hiddenObjects.forEach(function(obj){
@@ -611,9 +611,9 @@
 
 							});
 
-							for (var key in objectIdsToHide) {
+							for (var ns in objectIdsToHide) {
 
-								objectIdsToHide[key].forEach(function(obj) {
+								objectIdsToHide[ns].forEach(function(obj) {
 									TreeService.toggleTreeNodeById(obj);
 								});
 							}
@@ -638,7 +638,7 @@
 								}
 							}
 
-					});
+						});
 			
 				})
 				.catch(function(error) {
