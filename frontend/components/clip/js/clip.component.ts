@@ -77,8 +77,6 @@ class ClipController implements ng.IController {
 		this.direction = false;
 		this.availableUnits = this.ClientConfigService.units;
 
-		this.availableUnits.push("dm");
-
 		this.$element.bind("DOMMouseScroll mousewheel onmousewheel", (event) => {
 			this.handleScroll(event);
 		});
@@ -230,11 +228,22 @@ class ClipController implements ng.IController {
 			if (currentUnit === "mm") {
 				scaler = 0.1;
 			}
-			if (currentUnit === "dc") {
+			if (currentUnit === "dm") {
 				scaler = 10;
 			}
 			if (currentUnit === "m") {
 				scaler = 100;
+			}
+			break;
+		case "dm":
+			if (currentUnit === "mm") {
+				scaler = 0.01;
+			}
+			if (currentUnit === "cm") {
+				scaler = 0.1;
+			}
+			if (currentUnit === "m") {
+				scaler = 10;
 			}
 			break;
 		case "m":
