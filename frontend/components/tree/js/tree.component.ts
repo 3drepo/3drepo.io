@@ -200,7 +200,13 @@ class TreeController implements ng.IController {
 							console.log("No IFC");
 							break;
 						case "isolate":
-							console.log("Isol8");
+							// Hide all
+							while (this.nodes[0] && this.nodes[0].toggleState !== "invisible")
+								this.TreeService.toggleTreeNode(this.nodes[0]);
+							// Show selected
+							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
+								this.TreeService.toggleTreeNode(selectedNode);
+							});
 							break;
 						default:
 							console.error("Tree option menu selection unhandled");
