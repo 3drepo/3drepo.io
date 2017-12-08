@@ -52,7 +52,7 @@ div(
 								layout-fill)
 
 						div(ng-if="!vm.loadingComparision"
-							ng-repeat="model in compareType.models") 
+							ng-repeat="model in compareType[vm.modelType + 'Models']") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 
