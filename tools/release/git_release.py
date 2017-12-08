@@ -48,13 +48,7 @@ code = 0
 if code:
     fatalError("git force add failed")
 
-VERSION_FILE = 'backend/VERSION.json'
-with open(VERSION_FILE, 'r+') as f:
-    text = f.read()
-    text = '{ "VERSION" : "' + version + '" }'
-    f.seek(0)
-    f.write(text)
-    f.truncate()
+os.system("sed -i 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json")
 
 os.system("git add backend")
 os.system("git clean -f -d")
