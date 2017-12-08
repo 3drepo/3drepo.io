@@ -162,10 +162,7 @@ class PanelController implements ng.IController {
 		}
 	}
 
-	/**
-	 * Panel toggle button clicked
-	 */
-	public togglePanel(contentType) {
+	public togglePanel(contentType: string) {
 
 		// Get the content item
 		for (let i = 0; i < this.contentItems.length; i += 1) {
@@ -194,13 +191,7 @@ class PanelController implements ng.IController {
 		this.hideLastItemGap();
 	}
 
-	/**
-	 * A panel content is requesting a height change - change the heights of any shown panels
-	 *
-	 * @param {Object} contentItem
-	 * @param {Number} height
-	 */
-	public heightRequest(contentItem, height) {
+	public heightRequest(contentItem: any, height: number) {
 		contentItem.requestedHeight = height; // Keep a note of the requested height
 		contentItem.height = height; // Initially set the height to the requested height
 		this.calculateContentHeights();

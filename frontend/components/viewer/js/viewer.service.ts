@@ -426,6 +426,36 @@ export class ViewerService {
 		}
 	}
 
+	// DIFF
+
+	public diffToolLoadComparator(account: string, model: string, revision: string) {
+		return this.viewer.diffToolLoadComparator(account, model, revision);
+	}
+
+	public diffToolEnableWithClashMode() {
+		this.viewer.diffToolEnableWithClashMode();
+	}
+
+	public diffToolEnableWithDiffMode() {
+		this.viewer.diffToolEnableWithDiffMode();
+	}
+
+	public diffToolDisableAndClear() {
+		this.viewer.diffToolDisableAndClear();
+	}
+
+	public diffToolShowBaseModel() {
+		this.viewer.diffToolShowBaseModel();
+	}
+
+	public diffToolShowComparatorModel() {
+		this.viewer.diffToolShowComparatorModel();
+	}
+
+	public diffToolDiffView() {
+		this.viewer.diffToolDiffView();
+	}
+
 }
 
 export const ViewerServiceModule = angular

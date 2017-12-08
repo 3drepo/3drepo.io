@@ -1,0 +1,89 @@
+compare .topBorder {
+    border-top: 1px solid #e1e1e1;
+}
+
+compare .modelType {
+    color: grey;
+    border-right: solid 1px gainsboro;
+    border-left: solid 1px gainsboro;
+}
+
+compare .modelSides {
+
+}
+
+compare md-tabs md-tabs-content-wrapper {
+    height: 100%;
+}
+
+compare .compareState {
+    margin-left: 30px;
+}
+
+compare md-tab-item {
+    width: 50%;
+}
+
+compare .compareButton {
+    text-align: center;
+    margin: auto !important;
+}
+
+compare .compareVisibility {
+    margin-right: 15px;
+    min-width: initial;
+}
+
+compare .compareModel:hover {
+    background-color: #f0f0f0;
+}
+
+md-menu-content .authorDate {
+    color: #a6a6a6 !important;
+}
+
+compare .modelType {
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+}
+
+compare .selfDiffWarning {
+    text-align: center;
+    margin: 40px;
+}
+
+compare .modelTypeSelection {
+}
+
+compare .revisionText {
+    font-size: 12px;
+    color: grey;
+}
+
+compare .modelText {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+compare md-tabs-content-wrapper md-tab-content {
+    margin-bottom: 125px;
+}
+
+compare .topContainer {
+    height: 100%;
+}
+
+compare .bottomContainer {
+    z-index: 3;
+    position: absolute;
+    bottom: 0;
+    background: #fafafa;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 15px; 
+}
+
+compare .bottomSlider {
+    margin-left: 30px;
+}

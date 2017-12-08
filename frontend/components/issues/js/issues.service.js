@@ -561,7 +561,7 @@
 			if ((issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) || issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
-				
+		
 			}
 		}
 

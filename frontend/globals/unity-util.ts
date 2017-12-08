@@ -20,6 +20,8 @@ declare var SendMessage;
 export class UnityUtil {
 
 	public static errorCallback: any;
+	public static viewer: any;
+
 	public static LoadingState = {
 		VIEWER_READY : 1,  // Viewer has been loaded
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
@@ -35,6 +37,10 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
+	//Diff
+	public static loadComparatorResolve;
+	public static loadComparatorPromise;
+
 	public static unityHasErrored = false;
 
 	public static screenshotPromises = [];
@@ -46,8 +52,6 @@ export class UnityUtil {
 	public static SendMessage_vss;
 	public static SendMessage_vssn;
 	public static SendMessage_vsss;
-
-	public static viewer: any;
 
 	public static init(
 		errorCallback: any,
@@ -79,8 +83,7 @@ export class UnityUtil {
 			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
-
-			throw Error(`${param} is does not have a type which is supported by SendMessage.`);
+			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
 		}
 	}
 
@@ -104,7 +107,6 @@ export class UnityUtil {
 	}
 
 	public static onLoaded() {
-
 		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = {resolve, reject};
@@ -157,6 +159,8 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
+		console.log(methodName, requireStatus, params);
+
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -205,6 +209,13 @@ export class UnityUtil {
 		if (UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
 		}
+	}
+
+	public static comparatorLoaded() {
+		console.log("comparatorLoaded - resolve")
+		UnityUtil.loadComparatorResolve.resolve();
+		UnityUtil.loadComparatorPromise = null;
+		UnityUtil.loadComparatorResolve = null;
 	}
 
 	public static loaded(bboxStr) {
@@ -266,7 +277,6 @@ export class UnityUtil {
 			model,
 			meshID: id,
 		};
-
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
@@ -275,11 +285,118 @@ export class UnityUtil {
 			color : colour,
 			pinName : id,
 		};
+
 		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	public static clearHighlights() {
 		UnityUtil.toUnity("ClearHighlighting", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	* Visualise the difference view
+	* i.e. models will be rendered in greyscale, detailing the difference/clash
+	*/
+	public static diffToolDiffView() {
+		UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
+	}
+
+	/**
+	* Disable diff tool
+	* This also unloads the comparator models
+	*/
+	public static diffToolDisableAndClear() {
+		UnityUtil.toUnity("DiffToolDisable", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	* Enable diff tool
+	* This starts the diff tool in diff mode
+	*/
+	public static diffToolEnableWithDiffMode() {
+		UnityUtil.toUnity("DiffToolStartDiffMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	* Enable diff tool
+	* This starts the diff tool in clash mode
+	*/
+	public static diffToolEnableWithClashMode() {
+		UnityUtil.toUnity("DiffToolStartClashMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	 * Load comparator model for diff tool
+	 * This returns a promise which will be resolved when the comparator model is loaded
+	 */
+	public static diffToolLoadComparator(account, model, revision) {
+
+		const params: any = {
+			database : account,
+			model,
+		};
+
+		if (revision !== "head") {
+			params.revID = revision;
+		}
+		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		if (!UnityUtil.loadComparatorPromise) {
+			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
+				UnityUtil.loadComparatorResolve = {resolve, reject};
+			});
+		}
+		return UnityUtil.loadComparatorPromise;
+	}
+
+	/**
+	 * Set an existing submodel/model as a comparator model
+	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
+	 */
+	public static diffToolSetAsComparator(account, model) {
+		const params: any = {
+			database : account,
+			model,
+		};
+		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+	}
+
+	/**
+	* Only show the comparator model
+	* i.e. Only show the model you are trying to compare with, not the base model
+	*/
+	public static diffToolShowComparatorModel() {
+		UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
+	}
+
+	/**
+	* Only show the base model
+	* i.e. It will show only the original model, not the comparator nor the diff view
+	*/
+	public static diffToolShowBaseModel() {
+		UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
+	}
+
+	/**
+	* Compare transparent objects as if they are opaque objects
+	*/
+	public static diffToolRenderTransAsOpaque() {
+		UnityUtil.toUnity("DiffToolRenderTransAsOpaque", undefined, undefined);
+	}
+
+	/**
+	* Ignore semi-transparent objects in diff
+	*/
+	public static diffToolRenderTransAsInvisible() {
+		UnityUtil.toUnity("DiffToolRenderTransAsInvisible", undefined, undefined);
+	}
+
+	/**
+	* Compare transparent objects as of normal
+	*/
+	public static diffToolRenderTransAsDefault() {
+		UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
 	}
 
 	public static disableClippingPlanes() {
@@ -356,7 +473,6 @@ export class UnityUtil {
 	}
 
 	public static loadModel(account, model, branch, revision) {
-
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
 

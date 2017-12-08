@@ -203,3 +203,7 @@ panel-card-option-erase md-icon,
 panel-card-option-pin md-icon {
   color: inherit !important;
 }
+
+.leftButtons {
+  margin-left: 5px;
+}

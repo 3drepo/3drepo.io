@@ -46,7 +46,7 @@ export class PanelService {
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print"
+					icon: "fa-print",
 				},
 				{
 					hidden: false,
@@ -66,7 +66,7 @@ export class PanelService {
 					toggle: false,
 					selected: true,
 					firstSelected: true,
-					secondSelected: false
+					secondSelected: false,
 				},
 				{
 					hidden: false,
@@ -75,7 +75,7 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
 				},
 				{
 					hidden: false,
@@ -84,11 +84,11 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
-				},{
+					secondSelected: false,
+				}, {
 					hidden: false,
 					upperDivider: true,
-					label: "Created by: "
+					label: "Created by: ",
 				},
 			],
 			minHeight: 260,
@@ -151,6 +151,17 @@ export class PanelService {
 			options: [
 				{type: "visible", visible: true},
 			],
+		});
+
+		this.issuesPanelCard.left.push({
+			type: "compare",
+			title: "Compare",
+			show: false,
+			help: "Show clashes and differences between models",
+			icon: "compare",
+			minHeight: 80,
+			fixedHeight: false,
+			options: [],
 		});
 
 		this.issuesPanelCard.right.push({

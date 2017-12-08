@@ -430,8 +430,6 @@ export class TreeService {
 
 	/**
 	 * traverse children of a node recursively
-	 * @param {Object} node
-	 * @param {Function} callback
 	 */
 	public traverseNode(node: any, callback) {
 		callback(node);
