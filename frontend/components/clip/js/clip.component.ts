@@ -31,7 +31,7 @@ class ClipController implements ng.IController {
 	public sliderMin: number;
 	public sliderMax: number;
 	public sliderStep: number;
-	public displayDistance: number;
+	public displayDistance: any;
 	public precision: number;
 	public sliderPosition: number;
 	public axes: string[];
@@ -217,6 +217,9 @@ class ClipController implements ng.IController {
 			if (currentUnit === "cm") {
 				scaler = 10;
 			}
+			if (currentUnit === "dm") {
+				scaler = 100;
+			}
 			if (currentUnit === "m") {
 				scaler = 1000;
 			}
@@ -225,8 +228,22 @@ class ClipController implements ng.IController {
 			if (currentUnit === "mm") {
 				scaler = 0.1;
 			}
+			if (currentUnit === "dm") {
+				scaler = 10;
+			}
 			if (currentUnit === "m") {
 				scaler = 100;
+			}
+			break;
+		case "dm":
+			if (currentUnit === "mm") {
+				scaler = 0.01;
+			}
+			if (currentUnit === "cm") {
+				scaler = 0.1;
+			}
+			if (currentUnit === "m") {
+				scaler = 10;
 			}
 			break;
 		case "m":
@@ -235,6 +252,9 @@ class ClipController implements ng.IController {
 			}
 			if (currentUnit === "cm") {
 				scaler = 0.01;
+			}
+			if (currentUnit === "dm") {
+				scaler = 0.1;
 			}
 			break;
 		}
@@ -397,7 +417,7 @@ class ClipController implements ng.IController {
 	}
 
 	public handleMetric(unit) {
-		const metric = ["cm", "mm", "m"];
+		const metric = ["cm", "dm", "mm", "m"];
 		const isMetric = metric.indexOf(unit) !== -1;
 		return unit !== "ft" && isMetric;
 	}
