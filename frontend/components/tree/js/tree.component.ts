@@ -185,6 +185,30 @@ class TreeController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watch("vm.selectedMenuOption", 
+			(selectedOption: any) => {
+
+				if (selectedOption && selectedOption.hasOwnProperty("value")) {
+			
+					// Menu option
+					switch (selectedOption.value) {
+						case "showAll":
+							if (this.nodes[0] && this.nodes[0].toggleState !== "visible")
+								this.TreeService.toggleTreeNode(this.nodes[0]);
+							break;
+						case "hideIfc":
+							console.log("No IFC");
+							break;
+						case "isolate":
+							console.log("Isol8");
+							break;
+						default:
+							console.error("Tree option menu selection unhandled");
+					}
+				}
+
+			});
+
 		// TODO - check for better way to sync state between component and service
 		this.$scope.$watchCollection(() => this.TreeService.state,
 			(state) => {
@@ -450,6 +474,7 @@ export const TreeComponent: ng.IComponentOptions = {
 		model:  "=",
 		onContentHeightRequest: "&",
 		revision: "=",
+		selectedMenuOption: "=",
 	},
 	controller: TreeController,
 	controllerAs: "vm",

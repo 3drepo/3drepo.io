@@ -629,12 +629,16 @@
 									ids[key] = [];
 								}	
 
-								ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-								if (i < response.data.objects.length - 1) {
-									TreeService.selectNode(TreeService.getNodeById(treeMap.sharedIdToUid[obj.shared_id]), true);
-								} else {
-									// Only call expandToSelection for last selected node to improve performance
-									TreeService.expandToSelection(TreeService.getPath(treeMap.sharedIdToUid[obj.shared_id]), 0, undefined, true);
+								var objUid = treeMap.sharedIdToUid[obj.shared_id];
+								
+								if (objUid) {
+									ids[key].push(objUid);
+									if (i < response.data.objects.length - 1) {
+										TreeService.selectNode(TreeService.getNodeById(objUid), true);
+									} else {
+										// Only call expandToSelection for last selected node to improve performance
+										TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
+									}
 								}
 							}
 
