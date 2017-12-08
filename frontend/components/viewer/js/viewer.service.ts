@@ -262,11 +262,13 @@ export class ViewerService {
 		this.viewer.switchObjectVisibility(account, model, ids, visibility);
 	}
 
-	public handleUnityError(message: string)  {
+	public handleUnityError(message: string, reload: boolean)  {
 
 		this.DialogService.html("Unity Error", message, true)
 			.then(() => {
-				location.reload();
+				if (reload) {
+					location.reload();
+				}
 			}, () => {
 				console.error("Unity errorered and user canceled reload", message);
 			});
@@ -316,7 +318,7 @@ export class ViewerService {
 				"viewer",
 				document.getElementById("viewer"),
 				this.EventService.send,
-				() => {},
+				this.handleUnityError.bind(this),
 			);
 
 			this.viewer.setUnity();

@@ -37,7 +37,7 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
-	//Diff
+	// Diff
 	public static loadComparatorResolve;
 	public static loadComparatorPromise;
 
@@ -56,7 +56,9 @@ export class UnityUtil {
 	public static init(
 		errorCallback: any,
 	) {
-		errorCallback = errorCallback;
+
+		console.log(errorCallback);
+		UnityUtil.errorCallback = errorCallback;
 	}
 
 	public static _SendMessage(gameObject, func, param) {
@@ -88,17 +90,19 @@ export class UnityUtil {
 	}
 
 	public static onUnityError(err, url, line) {
-		const conf = `Your browser has failed to load 3D Repo. This may due to insufficient memory.
-					Please ensure you are using a 64bit web browser (Chrome or FireFox for best results),
-					reduce your memory usage and try again.
-					If you are unable to resolve this problem, please contact support@3drepo.org referencing the following:
-					<br><br> <code>Error ${err} occured at line ${line}
-					</code> <br><br> Click ok to refresh this page. <md-container>`;
+		let conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
+					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
+					(such as Chrome or Firefox), reduce your memory usage and try again.
+					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.`;
 
 		let reload = false;
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
 			reload = true;
+			conf += `<br><br> Click OK to refresh this page<md-container>`;
+		} else {
+			conf += `<br><md-container>`;
 		}
 
 		UnityUtil.userAlert(conf, reload);
@@ -140,19 +144,12 @@ export class UnityUtil {
 
 	public static userAlert(message, reload) {
 
-		const prefix = "" + "Unity Error: ";
-
-		const fullMessage = prefix + message;
-
 		if (!UnityUtil.unityHasErrored) {
 
 			// Unity can error multiple times, we don't want
 			// to keep annoying the user
 			UnityUtil.unityHasErrored = true;
-			UnityUtil.errorCallback({
-				message : fullMessage,
-				reload,
-			});
+			UnityUtil.errorCallback(message, reload);
 		}
 
 	}
@@ -212,7 +209,7 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
-		console.log("comparatorLoaded - resolve")
+		console.log("comparatorLoaded - resolve");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
