@@ -1,4 +1,4 @@
-import { browser, by, clickElement, element , env, expect, ExpectedConditions, login, logout, USER} from "./config/imports";
+import { browser, by, clickElement, element , env, expect, ExpectedConditions, hasClass, login, logout, USER} from "./config/imports";
 
 describe("Viewer page", function() {
 
@@ -361,10 +361,14 @@ describe("Viewer page", function() {
 					const compare = element(by.tagName("compare"));
 					const clash = compare.all(by.tagName("md-tab-item"));
 					clash.get(1).click();
-
+					browser.sleep(1000);
 					const active = compare.all(by.css(".md-active"));
-					expect(active.count()).to.eventually.equal(1);
-					expect(active.first().getText()).to.eventually.equal("3D Clash");
+					const inkBar = compare.all(by.tagName("md-ink-bar")).first();
+					expect(hasClass(clash.get(0), "md-active")).to.eventually.equal(false);
+					expect(hasClass(clash.get(1), "md-active")).to.eventually.equal(true);
+					expect(hasClass(inkBar, "md-left")).to.eventually.equal(false);
+					expect(hasClass(inkBar, "md-right")).to.eventually.equal(true);
+
 				});
 
 				it("closes", () => {
