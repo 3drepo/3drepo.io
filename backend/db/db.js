@@ -20,6 +20,11 @@
 
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
+	const connConfig = {
+//				reconnectTries: Number.MAX_VALUE,
+//				reconnectInterval: 2000,
+				autoReconnect: true
+			};
 
 	let db;
 	// db object only for authenicate
@@ -42,7 +47,6 @@
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
-
 		return connectString;
 	}
 
@@ -50,7 +54,7 @@
 		if(db){
 			return Promise.resolve(db.db(database));
 		} else {
-			return MongoClient.connect(getURL(database)).then(_db => {
+			return MongoClient.connect(getURL(database), connConfig).then(_db => {
 				db = _db;
 				return db;
 			});
@@ -61,16 +65,38 @@
 		if(authDB){
 			return Promise.resolve(authDB);
 		} else {
-			return MongoClient.connect(getURL('admin')).then(_db => {
+			return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
 				authDB = _db;
 				return authDB;
 			});
 		}
 	}
 
+	function disconnect()
+	{
+		if(db){
+			db.close();
+			db = null;
+		}
+	}
+
+	function getCollection(dbName, colName)
+	{
+		return db.db(dbName).collection(colName);
+	}
+
+	function listCollections(dbName)
+	{
+		return db.db(dbName).listCollections();
+	}
+
 	module.exports = {
+		disconnect,
 		getDB,
-		getAuthDB
+		getAuthDB,
+		getCollection,
+		listCollections
 	};
 
 }());
+

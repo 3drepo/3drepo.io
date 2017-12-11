@@ -95,13 +95,13 @@ var schema = mongoose.Schema({
 schema.statics.historyChunksStats = function(dbName){
 	'use strict';
 
-	return ModelFactory.db.db(dbName).listCollections().toArray().then(collections => {
+	return ModelFactory.dbManager.listCollections(dbName).toArray().then(collections => {
 
 		let historyChunks = _.filter(collections, collection => collection.name.endsWith('.history.chunks'));
 		let promises = [];
 
 		historyChunks.forEach(collection => {
-			promises.push(ModelFactory.db.db(dbName).collection(collection.name).stats());
+			promises.push(ModelFactory.dbManager.getCollection(dbName, collection.name).stats());
 		});
 
 		return Promise.all(promises);

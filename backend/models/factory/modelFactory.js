@@ -23,21 +23,23 @@ module.exports = {
 
 	models: {},
 
-	db: null,
+	dbManager: null,
 
-	setDB: function(db){	
-		this.db = db;
+	setDB: function(dbManager){	
+		this.dbManager = dbManager;
 	},
 
 	__checkDb: function(){
-		if (!this.db){
-			throw new Error('db connection is null');
-		}
+		dbManager.getAuthDB().then(db =>
+			{
+				if (!this.db){
+					throw new Error('db connection is null');
+				}
+			});
 	},
 
 	get: function (modelName, options){
 		'use strict';
-
 		this.__checkDb();
 
 		let Model = mongoose.model(modelName);
@@ -46,7 +48,7 @@ module.exports = {
 
 		let item = new Model(data);
 		
-		item.collection = this.db.db(options.account).collection(this.__collectionName(modelName, options));
+		item.collection = this.dbManager.getCollection(options.account, this.__collectionName(modelName, options));//this.db.db(options.account).collection(this.__collectionName(modelName, options));
 
 		item._dbcolOptions = options;
 
@@ -114,10 +116,9 @@ module.exports = {
 					throw new Error('account name (db) is missing');
 				}
 
-				let collection = self.db.db(options.account).collection(self.__collectionName(modelName, options));
+				let collection = self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));// self.db.db(options.account).collection(self.__collectionName(modelName, options));
 				mongooseModel.collection = collection;
-
-				return staticFunc.apply(this, args).then(items => {
+				const applyPromise = staticFunc.apply(this, args).then(items => {
 					if (Array.isArray(items)){
 
 						items.forEach((item, index, array) => {
@@ -136,6 +137,13 @@ module.exports = {
 					}
 
 					return Promise.resolve(items);
+				});
+
+				return applyPromise.then(items => {
+					return items;
+				}).catch(err => {
+					self.dbManager.disconnect();
+					return Promise.reject(err);
 				});
 			};
 		}
@@ -162,7 +170,7 @@ module.exports = {
 
 			//self.db.db(options.account).collection(self.__collectionName(modelName, options));
 
-			let collection = self.db.db(options.account).collection(self.__collectionName(modelName, options));
+			let collection =  self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));//self.db.db(options.account).collection(self.__collectionName(modelName, options));
 			mongooseModel.collection = collection;
 
 			var args = Array.prototype.slice.call(arguments);
