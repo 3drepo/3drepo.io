@@ -689,9 +689,6 @@
 				screenShotPromise = $q.defer(),
 				objectsPromise = $q.defer();
 
-			var objectsAccount = vm.account;
-			var objectsModel = vm.model;
-
 			if (vm.commentViewpoint) {
 				viewpointPromise.resolve(vm.commentViewpoint);
 			} else {
@@ -701,16 +698,9 @@
 				);
 			}
 
-			// Remove objectsModel for federations to check all models
-			if (vm.modelSettings && vm.modelSettings.federate) {
-				objectsModel = null;
-			}
-
 			//Get selected objects
 			ViewerService.getObjectsStatus({
-				promise: objectsPromise, 
-				account: objectsAccount, 
-				model: objectsModel
+				promise: objectsPromise 
 			});
 
 			viewpointPromise.promise
@@ -874,19 +864,10 @@
 		vm.saveComment = function() {
 			var viewpointPromise = $q.defer();
 			var objectsPromise = $q.defer();
-			var objectsAccount = vm.account;
-			var objectsModel = vm.model;
-
-			// Remove objectsModel for federations to check all models
-			if (vm.modelSettings && vm.modelSettings.federate) {
-				objectsModel = null;
-			}
 
 			//Get selected objects
 			ViewerService.getObjectsStatus({
-				promise: objectsPromise, 
-				account: objectsAccount, 
-				model: objectsModel
+				promise: objectsPromise 
 			});
 
 			objectsPromise.promise.then(function(objectInfo) {
