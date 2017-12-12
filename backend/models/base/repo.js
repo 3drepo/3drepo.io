@@ -18,7 +18,6 @@
 "use strict";
 
 var repoGraphScene = require("../../repo/repoGraphScene.js");
-var GridFSBucket = require("mongodb").GridFSBucket;
 var ModelFactory = require("../factory/modelFactory");
 var History = require("../history");
 var utils = require("../../utils");

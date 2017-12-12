@@ -17,7 +17,8 @@
 
 (function() {
 	"use strict";
-
+	
+	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const connConfig = {
