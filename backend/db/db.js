@@ -38,7 +38,12 @@
 	}
 
 	function dropCollection(database, collection) {
-		db.db(database).dropCollection(collection.name);
+		getDB(database).then(dbConn => {
+			dbConn.dropCollection(collection.name);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
 	}
 
 
@@ -84,20 +89,54 @@
 	}
 
 	function getGridFSBucket(database, collection) {
-		console.log(database, collection);
-		return new GridFSBucket(db.db(database), collection);
+		return getDB(database).then(dbConn => {
+			return new GridFSBucket(dbConn, collection);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
 	}
 
-	function getCollection(dbName, colName)	{
-		return db.db(dbName).collection(colName);
+	function getCollection(database, colName)	{
+		return getDB(database).then(dbConn => {
+			return dbConn.collection(colName);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
 	}
 
-	function listCollections(dbName) {
-		return db.db(dbName).listCollections();
+	function getCollectionStats(database, colName)	{
+		return getDB(database).then(dbConn => {
+			return dbConn.collection(colName).stats();
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
+	//FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
+	function _getCollection(database, colName)	{
+		return db.db(database).collection(colName);
+	}
+
+	function listCollections(database) {
+		return getDB(database).then(dbConn => {
+			return dbConn.listCollections().toArray();
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+		
 	}
 	
-	function runCommand(dbName, cmd) {
-		return db.db(dbName).command(cmd);
+	function runCommand(database, cmd) {
+		return getDB(database).then(dbConn => {
+			return dbConn.command(cmd);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
 	}
 
 	module.exports = {
@@ -106,6 +145,8 @@
 		getDB,
 		getAuthDB,
 		getCollection,
+		getCollectionStats,
+		_getCollection,
 		getGridFSBucket,
 		listCollections,
 		runCommand

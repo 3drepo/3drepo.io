@@ -34,46 +34,47 @@
 		
 		groupBy: (account, project, groups, sort, format) => {
 
-			const collection = ModelFactory.dbManager.getCollection(account, `${model}.issues`);
+			return ModelFactory.dbManager.getCollection(account, `${model}.issues`).then(collection => {
 
-			let fields = {};
-
-			groups.forEach(group => {
-				fields[group] = getField(group);
-			});
-
-			const field = `_id.${groups[0]}`;
-
-			const pipeline = [
-				{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
-				{ '$sort': {'count': sort, [field]: sort}}
-			];
-
-			if(!pipeline){
-				return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);
-			}
-
-			const promise = collection.aggregate(pipeline).toArray();
-
-			if(format === 'csv'){
-
-				let csvFields = [];
-				let csvFieldNames = [];
+				let fields = {};
 
 				groups.forEach(group => {
-					csvFields.push(`_id.${group}`);
-					csvFieldNames.push(group);
+					fields[group] = getField(group);
 				});
 
-				csvFieldNames.push('count');
-				csvFields.push('count');
+				const field = `_id.${groups[0]}`;
 
-				return promise.then(data => {
-					return json2csv({ data, fields: csvFields, fieldNames: csvFieldNames });
-				});
-			}
+				const pipeline = [
+					{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
+					{ '$sort': {'count': sort, [field]: sort}}
+				];
 
-			return promise;
+				if(!pipeline){
+					return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);
+				}
+
+				const promise = collection.aggregate(pipeline).toArray();
+
+				if(format === 'csv'){
+
+					let csvFields = [];
+					let csvFieldNames = [];
+
+					groups.forEach(group => {
+						csvFields.push(`_id.${group}`);
+						csvFieldNames.push(group);
+					});
+
+					csvFieldNames.push('count');
+					csvFields.push('count');
+
+					return promise.then(data => {
+						return json2csv({ data, fields: csvFields, fieldNames: csvFieldNames });
+					});
+				}
+
+				return promise;
+			});
 
 		}
 	};

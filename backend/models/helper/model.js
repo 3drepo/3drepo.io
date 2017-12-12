@@ -1380,29 +1380,30 @@ function listSubModels(account, model, branch){
 
 function downloadLatest(account, model){
 	
-	let bucket =  stash.getGridFSBucket(account, `${model}.history`);
+	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
 
-	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+		return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
 
-		if(!file){
-			return Promise.reject(responseCodes.NO_FILE_FOUND);
-		}
+			if(!file){
+				return Promise.reject(responseCodes.NO_FILE_FOUND);
+			}
 
-		// change file name
-		let filename = file.filename.split('_');
-		let ext = '';
+			// change file name
+			let filename = file.filename.split('_');
+			let ext = '';
+	
+			if (filename.length > 1){
+				ext = '.' + filename.pop();
+			}
 
-		if (filename.length > 1){
-			ext = '.' + filename.pop();
-		}
+			file.filename = filename.join('_').substr(36) + ext;
+	
+			return Promise.resolve({
+				readStream: bucket.openDownloadStream(file._id),
+				meta: file
+			});
 
-		file.filename = filename.join('_').substr(36) + ext;
-
-		return Promise.resolve({
-			readStream: bucket.openDownloadStream(file._id),
-			meta: file
 		});
-
 	});
 }
 

@@ -48,7 +48,8 @@ module.exports = {
 
 		let item = new Model(data);
 		
-		item.collection = this.dbManager.getCollection(options.account, this.__collectionName(modelName, options));
+		//FIXME: this needs to use the normal getCollection(), which returns a promise.
+		item.collection = this.dbManager._getCollection(options.account, this.__collectionName(modelName, options));
 
 		item._dbcolOptions = options;
 
@@ -116,34 +117,35 @@ module.exports = {
 					throw new Error('account name (db) is missing');
 				}
 
-				let collection = self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));
-				mongooseModel.collection = collection;
-				const applyPromise = staticFunc.apply(this, args).then(items => {
-					if (Array.isArray(items)){
+				return self.dbManager.getCollection(options.account, self.__collectionName(modelName, options)).then(collection => {
+					mongooseModel.collection = collection;
+					const applyPromise = staticFunc.apply(this, args).then(items => {
+						if (Array.isArray(items)){
 
-						items.forEach((item, index, array) => {
-							item.collection = collection;
-							item._dbcolOptions = options;
-							array[index] = item;
-						});
+							items.forEach((item, index, array) => {
+								item.collection = collection;
+								item._dbcolOptions = options;
+								array[index] = item;
+							});
 						
-					} else if (typeof items === 'number') {
+						} else if (typeof items === 'number') {
 
 
-					} else if (items){
+						} else if (items){
+	
+							items.collection = collection;
+							items._dbcolOptions = options;
+						}
 
-						items.collection = collection;
-						items._dbcolOptions = options;
-					}
+						return Promise.resolve(items);
+					});
 
-					return Promise.resolve(items);
-				});
-
-				return applyPromise.then(items => {
-					return items;
-				}).catch(err => {
-					self.dbManager.disconnect();
-					return Promise.reject(err);
+					return applyPromise.then(items => {
+						return items;
+					}).catch(err => {
+						self.dbManager.disconnect();
+						return Promise.reject(err);
+					});
 				});
 			};
 		}
@@ -168,13 +170,14 @@ module.exports = {
 
 		mongooseModel.update = function(options){
 
-			let collection =  self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));
-			mongooseModel.collection = collection;
+			return self.dbManager.getCollection(options.account, self.__collectionName(modelName, options)).then(collection => {
+				mongooseModel.collection = collection;
 
-			var args = Array.prototype.slice.call(arguments);
-			args.shift();
+				var args = Array.prototype.slice.call(arguments);
+				args.shift();
 
-			return update.apply(mongooseModel, args);
+				return update.apply(mongooseModel, args);
+			});
 		};
 
 		mongooseModel.prototype.model = modelName => {

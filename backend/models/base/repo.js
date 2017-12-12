@@ -50,25 +50,24 @@ statics._getGridFSBucket = function(dbCol, format){
 
 statics.findStashByFilename = function(dbCol, format, filename){
 
-	let bucket = this._getGridFSBucket(dbCol, format);
+	return this._getGridFSBucket(dbCol, format).then(bucket => {
 
-	return bucket.find({ filename }).toArray().then(files => {
-		if(!files.length){
-			return Promise.resolve(false);
-		} else {
-			return new Promise((resolve) => {
+		return bucket.find({ filename }).toArray().then(files => {
+			if(!files.length){
+				return Promise.resolve(false);
+			} else {
+				return new Promise((resolve) => {
+	
+					let downloadStream = bucket.openDownloadStreamByName(filename);
+					let bufs = [];
 
-				let downloadStream = bucket.openDownloadStreamByName(filename);
-				let bufs = [];
-
-				downloadStream.on("data", function(d){ bufs.push(d); });
-				downloadStream.on("end", function(){
-					resolve(Buffer.concat(bufs));
-				});
-
-			});
-
-		}
+					downloadStream.on("data", function(d){ bufs.push(d); });
+					downloadStream.on("end", function(){
+						resolve(Buffer.concat(bufs));
+					});
+				});	
+			}
+		});
 	});
 
 };
@@ -77,20 +76,22 @@ statics.getSharedId = function(dbCol, uid){
 
 	let projection = { shared_id: 1 };
 
-	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
-		if(!obj) {
-			return this.findById(dbCol, stringToUUID(uid), projection);
-		}
+	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
+		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
+			if(!obj) {
+				return this.findById(dbCol, stringToUUID(uid), projection);
+			}
 
-		//from3DRepoStash = true;
-		obj.toObject = () => obj;
-		return Promise.resolve(obj);
+			//from3DRepoStash = true;
+			obj.toObject = () => obj;
+			return Promise.resolve(obj);
 
-	}).then(obj => {
+		}).then(obj => {
 
-		obj = obj && obj.toObject();
-		return Promise.resolve(obj && uuidToString(obj.shared_id));
+			obj = obj && obj.toObject();
+			return Promise.resolve(obj && uuidToString(obj.shared_id));
 
+		});
 	});
 
 };
@@ -101,61 +102,47 @@ statics.findByUID = function(dbCol, uid, options){
 
 	let projection = options && options.projection || {};
 
-	let _find = () => ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
-		if(!obj) {
-			return this.findById(dbCol, stringToUUID(uid), projection);
-		}
+	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
+		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
+			if(!obj) {
+				return this.findById(dbCol, stringToUUID(uid), projection);
+			}
 
-		//from3DRepoStash = true;
-		obj.toObject = () => obj;
+			//from3DRepoStash = true;
+			obj.toObject = () => obj;
 
-		return Promise.resolve(obj);
+			return Promise.resolve(obj);
 
-	}).then(obj =>{
+		}).then(obj =>{
 
-		if(!obj){
-			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
-		}
-		// load extRef if _.extRef is defined
-		if(obj.type === "mesh" && obj._extRef){
+			if(!obj){
+				return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
+			}
+			// load extRef if _.extRef is defined
+			if(obj.type === "mesh" && obj._extRef){
 
-			let promises = [];
+				let promises = [];
+	
+				obj = obj.toObject();
+	
+				Object.keys(obj._extRef).forEach(type => {
+					let filename = obj._extRef[type];
+					promises.push(
+						this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
+							obj[type] = { buffer: data };
+						})
+					);
+				});
 
-			obj = obj.toObject();
+				return Promise.all(promises).then( () => {
+					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
+				});
 
-			Object.keys(obj._extRef).forEach(type => {
-				let filename = obj._extRef[type];
-				promises.push(
-					this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
-						obj[type] = { buffer: data };
-					})
-				);
-			});
-
-			return Promise.all(promises).then( () => {
-				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
-			});
-
-		} else {
-			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
-		}
+			} else {
+				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+			}	
+		});
 	});
-
-	return _find();
-
-	// if(options && options.stash){
-	// 	//find obj from stash
-	// 	return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
-	// 		if(!buffer){
-	// 			return _find();
-	// 		} else {
-	// 			return Promise.resolve(buffer);
-	// 		}
-	// 	});
-
-	// } else {
-	//	return _find();
-	//}
 
 };
 
