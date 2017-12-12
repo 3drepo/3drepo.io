@@ -32,7 +32,7 @@ module.exports = {
 	__checkDb: function(){
 		this.dbManager.getAuthDB().then(db =>
 			{
-				if (!this.db){
+				if (!db){
 					throw new Error('db connection is null');
 				}
 			});
