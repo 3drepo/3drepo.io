@@ -231,7 +231,7 @@ export class CompareService {
 	public loadModels() {
 		const allModels = [];
 		this.state.compareTypes.diff.targetModels.forEach((model) => {
-			console.log("loadModels - model: ", model);
+			//console.log("loadModels - model: ", model);
 			if (model.visible === true) {
 
 				this.state.loadingComparision = true;
@@ -249,7 +249,7 @@ export class CompareService {
 
 		});
 
-		console.log("loadModels - allModels", allModels);
+		//console.log("loadModels - allModels", allModels);
 
 		return Promise.all(allModels);
 	}
@@ -351,7 +351,7 @@ export class CompareService {
 	}
 
 	public diffFed() {
-		console.log("diffFed - start")
+		//console.log("diffFed - start")
 		this.ViewerService.diffToolDisableAndClear();
 
 		this.loadModels()

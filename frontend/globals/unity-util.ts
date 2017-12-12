@@ -156,7 +156,7 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
-		console.log(methodName, requireStatus, params);
+		//console.log(methodName, requireStatus, params);
 
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
@@ -209,7 +209,7 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
-		console.log("comparatorLoaded - resolve");
+		//console.log("comparatorLoaded - resolve");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
