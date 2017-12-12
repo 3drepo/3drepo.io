@@ -32,14 +32,14 @@ function getGridFSBucket (account, bucketName){
 function _getGridFSBucket (dbCol, format){
 	'use strict';
 
-	return getGridFSBucket(dbCol.account, { bucketName:  `${dbCol.model}.stash.${format}`});
+	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);
 }
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';
 
 	let bucket = _getGridFSBucket(dbCol, format);
-
+	console.log(filename);
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
 			systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
