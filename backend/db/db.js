@@ -84,6 +84,7 @@
 	}
 
 	function getGridFSBucket(database, collection) {
+		console.log(database, collection);
 		return new GridFSBucket(db.db(database), collection);
 	}
 
