@@ -79,7 +79,7 @@
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
 		
-		return ModelFactory.db.admin().command(grantRoleCmd);
+		return ModelFactory.dbManager.command("admin", grantRoleCmd);
 	};
 
 
@@ -94,7 +94,7 @@
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
 
-		return ModelFactory.db.admin().command(cmd);
+		return ModelFactory.dbManager.runCommand("admin", cmd);
 	};
 
 

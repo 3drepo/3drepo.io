@@ -45,7 +45,7 @@ var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
 
-	return ModelFactory.dbManager.getGridFSBucket(ModelFactory.db.db(dbCol.account),
+	return ModelFactory.dbManager.getGridFSBucket(dbCol.account,
 		{ bucketName:  `${dbCol.model}.stash.${format}`});
 };
 

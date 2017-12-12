@@ -219,7 +219,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 			'pwd': newPassword
 		 };
 
-		 return ModelFactory.db.admin().command(updateUserCmd);
+		 return ModelFactory.dbManager.runCommand("admin", updateUserCmd);
 
 	}).then(() => {
 
@@ -240,121 +240,122 @@ schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
 
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime, skipCheckEmail){
 	'use strict';
-	let adminDB = ModelFactory.db.admin();
+	return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
-	let cleanedCustomData = {};
-	let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+		let cleanedCustomData = {};
+		let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
-	if(config.auth.allowPlusSignInEmail){
-		emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-	}
-
-	if(customData && (!customData.email || !customData.email.match(emailRegex))){
-		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
-	}
-
-
-	if(!this.usernameRegExp.test(username)){
-		return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
-	}
-
-	for(let i=0 ; i < C.REPO_BLACKLIST_USERNAME.length; i++){
-		if(C.REPO_BLACKLIST_USERNAME[i] === username){
-			return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
+		if(config.auth.allowPlusSignInEmail){
+			emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 		}
-	}
 
-
-	['firstName', 'lastName', 'email'].forEach(key => {
-		if (customData && customData[key]){
-			cleanedCustomData[key] = customData[key];
+		if(customData && (!customData.email || !customData.email.match(emailRegex))){
+			return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
 		}
-	});
 
-	let billingInfo = {};
 
-	['firstName', 'lastName', 'phoneNo', 'countryCode', 'jobTitle', 'company'].forEach(key => {
-		if (customData && customData[key]){
-			billingInfo[key] = customData[key];
+		if(!this.usernameRegExp.test(username)){
+			return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 		}
-	});
 
-	//cleanedCustomData.billing = {};
-
-	var expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
-
-	cleanedCustomData.inactive = true;
-
-	//default permission
-	cleanedCustomData.permissions = [{
-		user: username,
-		permissions: [C.PERM_TEAMSPACE_ADMIN]
-	}];
-
-	//default templates
-	cleanedCustomData.permissionTemplates = [
-		{
-			_id: C.ADMIN_TEMPLATE,
-			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.VIEWER_TEMPLATE,
-			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COMMENTER_TEMPLATE,
-			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COLLABORATOR_TEMPLATE,
-			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+		for(let i=0 ; i < C.REPO_BLACKLIST_USERNAME.length; i++){
+			if(C.REPO_BLACKLIST_USERNAME[i] === username){
+				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
+			}
 		}
-	];
-
-	cleanedCustomData.jobs = C.DEFAULT_JOBS;
 	
-	if(customData){
-		cleanedCustomData.emailVerifyToken = {
-			token: crypto.randomBytes(64).toString('hex'),
-			expiredAt: expiryAt
-		};
-	}
 
-	return this.isUserNameTaken(username).then(count => {
+		['firstName', 'lastName', 'email'].forEach(key => {
+			if (customData && customData[key]){
+				cleanedCustomData[key] = customData[key];
+			}
+		});
 
-		if(count !== 0){
-			return Promise.reject(responseCodes.USER_EXISTS);
+		let billingInfo = {};
+
+		['firstName', 'lastName', 'phoneNo', 'countryCode', 'jobTitle', 'company'].forEach(key => {
+			if (customData && customData[key]){
+				billingInfo[key] = customData[key];
+			}
+		});
+
+		//cleanedCustomData.billing = {};
+
+		var expiryAt = new Date();
+		expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+
+		cleanedCustomData.inactive = true;
+
+		//default permission
+		cleanedCustomData.permissions = [{
+			user: username,
+			permissions: [C.PERM_TEAMSPACE_ADMIN]
+		}];
+
+		//default templates
+		cleanedCustomData.permissionTemplates = [
+			{
+				_id: C.ADMIN_TEMPLATE,
+				permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+			},
+			{
+				_id: C.VIEWER_TEMPLATE,
+				permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+			},
+			{
+				_id: C.COMMENTER_TEMPLATE,
+				permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+			},
+			{
+				_id: C.COLLABORATOR_TEMPLATE,
+				permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+			}
+		];	
+
+		cleanedCustomData.jobs = C.DEFAULT_JOBS;
+	
+		if(customData){
+			cleanedCustomData.emailVerifyToken = {
+				token: crypto.randomBytes(64).toString('hex'),
+				expiredAt: expiryAt
+			};
 		}
 
-		let checkEmail = Promise.resolve(0);
+		return this.isUserNameTaken(username).then(count => {
+	
+			if(count !== 0){
+				return Promise.reject(responseCodes.USER_EXISTS);
+			}
 
-		if(!skipCheckEmail){
-			checkEmail = this.isEmailTaken(customData.email);
-		}
+			let checkEmail = Promise.resolve(0);
 
-		return checkEmail;
-	}).then(count => {
+			if(!skipCheckEmail){
+				checkEmail = this.isEmailTaken(customData.email);
+			}
+	
+			return checkEmail;
+		}).then(count => {
 
-		if(count === 0){
+			if(count === 0){
+	
+				return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+					return Promise.resolve(cleanedCustomData.emailVerifyToken);
+				}).catch(err => {
+					return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+				});
 
-			return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
-				return Promise.resolve(cleanedCustomData.emailVerifyToken);
-			}).catch(err => {
-				return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
-			});
+			} else {
+				return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
+			}
 
-		} else {
-			return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
-		}
-
-	}).then(() => {
-		return this.findByUserName(username);
-	}).then(user => {
-		user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
-		return user.save();
-	}).then(() => {
-		return Promise.resolve(cleanedCustomData.emailVerifyToken);
+		}).then(() => {
+			return this.findByUserName(username);
+		}).then(user => {
+			user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
+			return user.save();
+		}).then(() => {
+			return Promise.resolve(cleanedCustomData.emailVerifyToken);
+		});
 	});
 };
 
