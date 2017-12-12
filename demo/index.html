@@ -14,15 +14,21 @@
             border: none;
             padding: 0;
             margin: 0;
+            background: grey;
         }
       </style>
     </head>
     
     <body>
+      <!-- Fetch Polyfill for requests -->
+      <script src="./fetch.js"></script>
 
+      <!-- 3D Repo dependencies -->
       <script src="./../frontend/components/viewer/js/globals/unity-util.js"></script>
       <script src="./../frontend/components/viewer/js/globals/viewer.js"></script>
       <script src="./../frontend/components/viewer/js/globals/pin.js"></script>
+
+      <!-- The demo code for the viewer -->
       <script src="./demo.js"></script>
 
     </body>
