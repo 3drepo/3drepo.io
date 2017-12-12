@@ -79,7 +79,7 @@
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
 		
-		return ModelFactory.dbManager.command("admin", grantRoleCmd);
+		return ModelFactory.dbManager.runCommand("admin", grantRoleCmd);
 	};
 
 

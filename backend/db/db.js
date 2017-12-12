@@ -38,7 +38,7 @@
 	}
 
 	function dropCollection(database, collection) {
-		db.db(account).dropCollection(collection.name);
+		db.db(database).dropCollection(collection.name);
 	}
 
 
