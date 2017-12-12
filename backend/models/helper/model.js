@@ -1602,7 +1602,7 @@ function removeModel(account, model, forceRemove){
 
 	}).then(() => {
 		
-		return ModelFactory.db.db(account).listCollections().toArray();
+		return ModelFactory.dbManager.listCollections(account).toArray();
 
 	}).then(collections => {
 		//remove model collections
@@ -1611,7 +1611,7 @@ function removeModel(account, model, forceRemove){
 
 		collections.forEach(collection => {
 			if(collection.name.startsWith(model + '.')){
-				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
+				promises.push(ModelFactory.dbManager.dropCollection(account, collection.name);
 			}
 		});
 

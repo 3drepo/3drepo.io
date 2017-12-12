@@ -59,7 +59,7 @@ describe('Mesh and Object extended from repo base', function(){
 	before(function(done) {
 
 		let db = new DB();
-		modelFactoryMock.setDB(db);
+		modelFactoryMock.setDB(DB);
 	    mockgoose(mongoose).then(function() {
 	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
 	            done(err);

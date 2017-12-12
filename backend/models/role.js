@@ -49,8 +49,7 @@
 			   		'roles': []
 				};
 
-				return ModelFactory.db.db(account)
-						.command(createRoleCmd).then(()=> {
+				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
 							return {role: roleName, db: account};
 						});
 			}
@@ -67,7 +66,7 @@
 			if(!role){
 				return Promise.resolve();
 			} else {
-				return ModelFactory.db.db(account).command(dropRoleCmd);
+				return ModelFactory.dbManager.runCommand(account, dropRoleCmd);
 			}
 		});
 		

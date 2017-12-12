@@ -34,7 +34,7 @@
 		
 		groupBy: (account, project, groups, sort, format) => {
 
-			const collection = ModelFactory.db.db(account).collection(`${model}.issues`);
+			const collection = ModelFactory.dbManager.getCollection(account, `${model}.issues`);
 
 			let fields = {};
 

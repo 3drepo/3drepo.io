@@ -21,8 +21,6 @@
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const connConfig = {
-//				reconnectTries: Number.MAX_VALUE,
-//				reconnectInterval: 2000,
 				autoReconnect: true
 			};
 
@@ -30,6 +28,18 @@
 	// db object only for authenicate
 	// POSSIBLE TO-DO: move all the users data and do not reply on mongo system.users 
 	let authDB;
+	
+	function disconnect() {
+		if(db){
+			db.close();
+			db = null;
+		}
+	}
+
+	function dropCollection(database, collection) {
+		db.db(account).dropCollection(collection.name);
+	}
+
 
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
@@ -50,7 +60,7 @@
 		return connectString;
 	}
 
-	function getDB(database){
+	function getDB(database) {
 		if(db){
 			return Promise.resolve(db.db(database));
 		} else {
@@ -61,7 +71,7 @@
 		}
 	}
 
-	function getAuthDB(){
+	function getAuthDB() {
 		if(authDB){
 			return Promise.resolve(authDB);
 		} else {
@@ -72,30 +82,31 @@
 		}
 	}
 
-	function disconnect()
-	{
-		if(db){
-			db.close();
-			db = null;
-		}
+	function getGridFSBucket(database, collection) {
+		return new GridFSBucket(database, collection);
 	}
 
-	function getCollection(dbName, colName)
-	{
+	function getCollection(dbName, colName)	{
 		return db.db(dbName).collection(colName);
 	}
 
-	function listCollections(dbName)
-	{
+	function listCollections(dbName) {
 		return db.db(dbName).listCollections();
+	}
+	
+	function runCommand(dbName, cmd) {
+		return db.db(dbName).command(cmd);
 	}
 
 	module.exports = {
 		disconnect,
+		dropCollection,
 		getDB,
 		getAuthDB,
 		getCollection,
-		listCollections
+		getGridFSBucket,
+		listCollections,
+		runCommand
 	};
 
 }());

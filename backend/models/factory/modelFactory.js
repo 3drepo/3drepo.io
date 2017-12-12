@@ -48,7 +48,7 @@ module.exports = {
 
 		let item = new Model(data);
 		
-		item.collection = this.dbManager.getCollection(options.account, this.__collectionName(modelName, options));//this.db.db(options.account).collection(this.__collectionName(modelName, options));
+		item.collection = this.dbManager.getCollection(options.account, this.__collectionName(modelName, options));
 
 		item._dbcolOptions = options;
 
@@ -116,7 +116,7 @@ module.exports = {
 					throw new Error('account name (db) is missing');
 				}
 
-				let collection = self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));// self.db.db(options.account).collection(self.__collectionName(modelName, options));
+				let collection = self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));
 				mongooseModel.collection = collection;
 				const applyPromise = staticFunc.apply(this, args).then(items => {
 					if (Array.isArray(items)){
@@ -168,9 +168,7 @@ module.exports = {
 
 		mongooseModel.update = function(options){
 
-			//self.db.db(options.account).collection(self.__collectionName(modelName, options));
-
-			let collection =  self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));//self.db.db(options.account).collection(self.__collectionName(modelName, options));
+			let collection =  self.dbManager.getCollection(options.account, self.__collectionName(modelName, options));
 			mongooseModel.collection = collection;
 
 			var args = Array.prototype.slice.call(arguments);
