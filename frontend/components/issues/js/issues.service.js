@@ -585,13 +585,9 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 					var objectsPromise = $q.defer();
-					var objectsAccount;
-					var objectsModel;
 
 					ViewerService.getObjectsStatus({
-						promise: objectsPromise,
-						account: objectsAccount,
-						model: objectsModel
+						promise: objectsPromise
 					});
 
 					// show currently hidden nodes

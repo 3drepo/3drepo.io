@@ -37,7 +37,7 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
-	// Diff promises
+	// Diff
 	public static loadComparatorResolve;
 	public static loadComparatorPromise;
 
@@ -49,9 +49,9 @@ export class UnityUtil {
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = "WebGLInterface";
 
-	public static sendMessageVss;
-	public static sendMessageVssn;
-	public static sendMessageVsss;
+	public static SendMessage_vss;
+	public static SendMessage_vssn;
+	public static SendMessage_vsss;
 
 	public static init(
 		errorCallback: any,
@@ -65,38 +65,27 @@ export class UnityUtil {
 
 		if (param === undefined) {
 
-			if (!UnityUtil.sendMessageVss) {
-				UnityUtil.sendMessageVss = Module.cwrap("SendMessage", "void", ["string", "string"]);
+			if (!UnityUtil.SendMessage_vss) {
+				UnityUtil.SendMessage_vss = Module.cwrap("SendMessage", "void", ["string", "string"]);
 			}
-			UnityUtil.sendMessageVss(gameObject, func);
+			UnityUtil.SendMessage_vss(gameObject, func);
 
 		} else if (typeof param === "string") {
 
-			if (!UnityUtil.sendMessageVsss) {
-				UnityUtil.sendMessageVsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
+			if (!UnityUtil.SendMessage_vsss) {
+				UnityUtil.SendMessage_vsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
 			}
-			UnityUtil.sendMessageVsss(gameObject, func, param);
+			UnityUtil.SendMessage_vsss(gameObject, func, param);
 
 		} else if (typeof param === "number") {
 
-			if (!UnityUtil.sendMessageVssn) {
-				UnityUtil.sendMessageVssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
+			if (!UnityUtil.SendMessage_vssn) {
+				UnityUtil.SendMessage_vssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
 			}
-			UnityUtil.sendMessageVssn(gameObject, func, param);
+			UnityUtil.SendMessage_vssn(gameObject, func, param);
 
 		} else {
 			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
-		}
-	}
-
-	public static cancelLoadModel() {
-		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
-			// If the previous model is being loaded but hasn't finished yet
-			UnityUtil.loadedResolve.reject("cancel");
-		}
-
-		if (UnityUtil.loadingResolve) {
-			UnityUtil.loadingResolve.reject("cancel");
 		}
 	}
 
@@ -166,6 +155,9 @@ export class UnityUtil {
 	}
 
 	public static toUnity(methodName, requireStatus, params) {
+
+		//console.log(methodName, requireStatus, params);
+
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -217,6 +209,7 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
+		//console.log("comparatorLoaded - resolve");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
@@ -448,10 +441,6 @@ export class UnityUtil {
 		UnityUtil.toUnity("GetPointInfo", false, 0);
 	}
 
-	public static hideHiddenByDefaultObjects() {
-		UnityUtil.toUnity("HideHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
-	}
-
 	public static highlightObjects(account, model, idArr, color, toggleMode) {
 		const params: any = {
 			database : account,
@@ -467,6 +456,17 @@ export class UnityUtil {
 		}
 
 		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+	}
+
+	public static cancelLoadModel() {
+		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
+			// If the previous model is being loaded but hasn't finished yet
+			UnityUtil.loadedResolve.reject("cancel");
+		}
+
+		if (UnityUtil.loadingResolve) {
+			UnityUtil.loadingResolve.reject("cancel");
+		}
 	}
 
 	public static loadModel(account, model, branch, revision) {
@@ -556,10 +556,6 @@ export class UnityUtil {
 		param.lookAt = lookAt;
 		UnityUtil.toUnity("SetViewpoint", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 
-	}
-
-	public static showHiddenByDefaultObjects() {
-		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	public static toggleStats() {
