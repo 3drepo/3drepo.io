@@ -84,7 +84,7 @@
 	}
 
 	function getGridFSBucket(database, collection) {
-		return new GridFSBucket(database, collection);
+		return new GridFSBucket(db.db(database), collection);
 	}
 
 	function getCollection(dbName, colName)	{
