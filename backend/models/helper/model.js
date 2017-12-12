@@ -1611,7 +1611,7 @@ function removeModel(account, model, forceRemove){
 
 		collections.forEach(collection => {
 			if(collection.name.startsWith(model + '.')){
-				promises.push(ModelFactory.dbManager.dropCollection(account, collection.name);
+				promises.push(ModelFactory.dbManager.dropCollection(account, collection.name));
 			}
 		});
 
