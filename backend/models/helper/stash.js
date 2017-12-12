@@ -25,7 +25,6 @@ var systemLogger = require("../../logger.js").systemLogger;
 
 function getGridFSBucket (account, bucketName){
 	'use strict';
-
 	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
 
@@ -99,6 +98,6 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 module.exports = {
 	findStashByFilename: findStashByFilename,
 	saveStashByFilename: saveStashByFilename,
-	getGridFSBucket: _getGridFSBucket
+	getGridFSBucket: getGridFSBucket
 
 };
