@@ -14,9 +14,11 @@ includes:
   - job
   - project
   - model
+  - modelHistory
   - tree
   - issue
   - group
+  - metadata
   - notification
   - permission
 
