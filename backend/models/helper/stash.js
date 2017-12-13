@@ -69,6 +69,10 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 				});
 
 			}
+		}).catch(err => {
+			systemLogger.logError("Errored during fetching of " + filename, err);
+			ModelFactory.dbManager.disconnect();
+			Promise.reject(err);
 		});
 	});
 }
