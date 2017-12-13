@@ -7,29 +7,28 @@
       <meta name="description" content="An example of how to use the 3D Repo viewer libraries">
       <meta name="author" content="SitePoint">
     
-      <style> 
-        html, body, .viewer, #canvas {
-            height: 100% !important;
-            width: 100% !important;
-            border: none;
-            padding: 0;
-            margin: 0;
-            background: grey;
-        }
-      </style>
+      <link href="./demo.css" type="text/css" rel="stylesheet">
     </head>
     
     <body>
+      <div id="changeModel">
+          
+          <input id="model" type="text" placeholder="Please enter model ID">
+          <button id="modelSubmit"> Load Model </button>
+         
+      </div>
+      <div id="status">
+      </div>
       <!-- Fetch Polyfill for requests -->
       <script src="./fetch.js"></script>
 
       <!-- 3D Repo dependencies -->
-      <script src="./../frontend/components/viewer/js/globals/unity-util.js"></script>
-      <script src="./../frontend/components/viewer/js/globals/viewer.js"></script>
-      <script src="./../frontend/components/viewer/js/globals/pin.js"></script>
+      <script src="https://www.3drepo.io/unity/unity-util.js"></script>
 
       <!-- The demo code for the viewer -->
       <script src="./demo.js"></script>
+      <link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
+      
 
     </body>
 </html>

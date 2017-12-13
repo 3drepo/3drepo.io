@@ -268,3 +268,9 @@ gulp.task('build', [
   gulp.start('service-workers');
 });
 
+gulp.task('unity-util', function() {
+  return gulp.src("./components/viewer/js/globals/unity-util.js")
+    .on('error', swallowError)
+    .pipe(gulp.dest('./../public/unity/'))
+    //.pipe(livereload())
+});
