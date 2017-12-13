@@ -14,7 +14,9 @@ includes:
   - job
   - project
   - model
+  - tree
   - issue
+  - group
   - notification
   - permission
 
