@@ -593,7 +593,7 @@
 					// show currently hidden nodes
 					objectsPromise.promise
 						.then(function() {
-							TreeService.resetHidden();
+							TreeService.showAllTreeNodes();
 							
 							response.data.hiddenObjects.forEach(function(obj){
 								var account = obj.account;

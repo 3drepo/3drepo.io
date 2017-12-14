@@ -45,6 +45,8 @@ export class TreeService {
 	private subTreesById;
 	private subModelIdToPath;
 	private idToNodeMap;
+	private shownByDefaultNodes;
+	private hiddenByDefaultNodes;
 
 	constructor(
 		private $q: IQService,
@@ -792,11 +794,43 @@ export class TreeService {
 
 	}
 
-	public toggleTreeNode(node) {
+	public hideTreeNodes(nodes) {
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			if (node.toggleState !== "invisible") {
+				this.toggleTreeNode(node, true);
+			}
+		}
+	}
+
+	public hideAllTreeNodes() {
+		const rootNode = this.allNodes[0];
+		while (rootNode && rootNode.toggleState !== "invisible") {
+			this.toggleTreeNode(rootNode, false);
+		}
+	}
+
+	public showTreeNodes(nodes) {
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			if (node.toggleState !== "visible") {
+				this.toggleTreeNode(node, true);
+			}
+		}
+	}
+
+	public showAllTreeNodes() {
+		const rootNode = this.allNodes[0];
+		while (rootNode && rootNode.toggleState !== "visible") {
+			this.toggleTreeNode(rootNode, false);
+		}
+	}
+
+	public toggleTreeNode(node: any, fastforward: boolean) {
 
 		let path;
-		let hasParent;
 		let lastParent = node;
+		let submodelRootParent = node;
 		let nodeToggleState = "visible";
 		let numInvisible = 0;
 		let numParentInvisible = 0;
@@ -832,47 +866,44 @@ export class TreeService {
 		path = node.path.split("__");
 		path.splice(path.length - 1, 1);
 
-		for (let i = 0; i < this.nodesToShow.length; i++) {
-			// Get node parent
-			if (this.nodesToShow[i]._id === path[path.length - 1]) {
+		// Get node parent
+		if (path.length > 0 && (!fastforward || (!node.children || node.children.length === 0))) {
 
-				lastParent = this.nodesToShow[i];
-				hasParent = true;
+			lastParent = this.getNodeById(path[path.length - 1]);
+			submodelRootParent = this.getNodeById(path[0]);
 
-			} else if (lastParent.parent) {
-
+			if (submodelRootParent.parent) {
 				// Get node parent and reconstruct the path in case it is a fed model
-				lastParent = lastParent.parent;
-				path = lastParent.path.split("__").concat(path);
-				hasParent = true;
+				path = submodelRootParent.parent.path.split("__").concat(path);
 			}
-		}
 
-		// Set the toggle state of the nodes above
-		if (hasParent) {
-			for (let i = (path.length - 1); i >= 0; i -= 1) {
-				for (let j = 0, nodesLength = this.nodesToShow.length; j < nodesLength; j += 1) {
-					if (this.nodesToShow[j]._id === path[i]) {
-						numInvisible = this.nodesToShow[j].children.reduce(
-							(total, child) => {
-								return child.toggleState === "invisible" ? total + 1 : total;
-							},
-							0);
-						numParentInvisible = this.nodesToShow[j].children.reduce(
-							(total, child) => {
-								return child.toggleState === "parentOfInvisible" ? total + 1 : total;
-							},
-							0);
+			// Set the toggle state of the nodes above
+			for (let i = (path.length - 1); i >= 0; i--) {
+				const parentNode = this.getNodeById(path[i]);
 
-						if (numInvisible === this.nodesToShow[j].children.length) {
-							this.nodesToShow[j].toggleState = "invisible";
-						} else if ((numParentInvisible + numInvisible) > 0) {
-							this.nodesToShow[j].toggleState = "parentOfInvisible";
-						} else {
-							this.setToggleState(this.nodesToShow[j], "visible");
-						}
+				numInvisible = parentNode.children.reduce(
+					(total, child) => {
+						return child.toggleState === "invisible" ? total + 1 : total;
+					},
+					0);
+				numParentInvisible = parentNode.children.reduce(
+					(total, child) => {
+						return child.toggleState === "parentOfInvisible" ? total + 1 : total;
+					},
+					0);
+
+				if (numInvisible === parentNode.children.length) {
+					parentNode.toggleState = "invisible";
+				} else if ((numParentInvisible + numInvisible) > 0) {
+					parentNode.toggleState = "parentOfInvisible";
+				} else {
+					if (fastforward) {
+						parentNode.toggleState = "visible";
+					} else {
+						this.setToggleState(parentNode, "visible");
 					}
 				}
+
 			}
 		}
 
@@ -881,7 +912,7 @@ export class TreeService {
 
 	public toggleTreeNodeById(id) {
 		const node = this.getNodeById(id);
-		this.toggleTreeNode(node);
+		this.toggleTreeNode(node, false);
 	}
 
 	public toggleNode(node) {
@@ -985,12 +1016,22 @@ export class TreeService {
 		this.visibilityUpdateTime = Date.now();
 	}
 
+	public getShownByDefaultNodes() {
+		return this.shownByDefaultNodes;
+	}
+
+	public getHiddenByDefaultNodes() {
+		return this.hiddenByDefaultNodes;
+	}
+
 	public getNodeById(id: string) {
 		return this.idToNodeMap[id];
 	}
 
 	public generateIdToNodeMap() {
 		this.idToNodeMap = [];
+		this.shownByDefaultNodes = [];
+		this.hiddenByDefaultNodes = [];
 		this.recurseIdToNodeMap(this.allNodes);
 	}
 
@@ -999,6 +1040,12 @@ export class TreeService {
 			nodes.forEach((node) => {
 				if (node._id) {
 					this.idToNodeMap[node._id] = node;
+					if (node.toggleState === "visible" && (!node.children || node.children.length === 0)) {
+						this.shownByDefaultNodes.push(node);
+					}
+					if (node.toggleState === "invisible") {
+						this.hiddenByDefaultNodes.push(node);
+					}
 					this.recurseIdToNodeMap(node.children);
 				}
 			});

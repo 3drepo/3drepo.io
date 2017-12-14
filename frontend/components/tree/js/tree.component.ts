@@ -51,6 +51,7 @@ class TreeController implements ng.IController {
 	private topIndex; // in pug
 	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
+	private hideIfc;
 
 	private currentSelectedId;
 	private currentSelectedIndex;
@@ -84,6 +85,7 @@ class TreeController implements ng.IController {
 		this.TreeService.resetInvisible();
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
+		this.hideIfc = true;
 		this.watchers();
 
 	}
@@ -185,27 +187,35 @@ class TreeController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.selectedMenuOption", 
+		this.$scope.$watch("vm.selectedMenuOption",
 			(selectedOption: any) => {
 
 				if (selectedOption && selectedOption.hasOwnProperty("value")) {
-			
+
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							if (this.nodes[0] && this.nodes[0].toggleState !== "visible")
-								this.TreeService.toggleTreeNode(this.nodes[0]);
+							this.TreeService.showAllTreeNodes();
+							if (this.hideIfc) {
+								this.TreeService.hideTreeNodes(this.TreeService.getHiddenByDefaultNodes());
+							}
 							break;
 						case "hideIfc":
-							console.log("No IFC");
+							this.hideIfc = selectedOption.selected;
+							if (this.hideIfc) {
+								this.ViewerService.hideHiddenByDefaultObjects();
+								this.TreeService.hideTreeNodes(this.TreeService.getHiddenByDefaultNodes());
+							} else {
+								this.ViewerService.showHiddenByDefaultObjects();
+								this.TreeService.showTreeNodes(this.TreeService.getHiddenByDefaultNodes());
+							}
 							break;
 						case "isolate":
 							// Hide all
-							while (this.nodes[0] && this.nodes[0].toggleState !== "invisible")
-								this.TreeService.toggleTreeNode(this.nodes[0]);
+							this.TreeService.hideAllTreeNodes();
 							// Show selected
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
-								this.TreeService.toggleTreeNode(selectedNode);
+								this.TreeService.toggleTreeNode(selectedNode, true);
 							});
 							break;
 						default:
@@ -401,7 +411,7 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		this.TreeService.toggleTreeNode(node);
+		this.TreeService.toggleTreeNode(node, false);
 	}
 
 	/**
