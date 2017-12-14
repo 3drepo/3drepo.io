@@ -169,15 +169,14 @@ module.exports = {
 		let update = mongooseModel.update;
 
 		mongooseModel.update = function(options){
+			//FIXME: another one that breaks when I turn it into a promise.
+			let collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
+			mongooseModel.collection = collection;
 
-			return self.dbManager.getCollection(options.account, self.__collectionName(modelName, options)).then(collection => {
-				mongooseModel.collection = collection;
+			var args = Array.prototype.slice.call(arguments);
+			args.shift();
 
-				var args = Array.prototype.slice.call(arguments);
-				args.shift();
-
-				return update.apply(mongooseModel, args);
-			});
+			return update.apply(mongooseModel, args);
 		};
 
 		mongooseModel.prototype.model = modelName => {
