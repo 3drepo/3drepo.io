@@ -545,7 +545,10 @@
 					account: issue.account,
 					model: issue.model
 				};
+
+				console.log("SENDING UPDATE CLIPPING PLANES");
 				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
@@ -595,6 +598,8 @@
 						.then(function() {
 							TreeService.showAllTreeNodes();
 							
+							console.log(response);
+
 							response.data.hiddenObjects.forEach(function(obj){
 								var account = obj.account;
 								var model = obj.model;

@@ -55,7 +55,8 @@ class CompareController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.loadingInfo = "Loading comparision models...";
+		this.CompareService.disableComparision();
+		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
 		this.modelType = this.CompareService.modelType;
@@ -66,7 +67,7 @@ class CompareController implements ng.IController {
 	}
 
 	public $onDestroy() {
-		this.ViewerService.diffToolDisableAndClear();
+		this.CompareService.disableComparision();
 	}
 
 	public watchers() {
@@ -171,7 +172,7 @@ class CompareController implements ng.IController {
 	}
 
 	public canCompare() {
-		return this.CompareService.canCompare();
+		return this.CompareService.canCompare() && !!this.ViewerService.currentModel.model;
 	}
 
 	public isModelClash(type: string) {
