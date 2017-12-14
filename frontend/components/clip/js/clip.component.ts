@@ -154,6 +154,27 @@ class ClipController implements ng.IController {
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 
 			switch (event.type) {
+			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
+
+				console.log("UPDATE_CLIPPING_PLANES", event.value);
+
+				if (!event.value.fromClipPanel) {
+					const clip = event.value.clippingPlanes[0];
+					if (clip) {
+						this.setDisplayValues(
+							this.determineAxis(clip.normal),
+							clip.distance,
+							false,
+							clip.clipDirection === 1,
+							undefined,
+						);
+						this.updateDisplayedDistance(true, this.visible);
+					} else {
+						this.reset();
+					}
+				}
+				break;
+
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
 				this.setDisplayValues(
 					this.determineAxis(event.value.normal),
@@ -304,11 +325,20 @@ class ClipController implements ng.IController {
 		return res;
 	}
 
+	public reset() {
+
+		const minMax = this.getMinMax();
+		const scaler = this.getScaler(this.units, this.modelUnits);
+		const dist = minMax.max * scaler;
+
+		this.setDisplayValues("X", dist, true, false, undefined);
+	}
+
 	/**
 	 * Initialise display values
 	 * This is called when we know the bounding box of our model
 	 */
-	public setDisplayValues(axis, distance, moveClip, direction, slider) {
+	public setDisplayValues(axis: string, distance: any, moveClip: boolean, direction: boolean, slider: any) {
 		const scaler = this.getScaler(this.units, this.modelUnits);
 		const newDistance = parseFloat(distance) * scaler;
 
@@ -319,8 +349,8 @@ class ClipController implements ng.IController {
 
 		this.displayDistance = newDistance;
 		this.direction = direction;
-
 		this.displayedAxis = axis;
+
 		if (slider != null) {
 			this.sliderPosition = slider;
 			if (moveClip) {

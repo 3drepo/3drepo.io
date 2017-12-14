@@ -21,6 +21,7 @@ export class CompareService {
 		"$filter",
 		"$q",
 
+		"TreeService",
 		"RevisionsService",
 		"ViewerService",
 	];
@@ -33,6 +34,7 @@ export class CompareService {
 		private $filter: any,
 		private $q: any,
 
+		private TreeService: any,
 		private RevisionsService: any,
 		private ViewerService: any,
 	) {
@@ -61,12 +63,6 @@ export class CompareService {
 		this.state.ready = this.readyDefer.promise;
 	}
 
-	public $onInit() {}
-
-	public $onDestroy() {
-		this.ViewerService.diffToolDisableAndClear();
-	}
-
 	public setMode(mode: any) {
 		this.state.mode = mode.type;
 	}
@@ -82,7 +78,7 @@ export class CompareService {
 			if (type === this.state.modelType) {
 				return "white";
 			}
-			return "white";
+			return "#fafafa";
 		case "color":
 			if (type === this.state.modelType) {
 				return "black";
@@ -231,7 +227,7 @@ export class CompareService {
 	public loadModels() {
 		const allModels = [];
 		this.state.compareTypes.diff.targetModels.forEach((model) => {
-			//console.log("loadModels - model: ", model);
+			// console.log("loadModels - model: ", model);
 			if (model.visible === true) {
 
 				this.state.loadingComparision = true;
@@ -249,7 +245,7 @@ export class CompareService {
 
 		});
 
-		//console.log("loadModels - allModels", allModels);
+		// console.log("loadModels - allModels", allModels);
 
 		return Promise.all(allModels);
 	}
@@ -351,12 +347,11 @@ export class CompareService {
 	}
 
 	public diffFed() {
-		//console.log("diffFed - start")
+		// console.log("diffFed - start")
 		this.ViewerService.diffToolDisableAndClear();
 
 		this.loadModels()
 			.then(() => {
-				console.log("diffFed - loadModels.then");
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
 			})
@@ -385,11 +380,28 @@ export class CompareService {
 
 	public toggleModelVisibility(model) {
 		if (this.state.modelType === "target") {
-			model.visible = !model.visible;
+			this.setTargetModelVisibility(model);
 		} else if (this.state.modelType === "base") {
-			// TODO: Handle base type
+			this.setBaseModelVisibility(model);
+
 		}
 		this.disableComparision();
+	}
+
+	private setBaseModelVisibility(model) {
+		const nodes = this.TreeService.getAllNodes();
+		if (nodes.length && nodes[0].children) {
+			const childNodes = nodes[0].children;
+			childNodes.forEach((node) => {
+				if (node.name === model.account + ":" + model.name) {
+					this.TreeService.toggleTreeNode(node);
+				}
+			});
+		}
+	}
+
+	private setTargetModelVisibility(model) {
+		model.visible = !model.visible;
 	}
 
 }
