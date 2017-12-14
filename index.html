@@ -1573,7 +1573,7 @@ Content-Type: image/png
 
           <h1 id="model">Model</h1>
 
-<h2 id="get-a-model">Get a model</h2>
+<h2 id="get-model-settings">Get Model Settings</h2>
 
 <blockquote>
 <p>Example request</p>
@@ -1914,7 +1914,7 @@ Content-Type: image/png
 </tr>
 </tbody></table>
 
-<h2 id="update-a-model">Update a model</h2>
+<h2 id="edit-a-federation">Edit a federation</h2>
 
 <blockquote>
 <p>Example request</p>
@@ -1939,9 +1939,9 @@ Content-Type: image/png
 </span></code></pre>
 <h3 id="put-accountname-modelid">PUT /{accountName}/{modelID}</h3>
 
-<p>Update a model. This API is used to update sub models in a federated model only.</p>
+<p>This API is used to update sub models in a federated model only.</p>
 
-<p>Updating a non-federated model will return an error. To update model settings, see <a href="#update-model-settings">Update model settings</a></p>
+<p>Calling this API with a  non-federated model will return an error. To update model settings, see <a href="#update-model-settings">Update model settings</a></p>
 
 <p>Request body</p>
 
@@ -2192,6 +2192,240 @@ have access to the <a href="#get-all-jobs">Get all jobs</a> for an account API.<
 <p>Response body</p>
 
 <p><a href="#job-object">Job object</a></p>
+
+          <h1 id="model-history">Model History</h1>
+
+<h2 id="list-all-revisions">List all revisions</h2>
+
+<h3 id="get-accountname-modelid-revisions-json">GET /{accountName}/{modelID}/revisions.json</h3>
+
+<blockquote>
+<p>Example request </p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revisions.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
+   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"818ecfd3-b6d6-4505-a2b0-93dc1ad12397"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"author"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"timestamp"</span><span class="p">:</span><span class="s2">"2017-02-13T10:45:05.000Z"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"818ecfd3-b6d6-4505-a2b0-93dc1ad12397"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"branch"</span><span class="p">:</span><span class="s2">"master"</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre>
+<p>Get all revisions within this model.</p>
+
+          <h1 id="tree">Tree</h1>
+
+<h2 id="model-tree">Model Tree</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-fulltree-json">GET /{accountName}/{modelID}/revision/master/head/fulltree.json</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/Version_22/fulltree.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="s2">"mainTree"</span><span class="p">:</span><span class="w"> 
+    </span><span class="p">{</span><span class="s2">"nodes"</span><span class="p">:</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"username"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"project"</span><span class="p">:</span><span class="s2">"3664beb0-2343-4ff3-b653-13a63d407bd3"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"transformation"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"cube.obj"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"path"</span><span class="p">:</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"e05e4e1a-cba6-421f-9f7a-69a1caf81807"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"toggleState"</span><span class="p">:</span><span class="s2">"visible"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"fdt002e0-55a8-40b3-b97c-1j3256jklade"</span><span class="p">],</span><span class="w">
+            </span><span class="s2">"children"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"username"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"project"</span><span class="p">:</span><span class="s2">"3664beb0-2343-4ff3-b653-13a63d407bd3"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"mesh"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"g default"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"path"</span><span class="p">:</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade__b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"86c58eb3-035b-45e7-990d-e4a3321ce8f8"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"toggleState"</span><span class="p">:</span><span class="s2">"visible"</span><span class="w">
+                </span><span class="p">}]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"idToName"</span><span class="p">:{</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">:</span><span class="s2">"cube.obj"</span><span class="p">,</span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">:</span><span class="s2">"g default"</span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+ </span><span class="s2">"subTrees"</span><span class="p">:[]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h3 id="get-accountname-modelid-revision-revision-fulltree-json">GET /{accountName}/{modelID}/revision/{revision}/fulltree.json</h3>
+
+<p>Fetch model tree. use master/head to get the tree for the latest model, otherwise, specify the revision ID or revision tag.</p>
+
+<p>This returns a json with various data:</p>
+
+<h3 id="tree-structure">Tree Structure</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>mainTree</td>
+<td>contains the main tree structure, and an id to name mapping for each node</td>
+</tr>
+<tr>
+<td>subTrees</td>
+<td>urls to subtree (federation only)</td>
+</tr>
+</tbody></table>
+
+<h3 id="tree-node">Tree Node</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>account</td>
+<td>teamspace this node belongs to</td>
+</tr>
+<tr>
+<td>project</td>
+<td>modelID this node belongs to</td>
+</tr>
+<tr>
+<td>type</td>
+<td>type of node this is (transformation, mesh or ref)</td>
+</tr>
+<tr>
+<td>name</td>
+<td>name of the node</td>
+</tr>
+<tr>
+<td>path</td>
+<td>path to get to this node</td>
+</tr>
+<tr>
+<td>_id</td>
+<td>unique ID of this node</td>
+</tr>
+<tr>
+<td>shared_id</td>
+<td>shared ID of this node</td>
+</tr>
+<tr>
+<td>toggleState</td>
+<td>default visibility state of this node (IFC Space are hidden by default)</td>
+</tr>
+<tr>
+<td>meta</td>
+<td>array of metadata ID associated with this node</td>
+</tr>
+<tr>
+<td>children</td>
+<td>array of children nodes</td>
+</tr>
+</tbody></table>
+
+<h2 id="tree-path">Tree Path</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-tree_path-json">GET /{accountName}/{modelID}/revision/master/head/tree_path.json</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/Version_22/tree_path.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="s2">"treePaths"</span><span class="p">:</span><span class="w">
+    </span><span class="p">{</span><span class="s2">"idToPath"</span><span class="p">:{</span><span class="w">
+        </span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">:</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">:</span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade__b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="w">
+    </span><span class="p">}}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h3 id="get-accountname-modelid-revision-revision-tree_path-json">GET /{accountName}/{modelID}/revision/{revision}/tree_path.json</h3>
+
+<p>Retrieve the full mapping of unique ID of nodes to the path that is required to tranverse into the node within the <a href="#model-tree">model tree</a>.</p>
+
+<h2 id="shared-id-mapping">Shared ID mapping</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-idmap-json">GET /{accountName}/{modelID}/revision/master/head/idMap.json</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/Version_22/idMap.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"idMap"</span><span class="p">:{</span><span class="w">
+        </span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">:</span><span class="s2">"86c58eb3-035b-45e7-990d-e4a3321ce8f8"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">:</span><span class="s2">"e05e4e1a-cba6-421f-9f7a-69a1caf81807"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h3 id="get-accountname-modelid-revision-revision-idmap-json">GET /{accountName}/{modelID}/revision/{revision}/idMap.json</h3>
+
+<p>Retrieve the full mapping of unique ID to shared ID of the nodes within the <a href="#model-tree">model tree</a>.</p>
+
+<h2 id="id-to-meshes">ID to meshes</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-idtomeshes-json">GET /{accountName}/{modelID}/revision/master/head/idToMeshes.json</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/Version_22/idToMeshes.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"idToMeshes"</span><span class="p">:{</span><span class="w">
+      </span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">:[</span><span class="w">
+         </span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"bed002e0-55a8-40b3-b97c-1b94a533aade"</span><span class="p">:[</span><span class="w">
+         </span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<h3 id="get-accountname-modelid-revision-revision-idtomeshes-json">GET /{accountName}/{modelID}/revision/{revision}/idToMeshes.json</h3>
+
+<p>Retrieve the full mapping of unique ID to the IDs of meshes this node is associated with.</p>
+
+<h2 id="get-all-meshes">Get All meshes</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-meshes-json">GET /{accountName}/{modelID}/revision/master/head/meshes.json</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/revision/Version_22/meshes.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="s2">"meshes"</span><span class="p">:[{</span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">,</span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"86c58eb3-035b-45e7-990d-e4a3321ce8f8"</span><span class="p">}]}</span><span class="w">
+</span></code></pre>
+<h3 id="get-accountname-modelid-revision-revision-meshes-json">GET /{accountName}/{modelID}/revision/{revision}/meshes.json</h3>
+
+<p>Retrieve the IDs of all meshes within the model.</p>
 
           <h1 id="issue">Issue</h1>
 
@@ -2841,6 +3075,362 @@ web socket client id returned from connecting to the web socket server when maki
 <h3 id="put-accountname-modelid-revision-revid-issues-issueid-json">PUT /{accountName}/{modelId}/revision/{revId}/issues/{issueId}.json</h3>
 
 <p>Deleta a comment, commenIndex start from 0.</p>
+
+          <h1 id="group">Group</h1>
+
+<p>Groups are a way to group a set of objects. Currently, it is mainly used by associating a group of objects to an issue.</p>
+
+<h2 id="add-a-group">Add a Group</h2>
+
+<h3 id="post-accountname-modelid-group">POST /{accountName}/{modelID}/group</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">POST</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/groups</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+      </span><span class="mi">255</span><span class="p">,</span><span class="w">
+      </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="mi">0</span><span class="w">
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"My Test Group"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"id"</span><span class="p">:</span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"86c58eb3-035b-45e7-990d-e4a3321ce8f8"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+      </span><span class="mi">255</span><span class="p">,</span><span class="w">
+      </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="mi">0</span><span class="w">
+   </span><span class="p">],</span><span class="w">
+   </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"4ssij3n7-4f6f-4116-awja-78a293843j37"</span><span class="p">,</span><span class="w">
+   </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"id"</span><span class="p">:</span><span class="s2">"b3011137-4f6f-4116-aada-78ac3a534237"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"86c58eb3-035b-45e7-990d-e4a3321ce8f8"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Add a Group to the model. This end point takes the follow parameters:</p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Required?</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>color</td>
+<td>Y</td>
+<td>RGB value for the highlighting colour of this group.</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Y</td>
+<td>Name of the group</td>
+</tr>
+<tr>
+<td>objects</td>
+<td>Y</td>
+<td>Array of objects that are included in the group.</td>
+</tr>
+</tbody></table>
+
+<p>The server will respond with the same information, with the name replaced by an ID to represent this group.</p>
+
+<h2 id="list-all-groups">List all groups</h2>
+
+<h3 id="get-accountname-modelid-groups">GET /{accountName}/{modelID}/groups</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/groups</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
+   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"55ffc510-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"issue_id"</span><span class="p">:</span><span class="s2">"562e2810-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+         </span><span class="mi">255</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"df429cab-735e-4f38-ab93-b857ec3961e9"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"0cbe281f-f393-42f9-9d51-99e899d2d9ba"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre>
+<p>List all groups associated with the model.</p>
+
+<h3 id="group-object">Group Object</h3>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>_id</td>
+<td>ID of this group</td>
+</tr>
+<tr>
+<td>issue_id</td>
+<td>ID of issue that this group is created for (only appears if the group was created by an issue</td>
+</tr>
+<tr>
+<td>color</td>
+<td>RGB value for the highlighting colour of this group.</td>
+</tr>
+<tr>
+<td>objects</td>
+<td>Array of objects that are included in the group.</td>
+</tr>
+</tbody></table>
+
+<p>The server will respond with the same information, with the name replaced by an ID to represent this group.</p>
+
+<h2 id="find-a-group">Find a Group</h2>
+
+<h3 id="get-accountname-modelid-groups-groupid">GET /{accountName}/{modelID}/groups/{groupID}</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/groups/55ffc510-e015-11e7-b944-052a1c989ca1</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"55ffc510-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"issue_id"</span><span class="p">:</span><span class="s2">"562e2810-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+         </span><span class="mi">255</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"df429cab-735e-4f38-ab93-b857ec3961e9"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"0cbe281f-f393-42f9-9d51-99e899d2d9ba"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Get <a href="#group-object">Group info</a> of a particular group given it&rsquo;s ID. </p>
+
+<h2 id="update-a-group">Update a Group</h2>
+
+<h3 id="put-accountname-modelid-groups-groupid">PUT /{accountName}/{modelID}/groups/{groupID}</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">PUT</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/groups/55ffc510-e015-11e7-b944-052a1c989ca1</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre><pre class="highlight json tab-json"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"55ffc510-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"issue_id"</span><span class="p">:</span><span class="s2">"562e2810-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+         </span><span class="mi">255</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"0cbe281f-f393-42f9-9d51-99e899d2d9ba"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span></code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"55ffc510-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"issue_id"</span><span class="p">:</span><span class="s2">"562e2810-e015-11e7-b944-052a1c989ca1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"color"</span><span class="p">:[</span><span class="w">
+         </span><span class="mi">255</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="p">,</span><span class="w">
+         </span><span class="mi">0</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="s2">"objects"</span><span class="p">:[</span><span class="w">
+         </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"shared_id"</span><span class="p">:</span><span class="s2">"0cbe281f-f393-42f9-9d51-99e899d2d9ba"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"account"</span><span class="p">:</span><span class="s2">"carmen"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"model"</span><span class="p">:</span><span class="s2">"25d063ae-b0fc-473b-a472-3e3405944f29"</span><span class="w">
+         </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Update <a href="#group-object">Group info</a> of a particular group given it&rsquo;s ID. </p>
+
+<h2 id="delete-a-group">Delete a Group</h2>
+
+<h3 id="delete-accountname-modelid-groups-groupid">DELETE /{accountName}/{modelID}/groups/{groupID}</h3>
+
+<blockquote>
+<p>Example request</p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">DELETE</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/groups/55ffc510-e015-11e7-b944-052a1c989ca1</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="w">
+   </span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Delete a particular group given it&rsquo;s ID. </p>
+
+          <h1 id="metadata">Metadata</h1>
+
+<h2 id="get-metadata-by-id">Get Metadata By ID</h2>
+
+<h3 id="get-accountname-modelid-meta-id-json">GET /{accountName}/{modelID}/meta/{id}.json</h3>
+
+<blockquote>
+<p>Example request </p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="nf">GET</span> <span class="nn">/repoman/00000000-0000-0000-0000-000000000000/meta/83aca55d-c7d5-4885-8913-213c86385685.json</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"meta"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"83aca55d-c7d5-4885-8913-213c86385685"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"M_K-Series Bar Joist-Rod Web:14K1:14K1:190265"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"IFC Type"</span><span class="p">:</span><span class="s2">"IfcBeam"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"IFC GUID"</span><span class="p">:</span><span class="s2">"2Uhw1he2z3UO$DBmBugLv0"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Work Plane"</span><span class="p">:</span><span class="s2">"Level : Roof - Main"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Reference Level"</span><span class="p">:</span><span class="s2">"Roof - Main"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Start Level Offset"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"End Level Offset"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"z-Direction Justification"</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"z-Direction Offset Value"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Lateral Justification"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Orientation"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Cross-Section Rotation"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Length"</span><span class="p">:</span><span class="mf">8.57</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Volume"</span><span class="p">:</span><span class="mf">0.012045</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Cut Length"</span><span class="p">:</span><span class="mf">8.57</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Structural Usage"</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Phase Created"</span><span class="p">:</span><span class="s2">"New Construction"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Rigid Links"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Horizontal Projection"</span><span class="p">:</span><span class="s2">"Default"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Reference"</span><span class="p">:</span><span class="s2">"Reference"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"IsExternal"</span><span class="p">:</span><span class="s2">"False"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"LoadBearing"</span><span class="p">:</span><span class="s2">"True"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Span"</span><span class="p">:</span><span class="mf">0.0095</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"Slope"</span><span class="p">:</span><span class="mi">0</span><span class="w">
+         </span><span class="p">}</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Given a metadata ID, retrieve the metadata info. Metadata IDs can be found within associated <a href="#tree-node">Tree Nodes</a>. </p>
+
+<h2 id="find-objects-with">Find Objects with&hellip;</h2>
+
+<h3 id="get-accountname-modelid-revision-master-head-meta-findobjectswith-metakey-json">GET /{accountName}/{modelID}/revision/master/head/meta/findObjectsWith/{metaKey}.json</h3>
+
+<h3 id="get-accountname-modelid-revision-revid-meta-findobjectswith-metakey-json">GET /{accountName}/{modelID}/revision/{revID}/meta/findObjectsWith/{metaKey}.json</h3>
+
+<blockquote>
+<p>Example request </p>
+</blockquote>
+<pre class="highlight http tab-http"><code><span class="err">GET /repoman/00000000-0000-0000-0000-000000000000/revision/master/head/meta/findObjsWith/IFC Type.json HTTP/1.1
+</span></code></pre>
+<blockquote>
+<p>Example response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+   </span><span class="s2">"data"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"0024c613-0012-4353-93b5-1714e6aa0c56"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"value"</span><span class="p">:</span><span class="s2">"IfcFooting"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"parents"</span><span class="p">:[</span><span class="w">
+            </span><span class="s2">"651d457a-c510-4cd7-9955-a0b015e76dcb"</span><span class="w">
+         </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"003ba24c-967e-408a-9c2f-51459dca7c19"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"value"</span><span class="p">:</span><span class="s2">"IfcBeam"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"parents"</span><span class="p">:[</span><span class="w">
+            </span><span class="s2">"954d6bf9-31bb-435c-9a26-017920743e12"</span><span class="w">
+         </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"00e75c1d-5a66-4a46-9912-fe30fc56089f"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"value"</span><span class="p">:</span><span class="s2">"IfcBeam"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"parents"</span><span class="p">:[</span><span class="w">
+            </span><span class="s2">"46bf6928-d124-40d6-946e-b241825c46c3"</span><span class="w">
+         </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"014f271d-dbd2-4e03-8d96-9b23fda84dae"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"value"</span><span class="p">:</span><span class="s2">"IfcBeam"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"parents"</span><span class="p">:[</span><span class="w">
+            </span><span class="s2">"55cb20c1-662f-4178-bfd1-6d7046932e31"</span><span class="w">
+         </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="s2">"_id"</span><span class="p">:</span><span class="s2">"0199482c-7370-4513-b97e-0db265af661c"</span><span class="p">,</span><span class="w">
+         </span><span class="s2">"metadata"</span><span class="p">:{</span><span class="w">
+            </span><span class="s2">"value"</span><span class="p">:</span><span class="s2">"IfcWallStandardCase"</span><span class="w">
+         </span><span class="p">},</span><span class="w">
+         </span><span class="s2">"parents"</span><span class="p">:[</span><span class="w">
+            </span><span class="s2">"513e2028-e507-49ef-99a9-24af1021d994"</span><span class="w">
+         </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Search the model for any metadata with the property {metaKey}. This returns it&rsquo;s value and also <a href="#tree-node">tree nodes</a> associated with the metadata.</p>
 
           <h1 id="notification">Notification</h1>
 
