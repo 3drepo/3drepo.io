@@ -456,7 +456,7 @@ export class UnityUtil {
 	 * currently highlighted.
 	 *
 	 * The object status will be returned via the promise provided.
-	 * @param {string} account - name of teamspace 
+	 * @param {string} account - name of teamspace
 	 * @param {string} model - name of the model
 	 * @param {object} promise - promise that the function will resolve with the object status info.
 	 */
@@ -485,7 +485,7 @@ export class UnityUtil {
 	 *  @param {string} model - name of model
 	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
 	 *  @param {number[]} color - RGB value of the highlighting colour
-	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted. 
+	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
 	 *  				Also any objects that are already highlighted will be unhighlighted
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode) {
@@ -614,7 +614,7 @@ export class UnityUtil {
 
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
-	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/) 
+	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/)
 	 */
 	public static setAPIHost(hostname) {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
@@ -630,7 +630,7 @@ export class UnityUtil {
 
 	/**
 	 * Set the units
-	 * By default, units are set to mm. 
+	 * By default, units are set to mm.
 	 * @param {string} units - i.e. "m", "mm", "ft" etc.
 	 */
 	public static setUnits(units) {
