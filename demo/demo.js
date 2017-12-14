@@ -1,5 +1,6 @@
 
 var PREFIX = "https://www.3drepo.io";
+var API_PREFIX = "https://api1.www.3drepo.io";
 
 // Unity requires its setting in a global 
 // variable called Module
@@ -20,7 +21,7 @@ init();
 function init() {
 
     // Replace as appropriate 
-    var API = PREFIX + "/api/";
+    var API = API_PREFIX + "/api/";
     var account;
 
     // Set the API for the viewer (for fetching models etc)
