@@ -698,12 +698,9 @@
 				);
 			}
 
-
 			//Get selected objects
 			ViewerService.getObjectsStatus({
-				promise: objectsPromise, 
-				account: vm.account, 
-				model: vm.model
+				promise: objectsPromise 
 			});
 
 			viewpointPromise.promise
@@ -870,9 +867,7 @@
 
 			//Get selected objects
 			ViewerService.getObjectsStatus({
-				promise: objectsPromise, 
-				account: vm.account, 
-				model: vm.model
+				promise: objectsPromise 
 			});
 
 			objectsPromise.promise.then(function(objectInfo) {
