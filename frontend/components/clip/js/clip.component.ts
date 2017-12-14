@@ -156,8 +156,6 @@ class ClipController implements ng.IController {
 			switch (event.type) {
 			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
 
-				console.log("UPDATE_CLIPPING_PLANES", event.value);
-
 				if (!event.value.fromClipPanel) {
 					const clip = event.value.clippingPlanes[0];
 					if (clip) {
