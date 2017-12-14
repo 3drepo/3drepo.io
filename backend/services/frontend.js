@@ -33,11 +33,14 @@ module.exports.createApp = function () {
 	const app = express();
 	const path = require("path");
 	const configRoute = require("../routes/config");
+	const cors = require("cors");
+
 	app.use("/config", configRoute);
 	
 	const publicDir = __dirname + "/../../public";
 
 	app.use(compress({ level: 9 }));
+	app.use(cors({ origin: true, credentials: true }));	
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));

@@ -187,7 +187,8 @@ var UnityUtil;
 
 
 	/*
-	 * =============== FROM UNITY ====================
+	 * ================== FROM UNITY ====================
+	 * The following functions are called by the unity viewer.
 	 */
 
 	UnityUtil.prototype.clipBroadcast = function(clipInfo) {
@@ -263,13 +264,23 @@ var UnityUtil;
 	 */
 
 
-	UnityUtil.prototype.centreToPoint = function(model, id) {
+	/**
+	 * Centres the viewpoint to the object
+	 * @param {string} ns - namespace for the object, i.e. teamspace + "." + model
+	 * @param {string} id - unique ID of the object to centre on
+	 */
+	UnityUtil.prototype.centreToPoint = function(ns, id) {
 		var params = {};
-		params.model = model;
+		params.model = ns;
 		params.meshID = id;
 		toUnity("CentreToObject", LoadingState.MODEL_LOADING, JSON.stringify(params));
 	};
 
+	/**
+	 *  Change the colour of an existing pin
+	 *  @param {string} id - ID of the pin 
+	 *  @param {number[]} colour - colour RGB value of the colour to change to.
+	 */
 	UnityUtil.prototype.changePinColour = function(id, colour) {
 		var params =  {};	
 		params.color = colour;
@@ -277,18 +288,34 @@ var UnityUtil;
 		toUnity("ChangePinColor", LoadingState.MODEL_LOADING, JSON.stringify(params));
 	};
 
+	/**
+	 * Clear all highlighting.
+	 */
 	UnityUtil.prototype.clearHighlights = function() {
 		toUnity("ClearHighlighting", LoadingState.MODEL_LOADED);
 	};
 	
+	/**
+	 *  Turn off any clipping planes imposed into the viewer
+	 */
 	UnityUtil.prototype.disableClippingPlanes = function() {
 		toUnity("DisableClip");
 	};
 	
+	/**
+	 * Disable the Measuring tool.
+	 */
 	UnityUtil.prototype.disableMeasuringTool = function(){
 		toUnity("StopMeasuringTool", LoadingState.MODEL_LOADING);
 	};
 
+	/**
+	 * Add a pin
+	 * @param {string} id - Identifier for the pin
+	 * @param {number[]} position - point in space where the pin should generate
+	 * @param {number[]} normal - normal vector for the pin (note: this is no longer used)
+	 * @param {number[]} colour - RGB value for the colour of the pin
+	 */
 	UnityUtil.prototype.dropPin = function(id, position, normal, colour) {
 		var params = {};
 		params.id = id;
@@ -299,11 +326,23 @@ var UnityUtil;
 
 	};
 
+	/**
+	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
+	 */
 	UnityUtil.prototype.enableMeasuringTool = function(){
 		toUnity("StartMeasuringTool", LoadingState.MODEL_LOADING);
-	}
+	};
 
-
+	/**
+	 * Get Object Status within the viewer. This will return you the list of
+	 * objects that are currently set invisible, and a list of object that are
+	 * currently highlighted.
+	 *
+	 * The object status will be returned via the promise provided.
+	 * @param {string} account - name of teamspace 
+	 * @param {string} model - name of the model
+	 * @param {object} promise - promise that the function will resolve with the object status info.
+	 */
 	UnityUtil.prototype.getObjectsStatus = function(account, model, promise) {
 		var nameSpace = "";
 		if(account && model) {
@@ -318,16 +357,21 @@ var UnityUtil;
 		}
 
 	};
-
+	
 	function _getObjectsStatus(nameSpace, promise) {
 		objectStatusPromise = promise;
 		toUnity("GetObjectsStatus", LoadingState.MODEL_LOADED, nameSpace);
 	}
 
-	UnityUtil.prototype.getPointInfo = function() {
-		toUnity("GetPointInfo", false, 0);
-	};
-
+	/**
+	 *  Highlight objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
+	 *  @param {number[]} color - RGB value of the highlighting colour
+	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted. 
+	 *  				Also any objects that are already highlighted will be unhighlighted
+	 */
 	UnityUtil.prototype.highlightObjects = function(account, model, idArr, color, toggleMode) {
 		var params = {};
 		params.database = account;
@@ -336,15 +380,16 @@ var UnityUtil;
 		params.toggle = toggleMode;
 		if(color) {
 			params.color = color;
-		}
-		else
-		{
+		} else {
 			params.color = [1,1,0];
 		}
 
 		toUnity("HighlightObjects", LoadingState.MODEL_LOADED, JSON.stringify(params));
 	};
 
+	/**
+	 * Cancel the loading of model.
+	 */
 	UnityUtil.prototype.cancelLoadModel = function() {
 		if(!loaded && loadedResolve) {
 			//If the previous model is being loaded but hasn't finished yet
@@ -356,6 +401,14 @@ var UnityUtil;
 		}
 	};
 
+	/**
+	 * Loading another model. NOTE: this will also clear the canvas of existing models
+	 * Use branch = master and revision = head to get the latest revision.
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string=} branch - ID of the branch (optional)
+	 *  @param {string} revision - ID of revision
+	 */
 	UnityUtil.prototype.loadModel  = function(account, model, branch, revision) {
 		
 		//console.log("pin - loadModel");
@@ -383,25 +436,47 @@ var UnityUtil;
 	
 	};
 
+	/**
+	 * Remove a pin from the viewer
+	 * @param {string} id - pin identifier
+	 */
 	UnityUtil.prototype.removePin = function(id) {
 		toUnity("RemovePin", LoadingState.MODEL_LOADING, id);
 	};
-	
+
+	/**
+	 * Clear the canvas and reset all settings
+	 */
 	UnityUtil.prototype.reset = function() {
 		this.disableMeasuringTool();
 		this.disableClippingPlanes();
 		toUnity("ClearCanvas", LoadingState.VIEWER_READY);
 	};
 
+	/**
+	 * Reset the viewpoint to ISO view.
+	 */
 	UnityUtil.prototype.resetCamera = function() {
 		toUnity("ResetCamera", LoadingState.VIEWER_READY);
 	};
 
+	/**
+	 * Request a screenshot. The screenshot will be returned as a JSON
+	 * object with a single field, ssByte, containing the screenshot in
+	 * base64.
+	 * @param {object} promise - promise that will be resolved, returning with the screenshot
+	 */
 	UnityUtil.prototype.requestScreenShot = function(promise) {
 		screenshotPromises.push(promise);
 		toUnity("RequestScreenShot", LoadingState.VIEWER_READY);
 	};
 
+	/**
+	 * Request the information of the current viewpoint
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
+	 */
 	UnityUtil.prototype.requestViewpoint = function(account, model, promise) {
 		if(vpPromise != null) {
 			vpPromise.then(_requestViewpoint(account, model, promise));
@@ -420,18 +495,42 @@ var UnityUtil;
 		toUnity("RequestViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
+	/**
+	 * Set API host urls. This is needs to be called before loading model.
+	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/) 
+	 */
 	UnityUtil.prototype.setAPIHost = function(hostname) {
 		toUnity("SetAPIHost", LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	};
 
+	/**
+	 * Set navigation mode.
+	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
+	 */
 	UnityUtil.prototype.setNavigation = function(navMode) {
 		toUnity("SetNavMode",LoadingState.VIEWER_READY, navMode);
 	};
 
+
+	/**
+	 * Set the units
+	 * By default, units are set to mm. 
+	 * @param {string} units - i.e. "m", "mm", "ft" etc.
+	 */
 	UnityUtil.prototype.setUnits = function(units) {
 		toUnity("SetUnits",LoadingState.MODEL_LOADING, units);
 	};
 
+	/**
+	 * Move viewpoint to the specified paramters
+	 * teamspace and model is only needed if the viewpoint is relative to a model
+	 * @param {number[]} pos - 3D point in space where the camera should be
+	 * @param {number[]} up - Up vector
+	 * @param {number[]} forward - forward vector
+	 * @param {number[]} lookAt - point in space the camera is looking at. (pivot point)
+	 * @param {string=} account - name of teamspace
+	 * @param {string=} model - name of model
+	 */
 	UnityUtil.prototype.setViewpoint = function(pos, up, forward, lookAt, account, model) {
 		var param = {};
 		if(account && model) {
@@ -445,12 +544,22 @@ var UnityUtil;
 		toUnity("SetViewpoint", LoadingState.MODEL_LOADING, JSON.stringify(param));
 
 	};
-	
+
+	/**
+	 * Toggle on/off rendering statistics.
+	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 */
 	UnityUtil.prototype.toggleStats = function() {
 		toUnity("ShowStats", LoadingState.VIEWER_READY);
 	};
 
-
+	/**
+	 * Toggle visibility of the given list of objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} ids - list of unique ids to toggle visibility
+	 *  @param {bool} visibility - true = toggle visible, false = toggle invisible
+	 */
 	UnityUtil.prototype.toggleVisibility = function(account, model, ids, visibility) {
 		var param = {};
 		if(account && model) {
@@ -463,6 +572,18 @@ var UnityUtil;
 
 	};
 
+	/**
+	 * Update the clipping plane to the given direction
+	 * teamspace and model is only needed if the viewpoint is relative to a model
+	 * @example
+	 * //Clipping plane is defined by the plane normal, distance from origin and it's direction
+	 * //direction = -1 means it will clip anything above the plane, 1 otherwise.
+	 * UnityUtil.updateClippingPlanes({normal : [0,-1,0], distance: 10, clipDirection: -1}, false)
+	 * @param {Object} clipPlane - object containing the clipping plane
+	 * @param {bool} requireBroadcast - if set to true, UnityUtil.clipBroadcast will be called after it is set.
+	 * @param {string=} account - name of teamspace
+	 * @param {string=} model - name of model
+	 */
 	UnityUtil.prototype.updateClippingPlanes = function (clipPlane, requireBroadcast, account, model) {
 		var param = {};
 		param.clip = clipPlane;

@@ -249,6 +249,13 @@ gulp.task('concat', ['clean'], function() {
   return gulp.src('app/**/*.js').pipe(concat('main.js')).pipe(gulp.dest('dist'));
 });
 
+gulp.task('unity-util', function() {
+  return gulp.src("./components/viewer/js/globals/unity-util.js")
+    .on('error', swallowError)
+    .pipe(gulp.dest('./../public/unity/'))
+    //.pipe(livereload())
+});
+
 // Final task to build everything for the frontend (public folder)
 // It will use 'javascript' task rather than the dev version which includes maps
 gulp.task('build', [
@@ -262,9 +269,9 @@ gulp.task('build', [
   'unity', 
   'custom',
   'manifest-icons', 
-  'manifest-file'
+  'manifest-file',
+  'unity-util'
 ], function () {
   console.log("None service worker tasks finished")
   gulp.start('service-workers');
 });
-
