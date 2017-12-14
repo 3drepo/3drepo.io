@@ -1,0 +1,51 @@
+html, body, .viewer, #canvas {
+    height: 100%;
+    width: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: rgb(235, 235, 235);
+    font-family: 'Nunito Sans', sans-serif;
+}
+#model {
+  height: 10vh;
+  background: rgba(255,255,255,0.0);
+  text-align: center;
+  width: 100%;
+}
+#changeModel {
+  margin: 0;
+  display: flex;
+  position: absolute;
+  width: 400px;
+  top: 5px;
+}
+#changeModel input, #changeModel button {
+  height: 7vh;
+  text-align: center;
+  min-height: 20px;
+  background: rgba(255, 255, 255, 0.803);
+  border: none;
+  margin: 0;
+  border: solid 1px #d0d0d0;
+}
+#changeModel button  {
+    width: 30%;
+  cursor: pointer;
+}
+#changeModel input {
+    width: 70%;
+}
+.hide {
+  display: none;
+}
+.show {
+  display: initial;
+}
+#status {
+    position: absolute;
+    top: 45vh;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+}
