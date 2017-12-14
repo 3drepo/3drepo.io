@@ -1603,7 +1603,7 @@ function removeModel(account, model, forceRemove){
 
 	}).then(() => {
 		
-		return ModelFactory.dbManager.listCollections(account).toArray();
+		return ModelFactory.dbManager.listCollections(account);
 
 	}).then(collections => {
 		//remove model collections
