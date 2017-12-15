@@ -49,7 +49,6 @@ statics._getGridFSBucket = function(dbCol, format){
 };
 
 statics.findStashByFilename = function(dbCol, format, filename){
-
 	return this._getGridFSBucket(dbCol, format).then(bucket => {
 
 		return bucket.find({ filename }).toArray().then(files => {
@@ -68,7 +67,10 @@ statics.findStashByFilename = function(dbCol, format, filename){
 				});	
 			}
 		});
-	});
+	}).catch(err =>{
+		ModelFactory.dbManager.disconnect()
+		return Promise.reject(err);
+	});;
 
 };
 
