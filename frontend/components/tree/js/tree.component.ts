@@ -273,9 +273,9 @@ class TreeController implements ng.IController {
 				}
 			}
 
-			lastViewerUpdateTime = this.TreeService.highlightMapUpdateTime;
+			lastViewerUpdateTime = Date.now();
 
-		}, 300);
+		}, 100);
 
 	}
 
