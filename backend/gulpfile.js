@@ -18,7 +18,7 @@ gulp.task("test:integrated", function(){
         .pipe(envs)
         .pipe(mocha({
             reporter: "spec",
-            timeout: 10000
+            timeout: 100000
         }))
         .once("error", (error) => {
             console.log(error);
