@@ -128,7 +128,6 @@ class TreeController implements ng.IController {
 				/*
 				* Get all the tree nodes
 				*/
-
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -281,9 +280,11 @@ class TreeController implements ng.IController {
 	}
 
 	/**
-	 * Handle visibility changes from tree service to viewer service
+	 * Handle visibility changes from tree service to viewer service.
+	 * @param clickedIds	Collection of ids to show/hide.
+	 * @param visible	Set ids to visibile.
 	 */
-	public handleVisibility(clickedIds, visible) {
+	public handleVisibility(clickedIds: any, visible: boolean) {
 		const objectIds = [];
 
 		for (const id in clickedIds) {
@@ -318,9 +319,10 @@ class TreeController implements ng.IController {
 	}
 
 	/**
-	 * Handle highlight changes from tree service to viewer service
+	 * Handle highlight changes from tree service to viewer service.
+	 * @param highlightMap	Collection of ids to highlight.
 	 */
-	public handleSelection(highlightMap) {
+	public handleSelection(highlightMap: any) {
 		// Update viewer highlights
 		this.ViewerService.clearHighlights();
 
@@ -351,7 +353,6 @@ class TreeController implements ng.IController {
 	/**
 	 * Set the content height.
 	 * The height of a node is dependent on its name length and its level.
-	 *
 	 * @param {Array} nodesToShow
 	 */
 	public setContentHeight(nodesToShow) {
@@ -382,7 +383,7 @@ class TreeController implements ng.IController {
 
 	/**
 	 * Fetch nodesToShow from tree service and update nodesToShow in tree component.
-	 * Returns this.nodesToShow.
+	 * @returns	nodesToShow.
 	 */
 	public fetchNodesToShow() {
 		this.nodesToShow = this.TreeService.getNodesToShow();

@@ -406,7 +406,8 @@ export class TreeService {
 	}
 
 	/**
-	 * Initialise the tree nodes to show to the first node
+	 * Initialise the tree nodes to show to the first node.
+	 * @param nodes	Array of root node to show.
 	 */
 	public initNodesToShow(nodes) {
 		// TODO: Is it a good idea to save tree state within each node?
@@ -423,7 +424,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Show the first set of children using the expand function but deselect the child used for this
+	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
 		this.expandToSelection(this.nodesToShow[0].children[0].path.split("__"), 0, true, false);
@@ -431,7 +432,7 @@ export class TreeService {
 	}
 
 	/**
-	 * traverse children of a node recursively
+	 * Traverse children of a node recursively
 	 */
 	public traverseNode(node: any, callback) {
 		callback(node);
@@ -670,7 +671,7 @@ export class TreeService {
 	/**
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
 	 */
-	public expandToSelection(path, level, noHighlight, multi) {
+	public expandToSelection(path, level, noHighlight, multi: boolean) {
 		let i;
 		let j;
 		let length;
@@ -794,6 +795,10 @@ export class TreeService {
 
 	}
 
+	/**
+	 * Hide a collection of nodes.
+	 * @param nodes	Array of nodes to be hidden.
+	 */
 	public hideTreeNodes(nodes) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
@@ -803,6 +808,9 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Hide all tree nodes.
+	 */
 	public hideAllTreeNodes() {
 		const rootNode = this.allNodes[0];
 		while (rootNode && rootNode.toggleState !== "invisible") {
@@ -810,6 +818,10 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Show a collection of nodes.
+	 * @param nodes	Array of nodes to be shown.
+	 */
 	public showTreeNodes(nodes) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
@@ -819,6 +831,9 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Show all tree nodes.
+	 */
 	public showAllTreeNodes() {
 		const rootNode = this.allNodes[0];
 		while (rootNode && rootNode.toggleState !== "visible") {
@@ -826,6 +841,11 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Toggle visibility of a node.
+	 * @param node		Node to be toggled.
+	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
+	 */
 	public toggleTreeNode(node: any, fastforward: boolean) {
 
 		let path;
@@ -910,11 +930,20 @@ export class TreeService {
 		this.toggleNode(node);
 	}
 
+	/**
+	 * Toggle visibility of a node given its id.
+	 * @param id	ID of node.
+	 */
 	public toggleTreeNodeById(id) {
 		const node = this.getNodeById(id);
 		this.toggleTreeNode(node, false);
 	}
 
+	/**
+	 * Update the state of clickedHidden and clickedShown, which are used by tree component
+	 * to apply changes to the viewer.
+	 * @param node	Node to toggle visibility. All children will also be toggled.
+	 */
 	public toggleNode(node) {
 		const childNodes = {};
 
@@ -956,7 +985,9 @@ export class TreeService {
 	}
 
 	/**
-	 * Selected a node in the tree
+	 * Select a node in the tree.
+	 * @param node	Node to select.
+	 * @param multi	Is multi select enabled.
 	 */
 	public selectNode(node: any, multi: boolean) {
 
@@ -998,6 +1029,10 @@ export class TreeService {
 		this.toggleNode(item);
 	}
 
+	/**
+	 * Toggle node from clickedHidden collection.
+	 * @param node	Node to toggle.
+	 */
 	public updateClickedHidden(node) {
 		if (node.toggleState === "invisible") {
 			this.clickedHidden[node._id] = node;
@@ -1007,6 +1042,10 @@ export class TreeService {
 		this.visibilityUpdateTime = Date.now();
 	}
 
+	/**
+	 * Toggle node from clickedShown collection.
+	 * @param node	Node to toggle.
+	 */
 	public updateClickedShown(node) {
 		if (node.toggleState === "visible") {
 			this.clickedShown[node._id] = node;
@@ -1016,18 +1055,32 @@ export class TreeService {
 		this.visibilityUpdateTime = Date.now();
 	}
 
+	/**
+	 * @returns	List of leaf nodes that are shown by default.
+	 */
 	public getShownByDefaultNodes() {
 		return this.shownByDefaultNodes;
 	}
 
+	/**
+	 * @returns	List of nodes that are hidden by default (usu. IFC space).
+	 */
 	public getHiddenByDefaultNodes() {
 		return this.hiddenByDefaultNodes;
 	}
 
+	/**
+	 * @param id	ID of node.
+	 * @returns	Node with corresponding ID.
+	 */
 	public getNodeById(id: string) {
 		return this.idToNodeMap[id];
 	}
 
+	/**
+	 * Creates a map of IDs to nodes, array of nodes shown by default, and
+	 * nodes hidden by default.
+	 */
 	public generateIdToNodeMap() {
 		this.idToNodeMap = [];
 		this.shownByDefaultNodes = [];
@@ -1035,6 +1088,10 @@ export class TreeService {
 		this.recurseIdToNodeMap(this.allNodes);
 	}
 
+	/**
+	 * Helper function for generateIdToNodeMap().
+	 * @param nodes	Collection of nodes to add to idToNodeMap.
+	 */
 	public recurseIdToNodeMap(nodes) {
 		if (nodes) {
 			nodes.forEach((node) => {
@@ -1052,11 +1109,18 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Sets the collection of all nodes and calls generateIdToNodeMap().
+	 * @param nodes	Collection of all nodes.
+	 */
 	public setAllNodes(nodes) {
 		this.allNodes = nodes;
 		this.generateIdToNodeMap();
 	}
 
+	/**
+	 * @returns	Collection of all nodes.
+	 */
 	public getAllNodes() {
 		return this.allNodes;
 	}
