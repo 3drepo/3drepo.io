@@ -51,11 +51,11 @@ class AccountAssignController implements ng.IController {
 	private projectPermissions;
 
 	constructor(
-		private $scope,
-		private $window,
-		private $q,
-		private $mdDialog,
-		private $location,
+		private $scope: ng.IScope,
+		private $window: ng.IWindowService,
+		private $q: ng.IQService,
+		private $mdDialog: any,
+		private $location: ng.ILocationService,
 
 		private APIService,
 	) {}

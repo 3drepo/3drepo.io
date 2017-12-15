@@ -49,9 +49,9 @@ class AccountBillingController implements ng.IController {
 	private priceLicenses;
 
 	constructor(
-		private $scope,
-		private $window,
-		private $timeout,
+		private $scope: ng.IScope,
+		private $window: ng.IWindowService,
+		private $timeout: ng.ITimeoutService,
 
 		private ClientConfigService,
 		private DialogService,
