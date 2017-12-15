@@ -600,17 +600,19 @@
 							
 							console.log(response);
 
-							response.data.hiddenObjects.forEach(function(obj){
-								var account = obj.account;
-								var model = obj.model;
-								var key = account + "@" + model;
-								if(!objectIdsToHide[key]){
-									objectIdsToHide[key] = [];
-								}	
+							if (response.data.hiddenObjects) {
+								response.data.hiddenObjects.forEach(function(obj){
+									var account = obj.account;
+									var model = obj.model;
+									var key = account + "@" + model;
+									if(!objectIdsToHide[key]){
+										objectIdsToHide[key] = [];
+									}	
 
-								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+									objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-							});
+								});
+							}
 
 							for (var ns in objectIdsToHide) {
 
