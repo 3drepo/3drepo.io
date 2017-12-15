@@ -363,6 +363,14 @@ export class Viewer {
 
 	}
 
+	public hideHiddenByDefaultObjects() {
+		UnityUtil.hideHiddenByDefaultObjects();
+	}
+
+	public showHiddenByDefaultObjects() {
+		UnityUtil.showHiddenByDefaultObjects();
+	}
+
 	public objectSelected(pointInfo) {
 
 		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {

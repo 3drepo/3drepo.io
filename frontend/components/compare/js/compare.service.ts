@@ -394,7 +394,7 @@ export class CompareService {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
-					this.TreeService.toggleTreeNode(node);
+					this.TreeService.toggleTreeNode(node, false);
 				}
 			});
 		}
