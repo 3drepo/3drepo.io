@@ -37,7 +37,6 @@ function _getGridFSBucket (dbCol, format){
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';
-	console.log("<<< STASH : find stash by filename");
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		return bucket.find({ filename }).toArray().then(files => {
 			if(!files.length){
