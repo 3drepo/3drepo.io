@@ -87,7 +87,6 @@ describe('Project Permissions::', function () {
 					.send({ username: teamspace, password: teamspace })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(teamspace);
-						console.log(teamspace + " has logged in!");
 						done(err);
 					});
 				},
@@ -98,7 +97,6 @@ describe('Project Permissions::', function () {
 					.send({ username: userCanCreateModel.username, password: userCanCreateModel.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userCanCreateModel.username);
-						console.log(userCanCreateModel + " has logged in!");
 						done(err);
 					});
 				},
@@ -109,7 +107,6 @@ describe('Project Permissions::', function () {
 					.send({ username: userCanCreateFed.username, password: userCanCreateFed.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userCanCreateFed.username);
-						console.log(userCanCreateFed + " has logged in!");
 						done(err);
 					});
 				},
@@ -120,7 +117,6 @@ describe('Project Permissions::', function () {
 					.send({ username: userCanUpdateProject.username, password: userCanUpdateProject.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userCanUpdateProject.username);
-						console.log(userCanUpdateProject + " has logged in!");
 						done(err);
 					});
 				},
@@ -131,7 +127,6 @@ describe('Project Permissions::', function () {
 					.send({ username: userProjectAdmin.username, password: userProjectAdmin.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userProjectAdmin.username);
-						console.log(userProjectAdmin + " has logged in!");
 						done(err);
 					});
 				},
@@ -142,7 +137,6 @@ describe('Project Permissions::', function () {
 					.send({ username: userNoPermission.username, password: userNoPermission.password })
 					.expect(200, function(err, res){
 						expect(res.body.username).to.equal(userNoPermission.username);
-						console.log(userNoPermission.username + " has logged in!");
 						done(err);
 					});
 				}

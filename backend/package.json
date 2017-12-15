@@ -40,7 +40,7 @@
     "mathjs": "1.7.1",
     "moment": "2.13.0",
     "moment-timezone": "0.5.4",
-    "mongodb": "2.2.22",
+    "mongodb": "2.2.21",
     "mongoose": "4.7.6",
     "mongoose-double": "0.0.1",
     "multer": "1.1.0",
