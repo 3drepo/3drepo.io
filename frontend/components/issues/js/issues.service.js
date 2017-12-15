@@ -598,8 +598,6 @@
 						.then(function() {
 							TreeService.showAllTreeNodes();
 							
-							console.log(response);
-
 							response.data.hiddenObjects.forEach(function(obj){
 								var account = obj.account;
 								var model = obj.model;
