@@ -127,14 +127,14 @@ class AccountItemsController implements ng.IController {
 
 		// TODO: Stop accessing query selectors in controllers (I did not write this)
 		this.existingModelFileUploader = this.$element[0].querySelector("#existingModelFileUploader");
-		this.existingModelFileUploader.addEventListener("change", () => {
-			this.modelToUpload = this.files[0];
+		this.existingModelFileUploader.addEventListener("change", (event) => {
+			this.modelToUpload = event.target.files[0];
 			this.$scope.$apply();
 		}, false);
 
 		this.newModelFileUploader = this.$element[0].querySelector("#newModelFileUploader");
-		this.newModelFileUploader.addEventListener("change", () => {
-			this.newModelFileToUpload = this.files[0];
+		this.newModelFileUploader.addEventListener("change", (event) =>  {
+			this.newModelFileToUpload = event.target.files[0];
 			this.$scope.$apply();
 		}, false);
 
