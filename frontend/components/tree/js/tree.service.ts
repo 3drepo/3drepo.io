@@ -47,6 +47,7 @@ export class TreeService {
 	private idToNodeMap;
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
+	private hideIfc;
 
 	constructor(
 		private $q: IQService,
@@ -66,6 +67,7 @@ export class TreeService {
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
+		this.hideIfc = true;
 	}
 
 	public setHighlightSelected(value) {
@@ -842,6 +844,30 @@ export class TreeService {
 	}
 
 	/**
+	 * Show all tree nodes and hide IFCs if necessary.
+	 */
+	public showAllTreeNodesAndIFCs() {
+		this.showAllTreeNodes();
+		if (this.hideIfc) {
+			this.hideTreeNodes(this.getHiddenByDefaultNodes());
+		}
+	}
+
+	/**
+	 * Isolate selected objects by hiding all other objects.
+	 */
+	public isolateSelected() {
+		// Hide all
+		this.hideAllTreeNodes();
+		// Show selected
+		if (this.getCurrentSelectedNodes()) {
+			this.getCurrentSelectedNodes().forEach((selectedNode) => {
+				this.toggleTreeNode(selectedNode, true);
+			});
+		}
+	}
+
+	/**
 	 * Toggle visibility of a node.
 	 * @param node		Node to be toggled.
 	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
@@ -1067,6 +1093,13 @@ export class TreeService {
 	 */
 	public getHiddenByDefaultNodes() {
 		return this.hiddenByDefaultNodes;
+	}
+
+	/**
+	 * @param value	Are IFC spaces hidden.
+	 */
+	public setHideIfc(value: boolean) {
+		this.hideIfc = value;
 	}
 
 	/**

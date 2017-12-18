@@ -194,13 +194,11 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodes();
-							if (this.hideIfc) {
-								this.TreeService.hideTreeNodes(this.TreeService.getHiddenByDefaultNodes());
-							}
+							this.TreeService.showAllTreeNodesAndIFCs();
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
+							this.TreeService.setHideIfc(this.hideIfc);
 							if (this.hideIfc) {
 								this.ViewerService.hideHiddenByDefaultObjects();
 								this.TreeService.hideTreeNodes(this.TreeService.getHiddenByDefaultNodes());
@@ -210,12 +208,7 @@ class TreeController implements ng.IController {
 							}
 							break;
 						case "isolate":
-							// Hide all
-							this.TreeService.hideAllTreeNodes();
-							// Show selected
-							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
-								this.TreeService.toggleTreeNode(selectedNode, true);
-							});
+							this.TreeService.isolateSelected();
 							break;
 						default:
 							console.error("Tree option menu selection unhandled");

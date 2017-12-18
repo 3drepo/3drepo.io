@@ -119,20 +119,20 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "isolate",
+					label: "Isolate Selected",
+					selected: false,
+					noToggle: true,
+					icon: "fa-scissors",
+				},
+				{
+					hidden: false,
 					value: "hideIfc",
 					label: "Hide IFC spaces",
 					selected: true,
 					toggle: true,
 					keepCheckSpace: true,
 					icon: "fa-home",
-				},
-				{
-					hidden: false,
-					value: "isolate",
-					label: "Isolate Selected",
-					selected: false,
-					noToggle: true,
-					icon: "fa-scissors",
 				},
 			],
 			options: [
