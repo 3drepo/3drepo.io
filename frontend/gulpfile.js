@@ -14,6 +14,7 @@ const merge = require('streamqueue');
 const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
+const typedoc = require("gulp-typedoc");
 
 const del = require('del');
 
@@ -305,6 +306,18 @@ gulp.task('javascript-build-dev', function(done){
 gulp.task('javascript', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build" ));
 
 gulp.task('javascript-dev', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev" ))
+
+gulp.task("typedoc", function() {
+    return gulp
+        .src(["./components/**/*.ts"])
+        .pipe(typedoc({
+            module: "commonjs",
+            target: "es6",
+            out: "docs/",
+            name: "3D Repo Frontend"
+        }))
+    ;
+});
 
 
 // Watch for changes and live reload in development

@@ -11,7 +11,7 @@ config/*
 !config/test/
 frontend/custom/*
 frontend/custom/test
-
+frontend/docs
 frontend/tests/e2e/built
 
 yarn-error.log
