@@ -59,7 +59,7 @@ describe('Mesh and Object extended from repo base', function(){
 	before(function(done) {
 
 		let db = new DB();
-		modelFactoryMock.setDB(db);
+		modelFactoryMock.setDB(DB);
 	    mockgoose(mongoose).then(function() {
 	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
 	            done(err);
@@ -68,7 +68,7 @@ describe('Mesh and Object extended from repo base', function(){
 
 	});
 
-	describe('#findByUID', function(){
+/*	describe('#findByUID', function(){
 		it('as a repo item it should have findByUID static function', function(){
 			expect(Mesh).to.have.property('findByUID');
 		});
@@ -105,7 +105,7 @@ describe('Mesh and Object extended from repo base', function(){
 			});
 		});
 	});
-
+*/
 	describe('#findByRevision', function(){
 		it('as a repo item it should have findByRevision static function', function(){
 			expect(Mesh).to.have.property('findByRevision');

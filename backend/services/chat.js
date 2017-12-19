@@ -49,7 +49,7 @@ module.exports.createApp = function (server, serverConfig){
 		let DB = require("../db/db");
 		DB.getDB("admin").then( db => {
 			// set db to singleton modelFactory class
-			require("../models/factory/modelFactory").setDB(db);
+			require("../models/factory/modelFactory").setDB(DB);
 			next();
 		}).catch( err => {
 			systemLogger.logError('Chat server - DB init error - ' + err.message);

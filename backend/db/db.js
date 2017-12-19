@@ -17,14 +17,35 @@
 
 (function() {
 	"use strict";
-
+	
+	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
+	const connConfig = {
+				autoReconnect: true
+			};
 
 	let db;
 	// db object only for authenicate
 	// POSSIBLE TO-DO: move all the users data and do not reply on mongo system.users 
 	let authDB;
+	
+	function disconnect() {
+		if(db){
+			db.close();
+			db = null;
+		}
+	}
+
+	function dropCollection(database, collection) {
+		getDB(database).then(dbConn => {
+			dbConn.dropCollection(collection.name);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
 
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
@@ -42,35 +63,94 @@
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
-
 		return connectString;
 	}
 
-	function getDB(database){
+	function getDB(database) {
 		if(db){
 			return Promise.resolve(db.db(database));
 		} else {
-			return MongoClient.connect(getURL(database)).then(_db => {
+			return MongoClient.connect(getURL(database), connConfig).then(_db => {
 				db = _db;
 				return db;
 			});
 		}
 	}
 
-	function getAuthDB(){
+	function getAuthDB() {
 		if(authDB){
 			return Promise.resolve(authDB);
 		} else {
-			return MongoClient.connect(getURL('admin')).then(_db => {
+			return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
 				authDB = _db;
 				return authDB;
 			});
 		}
 	}
 
+	function getGridFSBucket(database, collection) {
+		return getDB(database).then(dbConn => {
+			return new GridFSBucket(dbConn, collection);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
+	function getCollection(database, colName)	{
+		return getDB(database).then(dbConn => {
+			return dbConn.collection(colName);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
+	function getCollectionStats(database, colName)	{
+		return getDB(database).then(dbConn => {
+			return dbConn.collection(colName).stats();
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
+	//FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
+	function _getCollection(database, colName)	{
+		return db.db(database).collection(colName);
+	}
+
+	function listCollections(database) {
+		return getDB(database).then(dbConn => {
+			return dbConn.listCollections().toArray();
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+		
+	}
+	
+	function runCommand(database, cmd) {
+		return getDB(database).then(dbConn => {
+			return dbConn.command(cmd);
+		}).catch(err => {
+			disconnect();	
+			return Promise.reject(err);
+		});
+	}
+
 	module.exports = {
+		disconnect,
+		dropCollection,
 		getDB,
-		getAuthDB
+		getAuthDB,
+		getCollection,
+		getCollectionStats,
+		_getCollection,
+		getGridFSBucket,
+		listCollections,
+		runCommand
 	};
 
 }());
+

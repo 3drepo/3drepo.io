@@ -545,7 +545,10 @@
 					account: issue.account,
 					model: issue.model
 				};
+
+				console.log("SENDING UPDATE CLIPPING PLANES");
 				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
@@ -593,19 +596,21 @@
 					// show currently hidden nodes
 					objectsPromise.promise
 						.then(function() {
-							TreeService.resetHidden();
+							TreeService.showAllTreeNodes();
 							
-							response.data.hiddenObjects.forEach(function(obj){
-								var account = obj.account;
-								var model = obj.model;
-								var key = account + "@" + model;
-								if(!objectIdsToHide[key]){
-									objectIdsToHide[key] = [];
-								}	
+							if (response.data.hiddenObjects) {
+								response.data.hiddenObjects.forEach(function(obj){
+									var account = obj.account;
+									var model = obj.model;
+									var key = account + "@" + model;
+									if(!objectIdsToHide[key]){
+										objectIdsToHide[key] = [];
+									}	
 
-								objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+									objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
 
-							});
+								});
+							}
 
 							for (var ns in objectIdsToHide) {
 
@@ -625,12 +630,16 @@
 									ids[key] = [];
 								}	
 
-								ids[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-								if (i < response.data.objects.length - 1) {
-									TreeService.selectNode(TreeService.getNodeById(treeMap.sharedIdToUid[obj.shared_id]), true);
-								} else {
-									// Only call expandToSelection for last selected node to improve performance
-									TreeService.expandToSelection(TreeService.getPath(treeMap.sharedIdToUid[obj.shared_id]), 0, undefined, true);
+								var objUid = treeMap.sharedIdToUid[obj.shared_id];
+								
+								if (objUid) {
+									ids[key].push(objUid);
+									if (i < response.data.objects.length - 1) {
+										TreeService.selectNode(TreeService.getNodeById(objUid), true);
+									} else {
+										// Only call expandToSelection for last selected node to improve performance
+										TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
+									}
 								}
 							}
 

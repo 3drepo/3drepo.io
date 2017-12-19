@@ -20,7 +20,7 @@ div(
 
 				md-content(layout-fill)
 
-					div.topBorder.modelTypeSelection(
+					div.modelTypeSelection(
 						id="{{compareType.type + 'ModelTypeSection'}}"
 						ng-if="!vm.isModelClash(compareType.type)"
 						layout="row"
@@ -40,7 +40,7 @@ div(
 							ng-style="{ background: vm.getModelTypeStyle('target', 'background'), color: vm.getModelTypeStyle('target', 'color') }")
 							span Target model
 
-					#modelsList.topBorder
+					#modelsList
 
 						div(ng-if="vm.isModelClash(compareType.type)")
 							h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
@@ -57,7 +57,7 @@ div(
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 
 								md-button.modelSides.compareVisibility(ng-click="vm.toggleModelVisibility(model)")
-									md-icon.angular-material-icons(ng-if="model.visible") visibility
+									md-icon.angular-material-icons.visible(ng-if="model.visible") visibility
 									md-icon.angular-material-icons(ng-if="!model.visible") visibility_off
 									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
 
