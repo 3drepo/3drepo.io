@@ -58,7 +58,7 @@ class PanelCardController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
+		console.log(this.revision);
 		this.showHelp = false;
 		this.showFilter = false;
 		this.visibleStatus = false;
@@ -260,7 +260,7 @@ class PanelCardController implements ng.IController {
 		this.PanelService.handlePanelEvent(
 			this.contentData.type,
 			this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-			{on: on},
+			{on},
 		);
 	}
 

@@ -55,16 +55,21 @@ div(
 							ng-repeat="model in compareType[vm.modelType + 'Models']") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
-
-								md-button.modelSides.compareVisibility(ng-click="vm.toggleModelVisibility(model)")
+								md-button.modelSides.compareVisibility(
+									ng-if="vm.isFederation()"
+									ng-click="vm.toggleModelVisibility(model)")
 									md-icon.angular-material-icons.visible(ng-if="model.visible") visibility
 									md-icon.angular-material-icons(ng-if="!model.visible") visibility_off
 									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
+								md-button.modelSides.compareVisibility(
+									ng-if="!vm.isFederation()")
+									md-icon.angular-material-icons(ng-if="model.visible") block
+									md-tooltip(md-direction="bottom") Visibility toggling not available on models
+
 
 								div(ng-if="vm.modelType === 'base'" flex layout="column")
 									h5.modelText {{model.name}}
-									span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
-									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
 								
 								md-menu(
 									flex
@@ -75,16 +80,19 @@ div(
 									div(flex ng-click="$mdOpenMenu($event)" layout="row")
 										div(flex layout="column")
 											h5.modelText {{model.name}}
-											span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
-											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'target'") {{model.targetRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
 										md-icon.angular-material-icons expand_more
 										md-tooltip(md-direction="right") Change Revision
 									md-menu-content
 										md-menu-item(
 											ng-repeat="revision in model.revisions")
 
-											md-button(ng-click="vm.setRevision(model, revision)")
-												span {{revision.tag || revision.name}} 
+											md-button(
+												ng-click="vm.setTargetRevision(model, revision)")
+												span(ng-if="revision.name !== model.targetRevision") {{revision.tag || revision.name}} 
+												span.selectedRev(ng-if="revision.name === model.targetRevision") {{revision.tag || revision.name}} 
+												span
 												span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
 							md-divider
 								

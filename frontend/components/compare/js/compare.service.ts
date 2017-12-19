@@ -88,21 +88,43 @@ export class CompareService {
 
 	}
 
+	public isFederation() {
+		return this.state.isFed;
+	}
+
 	public isModelClash(type: string) {
 		return type === "clash" && !this.state.isFed;
 	}
 
-	public setRevision(model: any, revision: any) {
+	public setTargetRevision(model: any, revision: any) {
 
-		model.selectedRevision = revision._id;
-		model.selectedRevisionTag = revision.tag || revision.name;
+		model.targetRevision = revision._id;
+		model.targetRevisionTag = revision.tag || revision.name;
 
 		if (this.state.compareEnabled) {
 			this.state.compareEnabled = false;
 		}
 	}
 
-	public getCompareModelData(modelSettings: any, revisions: any[]) {
+	public nextRevision(revisions: any[], revision: any) {
+
+		if (!revision) {
+			return revisions[0];
+		}
+
+		const len = revisions.length;
+		const index = revisions.findIndex((r) => r._id === revision);
+
+		const lastRev = index + 1 === len;
+		if (lastRev) {
+			return revisions[index];
+		}
+
+		return revisions[index + 1];
+
+	}
+
+	public getCompareModelData(modelSettings: any, revisions: any[], revision: any, type: string) {
 		const headRevision = modelSettings.headRevisions.master;
 
 		const headRevisionObj = revisions.find((r) => {
@@ -110,7 +132,13 @@ export class CompareService {
 		});
 		const headRevisionTag = headRevisionObj.tag || headRevisionObj.name;
 
-		const revisionToUse = revisions[1] || revisions[0];
+		let baseRevision = revisions.find((rev) => rev._id === revision );
+		if (!baseRevision) {
+			baseRevision = revisions[0];
+		}
+		console.log(baseRevision, targetRevision);
+
+		const targetRevision = this.nextRevision(revisions, baseRevision.name);
 
 		return {
 			account: modelSettings.account,
@@ -119,20 +147,12 @@ export class CompareService {
 			model: modelSettings.model,
 			name: modelSettings.name,
 			revisions,
-			selectedRevision: revisionToUse.name,
-			selectedRevisionTag: revisionToUse.tag || revisionToUse.name,
+			baseRevision: baseRevision.name,
+			baseRevisionTag: baseRevision.tag || baseRevision.name,
+			targetRevision: targetRevision.name,
+			targetRevisionTag: targetRevision.tag || targetRevision.name,
 			visible: true,
 		};
-	}
-
-	public addModelsForModelCompare(account: string, model: string, modelSettings: any) {
-		return this.RevisionsService.listAll(account, model).then((revisions) => {
-
-			this.state.compareTypes.diff.targetModels = [ this.getCompareModelData(modelSettings, revisions) ];
-			this.state.compareTypes.diff.baseModels = [ this.getCompareModelData(modelSettings, revisions) ];
-
-		});
-
 	}
 
 	public getSettings(model: any) {
@@ -142,7 +162,21 @@ export class CompareService {
 		);
 	}
 
-	public addModelsForFederationCompare(modelSettings: any) {
+	public addModelsForModelCompare(account: string, model: string, modelSettings: any, revision: any) {
+		return this.RevisionsService.listAll(account, model).then((revisions) => {
+
+			this.state.compareTypes.diff.targetModels = [
+				this.getCompareModelData(modelSettings, revisions, revision, "target"),
+			];
+			this.state.compareTypes.diff.baseModels = [
+				this.getCompareModelData(modelSettings, revisions, revision, "base"),
+			];
+
+		});
+
+	}
+
+	public addModelsForFederationCompare(modelSettings: any, revision: any) {
 
 		const promises = [];
 
@@ -158,8 +192,8 @@ export class CompareService {
 			modelSettings.subModels.forEach((model, i) => {
 
 				if (model.database && model.model) {
-
-					const revisionPromise = this.getRevisionModels(model, type, i);
+					console.log(revision);
+					const revisionPromise = this.getRevisionModels(model, type, i, revision);
 					promises.push(revisionPromise);
 
 				} else {
@@ -173,13 +207,14 @@ export class CompareService {
 		return Promise.all(promises);
 	}
 
-	public getRevisionModels(model, type, i) {
+	public getRevisionModels(model, type, i, revision) {
+
 		return this.RevisionsService.listAll(model.database, model.model)
 			.then((revisions) => {
 				return this.getSettings(model).then((response) => {
 					const settings = response.data;
-					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions);
-					this.state.compareTypes[type].baseModels[i] = this.getCompareModelData(settings, revisions);
+					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions, revision, "target");
+					this.state.compareTypes[type].baseModels[i] = this.getCompareModelData(settings, revisions, revision, "base");
 				});
 			})
 			.catch((error) => {
@@ -234,7 +269,7 @@ export class CompareService {
 				const loadModel = this.ViewerService.diffToolLoadComparator(
 					model.account,
 					model.model,
-					model.selectedRevision,
+					model.targetRevision,
 				)
 					.catch((error) => {
 						console.error(error);
@@ -390,9 +425,11 @@ export class CompareService {
 
 	private setBaseModelVisibility(model) {
 		const nodes = this.TreeService.getAllNodes();
+		console.log(nodes);
 		if (nodes.length && nodes[0].children) {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
+				console.log(node, model);
 				if (node.name === model.account + ":" + model.name) {
 					this.TreeService.toggleTreeNode(node, false);
 				}

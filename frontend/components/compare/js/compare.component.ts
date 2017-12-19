@@ -28,6 +28,7 @@ class CompareController implements ng.IController {
 		"TreeService",
 	];
 
+	private revision: any;
 	private mode: string;
 	private modelType: string;
 	private compareTypes: any;
@@ -55,6 +56,7 @@ class CompareController implements ng.IController {
 	) {}
 
 	public $onInit() {
+		console.log(this.revision);
 		this.CompareService.disableComparision();
 		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
@@ -91,12 +93,18 @@ class CompareController implements ng.IController {
 		this.$scope.$watch(() => {
 			return this.TreeService.visibilityUpdateTime;
 		}, () => {
-			this.modelsReady.promise.then(() => {
-				const models = this.TreeService.getNodesToShow();
-				models.forEach(this.compareToTreeState.bind(this));
-			});
+			this.updateModels();
 		});
 
+	}
+
+	public updateModels() {
+		this.modelsReady.promise.then(() => {
+			const models = this.TreeService.getNodesToShow();
+			if (this.isFederation()) {
+				models.forEach(this.compareToTreeState.bind(this));
+			}
+		});
 	}
 
 	public compareToTreeState(shownModel: any) {
@@ -125,6 +133,8 @@ class CompareController implements ng.IController {
 
 	public modelSettingsReady() {
 
+		console.log("modelSettingsReady", this.model);
+
 		this.CompareService.state.isFed = this.modelSettings.federate;
 
 		const modelsReady = [];
@@ -133,6 +143,7 @@ class CompareController implements ng.IController {
 
 			modelsReady.push(this.CompareService.addModelsForFederationCompare(
 				this.modelSettings,
+				this.revision,
 			));
 
 		} else {
@@ -141,6 +152,7 @@ class CompareController implements ng.IController {
 				this.account,
 				this.model,
 				this.modelSettings,
+				this.revision,
 			));
 
 		}
@@ -167,8 +179,8 @@ class CompareController implements ng.IController {
 		this.CompareService.setModelType(type);
 	}
 
-	public setRevision(model: string, revision: string) {
-		this.CompareService.setRevision(model, revision);
+	public setTargetRevision(model: any, revision: any) {
+		this.CompareService.setTargetRevision(model, revision);
 	}
 
 	public canCompare() {
@@ -177,6 +189,10 @@ class CompareController implements ng.IController {
 
 	public isModelClash(type: string) {
 		return this.CompareService.isModelClash(type);
+	}
+
+	public isFederation() {
+		return this.CompareService.isFederation();
 	}
 
 	public changeCompareState(compareState: string) {
@@ -193,6 +209,7 @@ export const CompareComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
+		revision: "<",
 		modelSettings: "<",
 	},
 	controller: CompareController,
