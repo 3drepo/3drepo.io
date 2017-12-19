@@ -405,7 +405,7 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		this.TreeService.toggleTreeNode(node, false);
+		this.TreeService.toggleTreeNodeVisibility(node, false);
 	}
 
 	/**

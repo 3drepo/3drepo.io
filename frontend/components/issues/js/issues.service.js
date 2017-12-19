@@ -596,6 +596,8 @@
 					// show currently hidden nodes
 					objectsPromise.promise
 						.then(function() {
+							var hideIfcState = TreeService.getHideIfc();
+							TreeService.setHideIfc(false);
 							TreeService.showAllTreeNodes();
 							
 							if (response.data.hiddenObjects) {
@@ -615,10 +617,11 @@
 							for (var ns in objectIdsToHide) {
 
 								objectIdsToHide[ns].forEach(function(obj) {
-									TreeService.toggleTreeNodeById(obj);
+									TreeService.toggleTreeNodeVisibilityById(obj);
 								});
 							}
 							
+							TreeService.setHideIfc(hideIfcState);
 							TreeService.clearCurrentlySelected();
 
 							for (var i = 0; i < response.data.objects.length; i++) {
