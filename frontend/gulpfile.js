@@ -18,9 +18,11 @@ const rename = require('gulp-rename');
 const del = require('del');
 
 const ts = require('gulp-typescript');
+const localWebpack = require('webpack');
 
 const tsConfig = {
   typescript: require("typescript"),
+  //target: "es6",
   module: "amd",
   lib: ["es2015", "dom"],
   sourceMap: true
@@ -149,6 +151,20 @@ gulp.task('manifest-icons', function(done) {
     .on("end", done);
 });
 
+gulp.task('unity-util', function(done) {
+  return gulp.src('./_built/amd/globals/unity-util.js')
+    .on('error', swallowError)
+    .pipe(webpack({
+      output: {
+        filename: 'unity-util.js',
+        libraryTarget: 'umd',
+      },
+    }, localWebpack))
+    .pipe(gulp.dest('./../public/unity/'))
+    .on("end", done);
+    //.pipe(livereload())
+});
+
 
 const sw = function(callback, verbose) {
   var swPrecache = require('sw-precache');
@@ -204,7 +220,7 @@ gulp.task("amd-components", function(done){
       output: {
         filename: 'ts-components.js',
       },
-    }, require('webpack')))
+    }, localWebpack))
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('./_built/'))
     .on("end", done)
@@ -234,7 +250,7 @@ gulp.task("amd-dependencies", function(done){
         output: {
           filename: 'dependencies.js',
         },
-      }, require('webpack')))
+      }, localWebpack))
       .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
       .pipe(gulp.dest('./_built/'))
       .on("end", done)
@@ -340,6 +356,7 @@ gulp.task('build', gulp.series(
     'manifest-icons', 
     'manifest-file'
   ),
+  'unity-util',
   'service-workers'
   )
 );
