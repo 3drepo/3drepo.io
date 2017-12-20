@@ -116,7 +116,7 @@ class AccountModelController implements ng.IController {
 			modelsetting: {
 				label: "Settings",
 				icon: "settings",
-				hidden: !this.AuthService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions)
+				hidden: !this.AuthService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions),
 			},
 		};
 
@@ -124,14 +124,14 @@ class AccountModelController implements ng.IController {
 			this.modelOptions.download = {
 				label: "Download",
 				icon: "cloud_download",
-				hidden: !this.AuthService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions)
+				hidden: !this.AuthService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions),
 			};
 		}
 		this.uploadButtonDisabled = true;
 		this.modelOptions.delete = {
 			label: "Delete",
 			icon: "delete",
-			hidden: !this.AuthService.hasPermission(perms.PERM_DELETE_MODEL, this.model.permissions), 
+			hidden: !this.AuthService.hasPermission(perms.PERM_DELETE_MODEL, this.model.permissions),
 			color: "#F44336",
 		};
 
@@ -342,6 +342,10 @@ class AccountModelController implements ng.IController {
 
 	}
 
+	public revisionTimestamp(timestamp) {
+		return this.RevisionsService.revisionDateFilter(timestamp);
+	}
+
 	/**
 	* Go to the specified revision
 	*/
@@ -432,7 +436,7 @@ class AccountModelController implements ng.IController {
 
 			this.fileUploadInfo = "Uploading...";
 
-		} else if (modelData.status === "processing" || modelData.status === "uploaded"){
+		} else if (modelData.status === "processing" || modelData.status === "uploaded") {
 
 			this.fileUploadInfo = "Processing...";
 

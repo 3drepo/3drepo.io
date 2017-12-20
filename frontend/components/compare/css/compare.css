@@ -36,6 +36,10 @@ compare .compareVisibility {
     background-color: #eeeeee;
 } */
 
+md-menu-content .selectedRev {
+    font-weight: bold;
+}
+
 md-menu-content .authorDate {
     color: #a6a6a6 !important;
 }

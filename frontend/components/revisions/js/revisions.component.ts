@@ -90,6 +90,11 @@ class RevisionsController implements ng.IController {
 		this.DialogService.showDialog("revisions-dialog.html", this.$scope, event, true);
 	}
 
+	public revisionTimestamp(timestamp: string) {
+		console.log("REVISION TIMESTAMP", timestamp, this.RevisionsService.revisionDateFilter(timestamp));
+		return this.RevisionsService.revisionDateFilter(timestamp);
+	}
+
 	public goToRevision(revId) {
 
 		this.revision = revId;
