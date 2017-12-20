@@ -4,8 +4,6 @@ compare .topBorder {
 
 compare .modelType {
     color: grey;
-    border-right: solid 1px gainsboro;
-    border-left: solid 1px gainsboro;
 }
 
 compare .modelSides {
@@ -34,8 +32,12 @@ compare .compareVisibility {
     min-width: initial;
 }
 
-compare .compareModel:hover {
-    background-color: #f0f0f0;
+/* compare .compareModel:hover {
+    background-color: #eeeeee;
+} */
+
+md-menu-content .selectedRev {
+    font-weight: bold;
 }
 
 md-menu-content .authorDate {
@@ -66,8 +68,21 @@ compare .modelText {
     margin-bottom: 10px;
 }
 
+compare .visible {
+    color: #0c2f54;
+}
+
 compare md-tabs-content-wrapper md-tab-content {
     margin-bottom: 125px;
+    padding: 8px;
+}
+
+compare md-tabs-content-wrapper md-tab-content md-content {
+    background: white;
+}
+
+compare md-tabs-content-wrapper md-tab-content > div {
+    border: rgba(0,0,0,0.1) 1px solid;
 }
 
 compare .topContainer {

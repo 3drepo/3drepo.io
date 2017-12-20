@@ -21,6 +21,7 @@ class BottomButtonsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"ViewerService",
+		"TreeService",
 	];
 
 	private showButtons: boolean;
@@ -32,6 +33,7 @@ class BottomButtonsController implements ng.IController {
 
 	constructor(
 		private ViewerService: any,
+		private TreeService: any,
 	) {}
 
 	public $onInit() {
@@ -60,10 +62,28 @@ class BottomButtonsController implements ng.IController {
 
 		this.leftButtons = [];
 		this.leftButtons.push({
+			label: "Show All",
+			icon: "fa fa-eye",
+			click: () => { this.showAll(); },
+		});
+
+		this.leftButtons.push({
+			label: "Isolate",
+			icon: "fa fa-scissors",
+			click: () => { this.isolate(); },
+		});
+
+		this.leftButtons.push({
 			label: "Extent",
 			icon: "fa fa-home",
+			month: (new Date()).getMonth(),
 			click: () => { this.extent(); },
 		});
+
+		/*this.leftButtons.push({
+			label: "Turntable",
+			lick: () => { this.setViewingOptions(undefined); },
+		});*/
 
 		this.selectedMode = "Turntable";
 		this.setViewingOption(this.selectedMode);
@@ -85,6 +105,14 @@ class BottomButtonsController implements ng.IController {
 			this.showViewingOptionButtons = !this.showViewingOptionButtons;
 		}
 
+	}
+
+	public showAll() {
+		this.TreeService.showAllTreeNodesAndIFCs();
+	}
+
+	public isolate() {
+		this.TreeService.isolateSelected();
 	}
 
 }

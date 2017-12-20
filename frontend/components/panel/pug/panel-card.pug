@@ -96,11 +96,13 @@ div(layout="column", class="md-whiteframe-1dp")
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
 
-				filter-text='vm.filterText')
+				filter-text='vm.filterText'
+				selected-menu-option='vm.selectedMenuOption')
 
 			compare(
 				model-settings='vm.modelSettings'
 				account='vm.account'
+				revision='vm.revision'
 				model='vm.model'
 				ng-if="vm.contentData.type === 'compare'")
 

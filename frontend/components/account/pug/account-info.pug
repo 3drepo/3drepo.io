@@ -11,7 +11,7 @@
 				img.account-avatar-image(
 					ng-show="!vm.uploadingAvatar && vm.avatarUrl && vm.imageLoaded"
 					ng-src='{{vm.avatarUrl}}'
-					ng-click="vm.upload()")
+					ng-click="vm.uploadAvatar()")
 
 				md-container(
 					ng-if="vm.uploadingAvatar"
@@ -31,7 +31,7 @@
 				
 					div.avatar-upload(
 						ng-if="!vm.hasAvatar || !vm.imageLoaded"
-						ng-click="vm.upload()") 
+						ng-click="vm.uploadAvatar()") 
 						svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="150")
 							path(
 								fill="#0c2f54" 

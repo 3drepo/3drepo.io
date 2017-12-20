@@ -262,6 +262,14 @@ export class ViewerService {
 		this.viewer.switchObjectVisibility(account, model, ids, visibility);
 	}
 
+	public hideHiddenByDefaultObjects() {
+		this.viewer.hideHiddenByDefaultObjects();
+	}
+
+	public showHiddenByDefaultObjects() {
+		this.viewer.showHiddenByDefaultObjects();
+	}
+
 	public handleUnityError(message: string, reload: boolean)  {
 
 		this.DialogService.html("Unity Error", message, true)
