@@ -37,7 +37,7 @@ export class UnityUtil {
 	public static loadingPromise;
 	public static loadingResolve;
 
-	// Diff
+	// Diff promises
 	public static loadComparatorResolve;
 	public static loadComparatorPromise;
 
@@ -87,6 +87,23 @@ export class UnityUtil {
 		}
 	}
 
+	/**
+	 * Cancel the loading of model.
+	 */
+	public static cancelLoadModel() {
+		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
+			// If the previous model is being loaded but hasn't finished yet
+			UnityUtil.loadedResolve.reject("cancel");
+		}
+
+		if (UnityUtil.loadingResolve) {
+			UnityUtil.loadingResolve.reject("cancel");
+		}
+	}
+
+	/**
+	 * Handle a error from Unity
+	 */
 	public static onUnityError(err, url, line) {
 		let conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
 					<br><br> <code>Error ${err} occured at line ${line}</code>
@@ -479,6 +496,14 @@ export class UnityUtil {
 		UnityUtil.toUnity("GetObjectsStatus", UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 	}
 
+	public static getPointInfo() {
+		UnityUtil.toUnity("GetPointInfo", false, 0);
+	}
+
+	public static hideHiddenByDefaultObjects() {
+		UnityUtil.toUnity("HideHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
 	/**
 	 *  Highlight objects
 	 *  @param {string} account - name of teamspace
@@ -503,20 +528,6 @@ export class UnityUtil {
 		}
 
 		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-	}
-
-	/**
-	 * Cancel the loading of model.
-	 */
-	public static cancelLoadModel() {
-		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
-			// If the previous model is being loaded but hasn't finished yet
-			UnityUtil.loadedResolve.reject("cancel");
-		}
-
-		if (UnityUtil.loadingResolve) {
-			UnityUtil.loadingResolve.reject("cancel");
-		}
 	}
 
 	/**
@@ -664,6 +675,13 @@ export class UnityUtil {
 	/**
 	 * Toggle on/off rendering statistics.
 	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 */
+	public static showHiddenByDefaultObjects() {
+		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	 * Toggle stats for unity
 	 */
 	public static toggleStats() {
 		UnityUtil.toUnity("ShowStats", UnityUtil.LoadingState.VIEWER_READY, undefined);

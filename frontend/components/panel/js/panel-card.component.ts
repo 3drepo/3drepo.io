@@ -253,27 +253,15 @@ class PanelCardController implements ng.IController {
 	}
 
 	public toggleAdd(on) {
-		if (on) {
-			if (this.contentData.type === "issues") {
-				this.showToolbarOptions(["filter", "menu"], false);
-			}
-			this.hideItem();
-			this.PanelService.handlePanelEvent(
-				this.contentData.type,
-				this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-				{on: true},
-			);
-		} else {
-			if (this.contentData.type === "issues") {
-				this.showToolbarOptions(["filter", "menu"], true);
-			}
-			this.hideItem();
-			this.PanelService.handlePanelEvent(
-				this.contentData.type,
-				this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-				{on: false},
-			);
+		if (this.contentData.type === "issues") {
+			this.showToolbarOptions(["filter", "menu"], !on);
 		}
+		this.hideItem();
+		this.PanelService.handlePanelEvent(
+			this.contentData.type,
+			this.EventService.EVENT.PANEL_CARD_ADD_MODE,
+			{on},
+		);
 	}
 
 }

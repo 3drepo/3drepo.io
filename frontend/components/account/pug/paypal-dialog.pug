@@ -7,9 +7,13 @@ md-dialog#paypalDialog(aria-label="Paypal")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	.userContent
 		.cardInfo
-			b(ng-if="vm.payPalError") {{vm.payPalError}} 
+			p(ng-if="vm.payPalError") {{vm.payPalError}} 
 			br
-			p {{vm.payPalInfo}}
+			p(ng-if="!vm.payPalError") {{vm.payPalInfo}}
+			div(flex layout="column" layout-align="center center" ng-if="!vm.closeDialogEnabled")
+				br 
+				br
+				md-progress-circular()
 			br
 			div(ng-switch="vm.changeHelpToShow")
 				p(ng-switch-when="98")

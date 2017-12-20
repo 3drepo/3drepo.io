@@ -79,7 +79,7 @@ module.exports.createApp = function (serverConfig) {
 			.then(db => {
 				// set db to singleton modelFactory class
 				require("../models/factory/modelFactory")
-					.setDB(db);
+					.setDB(DB);
 				next();
 			})
 			.catch(err => {

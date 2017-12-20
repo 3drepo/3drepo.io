@@ -92,7 +92,8 @@ function prettyGMTDate() {
 
 function revisionDate() {
 	return (input) => {
-		return new Date(Date.parse(input)).toLocaleString();
+		const date = new Date(Date.parse(input)).toLocaleString();
+		return date.replace(",", "");
 	};
 }
 
