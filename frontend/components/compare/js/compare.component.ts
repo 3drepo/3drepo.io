@@ -56,7 +56,6 @@ class CompareController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		console.log(this.revision);
 		this.CompareService.disableComparision();
 		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
@@ -98,6 +97,10 @@ class CompareController implements ng.IController {
 
 	}
 
+	public revisionTimestamp(timestamp) {
+		return this.RevisionsService.revisionDateFilter(timestamp);
+	}
+
 	public updateModels() {
 		this.modelsReady.promise.then(() => {
 			const models = this.TreeService.getNodesToShow();
@@ -132,8 +135,6 @@ class CompareController implements ng.IController {
 	}
 
 	public modelSettingsReady() {
-
-		console.log("modelSettingsReady", this.model);
 
 		this.CompareService.state.isFed = this.modelSettings.federate;
 

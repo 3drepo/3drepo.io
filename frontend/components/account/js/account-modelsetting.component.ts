@@ -55,18 +55,16 @@ class AccountModelSettingController implements ng.IController {
 	) {}
 
 	public $onInit() {
- 
-		console.log("init model settings");
 
 		this.units = this.ClientConfigService.units;
 		this.mapTile = {};
 
 		// TODO: We should use statemanager eventually
 		this.urlData = this.$location.search();
-		this.modelId = this.urlData["modelId"];
-		this.modelName = this.urlData["modelName"];
-		this.targetAcct = this.urlData["targetAcct"];
-		this.targetProj = this.urlData["targetProj"];
+		this.modelId = this.urlData.modelId;
+		this.modelName = this.urlData.modelName;
+		this.targetAcct = this.urlData.targetAcct;
+		this.targetProj = this.urlData.targetProj;
 
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {

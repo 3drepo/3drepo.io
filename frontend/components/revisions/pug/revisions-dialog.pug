@@ -16,11 +16,11 @@ md-dialog.revisionsDialog(aria-label="Revisions")
 
 			div(layout="column", flex)
 				p(ng-if="rev.tag") {{rev.tag}}
-				p(ng-if="!rev.tag") {{rev._id}}
+				p(ng-if="!rev.tag") {{vm.revisionTimestamp(rev.timestamp)}}
 				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
 					p {{rev.author}}
 					p(ng-if="rev.current") (current revision)
-					p {{rev.timestamp | revisionDate }}
+					p ID: {{rev._id}}
 				.revisionsDialogInfo(layout="row", layout-align="space-between", flex)
 					p {{rev.desc}}
 

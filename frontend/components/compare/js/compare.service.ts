@@ -61,6 +61,7 @@ export class CompareService {
 		this.state.mode = "diff";
 		this.state.modelType = "base";
 		this.state.ready = this.readyDefer.promise;
+
 	}
 
 	public setMode(mode: any) {
@@ -98,8 +99,10 @@ export class CompareService {
 
 	public setTargetRevision(model: any, revision: any) {
 
+		const timestamp = this.RevisionsService.revisionDateFilter(revision.timestamp);
+
 		model.targetRevision = revision._id;
-		model.targetRevisionTag = revision.tag || revision.name;
+		model.targetRevisionTag = revision.tag || timestamp || revision.name;
 
 		if (this.state.compareEnabled) {
 			this.state.compareEnabled = false;
@@ -132,13 +135,19 @@ export class CompareService {
 		});
 		const headRevisionTag = headRevisionObj.tag || headRevisionObj.name;
 
-		let baseRevision = revisions.find((rev) => rev._id === revision );
-		if (!baseRevision) {
+		let baseRevision;
+
+		if (!this.isFederation) {
+			// If it's a model use the loaded revision
+			baseRevision = revisions.find((rev) => rev._id === revision );
+		} else {
+			// If it's a federation just set the base to the first revision
 			baseRevision = revisions[0];
 		}
-		console.log(baseRevision, targetRevision);
 
 		const targetRevision = this.nextRevision(revisions, baseRevision.name);
+		const baseTimestamp = this.RevisionsService.revisionDateFilter(baseRevision.timestamp);
+		const targetTimestamp = this.RevisionsService.revisionDateFilter(targetRevision.timestamp);
 
 		return {
 			account: modelSettings.account,
@@ -148,9 +157,9 @@ export class CompareService {
 			name: modelSettings.name,
 			revisions,
 			baseRevision: baseRevision.name,
-			baseRevisionTag: baseRevision.tag || baseRevision.name,
+			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
 			targetRevision: targetRevision.name,
-			targetRevisionTag: targetRevision.tag || targetRevision.name,
+			targetRevisionTag: targetRevision.tag || targetTimestamp || targetRevision.name,
 			visible: true,
 		};
 	}
@@ -192,7 +201,6 @@ export class CompareService {
 			modelSettings.subModels.forEach((model, i) => {
 
 				if (model.database && model.model) {
-					console.log(revision);
 					const revisionPromise = this.getRevisionModels(model, type, i, revision);
 					promises.push(revisionPromise);
 
@@ -425,11 +433,9 @@ export class CompareService {
 
 	private setBaseModelVisibility(model) {
 		const nodes = this.TreeService.getAllNodes();
-		console.log(nodes);
 		if (nodes.length && nodes[0].children) {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
-				console.log(node, model);
 				if (node.name === model.account + ":" + model.name) {
 					this.TreeService.toggleTreeNode(node, false);
 				}

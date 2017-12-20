@@ -51,8 +51,8 @@ div(
 								flex
 								layout-fill)
 
-						div(ng-if="!vm.loadingComparision"
-							ng-repeat="model in compareType[vm.modelType + 'Models']") 
+						div(ng-if="!vm.loadingComparision && model"
+							ng-repeat="model in compareType[vm.modelType + 'Models'] track by $index") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 								md-button.modelSides.compareVisibility(
@@ -90,10 +90,10 @@ div(
 
 											md-button(
 												ng-click="vm.setTargetRevision(model, revision)")
-												span(ng-if="revision.name !== model.targetRevision") {{revision.tag || revision.name}} 
-												span.selectedRev(ng-if="revision.name === model.targetRevision") {{revision.tag || revision.name}} 
+												span(ng-if="revision.name !== model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span.selectedRev(ng-if="revision.name === model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
 												span
-												span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
+												span.authorDate ({{revision.author}})
 							md-divider
 								
 

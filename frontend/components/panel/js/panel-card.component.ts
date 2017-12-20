@@ -58,7 +58,7 @@ class PanelCardController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		console.log(this.revision);
+
 		this.showHelp = false;
 		this.showFilter = false;
 		this.visibleStatus = false;
