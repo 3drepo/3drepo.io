@@ -1,0 +1,34 @@
+<html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+      <title>3D Repo Demo</title>
+      <meta name="description" content="An example of how to use the 3D Repo viewer libraries">
+      <meta name="author" content="SitePoint">
+    
+      <link href="./demo.css" type="text/css" rel="stylesheet">
+    </head>
+    
+    <body>
+      <div id="changeModel">
+          
+          <input id="model" type="text" placeholder="Please enter model ID">
+          <button id="modelSubmit"> Load Model </button>
+         
+      </div>
+      <div id="status">
+      </div>
+      <!-- Fetch Polyfill for requests -->
+      <script src="./fetch.js"></script>
+
+      <!-- 3D Repo dependencies -->
+      <script src="https://www.3drepo.io/unity/unity-util.js"></script>
+
+      <!-- The demo code for the viewer -->
+      <script src="./demo.js"></script>
+      <link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
+      
+
+    </body>
+</html>

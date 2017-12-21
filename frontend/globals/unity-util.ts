@@ -87,6 +87,9 @@ export class UnityUtil {
 		}
 	}
 
+	/**
+	 * Cancel the loading of model.
+	 */
 	public static cancelLoadModel() {
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
@@ -98,6 +101,9 @@ export class UnityUtil {
 		}
 	}
 
+	/**
+	 * Handle a error from Unity
+	 */
 	public static onUnityError(err, url, line) {
 		let conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
 					<br><br> <code>Error ${err} occured at line ${line}</code>
@@ -278,6 +284,11 @@ export class UnityUtil {
 	 * =============== TO UNITY ====================
 	 */
 
+	/**
+	 * Centres the viewpoint to the object
+	 * @param {string} ns - namespace for the object, i.e. teamspace + "." + model
+	 * @param {string} id - unique ID of the object to centre on
+	 */
 	public static centreToPoint(model, id) {
 		const params = {
 			model,
@@ -286,6 +297,11 @@ export class UnityUtil {
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	/**
+	 *  Change the colour of an existing pin
+	 *  @param {string} id - ID of the pin
+	 *  @param {number[]} colour - colour RGB value of the colour to change to.
+	 */
 	public static changePinColour(id, colour) {
 		const params =  {
 			color : colour,
@@ -295,6 +311,9 @@ export class UnityUtil {
 		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	/**
+	 * Clear all highlighting.
+	 */
 	public static clearHighlights() {
 		UnityUtil.toUnity("ClearHighlighting", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
@@ -334,6 +353,9 @@ export class UnityUtil {
 	/**
 	 * Load comparator model for diff tool
 	 * This returns a promise which will be resolved when the comparator model is loaded
+	 * @param {string} account - name of teamspace
+	 * @param {string} model - model ID
+	 * @param {revision=} revision - revision ID/tag to load
 	 */
 	public static diffToolLoadComparator(account, model, revision) {
 
@@ -358,6 +380,8 @@ export class UnityUtil {
 	/**
 	 * Set an existing submodel/model as a comparator model
 	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
+	 * @param {string} account - name of teamspace
+	 * @param {string} model - model ID
 	 */
 	public static diffToolSetAsComparator(account, model) {
 		const params: any = {
@@ -405,14 +429,27 @@ export class UnityUtil {
 		UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
 	}
 
+	/**
+	*  Turn off any clipping planes imposed into the viewer
+	*/
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity("DisableClip", undefined, undefined);
 	}
 
+	/**
+	 * Disable the Measuring tool.
+	 */
 	public static disableMeasuringTool() {
 		UnityUtil.toUnity("StopMeasuringTool", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	/**
+	 * Add a pin
+	 * @param {string} id - Identifier for the pin
+	 * @param {number[]} position - point in space where the pin should generate
+	 * @param {number[]} normal - normal vector for the pin (note: this is no longer used)
+	 * @param {number[]} colour - RGB value for the colour of the pin
+	 */
 	public static dropPin(id, position, normal, colour) {
 		const params = {
 			id,
@@ -423,10 +460,23 @@ export class UnityUtil {
 		UnityUtil.toUnity("DropPin", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	/**
+	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
+	 */
 	public static enableMeasuringTool() {
 		UnityUtil.toUnity("StartMeasuringTool", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	/**
+	 * Get Object Status within the viewer. This will return you the list of
+	 * objects that are currently set invisible, and a list of object that are
+	 * currently highlighted.
+	 *
+	 * The object status will be returned via the promise provided.
+	 * @param {string} account - name of teamspace
+	 * @param {string} model - name of the model
+	 * @param {object} promise - promise that the function will resolve with the object status info.
+	 */
 	public static getObjectsStatus(account, model, promise) {
 		let nameSpace = "";
 		if (account && model) {
@@ -454,6 +504,15 @@ export class UnityUtil {
 		UnityUtil.toUnity("HideHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
+	/**
+	 *  Highlight objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
+	 *  @param {number[]} color - RGB value of the highlighting colour
+	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
+	 *  				Also any objects that are already highlighted will be unhighlighted
+	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode) {
 		const params: any = {
 			database : account,
@@ -471,6 +530,14 @@ export class UnityUtil {
 		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
+	/**
+	 * Loading another model. NOTE: this will also clear the canvas of existing models
+	 * Use branch = master and revision = head to get the latest revision.
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string=} branch - ID of the branch (optional)
+	 *  @param {string} revision - ID of revision
+	 */
 	public static loadModel(account, model, branch, revision) {
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
@@ -497,25 +564,47 @@ export class UnityUtil {
 
 	}
 
+	/**
+	 * Remove a pin from the viewer
+	 * @param {string} id - pin identifier
+	 */
 	public static removePin(id) {
 		UnityUtil.toUnity("RemovePin", UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	/**
+	 * Clear the canvas and reset all settings
+	 */
 	public static reset() {
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.disableClippingPlanes();
 		UnityUtil.toUnity("ClearCanvas", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Reset the viewpoint to ISO view.
+	 */
 	public static resetCamera() {
 		UnityUtil.toUnity("ResetCamera", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Request a screenshot. The screenshot will be returned as a JSON
+	 * object with a single field, ssByte, containing the screenshot in
+	 * base64.
+	 * @param {object} promise - promise that will be resolved, returning with the screenshot
+	 */
 	public static requestScreenShot(promise) {
 		UnityUtil.screenshotPromises.push(promise);
 		UnityUtil.toUnity("RequestScreenShot", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Request the information of the current viewpoint
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
+	 */
 	public static requestViewpoint(account, model, promise) {
 		if (UnityUtil.vpPromise != null) {
 			UnityUtil.vpPromise.then(UnityUtil._requestViewpoint(account, model, promise));
@@ -534,18 +623,41 @@ export class UnityUtil {
 		UnityUtil.toUnity("RequestViewpoint", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
+	/**
+	 * Set API host urls. This is needs to be called before loading model.
+	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/)
+	 */
 	public static setAPIHost(hostname) {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
+	/**
+	 * Set navigation mode.
+	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
+	 */
 	public static setNavigation(navMode) {
 		UnityUtil.toUnity("SetNavMode", UnityUtil.LoadingState.VIEWER_READY, navMode);
 	}
 
+	/**
+	 * Set the units
+	 * By default, units are set to mm.
+	 * @param {string} units - i.e. "m", "mm", "ft" etc.
+	 */
 	public static setUnits(units) {
 		UnityUtil.toUnity("SetUnits", UnityUtil.LoadingState.MODEL_LOADING, units);
 	}
 
+	/**
+	 * Move viewpoint to the specified paramters
+	 * teamspace and model is only needed if the viewpoint is relative to a model
+	 * @param {number[]} pos - 3D point in space where the camera should be
+	 * @param {number[]} up - Up vector
+	 * @param {number[]} forward - forward vector
+	 * @param {number[]} lookAt - point in space the camera is looking at. (pivot point)
+	 * @param {string=} account - name of teamspace
+	 * @param {string=} model - name of model
+	 */
 	public static setViewpoint(pos, up, forward, lookAt, account, model) {
 		const param: any = {};
 		if (account && model) {
@@ -560,14 +672,28 @@ export class UnityUtil {
 
 	}
 
+	/**
+	 * Toggle on/off rendering statistics.
+	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
+	/**
+	 * Toggle stats for unity
+	 */
 	public static toggleStats() {
 		UnityUtil.toUnity("ShowStats", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Toggle visibility of the given list of objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} ids - list of unique ids to toggle visibility
+	 *  @param {bool} visibility - true = toggle visible, false = toggle invisible
+	 */
 	public static toggleVisibility(account, model, ids, visibility) {
 		const param: any = {};
 		if (account && model) {
@@ -580,6 +706,18 @@ export class UnityUtil {
 
 	}
 
+	/**
+	 * Update the clipping plane to the given direction
+	 * teamspace and model is only needed if the viewpoint is relative to a model
+	 * @example
+	 * //Clipping plane is defined by the plane normal, distance from origin and it's direction
+	 * //direction = -1 means it will clip anything above the plane, 1 otherwise.
+	 * UnityUtil.updateClippingPlanes({normal : [0,-1,0], distance: 10, clipDirection: -1}, false)
+	 * @param {Object} clipPlane - object containing the clipping plane
+	 * @param {bool} requireBroadcast - if set to true, UnityUtil.clipBroadcast will be called after it is set.
+	 * @param {string=} account - name of teamspace
+	 * @param {string=} model - name of model
+	 */
 	public static updateClippingPlanes(clipPlane, requireBroadcast, account, model) {
 		const param: any = {};
 		param.clip = clipPlane;
