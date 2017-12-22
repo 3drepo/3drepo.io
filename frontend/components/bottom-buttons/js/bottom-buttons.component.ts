@@ -62,6 +62,18 @@ class BottomButtonsController implements ng.IController {
 
 		this.leftButtons = [];
 		this.leftButtons.push({
+			label: "Extent",
+			icon: "fa fa-home",
+			month: (new Date()).getMonth(),
+			click: () => { this.extent(); },
+		});
+
+		this.leftButtons.push({
+			isViewingOptionButton: true,
+			click: () => { this.setViewingOption(undefined); },
+		});
+
+		this.leftButtons.push({
 			label: "Show All",
 			icon: "fa fa-eye",
 			click: () => { this.showAll(); },
@@ -72,18 +84,6 @@ class BottomButtonsController implements ng.IController {
 			icon: "fa fa-scissors",
 			click: () => { this.isolate(); },
 		});
-
-		this.leftButtons.push({
-			label: "Extent",
-			icon: "fa fa-home",
-			month: (new Date()).getMonth(),
-			click: () => { this.extent(); },
-		});
-
-		/*this.leftButtons.push({
-			label: "Turntable",
-			lick: () => { this.setViewingOptions(undefined); },
-		});*/
 
 		this.selectedMode = "Turntable";
 		this.setViewingOption(this.selectedMode);
