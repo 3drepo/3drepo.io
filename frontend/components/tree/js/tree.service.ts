@@ -915,9 +915,6 @@ export class TreeService {
 		// toggle yourself
 		this.setToggleState(node, visibility, fastforward);
 
-		this.updateClickedHidden(node);
-		this.updateClickedShown(node);
-
 		const stack = [node];
 		let head = null;
 
