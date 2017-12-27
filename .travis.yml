@@ -34,13 +34,7 @@ before_install:
     - cd backend && mongorestore
     - cd ./../../../
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
-
-install:
-    - cd ./backend 
-    - yarn install
-    - cd ./../frontend 
-    - yarn install
-    - yarn run gulp build
+    - echo $PWD
 
 cache:
   yarn: true
@@ -51,9 +45,18 @@ services:
   - rabbitmq
   - mongodb
 
-env:
-  - TEST_SUITE=backend
-  - TEST_SUITE=frontend
+matrix:
+    include:
+        - env: TEST_SUITE=backend
+          install:
+            - cd ./backend 
+            - yarn install
+          
+        - env: TEST_SUITE=backend
+          install:
+            - cd ./frontend 
+            - yarn install
+            - yarn run gulp build
 
 script: 
     - echo $PWD
