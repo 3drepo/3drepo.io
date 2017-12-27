@@ -10,7 +10,6 @@ const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
 const sourcemaps = require('gulp-sourcemaps');
-const merge = require('streamqueue');
 const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
