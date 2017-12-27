@@ -46,4 +46,5 @@
 	}
 	
 	window.TDR = angular.module("3drepo", ["ui.router", "ngMaterial", "ngAnimate", "ngSanitize", "vcRecaptcha"]);
+
 })();
