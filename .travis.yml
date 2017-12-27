@@ -56,7 +56,8 @@ env:
   - TEST_SUITE=frontend
 
 script: 
-    - test.sh TEST_SUITE
+    - echo $PWD
+    - ./test.sh TEST_SUITE
 
 notifications:
     email: 
