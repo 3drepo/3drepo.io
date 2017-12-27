@@ -33,6 +33,7 @@ DB.prototype.addUser = (username, password, options) => {
 DB.prototype.db = function() { return this; };
 
 DB.prototype.collection = function() { return this; };
+DB.prototype.getCollection = function() { return this; };
 
 DB.prototype.command = function() { return this; };
 

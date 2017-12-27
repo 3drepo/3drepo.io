@@ -1,6 +1,6 @@
 # Model
 
-## Get a model
+## Get Model Settings
 
 > Example request
 
@@ -214,7 +214,7 @@ code |  No | a short code represents this model, contains only numbers and alpha
 project |  No | project this model belongs to
 
 
-## Update a model
+## Edit a federation
 
 > Example request
 
@@ -243,9 +243,9 @@ PUT /repoman/00000000-0000-0000-0000-000000000000 HTTP/1.1
 
 ### PUT /{accountName}/{modelID}
 
-Update a model. This API is used to update sub models in a federated model only.
+This API is used to update sub models in a federated model only.
 
-Updating a non-federated model will return an error. To update model settings, see [Update model settings](#update-model-settings)
+Calling this API with a  non-federated model will return an error. To update model settings, see [Update model settings](#update-model-settings)
 
 Request body
 
@@ -459,3 +459,4 @@ Get the job assigned to user for this team space
 Response body
 
 [Job object](#job-object)
+

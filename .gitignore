@@ -2,8 +2,7 @@ node_modules
 
 !frontend/_built/empty
 frontend/_built/*
-
-
+*.*~
 *.bak
 *.swp
 /*.log
@@ -11,7 +10,7 @@ config/*
 !config/test/
 frontend/custom/*
 frontend/custom/test
-
+frontend/docs
 frontend/tests/e2e/built
 
 yarn-error.log

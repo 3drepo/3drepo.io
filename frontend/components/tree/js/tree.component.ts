@@ -51,6 +51,7 @@ class TreeController implements ng.IController {
 	private topIndex; // in pug
 	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
+	private hideIfc;
 
 	private currentSelectedId;
 	private currentSelectedIndex;
@@ -84,6 +85,7 @@ class TreeController implements ng.IController {
 		this.TreeService.resetInvisible();
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
+		this.hideIfc = true;
 		this.watchers();
 
 	}
@@ -126,7 +128,6 @@ class TreeController implements ng.IController {
 				/*
 				* Get all the tree nodes
 				*/
-
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -185,6 +186,37 @@ class TreeController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watch("vm.selectedMenuOption",
+			(selectedOption: any) => {
+
+				if (selectedOption && selectedOption.hasOwnProperty("value")) {
+
+					// Menu option
+					switch (selectedOption.value) {
+						case "showAll":
+							this.TreeService.showAllTreeNodesAndIFCs();
+							break;
+						case "hideIfc":
+							this.hideIfc = selectedOption.selected;
+							this.TreeService.setHideIfc(this.hideIfc);
+							if (this.hideIfc) {
+								this.ViewerService.hideHiddenByDefaultObjects();
+								this.TreeService.hideTreeNodes(this.TreeService.getHiddenByDefaultNodes());
+							} else {
+								this.ViewerService.showHiddenByDefaultObjects();
+								this.TreeService.showTreeNodes(this.TreeService.getHiddenByDefaultNodes());
+							}
+							break;
+						case "isolate":
+							this.TreeService.isolateSelected();
+							break;
+						default:
+							console.error("Tree option menu selection unhandled");
+					}
+				}
+
+			});
+
 		// TODO - check for better way to sync state between component and service
 		this.$scope.$watchCollection(() => this.TreeService.state,
 			(state) => {
@@ -234,16 +266,18 @@ class TreeController implements ng.IController {
 				}
 			}
 
-			lastViewerUpdateTime = this.TreeService.highlightMapUpdateTime;
+			lastViewerUpdateTime = Date.now();
 
-		}, 300);
+		}, 100);
 
 	}
 
 	/**
-	 * Handle visibility changes from tree service to viewer service
+	 * Handle visibility changes from tree service to viewer service.
+	 * @param clickedIds	Collection of ids to show/hide.
+	 * @param visible	Set ids to visibile.
 	 */
-	public handleVisibility(clickedIds, visible) {
+	public handleVisibility(clickedIds: any, visible: boolean) {
 		const objectIds = [];
 
 		for (const id in clickedIds) {
@@ -278,9 +312,10 @@ class TreeController implements ng.IController {
 	}
 
 	/**
-	 * Handle highlight changes from tree service to viewer service
+	 * Handle highlight changes from tree service to viewer service.
+	 * @param highlightMap	Collection of ids to highlight.
 	 */
-	public handleSelection(highlightMap) {
+	public handleSelection(highlightMap: any) {
 		// Update viewer highlights
 		this.ViewerService.clearHighlights();
 
@@ -311,7 +346,6 @@ class TreeController implements ng.IController {
 	/**
 	 * Set the content height.
 	 * The height of a node is dependent on its name length and its level.
-	 *
 	 * @param {Array} nodesToShow
 	 */
 	public setContentHeight(nodesToShow) {
@@ -342,7 +376,7 @@ class TreeController implements ng.IController {
 
 	/**
 	 * Fetch nodesToShow from tree service and update nodesToShow in tree component.
-	 * Returns this.nodesToShow.
+	 * @returns	nodesToShow.
 	 */
 	public fetchNodesToShow() {
 		this.nodesToShow = this.TreeService.getNodesToShow();
@@ -371,7 +405,7 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		this.TreeService.toggleTreeNode(node);
+		this.TreeService.toggleTreeNodeVisibility(node, false);
 	}
 
 	/**
@@ -450,6 +484,7 @@ export const TreeComponent: ng.IComponentOptions = {
 		model:  "=",
 		onContentHeightRequest: "&",
 		revision: "=",
+		selectedMenuOption: "=",
 	},
 	controller: TreeController,
 	controllerAs: "vm",

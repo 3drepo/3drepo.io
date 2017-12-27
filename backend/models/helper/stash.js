@@ -25,79 +25,76 @@ var systemLogger = require("../../logger.js").systemLogger;
 
 function getGridFSBucket (account, bucketName){
 	'use strict';
-
-	return new GridFSBucket(
-		ModelFactory.db.db(account),
-		{ bucketName:  bucketName}
-	);
+	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
 
 
 function _getGridFSBucket (dbCol, format){
 	'use strict';
 
-	return new GridFSBucket(
-		ModelFactory.db.db(dbCol.account),
-		{ bucketName:  `${dbCol.model}.stash.${format}`}
-	);
+	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);
 }
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';
-
-	let bucket = _getGridFSBucket(dbCol, format);
-
-	return bucket.find({ filename }).toArray().then(files => {
-		if(!files.length){
-			systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
-			return Promise.resolve(false);
+	return  _getGridFSBucket(dbCol, format).then(bucket => {
+		return bucket.find({ filename }).toArray().then(files => {
+			if(!files.length){
+				systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
+				return Promise.resolve(false);
 			
-		} else {
-			systemLogger.logInfo(filename + " - Retrieved from stash");
+			} else {
+				systemLogger.logInfo(filename + " - Retrieved from stash");
 
-			return new Promise((resolve) => {
+				return new Promise((resolve) => {
 
-				let downloadStream = bucket.openDownloadStreamByName(filename);
+					let downloadStream = bucket.openDownloadStreamByName(filename);
 
-				if(getStreamOnly){
-					
-					resolve(downloadStream);
+					if(getStreamOnly){
+							
+						resolve(downloadStream);
 
-				} else { 
+					} else { 
 
-					let bufs = [];
+						let bufs = [];
 
-					downloadStream.on('data', function(d){ bufs.push(d); });
-					downloadStream.on('end', function(){
-						resolve(Buffer.concat(bufs));
-					});
+						downloadStream.on('data', function(d){ bufs.push(d); });
+						downloadStream.on('end', function(){
+							resolve(Buffer.concat(bufs));
+						});
 
-				}
+					}
 
-			});
+				});
 
-		}
+			}
+		});
+	}).catch(err => {
+		systemLogger.logError("Errored during fetching of " + filename, err);
+		ModelFactory.dbManager.disconnect();
+		Promise.reject(err);
 	});
 }
 
 function saveStashByFilename(dbCol, format, filename, buffer){
 	'use strict';
 
-	let bucket = _getGridFSBucket(dbCol, format);
-	let uploadStream = bucket.openUploadStream(filename);
+	return  _getGridFSBucket(dbCol, format).then(bucket => {
+		let uploadStream = bucket.openUploadStream(filename);
 
-	let bufferStream = new stream.PassThrough();
-	bufferStream.end(buffer);
+		let bufferStream = new stream.PassThrough();
+		bufferStream.end(buffer);
 
-	bufferStream.pipe(uploadStream);
+		bufferStream.pipe(uploadStream);
 
-	return new Promise((resolve, reject) => {
-		uploadStream.once('finish', function(fileMeta) {
-			resolve(fileMeta);
-		});
+		return new Promise((resolve, reject) => {
+			uploadStream.once('finish', function(fileMeta) {
+				resolve(fileMeta);
+			});
 
-		uploadStream.once('error', function(err) {
-			reject(err);
+			uploadStream.once('error', function(err) {
+				reject(err);
+			});
 		});
 	});
 }

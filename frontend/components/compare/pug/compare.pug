@@ -20,7 +20,7 @@ div(
 
 				md-content(layout-fill)
 
-					div.topBorder.modelTypeSelection(
+					div.modelTypeSelection(
 						id="{{compareType.type + 'ModelTypeSection'}}"
 						ng-if="!vm.isModelClash(compareType.type)"
 						layout="row"
@@ -40,7 +40,7 @@ div(
 							ng-style="{ background: vm.getModelTypeStyle('target', 'background'), color: vm.getModelTypeStyle('target', 'color') }")
 							span Target model
 
-					#modelsList.topBorder
+					#modelsList
 
 						div(ng-if="vm.isModelClash(compareType.type)")
 							h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
@@ -51,20 +51,25 @@ div(
 								flex
 								layout-fill)
 
-						div(ng-if="!vm.loadingComparision"
-							ng-repeat="model in compareType[vm.modelType + 'Models']") 
+						div(ng-if="!vm.loadingComparision && model"
+							ng-repeat="model in compareType[vm.modelType + 'Models'] track by $index") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
-
-								md-button.modelSides.compareVisibility(ng-click="vm.toggleModelVisibility(model)")
-									md-icon.angular-material-icons(ng-if="model.visible") visibility
+								md-button.modelSides.compareVisibility(
+									ng-if="vm.isFederation()"
+									ng-click="vm.toggleModelVisibility(model)")
+									md-icon.angular-material-icons.visible(ng-if="model.visible") visibility
 									md-icon.angular-material-icons(ng-if="!model.visible") visibility_off
 									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
+								md-button.modelSides.compareVisibility(
+									ng-if="!vm.isFederation()")
+									md-icon.angular-material-icons(ng-if="model.visible") block
+									md-tooltip(md-direction="bottom") Visibility toggling not available on models
+
 
 								div(ng-if="vm.modelType === 'base'" flex layout="column")
 									h5.modelText {{model.name}}
-									span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
-									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
 								
 								md-menu(
 									flex
@@ -75,17 +80,20 @@ div(
 									div(flex ng-click="$mdOpenMenu($event)" layout="row")
 										div(flex layout="column")
 											h5.modelText {{model.name}}
-											span.revisionText(ng-if="vm.modelType === 'target'") {{model.selectedRevisionTag}}
-											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.headRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'target'") {{model.targetRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
 										md-icon.angular-material-icons expand_more
 										md-tooltip(md-direction="right") Change Revision
 									md-menu-content
 										md-menu-item(
 											ng-repeat="revision in model.revisions")
 
-											md-button(ng-click="vm.setRevision(model, revision)")
-												span {{revision.tag || revision.name}} 
-												span.authorDate ({{revision.author}} - {{vm.prettyTimestamp(revision.timestamp)}})
+											md-button(
+												ng-click="vm.setTargetRevision(model, revision)")
+												span(ng-if="revision.name !== model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span.selectedRev(ng-if="revision.name === model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span
+												span.authorDate ({{revision.author}})
 							md-divider
 								
 

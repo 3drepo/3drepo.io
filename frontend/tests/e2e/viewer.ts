@@ -46,13 +46,15 @@ describe("Viewer page", function() {
 
 		});
 
-		describe("with the right bottom buttons", () => {
+		/*
+		 * RIGHT BUTTONS CURRENTLY NOT IN USE
+		 * describe("with the right bottom buttons", () => {
 
 			it("visible", () => {
 				expect(element(by.id("rightButtons")).isDisplayed()).to.eventually.equal(true);
 			});
 
-		});
+		});*/
 
 		describe("left side buttons", () => {
 			it("visible", () => {
