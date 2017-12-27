@@ -52,7 +52,7 @@ matrix:
             - cd ./backend 
             - yarn install
           
-        - env: TEST_SUITE=backend
+        - env: TEST_SUITE=frontend
           install:
             - cd ./frontend 
             - yarn install
@@ -60,7 +60,7 @@ matrix:
 
 script: 
     - echo $PWD
-    - ./test.sh TEST_SUITE
+    - ./../test.sh TEST_SUITE
 
 notifications:
     email: 
