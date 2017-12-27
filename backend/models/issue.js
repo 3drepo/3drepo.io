@@ -456,8 +456,8 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 	let zip = archiver.create("zip");
 
-	zip.append(new Buffer(this.getModelBCF(model), "utf8"), {name: "model.bcf"})
-	.append(new Buffer(this.getBCFVersion(), "utf8"), {name: "bcf.version"});
+	zip.append(new Buffer.from(this.getModelBCF(model), "utf8"), {name: "model.bcf"})
+	.append(new Buffer.from(this.getBCFVersion(), "utf8"), {name: "bcf.version"});
 
 	let projection = {};
 	let noClean = true;
@@ -474,10 +474,10 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 			let bcf = issue.getBCFMarkup(_.get(settings, "properties.unit"));
 
-			zip.append(new Buffer(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
+			zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
 			bcf.viewpoints.forEach(vp => {
-				zip.append(new Buffer(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
+				zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
 			});
 
 			bcf.snapshots.forEach(snapshot => {
@@ -641,13 +641,13 @@ schema.statics.createIssue = function(dbColOptions, data){
 			data.viewpoint.group_id = data.group_id;
 			
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
-				content: new Buffer(data.viewpoint.scribble, "base64"),
+				content: new Buffer.from(data.viewpoint.scribble, "base64"),
 				flag: 1
 			});
 
 			if(data.viewpoint.screenshot){
 				data.viewpoint.screenshot = {
-					content: new Buffer(data.viewpoint.screenshot, "base64"),
+					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
 					flag: 1
 				};
 			}
@@ -872,12 +872,12 @@ schema.methods.updateComment = function(commentIndex, data){
 				data.viewpoint.guid = utils.generateUUID();
 
 				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
-					content: new Buffer(data.viewpoint.screenshot, "base64"),
+					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
 					flag: 1
 				});
 
 				data.viewpoint.scribble && (data.viewpoint.scribble = {
-					content: new Buffer(data.viewpoint.scribble, "base64"),
+					content: new Buffer.from(data.viewpoint.scribble, "base64"),
 					flag: 1
 				});
 
