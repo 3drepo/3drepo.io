@@ -122,7 +122,8 @@ class IssueListController implements ng.IController {
 					break;
 
 				case "showSubModels":
-					this.IssuesService.state.issueDisplay.showSubModelIssues = !this.IssuesService.state.issueDisplay.showSubModelIssues;
+					this.IssuesService.state.issueDisplay.showSubModelIssues =
+					!this.IssuesService.state.issueDisplay.showSubModelIssues;
 					break;
 
 				case "print":
@@ -236,7 +237,7 @@ export const IssueListComponent: ng.IComponentOptions = {
 	},
 	controller: IssueListController,
 	controllerAs: "vm",
-	templateUrl: "templates/issue-list.html",
+	templateUrl: "templates/issues-list.html",
 };
 
 export const IssueListComponentModule = angular
