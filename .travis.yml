@@ -35,11 +35,19 @@ before_install:
     - cd ./../../../
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
     - echo $PWD
+    - cd ./frontend 
+    - yarn install
+    - yarn run gulp build
+    - cd ./../backend 
+    - yarn install
+    - cd ..
+
 
 cache:
   yarn: true
   directories:
-    - node_modules
+    - ./frontend/node_modules
+    - ./backend/node_modules
 
 services:
   - rabbitmq
@@ -48,20 +56,15 @@ services:
 matrix:
     include:
         - env: TEST_SUITE=backend
-          install:
-            - cd ./backend 
-            - yarn install
-          
         - env: TEST_SUITE=frontend
-          install:
-            - cd ./frontend 
-            - yarn install
-            - yarn run gulp build
 
 script: 
     - echo $PWD
-    - sudo chmod +X ./../test.sh
-    - sudo ./../test.sh TEST_SUITE
+    - ls -lah
+    - ls -lah ./../
+    - chmod +X ./test.sh
+    - node --version
+    - bash ./test.sh $TEST_SUITE
 
 notifications:
     email: 
