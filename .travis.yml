@@ -60,8 +60,8 @@ matrix:
 
 script: 
     - echo $PWD
-    - chmod +X ./../test.sh
-    - ./../test.sh TEST_SUITE
+    - sudo chmod +X ./../test.sh
+    - sudo ./../test.sh TEST_SUITE
 
 notifications:
     email: 
