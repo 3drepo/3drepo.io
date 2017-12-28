@@ -14,8 +14,11 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.loadingTeamspaces", flex="100")
+					
+					md-card(md-padding layout="row" layout-align="center center") 
+						p Teamspaces are the top level container for all your content. Teamspaces hold Projects which in turn hold models and federations.
 
-					div(flex="100")
+					md-card.assignDropDowns(flex="100")
 						md-label Select Teamspace
 						md-select(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 							md-option(
@@ -32,14 +35,20 @@
 
 							thead(layout="row")
 
-								tr: th.userColumn User
+								tr
+									th.userColumn User
+										md-tooltip The user to assign permissions to
 
 								tr(
 									ng-repeat="(permission, value) in vm.teamspacePermissions"
 									ng-if="permission !== 'teamspace_admin'"
-									layout-align="center center"): th {{value}}
+									layout-align="center center")
+										th {{value.title}}
+											md-tooltip {{value.tooltip}}
 
-								tr: th.adminColumn Admin
+								tr
+									th.adminColumn Admin
+										md-tooltip {{vm.teamspacePermissions.teamspace_admin.tooltip}}
 
 							tbody(layout="column")
 								tr(
@@ -49,12 +58,12 @@
 
 									td.userColumn.userInput
 										p {{user.user}}
-
+		
 									td(ng-if="permission !== 'teamspace_admin'"
 										ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
 											ng-disabled="vm.teamspaceAdminDisabled(user, permission)"
-											aria-label="Checkbox {{value}}"
+											aria-label="Checkbox {{value.title}}"
 											layout-align="center center"
 											ng-click="vm.teamspaceStateChange(user, permission)"
 											ng-checked="vm.teamspaceAdminChecked(user, permission)")
@@ -79,7 +88,10 @@
 
 				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
 
-					div(layout="row")
+					md-card(layout="row" layout-align="center center") 
+						p Projects are a way of organising and grouping your models and federations. They sit below Teamspaces.
+
+					md-card.assignDropDowns(layout="row")
 						div(flex="50", layout="column")
 
 							md-label Select Teamspace
@@ -116,12 +128,15 @@
 							thead(layout="column")
 								tr
 									th.userColumn User
+										md-tooltip The user to assign permissions to
 
 									th(ng-if="permission !== 'admin_project'"
 										ng-repeat="(permission, value) in vm.projectPermissions"
-										layout-align="center center") {{value}}
+										layout-align="center center") {{value.title}}
+										md-tooltip {{value.tooltip}}
 
 									th.adminColumn Admin
+										md-tooltip {{vm.projectPermissions.admin_project.tooltip}}
 
 							tbody(layout="column")
 								tr(
@@ -138,7 +153,7 @@
 
 										md-checkbox(
 											ng-disabled="vm.isTeamspaceAdmin(user)"
-											aria-label="Project Permission {{value}}"
+											aria-label="Project Permission {{value.title}}"
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
 											ng-checked="vm.adminChecked(user, permission)")
@@ -164,7 +179,11 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
-					div(layout="row")
+
+					md-card(layout="row" layout-align="center center") 
+						p Models and Federations sit below Projects. Federations are made of individual Models.
+
+					md-card.assignDropDowns(layout="row")
 						div(flex="33", layout="column")
 
 							md-label Select Teamspace
@@ -215,7 +234,10 @@
 							flex)
 
 							thead(layout="row")
-								tr: th.fixedWidth.userColumn User
+								tr
+									th.fixedWidth.userColumn User
+										md-tooltip The user to assign permissions to
+
 								//tr: th.fixedWidth.userColumn Role
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
 									th.fixedWidth.sentenceCase(

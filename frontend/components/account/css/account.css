@@ -837,8 +837,13 @@ account-teamspaces md-content {
   min-height: 300px;
 }
 
+account-assign .assignDropDowns {
+  padding: 20px;
+}
 
-
+account-assign .assignDropDowns md-label {
+  font-weight: bold;
+}
 
 /** Account Assign ***********************************************************************************************/
 account-assign .assignTabHolder {

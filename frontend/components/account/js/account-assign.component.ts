@@ -79,7 +79,13 @@ class AccountAssignController implements ng.IController {
 
 		this.teamspacePermissions = {
 
-			teamspace_admin : "Admin",
+			teamspace_admin : {
+				title: "Admin",
+				tooltip: `
+					Give the user full administration privileges for
+					Teamspace and all sub projects, federations and models.
+				`,
+			},
 			// assign_licence	: "Assign Licence",
 			// revoke_licence	: "Revoke Licence",
 			// create_project	: "Create Project",
@@ -94,7 +100,13 @@ class AccountAssignController implements ng.IController {
 			// create_federation : "Create Federation",
 			// delete_project : "Delete Project",
 			// edit_project :  "Edit Project",
-			admin_project : "Admin Project",
+			admin_project :  {
+				title: "Admin Project",
+				tooltip: `
+					Give the user full administration privileges for the Project
+					and all federations and models held within it.
+				`,
+			},
 		};
 
 		this.modelRoles = ["unassigned"];
