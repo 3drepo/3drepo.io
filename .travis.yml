@@ -60,6 +60,7 @@ matrix:
 
 script: 
     - echo $PWD
+    - chmod +X ./../test.sh
     - ./../test.sh TEST_SUITE
 
 notifications:
