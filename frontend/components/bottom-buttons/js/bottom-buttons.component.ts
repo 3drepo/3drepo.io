@@ -101,19 +101,12 @@ class BottomButtonsController implements ng.IController {
 		this.isFocusMode = false;
 
 		this.escapeFocusModeButton = document.createElement("md-button");
-		this.escapeFocusModeButton.setAttribute("style", `
-							height: 50px;
-							width: 50px;
-							margin: 15px !important;
-							position: absolute;
-							z-index: 1000000000000;
-							border-radius: 30px;
-							background: rgb(6,86,60);
-							top: 0;
-							right: 0px;
-							cursor: pointer;
-							display: none;
-						`);
+		this.escapeFocusModeButton.className = "focus-button";
+		const icon = document.createElement("md-icon");
+		icon.innerHTML = "clear";
+		icon.className = "angular-material-icons material-icons close-icon";
+
+		this.escapeFocusModeButton.appendChild(icon);
 		document.getElementsByTagName("home")[0].appendChild(this.escapeFocusModeButton);
 	}
 
