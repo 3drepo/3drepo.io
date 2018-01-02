@@ -164,7 +164,7 @@
 			console.log(AuthService, AuthService.authPromise);
 			// If it's a logged in page just redirect to the
 			// users teamspace page
-			AuthService.authPromise.then(function(){
+			AuthService.authDefer.promise.then(function(){
 				if (
 					AuthService.loggedOutPage() && 
 					AuthService.getUsername()
@@ -343,6 +343,7 @@
 		vm.legalDisplay = function (event, display) {
 			$window.open("/" + display.value);
 		};
+		
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
