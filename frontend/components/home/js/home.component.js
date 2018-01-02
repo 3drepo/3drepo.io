@@ -161,6 +161,7 @@
 				removeTrailingSlash();
 			}
 
+			console.log(AuthService, AuthService.authPromise);
 			// If it's a logged in page just redirect to the
 			// users teamspace page
 			AuthService.authPromise.then(function(){
@@ -177,7 +178,7 @@
 		$scope.$watch(function(){
 			return $location.path();
 		}, function() {
-
+			console.log(vm.isLegalPage, vm.state.changing);
 			vm.handlePaths();
 			
 		});
