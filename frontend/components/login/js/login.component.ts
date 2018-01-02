@@ -55,6 +55,8 @@ class LoginController implements ng.IController {
 			this.loginMessage = "Welcome to 3D Repo";
 		}
 
+		this.watchers();
+
 	}
 
 	public watchers() {

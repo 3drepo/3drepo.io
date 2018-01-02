@@ -351,7 +351,7 @@
 					if (!event.value.error) {
 						if(!event.value.initialiser) {
 							
-							EventService.send(EventService.EVENT.UPDATE_STATE);
+							StateManager.updateState(true);
 
 							if(!StateManager.state.account){
 								
@@ -359,7 +359,7 @@
 								if (!username) {
 									console.error("Username is not defined for statemanager!");
 								}
-								EventService.send(EventService.EVENT.SET_STATE, { 
+								StateManager.setHomeState({ 
 									account: username
 								});
 							}
@@ -376,8 +376,7 @@
 					var currentPage = $location.path();
 
 					if (vm.doNotLogout.indexOf(currentPage) === -1) {
-						//EventService.send(EventService.EVENT.CLEAR_STATE);
-						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+						StateManager.setHomeState({ loggedIn: false, account: null });
 					}
 
 				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
