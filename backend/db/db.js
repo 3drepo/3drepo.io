@@ -26,9 +26,6 @@
 			};
 
 	let db;
-	// db object only for authenicate
-	// POSSIBLE TO-DO: move all the users data and do not reply on mongo system.users 
-	let authDB;
 	
 	function disconnect() {
 		if(db){
@@ -78,14 +75,9 @@
 	}
 
 	function getAuthDB() {
-		if(authDB){
-			return Promise.resolve(authDB);
-		} else {
-			return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
-				authDB = _db;
-				return authDB;
-			});
-		}
+		return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
+			return _db;
+		});
 	}
 
 	function getGridFSBucket(database, collection) {

@@ -117,9 +117,12 @@ schema.statics.authenticate = function(logger, username, password){
 		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
-	return DB.getAuthDB().then(authDB => {
+	let authDB = null;
+	return DB.getAuthDB().then(_authDB => {
+		authDB = _authDB;
 		return authDB.authenticate(username, password);
 	}).then(() => {
+		authDB.close();	
 		return this.findByUserName(username);
 	}).then(user => {
 		if(user.customData && user.customData.inactive) {
@@ -134,6 +137,9 @@ schema.statics.authenticate = function(logger, username, password){
 		return user.save();
 
 	}).catch( err => {
+		if(authDB) {
+			authDB.close();	
+		}
 		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
 	});
 };
