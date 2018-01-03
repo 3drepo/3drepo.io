@@ -498,6 +498,7 @@ Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, accoun
 
 	}).then(() => {
 		subscription.assignedUser = undefined;
+		subscription.job = undefined;
 		return subscription;
 	});
 
