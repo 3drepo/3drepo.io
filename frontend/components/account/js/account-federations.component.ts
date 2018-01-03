@@ -37,6 +37,8 @@ class AccountFederationsController implements ng.IController {
 	private originalFederationData;
 	private federationData;
 
+	private errorDialog;
+
 	private isSaving;
 	private modelRegExp;
 	private units;
@@ -291,7 +293,12 @@ class AccountFederationsController implements ng.IController {
 	 * Edit a federation
 	 */
 	public setupEditFederation(event: any, teamspace: any, project: any, model: any) {
+		console.log(model);
 		this.federationData = model;
+
+		// TODO: Why isn't this in the fed data model?
+		this.federationData.unit = this.federationData.unit || "mm";
+
 		this.federationData.teamspace = teamspace.name;
 
 		// Default projects wont have a name
@@ -367,7 +374,10 @@ export const AccountFederationsComponent: ng.IComponentOptions = {
 		federationsSaving: "=",
 		saveFederation: "=",
 		addToFederation: "=",
+		errorDialog: "=",
+		cancelFederationChanges: "=",
 		isDuplicateName: "=",
+		resetViewableCache: "=",
 		checkFederationSaveDisabled: "=",
 		federationSaveDisabled: "=",
 		isSaving: "=",
