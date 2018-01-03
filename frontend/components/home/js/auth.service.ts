@@ -26,18 +26,20 @@ export class AuthService {
 		"$mdDialog",
 
 		"ClientConfigService",
-		"EventService",
 		"AnalyticService",
 		"APIService",
 	];
 
-	public authPromise;
+	public authDefer;
+
 	private doNotLogout;
 	private legalPages;
 	private loggedOutPages;
 	private loggedOutPagesCamel;
 	private username;
 	private loggedIn;
+	private state;
+	private events;
 
 	constructor(
 		private $injector,
@@ -48,12 +50,11 @@ export class AuthService {
 		private $mdDialog,
 
 		private ClientConfigService: any,
-		private EventService: any,
 		private AnalyticService: any,
 		private APIService: any,
 	) {
 
-		this.authPromise = $q.defer().promise;
+		this.authDefer = $q.defer();
 
 		this.doNotLogout = [
 			"/terms",
@@ -93,14 +94,19 @@ export class AuthService {
 
 		this.initAutoLogout();
 
+		this.state = {};
+		this.events = {
+			USER_LOGGED_IN : "USER_LOGGED_IN",
+			USER_LOGGED_OUT : "USER_LOGGED_OUT",
+		};
+
 	}
 
 	public isLoggedIn() {
 		return this.loggedIn;
 	}
 
-	public initAutoLogout() {
-
+	public  initAutoLogout() {
 		// Check for mismatch
 		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
 
@@ -110,7 +116,7 @@ export class AuthService {
 
 	}
 
-	public loginSuccess(response) {
+	public loginSuccess(response: any) {
 
 		this.loggedIn = true;
 		this.username = response.data.username;
@@ -119,13 +125,14 @@ export class AuthService {
 		// using local storage
 		localStorage.setItem("loggedIn", "true");
 
-		this.EventService.send(this.EventService.EVENT.USER_LOGGED_IN, {
+		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: response.data.username,
 			initialiser: response.data.initialiser,
 		});
+
 		this.AnalyticService.setUserId(this.username);
 
-		this.authPromise.resolve(this.loggedIn);
+		this.authDefer.resolve(this.loggedIn);
 	}
 
 	public loginFailure(response) {
@@ -137,13 +144,13 @@ export class AuthService {
 
 		localStorage.setItem("loggedIn", "false");
 
-		this.EventService.send(this.EventService.EVENT.USER_LOGGED_IN, {
+		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: null,
 			initialiser,
 			error: response.data,
 		});
 
-		this.authPromise.resolve(response.data);
+		this.authDefer.resolve(response.data);
 	}
 
 	public logoutSuccess() {
@@ -151,23 +158,25 @@ export class AuthService {
 		this.username  = null;
 
 		localStorage.setItem("loggedIn", "false");
+		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
 
-		this.EventService.send(this.EventService.EVENT.USER_LOGGED_OUT);
-
-		this.authPromise.resolve(this.loggedIn);
+		this.authDefer.resolve(this.loggedIn);
 	}
 
 	public logoutFailure(reason) {
 		this.loggedIn  = false;
 		this.username  = null;
 
-		// localStorage.setItem("logged", "false");
-		this.EventService.send(
-			this.EventService.EVENT.USER_LOGGED_OUT,
-			{ error: reason },
-		);
+		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {
+			error: reason,
+		});
 
-		this.authPromise.resolve(this.loggedIn);
+		this.authDefer.resolve(this.loggedIn);
+	}
+
+	public setCurrentEvent(event, data) {
+		this.state.currentEvent = event;
+		this.state.currentData = data;
 	}
 
 	public localStorageLoggedIn() {
@@ -246,7 +255,7 @@ export class AuthService {
 					}
 				});
 
-			this.authPromise.then(() => {
+			this.authDefer.promise.then(() => {
 				initPromise.resolve(this.loggedIn);
 			}).catch((error) => {
 				// console.error("auto - Authentication error:", error);
@@ -254,17 +263,16 @@ export class AuthService {
 			});
 
 		} else if (interval) {
-			this.authPromise.then(() => {
+			this.authDefer.promise.then(() => {
 				this.shouldAutoLogout();
 				initPromise.resolve(this.loggedIn);
-
 			});
 		}
 
 		return initPromise.promise;
 	}
 
-	public getUsername( ) {
+	public getUsername() {
 		return this.username;
 	}
 
@@ -273,25 +281,25 @@ export class AuthService {
 	}
 
 	public login(loginUsername, password) {
-		this.authPromise = this.$q.defer().promise;
+		this.authDefer = this.$q.defer();
 
 		const postData = {username: loginUsername, password};
 
 		this.APIService.post("login", postData)
-			.then(this.loginSuccess)
-			.catch(this.loginFailure);
+			.then(this.loginSuccess.bind(this))
+			.catch(this.loginFailure.bind(this));
 
-		return this.authPromise;
+		return this.authDefer.promise;
 	}
 
 	public logout() {
-		this.authPromise = this.$q.defer().promise;
+		this.authDefer = this.$q.defer();
 
 		this.APIService.post("logout")
-			.then(this.logoutSuccess)
-			.catch(this.logoutFailure);
+			.then(this.logoutSuccess.bind(this))
+			.catch(this.logoutFailure.bind(this));
 
-		return this.authPromise;
+		return this.authDefer.promise;
 	}
 
 	public hasPermission(requiredPerm, permissions) {

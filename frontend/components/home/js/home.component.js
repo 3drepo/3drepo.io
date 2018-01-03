@@ -161,7 +161,6 @@
 				removeTrailingSlash();
 			}
 
-			console.log(AuthService, AuthService.authPromise);
 			// If it's a logged in page just redirect to the
 			// users teamspace page
 			AuthService.authDefer.promise.then(function(){
@@ -178,9 +177,7 @@
 		$scope.$watch(function(){
 			return $location.path();
 		}, function() {
-			console.log(vm.isLegalPage, vm.state.changing);
 			vm.handlePaths();
-			
 		});
 
 
@@ -344,17 +341,21 @@
 			$window.open("/" + display.value);
 		};
 		
+		$scope.$watch(
+			function() {
+				return AuthService.state; 
+			}, 
+			function() {
 
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if (angular.isDefined(event) && angular.isDefined(event.type)) {
-				if (event.type === EventService.EVENT.USER_LOGGED_IN) {
-					if (!event.value.error) {
-						if(!event.value.initialiser) {
-							
+				switch(AuthService.state.currentEvent) {
+				case "USER_LOGGED_IN":
+					if (!AuthService.state.currentData.error) {
+						if(!AuthService.state.currentData.initialiser) {
+						
 							StateManager.updateState(true);
 
 							if(!StateManager.state.account){
-								
+							
 								var username = AuthService.getUsername();
 								if (!username) {
 									console.error("Username is not defined for statemanager!");
@@ -365,23 +366,28 @@
 							}
 						}
 					} else {
-
-						EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-					
+						AuthService.setAuthState("USER_LOGGED_OUT", {});
 					}
-				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
-					
+					break;
+
+				case "USER_LOGGED_OUT":
 					// TODO: Use state manager
 					// Only fire the Logout Event if we're on the home page
 					var currentPage = $location.path();
-
+						
 					if (vm.doNotLogout.indexOf(currentPage) === -1) {
 						StateManager.setHomeState({ loggedIn: false, account: null });
 					}
-
-				} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "inherit";
+					break;
 				}
+				
+			},
+			true
+		);
+
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+				vm.pointerEvents = event.value.on ? "none" : "inherit";
 			}
 		});
 

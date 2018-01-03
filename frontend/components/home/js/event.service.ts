@@ -14,18 +14,16 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+declare const Viewer;
 
-(function () {
-	"use strict";
+export class EventService {
 
-	angular.module("3drepo")
-		.service("EventService", EventService);
+	public static internalCurrentError;
+	public static internalCurrentEvent;
 
-	EventService.$inject = ["$timeout"];
+	public static $inject: string[] = ["$timeout"];
 
-	function EventService ($timeout) {
-
-		var EVENT = {
+	private EVENT = {
 			AUTO_META_DATA: "EVENT_AUTO_META_DATA",
 			FILTER: "EVENT_FILTER",
 			FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
@@ -61,7 +59,7 @@
 
 			// Specific to the javascript viewer
 			// populated by the viewer.js script
-			
+
 			VIEWER: Viewer.EVENT,
 
 			// Ready signals
@@ -83,53 +81,52 @@
 			STATE_CHANGED: "EVENT_STATE_CHANGED",
 			SELECT_ISSUE: "EVENT_SELECT_ISSUE",
 			UPDATE_STATE: "EVENT_UPDATE_STATE",
-			ISSUES_READY: "EVENT_ISSUES_READY"
-		};
+			ISSUES_READY: "EVENT_ISSUES_READY",
+	};
 
-		var ERROR = {
-			DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME"
-		};
+	private ERROR = {
+		DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME",
+	};
 
-		var currentEvent = {};
-		var currentError = {};
-
-
-		var send = function (type, value) {
-			var stack = (new Error()).stack;
-			$timeout(function() {
-				if (angular.isUndefined(type)) {
-					console.trace("UNDEFINED EVENT TYPE" + type);
-				} else {
-					currentEvent = {type: type, value: value, stack: stack};
-					if (window.DEBUG && window.DEBUG === true) {
-						console.log("EVENT: ", currentEvent.type + " => ", currentEvent);
-					}
-				}
-			});
-		};
-
-		var sendError = function(type, value) {
-			$timeout(function() {
-				if (angular.isUndefined(type)) {
-					console.trace("UNDEFINED ERROR TYPE");
-				} else {
-					//console.log(type + " : " + JSON.stringify(value));
-					currentError = {type: type, value: value};
-				}
-			});
-		};
-
-		return {
-			EVENT: EVENT,
-			ERROR: ERROR,
-			currentEvent: function() {
-				return currentEvent;
-			},
-			currentError: function() {
-				return currentError;
-			},
-			send: send,
-			sendError: sendError
-		};
+	constructor(
+		private $timeout,
+	) {
+		EventService.internalCurrentEvent = {};
+		EventService.internalCurrentError = {};
 	}
-}());
+
+	public send(type, value) {
+		const stack = (new Error()).stack;
+		this.$timeout(() => {
+			if (type === null || type === undefined) {
+				console.trace("UNDEFINED EVENT TYPE" + type);
+			} else {
+				EventService.internalCurrentEvent = {type, value, stack};
+			}
+		});
+	}
+
+	public sendError(type, value) {
+		this.$timeout(() => {
+			if (type === null || type === undefined) {
+				console.trace("UNDEFINED ERROR TYPE");
+			} else {
+				// console.log(type + " : " + JSON.stringify(value));
+				EventService.internalCurrentError = {type, value};
+			}
+		});
+	}
+
+	public currentEvent() {
+		return EventService.internalCurrentEvent;
+	}
+
+	public currentError() {
+		return EventService.internalCurrentError;
+	}
+
+}
+
+export const EventServiceModule = angular
+	.module("3drepo")
+	.service("EventService", EventService);

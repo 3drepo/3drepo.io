@@ -1,3 +1,5 @@
+import { AuthService } from "../../home/js/auth.service";
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -61,14 +63,17 @@ class LoginController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-			if (event.type === this.EventService.EVENT.USER_LOGGED_IN) {
+		this.$scope.$watch(() => {
+			return this.AuthService.state.currentEvent;
+		}, () => {
+			console.log("changed", this.AuthService.state.currentEvent);
+			if (this.AuthService.state.currentEvent === this.AuthService.events.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
-					if (event.value.error.status === 500) {
+				if (!this.AuthService.state.currentData.initialiser && this.AuthService.state.currentData.hasOwnProperty("error")) {
+					if (this.AuthService.state.currentData.error.status === 500) {
 						this.errorMessage = "There is currently a problem with the system. Please try again later.";
 					} else {
-						this.errorMessage = this.APIService.getErrorMessage(event.value.error);
+						this.errorMessage = this.APIService.getErrorMessage(this.AuthService.state.currentData.error);
 					}
 				}
 			}
