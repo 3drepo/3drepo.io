@@ -41,6 +41,28 @@ class HomeController implements ng.IController {
 		"TemplateService",
 	];
 
+	private doNotLogout;
+	private legalPages;
+	private loggedOutPages;
+	private loggedIn;
+	private loginPage;
+	private isLoggedOutPage;
+	private functions;
+	private pointerEvents;
+	private goToAccount;
+	private goToUserPage;
+	private keysDown;
+	private firstState;
+	private state;
+	private query;
+	private isMobileDevice;
+	private legalDisplays;
+	private isLegalPage;
+	private page;
+	private loginMessage;
+	private backgroundImage;
+	private topLogo;
+
 	constructor(
 		private $scope,
 		private $http,
@@ -78,15 +100,15 @@ class HomeController implements ng.IController {
 
 		// Pages to not attempt a interval triggered logout from
 
-		this.doNotLogout = AuthService.doNotLogout;
-		this.legalPages = AuthService.legalPages;
-		this.loggedOutPages = AuthService.loggedOutPages;
+		this.doNotLogout = this.AuthService.doNotLogout;
+		this.legalPages = this.AuthService.legalPages;
+		this.loggedOutPages = this.AuthService.loggedOutPages;
 
 		this.loggedIn = false;
 		this.loginPage = true;
 		this.isLoggedOutPage = false;
 
-		this.functions = StateManager.functions;
+		this.functions = this.StateManager.functions;
 		this.pointerEvents = "inherit";
 		this.goToAccount = false;
 		this.goToUserPage = false;
@@ -94,14 +116,14 @@ class HomeController implements ng.IController {
 		this.firstState = true;
 
 		// Required for everything to work
-		this.state = StateManager.state;
-		this.query = StateManager.query;
+		this.state = this.StateManager.state;
+		this.query = this.StateManager.query;
 
 		this.isMobileDevice = true;
 
 		this.legalDisplays = [];
-		if (angular.isDefined(ClientConfigService.legal)) {
-			this.legalDisplays = ClientConfigService.legal;
+		if (this.ClientConfigService.legal !== undefined) {
+			this.legalDisplays = this.ClientConfigService.legal;
 		}
 		this.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		this.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
@@ -120,11 +142,13 @@ class HomeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(() => {
-			return this.$location.path();
-		}, function() {
-			this.handlePaths();
-		});
+		this.$scope.$watch(
+			() => {
+				return this.$location.path();
+			}, () => {
+				this.handlePaths();
+			},
+		);
 
 		/*
 		* Watch the state to handle moving to and from the login page
@@ -146,7 +170,7 @@ class HomeController implements ng.IController {
 					this.isLegalPage = true;
 					this.isLoggedOutPage = false;
 
-					this.legalPages.forEach(function(page) {
+					this.legalPages.forEach((page) => {
 						this.setPage(newState, page);
 					});
 
@@ -157,23 +181,23 @@ class HomeController implements ng.IController {
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
 
-					this.loggedOutPages.forEach(function(page) {
+					this.loggedOutPages.forEach((page) => {
 						this.setPage(newState, page);
 					});
 
 				} else if (
-					AuthService.getUsername() &&
-					newState.account !== AuthService.getUsername() &&
+					this.AuthService.getUsername() &&
+					newState.account !== this.AuthService.getUsername() &&
 					!newState.model
 				) {
 					// If it's some other random page that doesn't match
 					// anything sensible like legal, logged out pages, or account
 					this.isLoggedOutPage = false;
 					this.page = "";
-					$location.search({}); // Reset query parameters
-					$location.path("/" + AuthService.getUsername());
+					this.$location.search({}); // Reset query parameters
+					this.$location.path("/" + this.AuthService.getUsername());
 				} else if (
-					!AuthService.getUsername() &&
+					!this.AuthService.getUsername() &&
 					!legal &&
 					!loggedOut
 				) {
@@ -207,7 +231,7 @@ class HomeController implements ng.IController {
 									console.error("Username is not defined for statemanager!");
 								}
 								this.StateManager.setHomeState({
-									account: username
+									account: username,
 								});
 							}
 						}
@@ -231,8 +255,8 @@ class HomeController implements ng.IController {
 			true,
 		);
 
-		this.$scope.$watch(EventService.currentEvent, function(event) {
-			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				this.pointerEvents = event.value.on ? "none" : "inherit";
 			}
 		});
@@ -248,10 +272,10 @@ class HomeController implements ng.IController {
 
 	public setLoginPage() {
 
-		if (ClientConfigService.customLogins !== undefined) {
+		if (this.ClientConfigService.customLogins !== undefined) {
 
 			const sub = this.getSubdomain();
-			const custom = ClientConfigService.customLogins[sub];
+			const custom = this.ClientConfigService.customLogins[sub];
 
 			if (sub && custom) {
 				if (
@@ -320,12 +344,15 @@ class HomeController implements ng.IController {
 		}).length;
 	}
 
-	public setPage = function(state, page) {
+	public setPage(state, page) {
 		if (state[page] === true) {
 			this.page = page;
 		}
-	};
+	}
 
+	/**
+	 * Precache templates for the next pages
+	 */
 	public precacheTeamspaceTemplate() {
 
 		// The account teamspace template is hefty. If we cache it ASAP
@@ -342,7 +369,10 @@ class HomeController implements ng.IController {
 
 	}
 
-	public isMobile() {
+	/**
+	 * Check if the user is on mobile
+	 */
+	public isMobile(): boolean {
 
 		const mobile = screen.width <= 768;
 
@@ -355,6 +385,9 @@ class HomeController implements ng.IController {
 
 	}
 
+	/**
+	 * Show a dialog for mobile users
+	 */
 	public handleMobile() {
 
 		const message = "We have detected you are on a " +
@@ -372,9 +405,12 @@ class HomeController implements ng.IController {
 
 	}
 
-	public hasTrailingSlash() {
+	/**
+	 * Checks if the current URL has a trailing slash
+	 */
+	public hasTrailingSlash(): boolean {
 		// Check if we have a trailing slash in our URL
-		const absUrl = $location.absUrl();
+		const absUrl = this.$location.absUrl();
 		const trailingCheck = absUrl.substr(-1);
 		if (trailingCheck === "/") {
 			return true;
@@ -382,6 +418,9 @@ class HomeController implements ng.IController {
 		return false;
 	}
 
+	/**
+	 * Remove trailing slashes from the URL
+	 */
 	public removeTrailingSlash() {
 		// Remove the trailing slash from the URL
 		const currentPath = this.$location.path();
@@ -389,11 +428,17 @@ class HomeController implements ng.IController {
 		this.$location.path(minusSlash);
 	}
 
+	/**
+	 * Log the user out
+	 */
 	public logout() {
 		this.AuthService.logout();
 		this.ViewerService.reset();
 	}
 
+	/**
+	 * Go to the account page
+	 */
 	public home() {
 		this.ViewerService.reset();
 		this.StateManager.goHome();
@@ -411,7 +456,7 @@ class HomeController implements ng.IController {
 
 	public initKeyWatchers() {
 
-		this.$document.bind("keydown", function(event) {
+		this.$document.bind("keydown", (event) => {
 			if (this.keysDown.indexOf(event.which) === -1) {
 
 				this.keysDown.push(event.which);
@@ -422,7 +467,7 @@ class HomeController implements ng.IController {
 			}
 		});
 
-		this.$document.bind("keyup", function(event) {
+		this.$document.bind("keyup", (event) => {
 			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
 			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
 				if (this.keysDown[i] === event.which) {
