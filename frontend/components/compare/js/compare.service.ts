@@ -129,7 +129,7 @@ export class CompareService {
 
 	public getCompareModelData(modelSettings: any, revisions: any[], revision: any, type: string) {
 
-		// We can't access revisions, i.e. no permissions
+		// We can't access revisions, i.e. no permissions, missing file etc
 		if (revisions.length === 0) {
 			return null;
 		}

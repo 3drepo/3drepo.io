@@ -255,7 +255,7 @@ class SignupController implements ng.IController {
 		}
 
 		if (!allowedFormat.test(this.newUser.username)) {
-			this.registerErrorMessage = `Username not allowed: English letters,
+			this.registerErrorMessage = `Username not allowed: Max length 64 characters. Can contain upper and lowercase letters,
 				numbers, underscore allowed only, and must not start with number`;
 			return;
 		}
