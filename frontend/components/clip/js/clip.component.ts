@@ -155,7 +155,6 @@ class ClipController implements ng.IController {
 
 			switch (event.type) {
 			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-
 				if (!event.value.fromClipPanel) {
 					const clip = event.value.clippingPlanes[0];
 					if (clip) {
@@ -171,6 +170,9 @@ class ClipController implements ng.IController {
 						this.reset();
 					}
 				}
+				// else {
+				// 	this.reset();
+				// }
 				break;
 
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
@@ -193,7 +195,7 @@ class ClipController implements ng.IController {
 
 			case this.EventService.EVENT.VIEWER.BBOX_READY:
 				this.bbox = event.value.bbox;
-				this.setDisplayValues("X", this.bbox.max[0], this.visible, 0, this.direction);
+				this.setDisplayValues("X", this.bbox.max[0], this.visible, false, this.direction);
 				this.updateDisplayedDistance(true, this.visible);
 				break;
 
@@ -298,6 +300,8 @@ class ClipController implements ng.IController {
 			}],
 			fromClipPanel: true,
 		};
+
+		console.log("updateClippingPlane - UPDATE_CLIPPING_PLANES");
 		this.EventService.send(
 			this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
 			event,
@@ -324,12 +328,10 @@ class ClipController implements ng.IController {
 	}
 
 	public reset() {
-
 		const minMax = this.getMinMax();
 		const scaler = this.getScaler(this.units, this.modelUnits);
 		const dist = minMax.max * scaler;
-
-		this.setDisplayValues("X", dist, true, false, undefined);
+		this.setDisplayValues(this.displayedAxis, dist, true, false, true);
 	}
 
 	/**
