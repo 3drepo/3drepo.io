@@ -56,6 +56,9 @@ class CompareController implements ng.IController {
 	) {}
 
 	public $onInit() {
+
+		console.log("Init compare...");
+
 		this.CompareService.disableComparision();
 		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
@@ -124,7 +127,7 @@ class CompareController implements ng.IController {
 			const baseModels = this.compareTypes[type].baseModels;
 			for (let j = 0; j < baseModels.length; j++) {
 				const model = baseModels[j];
-				if (shownModel.name === model.account + ":" + model.name) {
+				if (model && shownModel.name === model.account + ":" + model.name) {
 					model.visible = (shownModel.toggleState === "visible");
 					break;
 				}

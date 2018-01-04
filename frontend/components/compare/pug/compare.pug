@@ -31,14 +31,16 @@ div(
 							flex="100"
 							layout-align="center center"
 							ng-style="{ background: vm.getModelTypeStyle('base', 'background'), color: vm.getModelTypeStyle('base', 'color') }")
-							span Base model
+							span(ng-if="vm.isFederation()") Base models
+							span(ng-if="!vm.isFederation()") Base model
 
 						div.modelType(
 							ng-click="vm.setModelType('target')"
 							flex="100"
 							layout-align="center center"
 							ng-style="{ background: vm.getModelTypeStyle('target', 'background'), color: vm.getModelTypeStyle('target', 'color') }")
-							span Target model
+							span(ng-if="vm.isFederation()") Target models
+							span(ng-if="!vm.isFederation()") Target model
 
 					#modelsList
 
