@@ -21,7 +21,6 @@ const Subscription = require("./subscription.js");
 const responseCodes = require("../response_codes.js");
 const ModelSetting = require("./modelSetting");
 const mongoose = require("mongoose");
-const User = require('./user');
 
 
 let Subscriptions = function (user, billingUser, billingAddress, subscriptions) {
@@ -140,6 +139,7 @@ Subscriptions.prototype.removeSubscriptionByPlan = function(plan){
 		let totalSize = 0;
 
 		//console.log(quotaAfterDelete);
+		const User = require('./user');
 		return User.historyChunksStats(this.billingUser).then(stats => {
 			
 			if (stats) { 
@@ -382,7 +382,7 @@ Subscriptions.prototype.updateAssignDetail = function(id, data){
 
 Subscriptions.prototype.assignSubscriptionToUser = function(id, userData){
 	
-	const User = require("./user.js");
+	const User = require('./user');
 
 	// can use .id function until mongoose fix this problem https://github.com/Automattic/mongoose/pull/4862
 	// let subscription = this.subscriptions.id(id);
@@ -498,6 +498,7 @@ Subscriptions.prototype.removeAssignedSubscriptionFromUser = function(id, accoun
 
 	}).then(() => {
 		subscription.assignedUser = undefined;
+		subscription.job = undefined;
 		return subscription;
 	});
 
