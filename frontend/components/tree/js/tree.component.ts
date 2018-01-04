@@ -86,6 +86,9 @@ class TreeController implements ng.IController {
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
+
+		this.allNodes = [];
+
 		this.watchers();
 
 	}
@@ -371,7 +374,9 @@ class TreeController implements ng.IController {
 	 * Initialise the tree nodes to show to the first node
 	 */
 	public initNodesToShow() {
-		this.TreeService.initNodesToShow([this.allNodes[0]]);
+		if (this.allNodes.length) {
+			this.TreeService.initNodesToShow([this.allNodes[0]]);
+		}
 	}
 
 	/**
