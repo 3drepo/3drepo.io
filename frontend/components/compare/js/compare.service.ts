@@ -144,7 +144,7 @@ export class CompareService {
 
 		if (!this.isFederation()) {
 			// If it's a model use the loaded revision
-			baseRevision = revisions.find((rev) => rev._id === revision );
+			baseRevision = revisions.find((rev) => rev._id === revision ) || revisions[0];
 		} else {
 			// If it's a federation just set the base to the first revision
 			baseRevision = revisions[0];

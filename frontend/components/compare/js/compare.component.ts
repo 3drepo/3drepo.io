@@ -57,8 +57,6 @@ class CompareController implements ng.IController {
 
 	public $onInit() {
 
-		console.log("Init compare...");
-
 		this.CompareService.disableComparision();
 		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
