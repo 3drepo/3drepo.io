@@ -18,199 +18,235 @@ declare const io;
 
 export class NotificationService {
 
-		public static $inject: string[] = [
-			"$injector",
-			"ClientConfigService",
-			"DialogService",
-		];
+	public static $inject: string[] = [
+		"$injector",
+		"ClientConfigService",
+		"DialogService",
+	];
 
-		private dialogOpen;
-		private lastDialogOpen;
-		private socket;
-		private joined;
+	public subscribe: any;
+	public unsubscribe: any;
 
-		constructor(
-			private $injector,
-			private ClientConfigService,
-			private DialogService,
-		) {
-			this.dialogOpen = false;
+	private dialogOpen;
+	private lastDialogOpen;
+	private socket;
+	private joined;
 
-			if (!ClientConfigService.chatHost || !ClientConfigService.chatPath) {
-				console.error("Chat server settings missing");
-				return;
-			}
+	constructor(
+		private $injector,
+		private ClientConfigService,
+		private DialogService,
+	) {
+		this.dialogOpen = false;
 
-			this.socket = io(ClientConfigService.chatHost, {
-				path: ClientConfigService.chatPath,
-				transports: ["websocket"],
-				reconnection: true,
-				reconnectionDelay: 500,
-				reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity,
-			});
+		if (!ClientConfigService.chatHost || !ClientConfigService.chatPath) {
+			console.error("Chat server settings missing");
+			return;
+		}
 
+		this.socket = io(ClientConfigService.chatHost, {
+			path: ClientConfigService.chatPath,
+			transports: ["websocket"],
+			reconnection: true,
+			reconnectionDelay: 500,
+			reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity,
+		});
+
+		this.joined = [];
+		this.setupSocketEvents();
+
+		this.subscribe = {
+			joinRoom: this.joinRoom,
+			getEventName: this.getEventName,
+			joined: this.joined,
+			socket: this.socket,
+
+			performSubscribe: this.performSubscribe,
+			newIssues: this.subscribeNewIssues,
+			newComment: this.subscribeNewComment,
+			commentChanged: this.subscribeCommentChanged,
+			commentDeleted: this.subscribeCommentDeleted,
+			issueChanged: this.subscribeIssueChanged,
+			modelStatusChanged: this.subscribeModelStatusChanged,
+			newModel: this.subscribeNewModel,
+		};
+
+		this.unsubscribe = {
+			joinRoom: this.joinRoom,
+			getEventName: this.getEventName,
+			joined: this.joined,
+			socket: this.socket,
+
+			performUnsubscribe: this.performUnsubscribe,
+			newIssues: this.unsubscribeNewIssues,
+			newComment: this.unsubscribeNewComment,
+			commentChanged: this.unsubscribeCommentChanged,
+			commentDeleted: this.unsubscribeCommentDeleted,
+			issueChanged: this.unsubscribeIssueChanged,
+			modelStatusChanged: this.unsubscribeModelStatusChanged,
+			newModel: this.unsubscribeNewModel,
+		};
+
+	}
+
+	public setupSocketEvents() {
+		this.socket.on("connect", () => {
+			this.addSocketIdToHeader(this.socket.id);
+		});
+
+		this.socket.on("disconnect", () => {
+
+			console.error("The websocket for the notification service was disconnected");
+			this.DialogService.disconnected();
+
+		});
+
+		this.socket.on("reconnect", () => {
+
+			console.debug("Rejoining all rooms on reconnect");
+
+			this.addSocketIdToHeader(this.socket.id);
+
+			const lastJoined = this.joined.slice(0);
 			this.joined = [];
-			this.setupSocketEvents();
-		}
 
-		public setupSocketEvents() {
-			this.socket.on("connect", () => {
-				this.addSocketIdToHeader(this.socket.id);
+			lastJoined.forEach((room) => {
+
+				room = room.split("::");
+
+				const account = room[0];
+				const model = room[1];
+
+				this.joinRoom(account, model);
 			});
+		});
+	}
 
-			this.socket.on("disconnect", () => {
+	public addSocketIdToHeader(socketId: string) {
 
-				console.error("The websocket for the notification service was disconnected");
-				this.DialogService.disconnected();
+		const $httpProvider = this.$injector.get("$http");
 
-			});
+		$httpProvider.defaults.headers.post = $httpProvider.defaults.headers.post || {};
+		$httpProvider.defaults.headers.put = $httpProvider.defaults.headers.put || {};
+		$httpProvider.defaults.headers.delete = $httpProvider.defaults.headers.delete || {};
 
-			this.socket.on("reconnect", () => {
+		$httpProvider.defaults.headers.post["x-socket-id"] = socketId;
+		$httpProvider.defaults.headers.put["x-socket-id"] = socketId;
+		$httpProvider.defaults.headers.delete["x-socket-id"] = socketId;
+	}
 
-				console.debug("Rejoining all rooms on reconnect");
+	public joinRoom(account: string, model: string) {
 
-				this.addSocketIdToHeader(this.socket.id);
+		let modelNameSpace = "";
 
-				const lastJoined = this.joined.slice(0);
-				this.joined = [];
-
-				lastJoined.forEach((room) => {
-
-					room = room.split("::");
-
-					const account = room[0];
-					const model = room[1];
-
-					this.joinRoom(account, model);
-				});
-			});
+		if (model) {
+			modelNameSpace = "::" + model;
 		}
 
-		public  addSocketIdToHeader(socketId: string) {
+		const room =  account + modelNameSpace;
+		if (this.joined.indexOf(room) === -1) {
 
-			const $httpProvider = this.$injector.get("$http");
+			this.socket.emit("join", {account, model});
+			this.joined.push(room);
+		}
+	}
 
-			$httpProvider.defaults.headers.post = $httpProvider.defaults.headers.post || {};
-			$httpProvider.defaults.headers.put = $httpProvider.defaults.headers.put || {};
-			$httpProvider.defaults.headers.delete = $httpProvider.defaults.headers.delete || {};
+	public getEventName(account: string, model: string, keys: any[], event): string {
 
-			$httpProvider.defaults.headers.post["x-socket-id"] = socketId;
-			$httpProvider.defaults.headers.put["x-socket-id"] = socketId;
-			$httpProvider.defaults.headers.delete["x-socket-id"] = socketId;
+		let modelNameSpace = "";
+
+		if (model) {
+			modelNameSpace = "::" + model;
 		}
 
-		public joinRoom(account: string, model: string) {
+		keys = keys || [];
+		let keyString = "";
 
-			let modelNameSpace = "";
-
-			if (model) {
-				modelNameSpace = "::" + model;
-			}
-
-			const room =  account + modelNameSpace;
-			if (this.joined.indexOf(room) === -1) {
-
-				this.socket.emit("join", {account, model});
-				this.joined.push(room);
-			}
+		if (keys.length) {
+			keyString =  "::" + keys.join("::");
 		}
 
-		public getEventName(account: string, model: string, keys: any[], event): string {
+		return account + modelNameSpace +  keyString + "::" + event;
+	}
 
-			let modelNameSpace = "";
+	public subscribeNewIssues(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "newIssues", callback);
+	}
 
-			if (model) {
-				modelNameSpace = "::" + model;
-			}
+	public unsubscribeNewIssues(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "newIssues");
+	}
 
-			keys = keys || [];
-			let keyString = "";
+	public subscribeNewComment(account: string, model: string, issueId: string, callback: any) {
+		this.performSubscribe(account, model, [issueId], "newComment", callback);
+	}
 
-			if (keys.length) {
-				keyString =  "::" + keys.join("::");
-			}
+	public unsubscribeNewComment(account: string, model: string, issueId: string) {
+		this.performUnsubscribe(account, model, [issueId], "newComment");
+	}
 
-			return account + modelNameSpace +  keyString + "::" + event;
+	public subscribeCommentChanged(account: string, model: string, issueId: string, callback: any) {
+		this.performSubscribe(account, model, [issueId], "commentChanged", callback);
+	}
+
+	public unsubscribeCommentChanged(account: string, model: string, issueId: string) {
+		this.performUnsubscribe(account, model, [issueId], "commentChanged");
+	}
+
+	public subscribeCommentDeleted(account: string, model: string, issueId: string, callback: any) {
+		this.performSubscribe(account, model, [issueId], "commentDeleted", callback);
+	}
+
+	public unsubscribeCommentDeleted(account: string, model: string, issueId: string) {
+		this.performUnsubscribe(account, model, [issueId], "commentDeleted");
+	}
+
+	public subscribeIssueChanged(account: string, model: string, issueId: string, callback: any) {
+		if (arguments.length === 3) {
+			callback = issueId;
+			this.performSubscribe(account, model, [], "issueChanged", callback);
+		} else {
+			this.performSubscribe(account, model, [issueId], "issueChanged", callback);
 		}
+	}
 
-		public subscribe(account: string, model: string, keys: any[], event: any, callback: any) {
-
-			this.joinRoom(account, model);
-
-			const eventName = this.getEventName(account, model, keys, event);
-			this.socket.on(eventName, (data) => {
-				callback(data);
-			});
+	public unsubscribeIssueChanged(account: string, model: string, issueId: string) {
+		if (arguments.length === 2) {
+			this.performUnsubscribe(account, model, [], "issueChanged");
+		} else {
+			this.performUnsubscribe(account, model, [issueId], "issueChanged");
 		}
+	}
 
-		public unsubscribe(account: string, model: string, keys: any[], event: any) {
-			this.socket.off(this.getEventName(account, model, keys, event));
-		}
+	public subscribeModelStatusChanged(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "modelStatusChanged", callback);
+	}
 
-		public subscribeNewIssues(account: string, model: string, callback: any) {
-			this.subscribe(account, model, [], "newIssues", callback);
-		}
+	public unsubscribeModelStatusChanged(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "modelStatusChanged");
+	}
 
-		public unsubscribeNewIssues(account: string, model: string) {
-			this.unsubscribe(account, model, [], "newIssues");
-		}
+	public subscribeNewModel(account: string, callback: any) {
+		this.performSubscribe(account, null, [], "newModel", callback);
+	}
 
-		public subscribeNewComment(account: string, model: string, issueId: string, callback: any) {
-			this.subscribe(account, model, [issueId], "newComment", callback);
-		}
+	public unsubscribeNewModel(account: string, model: string) {
+		this.performUnsubscribe(account, null, [], "newModel");
+	}
 
-		public unsubscribeNewComment(account: string, model: string, issueId: string) {
-			this.unsubscribe(account, model, [issueId], "newComment");
-		}
+	private performSubscribe(account: string, model: string, keys: any[], event: any, callback: any) {
 
-		public subscribeCommentChanged(account: string, model: string, issueId: string, callback: any) {
-			this.subscribe(account, model, [issueId], "commentChanged", callback);
-		}
+		this.joinRoom(account, model);
 
-		public unsubscribeCommentChanged(account: string, model: string, issueId: string) {
-			this.unsubscribe(account, model, [issueId], "commentChanged");
-		}
+		const eventName = this.getEventName(account, model, keys, event);
+		this.socket.on(eventName, (data) => {
+			callback(data);
+		});
+	}
 
-		public subscribeCommentDeleted(account: string, model: string, issueId: string, callback: any) {
-			this.subscribe(account, model, [issueId], "commentDeleted", callback);
-		}
-
-		public unsubscribeCommentDeleted(account: string, model: string, issueId: string) {
-			this.unsubscribe(account, model, [issueId], "commentDeleted");
-		}
-
-		public  subscribeIssueChanged(account: string, model: string, issueId: string, callback: any) {
-			if (arguments.length === 3) {
-				callback = issueId;
-				this.subscribe(account, model, [], "issueChanged", callback);
-			} else {
-				this.subscribe(account, model, [issueId], "issueChanged", callback);
-			}
-		}
-
-		public  unsubscribeIssueChanged(account: string, model: string, issueId: string) {
-			if (arguments.length === 2) {
-				this.unsubscribe(account, model, [], "issueChanged");
-			} else {
-				this.unsubscribe(account, model, [issueId], "issueChanged");
-			}
-		}
-
-		public  subscribeModelStatusChanged(account: string, model: string, callback: any) {
-			this.subscribe(account, model, [], "modelStatusChanged", callback);
-		}
-
-		public  unsubscribeModelStatusChanged(account: string, model: string) {
-			this.unsubscribe(account, model, [], "modelStatusChanged");
-		}
-
-		public  subscribeNewModel(account: string, callback: any) {
-			this.subscribe(account, null, [], "newModel", callback);
-		}
-
-		public  unsubscribeNewModel(account: string, model: string) {
-			this.unsubscribe(account, null, [], "newModel");
-		}
+	private performUnsubscribe(account: string, model: string, keys: any[], event: any) {
+		this.socket.off(this.getEventName(account, model, keys, event));
+	}
 
 }
 
