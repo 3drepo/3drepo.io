@@ -233,7 +233,7 @@ class TreeController implements ng.IController {
 				if (selectionData) {
 					this.setContentHeight(this.fetchNodesToShow());
 					this.TreeService.setShowNodes(true);
-					this.$timeout(() => {
+					requestAnimationFrame(() => {
 						// Redraw the tree
 
 						// Resize virtual repeater
@@ -241,13 +241,12 @@ class TreeController implements ng.IController {
 						// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
 						this.$scope.$broadcast("$md-resize");
 						this.topIndex = selectionData.selectedIndex;
-					});
 
-					this.$timeout(() => {
 						const el = document.getElementById(selectionData.selectedId);
 						if (el) {
 							el.scrollIntoView();
 						}
+
 					});
 				}
 			});
@@ -368,6 +367,10 @@ class TreeController implements ng.IController {
 			}
 		}
 		this.onContentHeightRequest({height});
+		this.$timeout(() => {
+			this.$scope.$broadcast("$md-resize");
+		});
+
 	}
 
 	/**
@@ -395,15 +398,13 @@ class TreeController implements ng.IController {
 
 		// rAF fixes flickering as expand is computationally expensive
 		requestAnimationFrame(() => {
-
 			this.TreeService.expand(event, id);
 			// Redraw the tree if needed
 			if (!this.TreeService.isShowNodes()) {
-				this.$timeout(() => {
-					this.TreeService.setShowNodes(true);
-				});
+				// this.$timeout(() => {
+				this.TreeService.setShowNodes(true);
+				// });
 			}
-
 			this.setContentHeight(this.fetchNodesToShow());
 		});
 
@@ -481,7 +482,7 @@ class TreeController implements ng.IController {
 
 }
 
-export const TreeComponent: ng.IComponentOptions = {
+public export const TreeComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
@@ -496,6 +497,6 @@ export const TreeComponent: ng.IComponentOptions = {
 	templateUrl: "templates/tree.html",
 };
 
-export const TreeComponentModule = angular
+public export const TreeComponentModule = angular
 	.module("3drepo")
 	.component("tree", TreeComponent);

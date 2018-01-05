@@ -24,7 +24,7 @@ export class TreeService {
 		"APIService",
 	];
 
-	public highlightSelectedViewerObject = false;
+	public highlightSelectedViewerObject;
 	public highlightMap;
 	public highlightMapUpdateTime;
 	public selectionData;
@@ -68,6 +68,7 @@ export class TreeService {
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
 		this.hideIfc = true;
+		this.highlightSelectedViewerObject = true;
 	}
 
 	public setHighlightSelected(value) {
@@ -899,7 +900,7 @@ export class TreeService {
 	 * @returns	True if node claims it has no children.
 	 */
 	public isLeafNode(node: any) {
-		return !node.children || !node.hasChildren || node.children.length === 0
+		return !node.children || !node.hasChildren || node.children.length === 0;
 	}
 
 	/**

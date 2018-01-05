@@ -100,24 +100,15 @@ class PanelCardController implements ng.IController {
 		});
 
 		/*
-		* Change toolbar options when toggling add functionality
-		*/
-		this.$scope.$watch("vm.showAdd", (newValue)  => {
-			if (this.isDefined(newValue)) {
-				this.toggleAdd(newValue);
-			}
-		});
-
-		/*
 		* Watch for card in edit mode
 		*/
 		this.$scope.$watch("vm.showEdit", (newValue) => {
 			if (this.isDefined(newValue)) {
-				this.PanelService.handlePanelEvent(
-					this.contentData.type,
-					this.EventService.EVENT.PANEL_CARD_EDIT_MODE,
-					{on: true},
-				);
+				// this.PanelService.handlePanelEvent(
+				// 	this.contentData.type,
+				// 	this.EventService.EVENT.PANEL_CARD_EDIT_MODE,
+				// 	{on: true},
+				// );
 				this.hideItem();
 			}
 		});
@@ -250,18 +241,6 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-	}
-
-	public toggleAdd(on) {
-		if (this.contentData.type === "issues") {
-			this.showToolbarOptions(["filter", "menu"], !on);
-		}
-		this.hideItem();
-		this.PanelService.handlePanelEvent(
-			this.contentData.type,
-			this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-			{on},
-		);
 	}
 
 }
