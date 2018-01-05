@@ -301,7 +301,6 @@ class ClipController implements ng.IController {
 			fromClipPanel: true,
 		};
 
-		console.log("updateClippingPlane - UPDATE_CLIPPING_PLANES");
 		this.EventService.send(
 			this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
 			event,

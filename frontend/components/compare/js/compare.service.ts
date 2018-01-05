@@ -179,13 +179,10 @@ export class CompareService {
 	public addModelsForModelCompare(account: string, model: string, modelSettings: any, revision: any) {
 		return this.RevisionsService.listAll(account, model).then((revisions) => {
 
-			console.log("addModelsForModelCompare - targetModels");
 			this.state.compareTypes.diff.targetModels = [
-
 				this.getCompareModelData(modelSettings, revisions, revision, "target"),
 			];
 
-			console.log("addModelsForModelCompare - baseModels");
 			this.state.compareTypes.diff.baseModels = [
 				this.getCompareModelData(modelSettings, revisions, revision, "base"),
 			];
