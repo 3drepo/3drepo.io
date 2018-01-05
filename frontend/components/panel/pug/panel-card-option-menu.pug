@@ -5,7 +5,7 @@ md-menu(md-position-mode="target-right target", md-offset="2 14")
 		md-icon.angular-material-icons more_vert
 	md-menu-content(width="4" style="max-height:none")
 		md-menu-item.menuHighlight(
-			ng-repeat="menuItem in vm.menu track by menuItem.label"
+			ng-repeat="menuItem in vm.menu track by $index"
 			ng-if="!menuItem.hidden")
 			md-button(ng-click="vm.menuItemSelected($index)")
 				div(layout="column" flex)

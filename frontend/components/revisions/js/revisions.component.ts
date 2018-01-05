@@ -41,7 +41,7 @@ class RevisionsController implements ng.IController {
 
 			if (this.RevisionsService.status.ready === true) {
 
-				this.revisions = this.RevisionsService.status.data;
+				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
 				this.revisionsLoading = false;
 
 				if (!this.revisions || !this.revisions[0]) {

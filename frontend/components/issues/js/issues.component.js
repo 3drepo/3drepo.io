@@ -216,10 +216,10 @@
 
 
 		$scope.$watch(function() {
-			return RevisionsService.status;
+			return RevisionsService.status.data;
 		}, function() {
 			if (RevisionsService.status.data) {
-				vm.revisions = RevisionsService.status.data;
+				vm.revisions = RevisionsService.status.data[vm.account + ":" + vm.model];
 			}
 		}, true);
 
@@ -348,36 +348,45 @@
 		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
-				
-				var issueShouldShow = false;
 
-				if (vm.revisions && vm.revisions.length) {
+				if (issue) {
+					var issueShouldShow = false;
 
-					var issueRevision = vm.revisions.find(function(rev){
-						return rev._id === issue.rev_id;
-					});
+					if (vm.revisions && vm.revisions.length) {
 
-					var currentRevision;
+						var currentRevision;
+						var issueRevision;
 
-					if(!vm.revision){
-						currentRevision = vm.revisions[0];
-					} else {
-						currentRevision = vm.revisions.find(function(rev){
-							return rev._id === vm.revision || rev.tag === vm.revision;
+						console.log(issue, vm.revisions);
+						
+						issueRevision = vm.revisions.find(function(rev){
+							return rev._id === issue.rev_id;
 						});
+
+						if(!vm.revision){
+							currentRevision = vm.revisions[0];
+						} else {
+							currentRevision = vm.revisions.find(function(rev){
+								return rev._id === vm.revision || rev.tag === vm.revision;
+							});
+						}
+
+						var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+						issueShouldShow = issueRevision && issueInDate;
+					} else {
+						issueShouldShow = true;
 					}
 
-					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
-					issueShouldShow = issueRevision && issueInDate;
+					if(issueShouldShow){
+						
+						IssuesService.addIssue(issue);
+						
+					}
 				} else {
-					issueShouldShow = true;
+					console.error("Issue is undefined/null: ", issue);
 				}
-
-				if(issueShouldShow){
-					
-					IssuesService.addIssue(issue);
-					
-				}
+				
+				
 
 			});
 
