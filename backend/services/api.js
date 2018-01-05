@@ -94,8 +94,7 @@ module.exports.createApp = function (serverConfig) {
 	app.set("views", "./pug");
 	app.set("view_engine", "pug");
 
-	app.use(bodyParser.json({ limit: "2mb" }));
-
+	app.use(bodyParser.json({ limit: "50mb" }));
 	app.use(compress());
 
 	app.use(function (req, res, next) {

@@ -940,9 +940,10 @@ export class TreeService {
 	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
 	 */
 	public toggleTreeNodeVisibility(node: any, fastforward: boolean) {
-
-		const nodeToggleState = (node.toggleState === "visible" || node.toggleState === "parentOfInvisible") ? "invisible" : "visible";
-		this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
+		if (node) {
+			const nodeToggleState = (node.toggleState === "visible" || node.toggleState === "parentOfInvisible") ? "invisible" : "visible";
+			this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
+		}
 	}
 
 	/**
@@ -1006,35 +1007,37 @@ export class TreeService {
 	 */
 	public selectNode(node: any, multi: boolean) {
 
-		const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
-			return element._id === node._id;
-		});
+		if (node) {
+			const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
+				return element._id === node._id;
+			});
 
-		if (multi) {
-			if (sameNodeIndex > -1) {
-				// Multiselect mode and we selected the same node - unselect it
-				this.currentSelectedNodes[sameNodeIndex].selected = false;
-				this.currentSelectedNodes.splice(sameNodeIndex, 1);
+			if (multi) {
+				if (sameNodeIndex > -1) {
+					// Multiselect mode and we selected the same node - unselect it
+					this.currentSelectedNodes[sameNodeIndex].selected = false;
+					this.currentSelectedNodes.splice(sameNodeIndex, 1);
+				} else {
+					node.selected = true;
+					this.currentSelectedNodes.push(node);
+				}
 			} else {
+				// If it is not multiselect mode, remove all highlights
+				this.clearCurrentlySelected();
 				node.selected = true;
 				this.currentSelectedNodes.push(node);
 			}
-		} else {
-			// If it is not multiselect mode, remove all highlights
-			this.clearCurrentlySelected();
-			node.selected = true;
-			this.currentSelectedNodes.push(node);
-		}
 
-		this.getMap().then((treeMap) => {
-			const map = {};
-			this.currentSelectedNodes.forEach((n) => {
-				this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+			this.getMap().then((treeMap) => {
+				const map = {};
+				this.currentSelectedNodes.forEach((n) => {
+					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+				});
+
+				this.highlightMapUpdateTime = Date.now();
+				this.highlightMap = map;
 			});
-
-			this.highlightMapUpdateTime = Date.now();
-			this.highlightMap = map;
-		});
+		}
 
 	}
 
