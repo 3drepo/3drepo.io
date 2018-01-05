@@ -357,8 +357,6 @@
 						var currentRevision;
 						var issueRevision;
 
-						console.log(issue, vm.revisions);
-						
 						issueRevision = vm.revisions.find(function(rev){
 							return rev._id === issue.rev_id;
 						});
@@ -452,37 +450,33 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			requestAnimationFrame(function() {
+			if (IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
+			}
+			
+			if (issue) {
 
-				if (IssuesService.state.selectedIssue) {
-					IssuesService.deselectPin(IssuesService.state.selectedIssue);
-				}
+				ViewerService.highlightObjects([]);
+				$state.go("home.account.model.issue", 
+					{
+						account: vm.account, 
+						model: vm.model, 
+						revision: vm.revision,
+						issue: issue._id,
+						noSet: true
+					}, 
+					{notify: false}
+				);
+
+				IssuesService.setSelectedIssue(issue);
 				
-				if (issue) {
+			} else {
+				IssuesService.resetSelectedIssue();
+			}
 
-					ViewerService.highlightObjects([]);
-					$state.go("home.account.model.issue", 
-						{
-							account: vm.account, 
-							model: vm.model, 
-							revision: vm.revision,
-							issue: issue._id,
-							noSet: true
-						}, 
-						{notify: false}
-					);
-
-					IssuesService.setSelectedIssue(issue);
-					
-				} else {
-					IssuesService.resetSelectedIssue();
-				}
-
-				vm.toShow = "showIssue";
-				vm.showAddButton = false;
-				vm.onShowItem();
-
-			});
+			vm.toShow = "showIssue";
+			vm.showAddButton = false;
+			vm.onShowItem();
 
 		};
 

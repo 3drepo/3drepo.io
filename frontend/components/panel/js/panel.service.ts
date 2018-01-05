@@ -200,6 +200,19 @@ export class PanelService {
 
 	}
 
+	// public handlePanelEvent(panelType, event, eventData) {		
+			
+	// 		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||		
+	// 			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE		
+	// 		) {		
+	// 			if (panelType === "tree") {
+	// 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
+	// 				this.TreeService.setHighlightSelected(!eventData.on);
+	// 			}
+	// 		}
+
+	// 	}
+
 }
 
 export const PanelServiceModule = angular

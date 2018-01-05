@@ -109,7 +109,7 @@
 			createBlankIssue: createBlankIssue,
 			isSelectedIssue: isSelectedIssue,
 			showIssuePins: showIssuePins,
-
+			resetIssues: resetIssues,
 			state: state
 			
 		};
@@ -117,6 +117,25 @@
 		return service;
 
 		/////////////
+
+		function resetIssues() {
+			state = {
+				heights : {
+					infoHeight : 135,
+					issuesListItemHeight : 141
+				},
+				selectedIssue: null,
+				allIssues: [],
+				issuesToShow: [],
+				displayIssue: null,
+				issueDisplay: {
+					showSubModelIssues: false,
+					showClosed: false,
+					sortOldestFirst : false,
+					excludeRoles: []
+				}
+			};
+		}
 
 		function createBlankIssue(creatorRole) {
 			return {

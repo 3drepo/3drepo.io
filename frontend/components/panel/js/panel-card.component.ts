@@ -90,6 +90,12 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
+		// this.$scope.$watch("vm.showAdd", (newValue)  => {
+		// 	if (this.isDefined(newValue)) {
+		// 		this.toggleAdd(newValue);
+		// 	}
+		// });
+
 		/*
 		* Watch show on contentData to toggle elements off
 		*/
@@ -123,10 +129,22 @@ class PanelCardController implements ng.IController {
 		});
 	}
 
-	/*
-		* Watch type on contentData to create content and tool bar options
-		*/
+	// public toggleAdd(on) {
+	// 	if (this.contentData.type === "issues") {
+	// 		this.showToolbarOptions(["filter", "menu"], !on);
+	// 	}
+	// 	this.hideItem();
+	// 	this.$timeout();
+	// 	// this.PanelService.handlePanelEvent(
+	// 	// 	this.contentData.type,
+	// 	// 	this.EventService.EVENT.PANEL_CARD_ADD_MODE,
+	// 	// 	{on},
+	// 	// );
+	// }
 
+	/*
+	* Watch type on contentData to create content and tool bar options
+	*/
 	public hasFilter() {
 		const filter = this.contentData.options.find((item) => {
 			return item.type === "filter";
