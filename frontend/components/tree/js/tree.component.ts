@@ -482,7 +482,7 @@ class TreeController implements ng.IController {
 
 }
 
-public export const TreeComponent: ng.IComponentOptions = {
+export const TreeComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
@@ -497,6 +497,6 @@ public export const TreeComponent: ng.IComponentOptions = {
 	templateUrl: "templates/tree.html",
 };
 
-public export const TreeComponentModule = angular
+export const TreeComponentModule = angular
 	.module("3drepo")
 	.component("tree", TreeComponent);
