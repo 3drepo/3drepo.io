@@ -550,7 +550,6 @@
 					model: issue.model
 				};
 
-				console.log("issuesservice - firing UPDATE_CLIPPING_PLANES");
 				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			} else {
