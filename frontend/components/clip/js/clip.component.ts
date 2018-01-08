@@ -51,6 +51,7 @@ class ClipController implements ng.IController {
 	public normal;
 
 	public onContentHeightRequest;
+	public show;
 
 	constructor(
 		private $scope: any,
@@ -110,7 +111,7 @@ class ClipController implements ng.IController {
 		 * Watch for show/hide of card
 		 */
 		this.$scope.$watch("vm.show", (newValue)  =>  {
-			if (newValue !== undefined && newValue !== undefined) {
+			if (newValue !== undefined && newValue !== null) {
 				this.visible = newValue;
 			}
 		});
@@ -119,7 +120,7 @@ class ClipController implements ng.IController {
 		 * Toggle the clipping plane
 		 */
 		this.$scope.$watch("vm.visible", (newValue) => {
-			if (newValue !== undefined && newValue !== undefined) {
+			if (newValue !== undefined && newValue !== null) {
 				if (newValue) {
 					this.updateClippingPlane();
 				} else {
@@ -155,6 +156,7 @@ class ClipController implements ng.IController {
 
 			switch (event.type) {
 			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
+
 				if (!event.value.fromClipPanel) {
 					const clip = event.value.clippingPlanes[0];
 					if (clip) {
@@ -168,14 +170,14 @@ class ClipController implements ng.IController {
 						this.updateDisplayedDistance(true, this.visible);
 					} else {
 						this.reset();
+						this.ViewerService.clearClippingPlanes();
 					}
 				}
-				// else {
-				// 	this.reset();
-				// }
+
 				break;
 
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
+
 				this.setDisplayValues(
 					this.determineAxis(event.value.normal),
 					event.value.distance,
@@ -327,10 +329,10 @@ class ClipController implements ng.IController {
 	}
 
 	public reset() {
-		const minMax = this.getMinMax();
-		const scaler = this.getScaler(this.units, this.modelUnits);
-		const dist = minMax.max * scaler;
-		this.setDisplayValues(this.displayedAxis, dist, true, false, true);
+		// const minMax = this.getMinMax();
+		// const scaler = this.getScaler(this.units, this.modelUnits);
+		// const dist = minMax.max * scaler;
+		// this.setDisplayValues(this.displayedAxis, dist, true, false, true);
 	}
 
 	/**
@@ -460,7 +462,6 @@ class ClipController implements ng.IController {
 	 * Update display slider based on current internal distance
 	 */
 	public updateDisplaySlider(updateDistance, moveClip) {
-
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;
