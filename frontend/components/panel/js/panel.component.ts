@@ -76,7 +76,6 @@ class PanelController implements ng.IController {
 				for (let i = 0; i < newValue.length; i ++) {
 
 					if (newValue[i].show !== oldValue[i].show) {
-						console.log(this.contentItems);
 						this.setupShownCards();
 						// this.getContentItemShownFromType();
 						break;

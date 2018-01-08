@@ -160,6 +160,7 @@ class ClipController implements ng.IController {
 				if (!event.value.fromClipPanel) {
 					const clip = event.value.clippingPlanes[0];
 					if (clip) {
+						// this.visible = true;
 						this.setDisplayValues(
 							this.determineAxis(clip.normal),
 							clip.distance,
@@ -329,10 +330,10 @@ class ClipController implements ng.IController {
 	}
 
 	public reset() {
-		// const minMax = this.getMinMax();
-		// const scaler = this.getScaler(this.units, this.modelUnits);
-		// const dist = minMax.max * scaler;
-		// this.setDisplayValues(this.displayedAxis, dist, true, false, true);
+		const minMax = this.getMinMax();
+		const scaler = this.getScaler(this.units, this.modelUnits);
+		const dist = minMax.max * scaler;
+		this.setDisplayValues(this.displayedAxis, dist, false, false, true);
 	}
 
 	/**
