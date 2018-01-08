@@ -76,6 +76,7 @@ class PanelController implements ng.IController {
 				for (let i = 0; i < newValue.length; i ++) {
 
 					if (newValue[i].show !== oldValue[i].show) {
+						console.log(this.contentItems);
 						this.setupShownCards();
 						// this.getContentItemShownFromType();
 						break;
@@ -98,7 +99,10 @@ class PanelController implements ng.IController {
 				// TODO: This is ugly, why are we doing this?
 				if (item && item.menu && event.value) {
 					event.value.menu.forEach((newItem) => {
-						if (item.menu.indexOf(newItem) === -1) {
+						const exists = item.menu.find((oldItem) => {
+							return oldItem.role === newItem.role;
+						});
+						if (!exists) {
 							item.menu.push(newItem);
 						}
 					});
