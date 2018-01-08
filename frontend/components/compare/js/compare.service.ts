@@ -38,29 +38,32 @@ export class CompareService {
 		private RevisionsService: any,
 		private ViewerService: any,
 	) {
+		this.reset();
+	}
 
+	public reset() {
 		this.settingsPromises = [];
-		this.readyDefer = $q.defer();
+		this.readyDefer = this.$q.defer();
 
-		this.state = {};
-		this.state.compareTypes = {
-			diff : {
-				label: "3D Diff",
-				baseModels: [],
-				targetModels: [],
-				type: "diff",
+		this.state = {
+			compareTypes : {
+				diff : {
+					label: "3D Diff",
+					baseModels: [],
+					targetModels: [],
+					type: "diff",
+				},
+				clash : {
+					label: "3D Clash",
+					baseModels: [],
+					targetModels: [],
+					type: "clash",
+				},
 			},
-			clash : {
-				label: "3D Clash",
-				baseModels: [],
-				targetModels: [],
-				type: "clash",
-			},
+			mode : "diff",
+			modelType : "base",
+			ready : this.readyDefer.promise,
 		};
-
-		this.state.mode = "diff";
-		this.state.modelType = "base";
-		this.state.ready = this.readyDefer.promise;
 
 	}
 
