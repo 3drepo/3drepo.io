@@ -99,9 +99,8 @@
 
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
-
+					
 					if (data) {
-
 						IssuesService.populateNewIssues(data);
 
 						setTimeout(function(){
@@ -175,6 +174,8 @@
 		};
 
 		vm.$onDestroy = function () {
+			vm.allIssues = [];
+			vm.issuesToShow = [];
 			vm.removeUnsavedPin();
 		};
 
@@ -224,23 +225,20 @@
 		}, true);
 
 		$scope.$watch(function(){
-			return IssuesService.state.allIssues;
+			return IssuesService.state;
 		}, function(){
-			vm.allIssues = IssuesService.state.allIssues;
-		}, true);
 
-		$scope.$watch(function(){
-			return IssuesService.state.issuesToShow;
-		}, function(){
-			vm.issuesToShow = IssuesService.state.issuesToShow;
+			if (vm.allIssues !== IssuesService.state.allIssues) {
+				vm.allIssues = IssuesService.state.allIssues;
+			}
+			if (vm.selectedIssue !== IssuesService.state.selectedIssue) {
+				vm.selectedIssue = IssuesService.state.selectedIssue;
+			}
+			if (vm.issuesToShow !== IssuesService.state.issuesToShow) {
+				vm.issuesToShow = IssuesService.state.issuesToShow;
+			}
+			
 		}, true);
-
-		$scope.$watch(function(){
-			return IssuesService.state.selectedIssue;
-		}, function(){
-			vm.selectedIssue = IssuesService.state.selectedIssue;
-		}, true);
-
 
 		/**
 		 * Set up event watching

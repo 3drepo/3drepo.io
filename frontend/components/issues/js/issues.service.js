@@ -41,23 +41,6 @@
 
 		var initPromise = $q.defer();
 
-		var state = {
-			heights : {
-				infoHeight : 135,
-				issuesListItemHeight : 141
-			},
-			selectedIssue: null,
-			allIssues: [],
-			issuesToShow: [],
-			displayIssue: null,
-			issueDisplay: {
-				showSubModelIssues: false,
-				showClosed: false,
-				sortOldestFirst : false,
-				excludeRoles: []
-			}
-		};
-
 		var service = {
 			init : init,
 			numIssues: numIssues,
@@ -109,17 +92,19 @@
 			createBlankIssue: createBlankIssue,
 			isSelectedIssue: isSelectedIssue,
 			showIssuePins: showIssuePins,
-			resetIssues: resetIssues,
-			state: state
+			resetIssues: resetIssues
 			
 		};
+
+		resetIssues();
 
 		return service;
 
 		/////////////
 
 		function resetIssues() {
-			state = {
+
+			service.state = {
 				heights : {
 					infoHeight : 135,
 					issuesListItemHeight : 141
@@ -149,10 +134,10 @@
 		}
 
 		function getDisplayIssue() {
-			if (state.displayIssue && state.allIssues.length > 0){
+			if (service.state.displayIssue && service.state.allIssues.length > 0){
 
-				var issueToDisplay = state.allIssues.find(function(issue){
-					return issue._id === state.displayIssue;
+				var issueToDisplay = service.state.allIssues.find(function(issue){
+					return issue._id === service.state.displayIssue;
 				});
 				
 				return issueToDisplay;
@@ -171,18 +156,18 @@
 		}
 
 		function setupIssuesToShow(model, filterText) {
-			state.issuesToShow = [];
+			service.state.issuesToShow = [];
 
-			if (state.allIssues.length > 0) {
+			if (service.state.allIssues.length > 0) {
 
 				// Sort
-				state.issuesToShow = state.allIssues.slice();
-				if (state.issueDisplay.sortOldestFirst) {
-					state.issuesToShow.sort(function(a, b){
+				service.state.issuesToShow = service.state.allIssues.slice();
+				if (service.state.issueDisplay.sortOldestFirst) {
+					service.state.issuesToShow.sort(function(a, b){
 						return a.created - b.created;
 					});
 				} else {
-					state.issuesToShow.sort(function(a, b){
+					service.state.issuesToShow.sort(function(a, b){
 						return b.created - a.created;
 					});
 				}
@@ -196,7 +181,7 @@
 
 					// TODO: do we need $filter?
 
-					state.issuesToShow = ($filter("filter")(state.issuesToShow, function(issue) {
+					service.state.issuesToShow = ($filter("filter")(service.state.issuesToShow, function(issue) {
 						// Required custom filter due to the fact that Angular
 						// does not allow compound OR filters
 						var i;
@@ -231,21 +216,21 @@
 				} 
 
 				// Closed
-				for (var i = (state.issuesToShow.length - 1); i >= 0; i -= 1) {
+				for (var i = (service.state.issuesToShow.length - 1); i >= 0; i -= 1) {
 
-					if (!state.issueDisplay.showClosed && (state.issuesToShow[i].status === "closed")) {
-						state.issuesToShow.splice(i, 1);
+					if (!service.state.issueDisplay.showClosed && (service.state.issuesToShow[i].status === "closed")) {
+						service.state.issuesToShow.splice(i, 1);
 					}
 				}
 
 				// Sub models
-				state.issuesToShow = state.issuesToShow.filter(function (issue) {
-					return state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+				service.state.issuesToShow = service.state.issuesToShow.filter(function (issue) {
+					return service.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 				});
 
 				//Roles Filter
-				state.issuesToShow = state.issuesToShow.filter(function(issue){
-					return state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
+				service.state.issuesToShow = service.state.issuesToShow.filter(function(issue){
+					return service.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			
 			}
@@ -253,24 +238,24 @@
 		}
 
 		function resetSelectedIssue() {
-			state.selectedIssue = undefined;
+			service.state.selectedIssue = undefined;
 			//showIssuePins();
 		}
 
 		function isSelectedIssue(issue) {
-			//console.log(state.selectedIssue);
-			if (!state.selectedIssue || !state.selectedIssue._id) {
+			//console.log(service.state.selectedIssue);
+			if (!service.state.selectedIssue || !service.state.selectedIssue._id) {
 				return false;
 			} else {
-				return issue._id === state.selectedIssue._id;
+				return issue._id === service.state.selectedIssue._id;
 			}
 		}
 
 		function showIssuePins() {
 
 			// TODO: This is still inefficent and unclean
-			state.allIssues.forEach(function(issue) {
-				var show = state.issuesToShow.find(function(shownIssue){
+			service.state.allIssues.forEach(function(issue) {
+				var show = service.state.issuesToShow.find(function(shownIssue){
 					return issue._id === shownIssue._id;
 				});
 
@@ -280,8 +265,8 @@
 				if (show !== undefined && pinPosition) {
 
 					var pinColor = Pin.pinColours.blue;
-					var isSelectedPin = state.selectedIssue && 
-										issue._id === state.selectedIssue._id;
+					var isSelectedPin = service.state.selectedIssue && 
+										issue._id === service.state.selectedIssue._id;
 
 					if (isSelectedPin) {
 						pinColor = Pin.pinColours.yellow;
@@ -307,14 +292,14 @@
 
 		function setSelectedIssue(issue, isCorrectState) {
 
-			if (state.selectedIssue) {
-				var different = (state.selectedIssue._id !== issue._id);
+			if (service.state.selectedIssue) {
+				var different = (service.state.selectedIssue._id !== issue._id);
 				if (different) {
-					deselectPin(state.selectedIssue);
+					deselectPin(service.state.selectedIssue);
 				}
 			}
 			
-			state.selectedIssue = issue;
+			service.state.selectedIssue = issue;
 
 			// If we're saving then we already have pin and
 			// highlights in place
@@ -327,34 +312,34 @@
 
 		function populateNewIssues(newIssues) {
 			newIssues.forEach(populateIssue);
-			state.allIssues = newIssues;
+			service.state.allIssues = newIssues;
 		}
 
 		function addIssue(issue) {
 			populateIssue(issue);
-			state.allIssues.unshift(issue);
+			service.state.allIssues.unshift(issue);
 		}
 
 		function updateIssues(issue) {
 
 			populateIssue(issue);
 
-			state.allIssues.forEach(function(oldIssue, i){
+			service.state.allIssues.forEach(function(oldIssue, i){
 				var matchs = oldIssue._id === issue._id;
 				if(matchs){
 
 					if(issue.status === "closed"){
 						
-						state.allIssues[i].justClosed = true;
+						service.state.allIssues[i].justClosed = true;
 
 						$timeout(function(){
 
-							state.allIssues[i] = issue;
+							service.state.allIssues[i] = issue;
 
 						}, 4000);
 
 					} else {
-						state.allIssues[i] = issue;
+						service.state.allIssues[i] = issue;
 					}
 
 				}
