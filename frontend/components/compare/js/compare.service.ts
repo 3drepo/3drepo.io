@@ -230,9 +230,7 @@ export class CompareService {
 			.then((revisions) => {
 				return this.getSettings(model).then((response) => {
 					const settings = response.data;
-					console.log("getRevisionModels - target", settings, revisions, revision);
 					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions, revision, "target");
-					console.log("getRevisionModels - base", settings, revisions, revision);
 					this.state.compareTypes[type].baseModels[i] = this.getCompareModelData(settings, revisions, revision, "base");
 				});
 			})
@@ -278,9 +276,9 @@ export class CompareService {
 		this.useSetModeComparision();
 	}
 
-	public loadModels() {
+	public loadModels(compareType: string) {
 		const allModels = [];
-		this.state.compareTypes.diff.targetModels.forEach((model) => {
+		this.state.compareTypes[compareType].targetModels.forEach((model) => {
 			if (model && model.visible === true) {
 
 				this.state.loadingComparision = true;
@@ -402,7 +400,7 @@ export class CompareService {
 		// console.log("diffFed - start")
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels()
+		this.loadModels("diff")
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
@@ -418,7 +416,7 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels()
+		this.loadModels("clash")
 			.then(() => {
 				this.ViewerService.diffToolEnableWithClashMode();
 				this.modelsLoaded();
