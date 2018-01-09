@@ -641,8 +641,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			data.viewpoint.group_id = data.group_id;
-			data.viewpoint.highlighted_group_id = data.highlighted_group_id;
-			data.viewpoint.hidden_group_id = data.hidden_group_id;
 			
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer(data.viewpoint.scribble, "base64"),
