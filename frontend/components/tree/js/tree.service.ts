@@ -54,6 +54,7 @@ export class TreeService {
 		private APIService,
 	) {
 		this.state = {};
+		this.state.showProgress = false;
 		this.state.lastParentWithName = null;
 		this.state.showNodes = true;
 		this.state.visible = {};
@@ -499,15 +500,14 @@ export class TreeService {
 	 */
 	public setToggleState(node: any, visibility: string, fastforward: boolean) {
 
-		let path;
-
-		if (this.canShowNode(node) && this.isLeafNode(node) || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
+		const showableLeaf = this.canShowNode(node) && this.isLeafNode(node);
+		if (showableLeaf || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
 			node.toggleState = visibility;
 		}
 
 		// a__b .. c__d
 		// toggle parent
-		path = node.path.split("__");
+		let path = node.path.split("__");
 		path.splice(path.length - 1, 1);
 
 		// Get node parent
@@ -703,7 +703,6 @@ export class TreeService {
 		let i;
 		let j;
 		let length;
-		let childrenLength;
 		let selectedId = path[path.length - 1];
 		let selectedIndex = 0;
 		let selectionFound = false;
@@ -718,7 +717,6 @@ export class TreeService {
 
 				this.nodesToShow[i].expanded = true;
 				this.nodesToShow[i].selected = false;
-				childrenLength = this.nodesToShow[i].children.length;
 
 				if (level === (path.length - 2)) {
 					selectedIndex = i;
@@ -726,16 +724,20 @@ export class TreeService {
 
 				let childWithNameCount = 0;
 
-				for (j = 0; j < childrenLength; j += 1) {
+				const childLength = this.nodesToShow[i].children.length;
+				for (j = 0; j < childLength; j ++) {
+
+					const childNode = this.nodesToShow[i].children[j];
+
 					// Set child to not expanded
-					this.nodesToShow[i].children[j].expanded = false;
+					childNode.expanded = false;
 
-					if (this.nodesToShow[i].children[j]._id === selectedId) {
+					if (childNode._id === selectedId) {
 
-						if (this.nodesToShow[i].children[j].hasOwnProperty("name")) {
-							this.nodesToShow[i].children[j].selected = true;
+						if (childNode.hasOwnProperty("name")) {
+							childNode.selected = true;
 							if (!noHighlight) {
-								this.selectNode(this.nodesToShow[i].children[j], multi);
+								this.selectNode(childNode, multi);
 							}
 							this.state.lastParentWithName = null;
 							selectedIndex = i + j + 1;
@@ -754,41 +756,53 @@ export class TreeService {
 						condLoop = false;
 					} else {
 						// This will clear any previously selected node
-						this.nodesToShow[i].children[j].selected = false;
+						childNode.selected = false;
 					}
 
 					// Only set the toggle state once when the node is listed
-					if (!this.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
-						this.setToggleState(this.nodesToShow[i].children[j], "visible", false);
+					if (!childNode.hasOwnProperty("toggleState")) {
+						this.setToggleState(childNode, "visible", false);
 					}
 
 					// Determine if child node has childern
-					this.nodesToShow[i].children[j].hasChildren = false;
-					if (("children" in this.nodesToShow[i].children[j]) && (this.nodesToShow[i].children[j].children.length > 0)) {
-						for (let k = 0, jLength = this.nodesToShow[i].children[j].children.length; k < jLength; k++) {
-							if (this.nodesToShow[i].children[j].children[k].hasOwnProperty("name")) {
-								this.nodesToShow[i].children[j].hasChildren = true;
+					childNode.hasChildren = false;
+					if (("children" in childNode) && (childNode.children.length > 0)) {
+						for (let k = 0, jLength = childNode.children.length; k < jLength; k++) {
+							if (childNode.children[k].hasOwnProperty("name")) {
+								childNode.hasChildren = true;
 								break;
 							}
 						}
 					}
 
 					// Set current selected node
-					if (this.nodesToShow[i].children[j].selected) {
+					if (childNode.selected) {
 						selectionFound = true;
 
 					}
 
-					this.nodesToShow[i].children[j].level = level + 1;
+					childNode.level = level + 1;
+					const nodeHasChildren = this.nodesToShow[i].hasChildren;
+					const nodeChildHasName = childNode.hasOwnProperty("name");
 
-					if (this.nodesToShow[i].hasChildren && this.nodesToShow[i].children[j].hasOwnProperty("name")) {
+					if (nodeHasChildren && nodeChildHasName) {
 
-						this.nodesToShow.splice(i + childWithNameCount + 1, 0, this.nodesToShow[i].children[j]);
+						// TODO: This is bad. This is a fix for nodes appearing twice in the list
+						//  Why only top level nodes? Why are nodes being spliced that already exist?
+						if (this.nodesToShow[i] === 0) {
+							const isDuplicate = this.nodesToShow.find((n) => n.name === childNode.name);
+							if (isDuplicate) {
+								continue;
+							}
+						}
+
+						this.nodesToShow.splice(i + childWithNameCount + 1, 0, childNode);
 						childWithNameCount++;
 					}
 
 				}
 			}
+			this.state.showProgress = false;
 		}
 
 		const selectionData = {
@@ -941,7 +955,8 @@ export class TreeService {
 	 */
 	public toggleTreeNodeVisibility(node: any, fastforward: boolean) {
 		if (node) {
-			const nodeToggleState = (node.toggleState === "visible" || node.toggleState === "parentOfInvisible") ? "invisible" : "visible";
+			const vis = node.toggleState === "visible" || node.toggleState === "parentOfInvisible";
+			const nodeToggleState = (vis) ? "invisible" : "visible";
 			this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
 		}
 	}
