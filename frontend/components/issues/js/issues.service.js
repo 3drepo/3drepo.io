@@ -564,7 +564,7 @@
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
-			if ((issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) || issue.hasOwnProperty("group_id")) {
+			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
 		
@@ -572,89 +572,135 @@
 		}
 
 		function showMultiIds(issue) {
-			var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
-			var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
+				if (issue.viewpoint.highlighted_group_id) {
+					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
+					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
 
-			APIService.get(groupUrl)
-				.then(function (response) {
-					handleTree(response);
-				})
-				.catch(function(error){
-					console.error("There was a problem getting the highlights: ", error);
-				});
+					APIService.get(highlightedGroupUrl)
+						.then(function (response) {
+							handleHighlights(response.data.objects);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting the highlights: ", error);
+						});
+				}
+				
+				if (issue.viewpoint.hidden_group_id) {
+					var hiddenGroupId = issue.viewpoint.hidden_group_id;
+					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+
+					APIService.get(hiddenGroupUrl)
+						.then(function (response) {
+							handleHidden(response.data.objects);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting visibility: ", error);
+						});
+				}
+			} else {
+				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
+				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+
+				APIService.get(groupUrl)
+					.then(function (response) {
+						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
+							response.data.hiddenObjects = null;
+						}
+						handleTree(response);
+					})
+					.catch(function(error){
+						console.error("There was a problem getting the highlights: ", error);
+					});
+			}
 		}
 
-		function handleTree(response) {
-
+		function handleHighlights(objects) {
 			var ids = [];
-			var objectIdsToHide = [];
+			
 			TreeService.getMap()
 				.then(function(treeMap){
-					var objectsPromise = $q.defer();
-
-					ViewerService.getObjectsStatus({
-						promise: objectsPromise
-					});
 
 					// show currently hidden nodes
-					objectsPromise.promise
-						.then(function() {
-							var hideIfcState = TreeService.getHideIfc();
-							TreeService.setHideIfc(false);
-							TreeService.showAllTreeNodes();
-							
-							if (response.data.hiddenObjects) {
-								response.data.hiddenObjects.forEach(function(obj){
-									var account = obj.account;
-									var model = obj.model;
-									var key = account + "@" + model;
-									if(!objectIdsToHide[key]){
-										objectIdsToHide[key] = [];
-									}	
+					TreeService.clearCurrentlySelected();
 
-									objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+					for (var i = 0; i < objects.length; i++) {
+						var obj = objects[i];
+						var account = obj.account;
+						var model = obj.model;
+						var key = account + "@" + model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
 
-								});
+						var objUid = treeMap.sharedIdToUid[obj.shared_id];
+						
+						if (objUid) {
+							ids[key].push(objUid);
+							if (i < objects.length - 1) {
+								TreeService.selectNode(TreeService.getNodeById(objUid), true);
+							} else {
+								// Only call expandToSelection for last selected node to improve performance
+								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 							}
-
-							for (var ns in objectIdsToHide) {
-
-								objectIdsToHide[ns].forEach(function(obj) {
-									TreeService.toggleTreeNodeVisibilityById(obj);
-								});
-							}
-							
-							TreeService.setHideIfc(hideIfcState);
-							TreeService.clearCurrentlySelected();
-
-							for (var i = 0; i < response.data.objects.length; i++) {
-								var obj = response.data.objects[i];
-								var account = obj.account;
-								var model = obj.model;
-								var key = account + "@" + model;
-								if(!ids[key]){
-									ids[key] = [];
-								}	
-
-								var objUid = treeMap.sharedIdToUid[obj.shared_id];
-								
-								if (objUid) {
-									ids[key].push(objUid);
-									if (i < response.data.objects.length - 1) {
-										TreeService.selectNode(TreeService.getNodeById(objUid), true);
-									} else {
-										// Only call expandToSelection for last selected node to improve performance
-										TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
-									}
-								}
-							}
-
-						});
+						}
+					}
 			
 				})
 				.catch(function(error) {
 					console.error(error);
 				});
+		}
+
+		function handleHidden(objects) {
+			var objectIdsToHide = [];
+			
+			TreeService.getMap()
+				.then(function(treeMap){
+
+					// show currently hidden nodes
+					var hideIfcState = TreeService.getHideIfc();
+					TreeService.setHideIfc(false);
+					TreeService.showAllTreeNodes();
+					
+					if (objects) {
+						objects.forEach(function(obj){
+							var account = obj.account;
+							var model = obj.model;
+							var key = account + "@" + model;
+							if(!objectIdsToHide[key]){
+								objectIdsToHide[key] = [];
+							}	
+
+							objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+
+						});
+					}
+
+					for (var ns in objectIdsToHide) {
+
+						objectIdsToHide[ns].forEach(function(obj) {
+							TreeService.toggleTreeNodeVisibilityById(obj);
+						});
+					}
+					
+					TreeService.setHideIfc(hideIfcState);
+
+				})
+				.catch(function(error) {
+					console.error(error);
+				});
+		}
+
+		function handleTree(response) {
+
+			if (response.data.objects && response.data.objects.length > 0) {
+				handleHighlights(response.data.objects);
+			}
+
+			if (response.data.hiddenObjects) {
+				handleHidden(response.data.hiddenObjects);
+			}
 
 		}
 

@@ -124,6 +124,8 @@ let schema = Schema({
 		near : Number,
 		clippingPlanes : [Schema.Types.Mixed ],
 		group_id: Object,
+		highlighted_group_id: Object,
+		hidden_group_id: Object,
 		screenshot: {
 			flag: Number, 
 			content: Object,
@@ -548,9 +550,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let promises = [];
 
 	let issue = Issue.createInstance(dbColOptions);
- 	issue._id = stringToUUID(uuid.v1());
+	issue._id = stringToUUID(uuid.v1());
 
- 	let checkGroup = function(group_id){
+	let checkGroup = function(group_id){
 		return Group.findByUID(dbColOptions, group_id).then(group => {
 			if(!group){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
@@ -558,11 +560,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 				return Promise.resolve(group);
 			}
 		});
- 	};
+	};
 
- 	if(!data.name){
- 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
- 	}
+	if(!data.name){
+		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
+	}
 
 	if(objectId){
 		promises.push(
@@ -639,6 +641,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			data.viewpoint.group_id = data.group_id;
+			data.viewpoint.highlighted_group_id = data.highlighted_group_id;
+			data.viewpoint.hidden_group_id = data.hidden_group_id;
 			
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer(data.viewpoint.scribble, "base64"),
@@ -1159,6 +1163,8 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.model = this._dbcolOptions.model;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
+	cleaned.highlighted_group_id = cleaned.highlighted_group_id ? uuidToString(cleaned.highlighted_group_id) : undefined;
+	cleaned.hidden_group_id = cleaned.hidden_group_id ? uuidToString(cleaned.hidden_group_id) : undefined;
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
@@ -1852,7 +1858,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 	});
 };
 
-var Issue = ModelFactory.createClass(
+let Issue = ModelFactory.createClass(
 	"Issue",
 	schema,
 	arg => {
