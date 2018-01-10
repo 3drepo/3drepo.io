@@ -84,14 +84,6 @@ class CompareController implements ng.IController {
 
 		}, true);
 
-		// this.$scope.$watch(() => {
-		// 	return this.revision;
-		// }, () => {
-		// 	if (this.revision) {
-		// 		this.updateModels();
-		// 	}
-		// });
-
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
 				this.modelsReady.resolve(this.modelSettingsReady());
@@ -128,7 +120,6 @@ class CompareController implements ng.IController {
 			for (let j = 0; j < baseModels.length; j++) {
 				const model = baseModels[j];
 				if (model && shownModel.name === model.account + ":" + model.name) {
-					console.log("Toggle State", shownModel.toggleState);
 					model.visible = shownModel.toggleState || "visible";
 					break;
 				}

@@ -106,7 +106,7 @@ class TreeController implements ng.IController {
 						if (!path) {
 							console.error("Couldn't find the object path");
 						} else {
-							console.log("OBJECT_SELECTED");
+
 							this.initNodesToShow();
 							this.TreeService.resetLastParentWithName();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
@@ -232,7 +232,7 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.TreeService.selectionData,
 			(selectionData) => {
 				if (selectionData) {
-					// console.log("selectionData");
+
 					this.setContentHeight(this.fetchNodesToShow());
 					this.TreeService.setShowNodes(true);
 					requestAnimationFrame(() => {
