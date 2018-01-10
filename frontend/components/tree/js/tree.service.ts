@@ -993,6 +993,8 @@ export class TreeService {
 			}
 		});
 
+		this.visibilityUpdateTime = Date.now();
+
 	}
 
 	public resetHidden() {
@@ -1072,7 +1074,6 @@ export class TreeService {
 		} else {
 			delete this.clickedHidden[node._id];
 		}
-		this.visibilityUpdateTime = Date.now();
 	}
 
 	/**
@@ -1085,7 +1086,6 @@ export class TreeService {
 		} else {
 			delete this.clickedShown[node._id];
 		}
-		this.visibilityUpdateTime = Date.now();
 	}
 
 	/**

@@ -84,16 +84,18 @@ class CompareController implements ng.IController {
 
 		}, true);
 
+		// this.$scope.$watch(() => {
+		// 	return this.revision;
+		// }, () => {
+		// 	if (this.revision) {
+		// 		this.updateModels();
+		// 	}
+		// });
+
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
 				this.modelsReady.resolve(this.modelSettingsReady());
 			}
-		});
-
-		this.$scope.$watch(() => {
-			return this.TreeService.visibilityUpdateTime;
-		}, () => {
-			this.updateModels();
 		});
 
 	}
@@ -126,7 +128,8 @@ class CompareController implements ng.IController {
 			for (let j = 0; j < baseModels.length; j++) {
 				const model = baseModels[j];
 				if (model && shownModel.name === model.account + ":" + model.name) {
-					model.visible = (shownModel.toggleState === "visible");
+					console.log("Toggle State", shownModel.toggleState);
+					model.visible = shownModel.toggleState || "visible";
 					break;
 				}
 			}
@@ -179,6 +182,10 @@ class CompareController implements ng.IController {
 
 	public setModelType(type: string) {
 		this.CompareService.setModelType(type);
+	}
+
+	public setBaseRevision(model: any, revision: any) {
+		this.CompareService.setBaseRevision(model, revision);
 	}
 
 	public setTargetRevision(model: any, revision: any) {

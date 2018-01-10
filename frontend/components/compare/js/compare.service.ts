@@ -146,10 +146,12 @@ export class CompareService {
 		let baseRevision;
 
 		if (!this.isFederation()) {
+			console.log(revision, revisions);
 			// If it's a model use the loaded revision
-			baseRevision = revisions.find((rev) => rev._id === revision ) || revisions[0];
+			baseRevision = revisions.find((rev) => rev.tag === revision || rev._id === revision ) || revisions[0];
 		} else {
 			// If it's a federation just set the base to the first revision
+			console.log("base Revision - ", revisions);
 			baseRevision = revisions[0];
 		}
 
@@ -168,7 +170,7 @@ export class CompareService {
 			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
 			targetRevision: targetRevision.name,
 			targetRevisionTag: targetRevision.tag || targetTimestamp || targetRevision.name,
-			visible: true,
+			visible: "visible",
 		};
 	}
 
@@ -180,8 +182,12 @@ export class CompareService {
 	}
 
 	public addModelsForModelCompare(account: string, model: string, modelSettings: any, revision: any) {
-		return this.RevisionsService.listAll(account, model).then((revisions) => {
 
+		this.state.compareTypes.diff.targetModels = [];
+		this.state.compareTypes.diff.baseModels = [];
+
+		return this.RevisionsService.listAll(account, model).then((revisions) => {
+			console.log(revision);
 			this.state.compareTypes.diff.targetModels = [
 				this.getCompareModelData(modelSettings, revisions, revision, "target"),
 			];
@@ -208,7 +214,7 @@ export class CompareService {
 			this.state.compareTypes[type].targetModels = [];
 
 			modelSettings.subModels.forEach((model, i) => {
-
+				console.log("")
 				if (model.database && model.model) {
 					const revisionPromise = this.getRevisionModels(model, type, i, revision);
 					promises.push(revisionPromise);
@@ -228,6 +234,7 @@ export class CompareService {
 
 		return this.RevisionsService.listAll(model.database, model.model)
 			.then((revisions) => {
+				console.log(revisions);
 				return this.getSettings(model).then((response) => {
 					const settings = response.data;
 					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions, revision, "target");
@@ -279,7 +286,7 @@ export class CompareService {
 	public loadModels(compareType: string) {
 		const allModels = [];
 		this.state.compareTypes[compareType].targetModels.forEach((model) => {
-			if (model && model.visible === true) {
+			if (model && model.visible === "visible") {
 
 				this.state.loadingComparision = true;
 				const loadModel = this.ViewerService.diffToolLoadComparator(
@@ -451,7 +458,13 @@ export class CompareService {
 	}
 
 	private setTargetModelVisibility(model) {
-		model.visible = !model.visible;
+		if (model.visible === "invisible") {
+			model.visible = "visible";
+		} else if (model.visible === "parentOfInvisible") {
+			model.visible = "visible";
+		} else {
+			model.visible = "invisible";
+		}
 	}
 
 }
