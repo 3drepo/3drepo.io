@@ -147,6 +147,9 @@ class TreeController implements ng.IController {
 				this.TreeService.expandFirstNode();
 				this.setupInfiniteItemsFilter();
 				this.setContentHeight(this.fetchNodesToShow());
+
+				// Force show all and tree visibility to be recalculated
+				this.TreeService.showAllTreeNodesAndIFCs();
 			}
 		});
 
