@@ -185,7 +185,6 @@ export class CompareService {
 		this.state.compareTypes.diff.baseModels = [];
 
 		return this.RevisionsService.listAll(account, model).then((revisions) => {
-			console.log(revision);
 			this.state.compareTypes.diff.targetModels = [
 				this.getCompareModelData(modelSettings, revisions, revision, "target"),
 			];
@@ -212,7 +211,6 @@ export class CompareService {
 			this.state.compareTypes[type].targetModels = [];
 
 			modelSettings.subModels.forEach((model, i) => {
-				console.log("");
 				if (model.database && model.model) {
 					const revisionPromise = this.getRevisionModels(model, type, i, revision);
 					promises.push(revisionPromise);
@@ -298,8 +296,6 @@ export class CompareService {
 				allModels.push(loadModel);
 			}
 		});
-
-		// console.log("loadModels - allModels", allModels);
 
 		return Promise.all(allModels);
 	}
@@ -401,7 +397,6 @@ export class CompareService {
 	}
 
 	public diffFed() {
-		// console.log("diffFed - start")
 		this.ViewerService.diffToolDisableAndClear();
 
 		this.loadModels("diff")
@@ -449,9 +444,13 @@ export class CompareService {
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
 					this.TreeService.toggleTreeNodeVisibility(node, false);
+					// Keep the compare componetn and TreeService
+					// in sync with regards to visibility
+					model.visible = node.toggleState;
 				}
 			});
 		}
+
 	}
 
 	private setTargetModelVisibility(model) {

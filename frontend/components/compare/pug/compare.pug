@@ -63,8 +63,8 @@ div(
 									ng-click="vm.toggleModelVisibility(model)")
 									md-icon.angular-material-icons.visible(ng-if="!model.visible") visibility
 									md-icon.angular-material-icons.visible(ng-if="model.visible === 'visible'") visibility
-									md-icon.angular-material-icons.visible(ng-if="model.visible === 'invisible'") visibility_off
-									md-icon.angular-material-icons.parentOfInvisible(ng-if="model.visible === 'parentOfInvisible'") visibility_off
+									md-icon.angular-material-icons.invisible(ng-if="model.visible === 'invisible'") visibility_off
+									md-icon.angular-material-icons.parentOfInvisible(ng-if="model.visible === 'parentOfInvisible'") visibility
 									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
 								
 								md-button.modelSides.compareVisibility(

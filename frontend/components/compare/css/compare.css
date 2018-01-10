@@ -73,8 +73,12 @@ compare .visible {
 }
 
 
+compare .invisible {
+    color: #999
+}
+
 compare .parentOfInvisible {
-    color: #999 ;
+    color: rgba(12, 47, 84, 0.48);
 }
 
 compare md-tabs-content-wrapper md-tab-content {

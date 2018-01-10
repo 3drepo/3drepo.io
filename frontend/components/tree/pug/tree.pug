@@ -45,9 +45,15 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 					p.noAccessName(ng-if="item.status") {{item.name}}
 				// Toggle visibility
 				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)", ng-if="!item.status")
-					md-icon.angular-material-icons(ng-if="item.toggleState==='visible'") visibility
-					md-icon.angular-material-icons(ng-if="item.toggleState==='invisible'") visibility_off
-					md-icon.angular-material-icons.parentOfInvisible(aria-label="ParentOfInvisible", ng-if="item.toggleState==='parentOfInvisible'") visibility_off
+					md-icon.angular-material-icons.visible(ng-if="item.toggleState==='visible'") visibility
+					md-tooltip(ng-if="item.toggleState==='visible'") Visible
+
+					md-icon.angular-material-icons.invisible(ng-if="item.toggleState==='invisible'") visibility_off
+					md-tooltip(ng-if="item.toggleState==='invisible'") Invisible
+
+					md-icon.angular-material-icons.parentOfInvisible(aria-label="ParentOfInvisible", ng-if="item.toggleState==='parentOfInvisible'") visibility
+					md-tooltip(ng-if="item.toggleState==='parentOfInvisible'") Some Children Invisible
+
 			md-divider(ng-if="item.name")
 
 // Filter list

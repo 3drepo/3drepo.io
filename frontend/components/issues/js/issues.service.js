@@ -243,7 +243,6 @@
 		}
 
 		function isSelectedIssue(issue) {
-			//console.log(service.state.selectedIssue);
 			if (!service.state.selectedIssue || !service.state.selectedIssue._id) {
 				return false;
 			} else {
