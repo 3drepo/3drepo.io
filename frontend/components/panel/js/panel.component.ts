@@ -72,6 +72,7 @@ class PanelController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
+			console.log(newValue, oldValue);
 			if (oldValue.length && newValue.length) {
 				for (let i = 0; i < newValue.length; i ++) {
 
