@@ -455,25 +455,29 @@ export class TreeService {
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
 	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
-		const model = node.model || node.project;
-		const key = this.getAccountModelKey(node.account, model);
-		let meshes = idToMeshes[node._id];
-		if (idToMeshes[key]) {
-			// the node is within a sub model
-			meshes = idToMeshes[key][node._id];
-		}
-		if (meshes) {
-			if (!nodes[key]) {
-				nodes[key] = meshes;
-			} else {
-				nodes[key] = nodes[key].concat(meshes);
+		if (node) {
+			const model = node.model || node.project;
+			const key = this.getAccountModelKey(node.account, model);
+			let meshes = idToMeshes[node._id];
+			if (idToMeshes[key]) {
+				// the node is within a sub model
+				meshes = idToMeshes[key][node._id];
 			}
-		} else if (node.children) {
-			// This should only happen in federations.
-			// Traverse down the tree to find submodel nodes
-			node.children.forEach((child) => {
-				this.traverseNodeAndPushId(child, nodes, idToMeshes);
-			});
+			if (meshes) {
+				if (!nodes[key]) {
+					nodes[key] = meshes;
+				} else {
+					nodes[key] = nodes[key].concat(meshes);
+				}
+			} else if (node.children) {
+				// This should only happen in federations.
+				// Traverse down the tree to find submodel nodes
+				node.children.forEach((child) => {
+					this.traverseNodeAndPushId(child, nodes, idToMeshes);
+				});
+			}
+		} else {
+			console.error("traverseNodeAndPushId node is null.");
 		}
 	}
 
