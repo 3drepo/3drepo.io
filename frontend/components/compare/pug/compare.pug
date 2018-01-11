@@ -61,11 +61,15 @@ div(
 								md-button.modelSides.compareVisibility(
 									ng-if="vm.isFederation()"
 									ng-click="vm.toggleModelVisibility(model)")
-									md-icon.angular-material-icons.visible(ng-if="!model.visible") visibility
+
 									md-icon.angular-material-icons.visible(ng-if="model.visible === 'visible'") visibility
+									md-tooltip(ng-if="model.visible === 'visible'") Visible
+
 									md-icon.angular-material-icons.invisible(ng-if="model.visible === 'invisible'") visibility_off
+									md-tooltip(ng-if="model.visible === 'invisible'") Invisible
+
 									md-icon.angular-material-icons.parentOfInvisible(ng-if="model.visible === 'parentOfInvisible'") visibility
-									md-tooltip(md-direction="bottom") Visibility in {{compareType.label}}
+									md-tooltip(ng-if="model.visible === 'parentOfInvisible'") Has Invisible Children
 								
 								md-button.modelSides.compareVisibility(
 									ng-if="!vm.isFederation()")

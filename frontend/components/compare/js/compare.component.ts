@@ -66,6 +66,7 @@ class CompareController implements ng.IController {
 		this.models = [];
 
 		this.watchers();
+
 	}
 
 	public $onDestroy() {
@@ -90,10 +91,23 @@ class CompareController implements ng.IController {
 			}
 		});
 
+		this.watchTreeVisibility();
+
 	}
 
-	public revisionTimestamp(timestamp) {
-		return this.RevisionsService.revisionDateFilter(timestamp);
+	public watchTreeVisibility() {
+		let lastViewerUpdateTime = Date.now();
+		setInterval(() => {
+
+			if (this.TreeService.visibilityUpdateTime) {
+				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
+					this.updateModels();
+				}
+			}
+
+			lastViewerUpdateTime = Date.now();
+
+		}, 250);
 	}
 
 	public updateModels() {
@@ -106,6 +120,7 @@ class CompareController implements ng.IController {
 	}
 
 	public compareToTreeState(shownModel: any) {
+
 		if (shownModel.level !== 1) {
 			return;
 		}
@@ -117,6 +132,7 @@ class CompareController implements ng.IController {
 			}
 
 			const baseModels = this.compareTypes[type].baseModels;
+
 			for (let j = 0; j < baseModels.length; j++) {
 				const model = baseModels[j];
 				if (model && shownModel.name === model.account + ":" + model.name) {
@@ -127,6 +143,10 @@ class CompareController implements ng.IController {
 
 		}
 
+	}
+
+	public revisionTimestamp(timestamp) {
+		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 
 	public modelSettingsReady() {

@@ -29,10 +29,9 @@ export class TreeService {
 	public highlightMapUpdateTime;
 	public selectionData;
 	public visibilityUpdateTime;
+	public treeReady;
 
 	private state;
-
-	private treeReady;
 	private treeMap = null;
 	private idToMeshes;
 	private baseURL;
@@ -53,6 +52,7 @@ export class TreeService {
 		private $q: IQService,
 		private APIService,
 	) {
+		this.treeReady = this.$q.defer();
 		this.state = {};
 		this.state.showProgress = false;
 		this.state.lastParentWithName = null;
@@ -102,7 +102,6 @@ export class TreeService {
 	}
 
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
-		this.treeReady = this.$q.defer();
 		this.treeMap = null;
 		branch = branch ? branch : "master";
 
