@@ -25,7 +25,7 @@
 module.exports.createApp = function (serverConfig) {
 
 	const sharedSession = serverConfig.session;
-	const log_iface = require("../logger.js");
+	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
 	const responseCodes = require("../response_codes");
@@ -46,7 +46,7 @@ module.exports.createApp = function (serverConfig) {
 	app.disable("etag");
 
 	// put logger in req object
-	app.use(log_iface.startRequest);
+	app.use(logger.startRequest);
 
 	// Configure various middleware
 	app.use((req, res, next) => {
