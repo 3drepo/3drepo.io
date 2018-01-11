@@ -52,9 +52,12 @@ export class TreeService {
 		private $q: IQService,
 		private APIService,
 	) {
+		this.reset();
+	}
+
+	public reset() {
 		this.treeReady = this.$q.defer();
 		this.state = {};
-		this.state.showProgress = false;
 		this.state.lastParentWithName = null;
 		this.state.showNodes = true;
 		this.state.visible = {};
@@ -805,7 +808,6 @@ export class TreeService {
 
 				}
 			}
-			this.state.showProgress = false;
 		}
 
 		const selectionData = {

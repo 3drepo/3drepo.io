@@ -29,6 +29,8 @@ class TreeController implements ng.IController {
 		"ViewerService",
 	];
 
+	public showProgress: boolean; // in pug
+
 	private promise;
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
@@ -42,7 +44,6 @@ class TreeController implements ng.IController {
 	private showFilterList; // in pug
 	private currentFilterItemSelected = null;
 	private viewerSelectedObject;
-	private showProgress; // in pug
 	private progressInfo; // in pug
 	private visible;
 	private invisible;
@@ -55,6 +56,7 @@ class TreeController implements ng.IController {
 
 	private currentSelectedId;
 	private currentSelectedIndex;
+	private hello;
 
 	constructor(
 		private $scope: IScope,
@@ -71,7 +73,7 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
-
+		this.hello = true;
 		this.nodes = [];
 		this.TreeService.setShowNodes(true);
 		this.showTree = true;
@@ -91,6 +93,10 @@ class TreeController implements ng.IController {
 
 		this.watchers();
 
+	}
+
+	public $onDestroy() {
+		this.TreeService.reset();
 	}
 
 	public watchers() {
@@ -129,9 +135,7 @@ class TreeController implements ng.IController {
 					this.currentFilterItemSelected = null;
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
-				/*
-				* Get all the tree nodes
-				*/
+
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -155,7 +159,6 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
 			const noFilterItemsFoundHeight = 82;
-
 			if (this.TreeService.isDefined(newValue)) {
 				if (newValue.toString() === "") {
 					this.showTree = true;
@@ -166,7 +169,7 @@ class TreeController implements ng.IController {
 				} else {
 					this.showTree = false;
 					this.showFilterList = false;
-					this.showProgress = true;
+					this.showProgress = false;
 					this.progressInfo = "Filtering tree for objects";
 
 					this.TreeService.search(newValue)
@@ -370,6 +373,10 @@ class TreeController implements ng.IController {
 			} else {
 				height += nodeMinHeight + lineHeight;
 			}
+		}
+
+		if (height === 0) {
+			height = 70;
 		}
 		this.onContentHeightRequest({height});
 		this.$timeout(() => {
