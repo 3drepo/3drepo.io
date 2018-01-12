@@ -1060,15 +1060,15 @@
 
 			var deferred = $q.defer();
 
-			var bfcUrl = account + "/" + model + "/issues.bcfzip";
+			var bcfUrl = account + "/" + model + "/issues.bcfzip";
 			if(revision){
-				bfcUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
+				bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
 			}
 
 			var formData = new FormData();
 			formData.append("file", file);
 
-			APIService.post(bfcUrl, formData, {"Content-Type": undefined}).then(function(res){
+			APIService.post(bcfUrl, formData, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();
