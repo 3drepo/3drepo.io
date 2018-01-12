@@ -6,5 +6,5 @@ if [ -z "$1" ]
 else
     pm2 stop all
     pm2 delete all
-    pm2 start "./run/3drepo.yml"
+    NODE_ENV=$1 NODE_CONFIG_DIR="./config" pm2 start "./run/3drepo.yml"
 fi

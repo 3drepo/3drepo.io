@@ -112,9 +112,9 @@ function runServer() {
 	const mainApp = express();
 
 	// Peform setup for various parts of the server
-	// setupSSL();
-	// handleHTTPSRedirect();
-	// handleSubdomains(mainApp);
+	setupSSL();
+	handleHTTPSRedirect();
+	handleSubdomains(mainApp);
 	
 	const server = config.using_ssl ? 
 					https.createServer(sslOptions, mainApp) : 
@@ -123,7 +123,7 @@ function runServer() {
 	const startFunc = serverStartFunction("0.0.0.0", config.port);
 
 	server.setTimeout(config.timeout * 1000);
-	server.listen(config.port, "0.0.0.0", startFunc)
+	server.listen(config.port, "0.0.0.0", startFunc);
 		// .on('error', function(error) { 
 		// 	systemLogger.logInfo(error);
 		// });
