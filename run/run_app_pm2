@@ -4,7 +4,7 @@ if [ -z "$1" ]
   then
     echo "No config argument supplied"
 else
-    sudo pm2 stop all
-    sudo pm2 delete all
-    sudo NODE_ENV=$1 NODE_CONFIG_DIR='./config' pm2 start "./run/3drepo.yml"
+    pm2 stop all
+    pm2 delete all
+    NODE_ENV=$1 NODE_CONFIG_DIR="./config" pm2 start "./run/3drepo.yml"
 fi

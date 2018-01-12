@@ -1,7 +1,7 @@
 apps:
   - name : "3drepo"
     script: "./backend/3drepo.js"
-    instances: 1
+    instances: "max"
     watch: false
-    exec_mode: "fork"
+    exec_mode: "cluster"
       
