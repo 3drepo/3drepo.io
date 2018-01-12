@@ -206,6 +206,9 @@
 
 		vm.selectIssue = function (issue) {
 			IssuesService.setSelectedIssue(issue);
+			$timeout(function() {
+				$scope.$broadcast("$md-resize");
+			});	
 		};
 
 		vm.isSelectedIssue = function(issue) {

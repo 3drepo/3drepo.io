@@ -457,12 +457,10 @@
 					topic_type: vm.issueData.topic_type,
 					assigned_roles: vm.issueData.assigned_roles
 				};
-	
+
 				IssuesService.updateIssue(vm.issueData, statusChangeData)
 					.then(function (response) {
-
 						if (response) {
-
 							var respData = response.data.issue;
 							IssuesService.populateIssue(respData);
 							vm.issueData = respData;
@@ -748,18 +746,36 @@
 			}
 		}
 
-		vm.createGroup = function(viewpoint, screenShot, objectInfo) {
-			// Create a group of selected objects
+		/**
+		 * @returns groupData	Object with list of nodes for group creation.
+		 */
+		function createGroupData(nodes) {
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
-				objects: objectInfo.highlightedNodes,
-				hiddenObjects: objectInfo.hiddenNodes
+				objects: nodes
 			};
+			return groupData;
+		}
 
-			APIService.post(vm.account + "/" + vm.model + "/groups", groupData)
-				.then(function (response) {
-					vm.doSaveIssue(viewpoint, screenShot, response.data._id);
+		vm.createGroup = function(viewpoint, screenShot, objectInfo) {
+
+			// Create a group of selected objects
+			var highlightedGroupData = createGroupData(objectInfo.highlightedNodes);
+			
+			// Create a group of hidden objects
+			var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
+
+			APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
+				.then(function (highlightedGroupResponse) {
+					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData)
+						.then(function (hiddenGroupResponse) {
+							viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+							vm.doSaveIssue(viewpoint, screenShot);
+						}).catch(function(error){
+							console.error(error);
+						})
 				}).catch(function(error){
 					console.error(error);
 				});
@@ -771,9 +787,8 @@
 		 * Send new issue data to server
 		 * @param viewpoint
 		 * @param screenShot
-		 * @param groupId
 		 */
-		vm.doSaveIssue = function(viewpoint, screenShot, groupId) {
+		vm.doSaveIssue = function(viewpoint, screenShot) {
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
@@ -802,10 +817,6 @@
 			if (pinData !== null) {
 				issue.pickedPos = pinData.pickedPos;
 				issue.pickedNorm = pinData.pickedNorm;
-			}
-			// Group data
-			if (angular.isDefined(groupId)) {
-				issue.group_id = groupId;
 			}
 
 			IssuesService.saveIssue(issue)
@@ -871,59 +882,63 @@
 			});
 
 			objectsPromise.promise.then(function(objectInfo) {
-				var groupData = {
-					name: vm.issueData.name, 
-					color: [255, 0, 0], 
-					objects: objectInfo.highlightedNodes,
-					hiddenObjects: objectInfo.hiddenNodes
-				};
-
-				APIService.post(vm.account + "/" + vm.model + "/groups", groupData).then(function (groupResponse) {
-					if (angular.isDefined(vm.commentThumbnail)) {
-						vm.commentViewpoint.group_id = groupResponse.data._id;
-						IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
-							.then(function (response) {
-								vm.saving = false;
-								vm.canEditDescription = vm.checkCanEditDesc();
-								vm.afterNewComment(response.data.issue);
-							})
-							.catch(function(error){
-								vm.errorSavingComment(error);
-							});
 				
-					} else {
-
-						ViewerService.getCurrentViewpoint(
-							{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
-						);
+				// Create a group of selected objects
+				var highlightedGroupData = createGroupData(objectInfo.highlightedNodes);
 				
-						viewpointPromise.promise.then(function (viewpoint) {
-							viewpoint.group_id = groupResponse.data._id;
-							IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
+				// Create a group of hidden objects
+				var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
+				
+				APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData).then(function (highlightedGroupResponse) {
+					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData).then(function (hiddenGroupResponse) {
+						if (angular.isDefined(vm.commentThumbnail)) {
+							vm.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+							vm.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+							IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
 								.then(function (response) {
 									vm.saving = false;
+									vm.canEditDescription = vm.checkCanEditDesc();
 									vm.afterNewComment(response.data.issue);
 								})
 								.catch(function(error){
 									vm.errorSavingComment(error);
 								});
-						})
+				
+						} else {
+
+							ViewerService.getCurrentViewpoint(
+								{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
+							);
+				
+							viewpointPromise.promise.then(function (viewpoint) {
+								viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+								viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+								IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
+									.then(function (response) {
+										vm.saving = false;
+										vm.afterNewComment(response.data.issue);
+									})
+									.catch(function(error){
+										vm.errorSavingComment(error);
+									});
+							})
 							.catch(function(error) {
 								console.error(error);
 							});
-					}
-				})
+						}
+					})
 					.catch(function(error) {
 						console(error);
 					});
-			})
+				})
 				.catch(function(error) {
 					console.error(error);
 				});
 
-			AnalyticService.sendEvent({
-				eventCategory: "Issue",
-				eventAction: "comment"
+				AnalyticService.sendEvent({
+					eventCategory: "Issue",
+					eventAction: "comment"
+				});
 			});
 		};
 

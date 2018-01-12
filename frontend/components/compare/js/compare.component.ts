@@ -56,6 +56,7 @@ class CompareController implements ng.IController {
 	) {}
 
 	public $onInit() {
+
 		this.CompareService.disableComparision();
 		this.loadingInfo = "Loading comparision...";
 		this.compareTypes = this.CompareService.state.compareTypes;
@@ -65,6 +66,7 @@ class CompareController implements ng.IController {
 		this.models = [];
 
 		this.watchers();
+
 	}
 
 	public $onDestroy() {
@@ -89,16 +91,23 @@ class CompareController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => {
-			return this.TreeService.visibilityUpdateTime;
-		}, () => {
-			this.updateModels();
-		});
+		this.watchTreeVisibility();
 
 	}
 
-	public revisionTimestamp(timestamp) {
-		return this.RevisionsService.revisionDateFilter(timestamp);
+	public watchTreeVisibility() {
+		let lastViewerUpdateTime = Date.now();
+		setInterval(() => {
+
+			if (this.TreeService.visibilityUpdateTime) {
+				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
+					this.updateModels();
+				}
+			}
+
+			lastViewerUpdateTime = Date.now();
+
+		}, 250);
 	}
 
 	public updateModels() {
@@ -111,6 +120,7 @@ class CompareController implements ng.IController {
 	}
 
 	public compareToTreeState(shownModel: any) {
+
 		if (shownModel.level !== 1) {
 			return;
 		}
@@ -122,16 +132,21 @@ class CompareController implements ng.IController {
 			}
 
 			const baseModels = this.compareTypes[type].baseModels;
+
 			for (let j = 0; j < baseModels.length; j++) {
 				const model = baseModels[j];
-				if (shownModel.name === model.account + ":" + model.name) {
-					model.visible = (shownModel.toggleState === "visible");
+				if (model && shownModel.name === model.account + ":" + model.name) {
+					model.visible = shownModel.toggleState || "visible";
 					break;
 				}
 			}
 
 		}
 
+	}
+
+	public revisionTimestamp(timestamp) {
+		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 
 	public modelSettingsReady() {
@@ -178,6 +193,10 @@ class CompareController implements ng.IController {
 
 	public setModelType(type: string) {
 		this.CompareService.setModelType(type);
+	}
+
+	public setBaseRevision(model: any, revision: any) {
+		this.CompareService.setBaseRevision(model, revision);
 	}
 
 	public setTargetRevision(model: any, revision: any) {

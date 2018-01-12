@@ -41,7 +41,7 @@ class RevisionsController implements ng.IController {
 
 			if (this.RevisionsService.status.ready === true) {
 
-				this.revisions = this.RevisionsService.status.data;
+				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
 				this.revisionsLoading = false;
 
 				if (!this.revisions || !this.revisions[0]) {
@@ -91,7 +91,6 @@ class RevisionsController implements ng.IController {
 	}
 
 	public revisionTimestamp(timestamp: string) {
-		console.log("REVISION TIMESTAMP", timestamp, this.RevisionsService.revisionDateFilter(timestamp));
 		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 

@@ -41,23 +41,6 @@
 
 		var initPromise = $q.defer();
 
-		var state = {
-			heights : {
-				infoHeight : 135,
-				issuesListItemHeight : 141
-			},
-			selectedIssue: null,
-			allIssues: [],
-			issuesToShow: [],
-			displayIssue: null,
-			issueDisplay: {
-				showSubModelIssues: false,
-				showClosed: false,
-				sortOldestFirst : false,
-				excludeRoles: []
-			}
-		};
-
 		var service = {
 			init : init,
 			numIssues: numIssues,
@@ -109,14 +92,35 @@
 			createBlankIssue: createBlankIssue,
 			isSelectedIssue: isSelectedIssue,
 			showIssuePins: showIssuePins,
-
-			state: state
+			resetIssues: resetIssues
 			
 		};
+
+		resetIssues();
 
 		return service;
 
 		/////////////
+
+		function resetIssues() {
+
+			service.state = {
+				heights : {
+					infoHeight : 135,
+					issuesListItemHeight : 141
+				},
+				selectedIssue: null,
+				allIssues: [],
+				issuesToShow: [],
+				displayIssue: null,
+				issueDisplay: {
+					showSubModelIssues: false,
+					showClosed: false,
+					sortOldestFirst : false,
+					excludeRoles: []
+				}
+			};
+		}
 
 		function createBlankIssue(creatorRole) {
 			return {
@@ -130,10 +134,10 @@
 		}
 
 		function getDisplayIssue() {
-			if (state.displayIssue && state.allIssues.length > 0){
+			if (service.state.displayIssue && service.state.allIssues.length > 0){
 
-				var issueToDisplay = state.allIssues.find(function(issue){
-					return issue._id === state.displayIssue;
+				var issueToDisplay = service.state.allIssues.find(function(issue){
+					return issue._id === service.state.displayIssue;
 				});
 				
 				return issueToDisplay;
@@ -152,18 +156,18 @@
 		}
 
 		function setupIssuesToShow(model, filterText) {
-			state.issuesToShow = [];
+			service.state.issuesToShow = [];
 
-			if (state.allIssues.length > 0) {
+			if (service.state.allIssues.length > 0) {
 
 				// Sort
-				state.issuesToShow = state.allIssues.slice();
-				if (state.issueDisplay.sortOldestFirst) {
-					state.issuesToShow.sort(function(a, b){
+				service.state.issuesToShow = service.state.allIssues.slice();
+				if (service.state.issueDisplay.sortOldestFirst) {
+					service.state.issuesToShow.sort(function(a, b){
 						return a.created - b.created;
 					});
 				} else {
-					state.issuesToShow.sort(function(a, b){
+					service.state.issuesToShow.sort(function(a, b){
 						return b.created - a.created;
 					});
 				}
@@ -177,7 +181,7 @@
 
 					// TODO: do we need $filter?
 
-					state.issuesToShow = ($filter("filter")(state.issuesToShow, function(issue) {
+					service.state.issuesToShow = ($filter("filter")(service.state.issuesToShow, function(issue) {
 						// Required custom filter due to the fact that Angular
 						// does not allow compound OR filters
 						var i;
@@ -212,21 +216,21 @@
 				} 
 
 				// Closed
-				for (var i = (state.issuesToShow.length - 1); i >= 0; i -= 1) {
+				for (var i = (service.state.issuesToShow.length - 1); i >= 0; i -= 1) {
 
-					if (!state.issueDisplay.showClosed && (state.issuesToShow[i].status === "closed")) {
-						state.issuesToShow.splice(i, 1);
+					if (!service.state.issueDisplay.showClosed && (service.state.issuesToShow[i].status === "closed")) {
+						service.state.issuesToShow.splice(i, 1);
 					}
 				}
 
 				// Sub models
-				state.issuesToShow = state.issuesToShow.filter(function (issue) {
-					return state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+				service.state.issuesToShow = service.state.issuesToShow.filter(function (issue) {
+					return service.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 				});
 
 				//Roles Filter
-				state.issuesToShow = state.issuesToShow.filter(function(issue){
-					return state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
+				service.state.issuesToShow = service.state.issuesToShow.filter(function(issue){
+					return service.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 				});
 			
 			}
@@ -234,24 +238,23 @@
 		}
 
 		function resetSelectedIssue() {
-			state.selectedIssue = undefined;
+			service.state.selectedIssue = undefined;
 			//showIssuePins();
 		}
 
 		function isSelectedIssue(issue) {
-			//console.log(state.selectedIssue);
-			if (!state.selectedIssue || !state.selectedIssue._id) {
+			if (!service.state.selectedIssue || !service.state.selectedIssue._id) {
 				return false;
 			} else {
-				return issue._id === state.selectedIssue._id;
+				return issue._id === service.state.selectedIssue._id;
 			}
 		}
 
 		function showIssuePins() {
 
 			// TODO: This is still inefficent and unclean
-			state.allIssues.forEach(function(issue) {
-				var show = state.issuesToShow.find(function(shownIssue){
+			service.state.allIssues.forEach(function(issue) {
+				var show = service.state.issuesToShow.find(function(shownIssue){
 					return issue._id === shownIssue._id;
 				});
 
@@ -261,8 +264,8 @@
 				if (show !== undefined && pinPosition) {
 
 					var pinColor = Pin.pinColours.blue;
-					var isSelectedPin = state.selectedIssue && 
-										issue._id === state.selectedIssue._id;
+					var isSelectedPin = service.state.selectedIssue && 
+										issue._id === service.state.selectedIssue._id;
 
 					if (isSelectedPin) {
 						pinColor = Pin.pinColours.yellow;
@@ -288,14 +291,14 @@
 
 		function setSelectedIssue(issue, isCorrectState) {
 
-			if (state.selectedIssue) {
-				var different = (state.selectedIssue._id !== issue._id);
+			if (service.state.selectedIssue) {
+				var different = (service.state.selectedIssue._id !== issue._id);
 				if (different) {
-					deselectPin(state.selectedIssue);
+					deselectPin(service.state.selectedIssue);
 				}
 			}
 			
-			state.selectedIssue = issue;
+			service.state.selectedIssue = issue;
 
 			// If we're saving then we already have pin and
 			// highlights in place
@@ -308,34 +311,34 @@
 
 		function populateNewIssues(newIssues) {
 			newIssues.forEach(populateIssue);
-			state.allIssues = newIssues;
+			service.state.allIssues = newIssues;
 		}
 
 		function addIssue(issue) {
 			populateIssue(issue);
-			state.allIssues.unshift(issue);
+			service.state.allIssues.unshift(issue);
 		}
 
 		function updateIssues(issue) {
 
 			populateIssue(issue);
 
-			state.allIssues.forEach(function(oldIssue, i){
+			service.state.allIssues.forEach(function(oldIssue, i){
 				var matchs = oldIssue._id === issue._id;
 				if(matchs){
 
 					if(issue.status === "closed"){
 						
-						state.allIssues[i].justClosed = true;
+						service.state.allIssues[i].justClosed = true;
 
 						$timeout(function(){
 
-							state.allIssues[i] = issue;
+							service.state.allIssues[i] = issue;
 
 						}, 4000);
 
 					} else {
-						state.allIssues[i] = issue;
+						service.state.allIssues[i] = issue;
 					}
 
 				}
@@ -560,7 +563,7 @@
 			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
-			if ((issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) || issue.hasOwnProperty("group_id")) {
+			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue);
 		
@@ -568,89 +571,135 @@
 		}
 
 		function showMultiIds(issue) {
-			var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
-			var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
+				if (issue.viewpoint.highlighted_group_id) {
+					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
+					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
 
-			APIService.get(groupUrl)
-				.then(function (response) {
-					handleTree(response);
-				})
-				.catch(function(error){
-					console.error("There was a problem getting the highlights: ", error);
-				});
+					APIService.get(highlightedGroupUrl)
+						.then(function (response) {
+							handleHighlights(response.data.objects);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting the highlights: ", error);
+						});
+				}
+				
+				if (issue.viewpoint.hidden_group_id) {
+					var hiddenGroupId = issue.viewpoint.hidden_group_id;
+					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+
+					APIService.get(hiddenGroupUrl)
+						.then(function (response) {
+							handleHidden(response.data.objects);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting visibility: ", error);
+						});
+				}
+			} else {
+				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
+				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+
+				APIService.get(groupUrl)
+					.then(function (response) {
+						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
+							response.data.hiddenObjects = null;
+						}
+						handleTree(response);
+					})
+					.catch(function(error){
+						console.error("There was a problem getting the highlights: ", error);
+					});
+			}
 		}
 
-		function handleTree(response) {
-
+		function handleHighlights(objects) {
 			var ids = [];
-			var objectIdsToHide = [];
+			
 			TreeService.getMap()
 				.then(function(treeMap){
-					var objectsPromise = $q.defer();
-
-					ViewerService.getObjectsStatus({
-						promise: objectsPromise
-					});
 
 					// show currently hidden nodes
-					objectsPromise.promise
-						.then(function() {
-							var hideIfcState = TreeService.getHideIfc();
-							TreeService.setHideIfc(false);
-							TreeService.showAllTreeNodes();
-							
-							if (response.data.hiddenObjects) {
-								response.data.hiddenObjects.forEach(function(obj){
-									var account = obj.account;
-									var model = obj.model;
-									var key = account + "@" + model;
-									if(!objectIdsToHide[key]){
-										objectIdsToHide[key] = [];
-									}	
+					TreeService.clearCurrentlySelected();
 
-									objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+					for (var i = 0; i < objects.length; i++) {
+						var obj = objects[i];
+						var account = obj.account;
+						var model = obj.model;
+						var key = account + "@" + model;
+						if(!ids[key]){
+							ids[key] = [];
+						}	
 
-								});
+						var objUid = treeMap.sharedIdToUid[obj.shared_id];
+						
+						if (objUid) {
+							ids[key].push(objUid);
+							if (i < objects.length - 1) {
+								TreeService.selectNode(TreeService.getNodeById(objUid), true);
+							} else {
+								// Only call expandToSelection for last selected node to improve performance
+								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 							}
-
-							for (var ns in objectIdsToHide) {
-
-								objectIdsToHide[ns].forEach(function(obj) {
-									TreeService.toggleTreeNodeVisibilityById(obj);
-								});
-							}
-							
-							TreeService.setHideIfc(hideIfcState);
-							TreeService.clearCurrentlySelected();
-
-							for (var i = 0; i < response.data.objects.length; i++) {
-								var obj = response.data.objects[i];
-								var account = obj.account;
-								var model = obj.model;
-								var key = account + "@" + model;
-								if(!ids[key]){
-									ids[key] = [];
-								}	
-
-								var objUid = treeMap.sharedIdToUid[obj.shared_id];
-								
-								if (objUid) {
-									ids[key].push(objUid);
-									if (i < response.data.objects.length - 1) {
-										TreeService.selectNode(TreeService.getNodeById(objUid), true);
-									} else {
-										// Only call expandToSelection for last selected node to improve performance
-										TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
-									}
-								}
-							}
-
-						});
+						}
+					}
 			
 				})
 				.catch(function(error) {
 					console.error(error);
 				});
+		}
+
+		function handleHidden(objects) {
+			var objectIdsToHide = [];
+			
+			TreeService.getMap()
+				.then(function(treeMap){
+
+					// show currently hidden nodes
+					var hideIfcState = TreeService.getHideIfc();
+					TreeService.setHideIfc(false);
+					TreeService.showAllTreeNodes();
+					
+					if (objects) {
+						objects.forEach(function(obj){
+							var account = obj.account;
+							var model = obj.model;
+							var key = account + "@" + model;
+							if(!objectIdsToHide[key]){
+								objectIdsToHide[key] = [];
+							}	
+
+							objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+
+						});
+					}
+
+					for (var ns in objectIdsToHide) {
+
+						objectIdsToHide[ns].forEach(function(obj) {
+							TreeService.toggleTreeNodeVisibilityById(obj);
+						});
+					}
+					
+					TreeService.setHideIfc(hideIfcState);
+
+				})
+				.catch(function(error) {
+					console.error(error);
+				});
+		}
+
+		function handleTree(response) {
+
+			if (response.data.objects && response.data.objects.length > 0) {
+				handleHighlights(response.data.objects);
+			}
+
+			if (response.data.hiddenObjects) {
+				handleHidden(response.data.hiddenObjects);
+			}
 
 		}
 

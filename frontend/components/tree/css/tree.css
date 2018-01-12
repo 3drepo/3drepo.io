@@ -80,8 +80,16 @@ tree .toggleButton {
   margin-right: 0 !important;
 }
 
-tree .parentOfInvisible {
+tree .visible {
+  color: #0c2f54;
+}
+
+tree .invisible {
   color: #999 !important;
+}
+
+tree .parentOfInvisible {
+  color: #6788ab !important;
 }
 
 /** Tree filter list **************************************************************************************************/
@@ -96,10 +104,4 @@ tree .filterNode div {
 
 tree .filterListNodeName {
   margin-left: 15px !important;
-}
-
-
-tree .virtual-repeat-full-height {
-  height: 100%;
-  position: initial;
 }

@@ -72,6 +72,15 @@ compare .visible {
     color: #0c2f54;
 }
 
+
+compare .invisible {
+    color: #999
+}
+
+compare .parentOfInvisible {
+    color: rgba(12, 47, 84, 0.48);
+}
+
 compare md-tabs-content-wrapper md-tab-content {
     margin-bottom: 125px;
     padding: 8px;

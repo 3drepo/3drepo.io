@@ -25,11 +25,11 @@ class BottomButtonsController implements ng.IController {
 	];
 
 	private showButtons: boolean;
-	private showViewingOptionButtons: boolean;
 	private viewingOptions: any;
 	private selectedViewingOptionIndex: number;
 	private leftButtons: any[];
 	private selectedMode: string;
+	private showViewingOptions: boolean;
 
 	constructor(
 		private ViewerService: any,
@@ -39,7 +39,6 @@ class BottomButtonsController implements ng.IController {
 	public $onInit() {
 
 		this.showButtons = true;
-		this.showViewingOptionButtons = false;
 
 		this.viewingOptions = {
 			Helicopter : {
@@ -54,7 +53,7 @@ class BottomButtonsController implements ng.IController {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
 			if (valid && event.target.classList.contains("emscripten")) {
-				this.showViewingOptionButtons = false;
+				this.showViewingOptions = false;
 			}
 		}, false);
 
@@ -70,7 +69,9 @@ class BottomButtonsController implements ng.IController {
 
 		this.leftButtons.push({
 			isViewingOptionButton: true,
-			click: () => { this.setViewingOption(undefined); },
+			click: () => {
+				this.showViewingOptions = !this.showViewingOptions;
+			},
 		});
 
 		this.leftButtons.push({
@@ -100,9 +101,6 @@ class BottomButtonsController implements ng.IController {
 			// Set the viewing mode
 			this.selectedMode = type;
 			this.ViewerService.setNavMode(this.viewingOptions[type].mode);
-			this.showViewingOptionButtons = false;
-		} else {
-			this.showViewingOptionButtons = !this.showViewingOptionButtons;
 		}
 
 	}

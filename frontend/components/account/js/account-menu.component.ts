@@ -22,6 +22,8 @@ class AccountMenuController implements ng.IController {
 
 		"AuthService",
 		"ViewerService",
+		"IssuesService",
+		"CompareService",
 	];
 
 	private $mdOpenMenu;
@@ -32,6 +34,8 @@ class AccountMenuController implements ng.IController {
 
 		private AuthService: any,
 		private ViewerService: any,
+		private IssuesService: any,
+		private CompareService: any,
 	) {}
 
 	public $onInit() {
@@ -51,7 +55,7 @@ class AccountMenuController implements ng.IController {
 	 * Show user models
 	 */
 	public showTeamspaces() {
-		this.ViewerService.reset();
+		this.resetServices();
 		this.$location.path(this.AuthService.getUsername());
 	}
 
@@ -60,7 +64,13 @@ class AccountMenuController implements ng.IController {
 	 */
 	public logout() {
 		this.AuthService.logout();
+		this.resetServices();
+	}
+
+	public resetServices() {
 		this.ViewerService.reset();
+		this.IssuesService.resetIssues();
+		this.CompareService.reset();
 	}
 
 	public openUserManual() {

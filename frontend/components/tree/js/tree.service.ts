@@ -24,15 +24,14 @@ export class TreeService {
 		"APIService",
 	];
 
-	public highlightSelectedViewerObject = false;
+	public highlightSelectedViewerObject;
 	public highlightMap;
 	public highlightMapUpdateTime;
 	public selectionData;
 	public visibilityUpdateTime;
+	public treeReady;
 
 	private state;
-
-	private treeReady;
 	private treeMap = null;
 	private idToMeshes;
 	private baseURL;
@@ -53,6 +52,11 @@ export class TreeService {
 		private $q: IQService,
 		private APIService,
 	) {
+		this.reset();
+	}
+
+	public reset() {
+		this.treeReady = this.$q.defer();
 		this.state = {};
 		this.state.lastParentWithName = null;
 		this.state.showNodes = true;
@@ -68,6 +72,7 @@ export class TreeService {
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
 		this.hideIfc = true;
+		this.highlightSelectedViewerObject = true;
 	}
 
 	public setHighlightSelected(value) {
@@ -100,7 +105,6 @@ export class TreeService {
 	}
 
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
-		this.treeReady = this.$q.defer();
 		this.treeMap = null;
 		branch = branch ? branch : "master";
 
@@ -453,25 +457,29 @@ export class TreeService {
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
 	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
-		const model = node.model || node.project;
-		const key = this.getAccountModelKey(node.account, model);
-		let meshes = idToMeshes[node._id];
-		if (idToMeshes[key]) {
-			// the node is within a sub model
-			meshes = idToMeshes[key][node._id];
-		}
-		if (meshes) {
-			if (!nodes[key]) {
-				nodes[key] = meshes;
-			} else {
-				nodes[key] = nodes[key].concat(meshes);
+		if (node) {
+			const model = node.model || node.project;
+			const key = this.getAccountModelKey(node.account, model);
+			let meshes = idToMeshes[node._id];
+			if (idToMeshes[key]) {
+				// the node is within a sub model
+				meshes = idToMeshes[key][node._id];
 			}
-		} else if (node.children) {
-			// This should only happen in federations.
-			// Traverse down the tree to find submodel nodes
-			node.children.forEach((child) => {
-				this.traverseNodeAndPushId(child, nodes, idToMeshes);
-			});
+			if (meshes) {
+				if (!nodes[key]) {
+					nodes[key] = meshes;
+				} else {
+					nodes[key] = nodes[key].concat(meshes);
+				}
+			} else if (node.children) {
+				// This should only happen in federations.
+				// Traverse down the tree to find submodel nodes
+				node.children.forEach((child) => {
+					this.traverseNodeAndPushId(child, nodes, idToMeshes);
+				});
+			}
+		} else {
+			console.error("traverseNodeAndPushId node is null.");
 		}
 	}
 
@@ -498,15 +506,14 @@ export class TreeService {
 	 */
 	public setToggleState(node: any, visibility: string, fastforward: boolean) {
 
-		let path;
-
-		if (this.canShowNode(node) && this.isLeafNode(node) || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
+		const showableLeaf = this.canShowNode(node) && this.isLeafNode(node);
+		if (showableLeaf || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
 			node.toggleState = visibility;
 		}
 
 		// a__b .. c__d
 		// toggle parent
-		path = node.path.split("__");
+		let path = node.path.split("__");
 		path.splice(path.length - 1, 1);
 
 		// Get node parent
@@ -702,7 +709,6 @@ export class TreeService {
 		let i;
 		let j;
 		let length;
-		let childrenLength;
 		let selectedId = path[path.length - 1];
 		let selectedIndex = 0;
 		let selectionFound = false;
@@ -717,7 +723,6 @@ export class TreeService {
 
 				this.nodesToShow[i].expanded = true;
 				this.nodesToShow[i].selected = false;
-				childrenLength = this.nodesToShow[i].children.length;
 
 				if (level === (path.length - 2)) {
 					selectedIndex = i;
@@ -725,16 +730,20 @@ export class TreeService {
 
 				let childWithNameCount = 0;
 
-				for (j = 0; j < childrenLength; j += 1) {
+				const childLength = this.nodesToShow[i].children.length;
+				for (j = 0; j < childLength; j ++) {
+
+					const childNode = this.nodesToShow[i].children[j];
+
 					// Set child to not expanded
-					this.nodesToShow[i].children[j].expanded = false;
+					childNode.expanded = false;
 
-					if (this.nodesToShow[i].children[j]._id === selectedId) {
+					if (childNode._id === selectedId) {
 
-						if (this.nodesToShow[i].children[j].hasOwnProperty("name")) {
-							this.nodesToShow[i].children[j].selected = true;
+						if (childNode.hasOwnProperty("name")) {
+							childNode.selected = true;
 							if (!noHighlight) {
-								this.selectNode(this.nodesToShow[i].children[j], multi);
+								this.selectNode(childNode, multi);
 							}
 							this.state.lastParentWithName = null;
 							selectedIndex = i + j + 1;
@@ -753,36 +762,47 @@ export class TreeService {
 						condLoop = false;
 					} else {
 						// This will clear any previously selected node
-						this.nodesToShow[i].children[j].selected = false;
+						childNode.selected = false;
 					}
 
 					// Only set the toggle state once when the node is listed
-					if (!this.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
-						this.setToggleState(this.nodesToShow[i].children[j], "visible", false);
+					if (!childNode.hasOwnProperty("toggleState")) {
+						this.setToggleState(childNode, "visible", false);
 					}
 
 					// Determine if child node has childern
-					this.nodesToShow[i].children[j].hasChildren = false;
-					if (("children" in this.nodesToShow[i].children[j]) && (this.nodesToShow[i].children[j].children.length > 0)) {
-						for (let k = 0, jLength = this.nodesToShow[i].children[j].children.length; k < jLength; k++) {
-							if (this.nodesToShow[i].children[j].children[k].hasOwnProperty("name")) {
-								this.nodesToShow[i].children[j].hasChildren = true;
+					childNode.hasChildren = false;
+					if (("children" in childNode) && (childNode.children.length > 0)) {
+						for (let k = 0, jLength = childNode.children.length; k < jLength; k++) {
+							if (childNode.children[k].hasOwnProperty("name")) {
+								childNode.hasChildren = true;
 								break;
 							}
 						}
 					}
 
 					// Set current selected node
-					if (this.nodesToShow[i].children[j].selected) {
+					if (childNode.selected) {
 						selectionFound = true;
 
 					}
 
-					this.nodesToShow[i].children[j].level = level + 1;
+					childNode.level = level + 1;
+					const nodeHasChildren = this.nodesToShow[i].hasChildren;
+					const nodeChildHasName = childNode.hasOwnProperty("name");
 
-					if (this.nodesToShow[i].hasChildren && this.nodesToShow[i].children[j].hasOwnProperty("name")) {
+					if (nodeHasChildren && nodeChildHasName) {
 
-						this.nodesToShow.splice(i + childWithNameCount + 1, 0, this.nodesToShow[i].children[j]);
+						// TODO: This is bad. This is a fix for nodes appearing twice in the list
+						//  Why only top level nodes? Why are nodes being spliced that already exist?
+						if (this.nodesToShow[i] === 0) {
+							const isDuplicate = this.nodesToShow.find((n) => n.name === childNode.name);
+							if (isDuplicate) {
+								continue;
+							}
+						}
+
+						this.nodesToShow.splice(i + childWithNameCount + 1, 0, childNode);
 						childWithNameCount++;
 					}
 
@@ -899,7 +919,7 @@ export class TreeService {
 	 * @returns	True if node claims it has no children.
 	 */
 	public isLeafNode(node: any) {
-		return !node.children || !node.hasChildren || node.children.length === 0
+		return !node.children || !node.hasChildren || node.children.length === 0;
 	}
 
 	/**
@@ -939,9 +959,11 @@ export class TreeService {
 	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
 	 */
 	public toggleTreeNodeVisibility(node: any, fastforward: boolean) {
-
-		const nodeToggleState = (node.toggleState === "visible" || node.toggleState === "parentOfInvisible") ? "invisible" : "visible";
-		this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
+		if (node) {
+			const vis = node.toggleState === "visible" || node.toggleState === "parentOfInvisible";
+			const nodeToggleState = (vis) ? "invisible" : "visible";
+			this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
+		}
 	}
 
 	/**
@@ -976,6 +998,8 @@ export class TreeService {
 			}
 		});
 
+		this.visibilityUpdateTime = Date.now();
+
 	}
 
 	public resetHidden() {
@@ -1005,35 +1029,37 @@ export class TreeService {
 	 */
 	public selectNode(node: any, multi: boolean) {
 
-		const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
-			return element._id === node._id;
-		});
+		if (node) {
+			const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
+				return element._id === node._id;
+			});
 
-		if (multi) {
-			if (sameNodeIndex > -1) {
-				// Multiselect mode and we selected the same node - unselect it
-				this.currentSelectedNodes[sameNodeIndex].selected = false;
-				this.currentSelectedNodes.splice(sameNodeIndex, 1);
+			if (multi) {
+				if (sameNodeIndex > -1) {
+					// Multiselect mode and we selected the same node - unselect it
+					this.currentSelectedNodes[sameNodeIndex].selected = false;
+					this.currentSelectedNodes.splice(sameNodeIndex, 1);
+				} else {
+					node.selected = true;
+					this.currentSelectedNodes.push(node);
+				}
 			} else {
+				// If it is not multiselect mode, remove all highlights
+				this.clearCurrentlySelected();
 				node.selected = true;
 				this.currentSelectedNodes.push(node);
 			}
-		} else {
-			// If it is not multiselect mode, remove all highlights
-			this.clearCurrentlySelected();
-			node.selected = true;
-			this.currentSelectedNodes.push(node);
-		}
 
-		this.getMap().then((treeMap) => {
-			const map = {};
-			this.currentSelectedNodes.forEach((n) => {
-				this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+			this.getMap().then((treeMap) => {
+				const map = {};
+				this.currentSelectedNodes.forEach((n) => {
+					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+				});
+
+				this.highlightMapUpdateTime = Date.now();
+				this.highlightMap = map;
 			});
-
-			this.highlightMapUpdateTime = Date.now();
-			this.highlightMap = map;
-		});
+		}
 
 	}
 
@@ -1053,7 +1079,6 @@ export class TreeService {
 		} else {
 			delete this.clickedHidden[node._id];
 		}
-		this.visibilityUpdateTime = Date.now();
 	}
 
 	/**
@@ -1066,7 +1091,6 @@ export class TreeService {
 		} else {
 			delete this.clickedShown[node._id];
 		}
-		this.visibilityUpdateTime = Date.now();
 	}
 
 	/**

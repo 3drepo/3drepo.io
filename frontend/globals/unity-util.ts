@@ -393,6 +393,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set tolerance threshold
+	 * @param {string} theshold - tolerance level for diffing/clashing
+	 */
+	public static diffToolSetThreshold(theshold) {
+		UnityUtil.toUnity("DiffToolSetThreshold", UnityUtil.LoadingState.MODEL_LOADED, theshold);
+
+	}
+
+	/**
 	* Only show the comparator model
 	* i.e. Only show the model you are trying to compare with, not the base model
 	*/
