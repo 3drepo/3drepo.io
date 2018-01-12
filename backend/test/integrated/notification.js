@@ -23,8 +23,8 @@ let config = require('../../config');
 let app = require("../../services/api.js").createApp(
 	{ session: config.api_server.session }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let async = require('async');
 let http = require('http');

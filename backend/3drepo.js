@@ -23,8 +23,8 @@ const constants = require("constants");
 
 const cluster = require("cluster");
 
-const log_iface = require("./logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("./logger.js");
+const systemLogger = logger.systemLogger;
 
 const config = require("./config.js");
 

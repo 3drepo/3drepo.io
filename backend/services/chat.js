@@ -21,21 +21,21 @@ module.exports.createApp = function (server, serverConfig){
 	//let app = require('express');
 	//var server = require('http').Server(app);
 
-	let config = require('../config');
-	let session = require('./session').session(config);
+	let config = require("../config");
+	let session = require("./session").session(config);
 	
-	let log_iface = require("../logger.js");
-	let middlewares = require('../middlewares/middlewares');
-	let systemLogger = log_iface.systemLogger;
+	let logger = require("../logger.js");
+	let middlewares = require("../middlewares/middlewares");
+	let systemLogger = logger.systemLogger;
 
 	//console.log(serverConfig);
-	let io = require("socket.io")(server, { path: '/' + serverConfig.subdirectory });
+	let io = require("socket.io")(server, { path: "/" + serverConfig.subdirectory });
 	let sharedSession = require("express-socket.io-session");
-	let _ = require('lodash');
+	let _ = require("lodash");
 
 	io.use((socket, next) => {
-		if(socket.handshake.query['connect.sid'] && !socket.handshake.headers.cookie){
-			socket.handshake.headers.cookie = 'connect.sid=' + socket.handshake.query['connect.sid'] + '; '; 
+		if(socket.handshake.query["connect.sid"] && !socket.handshake.headers.cookie){
+			socket.handshake.headers.cookie = "connect.sid=" + socket.handshake.query["connect.sid"] + "; "; 
 		}
 		//console.log(socket.handshake.headers.cookie);
 
@@ -52,7 +52,7 @@ module.exports.createApp = function (server, serverConfig){
 			require("../models/factory/modelFactory").setDB(DB);
 			next();
 		}).catch( err => {
-			systemLogger.logError('Chat server - DB init error - ' + err.message);
+			systemLogger.logError("Chat server - DB init error - " + err.message);
 		});
 	});
 
@@ -65,13 +65,13 @@ module.exports.createApp = function (server, serverConfig){
 		socket(queue);
 
 	}).catch(err => {
-		systemLogger.logError('Chat server - Queue init error - ' + err.message);
+		systemLogger.logError("Chat server - Queue init error - " + err.message);
 	});
 
 
 	let userToSocket = {};
-	let credentialErrorEventName = 'credentialError';
-	let joinedEventName = 'joined';
+	let credentialErrorEventName = "credentialError";
+	let joinedEventName = "joined";
 
 	function socket(queue){
 
@@ -84,8 +84,8 @@ module.exports.createApp = function (server, serverConfig){
 				//it is to avoid emitter getting its own message
 				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				
-				let modelNameSpace = msg.model ?  `::${msg.model}` : ''; 
-				let extraPrefix = '';
+				let modelNameSpace = msg.model ?  `::${msg.model}` : ""; 
+				let extraPrefix = "";
 
 				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0){
 					msg.extraKeys.forEach(key => {
@@ -99,17 +99,17 @@ module.exports.createApp = function (server, serverConfig){
 		});
 
 		//on client connect	
-		io.on('connection', socket => {
+		io.on("connection", socket => {
 			//socket error handler, frontend will attempt to reconnect
-			socket.on('error', err => {
-				systemLogger.logError('Chat server - socket error - ' + err.message);
+			socket.on("error", err => {
+				systemLogger.logError("Chat server - socket error - " + err.message);
 				systemLogger.logError(err.stack);
 			});
 
-			if(!_.get(socket, 'handshake.session.user')){
+			if(!_.get(socket, "handshake.session.user")){
 
-				systemLogger.logError(`socket connection without credential`);
-				socket.emit(credentialErrorEventName, { message: 'Connection without credential'});
+				systemLogger.logError("socket connection without credential");
+				socket.emit(credentialErrorEventName, { message: "Connection without credential"});
 				//console.log(socket.handshake);
 
 				return;
@@ -122,13 +122,13 @@ module.exports.createApp = function (server, serverConfig){
 
 			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
 
-			socket.on('join', data => {
+			socket.on("join", data => {
 				//check permission if the user have permission to join room
 				let auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				
 				auth(username, data.account, data.model).then(hasAccess => {
 
-					let modelNameSpace = data.model ?  `::${data.model}` : '';
+					let modelNameSpace = data.model ?  `::${data.model}` : "";
 
 					if(hasAccess){
 
@@ -153,9 +153,9 @@ module.exports.createApp = function (server, serverConfig){
 				
 			});
 
-			socket.on('leave', data => {
+			socket.on("leave", data => {
 
-				let modelNameSpace = data.model ?  `::${data.model}` : '';
+				let modelNameSpace = data.model ?  `::${data.model}` : "";
 
 				socket.leave(`${data.account}${modelNameSpace}`);
 				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}${modelNameSpace}`, { 
