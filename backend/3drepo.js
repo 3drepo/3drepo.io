@@ -21,8 +21,6 @@ const express = require("express");
 const fs = require("fs");
 const constants = require("constants");
 
-const cluster = require("cluster");
-
 const logger = require("./logger.js");
 const systemLogger = logger.systemLogger;
 
@@ -33,65 +31,57 @@ const http = require("http");
 const tls  = require("tls");
 const vhost = require("vhost");
 
-let certs   = {};
+let certs = {};
 let certMap = {};
-let ssl_options = {};
+let sslOptions = {};
 
-// The core express application
-const mainApp = express();
+function setupSSL() {
+	if ("ssl" in config) {
 
-if ("ssl" in config) {
-
-	for (let certGroup in config.ssl) {
-
-		if (config.ssl.hasOwnProperty(certGroup)) {
-			let certGroupOptions = {};
-
-			certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
-			certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
-
-			if (config.ssl[certGroup].ca) {
-				certGroupOptions.ca = fs.readFileSync(config.ssl[certGroup].ca, "utf8");
+		for (let certGroup in config.ssl) {
+	
+			if (config.ssl.hasOwnProperty(certGroup)) {
+				let certGroupOptions = {};
+	
+				certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
+				certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
+	
+				if (config.ssl[certGroup].ca) {
+					certGroupOptions.ca = fs.readFileSync(config.ssl[certGroup].ca, "utf8");
+				}
+	
+				certs[certGroup] = tls.createSecureContext(certGroupOptions);
+				
 			}
-
-			certs[certGroup] = tls.createSecureContext(certGroupOptions);
-			
+	
 		}
-
-	}
-
-	ssl_options = {
-		SNICallback: function(domain, callback)
-		{
-			let certGroup = certMap[domain];
-			callback(null, certs[certGroup]);
-		},
-		key: fs.readFileSync(config.ssl["default"].key, "utf8"),
-		cert: fs.readFileSync(config.ssl["default"].cert, "utf8"),
-		ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL",
-		//ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
-		honorCipherOrder: true,
-		ecdhCurve: "secp384r1",
-		secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION | 
-					constants.SSL_OP_NO_SSLv2 | 
-					constants.SSL_OP_NO_SSLv3
-	};
-
-	// This is the optional certificate authority
-	if (config.ssl["default"].ca) {
-		ssl_options.ca = fs.readFileSync(config.ssl["default"].ca, "utf8");
+	
+		sslOptions = {
+			SNICallback: function(domain, callback)
+			{
+				let certGroup = certMap[domain];
+				callback(null, certs[certGroup]);
+			},
+			key: fs.readFileSync(config.ssl["default"].key, "utf8"),
+			cert: fs.readFileSync(config.ssl["default"].cert, "utf8"),
+			ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL",
+			//ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
+			honorCipherOrder: true,
+			ecdhCurve: "secp384r1",
+			secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION | 
+						constants.SSL_OP_NO_SSLv2 | 
+						constants.SSL_OP_NO_SSLv3
+		};
+	
+		// This is the optional certificate authority
+		if (config.ssl["default"].ca) {
+			sslOptions.ca = fs.readFileSync(config.ssl["default"].ca, "utf8");
+		}
 	}
 }
 
 
-if (cluster.isMaster) {
-
-	for(let i = 0; i < config.numThreads; i++) {
-		cluster.fork();
-	}
-
-} else {
-
+function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 
 		let http_app = express();
@@ -115,89 +105,114 @@ if (cluster.isMaster) {
 		});
 
 	}
+}
 
-	if (config.hasOwnProperty("subdomains")) {
-		
-		for (let subdomain in config.subdomains) {
+function runServer() {
+	// The core express application
+	const mainApp = express();
 
-			if (config.subdomains.hasOwnProperty(subdomain)) {
-
-
-				let subDomainApp = express();
-	
-				let subdomainServers = config.subdomains[subdomain];
-
-				for (let subId = 0; subId < subdomainServers.length; subId++) {
-
-					let serverConfig = subdomainServers[subId];
-	
-					// Certificate group
-					let certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
-					certMap[serverConfig.hostname] = certGroup;
-	
-					systemLogger.logInfo(
-						"Loading " + 
-						serverConfig.service + 
-						" on " + serverConfig.hostname + ":" +
-						serverConfig.port + 
-						serverConfig.host_dir
-					);
-
-					if (!serverConfig.external) {
-
-						if(serverConfig.service === "chat"){
-							//chat server has its own port and can't attach to express
-	
-							let server = config.using_ssl ? 
-								https.createServer(ssl_options) : 
-								http.createServer();
-
-							server.listen(
-								serverConfig.port, 
-								"0.0.0.0", 
-								serverStartFunction("0.0.0.0", serverConfig.port)
-							);
-							
-							let service = `./services/${serverConfig.service}.js`;
-							require(service).createApp(server, serverConfig);
-	
-						} else {
-							
-							let service = `./services/${serverConfig.service}.js`;
-							let app = require(service).createApp(serverConfig);
-
-							subDomainApp.use(serverConfig.host_dir, app);
-
-						}
-	
-					}
-					// If the configuration specifies a redirect then apply
-					// it at this point
-					if (serverConfig.redirect) {
-						configRedirect(serverConfig, mainApp);
-					}
-				}
-	
-				if (subdomain !== "undefined") {
-					let subdomainHost = subdomain + "." + config.host;
-					mainApp.use(vhost(subdomainHost, subDomainApp));
-				} else {
-					mainApp.use(vhost(config.host, subDomainApp));
-				}
-
-			}
-		}
-	}
+	// Peform setup for various parts of the server
+	// setupSSL();
+	// handleHTTPSRedirect();
+	// handleSubdomains(mainApp);
 	
 	const server = config.using_ssl ? 
-					https.createServer(ssl_options, mainApp) : 
+					https.createServer(sslOptions, mainApp) : 
 					http.createServer(mainApp);
 
 	const startFunc = serverStartFunction("0.0.0.0", config.port);
 
 	server.setTimeout(config.timeout * 1000);
-	server.listen(config.port, "0.0.0.0", startFunc);
+	server.listen(config.port, "0.0.0.0", startFunc)
+		// .on('error', function(error) { 
+		// 	systemLogger.logInfo(error);
+		// });
 
+}
+
+function handleSubdomains(mainApp) {
+	if (config.hasOwnProperty("subdomains")) {
+		for (let subdomain in config.subdomains) {
+			if (config.subdomains.hasOwnProperty(subdomain)) {
+				setupSubdomain(mainApp, subdomain);
+			}
+		}
+	}
+}
+
+function setupSubdomain(mainApp, subdomain) {
+	let subDomainApp = express();
+	
+	let subdomainServers = config.subdomains[subdomain];
+
+	for (let subId = 0; subId < subdomainServers.length; subId++) {
+
+		let serverConfig = subdomainServers[subId];
+
+		// Certificate group
+		let certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
+		certMap[serverConfig.hostname] = certGroup;
+
+		logCreateService(serverConfig);
+
+		if (!serverConfig.external) {
+
+			if(serverConfig.service === "chat"){
+				//chat server has its own port and can't attach to express
+				createChat(serverConfig);
+				
+			} else {
+				
+				createService(subDomainApp, serverConfig);
+
+			}
+
+		}
+		// If the configuration specifies a redirect then apply
+		// it at this point
+		if (serverConfig.redirect) {
+			configRedirect(serverConfig, mainApp);
+		}
+	}
+
+	if (subdomain !== "undefined") {
+		let subdomainHost = subdomain + "." + config.host;
+		mainApp.use(vhost(subdomainHost, subDomainApp));
+	} else {
+		mainApp.use(vhost(config.host, subDomainApp));
+	}
+}
+
+function logCreateService(serverConfig) {
+	systemLogger.logInfo(
+		"Loading " + 
+		serverConfig.service + 
+		" on " + serverConfig.hostname + ":" +
+		serverConfig.port, 
+		serverConfig.host_dir
+	);
+}
+
+function createChat(serverConfig) {
+	let server = config.using_ssl ? 
+		https.createServer(sslOptions) : 
+		http.createServer();
+
+	server.listen(
+		serverConfig.port, 
+		"0.0.0.0", 
+		serverStartFunction("0.0.0.0", serverConfig.port)
+	);
+	
+	let service = `./services/${serverConfig.service}.js`;
+	require(service).createApp(server, serverConfig);
+}
+
+function createService(subDomainApp, serverConfig) {
+	let service = `./services/${serverConfig.service}.js`;
+	let app = require(service).createApp(serverConfig);
+
+	subDomainApp.use(serverConfig.host_dir, app);
 }
 
 function serverStartFunction(serverHost, serverPort) {
@@ -225,3 +240,5 @@ function configRedirect(serverConfig, app) {
 	});
 
 }
+
+runServer();
