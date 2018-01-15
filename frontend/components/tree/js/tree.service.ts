@@ -795,6 +795,8 @@ export class TreeService {
 
 						// TODO: This is bad. This is a fix for nodes appearing twice in the list
 						//  Why only top level nodes? Why are nodes being spliced that already exist?
+
+						console.log(this.nodesToShow[i]);
 						if (this.nodesToShow[i] === 0) {
 							const isDuplicate = this.nodesToShow.find((n) => n.name === childNode.name);
 							if (isDuplicate) {
