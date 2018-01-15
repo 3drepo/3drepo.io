@@ -71,6 +71,7 @@ class CompareController implements ng.IController {
 
 	public $onDestroy() {
 		this.CompareService.disableComparision();
+		this.CompareService.reset();
 	}
 
 	public watchers() {
