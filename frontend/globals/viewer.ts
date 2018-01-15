@@ -406,7 +406,7 @@ export class Viewer {
 
 	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
 
-		const canHighlight = !this.pinDropMode && !this.measureMode;
+		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
 		if (canHighlight) {
 
@@ -493,6 +493,7 @@ export class Viewer {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
+		this.initialized = false;
 		UnityUtil.reset();
 	}
 
