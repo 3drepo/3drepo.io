@@ -383,9 +383,6 @@
 				return;
 			}
 
-			console.log("SUBMODEL? ", submodel);
-
-
 			var isSubmodelIssue = (submodel !== undefined);
 			var issueShouldAdd = false;
 
