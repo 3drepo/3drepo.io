@@ -505,6 +505,7 @@ export class Viewer {
 	public loadModel(account, model, branch, revision) {
 
 		return UnityUtil.onReady().then(() => {
+			this.initialized = true;
 			this.account = account;
 			this.model = model;
 			this.branch = branch;
