@@ -115,7 +115,6 @@ export class ViewerService {
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
 				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				console.log(this.DocsService.state.active && this.pin.pinDropMode);
 				if (valid) {
 					this.DocsService.handleObjectSelected(event);
 				}
@@ -271,15 +270,21 @@ export class ViewerService {
 		this.viewer.showHiddenByDefaultObjects();
 	}
 
-	public handleUnityError(message: string, reload: boolean)  {
+	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
 
-		this.DialogService.html("Unity Error", message, true)
+		let errorType = "3D Repo Error";
+
+		if (isUnity) {
+			errorType = "Unity Error";
+		}
+
+		this.DialogService.html(errorType, message, true)
 			.then(() => {
 				if (reload) {
 					location.reload();
 				}
 			}, () => {
-				console.error("Unity errorered and user canceled reload", message);
+				console.error("Unity errored and user canceled reload", message);
 			});
 
 	}
