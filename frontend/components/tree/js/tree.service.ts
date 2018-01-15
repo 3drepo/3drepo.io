@@ -457,30 +457,38 @@ export class TreeService {
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
 	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
-		if (node) {
-			const model = node.model || node.project;
-			const key = this.getAccountModelKey(node.account, model);
-			let meshes = idToMeshes[node._id];
-			if (idToMeshes[key]) {
-				// the node is within a sub model
-				meshes = idToMeshes[key][node._id];
-			}
-			if (meshes) {
-				if (!nodes[key]) {
-					nodes[key] = meshes;
-				} else {
-					nodes[key] = nodes[key].concat(meshes);
-				}
-			} else if (node.children) {
-				// This should only happen in federations.
-				// Traverse down the tree to find submodel nodes
-				node.children.forEach((child) => {
-					this.traverseNodeAndPushId(child, nodes, idToMeshes);
-				});
-			}
-		} else {
-			console.error("traverseNodeAndPushId node is null.");
+
+		if (!node) {
+			console.error("traverseNodeAndPushId - idToMeshes is not defined: ", idToMeshes);
+			return;
 		}
+
+		if (!idToMeshes) {
+			console.error("traverseNodeAndPushId node is null: ", node);
+			return;
+		}
+
+		const model = node.model || node.project;
+		const key = this.getAccountModelKey(node.account, model);
+		let meshes = idToMeshes[node._id];
+		if (idToMeshes[key]) {
+			// the node is within a sub model
+			meshes = idToMeshes[key][node._id];
+		}
+		if (meshes) {
+			if (!nodes[key]) {
+				nodes[key] = meshes;
+			} else {
+				nodes[key] = nodes[key].concat(meshes);
+			}
+		} else if (node.children) {
+			// This should only happen in federations.
+			// Traverse down the tree to find submodel nodes
+			node.children.forEach((child) => {
+				this.traverseNodeAndPushId(child, nodes, idToMeshes);
+			});
+		}
+
 	}
 
 	public getVisibleArray(account: string, model: string) {

@@ -115,6 +115,7 @@ export class ViewerService {
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
 				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
+				console.log(this.DocsService.state.active && this.pin.pinDropMode);
 				if (valid) {
 					this.DocsService.handleObjectSelected(event);
 				}
