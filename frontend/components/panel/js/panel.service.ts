@@ -50,6 +50,14 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-upload",
+				},
+				{
+					hidden: false,
 					value: "exportBCF",
 					label: "Export BCF",
 					selected: false,
