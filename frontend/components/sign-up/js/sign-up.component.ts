@@ -14,7 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-declare var grecaptcha;
+declare const grecaptcha;
+declare let zxcvbn;
 class SignupController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -38,6 +39,8 @@ class SignupController implements ng.IController {
 	private version;
 	private logo;
 	private captchaKey;
+	private passwordStrength;
+	private passwordResult;
 
 	private tcAgreed;
 	private useReCAPTCHA;
@@ -57,9 +60,13 @@ class SignupController implements ng.IController {
 		private APIService,
 		private AuthService,
 		private $window,
-	) {}
+	) {
+
+	}
 
 	public $onInit() {
+
+		this.addPasswordStrengthLib();
 
 		this.AuthService.sendLoginRequest().then((response) => {
 			if (response.data.username) {
@@ -151,6 +158,16 @@ class SignupController implements ng.IController {
 
 	}
 
+	public addPasswordStrengthLib() {
+		const ZXCVBN_SRC = "/dist/zxcvbn.js";
+		const script = document.createElement("script");
+		script.src = ZXCVBN_SRC;
+		script.type = "text/javascript";
+		script.async = true;
+		const first = document.getElementsByTagName("script")[0];
+		document.body.appendChild(script);
+	}
+
 	public isDefined(variable) {
 		return variable !== undefined && variable !== null;
 	}
@@ -163,6 +180,11 @@ class SignupController implements ng.IController {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
+			if (this.newUser.password !== undefined && window.zxcvbn) {
+				const result = zxcvbn(this.newUser.password);
+				this.passwordResult = result;
+				this.passwordStrength = this.getPasswordStrength(result.score);
+			}
 		}, true);
 
 		this.$scope.$watch("AuthService.isLoggedIn()", (newValue) => {
@@ -171,6 +193,22 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
+	}
+
+	public getPasswordStrength(score) {
+		switch (score) {
+		case 0:
+			return "Very Weak";
+		case 1:
+			return "Weak";
+		case 2:
+			return "OK";
+		case 3:
+			return "Strong";
+		case 4:
+			return "Very Strong";
+		}
+		return "Very Weak";
 	}
 
 	public handleLegalItem(legalItem) {
@@ -265,6 +303,17 @@ class SignupController implements ng.IController {
 			return;
 		}
 
+		if ( !this.newUser.password || this.newUser.password.length < 9 ) {
+			this.registerErrorMessage = "Password must be longer than 8 characters";
+			return;
+		}
+
+		if (this.passwordResult && this.passwordResult.score < 2) {
+			console.log(this.passwordResult.feedback.suggestions);
+			this.registerErrorMessage = "Password is weak; " + this.passwordResult.feedback.suggestions.join(" ");
+			return;
+		}
+
 		if (this.showLegalText) {
 			allowRegister = this.newUser.tcAgreed;
 		}
@@ -317,7 +366,7 @@ class SignupController implements ng.IController {
 	}
 
 	public getLegalText(legalItem) {
-		return `<a target='_blank' href='/${legalItem.page}'> ${legalItem.title} </a>`;
+		return `<a target='_blank' href='/${legalItem.page}'>${legalItem.title}</a>`;
 	}
 }
 

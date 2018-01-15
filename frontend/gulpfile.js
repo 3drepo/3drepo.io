@@ -230,6 +230,22 @@ gulp.task("amd-components", function(done){
 gulp.task("tsc-amd-components", gulp.series("typescript-components", "amd-components"))
 // BUILD DEPENDENCIES
 
+gulp.task("zxcvbn", function(done) {
+
+  return gulp.src(['./zxcvbn-entry.js'])
+    .pipe(sourcemaps.init())
+    .pipe(webpack({
+      output: {
+        filename: 'zxcvbn.js',
+        libraryTarget: 'umd',
+        // library: 'strength'
+      },
+    }, localWebpack))
+    .pipe(gulp.dest("./../public/dist/"))
+  
+
+});
+
 gulp.task("typescript-globals", function(done) {
   
   // COMPILE TYPESCRIPT TO AMD
@@ -318,9 +334,9 @@ gulp.task('javascript-build-dev', function(done){
   
 });
 
-gulp.task('javascript', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build" ));
+gulp.task('javascript', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build", "zxcvbn" ));
 
-gulp.task('javascript-dev', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev" ))
+gulp.task('javascript-dev', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev", "zxcvbn"))
 
 gulp.task("typedoc", function() {
     return gulp
