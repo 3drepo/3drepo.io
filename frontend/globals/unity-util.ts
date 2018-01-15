@@ -491,7 +491,7 @@ export class UnityUtil {
 		if (account && model) {
 			nameSpace = account + "." + model;
 		}
-		if (UnityUtil.objectStatusPromise) {
+		if (UnityUtil.objectStatusPromise && UnityUtil.objectStatusPromise.then) {
 			UnityUtil.objectStatusPromise.then(() => {
 				UnityUtil._getObjectsStatus(nameSpace, promise);
 			});

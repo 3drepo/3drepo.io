@@ -1023,9 +1023,11 @@
 		 */
 		vm.deleteComment = function(event, index) {
 			event.stopPropagation();
-			IssuesService.deleteComment(vm.issueData, index)
+			var commentIndex = (vm.issueData.comments.length - 1) - index;
+
+			IssuesService.deleteComment(vm.issueData, commentIndex)
 				.then(function() {
-					vm.issueData.comments.splice(index, 1);
+					vm.issueData.comments.splice(commentIndex, 1);
 				})
 				.catch(function(error){
 					vm.errorDeleteComment(error);
