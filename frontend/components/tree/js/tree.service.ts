@@ -326,7 +326,7 @@ export class TreeService {
 
 	public getMap() {
 		// only do this once!
-		if (this.treeMap) {
+		if (this.treeMap && this.treeMap.idToMeshes) {
 			return Promise.resolve(this.treeMap);
 		} else {
 			this.treeMap = {
@@ -471,7 +471,7 @@ export class TreeService {
 		const model = node.model || node.project;
 		const key = this.getAccountModelKey(node.account, model);
 		let meshes = idToMeshes[node._id];
-		if (idToMeshes[key]) {
+		if (key && idToMeshes[key]) {
 			// the node is within a sub model
 			meshes = idToMeshes[key][node._id];
 		}
@@ -487,6 +487,8 @@ export class TreeService {
 			node.children.forEach((child) => {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
+		} else {
+			console.error("Meshes and node.children were both not defined", meshes, node.children);
 		}
 
 	}
