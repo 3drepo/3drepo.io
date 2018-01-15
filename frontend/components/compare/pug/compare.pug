@@ -18,9 +18,7 @@ div(
 				ng-repeat="compareType in vm.compareTypes"
 				label="{{compareType.label}}")
 
-				md-content(layout-fill)
-
-					div.modelTypeSelection(
+				div.modelTypeSelection(
 						id="{{compareType.type + 'ModelTypeSection'}}"
 						ng-if="!vm.isModelClash(compareType.type)"
 						layout="row"
@@ -42,8 +40,9 @@ div(
 							span(ng-if="vm.isFederation()") Target models
 							span(ng-if="!vm.isFederation()") Target model
 
-					#modelsList
+				md-content.modelListHolder(flex)
 
+					#modelsList
 						div(ng-if="vm.isModelClash(compareType.type)")
 							h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
 

@@ -46,6 +46,7 @@ export class CompareService {
 		this.readyDefer = this.$q.defer();
 
 		this.state = {
+			loadingComparision : false,
 			compareTypes : {
 				diff : {
 					label: "3D Diff",

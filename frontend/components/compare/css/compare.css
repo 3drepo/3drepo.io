@@ -63,6 +63,10 @@ compare .revisionText {
     color: grey;
 }
 
+compare .modelListHolder {
+    height: calc(100% - 39px);
+}
+
 compare .modelText {
     margin: 0;
     margin-bottom: 10px;
