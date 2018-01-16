@@ -751,7 +751,9 @@ export class TreeService {
 				const childNode = this.nodesToShow[i].children[j];
 
 				// Set child to not expanded
-				//childNode.expanded = false;
+				if (!multi) {
+					childNode.expanded = false;
+				}
 
 				if (childNode._id === selectedId) {
 
