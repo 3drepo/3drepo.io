@@ -43,6 +43,7 @@ class CompareController implements ng.IController {
 	private canChangeCompareState: boolean;
 	private models: any[];
 	private modelsReady;
+	private baseModels: any[];
 
 	constructor(
 		private $scope: any,
@@ -132,10 +133,8 @@ class CompareController implements ng.IController {
 				continue;
 			}
 
-			const baseModels = this.compareTypes[type].baseModels;
-
-			for (let j = 0; j < baseModels.length; j++) {
-				const model = baseModels[j];
+			for (let j = 0; j < this.baseModels.length; j++) {
+				const model = this.baseModels[j];
 				if (model && shownModel.name === model.account + ":" + model.name) {
 					model.visible = shownModel.toggleState || "visible";
 					break;
