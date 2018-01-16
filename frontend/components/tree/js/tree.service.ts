@@ -786,26 +786,20 @@ export class TreeService {
 				}
 
 				// Determine if child node has childern
-				childNode.hasChildren = false;
+				childNode.hasChildren = childNode.children &&
+										childNode.children.filter((child) => child.name).length > 0;
 
-				if (("children" in childNode) && (childNode.children.length > 0)) {
-					for (let k = 0, jLength = childNode.children.length; k < jLength; k++) {
-						if (childNode.children[k].hasOwnProperty("name")) {
-							childNode.hasChildren = true;
-							break;
-						}
-					}
-				}
-
+				// Increment child level
 				childNode.level = level + 1;
-				const nodeHasChildren = this.nodesToShow[i].hasChildren;
-				const nodeChildHasName = childNode.hasOwnProperty("name");
 
-				if (nodeHasChildren && nodeChildHasName) {
+				// If the node has a valid child
+				const hasChildren = this.nodesToShow[i].hasChildren &&
+									childNode.hasOwnProperty("name");
+
+				if (hasChildren) {
 
 					// TODO: This is bad. This is a fix for nodes appearing twice in the list
 					// Why are nodes being spliced that already exist?
-
 					const isDuplicate = this.nodesToShow.indexOf(childNode) !== -1;
 					if (isDuplicate) {
 						continue;
