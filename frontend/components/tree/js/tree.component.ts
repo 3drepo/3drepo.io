@@ -241,21 +241,12 @@ class TreeController implements ng.IController {
 
 					this.setContentHeight(this.fetchNodesToShow());
 					this.TreeService.setShowNodes(true);
-					requestAnimationFrame(() => {
-						// Redraw the tree
 
-						// Resize virtual repeater
-
-						// Taken from kseamon's comment - https://github.com/angular/material/issues/4314
-						this.$scope.$broadcast("$md-resize");
+					this.$timeout(() => {
+						console.log(selectionData.selectedIndex);
 						this.topIndex = selectionData.selectedIndex;
+					}, 200);
 
-						const el = document.getElementById(selectionData.selectedId);
-						if (el) {
-							el.scrollIntoView();
-						}
-
-					});
 				}
 			});
 
@@ -379,9 +370,9 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		this.$timeout(() => {
-			this.$scope.$broadcast("$md-resize");
-		});
+		// this.$timeout(() => {
+		this.$scope.$broadcast("$md-resize");
+		// });
 
 	}
 

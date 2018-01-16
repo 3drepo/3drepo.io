@@ -719,7 +719,12 @@ export class TreeService {
 	/**
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
 	 */
-	public expandToSelection(path, level, noHighlight, multi: boolean) {
+	public expandToSelection(path, level: number, noHighlight: boolean, multi: boolean) {
+
+		if (!path) {
+			console.error("Path not defined in expandToSelection");
+			return;
+		}
 
 		let selectedId = path[path.length - 1];
 		let selectedIndex = 0;
@@ -751,7 +756,8 @@ export class TreeService {
 				const childNode = this.nodesToShow[i].children[j];
 
 				// Set child to not expanded
-				//childNode.expanded = false;
+
+				// childNode.expanded = false;
 
 				if (childNode._id === selectedId) {
 
