@@ -47,6 +47,7 @@ export class TreeService {
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
 	private hideIfc;
+	private treeMapReady;
 
 	constructor(
 		private $q: IQService,
@@ -57,6 +58,7 @@ export class TreeService {
 
 	public reset() {
 		this.treeReady = this.$q.defer();
+		this.treeMapReady = null;
 		this.state = {};
 		this.state.lastParentWithName = null;
 		this.state.showNodes = true;
@@ -326,18 +328,19 @@ export class TreeService {
 
 	public getMap() {
 		// only do this once!
-		if (this.treeMap && this.treeMap.idToMeshes) {
-			return Promise.resolve(this.treeMap);
+		if (this.treeMapReady) {
+			return this.treeMapReady;
 		} else {
 			this.treeMap = {
 				oIdToMetaId: {},
 				sharedIdToUid: {},
 				uidToSharedId: {},
 			};
-			return this.treeReady.promise.then((tree) => {
+			this.treeMapReady = this.treeReady.promise.then((tree) => {
 				this.treeMap.idToMeshes = this.idToMeshes;
 				return this.genMap(tree.nodes, this.treeMap);
 			});
+			return this.treeMapReady;
 
 		}
 
@@ -488,7 +491,8 @@ export class TreeService {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
 		} else {
-			console.error("Meshes and node.children were both not defined", meshes, node.children);
+			// TODO: Is this a valid state?
+			// console.error("Meshes and node.children were both not defined", meshes, node.children);
 		}
 
 	}
@@ -716,106 +720,101 @@ export class TreeService {
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
 	 */
 	public expandToSelection(path, level, noHighlight, multi: boolean) {
-		let i;
-		let j;
-		let length;
+
 		let selectedId = path[path.length - 1];
 		let selectedIndex = 0;
-		let selectionFound = false;
 
 		// Force a redraw of the tree to get round the display problem
 		this.state.showNodes = false;
 		let condLoop = true;
-		for (i = 0, length = this.nodesToShow.length; i < length && condLoop; i++) {
-			if (this.nodesToShow[i]._id === path[level]) {
+		for (let i = 0, length = this.nodesToShow.length; i < length && condLoop; i++) {
 
-				this.state.lastParentWithName = this.nodesToShow[i];
+			// If the node is on this level?
+			if (this.nodesToShow[i]._id !== path[level]) {
+				continue;
+			}
 
-				this.nodesToShow[i].expanded = true;
-				this.nodesToShow[i].selected = false;
+			this.state.lastParentWithName = this.nodesToShow[i];
 
-				if (level === (path.length - 2)) {
-					selectedIndex = i;
+			this.nodesToShow[i].expanded = true;
+			this.nodesToShow[i].selected = false;
+
+			if (level === (path.length - 2)) {
+				selectedIndex = i;
+			}
+
+			let childWithNameCount = 0;
+
+			const childLength = this.nodesToShow[i].children.length;
+			for (let j = 0; j < childLength; j ++) {
+
+				const childNode = this.nodesToShow[i].children[j];
+
+				// Set child to not expanded
+				childNode.expanded = false;
+
+				if (childNode._id === selectedId) {
+
+					if (childNode.hasOwnProperty("name")) {
+						childNode.selected = true;
+						if (!noHighlight) {
+							this.selectNode(childNode, multi);
+						}
+						this.state.lastParentWithName = null;
+						selectedIndex = i + j + 1;
+
+					} else if (!noHighlight) {
+						// If the selected mesh doesn't have a name highlight the parent in the tree
+						// highlight the parent in the viewer
+
+						this.selectNode(this.nodesToShow[i], multi);
+						selectedId = this.nodesToShow[i]._id;
+						selectedIndex = i;
+						this.state.lastParentWithName = null;
+						selectedId = this.nodesToShow[i]._id;
+					}
+
+					condLoop = false;
+				} else {
+					// This will clear any previously selected node
+					childNode.selected = false;
 				}
 
-				let childWithNameCount = 0;
-
-				const childLength = this.nodesToShow[i].children.length;
-				for (j = 0; j < childLength; j ++) {
-
-					const childNode = this.nodesToShow[i].children[j];
-
-					// Set child to not expanded
-					childNode.expanded = false;
-
-					if (childNode._id === selectedId) {
-
-						if (childNode.hasOwnProperty("name")) {
-							childNode.selected = true;
-							if (!noHighlight) {
-								this.selectNode(childNode, multi);
-							}
-							this.state.lastParentWithName = null;
-							selectedIndex = i + j + 1;
-
-						} else if (!noHighlight) {
-							// If the selected mesh doesn't have a name highlight the parent in the tree
-							// highlight the parent in the viewer
-
-							this.selectNode(this.nodesToShow[i], multi);
-							selectedId = this.nodesToShow[i]._id;
-							selectedIndex = i;
-							this.state.lastParentWithName = null;
-							selectedId = this.nodesToShow[i]._id;
-						}
-
-						condLoop = false;
-					} else {
-						// This will clear any previously selected node
-						childNode.selected = false;
-					}
-
-					// Only set the toggle state once when the node is listed
-					if (!childNode.hasOwnProperty("toggleState")) {
-						this.setToggleState(childNode, "visible", false);
-					}
-
-					// Determine if child node has childern
-					childNode.hasChildren = false;
-					if (("children" in childNode) && (childNode.children.length > 0)) {
-						for (let k = 0, jLength = childNode.children.length; k < jLength; k++) {
-							if (childNode.children[k].hasOwnProperty("name")) {
-								childNode.hasChildren = true;
-								break;
-							}
-						}
-					}
-
-					// Set current selected node
-					if (childNode.selected) {
-						selectionFound = true;
-
-					}
-
-					childNode.level = level + 1;
-					const nodeHasChildren = this.nodesToShow[i].hasChildren;
-					const nodeChildHasName = childNode.hasOwnProperty("name");
-
-					if (nodeHasChildren && nodeChildHasName) {
-
-						// TODO: This is bad. This is a fix for nodes appearing twice in the list
-						//  Why only top level nodes? Why are nodes being spliced that already exist?
-
-						const isDuplicate = this.nodesToShow.find((n) => n.name === childNode.name);
-						if (isDuplicate) {
-							continue;
-						}
-
-						this.nodesToShow.splice(i + childWithNameCount + 1, 0, childNode);
-						childWithNameCount++;
-					}
-
+				// Only set the toggle state once when the node is listed
+				if (!childNode.hasOwnProperty("toggleState")) {
+					this.setToggleState(childNode, "visible", false);
 				}
+
+				// Determine if child node has childern
+				childNode.hasChildren = false;
+
+				if (("children" in childNode) && (childNode.children.length > 0)) {
+					for (let k = 0, jLength = childNode.children.length; k < jLength; k++) {
+						if (childNode.children[k].hasOwnProperty("name")) {
+							childNode.hasChildren = true;
+							break;
+						}
+					}
+				}
+
+				childNode.level = level + 1;
+				const nodeHasChildren = this.nodesToShow[i].hasChildren;
+				const nodeChildHasName = childNode.hasOwnProperty("name");
+
+				if (nodeHasChildren && nodeChildHasName) {
+
+					// TODO: This is bad. This is a fix for nodes appearing twice in the list
+					// Why are nodes being spliced that already exist?
+
+					const isDuplicate = this.nodesToShow.indexOf(childNode) !== -1;
+					if (isDuplicate) {
+						continue;
+					}
+
+					this.nodesToShow.splice(i + childWithNameCount + 1, 0, childNode);
+					childWithNameCount++;
+				}
+
 			}
 		}
 
@@ -824,6 +823,7 @@ export class TreeService {
 			selectedId,
 		};
 
+		// Only redraw on
 		if (level < (path.length - 2)) {
 			this.expandToSelection(path, (level + 1), undefined, multi);
 		} else if (level === (path.length - 2)) {
