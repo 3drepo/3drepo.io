@@ -53,7 +53,7 @@ div(
 								layout-fill)
 
 						div(ng-if="!vm.loadingComparision && model"
-							ng-repeat="model in compareType[vm.modelType + 'Models'] track by $index") 
+							ng-repeat="model in vm[vm.modelType + 'Models'] track by $index") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 								
