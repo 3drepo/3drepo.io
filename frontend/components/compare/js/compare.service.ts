@@ -52,10 +52,10 @@ export class CompareService {
 					label: "3D Diff",
 					type: "diff",
 				},
-				clash : {
-					label: "3D Clash",
-					type: "clash",
-				},
+				// clash : {
+				// 	label: "3D Clash",
+				// 	type: "clash",
+				// },
 			},
 			baseModels: [],
 			targetModels: [],
@@ -335,13 +335,14 @@ export class CompareService {
 
 		} else if (this.state.mode === "clash") {
 
-			if (this.state.isFed) {
-				this.ViewerService.diffToolEnableWithClashMode();
-			} else {
-				this.ViewerService.diffToolShowBaseModel();
-			}
+			// TODO: Bring back with clash
+			// if (this.state.isFed) {
+			// 	this.ViewerService.diffToolEnableWithClashMode();
+			// } else {
+			// 	this.ViewerService.diffToolShowBaseModel();
+			// }
 
-			this.changeCompareState("compare");
+			// this.changeCompareState("compare");
 
 		}
 	}
@@ -361,9 +362,10 @@ export class CompareService {
 		this.state.compareState = "compare";
 
 		if (this.state.mode === "clash") {
-			if (this.state.isFed === true) {
-				this.clashFed();
-			}
+			// TODO: Bring back with clash
+			// if (this.state.isFed === true) {
+			// 	this.clashFed();
+			// }
 		} else if (this.state.mode === "diff") {
 			if (this.state.isFed === false) {
 				this.diffModel(account, model);
@@ -410,21 +412,22 @@ export class CompareService {
 
 	}
 
-	public clashFed() {
+	// TODO: Bring back with clash
+	// public clashFed() {
 
-		this.ViewerService.diffToolDisableAndClear();
+	// 	this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels("clash")
-			.then(() => {
-				this.ViewerService.diffToolEnableWithClashMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
+	// 	this.loadModels("clash")
+	// 		.then(() => {
+	// 			this.ViewerService.diffToolEnableWithClashMode();
+	// 			this.modelsLoaded();
+	// 		})
+	// 		.catch((error) => {
+	// 			this.modelsLoaded();
+	// 			console.error(error);
+	// 		});
 
-	}
+	// }
 
 	public toggleModelVisibility(model) {
 		if (this.state.modelType === "target") {

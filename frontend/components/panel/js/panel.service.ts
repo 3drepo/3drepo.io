@@ -164,6 +164,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "compare",
 			title: "Compare",
+			// title: "Compare",
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
@@ -208,11 +209,11 @@ export class PanelService {
 
 	}
 
-	// public handlePanelEvent(panelType, event, eventData) {		
-			
-	// 		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||		
-	// 			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE		
-	// 		) {		
+	// public handlePanelEvent(panelType, event, eventData) {
+
+	// 		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
+	// 			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
+	// 		) {
 	// 			if (panelType === "tree") {
 	// 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
 	// 				this.TreeService.setHighlightSelected(!eventData.on);

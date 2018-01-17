@@ -11,8 +11,8 @@ div(
 			md-center-tabs="true"
 			layout-align="center center"
 			md-selected="0")
-			
-			md-tab(
+
+			md-tab.diff(
 				id="{{compareType.type + 'CompareTab'}}"
 				ng-click="vm.compareInNewMode(compareType)"
 				ng-repeat="compareType in vm.compareTypes"
