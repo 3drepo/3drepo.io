@@ -243,7 +243,6 @@ class TreeController implements ng.IController {
 					this.TreeService.setShowNodes(true);
 
 					this.$timeout(() => {
-						console.log(selectionData.selectedIndex);
 						this.topIndex = selectionData.selectedIndex;
 					}, 200);
 
