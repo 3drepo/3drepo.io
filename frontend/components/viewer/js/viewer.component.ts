@@ -28,7 +28,6 @@ class ViewerController implements ng.IController {
 		"ClientConfigService",
 		"EventService",
 		"ViewerService",
-		"CompareService",
 	];
 
 	private account: any;
@@ -48,7 +47,6 @@ class ViewerController implements ng.IController {
 		private ClientConfigService,
 		private EventService,
 		private ViewerService,
-		private CompareService,
 	) {
 
 		$scope.$watch(() => {
@@ -81,7 +79,7 @@ class ViewerController implements ng.IController {
 
 	public $onDestroy() {
 		this.$element.on("$destroy", () => {
-			this.CompareService.diffToolDisableAndClear();
+			this.ViewerService.diffToolDisableAndClear();
 			this.viewer.reset(); // Remove events watch
 		});
 	}
