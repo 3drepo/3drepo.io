@@ -50,6 +50,7 @@ export class ViewerService {
 		public DocsService: any,
 
 	) {
+		console.log("Loading viewer...")
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;

@@ -81,7 +81,7 @@ class ViewerController implements ng.IController {
 
 	public $onDestroy() {
 		this.$element.on("$destroy", () => {
-			this.CompareService.diffToolDisableAndClear();
+			this.ViewerService.diffToolDisableAndClear();
 			this.viewer.reset(); // Remove events watch
 		});
 	}
