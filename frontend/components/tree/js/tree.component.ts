@@ -115,7 +115,12 @@ class TreeController implements ng.IController {
 
 							this.initNodesToShow();
 							this.TreeService.resetLastParentWithName();
+							console.log("expandToSelection start");
+							let start = performance.now();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
+							let stop = performance.now();
+							console.log("expandToSelection end");
+							console.log("expandToSelection TOTAL TIME: ", stop - start, "ms");
 							// all these init and expanding unselects the selected, so let's select them again
 							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {

@@ -54,6 +54,7 @@ export class TreeService {
 		private APIService,
 	) {
 		this.reset();
+		
 	}
 
 	public reset() {
@@ -544,17 +545,25 @@ export class TreeService {
 			// Set the toggle state of the nodes above
 			for (let i = (path.length - 1); i >= 0; i--) {
 				const parentNode = this.getNodeById(path[i]);
+				let numInvisible = 0;
+				let numParentInvisible = 0;
+				let numVisible = 0;
 
-				const numInvisible = parentNode.children.reduce(
-					(total, child) => {
-						return child.toggleState === "invisible" ? total + 1 : total;
-					},
-					0);
-				const numParentInvisible = parentNode.children.reduce(
-					(total, child) => {
-						return child.toggleState === "parentOfInvisible" ? total + 1 : total;
-					},
-					0);
+				for (let j = 0; j < parentNode.children.length; j++) {
+					if (parentNode.children[j].toggleState === "invisible" ) {
+						numInvisible++;
+					} else if (parentNode.children[j].toggleState === "parentOfInvisible" ) {
+						numParentInvisible++;
+					} else {
+						numVisible++;
+					}
+
+					// If we have mixed visible and invisible/parentOfInvisible we know
+					// it's parentOfInvisible
+					if (numVisible > 0 && (numInvisible > 0 || numParentInvisible > 0) ) {
+						break;
+					}
+				}
 
 				if (numInvisible === parentNode.children.length) {
 					parentNode.toggleState = "invisible";
@@ -593,6 +602,7 @@ export class TreeService {
 	 * Expand a node to show its children.
 	 */
 	public expand(event, _id) {
+		const start = performance.now();
 
 		let i;
 		let j;
@@ -605,12 +615,7 @@ export class TreeService {
 		event.stopPropagation();
 
 		// Find node index
-		for (i = 0; i < this.nodesToShow.length; i += 1) {
-			if (this.nodesToShow[i]._id === _id) {
-				index = i;
-				break;
-			}
-		}
+		index = this.nodesToShow.indexOf(this.getNodeById(_id));
 
 		const _ids = [_id];
 		const nodeToExpand = this.nodesToShow[index];
@@ -713,14 +718,15 @@ export class TreeService {
 		}
 
 		nodeToExpand.expanded = !nodeToExpand.expanded;
-
+		const end = performance.now();
+		console.log("expand took: ", end - start, "ms")
 	}
 
 	/**
 	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
 	 */
 	public expandToSelection(path, level: number, noHighlight: boolean, multi: boolean) {
-
+		const start = performance.now();
 		if (!path) {
 			console.error("Path not defined in expandToSelection");
 			return;
@@ -832,6 +838,8 @@ export class TreeService {
 			this.selectionData = selectionData;
 		}
 
+		const end = performance.now();
+		console.log("expandToSelection took: ", end - start, "ms");
 		return selectionData;
 	}
 
@@ -866,14 +874,6 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide all tree nodes.
-	 */
-	public hideAllTreeNodes() {
-		const rootNode = this.allNodes[0];
-		this.setTreeNodeVisibility(rootNode, "invisible", false);
-	}
-
-	/**
 	 * Show a collection of nodes.
 	 * @param nodes	Array of nodes to be shown.
 	 */
@@ -886,13 +886,48 @@ export class TreeService {
 		}
 	}
 
+	public traverseAllNodes(rootNode, callback) {
+		let children = rootNode.children.concat();
+		while (children.length) {
+			let child = children.pop();
+			callback(child);
+			if (child.children) {
+				children = children.concat(child.children);
+			}
+		}
+	}
+
+	/**
+	 * Hide all tree nodes.
+	 */
+	public hideAllTreeNodes() {
+		const rootNode = this.allNodes[0];
+		this.traverseAllNodes(rootNode, (child) => {
+			child.toggleState = "invisible";
+		});
+		this.toggleNode(rootNode);
+	}
+
+
 	/**
 	 * Show all tree nodes.
 	 */
 	public showAllTreeNodes() {
+		
+		const start = performance.now();
+		console.log(this.allNodes[0])
 		const rootNode = this.allNodes[0];
-		this.setTreeNodeVisibility(rootNode, "visible", false);
+		this.traverseAllNodes(rootNode, (child) => {
+			child.toggleState = "visible";
+		});
+		this.toggleNode(rootNode);
+
+		//this.setTreeNodeVisibility(rootNode, "visible", false);
+		const stop = performance.now();
+		console.log("showAllTreeNodes: ", stop - start, "ms");
 	}
+
+	
 
 	/**
 	 * Show all tree nodes and hide IFCs if necessary.
@@ -945,7 +980,7 @@ export class TreeService {
 		// toggle yourself
 		this.setToggleState(node, visibility, fastforward);
 
-		const stack = [node];
+		let stack = [node];
 		let head = null;
 
 		while (stack.length > 0) {
@@ -956,9 +991,7 @@ export class TreeService {
 			}
 
 			if (head.children) {
-				for (let i = 0; i < head.children.length; i++) {
-					stack.push(head.children[i]);
-				}
+				stack = stack.concat(head.children);
 			}
 		}
 	}
