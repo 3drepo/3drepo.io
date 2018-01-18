@@ -76,6 +76,7 @@
 			canChangePriority: canChangePriority,
 			canChangeStatus: canChangeStatus,
 			canChangeType: canChangeType,
+			canChangeDueDate: canChangeDueDate,
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
 			canChangeStatusToClosed: canChangeStatusToClosed,
@@ -363,6 +364,10 @@
 				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
 			}
 
+			if (issue.due_date) {
+				issue.due_date = new Date(issue.due_date);
+			}
+
 			if (issue) {
 				issue.statusIcon = getStatusIcon(issue);
 			}
@@ -440,6 +445,12 @@
 		function canChangeType(issueData, userJob, permissions) {
 			
 			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canChangeDueDate(issueData, userJob, permissions) {
+			
+			return canChangeStatusToClosed(issueData, userJob, permissions);
 
 		}
 
@@ -1141,6 +1152,14 @@
 			case "desc":
 
 				comment.action.propertyText = "Description";
+
+				break;
+
+			case "due_date":
+
+				comment.action.propertyText = "Due Date";
+				comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+				comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
 
 				break;
 			}

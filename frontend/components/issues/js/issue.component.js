@@ -46,7 +46,7 @@
 		"IssuesService", "APIService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
-		"DialogService"
+		"DialogService", "$mdDateLocale"
 	];
 
 	function IssueCtrl (
@@ -54,7 +54,7 @@
 		IssuesService, APIService, NotificationService, AuthService, 
 		$timeout, $scope, ClientConfigService, AnalyticService, 
 		$state, StateManager, MeasureService, ViewerService,
-		DialogService
+		DialogService, $mdDateLocale
 	) {
 		
 		var vm = this;
@@ -404,6 +404,20 @@
 
 		};
 
+		vm.canChangeDueDate = function() {
+			
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
+
+			return IssuesService.canChangeDueDate(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+		};
+
 		vm.canChangeAssigned = function() {
 
 			if (!IssuesService.isOpen(vm.issueData)) {
@@ -455,6 +469,7 @@
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
+					due_date: vm.issueData.due_date,
 					assigned_roles: vm.issueData.assigned_roles
 				};
 
@@ -809,6 +824,7 @@
 				priority: vm.issueData.priority,
 				status: vm.issueData.status,
 				topic_type: vm.issueData.topic_type,
+				due_date: vm.issueData.due_date,
 				desc: vm.issueData.desc,
 				rev_id: vm.revision
 			};

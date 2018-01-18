@@ -105,6 +105,16 @@ div.heightFix(
 						
 						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
+			div(layout="row")
+				md-input-container(flex)
+					label Due Date
+					md-datepicker(
+						id="issueDueDate"
+						ng-model="vm.issueData.due_date"
+						ng-change="vm.statusChange()"
+						ng-disabled="!vm.canChangeDueDate()"
+						md-date-locale="locale")
+
 		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
 			div(layout="column", layout-align="start", flex)
 				div(ng-if="!vm.data", flex, layout="column")

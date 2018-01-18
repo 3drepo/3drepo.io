@@ -163,6 +163,22 @@ issue .issueOpenContainer {
   margin-top: 10px;
 }
 
+issue #issueDueDate .md-datepicker-button {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+issue #issueDueDate .md-datepicker-button md-icon {
+  margin-left: 0px;
+}
+
+issue #issueDueDate .md-datepicker-input-container {
+  margin: 0px;
+  width: 133.5px;
+}
+
 /** Issues List *******************************************************************************************************/
 issues-list .issueListItem {
   position: relative;

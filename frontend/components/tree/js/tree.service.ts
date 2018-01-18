@@ -940,26 +940,30 @@ export class TreeService {
 	 */
 	public setTreeNodeVisibility(node: any, visibility: string, fastforward: boolean) {
 
-		this.state.toggledNode = node;
+		if (node) {
+			this.state.toggledNode = node;
 
-		// toggle yourself
-		this.setToggleState(node, visibility, fastforward);
+			// toggle yourself
+			this.setToggleState(node, visibility, fastforward);
 
-		const stack = [node];
-		let head = null;
+			const stack = [node];
+			let head = null;
 
-		while (stack.length > 0) {
-			head = stack.pop();
+			while (stack.length > 0) {
+				head = stack.pop();
 
-			if (node !== head) {
-				this.setToggleState(head, visibility, fastforward);
-			}
+				if (node !== head) {
+					this.setToggleState(head, visibility, fastforward);
+				}
 
-			if (head.children) {
-				for (let i = 0; i < head.children.length; i++) {
-					stack.push(head.children[i]);
+				if (head.children) {
+					for (let i = 0; i < head.children.length; i++) {
+						stack.push(head.children[i]);
+					}
 				}
 			}
+		} else {
+			console.error("Unexpected undefined node in setTreeNodeVisibility");
 		}
 	}
 
