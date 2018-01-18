@@ -301,12 +301,15 @@ class TreeController implements ng.IController {
 				const account = vals[0];
 				const model = vals[1];
 
-				this.ViewerService.switchObjectVisibility(
-					account,
-					model,
-					objectIds[key],
-					visible,
-				);
+				if (this.ViewerService.viewer) {
+					this.ViewerService.switchObjectVisibility(
+						account,
+						model,
+						objectIds[key],
+						visible,
+					);
+				}
+
 			}
 		}
 	}

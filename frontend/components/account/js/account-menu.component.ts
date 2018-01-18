@@ -44,6 +44,7 @@ class AccountMenuController implements ng.IController {
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
+		this.isLiteMode = this.isMobileDevice;
 
 		this.$scope.$watch("vm.isLiteMode", () => {
 

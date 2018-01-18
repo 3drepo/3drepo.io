@@ -201,7 +201,7 @@ class PanelCardController implements ng.IController {
 				option = angular.element(optionElement);
 
 				// Create the element
-				if (option !== null) {
+				if (option !== null && this.options) {
 					this.options.prepend(option);
 					this.$compile(option)(this.$scope);
 				}

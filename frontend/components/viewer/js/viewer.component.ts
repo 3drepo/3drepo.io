@@ -68,6 +68,7 @@ class ViewerController implements ng.IController {
 	}
 
 	public $onInit() {
+		console.log("Viewer initialised...");
 
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
