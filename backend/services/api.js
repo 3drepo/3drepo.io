@@ -113,8 +113,9 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account", require("../routes/subscriptions"));
 	// invoices handler
 	app.use("/:account", require("../routes/invoice"));
-	// os api handler
+	// maps handler
 	app.use("/os", require("../routes/osBuilding"));
+	app.use("/:account", require("../routes/maps"));
 	// payment api header
 	app.use("/payment", require("../routes/payment"));
 

@@ -46,8 +46,8 @@ function parseUrl(url){
 function get(url, qs){
 	'use strict';
 	
-	qs = '?' + qs || '';
-	//console.log(url + qs);
+	qs = qs? '?' + qs : '';
+	console.log(url + qs);
 
 	return new Promise((resolve, reject) => {
 		https.get(url + qs, result => {
