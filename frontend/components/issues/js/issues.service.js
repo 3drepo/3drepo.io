@@ -523,10 +523,24 @@
 			}
 		}
 
-		function showIssue(issue) {
+		function showIssue(issue) {		
 			var issueData;
 				
 			showIssuePins();
+
+			// Remove highlight from any multi objects
+			ViewerService.highlightObjects([]);
+			TreeService.showAllTreeNodes();
+
+			// clear selection
+			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+
+			// Show multi objects
+			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
+
+				showMultiIds(issue);
+		
+			}
 
 			if(issue.viewpoint.position.length > 0) {
 				// Set the camera position
@@ -556,21 +570,11 @@
 				ViewerService.goToExtent();
 			}
 
-			// Remove highlight from any multi objects
-			ViewerService.highlightObjects([]);
-
-			// clear selection
-			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-
-			// Show multi objects
-			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
-
-				showMultiIds(issue);
-		
-			}
 		}
 
 		function showMultiIds(issue) {
+
+
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
@@ -640,7 +644,14 @@
 								TreeService.selectNode(TreeService.getNodeById(objUid), true);
 							} else {
 								// Only call expandToSelection for last selected node to improve performance
+								console.log("expandToSelection start - from issues service");
+								let start = performance.now();
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
+								let stop = performance.now();
+								console.log("expandToSelection end - from issues service");
+								console.log("expandToSelection TOTAL TIME - from issues service: ", stop - start, "ms");
+								
+								
 							}
 						}
 					}
@@ -652,34 +663,23 @@
 		}
 
 		function handleHidden(objects) {
-			var objectIdsToHide = [];
-			
+
 			TreeService.getMap()
 				.then(function(treeMap){
 
 					// show currently hidden nodes
 					var hideIfcState = TreeService.getHideIfc();
 					TreeService.setHideIfc(false);
-					TreeService.showAllTreeNodes();
-					
+
 					if (objects) {
 						objects.forEach(function(obj){
 							var account = obj.account;
 							var model = obj.model;
 							var key = account + "@" + model;
-							if(!objectIdsToHide[key]){
-								objectIdsToHide[key] = [];
-							}	
 
-							objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
+							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
+							TreeService.setTreeNodeVisibility(TreeService.getNodeById(nodeId), "invisible", false);
 
-						});
-					}
-
-					for (var ns in objectIdsToHide) {
-
-						objectIdsToHide[ns].forEach(function(obj) {
-							TreeService.toggleTreeNodeVisibilityById(obj);
 						});
 					}
 					
@@ -699,7 +699,7 @@
 
 			if (response.data.hiddenObjects) {
 				handleHidden(response.data.hiddenObjects);
-			}
+			} 
 
 		}
 

@@ -35,7 +35,7 @@ class TreeController implements ng.IController {
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
 	private clickedShown;
-	private lastParentWithName = null;
+	// private lastParentWithName = null;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
@@ -114,11 +114,11 @@ class TreeController implements ng.IController {
 						} else {
 
 							this.initNodesToShow();
-							this.TreeService.resetLastParentWithName();
+							// this.TreeService.resetLastParentWithName();
 							console.log("expandToSelection start");
-							let start = performance.now();
+							const start = performance.now();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
-							let stop = performance.now();
+							const stop = performance.now();
 							console.log("expandToSelection end");
 							console.log("expandToSelection TOTAL TIME: ", stop - start, "ms");
 							// all these init and expanding unselects the selected, so let's select them again
@@ -126,9 +126,9 @@ class TreeController implements ng.IController {
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
 								selectedNode.selected = true;
 							});
-							if (this.TreeService.getLastParentWithName()) {
-								this.TreeService.selectNode(this.TreeService.getLastParentWithName(), this.MultiSelectService.isMultiMode());
-							}
+							// if (this.TreeService.getLastParentWithName()) {
+							// 	this.TreeService.selectNode(this.TreeService.getLastParentWithName(), this.MultiSelectService.isMultiMode());
+							// }
 						}
 					}
 				}
@@ -158,7 +158,7 @@ class TreeController implements ng.IController {
 				this.setContentHeight(this.fetchNodesToShow());
 
 				// Force show all and tree visibility to be recalculated
-				this.TreeService.showAllTreeNodesAndIFCs();
+				this.TreeService.showAllTreeNodes();
 			}
 		});
 
@@ -209,7 +209,7 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodesAndIFCs();
+							this.TreeService.showAllTreeNodes();
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
@@ -273,7 +273,7 @@ class TreeController implements ng.IController {
 
 			lastViewerUpdateTime = Date.now();
 
-		}, 100);
+		}, 150);
 
 	}
 
@@ -407,7 +407,7 @@ class TreeController implements ng.IController {
 	public expand(event, id) {
 
 		// rAF fixes flickering as expand is computationally expensive
-		requestAnimationFrame(() => {
+		// requestAnimationFrame(() => {
 			this.TreeService.expand(event, id);
 			// Redraw the tree if needed
 			if (!this.TreeService.isShowNodes()) {
@@ -416,7 +416,7 @@ class TreeController implements ng.IController {
 				// });
 			}
 			this.setContentHeight(this.fetchNodesToShow());
-		});
+		// });
 
 	}
 
