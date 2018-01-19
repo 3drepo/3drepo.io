@@ -47,7 +47,6 @@ function get(url, qs){
 	'use strict';
 	
 	qs = qs? '?' + qs : '';
-	console.log(url + qs);
 
 	return new Promise((resolve, reject) => {
 		https.get(url + qs, result => {
@@ -68,7 +67,7 @@ function get(url, qs){
 				}
 
 				if([200, 201].indexOf(result.statusCode) === -1){
-					reject(body);
+					reject({resCode : result.statusCode, message: result.statusMessage});
 				} else {
 					resolve(body);
 				}

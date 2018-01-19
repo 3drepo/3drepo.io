@@ -20,24 +20,22 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
-const utils = require("../utils");
 const httpsGet = require('../libs/httpsReq');
 
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", middlewares.hasReadAccessToModel, getOSMTile);
 
 function getOSMTile(req, res, next){
 	//TODO: we may want to ensure the model has access to tiles
-	const place = utils.APIInfo(req);
 	httpsGet.get("https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png").then(image =>{
 		res.writeHead(200, {'Content-Type': 'image/png' });
 		res.write(image);
 		res.end();
 	}).catch(err => {
-		//FIXME: what error? this should use responseCodes	
+		console.log(err)
 		if(err.message){
 			res.status(500).json({ message: err.message});
-		} else {
-			res.status(500).send(err);
+		} else if (err.resCode){
+			res.status(err.resCode).json({message: err.message});
 		}
 	});
 
