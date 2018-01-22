@@ -48,6 +48,7 @@ const schema = mongoose.Schema({
 	},
 	surveyPoints: [
 		{
+			_id: false,
 			latLong: [Number],
 			position: [Number]
 		}
