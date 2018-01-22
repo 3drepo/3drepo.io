@@ -159,26 +159,7 @@ function getModelSetting(req, res, next){
 
 	_getModel(req).then(setting => {
 
-		//setting = setting.toObject();
-		
-		let whitelist = [
-			"name", 
-			"owner", 
-			"desc", 
-			"type", 
-			"permissions", 
-			"properties", 
-			"status", 
-			"errorReason", 
-			"federate", 
-			"subModels",
-			"fourDSequenceTag"
-		];
-
-
-		whitelist.forEach(key => {
-			resObj[key] = setting[key];
-		});
+		resObj = setting;
 		resObj.model = setting._id;
 		resObj.account = req.params.account;
 

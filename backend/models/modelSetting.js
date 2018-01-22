@@ -25,8 +25,6 @@ const _ = require("lodash");
 const schema = mongoose.Schema({
 	_id : String,
 	name: String, // model name
-	owner: String,
-	users: [String],
 	desc: String,
 	type: String,
 	corID: String,
@@ -39,18 +37,7 @@ const schema = mongoose.Schema({
 		permission: String
 	}],
 	properties: {
-		"pinSize" : Number,
-		"avatarHeight" : Number,
-		"visibilityLimit" : Number,
-		"speed" : Number,
-		"zNear" : Number,
-		"zFar" : Number,
-		"unit": String, //cm, m, ft, mm
-		"mapTile": {
-			lat: Number,
-			lon: Number,
-			y: Number
-		},
+		unit: String, //cm, m, ft, mm
 		code: String,
 		topicTypes: [{
 			_id: false,
@@ -59,6 +46,12 @@ const schema = mongoose.Schema({
 		}]
 
 	},
+	surveyPoints: [
+		{
+			latLong: [Number],
+			position: [Number]
+		}
+	],
 	fourDSequenceTag: String,
 	timestamp: Date,
 	subModels: [{
@@ -88,47 +81,43 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 
 schema.methods.updateProperties = function(updateObj){
-
 	Object.keys(updateObj).forEach(key => {
 
-		if (key === "name") {
-			this.name = updateObj[key];
-		}
+		switch (key) {
+			case "topicTypes":
+				let topicTypes = {};
+				updateObj[key].forEach(type => {
 
-		if(key === "code" && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
-			throw responseCodes.INVALID_MODEL_CODE;
-		}
-
-		if(key === "topicTypes"){
-			
-			let topicTypes = {};
-			updateObj[key].forEach(type => {
-
-				if(!type || !type.trim()){
-					return;
-				}
+					if(!type || !type.trim()){
+						return;
+					}
 				
-				//generate value from label
-				let value = type.trim().toLowerCase().replace(/ /g, "_");
+					//generate value from label
+					let value = type.trim().toLowerCase().replace(/ /g, "_");
 				
-				if(topicTypes[value]){
-					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-				} else {
-					topicTypes[value] = {
-						value,
-						label: type.trim()
-					};
+					if(topicTypes[value]){
+						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+					} else {	
+						topicTypes[value] = {
+							value,
+							label: type.trim()
+						};
+					}
+				});
+
+				this.properties[key] = _.values(topicTypes);
+				break;
+			case "code":
+				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
+					throw responseCodes.INVALID_MODEL_CODE;
 				}
-			});
-
-			this.properties[key] = _.values(topicTypes);
-		} else {
-			this.properties[key] = updateObj[key];
+			case "unit":
+				this.properties[key] = updateObj[key];
+				break;
+			default:
+				this[key] = updateObj[key];
 		}
-		if(key === "fourDSequenceTag"){
-			this[key] = updateObj[key];
 
-		}	
 	});
 
 };
