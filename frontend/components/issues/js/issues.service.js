@@ -524,24 +524,41 @@
 		}
 
 		function showIssue(issue) {		
-			var issueData;
-				
+
+			TreeService.showProgress = true;
+
 			showIssuePins();
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
+			var hideIfcState = TreeService.getHideIfc();
+			TreeService.setHideIfc(false);
 			TreeService.showAllTreeNodes();
+			TreeService.setHideIfc(hideIfcState);
 
 			// clear selection
-			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
+			//EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
 
-				showMultiIds(issue);
+				showMultiIds(issue).then(() => {
+					TreeService.showProgress = false;
+					handleShowIssue(issue);
+				});
+				
 		
+			} else {
+				TreeService.showProgress = false;
+				handleShowIssue(issue);
 			}
 
+			
+
+		}
+
+		function handleShowIssue(issue) {
+			var issueData;
 			if(issue.viewpoint.position.length > 0) {
 				// Set the camera position
 				issueData = {
@@ -552,9 +569,12 @@
 					account: issue.account,
 					model: issue.model
 				};
+				
+				$timeout().then(function(){
+					ViewerService.setCamera(issueData);
+				});
 
-				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
-
+				// TODO: Use ViewerService
 				// Set the clipping planes
 				issueData = {
 					clippingPlanes: issue.viewpoint.clippingPlanes,
@@ -569,53 +589,64 @@
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
-
 		}
 
 		function showMultiIds(issue) {
 
+			var promises = [];
 
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
 					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
 
-					APIService.get(highlightedGroupUrl)
+					var highlightPromise = APIService.get(highlightedGroupUrl)
 						.then(function (response) {
-							handleHighlights(response.data.objects);
+							return handleHighlights(response.data.objects);
 						})
 						.catch(function(error){
 							console.error("There was a problem getting the highlights: ", error);
 						});
+
+					promises.push(highlightPromise);
+
 				}
 				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
 					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
 
-					APIService.get(hiddenGroupUrl)
+					var hiddenPromise = APIService.get(hiddenGroupUrl)
 						.then(function (response) {
-							handleHidden(response.data.objects);
+							return handleHidden(response.data.objects);
 						})
 						.catch(function(error){
 							console.error("There was a problem getting visibility: ", error);
 						});
+
+					promises.push(hiddenPromise);
+					
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
 				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
 
-				APIService.get(groupUrl)
+				var handleTreePromise = APIService.get(groupUrl)
 					.then(function (response) {
 						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
 							response.data.hiddenObjects = null;
 						}
-						handleTree(response);
+						return handleTree(response);
 					})
 					.catch(function(error){
 						console.error("There was a problem getting the highlights: ", error);
 					});
+
+				promises.push(handleTreePromise);
+
 			}
+
+			return Promise.all(promises);
 		}
 
 		function handleHighlights(objects) {
@@ -646,6 +677,7 @@
 								// Only call expandToSelection for last selected node to improve performance
 								console.log("expandToSelection start - from issues service");
 								let start = performance.now();
+								TreeService.initNodesToShow([TreeService.allNodes[0]])
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 								let stop = performance.now();
 								console.log("expandToSelection end - from issues service");

@@ -143,6 +143,7 @@ export class TreeService {
 
 	public getTrees(url: string, setting: any) {
 
+		console.log("GET TREES")
 		this.APIService.get(url, {
 			headers: {
 				"Content-Type": "application/json",
@@ -156,10 +157,10 @@ export class TreeService {
 
 				// replace model id with model name in the tree if it is a federate model
 				if (setting.federate) {
+
 					mainTree.nodes.name = setting.name;
 					mainTree.nodes.children.forEach((child) => {
 						const name = child.name.split(":");
-
 						const subModel = setting.subModels.find((m) => {
 							return m.model === name[1];
 						});
@@ -172,8 +173,8 @@ export class TreeService {
 						if (subModel && child.children && child.children[0]) {
 							child.children[0].name = subModel.name;
 						}
-
 					});
+
 				}
 
 				const subTrees = json.data.subTrees;
@@ -183,6 +184,10 @@ export class TreeService {
 					.then((idToPath) => {
 
 						const awaitedSubTrees = [];
+
+						let invisibleNodes = 0;
+						let visibleNodes = 0;
+						let parentOfInvisible = 0;
 
 						if (idToPath && idToPath.treePaths) {
 
@@ -197,6 +202,16 @@ export class TreeService {
 
 								subTrees.forEach((subtree) => {
 
+									switch(subtree.toggleState) {
+										case "invisible": 
+											invisibleNodes++;
+										case "visible":
+											visibleNodes++;
+										case "parentOfInvisible":
+											parentOfInvisible++;
+									}
+
+									
 									const subtreeIdToPath = idToPath.treePaths.subModels.find((submodel) => {
 										return subtree.model === submodel.model;
 									});
@@ -219,6 +234,14 @@ export class TreeService {
 						mainTree.subTreesById = subTreesById;
 
 						Promise.all(awaitedSubTrees).then(() => {
+
+							if (mainTree.nodes.length === invisibleNodes && invisibleNodes > 0) {
+								mainTree.nodes.toggleState = "invisible";
+							} else if (parentOfInvisible > 0 || invisibleNodes > 0) {
+								mainTree.nodes.toggleState = "parentOfInvisible";
+							} else {
+								mainTree.nodes.toggleState = "visible";
+							}
 							return this.treeReady.resolve(mainTree);
 						});
 
@@ -265,6 +288,11 @@ export class TreeService {
 					const subTreeId = subTree._id;
 
 					subTree.parent = idToObjRef[treeId];
+					// console.log("Subtree and parent:", subTree.parent, subTree);
+
+					// if (subTree.toggleState === "invisible" && subTree.parent.toggleState === "visible") {
+					// 	subTree.parent.toggleState = "parentOfInvisible";
+					// }
 
 					Object.assign(mainTree.subModelIdToPath, subtree.idToPath);
 
@@ -428,8 +456,10 @@ export class TreeService {
 		this.nodesToShow[0].selected = false;
 		this.nodesToShow[0].hasChildren = this.nodesToShow[0].children;
 
+		console.log("getHiddenByDefaultNodes", this.getHiddenByDefaultNodes())
 		// Only make the top node visible if it does not have a toggleState
 		if (!this.nodesToShow[0].hasOwnProperty("toggleState")) {
+			console.log("HAS NO TOGGLE STATE SET: ", this.nodesToShow);
 			this.nodesToShow[0].toggleState = "visible";
 		}
 	}
@@ -438,8 +468,8 @@ export class TreeService {
 	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
-		this.expandToSelection(this.nodesToShow[0].children[0].path.split("__"), 0, true);
-		this.nodesToShow[0].children[0].selected = false;
+		this.expand(null, this.nodesToShow[0]._id);
+		// this.nodesToShow[0].children[0].selected = false;
 	}
 
 	/**
@@ -473,8 +503,7 @@ export class TreeService {
 			return;
 		}
 
-		const start = performance.now();
-
+		// const start = performance.now();
 		const model = node.model || node.project;
 		const key = this.getAccountModelKey(node.account, model);
 		let meshes = idToMeshes[node._id];
@@ -486,7 +515,8 @@ export class TreeService {
 			if (!nodes[key]) {
 				nodes[key] = meshes;
 			} else {
-				nodes[key] = nodes[key].concat(meshes);
+				// concat is slow!
+				Array.prototype.push.apply(nodes[key], meshes);
 			}
 		} else if (node.children) {
 			// This should only happen in federations.
@@ -500,26 +530,8 @@ export class TreeService {
 		}
 
 		const end = performance.now();
-		console.log("traverseNodeAndPushId took: ", end - start, "ms");
+		// console.log("traverseNodeAndPushId took: ", end - start, "ms");
 
-	}
-
-	public getVisibleArray(account: string, model: string) {
-		const key = this.getAccountModelKey(account, model);
-		if (!this.state.visible[key]) {
-			this.state.visible[key] = new Set();
-		}
-
-		return this.state.visible[key];
-	}
-
-	public getInvisibleArray(account: string, model: string) {
-		const key = this.getAccountModelKey(account, model);
-		if (!this.state.invisible[key]) {
-			this.state.invisible[key] = new Set();
-		}
-
-		return this.state.invisible[key];
 	}
 
 	/**
@@ -527,6 +539,7 @@ export class TreeService {
 	 */
 	public setToggleState(node: any, visibility: string, fastforward: boolean) {
 
+		const start = performance.now();
 		const showableLeaf = this.canShowNode(node) && this.isLeafNode(node);
 		if (showableLeaf || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
 			node.toggleState = visibility;
@@ -583,7 +596,8 @@ export class TreeService {
 		}
 
 		this.toggleNode(node);
-
+		const end = performance.now();
+		//console.log("setToggleState", end - start, "ms");
 	}
 
 	/*
@@ -634,7 +648,7 @@ export class TreeService {
 		}
 
 		const end = performance.now();
-		console.log("expand took: ", end - start, "ms");
+		//console.log("expand took: ", end - start, "ms");
 	}
 
 	public collapseTreeNode(nodeToCollapse: any, index: number) {
@@ -660,13 +674,14 @@ export class TreeService {
 			) {
 
 				if (this.nodesToShow[next].hasSubModelTree) {
+
 					// TODO - do we still need getSubTreesById?
 					const subTreesById = this.getSubTreesById();
 					const subModelNode = subTreesById[this.nodesToShow[next].children[0]._id];
 					nodeIds.push(subModelNode._id);
 				}
 
-				this.nodesToShow.splice(next, 1);
+				const splicedNode = this.nodesToShow.splice(next, 1);
 
 			} else {
 				endOfSplice = true;
@@ -678,7 +693,7 @@ export class TreeService {
 
 	}
 
-	public expandTreeNode(nodeToExpand: any, index: number) {
+	public expandTreeNode(nodeToExpand: any, index: number, multi: boolean) {
 
 		if (!nodeToExpand.children || nodeToExpand.children.length === 0) {
 			return;
@@ -687,28 +702,32 @@ export class TreeService {
 		const numChildren = nodeToExpand.children.length;
 
 		for (let i = 0; i < numChildren; i += 1) {
+
 			// For federation - handle node of model that cannot be viewed or has been deleted
 			// That node will be below level 0 only
-			if (
-				(nodeToExpand.level === 0) &&
-				nodeToExpand.children[i].hasOwnProperty("children") &&
-				nodeToExpand.children[i].children[0].hasOwnProperty("status")
-			) {
+			// if (
+			// 	(nodeToExpand.level === 0) &&
+			// 	nodeToExpand.children[i].hasOwnProperty("children") &&
+			// 	nodeToExpand.children[i].children[0].hasOwnProperty("status")
+			// ) {
 
-				nodeToExpand.children[i].status = nodeToExpand.children[i].children[0].status;
+			// 	nodeToExpand.children[i].status = nodeToExpand.children[i].children[0].status;
 
-			} else {
+			// } else {
 
-				// Normal tree node
-				// console.log()
-				nodeToExpand.children[i].expanded = false;
+			// 	// Normal tree node
+			// 	// console.log()
+			// 	//if (multi === false) {
+			// 		nodeToExpand.children[i].expanded = false;
+			// 		// If the child node does not have a toggleState set it to visible
+			// 		if (!nodeToExpand.children[i].hasOwnProperty("toggleState")) {
+			// 			this.setToggleState(nodeToExpand.children[i], "visible", false);
+			// 		}
+			// 	//}
 
-				// If the child node does not have a toggleState set it to visible
-				if (!nodeToExpand.children[i].hasOwnProperty("toggleState")) {
-					this.setToggleState(nodeToExpand.children[i], "visible", false);
-				}
+			// }
 
-			}
+			nodeToExpand.children[i].expanded = false;
 
 			// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
 			nodeToExpand.children[i].level = nodeToExpand.level + 1;
@@ -740,6 +759,7 @@ export class TreeService {
 	}
 
 	public setHasChildren(node: any) {
+		node.hasChildren = false;
 		if (node.children) {
 			for (let j = 0; j < node.children.length; j++) {
 				if (node.children[j].name) {
@@ -747,8 +767,6 @@ export class TreeService {
 					break;
 				}
 			}
-		} else {
-			node.hasChildren = false;
 		}
 	}
 
@@ -768,7 +786,6 @@ export class TreeService {
 			// If it's the last node in the path
 			// scroll to it
 			if (i === path.length - 1) {
-				console.log(this.nodesToShow, node);
 				selectedIndex = this.nodesToShow.indexOf(node);
 				selectedId = this.nodesToShow[selectedIndex]._id;
 			}
@@ -930,6 +947,13 @@ export class TreeService {
 
 	}
 
+	public setNodeVisibility(nodes) {
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			this.setTreeNodeVisibility(node, "invisible", false);
+		}
+	}
+
 	/**
 	 * Hide a collection of nodes.
 	 * @param nodes	Array of nodes to be hidden.
@@ -957,6 +981,7 @@ export class TreeService {
 	}
 
 	public traverseAllNodes(rootNode, callback) {
+
 		let children = rootNode.children.concat();
 		while (children.length) {
 			const child = children.pop();
@@ -971,27 +996,45 @@ export class TreeService {
 	 * Hide all tree nodes.
 	 */
 	public hideAllTreeNodes() {
-		const rootNode = this.allNodes[0];
-		this.traverseAllNodes(rootNode, (child) => {
-			child.toggleState = "invisible";
-		});
-		this.toggleNode(rootNode);
+		this.setTreeNodeVisibility(this.allNodes[0], "invisible", false);
 	}
 
 	/**
 	 * Show all tree nodes.
 	 */
-	public showAllTreeNodes() {
+	public showAllTreeNodes(forceFullTraversal: boolean) {
 
 		const start = performance.now();
 
-		const rootNode = this.allNodes[0];
-		this.traverseAllNodes(rootNode, (child) => {
+		const children = [this.allNodes[0]];
+		// this.traverseAllNodes(rootNode, (child) => {
+		// 	if (this.canShowNode(child)) {
+		// 		child.toggleState = "visible";
+		// 	}
+		// });
+
+		// const children = nodes.concat(nodes[0].children);
+		Array.prototype.push.apply(children, children[0].children);
+
+		while (children.length) {
+			const child = children.pop();
+			// if (child.children && (child.toggleState !== "visible" || forceFullTraversal)) {
+			// 	children = children.concat(child.children);
+			// }
+			if (child.children && child.toggleState !== "visible") {
+				Array.prototype.push.apply(children, child.children);
+			}
 			if (this.canShowNode(child)) {
 				child.toggleState = "visible";
+			} else {
+				// Child is an IFC Space 
+				child.toggleState = "invisible";
 			}
-		});
-		this.toggleNode(rootNode);
+		}
+
+		this.toggleNode(this.allNodes[0]);
+
+		// this.setTreeNodeVisibility(this.allNodes[0], "visible", false);
 
 		const stop = performance.now();
 		console.log("showAllTreeNodes: ", stop - start, "ms");
@@ -1033,12 +1076,13 @@ export class TreeService {
 	 */
 	public setTreeNodeVisibility(node: any, visibility: string, fastforward: boolean) {
 
+		const start = performance.now();
 		this.state.toggledNode = node;
 
 		// toggle yourself
 		this.setToggleState(node, visibility, fastforward);
 
-		let stack = [node];
+		const stack = [node];
 		let head = null;
 
 		while (stack.length > 0) {
@@ -1049,9 +1093,13 @@ export class TreeService {
 			}
 
 			if (head.children) {
-				stack = stack.concat(head.children);
+				// concat is slow! i.e. stack = stack.concat(head.children);
+				Array.prototype.push.apply(stack, head.children);
 			}
 		}
+
+		const stop = performance.now();
+		console.log("setTreeNodeVisibility: ", stop - start, "ms");
 	}
 
 	/**

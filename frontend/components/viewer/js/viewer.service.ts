@@ -184,6 +184,19 @@ export class ViewerService {
 
 	}
 
+	public setCamera(params) {
+		this.viewer.setCamera(
+			params.position,
+			params.view_dir,
+			params.up,
+			params.look_at,
+			params.animate !== undefined ? params.animate : true,
+			params.rollerCoasterMode,
+			params.account,
+			params.model,
+		);
+	}
+
 	public removeUnsavedPin() {
 		this.removePin({id: this.newPinId });
 		this.setPin({data: null});

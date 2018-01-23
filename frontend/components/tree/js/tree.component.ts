@@ -100,6 +100,19 @@ class TreeController implements ng.IController {
 	}
 
 	public watchers() {
+
+		this.$scope.$watch(() => {
+			return this.TreeService.showProgress;
+		}, (showProgress: any) => {
+			if (showProgress !== undefined && this.showProgress !== showProgress) {
+
+				this.showProgress = showProgress;
+				this.$timeout(() => {}).then(() => {
+					this.topIndex = this.topIndex + 0;
+				});
+			}
+		});
+
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
@@ -114,6 +127,7 @@ class TreeController implements ng.IController {
 						} else {
 
 							this.initNodesToShow();
+
 							// this.TreeService.resetLastParentWithName();
 							console.log("expandToSelection start");
 							const start = performance.now();
@@ -141,6 +155,7 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
+				console.log("TREE_READY");
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -153,12 +168,12 @@ class TreeController implements ng.IController {
 				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
 
 				this.initNodesToShow();
-				this.TreeService.expandFirstNode();
+				console.log("nodesToShow", this.TreeService.getNodesToShow());
 				this.setupInfiniteItemsFilter();
+				this.TreeService.setNodeVisibility(this.TreeService.getHiddenByDefaultNodes());
+				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
 
-				// Force show all and tree visibility to be recalculated
-				this.TreeService.showAllTreeNodes();
 			}
 		});
 
@@ -247,9 +262,9 @@ class TreeController implements ng.IController {
 					this.setContentHeight(this.fetchNodesToShow());
 					this.TreeService.setShowNodes(true);
 
-					this.$timeout(() => {
+					this.$timeout(() => {}).then(() => {
 						this.topIndex = selectionData.selectedIndex;
-					}, 200);
+					});
 
 				}
 			});
@@ -482,7 +497,7 @@ class TreeController implements ng.IController {
 			fetchMoreItems_(index) {
 				if (this.toLoad_ < index) {
 					this.toLoad_ += 20;
-					this.$timeout(() => {}, 300).then(() => {
+					this.$timeout(() => {}, 0).then(() => {
 						this.numLoaded_ = this.toLoad_;
 					});
 				}
