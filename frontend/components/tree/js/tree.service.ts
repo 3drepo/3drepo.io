@@ -758,18 +758,6 @@ export class TreeService {
 		nodeToExpand.expanded = true;
 	}
 
-	public setHasChildren(node: any) {
-		node.hasChildren = false;
-		if (node.children) {
-			for (let j = 0; j < node.children.length; j++) {
-				if (node.children[j].name) {
-					node.hasChildren = true;
-					break;
-				}
-			}
-		}
-	}
-
 	public expandToSelection(path, level: number, noHighlight: boolean, multi: boolean) {
 
 		let selectedIndex;
@@ -996,7 +984,37 @@ export class TreeService {
 	 * Hide all tree nodes.
 	 */
 	public hideAllTreeNodes() {
-		this.setTreeNodeVisibility(this.allNodes[0], "invisible", false);
+		const start = performance.now();
+
+		const children = [this.allNodes[0]];
+		// this.traverseAllNodes(rootNode, (child) => {
+		// 	if (this.canShowNode(child)) {
+		// 		child.toggleState = "visible";
+		// 	}
+		// });
+
+		// const children = nodes.concat(nodes[0].children);
+		Array.prototype.push.apply(children, children[0].children);
+
+		while (children.length) {
+			const child = children.pop();
+			// if (child.children && (child.toggleState !== "visible" || forceFullTraversal)) {
+			// 	children = children.concat(child.children);
+			// }
+			if (child.children && child.toggleState !== "invisible") {
+				Array.prototype.push.apply(children, child.children);
+			}
+
+			child.toggleState = "invisible";
+
+		}
+
+		this.toggleNode(this.allNodes[0]);
+
+		// this.setTreeNodeVisibility(this.allNodes[0], "visible", false);
+
+		const stop = performance.now();
+		console.log("hideAllTreeNodes: ", stop - start, "ms");
 	}
 
 	/**
