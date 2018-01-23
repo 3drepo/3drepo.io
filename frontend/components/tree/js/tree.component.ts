@@ -56,7 +56,7 @@ class TreeController implements ng.IController {
 
 	private currentSelectedId;
 	private currentSelectedIndex;
-	private hello;
+	private searching;
 
 	constructor(
 		private $scope: IScope,
@@ -73,7 +73,7 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
-		this.hello = true;
+
 		this.nodes = [];
 		this.TreeService.setShowNodes(true);
 		this.showTree = true;
@@ -170,9 +170,13 @@ class TreeController implements ng.IController {
 				this.initNodesToShow();
 				console.log("nodesToShow", this.TreeService.getNodesToShow());
 				this.setupInfiniteItemsFilter();
-				this.TreeService.setNodeVisibility(this.TreeService.getHiddenByDefaultNodes());
+
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
+				this.$timeout(() => {}).then(()=>{
+					this.TreeService.showAllTreeNodes();
+					this.TreeService.setNodeVisibility(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+				});
 
 			}
 		});
@@ -181,36 +185,43 @@ class TreeController implements ng.IController {
 			const noFilterItemsFoundHeight = 82;
 			if (this.TreeService.isDefined(newValue)) {
 				if (newValue.toString() === "") {
-					this.showTree = true;
-					this.showFilterList = false;
-					this.showProgress = false;
-					this.nodes = this.fetchNodesToShow();
-					this.setContentHeight(this.nodes);
-				} else {
+					this.showTreeInPane();
+				} else if (!this.searching) {
 					this.showTree = false;
 					this.showFilterList = false;
-					this.showProgress = false;
+					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
 
+					console.log("showProgress");
+
+					this.searching = true;
 					this.TreeService.search(newValue)
 						.then((json) => {
-							this.showFilterList = true;
-							this.showProgress = false;
-							this.nodes = json.data;
-							if (this.nodes.length > 0) {
-								this.filterItemsFound = true;
-								for (let i = 0; i < this.nodes.length; i ++) {
-									this.nodes[i].index = i;
-									this.nodes[i].toggleState = "visible";
-									this.nodes[i].class = "unselectedFilterItem";
-									this.nodes[i].level = 0;
+
+							if (!this.showFilterList) {
+								this.searching = false;
+								this.showFilterList = true;
+								this.showProgress = false;
+								this.nodes = json.data;
+								if (this.nodes.length > 0) {
+									this.filterItemsFound = true;
+									for (let i = 0; i < this.nodes.length; i ++) {
+										this.nodes[i].index = i;
+										this.nodes[i].toggleState = "visible";
+										this.nodes[i].class = "unselectedFilterItem";
+										this.nodes[i].level = 0;
+									}
+									this.setupInfiniteItemsFilter();
+									this.setContentHeight(this.nodes);
+								} else {
+									this.filterItemsFound = false;
+									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 								}
-								this.setupInfiniteItemsFilter();
-								this.setContentHeight(this.nodes);
-							} else {
-								this.filterItemsFound = false;
-								this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 							}
+							
+						})
+						.catch((error) => {
+							this.showTreeInPane();
 						});
 				}
 			}
@@ -290,6 +301,16 @@ class TreeController implements ng.IController {
 
 		}, 150);
 
+	}
+
+
+	public showTreeInPane() {
+		this.searching = false;
+		this.showTree = true;
+		this.showFilterList = false;
+		this.showProgress = false;
+		this.nodes = this.fetchNodesToShow();
+		this.setContentHeight(this.nodes);
 	}
 
 	/**
@@ -436,7 +457,13 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		this.TreeService.toggleTreeNodeVisibility(node, false);
+		let state;
+		if (node.toggleState === "invisible") {
+			state = "visible";
+		} else {
+			state = "invisible";
+		}
+		this.TreeService.setNodeVisibility([node], state);
 	}
 
 	/**
@@ -471,9 +498,7 @@ class TreeController implements ng.IController {
 
 	}
 
-	public toggleFilterNode(item) {
-		this.TreeService.toggleFilterNode(item);
-	}
+
 
 	public setupInfiniteItemsFilter() {
 		this.infiniteItemsFilter = {

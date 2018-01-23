@@ -570,9 +570,9 @@
 					model: issue.model
 				};
 				
-				$timeout().then(function(){
+				//$timeout().then(function(){
 					ViewerService.setCamera(issueData);
-				});
+				//});
 
 				// TODO: Use ViewerService
 				// Set the clipping planes
@@ -710,7 +710,7 @@
 							var key = account + "@" + model;
 
 							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
-							TreeService.setTreeNodeVisibility(TreeService.getNodeById(nodeId), "invisible", false);
+							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)]);
 
 						});
 					}

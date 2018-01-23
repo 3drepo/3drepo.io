@@ -445,7 +445,8 @@ export class CompareService {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
-					this.TreeService.toggleTreeNodeVisibility(node, false);
+					// TODO: Fix this
+					this.TreeService.setTreeNodeStatus(node, false);
 					// Keep the compare componetn and TreeService
 					// in sync with regards to visibility
 					model.visible = node.toggleState;
