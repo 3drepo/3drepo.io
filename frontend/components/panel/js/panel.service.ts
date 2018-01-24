@@ -48,14 +48,14 @@ export class PanelService {
 					noToggle: true,
 					icon: "fa-print",
 				},
-				{
+				/*{
 					hidden: false,
 					value: "importBCF",
 					label: "Import BCF",
 					selected: false,
 					noToggle: true,
 					icon: "fa-upload",
-				},
+				},*/
 				{
 					hidden: false,
 					value: "exportBCF",
