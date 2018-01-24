@@ -710,7 +710,7 @@
 							var key = account + "@" + model;
 
 							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
-							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)]);
+							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)], "invisible", false);
 
 						});
 					}

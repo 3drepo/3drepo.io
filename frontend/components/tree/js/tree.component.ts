@@ -39,7 +39,6 @@ class TreeController implements ng.IController {
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
-	private showNodes; // in pug
 	private showTree; // in pug
 	private showFilterList; // in pug
 	private currentFilterItemSelected = null;
@@ -53,6 +52,7 @@ class TreeController implements ng.IController {
 	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
 	private hideIfc;
+	private showNodes;
 
 	private currentSelectedId;
 	private currentSelectedIndex;
@@ -73,9 +73,8 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
-
+		this.showNodes = true;
 		this.nodes = [];
-		this.TreeService.setShowNodes(true);
 		this.showTree = true;
 		this.showFilterList = false;
 		this.TreeService.clearCurrentlySelected();
@@ -100,18 +99,6 @@ class TreeController implements ng.IController {
 	}
 
 	public watchers() {
-
-		this.$scope.$watch(() => {
-			return this.TreeService.showProgress;
-		}, (showProgress: any) => {
-			if (showProgress !== undefined && this.showProgress !== showProgress) {
-
-				this.showProgress = showProgress;
-				this.$timeout(() => {}).then(() => {
-					this.topIndex = this.topIndex + 0;
-				});
-			}
-		});
 
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 
@@ -175,7 +162,7 @@ class TreeController implements ng.IController {
 				this.setContentHeight(this.fetchNodesToShow());
 				this.$timeout(() => {}).then(()=>{
 					this.TreeService.showAllTreeNodes();
-					this.TreeService.setNodeVisibility(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+					this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
 
 			}
@@ -183,7 +170,7 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
 			const noFilterItemsFoundHeight = 82;
-			if (this.TreeService.isDefined(newValue)) {
+			if (newValue !== undefined) {
 				if (newValue.toString() === "") {
 					this.showTreeInPane();
 				} else if (!this.searching) {
@@ -271,7 +258,6 @@ class TreeController implements ng.IController {
 				if (selectionData) {
 
 					this.setContentHeight(this.fetchNodesToShow());
-					this.TreeService.setShowNodes(true);
 
 					this.$timeout(() => {}).then(() => {
 						this.topIndex = selectionData.selectedIndex;
@@ -413,9 +399,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		// this.$timeout(() => {
 		this.$scope.$broadcast("$md-resize");
-		// });
 
 	}
 
@@ -440,30 +424,24 @@ class TreeController implements ng.IController {
 	/**
 	 * Expand a node to show its children.
 	 */
-	public expand(event, id) {
-
-		// rAF fixes flickering as expand is computationally expensive
-		// requestAnimationFrame(() => {
-			this.TreeService.expand(event, id);
-			// Redraw the tree if needed
-			if (!this.TreeService.isShowNodes()) {
-				// this.$timeout(() => {
-				this.TreeService.setShowNodes(true);
-				// });
-			}
-			this.setContentHeight(this.fetchNodesToShow());
-		// });
-
+	public toggleNodeExpansion(event, id) {
+		this.TreeService.toggleNodeExpansion(event, id);
+		this.setContentHeight(this.fetchNodesToShow());
 	}
 
 	public toggleTreeNode(node) {
 		let state;
 		if (node.toggleState === "invisible") {
 			state = "visible";
+			this.TreeService.setVisibilityOfNodes([node], state);
+			if (this.TreeService.hideIfc) {
+				this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+			}
 		} else {
 			state = "invisible";
+			this.TreeService.setVisibilityOfNodes([node], state);
 		}
-		this.TreeService.setNodeVisibility([node], state);
+		
 	}
 
 	/**
@@ -497,8 +475,6 @@ class TreeController implements ng.IController {
 		}
 
 	}
-
-
 
 	public setupInfiniteItemsFilter() {
 		this.infiniteItemsFilter = {
