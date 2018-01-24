@@ -660,7 +660,7 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNode(this.nodesToShow[selectedIndex], multi).then(() => {
+			this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
 				this.selectionData = {
 					selectedIndex,
 					selectedId,
@@ -738,7 +738,9 @@ export class TreeService {
 
 	public setTreeNodeStatus(node: any, visibility: string) {
 
-		let children = [node];
+		if (!node) return;
+
+ 		let children = [node];
 		if (node.children) {
 			children = children.concat(node.children);
 		}
@@ -853,12 +855,10 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNode(node: any, multi: boolean) {
+	public selectNode(node: any, multi: boolean, final: boolean) {
 
 		if (node) {
-			const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
-				return element._id === node._id;
-			});
+			const sameNodeIndex = this.currentSelectedNodes.indexOf(node);
 
 			if (multi) {
 				if (sameNodeIndex > -1) {
@@ -876,15 +876,21 @@ export class TreeService {
 				this.currentSelectedNodes.push(node);
 			}
 
-			return this.getMap().then((treeMap) => {
-				const map = {};
-				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+			if (!final) {
+				return Promise.resolve();
+			} else {
+				return this.getMap().then((treeMap) => {
+					const map = {};
+					this.currentSelectedNodes.forEach((n) => {
+						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+					});
+	
+					this.highlightMapUpdateTime = Date.now();
+					this.highlightMap = map;
 				});
+			}
 
-				this.highlightMapUpdateTime = Date.now();
-				this.highlightMap = map;
-			});
+			
 		}
 
 		return Promise.reject("No node specified");

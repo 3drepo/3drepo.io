@@ -115,21 +115,14 @@ class TreeController implements ng.IController {
 
 							this.initNodesToShow();
 
-							// this.TreeService.resetLastParentWithName();
-							console.log("expandToSelection start");
-							const start = performance.now();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
-							const stop = performance.now();
-							console.log("expandToSelection end");
-							console.log("expandToSelection TOTAL TIME: ", stop - start, "ms");
+
 							// all these init and expanding unselects the selected, so let's select them again
 							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
 								selectedNode.selected = true;
 							});
-							// if (this.TreeService.getLastParentWithName()) {
-							// 	this.TreeService.selectNode(this.TreeService.getLastParentWithName(), this.MultiSelectService.isMultiMode());
-							// }
+
 						}
 					}
 				}
@@ -471,7 +464,7 @@ class TreeController implements ng.IController {
 
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
-			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode());
+			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
 		}
 
 	}
