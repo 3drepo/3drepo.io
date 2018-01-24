@@ -531,10 +531,15 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			var hideIfcState = TreeService.getHideIfc();
-			TreeService.setHideIfc(false);
+			var hideIfcState = TreeService.getHideIfc(); // TODO: potentially can be removed once hideIfc saved in issue
+			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
+				TreeService.setHideIfc(issue.viewpoint.hideIfc);
+				// TODO: need to propagate state change to UI
+			} else {
+				TreeService.setHideIfc(false); // TODO: potentially can be removed once hideIfc saved in issue
+			}
 			TreeService.showAllTreeNodes();
-			TreeService.setHideIfc(hideIfcState);
+			TreeService.setHideIfc(hideIfcState); // TODO: potentially can be removed once hideIfc saved in issue
 
 			// clear selection
 			//EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
