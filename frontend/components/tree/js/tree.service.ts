@@ -27,8 +27,9 @@ export class TreeService {
 	public highlightSelectedViewerObject;
 	public highlightMap;
 	public highlightMapUpdateTime;
-	public selectionData;
+	public selectionDataUpdateTime;
 	public visibilityUpdateTime;
+	public selectionData;
 	public treeReady;
 
 	private state;
@@ -54,14 +55,14 @@ export class TreeService {
 		private APIService,
 	) {
 		this.reset();
+
 	}
 
 	public reset() {
 		this.treeReady = this.$q.defer();
 		this.treeMapReady = null;
 		this.state = {};
-		this.state.lastParentWithName = null;
-		this.state.showNodes = true;
+
 		this.state.visible = {};
 		this.state.invisible = {};
 		this.state.idToPath = {};
@@ -154,10 +155,10 @@ export class TreeService {
 
 				// replace model id with model name in the tree if it is a federate model
 				if (setting.federate) {
+
 					mainTree.nodes.name = setting.name;
 					mainTree.nodes.children.forEach((child) => {
 						const name = child.name.split(":");
-
 						const subModel = setting.subModels.find((m) => {
 							return m.model === name[1];
 						});
@@ -170,8 +171,8 @@ export class TreeService {
 						if (subModel && child.children && child.children[0]) {
 							child.children[0].name = subModel.name;
 						}
-
 					});
+
 				}
 
 				const subTrees = json.data.subTrees;
@@ -366,24 +367,8 @@ export class TreeService {
 		this.clickedShown = {};
 	}
 
-	public getLastParentWithName() {
-		return this.state.lastParentWithName;
-	}
-
-	public resetLastParentWithName() {
-		this.state.lastParentWithName = null;
-	}
-
 	public getNodesToShow() {
 		return this.nodesToShow;
-	}
-
-	public setShowNodes(value) {
-		this.state.showNodes = value;
-	}
-
-	public isShowNodes() {
-		return this.state.showNodes;
 	}
 
 	public resetVisible() {
@@ -436,21 +421,9 @@ export class TreeService {
 	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
-		this.expandToSelection(this.nodesToShow[0].children[0].path.split("__"), 0, true, false);
-		this.nodesToShow[0].children[0].selected = false;
+		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
 	}
 
-	/**
-	 * Traverse children of a node recursively
-	 */
-	public traverseNode(node: any, callback) {
-		callback(node);
-		if (node.children) {
-			node.children.forEach((child) => {
-				this.traverseNode(child, callback);
-			});
-		}
-	}
 
 	public getAccountModelKey(account: string, model: string) {
 		return account + "@" + model;
@@ -482,6 +455,7 @@ export class TreeService {
 			if (!nodes[key]) {
 				nodes[key] = meshes;
 			} else {
+				// concat is slow!
 				nodes[key] = nodes[key].concat(meshes);
 			}
 		} else if (node.children) {
@@ -490,71 +464,59 @@ export class TreeService {
 			node.children.forEach((child) => {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
-		} else {
-			// TODO: Is this a valid state?
-			// console.error("Meshes and node.children were both not defined", meshes, node.children);
-		}
+		} 
+
 
 	}
 
-	public getVisibleArray(account: string, model: string) {
-		const key = this.getAccountModelKey(account, model);
-		if (!this.state.visible[key]) {
-			this.state.visible[key] = new Set();
-		}
-
-		return this.state.visible[key];
-	}
-
-	public getInvisibleArray(account: string, model: string) {
-		const key = this.getAccountModelKey(account, model);
-		if (!this.state.invisible[key]) {
-			this.state.invisible[key] = new Set();
-		}
-
-		return this.state.invisible[key];
-	}
 
 	/**
 	 * Set the toggle state of a node
 	 */
-	public setToggleState(node: any, visibility: string, fastforward: boolean) {
+	public updateParentVisibility(node: any) {
 
-		const showableLeaf = this.canShowNode(node) && this.isLeafNode(node);
-		if (showableLeaf || node.toggleState === "visible" || node.toggleState === "parentOfInvisible") {
-			node.toggleState = visibility;
-		}
-
-		// a__b .. c__d
-		// toggle parent
-		let path = node.path.split("__");
-		path.splice(path.length - 1, 1);
+		let path = this.getPath(node._id);
 
 		// Get node parent
-		if (path.length > 0 && (!fastforward || this.isLeafNode(node))) {
+		if (path && path.length > 0) {
 
-			const lastParent = this.getNodeById(path[path.length - 1]);
-			const submodelRootParent = this.getNodeById(path[0]);
-
-			if (submodelRootParent.parent) {
-				// Get node parent and reconstruct the path in case it is a fed model
-				path = submodelRootParent.parent.path.split("__").concat(path);
-			}
+			// We can skip up parent nodes if we know it has mixed 
+			// shown and hidden children
+			let hasParentOfInvisibleChild = false;
 
 			// Set the toggle state of the nodes above
 			for (let i = (path.length - 1); i >= 0; i--) {
+				
 				const parentNode = this.getNodeById(path[i]);
 
-				const numInvisible = parentNode.children.reduce(
-					(total, child) => {
-						return child.toggleState === "invisible" ? total + 1 : total;
-					},
-					0);
-				const numParentInvisible = parentNode.children.reduce(
-					(total, child) => {
-						return child.toggleState === "parentOfInvisible" ? total + 1 : total;
-					},
-					0);
+				if (parentNode.children === undefined || parentNode.children.length === 0) {
+					continue;
+				}
+
+				if (hasParentOfInvisibleChild) {
+					parentNode.toggleState = "parentOfInvisible";
+				}
+
+				let numInvisible = 0;
+				let numParentInvisible = 0;
+				let numVisible = 0;
+
+				for (let j = 0; j < parentNode.children.length; j++) {
+					if (parentNode.children[j].toggleState === "invisible" ) {
+						numInvisible++;
+					} else if (parentNode.children[j].toggleState === "parentOfInvisible" ) {
+						numParentInvisible++;
+					} else {
+						numVisible++;
+					}
+
+					// If we have mixed visible and invisible/parentOfInvisible we know
+					// it's parentOfInvisible
+					if (numVisible > 0 && (numInvisible > 0 || numParentInvisible > 0) ) {
+						hasParentOfInvisibleChild = true;
+						break;
+					}
+				}
 
 				if (numInvisible === parentNode.children.length) {
 					parentNode.toggleState = "invisible";
@@ -571,271 +533,155 @@ export class TreeService {
 
 	}
 
-	/*
-	* See if id in each ids is a sub string of path
-	*/
-	public matchPath(ids, path) {
+	/**
+	 * Toggle a node to expand or collapse it
+	 * @param event the click event
+	 * @param nodeId the id of the node to toggle
+	 */
+	public toggleNodeExpansion(event: any, nodeId: string) {
 
-		for (let i = 0; i < ids.length; i++) {
-			if (path.indexOf(ids[i]) !== -1) {
-				return true;
-			}
+		if (event) {
+			event.stopPropagation();
 		}
 
-		return false;
-	}
-
-	public isDefined(value) {
-		return value !== undefined && value !== null;
-	}
-
-	/**
-	 * Expand a node to show its children.
-	 */
-	public expand(event, _id) {
-
-		let i;
-		let j;
-		let jLength;
-		let numChildren = 0;
-		let index = -1;
-		let endOfSplice = false;
-		const numChildrenToForceRedraw = 3;
-
-		event.stopPropagation();
+		const nodeToExpand = this.getNodeById(nodeId);
 
 		// Find node index
-		for (i = 0; i < this.nodesToShow.length; i += 1) {
-			if (this.nodesToShow[i]._id === _id) {
-				index = i;
-				break;
-			}
-		}
+		const index = this.nodesToShow.indexOf(nodeToExpand);
 
-		const _ids = [_id];
-		const nodeToExpand = this.nodesToShow[index];
-
-		if (index === -1 || !nodeToExpand.hasChildren) {
+		if (index === -1 || (!nodeToExpand.children || nodeToExpand.children.length === 0) ) {
 			return;
 		}
 
 		if (nodeToExpand.expanded) {
-			// Collapse
 
-			// if the target itself contains subModelTree
-			if (nodeToExpand.hasSubModelTree) {
-				// node containing sub model tree must have only one child
-				// TODO - do we still need getSubTreesById?
-				const subTreesById = this.getSubTreesById();
-				const subModelNode = subTreesById[nodeToExpand.children[0]._id];
-				_ids.push(subModelNode._id);
-			}
-
-			const next = index + 1;
-			while (!endOfSplice) {
-
-				if (
-					this.isDefined(this.nodesToShow[next]) &&
-					this.matchPath(_ids, this.nodesToShow[next].path)
-				) {
-
-					if (this.nodesToShow[next].hasSubModelTree) {
-						// TODO - do we still need getSubTreesById?
-						const subTreesById = this.getSubTreesById();
-						const subModelNode = subTreesById[this.nodesToShow[next].children[0]._id];
-						_ids.push(subModelNode._id);
-					}
-
-					this.nodesToShow.splice(next, 1);
-
-				} else {
-					endOfSplice = true;
-				}
-
-			}
+			this.collapseTreeNode(nodeToExpand);
 
 		} else {
-			// Expand
-			numChildren = nodeToExpand.children.length;
 
-			// If the node has a large number of children then force a redraw of the tree to get round the display problem
-			if (numChildren >= numChildrenToForceRedraw) {
-				this.state.showNodes = false;
-			}
-
-			for (i = 0; i < numChildren; i += 1) {
-				// For federation - handle node of model that cannot be viewed or has been deleted
-				// That node will be below level 0 only
-				if (
-					(nodeToExpand.level === 0) &&
-					nodeToExpand.children[i].hasOwnProperty("children") &&
-					nodeToExpand.children[i].children[0].hasOwnProperty("status")
-				) {
-
-					nodeToExpand.children[i].status = nodeToExpand.children[i].children[0].status;
-
-				} else {
-
-					// Normal tree node
-					nodeToExpand.children[i].expanded = false;
-
-					// If the child node does not have a toggleState set it to visible
-					if (!nodeToExpand.children[i].hasOwnProperty("toggleState")) {
-						this.setToggleState(nodeToExpand.children[i], "visible", false);
-					}
-
-				}
-
-				// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
-				nodeToExpand.children[i].level = nodeToExpand.level + 1;
-				nodeToExpand.children[i].hasChildren = false;
-
-				const hasChildrenProp = ("children" in nodeToExpand.children[i]);
-				const hasChildrenLen = hasChildrenProp && (nodeToExpand.children[i].children.length > 0);
-
-				if (hasChildrenLen) {
-
-					for (j = 0, jLength = nodeToExpand.children[i].children.length; j < jLength; j++) {
-						if (nodeToExpand.children[i].children[j].hasOwnProperty("name")) {
-							nodeToExpand.children[i].hasChildren = true;
-							break;
-						}
-					}
-
-				}
-
-				if (nodeToExpand.children[i].hasOwnProperty("name")) {
-					this.nodesToShow.splice(index + i + 1, 0, nodeToExpand.children[i]);
-				}
-
-			}
+			this.expandTreeNode(nodeToExpand);
 
 		}
-
-		nodeToExpand.expanded = !nodeToExpand.expanded;
 
 	}
 
 	/**
-	 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
-	 */
-	public expandToSelection(path, level: number, noHighlight: boolean, multi: boolean) {
+	* Collapse a given tree node in the UI
+	* @param nodeToCollapse the node to collapse
+	*/
+	public collapseTreeNode(nodeToCollapse: any) {
 
-		if (!path) {
-			console.error("Path not defined in expandToSelection");
-			return;
+		let subNodes = []
+		if (nodeToCollapse.children) {
+			subNodes = subNodes.concat(nodeToCollapse.children)
 		}
 
-		let selectedId = path[path.length - 1];
-		let selectedIndex = 0;
+		nodeToCollapse.expanded = false;
+		
+		while (subNodes.length) {
 
-		// Force a redraw of the tree to get round the display problem
-		this.state.showNodes = false;
-		let condLoop = true;
-		for (let i = 0, length = this.nodesToShow.length; i < length && condLoop; i++) {
+			let subNodeToCollapse = subNodes.pop();
 
-			// If the node is on this level?
-			if (this.nodesToShow[i]._id !== path[level]) {
-				continue;
+			// Collapse the node
+			if (subNodeToCollapse.expanded === true) {
+				// If it has children lets collapse those too
+
+				if (subNodeToCollapse.children) {
+					subNodes = subNodes.concat(subNodeToCollapse.children)
+				}
+				subNodeToCollapse.expanded = false;
 			}
 
-			this.state.lastParentWithName = this.nodesToShow[i];
+			// Remove the node from the visible tree
+			let nodesToShowIndex = this.nodesToShow.indexOf(subNodeToCollapse);
 
-			this.nodesToShow[i].expanded = true;
-			this.nodesToShow[i].selected = false;
-
-			if (level === (path.length - 2)) {
-				selectedIndex = i;
+			if (nodesToShowIndex > -1) {
+				this.nodesToShow.splice(nodesToShowIndex, 1);
 			}
 
-			let childWithNameCount = 0;
-
-			const childLength = this.nodesToShow[i].children.length;
-			for (let j = 0; j < childLength; j ++) {
-
-				const childNode = this.nodesToShow[i].children[j];
-
-				// Set child to not expanded
-				if (!multi) {
-					childNode.expanded = false;
-				}
-
-				if (childNode._id === selectedId) {
-
-					if (childNode.hasOwnProperty("name")) {
-						childNode.selected = true;
-						if (!noHighlight) {
-							this.selectNode(childNode, multi);
-						}
-						this.state.lastParentWithName = null;
-						selectedIndex = i + j + 1;
-
-					} else if (!noHighlight) {
-						// If the selected mesh doesn't have a name highlight the parent in the tree
-						// highlight the parent in the viewer
-
-						this.selectNode(this.nodesToShow[i], multi);
-						selectedId = this.nodesToShow[i]._id;
-						selectedIndex = i;
-						this.state.lastParentWithName = null;
-						selectedId = this.nodesToShow[i]._id;
-					}
-
-					condLoop = false;
-				} else {
-					// This will clear any previously selected node
-					childNode.selected = false;
-				}
-
-				// Only set the toggle state once when the node is listed
-				if (!childNode.hasOwnProperty("toggleState")) {
-					this.setToggleState(childNode, "visible", false);
-				}
-
-				// Determine if child node has childern
-				childNode.hasChildren = childNode.children &&
-										childNode.children.filter((child) => child.name).length > 0;
-
-				// Increment child level
-				childNode.level = level + 1;
-
-				// If the node has a valid child
-				const hasChildren = this.nodesToShow[i].hasChildren &&
-									childNode.hasOwnProperty("name");
-
-				if (hasChildren) {
-
-					// TODO: This is bad. This is a fix for nodes appearing twice in the list
-					// Why are nodes being spliced that already exist?
-					const isDuplicate = this.nodesToShow.indexOf(childNode) !== -1;
-					if (isDuplicate) {
-						continue;
-					}
-
-					this.nodesToShow.splice(i + childWithNameCount + 1, 0, childNode);
-					childWithNameCount++;
-				}
-
-			}
 		}
 
-		const selectionData = {
-			selectedIndex,
-			selectedId,
-		};
-
-		// Only redraw on
-		if (level < (path.length - 2)) {
-			this.expandToSelection(path, (level + 1), undefined, multi);
-		} else if (level === (path.length - 2)) {
-			// Trigger tree redraw
-			this.selectionData = selectionData;
-		}
-
-		return selectionData;
 	}
 
-	public getPath(objectID) {
+	/**
+	 * Expand a given tree node in the UI
+	 * @param nodeToExpand the path array to traverse down
+	 */
+	public expandTreeNode(nodeToExpand: any) {
+	
+		if (!nodeToExpand.children || nodeToExpand.children.length === 0) {
+			return;
+		}
+		const index = this.nodesToShow.indexOf(nodeToExpand);
+		const numChildren = nodeToExpand.children.length;
+
+		for (let i = 0; i < numChildren; i += 1) {
+
+			nodeToExpand.children[i].expanded = false;
+			nodeToExpand.children[i].level = nodeToExpand.level + 1;
+
+			if (nodeToExpand.children[i].hasOwnProperty("name")) {
+				if (this.nodesToShow.indexOf(nodeToExpand.children[i]) === -1) {
+					this.nodesToShow.splice(index + i + 1, 0, nodeToExpand.children[i]);
+				}
+			}
+
+		}
+
+		nodeToExpand.expanded = true;
+	}
+
+	/**
+	 * Given a node expand the UI tree to that node and select it
+	 * @param path the path array to traverse down
+	 * @param level the level to start expanding at (generally the root node)
+	 * @param noHighlight whether no highlighting should take place
+	 * @param multi wether multiple nodes are selected in the selection
+	 */
+	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
+
+		let selectedIndex;
+		let selectedId;
+
+		// Cut it to the level provided
+		path = path.slice(level, path.length);
+
+		for (let i = 0; i < path.length; i++) {
+			const node = this.getNodeById(path[i]);
+			this.expandTreeNode(node);
+
+			// If it's the last node in the path
+			// scroll to it
+			if (i === path.length - 1) {
+				selectedIndex = this.nodesToShow.indexOf(node);
+				selectedId = this.nodesToShow[selectedIndex]._id;
+			}
+
+		}
+
+		if (!noHighlight) {
+			this.selectNode(this.nodesToShow[selectedIndex], multi).then(() => {
+				this.selectionData = {
+					selectedIndex,
+					selectedId,
+				};
+			});
+		} else {
+			this.selectionData = {
+				selectedIndex,
+				selectedId,
+			};
+		}	
+
+		
+	}
+
+	/**
+	 * Return a normalised path fo ra given object ID
+	 * This will fix paths for federations.
+	 * @param objectID the id of the node to get a path for
+	 */
+	public getPath(objectID: string) {
 
 		let path;
 		if (this.state.idToPath[objectID]) {
@@ -853,55 +699,88 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide a collection of nodes.
+	 * Set the given visibility of a set of nodes
 	 * @param nodes	Array of nodes to be hidden.
 	 */
-	public hideTreeNodes(nodes) {
+	public setVisibilityOfNodes(nodes: any[], visibility: string) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
-			if (node.toggleState !== "invisible") {
-				this.toggleTreeNodeVisibility(node, true);
-			}
+			this.setTreeNodeStatus(node, visibility);
 		}
 	}
 
 	/**
-	 * Hide all tree nodes.
+	 * Hide a collection of nodes.
+	 * @param nodes	Array of nodes to be hidden.
 	 */
-	public hideAllTreeNodes() {
-		const rootNode = this.allNodes[0];
-		this.setTreeNodeVisibility(rootNode, "invisible", false);
+	public hideTreeNodes(nodes: any[]) {
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			if (node.toggleState !== "invisible") {
+				this.setTreeNodeStatus(node, "invisible");
+			}
+		}
 	}
 
 	/**
 	 * Show a collection of nodes.
 	 * @param nodes	Array of nodes to be shown.
 	 */
-	public showTreeNodes(nodes) {
+	public showTreeNodes(nodes: any[]) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 			if (node.toggleState !== "visible") {
-				this.toggleTreeNodeVisibility(node, true);
+				this.setTreeNodeStatus(node, "visible");
 			}
 		}
+	}
+
+
+	public setTreeNodeStatus(node: any, visibility: string) {
+
+		let children = [node];
+		if (node.children) {
+			children = children.concat(node.children);
+		}
+		
+		while (children.length) {
+			const child = children.pop();
+
+			if (child.children && child.toggleState !== visibility) {
+				children = children.concat(child.children);
+			}
+
+			if (visibility === "visible" && this.canShowNode(child)) {
+				child.toggleState = "visible";
+			} else {
+				child.toggleState = "invisible";
+			}
+		
+		}
+
+		this.updateParentVisibility(node);
+
+	}
+
+	/**
+	 * Hide all tree nodes.
+	 */
+	public hideAllTreeNodes() {
+		this.setTreeNodeStatus(this.allNodes[0], "invisible");
 	}
 
 	/**
 	 * Show all tree nodes.
 	 */
 	public showAllTreeNodes() {
-		const rootNode = this.allNodes[0];
-		this.setTreeNodeVisibility(rootNode, "visible", false);
-	}
 
-	/**
-	 * Show all tree nodes and hide IFCs if necessary.
-	 */
-	public showAllTreeNodesAndIFCs() {
-		this.showAllTreeNodes();
+		this.setTreeNodeStatus(this.allNodes[0], "visible");
+
 		if (this.hideIfc) {
-			this.hideTreeNodes(this.getHiddenByDefaultNodes());
+			this.getHiddenByDefaultNodes()
+				.forEach(this.updateParentVisibility.bind(this));
 		}
+
 	}
 
 	/**
@@ -912,9 +791,7 @@ export class TreeService {
 		this.hideAllTreeNodes();
 		// Show selected
 		if (this.getCurrentSelectedNodes()) {
-			this.getCurrentSelectedNodes().forEach((selectedNode) => {
-				this.toggleTreeNodeVisibility(selectedNode, true);
-			});
+			this.showTreeNodes(this.getCurrentSelectedNodes());
 		}
 	}
 
@@ -929,60 +806,7 @@ export class TreeService {
 	 * @returns	True if node claims it has no children.
 	 */
 	public isLeafNode(node: any) {
-		return !node.children || !node.hasChildren || node.children.length === 0;
-	}
-
-	/**
-	 * Toggle visibility of a node.
-	 * @param node		Node to be toggled.
-	 * @param visibility	Visibility state (visible | invisible).
-	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
-	 */
-	public setTreeNodeVisibility(node: any, visibility: string, fastforward: boolean) {
-
-		this.state.toggledNode = node;
-
-		// toggle yourself
-		this.setToggleState(node, visibility, fastforward);
-
-		const stack = [node];
-		let head = null;
-
-		while (stack.length > 0) {
-			head = stack.pop();
-
-			if (node !== head) {
-				this.setToggleState(head, visibility, fastforward);
-			}
-
-			if (head.children) {
-				for (let i = 0; i < head.children.length; i++) {
-					stack.push(head.children[i]);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Toggle visibility of a node.
-	 * @param node		Node to be toggled.
-	 * @param fastforward	Skip update of parent mode visibility if 'node' is not a leaf node. Use when toggling many nodes.
-	 */
-	public toggleTreeNodeVisibility(node: any, fastforward: boolean) {
-		if (node) {
-			const vis = node.toggleState === "visible" || node.toggleState === "parentOfInvisible";
-			const nodeToggleState = (vis) ? "invisible" : "visible";
-			this.setTreeNodeVisibility(node, nodeToggleState, fastforward);
-		}
-	}
-
-	/**
-	 * Toggle visibility of a node given its id.
-	 * @param id	ID of node.
-	 */
-	public toggleTreeNodeVisibilityById(id) {
-		const node = this.getNodeById(id);
-		this.toggleTreeNodeVisibility(node, false);
+		return !node.children || !node.children || node.children.length === 0;
 	}
 
 	/**
@@ -1010,14 +834,6 @@ export class TreeService {
 
 		this.visibilityUpdateTime = Date.now();
 
-	}
-
-	public resetHidden() {
-		for (const id in this.clickedHidden) {
-			if (id) {
-				this.toggleTreeNodeVisibilityById(id);
-			}
-		}
 	}
 
 	/**
@@ -1060,7 +876,7 @@ export class TreeService {
 				this.currentSelectedNodes.push(node);
 			}
 
-			this.getMap().then((treeMap) => {
+			return this.getMap().then((treeMap) => {
 				const map = {};
 				this.currentSelectedNodes.forEach((n) => {
 					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
@@ -1071,12 +887,8 @@ export class TreeService {
 			});
 		}
 
-	}
+		return Promise.reject("No node specified");
 
-	public toggleFilterNode(item) {
-		this.setToggleState(item, (item.toggleState === "visible") ? "invisible" : "visible", false);
-		item.path = item._id;
-		this.toggleNode(item);
 	}
 
 	/**
