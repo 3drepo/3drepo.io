@@ -705,6 +705,7 @@
 				.then(function (viewpoint) {
 					objectsPromise.promise
 						.then(function(objectInfo) {
+							// TODO: save hideIfc state from TreeService somewhere along here
 							handleObjects(viewpoint, objectInfo, screenShotPromise);
 						})
 						.catch(function(error){
@@ -889,6 +890,8 @@
 				// Create a group of hidden objects
 				var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
 				
+				// TODO: save hideIfc state from TreeService
+
 				APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData).then(function (highlightedGroupResponse) {
 					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData).then(function (hiddenGroupResponse) {
 						if (angular.isDefined(vm.commentThumbnail)) {
