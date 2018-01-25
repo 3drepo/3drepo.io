@@ -631,7 +631,6 @@ export class TreeService {
 	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
 
 		let selectedIndex;
-		let specialNodeParent;
 
 		// Cut it to the level provided
 		path = path.slice(level, path.length);
@@ -646,36 +645,21 @@ export class TreeService {
 				selectedIndex = this.nodesToShow.indexOf(node);
 
 				if (selectedIndex === -1) {
-					specialNodeParent = this.getNodeById(path[i-1]);
+					// Sometimes we have an edge case where an object doesn't exist in the tree
+					// because it has no name. It is often objects like a window, so what we do
+					// is select its parent object to highlight that instead
+					const specialNodeParent = this.getNodeById(path[i-1]);
 					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
 				}
-
 			}
-
 		}
 
 		if (!noHighlight) {
-
-
-			// Sometimes we have an edge case where an object doesn't exist in the tree
-			// because it has no name. It is often objects like a window, so what we do
-			// is select its parent object to highlight that instead
-			if (specialNodeParent) {
-
-				this.selectNode(specialNodeParent, multi, true).then(() => {
-					this.selectionData = {
-						selectedIndex,
-					};
-				});
-
-			} else {
-				this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
-					this.selectionData = {
-						selectedIndex,
-					};
-				});
-			}
-
+			this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
+				this.selectionData = {
+					selectedIndex,
+				};
+			});
 		} else {
 			this.selectionData = {
 				selectedIndex,
