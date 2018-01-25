@@ -452,11 +452,10 @@ export class TreeService {
 			meshes = idToMeshes[key][node._id];
 		}
 		if (meshes) {
-			console.log(nodes[key], meshes)
 			if (!nodes[key]) {
-				nodes[key] = new Set(meshes);
+				nodes[key] = meshes;
 			} else {
-				nodes[key] = new Set(...nodes[key], ...meshes);
+				nodes[key] = nodes[key].concat(meshes);
 			}
 		} else if (node.children) {
 			// This should only happen in federations.

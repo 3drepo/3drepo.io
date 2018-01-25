@@ -410,14 +410,16 @@ export class Viewer {
 
 		if (canHighlight) {
 
-			const uniqueIds = Array.from(idsIn);
-
-			if (uniqueIds.length) {
-				const multi = multiOverride || this.multiSelectMode;
-				UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
-			} else {
-				UnityUtil.clearHighlights();
+			if (idsIn) {
+				const uniqueIds = Array.from(new Set(idsIn));
+				if (uniqueIds.length) {
+					const multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
+					return;
+				} 
 			}
+
+			UnityUtil.clearHighlights();
 
 		}
 
