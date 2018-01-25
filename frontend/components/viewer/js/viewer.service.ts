@@ -50,6 +50,7 @@ export class ViewerService {
 		public DocsService: any,
 
 	) {
+		console.log("Loading viewer...");
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
@@ -183,6 +184,19 @@ export class ViewerService {
 
 	}
 
+	public setCamera(params) {
+		this.viewer.setCamera(
+			params.position,
+			params.view_dir,
+			params.up,
+			params.look_at,
+			params.animate !== undefined ? params.animate : true,
+			params.rollerCoasterMode,
+			params.account,
+			params.model,
+		);
+	}
+
 	public removeUnsavedPin() {
 		this.removePin({id: this.newPinId });
 		this.setPin({data: null});
@@ -231,7 +245,9 @@ export class ViewerService {
 	}
 
 	public clearClippingPlanes() {
-		this.viewer.clearClippingPlanes();
+		if (this.viewer) {
+			this.viewer.clearClippingPlanes();
+		}
 	}
 
 	public getObjectsStatus(params) {
@@ -243,31 +259,40 @@ export class ViewerService {
 	}
 
 	public highlightObjects(params)  {
-
-		this.viewer.highlightObjects(
-			params.account,
-			params.model,
-			params.id ? [params.id] : params.ids,
-			params.zoom,
-			params.colour,
-			params.multi,
-		);
+		if (this.viewer) {
+			this.viewer.highlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+				params.zoom,
+				params.colour,
+				params.multi,
+			);
+		}
 	}
 
 	public setMultiSelectMode(value)  {
-		this.viewer.setMultiSelectMode(value);
+		if (this.viewer) {
+			this.viewer.setMultiSelectMode(value);
+		}
 	}
 
 	public switchObjectVisibility(account, model, ids, visibility)  {
-		this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		if (this.viewer) {
+			this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		}
 	}
 
 	public hideHiddenByDefaultObjects() {
-		this.viewer.hideHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.hideHiddenByDefaultObjects();
+		}
 	}
 
 	public showHiddenByDefaultObjects() {
-		this.viewer.showHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.showHiddenByDefaultObjects();
+		}
 	}
 
 	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
@@ -308,11 +333,15 @@ export class ViewerService {
 	}
 
 	public goToExtent() {
-		this.viewer.showAll();
+		if (this.viewer) {
+			this.viewer.showAll();
+		}
 	}
 
 	public setNavMode(mode) {
-		this.viewer.setNavMode(mode);
+		if (this.viewer) {
+			this.viewer.setNavMode(mode);
+		}
 	}
 
 	public unityInserted(): boolean {
@@ -346,12 +375,14 @@ export class ViewerService {
 
 		if (this.unityInserted() === true) {
 			return this.callInit();
-		} else {
+		} else if (this.viewer) {
+
 			return this.viewer.insertUnityLoader()
 				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error("Error inserting Unity script: ", error);
 				});
+
 		}
 
 	}
@@ -449,27 +480,40 @@ export class ViewerService {
 	}
 
 	public diffToolEnableWithClashMode() {
-		this.viewer.diffToolEnableWithClashMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithClashMode();
+		}
 	}
 
 	public diffToolEnableWithDiffMode() {
-		this.viewer.diffToolEnableWithDiffMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithDiffMode();
+		}
 	}
 
 	public diffToolDisableAndClear() {
-		this.viewer.diffToolDisableAndClear();
+		if (this.viewer) {
+			this.viewer.diffToolDisableAndClear();
+		}
+
 	}
 
 	public diffToolShowBaseModel() {
-		this.viewer.diffToolShowBaseModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowBaseModel();
+		}
 	}
 
 	public diffToolShowComparatorModel() {
-		this.viewer.diffToolShowComparatorModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowComparatorModel();
+		}
 	}
 
 	public diffToolDiffView() {
-		this.viewer.diffToolDiffView();
+		if (this.viewer) {
+			this.viewer.diffToolDiffView();
+		}
 	}
 
 }

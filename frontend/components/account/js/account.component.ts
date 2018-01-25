@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class AccountController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -52,6 +51,7 @@ class AccountController implements ng.IController {
 	private billingAddress;
 	private hasAvatar;
 	private quota;
+	// private showLiteModeButton;
 
 	constructor(
 		private $scope,
@@ -116,7 +116,7 @@ class AccountController implements ng.IController {
 	}
 
 	public handleDirectiveInit(directive) {
-		// If you go to a different URL teamspace you need to check 
+		// If you go to a different URL teamspace you need to check
 		// that you are actually the user in question!
 
 		// TODO: This shouldn't be necessary
@@ -329,7 +329,9 @@ export const AccountComponent: ng.IComponentOptions = {
 		query: "=",
 		account: "=",
 		keysDown: "=",
-		isMobileDevice: "<",
+		isMobileDevice: "=",
+		showLiteModeButton: "<",
+
 	},
 	controller: AccountController,
 	controllerAs: "vm",
