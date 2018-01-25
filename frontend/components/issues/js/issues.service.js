@@ -542,7 +542,7 @@
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
 
-				showMultiIds(issue).then(() => {
+				showMultiIds(issue).then( function() {
 					TreeService.showProgress = false;
 					handleShowIssue(issue);
 				});
@@ -570,9 +570,7 @@
 					model: issue.model
 				};
 				
-				//$timeout().then(function(){
-					ViewerService.setCamera(issueData);
-				//});
+				ViewerService.setCamera(issueData);
 
 				// TODO: Use ViewerService
 				// Set the clipping planes
@@ -668,7 +666,7 @@
 							} else {
 								// Only call expandToSelection for last selected node to improve performance
 
-								TreeService.initNodesToShow([TreeService.allNodes[0]])
+								TreeService.initNodesToShow([TreeService.allNodes[0]]);
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 								
 							}
@@ -688,9 +686,9 @@
 
 					if (objects) {
 						objects.forEach(function(obj){
-							var account = obj.account;
-							var model = obj.model;
-							var key = account + "@" + model;
+							//var account = obj.account;
+							//var model = obj.model;
+							//var key = account + "@" + model;
 
 							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
 							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)], "invisible", false);
