@@ -330,7 +330,7 @@ export const AccountComponent: ng.IComponentOptions = {
 		account: "=",
 		keysDown: "=",
 		isMobileDevice: "=",
-		showLiteModeButton: "<",
+		//showLiteModeButton: "<",
 
 	},
 	controller: AccountController,
