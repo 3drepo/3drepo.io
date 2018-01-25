@@ -62,8 +62,6 @@ export class TreeService {
 		this.treeMapReady = null;
 		this.state = {};
 
-		this.state.visible = {};
-		this.state.invisible = {};
 		this.state.idToPath = {};
 		this.state.hideIfc = true;
 		this.allNodes = [];
@@ -77,16 +75,28 @@ export class TreeService {
 		this.highlightSelectedViewerObject = true;
 	}
 
-	public setHighlightSelected(value) {
+	/**
+	 * @param value	True if OBJECT_SELECTED should be handled by component
+	 */
+	public setHighlightSelected(value: boolean) {
 		this.highlightSelectedViewerObject = value;
 	}
 
+	/**
+	 * Resets highlight map to prevent extra triggers of handleSelection.
+	 * TODO: DEPRECATE? timestamp used instead to check state sync.
+	 */
 	public resetHighlightMap() {
 		this.highlightMap = null;
 	}
 
-	public setHighlightMap(value) {
+	/**
+	 * Sets highlight map and updates highlightMapUpdateTime.
+	 * @param value	Map of highlighted objects.
+	 */
+	public setHighlightMap(value: any) {
 		this.highlightMap = value;
+		this.highlightMapUpdateTime = Date.now();
 	}
 
 	public genIdToObjRef(tree: any, map: any) {
@@ -370,14 +380,6 @@ export class TreeService {
 		return this.nodesToShow;
 	}
 
-	public resetVisible() {
-		this.state.visible = {};
-	}
-
-	public resetInvisible() {
-		this.state.invisible = {};
-	}
-
 	public getSubTreesById() {
 		return this.subTreesById;
 	}
@@ -423,7 +425,6 @@ export class TreeService {
 		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
 	}
 
-
 	public getAccountModelKey(account: string, model: string) {
 		return account + "@" + model;
 	}
@@ -462,18 +463,23 @@ export class TreeService {
 			node.children.forEach((child) => {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
-		} 
-
+		}
 	}
 
-
 	/**
+	 * TODO: Update description and rewrite --
+	 * Visibility going UP tree is correct, but
+	 * it forces visibility state going DOWN,
+	 * e.g. click on ROOT node causes all nodes
+	 * to be incorrectly visible/invisible.
 	 * Set the toggle state of a node
 	 */
 	public updateParentVisibility(node: any) {
 
 		let path = this.getPath(node._id);
 
+		//console.log("myId", node._id);
+		//console.log("myPath", path);
 		// Get node parent
 		if (path && path.length > 0) {
 
@@ -486,48 +492,46 @@ export class TreeService {
 				
 				const parentNode = this.getNodeById(path[i]);
 
-				if (parentNode.children === undefined || parentNode.children.length === 0) {
-					continue;
-				}
+				//console.log("parentNode id", path[i]);
 
-				if (hasParentOfInvisibleChild) {
-					parentNode.toggleState = "parentOfInvisible";
-				}
+				if (parentNode.children !== undefined && parentNode.children.length > 0) {
+					if (hasParentOfInvisibleChild) {
+						parentNode.toggleState = "parentOfInvisible";
+					}
 
-				let numInvisible = 0;
-				let numParentInvisible = 0;
-				let numVisible = 0;
+					let numInvisible = 0;
+					let numParentInvisible = 0;
+					let numVisible = 0;
 
-				for (let j = 0; j < parentNode.children.length; j++) {
-					if (parentNode.children[j].toggleState === "invisible" ) {
-						numInvisible++;
-					} else if (parentNode.children[j].toggleState === "parentOfInvisible" ) {
-						numParentInvisible++;
+					for (let j = 0; j < parentNode.children.length; j++) {
+						if (parentNode.children[j].toggleState === "invisible" ) {
+							numInvisible++;
+						} else if (parentNode.children[j].toggleState === "parentOfInvisible" ) {
+							numParentInvisible++;
+						} else {
+							numVisible++;
+						}
+
+						// If we have mixed visible and invisible/parentOfInvisible we know
+						// it's parentOfInvisible
+						if (numVisible > 0 && (numInvisible > 0 || numParentInvisible > 0) ) {
+							hasParentOfInvisibleChild = true;
+							break;
+						}
+					}
+
+					if (numInvisible === parentNode.children.length) {
+						parentNode.toggleState = "invisible";
+					} else if ((numParentInvisible + numInvisible) > 0) {
+						parentNode.toggleState = "parentOfInvisible";
 					} else {
-						numVisible++;
-					}
-
-					// If we have mixed visible and invisible/parentOfInvisible we know
-					// it's parentOfInvisible
-					if (numVisible > 0 && (numInvisible > 0 || numParentInvisible > 0) ) {
-						hasParentOfInvisibleChild = true;
-						break;
+						parentNode.toggleState = "visible";
 					}
 				}
-
-				if (numInvisible === parentNode.children.length) {
-					parentNode.toggleState = "invisible";
-				} else if ((numParentInvisible + numInvisible) > 0) {
-					parentNode.toggleState = "parentOfInvisible";
-				} else {
-					parentNode.toggleState = "visible";
-				}
-
 			}
 		}
 
 		this.updateClicked(node);
-
 	}
 
 	/**
@@ -544,22 +548,15 @@ export class TreeService {
 		const nodeToExpand = this.getNodeById(nodeId);
 
 		// Find node index
-		const index = this.nodesToShow.indexOf(nodeToExpand);
+		const nodeIndex = this.nodesToShow.indexOf(nodeToExpand);
 
-		if (index === -1 || (!nodeToExpand.children || nodeToExpand.children.length === 0) ) {
-			return;
+		if (nodeIndex !== -1 && nodeToExpand.children && nodeToExpand.children.length > 0) {
+			if (nodeToExpand.expanded) {
+				this.collapseTreeNode(nodeToExpand);
+			} else {
+				this.expandTreeNode(nodeToExpand);
+			}
 		}
-
-		if (nodeToExpand.expanded) {
-
-			this.collapseTreeNode(nodeToExpand);
-
-		} else {
-
-			this.expandTreeNode(nodeToExpand);
-
-		}
-
 	}
 
 	/**
@@ -568,36 +565,33 @@ export class TreeService {
 	*/
 	public collapseTreeNode(nodeToCollapse: any) {
 
-		let subNodes = []
+		let subNodes = [];
 		if (nodeToCollapse.children) {
-			subNodes = subNodes.concat(nodeToCollapse.children)
+			subNodes = subNodes.concat(nodeToCollapse.children);
 		}
 
 		nodeToCollapse.expanded = false;
-		
-		while (subNodes.length) {
 
-			let subNodeToCollapse = subNodes.pop();
+		while (subNodes.length > 0) {
+
+			const subNodeToCollapse = subNodes.pop();
 
 			// Collapse the node
-			if (subNodeToCollapse.expanded === true) {
+			if (subNodeToCollapse.expanded) {
 				// If it has children lets collapse those too
-
 				if (subNodeToCollapse.children) {
-					subNodes = subNodes.concat(subNodeToCollapse.children)
+					subNodes = subNodes.concat(subNodeToCollapse.children);
 				}
 				subNodeToCollapse.expanded = false;
 			}
 
 			// Remove the node from the visible tree
-			let nodesToShowIndex = this.nodesToShow.indexOf(subNodeToCollapse);
+			const subNodeToCollapseIndex = this.nodesToShow.indexOf(subNodeToCollapse);
 
-			if (nodesToShowIndex > -1) {
-				this.nodesToShow.splice(nodesToShowIndex, 1);
+			if (subNodeToCollapseIndex !== -1) {
+				this.nodesToShow.splice(subNodeToCollapseIndex, 1);
 			}
-
 		}
-
 	}
 
 	/**
@@ -605,27 +599,26 @@ export class TreeService {
 	 * @param nodeToExpand the path array to traverse down
 	 */
 	public expandTreeNode(nodeToExpand: any) {
-	
-		if (!nodeToExpand.children || nodeToExpand.children.length === 0) {
-			return;
-		}
-		const index = this.nodesToShow.indexOf(nodeToExpand);
-		const numChildren = nodeToExpand.children.length;
 
-		for (let i = 0; i < numChildren; i += 1) {
+		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
+			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
+			const numChildren = nodeToExpand.children.length;
 
-			nodeToExpand.children[i].expanded = false;
-			nodeToExpand.children[i].level = nodeToExpand.level + 1;
+			for (let i = 0; i < numChildren; i++) {
 
-			if (nodeToExpand.children[i].hasOwnProperty("name")) {
-				if (this.nodesToShow.indexOf(nodeToExpand.children[i]) === -1) {
-					this.nodesToShow.splice(index + i + 1, 0, nodeToExpand.children[i]);
+				nodeToExpand.children[i].expanded = false;
+				nodeToExpand.children[i].level = nodeToExpand.level + 1;
+
+				if (nodeToExpand.children[i].hasOwnProperty("name")) {
+					if (this.nodesToShow.indexOf(nodeToExpand.children[i]) === -1) {
+						this.nodesToShow.splice(nodeToExpandIndex + i + 1, 0, nodeToExpand.children[i]);
+					}
 				}
+
 			}
 
+			nodeToExpand.expanded = true;
 		}
-
-		nodeToExpand.expanded = true;
 	}
 
 	/**
@@ -651,12 +644,12 @@ export class TreeService {
 			// scroll to it
 			if (i === path.length - 1) {
 				selectedIndex = this.nodesToShow.indexOf(node);
-				
+
 				if (selectedIndex === -1) {
 					specialNodeParent = this.getNodeById(path[i-1]);
 					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
 				}
-					
+
 			}
 
 		}
@@ -671,26 +664,24 @@ export class TreeService {
 
 				this.selectNode(specialNodeParent, multi, true).then(() => {
 					this.selectionData = {
-						selectedIndex
+						selectedIndex,
 					};
 				});
 
 			} else {
 				this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
 					this.selectionData = {
-						selectedIndex
+						selectedIndex,
 					};
 				});
 			}
 
-			
 		} else {
 			this.selectionData = {
-				selectedIndex
+				selectedIndex,
 			};
-		}	
+		}
 
-		
 	}
 
 	/**
@@ -752,16 +743,17 @@ export class TreeService {
 		}
 	}
 
-
 	public setTreeNodeStatus(node: any, visibility: string) {
 
-		if (!node) return;
+		if (!node) {
+			return;
+		}
 
  		let children = [node];
 		if (node.children) {
 			children = children.concat(node.children);
 		}
-		
+
 		while (children.length) {
 			const child = children.pop();
 
@@ -774,7 +766,7 @@ export class TreeService {
 			} else {
 				child.toggleState = "invisible";
 			}
-		
+
 		}
 
 		this.updateParentVisibility(node);
@@ -902,17 +894,12 @@ export class TreeService {
 						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
 					});
 
-					this.highlightMap = map;
-					this.highlightMapUpdateTime = Date.now();
-					
+					this.setHighlightMap(map);
 				});
 			}
-
-			
-		} 
+		}
 
 		return Promise.reject("No node specified");
-
 	}
 
 	/**

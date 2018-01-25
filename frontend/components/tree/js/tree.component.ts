@@ -80,8 +80,6 @@ class TreeController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
-		this.TreeService.resetVisible();
-		this.TreeService.resetInvisible();
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
@@ -146,12 +144,11 @@ class TreeController implements ng.IController {
 				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
 
 				this.initNodesToShow();
-				console.log("nodesToShow", this.TreeService.getNodesToShow());
 				this.setupInfiniteItemsFilter();
 
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(() => {}).then(()=>{
+				this.$timeout(() => {}).then(() => {
 					this.TreeService.showAllTreeNodes();
 					this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
@@ -196,7 +193,7 @@ class TreeController implements ng.IController {
 									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 								}
 							}
-							
+
 						})
 						.catch((error) => {
 							this.showTreeInPane();
@@ -279,7 +276,6 @@ class TreeController implements ng.IController {
 		}, 150);
 
 	}
-
 
 	public showTreeInPane() {
 		this.searching = false;
@@ -432,7 +428,6 @@ class TreeController implements ng.IController {
 			state = "invisible";
 			this.TreeService.setVisibilityOfNodes([node], state);
 		}
-		
 	}
 
 	/**
