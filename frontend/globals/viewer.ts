@@ -411,12 +411,12 @@ export class Viewer {
 		if (canHighlight) {
 
 			if (idsIn) {
-				const uniqueIds = idsIn; // Array.from(new Set(idsIn));
+				const uniqueIds = Array.from(new Set(idsIn));
 				if (uniqueIds.length) {
 					const multi = multiOverride || this.multiSelectMode;
 					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
 					return;
-				}
+				} 
 			}
 
 			UnityUtil.clearHighlights();
