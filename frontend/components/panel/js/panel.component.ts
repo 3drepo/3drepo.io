@@ -289,6 +289,7 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
+		this.$timeout().then(() => { this.$scope.$broadcast("$md-resize") });
 	}
 
 }

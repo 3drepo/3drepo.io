@@ -539,9 +539,6 @@
 			}
 			TreeService.showAllTreeNodes();
 
-			// clear selection
-			//EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
 
@@ -653,8 +650,7 @@
 		}
 
 		function handleHighlights(objects) {
-			var ids = [];
-			
+
 			TreeService.getMap()
 				.then(function(treeMap){
 
@@ -663,29 +659,17 @@
 
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
-						var account = obj.account;
-						var model = obj.model;
-						var key = account + "@" + model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-
 						var objUid = treeMap.sharedIdToUid[obj.shared_id];
 						
 						if (objUid) {
-							ids[key].push(objUid);
+				
 							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true);
+								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
 							} else {
 								// Only call expandToSelection for last selected node to improve performance
-								console.log("expandToSelection start - from issues service");
-								let start = performance.now();
+
 								TreeService.initNodesToShow([TreeService.allNodes[0]])
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
-								let stop = performance.now();
-								console.log("expandToSelection end - from issues service");
-								console.log("expandToSelection TOTAL TIME - from issues service: ", stop - start, "ms");
-								
 								
 							}
 						}
