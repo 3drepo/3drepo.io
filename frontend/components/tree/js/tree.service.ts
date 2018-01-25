@@ -639,7 +639,7 @@ export class TreeService {
 	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
 
 		let selectedIndex;
-		let selectedId;
+		let specialNodeParent;
 
 		// Cut it to the level provided
 		path = path.slice(level, path.length);
@@ -652,22 +652,42 @@ export class TreeService {
 			// scroll to it
 			if (i === path.length - 1) {
 				selectedIndex = this.nodesToShow.indexOf(node);
-				selectedId = this.nodesToShow[selectedIndex]._id;
+				
+				if (selectedIndex === -1) {
+					specialNodeParent = this.getNodeById(path[i-1]);
+					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
+				}
+					
 			}
 
 		}
 
 		if (!noHighlight) {
-			this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
-				this.selectionData = {
-					selectedIndex,
-					selectedId,
-				};
-			});
+
+
+			// Sometimes we have an edge case where an object doesn't exist in the tree
+			// because it has no name. It is often objects like a window, so what we do
+			// is select its parent object to highlight that instead
+			if (specialNodeParent) {
+
+				this.selectNode(specialNodeParent, multi, true).then(() => {
+					this.selectionData = {
+						selectedIndex
+					};
+				});
+
+			} else {
+				this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
+					this.selectionData = {
+						selectedIndex
+					};
+				});
+			}
+
+			
 		} else {
 			this.selectionData = {
-				selectedIndex,
-				selectedId,
+				selectedIndex
 			};
 		}	
 
@@ -890,7 +910,7 @@ export class TreeService {
 			}
 
 			
-		}
+		} 
 
 		return Promise.reject("No node specified");
 

@@ -53,8 +53,6 @@ class TreeController implements ng.IController {
 	private onContentHeightRequest;
 	private hideIfc;
 	private showNodes;
-
-	private currentSelectedId;
 	private currentSelectedIndex;
 	private searching;
 
