@@ -347,9 +347,9 @@ describe("Viewer page", function() {
 					expect(element(by.id("diffCompareTab")).isPresent()).to.eventually.equal(true);
 				});
 
-				 it("has a clash compare tab", () => {
-				 	expect(element(by.id("clashCompareTab")).isPresent()).to.eventually.equal(true);
-				 });
+				// it("has a clash compare tab", () => {
+				// 	expect(element(by.id("clashCompareTab")).isPresent()).to.eventually.equal(true);
+				// });
 
 				it("has a the bottom container", () => {
 					expect(element(by.css(".bottomContainer")).isDisplayed()).to.eventually.equal(true);
@@ -359,19 +359,19 @@ describe("Viewer page", function() {
 					expect(element(by.css(".compareButton")).isDisplayed()).to.eventually.equal(true);
 				});
 
-				it("responds to tab changing correctly", () => {
-				 	const compare = element(by.tagName("compare"));
-				 	const clash = compare.all(by.tagName("md-tab-item"));
-				 	clash.get(1).click();
-				 	browser.sleep(1000);
-				 	const active = compare.all(by.css(".md-active"));
-				 	const inkBar = compare.all(by.tagName("md-ink-bar")).first();
-				 	expect(hasClass(clash.get(0), "md-active")).to.eventually.equal(false);
-				 	expect(hasClass(clash.get(1), "md-active")).to.eventually.equal(true);
-				 	expect(hasClass(inkBar, "md-left")).to.eventually.equal(false);
-				 	expect(hasClass(inkBar, "md-right")).to.eventually.equal(true);
+				// it("responds to tab changing correctly", () => {
+				// 	const compare = element(by.tagName("compare"));
+				// 	const clash = compare.all(by.tagName("md-tab-item"));
+				// 	clash.get(1).click();
+				// 	browser.sleep(1000);
+				// 	const active = compare.all(by.css(".md-active"));
+				// 	const inkBar = compare.all(by.tagName("md-ink-bar")).first();
+				// 	expect(hasClass(clash.get(0), "md-active")).to.eventually.equal(false);
+				// 	expect(hasClass(clash.get(1), "md-active")).to.eventually.equal(true);
+				// 	expect(hasClass(inkBar, "md-left")).to.eventually.equal(false);
+				// 	expect(hasClass(inkBar, "md-right")).to.eventually.equal(true);
 
-				});
+				// });
 
 				it("closes", () => {
 					const compareButton = element(by.id("compareLeftButton"));
