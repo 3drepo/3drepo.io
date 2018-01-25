@@ -697,7 +697,9 @@ export class TreeService {
 	public setVisibilityOfNodes(nodes: any[], visibility: string) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
-			this.setTreeNodeStatus(node, visibility);
+			if (node.toggleState !== visibility) {
+				this.setTreeNodeStatus(node, visibility);
+			}
 		}
 	}
 
@@ -706,12 +708,7 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be hidden.
 	 */
 	public hideTreeNodes(nodes: any[]) {
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			if (node.toggleState !== "invisible") {
-				this.setTreeNodeStatus(node, "invisible");
-			}
-		}
+		this.setVisibilityOfNodes(nodes, "invisible");
 	}
 
 	/**
@@ -719,12 +716,7 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be shown.
 	 */
 	public showTreeNodes(nodes: any[]) {
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			if (node.toggleState !== "visible") {
-				this.setTreeNodeStatus(node, "visible");
-			}
-		}
+		this.setVisibilityOfNodes(nodes, "visible");
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
@@ -738,14 +730,14 @@ export class TreeService {
 			children = children.concat(node.children);
 		}
 
-		while (children.length) {
+		while (children.length > 0) {
 			const child = children.pop();
 
 			if (child.children && child.toggleState !== visibility) {
 				children = children.concat(child.children);
 			}
 
-			if (visibility === "visible" && this.canShowNode(child)) {
+			if (visibility === "visible" && this.canShowNode(child)) { // TODO: check cond
 				child.toggleState = "visible";
 			} else {
 				child.toggleState = "invisible";
