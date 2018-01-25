@@ -410,10 +410,7 @@ export class Viewer {
 
 		if (canHighlight) {
 
-			idsIn = idsIn || [];
-			const uniqueIds = idsIn.filter((value, index) => {
-				return idsIn.indexOf(value) === index;
-			});
+			const uniqueIds = Array.from(idsIn);
 
 			if (uniqueIds.length) {
 				const multi = multiOverride || this.multiSelectMode;

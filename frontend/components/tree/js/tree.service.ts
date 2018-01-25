@@ -452,11 +452,11 @@ export class TreeService {
 			meshes = idToMeshes[key][node._id];
 		}
 		if (meshes) {
+			console.log(nodes[key], meshes)
 			if (!nodes[key]) {
-				nodes[key] = meshes;
+				nodes[key] = new Set(meshes);
 			} else {
-				// concat is slow!
-				nodes[key] = nodes[key].concat(meshes);
+				nodes[key] = new Set(...nodes[key], ...meshes);
 			}
 		} else if (node.children) {
 			// This should only happen in federations.
@@ -465,7 +465,6 @@ export class TreeService {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
 		} 
-
 
 	}
 
@@ -529,7 +528,7 @@ export class TreeService {
 			}
 		}
 
-		this.toggleNode(node);
+		this.updateClicked(node);
 
 	}
 
@@ -816,7 +815,7 @@ export class TreeService {
 	 * to apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public toggleNode(node) {
+	public updateClicked(node) {
 		const childNodes = {};
 
 		this.getMap().then((treeMap) => {
@@ -884,9 +883,10 @@ export class TreeService {
 					this.currentSelectedNodes.forEach((n) => {
 						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
 					});
-	
-					this.highlightMapUpdateTime = Date.now();
+
 					this.highlightMap = map;
+					this.highlightMapUpdateTime = Date.now();
+					
 				});
 			}
 

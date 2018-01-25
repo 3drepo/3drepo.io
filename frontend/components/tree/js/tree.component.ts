@@ -443,7 +443,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode());
+		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
 	}
 
 	public filterItemSelected(item) {
