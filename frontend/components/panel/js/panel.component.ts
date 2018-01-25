@@ -24,6 +24,7 @@ class PanelController implements ng.IController {
 
 		"PanelService",
 		"EventService",
+		"TreeService",
 	];
 
 	public maxHeightAvailable;
@@ -43,6 +44,7 @@ class PanelController implements ng.IController {
 
 		private PanelService: any,
 		private EventService: any,
+		private TreeService: any,
 	) {}
 
 	public $onInit() {
@@ -110,6 +112,11 @@ class PanelController implements ng.IController {
 
 			}
 		});
+
+		this.$scope.$watch(() => this.TreeService.getHideIfc(),
+			(hideIfc) => {
+				this.PanelService.setHideIfc(hideIfc);
+			});
 
 	}
 
@@ -282,6 +289,7 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
+		this.$timeout().then(() => { this.$scope.$broadcast("$md-resize") });
 	}
 
 }

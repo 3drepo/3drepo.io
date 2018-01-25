@@ -531,18 +531,13 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			var hideIfcState = TreeService.getHideIfc(); // TODO: potentially can be removed once hideIfc saved in issue
+			
+			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
 				// TODO: need to propagate state change to UI
-			} else {
-				TreeService.setHideIfc(false); // TODO: potentially can be removed once hideIfc saved in issue
 			}
 			TreeService.showAllTreeNodes();
-			TreeService.setHideIfc(hideIfcState); // TODO: potentially can be removed once hideIfc saved in issue
-
-			// clear selection
-			//EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
@@ -655,8 +650,7 @@
 		}
 
 		function handleHighlights(objects) {
-			var ids = [];
-			
+
 			TreeService.getMap()
 				.then(function(treeMap){
 
@@ -665,29 +659,17 @@
 
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
-						var account = obj.account;
-						var model = obj.model;
-						var key = account + "@" + model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-
 						var objUid = treeMap.sharedIdToUid[obj.shared_id];
 						
 						if (objUid) {
-							ids[key].push(objUid);
+				
 							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true);
+								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
 							} else {
 								// Only call expandToSelection for last selected node to improve performance
-								console.log("expandToSelection start - from issues service");
-								let start = performance.now();
+
 								TreeService.initNodesToShow([TreeService.allNodes[0]])
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
-								let stop = performance.now();
-								console.log("expandToSelection end - from issues service");
-								console.log("expandToSelection TOTAL TIME - from issues service: ", stop - start, "ms");
-								
 								
 							}
 						}
@@ -704,10 +686,6 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 
-					// show currently hidden nodes
-					var hideIfcState = TreeService.getHideIfc();
-					TreeService.setHideIfc(false);
-
 					if (objects) {
 						objects.forEach(function(obj){
 							var account = obj.account;
@@ -719,8 +697,6 @@
 
 						});
 					}
-					
-					TreeService.setHideIfc(hideIfcState);
 
 				})
 				.catch(function(error) {

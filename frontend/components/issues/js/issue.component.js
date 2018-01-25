@@ -46,7 +46,7 @@
 		"IssuesService", "APIService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
-		"DialogService"
+		"TreeService", "DialogService"
 	];
 
 	function IssueCtrl (
@@ -54,7 +54,7 @@
 		IssuesService, APIService, NotificationService, AuthService, 
 		$timeout, $scope, ClientConfigService, AnalyticService, 
 		$state, StateManager, MeasureService, ViewerService,
-		DialogService
+		TreeService, DialogService
 	) {
 		
 		var vm = this;
@@ -705,7 +705,7 @@
 				.then(function (viewpoint) {
 					objectsPromise.promise
 						.then(function(objectInfo) {
-							// TODO: save hideIfc state from TreeService somewhere along here
+							viewpoint.hideIfc = TreeService.getHideIfc();
 							handleObjects(viewpoint, objectInfo, screenShotPromise);
 						})
 						.catch(function(error){
@@ -890,13 +890,12 @@
 				// Create a group of hidden objects
 				var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
 				
-				// TODO: save hideIfc state from TreeService
-
 				APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData).then(function (highlightedGroupResponse) {
 					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData).then(function (hiddenGroupResponse) {
 						if (angular.isDefined(vm.commentThumbnail)) {
 							vm.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 							vm.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+							vm.commentViewpoint.hideIfc = TreeService.getHideIfc();
 							IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
 								.then(function (response) {
 									vm.saving = false;
@@ -916,6 +915,7 @@
 							viewpointPromise.promise.then(function (viewpoint) {
 								viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 								viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+								viewpoint.hideIfc = TreeService.getHideIfc();
 								IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
 									.then(function (response) {
 										vm.saving = false;

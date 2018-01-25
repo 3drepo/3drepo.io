@@ -47,7 +47,6 @@ export class TreeService {
 	private idToNodeMap;
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
-	private hideIfc;
 	private treeMapReady;
 
 	constructor(
@@ -66,6 +65,7 @@ export class TreeService {
 		this.state.visible = {};
 		this.state.invisible = {};
 		this.state.idToPath = {};
+		this.state.hideIfc = true;
 		this.allNodes = [];
 		this.currentSelectedNodes = [];
 		this.clickedHidden = {}; // or reset?
@@ -74,7 +74,6 @@ export class TreeService {
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
-		this.hideIfc = true;
 		this.highlightSelectedViewerObject = true;
 	}
 
@@ -455,7 +454,6 @@ export class TreeService {
 			if (!nodes[key]) {
 				nodes[key] = meshes;
 			} else {
-				// concat is slow!
 				nodes[key] = nodes[key].concat(meshes);
 			}
 		} else if (node.children) {
@@ -465,7 +463,6 @@ export class TreeService {
 				this.traverseNodeAndPushId(child, nodes, idToMeshes);
 			});
 		} 
-
 
 	}
 
@@ -529,7 +526,7 @@ export class TreeService {
 			}
 		}
 
-		this.toggleNode(node);
+		this.updateClicked(node);
 
 	}
 
@@ -641,7 +638,7 @@ export class TreeService {
 	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
 
 		let selectedIndex;
-		let selectedId;
+		let specialNodeParent;
 
 		// Cut it to the level provided
 		path = path.slice(level, path.length);
@@ -654,22 +651,42 @@ export class TreeService {
 			// scroll to it
 			if (i === path.length - 1) {
 				selectedIndex = this.nodesToShow.indexOf(node);
-				selectedId = this.nodesToShow[selectedIndex]._id;
+				
+				if (selectedIndex === -1) {
+					specialNodeParent = this.getNodeById(path[i-1]);
+					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
+				}
+					
 			}
 
 		}
 
 		if (!noHighlight) {
-			this.selectNode(this.nodesToShow[selectedIndex], multi).then(() => {
-				this.selectionData = {
-					selectedIndex,
-					selectedId,
-				};
-			});
+
+
+			// Sometimes we have an edge case where an object doesn't exist in the tree
+			// because it has no name. It is often objects like a window, so what we do
+			// is select its parent object to highlight that instead
+			if (specialNodeParent) {
+
+				this.selectNode(specialNodeParent, multi, true).then(() => {
+					this.selectionData = {
+						selectedIndex
+					};
+				});
+
+			} else {
+				this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
+					this.selectionData = {
+						selectedIndex
+					};
+				});
+			}
+
+			
 		} else {
 			this.selectionData = {
-				selectedIndex,
-				selectedId,
+				selectedIndex
 			};
 		}	
 
@@ -738,7 +755,9 @@ export class TreeService {
 
 	public setTreeNodeStatus(node: any, visibility: string) {
 
-		let children = [node];
+		if (!node) return;
+
+ 		let children = [node];
 		if (node.children) {
 			children = children.concat(node.children);
 		}
@@ -776,7 +795,7 @@ export class TreeService {
 
 		this.setTreeNodeStatus(this.allNodes[0], "visible");
 
-		if (this.hideIfc) {
+		if (this.state.hideIfc) {
 			this.getHiddenByDefaultNodes()
 				.forEach(this.updateParentVisibility.bind(this));
 		}
@@ -799,7 +818,7 @@ export class TreeService {
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
-		return !(this.hideIfc && this.getHiddenByDefaultNodes().includes(node));
+		return !(this.state.hideIfc && this.getHiddenByDefaultNodes().includes(node));
 	}
 
 	/**
@@ -814,7 +833,7 @@ export class TreeService {
 	 * to apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public toggleNode(node) {
+	public updateClicked(node) {
 		const childNodes = {};
 
 		this.getMap().then((treeMap) => {
@@ -853,12 +872,10 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNode(node: any, multi: boolean) {
+	public selectNode(node: any, multi: boolean, final: boolean) {
 
 		if (node) {
-			const sameNodeIndex = this.currentSelectedNodes.findIndex((element) => {
-				return element._id === node._id;
-			});
+			const sameNodeIndex = this.currentSelectedNodes.indexOf(node);
 
 			if (multi) {
 				if (sameNodeIndex > -1) {
@@ -876,16 +893,23 @@ export class TreeService {
 				this.currentSelectedNodes.push(node);
 			}
 
-			return this.getMap().then((treeMap) => {
-				const map = {};
-				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
-				});
+			if (!final) {
+				return Promise.resolve();
+			} else {
+				return this.getMap().then((treeMap) => {
+					const map = {};
+					this.currentSelectedNodes.forEach((n) => {
+						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+					});
 
-				this.highlightMapUpdateTime = Date.now();
-				this.highlightMap = map;
-			});
-		}
+					this.highlightMap = map;
+					this.highlightMapUpdateTime = Date.now();
+					
+				});
+			}
+
+			
+		} 
 
 		return Promise.reject("No node specified");
 
@@ -933,14 +957,14 @@ export class TreeService {
 	 * @returns	Value of IFC spaces hidden.
 	 */
 	public getHideIfc() {
-		return this.hideIfc;
+		return this.state.hideIfc;
 	}
 
 	/**
 	 * @param value	Are IFC spaces hidden.
 	 */
 	public setHideIfc(value: boolean) {
-		this.hideIfc = value;
+		this.state.hideIfc = value;
 	}
 
 	/**
