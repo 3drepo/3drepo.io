@@ -47,7 +47,6 @@ export class TreeService {
 	private idToNodeMap;
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
-	private hideIfc;
 	private treeMapReady;
 
 	constructor(
@@ -66,6 +65,7 @@ export class TreeService {
 		this.state.visible = {};
 		this.state.invisible = {};
 		this.state.idToPath = {};
+		this.state.hideIfc = true;
 		this.allNodes = [];
 		this.currentSelectedNodes = [];
 		this.clickedHidden = {}; // or reset?
@@ -74,7 +74,6 @@ export class TreeService {
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
-		this.hideIfc = true;
 		this.highlightSelectedViewerObject = true;
 	}
 
@@ -776,7 +775,7 @@ export class TreeService {
 
 		this.setTreeNodeStatus(this.allNodes[0], "visible");
 
-		if (this.hideIfc) {
+		if (this.state.hideIfc) {
 			this.getHiddenByDefaultNodes()
 				.forEach(this.updateParentVisibility.bind(this));
 		}
@@ -799,7 +798,7 @@ export class TreeService {
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
-		return !(this.hideIfc && this.getHiddenByDefaultNodes().includes(node));
+		return !(this.state.hideIfc && this.getHiddenByDefaultNodes().includes(node));
 	}
 
 	/**
@@ -933,14 +932,14 @@ export class TreeService {
 	 * @returns	Value of IFC spaces hidden.
 	 */
 	public getHideIfc() {
-		return this.hideIfc;
+		return this.state.hideIfc;
 	}
 
 	/**
 	 * @param value	Are IFC spaces hidden.
 	 */
 	public setHideIfc(value: boolean) {
-		this.hideIfc = value;
+		this.state.hideIfc = value;
 	}
 
 	/**

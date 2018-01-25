@@ -531,15 +531,13 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			var hideIfcState = TreeService.getHideIfc(); // TODO: potentially can be removed once hideIfc saved in issue
+			
+			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
 				// TODO: need to propagate state change to UI
-			} else {
-				TreeService.setHideIfc(false); // TODO: potentially can be removed once hideIfc saved in issue
 			}
 			TreeService.showAllTreeNodes();
-			TreeService.setHideIfc(hideIfcState); // TODO: potentially can be removed once hideIfc saved in issue
 
 			// clear selection
 			//EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
@@ -704,10 +702,6 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 
-					// show currently hidden nodes
-					var hideIfcState = TreeService.getHideIfc();
-					TreeService.setHideIfc(false);
-
 					if (objects) {
 						objects.forEach(function(obj){
 							var account = obj.account;
@@ -719,8 +713,6 @@
 
 						});
 					}
-					
-					TreeService.setHideIfc(hideIfcState);
 
 				})
 				.catch(function(error) {
