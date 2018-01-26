@@ -478,8 +478,6 @@ export class TreeService {
 
 		let path = this.getPath(node._id);
 
-		//console.log("myId", node._id);
-		//console.log("myPath", path);
 		// Get node parent
 		if (path && path.length > 0) {
 
@@ -497,6 +495,7 @@ export class TreeService {
 				if (parentNode.children !== undefined && parentNode.children.length > 0) {
 					if (hasParentOfInvisibleChild) {
 						parentNode.toggleState = "parentOfInvisible";
+						continue;
 					}
 
 					let numInvisible = 0;
@@ -726,7 +725,7 @@ export class TreeService {
 		}
 
  		let children = [node];
-		let parents = [node];
+		let hiddenByDefaultNodes = [];
 
 		if (node.children) {
 			children = children.concat(node.children);
@@ -739,22 +738,61 @@ export class TreeService {
 				children = children.concat(child.children);
 			}
 
-			if (this.isLeafNode(child)) {
-				if (visibility === "visible" && this.canShowNode(child)) { // TODO: check cond
-					child.toggleState = "visible";
-				} else {
-					child.toggleState = "invisible";
-				}
+			if (visibility === "visible" && this.canShowNode(child)) { 
+				child.toggleState = "visible";
+			} else if (visibility === "visible" && !this.canShowNode(child)) {
+				// This is an IFC Space 
+				hiddenByDefaultNodes.push(child);
 			} else {
-				parents.push(child);
+				child.toggleState = "invisible";
 			}
 
 		}
 
-		while (parents.length > 0) {
-			this.updateParentVisibility(parents.pop());
+		if (hiddenByDefaultNodes.length) {
+
+			// If we've been up this path before, no need 
+			// to try and set the visibility again
+			const pathHandled = new Set();
+
+			for (let i = 0; i < hiddenByDefaultNodes.length; i++) {
+				let hidden = hiddenByDefaultNodes[i];
+
+				const path = this.getPath(hidden._id); 
+				path.pop(); // remove the leaf node
+
+				while(path.length) {
+					let id = path.pop();
+
+					if (pathHandled.has(id)) {
+						break;
+					}
+
+					pathHandled.add(id);
+					let parent = this.getNodeById(id);
+
+					if (parent.toggleState === "visible") {
+						parent.toggleState = "parentOfInvisible";
+					}
+
+				}
+			};
 		}
 
+		this.updateParentVisibility(node);
+		
+	}
+
+	public checkHiddenByDefaultParents(node) {
+		let path = this.getPath(node._id);
+
+
+
+		// Get node parent
+		if (path && path.length > 0) {
+			let hidden = new Set(this.getHiddenByDefaultNodes());
+			if (hidden.has(node._id))
+		}
 	}
 
 	/**
