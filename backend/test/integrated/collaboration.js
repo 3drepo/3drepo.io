@@ -207,12 +207,6 @@ describe('Sharing/Unsharing a model', function () {
 
 		it('and the viewer should NOT be able to update model settings', function(done){
 			let body = {
-
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
@@ -450,11 +444,6 @@ describe('Sharing/Unsharing a model', function () {
 		it('and the commenter should NOT be able to update model settings', function(done){
 			let body = {
 
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
@@ -692,11 +681,6 @@ describe('Sharing/Unsharing a model', function () {
 		it('and the collaborator should NOT be able to update model settings', function(done){
 			let body = {
 
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
