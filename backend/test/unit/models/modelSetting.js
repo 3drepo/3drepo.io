@@ -75,11 +75,6 @@ describe('Model Settings', function(){
 			};
 
 			let expectedReturn = {
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: "metre",
 				topicTypes: [{
 					label: 'For info',
