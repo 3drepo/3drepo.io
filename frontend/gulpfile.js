@@ -20,6 +20,8 @@ const del = require('del');
 const ts = require('gulp-typescript');
 const localWebpack = require('webpack');
 
+let isWatch = false;
+
 const tsConfig = {
   typescript: require("typescript"),
   //target: "es6",
@@ -50,8 +52,10 @@ const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
 const icons = './icons/*.svg';
 
 function exitOnError(error) {
-	gutil.log(gutil.colors.red('[Error]'), error.toString());
-	process.exit(1);
+  gutil.log(gutil.colors.red('[Error]'), error.toString());
+  if (!isWatch) {
+    process.exit(1);
+  }
 }
 
 function swallowError (error) {
@@ -341,7 +345,7 @@ gulp.task("typedoc", function() {
 
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
-
+  isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true })
 
   // WATCHERS
