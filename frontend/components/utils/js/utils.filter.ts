@@ -15,6 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+function formatBytesGB() {
+
+	return (input: number, referenceValue: number) => {
+		const factor: number = 1073741824;
+		let units: string = "GB";
+		return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
+	};
+
+}
+
+
 function formatBytes() {
 
 	return (input: number, referenceValue: number) => {
@@ -96,6 +107,10 @@ function revisionDate() {
 		return date.replace(",", "");
 	};
 }
+
+export const FormatBytesGBModule = angular
+	.module("3drepo")
+	.filter("formatBytesGB", formatBytesGB);
 
 export const FormatBytesModule = angular
 	.module("3drepo")
