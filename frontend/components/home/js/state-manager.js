@@ -19,12 +19,27 @@
 	"use strict";
 
 	config.$inject = [
-		"$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider"
+		"$stateProvider", "$urlRouterProvider", "$locationProvider", "$httpProvider", "$mdDateLocaleProvider"
 	];
 
-	function config($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
+	function config($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $mdDateLocaleProvider) {
 		
 		$locationProvider.html5Mode(true);
+
+		$mdDateLocale.formatDate = function(date, timezone) {
+			if (!date) {
+			  return '';
+			}
+	
+			var localeTime = date.toLocaleTimeString();
+			var formatDate = date;
+			if (date.getHours() === 0 &&
+				(localeTime.indexOf('11:') !== -1 || localeTime.indexOf('23:') !== -1)) {
+				formatDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0, 0);
+			}
+			
+			return $filter('date')(formatDate, 'd/M/yyyy', timezone);
+		}
 
 		$stateProvider.state("home", {
 			name: "home",
