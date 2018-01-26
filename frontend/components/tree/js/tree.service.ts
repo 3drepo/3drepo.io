@@ -726,6 +726,8 @@ export class TreeService {
 		}
 
  		let children = [node];
+		let parents = [node];
+
 		if (node.children) {
 			children = children.concat(node.children);
 		}
@@ -737,15 +739,21 @@ export class TreeService {
 				children = children.concat(child.children);
 			}
 
-			if (visibility === "visible" && this.canShowNode(child)) { // TODO: check cond
-				child.toggleState = "visible";
+			if (this.isLeafNode(child)) {
+				if (visibility === "visible" && this.canShowNode(child)) { // TODO: check cond
+					child.toggleState = "visible";
+				} else {
+					child.toggleState = "invisible";
+				}
 			} else {
-				child.toggleState = "invisible";
+				parents.push(child);
 			}
 
 		}
 
-		this.updateParentVisibility(node);
+		while (parents.length > 0) {
+			this.updateParentVisibility(parents.pop());
+		}
 
 	}
 
