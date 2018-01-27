@@ -241,14 +241,14 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		this.$scope.$watch(() => this.TreeService.selectionData,
-			(selectionData) => {
-				if (selectionData) {
+		this.$scope.$watch(() => this.TreeService.selectedIndex,
+			(selectedIndex) => {
+				if (selectedIndex) {
 
 					this.setContentHeight(this.fetchNodesToShow());
 
 					this.$timeout(() => {}).then(() => {
-						this.topIndex = selectionData.selectedIndex;
+						this.topIndex = selectedIndex;
 					});
 
 				}

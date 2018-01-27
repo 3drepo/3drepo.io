@@ -535,7 +535,6 @@
 			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
-				// TODO: need to propagate state change to UI
 			}
 			TreeService.showAllTreeNodes();
 
