@@ -149,8 +149,8 @@ class TreeController implements ng.IController {
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
 				this.$timeout(() => {}).then(() => {
-					this.TreeService.showAllTreeNodes();
-					this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+					//this.TreeService.showAllTreeNodes();
+					//this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
 
 			}
@@ -417,17 +417,8 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		let state;
-		if (node.toggleState === "invisible") {
-			state = "visible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-			if (this.TreeService.hideIfc) {
-				this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
-			}
-		} else {
-			state = "invisible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-		}
+		let newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		this.TreeService.setTreeNodeStatus(node, newState);
 	}
 
 	/**
