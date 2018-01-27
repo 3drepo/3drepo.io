@@ -131,7 +131,6 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
-				console.log("TREE_READY");
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -166,8 +165,6 @@ class TreeController implements ng.IController {
 					this.showFilterList = false;
 					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
-
-					console.log("showProgress");
 
 					this.searching = true;
 					this.TreeService.search(newValue)

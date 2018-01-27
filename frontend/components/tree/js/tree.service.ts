@@ -519,14 +519,24 @@ export class TreeService {
 	public updateParentVisibility(node: any) {
 
 		if (node) {
-			const priorToggleState = node.toggleState;
+			const priorToggleState = node.toggleState.slice(1);
 
 			this.updateParentVisibilityByChildren(node);
 
-			const path = this.getPath(node._id);
-			if (path && path.length > 1) {
-				const parentNode = this.getNodeById(path[path.length - 2]);
-				this.updateParentVisibility(parentNode);
+			if (priorToggleState !== node.toggleState) {
+				const path = this.getPath(node._id);
+				if (path && path.length > 1) {
+					// Fast forward up path for parentOfInvisible state
+					if ("parentOfInvisible" === node.toggleState) {
+						for (let i = path.length - 2; i >= 0; i--) {
+							const parentNode = this.getNodeById(path[i]);
+							parentNode.toggleState = "parentOfInvisible";
+						}
+					} else {
+						const parentNode = this.getNodeById(path[path.length - 2]);
+						this.updateParentVisibility(parentNode);
+					}
+				}
 			}
 		}
 
