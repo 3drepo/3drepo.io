@@ -726,7 +726,7 @@ export class TreeService {
 
 	public setTreeNodeStatus(node: any, visibility: string) {
 
-		if (node) {
+		if (node && ("parentOfInvisible" === visibility || visibility !== node.toggleState)) {
 			const priorToggleState = node.toggleState;
 
  			let children = [node];
@@ -807,6 +807,7 @@ export class TreeService {
 	 */
 	public canShowNode(node: any) {
 		return !(this.state.hideIfc && this.getHiddenByDefaultNodes().indexOf(node) !== -1);
+		//return !(this.state.hideIfc && ((node.defaultState && "invisible" !== node.defaultState) || this.getHiddenByDefaultNodes().indexOf(node) !== -1));
 	}
 
 	/**
