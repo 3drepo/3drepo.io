@@ -680,7 +680,7 @@
 				.then(function(treeMap){
 
 					if (objects) {
-						const hiddenNodes = [];
+						var hiddenNodes = [];
 						for (var i = 0; i < objects.length; i++) {
 							// Make a list of nodes to hide
 							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
