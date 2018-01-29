@@ -1,7 +1,7 @@
 account-menu(
 	account="vm.account"
-	is-mobile-device="vm.isMobileDevice")
-	//show-lite-mode-button="vm.showLiteModeButton")
+	is-mobile-device="vm.isMobileDevice"
+	show-lite-mode-button="vm.showLiteModeButton")
 
 div#accountHolder(
 	layout="row"
@@ -85,6 +85,7 @@ div#accountHolder(
 
 div(ng-if="vm.state.model")
 	model(
+		is-mobile-device="vm.isMobileDevice"
 		keys-down="vm.keysDown"
 		account="vm.state.account"
 		model="vm.state.model"

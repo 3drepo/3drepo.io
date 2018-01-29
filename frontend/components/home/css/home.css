@@ -65,15 +65,6 @@ home #homeLogo img {
         margin-bottom: 80px;
         margin-top: 0px !important;
     }
-
-    /* home #homeLoggedOut {
-        top: 80px !important;
-    }
-        
-    home .homeHolder {
-        padding-bottom: 20px;
-    } */
-
 }
 
 home .homeUserContent {
@@ -145,7 +136,7 @@ home #legalLinks {
     margin-right: 18px;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   home #legalLinks {
     width: 100%;
     margin-right: 0;

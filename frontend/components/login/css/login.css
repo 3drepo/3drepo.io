@@ -6,7 +6,7 @@ login .loginContainer {
   overflow: hidden;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   login .homeUserContent {
     margin-top: 8vh;
   }

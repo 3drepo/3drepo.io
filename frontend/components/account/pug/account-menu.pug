@@ -14,7 +14,7 @@ md-menu#accountMenu(md-position-mode="target-right target")
 			md-button(ng-click="vm.openUserManual()")
 				md-icon.angular-material-icons(md-menu-align-target) description
 				| User Manual
-		//md-menu-item(ng-if="vm.showLiteModeButton")
+		md-menu-item
 			md-button()
 				md-switch(ng-model="vm.isLiteMode" aria-label="Lite Mode")
 					p Lite Mode

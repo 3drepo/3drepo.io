@@ -4,6 +4,7 @@
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
 	
 	measure(
+		ng-if="!vm.isMobileDevice"
 		keys-down="vm.keysDown"
 		id='measure-tool'
 	 	account='vm.account' 
@@ -18,6 +19,7 @@
 			revision="vm.revision")
 
 		panel#leftPanel(
+			ng-if="vm.isMobileDevice"
 			account="vm.account"
 			model="vm.model"
 			branch="vm.branch"
@@ -30,6 +32,7 @@
 			set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 		panel#rightPanel(
+			ng-if="!vm.isMobileDevice"
 			account="vm.account"
 			model="vm.model"
 			branch="vm.branch"
@@ -38,13 +41,11 @@
 			style="pointer-events:{{vm.pointerEvents}}")
 
 		right-panel(
-			hide-xs
-			hide-sm
+			ng-if="!vm.isMobileDevice"
 			style="pointer-events:{{vm.pointerEvents}}")
 
 		bottom-buttons(
-			hide-xs
-			hide-sm
+			ng-if="!vm.isMobileDevice"
 			style="pointer-events:{{vm.pointerEvents}}")
 
 error-dialog(

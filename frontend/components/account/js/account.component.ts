@@ -51,7 +51,7 @@ class AccountController implements ng.IController {
 	private billingAddress;
 	private hasAvatar;
 	private quota;
-	// private showLiteModeButton;
+	private showLiteModeButton;
 
 	constructor(
 		private $scope,
@@ -330,7 +330,7 @@ export const AccountComponent: ng.IComponentOptions = {
 		account: "=",
 		keysDown: "=",
 		isMobileDevice: "=",
-		//showLiteModeButton: "<",
+		showLiteModeButton: "<",
 
 	},
 	controller: AccountController,

@@ -1,5 +1,5 @@
 /** Responsive content ****/
-@media (max-width: 960px) { 
+@media (max-width: 767px) { 
 
   .userContent {
     height: 100% !important;
@@ -116,7 +116,7 @@ account-dir #account #accountItem userContent {
   overflow: auto;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   account-dir #account #accountItem {
     margin-left: 5%;
     margin-bottom: 100px;
@@ -301,7 +301,7 @@ account-info {
    margin-right: 5%; 
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   
   account-info #account #accountItem {
     min-height: 700px;
@@ -378,7 +378,7 @@ account-info .accountInfoPage .md-button {
 
 /** Account Menu ******************************************************************************************************/
 account-menu {
-  z-index: 1;
+  z-index: 3;
   position: absolute;
   top: 0;
   right: 0;

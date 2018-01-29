@@ -356,14 +356,14 @@ export class ViewerService {
 	public getViewer() {
 
 		if (this.viewer === undefined) {
-
+			console.log("setting viewer");
 			this.viewer = new Viewer(
 				"viewer",
 				document.getElementById("viewer"),
 				this.EventService.send,
 				this.handleUnityError.bind(this),
 			);
-
+			console.log("setting unity");
 			this.viewer.setUnity();
 
 		}

@@ -30,7 +30,7 @@ panel #items {
   pointer-events: inherit;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
     panel #items {
        width: 90vw !important;
        margin-left: 5vw;

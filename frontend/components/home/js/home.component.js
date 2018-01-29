@@ -283,8 +283,7 @@
 			console.log("isMobile", mobile);
 
 			if (mobile) {
-				//vm.showLiteModeButton = true;
-				//console.log(vm.showLiteModeButton);
+				vm.showLiteModeButton = true;
 				vm.handleMobile();
 			}
 
