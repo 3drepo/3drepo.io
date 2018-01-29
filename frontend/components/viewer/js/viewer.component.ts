@@ -28,7 +28,6 @@ class ViewerController implements ng.IController {
 		"ClientConfigService",
 		"EventService",
 		"ViewerService",
-		"CompareService",
 	];
 
 	private account: any;
@@ -48,7 +47,6 @@ class ViewerController implements ng.IController {
 		private ClientConfigService,
 		private EventService,
 		private ViewerService,
-		private CompareService,
 	) {
 
 		$scope.$watch(() => {
@@ -68,6 +66,7 @@ class ViewerController implements ng.IController {
 	}
 
 	public $onInit() {
+		console.log("Viewer initialised...");
 
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
@@ -81,7 +80,7 @@ class ViewerController implements ng.IController {
 
 	public $onDestroy() {
 		this.$element.on("$destroy", () => {
-			this.CompareService.diffToolDisableAndClear();
+			this.ViewerService.diffToolDisableAndClear();
 			this.viewer.reset(); // Remove events watch
 		});
 	}

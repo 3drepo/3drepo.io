@@ -35,11 +35,10 @@ class TreeController implements ng.IController {
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
 	private clickedShown;
-	private lastParentWithName = null;
+	// private lastParentWithName = null;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
-	private showNodes; // in pug
 	private showTree; // in pug
 	private showFilterList; // in pug
 	private currentFilterItemSelected = null;
@@ -53,10 +52,9 @@ class TreeController implements ng.IController {
 	private infiniteItemsFilter; // in pug
 	private onContentHeightRequest;
 	private hideIfc;
-
-	private currentSelectedId;
+	private showNodes;
 	private currentSelectedIndex;
-	private hello;
+	private searching;
 
 	constructor(
 		private $scope: IScope,
@@ -73,9 +71,8 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
-		this.hello = true;
+		this.showNodes = true;
 		this.nodes = [];
-		this.TreeService.setShowNodes(true);
 		this.showTree = true;
 		this.showFilterList = false;
 		this.TreeService.clearCurrentlySelected();
@@ -83,8 +80,6 @@ class TreeController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
-		this.TreeService.resetVisible();
-		this.TreeService.resetInvisible();
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
@@ -100,6 +95,7 @@ class TreeController implements ng.IController {
 	}
 
 	public watchers() {
+
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
@@ -114,16 +110,15 @@ class TreeController implements ng.IController {
 						} else {
 
 							this.initNodesToShow();
-							this.TreeService.resetLastParentWithName();
+
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
+
 							// all these init and expanding unselects the selected, so let's select them again
 							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
 								selectedNode.selected = true;
 							});
-							if (this.TreeService.getLastParentWithName()) {
-								this.TreeService.selectNode(this.TreeService.getLastParentWithName(), this.MultiSelectService.isMultiMode());
-							}
+
 						}
 					}
 				}
@@ -148,49 +143,57 @@ class TreeController implements ng.IController {
 				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
 
 				this.initNodesToShow();
-				this.TreeService.expandFirstNode();
 				this.setupInfiniteItemsFilter();
-				this.setContentHeight(this.fetchNodesToShow());
 
-				// Force show all and tree visibility to be recalculated
-				this.TreeService.showAllTreeNodesAndIFCs();
+				this.TreeService.expandFirstNode();
+				this.setContentHeight(this.fetchNodesToShow());
+				this.$timeout(() => {}).then(() => {
+					//this.TreeService.showAllTreeNodes();
+					//this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+				});
+
 			}
 		});
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
 			const noFilterItemsFoundHeight = 82;
-			if (this.TreeService.isDefined(newValue)) {
+			if (newValue !== undefined) {
 				if (newValue.toString() === "") {
-					this.showTree = true;
-					this.showFilterList = false;
-					this.showProgress = false;
-					this.nodes = this.fetchNodesToShow();
-					this.setContentHeight(this.nodes);
-				} else {
+					this.showTreeInPane();
+				} else if (!this.searching) {
 					this.showTree = false;
 					this.showFilterList = false;
-					this.showProgress = false;
+					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
 
+					this.searching = true;
 					this.TreeService.search(newValue)
 						.then((json) => {
-							this.showFilterList = true;
-							this.showProgress = false;
-							this.nodes = json.data;
-							if (this.nodes.length > 0) {
-								this.filterItemsFound = true;
-								for (let i = 0; i < this.nodes.length; i ++) {
-									this.nodes[i].index = i;
-									this.nodes[i].toggleState = "visible";
-									this.nodes[i].class = "unselectedFilterItem";
-									this.nodes[i].level = 0;
+
+							if (!this.showFilterList) {
+								this.searching = false;
+								this.showFilterList = true;
+								this.showProgress = false;
+								this.nodes = json.data;
+								if (this.nodes.length > 0) {
+									this.filterItemsFound = true;
+									for (let i = 0; i < this.nodes.length; i ++) {
+										this.nodes[i].index = i;
+										this.nodes[i].toggleState = "visible";
+										this.nodes[i].class = "unselectedFilterItem";
+										this.nodes[i].level = 0;
+									}
+									this.setupInfiniteItemsFilter();
+									this.setContentHeight(this.nodes);
+								} else {
+									this.filterItemsFound = false;
+									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 								}
-								this.setupInfiniteItemsFilter();
-								this.setContentHeight(this.nodes);
-							} else {
-								this.filterItemsFound = false;
-								this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 							}
+
+						})
+						.catch((error) => {
+							this.showTreeInPane();
 						});
 				}
 			}
@@ -204,7 +207,7 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodesAndIFCs();
+							this.TreeService.showAllTreeNodes();
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
@@ -235,16 +238,15 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		this.$scope.$watch(() => this.TreeService.selectionData,
-			(selectionData) => {
-				if (selectionData) {
+		this.$scope.$watch(() => this.TreeService.selectedIndex,
+			(selectedIndex) => {
+				if (selectedIndex) {
 
 					this.setContentHeight(this.fetchNodesToShow());
-					this.TreeService.setShowNodes(true);
 
-					this.$timeout(() => {
-						this.topIndex = selectionData.selectedIndex;
-					}, 200);
+					this.$timeout(() => {}).then(() => {
+						this.topIndex = selectedIndex;
+					});
 
 				}
 			});
@@ -268,8 +270,17 @@ class TreeController implements ng.IController {
 
 			lastViewerUpdateTime = Date.now();
 
-		}, 100);
+		}, 150);
 
+	}
+
+	public showTreeInPane() {
+		this.searching = false;
+		this.showTree = true;
+		this.showFilterList = false;
+		this.showProgress = false;
+		this.nodes = this.fetchNodesToShow();
+		this.setContentHeight(this.nodes);
 	}
 
 	/**
@@ -301,12 +312,15 @@ class TreeController implements ng.IController {
 				const account = vals[0];
 				const model = vals[1];
 
-				this.ViewerService.switchObjectVisibility(
-					account,
-					model,
-					objectIds[key],
-					visible,
-				);
+				if (this.ViewerService.viewer) {
+					this.ViewerService.switchObjectVisibility(
+						account,
+						model,
+						objectIds[key],
+						visible,
+					);
+				}
+
 			}
 		}
 	}
@@ -369,9 +383,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		// this.$timeout(() => {
 		this.$scope.$broadcast("$md-resize");
-		// });
 
 	}
 
@@ -396,24 +408,14 @@ class TreeController implements ng.IController {
 	/**
 	 * Expand a node to show its children.
 	 */
-	public expand(event, id) {
-
-		// rAF fixes flickering as expand is computationally expensive
-		requestAnimationFrame(() => {
-			this.TreeService.expand(event, id);
-			// Redraw the tree if needed
-			if (!this.TreeService.isShowNodes()) {
-				// this.$timeout(() => {
-				this.TreeService.setShowNodes(true);
-				// });
-			}
-			this.setContentHeight(this.fetchNodesToShow());
-		});
-
+	public toggleNodeExpansion(event, id) {
+		this.TreeService.toggleNodeExpansion(event, id);
+		this.setContentHeight(this.fetchNodesToShow());
 	}
 
 	public toggleTreeNode(node) {
-		this.TreeService.toggleTreeNodeVisibility(node, false);
+		let newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		this.TreeService.setTreeNodeStatus(node, newState);
 	}
 
 	/**
@@ -422,7 +424,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode());
+		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
 	}
 
 	public filterItemSelected(item) {
@@ -443,13 +445,9 @@ class TreeController implements ng.IController {
 
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
-			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode());
+			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
 		}
 
-	}
-
-	public toggleFilterNode(item) {
-		this.TreeService.toggleFilterNode(item);
 	}
 
 	public setupInfiniteItemsFilter() {
@@ -474,7 +472,7 @@ class TreeController implements ng.IController {
 			fetchMoreItems_(index) {
 				if (this.toLoad_ < index) {
 					this.toLoad_ += 20;
-					this.$timeout(() => {}, 300).then(() => {
+					this.$timeout(() => {}, 0).then(() => {
 						this.numLoaded_ = this.toLoad_;
 					});
 				}

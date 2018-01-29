@@ -5,7 +5,6 @@ div.homeContainer(
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
 
-
 	viewer(
 		id="viewer"
 		ng-if="!vm.isMobileDevice && !vm.isLegalPage"
@@ -33,9 +32,10 @@ div.homeContainer(
 			account='vm.state.account'
 			state='vm.state'
 			query='vm.query'
-			ng-if="vm.loggedIn"
 			is-mobile-device="vm.isMobileDevice"
-			keys-down="vm.keysDown")
+			keys-down="vm.keysDown"
+			ng-if="vm.loggedIn")
+			//show-lite-mode-button="vm.showLiteModeButton"
 
 	#homeLegalContainer(
 		flex="100"
