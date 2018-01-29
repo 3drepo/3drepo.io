@@ -30,7 +30,7 @@ tree .treeNodes p {
   word-break: break-all;
   word-wrap: break-word;
   margin: 8px 0 8px -5px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 tree .treeNode {

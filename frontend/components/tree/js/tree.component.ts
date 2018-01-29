@@ -53,8 +53,6 @@ class TreeController implements ng.IController {
 	private onContentHeightRequest;
 	private hideIfc;
 	private showNodes;
-
-	private currentSelectedId;
 	private currentSelectedIndex;
 	private searching;
 
@@ -82,8 +80,6 @@ class TreeController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
-		this.TreeService.resetVisible();
-		this.TreeService.resetInvisible();
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
@@ -115,21 +111,14 @@ class TreeController implements ng.IController {
 
 							this.initNodesToShow();
 
-							// this.TreeService.resetLastParentWithName();
-							console.log("expandToSelection start");
-							const start = performance.now();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
-							const stop = performance.now();
-							console.log("expandToSelection end");
-							console.log("expandToSelection TOTAL TIME: ", stop - start, "ms");
+
 							// all these init and expanding unselects the selected, so let's select them again
 							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
 							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
 								selectedNode.selected = true;
 							});
-							// if (this.TreeService.getLastParentWithName()) {
-							// 	this.TreeService.selectNode(this.TreeService.getLastParentWithName(), this.MultiSelectService.isMultiMode());
-							// }
+
 						}
 					}
 				}
@@ -142,7 +131,6 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
-				console.log("TREE_READY");
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -155,14 +143,13 @@ class TreeController implements ng.IController {
 				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
 
 				this.initNodesToShow();
-				console.log("nodesToShow", this.TreeService.getNodesToShow());
 				this.setupInfiniteItemsFilter();
 
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(() => {}).then(()=>{
-					this.TreeService.showAllTreeNodes();
-					this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+				this.$timeout(() => {}).then(() => {
+					//this.TreeService.showAllTreeNodes();
+					//this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
 
 			}
@@ -178,8 +165,6 @@ class TreeController implements ng.IController {
 					this.showFilterList = false;
 					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
-
-					console.log("showProgress");
 
 					this.searching = true;
 					this.TreeService.search(newValue)
@@ -205,7 +190,7 @@ class TreeController implements ng.IController {
 									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 								}
 							}
-							
+
 						})
 						.catch((error) => {
 							this.showTreeInPane();
@@ -253,14 +238,14 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		this.$scope.$watch(() => this.TreeService.selectionData,
-			(selectionData) => {
-				if (selectionData) {
+		this.$scope.$watch(() => this.TreeService.selectedIndex,
+			(selectedIndex) => {
+				if (selectedIndex) {
 
 					this.setContentHeight(this.fetchNodesToShow());
 
 					this.$timeout(() => {}).then(() => {
-						this.topIndex = selectionData.selectedIndex;
+						this.topIndex = selectedIndex;
 					});
 
 				}
@@ -288,7 +273,6 @@ class TreeController implements ng.IController {
 		}, 150);
 
 	}
-
 
 	public showTreeInPane() {
 		this.searching = false;
@@ -430,18 +414,8 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		let state;
-		if (node.toggleState === "invisible") {
-			state = "visible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-			if (this.TreeService.hideIfc) {
-				this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
-			}
-		} else {
-			state = "invisible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-		}
-		
+		let newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		this.TreeService.setTreeNodeStatus(node, newState);
 	}
 
 	/**
@@ -450,7 +424,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode());
+		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
 	}
 
 	public filterItemSelected(item) {
@@ -471,7 +445,7 @@ class TreeController implements ng.IController {
 
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
-			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode());
+			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
 		}
 
 	}

@@ -48,14 +48,14 @@ export class PanelService {
 					noToggle: true,
 					icon: "fa-print",
 				},
-				{
+				/*{
 					hidden: false,
 					value: "importBCF",
 					label: "Import BCF",
 					selected: false,
 					noToggle: true,
 					icon: "fa-upload",
-				},
+				},*/
 				{
 					hidden: false,
 					value: "exportBCF",
@@ -221,6 +221,19 @@ export class PanelService {
 	// 		}
 
 	// 	}
+
+	public setHideIfc(value: boolean) {
+		const issuesCardIndex = 1; // index of tree panel
+		const menuItemIndex = 2; // index of hideIfc
+		
+		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
+			.menu[menuItemIndex];
+
+		// Change state if different
+		if (hideIfcMenuItem.selected !== value) {
+			hideIfcMenuItem.selected = value;
+		}
+	}
 
 }
 

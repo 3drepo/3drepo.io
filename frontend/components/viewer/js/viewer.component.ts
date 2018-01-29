@@ -28,7 +28,6 @@ class ViewerController implements ng.IController {
 		"ClientConfigService",
 		"EventService",
 		"ViewerService",
-		"CompareService",
 	];
 
 	private account: any;
@@ -48,7 +47,6 @@ class ViewerController implements ng.IController {
 		private ClientConfigService,
 		private EventService,
 		private ViewerService,
-		private CompareService,
 	) {
 
 		$scope.$watch(() => {

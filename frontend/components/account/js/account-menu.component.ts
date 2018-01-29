@@ -28,9 +28,9 @@ class AccountMenuController implements ng.IController {
 
 	private $mdOpenMenu;
 	private userAccount;
-	private showLiteModeButton;
+	//private showLiteModeButton;
 	private isMobileDevice;
-	private isLiteMode;
+	//private isLiteMode;
 
 	constructor(
 		private $location: any,
@@ -44,14 +44,14 @@ class AccountMenuController implements ng.IController {
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
-		this.isLiteMode = this.isMobileDevice;
+		// this.isLiteMode = this.isMobileDevice;
 
-		this.$scope.$watch("vm.isLiteMode", () => {
+		// this.$scope.$watch("vm.isLiteMode", () => {
 
-			if (this.isLiteMode !== undefined) {
-				this.isMobileDevice = this.isLiteMode;
-			}
-		});
+		// 	if (this.isLiteMode !== undefined) {
+		// 		this.isMobileDevice = this.isLiteMode;
+		// 	}
+		// });
 	}
 
 	/**
@@ -93,7 +93,7 @@ class AccountMenuController implements ng.IController {
 
 export const AccountMenuComponent: ng.IComponentOptions = {
 	bindings: {
-		showLiteModeButton: "=",
+		//showLiteModeButton: "=",
 		isMobileDevice: "=",
 	},
 	controller: AccountMenuController,
