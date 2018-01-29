@@ -105,22 +105,27 @@ export class UnityUtil {
 	 * Handle a error from Unity
 	 */
 	public static onUnityError(err, url, line) {
-		let conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
-					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
-					(such as Chrome or Firefox), reduce your memory usage and try again.
-					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.`;
-
+		let conf;
 		let reload = false;
+
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
 			reload = true;
-			conf += `<br><br> Click OK to refresh this page<md-container>`;
+			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
+					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
+					(such as Chrome or Firefox), reduce your memory usage and try again.
+					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
+					<br><md-container>`;
 		} else {
-			conf += `<br><md-container>`;
+			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
+				<br><br> Click OK to refresh this page<md-container>`;
 		}
 
-		UnityUtil.userAlert(conf, reload);
+		const isUnityError = reload;
+
+		UnityUtil.userAlert(conf, reload, isUnityError);
 
 		return true;
 	}
@@ -157,14 +162,14 @@ export class UnityUtil {
 
 	}
 
-	public static userAlert(message, reload) {
+	public static userAlert(message, reload, isUnity) {
 
 		if (!UnityUtil.unityHasErrored) {
 
 			// Unity can error multiple times, we don't want
 			// to keep annoying the user
 			UnityUtil.unityHasErrored = true;
-			UnityUtil.errorCallback(message, reload);
+			UnityUtil.errorCallback(message, reload, isUnity);
 		}
 
 	}
@@ -180,7 +185,7 @@ export class UnityUtil {
 			}).catch((error) => {
 				if (error !== "cancel") {
 					console.error("UnityUtil.onLoaded() failed: ", error);
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 				}
 			});
 		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
@@ -189,7 +194,7 @@ export class UnityUtil {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 			}).catch((error) => {
 				if (error !== "cancel") {
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 					console.error("UnityUtil.onLoading() failed: ", error);
 				}
 			});
@@ -198,7 +203,7 @@ export class UnityUtil {
 				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 			}).catch((error) => {
 				if (error !== "cancel") {
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 					console.error("UnityUtil.onReady() failed: ", error);
 				}
 			});
@@ -393,6 +398,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set tolerance threshold
+	 * @param {string} theshold - tolerance level for diffing/clashing
+	 */
+	public static diffToolSetThreshold(theshold) {
+		UnityUtil.toUnity("DiffToolSetThreshold", UnityUtil.LoadingState.MODEL_LOADED, theshold);
+
+	}
+
+	/**
 	* Only show the comparator model
 	* i.e. Only show the model you are trying to compare with, not the base model
 	*/
@@ -482,7 +496,7 @@ export class UnityUtil {
 		if (account && model) {
 			nameSpace = account + "." + model;
 		}
-		if (UnityUtil.objectStatusPromise) {
+		if (UnityUtil.objectStatusPromise && UnityUtil.objectStatusPromise.then) {
 			UnityUtil.objectStatusPromise.then(() => {
 				UnityUtil._getObjectsStatus(nameSpace, promise);
 			});

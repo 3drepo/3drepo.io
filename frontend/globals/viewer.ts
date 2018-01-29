@@ -406,21 +406,20 @@ export class Viewer {
 
 	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
 
-		const canHighlight = !this.pinDropMode && !this.measureMode;
+		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
 		if (canHighlight) {
 
-			idsIn = idsIn || [];
-			const uniqueIds = idsIn.filter((value, index) => {
-				return idsIn.indexOf(value) === index;
-			});
-
-			if (uniqueIds.length) {
-				const multi = multiOverride || this.multiSelectMode;
-				UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
-			} else {
-				UnityUtil.clearHighlights();
+			if (idsIn) {
+				const uniqueIds = Array.from(new Set(idsIn));
+				if (uniqueIds.length) {
+					const multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
+					return;
+				} 
 			}
+
+			UnityUtil.clearHighlights();
 
 		}
 
@@ -493,6 +492,7 @@ export class Viewer {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
+		this.initialized = false;
 		UnityUtil.reset();
 	}
 
@@ -504,6 +504,7 @@ export class Viewer {
 	public loadModel(account, model, branch, revision) {
 
 		return UnityUtil.onReady().then(() => {
+			this.initialized = true;
 			this.account = account;
 			this.model = model;
 			this.branch = branch;

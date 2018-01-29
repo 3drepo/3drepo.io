@@ -22,8 +22,8 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing"}) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const UserBilling = require("../../models/userBilling");
 const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const helpers = require("./helpers");

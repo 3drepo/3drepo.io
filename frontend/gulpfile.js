@@ -10,7 +10,6 @@ const watch = require('gulp-watch');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
 const sourcemaps = require('gulp-sourcemaps');
-const merge = require('streamqueue');
 const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
@@ -20,6 +19,8 @@ const del = require('del');
 
 const ts = require('gulp-typescript');
 const localWebpack = require('webpack');
+
+let isWatch = false;
 
 const tsConfig = {
   typescript: require("typescript"),
@@ -50,11 +51,17 @@ const allJs = ['_built/ts-components.js', 'components/**/*.js'];
 const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
 const icons = './icons/*.svg';
 
+function exitOnError(error) {
+  gutil.log(gutil.colors.red('[Error]'), error.toString());
+  if (!isWatch) {
+    process.exit(1);
+  }
+}
+
 function swallowError (error) {
 
   // If you want details of the error in the console
   console.log(error.toString())
-
   this.emit('end')
 }
 
@@ -206,7 +213,7 @@ gulp.task("typescript-components", function(done){
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['components/**/*.ts'])
     .pipe(ts(tsConfig))
-    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+    .on('error', exitOnError)
     .pipe(gulp.dest('./_built/amd/components/'))
     .on("end", done)
 
@@ -222,7 +229,7 @@ gulp.task("amd-components", function(done){
         filename: 'ts-components.js',
       },
     }, localWebpack))
-    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+    .on('error', exitOnError)
     .pipe(gulp.dest('./_built/'))
     .on("end", done)
 
@@ -236,7 +243,7 @@ gulp.task("typescript-globals", function(done) {
   // COMPILE TYPESCRIPT TO AMD
   return gulp.src(['globals/*.ts'])
     .pipe(ts(tsConfig))
-    .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+    .on('error', exitOnError)
     .pipe(gulp.dest('./_built/amd/globals/'))
     .on("end", done)
 
@@ -252,7 +259,7 @@ gulp.task("amd-dependencies", function(done){
           filename: 'dependencies.js',
         },
       }, localWebpack))
-      .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+      .on('error', exitOnError)
       .pipe(gulp.dest('./_built/'))
       .on("end", done)
 
@@ -283,7 +290,7 @@ gulp.task('javascript-build', function(done){
           .pipe(sourcemaps.init())
           .pipe(concat("three_d_repo.min.js"))
           .pipe(uglify({mangle: false})) // Mangle causes error for some reason
-            .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
+            .on('error', exitOnError)
           .pipe(size())
           .pipe(sourcemaps.write('./maps'))
           .pipe(gulp.dest("./../public/dist/"))
@@ -338,7 +345,7 @@ gulp.task("typedoc", function() {
 
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
-
+  isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true })
 
   // WATCHERS

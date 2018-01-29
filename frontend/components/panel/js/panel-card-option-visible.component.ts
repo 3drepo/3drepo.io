@@ -17,11 +17,24 @@
 
 class PanelCardOptionVisibleController implements ng.IController {
 
+	public static $inject: string[] = [
+		"$scope",
+	];
+
 	private visible;
 	private icon;
 
-	constructor() {
+	constructor(
+		private $scope: ng.IScope,
+	) {
 		this.icon = "visibility";
+	}
+
+	public $ngInit() {
+		this.$scope.$watch("vm.visible", () => {
+			// console.log("vm.visible", this.visible);
+			//
+		});
 	}
 
 	public toggleVisible(event) {

@@ -628,6 +628,7 @@ class AccountItemsController implements ng.IController {
 
 			})
 			.catch((error) => {
+				console.log(this);
 				const title = "Error Saving Federation";
 				const action = "saving the federation";
 				this.errorDialog(title, action, error);
@@ -723,6 +724,7 @@ class AccountItemsController implements ng.IController {
 			desc: "",
 			type: "",
 			subModels: [],
+			unit: "mm",
 		};
 
 		this.federationErrorMessage = "";
@@ -843,7 +845,9 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public showAllModelDialogInputs(): boolean {
-		return this.teamspaceAndProjectSelected() && this.newModelData.name.length > 0;
+		return this.teamspaceAndProjectSelected() &&
+			this.newModelData.name &&
+			this.newModelData.name.length;
 	}
 
 	public teamspaceAndProjectSelected(): boolean {
@@ -947,7 +951,8 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public errorDialog(title, action, error) {
-		const message = (error.data.message) ? error.data.message : "Unknown Error";
+		console.log(error);
+		const message = (error && error.data && error.data.message) ? error.data.message : "Unknown Error";
 		const content = "Something went wrong " +  action + ": <br><br>" +
 			"<strong> " + message + "</strong>" +
 			"<br><br> If this is unexpected please message support@3drepo.io.";

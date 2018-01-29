@@ -33,7 +33,7 @@ export class RevisionsService {
 	) {
 		this.revisionDateFilter = this.$filter("revisionDate");
 		this.status = {
-			data: null,
+			data: {},
 			ready: false,
 		};
 	}
@@ -45,11 +45,11 @@ export class RevisionsService {
 
 				if (response.status === 200) {
 					this.status.ready = true;
-					this.status.data = response.data;
+					this.status.data[account + ":" + model] = response.data;
 					return response.data;
 				} else {
 					this.status.ready = false;
-					this.status.data = response.data;
+					this.status.data[account + ":" + model] = null;
 					return response.data;
 				}
 
