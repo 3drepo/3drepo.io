@@ -275,7 +275,7 @@ export class TreeService {
 					subTree.parent = idToObjRef[treeId];
 
 					// Correct main tree using incoming subtree for federation
-					let nodeIdsToUpdate = subTree.parent.path.split("__");
+					const nodeIdsToUpdate = subTree.parent.path.split("__");
 
 					for (let i = nodeIdsToUpdate.length - 1; i >= 0; i--) {
 						const nodeToUpdate = idToObjRef[nodeIdsToUpdate[i]];
@@ -424,11 +424,6 @@ export class TreeService {
 		this.nodesToShow[0].expanded = false;
 		this.nodesToShow[0].selected = false;
 		this.nodesToShow[0].hasChildren = this.nodesToShow[0].children;
-
-		// Only make the top node visible if it does not have a toggleState
-		if (!this.nodesToShow[0].hasOwnProperty("toggleState")) {
-			this.updateParentVisibility(this.nodesToShow[0]);
-		}
 	}
 
 	/**
@@ -519,11 +514,11 @@ export class TreeService {
 	public updateParentVisibility(node: any) {
 
 		if (node) {
-			const priorToggleState = node.toggleState.slice(1);
+			const priorToggleState = node.toggleState;
 
 			this.updateParentVisibilityByChildren(node);
 
-			if (priorToggleState !== node.toggleState) {
+			if (priorToggleState !== node.toggleState || this.isLeafNode(node)) {
 				const path = this.getPath(node._id);
 				if (path && path.length > 1) {
 					// Fast forward up path for parentOfInvisible state
@@ -657,8 +652,8 @@ export class TreeService {
 					// Sometimes we have an edge case where an object doesn't exist in the tree
 					// because it has no name. It is often objects like a window, so what we do
 					// is select its parent object to highlight that instead
-					const specialNodeParent = this.getNodeById(path[i-1]);
-					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
+					const specialNodeParent = this.getNodeById(path[i - 1]);
+					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
 				}
 			}
 		}
@@ -729,11 +724,13 @@ export class TreeService {
 		if (node && ("parentOfInvisible" === visibility || visibility !== node.toggleState)) {
 			const priorToggleState = node.toggleState;
 
- 			let children = [node];
-			let parentNode = node;
+			let children = [];
+			const parentNode = node;
 
 			if (node.children) {
 				children = children.concat(node.children);
+			} else {
+				children = [node];
 			}
 
 			while (children.length > 0) {
@@ -777,20 +774,6 @@ export class TreeService {
 	}
 
 	/**
-	 * Save current toggleState as defaultState.
-	 * @param node	Root tree node to set.
-	 */
-	public saveDefaultNodeState(node: any) {
-		if (node) {
-			node.defaultState = node.toggleState;
-
-			for (let i = 0; node.children && i < node.children.length; i++) {
-				this.saveDefaultNodeState(node.children[i]);
-			}
-		}
-	}
-
-	/**
 	 * Isolate selected objects by hiding all other objects.
 	 */
 	public isolateSelected() {
@@ -806,8 +789,9 @@ export class TreeService {
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
-		//return !(this.state.hideIfc && this.getHiddenByDefaultNodes().indexOf(node) !== -1);
-		return !(this.state.hideIfc && ((node.defaultState && "invisible" === node.defaultState) || this.getHiddenByDefaultNodes().indexOf(node) !== -1));
+		return !(this.state.hideIfc && (
+			(node.defaultState && "invisible" === node.defaultState) ||
+			this.getHiddenByDefaultNodes().indexOf(node) !== -1));
 	}
 
 	/**

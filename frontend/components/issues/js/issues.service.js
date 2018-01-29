@@ -551,9 +551,6 @@
 				TreeService.showProgress = false;
 				handleShowIssue(issue);
 			}
-
-			
-
 		}
 
 		function handleShowIssue(issue) {
@@ -671,7 +668,6 @@
 							}
 						}
 					}
-			
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -684,17 +680,13 @@
 				.then(function(treeMap){
 
 					if (objects) {
-						objects.forEach(function(obj){
-							//var account = obj.account;
-							//var model = obj.model;
-							//var key = account + "@" + model;
-
-							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
-							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)], "invisible", false);
-
-						});
+						const hiddenNodes = [];
+						for (var i = 0; i < objects.length; i++) {
+							// Make a list of nodes to hide
+							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+						}
+						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
-
 				})
 				.catch(function(error) {
 					console.error(error);
