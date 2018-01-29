@@ -325,19 +325,24 @@
 			// Do the same for all subModels
 			if(vm.subModels){
 				vm.subModels.forEach(function(subModel){
-					var submodel = true;
-					NotificationService.subscribe.newIssues(
-						subModel.database, 
-						subModel.model, 
-						function(issues){ 
-							vm.newIssueListener(issues, submodel); 
-						}
-					);
-					NotificationService.subscribe.issueChanged(
-						subModel.database,
-						subModel.model, 
-						vm.handleIssueChanged
-					);
+					//var submodel = true;
+					if (subModel) {
+						NotificationService.subscribe.newIssues(
+							subModel.database, 
+							subModel.model, 
+							function(issues){ 
+								vm.newIssueListener(issues, subModel); 
+							}
+						);
+						NotificationService.subscribe.issueChanged(
+							subModel.database,
+							subModel.model, 
+							vm.handleIssueChanged
+						);
+					} else {
+						console.error("Submodel was expected to be defined for issue subscription: ", subModel);
+					}
+					
 				});
 			}
 
@@ -346,44 +351,7 @@
 		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
-
-				if (issue) {
-					var issueShouldShow = false;
-
-					if (vm.revisions && vm.revisions.length) {
-
-						var currentRevision;
-						var issueRevision;
-
-						issueRevision = vm.revisions.find(function(rev){
-							return rev._id === issue.rev_id;
-						});
-
-						if(!vm.revision){
-							currentRevision = vm.revisions[0];
-						} else {
-							currentRevision = vm.revisions.find(function(rev){
-								return rev._id === vm.revision || rev.tag === vm.revision;
-							});
-						}
-
-						var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
-						issueShouldShow = issueRevision && issueInDate;
-					} else {
-						issueShouldShow = true;
-					}
-
-					if(issueShouldShow){
-						
-						IssuesService.addIssue(issue);
-						
-					}
-				} else {
-					console.error("Issue is undefined/null: ", issue);
-				}
-				
-				
-
+				vm.shouldShowIssue(issue, submodel);
 			});
 
 		};
@@ -408,6 +376,75 @@
 
 		});
 
+		vm.shouldShowIssue = function(issue, submodel) {
+			
+			if (!issue) {
+				console.error("Issue is undefined/null: ", issue);
+				return;
+			}
+
+			var isSubmodelIssue = (submodel !== undefined);
+			var issueShouldAdd = false;
+
+			if (vm.revisions && vm.revisions.length) {
+
+				var currentRevision;
+
+				// vm.revision will be null if on head revision
+				// as it is not set via the URL state
+				if (!vm.revision){
+					currentRevision = vm.revisions[0]; // Set it to the top revision
+				} else {
+					currentRevision = vm.revisions.find(function(rev){
+						return rev._id === vm.revision || rev.tag === vm.revision;
+					});
+				}
+
+				// If Federation 
+				if (!isSubmodelIssue) {
+					issueShouldAdd = vm.checkIssueShouldAdd(issue, currentRevision, vm.revisions);
+					if (issueShouldAdd) {
+						IssuesService.addIssue(issue);
+					}
+				} 	
+				
+				// If submodel 
+				if (isSubmodelIssue) {
+
+					if (submodel) {
+
+						RevisionsService.listAll(submodel.database, submodel.model)
+							.then(function(submodelRevisions){
+								issueShouldAdd = vm.checkIssueShouldAdd(issue, currentRevision, submodelRevisions);
+								if (issueShouldAdd) {
+									IssuesService.addIssue(issue);
+								}
+							})
+							.catch(function(error){
+								console.error("Something went wrong getting submodel revisions", error);
+							});
+					}
+
+				}
+			}
+
+		};
+
+		vm.checkIssueShouldAdd = function(issue, currentRevision, revisions) {
+
+			var issueRevision = revisions.find(function(rev){
+				return rev._id === issue.rev_id;
+			});
+
+			if (!issueRevision || !currentRevision) {
+				console.error("Issue revision or current revision are not set: ", issueRevision, currentRevision);
+				return true;
+			}
+
+			var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+			return issueRevision && issueInDate;
+
+		};
 
 		/**
 		* import bcf

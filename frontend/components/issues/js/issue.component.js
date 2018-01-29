@@ -46,7 +46,7 @@
 		"IssuesService", "APIService", "NotificationService", "AuthService", 
 		"$timeout", "$scope", "ClientConfigService", "AnalyticService", 
 		"$state", "StateManager", "MeasureService", "ViewerService",
-		"DialogService"
+		"TreeService", "DialogService"
 	];
 
 	function IssueCtrl (
@@ -54,7 +54,7 @@
 		IssuesService, APIService, NotificationService, AuthService, 
 		$timeout, $scope, ClientConfigService, AnalyticService, 
 		$state, StateManager, MeasureService, ViewerService,
-		DialogService
+		TreeService, DialogService
 	) {
 		
 		var vm = this;
@@ -705,6 +705,7 @@
 				.then(function (viewpoint) {
 					objectsPromise.promise
 						.then(function(objectInfo) {
+							viewpoint.hideIfc = TreeService.getHideIfc();
 							handleObjects(viewpoint, objectInfo, screenShotPromise);
 						})
 						.catch(function(error){
@@ -894,6 +895,7 @@
 						if (angular.isDefined(vm.commentThumbnail)) {
 							vm.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 							vm.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+							vm.commentViewpoint.hideIfc = TreeService.getHideIfc();
 							IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
 								.then(function (response) {
 									vm.saving = false;
@@ -913,6 +915,7 @@
 							viewpointPromise.promise.then(function (viewpoint) {
 								viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 								viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+								viewpoint.hideIfc = TreeService.getHideIfc();
 								IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
 									.then(function (response) {
 										vm.saving = false;
@@ -1023,9 +1026,11 @@
 		 */
 		vm.deleteComment = function(event, index) {
 			event.stopPropagation();
-			IssuesService.deleteComment(vm.issueData, index)
+			var commentIndex = (vm.issueData.comments.length - 1) - index;
+
+			IssuesService.deleteComment(vm.issueData, commentIndex)
 				.then(function() {
-					vm.issueData.comments.splice(index, 1);
+					vm.issueData.comments.splice(commentIndex, 1);
 				})
 				.catch(function(error){
 					vm.errorDeleteComment(error);

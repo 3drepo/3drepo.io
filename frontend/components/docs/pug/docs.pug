@@ -1,9 +1,14 @@
 md-list.typesList
+	div(ng-if="vm.noMetadata" layout="column" layout-align="center center")
+		h3 Model has no metadata!
+
 	#docItem(ng-repeat="(key, value) in vm.docs")
-	
+		
 		// Meta data
 		div(ng-if="key==='Meta Data'")
-			.dataItem(ng-repeat="metadataItem in value.data", layout="column", flex)
+			.dataItem(
+				ng-if="!vm.noMetadata"
+				ng-repeat="metadataItem in value.data", layout="column", flex)
 				
 				div(ng-repeat="(mKey, mValue) in metadataItem.metadata"
 					layout="row", layout-align="space-between start"

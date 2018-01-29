@@ -106,7 +106,7 @@ class BottomButtonsController implements ng.IController {
 	}
 
 	public showAll() {
-		this.TreeService.showAllTreeNodesAndIFCs();
+		this.TreeService.showAllTreeNodes();
 	}
 
 	public isolate() {

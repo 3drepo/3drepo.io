@@ -27,6 +27,7 @@ export class DocsService {
 
 	private state: any;
 	private docTypeHeight: number;
+	private noMetadata: boolean;
 
 	constructor(
 		private $q: any,
@@ -35,6 +36,7 @@ export class DocsService {
 		private APIService: any,
 		private TreeService: any,
 	) {
+		this.noMetadata = false;
 		this.docTypeHeight = 50;
 		this.state = {
 			disabled: false,
@@ -58,7 +60,7 @@ export class DocsService {
 		this.getDocs(account, model, id)
 			.then((data) => {
 
-				console.log("DOCS - ", data)
+				console.log("DOCS - ", data);
 
 				if (!data) {
 					return;
@@ -93,7 +95,7 @@ export class DocsService {
 			.then((treeMap) => {
 				const metadataIds = treeMap.oIdToMetaId[object.id];
 				if (metadataIds && metadataIds.length) {
-
+					this.state.noMetadata = false;
 					this.updateDocs(
 						object.account,
 						object.model,
@@ -101,7 +103,8 @@ export class DocsService {
 					);
 
 				} else {
-					this.state.show = false;
+					this.state.noMetadata = true;
+					this.state.show = true;
 				}
 		});
 

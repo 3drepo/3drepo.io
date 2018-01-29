@@ -85,8 +85,6 @@
 			vm.state = StateManager.state;
 			vm.query = StateManager.query;
 
-			vm.isMobileDevice = true;
-
 			vm.legalDisplays = [];
 			if (angular.isDefined(ClientConfigService.legal)) {
 				vm.legalDisplays = ClientConfigService.legal;
@@ -173,6 +171,12 @@
 			});	
 
 		};
+
+		$scope.$watch("vm.isMobileDevice", function() {
+
+			console.log("vm.isMobileDevice changed", vm.isMobileDevice);
+			
+		});
 
 		$scope.$watch(function(){
 			return $location.path();
@@ -274,10 +278,13 @@
 		};
 
 		vm.isMobile = function() {
-
+			
 			var mobile = screen.width <= 768;
+			console.log("isMobile", mobile);
 
 			if (mobile) {
+				//vm.showLiteModeButton = true;
+				//console.log(vm.showLiteModeButton);
 				vm.handleMobile();
 			}
 
@@ -299,9 +306,17 @@
 					.title("3D Repo Lite")
 					.textContent(message)
 					.ariaLabel("3D Repo Lite Dialog")
+					.cancel("Run the full version")
 					.ok("OK")
 					
-			);
+			)
+				.then(function(a) {
+					console.log("ok");
+				})
+				.catch(function(b) {
+					console.log("cancel");
+					vm.isMobileDevice = false;
+				});
 
 		};
 

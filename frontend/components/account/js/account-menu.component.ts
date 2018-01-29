@@ -19,7 +19,7 @@ class AccountMenuController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$location",
-
+		"$scope",
 		"AuthService",
 		"ViewerService",
 		"IssuesService",
@@ -28,9 +28,13 @@ class AccountMenuController implements ng.IController {
 
 	private $mdOpenMenu;
 	private userAccount;
+	//private showLiteModeButton;
+	private isMobileDevice;
+	//private isLiteMode;
 
 	constructor(
 		private $location: any,
+		private $scope: any,
 
 		private AuthService: any,
 		private ViewerService: any,
@@ -40,6 +44,14 @@ class AccountMenuController implements ng.IController {
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
+		// this.isLiteMode = this.isMobileDevice;
+
+		// this.$scope.$watch("vm.isLiteMode", () => {
+
+		// 	if (this.isLiteMode !== undefined) {
+		// 		this.isMobileDevice = this.isLiteMode;
+		// 	}
+		// });
 	}
 
 	/**
@@ -80,7 +92,10 @@ class AccountMenuController implements ng.IController {
 }
 
 export const AccountMenuComponent: ng.IComponentOptions = {
-	bindings: {},
+	bindings: {
+		//showLiteModeButton: "=",
+		isMobileDevice: "=",
+	},
 	controller: AccountMenuController,
 	controllerAs: "vm",
 	templateUrl: "templates/account-menu.html",

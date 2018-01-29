@@ -523,11 +523,38 @@
 			}
 		}
 
-		function showIssue(issue) {
-			var issueData;
-				
+		function showIssue(issue) {		
+
+			TreeService.showProgress = true;
+
 			showIssuePins();
 
+			// Remove highlight from any multi objects
+			ViewerService.highlightObjects([]);
+			
+			// Reset object visibility
+			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
+				TreeService.setHideIfc(issue.viewpoint.hideIfc);
+			}
+			TreeService.showAllTreeNodes();
+
+			// Show multi objects
+			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
+
+				showMultiIds(issue).then( function() {
+					TreeService.showProgress = false;
+					handleShowIssue(issue);
+				});
+				
+		
+			} else {
+				TreeService.showProgress = false;
+				handleShowIssue(issue);
+			}
+		}
+
+		function handleShowIssue(issue) {
+			var issueData;
 			if(issue.viewpoint.position.length > 0) {
 				// Set the camera position
 				issueData = {
@@ -538,9 +565,10 @@
 					account: issue.account,
 					model: issue.model
 				};
+				
+				ViewerService.setCamera(issueData);
 
-				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, issueData);
-
+				// TODO: Use ViewerService
 				// Set the clipping planes
 				issueData = {
 					clippingPlanes: issue.viewpoint.clippingPlanes,
@@ -555,68 +583,68 @@
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
-
-			// Remove highlight from any multi objects
-			ViewerService.highlightObjects([]);
-
-			// clear selection
-			EventService.send(EventService.EVENT.RESET_SELECTED_OBJS, []);
-
-			// Show multi objects
-			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
-
-				showMultiIds(issue);
-		
-			}
 		}
 
 		function showMultiIds(issue) {
+
+			var promises = [];
+
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
 					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
 
-					APIService.get(highlightedGroupUrl)
+					var highlightPromise = APIService.get(highlightedGroupUrl)
 						.then(function (response) {
-							handleHighlights(response.data.objects);
+							return handleHighlights(response.data.objects);
 						})
 						.catch(function(error){
 							console.error("There was a problem getting the highlights: ", error);
 						});
+
+					promises.push(highlightPromise);
+
 				}
 				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
 					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
 
-					APIService.get(hiddenGroupUrl)
+					var hiddenPromise = APIService.get(hiddenGroupUrl)
 						.then(function (response) {
-							handleHidden(response.data.objects);
+							return handleHidden(response.data.objects);
 						})
 						.catch(function(error){
 							console.error("There was a problem getting visibility: ", error);
 						});
+
+					promises.push(hiddenPromise);
+					
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
 				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
 
-				APIService.get(groupUrl)
+				var handleTreePromise = APIService.get(groupUrl)
 					.then(function (response) {
 						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
 							response.data.hiddenObjects = null;
 						}
-						handleTree(response);
+						return handleTree(response);
 					})
 					.catch(function(error){
 						console.error("There was a problem getting the highlights: ", error);
 					});
+
+				promises.push(handleTreePromise);
+
 			}
+
+			return Promise.all(promises);
 		}
 
 		function handleHighlights(objects) {
-			var ids = [];
-			
+
 			TreeService.getMap()
 				.then(function(treeMap){
 
@@ -625,26 +653,21 @@
 
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
-						var account = obj.account;
-						var model = obj.model;
-						var key = account + "@" + model;
-						if(!ids[key]){
-							ids[key] = [];
-						}	
-
 						var objUid = treeMap.sharedIdToUid[obj.shared_id];
 						
 						if (objUid) {
-							ids[key].push(objUid);
+				
 							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true);
+								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
 							} else {
 								// Only call expandToSelection for last selected node to improve performance
+
+								TreeService.initNodesToShow([TreeService.allNodes[0]]);
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
+								
 							}
 						}
 					}
-			
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -652,39 +675,18 @@
 		}
 
 		function handleHidden(objects) {
-			var objectIdsToHide = [];
-			
+
 			TreeService.getMap()
 				.then(function(treeMap){
 
-					// show currently hidden nodes
-					var hideIfcState = TreeService.getHideIfc();
-					TreeService.setHideIfc(false);
-					TreeService.showAllTreeNodes();
-					
 					if (objects) {
-						objects.forEach(function(obj){
-							var account = obj.account;
-							var model = obj.model;
-							var key = account + "@" + model;
-							if(!objectIdsToHide[key]){
-								objectIdsToHide[key] = [];
-							}	
-
-							objectIdsToHide[key].push(treeMap.sharedIdToUid[obj.shared_id]);
-
-						});
+						var hiddenNodes = [];
+						for (var i = 0; i < objects.length; i++) {
+							// Make a list of nodes to hide
+							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+						}
+						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
-
-					for (var ns in objectIdsToHide) {
-
-						objectIdsToHide[ns].forEach(function(obj) {
-							TreeService.toggleTreeNodeVisibilityById(obj);
-						});
-					}
-					
-					TreeService.setHideIfc(hideIfcState);
-
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -699,7 +701,7 @@
 
 			if (response.data.hiddenObjects) {
 				handleHidden(response.data.hiddenObjects);
-			}
+			} 
 
 		}
 
@@ -1060,15 +1062,15 @@
 
 			var deferred = $q.defer();
 
-			var bfcUrl = account + "/" + model + "/issues.bcfzip";
+			var bcfUrl = account + "/" + model + "/issues.bcfzip";
 			if(revision){
-				bfcUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
+				bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
 			}
 
 			var formData = new FormData();
 			formData.append("file", file);
 
-			APIService.post(bfcUrl, formData, {"Content-Type": undefined}).then(function(res){
+			APIService.post(bcfUrl, formData, {"Content-Type": undefined}).then(function(res){
 				
 				if(res.status === 200){
 					deferred.resolve();

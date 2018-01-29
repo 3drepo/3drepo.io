@@ -1,9 +1,11 @@
 // Progress
-tdr-progress(ng-if="vm.showProgress" info="vm.progressInfo")
+tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 
 // Tree
-.virtualRepeatInfiniteScroll(ng-if="!vm.showProgress", ng-show="vm.showTree")
-	md-virtual-repeat-container.vertical-container.virtual-repeat-full-height(md-top-index="vm.topIndex", ng-show="vm.showNodes")
+.virtualRepeatInfiniteScroll(ng-show="!vm.showProgress && vm.showTree")
+	md-virtual-repeat-container.vertical-container.virtual-repeat-full-height(
+		md-top-index="vm.topIndex"
+		ng-show="vm.showNodes")
 
 		.treeNodes.repeated-item(id="{{item._id}}" md-virtual-repeat="item in vm.nodesToShow")
 			.treeNode(
@@ -16,22 +18,22 @@ tdr-progress(ng-if="vm.showProgress" info="vm.progressInfo")
 				// Expand/collapse
 				md-button.md-icon-button.md-primary.expandButton.clickToExpand(
 					aria-label="Toggle Expand"
-					ng-click="vm.expand($event, item._id)"
-					ng-if="!item.status && !item.expanded && item.hasChildren")
+					ng-click="vm.toggleNodeExpansion($event, item._id)"
+					ng-if="!item.status && !item.expanded && (item.children && item.children.length)")
 
 					md-icon.angular-material-icons add_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickToCollapse(
 					aria-label="Toggle Expand"
-					ng-click="vm.expand($event, item._id)"
+					ng-click="vm.toggleNodeExpansion($event, item._id)"
 					ng-if="!item.status && item.expanded")
 					
 					md-icon.angular-material-icons indeterminate_check_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickNoEvent(
 					aria-label="Toggle Expand"
-					ng-click="vm.expand($event, item._id)"
-					ng-if="!item.status && !item.expanded && !item.hasChildren")
+					ng-click="vm.toggleNodeExpansion($event, item._id)"
+					ng-if="!item.status && !item.expanded && !(item.children && item.children.length)")
 
 					md-icon.angular-material-icons remove
 
@@ -72,10 +74,7 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 
 					p.filterListNodeName {{item.name}}
 
-				// Toggle visibility
-				//md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
-					md-icon.angular-material-icons(aria-label="Visible", ng-if="item.toggleState==='visible'") visibility
-					md-icon.angular-material-icons(aria-label="Invisible", ng-if="item.toggleState==='invisible'") visibility_off
+
 			md-divider(ng-if="item")
 
 .cardInfo(ng-if="vm.showFilterList && !vm.filterItemsFound")
