@@ -806,8 +806,8 @@ export class TreeService {
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
-		return !(this.state.hideIfc && this.getHiddenByDefaultNodes().indexOf(node) !== -1);
-		//return !(this.state.hideIfc && ((node.defaultState && "invisible" !== node.defaultState) || this.getHiddenByDefaultNodes().indexOf(node) !== -1));
+		//return !(this.state.hideIfc && this.getHiddenByDefaultNodes().indexOf(node) !== -1);
+		return !(this.state.hideIfc && ((node.defaultState && "invisible" === node.defaultState) || this.getHiddenByDefaultNodes().indexOf(node) !== -1));
 	}
 
 	/**
