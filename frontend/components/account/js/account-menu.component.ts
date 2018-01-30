@@ -19,23 +19,39 @@ class AccountMenuController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$location",
-
+		"$scope",
 		"AuthService",
 		"ViewerService",
+		"IssuesService",
+		"CompareService",
 	];
 
 	private $mdOpenMenu;
 	private userAccount;
+	//private showLiteModeButton;
+	private isMobileDevice;
+	//private isLiteMode;
 
 	constructor(
 		private $location: any,
+		private $scope: any,
 
 		private AuthService: any,
 		private ViewerService: any,
+		private IssuesService: any,
+		private CompareService: any,
 	) {}
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
+		// this.isLiteMode = this.isMobileDevice;
+
+		// this.$scope.$watch("vm.isLiteMode", () => {
+
+		// 	if (this.isLiteMode !== undefined) {
+		// 		this.isMobileDevice = this.isLiteMode;
+		// 	}
+		// });
 	}
 
 	/**
@@ -51,7 +67,7 @@ class AccountMenuController implements ng.IController {
 	 * Show user models
 	 */
 	public showTeamspaces() {
-		this.ViewerService.reset();
+		this.resetServices();
 		this.$location.path(this.AuthService.getUsername());
 	}
 
@@ -60,7 +76,13 @@ class AccountMenuController implements ng.IController {
 	 */
 	public logout() {
 		this.AuthService.logout();
+		this.resetServices();
+	}
+
+	public resetServices() {
 		this.ViewerService.reset();
+		this.IssuesService.resetIssues();
+		this.CompareService.reset();
 	}
 
 	public openUserManual() {
@@ -70,7 +92,10 @@ class AccountMenuController implements ng.IController {
 }
 
 export const AccountMenuComponent: ng.IComponentOptions = {
-	bindings: {},
+	bindings: {
+		//showLiteModeButton: "=",
+		isMobileDevice: "=",
+	},
 	controller: AccountMenuController,
 	controllerAs: "vm",
 	templateUrl: "templates/account-menu.html",

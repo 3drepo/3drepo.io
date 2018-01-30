@@ -2,7 +2,7 @@ import { USER, browser, by, element , env, expect, login, logout} from "./config
 
 describe("Account menu button", function() {
 
-	this.timeout(6000);
+	this.timeout(60000);
 
 	describe("should be", () => {
 		

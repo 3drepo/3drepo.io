@@ -16,12 +16,47 @@
  */
 "use strict";
 
+const config = require("./config.js");
+const winston = require("winston");
+require("winston-daily-rotate-file");
+
+let log;
+
+/**
+ * The repoLogger init and factory
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {string} id - Unique logger ID
+ * @returns
+ */
+const repoLogger = function (req, res, id) {
+
+	let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
+
+	self.uid = id;
+
+	if (req) {
+		self.session = req.session;
+		self.req = req;
+	}
+
+	self.res = res;
+
+	if (!log) {
+		console.log("createLogger", id);
+		log = createLogger();
+	}
+
+	self.logger = log;
+	self.startTime = (new Date())
+		.getTime();
+
+	return self;
+};
+
 function createLogger() {
 
-	const config = require("./config.js");
-	const winston = require("winston");
-	require("winston-daily-rotate-file");
-	
 	// Custom logging levels for logger
 	const customLevels = {
 		levels: {
@@ -78,33 +113,6 @@ function createLogger() {
 		transports: transports
 	});
 }
-
-/**
- * The repoLogger init and factory
- * 
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {string} id - Unique logger ID
- * @returns
- */
-const repoLogger = function (req, res, id) {
-	let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
-
-	self.uid = id;
-
-	if (req) {
-		self.session = req.session;
-		self.req = req;
-	}
-
-	self.res = res;
-
-	self.logger = createLogger();
-	self.startTime = (new Date())
-		.getTime();
-
-	return self;
-};
 
 /**
  * Function to log a message
@@ -191,6 +199,9 @@ repoLogger.prototype.logFatal = function (msg, meta) {
 	this.logMessage("fatal", msg, meta);
 };
 
+
+const systemLogger = new repoLogger(null, null, "system");
+
 /**
  * Middleware to call at the start of every request to
  * initialize logger
@@ -202,13 +213,14 @@ repoLogger.prototype.logFatal = function (msg, meta) {
  */
 module.exports.startRequest = function (req, res, next) {
 
-	const shortid = require("shortid");
 	const C = require("./constants");
 
 	req[C.REQ_REPO] = {};
-	req[C.REQ_REPO].logger = new repoLogger(req, res, shortid.generate()); // Create logger for this request
+	req[C.REQ_REPO].logger = systemLogger;
+	
+	// req[C.REQ_REPO].logger = new repoLogger(req, res, shortid.generate()); // Create logger for this request
 
 	next();
 };
 	
-module.exports.systemLogger = new repoLogger(null, null, "system");
+module.exports.systemLogger = systemLogger;

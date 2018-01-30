@@ -66,7 +66,6 @@
 		var stateStack       = [window.ClientConfig.structure];
 		var stateNameStack   = ["home"];
 
-		//console.log("stateStack", stateStack);
 		while (stateStack.length > 0) {
 			var stackLength      = stateStack.length;
 			var parentState      = stateStack[0];
@@ -162,10 +161,6 @@
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
-		// $rootScope.$on("$locationChangeStart", function(event, next, current) {
-		// 	console.log("locationChange");
-		// });
-
 		$rootScope.$on("$locationChangeSuccess", function() {
 
 			AnalyticService.sendPageView(location);
@@ -182,8 +177,9 @@
 
 	function StateManager(
 		$mdDialog, $location, $q, $state, $rootScope, 
-		$timeout, EventService, $window, AuthService, 
-		ClientConfigService, ViewerService
+		$timeout, $window, AuthService, 
+		ClientConfigService, ViewerService, IssuesService,
+		CompareService
 	) {
 				
 		var self = this;
@@ -200,10 +196,9 @@
 
 			// TODO: Do this properly using state manager
 			var path = "/";
-			//console.log("AuthService.getUsername", AuthService.getUsername());
+
 			if (AuthService.isLoggedIn() && AuthService.getUsername()) {
 				path = "/" + AuthService.getUsername();
-				//EventService.send(EventService.EVENT.SET_STATE, { account: AuthService.getUsername() });
 			}
 
 			$location.path(path);
@@ -363,14 +358,6 @@
 
 		this.stateVars   = {};
 
-		this.clearState = function(state) {
-			for (var state in self.state) {
-				if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state)) {
-					self.setStateVar(state, null);
-				}
-			}
-		};
-
 		this.clearQuery = function(state) {
 			for(var param in self.query) {
 				delete self.query[param];
@@ -445,9 +432,9 @@
 		};
 
 		this.setState = function(stateParams) {
-		// Copy all state parameters and extra parameters
-		// to the state#
-		//console.log('stateParams', stateParams);
+			// Copy all state parameters and extra parameters
+			// to the state
+
 			if(stateParams.noSet){
 				return;
 			}
@@ -471,7 +458,6 @@
 			var newStateName = self.genStateName();
 
 			if (Object.keys(self.changedState).length) {
-				EventService.send(EventService.EVENT.STATE_CHANGED, self.changedState);
 				self.changedState = {};
 			}
 
@@ -516,6 +502,8 @@
 				).then(function() {
 					$location.path(account);
 					ViewerService.reset();
+					CompareService.reset();
+					IssuesService.resetIssues();
 				}, function() {
 					
 				});
@@ -523,23 +511,15 @@
 
 		};
 
-		$rootScope.$watch(EventService.currentEvent, function(event) {
-			if (angular.isDefined(event) && angular.isDefined(event.type)) {
-				if (event.type === EventService.EVENT.SET_STATE) {
-					for (var key in event.value) {
-						if (key !== "updateLocation" && event.value.hasOwnProperty(key)) {
-							self.setStateVar(key, event.value[key]);
-						}
-					}
-
-					self.updateState();
-				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
-					self.clearState();
-				} else if (event.type === EventService.EVENT.UPDATE_STATE){
-					self.updateState(true);
+		this.setHomeState = function(value) {
+			for (var key in value) {
+				if (key !== "updateLocation" && value.hasOwnProperty(key)) {
+					self.setStateVar(key, value[key]);
 				}
 			}
-		});
+			self.updateState();
+		};
+
 	}
 
 
@@ -549,8 +529,8 @@
 
 	StateManager.$inject = [
 		"$mdDialog", "$location", "$q", "$state", "$rootScope",
-		"$timeout", "EventService", "$window", "AuthService",
-		"ClientConfigService", "ViewerService"
+		"$timeout", "$window", "AuthService",
+		"ClientConfigService", "ViewerService", "IssuesService", "CompareService"
 	];
 
 	angular.module("3drepo")

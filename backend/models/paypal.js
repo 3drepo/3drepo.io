@@ -24,17 +24,17 @@ const moment = require("moment");
 const url = require("url");
 const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
-const config = require('../config');
-const httpsPost = require('../libs/httpsReq').post;
-const querystring = require('../libs/httpsReq').querystring;
-const Mailer = require('../mailer/mailer');
-const IPN = require('./ipn');
-const Invoice = require('./invoice');
+const config = require("../config");
+const httpsPost = require("../libs/httpsReq").post;
+const querystring = require("../libs/httpsReq").querystring;
+const Mailer = require("../mailer/mailer");
+const IPN = require("./ipn");
+const Invoice = require("./invoice");
 
 paypal.configure({
-	'mode': config.paypal.mode, //sandbox or live
-	'client_id': config.paypal.client_id,
-	'client_secret': config.paypal.client_secret,
+	"mode": config.paypal.mode, //sandbox or live
+	"client_id": config.paypal.client_id,
+	"client_secret": config.paypal.client_secret,
 });
 
 let updateBillingAddress = function (billingAgreementId, billingAddress) {
@@ -59,10 +59,10 @@ let updateBillingAddress = function (billingAgreementId, billingAddress) {
 				});
 
 				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-				paypalError.message = err.response.message;
+				paypalError.message = err.response && err.response.message || err.message;
 				reject(paypalError);
 			} else {
-				systemLogger.logInfo('Billing address updated successfully on PayPal side',{
+				systemLogger.logInfo("Billing address updated successfully on PayPal side",{
 					billingAgreementId: billingAgreementId
 				});
 				resolve(paypalAddress);
@@ -153,8 +153,8 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 					systemLogger.logError(JSON.stringify(err));
 
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-
-					paypalError.message = err.response.message;
+					paypalError.message = err.response && err.response.message || err.message;
+			
 					reject(paypalError);
 				} else {
 					resolve(billingPlan);
@@ -172,7 +172,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 			if (hasProRata) {
 				desc += `This month's pro-rata: £${proRataAmount}. `;
 			}
-			desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
+			desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format("Do MMM YYYY")}`;
 
 			let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
 				billingPlan.id,
@@ -185,7 +185,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 				if (err) {
 					systemLogger.logError(JSON.stringify(err));
 					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-					paypalError.message = err.response.message;
+					paypalError.message = err.response && err.response.message || err.message;
 					reject(paypalError);
 				} else {
 
@@ -228,7 +228,7 @@ let executeAgreement = function(token){
 				reject(err);
 			} else if(
 				(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) ||
-				['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
+				["Expired", "Suspended", "Cancelled"].indexOf(billingAgreement.state) !== -1
 			){
 				reject(responseCodes.EXECUTE_AGREEMENT_ERROR);
 
@@ -242,14 +242,14 @@ let executeAgreement = function(token){
 let verifyGenuine = function(url, qs) {
 
 	return httpsPost(url, qs).then(resData => {
-		if(resData === 'VERIFIED') {
+		if(resData === "VERIFIED") {
 			return Promise.resolve();
 		} else {
-			return Promise.reject({ message: 'ipn message validation failed'});
+			return Promise.reject({ message: "ipn message validation failed"});
 		}
 	});
 
-}
+};
 
 let validateIPN = function(data){
 
@@ -260,7 +260,7 @@ let validateIPN = function(data){
 
 	let url = config.paypal.ipnValidateUrl;
 	let qs = querystring(data);
-	qs = 'cmd=_notify-validate&' + qs;
+	qs = "cmd=_notify-validate&" + qs;
 
 	//first verify this message is genuinely coming from paypal
 	return verifyGenuine(url, qs);
@@ -270,17 +270,17 @@ let determineIPNType = function(paymentInfo){
 
 	let type = paymentInfo.txn_type;
 
-	if(type === 'recurring_payment_profile_created'){
+	if(type === "recurring_payment_profile_created"){
 		return C.IPN_PAYMENT_INIT;
-	} else if (type === 'recurring_payment' && paymentInfo.payment_status === 'Completed'){
+	} else if (type === "recurring_payment" && paymentInfo.payment_status === "Completed"){
 		return C.IPN_PAYMENT_SUCCESS;
-	} else if (type === 'recurring_payment_profile_cancel'){
+	} else if (type === "recurring_payment_profile_cancel"){
 		return C.IPN_PAYMENT_CANCEL;
-	} else if (type === 'recurring_payment_suspended' || type === 'recurring_payment_suspended_due_to_max_failed_payment'){
+	} else if (type === "recurring_payment_suspended" || type === "recurring_payment_suspended_due_to_max_failed_payment"){
 		return C.IPN_PAYMENT_SUSPENDED;
-	} else if (type === 'recurring_payment_failed' || type === 'recurring_payment_skipped'){
+	} else if (type === "recurring_payment_failed" || type === "recurring_payment_skipped"){
 		return C.IPN_PAYMENT_FAILED;
-	} else if (paymentInfo.payment_status === 'Refunded'){
+	} else if (paymentInfo.payment_status === "Refunded"){
 		return C.IPN_PAYMENT_REFUNDED;
 	}
 
@@ -288,27 +288,27 @@ let determineIPNType = function(paymentInfo){
 };
 
 let handleIPN = function(paymentInfo){
-	const User = require('./user');
+	const User = require("./user");
 
 	let billingAgreementId = paymentInfo.recurring_payment_id;
 	let ipnType = determineIPNType(paymentInfo);
 
 	//save IPN
 	IPN.save(paymentInfo).catch(err => {
-		systemLogger.logError('Failed to save IPN', {err: err, billingAgreementId: billingAgreementId} );
+		systemLogger.logError("Failed to save IPN", {err: err, billingAgreementId: billingAgreementId} );
 	});
 
 	validateIPN(paymentInfo).then(() => {
 
 		if(ipnType === C.IPN_PAYMENT_INIT){
 			//ignore
-			systemLogger.logInfo('Payment init IPN', {billingAgreementId: billingAgreementId} );
+			systemLogger.logInfo("Payment init IPN", {billingAgreementId: billingAgreementId} );
 
 		} else if(ipnType === C.IPN_PAYMENT_SUCCESS){
 
 			return User.activateSubscription(billingAgreementId, {
 
-				gateway: 'PAYPAL',
+				gateway: "PAYPAL",
 				currency: paymentInfo.currency_code,
 				amount: paymentInfo.mc_gross,
 				createBilling: true,
@@ -319,12 +319,12 @@ let handleIPN = function(paymentInfo){
 				transactionId: paymentInfo.txn_id
 
 			}, paymentInfo).then(() => {
-				systemLogger.logInfo('payment confirmed and licenses activated', { billingAgreementId });
+				systemLogger.logInfo("payment confirmed and licenses activated", { billingAgreementId });
 			});
 
 		} else if (ipnType === C.IPN_PAYMENT_CANCEL) {
 			// ignore
-			systemLogger.logInfo('IPN said subscription canceled', { billingAgreementId });
+			systemLogger.logInfo("IPN said subscription canceled", { billingAgreementId });
 
 		} else if (ipnType === C.IPN_PAYMENT_FAILED){
 
@@ -335,11 +335,11 @@ let handleIPN = function(paymentInfo){
 					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`});
 				}
 
-				systemLogger.logInfo('Payment failed', { billingAgreementId, user: user.user });
+				systemLogger.logInfo("Payment failed", { billingAgreementId, user: user.user });
 
 				User.findByUserName(user.customData.billing.billingUser).then(billingUser => {
 					Mailer.sendPaymentFailedEmail(billingUser.customData.email, {
-						amount: paymentInfo.currency_code +  ' ' + (paymentInfo.mc_gross || paymentInfo.initial_payment_amount)
+						amount: paymentInfo.currency_code +  " " + (paymentInfo.mc_gross || paymentInfo.initial_payment_amount)
 					});
 				});
 
@@ -353,7 +353,7 @@ let handleIPN = function(paymentInfo){
 					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`, ipn: paymentInfo});
 				}
 
-				systemLogger.logInfo('Billing agreement suspended', { billingAgreementId, user: user.user });
+				systemLogger.logInfo("Billing agreement suspended", { billingAgreementId, user: user.user });
 
 				User.findByUserName(user.customData.billing.billingUser).then(billingUser => {
 					Mailer.sendSubscriptionSuspendedEmail(billingUser.customData.email, { billingUser: billingUser.user });
@@ -372,16 +372,16 @@ let handleIPN = function(paymentInfo){
 				Invoice.createRefund(user, {
 					billingAgreementId: billingAgreementId,
 					raw: paymentInfo,
-					gateway: 'PAYPAL',
+					gateway: "PAYPAL",
 					currency: paymentInfo.currency_code,
 					amount: paymentInfo.mc_gross,
 					transactionId: paymentInfo.txn_id,
 					paymentDate: new Date(paymentInfo.payment_date)
 
 				}).then(() => {
-					systemLogger.logInfo('Created and sent refund invoice to user', { billingAgreementId, user: user.user });
+					systemLogger.logInfo("Created and sent refund invoice to user", { billingAgreementId, user: user.user });
 				}).catch(err => {
-					systemLogger.logError('Error while creating refund notice', {err: err, user: user.user, ipn: paymentInfo} );
+					systemLogger.logError("Error while creating refund notice", {err: err, user: user.user, ipn: paymentInfo} );
 				});
 
 			});
@@ -389,7 +389,7 @@ let handleIPN = function(paymentInfo){
 		} else if(ipnType === C.IPN_UNKONWN) {
 
 			//other payment status we don't know how to deal with
-			return Promise.reject({ message: 'unexpected ipn message type'});
+			return Promise.reject({ message: "unexpected ipn message type"});
 		}
 
 	}).catch( err => {
@@ -397,7 +397,7 @@ let handleIPN = function(paymentInfo){
 		// log error and send email to support
 		if(err){
 
-			systemLogger.logError('Error while activating subscription', {err: err, billingAgreementId: billingAgreementId} );
+			systemLogger.logError("Error while activating subscription", {err: err, billingAgreementId: billingAgreementId} );
 
 			if(err.stack){
 				systemLogger.logError(err.stack);

@@ -67,7 +67,7 @@ md-dialog.newModelDialog(aria-label="New model")
 			md-input-container(ng-if="vm.showAllModelDialogInputs()")
 				label Unit
 				md-select(
-					ng-init="vm.newModelData.unit = vm.units[3].value"
+					ng-init="vm.newModelData.unit = vm.units[1].value"
 					ng-required="required"
 					ng-model="vm.newModelData.unit")
 					md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
