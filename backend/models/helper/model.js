@@ -389,8 +389,8 @@ function importToyProject(account, username){
 		return Promise.all([
 
 			importToyModel(account, username, 'Lego_House_Architecture', '9d8e8a6a-466e-46ea-b1bc-965dff2e143a', project.name),
-			//importToyModel(account, username, 'Lego_House_Landscape', 'b0d6e585-c5d6-4015-98a6-5e123112098a', project.name),
-			//importToyModel(account, username, 'Lego_House_Structure', 'f4cbbffd-9ba5-48ac-b3a5-22dd2bcf5190', project.name)
+			importToyModel(account, username, 'Lego_House_Landscape', 'b0d6e585-c5d6-4015-98a6-5e123112098a', project.name),
+			importToyModel(account, username, 'Lego_House_Structure', 'f4cbbffd-9ba5-48ac-b3a5-22dd2bcf5190', project.name)
 
 		]).then(models => {
 
