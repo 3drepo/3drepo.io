@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var _ = require('lodash');
+let _ = require("lodash");
 
 
 function Utils() {
@@ -41,7 +41,7 @@ function Utils() {
     *******************************************************************************/
     this.stringToUUID = function(uuid) {
         let bytes = nodeuuid.parse(uuid);
-        let buf   = new Buffer(bytes);
+        let buf   = new Buffer.from(bytes);
 
         return mongo.Binary(buf, 3);
     };
@@ -249,10 +249,10 @@ function Utils() {
     this.mongoErrorToResCode = function(err){
 
       //let _ = require('lodash');
-      let responseCodes = require('./response_codes');
-      if(err.name === 'ValidationError'){
+      let responseCodes = require("./response_codes");
+      if(err.name === "ValidationError"){
         return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
-      } else if(err.name === 'MongoError') {
+      } else if(err.name === "MongoError") {
         return responseCodes.DB_ERROR(err);
       } else {
         return err;

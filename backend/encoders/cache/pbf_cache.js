@@ -16,9 +16,9 @@
  */
 
 // var constants    = require('../constants.js');
-var logIface     = require('../../logger.js');
-var logger       = logIface.logger;
-var repoNodeMesh = require('../../repo/repoNodeMesh.js');
+let logIface     = require("../../logger.js");
+let logger       = logIface.logger;
+let repoNodeMesh = require("../../repo/repoNodeMesh.js");
 // var pbf_levels   = 10;
 
 function PBFCache() {
@@ -29,38 +29,38 @@ function PBFCache() {
 	this.genPopCache = function(mesh) {
 
 		if (!(mesh.id in pbfCache)) {
-			var bbox             = repoNodeMesh.extractBoundingBox(mesh);
-			var valid_tri        = new Array(mesh.faces_count);
-			var vertex_map       = new Array(mesh.vertices_count);
-			var vertex_quant_idx = new Array(mesh.vertices_count);
-			var vertex_quant     = new Array(mesh.vertices_count);
+			let bbox             = repoNodeMesh.extractBoundingBox(mesh);
+			let valid_tri        = new Array(mesh.faces_count);
+			let vertex_map       = new Array(mesh.vertices_count);
+			let vertex_quant_idx = new Array(mesh.vertices_count);
+			let vertex_quant     = new Array(mesh.vertices_count);
 
-			var new_vertex_id = 0;
+			let new_vertex_id = 0;
 
-			var vertex_values = new Array(mesh.vertices_count);
-			var tri           = new Array(mesh.faces_count);
-			var normal_values = new Array(mesh.vertices_count);
-			var tex_coords    = new Array(mesh.vertices_count);
+			let vertex_values = new Array(mesh.vertices_count);
+			let tri           = new Array(mesh.faces_count);
+			let normal_values = new Array(mesh.vertices_count);
+			let tex_coords    = new Array(mesh.vertices_count);
 
-			var vertNum  = 0;
-			var vertIdx  = 0;
-			var comp_idx = 0;
+			let vertNum  = 0;
+			let vertIdx  = 0;
+			let comp_idx = 0;
 
-			var has_tex = false;
+			let has_tex = false;
 
-			if ('uv_channels' in mesh) {
+			if ("uv_channels" in mesh) {
 				if (mesh[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] === 2) {
-					logging.log('error', 'Only support two channels texture coordinates');
+					logging.log("error", "Only support two channels texture coordinates");
 					return null;
 				} else {
 					has_tex = true;
 				}
 			}
 
-			var minTexcoordU = 0;
-			var maxTexcoordu = 0;
-			var minTexcoordV = 0;
-			var maxTexcoordV = 0;
+			let minTexcoordU = 0;
+			let maxTexcoordu = 0;
+			let minTexcoordV = 0;
+			let maxTexcoordV = 0;
 
 			for (vertNum = 0; vertNum < mesh.vertices_count; vertNum++) {
 				vertex_map[vertNum] = -1;
@@ -113,15 +113,15 @@ function PBFCache() {
 
 			pbfCache[mesh.id] = {};
 
-			var lod = 0;
-			var buf_offset = 0;
+			let lod = 0;
+			let buf_offset = 0;
 
-			var added_verts = 0;
-			var prev_added_verts = 0;
-			var max_bits = 16;
-			var max_quant = Math.pow(2, max_bits) - 1;
+			let added_verts = 0;
+			let prev_added_verts = 0;
+			let max_bits = 16;
+			let max_quant = Math.pow(2, max_bits) - 1;
 
-			var stride = has_tex ? 16 : 12;
+			let stride = has_tex ? 16 : 12;
 			pbfCache[mesh.id].stride = stride;
 
 			pbfCache[mesh.id].minTexcoordU = minTexcoordU;
@@ -132,42 +132,42 @@ function PBFCache() {
 			if (has_tex) { pbfCache[mesh.id].has_tex = has_tex; }
 
 			while ((new_vertex_id < mesh.vertices_count) && (lod < 16)) {
-				logger.log('debug', 'Mesh ' + mesh.id + ' - Generating LOD ' + lod);
-				var idxBuf = new Buffer(2 * 3 * mesh.faces_count);
-				var vertBuf = new Buffer(stride * mesh.vertices_count);
+				logger.log("debug", "Mesh " + mesh.id + " - Generating LOD " + lod);
+				let idxBuf = new Buffer.alloc(2 * 3 * mesh.faces_count);
+				let vertBuf = new Buffer.alloc(stride * mesh.vertices_count);
 
-				var vertBufPtr = 0;
-				var idxBufPtr = 0;
-				var dim = Math.pow(2, (max_bits - lod));
+				let vertBufPtr = 0;
+				let idxBufPtr = 0;
+				let dim = Math.pow(2, (max_bits - lod));
 
 				// For all non mapped vertices compute quantization
 				for (vertNum = 0; vertNum < mesh.vertices_count; vertNum++) {
 					if (vertex_map[vertNum] === -1) {
-						var vert_x_normal = Math.floor(((vertex_values[vertNum][0] - bbox.min[0]) / bbox.size[0]) * max_quant + 0.5);
-						var vert_y_normal = Math.floor(((vertex_values[vertNum][1] - bbox.min[1]) / bbox.size[1]) * max_quant + 0.5);
-						var vert_z_normal = Math.floor(((vertex_values[vertNum][2] - bbox.min[2]) / bbox.size[2]) * max_quant + 0.5);
+						let vert_x_normal = Math.floor(((vertex_values[vertNum][0] - bbox.min[0]) / bbox.size[0]) * max_quant + 0.5);
+						let vert_y_normal = Math.floor(((vertex_values[vertNum][1] - bbox.min[1]) / bbox.size[1]) * max_quant + 0.5);
+						let vert_z_normal = Math.floor(((vertex_values[vertNum][2] - bbox.min[2]) / bbox.size[2]) * max_quant + 0.5);
 
-						var vert_x = Math.floor(vert_x_normal / dim) * dim;
-						var vert_y = Math.floor(vert_y_normal / dim) * dim;
-						var vert_z = Math.floor(vert_z_normal / dim) * dim;
+						let vert_x = Math.floor(vert_x_normal / dim) * dim;
+						let vert_y = Math.floor(vert_y_normal / dim) * dim;
+						let vert_z = Math.floor(vert_z_normal / dim) * dim;
 
-						var quant_idx = vert_x + vert_y * dim + vert_z * dim * dim;
+						let quant_idx = vert_x + vert_y * dim + vert_z * dim * dim;
 
 						vertex_quant_idx[vertNum] = quant_idx;
 						vertex_quant[vertNum] = [vert_x_normal, vert_y_normal, vert_z_normal];
 					}
 				}
 
-				var num_indices = 0;
+				let num_indices = 0;
 
 				for (tri_num = 0; tri_num < mesh.faces_count; tri_num++) {
 					if (!valid_tri[tri_num]) {
-						var quant_map = [-1, -1, -1];
+						let quant_map = [-1, -1, -1];
 
-						var is_valid = true;
+						let is_valid = true;
 
 						for (vertIdx = 0; vertIdx < 3; vertIdx++) {
-							var curr_quant = vertex_quant_idx[tri[tri_num][vertIdx]];
+							let curr_quant = vertex_quant_idx[tri[tri_num][vertIdx]];
 
 							if (curr_quant in quant_map) {
 								is_valid = false;
@@ -210,7 +210,7 @@ function PBFCache() {
 
 									if (has_tex) {
 										for (comp_idx = 0; comp_idx < 2; comp_idx++) {
-											var wrap_tex = tex_coords[vertNum][comp_idx];
+											let wrap_tex = tex_coords[vertNum][comp_idx];
 
 											if (comp_idx === 0) { 
 												wrap_tex = (wrap_tex - minTexcoordU) / (maxTexcoordu - minTexcoordU); 
@@ -259,7 +259,7 @@ function PBFCache() {
 			}
 
 			pbfCache[mesh.id].num_levels = lod;
-			logger.log('debug', '#LEVELS : ' + pbfCache[mesh.id].num_levels);
+			logger.log("debug", "#LEVELS : " + pbfCache[mesh.id].num_levels);
 		}
 	};
 
@@ -268,23 +268,23 @@ function PBFCache() {
 		dbInterface.getCache(project, meshId, getData, level, function(err, coll) {
 			if (err) { return callback(err); }
  
-			var max_lod = 0;
+			let max_lod = 0;
 
-			for (var idx = 0; idx < coll.length; idx++) {
+			for (let idx = 0; idx < coll.length; idx++) {
 
-				var cache_obj = coll[idx];
-				if (cache_obj.type === 'PopGeometry') {
-					if ('stride' in cache_obj) { pbfCache[meshId].stride = cache_obj.stride; }
+				let cache_obj = coll[idx];
+				if (cache_obj.type === "PopGeometry") {
+					if ("stride" in cache_obj) { pbfCache[meshId].stride = cache_obj.stride; }
 
-					if ('min_texcoordu' in cache_obj) {
+					if ("min_texcoordu" in cache_obj) {
 						pbfCache[meshId].minTexcoordU = cache_obj.min_texcoordu;
 						pbfCache[meshId].maxTexcoordu = cache_obj.max_texcoordu;
 						pbfCache[meshId].minTexcoordV = cache_obj.min_texcoordv;
 						pbfCache[meshId].maxTexcoordV = cache_obj.max_texcoordv;
 						pbfCache[meshId].has_tex      = true;
 					}
-				} else if (cache_obj.type === 'PopGeometryLevel') {
-					var lod                                    = cache_obj.level;
+				} else if (cache_obj.type === "PopGeometryLevel") {
+					let lod                                    = cache_obj.level;
 					pbfCache[meshId][lod]               = {};
 					pbfCache[meshId][lod].numIdx        = cache_obj.num_idx;
 					pbfCache[meshId][lod].vertBufOffset = cache_obj.vert_buf_offset;
@@ -310,7 +310,7 @@ function PBFCache() {
 	};
 
 	this.getPopCache = function(dbInterface, project, getData, level, meshId, callback) {
-		var alreadyHave = true;
+		let alreadyHave = true;
 
 		if (meshId in pbfCache) {
 			// TODO: Lazy, if a level is not passed in when getting data
