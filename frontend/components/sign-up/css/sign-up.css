@@ -38,6 +38,12 @@ sign-up .sign-up-button {
     width: 80%;
 }
 
+sign-up .free {
+    color: #585858;
+    margin: 5px;
+    margin-bottom: 25px;
+}
+
 sign-up .sign-up-button md-progress-circular {
     display: inline-block;
     vertical-align: middle;
