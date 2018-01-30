@@ -11,20 +11,18 @@ div(
 			md-center-tabs="true"
 			layout-align="center center"
 			md-selected="0")
-			
-			md-tab(
+
+			md-tab.diff(
 				id="{{compareType.type + 'CompareTab'}}"
 				ng-click="vm.compareInNewMode(compareType)"
 				ng-repeat="compareType in vm.compareTypes"
 				label="{{compareType.label}}")
 
-				md-content(layout-fill)
-
-					div.modelTypeSelection(
-						id="{{compareType.type + 'ModelTypeSection'}}"
-						ng-if="!vm.isModelClash(compareType.type)"
-						layout="row"
-						layout-align="center center")
+				div.modelTypeSelection(
+					ng-if="!vm.isModelClash(compareType.type)"
+					id="{{compareType.type + 'ModelTypeSection'}}"
+					layout="row"
+					layout-align="center center")
 
 						div.modelType(
 							ng-click="vm.setModelType('base')"
@@ -42,10 +40,10 @@ div(
 							span(ng-if="vm.isFederation()") Target models
 							span(ng-if="!vm.isFederation()") Target model
 
-					#modelsList
+				md-content(flex, ng-if="vm.isModelClash(compareType.type)")
+					h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
 
-						div(ng-if="vm.isModelClash(compareType.type)")
-							h3.selfDiffWarning Model can't clash with itself! Try differencing with a revision.
+				md-content.modelListHolder(flex, ng-if="!vm.isModelClash(compareType.type)")
 
 						div(ng-if="vm.loadingComparision")
 							tdr-progress(
@@ -54,7 +52,7 @@ div(
 								layout-fill)
 
 						div(ng-if="!vm.loadingComparision && model"
-							ng-repeat="model in compareType[vm.modelType + 'Models'] track by $index") 
+							ng-repeat="model in vm[vm.modelType + 'Models'] track by $index") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
 								

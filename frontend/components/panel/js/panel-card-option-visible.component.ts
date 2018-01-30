@@ -32,7 +32,7 @@ class PanelCardOptionVisibleController implements ng.IController {
 
 	public $ngInit() {
 		this.$scope.$watch("vm.visible", () => {
-			console.log("vm.visible", this.visible);
+			// console.log("vm.visible", this.visible);
 			//
 		});
 	}

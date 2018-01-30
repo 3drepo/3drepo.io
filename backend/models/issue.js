@@ -126,6 +126,7 @@ let schema = Schema({
 		group_id: Object,
 		highlighted_group_id: Object,
 		hidden_group_id: Object,
+		hideIfc: Boolean,
 		screenshot: {
 			flag: Number, 
 			content: Object,

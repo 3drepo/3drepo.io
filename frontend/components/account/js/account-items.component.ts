@@ -845,7 +845,9 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public showAllModelDialogInputs(): boolean {
-		return this.teamspaceAndProjectSelected() && this.newModelData.name.length > 0;
+		return this.teamspaceAndProjectSelected() &&
+			this.newModelData.name &&
+			this.newModelData.name.length;
 	}
 
 	public teamspaceAndProjectSelected(): boolean {

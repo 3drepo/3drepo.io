@@ -46,20 +46,19 @@ export class CompareService {
 		this.readyDefer = this.$q.defer();
 
 		this.state = {
+			loadingComparision : false,
 			compareTypes : {
 				diff : {
 					label: "3D Diff",
-					baseModels: [],
-					targetModels: [],
 					type: "diff",
 				},
-				clash : {
-					label: "3D Clash",
-					baseModels: [],
-					targetModels: [],
-					type: "clash",
-				},
+				// clash : {
+				// 	label: "3D Clash",
+				// 	type: "clash",
+				// },
 			},
+			baseModels: [],
+			targetModels: [],
 			mode : "diff",
 			modelType : "base",
 			ready : this.readyDefer.promise,
@@ -181,15 +180,15 @@ export class CompareService {
 
 	public addModelsForModelCompare(account: string, model: string, modelSettings: any, revision: any) {
 
-		this.state.compareTypes.diff.targetModels = [];
-		this.state.compareTypes.diff.baseModels = [];
+		this.state.targetModels = [];
+		this.state.baseModels = [];
 
 		return this.RevisionsService.listAll(account, model).then((revisions) => {
-			this.state.compareTypes.diff.targetModels = [
+			this.state.targetModels = [
 				this.getCompareModelData(modelSettings, revisions, revision, "target"),
 			];
 
-			this.state.compareTypes.diff.baseModels = [
+			this.state.baseModels = [
 				this.getCompareModelData(modelSettings, revisions, revision, "base"),
 			];
 
@@ -207,8 +206,8 @@ export class CompareService {
 				continue;
 			}
 
-			this.state.compareTypes[type].baseModels = [];
-			this.state.compareTypes[type].targetModels = [];
+			this.state.baseModels = [];
+			this.state.targetModels = [];
 
 			modelSettings.subModels.forEach((model, i) => {
 				if (model.database && model.model) {
@@ -232,8 +231,8 @@ export class CompareService {
 			.then((revisions) => {
 				return this.getSettings(model).then((response) => {
 					const settings = response.data;
-					this.state.compareTypes[type].targetModels[i] = this.getCompareModelData(settings, revisions, revision, "target");
-					this.state.compareTypes[type].baseModels[i] = this.getCompareModelData(settings, revisions, revision, "base");
+					this.state.targetModels[i] = this.getCompareModelData(settings, revisions, revision, "target");
+					this.state.baseModels[i] = this.getCompareModelData(settings, revisions, revision, "base");
 				});
 			})
 			.catch((error) => {
@@ -280,7 +279,7 @@ export class CompareService {
 
 	public loadModels(compareType: string) {
 		const allModels = [];
-		this.state.compareTypes[compareType].targetModels.forEach((model) => {
+		this.state.targetModels.forEach((model) => {
 			if (model && model.visible === "visible") {
 
 				this.state.loadingComparision = true;
@@ -336,13 +335,14 @@ export class CompareService {
 
 		} else if (this.state.mode === "clash") {
 
-			if (this.state.isFed) {
-				this.ViewerService.diffToolEnableWithClashMode();
-			} else {
-				this.ViewerService.diffToolShowBaseModel();
-			}
+			// TODO: Bring back with clash
+			// if (this.state.isFed) {
+			// 	this.ViewerService.diffToolEnableWithClashMode();
+			// } else {
+			// 	this.ViewerService.diffToolShowBaseModel();
+			// }
 
-			this.changeCompareState("compare");
+			// this.changeCompareState("compare");
 
 		}
 	}
@@ -362,9 +362,10 @@ export class CompareService {
 		this.state.compareState = "compare";
 
 		if (this.state.mode === "clash") {
-			if (this.state.isFed === true) {
-				this.clashFed();
-			}
+			// TODO: Bring back with clash
+			// if (this.state.isFed === true) {
+			// 	this.clashFed();
+			// }
 		} else if (this.state.mode === "diff") {
 			if (this.state.isFed === false) {
 				this.diffModel(account, model);
@@ -379,7 +380,7 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		const modelToDiff = this.state.compareTypes.diff.baseModels.find((m) => {
+		const modelToDiff = this.state.baseModels.find((m) => {
 			return m.model === model;
 		});
 		const revision = modelToDiff.selectedRevision;
@@ -411,21 +412,22 @@ export class CompareService {
 
 	}
 
-	public clashFed() {
+	// TODO: Bring back with clash
+	// public clashFed() {
 
-		this.ViewerService.diffToolDisableAndClear();
+	// 	this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels("clash")
-			.then(() => {
-				this.ViewerService.diffToolEnableWithClashMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
+	// 	this.loadModels("clash")
+	// 		.then(() => {
+	// 			this.ViewerService.diffToolEnableWithClashMode();
+	// 			this.modelsLoaded();
+	// 		})
+	// 		.catch((error) => {
+	// 			this.modelsLoaded();
+	// 			console.error(error);
+	// 		});
 
-	}
+	// }
 
 	public toggleModelVisibility(model) {
 		if (this.state.modelType === "target") {
@@ -443,7 +445,8 @@ export class CompareService {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
-					this.TreeService.toggleTreeNodeVisibility(node, false);
+					// TODO: Fix this
+					this.TreeService.setTreeNodeStatus(node, false);
 					// Keep the compare componetn and TreeService
 					// in sync with regards to visibility
 					model.visible = node.toggleState;
