@@ -263,7 +263,7 @@
 				info = _info;
 
 				return this.channel.sendToQueue(queueName,
-					new Buffer(msg), {
+					new Buffer.from(msg), {
 						correlationId: corID,
 						appId: this.uid,
 						persistent: true
@@ -368,7 +368,7 @@
 				return this.channel.publish(
 					this.eventExchange,
 					"",
-					new Buffer(msg), {
+					new Buffer.from(msg), {
 						persistent: true
 					}
 				);
