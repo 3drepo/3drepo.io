@@ -115,7 +115,9 @@ groupSchema.methods.updateAttrs = function(data){
 	}).then(() => {
 
 		data.objects.forEach(obj => {
-			obj.id = utils.stringToUUID(obj.id);
+			if ("[object String]" === Object.prototype.toString.call(obj.id)) {
+				obj.id = utils.stringToUUID(obj.id);
+			}
 		});
 
 		this.name = data.name || this.name;
