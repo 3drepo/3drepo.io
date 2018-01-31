@@ -1102,68 +1102,64 @@
 		function convertActionCommentToText(comment, topic_types) {
 			var text = "";
 
-			switch (comment.action.property) {
-			case "priority":
+			if (comment) {
+				switch (comment.action.property) {
+				case "priority":
 
-				comment.action.propertyText = "Priority";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to = convertActionValueToText(comment.action.to);
-				break;
+					comment.action.propertyText = "Priority";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
+					break;
 
-			case "status":
+				case "status":
 
-				comment.action.propertyText = "Status";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to= convertActionValueToText(comment.action.to);
+					comment.action.propertyText = "Status";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to= convertActionValueToText(comment.action.to);
+					break;
 
-				break;
+				case "assigned_roles":
 
-			case "assigned_roles":
+					comment.action.propertyText = "Assigned";
+					comment.action.from = comment.action.from.toString();
+					comment.action.to= comment.action.to.toString();	
+					break;
 
-				comment.action.propertyText = "Assigned";
-				comment.action.from = comment.action.from.toString();
-				comment.action.to= comment.action.to.toString();	
-							
-				break;
+				case "topic_type":
 
-			case "topic_type":
+					comment.action.propertyText = "Type";
+					if(topic_types){
 
-				comment.action.propertyText = "Type";
-				if(topic_types){
+						var from = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.from;
+						});
 
-					var from = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.from;
-					});
+						var to = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.to;
+						});
 
-					var to = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.to;
-					});
+						if(from && from.label){
+							comment.action.from = from.label;
+						}
 
-					if(from && from.label){
-						comment.action.from = from.label;
+						if(to && to.label){
+							comment.action.to = to.label;
+						}
 					}
+					break;
 
-					if(to && to.label){
-						comment.action.to = to.label;
-					}
+				case "desc":
 
+					comment.action.propertyText = "Description";
+					break;
+
+				case "due_date":
+
+					comment.action.propertyText = "Due Date";
+					comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					break;
 				}
-
-				break;
-
-			case "desc":
-
-				comment.action.propertyText = "Description";
-
-				break;
-
-			case "due_date":
-
-				comment.action.propertyText = "Due Date";
-				comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
-				comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
-
-				break;
 			}
 
 			return text;
