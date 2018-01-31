@@ -29,8 +29,6 @@ class AccountMenuController implements ng.IController {
 	private $mdOpenMenu;
 	private userAccount;
 	private showLiteModeButton;
-	private isMobileDevice;
-	private isLiteMode;
 
 	constructor(
 		private $location: any,
@@ -44,14 +42,6 @@ class AccountMenuController implements ng.IController {
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
-		this.isLiteMode = this.isMobileDevice;
-
-		this.$scope.$watch("vm.isLiteMode", () => {
-
-			if (this.isLiteMode !== undefined) {
-				this.isMobileDevice = this.isLiteMode;
-			}
-		});
 	}
 
 	/**
@@ -89,12 +79,21 @@ class AccountMenuController implements ng.IController {
 		window.open("http://3drepo.org/models/3drepo-io-user-manual/", "_blank");
 	}
 
+	public hasMemorySettings() {
+		const mem = localStorage.getItem("deviceMemory");
+		return !!mem;
+	}
+
+	public resetMemorySettings() {
+		localStorage.removeItem("deviceMemory");
+	}
+
 }
 
 export const AccountMenuComponent: ng.IComponentOptions = {
 	bindings: {
 		showLiteModeButton: "=",
-		isMobileDevice: "=",
+		isLiteMode: "=",
 	},
 	controller: AccountMenuController,
 	controllerAs: "vm",

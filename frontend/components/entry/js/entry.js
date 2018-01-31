@@ -14,6 +14,7 @@
 			if (window.ClientConfig.unitySettings) {
 				// Assign unity settings
 				window.Module = ClientConfig.unitySettings;
+				console.log("unitySettings MEMORY : ", window.Module);
 			} else {
 				console.error("ClientConfig does not have any provided Unity settings!");
 			}

@@ -7,7 +7,8 @@ div.homeContainer(
 
 	viewer(
 		id="viewer"
-		ng-if="!vm.isMobileDevice && !vm.isLegalPage"
+		ng-if="!vm.isLiteMode && !vm.isLegalPage"
+		device-memory="vm.deviceMemory"
 		node="node"
 		account="vm.state.account"
 		model="vm.state.model"
@@ -30,7 +31,7 @@ div.homeContainer(
 			account='vm.state.account'
 			state='vm.state'
 			query='vm.query'
-			is-mobile-device="vm.isMobileDevice"
+			is-lite-mode="vm.isLiteMode"
 			keys-down="vm.keysDown"
 			ng-if="vm.loggedIn"
 			show-lite-mode-button="vm.showLiteModeButton")

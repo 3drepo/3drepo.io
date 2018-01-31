@@ -31,6 +31,7 @@ panel #items {
 }
 
 @media (max-width: 767px) {
+
     panel #items {
        width: 90vw !important;
        margin-left: 5vw;

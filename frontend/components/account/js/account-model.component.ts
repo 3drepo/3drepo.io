@@ -463,7 +463,7 @@ export const AccountModelComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "=",
 		model: "=",
-		isMobileDevice: "<",
+		isLiteMode: "<",
 		project: "=",
 		userAccount: "=",
 		onUploadFile: "&",

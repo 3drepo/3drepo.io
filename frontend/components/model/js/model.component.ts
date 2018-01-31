@@ -245,7 +245,7 @@ export const ModelComponent: ng.IComponentOptions = {
 		model:  "=",
 		revision: "=",
 		state:    "=",
-		isMobileDevice: "=",
+		isLiteMode: "=",
 	},
 	controller: ModelController,
 	controllerAs: "vm",

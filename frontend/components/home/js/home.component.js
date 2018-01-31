@@ -37,14 +37,14 @@
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
 		"StateManager", "EventService", "APIService", "ClientConfigService", 
 		"$location", "SWService", "AnalyticService", "ViewerService", 
-		"$document", "TemplateService"
+		"$document", "TemplateService", "DialogService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, APIService, ClientConfigService, $location,
-		SWService, AnalyticService, ViewerService, $document, TemplateService
+		SWService, AnalyticService, ViewerService, $document, TemplateService, DialogService
 	) {
 
 		var vm = this;
@@ -92,7 +92,8 @@
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-			vm.isMobileDevice = vm.isMobile();
+			vm.isLiteMode = true;
+			vm.handlePotentialMobile();
 
 		};
 
@@ -172,9 +173,9 @@
 
 		};
 
-		$scope.$watch("vm.isMobileDevice", function() {
+		$scope.$watch("vm.isLiteMode", function() {
 
-			console.log("vm.isMobileDevice changed", vm.isMobileDevice);
+			console.log("vm.isLiteMode changed", vm.isLiteMode);
 			
 		});
 
@@ -277,48 +278,59 @@
 
 		};
 
-		vm.isMobile = function() {
+		vm.handlePotentialMobile = function() {
 			
-			var mobile = screen.width <= 768;
-			console.log("isMobile", mobile);
+			// Regex test is as recommended by Mozilla: 
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
+			
+			var mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
+			var setMemory = localStorage.getItem("deviceMemory");
 
-			if (mobile) {
-				vm.showLiteModeButton = true;
-				vm.handleMobile();
+			if (mobile && !setMemory) {
+				DialogService.showDialog(
+					"lite-dialog.html",
+					$scope,
+					event,
+					false,
+					null,
+					false
+				)
+			} else if (!mobile && setMemory) {
+				// We've resized to normal mode i.e. when debugging etc
+				vm.isLiteMode = false;
+				localStorage.removeItem("deviceMemory");
+			} else if (mobile && setMemory) {
+				// We're on mobile/tablet and we have a previous 
+				// memory setting selected
+				vm.isLiteMode = false;
+				vm.deviceMemory = setMemory;
 			}
-
-			console.debug("Is mobile? ", mobile);
-			return mobile;
-
+			
 		};
 
-		vm.handleMobile = function() {
+		vm.showMemorySelected = false;
 
-			var message = "We have detected you are on a " +
-			"mobile device and will show the 3D Repo lite experience for " +
-			"smoother performance.";
+		vm.useLiteMode = function() {
+			vm.isLiteMode = true;
+			DialogService.closeDialog();
+		}
 
-			$mdDialog.show(
+		vm.useNormalMode = function() {
+			vm.isLiteMode = false;
+			vm.showMemorySelected = true;
+			vm.deviceMemory = 2; // Default for mobile/tablet in normal mode
+		}
 
-				$mdDialog.confirm()
-					.clickOutsideToClose(true)
-					.title("3D Repo Lite")
-					.textContent(message)
-					.ariaLabel("3D Repo Lite Dialog")
-					.cancel("Run the full version")
-					.ok("OK")
-					
-			)
-				.then(function(a) {
-					console.log("ok");
-				})
-				.catch(function(b) {
-					console.log("cancel");
-					vm.isMobileDevice = false;
-				});
-
-		};
-
+		vm.memorySelected = function() {
+			DialogService.closeDialog();
+			if (vm.deviceMemory == 0) {
+				vm.deviceMemory = 2;
+			}
+			localStorage.setItem("deviceMemory", vm.deviceMemory);
+			if (vm.state.model) {
+				location.reload();
+			}
+		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL

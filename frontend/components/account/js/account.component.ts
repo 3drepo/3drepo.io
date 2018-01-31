@@ -329,7 +329,7 @@ export const AccountComponent: ng.IComponentOptions = {
 		query: "=",
 		account: "=",
 		keysDown: "=",
-		isMobileDevice: "=",
+		isLiteMode: "=",
 		showLiteModeButton: "<",
 
 	},

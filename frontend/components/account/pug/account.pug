@@ -1,6 +1,6 @@
 account-menu(
 	account="vm.account"
-	is-mobile-device="vm.isMobileDevice"
+	is-lite-mode="vm.isLiteMode"
 	show-lite-mode-button="vm.showLiteModeButton")
 
 div#accountHolder(
@@ -17,7 +17,7 @@ div#accountHolder(
 		account-info(
 			flex-xs="85"
 			flex-sm="85"
-			flex-md="45"
+			flex-md="25"
 			flex-lg="30"
 			flex-xl="25"
 
@@ -32,7 +32,7 @@ div#accountHolder(
 		#accountItem(flex="100")
 
 			account-teamspaces(
-				is-mobile-device="vm.isMobileDevice"
+				is-lite-mode="vm.isLiteMode"
 				loading="vm.loadingAccount"
 				ng-show="vm.itemToShow === 'teamspaces'"
 				account="vm.account"
@@ -85,7 +85,7 @@ div#accountHolder(
 
 div(ng-if="vm.state.model")
 	model(
-		is-mobile-device="vm.isMobileDevice"
+		is-lite-mode="vm.isLiteMode"
 		keys-down="vm.keysDown"
 		account="vm.state.account"
 		model="vm.state.model"
