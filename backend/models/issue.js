@@ -176,6 +176,7 @@ let schema = Schema({
 	status_last_changed: Number,
 	priority_last_changed: Number,
 	creator_role: String,
+	due_date: Number,
 
 	//to be remove
 	scribble: Object,
@@ -1131,6 +1132,16 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		
 	}
 
+	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
+		const canChangeStatus = isAdmin || hasOwnerJob;
+		if (canChangeStatus) {
+			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, Date.parse(data.due_date));
+			this.due_date = Date.parse(data.due_date);
+		} else {
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+		}
+	}
+
 	let settings;
 
 	return ModelSetting.findById(this._dbcolOptions, this._dbcolOptions.model).then(_settings => {
@@ -1256,7 +1267,9 @@ schema.methods.getBCFMarkup = function(unit){
 
 	let scale = 1;
 
-	if(unit === "cm"){
+	if(unit === "dm"){
+		scale = 0.1;
+	} else if (unit === "cm") {
 		scale = 0.01;
 	} else if (unit === "mm") {
 		scale = 0.001;
@@ -1276,9 +1289,9 @@ schema.methods.getBCFMarkup = function(unit){
 					"Guid": uuidToString(this._id),
 					"TopicStatus": this.status ? this.status : (this.closed ? "closed" : "open")
 				},
+				"Title": this.name,
 				"Priority": this.priority,
-				"Title": this.name ,
-				"CreationDate": moment(this.created).format() ,
+				"CreationDate": moment(this.created).format(),
 				"CreationAuthor": this.owner,
 				"Description": this.desc
 			},
@@ -1287,6 +1300,12 @@ schema.methods.getBCFMarkup = function(unit){
 		}
 	};
 
+	if (_.get(this, "due_date")) {
+		markup.Markup.Topic.DueDate = moment(_.get(this, "due_date")).format();
+	} else if (_.get(this, "extras.DueDate")) {
+		markup.Markup.Topic.DueDate = _.get(this, "extras.DueDate"); // For backwards compatibility
+	}
+	
 	this.topic_type && (markup.Markup.Topic["@"].TopicType = this.topic_type);
 
 	_.get(this, "extras.Header") && (markup.Markup.Header = _.get(this, "extras.Header"));
@@ -1295,7 +1314,6 @@ schema.methods.getBCFMarkup = function(unit){
 	_.get(this, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(this, "extras.Labels"));
 	_.get(this, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(this, "extras.ModifiedDate"));
 	_.get(this, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(this, "extras.ModifiedAuthor"));
-	_.get(this, "extras.DueDate") && (markup.Markup.Topic.DueDate = _.get(this, "extras.DueDate"));
 	_.get(this, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = _.get(this, "extras.AssignedTo"));
 	_.get(this, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(this, "extras.BimSnippet"));
 	_.get(this, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(this, "extras.DocumentReference"));
@@ -1312,12 +1330,12 @@ schema.methods.getBCFMarkup = function(unit){
 			"@":{
 				Guid: utils.uuidToString(comment.guid)
 			},
+			"Date": moment(comment.created).format(),
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
 				"@": {Guid: utils.uuidToString(comment.viewpoint)}
 			},
-			"Date": moment(comment.created).format(),
 			// bcf 1.0 for back comp
 			"Status": this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, " ")) : "",
 			"VerbalStatus": this.status ? this.status : (this.closed ? "closed" : "open")
@@ -1643,7 +1661,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
 						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
-						issue.extras.DueDate = _.get(xml, "Markup.Topic[0].DueDate[0]._");
+						issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
 						issue.extras.AssignedTo = _.get(xml, "Markup.Topic[0].AssignedTo[0]._");
 						issue.desc = _.get(xml, "Markup.Topic[0].Description[0]._");
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
