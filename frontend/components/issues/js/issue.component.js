@@ -222,6 +222,7 @@
 			vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
 			vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
 			vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
+			//vm.issueData.due_date = (!vm.issueData.due_date) ? [] : vm.issueData.due_date;
 			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 			vm.checkCanComment();
@@ -479,7 +480,7 @@
 							var respData = response.data.issue;
 							IssuesService.populateIssue(respData);
 							vm.issueData = respData;
-						
+
 							// Add info for new comment
 							var commentCount = respData.comments.length;
 							var comment = respData.comments[commentCount - 1];
