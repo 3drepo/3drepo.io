@@ -388,8 +388,9 @@ function importToyProject(account, username){
 
 		return Promise.all([
 
-			importToyModel(account, username, 'Sample_House', 'Sample_House', project.name),
-			importToyModel(account, username, 'Sample_Tree', 'Sample_Tree', project.name)
+			importToyModel(account, username, 'Lego_House_Architecture', '9d8e8a6a-466e-46ea-b1bc-965dff2e143a', project.name),
+			importToyModel(account, username, 'Lego_House_Landscape', 'b0d6e585-c5d6-4015-98a6-5e123112098a', project.name),
+			importToyModel(account, username, 'Lego_House_Structure', 'f4cbbffd-9ba5-48ac-b3a5-22dd2bcf5190', project.name)
 
 		]).then(models => {
 
@@ -408,7 +409,7 @@ function importToyProject(account, username){
 				};
 			});
 
-			return importToyModel(account, username, 'Sample_Federation', 'Sample_Federation', project.name, subModels, skip);
+			return importToyModel(account, username, 'Lego_House_Federation', 'cfffd7e4-9fec-4f31-b606-32e6239df076', project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -430,11 +431,8 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	let desc = '';
 	let type = 'sample';
 
-	//dun move the toy model instead make a copy of it
-	// let copy = true;
-
 	let data = {
-		desc, type, project, unit: 'm', subModels
+		desc, type, project, unit: 'mm', subModels
 	};
 
 	return createAndAssignRole(modelName, account, username, data).then(data => {

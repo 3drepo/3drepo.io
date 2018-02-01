@@ -774,7 +774,7 @@
 
 			var deferred = $q.defer();
 			var issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
-		
+
 			APIService.get(issueUrl).then(function(res){
 
 				res.data = cleanIssue(res.data);

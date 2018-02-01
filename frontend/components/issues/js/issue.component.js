@@ -242,7 +242,7 @@
 				vm.issueFailedToLoad = false;
 				vm.issueData = null;
 
-				IssuesService.getIssue(vm.account, vm.model, vm.data._id)
+				IssuesService.getIssue(vm.data.account, vm.data.model, vm.data._id)
 					.then(function(fetchedIssue){
 						vm.setEditIssueData(fetchedIssue);
 						vm.startNotification();

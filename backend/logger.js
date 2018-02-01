@@ -44,6 +44,7 @@ const repoLogger = function (req, res, id) {
 	self.res = res;
 
 	if (!log) {
+		console.log("createLogger", id);
 		log = createLogger();
 	}
 
