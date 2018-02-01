@@ -105,7 +105,7 @@ config.numThreads = coalesce(config.numThreads, 1);
 config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
 // Global config variable used in the function above
-let default_http_port = coalesce(config.http_port, 8080); // Default http port
+let default_http_port = coalesce(config.http_port, 80); // Default http port
 let default_https_port = coalesce(config.https_port, 443); // Default https port
 
 // Check for hostname and ip here
