@@ -1,5 +1,11 @@
 /** Issues ************************************************************************************************************/
 
+issues {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
 issues #issuesAddContainer {
   position: relative;
   margin: 15px;
@@ -79,10 +85,11 @@ issues #issueDescriptionContainer {
   margin-top: 0px;
 }
 
-issues #issuesContent {
-  height: calc(100% - 70px);
-  overflow-y: auto;
-  overflow-x: hidden;
+issues #issueInformation {
+  display: block;
+  overflow-y: scroll;
+  position: relative;
+  height: calc(100% - 75px);
 }
 
 issues .importBCFLoading {
@@ -99,6 +106,8 @@ issues #issueRoleIndicator {
 issue {
   display: block;
   height: 100%;
+  position: absolute;
+  overflow: hidden;
 }
 
 issue md-list-item .md-button,
@@ -164,6 +173,13 @@ issue .issueOpenContainer {
 }
 
 /** Issues List *******************************************************************************************************/
+issues-list {
+  display: block;
+  height: 100%;
+  position: relative;
+  overflow-y: scroll;
+}
+
 issues-list .issueListItem {
   position: relative;
   outline: none;
@@ -277,17 +293,24 @@ issues-list-item #issueListItemStatus {
 }
 
 /** Issue Comp ********************************************************************************************************/
+issue {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
 issue #issueAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 issue #issueFooterButtons {
-  position: absolute;
-  bottom: 0;
   background: white;
   width: 100%;
   z-index: 10;
+  height: auto;
+  bottom: 0px;
+  position: absolute;
 }
 
 issue .issueItemContainer {

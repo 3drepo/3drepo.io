@@ -185,16 +185,18 @@ export class ViewerService {
 	}
 
 	public setCamera(params) {
-		this.viewer.setCamera(
-			params.position,
-			params.view_dir,
-			params.up,
-			params.look_at,
-			params.animate !== undefined ? params.animate : true,
-			params.rollerCoasterMode,
-			params.account,
-			params.model,
-		);
+		if (this.viewer) {
+			this.viewer.setCamera(
+				params.position,
+				params.view_dir,
+				params.up,
+				params.look_at,
+				params.animate !== undefined ? params.animate : true,
+				params.rollerCoasterMode,
+				params.account,
+				params.model,
+			);
+		}
 	}
 
 	public removeUnsavedPin() {
@@ -210,7 +212,9 @@ export class ViewerService {
 	}
 
 	public clearHighlights() {
-		this.viewer.clearHighlights();
+		if (this.viewer) {
+			this.viewer.clearHighlights();
+		}
 	}
 
 	public getCurrentViewpoint(params) {

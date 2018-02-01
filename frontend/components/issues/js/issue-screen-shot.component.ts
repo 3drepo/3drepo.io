@@ -172,79 +172,117 @@ class IssueScreenshotController implements ng.IController {
 		this.DialogService.closeDialog();
 	}
 
-	public initCanvas(canvas) {
-
-		canvas.addEventListener("mousedown", (event) => {
-			this.mouseDragX = event.layerX;
-			this.mouseDragY = event.layerY;
-			this.mouseDragging = true;
-
-			this.updateImage(canvas);
-
-			// window.status="DOWN: "+event.layerX+", "+event.layerY;
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-			this.actionsPointerEvents = "none";
-		}, false);
-
-		canvas.addEventListener("mouseup", (event) => {
-			this.mouseButton = 0;
-			this.mouseDragging = false;
-			this.lastMouseDragX = -1;
-			this.lastMouseDragY = -1;
-
-			this.updateImage(canvas);
-
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-			this.actionsPointerEvents = "auto";
-		}, false);
-
-		canvas.addEventListener("mouseout", (event) => {
-			this.mouseButton = 0;
-			this.mouseDragging = false;
-			this.lastMouseDragX = -1;
-			this.lastMouseDragY = -1;
-
-			this.updateImage(canvas);
-
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-			this.actionsPointerEvents = "auto";
-
-		}, false);
-
-		canvas.addEventListener("mousemove", (event) => {
-
-			this.mouseDragX = event.layerX;
-			this.mouseDragY = event.layerY;
-
-			if (!this.mouseDragging && !this.showPenIndicator) {
-				this.$timeout(() => {
-					this.showPenIndicator = true;
-				});
-			} else {
-				if ((this.lastMouseDragX !== -1) && (!this.hasDrawnOnCanvas)) {
-					this.hasDrawnOnCanvas = true;
+	public normaliseInteraction(coordinate, event) {
+		switch (coordinate) {
+			case "x":
+				if (event.layerX) {
+					return event.layerX;
+				} else {
+					const touch = event.touches[0];
+					const canvasEl = touch.target.getBoundingClientRect();
+					return touch.clientX - canvasEl.x;
 				}
-				this.updateImage(canvas);
+			case "y":
+				if (event.layerY) {
+					return event.layerY;
+				} else {
+					const touch = event.touches[0];
+					const canvasEl = touch.target.getBoundingClientRect();
+					return touch.clientY - canvasEl.y;
+				}
 			}
+	}
 
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
+	public startDraw(event: any, canvas: any) {
+		console.log("Drawing starting");
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
 
-			this.setPenIndicatorPosition(event.layerX, event.layerY);
+		this.mouseDragX = this.normaliseInteraction("x", event);
+		this.mouseDragY = this.normaliseInteraction("y", event);
+		this.mouseDragging = true;
+
+		this.updateImage(canvas);
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
+		this.actionsPointerEvents = "none";
+	}
+
+	public endDraw(event: any, canvas: any) {
+		console.log("Drawing ends");
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseButton = 0;
+		this.mouseDragging = false;
+		this.lastMouseDragX = -1;
+		this.lastMouseDragY = -1;
+
+		this.updateImage(canvas);
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+		this.actionsPointerEvents = "auto";
+	}
+
+	public outOfDrawCanvas(event: any, canvas: any) {
+		console.log("Drawing went off canvas");
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseButton = 0;
+		this.mouseDragging = false;
+		this.lastMouseDragX = -1;
+		this.lastMouseDragY = -1;
+		this.updateImage(canvas);
+
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+		this.actionsPointerEvents = "auto";
+	}
+
+	public moveOnDrawCanvas(event: any, canvas: any) {
+		console.log("Drawing is moving");
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+		console.log(event, event.layerX, event.layerY);
+
+		this.mouseDragX = this.normaliseInteraction("x", event);
+		this.mouseDragY = this.normaliseInteraction("y", event);
+
+		if (!this.mouseDragging && !this.showPenIndicator) {
+			this.$timeout(() => {
+				this.showPenIndicator = true;
+			});
+		} else {
+			if ((this.lastMouseDragX !== -1) && (!this.hasDrawnOnCanvas)) {
+				this.hasDrawnOnCanvas = true;
+			}
+			this.updateImage(canvas);
+		}
+
+		this.setPenIndicatorPosition(event.layerX, event.layerY);
+	}
+
+	public addCanvasEventListener(canvas, eventName, callback) {
+		canvas.addEventListener(eventName, (event) => {
+			callback(event, canvas);
 		}, false);
+	}
+
+	public initCanvas(canvas: any) {
+
+		this.addCanvasEventListener(canvas, "touchstart", this.startDraw.bind(this));
+		this.addCanvasEventListener(canvas, "mousedown", this.startDraw.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchend", this.endDraw.bind(this));
+		this.addCanvasEventListener(canvas, "mouseup", this.endDraw.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchleave", this.outOfDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, "mouseout", this.outOfDrawCanvas.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchmove", this.moveOnDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, "mousemove", this.moveOnDrawCanvas.bind(this));
 
 	}
 

@@ -304,6 +304,9 @@
 				// memory setting selected
 				vm.isLiteMode = false;
 				vm.deviceMemory = setMemory;
+			} else {
+				//We're just on desktop/laptop
+				vm.isLiteMode = false
 			}
 			
 		};

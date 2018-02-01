@@ -10,37 +10,36 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
 
-#issuesContent(ng-show="!vm.showProgress")
 
-	// Issues list
-	issues-list(
-		ng-if="vm.toShow === 'showIssues'"
-		issues-to-show="vm.issuesToShow"
-		account="vm.account"
-		model="vm.model"
-		filter-text="vm.filterText"
-		import-bcf="vm.importBcf(file)"
-		on-edit-issue="vm.editIssue(issue)"
-		content-height="vm.setContentHeight(height)"
-		menu-option="vm.selectedMenuOption"
-		issue-display="vm.issueDisplay")
+// Issues list
+issues-list(
+	ng-if="!vm.showProgress && vm.toShow === 'showIssues'"
+	issues-to-show="vm.issuesToShow"
+	account="vm.account"
+	model="vm.model"
+	filter-text="vm.filterText"
+	import-bcf="vm.importBcf(file)"
+	on-edit-issue="vm.editIssue(issue)"
+	content-height="vm.setContentHeight(height)"
+	menu-option="vm.selectedMenuOption"
+	issue-display="vm.issueDisplay")
 
-	// Issue
-	issue(
-		ng-if="vm.toShow === 'showIssue'"
-		account="vm.account"
-		data="vm.selectedIssue"
-		model="vm.model"
-		keys-down="vm.keysDown"
-		exit="vm.editIssueExit(issue)"
-		model-settings="vm.modelSettings"
-		event="vm.event"
-		content-height="vm.setContentHeight(height)"
-		selected-objects="vm.selectedObjects"
-		revision="vm.revision"
-		set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
-		user-job="vm.modelUserJob"
-		available-jobs="vm.availableJobs")
+// Issue
+issue(
+	ng-if="!vm.showProgress && vm.toShow === 'showIssue'"
+	account="vm.account"
+	data="vm.selectedIssue"
+	model="vm.model"
+	keys-down="vm.keysDown"
+	exit="vm.editIssueExit(issue)"
+	model-settings="vm.modelSettings"
+	event="vm.event"
+	content-height="vm.setContentHeight(height)"
+	selected-objects="vm.selectedObjects"
+	revision="vm.revision"
+	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})"
+	user-job="vm.modelUserJob"
+	available-jobs="vm.availableJobs")
 
 
 #issuesAddButton(ng-if="vm.showAddButton && !vm.showProgress", layout-margin)

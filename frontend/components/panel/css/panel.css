@@ -19,15 +19,19 @@ panel  {
   display: block;
   position: absolute;
   pointer-events: inherit;
-  top: 20px;
+  top: 30px;
   width: 470px;
   z-index: 2;
 }
 
 panel #items {
   position: absolute;
-  width: 400px;
+  width: 380px;
   pointer-events: inherit;
+}
+
+panel {
+  z-index: 25;
 }
 
 @media (max-width: 767px) {
