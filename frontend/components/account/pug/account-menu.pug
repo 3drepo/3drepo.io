@@ -16,7 +16,7 @@ md-menu#accountMenu(md-position-mode="target-right target")
 				| User Manual
 		md-menu-item
 			md-button()
-				md-switch(ng-model="vm.isLiteMode" aria-label="Lite Mode")
+				md-switch(ng-model="vm.isLiteMode" ng-change="vm.handleLiteModeChange()" aria-label="Lite Mode")
 					p Lite Mode
 
 		md-menu-item(ng-if="vm.hasMemorySettings()")

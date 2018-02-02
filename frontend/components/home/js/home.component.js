@@ -92,10 +92,26 @@
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-			vm.isLiteMode = true;
+			vm.isLiteMode = vm.getLiteModeState();
+			console.log("isLiteMode set to", vm.isLiteMode);
 			vm.handlePotentialMobile();
 
 		};
+
+		vm.getLiteModeState = function() {
+
+			var stored = localStorage.getItem("liteMode");
+			if (stored !== undefined && stored !== null) {
+				if (stored === "false") {
+					return false;
+				} else if (stored === "true") {
+					return true;
+				}
+			} 
+			
+			return false; // Default
+
+		}
 
 		vm.getSubdomain = function() {
 			var host = $location.host();
@@ -285,8 +301,12 @@
 			
 			var mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
 			var setMemory = localStorage.getItem("deviceMemory");
+			
+			console.log("Memory limit set to: ", setMemory);
 
-			if (mobile && !setMemory) {
+			// We're in mobile, with no memory set
+			// and it's not already in lite mode
+			if (mobile && !setMemory && !vm.isLiteMode) {
 				DialogService.showDialog(
 					"lite-dialog.html",
 					$scope,
@@ -295,31 +315,39 @@
 					null,
 					false
 				)
-			} else if (!mobile && setMemory) {
-				// We've resized to normal mode i.e. when debugging etc
-				vm.isLiteMode = false;
-				localStorage.removeItem("deviceMemory");
-			} else if (mobile && setMemory) {
+				return;
+			} 
+
+			if (!vm.isLiteMode && mobile && setMemory) {
 				// We're on mobile/tablet and we have a previous 
 				// memory setting selected
-				vm.isLiteMode = false;
-				vm.deviceMemory = setMemory;
-			} else {
-				//We're just on desktop/laptop
-				vm.isLiteMode = false
-			}
+				vm.deviceMemory = parseInt(setMemory);
+				return;
+			} 
+			
+			// if (!mobile && setMemory) {
+			// 	// We've resized to normal mode i.e. when debugging etc
+			// 	vm.setLiteMode(false);
+			// 	localStorage.removeItem("deviceMemory");
+			// } else
+			
 			
 		};
+
+		vm.setLiteMode = function(onOrOff) {
+			vm.isLiteMode = onOrOff;
+			localStorage.setItem("liteMode", onOrOff);
+		}
 
 		vm.showMemorySelected = false;
 
 		vm.useLiteMode = function() {
-			vm.isLiteMode = true;
+			vm.setLiteMode(true);
 			DialogService.closeDialog();
 		}
 
 		vm.useNormalMode = function() {
-			vm.isLiteMode = false;
+			vm.setLiteMode(false);
 			vm.showMemorySelected = true;
 			vm.deviceMemory = 2; // Default for mobile/tablet in normal mode
 		}
