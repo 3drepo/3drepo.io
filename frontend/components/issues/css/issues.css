@@ -79,7 +79,15 @@ issues #issuesAddButton {
   bottom: 0;
   right: 0;
   margin-right: 12px;
+  width: 100%;
+  background: white;
+  margin: 0;
+  padding: 0;
 }
+
+/* issues #issuesAddButton button {
+  float: right;
+} */
 
 issues #issueDescriptionContainer {
   margin-top: 0px;
@@ -175,7 +183,7 @@ issue .issueOpenContainer {
 /** Issues List *******************************************************************************************************/
 issues-list {
   display: block;
-  height: 100%;
+  height: calc(100% - 50px);
   position: relative;
   overflow-y: scroll;
 }

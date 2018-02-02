@@ -42,10 +42,18 @@ issue(
 	available-jobs="vm.availableJobs")
 
 
-#issuesAddButton(ng-if="vm.showAddButton && !vm.showProgress", layout-margin)
-	span.addHint(ng-if="!vm.canAddIssue") You don't have permission to add an issue
-	span.addHint(ng-if="vm.canAddIssue && !vm.modelLoaded()") You can add an issue after model load
-	
+#issuesAddButton(
+	ng-if="vm.showAddButton && !vm.showProgress"
+	layout="row"
+	layout-align="left center"
+	layout-margin)
+	div(
+		style="text-align: center;"
+		flex, 
+		layout-align="center center")
+		span.addHint(ng-if="!vm.canAddIssue") You don't have permission to add an issue
+		span.addHint(ng-if="vm.canAddIssue && !vm.modelLoaded()") You can add an issue after model load
+
 	md-button.md-accent.md-fab.md-mini(
 		id="addIssue"
 		aria-label="Add"

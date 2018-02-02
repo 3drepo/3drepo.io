@@ -60,7 +60,11 @@ panel {
     }
 
 }
- 
+
+
+panel #docsPanel #panelCardContainer {
+  max-height: 85vh;
+}
 
 panel #buttons {
   position: absolute;
