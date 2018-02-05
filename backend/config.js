@@ -98,6 +98,7 @@ let fillInServerDetails = function (serverObject, name, using_ssl, host, default
 };
 
 config.consoleLogging = coalesce(config.consoleLogging, true);
+config.maintenanceMode = coalesce(config.maintenanceMode, false);
 
 // Check for hostname and ip here
 config.host = coalesce(config.host, "127.0.0.1");
@@ -185,7 +186,7 @@ for (let i = 0; i < config.servers.length; i++) {
 		fillInServerDetails(server, "chat", config.using_ssl, config.host, server.http_port, server.https_port);
 		server.chat_host = server.base_url_no_port + ":" + server.port;
 		config.chat_server = server;
-		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== 'undefined' ? server.reconnection_attempts : config.chat_reconnection_attempts);
+		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
 	} else if (server.service === "frontend"){
 
@@ -285,7 +286,7 @@ config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxatio
 //get frontend base url
 config.getBaseURL = function (useNonPublicPort) {
 
-	let frontEndServerConfig = config.servers.find(server => server.service === 'frontend');
+	let frontEndServerConfig = config.servers.find(server => server.service === "frontend");
 
 	let port = "";
 

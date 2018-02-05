@@ -20,7 +20,7 @@
 				h3.welcome {{vm.loginMessage}}!
 
 			// Behaviour if we provide a notice to the user
-			span(ng-if="vm.userNotice") 
+			span.userNotice(ng-if="vm.userNotice") 
 				strong Notice 
 				span : {{vm.userNotice}}
 			br(ng-if="vm.userNotice")
