@@ -25,6 +25,9 @@ var _ = require('lodash');
 var Schema = mongoose.Schema;
 var Mesh = require('./mesh');
 var responseCodes = require('../response_codes.js');
+var Meta = require('./meta');
+var systemLogger = require("../logger.js").systemLogger;
+var ifcIdMaps;
 
 var groupSchema = Schema({
 	// no extra attributes
@@ -33,17 +36,88 @@ var groupSchema = Schema({
 		_id : false,
 		shared_id: Object,
 		account: String,
-		model: String
+		model: String,
+		ifc_guid: String
 	}],
 	issue_id: Object,
 	color: [Number]
 });
 
+groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
+	return Meta.find({ account, model }, { type: "meta", "metadata.IFC GUID": ifcGuid }, { "parents": 1, "metadata.IFC GUID": 1 })
+		.then(results => {
+			let uuids = [];
+			for (let i = 0; i < results.length; i++) {
+				uuids = uuids.concat(results[i].parents);
+				/*if (results[i].parents.length > 0) {
+					uuids.push(results[i].parents[0]);
+				}*/
+			}
+			return uuids;
+		});
+}
 
+groupSchema.methods.uuidToIfcGuids = function(obj) {
+	var account = obj.account;
+	var model = obj.model;
+	var uid = obj.shared_id;
+	var parent = utils.stringToUUID(uid);
+	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
+	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
+		.then(results => {
+			var ifcGuids = [];
+			results.forEach(res => {
+				if (groupSchema.statics.isIfcGuid(res.metadata['IFC GUID'])) {
+					ifcGuids.push(res.metadata['IFC GUID']);
+				}
+			});
+			return ifcGuids;
+		});
+}
+
+/**
+ * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
+ */
+groupSchema.statics.isIfcGuid = function(value) {
+	return value && 22 === value.length;
+}
 
 groupSchema.statics.findByUID = function(dbCol, uid){
 	'use strict';
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) });
+	
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+			let sharedIdObjects;
+			let sharedIdPromises = [];
+
+			for (let i = 0; i < group.objects.length; i++) {
+				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
+					sharedIdPromises.push(
+						this.ifcGuidToUUIDs(group.objects[i].account,
+							group.objects[i].model,
+							group.objects[i].ifc_guid).then(sharedIds => {
+							for (let j = 0; j < sharedIds.length; j++) {
+								if (!sharedIdObjects) {
+									sharedIdObjects = [];
+								}
+								sharedIdObjects.push({
+									account: group.objects[i].account,
+									model: group.objects[i].model,
+									shared_id: sharedIds[j]
+								});
+							}
+						})
+					)
+				}
+			}
+
+			return Promise.all(sharedIdPromises).then(() => {
+				if (sharedIdObjects && sharedIdObjects.length > 0) {
+					group.objects = sharedIdObjects;
+				}
+				return group;
+			});
+		});;
 };
 
 groupSchema.statics.listGroups = function(dbCol){
@@ -55,18 +129,33 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
+	let ifcGuidPromises = [];
+
 	data.objects.forEach(obj => {
 		if ("[object String]" === Object.prototype.toString.call(obj.id)) {
 			obj.id = utils.stringToUUID(obj.id);
 		}
+		ifcGuidPromises.push(
+			this.uuidToIfcGuids(obj).then(ifcGuids => {
+				if (ifcGuids && ifcGuids.length > 0) {
+					for (let i = 0; i < ifcGuids.length; i++) {
+						obj.ifc_guid = ifcGuids[i];
+						delete obj.shared_id;
+					}
+				}
+			})
+		);
 	});
 
-	this.name = data.name || this.name;
-	this.objects = data.objects || this.objects;
-	this.color = data.color || this.color;
+	return Promise.all(ifcGuidPromises).then(() => {
 
-	this.markModified('objects');
-	return this.save();
+		this.name = data.name || this.name;
+		this.objects = data.objects || this.objects;
+		this.color = data.color || this.color;
+
+		this.markModified('objects');
+		return this.save();
+	});
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
@@ -89,13 +178,15 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	cleaned.objects.forEach(object => {
-		if (object.shared_id &&
-			"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-			//object.id = utils.uuidToString(object.id);
-			object.shared_id = utils.uuidToString(object.shared_id);
-		}
-	});
+	if (cleaned.objects) {
+		cleaned.objects.forEach(object => {
+			if (object.shared_id &&
+				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
+				//object.id = utils.uuidToString(object.id);
+				object.shared_id = utils.uuidToString(object.shared_id);
+			}
+		});
+	}
 	return cleaned;
 
 };
