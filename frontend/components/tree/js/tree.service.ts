@@ -697,7 +697,7 @@ export class TreeService {
 	public setVisibilityOfNodes(nodes: any[], visibility: string) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
-			if (node.toggleState !== visibility) {
+			if (node && node.toggleState !== visibility) {
 				this.setTreeNodeStatus(node, visibility);
 			}
 		}

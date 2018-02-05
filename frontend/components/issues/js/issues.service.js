@@ -665,7 +665,7 @@
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
 						var objUid = treeMap.sharedIdToUid[obj.shared_id];
-						
+
 						if (objUid) {
 				
 							if (i < objects.length - 1) {
@@ -691,10 +691,14 @@
 				.then(function(treeMap){
 
 					if (objects) {
+						// Make a list of nodes to hide
 						var hiddenNodes = [];
 						for (var i = 0; i < objects.length; i++) {
-							// Make a list of nodes to hide
-							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+							var nodeSharedId = treeMap.sharedIdToUid[objects[i].shared_id];
+
+							if (nodeSharedId) {
+								hiddenNodes.push(TreeService.getNodeById(nodeSharedId));
+							}
 						}
 						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
