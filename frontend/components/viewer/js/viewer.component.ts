@@ -51,7 +51,6 @@ class ViewerController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		console.log("Viewer initialised...");
 
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
@@ -59,13 +58,12 @@ class ViewerController implements ng.IController {
 		this.pointerEvents = "auto";
 		this.measureMode = false;
 
-		console.log(this.deviceMemory);
 		if (this.deviceMemory) {
 			const gigabyte = 1073741824;
 			const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
 			const assignedMemory = gigabyte * (this.deviceMemory / 2);
 			window.Module.TOTAL_MEMORY = (assignedMemory < MAX_MEMORY) ? assignedMemory : MAX_MEMORY;
-			console.log("Memory set to ", window.Module.TOTAL_MEMORY);
+			console.debug("Memory set to ", window.Module.TOTAL_MEMORY);
 		}
 
 		this.viewer = this.ViewerService.getViewer();

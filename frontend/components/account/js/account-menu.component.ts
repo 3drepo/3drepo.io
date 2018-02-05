@@ -44,11 +44,9 @@ class AccountMenuController implements ng.IController {
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
-		console.log("account-menu this.isLiteMode", this.isLiteMode)
 	}
 
 	public handleLiteModeChange() {
-		console.log("handleLiteModeChange", this.isLiteMode)
 		if (this.isLiteMode !== undefined && this.isLiteMode !== null) {
 			localStorage.setItem("liteMode", this.isLiteMode);
 			location.reload();

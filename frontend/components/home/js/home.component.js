@@ -93,7 +93,6 @@
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
 			vm.isLiteMode = vm.getLiteModeState();
-			console.log("isLiteMode set to", vm.isLiteMode);
 			vm.handlePotentialMobile();
 
 		};
@@ -188,12 +187,6 @@
 			});	
 
 		};
-
-		$scope.$watch("vm.isLiteMode", function() {
-
-			console.log("vm.isLiteMode changed", vm.isLiteMode);
-			
-		});
 
 		$scope.$watch(function(){
 			return $location.path();
@@ -302,7 +295,7 @@
 			var mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
 			var setMemory = localStorage.getItem("deviceMemory");
 			
-			console.log("Memory limit set to: ", setMemory);
+			console.debug("Memory limit set to: ", setMemory);
 
 			// We're in mobile, with no memory set
 			// and it's not already in lite mode

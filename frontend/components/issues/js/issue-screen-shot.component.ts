@@ -194,7 +194,7 @@ class IssueScreenshotController implements ng.IController {
 	}
 
 	public startDraw(event: any, canvas: any) {
-		console.log("Drawing starting");
+
 		event.preventDefault();
 		event.stopPropagation();
 		event.returnValue = false;
@@ -209,7 +209,7 @@ class IssueScreenshotController implements ng.IController {
 	}
 
 	public endDraw(event: any, canvas: any) {
-		console.log("Drawing ends");
+
 		event.preventDefault();
 		event.stopPropagation();
 		event.returnValue = false;
@@ -225,7 +225,7 @@ class IssueScreenshotController implements ng.IController {
 	}
 
 	public outOfDrawCanvas(event: any, canvas: any) {
-		console.log("Drawing went off canvas");
+
 		event.preventDefault();
 		event.stopPropagation();
 		event.returnValue = false;
@@ -241,11 +241,9 @@ class IssueScreenshotController implements ng.IController {
 	}
 
 	public moveOnDrawCanvas(event: any, canvas: any) {
-		console.log("Drawing is moving");
 		event.preventDefault();
 		event.stopPropagation();
 		event.returnValue = false;
-		console.log(event, event.layerX, event.layerY);
 
 		this.mouseDragX = this.normaliseInteraction("x", event);
 		this.mouseDragY = this.normaliseInteraction("y", event);
