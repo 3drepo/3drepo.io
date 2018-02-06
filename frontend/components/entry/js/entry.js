@@ -7,8 +7,6 @@
 			return;
 		} else {
 
-			console.log(window.ClientConfig.maintenanceMode);
-
 			if (window.ClientConfig && window.ClientConfig.maintenanceMode === true) {
 			  document.getElementById("maintenanceMode").style.display = "block";
 			  maintenanceMode = true;
