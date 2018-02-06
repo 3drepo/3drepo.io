@@ -97,6 +97,12 @@ let fillInServerDetails = function (serverObject, name, using_ssl, host, default
 
 };
 
+if (config === undefined) {
+	console.error("Config is undefined. Is it in a subfolder of the config directory, " +
+	"well formed and named config.js?");
+	process.exit(1);
+}
+
 config.consoleLogging = coalesce(config.consoleLogging, true);
 config.maintenanceMode = coalesce(config.maintenanceMode, false);
 
