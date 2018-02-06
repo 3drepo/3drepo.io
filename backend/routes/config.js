@@ -120,14 +120,9 @@
         }
     
         let clientConfig = {
-            "pluginLoaded": [],
-            "pluginPug": [],
-            "pluginJS": [],
-            "pluginAngular": {},
-            "parentStateJSON": {},
+            "maintenanceMode": config.maintenanceMode,
             "ui": {},
             "uistate": {},
-            "pluginCSS": [],
             "structure": pluginStructure,
             "frontendPug": [],
             "gaTrackId": config.gaTrackId,
