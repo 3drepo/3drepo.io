@@ -670,6 +670,7 @@
 			}
 
 			return Promise.all(promises);
+
 		}
 
 		function handleHighlights(objects) {
@@ -697,6 +698,9 @@
 							}
 						}
 					}
+
+					angular.element(window).triggerHandler("resize");
+					
 				})
 				.catch(function(error) {
 					console.error(error);
