@@ -121,7 +121,7 @@ class TreeController implements ng.IController {
 
 							this.TreeService.updateModelState(this.allNodes[0]);
 
-              angular.element((window as any).window).triggerHandler("resize");
+							angular.element((window as any).window).triggerHandler("resize");
 
 						}
 					}
