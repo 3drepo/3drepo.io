@@ -448,7 +448,7 @@ class TreeController implements ng.IController {
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
 			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
-			this.TreeService.updateModelState(no;
+			this.TreeService.updateModelState(selectedNode);
 		}
 
 	}
