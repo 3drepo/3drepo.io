@@ -121,6 +121,8 @@ class TreeController implements ng.IController {
 
 							this.TreeService.updateModelState(this.allNodes[0]);
 
+              angular.element((window as any).window).triggerHandler("resize");
+
 						}
 					}
 				}
@@ -385,7 +387,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		this.$scope.$broadcast("$md-resize");
+		angular.element((window as any).window).triggerHandler("resize");
 
 	}
 
