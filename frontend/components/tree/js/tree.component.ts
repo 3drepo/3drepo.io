@@ -119,6 +119,8 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
+							this.TreeService.updateModelState(this.allNodes[0]);
+
 						}
 					}
 				}

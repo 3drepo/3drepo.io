@@ -583,6 +583,8 @@
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
+
+			TreeService.updateModelState(TreeService.allNodes[0]);
 		}
 
 		function showMultiIds(issue) {

@@ -674,8 +674,6 @@ export class TreeService {
 			this.selectedIndex = selectedIndex;
 		}
 
-		this.updateModelState(this.allNodes[0]);
-
 	}
 
 	/**
