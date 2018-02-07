@@ -290,7 +290,7 @@ class PanelController implements ng.IController {
 			}
 		}
 		this.$timeout().then(() => {
-			angular.element(window).triggerHandler("resize");
+			angular.element(this.$window).triggerHandler("resize");
 		});
 	}
 

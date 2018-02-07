@@ -59,6 +59,7 @@ class TreeController implements ng.IController {
 	constructor(
 		private $scope: IScope,
 		private $timeout: ITimeoutService,
+		private $window: any,
 
 		private TreeService,
 		private EventService,
@@ -119,7 +120,7 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
-							angular.element(window).triggerHandler("resize");
+							angular.element(this.$window).triggerHandler("resize");
 
 						}
 					}
@@ -385,7 +386,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		angular.element(window).triggerHandler("resize");
+		angular.element(this.$window).triggerHandler("resize");
 
 	}
 
