@@ -593,7 +593,7 @@
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
-					var highlightPromise
+					var highlightPromise;
 
 					if(groupsCache[highlightedGroupId]) {
 						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
