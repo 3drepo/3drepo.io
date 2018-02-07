@@ -1,11 +1,17 @@
 @media print {
-    html, body, home {
+
+    html, body, home, .homeContainer, 
+    #homeLegalContainer, #legal, #legalText, 
+    #terms, #privacy, #cookies {
         overflow: visible !important;
         height: 100% !important;
     }
-    #legal #legalText {
-        height: 100% !important;
-    }
+
+}
+
+#terms, #privacy, #cookies {
+    width: 100%;
+    height: 100%;
 }
 
 home {
@@ -153,16 +159,16 @@ home #legalLinks {
     background: #0c2f54;
   }
 
-    home #legalLinks a {
+home #legalLinks a {
     font-size: 11px !important;
     margin: 5px 5px 5px !important;
   }
 
 }
 
-home #homeLegalContainer {
+/* home #homeLegalContainer {
     overflow: hidden !important;
-}
+} */
 
 home #homeLoggedOut {
     top: 80px;
