@@ -21,6 +21,10 @@ login .username {
   margin-bottom: 0px;
 }
 
+login .userNotice {
+  margin-top: 10px;
+}
+
 login md-progress-circular {
   width: 25px !important;
   height: 25px !important;
