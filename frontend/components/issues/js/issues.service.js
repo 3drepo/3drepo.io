@@ -536,7 +536,7 @@
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
 			}
-			TreeService.showAllTreeNodes();
+			TreeService.showAllTreeNodes(false);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
