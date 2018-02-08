@@ -37,6 +37,7 @@ class ViewerController implements ng.IController {
 	private pointerEvents: string;
 	private measureMode: boolean;
 	private viewer: any;
+	private deviceMemory: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -47,26 +48,9 @@ class ViewerController implements ng.IController {
 		private ClientConfigService,
 		private EventService,
 		private ViewerService,
-	) {
-
-		$scope.$watch(() => {
-			return ViewerService.pin;
-		}, () => {
-			this.viewer.setPinDropMode(ViewerService.pin.pinDropMode);
-		}, true);
-
-		$scope.$watch(EventService.currentEvent, (event: any) => {
-			const validEvent = event !== undefined && event.type !== undefined;
-
-			if (validEvent && ViewerService.initialised) {
-				ViewerService.handleEvent(event, this.account, this.model);
-			}
-		});
-
-	}
+	) {}
 
 	public $onInit() {
-		console.log("Viewer initialised...");
 
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
@@ -74,7 +58,17 @@ class ViewerController implements ng.IController {
 		this.pointerEvents = "auto";
 		this.measureMode = false;
 
+		if (this.deviceMemory) {
+			const gigabyte = 1073741824;
+			const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
+			const assignedMemory = gigabyte * (this.deviceMemory / 2);
+			window.Module.TOTAL_MEMORY = (assignedMemory < MAX_MEMORY) ? assignedMemory : MAX_MEMORY;
+			console.debug("Memory set to ", window.Module.TOTAL_MEMORY);
+		}
+
 		this.viewer = this.ViewerService.getViewer();
+
+		this.watchers();
 
 	}
 
@@ -85,6 +79,25 @@ class ViewerController implements ng.IController {
 		});
 	}
 
+	public watchers() {
+		this.$scope.$watch(() => {
+			return this.ViewerService.pin;
+		}, () => {
+			if (this.viewer) {
+				this.viewer.setPinDropMode(this.ViewerService.pin.pinDropMode);
+			}
+		}, true);
+
+		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
+			const validEvent = event !== undefined && event.type !== undefined;
+
+			if (validEvent && this.ViewerService.initialised) {
+				this.ViewerService.handleEvent(event, this.account, this.model);
+			}
+		});
+
+	}
+
 }
 
 export const ViewerComponent: ng.IComponentOptions = {
@@ -93,6 +106,7 @@ export const ViewerComponent: ng.IComponentOptions = {
 			branch: "<",
 			model: "<",
 			revision: "<",
+			deviceMemory: "<",
 		},
 		controller: ViewerController,
 		controllerAs: "vm",

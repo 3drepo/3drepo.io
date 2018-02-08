@@ -1,4 +1,4 @@
-import { USER, browser, by, element , env, expect, login, logout} from "./config/imports";
+import { browser, by, element, env , expect, login, logout, USER} from "./config/imports";
 
 describe("Adding items", function() {
 
@@ -27,10 +27,10 @@ describe("Adding items", function() {
             expect(element(by.id("addProject")).isDisplayed()).to.eventually.equal(true);
             
 			element(by.id('addButtons')).click();
-            expect(element(by.id("floating-button")).isDisplayed()).to.eventually.equal(false);
-            expect(element(by.id("addModel")).isDisplayed()).to.eventually.equal(false);
-            expect(element(by.id("addFederation")).isDisplayed()).to.eventually.equal(false);
-            expect(element(by.id("addProject")).isDisplayed()).to.eventually.equal(false);
+            expect(element(by.id("floating-button")).isPresent()).to.eventually.equal(false);
+            expect(element(by.id("addModel")).isPresent()).to.eventually.equal(false);
+            expect(element(by.id("addFederation")).isPresent()).to.eventually.equal(false);
+            expect(element(by.id("addProject")).isPresent()).to.eventually.equal(false);
             
 		});
 
@@ -93,7 +93,6 @@ describe("Adding items", function() {
 
 		});
 
-		
 	});
 
 });

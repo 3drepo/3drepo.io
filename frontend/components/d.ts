@@ -1,7 +1,10 @@
 declare global {
-    const angular: ng.IAngularStatic;
+	const angular: ng.IAngularStatic;
 }
 declare global {
-    interface Window { zxcvbn: any; }
+	interface Window {
+		Module: any;
+		zxcvbn: any;
+	}
 }
 export {};

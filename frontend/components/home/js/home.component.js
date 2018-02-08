@@ -37,14 +37,14 @@
 		"$timeout", "$compile", "$mdDialog", "$window", "AuthService", 
 		"StateManager", "EventService", "APIService", "ClientConfigService", 
 		"$location", "SWService", "AnalyticService", "ViewerService", 
-		"$document", "TemplateService"
+		"$document", "TemplateService", "DialogService"
 	];
 
 	function HomeCtrl(
 		$scope, $http, $templateCache, $element, $interval, $timeout, 
 		$compile, $mdDialog, $window, AuthService, StateManager,
 		EventService, APIService, ClientConfigService, $location,
-		SWService, AnalyticService, ViewerService, $document, TemplateService
+		SWService, AnalyticService, ViewerService, $document, TemplateService, DialogService
 	) {
 
 		var vm = this;
@@ -92,9 +92,25 @@
 			vm.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 			vm.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-			vm.isMobileDevice = vm.isMobile();
+			vm.isLiteMode = vm.getLiteModeState();
+			vm.handlePotentialMobile();
 
 		};
+
+		vm.getLiteModeState = function() {
+
+			var stored = localStorage.getItem("liteMode");
+			if (stored !== undefined && stored !== null) {
+				if (stored === "false") {
+					return false;
+				} else if (stored === "true") {
+					return true;
+				}
+			} 
+			
+			return false; // Default
+
+		}
 
 		vm.getSubdomain = function() {
 			var host = $location.host();
@@ -171,12 +187,6 @@
 			});	
 
 		};
-
-		$scope.$watch("vm.isMobileDevice", function() {
-
-			console.log("vm.isMobileDevice changed", vm.isMobileDevice);
-			
-		});
 
 		$scope.$watch(function(){
 			return $location.path();
@@ -277,49 +287,74 @@
 
 		};
 
-		vm.isMobile = function() {
+		vm.handlePotentialMobile = function() {
 			
-			var mobile = screen.width <= 768;
-			console.log("isMobile", mobile);
+			// Regex test is as recommended by Mozilla: 
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
+			
+			var mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
+			var setMemory = localStorage.getItem("deviceMemory");
+			
+			console.debug("Memory limit set to: ", setMemory);
 
-			if (mobile) {
-				//vm.showLiteModeButton = true;
-				//console.log(vm.showLiteModeButton);
-				vm.handleMobile();
+			// We're in mobile, with no memory set
+			// and it's not already in lite mode
+			if (mobile && !setMemory && !vm.isLiteMode) {
+				DialogService.showDialog(
+					"lite-dialog.html",
+					$scope,
+					event,
+					false,
+					null,
+					false
+				)
+				return;
+			} 
+
+			if (!vm.isLiteMode && mobile && setMemory) {
+				// We're on mobile/tablet and we have a previous 
+				// memory setting selected
+				vm.deviceMemory = parseInt(setMemory);
+				return;
+			} 
+			
+			// if (!mobile && setMemory) {
+			// 	// We've resized to normal mode i.e. when debugging etc
+			// 	vm.setLiteMode(false);
+			// 	localStorage.removeItem("deviceMemory");
+			// } else
+			
+			
+		};
+
+		vm.setLiteMode = function(onOrOff) {
+			vm.isLiteMode = onOrOff;
+			localStorage.setItem("liteMode", onOrOff);
+		}
+
+		vm.showMemorySelected = false;
+
+		vm.useLiteMode = function() {
+			vm.setLiteMode(true);
+			DialogService.closeDialog();
+		}
+
+		vm.useNormalMode = function() {
+			vm.setLiteMode(false);
+			vm.showMemorySelected = true;
+			vm.deviceMemory = 2; // Default for mobile/tablet in normal mode
+		}
+
+		vm.memorySelected = function() {
+			DialogService.closeDialog();
+			if (vm.deviceMemory == 0) {
+				vm.deviceMemory = 2;
 			}
-
-			console.debug("Is mobile? ", mobile);
-			return mobile;
-
-		};
-
-		vm.handleMobile = function() {
-
-			var message = "We have detected you are on a " +
-			"mobile device and will show the 3D Repo lite experience for " +
-			"smoother performance.";
-
-			$mdDialog.show(
-
-				$mdDialog.confirm()
-					.clickOutsideToClose(true)
-					.title("3D Repo Lite")
-					.textContent(message)
-					.ariaLabel("3D Repo Lite Dialog")
-					.cancel("Run the full version")
-					.ok("OK")
-					
-			)
-				.then(function(a) {
-					console.log("ok");
-				})
-				.catch(function(b) {
-					console.log("cancel");
-					vm.isMobileDevice = false;
-				});
-
-		};
-
+			localStorage.setItem("deviceMemory", vm.deviceMemory);
+			if (vm.state.model) {
+				location.reload();
+			}
+		}
 
 		function hasTrailingSlash() {
 			// Check if we have a trailing slash in our URL

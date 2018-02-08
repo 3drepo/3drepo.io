@@ -21,7 +21,7 @@ class AccountTeamspacesController implements ng.IController {
 	];
 
 	private loading;
-	private isMobileDevice;
+	private isLiteMode;
 	private account;
 	private accounts;
 	private onShowPage;
@@ -49,7 +49,7 @@ export const AccountTeamspacesComponent: ng.IComponentOptions = {
 		loading: "=",
 		selectedIndex: "=",
 		itemToShow: "=",
-		isMobileDevice: "<",
+		isLiteMode: "<",
 	},
 	controller: AccountTeamspacesController,
 	controllerAs: "vm",

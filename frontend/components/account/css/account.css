@@ -1,5 +1,5 @@
 /** Responsive content ****/
-@media (max-width: 960px) { 
+@media (max-width: 767px) { 
 
   .userContent {
     height: 100% !important;
@@ -79,6 +79,8 @@ account-dir #account .userContentNoMargin {
 
 account-dir #account {  
   background-size: contain;
+  position: absolute;
+  width: 100%;
 }
 
 account-dir #accountHolder {
@@ -108,7 +110,7 @@ account-dir .dataContainer {
 }
 
 account-dir #account #accountItem {
-   margin-right: 5%;
+  margin-right: 5%;
 }
 
 account-dir #account #accountItem userContent {
@@ -116,11 +118,18 @@ account-dir #account #accountItem userContent {
   overflow: auto;
 }
 
-@media (max-width: 960px) {
+@media (min-width:600px) and (max-width:960px) {
   account-dir #account #accountItem {
     margin-left: 5%;
-    margin-bottom: 100px;
-    /* margin-top: 200px; */
+    margin-right: 5%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+  }
+}
+
+@media (max-width: 767px) {
+  account-dir #account #accountItem {
+    margin-left: 5%;
   }
 }
 
@@ -301,18 +310,10 @@ account-info {
    margin-right: 5%; 
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   
-  account-info #account #accountItem {
-    min-height: 700px;
-  }
-
   account-info #accountInfoContent {
      max-height: 100% !important;
-  }
-
-  account-info {
-    margin-bottom: 100px;
   }
   
 }
@@ -347,16 +348,6 @@ account-info md-list {
   padding: 0;
 }
 
-/*
-account-info .accountInfoPage {
-  min-height: 50px;
-}
-account-info .accountInfoPage .md-button {
-  min-height: 50px!important;
-  height: 50px;
-}
-*/
-
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
   max-width: 300px;
@@ -378,7 +369,7 @@ account-info .accountInfoPage .md-button {
 
 /** Account Menu ******************************************************************************************************/
 account-menu {
-  z-index: 1;
+  z-index: 3;
   position: absolute;
   top: 0;
   right: 0;
