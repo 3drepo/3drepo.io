@@ -55,7 +55,7 @@ class PanelController implements ng.IController {
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
-		this.itemGap = 20,
+		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
 

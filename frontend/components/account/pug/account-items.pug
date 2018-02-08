@@ -12,17 +12,17 @@
 				md-list-item.tree-node(flex)
 					.account(layout="row", layout-align="start center", md-ink-ripple, flex, ng-click="vm.toggleProjects(account.projects)")
 						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons(ng-show="vm.shouldShow(account.projects)") folder_open
-							md-icon.angular-material-icons(ng-show="!vm.shouldShow(account.projects)") folder
+							md-icon.angular-material-icons(ng-if="vm.shouldShow(account.projects)") folder_open
+							md-icon.angular-material-icons(ng-if="!vm.shouldShow(account.projects)") folder
 						p {{account.account}}
-						md-icon.angular-material-icons.accountModelsSharedIcon(ng-show="!account.canAddModel") group
+						md-icon.angular-material-icons.accountModelsSharedIcon(ng-if="!account.canAddModel") group
 
 
 				div( layout="column")
 					// Project
 					
-					div(ng-show="vm.shouldShow(account.projects, 'projects', account.account)")
-						p.no-federations(ng-show="account.projects.length === 0") No projects created
+					div(ng-if="vm.shouldShow(account.projects, 'projects', account.account)")
+						p.no-federations(ng-if="account.projects.length === 0") No projects created
 
 						md-list.tree-branch(
 							ng-if="vm.hasViewableModel(project)"
@@ -33,13 +33,13 @@
 
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
-										md-icon.angular-material-icons(ng-show="vm.shouldShow(project)") folder_open
-										md-icon.angular-material-icons(ng-show="!vm.shouldShow(project)") folder 
+										md-icon.angular-material-icons(ng-if="vm.shouldShow(project)") folder_open
+										md-icon.angular-material-icons(ng-if="!vm.shouldShow(project)") folder 
 									p.projectName {{project.name}}
 
 								md-menu(
 									md-position-mode="target-right target"
-									ng-show="vm.projectData.visible(project)")
+									ng-if="vm.projectData.visible(project)")
 									md-button.md-icon-button(
 										aria-label="More"
 										ng-click="$mdOpenMenu($event)")
@@ -47,7 +47,7 @@
 									md-menu-content(width="3")
 										md-menu-item(ng-repeat="(key, value) in vm.projectData.projectOptions")
 											md-button(
-												ng-show="value.visible(project)"
+												ng-if="value.visible(project)"
 												ng-click="vm.doProjectOption(key, project, account)")
 												div(layout="row", flex)
 													span(flex, style="color:{{value.color}}") {{value.label}}
@@ -58,22 +58,21 @@
 
 
 							// Project Models and Federations
-							md-list.tree-branch(ng-show="vm.shouldShow(project, 'project', account.account)")
+							md-list.tree-branch(ng-if="vm.shouldShow(project, 'project', account.account)")
 
 								div(ng-click="vm.toggleModels(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-show="vm.shouldShow(project, 'models')") folder_open
-											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'models')") folder
+											md-icon.angular-material-icons(ng-if="vm.shouldShow(project, 'models')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.shouldShow(project, 'models')") folder
 										p Models
 								
-								div(ng-show="vm.shouldShow(project, 'models', account.account)")
+								div(ng-if="vm.shouldShow(project, 'models', account.account)")
 									div(ng-repeat="model in vm.getIndividualModels(project.models)"
-										ng-if="model.permissions.length"
-										ng-show="model.name")
+										ng-if="model.permissions.length && model.name")
 								
 										account-model(
-											is-mobile-device="vm.isMobileDevice"
+											is-lite-mode="vm.isLiteMode"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
@@ -87,22 +86,20 @@
 											quota="vm.quota"
 											subscriptions="vm.subscriptions")
 
-									p.no-federations(ng-show="vm.getIndividualModels(project.models).length == 0") No models created
+									p.no-federations(ng-if="vm.getIndividualModels(project.models).length == 0") No models created
 
 								
 								div(ng-click="vm.toggleFederations(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-show="vm.shouldShow(project, 'federations')") folder_open
-											md-icon.angular-material-icons(ng-show="!vm.shouldShow(project, 'federations')") folder
+											md-icon.angular-material-icons(ng-if="vm.shouldShow(project, 'federations')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.shouldShow(project, 'federations')") folder
 										p Federations
 									
-								div(ng-show="vm.shouldShow(project, 'federations', account.account)")
+								div(ng-if="vm.shouldShow(project, 'federations', account.account)")
 
 									div(ng-repeat="federation in vm.getFederations(project.models)"
-										ng-show="federation.name"
-										ng-if="federation.permissions.length"
-										)
+										ng-if="federation.name && federation.permissions.length")
 										
 										account-federations(											
 											federation="federation"
@@ -129,34 +126,34 @@
 											subscriptions="vm.subscriptions")
 
 									p.no-federations(
-										ng-show="!vm.hasFederations(project.models)") No federations created
+										ng-if="!vm.hasFederations(project.models)") No federations created
 
 
 						// Default - default space models and federations
-						md-list.tree-branch(ng-show="(account.models.length || account.models.length)")
+						md-list.tree-branch(ng-if="(account.models.length || account.models.length)")
 							div(ng-click="vm.toggleDefault(account.account, 'project')")
 								md-list-item.tree-node(flex, md-ink-ripple)
 									md-button.md-icon-button(aria-label="Folder")
-										md-icon.angular-material-icons(ng-show="vm.showDefaults(account.account, 'project')") folder_open
-										md-icon.angular-material-icons(ng-show="!vm.showDefaults(account.account, 'project')") folder  
+										md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'project')") folder_open
+										md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'project')") folder  
 									p Default
 
 							// Unassigned Models and Federations
-							md-list.tree-branch(ng-show="vm.showDefaults(account.account, 'project')")
+							md-list.tree-branch(ng-if="vm.showDefaults(account.account, 'project')")
 
 								div(ng-click="vm.toggleDefault(account.account, 'models')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-show="vm.showDefaults(account.account, 'models')") folder_open
-											md-icon.angular-material-icons(ng-show="!vm.showDefaults(account.account, 'models')") folder 
+											md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'models')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'models')") folder 
 										p Models
 								
-								div(ng-show="vm.showDefaults(account.account, 'models')")
-									div(ng-show="model.name"
+								div(ng-if="vm.showDefaults(account.account, 'models')")
+									div(ng-if="model.name"
 										ng-repeat="model in account.models")
 
 										account-model(
-											is-mobile-device="vm.isMobileDevice"
+											is-lite-mode="vm.isLiteMode"
 											account="account.name"
 											is-account-admin="account.permissions.indexOf('teamspace_admin')"
 											project="project"
@@ -171,16 +168,16 @@
 											quota="vm.quota"
 											subscriptions="vm.subscriptions")
 
-								p.no-federations(ng-show="account.models.length === 0") No default models
+								p.no-federations(ng-if="account.models.length === 0") No default models
 
 								div(ng-click="vm.toggleDefault(account.account, 'feds')")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
-											md-icon.angular-material-icons(ng-show="vm.showDefaults(account.account, 'feds')") folder_open
-											md-icon.angular-material-icons(ng-show="!vm.showDefaults(account.account, 'feds')") folder 
+											md-icon.angular-material-icons(ng-if="vm.showDefaults(account.account, 'feds')") folder_open
+											md-icon.angular-material-icons(ng-if="!vm.showDefaults(account.account, 'feds')") folder 
 										p Federations
 
-								div(ng-show="vm.showDefaults(account.account, 'feds') && federation.name"
+								div(ng-if="vm.showDefaults(account.account, 'feds') && federation.name"
 									ng-repeat="(federationIndex, federation) in account.fedModels")
 
 									account-federations(
@@ -195,24 +192,24 @@
 										save-federation="vm.saveFederation"
 										accounts="vm.accounts")
 
-								p.no-federations(ng-show="account.fedModels.length === 0 && vm.showDefaults(account.account, 'feds')") No default federations
+								p.no-federations(ng-if="account.fedModels.length === 0 && vm.showDefaults(account.account, 'feds')") No default federations
 			
 			md-divider
 
 md-divider
 
 div(layout="row" flex layout-align="end center")
-	#floating-button(layout="column" ng-show="vm.addButtons")
+	#floating-button(layout="column" ng-if="vm.addButtons")
 		md-button(id="addModel" layout="row" ng-click="vm.newModel($event, vm.accounts)") Add Model
 		md-button(id="addFederation" layout="row" ng-click="vm.setupNewFederation($event, vm.accounts)") Add Federation 
 		md-button(id="addProject" layout="row" ng-click="vm.newProject($event,  vm.accounts)") Add Project
 div(layout="row" flex layout-align="end center")
-	span.addHint(ng-show="!vm.addButtons") Add projects, models & federations
+	span.addHint(ng-if="!vm.addButtons") Add projects, models & federations
 	md-button.md-accent.md-fab.md-mini(id="addButtons" aria-label="Add", ng-click="vm.addButtonsToggle()")
 		md-icon.angular-material-icons {{vm.addButtonType}}
 
 
-	//div(ng-show="!vm.modelsExist")
+	//div(ng-if="!vm.modelsExist")
 		.cardInfo(layout="row", layout-align="center center")
 			p {{vm.info}}
-			md-progress-circular(md-diameter="20px", ng-show="vm.showProgress", md-mode="indeterminate")
+			md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")
