@@ -12,14 +12,14 @@ div(layout="row", layout-align="start center", flex)
 
 	.modelRight(layout="row", layout-align="start center")
 		.modelUploadInfo(layout="row", layout-align="start center")
-			p.modelUploadFilename(ng-if="!vm.isMobileDevice") {{vm.uploadFileName}}
-			p.modelUploadInfo(ng-if="!vm.isMobileDevice") {{vm.fileUploadInfo}}
+			p.modelUploadFilename(ng-if="!vm.isLiteMode") {{vm.uploadFileName}}
+			p.modelUploadInfo(ng-if="!vm.isLiteMode") {{vm.fileUploadInfo}}
 			md-progress-circular.modelUploadIcon(
 				md-mode="indeterminate"
 				md-diameter="15"
 				ng-if="vm.isProcessing()")
 
-		p.modelTimestamp(ng-if="!vm.isMobileDevice") {{vm.model.timestampPretty}}
+		p.modelTimestamp(ng-if="!vm.isLiteMode") {{vm.model.timestampPretty}}
 
 		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
 			md-button.md-icon-button(
