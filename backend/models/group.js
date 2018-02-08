@@ -49,8 +49,9 @@ groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
 			let uuids = [];
 			for (let i = 0; i < results.length; i++) {
 				uuids = uuids.concat(results[i].parents);
-				/*if (results[i].parents.length > 0) {
-					uuids.push(results[i].parents[0]);
+				/*for (let j = 0; results[i].parents && j < results[i].parents.length; j++) {
+					//console.log(results[i].parents[j]);
+					uuids.add(results[i].parents[j]);
 				}*/
 			}
 			return uuids;
@@ -65,7 +66,7 @@ groupSchema.methods.uuidToIfcGuids = function(obj) {
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
 	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
-			var ifcGuids = [];
+			let ifcGuids = [];
 			results.forEach(res => {
 				if (groupSchema.statics.isIfcGuid(res.metadata['IFC GUID'])) {
 					ifcGuids.push(res.metadata['IFC GUID']);
@@ -89,26 +90,32 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 		.then(group => {
 			let sharedIdObjects;
 			let sharedIdPromises = [];
+			let uniqueGroupObjects = [];
 
 			for (let i = 0; i < group.objects.length; i++) {
 				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
-					sharedIdPromises.push(
-						this.ifcGuidToUUIDs(group.objects[i].account,
-							group.objects[i].model,
-							group.objects[i].ifc_guid).then(sharedIds => {
-							for (let j = 0; j < sharedIds.length; j++) {
-								if (!sharedIdObjects) {
-									sharedIdObjects = [];
-								}
-								sharedIdObjects.push({
-									account: group.objects[i].account,
-									model: group.objects[i].model,
-									shared_id: sharedIds[j]
-								});
-							}
-						})
-					)
+					uniqueGroupObjects[group.objects[i].ifc_guid] = group.objects[i];
 				}
+			}
+
+			for (let ifcGuid in uniqueGroupObjects) {
+				const groupObject = uniqueGroupObjects[ifcGuid];
+				sharedIdPromises.push(
+					this.ifcGuidToUUIDs(groupObject.account,
+						groupObject.model,
+						groupObject.ifc_guid).then(sharedIds => {
+						for (let j = 0; j < sharedIds.length; j++) {
+							if (!sharedIdObjects) {
+								sharedIdObjects = [];
+							}
+							sharedIdObjects.push({
+								account: groupObject.account,
+								model: groupObject.model,
+								shared_id: sharedIds[j]
+							});
+						}
+					})
+				)
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
