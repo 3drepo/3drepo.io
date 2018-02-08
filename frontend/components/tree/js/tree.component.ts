@@ -119,6 +119,8 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
+							this.TreeService.updateModelState(this.allNodes[0]);
+
 							angular.element((window as any).window).triggerHandler("resize");
 
 						}
@@ -209,7 +211,7 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodes();
+							this.TreeService.showAllTreeNodes(true);
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
@@ -418,6 +420,7 @@ class TreeController implements ng.IController {
 	public toggleTreeNode(node) {
 		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
 		this.TreeService.setTreeNodeStatus(node, newState);
+		this.TreeService.updateModelState(node);
 	}
 
 	/**
@@ -427,6 +430,7 @@ class TreeController implements ng.IController {
 	 */
 	public selectNode(node) {
 		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
+		this.TreeService.updateModelState(node);
 	}
 
 	public filterItemSelected(item) {
@@ -448,6 +452,7 @@ class TreeController implements ng.IController {
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
 			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.updateModelState(selectedNode);
 		}
 
 	}
