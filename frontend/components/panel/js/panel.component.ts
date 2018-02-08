@@ -144,7 +144,7 @@ class PanelController implements ng.IController {
 		/*
 		* Watch for screen resize
 		*/
-		angular.element(this.$window).bind("resize", () => {
+		angular.element(window as any).bind("resize", () => {
 			this.resize();
 		});
 
@@ -289,7 +289,9 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
-		this.$timeout().then(() => { this.$scope.$broadcast("$md-resize"); });
+		this.$timeout().then(() => {
+			angular.element(window as any).triggerHandler("resize");
+		});
 	}
 
 }

@@ -89,6 +89,10 @@
 		}
 	
 		function showDialog() {
+
+			if (this.ClientConfigService && this.ClientConfigService.maintenanceMode) {
+				location.reload();
+			}
 	
 			if (!newVersionDialogOpen) {
 				newVersionDialogOpen = true;
