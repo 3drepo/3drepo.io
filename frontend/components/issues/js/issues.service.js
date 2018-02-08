@@ -532,12 +532,13 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			
+			TreeService.clearCurrentlySelected();
+
 			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
 			}
-			TreeService.showAllTreeNodes();
+			TreeService.showAllTreeNodes(false);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
@@ -584,6 +585,8 @@
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
+
+			TreeService.updateModelState(TreeService.allNodes[0]);
 		}
 
 		function showMultiIds(issue) {
@@ -677,9 +680,6 @@
 
 			TreeService.getMap()
 				.then(function(treeMap){
-
-					// show currently hidden nodes
-					TreeService.clearCurrentlySelected();
 
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
