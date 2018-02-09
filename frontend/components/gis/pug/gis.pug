@@ -2,13 +2,13 @@ div(
 	layout="column" 
 	layout-fill)
 
-        div(
+        div.gisNotice(
             layout="column"
             layout-align="center center"
             ng-if="!vm.modelSettings")
             h3 Loading model settings...
 
-        div(
+        div.gisNotice(
             layout="column"
             layout-align="center center"
             ng-if="vm.modelSettings && (!vm.modelSettings.surveyPoints || (vm.modelSettings.surveyPoints && !vm.modelSettings.surveyPoints.length))")

@@ -11,6 +11,22 @@
 
 }
 
+account-modelsetting .heightFill {
+  height: 105px;
+}
+
+account-modelsetting .modelSettingSubtitle {
+  margin-left: 8px;
+}
+
+account-modelsetting .modelSettingInputContainer {
+  margin-top: 20px;
+}
+
+account-modelsetting .modelSettingInput {
+  width: 80%;
+}
+
 account-licenses .userContent {
   height: calc(100vh - 280px);
   max-height: 482px !important;
@@ -711,6 +727,8 @@ account-itemsetting #accountTeamMemberRole {
 account-itemsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
 }
+
+
 
 /** Federation Dialog *************************************************************************************************/
 

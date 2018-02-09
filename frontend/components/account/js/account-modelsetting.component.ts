@@ -45,6 +45,8 @@ class AccountModelSettingController implements ng.IController {
 	private message;
 	private data;
 
+	private referencePoints: any;
+
 	constructor(
 		private $scope: any,
 		private $location: any,
@@ -66,18 +68,34 @@ class AccountModelSettingController implements ng.IController {
 		this.targetAcct = this.urlData.targetAcct;
 		this.targetProj = this.urlData.targetProj;
 
+		this.referencePoints = {
+			latLong : {},
+			position: {},
+		};
+
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
 
 				if (response.status === 200 && response.data && response.data.properties) {
 
 					const props = response.data.properties;
+					console.log("data", response.data);
 
-					if (props.mapTile) {
-						props.mapTile.lat && (this.mapTile.lat = props.mapTile.lat);
-						props.mapTile.lon && (this.mapTile.lon = props.mapTile.lon);
-						props.mapTile.y && (this.mapTile.y = props.mapTile.y);
+					if (response.data.surveyPoints && response.data.surveyPoints.length) {
+						const reference = response.data.surveyPoints[0];
+						if (reference.latLong) {
+							this.referencePoints.latLong.latitude = reference.latLong[0];
+							this.referencePoints.latLong.longitude = reference.latLong[1];
+							this.referencePoints.latLong.elevation = reference.latLong[2];
+							this.referencePoints.latLong.angleFromNorth = reference.latLong[3];
+						}
+						if (reference.position) {
+							this.referencePoints.position.x = reference.position[0];
+							this.referencePoints.position.z = reference.position[1];
+							this.referencePoints.position.y = -1 * reference.position[2];
+						}
 					}
+
 					if (response.data.type) {
 						this.modelType = response.data.type;
 					}
@@ -151,19 +169,61 @@ class AccountModelSettingController implements ng.IController {
 
 	}
 
+	public getLatLong() {
+		return [
+			parseFloat(this.referencePoints.latLong.latitude) || 0.0,
+			parseFloat(this.referencePoints.latLong.longitude) || 0.0,
+			parseFloat(this.referencePoints.latLong.elevation) || 0.0,
+			parseFloat(this.referencePoints.latLong.angleFromNorth) || 0.0,
+		];
+	}
+
+	public getPosition() {
+
+		// 3drepo.io expects coordinates to come in the format
+		// (x,z,-y) so we need to do some massaging to our data
+
+		return [
+			parseFloat(this.referencePoints.position.x) || 0.0,
+			parseFloat(this.referencePoints.position.z) || 0.0,
+			-parseFloat(this.referencePoints.position.y) || 0.0,
+		];
+	}
+
 	/**
 	 * Save the model settings to the backend
 	 */
 	public save() {
 
-		const data = {
+		const data: any = {
 			name: this.modelName,
-			mapTile: this.mapTile,
 			unit: this.unit,
 			code: this.code,
 			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
 			fourDSequenceTag: this.fourDSequenceTag,
 		};
+
+		if (this.referencePoints.position) {
+			if (!data.surveyPoints) {
+				data.surveyPoints = [{
+					position: this.getPosition(),
+				}];
+			} else {
+				data.surveyPoints[0].position = this.getPosition();
+			}
+		}
+
+		if (this.referencePoints.latLong) {
+			if (!data.surveyPoints) {
+				data.surveyPoints = [{
+					latLong: this.getLatLong(),
+				}];
+			} else {
+				data.surveyPoints[0].latLong = this.getLatLong();
+			}
+		}
+
+		console.log("surveyPoints: ", data.surveyPoints);
 
 		const saveUrl = this.targetAcct + "/" + this.modelId +  "/settings";
 

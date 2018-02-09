@@ -29,3 +29,7 @@ gis .gisVisibilityIcon {
     border: none;
     height: 100%;
 }
+
+gis .gisNotice {
+    text-align: center;
+}

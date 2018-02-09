@@ -21,43 +21,62 @@ class GISController implements ng.IController {
 		"$scope",
 		"$q",
 
+		"ViewerService",
 		"GISService",
 	];
 
 	private selectedProvider: any;
 	private providers: any[];
 	private modelSettings: any;
+	private onContentHeightRequest: any;
 
 	constructor(
 		private $scope: any,
 		private $q: any,
 
+		private ViewerService: any,
 		private GISService: any,
 	) {}
 
 	public $onInit() {
-
+		this.onContentHeightRequest({height: 130});
 		this.watchers();
 		this.providers = this.GISService.getProviders();
 		this.selectedProvider = this.providers[0];
 	}
 
 	public $onDestroy() {
-
+		this.GISService.mapStop();
 	}
 
 	public watchers() {
+		const modelsLoaded = this.$q.defer();
+
 		this.$scope.$watch("vm.modelSettings", () => {
-			console.log(this.modelSettings);
+
 			if (
 				this.modelSettings &&
 				this.modelSettings.surveyPoints &&
 				this.modelSettings.surveyPoints.length
 			) {
-				console.log("modelSettings.surveyPoints", this.modelSettings.surveyPoints)
-				this.GISService.mapInitialise(this.modelSettings.surveyPoints);
+
+				modelsLoaded.promise.then(() => {
+					console.log("modelSettings.surveyPoints", this.modelSettings.surveyPoints);
+					this.GISService.mapInitialise(this.modelSettings.surveyPoints);
+				});
 			}
 		});
+
+		this.$scope.$watch(
+			() => {
+				return this.ViewerService.currentModel && !!this.ViewerService.currentModel.model;
+			},
+			(loaded) => {
+				if (loaded) {
+					modelsLoaded.resolve();
+				}
+			},
+		);
 	}
 
 	public toggleLayerVisibility(layer: any) {
@@ -72,6 +91,7 @@ export const GISComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		onContentHeightRequest: "&",
 	},
 	controller: GISController,
 	controllerAs: "vm",
