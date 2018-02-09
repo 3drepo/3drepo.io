@@ -904,6 +904,29 @@ export class TreeService {
 	}
 
 	/**
+	 * Select multiple nodes in the tree.
+	 * @param nodes	Array of nodes to select.
+	 * @param multi	Is multi select enabled.
+	 */
+	public selectNodes(nodes: any[], multi: boolean, final: boolean) {
+
+		if (nodes && nodes.length > 0) {
+			if (!multi) {
+				// If it is not multiselect mode, remove all highlights
+				this.clearCurrentlySelected();
+			}
+
+			for (let i = 0; i < nodes.length; i++) {
+				const sameNodeIndex = this.currentSelectedNodes.indexOf(nodes[i]);
+
+				if (-1 === sameNodeIndex || multi) {
+					this.selectNode(nodes[i], true, final && nodes.length - 1 === i);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Toggle node from clickedHidden collection.
 	 * @param node	Node to toggle.
 	 */

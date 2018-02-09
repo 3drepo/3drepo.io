@@ -692,18 +692,26 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 
+					var nodes = new Set();
+
 					for (var i = 0; i < objects.length; i++) {
 						var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
-							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
-							} else {
-								// Only call expandToSelection for last selected node to improve performance
+							var node = TreeService.getNodeById(objUid);
+							if (node && node.hasOwnProperty("name")) {
+								nodes.add(node);
+							}
 
+							if (i === objects.length - 1) {
+								// Only call expandToSelection for last selected node to improve performance
 								TreeService.initNodesToShow([TreeService.allNodes[0]]);
+								// TODO: we no longer need to select here, but still need to expand tree
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 								
+								if (nodes.size > 0) {
+									TreeService.selectNodes(Array.from(nodes), false, true);
+								}
 							}
 						}
 					}
