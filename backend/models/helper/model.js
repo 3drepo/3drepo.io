@@ -256,8 +256,9 @@ function createAndAssignRole(modelName, account, username, data) {
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
 	}
 
-	console.log(data, data.code);
+	console.log(data, data.code || false);
 	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)){
+		console.log("Invalid model code found.");
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
 	}
 
