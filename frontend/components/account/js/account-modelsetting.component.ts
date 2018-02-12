@@ -44,6 +44,7 @@ class AccountModelSettingController implements ng.IController {
 	private fourDSequenceTag;
 	private message;
 	private data;
+	private loaded: boolean;
 
 	private referencePoints: any;
 
@@ -58,6 +59,7 @@ class AccountModelSettingController implements ng.IController {
 
 	public $onInit() {
 
+		this.loaded = false;
 		this.units = this.ClientConfigService.units;
 		this.mapTile = {};
 
@@ -118,6 +120,7 @@ class AccountModelSettingController implements ng.IController {
 					this.message = response.data.message;
 				}
 
+				this.loaded = true;
 			})
 			.catch((error) => {
 				console.error(error);

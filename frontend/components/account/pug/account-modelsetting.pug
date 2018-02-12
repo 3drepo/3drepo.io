@@ -7,130 +7,136 @@
 				h2 Model Settings
 		.userContent
 
-			h3.modelSettingSubtitle Model Information
-			br
-
-			div.modelSettingInputContainer(layout="column")
-				div(layout="row" flex)
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label Model name
-							input(type="text", ng-model="vm.modelName")
-
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label Model type
-							input(type="text", ng-model="vm.modelType", disabled)
-				div(layout="row" flex)
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label Model code
-							input(type="text", ng-model="vm.code", maxlength=5)
-
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label 4D Sequence Tag
-							input(type="text", ng-model="vm.fourDSequenceTag")
-
-				div(layout="row" flex)
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label Issue topic types
-							textarea(type="text", ng-model="vm.topicTypes")
-							.inputHint One line per topic type
-
-					div(flex="50")
-						md-input-container.modelSettingInput(layout-fill layout-margin)
-							label Unit
-							md-select(ng-model="vm.unit", ng-disabled="vm.oldUnit")
-								md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
-
-
-			h3.modelSettingSubtitle GIS Reference Information
-			br
-			table(
-				layout="column"
-				flex)
+			div.loadingText(ng-if="!vm.loaded")
+				md-progress-circular.loading
+				br
+				h3 Loading Model Settings
 				
-				thead(layout="row" flex)
-					tr(layout="row" flex)
-						th(flex="50") Survey Point
-						th(flex="50") Project Point
+			div(ng-if="vm.loaded")
+				h3.modelSettingSubtitle Model Information
+				br
 
-				tbody(layout="row" flex)
+				div.modelSettingInputContainer(layout="column")
+					div(layout="row" flex)
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Model name
+								input(type="text", ng-model="vm.modelName")
+
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Model type
+								input(type="text", ng-model="vm.modelType", disabled)
+					div(layout="row" flex)
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Model code
+								input(type="text", ng-model="vm.code", maxlength=5)
+
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label 4D Sequence Tag
+								input(type="text", ng-model="vm.fourDSequenceTag")
+
+					div(layout="row" flex)
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Issue topic types
+								textarea(type="text", ng-model="vm.topicTypes")
+								.inputHint One line per topic type
+
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Unit
+								md-select(ng-model="vm.unit", ng-disabled="vm.oldUnit")
+									md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+
+				h3.modelSettingSubtitle GIS Reference Information
+				br
+				table(
+					layout="column"
+					flex)
 					
-					tr(layout="column" 
-						flex="50" 
-						layout-fill
-						layout-align="center center")
+					thead(layout="row" flex)
+						tr(layout="row" flex)
+							th(flex="50") Survey Point
+							th(flex="50") Project Point
 
-						td
-							md-input-container
-								label Latitude (Decimal)
-								input.gisInput(
-									type="number"
-									ng-model="vm.referencePoints.latLong.latitude")
-						td  
-							md-input-container
-								label Longitude (Decimal)
-								input.gisInput(
-									type="number" 
-									ng-model="vm.referencePoints.latLong.longitude") 
-						td
-							md-input-container
-								label Elevation (Meters)
-								input.gisInput(
-									type="number"
-									disabled 
-									ng-value="0") 
-						td
-							md-input-container
-								label Angle from North (Clockwise Degrees)
-								input.gisInput(
-									type="number"
-									ng-model="vm.referencePoints.latLong.angleFromNorth")
-					
-					tr(layout="column" 
-						flex="50" 
-						layout-fill
-						layout-align="center center")
+					tbody(layout="row" flex)
+						
+						tr(layout="column" 
+							flex="50" 
+							layout-fill
+							layout-align="center center")
 
-						td
-							md-input-container
-								label x ({{vm.unit}})
-								input.gisInput(
-									type="number"
-									ng-model="vm.referencePoints.position.x") 
-						td
-							md-input-container
-								label y ({{vm.unit}})
-								input.gisInput(
-									type="number"
-									ng-model="vm.referencePoints.position.y") 
-						td
-							md-input-container
-								label z ({{vm.unit}})
-								input.gisInput(
-									type="number"
-									ng-model="vm.referencePoints.position.z") 
-						td
-							div.heightFill
+							td
+								md-input-container
+									label Latitude (Decimal)
+									input.gisInput(
+										type="number"
+										ng-model="vm.referencePoints.latLong.latitude")
+							td  
+								md-input-container
+									label Longitude (Decimal)
+									input.gisInput(
+										type="number" 
+										ng-model="vm.referencePoints.latLong.longitude") 
+							td
+								md-input-container
+									label Elevation (Meters)
+									input.gisInput(
+										type="number"
+										disabled 
+										ng-value="0") 
+							td
+								md-input-container
+									label Angle from North (Clockwise Degrees)
+									input.gisInput(
+										type="number"
+										ng-model="vm.referencePoints.latLong.angleFromNorth")
+						
+						tr(layout="column" 
+							flex="50" 
+							layout-fill
+							layout-align="center center")
 
-			//div(layout="row")
-				md-input-container(flex)
-					label Latitude
-					input(type="text", ng-model="vm.mapTile.lat")
-				md-input-container(flex)
-					label Longitude
-					input(type="text", ng-model="vm.mapTile.lon")
+							td
+								md-input-container
+									label x ({{vm.unit}})
+									input.gisInput(
+										type="number"
+										ng-model="vm.referencePoints.position.x") 
+							td
+								md-input-container
+									label y ({{vm.unit}})
+									input.gisInput(
+										type="number"
+										ng-model="vm.referencePoints.position.y") 
+							td
+								md-input-container
+									label z ({{vm.unit}})
+									input.gisInput(
+										type="number"
+										ng-model="vm.referencePoints.position.z") 
+							td
+								div.heightFill
 
-			//div(layout="row")
-				md-input-container(flex)
-					label Sea level
-					input(type="text", ng-model="vm.mapTile.y")
-				md-input-container(flex)
+				//div(layout="row")
+					md-input-container(flex)
+						label Latitude
+						input(type="text", ng-model="vm.mapTile.lat")
+					md-input-container(flex)
+						label Longitude
+						input(type="text", ng-model="vm.mapTile.lon")
+
+				//div(layout="row")
+					md-input-container(flex)
+						label Sea level
+						input(type="text", ng-model="vm.mapTile.y")
+					md-input-container(flex)
 
 
-			div(layout="row")
-				md-button.md-raised.md-accent(ng-click="vm.save()") Save
-				p {{vm.message}}
+				div(layout="row")
+					md-button.md-raised.md-accent(ng-click="vm.save()") Save
+					p {{vm.message}}
