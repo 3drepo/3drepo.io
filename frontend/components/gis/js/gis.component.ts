@@ -61,8 +61,13 @@ class GISController implements ng.IController {
 			) {
 
 				modelsLoaded.promise.then(() => {
-					console.log("modelSettings.surveyPoints", this.modelSettings.surveyPoints);
-					this.GISService.mapInitialise(this.modelSettings.surveyPoints);
+					const surveySettings = {
+						surveyPoints: this.modelSettings.surveyPoints,
+						elevation: this.modelSettings.elevation || 0,
+						angleFromNorth: this.modelSettings.angleFromNorth || 0,
+					};
+					console.log("modelSettings.surveyPoints", surveySettings);
+					this.GISService.mapInitialise(surveySettings);
 				});
 			}
 		});

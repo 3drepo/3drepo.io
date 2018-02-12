@@ -74,9 +74,9 @@ class AccountModelSettingController implements ng.IController {
 			latLong : {
 				latitude: 0.0,
 				longitude: 0.0,
-				angleFromNorth: 0.0,
-				elevation: 0.0,
 			},
+			angleFromNorth: 0.0,
+			elevation: 0.0,
 			position: {
 				x : 0.0,
 				y: 0.0,
@@ -84,6 +84,11 @@ class AccountModelSettingController implements ng.IController {
 			},
 		};
 
+		this.fetchModelSettings();
+
+	}
+
+	public fetchModelSettings() {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
 
@@ -97,8 +102,12 @@ class AccountModelSettingController implements ng.IController {
 						if (reference.latLong) {
 							this.referencePoints.latLong.latitude = reference.latLong[0];
 							this.referencePoints.latLong.longitude = reference.latLong[1];
-							this.referencePoints.latLong.elevation = reference.latLong[2];
-							this.referencePoints.latLong.angleFromNorth = reference.latLong[3];
+						}
+						if (response.data.elevation) {
+							this.referencePoints.elevation = response.data.elevation;
+						}
+						if (response.data.angleFromNorth) {
+							this.referencePoints.angleFromNorth = response.data.angleFromNorth;
 						}
 						if (reference.position) {
 							this.referencePoints.position.x = reference.position[0];
@@ -134,7 +143,6 @@ class AccountModelSettingController implements ng.IController {
 			.catch((error) => {
 				console.error(error);
 			});
-
 	}
 
 	/**
@@ -185,8 +193,6 @@ class AccountModelSettingController implements ng.IController {
 		return [
 			parseFloat(this.referencePoints.latLong.latitude) || 0.0,
 			parseFloat(this.referencePoints.latLong.longitude) || 0.0,
-			parseFloat(this.referencePoints.latLong.elevation) || 0.0,
-			parseFloat(this.referencePoints.latLong.angleFromNorth) || 0.0,
 		];
 	}
 
@@ -226,6 +232,14 @@ class AccountModelSettingController implements ng.IController {
 			}
 		}
 
+		if (!data.elevation) {
+			data.elevation = this.referencePoints.elevation || 0.0;
+		}
+
+		if (!data.angleFromNorth) {
+			data.angleFromNorth = this.referencePoints.angleFromNorth || 0.0;
+		}
+
 		if (this.referencePoints.latLong) {
 			if (!data.surveyPoints) {
 				data.surveyPoints = [{
@@ -254,7 +268,7 @@ class AccountModelSettingController implements ng.IController {
 				}
 			})
 			.catch((error) => {
-				this.message = "There was an error saving model settings"
+				this.message = "There was an error saving model settings";
 				console.error("Error saving model settings", error);
 			});
 

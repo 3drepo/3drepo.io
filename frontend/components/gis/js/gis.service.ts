@@ -43,11 +43,12 @@ export class GISService {
 		];
 	}
 
-	public mapInitialise(surveyPoints) {
-		if (!this.initialised && surveyPoints && surveyPoints.length) {
-			console.log("mapInitialise", surveyPoints);
-			if (surveyPoints[0].latLong && surveyPoints[0].position) {
-				this.ViewerService.mapInitialise(surveyPoints);
+	public mapInitialise(params) {
+		if (!this.initialised && params && params.surveyPoints.length) {
+			if (params.surveyPoints[0].latLong && params.surveyPoints[0].position) {
+
+				console.log("mapInitialise", params);
+				this.ViewerService.mapInitialise(params);
 				this.initialised = true;
 			}
 		}
