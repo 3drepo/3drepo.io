@@ -8,6 +8,12 @@ bottom-buttons {
   text-align: center;
 }
 
+@media (max-width: 767px) { 
+  bottom-buttons #middleButtons {
+    display: none;
+  } 
+}
+
 bottom-buttons #middleButtons {
   margin: auto;
 }
