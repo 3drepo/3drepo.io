@@ -53,6 +53,8 @@ const schema = mongoose.Schema({
 			position: [Number]
 		}
 	],
+	angleFromNorth : Number,
+	elevation: Number,
 	fourDSequenceTag: String,
 	timestamp: Date,
 	subModels: [{
