@@ -748,6 +748,32 @@
 		}
 
 		/**
+		 * Prune node from group if its parent is already a part of the group.
+		 * @returns prunedNodes	List of nodes with children pruned out.
+		 */
+		function pruneNodes(nodes) {
+			console.log("orig nodes", nodes);
+			//var nodeIds = nodes.map(x => x.id);
+			//console.log(nodeIds);
+			var prunedNodes = [];
+			for (var i = 0; i < nodes.length; i++) {
+				var nodePath = TreeService.getPath(nodes[i].id);
+				var parentNodeId;
+				if (nodePath.length > 1) {
+					parentNodeId = nodePath[nodePath.length - 2];
+				}
+				if (!parentNodeId ||
+						"invisible" !== TreeService.getNodeById(parentNodeId).toggleState) {
+						//-1 === nodeIds.indexOf(parentNodeId)) {
+					//console.log(-1 === nodeIds.indexOf(parentNodeId));
+					prunedNodes.push(nodes[i]);
+				}
+			}
+			console.log("pruned nodes", prunedNodes);
+			return prunedNodes;
+		}
+
+		/**
 		 * @returns groupData	Object with list of nodes for group creation.
 		 */
 		function createGroupData(nodes) {
@@ -765,7 +791,7 @@
 			var highlightedGroupData = createGroupData(objectInfo.highlightedNodes);
 			
 			// Create a group of hidden objects
-			var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
+			var hiddenGroupData = createGroupData(pruneNodes(objectInfo.hiddenNodes));
 
 			APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
 				.then(function (highlightedGroupResponse) {
