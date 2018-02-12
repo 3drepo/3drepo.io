@@ -71,8 +71,17 @@ class AccountModelSettingController implements ng.IController {
 		this.targetProj = this.urlData.targetProj;
 
 		this.referencePoints = {
-			latLong : {},
-			position: {},
+			latLong : {
+				latitude: 0.0,
+				longitude: 0.0,
+				angleFromNorth: 0.0,
+				elevation: 0.0,
+			},
+			position: {
+				x : 0.0,
+				y: 0.0,
+				z: 0.0,
+			},
 		};
 
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
@@ -191,6 +200,7 @@ class AccountModelSettingController implements ng.IController {
 			parseFloat(this.referencePoints.position.z) || 0.0,
 			-parseFloat(this.referencePoints.position.y) || 0.0,
 		];
+
 	}
 
 	/**
@@ -242,6 +252,10 @@ class AccountModelSettingController implements ng.IController {
 				} else {
 					this.message = response.data.message;
 				}
+			})
+			.catch((error) => {
+				this.message = "There was an error saving model settings"
+				console.error("Error saving model settings", error);
 			});
 
 	}
