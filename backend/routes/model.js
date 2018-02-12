@@ -206,8 +206,10 @@ function createModel(req, res, next){
 	data.userPermissions = req.session.user.permissions;
 
 	createAndAssignRole(modelName, account, username, data).then(data => {
+		console.log("success: " , data);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
 	}).catch( err => {
+		console.log("failed: ", err);
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
