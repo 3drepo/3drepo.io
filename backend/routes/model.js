@@ -200,6 +200,8 @@ function createModel(req, res, next){
 		project: req.body.project
 	};
 
+	console.log(data);
+
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 	data.userPermissions = req.session.user.permissions;
 
