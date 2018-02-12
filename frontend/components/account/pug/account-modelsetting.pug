@@ -61,42 +61,59 @@
 					
 					tr(layout="column" 
 						flex="50" 
+						layout-fill
 						layout-align="center center")
 
+						td
+							md-input-container
+								label Latitude (Decimal)
+								input.gisInput(
+									type="number"
+									ng-model="vm.referencePoints.latLong.latitude")
 						td  
 							md-input-container
-								label Latitude
-								input(type="number", ng-model="vm.referencePoints.latLong.latitude")
-						td  
+								label Longitude (Decimal)
+								input.gisInput(
+									type="number" 
+									ng-model="vm.referencePoints.latLong.longitude") 
+						td
 							md-input-container
-								label Longitude
-								input(type="number", ng-model="vm.referencePoints.latLong.longitude") 
-						td  
+								label Elevation (Meters)
+								input.gisInput(
+									type="number"
+									disabled 
+									ng-value="0") 
+						td
 							md-input-container
-								label Elevation
-								input(type="number", ng-model="vm.referencePoints.latLong.elevation")
-						td 
-							md-input-container
-								label Angle from North 
-								input(type="number", ng-model="vm.referencePoints.latLong.angleFromNorth")
+								label Angle from North (Clockwise Degrees)
+								input.gisInput(
+									type="number"
+									ng-model="vm.referencePoints.latLong.angleFromNorth")
 					
 					tr(layout="column" 
 						flex="50" 
+						layout-fill
 						layout-align="center center")
 
-						td 
+						td
 							md-input-container
-								label x
-								input(type="number", ng-model="vm.referencePoints.position.x") 
-						td  
+								label x ({{vm.unit}})
+								input.gisInput(
+									type="number"
+									ng-model="vm.referencePoints.position.x") 
+						td
 							md-input-container
-								label y
-								input(type="number", ng-model="vm.referencePoints.position.y") 
-						td  
+								label y ({{vm.unit}})
+								input.gisInput(
+									type="number"
+									ng-model="vm.referencePoints.position.y") 
+						td
 							md-input-container
-								label z
-								input(type="number", ng-model="vm.referencePoints.position.z") 
-						td  
+								label z ({{vm.unit}})
+								input.gisInput(
+									type="number"
+									ng-model="vm.referencePoints.position.z") 
+						td
 							div.heightFill
 
 			//div(layout="row")

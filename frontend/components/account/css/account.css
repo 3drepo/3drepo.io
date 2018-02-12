@@ -11,6 +11,11 @@
 
 }
 
+account-modelsetting .gisInput {
+  width: 15vw;
+  min-width: 130px;
+}
+
 account-modelsetting .heightFill {
   height: 105px;
 }
