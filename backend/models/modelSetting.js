@@ -70,6 +70,14 @@ const schema = mongoose.Schema({
 
 
 schema.statics.defaultTopicTypes = [
+	{value: "clash", label: "Clash"},
+	{value: "diff", label: "Diff"},
+	{value: "rfi", label: "RFI"},
+	{value: "risk", label: "Risk"},
+	{value: "hs", label: "H&S"},
+	{value: "design", label: "Design"},
+	{value: "constructibility", label: "Constructibility"},
+	{value: "gis", label: "GIS"},
 	{value: "for_information", label: "For information"},
 	{value: "vr", label: "VR"}
 ];
@@ -109,7 +117,7 @@ schema.methods.updateProperties = function(updateObj){
 				}
 				
 				//generate value from label
-				let value = type.trim().toLowerCase().replace(/ /g, "_");
+				let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");;
 				
 				if(topicTypes[value]){
 					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
