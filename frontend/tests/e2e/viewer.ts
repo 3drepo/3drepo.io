@@ -25,7 +25,7 @@ describe("Viewer page", function() {
 		describe("with the left bottom buttons", () => {
 
 			it("visible", () => {
-				expect(element(by.id("leftButtons")).isDisplayed()).to.eventually.equal(true);
+				expect(element(by.id("middleButtons")).isDisplayed()).to.eventually.equal(true);
 			});
 
 		});
