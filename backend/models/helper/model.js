@@ -1686,6 +1686,10 @@ function getModelPermission(username, setting, account){
 	});
 }
 
+function getAllMetadata(account, model, branch, rev) {
+	return getAllIdsWithMetadataField(account, model, branch, rev, "");
+}
+
 function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 	//Get sequence tag then call the generic getAllIdsWithMetadataField
 	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
@@ -1706,7 +1710,11 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 	//Get the revision object to find all relevant IDs
 	let getHistory;
 	let history;
-	let fullFieldName = "metadata." + fieldName;
+	let fullFieldName = "metadata";
+
+	if (fieldName && fieldName.length > 0) {
+		fullFieldName += "." + fieldName;
+	}
 
 	if(rev && utils.isUUID(rev)){
 		getHistory = History.findByUID({ account, model }, rev);
@@ -1771,12 +1779,11 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			if(obj){
 				//rename fieldName to "value"
 				let parsedObj = {data: obj};
-				if(obj.length > 0)
-				{
+				if(obj.length > 0 && fieldName && fieldName.length > 0) {
 					const objStr = JSON.stringify(obj);
 					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
 				}
-				if(_subMeta.length > 0){
+				if(_subMeta.length > 0) {
 					parsedObj.subModels = _subMeta;
 				}
 				return parsedObj;
@@ -1866,6 +1873,7 @@ module.exports = {
 	getMetadata,
 	getFullTree_noSubTree,
 	resetCorrelationId,
+	getAllMetadata,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
 	setStatus,
