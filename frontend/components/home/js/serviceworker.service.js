@@ -4,9 +4,9 @@
 	angular.module("3drepo")
 		.service("SWService", SWService);
 
-	SWService.$inject = ["DialogService"];
+	SWService.$inject = ["DialogService", "ClientConfigService"];
 
-	function SWService(DialogService) {
+	function SWService(DialogService, ClientConfigService) {
 
 		var path = "/"; //"/service-workers/";
 		var newVersionDialogOpen = false;
@@ -90,7 +90,7 @@
 	
 		function showDialog() {
 
-			if (this.ClientConfigService && this.ClientConfigService.maintenanceMode) {
+			if (ClientConfigService && ClientConfigService.maintenanceMode === true) {
 				location.reload();
 			}
 	
