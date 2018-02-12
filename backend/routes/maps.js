@@ -22,7 +22,7 @@ const middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
 const httpsGet = require('../libs/httpsReq');
 
-router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", middlewares.hasReadAccessToModel, getOSMTile);
+router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
 
 function getOSMTile(req, res, next){
 	//TODO: we may want to ensure the model has access to tiles
