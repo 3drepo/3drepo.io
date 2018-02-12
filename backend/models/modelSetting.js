@@ -83,7 +83,7 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
-
+		if(!updateObj[key]) return;
 		switch (key) {
 			case "topicTypes":
 				let topicTypes = {};
