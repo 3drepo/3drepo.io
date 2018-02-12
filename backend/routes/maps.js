@@ -33,7 +33,7 @@ function getOSMTile(req, res, next){
 		res.write(image);
 		res.end();
 	}).catch(err => {
-		console.log(err);
+		systemLogger.logError(err);
 		if(err.message){
 			res.status(500).json({ message: err.message});
 		} else if (err.resCode){

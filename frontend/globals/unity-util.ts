@@ -580,14 +580,10 @@ export class UnityUtil {
 
 	/**
 	 * Initialise map creator within unity
-	 * @param {Object[]} surveyPoints - array of survey points and it's respective latitude and longitude value
+	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
-	public static mapInitialise(surveyPoints) {
-		const params: any = {
-			surveyPoints,
-		};
-
-		UnityUtil.toUnity("MapsInitiate", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	public static mapInitialise(surveyingInfo) {
+		UnityUtil.toUnity("MapsInitiate", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
 	}
 
 	/**
