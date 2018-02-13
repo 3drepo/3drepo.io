@@ -55,11 +55,13 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
-	data.objects.forEach(obj => {
-		if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-			obj.id = utils.stringToUUID(obj.id);
+	if (data.objects) {
+		for (let i = 0; i < data.objects.length; i++) {
+			if ("[object String]" === Object.prototype.toString.call(data.objects[i].id)) {
+				data.objects[i].id = utils.stringToUUID(data.objects[i].id);
+			}
 		}
-	});
+	}
 
 	this.name = data.name || this.name;
 	this.objects = data.objects || this.objects;
@@ -89,13 +91,16 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	cleaned.objects.forEach(object => {
-		if (object.shared_id &&
-			"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-			//object.id = utils.uuidToString(object.id);
-			object.shared_id = utils.uuidToString(object.shared_id);
+	if (cleaned.objects) {
+		for (let i = 0; i < cleaned.objects.length; i++) {
+			const object = cleaned.objects[i];
+			if (object.shared_id &&
+				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
+				//object.id = utils.uuidToString(object.id);
+				object.shared_id = utils.uuidToString(object.shared_id);
+			}
 		}
-	});
+	}
 	return cleaned;
 
 };
