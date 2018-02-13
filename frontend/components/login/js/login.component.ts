@@ -64,7 +64,6 @@ class LoginController implements ng.IController {
 		this.$scope.$watch(() => {
 			return this.AuthService.state.currentEvent;
 		}, () => {
-			console.log("changed", this.AuthService.state.currentEvent);
 			if (this.AuthService.state.currentEvent === this.AuthService.events.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
 				if (!this.AuthService.state.currentData.initialiser && this.AuthService.state.currentData.hasOwnProperty("error")) {

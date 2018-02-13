@@ -156,7 +156,7 @@ export class StateManagerService {
 	}
 
 	public handleStateChange(stateChangeObject) {
-		console.log("handleStateChange");
+
 		let param;
 		const fromParams = stateChangeObject.fromParams;
 		const toParams   = stateChangeObject.toParams;
