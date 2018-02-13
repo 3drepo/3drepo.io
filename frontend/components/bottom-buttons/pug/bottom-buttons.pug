@@ -1,11 +1,9 @@
 div(
 	layout="row"
-	flex
-	layout-align="space-between")
+	flex)
 
-	// LEFT HAND SIDE BUTTTONS
-	#leftButtons(ng-if="vm.showButtons", layout="row")
-		span(ng-repeat="button in vm.leftButtons", layout="column")
+	div#middleButtons(layout-align="space-between" ng-if="vm.showButtons", layout="row")
+		span.middleButtonHolder(ng-repeat="button in vm.leftButtons", layout="column")
 			md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 				ng-click="button.click()"
 				aria-label="{{button.label}}")
@@ -24,18 +22,16 @@ div(
 					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.isolate2}}")
 		
 				svg(ng-if="button.label === 'Focus'"
-					width="24px" style="padding-top: 2px;" height="24px" viewBox="0 0 1024 1024")
+					width="24px" height="24px" viewBox="0 0 1024 1024")
 					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.focus}}")
 		
 				// HELICOPTER
 				svg(ng-if="vm.selectedMode === 'Helicopter' && button.isViewingOptionButton"
-					width="60%"
 					xmlns="http://www.w3.org/2000/svg" 
 					viewBox="0 0 18 10.42")
 					path(fill="#fff" ng-attr-d="{{vm.customIcons.helicopter}}")
 				// TURNTABLE
 				svg(ng-if="vm.selectedMode === 'Turntable' && button.isViewingOptionButton"
-					width="60%"
 					xmlns="http://www.w3.org/2000/svg" 
 					viewBox="0 0 23.94 22.46")
 					path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1}}")
@@ -47,7 +43,7 @@ div(
 			label(ng-if="button.isViewingOptionButton") {{vm.selectedMode}} 
 
 			// OPTIONS
-			.viewingOptionButtonHolder
+			.viewingOptionButtonHolder(layout-align="center center")
 				.viewingOptionButtons(
 					layout="column"
 					ng-if="vm.showViewingOptions && button.isViewingOptionButton"
@@ -61,23 +57,15 @@ div(
 	
 						// HELICOPTER
 						svg(ng-if="mode === 'Helicopter'"
-							width="60%"
 							xmlns="http://www.w3.org/2000/svg" 
 							viewBox="0 0 18 10.42")
 							path(fill="#fff" ng-attr-d="{{vm.customIcons.helicopter}}")
 					
 						// TURNTABLE
 						svg(ng-if="mode === 'Turntable'"
-							width="60%"
 							xmlns="http://www.w3.org/2000/svg" 
 							viewBox="0 0 23.94 22.46")
-							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1")
-							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable2")
-							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable3")
+							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1}}")
+							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable2}}")
+							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable3}}")
 
-
-	// RIGHT HAND SIDE BUTTTONS
-	//#rightButtons(ng-if="vm.showButtons", layout="column" layout-align="center center")
-		
-
-//compass(ng-click="vm.toggleElements()")

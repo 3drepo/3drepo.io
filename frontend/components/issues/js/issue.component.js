@@ -777,6 +777,11 @@
 		 * @returns groupData	Object with list of nodes for group creation.
 		 */
 		function createGroupData(nodes) {
+			/*var groupNodesLimit = 25000;
+			if (nodes && nodes.length > groupNodesLimit) {
+				nodes.length = groupNodesLimit;
+				console.error("Upper limit of " + groupNodesLimit + " exceeded! Saved viewpoint will be incomplete.");
+			}*/
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 

@@ -693,4 +693,26 @@ export class Viewer {
 		}
 	}
 
+	/**
+	 * Initialise map creator within unity
+	 * @param {Object[]} surveyPoints - array of survey points and it's respective latitude and longitude value
+	 */
+	public mapInitialise(surveyPoints) {
+		UnityUtil.mapInitialise(surveyPoints);
+	}
+
+	/**
+	 * Start map generation
+	 */
+	public  mapStart() {
+		UnityUtil.mapStart();
+	}
+
+	/**
+	 * Stop map generation
+	 */
+	public mapStop() {
+		UnityUtil.mapStop();
+	}
+
 }

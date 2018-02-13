@@ -209,11 +209,6 @@ describe('Model', function () {
 
 		let body = {
 
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: 'cm',
 				code: '00222',
 				topicTypes: ['For Info', '3D Repo', 'Vr']
@@ -222,11 +217,6 @@ describe('Model', function () {
 		
 		let expectedReturn = {
 
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: 'cm',
 				code: '00222',
 				topicTypes: [{
