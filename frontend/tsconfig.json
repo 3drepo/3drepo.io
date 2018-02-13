@@ -8,7 +8,7 @@
       "removeComments": true,
       "noImplicitAny": false,
       "outDir": "./tests/e2e/built",
-      "types": ["mocha", "chai", "node"]
+      "types": ["mocha", "chai", "node", "angular"]
     },
     "include": [
       "./tests/e2e/**/*"

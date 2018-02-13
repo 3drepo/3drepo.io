@@ -1,0 +1,47 @@
+div(
+	layout="column" 
+	layout-fill)
+
+        div.gisNotice(
+            layout="column"
+            layout-align="center center"
+            ng-if="!vm.modelSettings")
+            h3 Loading model settings...
+
+        div.gisNotice(
+            layout="column"
+            layout-align="center center"
+            ng-if="vm.modelSettings && (!vm.modelSettings.surveyPoints || (vm.modelSettings.surveyPoints && !vm.modelSettings.surveyPoints.length))")
+            h3 Reference data no available, please update model settings with survey points
+
+        div(
+            layout-align="center center"
+            layout="column"
+            ng-if="vm.modelSettings && vm.modelSettings.surveyPoints && vm.modelSettings.surveyPoints.length")
+
+            md-select.gisSelect(ng-model="vm.selectedProvider")
+                md-option.gisOption(
+                    layout-align="center center"
+                    ng-repeat="provider in vm.providers" 
+                    ng-value="provider") {{provider.name}}
+
+            md-container(layout-fill layout="column")
+
+                div.gisLayer(
+                    layout="row"
+                    layout-align="space-around center"
+                    ng-repeat="layer in vm.selectedProvider.layers")
+
+                    div(
+                        layout-align="space-around center"
+                        flex)
+                        md-icon.gisLayerIcon.angular-material-icons(flex) map 
+                        span(flex) {{layer.name}}
+
+                    button.gisVisibilityIcon(
+                        ng-click="vm.toggleLayerVisibility(layer)")
+                        md-icon.angular-material-icons(ng-if="layer.visibility === 'visible'") visibility
+                        md-icon.angular-material-icons(ng-if="layer.visibility === 'invisible'") visibility_off
+
+                    md-divider
+        

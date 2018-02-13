@@ -166,17 +166,17 @@ class ModelController implements ng.IController {
 
 		if (!this.ViewerService.currentModel.model) {
 			console.debug("Initiating Viewer");
-
-			this.ViewerService.initViewer()
-				.then(() => {
-					this.ViewerService.loadViewerModel(
-						this.account,
-						this.model,
-						this.branch,
-						this.revision,
-					);
-				});
-
+			if (this.ViewerService.viewer) {
+				this.ViewerService.initViewer()
+					.then(() => {
+						this.ViewerService.loadViewerModel(
+							this.account,
+							this.model,
+							this.branch,
+							this.revision,
+						);
+					});
+			}
 		} else {
 			// Load the model
 			this.ViewerService.loadViewerModel(
@@ -245,6 +245,7 @@ export const ModelComponent: ng.IComponentOptions = {
 		model:  "=",
 		revision: "=",
 		state:    "=",
+		isLiteMode: "=",
 	},
 	controller: ModelController,
 	controllerAs: "vm",

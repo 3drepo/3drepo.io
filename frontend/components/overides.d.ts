@@ -3,5 +3,10 @@ declare global {
 }
 declare global {
 	const ClientConfig: any;
+	interface Window {
+		Module: any;
+		zxcvbn: any;
+		ClientConfig: any;
+	}
 }
 export {};

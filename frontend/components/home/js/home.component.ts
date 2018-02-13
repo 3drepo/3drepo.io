@@ -39,6 +39,7 @@ class HomeController implements ng.IController {
 		"AnalyticService",
 		"ViewerService",
 		"TemplateService",
+		"DialogService",
 	];
 
 	private doNotLogout;
@@ -62,6 +63,9 @@ class HomeController implements ng.IController {
 	private loginMessage;
 	private backgroundImage;
 	private topLogo;
+	private showMemorySelected;
+	private isLiteMode;
+	private deviceMemory;
 
 	constructor(
 		private $scope,
@@ -85,11 +89,14 @@ class HomeController implements ng.IController {
 		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
+		private DialogService,
 	) {}
 
 	public $onInit() {
 
+		this.showMemorySelected = false;
 		this.handlePaths();
+
 		this.setLoginPage();
 
 		this.AnalyticService.init();
@@ -119,21 +126,17 @@ class HomeController implements ng.IController {
 		this.state = this.StateManager.state;
 		this.query = this.StateManager.query;
 
-		this.isMobileDevice = true;
-
 		this.legalDisplays = [];
-		if (this.ClientConfigService.legal !== undefined) {
+		if (angular.isDefined(this.ClientConfigService.legal)) {
 			this.legalDisplays = this.ClientConfigService.legal;
 		}
 		this.legalDisplays.push({title: "Pricing", page: "http://3drepo.org/pricing"});
 		this.legalDisplays.push({title: "Contact", page: "http://3drepo.org/contact/"});
 
-		this.isMobileDevice = this.isMobile();
+		this.isLiteMode = this.getLiteModeState();
+		this.handlePotentialMobile();
 		this.watchers();
 
-		/**
-		 * Close the dialog
-		 */
 		this.$scope.closeDialog = () => {
 			this.$mdDialog.cancel();
 		};
@@ -142,13 +145,11 @@ class HomeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(
-			() => {
-				return this.$location.path();
-			}, () => {
-				this.handlePaths();
-			},
-		);
+		this.$scope.$watch(() => {
+			return this.$location.path();
+		}, () => {
+			this.handlePaths();
+		});
 
 		/*
 		* Watch the state to handle moving to and from the login page
@@ -213,14 +214,18 @@ class HomeController implements ng.IController {
 
 		this.$scope.$watch(
 			() => {
-				return this.AuthService.state;
+				return this.$location.path();
 			},
 			() => {
+				this.handlePaths();
+			},
+		);
 
-				switch (this.AuthService.state.currentEvent) {
-				case "USER_LOGGED_IN":
-					if (!this.AuthService.state.currentData.error) {
-						if (!this.AuthService.state.currentData.initialiser) {
+		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === this.EventService.EVENT.USER_LOGGED_IN) {
+					if (!event.value.error) {
+						if (!event.value.initialiser) {
 
 							this.StateManager.updateState(true);
 
@@ -236,11 +241,10 @@ class HomeController implements ng.IController {
 							}
 						}
 					} else {
-						this.AuthService.setAuthState("USER_LOGGED_OUT", {});
+						this.EventService.send(this.EventService.EVENT.USER_LOGGED_OUT);
 					}
-					break;
+				} else if (event.type === this.EventService.EVENT.USER_LOGGED_OUT) {
 
-				case "USER_LOGGED_OUT":
 					// TODO: Use state manager
 					// Only fire the Logout Event if we're on the home page
 					const currentPage = this.$location.path();
@@ -248,18 +252,88 @@ class HomeController implements ng.IController {
 					if (this.doNotLogout.indexOf(currentPage) === -1) {
 						this.StateManager.setHomeState({ loggedIn: false, account: null });
 					}
-					break;
+
+				} else if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+					this.pointerEvents = event.value.on ? "none" : "inherit";
 				}
-
-			},
-			true,
-		);
-
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? "none" : "inherit";
 			}
 		});
+
+		/*
+		* Watch the state to handle moving to and from the login page
+		*/
+		this.$scope.$watch("vm.state", (oldState, newState) => {
+
+			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
+
+			this.loggedIn = this.AuthService.isLoggedIn();
+
+			if ( (newState && change) || (newState && this.firstState)) {
+
+				// If it's a legal page
+				const legal = this.pageCheck(newState, this.legalPages);
+				const loggedOut = this.pageCheck(newState, this.loggedOutPages);
+
+				if (legal) {
+
+					this.isLegalPage = true;
+					this.isLoggedOutPage = false;
+
+					this.legalPages.forEach((page) => {
+						this.setPage(newState, page);
+					});
+
+				} else if (loggedOut && !newState.loggedIn) {
+
+					// If its a logged out page which isnt login
+
+					this.isLegalPage = false;
+					this.isLoggedOutPage = true;
+
+					this.loggedOutPages.forEach((page) => {
+						this.setPage(newState, page);
+					});
+
+				} else if (
+					this.AuthService.getUsername() &&
+					newState.account !== this.AuthService.getUsername() &&
+					!newState.model
+				) {
+					// If it's some other random page that doesn't match
+					// anything sensible like legal, logged out pages, or account
+					this.isLoggedOutPage = false;
+					this.page = "";
+					this.$location.search({}); // Reset query parameters
+					this.$location.path("/" + this.AuthService.getUsername());
+				} else if (
+					!this.AuthService.getUsername() &&
+					!legal &&
+					!loggedOut
+				) {
+
+					// Login page or none existant page
+					this.isLoggedOutPage = false;
+					this.page = "";
+				}
+
+			}
+		}, true);
+
+	}
+
+	public getLiteModeState() {
+
+		const stored = localStorage.getItem("liteMode");
+		if (stored !== undefined && stored !== null) {
+			if (stored === "false") {
+				return false;
+			} else if (stored === "true") {
+				return true;
+			}
+		}
+
+		return false; // Default
+
 	}
 
 	public getSubdomain() {
@@ -350,9 +424,6 @@ class HomeController implements ng.IController {
 		}
 	}
 
-	/**
-	 * Precache templates for the next pages
-	 */
 	public precacheTeamspaceTemplate() {
 
 		// The account teamspace template is hefty. If we cache it ASAP
@@ -369,46 +440,67 @@ class HomeController implements ng.IController {
 
 	}
 
-	/**
-	 * Check if the user is on mobile
-	 */
-	public isMobile(): boolean {
+	public handlePotentialMobile() {
 
-		const mobile = screen.width <= 768;
+		// Regex test is as recommended by Mozilla:
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
 
-		if (mobile) {
-			this.handleMobile();
+		const mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
+		const setMemory = localStorage.getItem("deviceMemory");
+
+		console.debug("Memory limit set to: ", setMemory);
+
+		// We're in mobile, with no memory set
+		// and it's not already in lite mode
+		if (mobile && !setMemory && !this.isLiteMode) {
+			this.DialogService.showDialog(
+				"lite-dialog.html",
+				this.$scope,
+				event,
+				false,
+				null,
+				false,
+			);
+			return;
 		}
 
-		console.debug("Is mobile? ", mobile);
-		return mobile;
+		if (!this.isLiteMode && mobile && setMemory) {
+			// We're on mobile/tablet and we have a previous
+			// memory setting selected
+			this.deviceMemory = parseInt(setMemory, 10);
+			return;
+		}
 
 	}
 
-	/**
-	 * Show a dialog for mobile users
-	 */
-	public handleMobile() {
-
-		const message = "We have detected you are on a " +
-		"mobile device and will show the 3D Repo lite experience for " +
-		"smoother performance.";
-
-		this.$mdDialog.show(
-			this.$mdDialog.confirm()
-				.clickOutsideToClose(true)
-				.title("3D Repo Lite")
-				.textContent(message)
-				.ariaLabel("3D Repo Lite Dialog")
-				.ok("OK"),
-		);
-
+	public setLiteMode(onOrOff) {
+		this.isLiteMode = onOrOff;
+		localStorage.setItem("liteMode", onOrOff);
 	}
 
-	/**
-	 * Checks if the current URL has a trailing slash
-	 */
-	public hasTrailingSlash(): boolean {
+	public useLiteMode() {
+		this.setLiteMode(true);
+		this.DialogService.closeDialog();
+	}
+
+	public useNormalMode() {
+		this.setLiteMode(false);
+		this.showMemorySelected = true;
+		this.deviceMemory = 2; // Default for mobile/tablet in normal mode
+	}
+
+	public memorySelected() {
+		this.DialogService.closeDialog();
+		if (this.deviceMemory === 0) {
+			this.deviceMemory = 2;
+		}
+		localStorage.setItem("deviceMemory", this.deviceMemory);
+		if (this.state.model) {
+			location.reload();
+		}
+	}
+
+	public hasTrailingSlash() {
 		// Check if we have a trailing slash in our URL
 		const absUrl = this.$location.absUrl();
 		const trailingCheck = absUrl.substr(-1);
@@ -418,9 +510,6 @@ class HomeController implements ng.IController {
 		return false;
 	}
 
-	/**
-	 * Remove trailing slashes from the URL
-	 */
 	public removeTrailingSlash() {
 		// Remove the trailing slash from the URL
 		const currentPath = this.$location.path();
@@ -428,17 +517,11 @@ class HomeController implements ng.IController {
 		this.$location.path(minusSlash);
 	}
 
-	/**
-	 * Log the user out
-	 */
 	public logout() {
 		this.AuthService.logout();
 		this.ViewerService.reset();
 	}
 
-	/**
-	 * Go to the account page
-	 */
 	public home() {
 		this.ViewerService.reset();
 		this.StateManager.goHome();
@@ -458,9 +541,7 @@ class HomeController implements ng.IController {
 
 		this.$document.bind("keydown", (event) => {
 			if (this.keysDown.indexOf(event.which) === -1) {
-
 				this.keysDown.push(event.which);
-
 				// Recreate list so that it changes are registered in components
 				this.keysDown = this.keysDown.slice();
 

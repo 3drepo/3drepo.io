@@ -22,8 +22,8 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 
 describe('Login', function () {

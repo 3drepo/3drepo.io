@@ -206,6 +206,7 @@
 
 		vm.selectIssue = function (issue) {
 			IssuesService.setSelectedIssue(issue);
+			angular.element(window).triggerHandler("resize");
 		};
 
 		vm.isSelectedIssue = function(issue) {

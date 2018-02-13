@@ -628,7 +628,6 @@ class AccountItemsController implements ng.IController {
 
 			})
 			.catch((error) => {
-				console.log(this);
 				const title = "Error Saving Federation";
 				const action = "saving the federation";
 				this.errorDialog(title, action, error);
@@ -845,7 +844,9 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public showAllModelDialogInputs(): boolean {
-		return this.teamspaceAndProjectSelected() && this.newModelData.name.length > 0;
+		return this.teamspaceAndProjectSelected() &&
+			this.newModelData.name &&
+			this.newModelData.name.length;
 	}
 
 	public teamspaceAndProjectSelected(): boolean {
@@ -949,7 +950,7 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public errorDialog(title, action, error) {
-		console.log(error);
+		console.error(error);
 		const message = (error && error.data && error.data.message) ? error.data.message : "Unknown Error";
 		const content = "Something went wrong " +  action + ": <br><br>" +
 			"<strong> " + message + "</strong>" +
@@ -1225,7 +1226,7 @@ export const AccountItemsComponent: ng.IComponentOptions = {
 		onShowPage: "&",
 		quota: "=",
 		subscriptions: "=",
-		isMobileDevice: "<",
+		isLiteMode: "<",
 	},
 	controller: AccountItemsController,
 	controllerAs: "vm",

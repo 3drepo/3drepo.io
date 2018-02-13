@@ -48,6 +48,14 @@ export class PanelService {
 					noToggle: true,
 					icon: "fa-print",
 				},
+				/*{
+					hidden: false,
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-upload",
+				},*/
 				{
 					hidden: false,
 					value: "exportBCF",
@@ -156,9 +164,21 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "compare",
 			title: "Compare",
+			// title: "Compare",
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
+			minHeight: 80,
+			fixedHeight: false,
+			options: [],
+		});
+
+		this.issuesPanelCard.left.push({
+			type: "gis",
+			title: "GIS",
+			show: false,
+			help: "Add various GIS data to the view",
+			icon: "landscape",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [],
@@ -200,17 +220,30 @@ export class PanelService {
 
 	}
 
-	public handlePanelEvent(panelType, event, eventData) {
+	// public handlePanelEvent(panelType, event, eventData) {
 
-		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
-			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
-		) {
-			if (panelType === "tree") {
-				// If another card is in modify mode don't show a node if an object is clicked in the viewer
-				this.TreeService.setHighlightSelected(!eventData.on);
-			}
+	// 		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
+	// 			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
+	// 		) {
+	// 			if (panelType === "tree") {
+	// 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
+	// 				this.TreeService.setHighlightSelected(!eventData.on);
+	// 			}
+	// 		}
+
+	// 	}
+
+	public setHideIfc(value: boolean) {
+		const issuesCardIndex = 1; // index of tree panel
+		const menuItemIndex = 2; // index of hideIfc
+
+		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
+			.menu[menuItemIndex];
+
+		// Change state if different
+		if (hideIfcMenuItem.selected !== value) {
+			hideIfcMenuItem.selected = value;
 		}
-
 	}
 
 }

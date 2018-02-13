@@ -262,7 +262,6 @@ function getIssuesBCF(req, res, next) {
 
 function findIssueById(req, res, next) {
 	
-
 	let params = req.params;
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, model: req.params.model};

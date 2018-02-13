@@ -22,8 +22,8 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
@@ -209,11 +209,6 @@ describe('Model', function () {
 
 		let body = {
 
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: 'cm',
 				code: '00222',
 				topicTypes: ['For Info', '3D Repo', 'Vr']
@@ -222,11 +217,6 @@ describe('Model', function () {
 		
 		let expectedReturn = {
 
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: 'cm',
 				code: '00222',
 				topicTypes: [{

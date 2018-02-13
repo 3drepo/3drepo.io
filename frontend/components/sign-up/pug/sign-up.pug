@@ -16,13 +16,16 @@
 
 		.userContent(layout="column", layout-align="start center")
 			div.sign-up-padding
+				div(layout="column" layout-align="center center")
+					p.free Creating a 3D Repo account is free, and no credit card details are required.
 				form
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
 							label Username
 							input(type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true")
 						md-input-container(flex)
-							label Password
+							label(ng-if="!vm.newUser.password") Password 
+							label(ng-if="vm.newUser.password") Password ({{vm.passwordStrength}})
 							input(type='password', ng-model='vm.newUser.password', required ng-keypress="vm.register($event)")
 
 					div(layout="row", layout-xs="column")

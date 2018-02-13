@@ -113,8 +113,8 @@
 	function createQueueInstance(){
 
 		// init ampq and import queue object
-		let log_iface = require("../logger.js");
-		let systemLogger = log_iface.systemLogger;
+		let logger = require("../logger.js");
+		let systemLogger = logger.systemLogger;
 
 		return importQueue.connect(config.cn_queue.host, {
 

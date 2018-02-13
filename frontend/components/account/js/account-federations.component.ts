@@ -293,7 +293,6 @@ class AccountFederationsController implements ng.IController {
 	 * Edit a federation
 	 */
 	public setupEditFederation(event: any, teamspace: any, project: any, model: any) {
-		console.log(model);
 		this.federationData = model;
 
 		// TODO: Why isn't this in the fed data model?

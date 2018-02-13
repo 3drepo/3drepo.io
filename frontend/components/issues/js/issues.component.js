@@ -99,9 +99,8 @@
 
 			vm.getIssues = IssuesService.getIssues(vm.account, vm.model, vm.revision)
 				.then(function (data) {
-
+					
 					if (data) {
-
 						IssuesService.populateNewIssues(data);
 
 						setTimeout(function(){
@@ -175,6 +174,8 @@
 		};
 
 		vm.$onDestroy = function () {
+			vm.allIssues = [];
+			vm.issuesToShow = [];
 			vm.removeUnsavedPin();
 		};
 
@@ -216,31 +217,28 @@
 
 
 		$scope.$watch(function() {
-			return RevisionsService.status;
+			return RevisionsService.status.data;
 		}, function() {
 			if (RevisionsService.status.data) {
-				vm.revisions = RevisionsService.status.data;
+				vm.revisions = RevisionsService.status.data[vm.account + ":" + vm.model];
 			}
 		}, true);
 
 		$scope.$watch(function(){
-			return IssuesService.state.allIssues;
+			return IssuesService.state;
 		}, function(){
-			vm.allIssues = IssuesService.state.allIssues;
-		}, true);
 
-		$scope.$watch(function(){
-			return IssuesService.state.issuesToShow;
-		}, function(){
-			vm.issuesToShow = IssuesService.state.issuesToShow;
+			if (vm.allIssues !== IssuesService.state.allIssues) {
+				vm.allIssues = IssuesService.state.allIssues;
+			}
+			if (vm.selectedIssue !== IssuesService.state.selectedIssue) {
+				vm.selectedIssue = IssuesService.state.selectedIssue;
+			}
+			if (vm.issuesToShow !== IssuesService.state.issuesToShow) {
+				vm.issuesToShow = IssuesService.state.issuesToShow;
+			}
+			
 		}, true);
-
-		$scope.$watch(function(){
-			return IssuesService.state.selectedIssue;
-		}, function(){
-			vm.selectedIssue = IssuesService.state.selectedIssue;
-		}, true);
-
 
 		/**
 		 * Set up event watching
@@ -327,19 +325,24 @@
 			// Do the same for all subModels
 			if(vm.subModels){
 				vm.subModels.forEach(function(subModel){
-					var submodel = true;
-					NotificationService.subscribe.newIssues(
-						subModel.database, 
-						subModel.model, 
-						function(issues){ 
-							vm.newIssueListener(issues, submodel); 
-						}
-					);
-					NotificationService.subscribe.issueChanged(
-						subModel.database,
-						subModel.model, 
-						vm.handleIssueChanged
-					);
+					//var submodel = true;
+					if (subModel) {
+						NotificationService.subscribe.newIssues(
+							subModel.database, 
+							subModel.model, 
+							function(issues){ 
+								vm.newIssueListener(issues, subModel); 
+							}
+						);
+						NotificationService.subscribe.issueChanged(
+							subModel.database,
+							subModel.model, 
+							vm.handleIssueChanged
+						);
+					} else {
+						console.error("Submodel was expected to be defined for issue subscription: ", subModel);
+					}
+					
 				});
 			}
 
@@ -348,37 +351,7 @@
 		vm.newIssueListener = function(issues, submodel) {
 
 			issues.forEach(function(issue) {
-				
-				var issueShouldShow = false;
-
-				if (vm.revisions && vm.revisions.length) {
-
-					var issueRevision = vm.revisions.find(function(rev){
-						return rev._id === issue.rev_id;
-					});
-
-					var currentRevision;
-
-					if(!vm.revision){
-						currentRevision = vm.revisions[0];
-					} else {
-						currentRevision = vm.revisions.find(function(rev){
-							return rev._id === vm.revision || rev.tag === vm.revision;
-						});
-					}
-
-					var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
-					issueShouldShow = issueRevision && issueInDate;
-				} else {
-					issueShouldShow = true;
-				}
-
-				if(issueShouldShow){
-					
-					IssuesService.addIssue(issue);
-					
-				}
-
+				vm.shouldShowIssue(issue, submodel);
 			});
 
 		};
@@ -403,6 +376,75 @@
 
 		});
 
+		vm.shouldShowIssue = function(issue, submodel) {
+			
+			if (!issue) {
+				console.error("Issue is undefined/null: ", issue);
+				return;
+			}
+
+			var isSubmodelIssue = (submodel !== undefined);
+			var issueShouldAdd = false;
+
+			if (vm.revisions && vm.revisions.length) {
+
+				var currentRevision;
+
+				// vm.revision will be null if on head revision
+				// as it is not set via the URL state
+				if (!vm.revision){
+					currentRevision = vm.revisions[0]; // Set it to the top revision
+				} else {
+					currentRevision = vm.revisions.find(function(rev){
+						return rev._id === vm.revision || rev.tag === vm.revision;
+					});
+				}
+
+				// If Federation 
+				if (!isSubmodelIssue) {
+					issueShouldAdd = vm.checkIssueShouldAdd(issue, currentRevision, vm.revisions);
+					if (issueShouldAdd) {
+						IssuesService.addIssue(issue);
+					}
+				} 	
+				
+				// If submodel 
+				if (isSubmodelIssue) {
+
+					if (submodel) {
+
+						RevisionsService.listAll(submodel.database, submodel.model)
+							.then(function(submodelRevisions){
+								issueShouldAdd = vm.checkIssueShouldAdd(issue, currentRevision, submodelRevisions);
+								if (issueShouldAdd) {
+									IssuesService.addIssue(issue);
+								}
+							})
+							.catch(function(error){
+								console.error("Something went wrong getting submodel revisions", error);
+							});
+					}
+
+				}
+			}
+
+		};
+
+		vm.checkIssueShouldAdd = function(issue, currentRevision, revisions) {
+
+			var issueRevision = revisions.find(function(rev){
+				return rev._id === issue.rev_id;
+			});
+
+			if (!issueRevision || !currentRevision) {
+				console.error("Issue revision or current revision are not set: ", issueRevision, currentRevision);
+				return true;
+			}
+
+			var issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
+			return issueRevision && issueInDate;
+
+		};
 
 		/**
 		* import bcf
@@ -443,37 +485,33 @@
 		 */
 		vm.editIssue = function (issue) {
 			
-			requestAnimationFrame(function() {
+			if (IssuesService.state.selectedIssue) {
+				IssuesService.deselectPin(IssuesService.state.selectedIssue);
+			}
+			
+			if (issue) {
 
-				if (IssuesService.state.selectedIssue) {
-					IssuesService.deselectPin(IssuesService.state.selectedIssue);
-				}
+				ViewerService.highlightObjects([]);
+				$state.go("home.account.model.issue", 
+					{
+						account: vm.account, 
+						model: vm.model, 
+						revision: vm.revision,
+						issue: issue._id,
+						noSet: true
+					}, 
+					{notify: false}
+				);
+
+				IssuesService.setSelectedIssue(issue);
 				
-				if (issue) {
+			} else {
+				IssuesService.resetSelectedIssue();
+			}
 
-					ViewerService.highlightObjects([]);
-					$state.go("home.account.model.issue", 
-						{
-							account: vm.account, 
-							model: vm.model, 
-							revision: vm.revision,
-							issue: issue._id,
-							noSet: true
-						}, 
-						{notify: false}
-					);
-
-					IssuesService.setSelectedIssue(issue);
-					
-				} else {
-					IssuesService.resetSelectedIssue();
-				}
-
-				vm.toShow = "showIssue";
-				vm.showAddButton = false;
-				vm.onShowItem();
-
-			});
+			vm.toShow = "showIssue";
+			vm.showAddButton = false;
+			vm.onShowItem();
 
 		};
 

@@ -178,7 +178,8 @@
 	function StateManager(
 		$mdDialog, $location, $q, $state, $rootScope, 
 		$timeout, $window, AuthService, 
-		ClientConfigService, ViewerService
+		ClientConfigService, ViewerService, IssuesService,
+		CompareService
 	) {
 				
 		var self = this;
@@ -501,6 +502,8 @@
 				).then(function() {
 					$location.path(account);
 					ViewerService.reset();
+					CompareService.reset();
+					IssuesService.resetIssues();
 				}, function() {
 					
 				});
@@ -515,7 +518,7 @@
 				}
 			}
 			self.updateState();
-		}
+		};
 
 	}
 
@@ -527,7 +530,7 @@
 	StateManager.$inject = [
 		"$mdDialog", "$location", "$q", "$state", "$rootScope",
 		"$timeout", "$window", "AuthService",
-		"ClientConfigService", "ViewerService"
+		"ClientConfigService", "ViewerService", "IssuesService", "CompareService"
 	];
 
 	angular.module("3drepo")
