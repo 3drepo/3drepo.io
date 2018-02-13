@@ -21,7 +21,8 @@ export class EventService {
 	public static internalCurrentError;
 	public static internalCurrentEvent;
 
-	public static $inject: string[] = ["$timeout"];
+	public static $inject: string[] = [
+	];
 
 	private EVENT = {
 		AUTO_META_DATA: "EVENT_AUTO_META_DATA",
@@ -89,7 +90,6 @@ export class EventService {
 	};
 
 	constructor(
-		private $timeout,
 	) {
 		EventService.internalCurrentEvent = {};
 		EventService.internalCurrentError = {};
@@ -97,24 +97,23 @@ export class EventService {
 
 	public send(type, value) {
 		const stack = (new Error()).stack;
-		this.$timeout(() => {
+		setTimeout(() => {
 			if (type === null || type === undefined) {
 				console.trace("UNDEFINED EVENT TYPE" + type);
 			} else {
 				EventService.internalCurrentEvent = {type, value, stack};
 			}
-		});
+		}, 0);
 	}
 
 	public sendError(type, value) {
-		this.$timeout(() => {
+		setTimeout(() => {
 			if (type === null || type === undefined) {
 				console.trace("UNDEFINED ERROR TYPE");
 			} else {
-				// console.log(type + " : " + JSON.stringify(value));
 				EventService.internalCurrentError = {type, value};
 			}
-		});
+		}, 0);
 	}
 
 	public currentEvent() {

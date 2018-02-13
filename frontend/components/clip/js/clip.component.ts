@@ -42,7 +42,7 @@ class ClipController implements ng.IController {
 	public units: string;
 	public modelUnits: string;
 	public disableWatchDistance: boolean;
-	public offsetTrans;
+	// public offsetTrans;
 	public modelTrans;
 	public disableWatchSlider;
 	public displayedAxis;
@@ -189,12 +189,16 @@ class ClipController implements ng.IController {
 				this.updateDisplayedDistance(true, this.visible);
 				break;
 
-			case this.EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO:
-				this.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
-				if (event.value.isMainModel) {
-					this.offsetTrans = event.value.modelTrans;
-				}
-				break;
+			// case this.EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO:
+			// 	console.log(event.value);
+			// 	if (event.value && event.value.modelNameSpace) {
+			// 		this.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
+			// 		if (event.value.isMainModel) {
+			// 			this.offsetTrans = event.value.modelTrans;
+			// 		}
+			// 	}
+
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.BBOX_READY:
 				this.bbox = event.value.bbox;

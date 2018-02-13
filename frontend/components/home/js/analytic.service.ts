@@ -80,6 +80,7 @@ export class AnalyticService {
 
 		// TS doesn't like googles minified code...
 
+		/* tslint:disable */
 		// @ts-ignore
 		(function(i, s,o,g,r,a,m) {i.GoogleAnalyticsObject = r; i[r] = i[r] || function() {
 		// @ts-ignore
@@ -88,6 +89,7 @@ export class AnalyticService {
 		m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m);
 		// @ts-ignore
 		})(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
+		/* tslint:enable */
 
 		if (this.ClientConfigService.userId) {
 			ga("create", this.ClientConfigService.gaTrackId, "auto", { userId: this.ClientConfigService.userId });
