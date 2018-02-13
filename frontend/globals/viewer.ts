@@ -128,8 +128,9 @@ export class Viewer {
 	public units = "m";
 	public convertToM = 1.0;
 	public logos = [];
+	public divId = "unityViewer";
 
-	public unityLoaderPath = "unity/Release/UnityLoader.js";
+	public unityLoaderPath = "unity/Build/UnityLoader.js";
 	public unityScriptInserted = false;
 	public viewer: HTMLElement;
 
@@ -191,9 +192,9 @@ export class Viewer {
 
 		this.loadingDiv.appendChild(this.loadingDivText);
 
-		const canvas = document.createElement("canvas");
+		const canvas = document.createElement("div");
 		canvas.className = "emscripten";
-		canvas.setAttribute("id", "canvas");
+		canvas.setAttribute("id", this.divId);
 		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
 		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
 
@@ -232,10 +233,9 @@ export class Viewer {
 
 	public insertUnityLoader() {
 		return new Promise((resolve, reject) => {
-			this.unityLoaderScript.setAttribute("defer", "");
-			this.unityLoaderScript.setAttribute("async", "");
 			this.unityLoaderScript.addEventListener ("load", () => {
 				console.debug("Loaded UnityLoader.js succesfully");
+				UnityUtil.loadUnity(this.divId);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ("error", (error) => {
@@ -416,7 +416,7 @@ export class Viewer {
 					const multi = multiOverride || this.multiSelectMode;
 					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
 					return;
-				} 
+				}
 			}
 
 			UnityUtil.clearHighlights();

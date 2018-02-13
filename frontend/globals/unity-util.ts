@@ -16,6 +16,7 @@
  **/
 declare var Module;
 declare var SendMessage;
+declare var UnityLoader;
 
 export class UnityUtil {
 
@@ -27,6 +28,8 @@ export class UnityUtil {
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
 		MODEL_LOADED : 3, // Models
 	};
+
+	public static unityInstance;
 
 	public static readyPromise;
 	public static readyResolve;
@@ -49,42 +52,15 @@ export class UnityUtil {
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = "WebGLInterface";
 
-	public static sendMessageVss;
-	public static sendMessageVssn;
-	public static sendMessageVsss;
-
 	public static init(
 		errorCallback: any,
 	) {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static _SendMessage(gameObject, func, param) {
-
-		if (param === undefined) {
-
-			if (!UnityUtil.sendMessageVss) {
-				UnityUtil.sendMessageVss = Module.cwrap("SendMessage", "void", ["string", "string"]);
-			}
-			UnityUtil.sendMessageVss(gameObject, func);
-
-		} else if (typeof param === "string") {
-
-			if (!UnityUtil.sendMessageVsss) {
-				UnityUtil.sendMessageVsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
-			}
-			UnityUtil.sendMessageVsss(gameObject, func, param);
-
-		} else if (typeof param === "number") {
-
-			if (!UnityUtil.sendMessageVssn) {
-				UnityUtil.sendMessageVssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
-			}
-			UnityUtil.sendMessageVssn(gameObject, func, param);
-
-		} else {
-			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
-		}
+	public static loadUnity(
+		divId: any) {
+		UnityUtil.unityInstance = UnityLoader.instantiate(divId, "unity/Build/unity.json");
 	}
 
 	/**
@@ -181,7 +157,9 @@ export class UnityUtil {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
 					console.error("UnityUtil.onLoaded() failed: ", error);
@@ -191,7 +169,9 @@ export class UnityUtil {
 		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
 			// Requires model to be loading
 			UnityUtil.onLoading().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
 					UnityUtil.userAlert(error, true, true);
@@ -200,7 +180,9 @@ export class UnityUtil {
 			});
 		} else {
 			UnityUtil.onReady().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
 					UnityUtil.userAlert(error, true, true);
@@ -256,7 +238,6 @@ export class UnityUtil {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
 		// readyoptimisation in added into unity.
-		SendMessage = UnityUtil._SendMessage;
 		UnityUtil.readyResolve.resolve();
 	}
 
