@@ -520,6 +520,24 @@ export class ViewerService {
 		}
 	}
 
+	public mapInitialise(surveyPoints) {
+		if (this.viewer) {
+			this.viewer.mapInitialise(surveyPoints);
+		}
+	}
+
+	public  mapStart() {
+		if (this.viewer) {
+			this.viewer.mapStart();
+		}
+	}
+
+	public mapStop() {
+		if (this.viewer) {
+			this.viewer.mapStop();
+		}
+	}
+
 }
 
 export const ViewerServiceModule = angular
