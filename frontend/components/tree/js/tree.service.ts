@@ -534,8 +534,8 @@ export class TreeService {
 			// Fast forward up path for parentOfInvisible state
 			if ("parentOfInvisible" === node.toggleState) {
 				for (let i = path.length - 2; i >= 0; i--) {
-					node = this.getNodeById(path[i]);
-					node.toggleState = "parentOfInvisible";
+					const parentNode = this.getNodeById(path[i]);
+					parentNode.toggleState = "parentOfInvisible";
 				}
 				return;
 			}
