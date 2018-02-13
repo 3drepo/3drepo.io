@@ -1,5 +1,3 @@
-import { IScope, ITimeoutService } from "angular";
-// import { TreeService } from "./tree.service";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -57,8 +55,8 @@ class TreeController implements ng.IController {
 	private searching;
 
 	constructor(
-		private $scope: IScope,
-		private $timeout: ITimeoutService,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
 
 		private TreeService,
 		private EventService,

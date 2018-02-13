@@ -1,5 +1,3 @@
-import { AuthService } from "../../home/js/auth.service";
-
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

@@ -1,5 +1,3 @@
-import { IQService } from "angular";
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -50,7 +48,7 @@ export class TreeService {
 	private treeMapReady;
 
 	constructor(
-		private $q: IQService,
+		private $q: ng.IQService,
 		private APIService,
 	) {
 		this.reset();

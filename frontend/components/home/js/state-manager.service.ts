@@ -67,15 +67,14 @@ export class StateManagerService {
 
 		this.changedState = {};
 		this.structure  = ClientConfigService.structure;
-		this.changed     = {};
-		this.state       = { loggedIn : false };
-		this.query       = {};
-		this.functions   = [];
+		this.changed = {};
+		this.state = { loggedIn : false };
+		this.query = {};
+		this.functions = [];
 		this.stateChangeQueue = [];
-		this.stateVars   = {};
+		this.stateVars = {};
 
 		this.setupStateStack();
-
 		this.clearChanged();
 
 	}
@@ -86,8 +85,8 @@ export class StateManagerService {
 
 		// Populate list of functions
 		while (stateStack.length > 0) {
-			const stackLength      = stateStack.length;
-			const parentState      = stateStack[stackLength - 1];
+			const stackLength = stateStack.length;
+			const parentState = stateStack[stackLength - 1];
 
 			let functionName;
 
@@ -146,10 +145,10 @@ export class StateManagerService {
 	}
 
 	public compareStateChangeObjects(stateChangeA, stateChangeB) {
-		return	(stateChangeA.toState	 === stateChangeB.toState) &&
-			(stateChangeA.toParams	 === stateChangeB.toParams) &&
-			(stateChangeA.fromState  === stateChangeB.fromState) &&
-			(stateChangeA.fromParams === stateChangeB.fromParams);
+		return	(stateChangeA.toState === stateChangeB.toState) &&
+				(stateChangeA.toParams === stateChangeB.toParams) &&
+				(stateChangeA.fromState === stateChangeB.fromState) &&
+				(stateChangeA.fromParams === stateChangeB.fromParams);
 	}
 
 	public startStateChange(stateChangeObject) {
@@ -157,6 +156,7 @@ export class StateManagerService {
 	}
 
 	public handleStateChange(stateChangeObject) {
+		console.log("handleStateChange");
 		let param;
 		const fromParams = stateChangeObject.fromParams;
 		const toParams   = stateChangeObject.toParams;
@@ -310,7 +310,7 @@ export class StateManagerService {
 		}
 		// console.log(letName, value);
 		this.state[letName] = value;
-	};
+	}
 
 	public setState(stateParams) {
 		// Copy all state parameters and extra parameters

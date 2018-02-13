@@ -221,41 +221,55 @@ class HomeController implements ng.IController {
 			},
 		);
 
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (angular.isDefined(event) && angular.isDefined(event.type)) {
-				if (event.type === this.EventService.EVENT.USER_LOGGED_IN) {
-					if (!event.value.error) {
-						if (!event.value.initialiser) {
+		this.$scope.$watch(() => {
+			return this.AuthService.state;
+		}, () => {
 
-							this.StateManager.updateState(true);
+			const events = this.AuthService.events;
+			const event = this.AuthService.state.currentEvent;
+			if (event === undefined) {
+				return;
+			}
 
-							if (!this.StateManager.state.account) {
+			switch (event) {
+			case events.USER_LOGGED_IN:
+				if (!this.AuthService.state.currentData.error) {
+					if (!this.AuthService.state.currentData.initialiser) {
 
-								const username = this.AuthService.getUsername();
-								if (!username) {
-									console.error("Username is not defined for statemanager!");
-								}
-								this.StateManager.setHomeState({
-									account: username,
-								});
+						this.StateManager.updateState(true);
+
+						if (!this.StateManager.state.account) {
+
+							const username = this.AuthService.getUsername();
+							if (!username) {
+								console.error("Username is not defined for statemanager!");
 							}
+
+							this.StateManager.setHomeState({
+								account: username,
+							});
 						}
-					} else {
-						this.EventService.send(this.EventService.EVENT.USER_LOGGED_OUT);
 					}
-				} else if (event.type === this.EventService.EVENT.USER_LOGGED_OUT) {
-
-					// TODO: Use state manager
-					// Only fire the Logout Event if we're on the home page
-					const currentPage = this.$location.path();
-
-					if (this.doNotLogout.indexOf(currentPage) === -1) {
-						this.StateManager.setHomeState({ loggedIn: false, account: null });
-					}
-
-				} else if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					this.pointerEvents = event.value.on ? "none" : "inherit";
+				} else {
+					this.AuthService.logout();
 				}
+
+			case events.USER_LOGGED_OUT:
+
+				// TODO: Use state manager
+				// Only fire the Logout Event if we're on the home page
+				const currentPage = this.$location.path();
+
+				if (this.doNotLogout.indexOf(currentPage) === -1) {
+					this.StateManager.setHomeState({ loggedIn: false, account: null });
+				}
+			}
+
+		}, true);
+
+		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+				this.pointerEvents = event.value.on ? "none" : "inherit";
 			}
 		});
 

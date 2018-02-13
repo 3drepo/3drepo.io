@@ -15,9 +15,8 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 
-import { Pin } from "./pin";
-import { UnityUtil } from "./unity-util";
-
+declare const Pin;
+declare const UnityUtil; 
 declare const ClientConfig;
 declare const Module;
 

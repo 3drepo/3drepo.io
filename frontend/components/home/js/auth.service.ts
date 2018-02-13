@@ -226,7 +226,7 @@ export class AuthService {
 		// are or not
 		if (this.loggedIn === null) {
 			// Initialize
-			// console.log("auto - sendLoginRequest");
+
 			this.sendLoginRequest()
 				.then((data) => {
 					// If we are not logging in because of an interval
