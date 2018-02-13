@@ -41,6 +41,14 @@ home #homeBackground {
     top:0
 }
 
+@media (max-width: 767px) { 
+    home #homeLogo {
+        display: none;
+    } 
+}
+
+
+
 home #homeLogo {
     padding-bottom: 20px;
     padding-top: 10px;

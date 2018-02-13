@@ -113,6 +113,27 @@ describe('Metadata', function () {
 		});
 	});
 
+	it('all metadata of head master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/meta/all.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('all metadata of revision tag should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/myTag/meta/all.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('all metadata of non existent revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/blahblah123/meta/all.json`)
+		.expect(404, function(err, res){
+			done(err);
+		});
+	});
+
 	it('4D Task Sequence search of head master should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/master/head/meta/4DTaskSequence.json`)
 		.expect(200, function(err, res){

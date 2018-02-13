@@ -11,6 +11,46 @@
 
 }
 
+account-modelsetting .loadingHolder {
+  margin: auto 0;
+  display: block;
+}
+
+account-modelsetting .loadingHolder h3 {
+  text-align: center;
+  margin-top: 40px;
+  font-weight: lighter;
+}
+
+
+account-modelsetting .loading {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+account-modelsetting .gisInput {
+  width: 15vw;
+  min-width: 130px;
+}
+
+account-modelsetting .heightFill {
+  height: 105px;
+}
+
+account-modelsetting .modelSettingSubtitle {
+  margin-left: 8px;
+}
+
+account-modelsetting .modelSettingInputContainer {
+  margin-top: 20px;
+}
+
+account-modelsetting .modelSettingInput {
+  width: 80%;
+}
+
 account-licenses .userContent {
   height: calc(100vh - 280px);
   max-height: 482px !important;
@@ -711,6 +751,8 @@ account-itemsetting #accountTeamMemberRole {
 account-itemsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
 }
+
+
 
 /** Federation Dialog *************************************************************************************************/
 

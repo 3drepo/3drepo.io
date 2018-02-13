@@ -579,6 +579,28 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Initialise map creator within unity
+	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
+	 */
+	public static mapInitialise(surveyingInfo) {
+		UnityUtil.toUnity("MapsInitiate", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
+	}
+
+	/**
+	 * Start map generation
+	 */
+	public static mapStart() {
+		UnityUtil.toUnity("ShowMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Stop map generation
+	 */
+	public static mapStop() {
+		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
 	 * Remove a pin from the viewer
 	 * @param {string} id - pin identifier
 	 */
