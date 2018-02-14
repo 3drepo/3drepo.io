@@ -71,11 +71,11 @@ export class StateManagerService {
 		this.state = { loggedIn : false };
 		this.query = {};
 		this.functions = [];
-		this.stateChangeQueue = [];
 		this.stateVars = {};
 
 		this.setupStateStack();
 		this.clearChanged();
+		this.stateChangeQueue = [];
 
 	}
 
@@ -128,12 +128,6 @@ export class StateManagerService {
 	public destroy()  {
 		delete this.state;
 		this.state = {};
-
-		// delete this.ui;
-		// this.ui = {};
-
-		// delete this.Data;
-		// this.Data = {};
 	}
 
 	public clearChanged() {
@@ -185,14 +179,14 @@ export class StateManagerService {
 
 		// Loop through structure. If a parent is null, then we must clear
 		// it's children
-		const stateStack       = [this.ClientConfigService.structure];
-		const stateNameStack   = ["home"];
-		let clearBelow       = false;
+		const stateStack = [this.ClientConfigService.structure];
+		const stateNameStack = ["home"];
+		let clearBelow = false;
 
 		while (stateStack.length > 0) {
-			const stackLength      = stateStack.length;
-			const parentState      = stateStack[stackLength - 1];
-			const parentStateName  = stateNameStack[stackLength - 1];
+			const stackLength = stateStack.length;
+			const parentState = stateStack[stackLength - 1];
+			const parentStateName = stateNameStack[stackLength - 1];
 
 			if (parentStateName !== "home" && !this.state[parentStateName]) {
 				clearBelow = true;
@@ -237,7 +231,7 @@ export class StateManagerService {
 
 	public clearQuery(state) {
 		for (const param in this.query) {
-			if (this.query.hasOwnProperty(this.query)) {
+			if (this.query.hasOwnProperty(param)) {
 				delete this.query[param];
 			}
 		}

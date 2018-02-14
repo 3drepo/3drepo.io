@@ -23,9 +23,11 @@ md-dialog.deleteDialog(aria-label="Delete")
 
 			md-input-container(ng-if="!vm.deleteError")
 				md-button.md-raised.md-accent(
+					id="deleteModelNo"
 					ng-disabled="vm.deleteError"
 					ng-click="vm.closeDialog()") No
 				md-button.md-accent(
+					id="deleteModelYes"
 					ng-disabled="vm.deleteError"
 					ng-click="vm.deleteModel()") Yes
 

@@ -278,6 +278,7 @@ class HomeController implements ng.IController {
 		*/
 		this.$scope.$watch("vm.state", (oldState, newState) => {
 
+			console.log("vm.state change", newState)
 			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
 			this.loggedIn = this.AuthService.isLoggedIn();

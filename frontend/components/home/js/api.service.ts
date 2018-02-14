@@ -147,7 +147,7 @@ export class APIService {
 	 * @param data
 	 * @returns {*}
 	 */
-	public del(url: string, data: any) {
+	public delete(url: string, data: any) {
 
 		this.checkUrl(url);
 
