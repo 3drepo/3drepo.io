@@ -513,37 +513,33 @@ export class TreeService {
 	 */
 	public updateParentVisibility(node: any) {
 
-		while (node) {
+		let nodes = [node];
+
+		while (nodes && nodes.length > 0) {
+			const currentNode = nodes.pop();
 
 			// Store the state before it's potentially changed
 			// by updateParentVisibility
-			const priorToggleState = node.toggleState;
+			const priorToggleState = currentNode.toggleState;
 
-			this.updateParentVisibilityByChildren(node);
+			this.updateParentVisibilityByChildren(currentNode);
 
-			if ( !(priorToggleState !== node.toggleState || this.isLeafNode(node)) ) {
-				return;
-			}
+			if (priorToggleState !== currentNode.toggleState || this.isLeafNode(currentNode)) {
+				const path = this.getPath(currentNode._id);
 
-			const path = this.getPath(node._id);
-
-			if (!path || path.length < 2) {
-				return;
-			}
-
-			// Fast forward up path for parentOfInvisible state
-			if ("parentOfInvisible" === node.toggleState) {
-				for (let i = path.length - 2; i >= 0; i--) {
-					node = this.getNodeById(path[i]);
-					node.toggleState = "parentOfInvisible";
+				if (path && path.length > 1) {
+					// Fast forward up path for parentOfInvisible state
+					if ("parentOfInvisible" === currentNode.toggleState) {
+						for (let i = path.length - 2; i >= 0; i--) {
+							const parentNode = this.getNodeById(path[i]);
+							parentNode.toggleState = "parentOfInvisible";
+						}
+					} else {
+						nodes.push(this.getNodeById(path[path.length - 2]));
+					}
 				}
-				return;
 			}
-
-			node = this.getNodeById(path[path.length - 2]);
-
 		}
-
 	}
 
 	/**
@@ -673,7 +669,6 @@ export class TreeService {
 		} else {
 			this.selectedIndex = selectedIndex;
 		}
-
 	}
 
 	/**
@@ -682,8 +677,8 @@ export class TreeService {
 	 * @param objectID the id of the node to get a path for
 	 */
 	public getPath(objectID: string) {
-
 		let path;
+
 		if (this.state.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
 			path = this.state.idToPath[objectID].split("__");
@@ -692,10 +687,11 @@ export class TreeService {
 			path = this.subModelIdToPath[objectID].split("__");
 			const parentPath = this.subTreesById[path[0]].parent.path.split("__");
 			path = parentPath.concat(path);
+		} else {
+			path = this.getNodeById(objectID).path.split("__");
 		}
 
 		return path;
-
 	}
 
 	/**
