@@ -138,21 +138,24 @@ groupSchema.methods.updateAttrs = function(data){
 
 	let ifcGuidPromises = [];
 
-	data.objects.forEach(obj => {
-		if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-			obj.id = utils.stringToUUID(obj.id);
-		}
-		ifcGuidPromises.push(
-			this.uuidToIfcGuids(obj).then(ifcGuids => {
-				if (ifcGuids && ifcGuids.length > 0) {
-					for (let i = 0; i < ifcGuids.length; i++) {
-						obj.ifc_guid = ifcGuids[i];
-						delete obj.shared_id;
+	if (data.objects) {
+		for (let i = 0; i < data.objects.length; i++) {
+			const obj = data.objects[i];
+			if ("[object String]" === Object.prototype.toString.call(obj.id)) {
+				obj.id = utils.stringToUUID(obj.id);
+			}
+			ifcGuidPromises.push(
+				this.uuidToIfcGuids(obj).then(ifcGuids => {
+					if (ifcGuids && ifcGuids.length > 0) {
+						for (let i = 0; i < ifcGuids.length; i++) {
+							obj.ifc_guid = ifcGuids[i];
+							delete obj.shared_id;
+						}
 					}
-				}
-			})
-		);
-	});
+				})
+			);
+		}
+	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
 
@@ -186,13 +189,14 @@ groupSchema.methods.clean = function(){
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	if (cleaned.objects) {
-		cleaned.objects.forEach(object => {
+		for (let i = 0; i < cleaned.objects.length; i++) {
+			const object = cleaned.objects[i];
 			if (object.shared_id &&
 				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
 				//object.id = utils.uuidToString(object.id);
 				object.shared_id = utils.uuidToString(object.shared_id);
 			}
-		});
+		}
 	}
 	return cleaned;
 
