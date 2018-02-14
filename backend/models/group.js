@@ -55,78 +55,20 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
-	let objects = [];
-
-	data.objects.forEach(obj =>{
-		objects.push(obj.id);
-	});
-
-	if(!objects){
-		return Promise.resolve();
+	if (data.objects) {
+		for (let i = 0; i < data.objects.length; i++) {
+			if ("[object String]" === Object.prototype.toString.call(data.objects[i].id)) {
+				data.objects[i].id = utils.stringToUUID(data.objects[i].id);
+			}
+		}
 	}
 
-	let currentObjects = [];
+	this.name = data.name || this.name;
+	this.objects = data.objects || this.objects;
+	this.color = data.color || this.color;
 
-	this.objects.forEach(obj => {
-		currentObjects.push(utils.uuidToString(obj.id));
-	});
-
-	let newObjects = _.difference(objects, currentObjects);
-
-	let addPromises = [];
-
-	newObjects.forEach(id => {
-
-		let obj = data.objects.find(obj => obj.id === id);
-		addPromises.push(
-			Mesh.addGroup(
-				obj.account,
-				obj.model,
-				id,
-				utils.uuidToString(this._id)
-			).then( mesh => {
-
-				obj.shared_id = mesh.shared_id;
-			})
-		);
-	});
-
-	return Promise.all(addPromises).then(() =>{
-
-		let removeObjects = _.difference(currentObjects, objects);
-		let removePromises = [];
-
-		removeObjects.forEach(id => {
-
-			let obj = this.objects.find(obj => utils.uuidToString(obj.id) === id);
-
-			removePromises.push(
-				Mesh.removeGroup(
-					obj.account,
-					obj.model,
-					id,
-					utils.uuidToString(this._id)
-				)
-			);
-		});
-
-		return Promise.all(removePromises);
-
-	}).then(() => {
-
-		data.objects.forEach(obj => {
-			obj.id = utils.stringToUUID(obj.id);
-		});
-
-		this.name = data.name || this.name;
-		this.objects = data.objects || this.objects;
-		this.color = data.color || this.color;
-
-		this.markModified('objects');
-		return this.save();
-
-	});
-
+	this.markModified('objects');
+	return this.save();
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
@@ -149,10 +91,16 @@ groupSchema.methods.clean = function(){
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	cleaned.objects.forEach(object => {
-		//object.id = utils.uuidToString(object.id);
-		object.shared_id && (object.shared_id = utils.uuidToString(object.shared_id));
-	});
+	if (cleaned.objects) {
+		for (let i = 0; i < cleaned.objects.length; i++) {
+			const object = cleaned.objects[i];
+			if (object.shared_id &&
+				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
+				//object.id = utils.uuidToString(object.id);
+				object.shared_id = utils.uuidToString(object.shared_id);
+			}
+		}
+	}
 	return cleaned;
 
 };
