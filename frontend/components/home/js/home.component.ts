@@ -94,7 +94,6 @@ class HomeController implements ng.IController {
 
 	public $onInit() {
 
-		this.showMemorySelected = false;
 		this.handlePaths();
 
 		this.setLoginPage();
@@ -135,141 +134,66 @@ class HomeController implements ng.IController {
 
 		this.isLiteMode = this.getLiteModeState();
 		this.handlePotentialMobile();
-		this.watchers();
+		this.showMemorySelected = false;
 
-		this.$scope.closeDialog = () => {
+		this.watchers();
+		this.initKeyWatchers();
+
+		/**
+		 * Close the dialog
+		 */
+		this.$scope.closeDialog = function() {
 			this.$mdDialog.cancel();
 		};
 
 	}
 
 	public watchers() {
-
 		this.$scope.$watch(() => {
 			return this.$location.path();
 		}, () => {
+
 			this.handlePaths();
+
 		});
-
-		/*
-		* Watch the state to handle moving to and from the login page
-		*/
-		this.$scope.$watch("vm.state", (oldState, newState) => {
-
-			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
-
-			this.loggedIn = this.AuthService.isLoggedIn();
-
-			if ( (newState && change) || (newState && this.firstState)) {
-
-				// If it's a legal page
-				const legal = this.pageCheck(newState, this.legalPages);
-				const loggedOut = this.pageCheck(newState, this.loggedOutPages);
-
-				if (legal) {
-
-					this.isLegalPage = true;
-					this.isLoggedOutPage = false;
-
-					this.legalPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
-				} else if (loggedOut && !newState.loggedIn) {
-
-					// If its a logged out page which isnt login
-
-					this.isLegalPage = false;
-					this.isLoggedOutPage = true;
-
-					this.loggedOutPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
-				} else if (
-					this.AuthService.getUsername() &&
-					newState.account !== this.AuthService.getUsername() &&
-					!newState.model
-				) {
-					// If it's some other random page that doesn't match
-					// anything sensible like legal, logged out pages, or account
-					this.isLoggedOutPage = false;
-					this.page = "";
-					this.$location.search({}); // Reset query parameters
-					this.$location.path("/" + this.AuthService.getUsername());
-				} else if (
-					!this.AuthService.getUsername() &&
-					!legal &&
-					!loggedOut
-				) {
-
-					// Login page or none existant page
-
-					this.isLoggedOutPage = false;
-					this.page = "";
-				}
-
-			}
-		}, true);
-
-		this.$scope.$watch(
-			() => {
-				return this.$location.path();
-			},
-			() => {
-				this.handlePaths();
-			},
-		);
-
-		this.$scope.$watch(() => {
-			return this.AuthService.state;
-		}, () => {
-
-			const events = this.AuthService.events;
-			const event = this.AuthService.state.currentEvent;
-			if (event === undefined) {
-				return;
-			}
-
-			switch (event) {
-			case events.USER_LOGGED_IN:
-				if (!this.AuthService.state.currentData.error) {
-					if (!this.AuthService.state.currentData.initialiser) {
-
-						this.StateManager.updateState(true);
-
-						if (!this.StateManager.state.account) {
-
-							const username = this.AuthService.getUsername();
-							if (!username) {
-								console.error("Username is not defined for statemanager!");
-							}
-
-							this.StateManager.setHomeState({
-								account: username,
-							});
-						}
-					}
-				} else {
-					this.AuthService.logout();
-				}
-
-			case events.USER_LOGGED_OUT:
-
-				// TODO: Use state manager
-				// Only fire the Logout Event if we're on the home page
-				const currentPage = this.$location.path();
-
-				if (this.doNotLogout.indexOf(currentPage) === -1) {
-					this.StateManager.setHomeState({ loggedIn: false, account: null });
-				}
-			}
-
-		}, true);
 
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? "none" : "inherit";
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === this.EventService.EVENT.USER_LOGGED_IN) {
+					if (!event.value.error) {
+						if (!event.value.initialiser) {
+
+							this.StateManager.updateState(true);
+
+							if (!this.StateManager.state.account){
+
+								const username = this.AuthService.getUsername();
+								if (!username) {
+									console.error("Username is not defined for statemanager!");
+								}
+								this.StateManager.setHomeState({
+									account: username,
+								});
+							}
+						}
+					} else {
+
+						this.EventService.send(this.EventService.EVENT.USER_LOGGED_OUT);
+
+					}
+				} else if (event.type === this.EventService.EVENT.USER_LOGGED_OUT) {
+
+					// TODO: Use state manager
+					// Only fire the Logout Event if we're on the home page
+					const currentPage = this.$location.path();
+
+					if (this.doNotLogout.indexOf(currentPage) === -1) {
+						this.StateManager.setHomeState({ loggedIn: false, account: null });
+					}
+
+				} else if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+					this.pointerEvents = event.value.on ? "none" : "inherit";
+				}
 			}
 		});
 
@@ -278,7 +202,6 @@ class HomeController implements ng.IController {
 		*/
 		this.$scope.$watch("vm.state", (oldState, newState) => {
 
-			console.log("vm.state change", newState)
 			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
 			this.loggedIn = this.AuthService.isLoggedIn();
@@ -310,7 +233,7 @@ class HomeController implements ng.IController {
 					});
 
 				} else if (
-					this.AuthService.getUsername() &&
+					this.AuthService.getUsername() && 
 					newState.account !== this.AuthService.getUsername() &&
 					!newState.model
 				) {
@@ -327,6 +250,7 @@ class HomeController implements ng.IController {
 				) {
 
 					// Login page or none existant page
+
 					this.isLoggedOutPage = false;
 					this.page = "";
 				}
@@ -355,7 +279,7 @@ class HomeController implements ng.IController {
 		const host = this.$location.host();
 		if (host.indexOf(".") < 0) {
 			return "";
-		}
+		} 
 		return host.split(".")[0];
 	}
 
@@ -542,28 +466,24 @@ class HomeController implements ng.IController {
 		this.StateManager.goHome();
 	}
 
-	/**
-	 * Display legal text
-	 *
-	 * @param event
-	 * @param display
-	 */
 	public legalDisplay(event, display) {
 		this.$window.open("/" + display.value);
 	}
 
 	public initKeyWatchers() {
 
-		this.$document.bind("keydown", (event) => {
+		this.$document.bind("keydown", function(event) {
 			if (this.keysDown.indexOf(event.which) === -1) {
+
 				this.keysDown.push(event.which);
+
 				// Recreate list so that it changes are registered in components
 				this.keysDown = this.keysDown.slice();
 
 			}
 		});
 
-		this.$document.bind("keyup", (event) => {
+		this.$document.bind("keyup", function(event) {
 			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
 			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
 				if (this.keysDown[i] === event.which) {
