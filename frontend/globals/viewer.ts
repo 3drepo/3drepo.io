@@ -195,6 +195,7 @@ export class Viewer {
 		const unityHolder = document.createElement("div");
 		unityHolder.className = "emscripten";
 		unityHolder.setAttribute("id", this.divId);
+		unityHolder.removeAttribute("style");
 		unityHolder.setAttribute("width", "100%");
 		unityHolder.setAttribute("height", "100%");
 		unityHolder.setAttribute("tabindex", "1"); // You need this for unityHolder to register keyboard events

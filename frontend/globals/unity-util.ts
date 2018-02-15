@@ -58,12 +58,22 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static loadUnity(divId: any) {
-		const unitySettings: any = {};
+	public static onProgress(gameInstance, progress) {
+		gameInstance.container = document.createElement("div");
+		gameInstance.container.style.display = "none";
+		gameInstance.logo = document.createElement("div");
+		gameInstance.logo.style.display = "none";
+		gameInstance.progress = document.createElement("div");
+		gameInstance.progress.style.display = "none";
+	}
 
+	public static loadUnity(divId: any) {
+		const unitySettings: any = {
+			onProgress: this.onProgress,
+		};
+		UnityLoader.Error.handler = this.onUnityError;
 		if (window && (window as any).Module) {
 			unitySettings.Module = (window as any).Module;
-			console.log(unitySettings);
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				"unity/Build/unity.json",
@@ -95,9 +105,12 @@ export class UnityUtil {
 	/**
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(err, url, line) {
-		let conf;
+	public static onUnityError(errorObject) {
+
+		const err = errorObject.message;
+		const line = errorObject.lineno;
 		let reload = false;
+		let conf;
 
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {

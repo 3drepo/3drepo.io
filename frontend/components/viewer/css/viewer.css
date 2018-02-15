@@ -21,16 +21,19 @@ viewer #unityViewer {
     height: 100% !important;
     width: 100% !important;
     overflow: hidden;
-    background: rgba(0,0,0,0);
+    background: rgba(0, 0, 0, 0) !important;
 }
 
-viewer #unityViewer {
-    height: 100% !important;
-    width: 100% !important;
+.emscripten {
+    background: rgba(0,0,0,0) !important;
+}
+
+div#unityViewer.emscripten canvas {
+    background: rgba(0,0,0,0) !important;
 }
 
 viewer #unityViewer canvas {
     height: 100% !important;
     width: 100% !important;
-    background: rgba(0,0,0,0);
+    background: rgba(0,0,0,0) !important;
 }
