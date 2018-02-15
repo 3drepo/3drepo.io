@@ -58,13 +58,24 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static onProgress(gameInstance, progress) {
-		gameInstance.container = document.createElement("div");
-		gameInstance.container.style.display = "none";
-		gameInstance.logo = document.createElement("div");
-		gameInstance.logo.style.display = "none";
-		gameInstance.progress = document.createElement("div");
-		gameInstance.progress.style.display = "none";
+	public static onProgress(gameInstance, progress: number) {
+
+		if (!gameInstance.progress) {
+			gameInstance.progress = document.createElement("div");
+			gameInstance.progress.className = "unityProgressBar";
+			document.getElementById("viewer").appendChild(gameInstance.progress);
+		}
+
+		requestAnimationFrame(() => {
+			if (progress === 1) {
+				gameInstance.progress.style.width = 0;
+				gameInstance.progress.style.display = "none";
+			} else {
+				const width = document.body.clientWidth * (progress);
+				gameInstance.progress.style.width = width + "px";
+			}
+		});
+
 	}
 
 	public static loadUnity(divId: any) {

@@ -16,6 +16,16 @@ viewer .loadingViewerText {
 }
 
 
+viewer .unityProgressBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    border-bottom: solid 1px #bd0000;
+    background-color: red;
+}
+
+
 viewer #unityViewer {
     position : absolute;
     height: 100% !important;
