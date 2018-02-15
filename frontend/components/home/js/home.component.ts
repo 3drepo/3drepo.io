@@ -149,26 +149,36 @@ class HomeController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watch(() => {
-			return this.$location.path();
-		}, () => {
 
-			this.handlePaths();
+		this.$scope.$watch(
+			() => {
+				return this.$location.path();
+			}, () => {
+				this.handlePaths();
+			},
+		);
 
-		});
 
-		this.$scope.$watch(() => this.AuthService.state.currentEvent, (event) => {
+		// TODO: This feels like a bit of a hack. Let's come up with
+		// a better way!
+		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
 
-			const currentData = this.AuthService.state.currentData;
+			const event = this.AuthService.state.currentEvent;
+
 			if (!angular.isDefined(event)) {
 				return;
 			}
 
+			console.log("event", event);
+
 			switch (event) {
 			case this.AuthService.events.USER_LOGGED_IN:
+				console.log("USER_LOGGED_IN", this.AuthService.state);
 
 				if (!currentData.error) {
 					if (!currentData.initialiser) {
+
+						console.log("Updating login state")
 
 						this.StateManager.updateState(true);
 
@@ -200,7 +210,7 @@ class HomeController implements ng.IController {
 				break;
 			}
 
-		});
+		}, true);
 
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {

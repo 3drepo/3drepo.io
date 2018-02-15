@@ -117,7 +117,7 @@ export class AuthService {
 	}
 
 	public loginSuccess(response: any) {
-
+		console.log("login success");
 		this.loggedIn = true;
 		this.username = response.data.username;
 
