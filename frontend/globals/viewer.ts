@@ -192,23 +192,26 @@ export class Viewer {
 
 		this.loadingDiv.appendChild(this.loadingDivText);
 
-		const canvas = document.createElement("div");
-		canvas.className = "emscripten";
-		canvas.setAttribute("id", this.divId);
-		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+		const unityHolder = document.createElement("div");
+		unityHolder.className = "emscripten";
+		unityHolder.setAttribute("id", this.divId);
+		unityHolder.setAttribute("width", "100%");
+		unityHolder.setAttribute("height", "100%");
+		unityHolder.setAttribute("tabindex", "1"); // You need this for unityHolder to register keyboard events
+		unityHolder.setAttribute("oncontextmenu", "event.preventDefault()");
 
-		canvas.onmousedown = () => {
+		unityHolder.onmousedown = () => {
 			return false;
 		};
 
-		canvas.style["pointer-events"] = "all";
+		unityHolder.style["pointer-events"] = "all";
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(canvas);
+		this.viewer.appendChild(unityHolder);
 		this.viewer.appendChild(this.loadingDiv);
 
 		this.unityLoaderScript = document.createElement("script");
+
 
 	}
 

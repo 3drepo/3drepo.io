@@ -15,13 +15,22 @@ viewer .loadingViewerText {
     padding-top: 40vh;
 }
 
-canvas.emscripten {
-    position : absolute;
-    width: 100% !important;
-}
 
-canvas.emscripten {
+viewer #unityViewer {
+    position : absolute;
     height: 100% !important;
     width: 100% !important;
     overflow: hidden;
+    background: rgba(0,0,0,0);
+}
+
+viewer #unityViewer {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+viewer #unityViewer canvas {
+    height: 100% !important;
+    width: 100% !important;
+    background: rgba(0,0,0,0);
 }

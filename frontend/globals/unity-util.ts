@@ -58,9 +58,24 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static loadUnity(
-		divId: any) {
-		UnityUtil.unityInstance = UnityLoader.instantiate(divId, "unity/Build/unity.json");
+	public static loadUnity(divId: any) {
+		const unitySettings: any = {};
+
+		if (window && (window as any).Module) {
+			unitySettings.Module = (window as any).Module;
+			console.log(unitySettings);
+			UnityUtil.unityInstance = UnityLoader.instantiate(
+				divId,
+				"unity/Build/unity.json",
+				unitySettings,
+			);
+		} else {
+			UnityUtil.unityInstance = UnityLoader.instantiate(
+				divId,
+				"unity/Build/unity.json",
+			);
+		}
+
 	}
 
 	/**
