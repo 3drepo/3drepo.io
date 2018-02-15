@@ -82,11 +82,12 @@ describe("Viewer page", function() {
 
 		});
 
+		// This dissappears to quickly now
 		describe("loading text", () => {
 
 			it("to exist", () => {
-				expect(element(by.className("loadingViewer")).isDisplayed()).to.eventually.equal(true);
-				expect(element(by.className("loadingViewerText")).isDisplayed()).to.eventually.equal(true);
+				expect(element(by.className("loadingViewer")).isPresent()).to.eventually.equal(true);
+				expect(element(by.className("loadingViewerText")).isPresent()).to.eventually.equal(true);
 			});
 
 		});
