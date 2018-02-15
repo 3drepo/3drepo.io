@@ -191,8 +191,6 @@ export class UnityUtil {
 
 	public static toUnity(methodName, requireStatus, params) {
 
-		// console.log(methodName, requireStatus, params);
-
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -250,7 +248,6 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
-		// console.log("comparatorLoaded - resolve");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
@@ -266,6 +263,11 @@ export class UnityUtil {
 
 	public static loading(bboxStr) {
 		UnityUtil.loadingResolve.resolve();
+	}
+
+	public static navMethodChanged(newNavMode) {
+		// TODO: do some front end magic to update the navigation button
+		// newNavMode can currently be "Turntable" or "Helicopter"
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
