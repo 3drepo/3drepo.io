@@ -18,7 +18,6 @@
 function StateManagerRun($location, $rootScope, $state, StateManager, AuthService, $timeout, AnalyticService) {
 
 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
-		console.log("state - $stateChangeStart")
 
 		StateManager.state.changing = true;
 
@@ -39,7 +38,7 @@ function StateManagerRun($location, $rootScope, $state, StateManager, AuthServic
 	});
 
 	$rootScope.$on("$stateChangeSuccess", (event, toState, toParams, fromState, fromParams) => {
-		console.log("state - $stateChangeSuccess")
+
 		const stateChangeObject = {
 			toState,
 			toParams,
@@ -51,7 +50,7 @@ function StateManagerRun($location, $rootScope, $state, StateManager, AuthServic
 	});
 
 	$rootScope.$on("$locationChangeSuccess", () => {
-		console.log("state - $locationChangeSuccess")
+
 		AnalyticService.sendPageView(location);
 
 		const queryParams = $location.search();

@@ -158,12 +158,14 @@ class HomeController implements ng.IController {
 		});
 
 		this.$scope.$watch(() => this.AuthService.state.currentEvent, (event) => {
-			console.log("new value");
+
 			const currentData = this.AuthService.state.currentData;
 			if (!angular.isDefined(event)) {
 				return;
 			}
-			if (event === this.AuthService.events.USER_LOGGED_IN) {
+
+			switch (event) {
+			case this.AuthService.events.USER_LOGGED_IN:
 
 				if (!currentData.error) {
 					if (!currentData.initialiser) {
@@ -182,12 +184,12 @@ class HomeController implements ng.IController {
 						}
 					}
 				} else {
-
 					this.AuthService.logout();
-
 				}
-			} else if (event === this.AuthService.events.USER_LOGGED_OUT) {
 
+				break;
+
+			case this.AuthService.events.USER_LOGGED_OUT:
 				// TODO: Use state manager
 				// Only fire the Logout Event if we're on the home page
 				const currentPage = this.$location.path();
@@ -195,11 +197,15 @@ class HomeController implements ng.IController {
 				if (this.doNotLogout.indexOf(currentPage) === -1) {
 					this.StateManager.setHomeState({ loggedIn: false, account: null });
 				}
+				break;
 			}
-			// } else if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-			// 	this.pointerEvents = event.value.on ? "none" : "inherit";
-			// }
 
+		});
+
+		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+				this.pointerEvents = event.value.on ? "none" : "inherit";
+			}
 		});
 
 		/*
