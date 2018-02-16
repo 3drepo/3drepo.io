@@ -15,13 +15,35 @@ viewer .loadingViewerText {
     padding-top: 40vh;
 }
 
-canvas.emscripten {
-    position : absolute;
-    width: 100% !important;
+
+viewer .unityProgressBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    border-bottom: solid 1px #bd0000;
+    background-color: red;
 }
 
-canvas.emscripten {
+
+viewer #unityViewer {
+    position : absolute;
     height: 100% !important;
     width: 100% !important;
     overflow: hidden;
+    background: rgba(0, 0, 0, 0) !important;
+}
+
+.emscripten {
+    background: rgba(0,0,0,0) !important;
+}
+
+div#unityViewer.emscripten canvas {
+    background: rgba(0,0,0,0) !important;
+}
+
+viewer #unityViewer canvas {
+    height: 100% !important;
+    width: 100% !important;
+    background: rgba(0,0,0,0) !important;
 }
