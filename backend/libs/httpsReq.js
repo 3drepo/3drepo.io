@@ -18,6 +18,8 @@
 
 var https = require('https');
 
+const httpsAgent = new https.Agent({keepAlive:true});
+
 function parseUrl(url){
 	'use strict';
 
@@ -43,13 +45,16 @@ function parseUrl(url){
 }
 
 
-function get(url, qs){
+function get(hostname, path){
 	'use strict';
 	
-	qs = qs? '?' + qs : '';
-
+	const options = {
+		hostname,
+		path,
+		agent: httpsAgent
+	}
 	return new Promise((resolve, reject) => {
-		https.get(url + qs, result => {
+		https.get(options, result => {
 			//console.log(url + qs);
 			// Buffer the body entirely for processing as a whole.
 
