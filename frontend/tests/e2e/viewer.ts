@@ -2,7 +2,8 @@ import { browser, by, clickElement, element , env, expect, ExpectedConditions, h
 
 describe("Viewer page", function() {
 
-	this.timeout(60000 * 2);
+	const timeout = 60000 * 4;
+	this.timeout(timeout);
 
 	before(() => {
 		login();
@@ -97,8 +98,8 @@ describe("Viewer page", function() {
 			before(() => {
 
 				browser.wait(
-					ExpectedConditions.elementToBeClickable(element(by.id("addIssue"))),
-					60000 * 2,
+					ExpectedConditions.invisibilityOf(element(by.id("unityProgressBar"))),
+					timeout,
 				);
 
 			});
@@ -112,7 +113,6 @@ describe("Viewer page", function() {
 			});
 
 			describe("and interacting with the left side buttons", () => {
-
 				it("by clicking the issues button should hide and show issues panel", () => {
 
 					// Shown by default
@@ -164,8 +164,8 @@ describe("Viewer page", function() {
 
 			describe("and interacting with the right side buttons", () => {
 
-				const orange = "rgba(255, 152, 0, 1)";
-				const green = "rgba(6, 86, 60, 1)";
+				const orange = "255, 152, 0"; // For FF / Chrome compat
+				const green = "6, 86, 60";
 
 				it("by clicking on the metadata button should be activate it", () => {
 
@@ -173,8 +173,8 @@ describe("Viewer page", function() {
 					const measure = element(by.id("measureButton"));
 					meta.click();
 
-					expect(meta.getCssValue("background-color")).to.eventually.equal(orange);
-					expect(measure.getCssValue("background-color")).to.eventually.equal(green);
+					expect(meta.getCssValue("background-color")).to.eventually.include(orange);
+					expect(measure.getCssValue("background-color")).to.eventually.include(green);
 
 				});
 
@@ -195,8 +195,8 @@ describe("Viewer page", function() {
 					const measure = element(by.id("measureButton"));
 					const meta = element(by.id("metadataButton"));
 					measure.click();
-					expect(meta.getCssValue("background-color")).to.eventually.equal(green);
-					expect(measure.getCssValue("background-color")).to.eventually.equal(orange);
+					expect(meta.getCssValue("background-color")).to.eventually.include(green);
+					expect(measure.getCssValue("background-color")).to.eventually.include(orange);
 				});
 
 			});
@@ -302,8 +302,10 @@ describe("Viewer page", function() {
 					const yAxis = element(by.id("YClipAxis"));
 					const zAxis = element(by.id("ZClipAxis"));
 					yAxis.click();
+					browser.sleep(50);
 					expect(yAxis.getAttribute("aria-checked")).to.eventually.equal("true");
 					zAxis.click();
+					browser.sleep(50);
 					expect(zAxis.getAttribute("aria-checked")).to.eventually.equal("true");
 				});
 
