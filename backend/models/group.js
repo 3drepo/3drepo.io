@@ -56,36 +56,81 @@ groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
 			}
 			return uuids;
 		});
-}
+};
 
-groupSchema.methods.uuidToIfcGuids = function(obj) {
+groupSchema.statics.uuidToIfcGuids = function(obj) {
 	var account = obj.account;
 	var model = obj.model;
 	var uid = obj.shared_id;
+	if ("[object String]" !== Object.prototype.toString.call(uid)) {
+		uid = utils.uuidToString(uid);
+	}
 	var parent = utils.stringToUUID(uid);
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
 	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
 			results.forEach(res => {
-				if (groupSchema.statics.isIfcGuid(res.metadata['IFC GUID'])) {
+				if (this.isIfcGuid(res.metadata['IFC GUID'])) {
 					ifcGuids.push(res.metadata['IFC GUID']);
 				}
 			});
 			return ifcGuids;
 		});
-}
+};
 
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
  */
 groupSchema.statics.isIfcGuid = function(value) {
 	return value && 22 === value.length;
-}
+};
+
+groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
+	'use strict';
+
+	// Extract a unique list of IDs only
+	let groupObjectsMap = [];
+
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+			let ifcGuidPromises = [];
+
+			for (let i = 0; i < group.objects.length; i++) {
+				const obj = group.objects[i];
+				if (obj.shared_id) {
+					// Convert sharedIds to IFC Guids
+					ifcGuidPromises.push(
+						this.uuidToIfcGuids(obj).then(ifcGuids => {
+							if (ifcGuids && ifcGuids.length > 0) {
+								for (let i = 0; i < ifcGuids.length; i++) {
+									obj.ifc_guid = ifcGuids[i];
+									delete obj.shared_id;
+									groupObjectsMap[obj.ifc_guid] = obj;
+								}
+							} else {
+								groupObjectsMap[obj.shared_id] = obj;
+							}
+						})
+					);
+				}
+			}
+
+			return Promise.all(ifcGuidPromises).then(() => {
+				if (groupObjectsMap) {
+					group.objects = [];
+					for (let id in groupObjectsMap) {
+						group.objects.push(groupObjectsMap[id]);
+					}
+				}
+				return group;
+			});
+		});
+};
 
 groupSchema.statics.findByUID = function(dbCol, uid){
 	'use strict';
-	
+
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
 			let sharedIdObjects;
@@ -124,7 +169,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 				}
 				return group;
 			});
-		});;
+		});
 };
 
 groupSchema.statics.listGroups = function(dbCol){
@@ -145,7 +190,7 @@ groupSchema.methods.updateAttrs = function(data){
 				obj.id = utils.stringToUUID(obj.id);
 			}
 			ifcGuidPromises.push(
-				this.uuidToIfcGuids(obj).then(ifcGuids => {
+				groupSchema.statics.uuidToIfcGuids(obj).then(ifcGuids => {
 					if (ifcGuids && ifcGuids.length > 0) {
 						for (let i = 0; i < ifcGuids.length; i++) {
 							obj.ifc_guid = ifcGuids[i];

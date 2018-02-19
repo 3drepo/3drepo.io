@@ -474,25 +474,31 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 	}).then(issues => {
 
+		let bcfPromises = [];
+
 		issues.forEach(issue => {
 
-			let bcf = issue.getBCFMarkup(_.get(settings, "properties.unit"));
+			bcfPromises.push(
+				issue.getBCFMarkup(account, model, _.get(settings, "properties.unit")).then(bcf => {
 
-			zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
+					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
-			bcf.viewpoints.forEach(vp => {
-				zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
-			});
+					bcf.viewpoints.forEach(vp => {
+						zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
+					});
 
-			bcf.snapshots.forEach(snapshot => {
-				zip.append(snapshot.snapshot.buffer, {name: `${uuidToString(issue._id)}/${snapshot.filename}`});
-			});
+					bcf.snapshots.forEach(snapshot => {
+						zip.append(snapshot.snapshot.buffer, {name: `${uuidToString(issue._id)}/${snapshot.filename}`});
+					});
 
+				})
+			);
 		});
 
-		zip.finalize();
-
-		return Promise.resolve(zip);
+		return Promise.all(bcfPromises).then(() => {
+			zip.finalize();
+			return Promise.resolve(zip);
+		});
 	});
 
 };
@@ -1255,7 +1261,7 @@ schema.methods.generateViewpointGUID = function(){
 	}
 };
 
-schema.methods.getBCFMarkup = function(unit){
+schema.methods.getBCFMarkup = function(account, model, unit){
 	
 
 	this.generateViewpointGUID();
@@ -1348,6 +1354,7 @@ schema.methods.getBCFMarkup = function(unit){
 
 	});
 
+	let viewpointsPromises = [];
 
 	// generate viewpoints
 	let snapshotNo = 0;
@@ -1364,9 +1371,6 @@ schema.methods.getBCFMarkup = function(unit){
 			},
 			"Viewpoint": viewpointFileName,
 			"Snapshot":  null
-
-
-			
 		};
 
 		if(vp.screenshot.flag){
@@ -1394,7 +1398,6 @@ schema.methods.getBCFMarkup = function(unit){
 			}
 		};
 
-
 		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >=3){
 
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
@@ -1417,7 +1420,74 @@ schema.methods.getBCFMarkup = function(unit){
 			};
 		}
 
-		_.get(vp, "extras.Components") && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components"));
+		if (_.get(vp, "extras.Components")) {
+			// TODO: Consider if extras.Components should only be used if groups don't exist
+			// TODO: Could potentially check each sub-property (ViewSetupHints, ComponentSelection, etc.
+			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
+		}
+
+		let componentsPromises = [];
+
+		if (_.get(vp, "highlighted_group_id")) {
+			let highlightedGroupId = _.get(vp, "highlighted_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.ComponentSelection) {
+								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection = {};
+								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection.Component.push({
+									"@": {
+										ifcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
+							}
+						}
+					}
+				})
+			);
+		}
+
+		if (_.get(vp, "hidden_group_id")) {
+			let hiddenGroupId = _.get(vp, "hidden_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility) {
+								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility = {
+										"@": {
+											DefaultVisibility: true
+										}
+									};
+								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+							viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component.push({
+								"@": {
+									ifcGuid: groupObject.ifc_guid
+								},
+								OriginatingSystem: "3D Repo"
+							});
+							}
+						}
+					}
+				})
+			);
+		}
+
 		_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, "extras.Spaces"));
 		_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, "extras.SpaceBoundaries"));
 		_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, "extras.Openings"));
@@ -1426,20 +1496,24 @@ schema.methods.getBCFMarkup = function(unit){
 		_.get(vp, "extras.ClippingPlanes") && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes"));
 		_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
 
-		viewpointEntries.push({
-			filename: viewpointFileName,
-			xml:  xmlBuilder.buildObject(viewpointXmlObj)
-		});
+		viewpointsPromises.push(
+			Promise.all(componentsPromises).then(() => {
+				viewpointEntries.push({
+					filename: viewpointFileName,
+					xml:  xmlBuilder.buildObject(viewpointXmlObj)
+				});
+			})
+		);
 
 	});
 
-
-
-	return {
-		markup: xmlBuilder.buildObject(markup),
-		viewpoints: viewpointEntries,
-		snapshots: snapshotEntries
-	};
+	return Promise.all(viewpointsPromises).then(() => {
+		return {
+			markup: xmlBuilder.buildObject(markup),
+			viewpoints: viewpointEntries,
+			snapshots: snapshotEntries
+		};
+	});
 };
 
 schema.statics.getBCFVersion = function(){
@@ -1478,7 +1552,6 @@ schema.statics.getModelBCF = function(modelId){
 
 
 schema.statics.importBCF = function(requester, account, model, revId, zipPath){
-	
 
 	let self = this;
 	let settings;
