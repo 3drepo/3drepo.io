@@ -231,7 +231,6 @@ class AccountModelSettingController implements ng.IController {
 				}];
 			} else {
 				data.surveyPoints[0].position = this.getPosition();
-				console.log("getPosition", data.surveyPoints[0].position);
 			}
 		}
 
@@ -252,8 +251,6 @@ class AccountModelSettingController implements ng.IController {
 				data.surveyPoints[0].latLong = this.getLatLong();
 			}
 		}
-
-		console.log("surveyPoints: ", data.surveyPoints);
 
 		const saveUrl = this.targetAcct + "/" + this.modelId +  "/settings";
 
