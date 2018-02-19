@@ -44,10 +44,8 @@ export class GISService {
 	}
 
 	public mapInitialise(params) {
-		if (!this.initialised && params && params.surveyPoints.length) {
+		if (params && params.surveyPoints.length) {
 			if (params.surveyPoints[0].latLong && params.surveyPoints[0].position) {
-
-				console.log("mapInitialise", params);
 				this.ViewerService.mapInitialise(params);
 				this.initialised = true;
 			}
