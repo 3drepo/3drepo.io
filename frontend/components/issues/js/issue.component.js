@@ -241,7 +241,7 @@
 				vm.issueFailedToLoad = false;
 				vm.issueData = null;
 
-				IssuesService.getIssue(vm.account, vm.model, vm.data._id)
+				IssuesService.getIssue(vm.data.account, vm.data.model, vm.data._id)
 					.then(function(fetchedIssue){
 						vm.setEditIssueData(fetchedIssue);
 						vm.startNotification();
@@ -748,9 +748,51 @@
 		}
 
 		/**
+		 * Prune node from group if its parent is already a part of the group.
+		 * @returns prunedNodes	List of nodes with children pruned out.
+		 */
+		function pruneNodes(nodes, property) {
+			var prunedNodes = [];
+
+			if (property) {
+				var prunedNodesMap = [];
+				for (var i = 0; i < nodes.length; i++) {
+					var nodePath = TreeService.getPath(nodes[i].id);
+					var node = TreeService.getNodeById(nodes[i].id);
+					while (nodePath && nodePath.length > 0) {
+						var parentNodeId = nodePath.shift();
+						var parentNode = TreeService.getNodeById(parentNodeId);
+						if (node[property] === parentNode[property]) {
+							prunedNodesMap[parentNode._id] = {
+								account: parentNode.account,
+								id: parentNode._id,
+								model: parentNode.project,
+								shared_id: parentNode.shared_id
+							}
+							nodePath = undefined;
+						}
+					}
+				}
+				for (var nodeId in prunedNodesMap) {
+					prunedNodes.push(prunedNodesMap[nodeId]);
+				}
+			} else {
+				console.error("pruneNodes - arg. property (\"toggleState\" | \"selected\") undefined! Returning nodes.");
+				prunedNodes = nodes;
+			}
+
+			return prunedNodes;
+		}
+
+		/**
 		 * @returns groupData	Object with list of nodes for group creation.
 		 */
 		function createGroupData(nodes) {
+			/*var groupNodesLimit = 25000;
+			if (nodes && nodes.length > groupNodesLimit) {
+				nodes.length = groupNodesLimit;
+				console.error("Upper limit of " + groupNodesLimit + " exceeded! Saved viewpoint will be incomplete.");
+			}*/
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
@@ -762,10 +804,10 @@
 		vm.createGroup = function(viewpoint, screenShot, objectInfo) {
 
 			// Create a group of selected objects
-			var highlightedGroupData = createGroupData(objectInfo.highlightedNodes);
+			var highlightedGroupData = createGroupData(pruneNodes(objectInfo.highlightedNodes, "selected"));
 			
 			// Create a group of hidden objects
-			var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
+			var hiddenGroupData = createGroupData(pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
 			APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
 				.then(function (highlightedGroupResponse) {
@@ -885,10 +927,10 @@
 			objectsPromise.promise.then(function(objectInfo) {
 				
 				// Create a group of selected objects
-				var highlightedGroupData = createGroupData(objectInfo.highlightedNodes);
+				var highlightedGroupData = createGroupData(pruneNodes(objectInfo.highlightedNodes, "selected"));
 				
 				// Create a group of hidden objects
-				var hiddenGroupData = createGroupData(objectInfo.hiddenNodes);
+				var hiddenGroupData = createGroupData(pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 				
 				APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData).then(function (highlightedGroupResponse) {
 					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData).then(function (hiddenGroupResponse) {

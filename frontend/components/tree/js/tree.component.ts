@@ -119,6 +119,10 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
+							this.TreeService.updateModelState(this.allNodes[0]);
+
+							angular.element((window as any).window).triggerHandler("resize");
+
 						}
 					}
 				}
@@ -131,7 +135,6 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
-				console.log("TREE_READY");
 				this.allNodes = [];
 				this.allNodes.push(event.value.nodes);
 				this.TreeService.setAllNodes(this.allNodes);
@@ -149,8 +152,8 @@ class TreeController implements ng.IController {
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
 				this.$timeout(() => {}).then(() => {
-					this.TreeService.showAllTreeNodes();
-					this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+					// this.TreeService.showAllTreeNodes();
+					// this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
 
 			}
@@ -166,8 +169,6 @@ class TreeController implements ng.IController {
 					this.showFilterList = false;
 					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
-
-					console.log("showProgress");
 
 					this.searching = true;
 					this.TreeService.search(newValue)
@@ -210,7 +211,7 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodes();
+							this.TreeService.showAllTreeNodes(true);
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
@@ -241,14 +242,14 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		this.$scope.$watch(() => this.TreeService.selectionData,
-			(selectionData) => {
-				if (selectionData) {
+		this.$scope.$watch(() => this.TreeService.selectedIndex,
+			(selectedIndex) => {
+				if (selectedIndex) {
 
 					this.setContentHeight(this.fetchNodesToShow());
 
 					this.$timeout(() => {}).then(() => {
-						this.topIndex = selectionData.selectedIndex;
+						this.topIndex = selectedIndex;
 					});
 
 				}
@@ -386,7 +387,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		this.$scope.$broadcast("$md-resize");
+		angular.element((window as any).window).triggerHandler("resize");
 
 	}
 
@@ -417,17 +418,9 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		let state;
-		if (node.toggleState === "invisible") {
-			state = "visible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-			if (this.TreeService.hideIfc) {
-				this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
-			}
-		} else {
-			state = "invisible";
-			this.TreeService.setVisibilityOfNodes([node], state);
-		}
+		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		this.TreeService.setTreeNodeStatus(node, newState);
+		this.TreeService.updateModelState(node);
 	}
 
 	/**
@@ -437,6 +430,7 @@ class TreeController implements ng.IController {
 	 */
 	public selectNode(node) {
 		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
+		this.TreeService.updateModelState(node);
 	}
 
 	public filterItemSelected(item) {
@@ -458,6 +452,7 @@ class TreeController implements ng.IController {
 		if (selectedNode) {
 			// TODO: This throws a unity error when filtering
 			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.updateModelState(selectedNode);
 		}
 
 	}

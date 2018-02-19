@@ -7,94 +7,163 @@ html(lang="en" ng-app="3drepo")
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 
-		title 3D Repo
-
-		// All CSS minified
-		link(rel='stylesheet', type='text/css', href=baseURL + '/dist/three_d_repo.min.css')
+		title 3D Repo - Refund
 
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+		style(type='text/css').
+
+			html, body {
+				font-family: Roboto, sans-serif;
+				width: 100%;
+				height: 100%;
+				padding: 0;
+				margin: 0;
+			}
+
+			div.container {
+				width: 90%;
+				padding: 5%;
+				position: absolute;
+			}
+
+			p {
+				margin-top: 0px;
+				margin-bottom: 0px;
+				padding: 0px;
+				font-weight: lighter;
+			}
+			table {
+				width: 100%;
+				table-layout : fixed;
+				padding-bottom: 15px;
+			}
+			.tableCell {
+				text-align: left;
+				font-weight: normal;
+				padding: 0;
+				padding-top: 10px;
+				vertical-align: top;
+			}
+			.tableHead {
+				font-weight: bold;
+				padding-bottom: 1px;
+				margin-bottom: 9px;
+				border-bottom: 1px solid black; 
+				border-collapse: collapse;
+			}
+
+			.productCol {
+				width: 300px;
+			}
+
+			.topBlocks {
+				width: 50%;
+				display: inline-block;
+				height: 300px;
+				vertical-align: top;
+			}
+
+			#billingCompanyAddress {
+				text-align: left;
+			}
+
+			#billingInvoice {
+				text-align: right;
+			}
+
+			.companyTitle {
+				font-weight: 500;
+				font-size: 1.2em;
+			}
+			
+			.invoice {
+				margin-top: 50px;
+				font-size: 40px;
+			}
+
+			#billingPeriod {
+				font-size: 14px;
+				font-weight: 400;
+				color: #8a8a8a;
+			}
+
+			#billingInvoiceLogo {
+				height: 57.5px;
+			}
 
 	body
-		billing.ng-scope.ng-isolate-scope(username='vm.query.username', token='vm.query.token', query='vm.query')
-			div(layout-fill, layout="column", class="layout-fill layout-column")
-				// md-toolbar.noPrint
-				// 	.md-toolbar-tools
-				// 		span(flex)
-				// 		img(src="/public/images/3drepo-logo-white.png")
-				// 		span(flex)
-				// 		md-button.md-icon-button(aria-label="Home", ng-click="home()")
-				// 			md-icon.angular-material-icons home
+		div.container
+			div
+				#billingCompanyAddress.topBlocks
 
-				md-content(ng-if="showBilling", layout="row", flex="none", layout-align="center", class="ng-scope _md layout-align-center-stretch layout-row flex-none")
-					div(layout="column", class="layout-column", style="width:90%")
-						#billingCompanyAddress(layout="row", layout-align="start start", class="layout-align-start-start layout-row")
-							div(layout="column", class="layout-column flex-45", flex="45")
-								label.md-title 3D Repo
-								label 20 Eastbourne Terrace
-								label London
-								label W2 6LG
-								label United Kingdom
-								label VAT registration: GB 206 9090 15
-								label
-									| Email:
-									=" "
-									a(href="mailto:support@3drepo.org") support@3drepo.org
+					div(layout="column", class="layout-column flex-45", flex="45")
+						p.companyTitle 3D Repo
+						p 20 Eastbourne Terrace
+						p London
+						p W2 6LG
+						p United Kingdom
+						p VAT registration: GB 206 9090 15
+						p
+							| Email:
+							=" "
+							a(href="mailto:support@3drepo.org") support@3drepo.org
 
-							span.flex(flex)
+					span.flex(flex)
 
-							div(layout="column", layout-align="end end", class="layout-align-end-end layout-column")
-								img#billingInvoiceLogo(src=baseURL+"/images/logo.png" style="height:57.5px")
-								p.md-display-1.ng-binding 
-														| Credit Note
+				#billingInvoice.topBlocks
+					div
+						img#billingInvoiceLogo(src=baseURL+"/images/logo.png")
+					
+					div.invoice
+						p Credit Note
 
-								if !billing.pending
-									span PayPal transaction ID: #{billing.transactionId}
+					if !billing.pending
+						br
+						span PayPal transaction ID: #{billing.transactionId}
 
-							//span(flex)
-							//md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
+			table(cellspacing="0")
+				tr
+					th.tableCell.tableHead To
+					th.tableCell.tableHead Date
+					th.tableCell.tableHead Credit Note Number
 
-						#billingGap
+				tr.billingClientAddress
+				
+					td.tableCell 
+						div 
+							p #{billing.info.firstName} #{billing.info.lastName}
+							if billing.info.company
+								p #{billing.info.company}
+							p #{billing.info.line1}
 
-						.billingInfoTitle(layout="row", flex="none", class="billingInfoTitle layout-row flex-none")
-							label(flex="30", class="flex-30") To
-							label(flex="30", class="flex-30") Date
-							label(flex="20", class="flex-20") Credit Note Number
+							if billing.info.line2
+								p #{billing.info.line2}
+							p #{billing.info.city}
+							p #{billing.info.postalCode}
+							p #{billing.info.country}
+							if billing.info.vat
+								p VAT ID: #{billing.info.vat}
 
-						md-divider(flex="none", class="flex-none")
+					td.tableCell #{billing.createdAt} GMT
+					td.tableCell #{billing.invoiceNo}
 
-						#billingClientAddress(layout="row", flex="none", class="layout-row flex-none")
-							div(layout="column", class="layout-column flex-30", flex="30")
-								label #{billing.info.firstName} #{billing.info.lastName}
-								if billing.info.company
-									label #{billing.info.company}
-								label #{billing.info.line1}
-								if billing.info.line2
-									label #{billing.info.line2}
-								label #{billing.info.city}
-								label #{billing.info.postalCode}
-								label #{billing.info.country}
-								if billing.info.vat
-									label VAT ID: #{billing.info.vat}
-							label(flex="30", class="ng-binding flex-30") #{billing.createdAt} GMT
-							label(flex="20", class="flex-20") #{billing.invoiceNo}
+			table(cellspacing="0")
+				tr
+					th.tableCell.tableHead.productCol Description
+					th.tableCell.tableHead Net
+					th.tableCell.tableHead VAT (%)
+					th.tableCell.tableHead VAT
+					th.tableCell.tableHead Total
 
-						.billingInfoTitle.layout-row.flex-none(layout="row", flex="none", class="flex-none")
-							label(flex="60", class="flex-60") Description
-							label(flex="10", class="flex-10") Net
-							label(flex="10", class="flex-10") VAT (%)
-							label(flex="10", class="flex-10") VAT
-							label Total
+				tr
+					td.tableCell.productCol 
+						p Refund
+					td.tableCell £#{billing.netAmount}
+					td.tableCell #{billing.taxPercentage}%
+					td.tableCell £#{billing.taxAmount}
+					td.tableCell £#{billing.amount}
 
-						md-divider(flex="none", class="flex-none")
-
-						#billingProductInfo(layout="row", flex="none", class="layout-row flex-none")
-							div(flex="60", layout="column", class="layout-column flex-60", layout-align="start")
-								label 
-									| Refund
-							label(flex="10", class="ng-binding flex-10") £#{billing.netAmount}
-							label(flex="10", class="ng-binding flex-10") #{billing.taxPercentage}%
-							label(flex="10", class="ng-binding flex-10") £#{billing.taxAmount}
-							label#billingTotalValue(class="ng-binding") £#{billing.amount}
-
+			
+			br
 

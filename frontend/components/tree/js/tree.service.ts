@@ -29,7 +29,7 @@ export class TreeService {
 	public highlightMapUpdateTime;
 	public selectionDataUpdateTime;
 	public visibilityUpdateTime;
-	public selectionData;
+	public selectedIndex;
 	public treeReady;
 
 	private state;
@@ -274,6 +274,19 @@ export class TreeService {
 
 					subTree.parent = idToObjRef[treeId];
 
+					// Correct main tree using incoming subtree for federation
+					const nodeIdsToUpdate = subTree.parent.path.split("__");
+
+					for (let i = nodeIdsToUpdate.length - 1; i >= 0; i--) {
+						const nodeToUpdate = idToObjRef[nodeIdsToUpdate[i]];
+
+						if (nodeToUpdate.children) {
+							this.updateParentVisibilityByChildren(nodeToUpdate);
+						} else if (nodeIdsToUpdate.length - 1 === i) {
+							nodeToUpdate.toggleState = subTree.toggleState;
+						}
+					}
+
 					Object.assign(mainTree.subModelIdToPath, subtree.idToPath);
 
 					idToObjRef[treeId].children = [subTree];
@@ -411,11 +424,6 @@ export class TreeService {
 		this.nodesToShow[0].expanded = false;
 		this.nodesToShow[0].selected = false;
 		this.nodesToShow[0].hasChildren = this.nodesToShow[0].children;
-
-		// Only make the top node visible if it does not have a toggleState
-		if (!this.nodesToShow[0].hasOwnProperty("toggleState")) {
-			this.nodesToShow[0].toggleState = "visible";
-		}
 	}
 
 	/**
@@ -467,70 +475,71 @@ export class TreeService {
 	}
 
 	/**
-	 * TODO: Update description and rewrite --
-	 * Visibility going UP tree is correct, but
-	 * it forces visibility state going DOWN,
-	 * e.g. click on ROOT node causes all nodes
-	 * to be incorrectly visible/invisible.
-	 * Set the toggle state of a node
+	 * Helper function for updateParentVisibility which updates toggleState for given node only.
+	 * @param node	Node to update.
+	 */
+	public updateParentVisibilityByChildren(node: any) {
+		if (node.children) {
+			let visibleChildCount = 0;
+			let parentOfInvisibleChildCount = 0;
+
+			for (let i = 0; 0 === parentOfInvisibleChildCount && node.children && i < node.children.length; i++) {
+				switch (node.children[i].toggleState) {
+					case "visible":
+						visibleChildCount++;
+						break;
+					case "parentOfInvisible":
+						parentOfInvisibleChildCount++;
+						break;
+				}
+			}
+
+			if (parentOfInvisibleChildCount > 0) {
+				node.toggleState = "parentOfInvisible";
+			} else if (node.children.length === visibleChildCount) {
+				node.toggleState = "visible";
+			} else if (0 === visibleChildCount) {
+				node.toggleState = "invisible";
+			} else {
+				node.toggleState = "parentOfInvisible";
+			}
+		}
+	}
+
+	/**
+	 * Update toggleState of given node based on its children and
+	 * traverse up the tree if necessary and call updateModelState
+	 * @param node	Node to update.
 	 */
 	public updateParentVisibility(node: any) {
 
-		let path = this.getPath(node._id);
+		let nodes = [node];
 
-		// Get node parent
-		if (path && path.length > 0) {
+		while (nodes && nodes.length > 0) {
+			const currentNode = nodes.pop();
 
-			// We can skip up parent nodes if we know it has mixed 
-			// shown and hidden children
-			let hasParentOfInvisibleChild = false;
+			// Store the state before it's potentially changed
+			// by updateParentVisibility
+			const priorToggleState = currentNode.toggleState;
 
-			// Set the toggle state of the nodes above
-			for (let i = (path.length - 1); i >= 0; i--) {
-				
-				const parentNode = this.getNodeById(path[i]);
+			this.updateParentVisibilityByChildren(currentNode);
 
-				//console.log("parentNode id", path[i]);
+			if (priorToggleState !== currentNode.toggleState || this.isLeafNode(currentNode)) {
+				const path = this.getPath(currentNode._id);
 
-				if (parentNode.children !== undefined && parentNode.children.length > 0) {
-					if (hasParentOfInvisibleChild) {
-						parentNode.toggleState = "parentOfInvisible";
-						continue;
-					}
-
-					let numInvisible = 0;
-					let numParentInvisible = 0;
-					let numVisible = 0;
-
-					for (let j = 0; j < parentNode.children.length; j++) {
-						if (parentNode.children[j].toggleState === "invisible" ) {
-							numInvisible++;
-						} else if (parentNode.children[j].toggleState === "parentOfInvisible" ) {
-							numParentInvisible++;
-						} else {
-							numVisible++;
+				if (path && path.length > 1) {
+					// Fast forward up path for parentOfInvisible state
+					if ("parentOfInvisible" === currentNode.toggleState) {
+						for (let i = path.length - 2; i >= 0; i--) {
+							const parentNode = this.getNodeById(path[i]);
+							parentNode.toggleState = "parentOfInvisible";
 						}
-
-						// If we have mixed visible and invisible/parentOfInvisible we know
-						// it's parentOfInvisible
-						if (numVisible > 0 && (numInvisible > 0 || numParentInvisible > 0) ) {
-							hasParentOfInvisibleChild = true;
-							break;
-						}
-					}
-
-					if (numInvisible === parentNode.children.length) {
-						parentNode.toggleState = "invisible";
-					} else if ((numParentInvisible + numInvisible) > 0) {
-						parentNode.toggleState = "parentOfInvisible";
 					} else {
-						parentNode.toggleState = "visible";
+						nodes.push(this.getNodeById(path[path.length - 2]));
 					}
 				}
 			}
 		}
-
-		this.updateClicked(node);
 	}
 
 	/**
@@ -647,24 +656,19 @@ export class TreeService {
 					// Sometimes we have an edge case where an object doesn't exist in the tree
 					// because it has no name. It is often objects like a window, so what we do
 					// is select its parent object to highlight that instead
-					const specialNodeParent = this.getNodeById(path[i-1]);
-					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent)
+					const specialNodeParent = this.getNodeById(path[i - 1]);
+					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
 				}
 			}
 		}
 
 		if (!noHighlight) {
 			this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
-				this.selectionData = {
-					selectedIndex,
-				};
+				this.selectedIndex = selectedIndex;
 			});
 		} else {
-			this.selectionData = {
-				selectedIndex,
-			};
+			this.selectedIndex = selectedIndex;
 		}
-
 	}
 
 	/**
@@ -673,8 +677,8 @@ export class TreeService {
 	 * @param objectID the id of the node to get a path for
 	 */
 	public getPath(objectID: string) {
-
 		let path;
+
 		if (this.state.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
 			path = this.state.idToPath[objectID].split("__");
@@ -683,10 +687,11 @@ export class TreeService {
 			path = this.subModelIdToPath[objectID].split("__");
 			const parentPath = this.subTreesById[path[0]].parent.path.split("__");
 			path = parentPath.concat(path);
+		} else {
+			path = this.getNodeById(objectID).path.split("__");
 		}
 
 		return path;
-
 	}
 
 	/**
@@ -708,6 +713,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, "invisible");
+		this.updateModelState(this.allNodes[0]);
 	}
 
 	/**
@@ -716,104 +722,71 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, "visible");
+		this.updateModelState(this.allNodes[0]);
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
 
-		if (!node) {
-			return;
-		}
+		if (node && ("parentOfInvisible" === visibility || visibility !== node.toggleState)) {
+			const priorToggleState = node.toggleState;
 
- 		let children = [node];
-		let hiddenByDefaultNodes = [];
+			let children = [];
+			const leafNodes = [];
+			const parentNode = node;
 
-		if (node.children) {
-			children = children.concat(node.children);
-		}
-
-		while (children.length > 0) {
-			const child = children.pop();
-
-			if (child.children && child.toggleState !== visibility) {
-				children = children.concat(child.children);
-			}
-
-			if (visibility === "visible" && this.canShowNode(child)) { 
-				child.toggleState = "visible";
-			} else if (visibility === "visible" && !this.canShowNode(child)) {
-				// This is an IFC Space 
-				hiddenByDefaultNodes.push(child);
+			if (node.children) {
+				children = children.concat(node.children);
 			} else {
-				child.toggleState = "invisible";
+				children = [node];
 			}
 
-		}
+			while (children.length > 0) {
+				const child = children.pop();
 
-		if (hiddenByDefaultNodes.length) {
-
-			// If we've been up this path before, no need 
-			// to try and set the visibility again
-			const pathHandled = new Set();
-
-			for (let i = 0; i < hiddenByDefaultNodes.length; i++) {
-				let hidden = hiddenByDefaultNodes[i];
-
-				const path = this.getPath(hidden._id); 
-				path.pop(); // remove the leaf node
-
-				while(path.length) {
-					let id = path.pop();
-
-					if (pathHandled.has(id)) {
-						break;
-					}
-
-					pathHandled.add(id);
-					let parent = this.getNodeById(id);
-
-					if (parent.toggleState === "visible") {
-						parent.toggleState = "parentOfInvisible";
-					}
-
+				if (child.children && child.toggleState !== visibility) {
+					children = children.concat(child.children);
 				}
-			};
-		}
 
-		this.updateParentVisibility(node);
-		
-	}
+				if (!child.hasOwnProperty("defaultState")) {
+					if (visibility === "visible" && this.canShowNode(child)) {
+						child.toggleState = "visible";
+					} else {
+						child.toggleState = "invisible";
+					}
+				} else {
+					if (visibility === "visible") {
+						child.toggleState = (this.getHideIfc()) ? child.defaultState : "visible";
+					} else {
+						child.toggleState = "invisible";
+					}
+				}
+			}
 
-	public checkHiddenByDefaultParents(node) {
-		let path = this.getPath(node._id);
-
-
-
-		// Get node parent
-		if (path && path.length > 0) {
-			let hidden = new Set(this.getHiddenByDefaultNodes());
-			if (hidden.has(node._id))
+			this.updateParentVisibility(parentNode);
 		}
 	}
 
 	/**
 	 * Hide all tree nodes.
 	 */
-	public hideAllTreeNodes() {
+	public hideAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus(this.allNodes[0], "invisible");
+		if (updateModel) {
+			this.updateModelState(this.allNodes[0]);
+		}
 	}
 
 	/**
 	 * Show all tree nodes.
 	 */
-	public showAllTreeNodes() {
-
+	public showAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus(this.allNodes[0], "visible");
 
-		if (this.state.hideIfc) {
-			this.getHiddenByDefaultNodes()
-				.forEach(this.updateParentVisibility.bind(this));
+		// It's not always necessary to update the model
+		// say we are resetting the state to then show/hide specific nodes
+		if (updateModel) {
+			this.updateModelState(this.allNodes[0]);
 		}
-
 	}
 
 	/**
@@ -821,7 +794,7 @@ export class TreeService {
 	 */
 	public isolateSelected() {
 		// Hide all
-		this.hideAllTreeNodes();
+		this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 		// Show selected
 		if (this.getCurrentSelectedNodes()) {
 			this.showTreeNodes(this.getCurrentSelectedNodes());
@@ -832,7 +805,9 @@ export class TreeService {
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
-		return !(this.state.hideIfc && this.getHiddenByDefaultNodes().includes(node));
+		return !(this.state.hideIfc && (
+			(node.defaultState && "invisible" === node.defaultState) ||
+			this.getHiddenByDefaultNodes().indexOf(node) !== -1));
 	}
 
 	/**
@@ -847,25 +822,25 @@ export class TreeService {
 	 * to apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public updateClicked(node) {
-		const childNodes = {};
+	public updateModelState(node) {
 
 		this.getMap().then((treeMap) => {
+			const childNodes = {};
 			this.traverseNodeAndPushId(node, childNodes, treeMap.idToMeshes);
 			for (const key in childNodes) {
 				if (key) {
-					childNodes[key].forEach((id) => {
+					for (let i = 0; i < childNodes[key].length; i++) {
+						const id  = childNodes[key][i];
 						const n = this.getNodeById(id);
 						if (n) {
-							this.updateClickedHidden(n);
-							this.updateClickedShown(n);
+							this.updateModelStateHidden(n);
+							this.updateModelStateShown(n);
 						}
-					});
+					}
 				}
 			}
+			this.visibilityUpdateTime = Date.now();
 		});
-
-		this.visibilityUpdateTime = Date.now();
 
 	}
 
@@ -928,7 +903,7 @@ export class TreeService {
 	 * Toggle node from clickedHidden collection.
 	 * @param node	Node to toggle.
 	 */
-	public updateClickedHidden(node) {
+	public updateModelStateHidden(node) {
 		if (node.toggleState === "invisible") {
 			this.clickedHidden[node._id] = node;
 		} else {
@@ -940,7 +915,7 @@ export class TreeService {
 	 * Toggle node from clickedShown collection.
 	 * @param node	Node to toggle.
 	 */
-	public updateClickedShown(node) {
+	public updateModelStateShown(node) {
 		if (node.toggleState === "visible") {
 			this.clickedShown[node._id] = node;
 		} else {
@@ -1010,6 +985,7 @@ export class TreeService {
 					if (node.toggleState === "invisible") {
 						this.hiddenByDefaultNodes.push(node);
 					}
+					node.defaultState = node.toggleState;
 					this.recurseIdToNodeMap(node.children);
 				}
 			});

@@ -5,7 +5,7 @@ describe("Account menu button", function() {
 	this.timeout(60000);
 
 	describe("should be", () => {
-		
+
 		before(() => {
 			browser.get(env.baseUrl);
 			browser.waitForAngular();
@@ -14,7 +14,7 @@ describe("Account menu button", function() {
 		it("hidden on the login page", () => {
 			expect(element.all(by.css(".accountMenuButton")).count()).to.eventually.equal(0);
 		});
-	
+
 	});
 
 	describe("should be present and", () => {
@@ -22,7 +22,7 @@ describe("Account menu button", function() {
 		before(() => {
 			login();
 		});
-	
+
 		after(() => {
 			element.all(by.tagName("body")).first().click();
 			logout();
@@ -41,7 +41,7 @@ describe("Account menu button", function() {
 
 			it("should have the username at the top", () => {
 				const content = element(by.id("accountMenuContent")).all(by.tagName("md-menu-item"));
-				expect(content.count()).to.eventually.equal(4);
+				expect(content.count()).to.eventually.equal(5);
 				expect(content.first().getText()).to.eventually.equal("account_circle\n" + USER.USERNAME);
 			});
 
@@ -56,8 +56,8 @@ describe("Account menu button", function() {
 			it("should have a teamspaces page button", () => {
 				expect(element(by.css('[ng-click="vm.showTeamspaces()"]')).isDisplayed()).to.eventually.equal(true);
 			});
-			
-		})
+
+		});
 
 	});
 

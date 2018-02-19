@@ -1,165 +1,163 @@
-div.heightFix(
+
+md-content#issueInformation(
 	ng-if="vm.issueData && vm.modelSettings"
-	flex
 	layout="column"
-	layout-fill
 	tabindex="0"
 	tdr-focus="true")
 
-	div
-		// Title
-		.issueItemContainer#issueTitleArea(
-			layout="column"
-			layout-align="start"
-			flex
-			ng-class="{issueTitleArea: vm.data}"
-			ng-click="vm.toggleShowAdditional()")
+	// Title
+	.issueItemContainer#issueTitleArea(
+		layout="column"
+		layout-align="start"
+		flex
+		ng-class="{issueTitleArea: vm.data}"
+		ng-click="vm.toggleShowAdditional()")
 
-				div(layout="row", flex, layout-align="space-between")
-					div(layout="row", flex)
-						#issueRoleIndicator(ng-style="{backgroundColor: vm.issueData.issueRoleColor}")
-						
-						div(ng-if="!vm.data"
-							layout="column"
-							flex)
-							md-input-container#issueTitleInput(
-								style="width=100%;"
+			div(layout="row", flex, layout-align="space-between")
+				div(layout="row", flex)
+					#issueRoleIndicator(ng-style="{backgroundColor: vm.issueData.issueRoleColor}")
+					
+					div(ng-if="!vm.data"
+						layout="column"
+						flex)
+						md-input-container#issueTitleInput(
+							style="width=100%;"
+							flex
+							md-no-float)
+
+							input(
 								flex
-								md-no-float)
+								type="text"
+								ng-model="vm.issueData.name"
+								ng-change="vm.nameChange()"
+								ng-disabled="vm.data"
+								ng-focus="vm.textInputHasFocus(true)"
+								ng-blur="vm.textInputHasFocus(false)"
+								aria-label="Title"
+								tdr-focus="true"
+								required
+								placeholder="Title",
+								ng-click="vm.titleInputClick($event)")
 
-								input(
-									flex
-									type="text"
-									ng-model="vm.issueData.name"
-									ng-change="vm.nameChange()"
-									ng-disabled="vm.data"
-									ng-focus="vm.textInputHasFocus(true)"
-									ng-blur="vm.textInputHasFocus(false)"
-									aria-label="Title"
-									tdr-focus="true"
-									required
-									placeholder="Title",
-									ng-click="vm.titleInputClick($event)")
+					label#issueTitle(ng-if="vm.data") {{vm.issueData.title}}
 
-						label#issueTitle(ng-if="vm.data") {{vm.issueData.title}}
+				span(flex="5")
+				md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
+					md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
+					md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
 
-					span(flex="5")
-					md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
-						md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
-						md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
+	// Info
+	.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
+		div(flex="10")
+			md-icon.angular-material-icons#issueStatusIcon(
+				style="color:{{vm.issueData.statusIcon.colour}}") {{vm.issueData.statusIcon.icon}}
 
-		// Info
-		.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
-			div(flex="10")
-				md-icon.angular-material-icons#issueStatusIcon(
-					style="color:{{vm.issueData.statusIcon.colour}}") {{vm.issueData.statusIcon.icon}}
+		.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
+			label {{vm.data.owner}}
+			label {{vm.data.timeStamp}}
 
-			.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
-				label {{vm.data.owner}}
-				label {{vm.data.timeStamp}}
+	// Status
+	.issueItemContainer#issueAdditional(layout="column", ng-if="vm.showAdditional")
+		div(layout="row")
+			md-input-container.issueItemStatus(flex)
+				label Priority
+				md-select(
+					id="issuePriority"
+					ng-model="vm.issueData.priority"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangePriority()")
+			
+					md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
+			
+			md-input-container.issueItemStatus(flex)
+				label Status
+				md-select(
+					id="issueStatus"
+					ng-model="vm.issueData.status"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeStatus()")
+					
+					md-option(
+						ng-repeat="status in vm.statuses"
+						ng-disabled="vm.disableStatusOption(status)"
+						value="{{status.value}}") {{status.label}}
 
-		// Status
-		.issueItemContainer#issueAdditional(layout="column", ng-if="vm.showAdditional")
-			div(layout="row")
-				md-input-container.issueItemStatus(flex)
-					label Priority
-					md-select(
-						id="issuePriority"
-						ng-model="vm.issueData.priority"
-						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canChangePriority()")
-				
-						md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
-				
-				md-input-container.issueItemStatus(flex)
-					label Status
-					md-select(
-						id="issueStatus"
-						ng-model="vm.issueData.status"
-						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canChangeStatus()")
-						
-						md-option(
-							ng-repeat="status in vm.statuses"
-							ng-disabled="vm.disableStatusOption(status)"
-							value="{{status.value}}") {{status.label}}
+		div(layout="row")
+			md-input-container(flex)
+				label Assign
+				md-select(
+					id="issueAssign"
+					ng-model="vm.issueData.assigned_roles[0]"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeAssigned()")
 
-			div(layout="row")
-				md-input-container(flex)
-					label Assign
-					md-select(
-						id="issueAssign"
-						ng-model="vm.issueData.assigned_roles[0]"
-						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canChangeAssigned()")
+					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
+			
+			md-input-container(flex)
+				label Type
+				md-select(
+					id="issueType"
+					ng-model="vm.issueData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
-						md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
-				
-				md-input-container(flex)
-					label Type
-					md-select(
-						id="issueType"
-						ng-model="vm.issueData.topic_type"
-						ng-change="vm.statusChange()"
-						ng-disabled="!vm.canChangeType()")
-						
-						md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+	.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
+		div(layout="column", layout-align="start", flex)
+			div(ng-if="!vm.data", flex, layout="column")
+				md-input-container#descriptionText()
+					label Description
+					textarea(
+						ng-model="vm.issueData.desc"
+						ng-disabled="vm.data"
+						ng-focus="vm.textInputHasFocus(true)"
+						ng-blur="vm.textInputHasFocus(false)")
 
-		.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
-			div(layout="column", layout-align="start", flex)
-				div(ng-if="!vm.data", flex, layout="column")
-					md-input-container#descriptionText()
-						label Description
+			#issueDescription(
+				ng-if="vm.data"
+				layout="column"
+				ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
+
+				div(layout='row', layout-align="space-between", flex)
+					label(
+						ng-if="!vm.editingDescription"
+						ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
+					md-input-container(flex, ng-if="vm.editingDescription")
 						textarea(
 							ng-model="vm.issueData.desc"
-							ng-disabled="vm.data"
+							aria-label="Description"
+							tdr-focus="true"
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
+					
+					.issueTextActions(layout="row", ng-if="vm.canEditDescription")
+						md-button.md-icon-button.md-accent(
+							aria-label="Edit Description Toggle"
+							ng-click="vm.toggleEditDescription($event)")
 
-				#issueDescription(
-					ng-if="vm.data"
-					layout="column"
-					ng-click="vm.showViewpoint($event, vm.issueData.viewpoint)")
+							md-tooltip(
+								ng-if="!vm.editingDescription"
+								md-direction="bottom") Edit Description
+							md-icon.angular-material-icons(
+								ng-if="!vm.editingDescription"
+								style="color:{{vm.editCommentColor}}") mode_edit
 
-					div(layout='row', layout-align="space-between", flex)
-						label(
-							ng-if="!vm.editingDescription"
-							ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
-						md-input-container(flex, ng-if="vm.editingDescription")
-							textarea(
-								ng-model="vm.issueData.desc"
-								aria-label="Description"
-								tdr-focus="true"
-								ng-focus="vm.textInputHasFocus(true)"
-								ng-blur="vm.textInputHasFocus(false)")
-						
-						.issueTextActions(layout="row", ng-if="vm.canEditDescription")
-							md-button.md-icon-button.md-accent(
-								aria-label="Edit Description Toggle"
-								ng-click="vm.toggleEditDescription($event)")
+							md-tooltip(
+								ng-if="vm.editingDescription"
+								md-direction="bottom") Save Description
+							md-icon.angular-material-icons(
+								ng-if="vm.editingDescription"
+								style="color:{{vm.editCommentColor}}") save
+							
+			
+			.issueThumbnail(
+				ng-if="vm.issueData.descriptionThumbnail"
+				ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
+				img.issueThumbnailImage(ng-src="{{vm.issueData.descriptionThumbnail}}")
 
-								md-tooltip(
-									ng-if="!vm.editingDescription"
-									md-direction="bottom") Edit Description
-								md-icon.angular-material-icons(
-									ng-if="!vm.editingDescription"
-									style="color:{{vm.editCommentColor}}") mode_edit
 
-								md-tooltip(
-									ng-if="vm.editingDescription"
-									md-direction="bottom") Save Description
-								md-icon.angular-material-icons(
-									ng-if="vm.editingDescription"
-									style="color:{{vm.editCommentColor}}") save
-								
-				
-				.issueThumbnail(
-					ng-if="vm.issueData.descriptionThumbnail"
-					ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
-					img.issueThumbnailImage(ng-src="{{vm.issueData.descriptionThumbnail}}")
-
-	
-	#descriptionAndComments(flex, , ng-if="vm.issueData.comments.length > 0")
+	#descriptionAndComments(flex, ng-if="vm.issueData.comments.length > 0")
 		md-divider
 
 		// Comments
@@ -240,19 +238,26 @@ div.heightFix(
 
 md-divider
 
-
-
 .issueItemContainer#issueFooterButtons(layout="column")
 
-	.issueThumbnail.fillHeight(layout="row", layout-align="center", ng-if="vm.commentThumbnail", ng-click="vm.showThumbnail()")
-		img.issueThumbnailImage(id="commentThumbnail" ng-src="{{vm.commentThumbnail}}")
+	.issueThumbnail.fillHeight(
+		layout="row"
+		layout-align="center"
+		ng-if="vm.commentThumbnail"
+		ng-click="vm.showThumbnail()")
+
+		img.issueThumbnailImage(
+			id="commentThumbnail"
+			ng-src="{{vm.commentThumbnail}}")
 	
-	div(layout="row")
+	div(layout="row" flex="100")
 		// New comment
-		.issueItemContainer#issueNewComment(layout="row", layout-align="start center", flex="100" ng-if="vm.data")
+		.issueItemContainer#issueNewComment(
+			layout="row"
+			layout-align="start center"
+			flex="100"
+			ng-if="vm.data")
 			
-			//- md-input-container(flex md-no-float class="md-block")
-			//- 	label.issuesLabel
 			textarea(
 				flex="100"
 				placeholder="{{vm.getCommentPlaceholderText()}}"
@@ -290,14 +295,7 @@ md-divider
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
-	
-	//span(
-		layout="row" 
-		layout-align="center center"
-		ng-if="vm.submitDisabled && vm.checkCanComment" 
-		style="color: #9e9e9e;") {{ vm.disabledReason }}
-
-
+		
 // Whilst issue is loading
 div.heightFix(
 	ng-if="!vm.modelSettings || !vm.issueData"

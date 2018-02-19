@@ -206,9 +206,7 @@
 
 		vm.selectIssue = function (issue) {
 			IssuesService.setSelectedIssue(issue);
-			$timeout(function() {
-				$scope.$broadcast("$md-resize");
-			});	
+			angular.element(window).triggerHandler("resize");
 		};
 
 		vm.isSelectedIssue = function(issue) {

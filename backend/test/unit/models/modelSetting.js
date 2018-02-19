@@ -68,12 +68,6 @@ describe('Model Settings', function(){
 		it('should update properties', function(){
 
 			let props = {
-
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: "metre",
 				topicTypes: ['For info', 'VR'],
 				code: '09ABC'
@@ -81,11 +75,6 @@ describe('Model Settings', function(){
 			};
 
 			let expectedReturn = {
-				mapTile: {
-					lat: 123,
-					lon: 234,
-					y: 5
-				},
 				unit: "metre",
 				topicTypes: [{
 					label: 'For info',

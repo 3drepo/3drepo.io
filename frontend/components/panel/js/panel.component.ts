@@ -55,7 +55,7 @@ class PanelController implements ng.IController {
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
-		this.itemGap = 20,
+		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
 
@@ -74,7 +74,7 @@ class PanelController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
-			//console.log(newValue, oldValue);
+			// console.log(newValue, oldValue);
 			if (oldValue.length && newValue.length) {
 				for (let i = 0; i < newValue.length; i ++) {
 
@@ -144,7 +144,7 @@ class PanelController implements ng.IController {
 		/*
 		* Watch for screen resize
 		*/
-		angular.element(this.$window).bind("resize", () => {
+		angular.element(window as any).bind("resize", () => {
 			this.resize();
 		});
 
@@ -289,7 +289,9 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
-		this.$timeout().then(() => { this.$scope.$broadcast("$md-resize") });
+		this.$timeout().then(() => {
+			angular.element(window as any).triggerHandler("resize");
+		});
 	}
 
 }

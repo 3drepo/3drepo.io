@@ -37,7 +37,8 @@
 			config = {},
 			numIssues = 0,
 			availableJobs = [],
-			updatedIssue = null;
+			updatedIssue = null,
+			groupsCache = {};
 
 		var initPromise = $q.defer();
 
@@ -531,13 +532,13 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			
+			TreeService.clearCurrentlySelected();
+
 			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
-				// TODO: need to propagate state change to UI
 			}
-			TreeService.showAllTreeNodes();
+			TreeService.showAllTreeNodes(false);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
@@ -552,9 +553,6 @@
 				TreeService.showProgress = false;
 				handleShowIssue(issue);
 			}
-
-			
-
 		}
 
 		function handleShowIssue(issue) {
@@ -587,6 +585,8 @@
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
+
+			TreeService.updateModelState(TreeService.allNodes[0]);
 		}
 
 		function showMultiIds(issue) {
@@ -596,15 +596,24 @@
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
-					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
+					var highlightPromise;
 
-					var highlightPromise = APIService.get(highlightedGroupUrl)
-						.then(function (response) {
-							return handleHighlights(response.data.objects);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting the highlights: ", error);
-						});
+					if(groupsCache[highlightedGroupId]) {
+						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
+					} else {
+						var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
+
+						highlightPromise = APIService.get(highlightedGroupUrl)
+							.then(function (response) {
+								groupsCache[highlightedGroupId] = response.data.objects;
+								return handleHighlights(response.data.objects);
+							})
+							.catch(function(error){
+								console.error("There was a problem getting the highlights: ", error);
+							});
+					}
+
+					
 
 					promises.push(highlightPromise);
 
@@ -612,48 +621,65 @@
 				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
-					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+					var hiddenPromise;
 
-					var hiddenPromise = APIService.get(hiddenGroupUrl)
-						.then(function (response) {
-							return handleHidden(response.data.objects);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting visibility: ", error);
-						});
+					if(groupsCache[hiddenGroupId]) {
 
+						highlightPromise = handleHidden(groupsCache[hiddenGroupId]);
+					} else {
+						var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+
+						hiddenPromise = APIService.get(hiddenGroupUrl)
+							.then(function (response) {
+								groupsCache[hiddenGroupId] = response.data.objects;
+								return handleHidden(response.data.objects);
+							})
+							.catch(function(error){
+								console.error("There was a problem getting visibility: ", error);
+							});
+
+					}
+
+					
 					promises.push(hiddenPromise);
 					
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
-				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+				var handleTreePromise;
 
-				var handleTreePromise = APIService.get(groupUrl)
-					.then(function (response) {
-						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
-							response.data.hiddenObjects = null;
-						}
-						return handleTree(response);
-					})
-					.catch(function(error){
-						console.error("There was a problem getting the highlights: ", error);
-					});
+				if (groupsCache[groupId]) {
+					handleTreePromise = handleTree(groupsCache[groupId]);
+				} else {
 
+					var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+
+					handleTreePromise = APIService.get(groupUrl)
+						.then(function (response) {
+							if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
+								response.data.hiddenObjects = null;
+							}
+							groupsCache[groupId] = response;
+							return handleTree(response);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting the highlights: ", error);
+						});
+
+				}
+				
 				promises.push(handleTreePromise);
 
 			}
 
 			return Promise.all(promises);
+
 		}
 
 		function handleHighlights(objects) {
 
 			TreeService.getMap()
 				.then(function(treeMap){
-
-					// show currently hidden nodes
-					TreeService.clearCurrentlySelected();
 
 					for (var i = 0; i < objects.length; i++) {
 						var obj = objects[i];
@@ -672,7 +698,9 @@
 							}
 						}
 					}
-			
+
+					angular.element(window).triggerHandler("resize");
+					
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -685,17 +713,13 @@
 				.then(function(treeMap){
 
 					if (objects) {
-						objects.forEach(function(obj){
-							//var account = obj.account;
-							//var model = obj.model;
-							//var key = account + "@" + model;
-
-							var nodeId = treeMap.sharedIdToUid[obj.shared_id];
-							TreeService.hideTreeNodes([TreeService.getNodeById(nodeId)], "invisible", false);
-
-						});
+						var hiddenNodes = [];
+						for (var i = 0; i < objects.length; i++) {
+							// Make a list of nodes to hide
+							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+						}
+						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
-
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -772,7 +796,7 @@
 
 			var deferred = $q.defer();
 			var issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
-		
+
 			APIService.get(issueUrl).then(function(res){
 
 				res.data = cleanIssue(res.data);
