@@ -107,6 +107,20 @@ class AccountProfileController implements ng.IController {
 			});
 	}
 
+	public canUpdate() {
+
+		const valid = this.firstNameNew &&
+				this.lastNameNew &&
+				this.emailNew;
+
+		const notSame = this.firstName !== this.firstNameNew ||
+					this.lastName !== this.lastNameNew ||
+					this.email !== this.emailNew;
+
+		return valid && notSame;
+
+	}
+
 	/**
 	 * Toggle showing of user info
 	 */

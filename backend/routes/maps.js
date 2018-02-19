@@ -26,14 +26,16 @@ router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
 
 function getOSMTile(req, res, next){
 	//TODO: we may want to ensure the model has access to tiles
-	const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
-	systemLogger.logInfo("Fetching map tile: " + url);
-	httpsGet.get(url).then(image =>{
+//	const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+	const domain = "a.tile.openstreetmap.org";
+	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png"
+	systemLogger.logInfo("Fetching osm map tile: " + uri);
+	httpsGet.get(domain, uri).then(image =>{
 		res.writeHead(200, {'Content-Type': 'image/png' });
 		res.write(image);
 		res.end();
 	}).catch(err => {
-		systemLogger.logError(err);
+		systemLogger.logError(JSON.stringify(err));
 		if(err.message){
 			res.status(500).json({ message: err.message});
 		} else if (err.resCode){
