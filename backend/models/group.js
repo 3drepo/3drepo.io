@@ -98,6 +98,9 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 
 			for (let i = 0; i < group.objects.length; i++) {
 				const obj = group.objects[i];
+				if (obj.ifc_guid) {
+					groupObjectsMap[obj.ifc_guid] = obj;
+				}
 				if (obj.shared_id) {
 					// Convert sharedIds to IFC Guids
 					ifcGuidPromises.push(
