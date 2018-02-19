@@ -397,6 +397,6 @@ export class StateManagerService {
 
 }
 
-export const TemplateServiceModule = angular
+export const StateManagerServiceModule = angular
 	.module("3drepo")
 	.service("StateManager", StateManagerService);

@@ -50,6 +50,6 @@ function ThemeConfig($mdThemingProvider) {
 
 }
 
-export const TemplateServiceModule = angular
+export const ThemeConfigModule = angular
 	.module("3drepo")
 	.config(["$mdThemingProvider", ThemeConfig]);

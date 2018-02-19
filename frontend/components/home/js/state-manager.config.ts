@@ -130,7 +130,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$urlRouterProvider.otherwise("");
 }
 
-export const TemplateServiceModule = angular
+export const StateManagerConfigModule = angular
 	.module("3drepo")
 	.config([
 		"$stateProvider",

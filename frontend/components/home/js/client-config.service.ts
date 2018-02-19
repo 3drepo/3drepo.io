@@ -61,6 +61,6 @@ export class ClientConfigService {
 
 }
 
-export const AuthServiceModule = angular
+export const ClientConfigServiceModule = angular
 	.module("3drepo")
 	.service("ClientConfigService", ClientConfigService);
