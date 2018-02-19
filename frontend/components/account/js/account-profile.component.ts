@@ -117,7 +117,6 @@ class AccountProfileController implements ng.IController {
 					this.lastName !== this.lastNameNew ||
 					this.email !== this.emailNew;
 
-		console.log("canUpdate", valid, notSame);
 		return valid && notSame;
 
 	}

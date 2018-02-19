@@ -115,7 +115,6 @@ class AccountModelSettingController implements ng.IController {
 							this.referencePoints.position.x = reference.position[0];
 							this.referencePoints.position.z = -1 * reference.position[1];
 							this.referencePoints.position.y = -1 * reference.position[2];
-							console.log("Set referencePoint.position.y ", -1 * reference.position[2])
 						}
 					}
 
@@ -232,7 +231,7 @@ class AccountModelSettingController implements ng.IController {
 				}];
 			} else {
 				data.surveyPoints[0].position = this.getPosition();
-				console.log("getPosition", data.surveyPoints[0].position)
+				console.log("getPosition", data.surveyPoints[0].position);
 			}
 		}
 
