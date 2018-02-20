@@ -566,6 +566,10 @@
 			}
 		}
 
+		function showOrthogonalViewPrompt() {
+			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
+		}
+
 		function handleShowIssue(issue) {
 			var issueData;
 			if(issue.viewpoint.position.length > 0) {
@@ -580,6 +584,10 @@
 				};
 				
 				ViewerService.setCamera(issueData);
+
+				if ("orthogonal" === issue.viewpoint.type) {
+					showOrthogonalViewPrompt();
+				}
 
 				// TODO: Use ViewerService
 				// Set the clipping planes
