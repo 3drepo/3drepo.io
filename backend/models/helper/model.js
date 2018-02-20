@@ -859,6 +859,9 @@ function getModelProperties(account, model, branch, rev, username){
 						model: ref.project
 					});
 				})
+				.catch(err => {
+					return Promise.resolve();
+				})
 			);
 		});
 
@@ -1751,12 +1754,17 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			}
 
 			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username).then(obj => {
+				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
+				.then(obj => {
 					return Promise.resolve({
 						data: obj.data,
 						account: ref.owner,
 						model: ref.project
 					});
+				})
+				.catch(err => {
+					//Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+					return Promise.resolve();
 				})
 			);
 		});
