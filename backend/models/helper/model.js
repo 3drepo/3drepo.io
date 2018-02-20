@@ -323,6 +323,18 @@ function createAndAssignRole(modelName, account, username, data) {
 			setting.timestamp = new Date();
 		}
 
+		if(data.surveyPoints) {
+			setting.surveyPoints = data.surveyPoints;
+		}
+
+		if(data.angleFromNorth) {
+			setting.angleFromNorth = data.angleFromNorth;
+		}
+
+		if(data.elevation) {
+			setting.elevation = data.elevation;
+		}
+
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
@@ -432,7 +444,18 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	let type = 'sample';
 
 	let data = {
-		desc, type, project, unit: 'mm', subModels
+		desc, 
+		type, 
+		project, 
+		unit: 'mm', 
+		subModels,
+		surveyPoints: [
+			{
+				latLong: [48.92454, 2.02831],
+				position: [ 0, 0, 0],
+			}
+		],
+		angleFromNorth: 145,
 	};
 
 	return createAndAssignRole(modelName, account, username, data).then(data => {
