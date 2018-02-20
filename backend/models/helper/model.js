@@ -1831,7 +1831,6 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 }
 
 function getMetadata(account, model, id){
-	
 
 	let projection = {
 		shared_id: 0,

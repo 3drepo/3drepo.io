@@ -62,7 +62,7 @@
     "xml2js": "0.4.17",
     "xmlbuilder": "8.2.2",
     "pm2": "^2.9.1",
-    "yauzl": "git://github.com/3drepo/yauzl.git"
+    "yauzl": "2.9.1"
   },
   "devDependencies": {
     "chai": "4.1.2",

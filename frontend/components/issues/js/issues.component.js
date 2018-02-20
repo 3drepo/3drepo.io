@@ -463,7 +463,7 @@
 				.then(function(data){
 
 					vm.importingBCF = false;
-					vm.allIssues = (data === "") ? [] : data;
+					IssuesService.state.allIssues = (data === "") ? [] : data;
 
 				})
 				.catch(function(error){
