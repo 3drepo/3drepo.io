@@ -1063,8 +1063,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	}
 
-	const statusExists = !forceStatusChanged && 
-							data.hasOwnProperty("status");
+	const statusExists = !forceStatusChanged && data.hasOwnProperty("status");
 
 	if(statusExists) {
 
@@ -1080,8 +1079,8 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 			if(statusHasChanged) {
 
 				const canChangeStatus = isAdmin || 
-										hasOwnerJob || 
-										(hasAssignedJob && data.status !== statusEnum.CLOSED);
+					hasOwnerJob ||
+					(hasAssignedJob && data.status !== statusEnum.CLOSED);
 				
 				if (canChangeStatus) {
 
@@ -1475,12 +1474,12 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component = [];
 							}
 							if (groupObject.ifc_guid) {
-							viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component.push({
-								"@": {
-									ifcGuid: groupObject.ifc_guid
-								},
-								OriginatingSystem: "3D Repo"
-							});
+								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component.push({
+									"@": {
+										ifcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
 							}
 						}
 					}
@@ -1769,6 +1768,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					vpGuids.forEach(guid => {
 
+						let groupPromises = [];
+
 						if(!viewpoints[guid].viewpointXml){
 							return;
 						}
@@ -1776,7 +1777,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						let extras = {};
 						let vpXML = viewpoints[guid].viewpointXml;
 
-						extras.Components = _.get(vpXML, "VisualizationInfo.Components");
 						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
 						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
@@ -1857,7 +1857,79 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							vp.type = "orthogonal";
 						}
 
-						issue.viewpoints.push(vp);
+						if (_.get(vpXML, "VisualizationInfo.Components")) {
+							const groupDbCol = {
+								account: account,
+								model: model
+							};
+
+							let vpComponents = _.get(vpXML, "VisualizationInfo.Components");
+
+							for (let i = 0; i < vpComponents.length; i++) {
+								if (vpComponents[i].ComponentSelection) {
+									let highlightedObjects = [];
+
+									for (let j = 0; j < vpComponents[i].ComponentSelection.length; j++) {
+										for (let k = 0; k < vpComponents[i].ComponentSelection[j].Component.length; k++) {
+											highlightedObjects.push({
+												account: account,
+												model: model,
+												ifc_guid: vpComponents[i].ComponentSelection[j].Component[k]['@'].ifcGuid
+											});
+										}
+									}
+
+									if (highlightedObjects.length > 0) {
+										let highlightedObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: highlightedObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
+												vp.highlighted_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+								}
+								if (vpComponents[i].ComponentVisibility) {
+									let hiddenObjects = [];
+
+									for (let j = 0; j < vpComponents[i].ComponentVisibility.length; j++) {
+										if (vpComponents[i].ComponentVisibility[j]['@'].DefaultVisibility) {
+											for (let k = 0; k < vpComponents[i].ComponentVisibility[j].Component.length; k++) {
+												hiddenObjects.push({
+													account: account,
+													model: model,
+													ifc_guid: vpComponents[i].ComponentVisibility[j].Component[k]['@'].ifcGuid
+												});
+											}
+										} else {
+											systemLogger.logError("ComponentVisibility where DefaultVisibility is false currently unsupported for BCF import!");
+										}
+									}
+
+									if (hiddenObjects.length > 0) {
+										let hiddenObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: hiddenObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
+												vp.hidden_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+								}
+							}
+						}
+
+						Promise.all(groupPromises).then(() => {
+							issue.viewpoints.push(vp);
+						});
 					});
 
 					//take the first screenshot as thumbnail

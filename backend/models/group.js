@@ -189,19 +189,22 @@ groupSchema.methods.updateAttrs = function(data){
 	if (data.objects) {
 		for (let i = 0; i < data.objects.length; i++) {
 			const obj = data.objects[i];
-			if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-				obj.id = utils.stringToUUID(obj.id);
-			}
-			ifcGuidPromises.push(
-				groupSchema.statics.uuidToIfcGuids(obj).then(ifcGuids => {
-					if (ifcGuids && ifcGuids.length > 0) {
-						for (let i = 0; i < ifcGuids.length; i++) {
-							obj.ifc_guid = ifcGuids[i];
-							delete obj.shared_id;
+
+			if (obj.shared_id) {
+				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
+					obj.id = utils.stringToUUID(obj.id);
+				}
+				ifcGuidPromises.push(
+					groupSchema.statics.uuidToIfcGuids(obj).then(ifcGuids => {
+						if (ifcGuids && ifcGuids.length > 0) {
+							for (let i = 0; i < ifcGuids.length; i++) {
+								obj.ifc_guid = ifcGuids[i];
+								delete obj.shared_id;
+							}
 						}
-					}
-				})
-			);
+					})
+				);
+			}
 		}
 	}
 
@@ -223,7 +226,6 @@ groupSchema.statics.createGroup = function(dbCol, data){
 		account: dbCol.account, 
 		model: dbCol.model
 	});
-
 
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.updateAttrs(data);
