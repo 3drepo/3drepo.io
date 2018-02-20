@@ -635,16 +635,16 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.owner = data.owner;
 		issue.status = data.status;
 		issue.topic_type = data.topic_type;
-		if(data.desc && data.desc !== "")
-		{
+		if (data.desc && data.desc !== "") {
 			issue.desc = data.desc;
-		}
-		else
-		{
+		} else {
 			issue.desc = "(No Description)";
 		}
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
+		if (data.due_date) {
+			issue.due_date = Date.parse(data.due_date);
+		}
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
@@ -1065,7 +1065,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	const statusExists = !forceStatusChanged && data.hasOwnProperty("status");
 
-	if(statusExists) {
+	if (statusExists) {
 
 		const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
 		if (invalidStatus) {
