@@ -1805,11 +1805,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 						let scale = 1;
 						let unit = _.get(settings, "properties.unit");
-						if(unit === "cm"){
+						if (unit === "dm") {
+							scale = 10;
+						} else if (unit === "cm") {
 							scale = 100;
-						} else if (unit === "mm"){
+						} else if (unit === "mm") {
 							scale = 1000;
-						} else if (unit === "ft"){
+						} else if (unit === "ft") {
 							scale = 3.28084;
 						}	
 
