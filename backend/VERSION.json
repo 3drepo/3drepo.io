@@ -6,5 +6,9 @@
   "navis" :{
 	"current" : "2.8.0",
 	"supported": []
+  },
+  "unitydll" : {
+	"current": "2.8.0",
+	"supported" : []
   }
 }
