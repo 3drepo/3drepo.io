@@ -23,13 +23,13 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"APIService", "TreeService", "AuthService", "MultiSelectService",
+		"APIService", "TreeService", "AuthService", "MultiSelectService", "ClipService",
 		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		APIService, TreeService, AuthService, MultiSelectService,
+		APIService, TreeService, AuthService, MultiSelectService, ClipService,
 		ViewerService, $timeout, $filter
 	) {
 
@@ -579,7 +579,9 @@
 					model: issue.model
 				};
 
-				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				ClipService.updateClippingPlane(issueData);
+
+				//EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
 
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
