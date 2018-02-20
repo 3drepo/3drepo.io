@@ -778,7 +778,8 @@
 					while (nodePath && nodePath.length > 0) {
 						var parentNodeId = nodePath.shift();
 						var parentNode = TreeService.getNodeById(parentNodeId);
-						if (node[property] === parentNode[property]) {
+						if ((node[property] && node[property] === parentNode[property]) ||
+								(!node[property] && 1 === nodePath.length)) {
 							prunedNodesMap[parentNode._id] = {
 								account: parentNode.account,
 								id: parentNode._id,
@@ -804,11 +805,6 @@
 		 * @returns groupData	Object with list of nodes for group creation.
 		 */
 		function createGroupData(nodes) {
-			/*var groupNodesLimit = 25000;
-			if (nodes && nodes.length > groupNodesLimit) {
-				nodes.length = groupNodesLimit;
-				console.error("Upper limit of " + groupNodesLimit + " exceeded! Saved viewpoint will be incomplete.");
-			}*/
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
