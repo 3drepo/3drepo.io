@@ -1929,6 +1929,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 								if (vpComponents[i].Coloring) {
 									vp.extras.Coloring = vpComponents[i].Coloring;
+									systemLogger.logInfo("Colouring not fully supported for BCF import!");
+								}
+
+								if (vpComponents[i].ViewSetupHints) {
+									// TODO: Full ViewSetupHints support -
+									// SpaceVisible should correspond to !hideIfc
+									//console.log(vpComponents[i].ViewSetupHints);
+									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
+									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
 								}
 							}
 						}
