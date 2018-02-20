@@ -1733,7 +1733,9 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
 						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
-						issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
+						if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
+							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
+						}
 						issue.extras.AssignedTo = _.get(xml, "Markup.Topic[0].AssignedTo[0]._");
 						issue.desc = _.get(xml, "Markup.Topic[0].Description[0]._");
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
