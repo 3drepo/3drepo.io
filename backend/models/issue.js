@@ -1421,7 +1421,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 
 		if (_.get(vp, "extras.Components")) {
 			// TODO: Consider if extras.Components should only be used if groups don't exist
-			// TODO: Could potentially check each sub-property (ViewSetupHints, ComponentSelection, etc.
+			// TODO: Could potentially check each sub-property (ViewSetupHints, Selection, etc.
 			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
 		}
 
@@ -1437,12 +1437,12 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
 								viewpointXmlObj.VisualizationInfo.Components = {};
 							}
-							if (!viewpointXmlObj.VisualizationInfo.Components.ComponentSelection) {
-								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection = {};
-								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection.Component = [];
+							if (!viewpointXmlObj.VisualizationInfo.Components.Selection) {
+								viewpointXmlObj.VisualizationInfo.Components.Selection = {};
+								viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
 							}
 							if (groupObject.ifc_guid) {
-								viewpointXmlObj.VisualizationInfo.Components.ComponentSelection.Component.push({
+								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
 									"@": {
 										ifcGuid: groupObject.ifc_guid
 									},
@@ -1465,16 +1465,16 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
 								viewpointXmlObj.VisualizationInfo.Components = {};
 							}
-							if (!viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility) {
-								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility = {
+							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
 										"@": {
 											DefaultVisibility: true
 										}
 									};
-								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component = [];
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component = [];
 							}
 							if (groupObject.ifc_guid) {
-								viewpointXmlObj.VisualizationInfo.Components.ComponentVisibility.Component.push({
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component.push({
 									"@": {
 										ifcGuid: groupObject.ifc_guid
 									},
@@ -1866,15 +1866,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							let vpComponents = _.get(vpXML, "VisualizationInfo.Components");
 
 							for (let i = 0; i < vpComponents.length; i++) {
-								if (vpComponents[i].ComponentSelection) {
+
+								if (vpComponents[i].Selection) {
 									let highlightedObjects = [];
 
-									for (let j = 0; j < vpComponents[i].ComponentSelection.length; j++) {
-										for (let k = 0; k < vpComponents[i].ComponentSelection[j].Component.length; k++) {
+									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
+										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
 											highlightedObjects.push({
 												account: account,
 												model: model,
-												ifc_guid: vpComponents[i].ComponentSelection[j].Component[k]['@'].ifcGuid
+												ifc_guid: vpComponents[i].Selection[j].Component[k]['@'].ifcGuid
 											});
 										}
 									}
@@ -1893,20 +1894,21 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										);
 									}
 								}
-								if (vpComponents[i].ComponentVisibility) {
+
+								if (vpComponents[i].Visibility) {
 									let hiddenObjects = [];
 
-									for (let j = 0; j < vpComponents[i].ComponentVisibility.length; j++) {
-										if (vpComponents[i].ComponentVisibility[j]['@'].DefaultVisibility) {
-											for (let k = 0; k < vpComponents[i].ComponentVisibility[j].Component.length; k++) {
+									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										if (vpComponents[i].Visibility[j]['@'].DefaultVisibility) {
+											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
 												hiddenObjects.push({
 													account: account,
 													model: model,
-													ifc_guid: vpComponents[i].ComponentVisibility[j].Component[k]['@'].ifcGuid
+													ifc_guid: vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid
 												});
 											}
 										} else {
-											systemLogger.logError("ComponentVisibility where DefaultVisibility is false currently unsupported for BCF import!");
+											systemLogger.logError("Visibility where DefaultVisibility is false currently unsupported for BCF import!");
 										}
 									}
 
@@ -1923,6 +1925,10 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											})
 										);
 									}
+								}
+
+								if (vpComponents[i].Coloring) {
+									vp.extras.Coloring = vpComponents[i].Coloring;
 								}
 							}
 						}
