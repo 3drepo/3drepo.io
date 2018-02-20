@@ -51,6 +51,8 @@ class SignupController implements ng.IController {
 	private legalText;
 	private legalTitle;
 	private registerErrorMessage;
+	private emailInvalid;
+	private allowedPhone;
 
 	constructor(
 		private $scope,
@@ -65,6 +67,7 @@ class SignupController implements ng.IController {
 	}
 
 	public $onInit() {
+		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
 		this.addPasswordStrengthLib();
 
@@ -90,6 +93,8 @@ class SignupController implements ng.IController {
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
+
+		this.emailInvalid = false;
 
 		this.jobTitles = [
 			"Director",
@@ -183,7 +188,12 @@ class SignupController implements ng.IController {
 			if (this.newUser.password !== undefined && window.zxcvbn) {
 				const result = zxcvbn(this.newUser.password);
 				this.passwordResult = result;
-				this.passwordStrength = this.getPasswordStrength(result.score);
+				this.passwordStrength = this.getPasswordStrength(this.newUser.password, result.score);
+			}
+			if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
+				this.invalidatePhoneNumber();
+			} else {
+				this.validatePhoneNumber();
 			}
 		}, true);
 
@@ -193,22 +203,53 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
+
+		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
+			if (error.email) {
+				this.emailInvalid = true;
+			}
+		}, true);
 	}
 
-	public getPasswordStrength(score) {
+	public getPasswordStrength(password, score) {
+		if (password.length < 8) {
+			this.invalidatePassword();
+			return "Must be at least 8 characters";
+		}
 		switch (score) {
 		case 0:
+			this.invalidatePassword();
 			return "Very Weak";
 		case 1:
+			this.invalidatePassword();
 			return "Weak";
 		case 2:
+			this.validatePassword();
 			return "OK";
 		case 3:
+			this.validatePassword();
 			return "Strong";
 		case 4:
+			this.validatePassword();
 			return "Very Strong";
 		}
 		return "Very Weak";
+	}
+
+	public invalidatePassword() {
+		this.$scope.signup.password.$setValidity("required", false);
+	}
+
+	public validatePassword() {
+		this.$scope.signup.password.$setValidity("required", true);
+	}
+
+	public invalidatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", false);
+	}
+
+	public validatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
@@ -274,7 +315,6 @@ class SignupController implements ng.IController {
 		let	allowRegister = true;
 		const formatRegex = this.ClientConfigService.usernameRegExp;
 		const allowedFormat = new RegExp(formatRegex); // English letters, numbers, underscore, not starting with number
-		const allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
 		if (
 			(!this.isDefined(this.newUser.username)) ||
@@ -288,7 +328,11 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.country))
 
 		) {
-			this.registerErrorMessage = "Please fill all required fields";
+			if (this.emailInvalid) {
+				this.registerErrorMessage = "Email is invalid";
+			} else {
+				this.registerErrorMessage = "Please fill all required fields";
+			}
 			return;
 		}
 
@@ -298,19 +342,19 @@ class SignupController implements ng.IController {
 			return;
 		}
 
-		if ( this.newUser.phoneNo && !allowedPhone.test(this.newUser.phoneNo) ) {
+		if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
 			this.registerErrorMessage = "Phone number can be blank, or made of numbers and +- characters only";
 			return;
 		}
 
-		if ( !this.newUser.password || this.newUser.password.length < 9 ) {
-			this.registerErrorMessage = "Password must be longer than 8 characters";
+		if ( !this.newUser.password || this.newUser.password.length < 8 ) {
+			this.registerErrorMessage = "Password must be at least 8 characters long";
 			return;
 		}
 
 		if (this.passwordResult && this.passwordResult.score < 2) {
 			console.log(this.passwordResult.feedback.suggestions);
-			this.registerErrorMessage = "Password is weak; " + this.passwordResult.feedback.suggestions.join(" ");
+			this.registerErrorMessage = "Password is too weak; " + this.passwordResult.feedback.suggestions.join(" ");
 			return;
 		}
 
