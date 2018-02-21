@@ -456,7 +456,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 
 };
 
-schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId){
+schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids){
 	
 
 	let zip = archiver.create("zip");
@@ -471,7 +471,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return this.findByModelName({account, model}, username, branch, revId, projection, noClean);
+		return this.findByModelName({account, model}, username, branch, revId, projection, noClean, ids);
 
 	}).then(issues => {
 
