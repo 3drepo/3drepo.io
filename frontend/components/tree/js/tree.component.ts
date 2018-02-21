@@ -30,7 +30,7 @@ class TreeController implements ng.IController {
 	];
 
 	public showProgress: boolean; // in pug
-
+	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
@@ -171,14 +171,17 @@ class TreeController implements ng.IController {
 					this.progressInfo = "Filtering tree for objects";
 
 					this.searching = true;
-					this.TreeService.search(newValue)
+
+					this.TreeService.search(newValue, this.revision)
 						.then((json) => {
 
 							if (!this.showFilterList) {
 								this.searching = false;
 								this.showFilterList = true;
 								this.showProgress = false;
-								this.nodes = json.data;
+								this.nodes = json.data.filter((node) => {
+									return this.TreeService.getNodeById(node._id) !== undefined;
+								});
 								if (this.nodes.length > 0) {
 									this.filterItemsFound = true;
 									for (let i = 0; i < this.nodes.length; i ++) {
@@ -447,12 +450,14 @@ class TreeController implements ng.IController {
 			this.currentFilterItemSelected = item;
 		}
 
-		const selectedNode = this.nodes[item.index];
+		const selectedComponentNode = this.nodes[item.index];
 
-		if (selectedNode) {
+		if (selectedComponentNode) {
 			// TODO: This throws a unity error when filtering
-			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
-			this.TreeService.updateModelState(selectedNode);
+
+			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
+			this.TreeService.selectNode(serviceNode, this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.updateModelState(serviceNode);
 		}
 
 	}

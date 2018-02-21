@@ -318,8 +318,13 @@ export class TreeService {
 		}
 	}
 
-	public search(searchString: string) {
-		const url = `${this.baseURL}searchtree.json?searchString=${searchString}`;
+	public search(searchString: string, revision: string) {
+		let url;
+		if (!revision) {
+			url = `${this.baseURL}searchtree.json?searchString=${searchString}`;
+		} else {
+			url = `${this.baseURL}searchtree.json?searchString=${searchString}&rev=${revision}`;
+		}
 		return this.APIService.get(url);
 	}
 
@@ -517,7 +522,7 @@ export class TreeService {
 	 */
 	public updateParentVisibility(node: any) {
 
-		let nodes = [node];
+		const nodes = [node];
 
 		while (nodes && nodes.length > 0) {
 			const currentNode = nodes.pop();
