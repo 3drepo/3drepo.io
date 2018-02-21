@@ -137,9 +137,18 @@
 				
 				case "print":
 					var ids = [];
-					IssuesService.state.issuesToShow.forEach(function(issue){
+					var issuesToPrint = IssuesService.state.issuesToShow.concat();
+
+					issuesToPrint.sort(function() {
+						return function(a, b) {
+							return a.created - b.created;
+						};
+					})
+					console.log(issuesToPrint)
+					issuesToPrint.forEach(function(issue){
 						ids.push(issue._id);
 					});
+					console.log("IDs", ids);
 					var printEndpoint = vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",");
 					var printUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, printEndpoint);
 					$window.open(printUrl, "_blank");
