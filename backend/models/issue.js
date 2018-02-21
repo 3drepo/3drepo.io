@@ -40,6 +40,7 @@ let yauzl = require("yauzl");
 let xml2js = require("xml2js");
 let systemLogger = require("../logger.js").systemLogger;
 let Group = require("./group");
+var Meta = require('./meta');
 let gm = require("gm");
 let C = require("../constants");
 
@@ -1549,6 +1550,12 @@ schema.statics.getModelBCF = function(modelId){
 	return xmlBuilder.buildObject(model);
 };
 
+schema.statics.getIfcGuids = function(account, model) {
+	return Meta.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 })
+		.then(ifcGuidResults => {
+			return ifcGuidResults;
+		});
+};
 
 schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
@@ -1578,6 +1585,27 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 		settings = _settings;
 
 	}).then(() => {
+		let ifcToModelMapPromises = [];
+		let ifcToModelMap = [];
+
+		if (settings.federate) {
+			for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
+				const subModelId = settings.subModels[i].model;
+				ifcToModelMapPromises.push(
+					this.getIfcGuids(account, subModelId).then(ifcGuidResults => {
+						for (let j = 0; j < ifcGuidResults.length; j++) {
+							ifcToModelMap[ifcGuidResults[j].metadata['IFC GUID']] = subModelId;
+						}
+					})
+				);
+			}
+		}
+
+		return Promise.all(ifcToModelMapPromises).then(() => {
+			return ifcToModelMap;
+		});
+
+	}).then(ifcToModelMap => {
 
 		return new Promise((resolve, reject) => {
 
@@ -1871,14 +1899,21 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
+								// TODO: refactor to reduce duplication?
 								if (vpComponents[i].Selection) {
 									let highlightedObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
 										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
+											let objectModel = model;
+
+											if (settings.federate) {
+												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]['@'].ifcGuid];
+											}
+
 											highlightedObjects.push({
 												account: account,
-												model: model,
+												model: objectModel,
 												ifc_guid: vpComponents[i].Selection[j].Component[k]['@'].ifcGuid
 											});
 										}
@@ -1905,9 +1940,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
 										if (vpComponents[i].Visibility[j]['@'].DefaultVisibility) {
 											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
+												let objectModel = model;
+
+												if (settings.federate) {
+													objectModel = ifcToModelMap[vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid];
+												}
+
 												hiddenObjects.push({
 													account: account,
-													model: model,
+													model: objectModel,
 													ifc_guid: vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid
 												});
 											}
