@@ -554,8 +554,18 @@
 		 * @param viewpoint
 		 */
 		vm.showScreenShot = function (event, viewpoint) {
-			vm.screenShot = APIService.getAPIUrl(viewpoint.screenshot);
-			vm.showScreenshotDialog(event);
+			console.log(viewpoint.screenshot);
+			if (viewpoint.screenshot) {
+
+				// We have a saved screenshot we use that
+				vm.screenShot = APIService.getAPIUrl(viewpoint.screenshot);
+				vm.showScreenshotDialog(event);
+			} else if (vm.issueData.descriptionThumbnail) {
+
+				// We haven't saved yet we can use the thumbnail
+				vm.screenShot = vm.issueData.descriptionThumbnail;
+				vm.showScreenshotDialog(event);
+			}
 		};
 
 		/**

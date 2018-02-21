@@ -147,6 +147,8 @@ class IssueScreenshotController implements ng.IController {
 				this.changePenSize();
 				this.actionsPointerEvents = "auto";
 
+				console.log(this.screenShotPromise);
+
 				// Get the screen shot
 				this.ViewerService.getScreenshot(this.screenShotPromise);
 
