@@ -234,9 +234,8 @@ export class TreeService {
 
 			})
 			.catch((error) => {
-
 				console.error("Tree Init Error:", error);
-
+				this.reset();
 			});
 	}
 

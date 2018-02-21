@@ -117,7 +117,7 @@ class IssueScreenshotController implements ng.IController {
 		} else {
 			this.$element.ready(() => {
 
-				angular.element(window).bind("resize", () => {
+				angular.element((window as any)).bind("resize", () => {
 					this.handleResize();
 				});
 
@@ -146,8 +146,6 @@ class IssueScreenshotController implements ng.IController {
 				this.showPenIndicator = false;
 				this.changePenSize();
 				this.actionsPointerEvents = "auto";
-
-				console.log(this.screenShotPromise);
 
 				// Get the screen shot
 				this.ViewerService.getScreenshot(this.screenShotPromise);
@@ -199,7 +197,7 @@ class IssueScreenshotController implements ng.IController {
 				// 	imgObj.width * ratio, imgObj.height * ratio,
 				// );
 			};
-			console.log(imgObj);
+
 		});
 		// requestAnimationFrame(() => {
 		// 	this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
