@@ -570,35 +570,51 @@
 			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
 		}
 
-		function handleShowIssue(issue) {
-			var issueData;
-			if(issue.viewpoint.position.length > 0) {
-				// Set the camera position
-				issueData = {
-					position : issue.viewpoint.position,
-					view_dir : issue.viewpoint.view_dir,
-					look_at : issue.viewpoint.look_at,
-					up: issue.viewpoint.up,
-					account: issue.account,
-					model: issue.model
-				};
-				
-				ViewerService.setCamera(issueData);
 
-				if ("orthogonal" === issue.viewpoint.type) {
-					showOrthogonalViewPrompt();
+		function handleCameraView(issue) {
+			// Set the camera position
+			var issueData = {
+				position : issue.viewpoint.position,
+				view_dir : issue.viewpoint.view_dir,
+				look_at : issue.viewpoint.look_at,
+				up: issue.viewpoint.up,
+				account: issue.account,
+				model: issue.model
+			};
+			
+			ViewerService.setCamera(issueData);
+
+			if ("orthogonal" === issue.viewpoint.type) {
+				showOrthogonalViewPrompt();
+			}
+		}
+
+		function handleClippingPlane(issue) {
+
+			// TODO: Use ViewerService
+			// Set the clipping planes
+			var issueData = {
+				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
+				account: issue.account,
+				model: issue.model
+			};
+
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+
+		}
+
+		function handleShowIssue(issue) {
+
+			if(issue && issue.viewpoint ) {
+				
+				if (issue.viewpoint.position && issue.viewpoint.position.length > 0) {
+					handleCameraView(issue);
 				}
 
-				// TODO: Use ViewerService
-				// Set the clipping planes
-				issueData = {
-					clippingPlanes: issue.viewpoint.clippingPlanes,
-					fromClipPanel: false,
-					account: issue.account,
-					model: issue.model
-				};
-
-				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				//if (issue.viewpoint.clippingPlanes && issue.viewpoint.clippingPlanes.length) {
+				handleClippingPlane(issue);
+				//}
 
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
