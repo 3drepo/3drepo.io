@@ -372,6 +372,10 @@ export class TreeService {
 		return this.currentSelectedNodes;
 	}
 
+	public setCurrentSelectedNodes(nodes) {
+		this.currentSelectedNodes = nodes;
+	}
+
 	public getClickedHidden() {
 		return this.clickedHidden;
 	}
@@ -795,11 +799,15 @@ export class TreeService {
 	 * Isolate selected objects by hiding all other objects.
 	 */
 	public isolateSelected() {
+
+		const selectedNodes = this.getCurrentSelectedNodes().concat();
+
 		// Hide all
 		this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 		// Show selected
-		if (this.getCurrentSelectedNodes()) {
-			this.showTreeNodes(this.getCurrentSelectedNodes());
+		if (selectedNodes) {
+			this.setCurrentSelectedNodes(selectedNodes);
+			this.showTreeNodes(selectedNodes);
 		}
 	}
 
