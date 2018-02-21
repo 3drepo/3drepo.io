@@ -222,6 +222,7 @@
 			vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
 			vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
 			vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
+			//vm.issueData.due_date = (!vm.issueData.due_date) ? [] : vm.issueData.due_date;
 			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 			vm.checkCanComment();
@@ -404,6 +405,20 @@
 
 		};
 
+		vm.canChangeDueDate = function() {
+			
+			if (!IssuesService.isOpen(vm.issueData)) {
+				return false;
+			}
+
+			return IssuesService.canChangeDueDate(
+				vm.issueData,
+				vm.userJob,
+				vm.modelSettings.permissions
+			);
+
+		};
+
 		vm.canChangeAssigned = function() {
 
 			if (!IssuesService.isOpen(vm.issueData)) {
@@ -455,6 +470,7 @@
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
+					due_date: vm.issueData.due_date,
 					assigned_roles: vm.issueData.assigned_roles
 				};
 
@@ -464,7 +480,7 @@
 							var respData = response.data.issue;
 							IssuesService.populateIssue(respData);
 							vm.issueData = respData;
-						
+
 							// Add info for new comment
 							var commentCount = respData.comments.length;
 							var comment = respData.comments[commentCount - 1];
@@ -772,7 +788,8 @@
 					while (nodePath && nodePath.length > 0) {
 						var parentNodeId = nodePath.shift();
 						var parentNode = TreeService.getNodeById(parentNodeId);
-						if (node[property] === parentNode[property]) {
+						if ((node[property] && node[property] === parentNode[property]) ||
+								(!node[property] && 1 === nodePath.length)) {
 							prunedNodesMap[parentNode._id] = {
 								account: parentNode.account,
 								id: parentNode._id,
@@ -798,11 +815,6 @@
 		 * @returns groupData	Object with list of nodes for group creation.
 		 */
 		function createGroupData(nodes) {
-			/*var groupNodesLimit = 25000;
-			if (nodes && nodes.length > groupNodesLimit) {
-				nodes.length = groupNodesLimit;
-				console.error("Upper limit of " + groupNodesLimit + " exceeded! Saved viewpoint will be incomplete.");
-			}*/
 			var groupData = {
 				name: vm.issueData.name, 
 				color: [255, 0, 0], 
@@ -862,6 +874,7 @@
 				priority: vm.issueData.priority,
 				status: vm.issueData.status,
 				topic_type: vm.issueData.topic_type,
+				due_date: vm.issueData.due_date,
 				desc: vm.issueData.desc,
 				rev_id: vm.revision
 			};

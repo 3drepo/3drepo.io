@@ -500,6 +500,7 @@ export class TreeService {
 				node.toggleState = "visible";
 			} else if (0 === visibleChildCount) {
 				node.toggleState = "invisible";
+				this.setNodeSelection(node, false);
 			} else {
 				node.toggleState = "parentOfInvisible";
 			}
@@ -701,7 +702,7 @@ export class TreeService {
 	public setVisibilityOfNodes(nodes: any[], visibility: string) {
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
-			if (node.toggleState !== visibility) {
+			if (node && node.toggleState !== visibility) {
 				this.setTreeNodeStatus(node, visibility);
 			}
 		}
@@ -752,12 +753,14 @@ export class TreeService {
 						child.toggleState = "visible";
 					} else {
 						child.toggleState = "invisible";
+						this.setNodeSelection(child, false);
 					}
 				} else {
 					if (visibility === "visible") {
 						child.toggleState = (this.getHideIfc()) ? child.defaultState : "visible";
 					} else {
 						child.toggleState = "invisible";
+						this.setNodeSelection(child, false);
 					}
 				}
 			}
@@ -857,6 +860,38 @@ export class TreeService {
 	}
 
 	/**
+	 * Set selection status of node.
+	 * @param node		Node to set.
+	 * @param isSelected	Is selected.
+	 */
+	public setNodeSelection(node: any, isSelected: boolean) {
+		if (node.selected !== isSelected) {
+			const nodeIndex = this.currentSelectedNodes.indexOf(node);
+
+			if (isSelected) {
+				if (-1 === nodeIndex) {
+					node.selected = true;
+					this.currentSelectedNodes.push(node);
+				}
+			} else {
+				if (nodeIndex > -1) {
+					this.currentSelectedNodes[nodeIndex].selected = false;
+					this.currentSelectedNodes.splice(nodeIndex, 1);
+				}
+			}
+
+			return this.getMap().then((treeMap) => {
+				const map = {};
+				this.currentSelectedNodes.forEach((n) => {
+					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+				});
+
+				this.setHighlightMap(map);
+			});
+		}
+	}
+
+	/**
 	 * Select a node in the tree.
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
@@ -864,22 +899,13 @@ export class TreeService {
 	public selectNode(node: any, multi: boolean, final: boolean) {
 
 		if (node) {
-			const sameNodeIndex = this.currentSelectedNodes.indexOf(node);
-
 			if (multi) {
-				if (sameNodeIndex > -1) {
-					// Multiselect mode and we selected the same node - unselect it
-					this.currentSelectedNodes[sameNodeIndex].selected = false;
-					this.currentSelectedNodes.splice(sameNodeIndex, 1);
-				} else {
-					node.selected = true;
-					this.currentSelectedNodes.push(node);
-				}
+				// Multiselect mode and we selected the same node - unselect it
+				this.setNodeSelection(node, !node.selected);
 			} else {
 				// If it is not multiselect mode, remove all highlights
 				this.clearCurrentlySelected();
-				node.selected = true;
-				this.currentSelectedNodes.push(node);
+				this.setNodeSelection(node, true);
 			}
 
 			if (!final) {
@@ -897,6 +923,29 @@ export class TreeService {
 		}
 
 		return Promise.reject("No node specified");
+	}
+
+	/**
+	 * Select multiple nodes in the tree.
+	 * @param nodes	Array of nodes to select.
+	 * @param multi	Is multi select enabled.
+	 */
+	public selectNodes(nodes: any[], multi: boolean, final: boolean) {
+
+		if (nodes && nodes.length > 0) {
+			if (!multi) {
+				// If it is not multiselect mode, remove all highlights
+				this.clearCurrentlySelected();
+			}
+
+			for (let i = 0; i < nodes.length; i++) {
+				const sameNodeIndex = this.currentSelectedNodes.indexOf(nodes[i]);
+
+				if (-1 === sameNodeIndex || multi) {
+					this.selectNode(nodes[i], true, final && nodes.length - 1 === i);
+				}
+			}
+		}
 	}
 
 	/**

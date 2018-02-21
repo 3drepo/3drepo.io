@@ -77,6 +77,7 @@
 			canChangePriority: canChangePriority,
 			canChangeStatus: canChangeStatus,
 			canChangeType: canChangeType,
+			canChangeDueDate: canChangeDueDate,
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
 			canChangeStatusToClosed: canChangeStatusToClosed,
@@ -364,6 +365,10 @@
 				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
 			}
 
+			if (issue.due_date) {
+				issue.due_date = new Date(issue.due_date);
+			}
+
 			if (issue) {
 				issue.statusIcon = getStatusIcon(issue);
 			}
@@ -441,6 +446,12 @@
 		function canChangeType(issueData, userJob, permissions) {
 			
 			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canChangeDueDate(issueData, userJob, permissions) {
+			
+			return canChangeStatusToClosed(issueData, userJob, permissions);
 
 		}
 
@@ -555,6 +566,10 @@
 			}
 		}
 
+		function showOrthogonalViewPrompt() {
+			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
+		}
+
 		function handleShowIssue(issue) {
 			var issueData;
 			if(issue.viewpoint.position.length > 0) {
@@ -569,6 +584,10 @@
 				};
 				
 				ViewerService.setCamera(issueData);
+
+				if ("orthogonal" === issue.viewpoint.type) {
+					showOrthogonalViewPrompt();
+				}
 
 				// TODO: Use ViewerService
 				// Set the clipping planes
@@ -681,20 +700,26 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 
-					for (var i = 0; i < objects.length; i++) {
-						var obj = objects[i];
-						var objUid = treeMap.sharedIdToUid[obj.shared_id];
-						
-						if (objUid) {
-				
-							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
-							} else {
-								// Only call expandToSelection for last selected node to improve performance
+					var nodes = new Set();
 
+					for (var i = 0; i < objects.length; i++) {
+						var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+						if (objUid) {
+							var node = TreeService.getNodeById(objUid);
+							if (node && node.hasOwnProperty("name")) {
+								nodes.add(node);
+							}
+
+							if (i === objects.length - 1) {
+								// Only call expandToSelection for last selected node to improve performance
 								TreeService.initNodesToShow([TreeService.allNodes[0]]);
+								// TODO: we no longer need to select here, but still need to expand tree
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 								
+								if (nodes.size > 0) {
+									TreeService.selectNodes(Array.from(nodes), false, true);
+								}
 							}
 						}
 					}
@@ -713,10 +738,14 @@
 				.then(function(treeMap){
 
 					if (objects) {
+						// Make a list of nodes to hide
 						var hiddenNodes = [];
 						for (var i = 0; i < objects.length; i++) {
-							// Make a list of nodes to hide
-							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+							var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+							if (objUid) {
+								hiddenNodes.push(TreeService.getNodeById(objUid));
+							}
 						}
 						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
@@ -1124,60 +1153,64 @@
 		function convertActionCommentToText(comment, topic_types) {
 			var text = "";
 
-			switch (comment.action.property) {
-			case "priority":
+			if (comment) {
+				switch (comment.action.property) {
+				case "priority":
 
-				comment.action.propertyText = "Priority";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to = convertActionValueToText(comment.action.to);
-				break;
+					comment.action.propertyText = "Priority";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
+					break;
 
-			case "status":
+				case "status":
 
-				comment.action.propertyText = "Status";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to= convertActionValueToText(comment.action.to);
+					comment.action.propertyText = "Status";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to= convertActionValueToText(comment.action.to);
+					break;
 
-				break;
+				case "assigned_roles":
 
-			case "assigned_roles":
+					comment.action.propertyText = "Assigned";
+					comment.action.from = comment.action.from.toString();
+					comment.action.to= comment.action.to.toString();	
+					break;
 
-				comment.action.propertyText = "Assigned";
-				comment.action.from = comment.action.from.toString();
-				comment.action.to= comment.action.to.toString();	
-							
-				break;
+				case "topic_type":
 
-			case "topic_type":
+					comment.action.propertyText = "Type";
+					if(topic_types){
 
-				comment.action.propertyText = "Type";
-				if(topic_types){
+						var from = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.from;
+						});
 
-					var from = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.from;
-					});
+						var to = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.to;
+						});
 
-					var to = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.to;
-					});
+						if(from && from.label){
+							comment.action.from = from.label;
+						}
 
-					if(from && from.label){
-						comment.action.from = from.label;
+						if(to && to.label){
+							comment.action.to = to.label;
+						}
 					}
+					break;
 
-					if(to && to.label){
-						comment.action.to = to.label;
-					}
+				case "desc":
 
+					comment.action.propertyText = "Description";
+					break;
+
+				case "due_date":
+
+					comment.action.propertyText = "Due Date";
+					comment.action.from = (comment.action.from) ? (new Date(parseInt(comment.action.from))).toLocaleDateString() : "Set";
+					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					break;
 				}
-
-				break;
-
-			case "desc":
-
-				comment.action.propertyText = "Description";
-
-				break;
 			}
 
 			return text;

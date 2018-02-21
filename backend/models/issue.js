@@ -176,6 +176,7 @@ let schema = Schema({
 	status_last_changed: Number,
 	priority_last_changed: Number,
 	creator_role: String,
+	due_date: Number,
 
 	//to be remove
 	scribble: Object,
@@ -473,25 +474,31 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 	}).then(issues => {
 
+		let bcfPromises = [];
+
 		issues.forEach(issue => {
 
-			let bcf = issue.getBCFMarkup(_.get(settings, "properties.unit"));
+			bcfPromises.push(
+				issue.getBCFMarkup(account, model, _.get(settings, "properties.unit")).then(bcf => {
 
-			zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
+					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
-			bcf.viewpoints.forEach(vp => {
-				zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
-			});
+					bcf.viewpoints.forEach(vp => {
+						zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${uuidToString(issue._id)}/${vp.filename}`});
+					});
 
-			bcf.snapshots.forEach(snapshot => {
-				zip.append(snapshot.snapshot.buffer, {name: `${uuidToString(issue._id)}/${snapshot.filename}`});
-			});
+					bcf.snapshots.forEach(snapshot => {
+						zip.append(snapshot.snapshot.buffer, {name: `${uuidToString(issue._id)}/${snapshot.filename}`});
+					});
 
+				})
+			);
 		});
 
-		zip.finalize();
-
-		return Promise.resolve(zip);
+		return Promise.all(bcfPromises).then(() => {
+			zip.finalize();
+			return Promise.resolve(zip);
+		});
 	});
 
 };
@@ -628,16 +635,16 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.owner = data.owner;
 		issue.status = data.status;
 		issue.topic_type = data.topic_type;
-		if(data.desc && data.desc !== "")
-		{
+		if (data.desc && data.desc !== "") {
 			issue.desc = data.desc;
-		}
-		else
-		{
+		} else {
 			issue.desc = "(No Description)";
 		}
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
+		if (data.due_date) {
+			issue.due_date = Date.parse(data.due_date);
+		}
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
@@ -1056,10 +1063,9 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	}
 
-	const statusExists = !forceStatusChanged && 
-							data.hasOwnProperty("status");
+	const statusExists = !forceStatusChanged && data.hasOwnProperty("status");
 
-	if(statusExists) {
+	if (statusExists) {
 
 		const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
 		if (invalidStatus) {
@@ -1073,8 +1079,8 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 			if(statusHasChanged) {
 
 				const canChangeStatus = isAdmin || 
-										hasOwnerJob || 
-										(hasAssignedJob && data.status !== statusEnum.CLOSED);
+					hasOwnerJob ||
+					(hasAssignedJob && data.status !== statusEnum.CLOSED);
 				
 				if (canChangeStatus) {
 
@@ -1129,6 +1135,16 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 		}
 		
+	}
+
+	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
+		const canChangeStatus = isAdmin || hasOwnerJob;
+		if (canChangeStatus) {
+			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, Date.parse(data.due_date));
+			this.due_date = Date.parse(data.due_date);
+		} else {
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+		}
 	}
 
 	let settings;
@@ -1244,7 +1260,7 @@ schema.methods.generateViewpointGUID = function(){
 	}
 };
 
-schema.methods.getBCFMarkup = function(unit){
+schema.methods.getBCFMarkup = function(account, model, unit){
 	
 
 	this.generateViewpointGUID();
@@ -1256,7 +1272,9 @@ schema.methods.getBCFMarkup = function(unit){
 
 	let scale = 1;
 
-	if(unit === "cm"){
+	if(unit === "dm"){
+		scale = 0.1;
+	} else if (unit === "cm") {
 		scale = 0.01;
 	} else if (unit === "mm") {
 		scale = 0.001;
@@ -1276,9 +1294,9 @@ schema.methods.getBCFMarkup = function(unit){
 					"Guid": uuidToString(this._id),
 					"TopicStatus": this.status ? this.status : (this.closed ? "closed" : "open")
 				},
+				"Title": this.name,
 				"Priority": this.priority,
-				"Title": this.name ,
-				"CreationDate": moment(this.created).format() ,
+				"CreationDate": moment(this.created).format(),
 				"CreationAuthor": this.owner,
 				"Description": this.desc
 			},
@@ -1287,6 +1305,12 @@ schema.methods.getBCFMarkup = function(unit){
 		}
 	};
 
+	if (_.get(this, "due_date")) {
+		markup.Markup.Topic.DueDate = moment(_.get(this, "due_date")).format();
+	} else if (_.get(this, "extras.DueDate")) {
+		markup.Markup.Topic.DueDate = _.get(this, "extras.DueDate"); // For backwards compatibility
+	}
+	
 	this.topic_type && (markup.Markup.Topic["@"].TopicType = this.topic_type);
 
 	_.get(this, "extras.Header") && (markup.Markup.Header = _.get(this, "extras.Header"));
@@ -1295,7 +1319,6 @@ schema.methods.getBCFMarkup = function(unit){
 	_.get(this, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(this, "extras.Labels"));
 	_.get(this, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(this, "extras.ModifiedDate"));
 	_.get(this, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(this, "extras.ModifiedAuthor"));
-	_.get(this, "extras.DueDate") && (markup.Markup.Topic.DueDate = _.get(this, "extras.DueDate"));
 	_.get(this, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = _.get(this, "extras.AssignedTo"));
 	_.get(this, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(this, "extras.BimSnippet"));
 	_.get(this, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(this, "extras.DocumentReference"));
@@ -1312,12 +1335,12 @@ schema.methods.getBCFMarkup = function(unit){
 			"@":{
 				Guid: utils.uuidToString(comment.guid)
 			},
+			"Date": moment(comment.created).format(),
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
 				"@": {Guid: utils.uuidToString(comment.viewpoint)}
 			},
-			"Date": moment(comment.created).format(),
 			// bcf 1.0 for back comp
 			"Status": this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, " ")) : "",
 			"VerbalStatus": this.status ? this.status : (this.closed ? "closed" : "open")
@@ -1330,6 +1353,7 @@ schema.methods.getBCFMarkup = function(unit){
 
 	});
 
+	let viewpointsPromises = [];
 
 	// generate viewpoints
 	let snapshotNo = 0;
@@ -1346,9 +1370,6 @@ schema.methods.getBCFMarkup = function(unit){
 			},
 			"Viewpoint": viewpointFileName,
 			"Snapshot":  null
-
-
-			
 		};
 
 		if(vp.screenshot.flag){
@@ -1376,7 +1397,6 @@ schema.methods.getBCFMarkup = function(unit){
 			}
 		};
 
-
 		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >=3){
 
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
@@ -1399,7 +1419,74 @@ schema.methods.getBCFMarkup = function(unit){
 			};
 		}
 
-		_.get(vp, "extras.Components") && (viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components"));
+		if (_.get(vp, "extras.Components")) {
+			// TODO: Consider if extras.Components should only be used if groups don't exist
+			// TODO: Could potentially check each sub-property (ViewSetupHints, Selection, etc.
+			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
+		}
+
+		let componentsPromises = [];
+
+		if (_.get(vp, "highlighted_group_id")) {
+			let highlightedGroupId = _.get(vp, "highlighted_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.Selection) {
+								viewpointXmlObj.VisualizationInfo.Components.Selection = {};
+								viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
+									"@": {
+										ifcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
+							}
+						}
+					}
+				})
+			);
+		}
+
+		if (_.get(vp, "hidden_group_id")) {
+			let hiddenGroupId = _.get(vp, "hidden_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
+										"@": {
+											DefaultVisibility: true
+										}
+									};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component.push({
+									"@": {
+										ifcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
+							}
+						}
+					}
+				})
+			);
+		}
+
 		_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, "extras.Spaces"));
 		_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, "extras.SpaceBoundaries"));
 		_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, "extras.Openings"));
@@ -1408,20 +1495,24 @@ schema.methods.getBCFMarkup = function(unit){
 		_.get(vp, "extras.ClippingPlanes") && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes"));
 		_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
 
-		viewpointEntries.push({
-			filename: viewpointFileName,
-			xml:  xmlBuilder.buildObject(viewpointXmlObj)
-		});
+		viewpointsPromises.push(
+			Promise.all(componentsPromises).then(() => {
+				viewpointEntries.push({
+					filename: viewpointFileName,
+					xml:  xmlBuilder.buildObject(viewpointXmlObj)
+				});
+			})
+		);
 
 	});
 
-
-
-	return {
-		markup: xmlBuilder.buildObject(markup),
-		viewpoints: viewpointEntries,
-		snapshots: snapshotEntries
-	};
+	return Promise.all(viewpointsPromises).then(() => {
+		return {
+			markup: xmlBuilder.buildObject(markup),
+			viewpoints: viewpointEntries,
+			snapshots: snapshotEntries
+		};
+	});
 };
 
 schema.statics.getBCFVersion = function(){
@@ -1460,7 +1551,6 @@ schema.statics.getModelBCF = function(modelId){
 
 
 schema.statics.importBCF = function(requester, account, model, revId, zipPath){
-	
 
 	let self = this;
 	let settings;
@@ -1643,7 +1733,9 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
 						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
-						issue.extras.DueDate = _.get(xml, "Markup.Topic[0].DueDate[0]._");
+						if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
+							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
+						}
 						issue.extras.AssignedTo = _.get(xml, "Markup.Topic[0].AssignedTo[0]._");
 						issue.desc = _.get(xml, "Markup.Topic[0].Description[0]._");
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
@@ -1678,6 +1770,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					vpGuids.forEach(guid => {
 
+						let groupPromises = [];
+
 						if(!viewpoints[guid].viewpointXml){
 							return;
 						}
@@ -1685,7 +1779,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						let extras = {};
 						let vpXML = viewpoints[guid].viewpointXml;
 
-						extras.Components = _.get(vpXML, "VisualizationInfo.Components");
 						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
 						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
@@ -1712,11 +1805,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 						let scale = 1;
 						let unit = _.get(settings, "properties.unit");
-						if(unit === "cm"){
+						if (unit === "dm") {
+							scale = 10;
+						} else if (unit === "cm") {
 							scale = 100;
-						} else if (unit === "mm"){
+						} else if (unit === "mm") {
 							scale = 1000;
-						} else if (unit === "ft"){
+						} else if (unit === "ft") {
 							scale = 3.28084;
 						}	
 
@@ -1766,7 +1861,94 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							vp.type = "orthogonal";
 						}
 
-						issue.viewpoints.push(vp);
+						if (_.get(vpXML, "VisualizationInfo.Components")) {
+							const groupDbCol = {
+								account: account,
+								model: model
+							};
+
+							let vpComponents = _.get(vpXML, "VisualizationInfo.Components");
+
+							for (let i = 0; i < vpComponents.length; i++) {
+
+								if (vpComponents[i].Selection) {
+									let highlightedObjects = [];
+
+									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
+										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
+											highlightedObjects.push({
+												account: account,
+												model: model,
+												ifc_guid: vpComponents[i].Selection[j].Component[k]['@'].ifcGuid
+											});
+										}
+									}
+
+									if (highlightedObjects.length > 0) {
+										let highlightedObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: highlightedObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
+												vp.highlighted_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+								}
+
+								if (vpComponents[i].Visibility) {
+									let hiddenObjects = [];
+
+									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										if (vpComponents[i].Visibility[j]['@'].DefaultVisibility) {
+											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
+												hiddenObjects.push({
+													account: account,
+													model: model,
+													ifc_guid: vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid
+												});
+											}
+										} else {
+											systemLogger.logError("Visibility where DefaultVisibility is false currently unsupported for BCF import!");
+										}
+									}
+
+									if (hiddenObjects.length > 0) {
+										let hiddenObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: hiddenObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
+												vp.hidden_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+								}
+
+								if (vpComponents[i].Coloring) {
+									vp.extras.Coloring = vpComponents[i].Coloring;
+									systemLogger.logInfo("Colouring not fully supported for BCF import!");
+								}
+
+								if (vpComponents[i].ViewSetupHints) {
+									// TODO: Full ViewSetupHints support -
+									// SpaceVisible should correspond to !hideIfc
+									//console.log(vpComponents[i].ViewSetupHints);
+									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
+									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
+								}
+							}
+						}
+
+						Promise.all(groupPromises).then(() => {
+							issue.viewpoints.push(vp);
+						});
 					});
 
 					//take the first screenshot as thumbnail
