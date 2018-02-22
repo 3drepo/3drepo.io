@@ -40,7 +40,7 @@ let yauzl = require("yauzl");
 let xml2js = require("xml2js");
 let systemLogger = require("../logger.js").systemLogger;
 let Group = require("./group");
-var Meta = require('./meta');
+let Meta = require("./meta");
 let gm = require("gm");
 let C = require("../constants");
 
@@ -457,7 +457,6 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 };
 
 schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids){
-	
 
 	let zip = archiver.create("zip");
 
@@ -501,11 +500,9 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 			return Promise.resolve(zip);
 		});
 	});
-
 };
 
 schema.statics.findBySharedId = function(dbColOptions, sid, number) {
-	
 
 	let filter = { parent: stringToUUID(sid) };
 
@@ -525,7 +522,6 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 };
 
 schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
-	
 
 	let projection = {};
 
@@ -552,7 +548,6 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 };
 
 schema.statics.createIssue = function(dbColOptions, data){
-	
 
 	let objectId = data.object_id;
 
@@ -672,7 +667,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.creator_role = data.creator_role || issue.creator_role;
 		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
 
-
 		if(data.viewpoint && data.viewpoint.screenshot){
 
 			return this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
@@ -690,9 +684,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return Promise.resolve();
 		}
 
-
 	}).then(image => {
-
 
 		if(image){
 			issue.thumbnail = {
@@ -719,16 +711,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
 			return Promise.resolve(cleaned);
-
 		});
-
 	});
-
 };
 
 schema.statics.getScreenshot = function(dbColOptions, uid, vid){
-	
-	
 
 	return this.findById(dbColOptions, stringToUUID(uid), { 
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } },
@@ -744,7 +731,6 @@ schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 };
 
 schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
-	
 
 	return this.findById(dbColOptions, stringToUUID(uid), { 
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
@@ -776,8 +762,6 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 };
 
 schema.statics.getThumbnail = function(dbColOptions, uid){
-	
-	
 
 	return this.findById(dbColOptions, stringToUUID(uid), { thumbnail: 1 }).then(issue => {
 
@@ -790,7 +774,6 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 };
 
 schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
-	
 
 	let image, sourceX, sourceY, sourceWidth, sourceHeight;
 
@@ -848,12 +831,9 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 			});
 		});
 	});
-
 };
 
-
 schema.methods.updateComment = function(commentIndex, data){
-	
 
 	let timeStamp = (new Date()).getTime();
 
@@ -910,7 +890,6 @@ schema.methods.updateComment = function(commentIndex, data){
 				});
 
 				this.commentCount++;
-
 			}
 		}).then(() => {
 			return this.save();
@@ -924,7 +903,6 @@ schema.methods.updateComment = function(commentIndex, data){
 			ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, eventData);
 			return comment;
 		});
-
 
 	} else {
 
@@ -960,20 +938,17 @@ schema.methods.updateComment = function(commentIndex, data){
 			return comment;
 		});
 	}
-
-	
 };
 
 function isSystemComment(comment){
-	
+
 	return !_.isEmpty(comment.toObject().action);
 }
 
 schema.methods.removeComment = function(commentIndex, data){
-	
 
 	let commentObj = this.comments[commentIndex];
-	
+
 	if(!commentObj){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
 	}
@@ -1012,7 +987,6 @@ schema.methods.isClosed = function(){
 
 
 schema.methods.addSystemComment = function(owner, property, from , to){
-	
 
 	let timeStamp = (new Date()).getTime();
 	let comment = {
@@ -1030,7 +1004,6 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	let commentLen = this.comments.length;
 
 	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
-
 		this.comments[commentLen - 2].sealed = true;
 	}
 
@@ -1038,12 +1011,11 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 };
 
 schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob) {
-	
 
 	let forceStatusChanged;
 	let systemComment; 
 	const assignedHasChanged = data.hasOwnProperty("assigned_roles") && 
-								!_.isEqual(this.assigned_roles, data.assigned_roles);
+					!_.isEqual(this.assigned_roles, data.assigned_roles);
 
 	if (assignedHasChanged) {
 		//force status change to in progress if assigned roles during status=for approval
@@ -1056,12 +1028,11 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		);
 
 		this.assigned_roles = data.assigned_roles;
-		
+
 		if(this.status === statusEnum.FOR_APPROVAL) {
 			forceStatusChanged = true;
 			this.status = statusEnum.IN_PROGRESS;
 		}
-
 	}
 
 	const statusExists = !forceStatusChanged && data.hasOwnProperty("status");
@@ -1076,13 +1047,13 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		} else {
 
 			const statusHasChanged = data.status !== this.status;
-			
+
 			if(statusHasChanged) {
 
 				const canChangeStatus = isAdmin || 
 					hasOwnerJob ||
 					(hasAssignedJob && data.status !== statusEnum.CLOSED);
-				
+
 				if (canChangeStatus) {
 
 					//change status to for_approval if assigned roles is changed.
@@ -1096,9 +1067,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 				} else {
 					throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 				}
-				
 			}
-
 		}
 	}
 
@@ -1110,7 +1079,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		} else if(data.priority !== this.priority) {
 
 			const canChangeStatus = isAdmin || hasOwnerJob;
-			
+
 			if (canChangeStatus) {
 				systemComment = this.addSystemComment(data.owner, "priority", this.priority, data.priority);
 
@@ -1135,7 +1104,6 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		} else {
 			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 		}
-		
 	}
 
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
@@ -1160,15 +1128,12 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		let issue = this.clean(settings.type, settings.properties.code);
 		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, issue);
 		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, systemComment);
-		
-		return issue;
 
+		return issue;
 	});
-	
 };
 
 schema.methods.clean = function(typePrefix, modelCode){
-	
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
@@ -1184,12 +1149,11 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
-		
+
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
 			cleaned.viewpoints[i].screenshotSmall = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshotSmall.png";
 		}
-
 	});
 
 	if(_.get(cleaned, "thumbnail.flag")){
@@ -1200,7 +1164,6 @@ schema.methods.clean = function(typePrefix, modelCode){
 
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
-
 
 		if(cleaned.comments[i].viewpoint){
 
@@ -1216,7 +1179,6 @@ schema.methods.clean = function(typePrefix, modelCode){
 			// for all other non system comments
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
-		
 	});
 
 	if( cleaned.comments &&
@@ -1236,14 +1198,13 @@ schema.methods.clean = function(typePrefix, modelCode){
 	if(cleaned.viewpoints.length > 0){
 		cleaned.viewpoint = cleaned.viewpoints[0];
 	}
-	
+
 	cleaned.viewpoints = undefined;
 
 	return cleaned;
 };
 
 schema.methods.generateCommentsGUID = function(){
-	
 
 	this.comments.forEach(comment => {
 		if(!comment.guid && !isSystemComment(comment)){
@@ -1262,12 +1223,11 @@ schema.methods.generateViewpointGUID = function(){
 };
 
 schema.methods.getBCFMarkup = function(account, model, unit){
-	
 
 	this.generateViewpointGUID();
 	this.generateCommentsGUID();
 	this.save();
-	
+
 	let viewpointEntries = [];
 	let snapshotEntries = [];
 
@@ -1311,7 +1271,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	} else if (_.get(this, "extras.DueDate")) {
 		markup.Markup.Topic.DueDate = _.get(this, "extras.DueDate"); // For backwards compatibility
 	}
-	
+
 	this.topic_type && (markup.Markup.Topic["@"].TopicType = this.topic_type);
 
 	_.get(this, "extras.Header") && (markup.Markup.Header = _.get(this, "extras.Header"));
@@ -1324,7 +1284,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	_.get(this, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(this, "extras.BimSnippet"));
 	_.get(this, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(this, "extras.DocumentReference"));
 	_.get(this, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(this, "extras.RelatedTopic"));
-	
+
 	//add comments
 	this.comments.forEach(comment => {
 
@@ -1351,7 +1311,6 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		_.get(comment, "extras.ModifiedAuthor") && (commentXmlObj.ModifiedAuthor = _.get(comment, "extras.ModifiedAuthor"));
 
 		markup.Markup.Comment.push(commentXmlObj);
-
 	});
 
 	let viewpointsPromises = [];
@@ -1374,14 +1333,12 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		};
 
 		if(vp.screenshot.flag){
-
 			vpObj.Snapshot = snapshotFileName;
 			snapshotEntries.push({
 				filename: snapshotFileName,
 				snapshot: vp.screenshot.content
 			});
 			snapshotNo++;
-
 		}
 
 		_.get(vp, "extras.Index") && (vpObj.Index = vp.extras.Index);
@@ -1517,7 +1474,6 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 };
 
 schema.statics.getBCFVersion = function(){
-	
 
 	return `
 		<?xml version="1.0" encoding="UTF-8"?>
@@ -1529,7 +1485,6 @@ schema.statics.getBCFVersion = function(){
 };
 
 schema.statics.getModelBCF = function(modelId){
-	
 
 	let model = {
 		ProjectExtension:{
@@ -1594,7 +1549,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				ifcToModelMapPromises.push(
 					this.getIfcGuids(account, subModelId).then(ifcGuidResults => {
 						for (let j = 0; j < ifcGuidResults.length; j++) {
-							ifcToModelMap[ifcGuidResults[j].metadata['IFC GUID']] = subModelId;
+							ifcToModelMap[ifcGuidResults[j].metadata["IFC GUID"]] = subModelId;
 						}
 					})
 				);
@@ -1908,13 +1863,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											let objectModel = model;
 
 											if (settings.federate) {
-												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]['@'].ifcGuid];
+												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].ifcGuid];
 											}
 
 											highlightedObjects.push({
 												account: account,
 												model: objectModel,
-												ifc_guid: vpComponents[i].Selection[j].Component[k]['@'].ifcGuid
+												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].ifcGuid
 											});
 										}
 									}
@@ -1938,18 +1893,18 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									let hiddenObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
-										if (vpComponents[i].Visibility[j]['@'].DefaultVisibility) {
+										if (vpComponents[i].Visibility[j]["@"].DefaultVisibility) {
 											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
 												let objectModel = model;
 
 												if (settings.federate) {
-													objectModel = ifcToModelMap[vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid];
+													objectModel = ifcToModelMap[vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid];
 												}
 
 												hiddenObjects.push({
 													account: account,
 													model: objectModel,
-													ifc_guid: vpComponents[i].Visibility[j].Component[k]['@'].ifcGuid
+													ifc_guid: vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid
 												});
 											}
 										} else {
