@@ -65,7 +65,6 @@ let actionSchema = Schema({
 });
 
 function propertyTextMapping(property){
-	
 
 	let mapping = {
 		"priority": "Priority",
@@ -84,7 +83,6 @@ actionSchema.virtual("propertyText").get(function(){
 
 actionSchema.set("toObject", { virtuals: true, getters:true });
 
-
 let schema = Schema({
 	_id: Object,
 	object_id: Object,
@@ -92,7 +90,7 @@ let schema = Schema({
 	name: { type: String, required: true },
 	topic_type: String,
 	status: {
-        type: String
+        	type: String
 	},
 
 
@@ -181,7 +179,7 @@ let schema = Schema({
 
 	//to be remove
 	scribble: Object,
-	
+
 	//bcf extra fields we don't care
 	extras: {}
 });
@@ -238,7 +236,6 @@ schema.statics._find = function(dbColOptions, filter, projection, sort, noClean)
 };
 
 schema.statics.getFederatedModelList = function(dbColOptions, username, branch, revision){
-	
 
 	let allRefs = [];
 
@@ -304,16 +301,13 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 		});
 	}
 
-
 	return _get(dbColOptions, branch, revision).then(() => {
 		return Promise.resolve(allRefs);
 	});
-
 };
 
 
 schema.statics.findByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
-	
 
 	let issues;
 	let self = this;
@@ -321,8 +315,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 
 	let addRevFilter = Promise.resolve();
 
-	if(ids){
-
+	if (ids) {
 		ids.forEach((id, i) => {
 			ids[i] = stringToUUID(id);
 		});
@@ -338,7 +331,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 		sort = {sort: {"created": -1}};
 	}
 
-	if (revId){
+	if (revId) {
 
 		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
 		let currHistory;
@@ -392,7 +385,6 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 			}
 		});
 	}
-
 
 	return addRevFilter.then(() => {
 		
@@ -453,7 +445,6 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 			});
 		}
 	});
-
 };
 
 schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids){
@@ -1613,16 +1604,23 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issues.forEach(issue => {
 
 							saveIssueProms.push(
-								Issue.count({account, model}, { _id: issue._id}).then(count => {
-
-									if(count <= 0) {
+								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
+									if (!matchingIssue) {
 										issue.number = ++issueCounter;
 										return issue.save();
 									} else {
-										//console.log('duplicate issue');
-										return Promise.resolve();
+										const commentAttrs = ["comments", "viewpoints"];
+										for (let commentAttrIndex in commentAttrs) {
+											const commentAttr = commentAttrs[commentAttrIndex];
+											for (let i = matchingIssue[commentAttr].length - 1; i >= 0; i--) {
+												if (-1 === issue[commentAttr].findIndex(issueComment =>
+														utils.uuidToString(issueComment.guid) === utils.uuidToString(matchingIssue[commentAttr][i].guid))) {
+													issue[commentAttr].unshift(matchingIssue[commentAttr][i]);
+												}
+											}
+										}
+										return Issue.update({account, model}, { _id: issue._id}, issue);
 									}
-
 								})
 							);
 						});
@@ -1635,7 +1633,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						let notifications = [];
 
 						savedIssues.forEach(issue => {
-							if(issue){
+							if(issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
 							}
 						});
