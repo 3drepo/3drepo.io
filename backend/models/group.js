@@ -49,10 +49,6 @@ groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
 			let uuids = [];
 			for (let i = 0; i < results.length; i++) {
 				uuids = uuids.concat(results[i].parents);
-				/*for (let j = 0; results[i].parents && j < results[i].parents.length; j++) {
-					//console.log(results[i].parents[j]);
-					uuids.add(results[i].parents[j]);
-				}*/
 			}
 			return uuids;
 		});

@@ -1207,11 +1207,41 @@
 				case "due_date":
 
 					comment.action.propertyText = "Due Date";
-					comment.action.from = (comment.action.from) ? (new Date(parseInt(comment.action.from))).toLocaleDateString() : "Set";
 					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					if (comment.action.from) {
+						comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+					} else {
+						text = comment.action.propertyText + " set to " +
+							comment.action.to + " by " +
+							comment.owner;
+					}
 					break;
+
+				case "bcf_import":
+
+					comment.action.propertyText = "BCF Import";
+					text = comment.action.propertyText + " by " + comment.owner;
+					break;
+
 				}
 			}
+
+			if (0 === text.length) {
+				if (!comment.action.from) {
+					comment.action.from = "";
+				}
+
+				if (!comment.action.to) {
+					comment.action.to = "";
+				}
+
+				text = comment.action.propertyText + " updated from " +
+					comment.action.from + " to " +
+					comment.action.to + " by " +
+					comment.owner;
+			}
+
+			comment.action.text = text;
 
 			return text;
 		}
