@@ -1617,6 +1617,11 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 														utils.uuidToString(issueComment.guid) === utils.uuidToString(issue[commentAttr][i].guid))) {
 													matchingIssue[commentAttr].push(issue[commentAttr][i]);
 												}
+												if (matchingIssue[commentAttr].length > 0 && matchingIssue[commentAttr][0].created) {
+													matchingIssue[commentAttr] = matchingIssue[commentAttr].sort((a, b) => {
+														return a.created > b.created;
+													});
+												}
 											}
 										}
 										return Issue.update({account, model}, { _id: issue._id}, matchingIssue);
