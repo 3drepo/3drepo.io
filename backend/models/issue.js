@@ -1618,7 +1618,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									if (!matchingIssue) {
 										issue.number = ++issueCounter;
 										// Set system notification of BCF import
-										issue.comments.push(bcfImportNotification);
+										//issue.comments.push(bcfImportNotification);
 										return issue.save();
 									} else {
 										// Set system notification of BCF import
