@@ -1623,16 +1623,27 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									} else {
 										// Set system notification of BCF import
 										matchingIssue.comments.push(bcfImportNotification);
-										const commentAttrs = ["comments", "viewpoints"];
-										for (let commentAttrIndex in commentAttrs) {
-											const commentAttr = commentAttrs[commentAttrIndex];
-											for (let i = 0; i < issue[commentAttr].length; i++) {
-												if (-1 === matchingIssue[commentAttr].findIndex(issueComment =>
-														utils.uuidToString(issueComment.guid) === utils.uuidToString(issue[commentAttr][i].guid))) {
-													matchingIssue[commentAttr].push(issue[commentAttr][i]);
+
+										// Replace following attributes if they do not exist
+										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
+										for (let simpleAttrIndex in simpleAttrs) {
+											const simpleAttr = simpleAttrs[simpleAttrIndex];
+											if (undefined === matchingIssue[simpleAttr] && undefined !== issue[simpleAttr]) {
+												matchingIssue[simpleAttr] = issue[simpleAttr];
+											}
+										}
+
+										// Attempt to merge following attributes and sort by created desc
+										const complexAttrs = ["comments", "viewpoints"];
+										for (let complexAttrIndex in complexAttrs) {
+											const complexAttr = complexAttrs[complexAttrIndex];
+											for (let i = 0; i < issue[complexAttr].length; i++) {
+												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
+														utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
+													matchingIssue[complexAttr].push(issue[complexAttr][i]);
 												}
-												if (matchingIssue[commentAttr].length > 0 && matchingIssue[commentAttr][0].created) {
-													matchingIssue[commentAttr] = matchingIssue[commentAttr].sort((a, b) => {
+												if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
+													matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
 														return a.created > b.created;
 													});
 												}
