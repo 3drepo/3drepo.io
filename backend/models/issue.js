@@ -1612,14 +1612,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										const commentAttrs = ["comments", "viewpoints"];
 										for (let commentAttrIndex in commentAttrs) {
 											const commentAttr = commentAttrs[commentAttrIndex];
-											for (let i = matchingIssue[commentAttr].length - 1; i >= 0; i--) {
-												if (-1 === issue[commentAttr].findIndex(issueComment =>
-														utils.uuidToString(issueComment.guid) === utils.uuidToString(matchingIssue[commentAttr][i].guid))) {
-													issue[commentAttr].unshift(matchingIssue[commentAttr][i]);
+											for (let i = 0; i < issue[commentAttr].length; i++) {
+												if (-1 === matchingIssue[commentAttr].findIndex(issueComment =>
+														utils.uuidToString(issueComment.guid) === utils.uuidToString(issue[commentAttr][i].guid))) {
+													matchingIssue[commentAttr].push(issue[commentAttr][i]);
 												}
 											}
 										}
-										return Issue.update({account, model}, { _id: issue._id}, issue);
+										return Issue.update({account, model}, { _id: issue._id}, matchingIssue);
 									}
 								})
 							);
