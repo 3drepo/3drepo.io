@@ -981,6 +981,7 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 
 	let timeStamp = (new Date()).getTime();
 	let comment = {
+		guid: utils.generateUUID(),
 		created: timeStamp,
 		action:{
 			property, from, to
@@ -1605,10 +1606,23 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
+									// System notification of BCF import
+									const timeStamp = (new Date()).getTime();
+									const bcfImportNotification = {
+										guid: utils.generateUUID(),
+										created: timeStamp,
+										action: {property: "bcf_import"},
+										owner: account
+									};
+
 									if (!matchingIssue) {
 										issue.number = ++issueCounter;
+										// Set system notification of BCF import
+										issue.comments.push(bcfImportNotification);
 										return issue.save();
 									} else {
+										// Set system notification of BCF import
+										matchingIssue.comments.push(bcfImportNotification);
 										const commentAttrs = ["comments", "viewpoints"];
 										for (let commentAttrIndex in commentAttrs) {
 											const commentAttr = commentAttrs[commentAttrIndex];
