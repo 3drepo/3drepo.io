@@ -1,5 +1,3 @@
-import { IScope, ITimeoutService } from "angular";
-// import { TreeService } from "./tree.service";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -57,8 +55,8 @@ class TreeController implements ng.IController {
 	private searching;
 
 	constructor(
-		private $scope: IScope,
-		private $timeout: ITimeoutService,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
 
 		private TreeService,
 		private EventService,
@@ -71,6 +69,7 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
+		this.TreeService.reset();
 		this.showNodes = true;
 		this.nodes = [];
 		this.showTree = true;
@@ -83,11 +82,8 @@ class TreeController implements ng.IController {
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
-
 		this.allNodes = [];
-
 		this.watchers();
-
 	}
 
 	public $onDestroy() {

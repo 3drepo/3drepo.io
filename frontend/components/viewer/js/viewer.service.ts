@@ -1,4 +1,3 @@
-import { IQService } from "angular";
 import { UnityUtil } from "../../../_built/amd/globals/unity-util";
 
 /**
@@ -41,7 +40,7 @@ export class ViewerService {
 	private Viewer: any;
 
 	constructor(
-		public $q: IQService,
+		public $q: ng.IQService,
 
 		public ClientConfigService: any,
 		public APIService: any,

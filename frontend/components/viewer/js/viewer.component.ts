@@ -1,5 +1,3 @@
-import { IController } from "angular";
-
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
