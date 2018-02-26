@@ -57,7 +57,6 @@ export class TreeService {
 
 	public reset() {
 		this.treeReady = this.$q.defer();
-		this.treeSet = this.$q.defer();
 		this.treeMapReady = null;
 		this.state = {};
 
