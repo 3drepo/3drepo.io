@@ -126,7 +126,6 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public invalidatePassword(result) {
-		console.log("setting invalid", this.$scope);
 		// this.$scope.password.new.$setValidity("required", false);
 		this.buttonDisabled = true;
 		this.message = "Password is too weak; " + result.feedback.suggestions.join(" ");
@@ -134,7 +133,6 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public validatePassword() {
-		console.log("setting valid");
 		// this.$scope.password.new.$setValidity("required", true);
 		this.buttonDisabled = false;
 		this.message = "";

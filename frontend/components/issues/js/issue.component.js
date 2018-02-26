@@ -168,11 +168,9 @@
 
 	
 		vm.convertCommentTopicType = function() {
-			console.log("vm.convertCommentTopicType");
 			if (vm.issueData && vm.issueData.comments) {
 				vm.issueData.comments.forEach(function(comment){
 					if(comment.action && comment.action.property === "topic_type"){
-						console.log("comment", comment, vm.topic_types);
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 					}
 				});
@@ -229,7 +227,6 @@
 
 			vm.checkCanComment();
 
-			console.log("setEditIssueData")
 			vm.convertCommentTopicType();
 
 			// Can edit description if no comments

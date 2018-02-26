@@ -98,13 +98,11 @@ class AccountProfileController implements ng.IController {
 	}
 
 	public invalidatePassword() {
-		console.log("setting invalid");
 		this.$scope.password.new.$setValidity("required", false);
 		this.passwordValid = false;
 	}
 
 	public validatePassword() {
-		console.log("setting valid");
 		this.$scope.password.new.$setValidity("required", true);
 		this.passwordValid = true;
 	}
