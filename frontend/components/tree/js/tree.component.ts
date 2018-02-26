@@ -131,20 +131,12 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
-				this.allNodes = [];
-				this.allNodes.push(event.value.nodes);
-				this.TreeService.setAllNodes(this.allNodes);
+				this.allNodes = this.TreeService.getAllNodes();
 				this.nodes = this.allNodes;
 				this.showTree = true;
 				this.showProgress = false;
-				this.TreeService.setSubTreesById(event.value.subTreesById);
-				this.TreeService.setCachedIdToPath(event.value.idToPath);
-
-				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
-
 				this.initNodesToShow();
 				this.setupInfiniteItemsFilter();
-
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
 				this.$timeout(() => {}).then(() => {

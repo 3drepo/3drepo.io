@@ -621,7 +621,9 @@
 				ViewerService.goToExtent();
 			}
 
-			TreeService.updateModelState(TreeService.allNodes[0]);
+			TreeService.getMap().then(function(){
+				TreeService.updateModelState(TreeService.allNodes[0]);
+			});
 		}
 
 		function showMultiIds(issue) {

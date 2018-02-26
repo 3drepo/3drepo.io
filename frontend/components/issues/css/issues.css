@@ -433,6 +433,19 @@ issue .issueCommentOwner .issueNotification {
   color: rgb(6, 86, 60);
 }
 
+issue .issueOrthogonalView {
+  color: #949494;
+}
+
+
+issue .issueOrthogonalViewIssue {
+  color: #949494;
+  font-size: 14px;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+
 issue .issueAutoComment label {
   color: rgba(0, 0, 0, 0.5);
   /*font-style: italic;*/

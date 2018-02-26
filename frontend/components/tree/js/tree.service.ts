@@ -57,6 +57,7 @@ export class TreeService {
 
 	public reset() {
 		this.treeReady = this.$q.defer();
+		this.treeSet = this.$q.defer();
 		this.treeMapReady = null;
 		this.state = {};
 
@@ -130,7 +131,13 @@ export class TreeService {
 		this.getTrees(url, setting);
 		this.getIdToMeshes();
 
-		return this.treeReady.promise;
+		return this.treeReady.promise.then((tree) => {
+			this.setAllNodes([tree.nodes]);
+			this.setSubTreesById(tree.subTreesById);
+			this.setCachedIdToPath(tree.idToPath);
+			this.setSubModelIdToPath(tree.subModelIdToPath);
+			return tree;
+		});
 
 	}
 
@@ -453,12 +460,12 @@ export class TreeService {
 	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
 
 		if (!node) {
-			console.error("traverseNodeAndPushId - idToMeshes is not defined: ", idToMeshes);
+			console.error("traverseNodeAndPushId node is null: ", node);
 			return;
 		}
 
 		if (!idToMeshes) {
-			console.error("traverseNodeAndPushId node is null: ", node);
+			console.error("traverseNodeAndPushId - idToMeshes is not defined: ", idToMeshes);
 			return;
 		}
 
@@ -1027,7 +1034,7 @@ export class TreeService {
 	 * nodes hidden by default.
 	 */
 	public generateIdToNodeMap() {
-		this.idToNodeMap = [];
+		this.idToNodeMap = {};
 		this.shownByDefaultNodes = [];
 		this.hiddenByDefaultNodes = [];
 		this.recurseIdToNodeMap(this.allNodes);
