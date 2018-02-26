@@ -1272,14 +1272,14 @@ function getFullTree_noSubTree(account, model, branch, rev){
 }
 
 function searchTree(account, model, branch, rev, searchString, username){
-	
-
-	let items = [];
 
 	let search = (history) => {
 
+		let items = [];
+
 		let filter = {
 			_id: {'$in': history.current },
+			type: {'$in': ["transformation", "mesh"]},
 			name: new RegExp(searchString, 'i')
 		};
 

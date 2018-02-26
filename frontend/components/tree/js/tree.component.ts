@@ -167,9 +167,7 @@ class TreeController implements ng.IController {
 								this.searching = false;
 								this.showFilterList = true;
 								this.showProgress = false;
-								this.nodes = json.data.filter((node) => {
-									return this.TreeService.getNodeById(node._id) !== undefined;
-								});
+								this.nodes = json.data;
 								if (this.nodes.length > 0) {
 									this.filterItemsFound = true;
 									for (let i = 0; i < this.nodes.length; i ++) {
