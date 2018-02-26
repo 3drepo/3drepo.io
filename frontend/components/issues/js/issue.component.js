@@ -573,7 +573,6 @@
 		 * @param viewpoint
 		 */
 		vm.showScreenShot = function (event, viewpoint) {
-			console.log(viewpoint.screenshot);
 			if (viewpoint.screenshot) {
 
 				// We have a saved screenshot we use that
