@@ -168,9 +168,11 @@
 
 	
 		vm.convertCommentTopicType = function() {
+			console.log("vm.convertCommentTopicType");
 			if (vm.issueData && vm.issueData.comments) {
 				vm.issueData.comments.forEach(function(comment){
 					if(comment.action && comment.action.property === "topic_type"){
+						console.log("comment", comment, vm.topic_types);
 						IssuesService.convertActionCommentToText(comment, vm.topic_types);
 					}
 				});
@@ -226,6 +228,8 @@
 			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 			vm.checkCanComment();
+
+			console.log("setEditIssueData")
 			vm.convertCommentTopicType();
 
 			// Can edit description if no comments
@@ -482,19 +486,21 @@
 							vm.issueData = respData;
 
 							// Add info for new comment
-							var commentCount = respData.comments.length;
-							var comment = respData.comments[commentCount - 1];
-							IssuesService.convertActionCommentToText(comment, vm.topic_types);
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							// vm.issueData.comments.push(comment);
-	
+							vm.issueData.comments.forEach(function(comment){
+								if (comment && comment.action && comment.action.property) {
+									IssuesService.convertActionCommentToText(comment, vm.topic_types);
+								}
+								if (comment && comment.created) {
+									comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+								}
+							})
+
 							// Update last but one comment in case it was "sealed"
 							if (vm.issueData.comments.length > 1) {
 								vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
 							}
 	
 							// Update the actual data model
-							
 							IssuesService.updateIssues(vm.issueData);
 
 							vm.commentAreaScrollToBottom();
