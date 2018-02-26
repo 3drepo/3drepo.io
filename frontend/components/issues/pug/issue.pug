@@ -113,6 +113,9 @@ md-content#issueInformation(
 					ng-disabled="!vm.canChangeDueDate()"
 					md-date-locale="locale")
 
+		.issueOrthogonalViewIssue(layout="row" ng-if="vm.issueData.viewpoint.type === 'orthogonal'")
+			p Orthogonal view: objects in the viewer are shown in perspective projection.
+
 	.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
 			div(ng-if="!vm.data", flex, layout="column")
@@ -185,10 +188,10 @@ md-content#issueInformation(
 					div(layout='row', layout-align="space-between", flex)
 						// Saved normal comment
 						label.issueCommentTitle(
-						flex
-						ng-if="!comment.editing && !comment.action"
-						ng-bind-html="comment.comment | linky:'_blank'")
-						// Saved auto comment
+							flex
+							ng-if="!comment.editing && !comment.action"
+							ng-bind-html="comment.comment | linky:'_blank'")
+							// Saved auto comment
 
 						// Editing normal comment
 						md-input-container.fillHeight(flex, ng-if="comment.editing")
@@ -242,6 +245,12 @@ md-content#issueInformation(
 						ng-click="vm.showScreenShot($event, comment.viewpoint)"
 						flex)
 						img.issueThumbnailImage(ng-src="{{comment.viewpoint.screenshotPath}}")
+
+					.issueOrthogonalView(
+						layout="row"
+						flex
+						ng-if="comment.viewpoint.type === 'orthogonal'")
+						p Comment saved with orthogonal view
 
 					md-divider
 					

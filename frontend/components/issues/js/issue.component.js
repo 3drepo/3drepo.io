@@ -226,6 +226,7 @@
 			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
 
 			vm.checkCanComment();
+
 			vm.convertCommentTopicType();
 
 			// Can edit description if no comments
@@ -482,19 +483,21 @@
 							vm.issueData = respData;
 
 							// Add info for new comment
-							var commentCount = respData.comments.length;
-							var comment = respData.comments[commentCount - 1];
-							IssuesService.convertActionCommentToText(comment, vm.topic_types);
-							comment.timeStamp = IssuesService.getPrettyTime(comment.created);
-							// vm.issueData.comments.push(comment);
-	
+							vm.issueData.comments.forEach(function(comment){
+								if (comment && comment.action && comment.action.property) {
+									IssuesService.convertActionCommentToText(comment, vm.topic_types);
+								}
+								if (comment && comment.created) {
+									comment.timeStamp = IssuesService.getPrettyTime(comment.created);
+								}
+							})
+
 							// Update last but one comment in case it was "sealed"
 							if (vm.issueData.comments.length > 1) {
 								vm.issueData.comments[vm.issueData.comments.length - 2].sealed = true;
 							}
 	
 							// Update the actual data model
-							
 							IssuesService.updateIssues(vm.issueData);
 
 							vm.commentAreaScrollToBottom();
@@ -570,8 +573,17 @@
 		 * @param viewpoint
 		 */
 		vm.showScreenShot = function (event, viewpoint) {
-			vm.screenShot = APIService.getAPIUrl(viewpoint.screenshot);
-			vm.showScreenshotDialog(event);
+			if (viewpoint.screenshot) {
+
+				// We have a saved screenshot we use that
+				vm.screenShot = APIService.getAPIUrl(viewpoint.screenshot);
+				vm.showScreenshotDialog(event);
+			} else if (vm.issueData.descriptionThumbnail) {
+
+				// We haven't saved yet we can use the thumbnail
+				vm.screenShot = vm.issueData.descriptionThumbnail;
+				vm.showScreenshotDialog(event);
+			}
 		};
 
 		/**

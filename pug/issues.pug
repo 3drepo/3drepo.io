@@ -6,13 +6,23 @@ html(lang="en" ng-app="3drepo").ng-scope
 		html, body {
 				font-family: Roboto, sans-serif;
 		}
+		table {
+			border-collapse: separate;
+			border-spacing: 10px;
+		}
+		.bold {
+			font-weight: bold;
+		}
 	head
 		each issueTypeIssues, issueType in issues
 			if issueType === "open" && issueTypeIssues.length > 0
 				h2 Open Issues
 			else if issueType === "closed" && issueTypeIssues.length > 0
 				h2 Closed Issues
-			each issue in issueTypeIssues
+
+			// TODO: Time stamps - What is going on here?!
+			each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
+				hr
 				table(border=0)
 					tr
 						td(colspan=2)
@@ -42,12 +52,16 @@ html(lang="en" ng-app="3drepo").ng-scope
 							b Description: 
 							span #{issue.desc}
 					tr
-						td #{issue.owner} [#{issue.created}]
+						td
+							span.bold #{issue.owner} 
+							span [#{new Date(issue.created).toUTCString()}]
 						td Issue Opened....
 					if issue.comments
 						each comment in issue.comments
 							tr
-								td #{comment.owner} [#{comment.created}]
+								td
+									span.bold #{comment.owner} 
+									span [#{new Date(comment.created).toUTCString()}]
 								td 
 									if comment.comment
 										| #{comment.comment}

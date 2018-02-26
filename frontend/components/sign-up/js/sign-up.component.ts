@@ -22,10 +22,12 @@ class SignupController implements ng.IController {
 		"$scope",
 		"$mdDialog",
 		"$location",
+		"$window",
+
 		"ClientConfigService",
 		"APIService",
 		"AuthService",
-		"$window",
+		"PasswordService",
 	];
 
 	private reCaptchaResponse;
@@ -51,22 +53,27 @@ class SignupController implements ng.IController {
 	private legalText;
 	private legalTitle;
 	private registerErrorMessage;
+	private emailInvalid;
+	private allowedPhone;
 
 	constructor(
 		private $scope,
 		private $mdDialog,
 		private $location,
+		private $window,
+
 		private ClientConfigService,
 		private APIService,
 		private AuthService,
-		private $window,
+		private PasswordService,
 	) {
 
 	}
 
 	public $onInit() {
+		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
-		this.addPasswordStrengthLib();
+		this.PasswordService.addPasswordStrengthLib();
 
 		this.AuthService.sendLoginRequest().then((response) => {
 			if (response.data.username) {
@@ -90,6 +97,8 @@ class SignupController implements ng.IController {
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
+
+		this.emailInvalid = false;
 
 		this.jobTitles = [
 			"Director",
@@ -153,19 +162,8 @@ class SignupController implements ng.IController {
 				this.legalText += ".";
 			}
 		}
-
 		this.watchers();
 
-	}
-
-	public addPasswordStrengthLib() {
-		const ZXCVBN_SRC = "/dist/zxcvbn.js";
-		const script = document.createElement("script");
-		script.src = ZXCVBN_SRC;
-		script.type = "text/javascript";
-		script.async = true;
-		const first = document.getElementsByTagName("script")[0];
-		document.body.appendChild(script);
 	}
 
 	public isDefined(variable) {
@@ -180,10 +178,17 @@ class SignupController implements ng.IController {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
-			if (this.newUser.password !== undefined && window.zxcvbn) {
-				const result = zxcvbn(this.newUser.password);
+			if (this.newUser.password !== undefined && this.PasswordService.passwordLibraryAvailable()) {
+				const result = this.PasswordService.evaluatePassword(this.newUser.password);
 				this.passwordResult = result;
-				this.passwordStrength = this.getPasswordStrength(result.score);
+				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
+				this.checkInvalidPassword(result.score);
+
+			}
+			if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
+				this.invalidatePhoneNumber();
+			} else {
+				this.validatePhoneNumber();
 			}
 		}, true);
 
@@ -193,22 +198,48 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
+
+		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
+			if (error.email) {
+				this.emailInvalid = true;
+			}
+		}, true);
 	}
 
-	public getPasswordStrength(score) {
+	public checkInvalidPassword(score) {
 		switch (score) {
 		case 0:
-			return "Very Weak";
+			this.invalidatePassword();
+			break;
 		case 1:
-			return "Weak";
+			this.invalidatePassword();
+			break;
 		case 2:
-			return "OK";
+			this.validatePassword();
+			break;
 		case 3:
-			return "Strong";
+			this.validatePassword();
+			break;
 		case 4:
-			return "Very Strong";
+			this.validatePassword();
+			break;
 		}
-		return "Very Weak";
+	}
+
+	public invalidatePassword() {
+		this.$scope.signup.password.$setValidity("required", false);
+	}
+
+	public validatePassword() {
+		this.$scope.signup.password.$setValidity("required", true);
+	}
+
+	public invalidatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", false);
+	}
+
+	public validatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
@@ -274,7 +305,6 @@ class SignupController implements ng.IController {
 		let	allowRegister = true;
 		const formatRegex = this.ClientConfigService.usernameRegExp;
 		const allowedFormat = new RegExp(formatRegex); // English letters, numbers, underscore, not starting with number
-		const allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
 		if (
 			(!this.isDefined(this.newUser.username)) ||
@@ -288,7 +318,11 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.country))
 
 		) {
-			this.registerErrorMessage = "Please fill all required fields";
+			if (this.emailInvalid) {
+				this.registerErrorMessage = "Email is invalid";
+			} else {
+				this.registerErrorMessage = "Please fill all required fields";
+			}
 			return;
 		}
 
@@ -298,19 +332,18 @@ class SignupController implements ng.IController {
 			return;
 		}
 
-		if ( this.newUser.phoneNo && !allowedPhone.test(this.newUser.phoneNo) ) {
+		if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
 			this.registerErrorMessage = "Phone number can be blank, or made of numbers and +- characters only";
 			return;
 		}
 
-		if ( !this.newUser.password || this.newUser.password.length < 9 ) {
-			this.registerErrorMessage = "Password must be longer than 8 characters";
+		if ( !this.newUser.password || this.newUser.password.length < 8 ) {
+			this.registerErrorMessage = "Password must be at least 8 characters long";
 			return;
 		}
 
 		if (this.passwordResult && this.passwordResult.score < 2) {
-			console.log(this.passwordResult.feedback.suggestions);
-			this.registerErrorMessage = "Password is weak; " + this.passwordResult.feedback.suggestions.join(" ");
+			this.registerErrorMessage = "Password is too weak; " + this.passwordResult.feedback.suggestions.join(" ");
 			return;
 		}
 

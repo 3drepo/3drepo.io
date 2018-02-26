@@ -153,19 +153,23 @@ function setupSubdomain(mainApp, subdomain) {
 		let certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
 		certMap[serverConfig.hostname] = certGroup;
 
-		logCreateService(serverConfig);
-
 		if (!serverConfig.external) {
 
-			if(serverConfig.service === "chat"){
+			// Only load frontend server in maintenance mode
+
+			if(!config.maintenanceMode && serverConfig.service === "chat"){
+
 				//chat server has its own port and can't attach to express
+				logCreateService(serverConfig);
 				createChat(serverConfig);
-				
-			} else {
-				
+
+			}  else if (!config.maintenanceMode || serverConfig.service === "frontend") {
+
+				logCreateService(serverConfig);
 				createService(subDomainApp, serverConfig);
 
-			}
+			} 
+
 
 		}
 		// If the configuration specifies a redirect then apply

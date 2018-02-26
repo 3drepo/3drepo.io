@@ -145,6 +145,7 @@ class ClipController implements ng.IController {
 		 */
 		this.$scope.$watch("vm.sliderPosition", () => {
 			if (!this.disableWatchSlider) {
+
 				this.updateDisplayedDistance(false, this.visible);
 			}
 
@@ -168,8 +169,10 @@ class ClipController implements ng.IController {
 							clip.clipDirection === 1,
 							undefined,
 						);
+
 						this.updateDisplayedDistance(true, this.visible);
 					} else {
+
 						this.reset();
 						this.ViewerService.clearClippingPlanes();
 					}
@@ -186,6 +189,7 @@ class ClipController implements ng.IController {
 					event.value.clipDirection === 1,
 					undefined,
 				);
+
 				this.updateDisplayedDistance(true, this.visible);
 				break;
 
@@ -331,8 +335,7 @@ class ClipController implements ng.IController {
 
 	public reset() {
 		const minMax = this.getMinMax();
-		const scaler = this.getScaler(this.units, this.modelUnits);
-		const dist = minMax.max * scaler;
+		const dist = minMax.max;
 		this.setDisplayValues(this.displayedAxis, dist, false, false, true);
 	}
 
