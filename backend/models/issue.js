@@ -1932,7 +1932,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									let hiddenObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
-										if (vpComponents[i].Visibility[j]["@"].DefaultVisibility) {
+										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
 											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
 												let objectModel = model;
 
