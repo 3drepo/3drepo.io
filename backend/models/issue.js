@@ -583,9 +583,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		if(_.map(statusEnum).indexOf(data.status) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
-		}
+		// if(_.map(statusEnum).indexOf(data.status) === -1){
+		// 	return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
+		// }
 
 		if(_.map(priorityEnum).indexOf(data.priority) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
@@ -1041,36 +1041,37 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	if (statusExists) {
 
-		const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
-		if (invalidStatus) {
+		// const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
+		// if (invalidStatus) {
 
-			throw responseCodes.ISSUE_INVALID_STATUS;
+		// 	throw responseCodes.ISSUE_INVALID_STATUS;
 
-		} else {
+		// } else {
 
-			const statusHasChanged = data.status !== this.status;
+		const statusHasChanged = data.status !== this.status;
 
-			if(statusHasChanged) {
+		if(statusHasChanged) {
 
-				const canChangeStatus = isAdmin || 
-					hasOwnerJob ||
-					(hasAssignedJob && data.status !== statusEnum.CLOSED);
+			const canChangeStatus = isAdmin || 
+				hasOwnerJob ||
+				(hasAssignedJob && data.status !== statusEnum.CLOSED);
 
-				if (canChangeStatus) {
+			if (canChangeStatus) {
 
-					//change status to for_approval if assigned roles is changed.
-					if (data.status === statusEnum.FOR_APPROVAL) {
-						this.assigned_roles = this.creator_role ? [this.creator_role] : [];
-					}
-
-					systemComment = this.addSystemComment(data.owner, "status", this.status, data.status);
-					this.status_last_changed = (new Date()).getTime();
-					this.status = data.status;			
-				} else {
-					throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+				//change status to for_approval if assigned roles is changed.
+				if (data.status === statusEnum.FOR_APPROVAL) {
+					this.assigned_roles = this.creator_role ? [this.creator_role] : [];
 				}
+
+				systemComment = this.addSystemComment(data.owner, "status", this.status, data.status);
+				this.status_last_changed = (new Date()).getTime();
+				this.status = data.status;			
+			} else {
+				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}
 		}
+
+		//}
 	}
 
 	if(data.hasOwnProperty("priority")){

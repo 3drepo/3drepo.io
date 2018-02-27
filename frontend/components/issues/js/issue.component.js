@@ -156,6 +156,28 @@
 
 		};
 
+		vm.createStatusLabel = function(status) {
+			status.charAt(0).toUpperCase() + status.slice(1);
+		}
+
+		vm.handleBCFStatus = function(BCFStatus) {
+
+			var exists = vm.statuses.find(function(status) {
+				return BCFStatus === status.value
+			});
+
+			if (!exists) {
+				var newStatus = {
+					value: BCFStatus,
+					label: BCFStatus
+				}
+				// console.log(newStatus);
+				vm.statuses.push(newStatus);
+				$timeout(function() {});
+			}
+			
+		}
+
 		vm.getPlaceholderText = function() {
 			if (vm.canComment()) {
 				return "Write a new comment";
@@ -222,8 +244,13 @@
 			vm.issueData.priority = (!vm.issueData.priority) ? "none" : vm.issueData.priority;
 			vm.issueData.status = (!vm.issueData.status) ? "open" : vm.issueData.status;
 			vm.issueData.topic_type = (!vm.issueData.topic_type) ? "for_information" : vm.issueData.topic_type;
-			//vm.issueData.due_date = (!vm.issueData.due_date) ? [] : vm.issueData.due_date;
 			vm.issueData.assigned_roles = (!vm.issueData.assigned_roles) ? [] : vm.issueData.assigned_roles;
+
+			vm.issueData.status = vm.issueData.status.toLowerCase()
+
+			//console.log(vm.issueData.status)
+
+			vm.handleBCFStatus(vm.issueData.status);
 
 			vm.checkCanComment();
 
