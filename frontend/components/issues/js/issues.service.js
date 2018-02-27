@@ -37,7 +37,8 @@
 			config = {},
 			numIssues = 0,
 			availableJobs = [],
-			updatedIssue = null;
+			updatedIssue = null,
+			groupsCache = {};
 
 		var initPromise = $q.defer();
 
@@ -76,6 +77,7 @@
 			canChangePriority: canChangePriority,
 			canChangeStatus: canChangeStatus,
 			canChangeType: canChangeType,
+			canChangeDueDate: canChangeDueDate,
 			canChangeAssigned: canChangeAssigned,
 			canComment: canComment,
 			canChangeStatusToClosed: canChangeStatusToClosed,
@@ -363,6 +365,10 @@
 				issue.thumbnailPath = getThumbnailPath(issue.thumbnail);
 			}
 
+			if (issue.due_date) {
+				issue.due_date = new Date(issue.due_date);
+			}
+
 			if (issue) {
 				issue.statusIcon = getStatusIcon(issue);
 			}
@@ -440,6 +446,12 @@
 		function canChangeType(issueData, userJob, permissions) {
 			
 			return canComment(issueData, userJob, permissions);
+
+		}
+
+		function canChangeDueDate(issueData, userJob, permissions) {
+			
+			return canChangeStatusToClosed(issueData, userJob, permissions);
 
 		}
 
@@ -531,12 +543,13 @@
 
 			// Remove highlight from any multi objects
 			ViewerService.highlightObjects([]);
-			
+			TreeService.clearCurrentlySelected();
+
 			// Reset object visibility
 			if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
 				TreeService.setHideIfc(issue.viewpoint.hideIfc);
 			}
-			TreeService.showAllTreeNodes();
+			TreeService.showAllTreeNodes(false);
 
 			// Show multi objects
 			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
@@ -553,36 +566,64 @@
 			}
 		}
 
+		function showOrthogonalViewPrompt() {
+			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
+		}
+
+
+		function handleCameraView(issue) {
+			// Set the camera position
+			var issueData = {
+				position : issue.viewpoint.position,
+				view_dir : issue.viewpoint.view_dir,
+				look_at : issue.viewpoint.look_at,
+				up: issue.viewpoint.up,
+				account: issue.account,
+				model: issue.model
+			};
+			
+			ViewerService.setCamera(issueData);
+
+			if ("orthogonal" === issue.viewpoint.type) {
+				showOrthogonalViewPrompt();
+			}
+		}
+
+		function handleClippingPlane(issue) {
+
+			// TODO: Use ViewerService
+			// Set the clipping planes
+			var issueData = {
+				clippingPlanes: issue.viewpoint.clippingPlanes,
+				fromClipPanel: false,
+				account: issue.account,
+				model: issue.model
+			};
+
+			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+
+		}
+
 		function handleShowIssue(issue) {
-			var issueData;
-			if(issue.viewpoint.position.length > 0) {
-				// Set the camera position
-				issueData = {
-					position : issue.viewpoint.position,
-					view_dir : issue.viewpoint.view_dir,
-					look_at : issue.viewpoint.look_at,
-					up: issue.viewpoint.up,
-					account: issue.account,
-					model: issue.model
-				};
+
+			if(issue && issue.viewpoint ) {
 				
-				ViewerService.setCamera(issueData);
+				if (issue.viewpoint.position && issue.viewpoint.position.length > 0) {
+					handleCameraView(issue);
+				}
 
-				// TODO: Use ViewerService
-				// Set the clipping planes
-				issueData = {
-					clippingPlanes: issue.viewpoint.clippingPlanes,
-					fromClipPanel: false,
-					account: issue.account,
-					model: issue.model
-				};
-
-				EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
+				//if (issue.viewpoint.clippingPlanes && issue.viewpoint.clippingPlanes.length) {
+				handleClippingPlane(issue);
+				//}
 
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
 				ViewerService.goToExtent();
 			}
+
+			TreeService.getMap().then(function(){
+				TreeService.updateModelState(TreeService.allNodes[0]);
+			});
 		}
 
 		function showMultiIds(issue) {
@@ -592,15 +633,24 @@
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
-					var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
+					var highlightPromise;
 
-					var highlightPromise = APIService.get(highlightedGroupUrl)
-						.then(function (response) {
-							return handleHighlights(response.data.objects);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting the highlights: ", error);
-						});
+					if(groupsCache[highlightedGroupId]) {
+						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
+					} else {
+						var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
+
+						highlightPromise = APIService.get(highlightedGroupUrl)
+							.then(function (response) {
+								groupsCache[highlightedGroupId] = response.data.objects;
+								return handleHighlights(response.data.objects);
+							})
+							.catch(function(error){
+								console.error("There was a problem getting the highlights: ", error);
+							});
+					}
+
+					
 
 					promises.push(highlightPromise);
 
@@ -608,39 +658,59 @@
 				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
-					var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+					var hiddenPromise;
 
-					var hiddenPromise = APIService.get(hiddenGroupUrl)
-						.then(function (response) {
-							return handleHidden(response.data.objects);
-						})
-						.catch(function(error){
-							console.error("There was a problem getting visibility: ", error);
-						});
+					if(groupsCache[hiddenGroupId]) {
 
+						highlightPromise = handleHidden(groupsCache[hiddenGroupId]);
+					} else {
+						var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
+
+						hiddenPromise = APIService.get(hiddenGroupUrl)
+							.then(function (response) {
+								groupsCache[hiddenGroupId] = response.data.objects;
+								return handleHidden(response.data.objects);
+							})
+							.catch(function(error){
+								console.error("There was a problem getting visibility: ", error);
+							});
+
+					}
+
+					
 					promises.push(hiddenPromise);
 					
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
-				var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+				var handleTreePromise;
 
-				var handleTreePromise = APIService.get(groupUrl)
-					.then(function (response) {
-						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
-							response.data.hiddenObjects = null;
-						}
-						return handleTree(response);
-					})
-					.catch(function(error){
-						console.error("There was a problem getting the highlights: ", error);
-					});
+				if (groupsCache[groupId]) {
+					handleTreePromise = handleTree(groupsCache[groupId]);
+				} else {
 
+					var groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+
+					handleTreePromise = APIService.get(groupUrl)
+						.then(function (response) {
+							if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
+								response.data.hiddenObjects = null;
+							}
+							groupsCache[groupId] = response;
+							return handleTree(response);
+						})
+						.catch(function(error){
+							console.error("There was a problem getting the highlights: ", error);
+						});
+
+				}
+				
 				promises.push(handleTreePromise);
 
 			}
 
 			return Promise.all(promises);
+
 		}
 
 		function handleHighlights(objects) {
@@ -648,26 +718,32 @@
 			TreeService.getMap()
 				.then(function(treeMap){
 
-					// show currently hidden nodes
-					TreeService.clearCurrentlySelected();
+					var nodes = new Set();
 
 					for (var i = 0; i < objects.length; i++) {
-						var obj = objects[i];
-						var objUid = treeMap.sharedIdToUid[obj.shared_id];
-						
-						if (objUid) {
-				
-							if (i < objects.length - 1) {
-								TreeService.selectNode(TreeService.getNodeById(objUid), true, false);
-							} else {
-								// Only call expandToSelection for last selected node to improve performance
+						var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
+						if (objUid) {
+							var node = TreeService.getNodeById(objUid);
+							if (node && node.hasOwnProperty("name")) {
+								nodes.add(node);
+							}
+
+							if (i === objects.length - 1) {
+								// Only call expandToSelection for last selected node to improve performance
 								TreeService.initNodesToShow([TreeService.allNodes[0]]);
+								// TODO: we no longer need to select here, but still need to expand tree
 								TreeService.expandToSelection(TreeService.getPath(objUid), 0, undefined, true);
 								
+								if (nodes.size > 0) {
+									TreeService.selectNodes(Array.from(nodes), false, true);
+								}
 							}
 						}
 					}
+
+					angular.element(window).triggerHandler("resize");
+					
 				})
 				.catch(function(error) {
 					console.error(error);
@@ -680,10 +756,14 @@
 				.then(function(treeMap){
 
 					if (objects) {
+						// Make a list of nodes to hide
 						var hiddenNodes = [];
 						for (var i = 0; i < objects.length; i++) {
-							// Make a list of nodes to hide
-							hiddenNodes.push(TreeService.getNodeById(treeMap.sharedIdToUid[objects[i].shared_id]));
+							var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+							if (objUid) {
+								hiddenNodes.push(TreeService.getNodeById(objUid));
+							}
 						}
 						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
 					}
@@ -1091,61 +1171,95 @@
 		function convertActionCommentToText(comment, topic_types) {
 			var text = "";
 
-			switch (comment.action.property) {
-			case "priority":
+			if (comment) {
+				switch (comment.action.property) {
+				case "priority":
 
-				comment.action.propertyText = "Priority";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to = convertActionValueToText(comment.action.to);
-				break;
+					comment.action.propertyText = "Priority";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to = convertActionValueToText(comment.action.to);
+					break;
 
-			case "status":
+				case "status":
 
-				comment.action.propertyText = "Status";
-				comment.action.from = convertActionValueToText(comment.action.from);
-				comment.action.to= convertActionValueToText(comment.action.to);
+					comment.action.propertyText = "Status";
+					comment.action.from = convertActionValueToText(comment.action.from);
+					comment.action.to= convertActionValueToText(comment.action.to);
+					break;
 
-				break;
+				case "assigned_roles":
 
-			case "assigned_roles":
+					comment.action.propertyText = "Assigned";
+					comment.action.from = comment.action.from.toString();
+					comment.action.to= comment.action.to.toString();	
+					break;
 
-				comment.action.propertyText = "Assigned";
-				comment.action.from = comment.action.from.toString();
-				comment.action.to= comment.action.to.toString();	
-							
-				break;
+				case "topic_type":
 
-			case "topic_type":
+					comment.action.propertyText = "Type";
+					if(topic_types){
 
-				comment.action.propertyText = "Type";
-				if(topic_types){
+						var from = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.from;
+						});
 
-					var from = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.from;
-					});
+						var to = topic_types.find(function(topic_type){
+							return topic_type.value === comment.action.to;
+						});
 
-					var to = topic_types.find(function(topic_type){
-						return topic_type.value === comment.action.to;
-					});
+						if(from && from.label){
+							comment.action.from = from.label;
+						}
 
-					if(from && from.label){
-						comment.action.from = from.label;
+						if(to && to.label){
+							comment.action.to = to.label;
+						}
 					}
+					break;
 
-					if(to && to.label){
-						comment.action.to = to.label;
+				case "desc":
+
+					comment.action.propertyText = "Description";
+					break;
+
+				case "due_date":
+
+					comment.action.propertyText = "Due Date";
+					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					if (comment.action.from) {
+						comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+					} else {
+						text = comment.action.propertyText + " set to " +
+							comment.action.to + " by " +
+							comment.owner;
 					}
+					break;
+
+				case "bcf_import":
+
+					comment.action.propertyText = "BCF Import";
+					text = comment.action.propertyText + " by " + comment.owner;
+					break;
 
 				}
-
-				break;
-
-			case "desc":
-
-				comment.action.propertyText = "Description";
-
-				break;
 			}
+
+			if (0 === text.length) {
+				if (!comment.action.from) {
+					comment.action.from = "";
+				}
+
+				if (!comment.action.to) {
+					comment.action.to = "";
+				}
+
+				text = comment.action.propertyText + " updated from " +
+					comment.action.from + " to " +
+					comment.action.to + " by " +
+					comment.owner;
+			}
+
+			comment.action.text = text;
 
 			return text;
 		}

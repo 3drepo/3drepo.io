@@ -6,6 +6,7 @@ require("angular-material");
 require("angular-sanitize");
 require("angular-aria");
 require("angular-recaptcha");
+
 // require("material-design-icons");
 window.io = require("socket.io-client"); // Otherwise io is undefined
 

@@ -1,4 +1,3 @@
-import { IQService } from "angular";
 import { UnityUtil } from "../../../_built/amd/globals/unity-util";
 
 /**
@@ -41,7 +40,7 @@ export class ViewerService {
 	private Viewer: any;
 
 	constructor(
-		public $q: IQService,
+		public $q: ng.IQService,
 
 		public ClientConfigService: any,
 		public APIService: any,
@@ -50,7 +49,7 @@ export class ViewerService {
 		public DocsService: any,
 
 	) {
-		console.log("Loading viewer...");
+
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
@@ -185,16 +184,18 @@ export class ViewerService {
 	}
 
 	public setCamera(params) {
-		this.viewer.setCamera(
-			params.position,
-			params.view_dir,
-			params.up,
-			params.look_at,
-			params.animate !== undefined ? params.animate : true,
-			params.rollerCoasterMode,
-			params.account,
-			params.model,
-		);
+		if (this.viewer) {
+			this.viewer.setCamera(
+				params.position,
+				params.view_dir,
+				params.up,
+				params.look_at,
+				params.animate !== undefined ? params.animate : true,
+				params.rollerCoasterMode,
+				params.account,
+				params.model,
+			);
+		}
 	}
 
 	public removeUnsavedPin() {
@@ -210,7 +211,9 @@ export class ViewerService {
 	}
 
 	public clearHighlights() {
-		this.viewer.clearHighlights();
+		if (this.viewer) {
+			this.viewer.clearHighlights();
+		}
 	}
 
 	public getCurrentViewpoint(params) {
@@ -513,6 +516,24 @@ export class ViewerService {
 	public diffToolDiffView() {
 		if (this.viewer) {
 			this.viewer.diffToolDiffView();
+		}
+	}
+
+	public mapInitialise(surveyPoints) {
+		if (this.viewer) {
+			this.viewer.mapInitialise(surveyPoints);
+		}
+	}
+
+	public  mapStart() {
+		if (this.viewer) {
+			this.viewer.mapStart();
+		}
+	}
+
+	public mapStop() {
+		if (this.viewer) {
+			this.viewer.mapStop();
 		}
 	}
 

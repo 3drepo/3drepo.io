@@ -18,6 +18,9 @@ class AccountProfileController implements ng.IController {
 
 	public static $inject: string[] = [
 		"AccountService",
+		"PasswordService",
+
+		"$scope",
 	];
 
 	private emailNew;
@@ -35,22 +38,74 @@ class AccountProfileController implements ng.IController {
 	private passwordSaveError;
 	private showInfo;
 	private showChangePassword;
+	private passwordValid;
+	private passwordStrength;
 
 	constructor(
 		private AccountService: any,
+		private PasswordService: any,
+
+		private $scope: any,
 	) {}
 
 	/*
 		* Init
 		*/
-	public $onInit = function() {
+	public $onInit() {
 		this.showInfo = true;
 		this.showChangePassword = false;
 		this.firstNameNew = this.firstName;
 		this.lastNameNew = this.lastName;
 		this.emailNew = this.email;
+		this.passwordStrength = "";
+		this.PasswordService.addPasswordStrengthLib();
+		this.watchers();
+	}
 
-	};
+	public watchers() {
+		this.$scope.$watch("vm.newPassword", (newPassword) => {
+			if (newPassword !== undefined) {
+				const result = this.PasswordService.evaluatePassword(this.newPassword);
+				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
+				this.checkInvalidPassword(result);
+			}
+		});
+	}
+
+	public checkInvalidPassword(result) {
+		switch (result.score) {
+		case 0:
+			this.invalidatePassword();
+			this.passwordSaveError = "Password is too weak; " + result.feedback.suggestions.join(" ");
+			break;
+		case 1:
+			this.invalidatePassword();
+			this.passwordSaveError = "Password is too weak; " + result.feedback.suggestions.join(" ");
+			break;
+		case 2:
+			this.validatePassword();
+			this.passwordSaveError = "";
+			break;
+		case 3:
+			this.validatePassword();
+			this.passwordSaveError = "";
+			break;
+		case 4:
+			this.validatePassword();
+			this.passwordSaveError = "";
+			break;
+		}
+	}
+
+	public invalidatePassword() {
+		this.$scope.password.new.$setValidity("required", false);
+		this.passwordValid = false;
+	}
+
+	public validatePassword() {
+		this.$scope.password.new.$setValidity("required", true);
+		this.passwordValid = true;
+	}
 
 	/**
 	 * Update the user info
@@ -105,6 +160,33 @@ class AccountProfileController implements ng.IController {
 					this.passwordSaveError = "Unknown error updating password";
 				}
 			});
+	}
+
+	public passwordUpdateDisabled() {
+		if (!this.oldPassword || !this.newPassword) {
+			return true;
+		}
+		if (this.oldPassword === this.newPassword) {
+			return true;
+		}
+		if (!this.passwordValid) {
+			return true;
+		}
+		return false;
+	}
+
+	public canUpdate() {
+
+		const valid = this.firstNameNew &&
+				this.lastNameNew &&
+				this.emailNew;
+
+		const notSame = this.firstName !== this.firstNameNew ||
+					this.lastName !== this.lastNameNew ||
+					this.email !== this.emailNew;
+
+		return valid && notSame;
+
 	}
 
 	/**

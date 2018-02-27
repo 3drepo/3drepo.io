@@ -48,14 +48,14 @@ export class PanelService {
 					noToggle: true,
 					icon: "fa-print",
 				},
-				/*{
+				{
 					hidden: false,
 					value: "importBCF",
 					label: "Import BCF",
 					selected: false,
 					noToggle: true,
 					icon: "fa-upload",
-				},*/
+				},
 				{
 					hidden: false,
 					value: "exportBCF",
@@ -173,6 +173,17 @@ export class PanelService {
 			options: [],
 		});
 
+		this.issuesPanelCard.left.push({
+			type: "gis",
+			title: "GIS",
+			show: false,
+			help: "Add various GIS data to the view",
+			icon: "landscape",
+			minHeight: 80,
+			fixedHeight: false,
+			options: [],
+		});
+
 		this.issuesPanelCard.right.push({
 			type: "docs",
 			title: "Meta Data",
@@ -225,7 +236,7 @@ export class PanelService {
 	public setHideIfc(value: boolean) {
 		const issuesCardIndex = 1; // index of tree panel
 		const menuItemIndex = 2; // index of hideIfc
-		
+
 		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
 			.menu[menuItemIndex];
 

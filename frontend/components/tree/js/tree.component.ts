@@ -1,5 +1,3 @@
-import { IScope, ITimeoutService } from "angular";
-// import { TreeService } from "./tree.service";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -30,7 +28,7 @@ class TreeController implements ng.IController {
 	];
 
 	public showProgress: boolean; // in pug
-
+	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
@@ -57,8 +55,8 @@ class TreeController implements ng.IController {
 	private searching;
 
 	constructor(
-		private $scope: IScope,
-		private $timeout: ITimeoutService,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
 
 		private TreeService,
 		private EventService,
@@ -71,6 +69,7 @@ class TreeController implements ng.IController {
 	}
 
 	public $onInit() {
+		this.TreeService.reset();
 		this.showNodes = true;
 		this.nodes = [];
 		this.showTree = true;
@@ -83,11 +82,8 @@ class TreeController implements ng.IController {
 		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
-
 		this.allNodes = [];
-
 		this.watchers();
-
 	}
 
 	public $onDestroy() {
@@ -119,6 +115,10 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
+							this.TreeService.updateModelState(this.allNodes[0]);
+
+							angular.element((window as any).window).triggerHandler("resize");
+
 						}
 					}
 				}
@@ -131,25 +131,17 @@ class TreeController implements ng.IController {
 				}
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
-				this.allNodes = [];
-				this.allNodes.push(event.value.nodes);
-				this.TreeService.setAllNodes(this.allNodes);
+				this.allNodes = this.TreeService.getAllNodes();
 				this.nodes = this.allNodes;
 				this.showTree = true;
 				this.showProgress = false;
-				this.TreeService.setSubTreesById(event.value.subTreesById);
-				this.TreeService.setCachedIdToPath(event.value.idToPath);
-
-				this.TreeService.setSubModelIdToPath(event.value.subModelIdToPath);
-
 				this.initNodesToShow();
 				this.setupInfiniteItemsFilter();
-
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
 				this.$timeout(() => {}).then(() => {
-					//this.TreeService.showAllTreeNodes();
-					//this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
+					// this.TreeService.showAllTreeNodes();
+					// this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
 				});
 
 			}
@@ -167,7 +159,8 @@ class TreeController implements ng.IController {
 					this.progressInfo = "Filtering tree for objects";
 
 					this.searching = true;
-					this.TreeService.search(newValue)
+
+					this.TreeService.search(newValue, this.revision)
 						.then((json) => {
 
 							if (!this.showFilterList) {
@@ -207,7 +200,7 @@ class TreeController implements ng.IController {
 					// Menu option
 					switch (selectedOption.value) {
 						case "showAll":
-							this.TreeService.showAllTreeNodes();
+							this.TreeService.showAllTreeNodes(true);
 							break;
 						case "hideIfc":
 							this.hideIfc = selectedOption.selected;
@@ -383,7 +376,7 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		this.$scope.$broadcast("$md-resize");
+		angular.element((window as any).window).triggerHandler("resize");
 
 	}
 
@@ -414,8 +407,9 @@ class TreeController implements ng.IController {
 	}
 
 	public toggleTreeNode(node) {
-		let newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
 		this.TreeService.setTreeNodeStatus(node, newState);
+		this.TreeService.updateModelState(node);
 	}
 
 	/**
@@ -425,6 +419,7 @@ class TreeController implements ng.IController {
 	 */
 	public selectNode(node) {
 		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
+		this.TreeService.updateModelState(node);
 	}
 
 	public filterItemSelected(item) {
@@ -441,11 +436,14 @@ class TreeController implements ng.IController {
 			this.currentFilterItemSelected = item;
 		}
 
-		const selectedNode = this.nodes[item.index];
+		const selectedComponentNode = this.nodes[item.index];
 
-		if (selectedNode) {
+		if (selectedComponentNode) {
 			// TODO: This throws a unity error when filtering
-			this.TreeService.selectNode(selectedNode, this.MultiSelectService.isMultiMode(), true);
+
+			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
+			this.TreeService.selectNode(serviceNode, this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.updateModelState(serviceNode);
 		}
 
 	}

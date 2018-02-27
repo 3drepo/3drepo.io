@@ -1,11 +1,17 @@
 @media print {
-    html, body, home {
+
+    html, body, home, .homeContainer, 
+    #homeLegalContainer, #legal, #legalText, 
+    #terms, #privacy, #cookies {
         overflow: visible !important;
         height: 100% !important;
     }
-    #legal #legalText {
-        height: 100% !important;
-    }
+
+}
+
+#terms, #privacy, #cookies {
+    width: 100%;
+    height: 100%;
 }
 
 home {
@@ -34,6 +40,14 @@ home #homeBackground {
     height:100%;
     top:0
 }
+
+@media (max-width: 767px) { 
+    home #homeLogo {
+        display: none;
+    } 
+}
+
+
 
 home #homeLogo {
     padding-bottom: 20px;
@@ -65,15 +79,6 @@ home #homeLogo img {
         margin-bottom: 80px;
         margin-top: 0px !important;
     }
-
-    /* home #homeLoggedOut {
-        top: 80px !important;
-    }
-        
-    home .homeHolder {
-        padding-bottom: 20px;
-    } */
-
 }
 
 home .homeUserContent {
@@ -145,7 +150,7 @@ home #legalLinks {
     margin-right: 18px;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   home #legalLinks {
     width: 100%;
     margin-right: 0;
@@ -153,16 +158,16 @@ home #legalLinks {
     background: #0c2f54;
   }
 
-    home #legalLinks a {
+home #legalLinks a {
     font-size: 11px !important;
     margin: 5px 5px 5px !important;
   }
 
 }
 
-home #homeLegalContainer {
+/* home #homeLegalContainer {
     overflow: hidden !important;
-}
+} */
 
 home #homeLoggedOut {
     top: 80px;

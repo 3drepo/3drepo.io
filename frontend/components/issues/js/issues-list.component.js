@@ -118,69 +118,80 @@
 			// Menu option
 			if (vm.menuOption && vm.menuOption.value) {
 
+				var ids = [];
+				IssuesService.state.issuesToShow.forEach(function(issue){
+					ids.push(issue._id);
+				});
+
 				switch(vm.menuOption.value) {
-				
-				case "sortByDate":
-					//vm.sortOldestFirst = !vm.sortOldestFirst;
-					IssuesService.state.issueDisplay.sortOldestFirst = !IssuesService.state.issueDisplay.sortOldestFirst;
-					break;
-				
-				case "showClosed":
-					//vm.showClosed = !vm.showClosed;
-					IssuesService.state.issueDisplay.showClosed = !IssuesService.state.issueDisplay.showClosed;
-					break;
 
-				case "showSubModels":
-					//vm.showSubModelIssues = !vm.showSubModelIssues;
-					IssuesService.state.issueDisplay.showSubModelIssues = !IssuesService.state.issueDisplay.showSubModelIssues;
-					break;
-				
-				case "print":
-					var ids = [];
-					IssuesService.state.issuesToShow.forEach(function(issue){
-						ids.push(issue._id);
-					});
-					var printEndpoint = vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",");
-					var printUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, printEndpoint);
-					$window.open(printUrl, "_blank");
-					break;
+					case "sortByDate":
+						//vm.sortOldestFirst = !vm.sortOldestFirst;
+						IssuesService.state.issueDisplay.sortOldestFirst = !IssuesService.state.issueDisplay.sortOldestFirst;
+						break;
 
-				case "exportBCF":
-					var bcfEndpoint = vm.account + "/" + vm.model + "/issues.bcfzip";
-					var bcfUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, bcfEndpoint);
-					$window.open(bcfUrl, "_blank");
-					break;
+					case "showClosed":
+						//vm.showClosed = !vm.showClosed;
+						IssuesService.state.issueDisplay.showClosed = !IssuesService.state.issueDisplay.showClosed;
+						break;
 
-				case "importBCF":
-					var file = document.createElement("input");
-					file.setAttribute("type", "file");
-					file.setAttribute("accept", ".zip,.bcfzip");
-					file.click();
+					case "showSubModels":
+						//vm.showSubModelIssues = !vm.showSubModelIssues;
+						IssuesService.state.issueDisplay.showSubModelIssues = !IssuesService.state.issueDisplay.showSubModelIssues;
+						break;
 
-					file.addEventListener("change", function () {
-						vm.importBcf({file: file.files[0]});
-					});
-					break;
+					case "print":
+						var ids = [];
+						var issuesToPrint = IssuesService.state.issuesToShow.concat();
 
-				case "filterRole":
-					var roleIndex = IssuesService.state.issueDisplay.excludeRoles.indexOf(vm.menuOption.role);
-					if(vm.menuOption.selected){
-						if(roleIndex !== -1){
-							IssuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
+						issuesToPrint.sort(function() {
+							return function(a, b) {
+								return a.created - b.created;
+							};
+						})
+
+						issuesToPrint.forEach(function(issue){
+							ids.push(issue._id);
+						});
+
+						var printEndpoint = vm.account + "/" + vm.model + "/issues.html?ids=" + ids.join(",");
+						var printUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, printEndpoint);
+						$window.open(printUrl, "_blank");
+						break;
+
+					case "exportBCF":
+						var bcfEndpoint = vm.account + "/" + vm.model + "/issues.bcfzip?ids=" + ids.join(",");
+						var bcfUrl = ClientConfigService.apiUrl(ClientConfigService.GET_API, bcfEndpoint);
+						$window.open(bcfUrl, "_blank");
+						break;
+
+					case "importBCF":
+						var file = document.createElement("input");
+						file.setAttribute("type", "file");
+						file.setAttribute("accept", ".zip,.bcfzip");
+						file.click();
+
+						file.addEventListener("change", function () {
+							vm.importBcf({file: file.files[0]});
+						});
+						break;
+
+					case "filterRole":
+						var roleIndex = IssuesService.state.issueDisplay.excludeRoles.indexOf(vm.menuOption.role);
+						if(vm.menuOption.selected){
+							if(roleIndex !== -1){
+								IssuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
+							}
+						} else {
+							if(roleIndex === -1){
+								IssuesService.state.issueDisplay.excludeRoles.push(vm.menuOption.role);
+							}
 						}
-					} else {
-						if(roleIndex === -1){
-							IssuesService.state.issueDisplay.excludeRoles.push(vm.menuOption.role);
-						}
-					}
-					break;
-
+						break;
 				}
 
 				vm.setupIssuesToShow();
-
 			}
-
 		});
 
 		vm.setupIssuesToShow = function() {
@@ -206,9 +217,7 @@
 
 		vm.selectIssue = function (issue) {
 			IssuesService.setSelectedIssue(issue);
-			$timeout(function() {
-				$scope.$broadcast("$md-resize");
-			});	
+			angular.element(window).triggerHandler("resize");
 		};
 
 		vm.isSelectedIssue = function(issue) {

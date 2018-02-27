@@ -128,7 +128,24 @@
 		$urlRouterProvider.otherwise("");
 	}
 
-	function run($location, $rootScope, $state, StateManager, AuthService, $timeout, AnalyticService) {
+	function run($location, $rootScope, $state, StateManager, AuthService, $timeout, AnalyticService, $mdDateLocale, $filter) {
+
+		$mdDateLocale.formatDate = function(date, timezone) {
+			if (!date) {
+			  return '';
+			}
+	
+			var localeTime = date.toLocaleTimeString();
+			var formatDate = date;
+			if (date.getHours() === 0 &&
+				(localeTime.indexOf('11:') !== -1 || localeTime.indexOf('23:') !== -1)) {
+				formatDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0, 0);
+			}
+			
+			return $filter('date')(formatDate, 'd/M/yyyy', timezone);
+		}
+
+
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 
 			StateManager.state.changing = true;
@@ -524,7 +541,7 @@
 
 
 	run.$inject = [
-		"$location", "$rootScope", "$state", "StateManager", "AuthService", "$timeout", "AnalyticService"
+		"$location", "$rootScope", "$state", "StateManager", "AuthService", "$timeout", "AnalyticService", "$mdDateLocale", "$filter"
 	];
 
 	StateManager.$inject = [
