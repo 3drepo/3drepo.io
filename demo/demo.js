@@ -6,14 +6,6 @@ var API_PREFIX = "https://api1.www.3drepo.io";
 // variable called Module
 var Module = {
     TOTAL_MEMORY: 2130706432,
-    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
-    compatibilitycheck: null,
-    backgroundColor: "#222C36",
-    splashStyle: "Light",
-    dataUrl: PREFIX + "/unity/Release/unity.data",
-    codeUrl: PREFIX + "/unity/Release/unity.js",
-    asmUrl: PREFIX + "/unity/Release/unity.asm.js",
-    memUrl: PREFIX + "/unity/Release/unity.mem",
 };
 
 init();

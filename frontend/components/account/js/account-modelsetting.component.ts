@@ -110,8 +110,10 @@ class AccountModelSettingController implements ng.IController {
 							this.referencePoints.angleFromNorth = response.data.angleFromNorth;
 						}
 						if (reference.position) {
+
+							// Positions coming from the API
 							this.referencePoints.position.x = reference.position[0];
-							this.referencePoints.position.z = reference.position[1];
+							this.referencePoints.position.z = -1 * reference.position[1];
 							this.referencePoints.position.y = -1 * reference.position[2];
 						}
 					}
@@ -199,11 +201,11 @@ class AccountModelSettingController implements ng.IController {
 	public getPosition() {
 
 		// 3drepo.io expects coordinates to come in the format
-		// (x,z,-y) so we need to do some massaging to our data
+		// (x, -z, -y) so we need to do some massaging to our data
 
 		return [
 			parseFloat(this.referencePoints.position.x) || 0.0,
-			parseFloat(this.referencePoints.position.z) || 0.0,
+			-parseFloat(this.referencePoints.position.z) || 0.0,
 			-parseFloat(this.referencePoints.position.y) || 0.0,
 		];
 
@@ -249,8 +251,6 @@ class AccountModelSettingController implements ng.IController {
 				data.surveyPoints[0].latLong = this.getLatLong();
 			}
 		}
-
-		console.log("surveyPoints: ", data.surveyPoints);
 
 		const saveUrl = this.targetAcct + "/" + this.modelId +  "/settings";
 

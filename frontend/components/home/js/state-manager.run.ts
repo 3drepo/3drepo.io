@@ -15,7 +15,35 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function StateManagerRun($location, $rootScope, $state, StateManager, AuthService, $timeout, AnalyticService) {
+function StateManagerRun(
+	$location,
+	$rootScope,
+	$state,
+	$timeout,
+	$mdDateLocale,
+	$filter,
+
+	StateManager,
+	AuthService,
+	AnalyticService,
+) {
+
+	const dateFilter = $filter("date");
+
+	$mdDateLocale.formatDate = (date, timezone) => {
+		if (!date) {
+			return "";
+		}
+
+		const localeTime = date.toLocaleTimeString();
+		let formatDate = date;
+		if (date.getHours() === 0 &&
+			(localeTime.indexOf("11:") !== -1 || localeTime.indexOf("23:") !== -1)) {
+			formatDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0, 0);
+		}
+
+		return dateFilter(formatDate, "d/M/yyyy", timezone);
+	};
 
 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
 
@@ -71,9 +99,12 @@ export const StateManagerRunModule = angular
 		"$location",
 		"$rootScope",
 		"$state",
+		"$timeout",
+		"$mdDateLocale",
+		"$filter",
+
 		"StateManager",
 		"AuthService",
-		"$timeout",
 		"AnalyticService",
 		StateManagerRun,
 	]);

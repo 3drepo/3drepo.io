@@ -80,15 +80,8 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
-		unitySettings: {
+	unitySettings: {
         TOTAL_MEMORY: 2130706432 / 10,
-        compatibilitycheck: null,
-        backgroundColor: "#222C36",
-        splashStyle: "Light",
-        dataUrl: "unity/Release/unity.data",
-        codeUrl: "unity/Release/unity.js",
-        asmUrl: "unity/Release/unity.asm.js",
-        memUrl: "unity/Release/unity.mem"
     },
 	auth: {
 		captcha: false,
@@ -132,12 +125,5 @@ module.exports = {
 	userNotice: false,
 	unitySettings: {
         TOTAL_MEMORY: 2130706432 / 10,
-        compatibilitycheck: null,
-        backgroundColor: "#222C36",
-        splashStyle: "Light",
-        dataUrl: "unity/Release/unity.data",
-        codeUrl: "unity/Release/unity.js",
-        asmUrl: "unity/Release/unity.asm.js",
-        memUrl: "unity/Release/unity.mem"
     },
 }

@@ -138,6 +138,7 @@ class BottomButtonsController implements ng.IController {
 			// Set the viewing mode
 			this.selectedMode = type;
 			this.ViewerService.setNavMode(this.viewingOptions[type].mode);
+			this.showViewingOptions = false;
 		}
 
 	}
