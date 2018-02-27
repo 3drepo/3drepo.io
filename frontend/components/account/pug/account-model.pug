@@ -32,5 +32,5 @@ div(layout="row", layout-align="start center", flex)
 				md-menu-item(ng-repeat="(key, value) in vm.modelOptions", ng-if="!value.hidden")
 					md-button(ng-click="vm.doModelOption($event, key)")
 						div(layout="row", flex)
-							span(flex, style="color:{{value.color}}") {{value.label}}
 							md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
+							span(flex, style="color:{{value.color}}") {{value.label}}
