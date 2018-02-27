@@ -158,7 +158,6 @@ class HomeController implements ng.IController {
 			},
 		);
 
-
 		// TODO: This feels like a bit of a hack. Let's come up with
 		// a better way!
 		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
@@ -169,16 +168,11 @@ class HomeController implements ng.IController {
 				return;
 			}
 
-			console.log("event", event);
-
 			switch (event) {
 			case this.AuthService.events.USER_LOGGED_IN:
-				console.log("USER_LOGGED_IN", this.AuthService.state);
 
 				if (!currentData.error) {
 					if (!currentData.initialiser) {
-
-						console.log("Updating login state")
 
 						this.StateManager.updateState(true);
 
@@ -254,7 +248,7 @@ class HomeController implements ng.IController {
 					});
 
 				} else if (
-					this.AuthService.getUsername() && 
+					this.AuthService.getUsername() &&
 					newState.account !== this.AuthService.getUsername() &&
 					!newState.model
 				) {
@@ -300,7 +294,7 @@ class HomeController implements ng.IController {
 		const host = this.$location.host();
 		if (host.indexOf(".") < 0) {
 			return "";
-		} 
+		}
 		return host.split(".")[0];
 	}
 
