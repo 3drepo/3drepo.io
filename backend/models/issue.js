@@ -547,16 +547,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let issue = Issue.createInstance(dbColOptions);
 	issue._id = stringToUUID(uuid.v1());
 
-	let checkGroup = function(group_id){
-		return Group.findByUID(dbColOptions, group_id).then(group => {
-			if(!group){
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			} else {
-				return Promise.resolve(group);
-			}
-		});
-	};
-
 	if(!data.name){
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
 	}
@@ -587,21 +577,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}
 	}));
 
-	let group;
-
 	return Promise.all(promises).then(() => {
-
-		if(data.group_id){
-			return checkGroup(data.group_id);
-		} else {
-			return Promise.resolve();
-		}
-		
-	}).then(_group => {
-
-		if(_group){
-			group = _group;
-		}
 
 		return Issue.count(dbColOptions);
 		
@@ -686,12 +662,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		return issue.save().then(issue => {
 
-			if(group){
-				group.issue_id = issue._id;
-				return group.save();
-			} else {
-				return Promise.resolve();
-			}
+			return this.setGroupIssueId(dbColOptions, data, issue._id);
 
 		}).then(() => {
 			return ModelSetting.findById(dbColOptions, dbColOptions.model);
@@ -703,6 +674,43 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			return Promise.resolve(cleaned);
 		});
+	});
+};
+
+schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
+
+	let checkGroup = function(group_id){
+		return Group.findByUID(dbColOptions, group_id).then(group => {
+			if(!group){
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			} else {
+				return Promise.resolve(group);
+			}
+		});
+	};
+
+	let groupCheckPromises = [];
+
+	if (data.group_id){
+		groupCheckPromises.push(checkGroup(data.group_id));
+	}
+
+	if (data.viewpoint && data.viewpoint.highlighted_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.highlighted_group_id));
+	}
+
+	if (data.viewpoint && data.viewpoint.hidden_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
+	}
+
+	return Promise.all(groupCheckPromises).then(groups => {
+
+		for (let i = 0; groups && i < groups.length; i++) {
+			groups[i].issue_id = issueId;
+			groups[i].save();
+		}
+
+		return Promise.resolve();
 	});
 };
 
@@ -886,6 +894,8 @@ schema.methods.updateComment = function(commentIndex, data){
 			return this.save();
 
 		}).then(issue => {
+
+			schema.statics.setGroupIssueId(this._dbcolOptions, data, issue._id);
 
 			issue = issue.clean();
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
