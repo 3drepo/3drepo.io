@@ -1626,7 +1626,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										guid: utils.generateUUID(),
 										created: timeStamp,
 										action: {property: "bcf_import"},
-										owner: account
+										owner: requester.user
 									};
 
 									if (!matchingIssue) {
@@ -1683,7 +1683,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						});
 
 						if(notifications.length){
-							ChatEvent.newIssues(requester, account, model, notifications);
+							ChatEvent.newIssues(requester.socketId, account, model, notifications);
 						}
 						
 						resolve();
