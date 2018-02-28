@@ -26,6 +26,7 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
+		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -61,6 +62,7 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
+		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -199,10 +201,8 @@ class ModelController implements ng.IController {
 					this.PanelService.hideSubModels(this.issuesCardIndex, true);
 				}
 
-				this.EventService.send(
-					this.EventService.EVENT.MODEL_SETTINGS_READY,
-					data,
-				);
+				this.ViewerService.updateViewerSettings(data.updateViewerSettings);
+				this.ClipService.initClip(data.properties.unit);
 
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
 					.then((tree) => {

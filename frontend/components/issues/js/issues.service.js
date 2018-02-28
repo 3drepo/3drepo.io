@@ -23,13 +23,13 @@
 
 	IssuesService.$inject = [
 		"$q", "$sanitize", "ClientConfigService", "EventService", 
-		"APIService", "TreeService", "AuthService", "MultiSelectService",
+		"APIService", "TreeService", "AuthService", "MultiSelectService", "ClipService",
 		"ViewerService", "$timeout", "$filter"
 	];
 
 	function IssuesService(
 		$q, $sanitize, ClientConfigService, EventService, 
-		APIService, TreeService, AuthService, MultiSelectService,
+		APIService, TreeService, AuthService, MultiSelectService, ClipService,
 		ViewerService, $timeout, $filter
 	) {
 
@@ -589,21 +589,6 @@
 			}
 		}
 
-		function handleClippingPlane(issue) {
-
-			// TODO: Use ViewerService
-			// Set the clipping planes
-			var issueData = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			};
-
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
-
-		}
-
 		function handleShowIssue(issue) {
 
 			if(issue && issue.viewpoint ) {
@@ -612,9 +597,14 @@
 					handleCameraView(issue);
 				}
 
-				//if (issue.viewpoint.clippingPlanes && issue.viewpoint.clippingPlanes.length) {
-				handleClippingPlane(issue);
-				//}
+				var issueData = {
+					clippingPlanes: issue.viewpoint.clippingPlanes,
+					fromClipPanel: false,
+					account: issue.account,
+					model: issue.model
+				};
+
+				ClipService.updateClippingPlane(issueData);
 
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
