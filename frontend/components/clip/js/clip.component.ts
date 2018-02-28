@@ -69,6 +69,7 @@ class ClipController implements ng.IController {
 	) {}
 
 	public $onInit() {
+		this.ClipService.reset();
 
 		this.onContentHeightRequest({height: 130});
 
@@ -86,6 +87,7 @@ class ClipController implements ng.IController {
 	public $onDestroy() {
 		this.units = undefined;
 		this.bbox = null;
+		this.ClipService.setShow(false);
 	}
 
 	public watchers() {
