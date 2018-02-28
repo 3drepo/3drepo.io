@@ -62,7 +62,7 @@
 							// Project Models and Federations
 							md-list.tree-branch(ng-show="vm.shouldShow(project, 'project', account.account)")
 
-								div(ng-click="vm.toggleModels(project)")
+								div.toggleModels(ng-click="vm.toggleModels(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
 											md-icon.angular-material-icons(ng-if="vm.shouldShow(project, 'models')") folder_open
@@ -91,7 +91,7 @@
 									p.no-federations(ng-if="vm.getIndividualModels(project.models).length == 0") No models created
 
 								
-								div(ng-click="vm.toggleFederations(project)")
+								div.toggleFederations(ng-click="vm.toggleFederations(project)")
 									md-list-item.tree-node(flex)
 										md-button.md-icon-button(aria-label="Folder")
 											md-icon.angular-material-icons(ng-if="vm.shouldShow(project, 'federations')") folder_open

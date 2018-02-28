@@ -221,13 +221,18 @@ function getIssuesBCF(req, res, next) {
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let model = req.params.model;
-	
+
+	let ids;
+	if (req.query.ids) {
+		ids = req.query.ids.split(",");
+	}
+
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
 	} else {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
 	}
 
 	getBCFZipRS.then(zipRS => {

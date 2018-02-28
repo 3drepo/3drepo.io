@@ -15,30 +15,30 @@ describe("Adding items", function() {
 	describe("needs the teamspace page", () => {
 
 		it("with button for adding projects, models and federations", () => {
-			expect(element(by.id('addButtons')).isPresent()).to.eventually.equal(true);
+			expect(element(by.id("addButtons")).isPresent()).to.eventually.equal(true);
 		});
 
 		it("with add button should show add menu and hide on second click", () => {
-            
-            element(by.id("addButtons")).click();
-            expect(element(by.id("floating-button")).isDisplayed()).to.eventually.equal(true);
-            expect(element(by.id("addModel")).isDisplayed()).to.eventually.equal(true);
-            expect(element(by.id("addFederation")).isDisplayed()).to.eventually.equal(true);
-            expect(element(by.id("addProject")).isDisplayed()).to.eventually.equal(true);
-            
-			         element(by.id('addButtons')).click();
-            expect(element(by.id("floating-button")).isPresent()).to.eventually.equal(false);
-            expect(element(by.id("addModel")).isPresent()).to.eventually.equal(false);
-            expect(element(by.id("addFederation")).isPresent()).to.eventually.equal(false);
-            expect(element(by.id("addProject")).isPresent()).to.eventually.equal(false);
+
+			element(by.id("addButtons")).click();
+			expect(element(by.id("floating-button")).isDisplayed()).to.eventually.equal(true);
+			expect(element(by.id("addModel")).isDisplayed()).to.eventually.equal(true);
+			expect(element(by.id("addFederation")).isDisplayed()).to.eventually.equal(true);
+			expect(element(by.id("addProject")).isDisplayed()).to.eventually.equal(true);
+
+			element(by.id("addButtons")).click();
+			expect(element(by.id("floating-button")).isPresent()).to.eventually.equal(false);
+			expect(element(by.id("addModel")).isPresent()).to.eventually.equal(false);
+			expect(element(by.id("addFederation")).isPresent()).to.eventually.equal(false);
+			expect(element(by.id("addProject")).isPresent()).to.eventually.equal(false);
 
 		});
 
 		it("with a 'Add Model' button that opens a dialog on click", () => {
 
-			element(by.id('addButtons')).click();
-			element(by.id('addModel')).click();
-			const dialog = element(by.className('newModelDialog'));
+			element(by.id("addButtons")).click();
+			element(by.id("addModel")).click();
+			const dialog = element(by.className("newModelDialog"));
 			expect(dialog.isDisplayed()).to.eventually.equal(true);
 
 		});
@@ -47,8 +47,8 @@ describe("Adding items", function() {
 
 			it("that has the correct fields", () => {
 
-				const teamspace = element(by.model('vm.newModelData.teamspace'));
-				const project = element(by.model('vm.newModelData.project'));
+				const teamspace = element(by.model("vm.newModelData.teamspace"));
+				const project = element(by.model("vm.newModelData.project"));
 				expect(teamspace.isDisplayed()).to.eventually.equal(true);
 				expect(project.isDisplayed()).to.eventually.equal(true);
 
@@ -56,7 +56,7 @@ describe("Adding items", function() {
 
 			it("with the teamspace defaulting to the test user name", () => {
 
-				const menu = element.all(by.tagName('md-select'));
+				const menu = element.all(by.tagName("md-select"));
 				expect(menu.count()).to.eventually.equal(2);
 				expect(menu.get(0).getText()).to.eventually.equal(USER.USERNAME);
 
@@ -64,29 +64,58 @@ describe("Adding items", function() {
 
 			it("and you can change the project", () => {
 
-				const menu = element.all(by.tagName('md-select'));
+				const menu = element.all(by.tagName("md-select"));
 				menu.get(1).click();
 
 				browser.sleep(1000);
 
 				const select = element.all(by.css(".md-active"));
 
-				const option = select.all(by.tagName("md-option")).get(0)
+				const option = select.all(by.tagName("md-option")).get(0);
 				option.click();
 
-				const name = element(by.model('vm.newModelData.name'));
+				const name = element(by.model("vm.newModelData.name"));
 				expect(name.isDisplayed()).to.eventually.equal(true);
 
 			});
 
-			it("and you can save the model without uploading", () => {
+			it("and you can save and delete the model without uploading", () => {
 
-				expect(element(by.model('vm.newModelData.name')).isDisplayed()).to.eventually.equal(true);
-				element(by.model('vm.newModelData.name')).sendKeys("testmodel");
+				expect(element(by.model("vm.newModelData.name")).isDisplayed()).to.eventually.equal(true);
+				element(by.model("vm.newModelData.name")).sendKeys("testmodel");
 				element(by.css('[ng-click="vm.saveNewModel()"]')).click();
 
 				const dialog = element.all(by.className("newModelDialog"));
+				expect(dialog.count()).to.eventually.equal(0);
 
+			});
+
+			it("and the model can be deleted after", () => {
+
+				const toggleModels = element(by.css(".toggleModels"));
+				expect(toggleModels.isDisplayed()).to.eventually.equal(true);
+				toggleModels.click();
+				browser.sleep(500);
+
+				const testmodelButton = element.all(by.css(".modelSettingsButton")).get(2);
+				testmodelButton.click();
+				browser.sleep(500);
+
+				const testmodelMenu = element.all(by.css(".modelOptionsMenu")).get(2);
+				expect(testmodelMenu.isDisplayed()).to.eventually.equal(true);
+				const deleteButton = testmodelMenu.all(by.tagName("md-menu-item")).get(4);
+				expect(deleteButton.isDisplayed()).to.eventually.equal(true);
+				deleteButton.click();
+				browser.sleep(500);
+
+				const deleteDialog = element(by.tagName("md-dialog"));
+				expect(deleteDialog.isDisplayed()).to.eventually.equal(true);
+
+				const yes = element(by.id("deleteModelYes"));
+				expect(yes.isDisplayed()).to.eventually.equal(true);
+				yes.click();
+
+				const dialog = element.all(by.tagName("md-dialog"));
 				expect(dialog.count()).to.eventually.equal(0);
 
 			});

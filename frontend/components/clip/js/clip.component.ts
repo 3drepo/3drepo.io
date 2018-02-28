@@ -46,7 +46,7 @@ class ClipController implements ng.IController {
 	public units: string;
 	public modelUnits: string;
 	public disableWatchDistance: boolean;
-	public offsetTrans;
+	// public offsetTrans;
 	public modelTrans;
 	public disableWatchSlider;
 	public displayedAxis;

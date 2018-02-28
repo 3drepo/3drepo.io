@@ -95,7 +95,6 @@ class AccountModelSettingController implements ng.IController {
 				if (response.status === 200 && response.data && response.data.properties) {
 
 					const props = response.data.properties;
-					console.log("data", response.data);
 
 					if (response.data.surveyPoints && response.data.surveyPoints.length) {
 						const reference = response.data.surveyPoints[0];
