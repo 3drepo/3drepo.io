@@ -15,13 +15,13 @@
 			if (window.ClientConfig.VERSION) {
 				console.log("======== 3D REPO - Version " + window.ClientConfig.VERSION + " ======");
 			} else {
-				console.log("No version number in config...");
+				console.error("No version number in config...");
 			}
 
 			if (window.ClientConfig.unitySettings) {
 				// Assign unity settings
 				window.Module = ClientConfig.unitySettings;
-				console.log("unitySettings MEMORY : ", window.Module);
+				
 			} else {
 				console.error("ClientConfig does not have any provided Unity settings!");
 			}
