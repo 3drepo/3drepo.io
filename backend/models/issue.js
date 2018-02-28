@@ -1170,7 +1170,10 @@ schema.methods.clean = function(typePrefix, modelCode){
 
 		if(cleaned.comments[i].viewpoint){
 
-			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
+			const commentViewpoint = JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint)));
+			if (commentViewpoint) {
+				cleaned.comments[i].viewpoint = JSON.parse(commentViewpoint);
+			}
 
 			if(i > 0 && cleaned.comments[i-1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
 				//hide repeated screenshot if consecutive comments relate to the same viewpoint
