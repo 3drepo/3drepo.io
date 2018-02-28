@@ -359,11 +359,9 @@ export class ClipService {
 	 */
 	public updateDisplayedDistance(updateSlider, moveClip) {
 
-		console.log("state - bbox before getMinMax", this.state.bbox);
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;
-		console.log("state - minMax", this.sliderPosition);
 
 		const percentage = 1 - this.state.sliderPosition / 100;
 
@@ -376,7 +374,6 @@ export class ClipService {
 
 		if (!isNaN(newDistance)) {
 			this.state.displayDistance = newDistance;
-			console.log("state - displayDistance", this.state.displayDistance);
 			if (moveClip) {
 				this.updateClippingPlaneByModel();
 			}
