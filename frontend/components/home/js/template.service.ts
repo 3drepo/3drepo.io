@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,42 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function() {
-	"use strict";
+export class TemplateService {
 
-	angular.module("3drepo")
-		.service("TemplateService", TemplateService);
-		
-	TemplateService.$inject = [
-		"$http", "$templateCache"
+	public static $inject: string[] = [
+		"$http",
+		"$templateCache",
 	];
-		
-	function TemplateService(
-		$http, $templateCache
+
+	constructor(
+		private $http: any,
+		private $templateCache: any,
 	) {
+	}
 
-		var service = {
-			precache: precache
-		};
-
-		return service;
-
-		////////
-
-		function precache(preCacheTemplates) {
-			preCacheTemplates.forEach(function(templatePath){
-				$http.get(templatePath).then(function(response) {
-					$templateCache.put(templatePath, response.data);
-				});
+	public precache(preCacheTemplates) {
+		preCacheTemplates.forEach((templatePath) => {
+			this.$http.get(templatePath).then((response) => {
+				this.$templateCache.put(templatePath, response.data);
 			});
-
-		}
+		});
 
 	}
-			
-})();
 
+}
 
-
-
-		
+export const TemplateServiceModule = angular
+	.module("3drepo")
+	.service("TemplateService", TemplateService);

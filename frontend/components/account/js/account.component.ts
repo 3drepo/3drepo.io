@@ -102,7 +102,7 @@ class AccountController implements ng.IController {
 		if (!this.accountInitialised) {
 			// TODO: This is also a mess
 			this.getUserInfo().then(() => {
-				this.AuthService.authPromise.then(() => {
+				this.AuthService.authDefer.promise.then(() => {
 					this.AccountService.accountDefer.promise.then(() => {
 						this.handleDirectiveInit(directive);
 					});

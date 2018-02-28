@@ -7,14 +7,13 @@
       "declaration": false,
       "removeComments": true,
       "noImplicitAny": false,
-      "outDir": "./tests/e2e/built",
+      "outDir": "./e2e/built",
       "types": ["mocha", "chai", "node"]
     },
     "include": [
-      "./tests/e2e/**/*"
+      "./e2e/**/*"
     ],
     "exclude": [
-      "./tests/e2e/built",
-      "./node_modules"
+      "./e2e/built"
     ]
   }

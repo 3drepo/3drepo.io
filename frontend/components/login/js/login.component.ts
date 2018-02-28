@@ -15,23 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /**
- *	Copyright (C) 2014 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 class LoginController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -78,14 +61,16 @@ class LoginController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-			if (event.type === this.EventService.EVENT.USER_LOGGED_IN) {
+		this.$scope.$watch(() => {
+			return this.AuthService.state.currentEvent;
+		}, () => {
+			if (this.AuthService.state.currentEvent === this.AuthService.events.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				if (!event.value.initialiser && event.value.hasOwnProperty("error")) {
-					if (event.value.error.status === 500) {
+				if (!this.AuthService.state.currentData.initialiser && this.AuthService.state.currentData.hasOwnProperty("error")) {
+					if (this.AuthService.state.currentData.error.status === 500) {
 						this.errorMessage = "There is currently a problem with the system. Please try again later.";
 					} else {
-						this.errorMessage = this.APIService.getErrorMessage(event.value.error);
+						this.errorMessage = this.APIService.getErrorMessage(this.AuthService.state.currentData.error);
 					}
 				}
 			}
