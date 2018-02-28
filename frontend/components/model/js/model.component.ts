@@ -201,12 +201,6 @@ class ModelController implements ng.IController {
 					this.PanelService.hideSubModels(this.issuesCardIndex, true);
 				}
 
-				console.log(data);
-				// this.EventService.send(
-				// 	this.EventService.EVENT.MODEL_SETTINGS_READY,
-				// 	data,
-				// );
-
 				this.ViewerService.updateViewerSettings(data.updateViewerSettings);
 				this.ClipService.initClip(data.properties.unit);
 

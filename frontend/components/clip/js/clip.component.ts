@@ -102,7 +102,6 @@ class ClipController implements ng.IController {
 		);
 
 		this.$scope.$watch("vm.displayDistance", (value) => {
-			console.log("clip - updateDisplaySlider", value );
 			this.ClipService.updateDisplaySlider(false, this.visible);
 		});
 
@@ -141,7 +140,6 @@ class ClipController implements ng.IController {
 		 * Watch the slider position
 		 */
 		this.$scope.$watch("vm.sliderPosition", (value) => {
-			console.log("clip - sliderPosition", value);
 			this.ClipService.setSliderPosition(value);
 		});
 
@@ -158,29 +156,13 @@ class ClipController implements ng.IController {
 				break;
 
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
-
-				console.log("clip - CLIPPING_PLANE_BROADCAST");
 				this.ClipService.setClippingPlane(event.value);
 				break;
 
-			// case this.EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO:
-			// 	this.modelTrans[event.value.modelNameSpace] = event.value.modelTrans;
-			// 	if (event.value.isMainModel) {
-			// 		this.offsetTrans = event.value.modelTrans;
-			// 	}
-			// 	break;
-
 			case this.EventService.EVENT.VIEWER.BBOX_READY:
-				console.log("clip - BBOX_READY");
 				this.ClipService.setBoundingBox(event.value.bbox);
 				break;
 		}
-
-			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
-			// 	console.log("clip - MODEL_SETTINGS_READY");
-			// 	this.ClipService.initClip(event.value.properties.unit);
-			// 	break;
-			// }
 
 	}
 
@@ -189,7 +171,6 @@ class ClipController implements ng.IController {
 	}
 
 	public handleScroll(event) {
-		console.log("Handling scroll!", event);
 		this.ClipService.handleScroll(event);
 		this.$timeout();
 	}

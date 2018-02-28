@@ -168,7 +168,6 @@ export class ClipService {
 
 	public setBoundingBox(bbox: any) {
 		if (bbox) {
-			console.log("clip - setting bounding box");
 			this.state.bbox = bbox;
 			this.setDisplayValues(
 				"X",
