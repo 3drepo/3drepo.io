@@ -589,21 +589,6 @@
 			}
 		}
 
-		function handleClippingPlane(issue) {
-
-			// TODO: Use ViewerService
-			// Set the clipping planes
-			var issueData = {
-				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				account: issue.account,
-				model: issue.model
-			};
-
-			EventService.send(EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES, issueData);
-
-		}
-
 		function handleShowIssue(issue) {
 
 			if(issue && issue.viewpoint ) {
@@ -612,13 +597,14 @@
 					handleCameraView(issue);
 				}
 
-<<<<<<< HEAD
+				var issueData = {
+					clippingPlanes: issue.viewpoint.clippingPlanes,
+					fromClipPanel: false,
+					account: issue.account,
+					model: issue.model
+				};
+
 				ClipService.updateClippingPlane(issueData);
-=======
-				//if (issue.viewpoint.clippingPlanes && issue.viewpoint.clippingPlanes.length) {
-				handleClippingPlane(issue);
-				//}
->>>>>>> c49edc756ce1266e689efe15d6f8c5d7c3487259
 
 			} else {
 				//This issue does not have a viewpoint, go to default viewpoint
