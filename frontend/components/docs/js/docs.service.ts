@@ -60,8 +60,6 @@ export class DocsService {
 		this.getDocs(account, model, id)
 			.then((data) => {
 
-				console.log("DOCS - ", data);
-
 				if (!data) {
 					return;
 				}

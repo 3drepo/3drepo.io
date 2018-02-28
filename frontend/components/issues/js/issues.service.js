@@ -566,11 +566,6 @@
 			}
 		}
 
-		function showOrthogonalViewPrompt() {
-			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
-		}
-
-
 		function handleCameraView(issue) {
 			// Set the camera position
 			var issueData = {
@@ -584,9 +579,6 @@
 			
 			ViewerService.setCamera(issueData);
 
-			if ("orthogonal" === issue.viewpoint.type) {
-				showOrthogonalViewPrompt();
-			}
 		}
 
 		function handleClippingPlane(issue) {
