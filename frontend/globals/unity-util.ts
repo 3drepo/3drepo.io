@@ -316,7 +316,7 @@ export class UnityUtil {
 	 * @param {string} ns - namespace for the object, i.e. teamspace + "." + model
 	 * @param {string} id - unique ID of the object to centre on
 	 */
-	public static centreToPoint(model, id) {
+	public static centreToPoint(model: string, id: string) {
 		const params = {
 			model,
 			meshID: id,

@@ -413,6 +413,10 @@ export class TreeService {
 		return this.subTreesById;
 	}
 
+	public getMeshId(nodeId: string) {
+		return this.idToMeshes[nodeId];
+	}
+
 	public setSubTreesById(value) {
 		this.subTreesById = value;
 	}

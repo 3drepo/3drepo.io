@@ -28,6 +28,9 @@ class TreeController implements ng.IController {
 	];
 
 	public showProgress: boolean; // in pug
+	private model;
+	private account;
+
 	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
@@ -410,6 +413,20 @@ class TreeController implements ng.IController {
 		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
 		this.TreeService.setTreeNodeStatus(node, newState);
 		this.TreeService.updateModelState(node);
+	}
+
+	public selectAndCentreNode(node: any) {
+
+		this.selectNode(node);
+		this.TreeService.getMap().then(() => {
+			const meshId = this.TreeService.getMeshId(node._id);
+			this.ViewerService.centreToPoint({
+				teamspace: this.account,
+				model: this.model,
+				meshId,
+			});
+		});
+
 	}
 
 	/**
