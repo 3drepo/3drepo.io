@@ -61,6 +61,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})')
 
 			clip(
+				model="vm.model"
 				ng-if="vm.contentData.type === 'clip'"
 				show-add='vm.showAdd'
 				show='vm.contentData.show'
@@ -69,14 +70,12 @@ div(layout="column", class="md-whiteframe-1dp")
 				hide-item='vm.hideSelectedItem'
 				show-edit='vm.showEdit'
 				account='vm.account'
-				model='vm.model'
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
 				keys-down='vm.keysDown'
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-				
 				visible='vm.visible')
 
 			tree(
