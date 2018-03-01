@@ -8,8 +8,6 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15", ng-if="vm.importingBCF")
-
 
 // Issues list
 issues-list(
@@ -51,6 +49,11 @@ issue(
 		style="text-align: center;"
 		flex, 
 		layout-align="center center")
+		
+		div(layout="row" ng-if="vm.importingBCF" layout-align="center center")
+			span(flex="50").addHint Uploading BCF... 
+			md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15")
+
 		span.addHint(ng-if="!vm.canAddIssue") You don't have permission to add an issue
 		span.addHint(ng-if="vm.canAddIssue && !vm.modelLoaded()") You can add an issue after model load
 

@@ -216,8 +216,9 @@ describe("Issues", function () {
 
 			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
-			.expect(400 , function(err, res){
-				expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_STATUS.value);
+			.expect(200 , function(err, res){
+				// Invalid status is now allowed to accommodate for BCF import
+				// expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_STATUS.value);
 				done(err);
 			});
 		});
@@ -306,8 +307,9 @@ describe("Issues", function () {
 				function(done){
 					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(status)
-					.expect(400, function(err, res){
-						expect(res.body.value === responseCodes.ISSUE_INVALID_STATUS.value);
+					.expect(200, function(err, res){
+						// Invalid status is now allowed to accommodate for BCF import
+						// expect(res.body.value === responseCodes.ISSUE_INVALID_STATUS.value);
 						done(err);
 					});
 				}

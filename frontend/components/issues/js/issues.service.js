@@ -552,7 +552,11 @@
 			TreeService.showAllTreeNodes(false);
 
 			// Show multi objects
-			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id") || issue.viewpoint.hasOwnProperty("group_id"))) || issue.hasOwnProperty("group_id")) {
+			if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
+							issue.viewpoint.hasOwnProperty("hidden_group_id") ||
+							issue.viewpoint.hasOwnProperty("shown_group_id") ||
+							issue.viewpoint.hasOwnProperty("group_id"))) ||
+					issue.hasOwnProperty("group_id")) {
 
 				showMultiIds(issue).then( function() {
 					TreeService.showProgress = false;
@@ -565,11 +569,6 @@
 				handleShowIssue(issue);
 			}
 		}
-
-		function showOrthogonalViewPrompt() {
-			console.log("Orthogonal view requested: objects in the viewer are shown in perspective projection.");
-		}
-
 
 		function handleCameraView(issue) {
 			// Set the camera position
@@ -584,9 +583,6 @@
 			
 			ViewerService.setCamera(issueData);
 
-			if ("orthogonal" === issue.viewpoint.type) {
-				showOrthogonalViewPrompt();
-			}
 		}
 
 		function handleShowIssue(issue) {
@@ -620,12 +616,14 @@
 
 			var promises = [];
 
-			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") || issue.viewpoint.hasOwnProperty("hidden_group_id"))) {
+			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
+						issue.viewpoint.hasOwnProperty("hidden_group_id") ||
+						issue.viewpoint.hasOwnProperty("shown_group_id"))) {
 				if (issue.viewpoint.highlighted_group_id) {
 					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
 					var highlightPromise;
 
-					if(groupsCache[highlightedGroupId]) {
+					if (groupsCache[highlightedGroupId]) {
 						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
 					} else {
 						var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
@@ -640,19 +638,15 @@
 							});
 					}
 
-					
-
 					promises.push(highlightPromise);
-
 				}
 				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
 					var hiddenPromise;
 
-					if(groupsCache[hiddenGroupId]) {
-
-						highlightPromise = handleHidden(groupsCache[hiddenGroupId]);
+					if (groupsCache[hiddenGroupId]) {
+						hiddenPromise = handleHidden(groupsCache[hiddenGroupId]);
 					} else {
 						var hiddenGroupUrl = issue.account + "/" + issue.model + "/groups/" + hiddenGroupId;
 
@@ -667,9 +661,29 @@
 
 					}
 
-					
 					promises.push(hiddenPromise);
-					
+				}
+
+				if (issue.viewpoint.shown_group_id) {
+					var shownGroupId = issue.viewpoint.shown_group_id;
+					var shownPromise;
+
+					if (groupsCache[shownGroupId]) {
+						shownPromise = handleShown(groupsCache[shownGroupId]);
+					} else {
+						var shownGroupUrl = issue.account + "/" + issue.model + "/groups/" + shownGroupId;
+
+						shownPromise = APIService.get(shownGroupUrl)
+							.then(function (response) {
+								groupsCache[shownGroupId] = response.data.objects;
+								return handleShown(response.data.objects);
+							})
+							.catch(function(error) {
+								console.error("There was a problem getting visibility: ", error);
+							});
+					}
+
+					promises.push(shownPromise);
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
@@ -755,7 +769,32 @@
 								hiddenNodes.push(TreeService.getNodeById(objUid));
 							}
 						}
-						TreeService.hideTreeNodes(hiddenNodes, "invisible", false);
+						TreeService.hideTreeNodes(hiddenNodes);
+					}
+				})
+				.catch(function(error) {
+					console.error(error);
+				});
+		}
+
+		function handleShown(objects) {
+
+			TreeService.getMap()
+				.then(function(treeMap){
+
+					TreeService.hideAllTreeNodes(false);
+
+					if (objects) {
+						// Make a list of nodes to shown
+						var shownNodes = [];
+						for (var i = 0; i < objects.length; i++) {
+							var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+							if (objUid) {
+								shownNodes.push(TreeService.getNodeById(objUid));
+							}
+						}
+						TreeService.showTreeNodes(shownNodes);
 					}
 				})
 				.catch(function(error) {

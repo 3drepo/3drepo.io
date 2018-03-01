@@ -355,7 +355,7 @@ function importBCF(req, res, next){
 	function fileFilter(req, file, cb){
 
 		let acceptedFormat = [
-			"bcfzip", "zip"
+			"bcf", "bcfzip", "zip"
 		];
 
 		let format = file.originalname.split(".");
@@ -392,7 +392,7 @@ function importBCF(req, res, next){
 		} else {
 
 
-			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);
