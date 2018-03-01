@@ -46,6 +46,7 @@ export class TreeService {
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
 	private treeMapReady;
+	private currentSelectedMap: any;
 
 	constructor(
 		private $q: ng.IQService,
@@ -279,6 +280,8 @@ export class TreeService {
 					const subTree = subtree.buf.nodes;
 					const subTreeId = subTree._id;
 
+					console.log("subTree", subTree);
+
 					subTree.parent = idToObjRef[treeId];
 
 					// Correct main tree using incoming subtree for federation
@@ -286,6 +289,8 @@ export class TreeService {
 
 					for (let i = nodeIdsToUpdate.length - 1; i >= 0; i--) {
 						const nodeToUpdate = idToObjRef[nodeIdsToUpdate[i]];
+
+						console.log("nodeToUpdate", nodeToUpdate);
 
 						if (nodeToUpdate.children) {
 							this.updateParentVisibilityByChildren(nodeToUpdate);
@@ -414,7 +419,27 @@ export class TreeService {
 	}
 
 	public getMeshId(nodeId: string) {
-		return this.idToMeshes[nodeId];
+
+		console.log(this.idToMeshes);
+		let meshId = this.idToMeshes[nodeId];
+
+		if (meshId !== undefined) {
+			return meshId;
+		}
+
+		for (const key in this.idToMeshes) {
+			if (key) {
+				console.log(key, this.idToMeshes[key], nodeId);
+				const potentialMeshId = this.idToMeshes[key][nodeId];
+				if (potentialMeshId !== undefined) {
+					meshId = potentialMeshId;
+					return meshId;
+				}
+			}
+		}
+
+		return meshId;
+
 	}
 
 	public setSubTreesById(value) {
@@ -905,12 +930,15 @@ export class TreeService {
 			}
 
 			return this.getMap().then((treeMap) => {
-				const map = {};
-				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+				this.currentSelectedMap = {};
+				this.currentSelectedNodes.forEach((selectedNode: any) => {
+					this.traverseNodeAndPushId(
+						selectedNode,
+						this.currentSelectedMap,
+						treeMap.idToMeshes,
+					);
 				});
-
-				this.setHighlightMap(map);
+				this.setHighlightMap(this.currentSelectedMap);
 			});
 		}
 	}
@@ -936,12 +964,17 @@ export class TreeService {
 				return Promise.resolve();
 			} else {
 				return this.getMap().then((treeMap) => {
-					const map = {};
-					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+					this.currentSelectedMap = {};
+					this.currentSelectedNodes.forEach((selectedNode) => {
+						this.traverseNodeAndPushId(
+							selectedNode,
+							this.currentSelectedMap,
+							treeMap.idToMeshes,
+						);
 					});
 
-					this.setHighlightMap(map);
+					this.setHighlightMap(this.currentSelectedMap);
+					return this.currentSelectedMap;
 				});
 			}
 		}

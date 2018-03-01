@@ -417,14 +417,21 @@ class TreeController implements ng.IController {
 
 	public selectAndCentreNode(node: any) {
 
-		this.selectNode(node);
-		this.TreeService.getMap().then(() => {
-			const meshId = this.TreeService.getMeshId(node._id);
-			this.ViewerService.centreToPoint({
-				teamspace: this.account,
-				model: this.model,
-				meshId,
-			});
+		this.selectNode(node).then((currentSelectedMap) => {
+
+			if (Object.keys(currentSelectedMap).length === 0) {
+				return;
+			}
+			const key = Object.keys(currentSelectedMap)[0];
+			if (key) {
+				const meshId = currentSelectedMap[key][0];
+				this.ViewerService.centreToPoint({
+					teamspace: node.account,
+					model: node.project,
+					meshId,
+				});
+			}
+
 		});
 
 	}
@@ -435,8 +442,11 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
-		this.TreeService.updateModelState(node);
+		return this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true)
+			.then((currentSelectedMap) => {
+				this.TreeService.updateModelState(node);
+				return currentSelectedMap;
+			});
 	}
 
 	public filterItemSelected(item) {
