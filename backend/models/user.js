@@ -55,7 +55,8 @@ let schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: { 
+		billing: {
+			_id : false,
 			type: userBilling, 
 			default: userBilling,
 			get: function(billing){
@@ -412,11 +413,6 @@ schema.statics.verify = function(username, token, options){
 			ModelHelper.importToyProject(username, username).catch(err => {
 				systemLogger.logError("Failed to import toy model", { err : err && err.stack ? err.stack : err});
 			});
-		}
-
-		if(!skipCreateBasicPlan){
-			//basic quota
-			user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
 		}
 		
 		Role.createTeamSpaceRole(username).then(role => {
