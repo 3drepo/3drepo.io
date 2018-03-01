@@ -125,6 +125,7 @@ let schema = Schema({
 		group_id: Object,
 		highlighted_group_id: Object,
 		hidden_group_id: Object,
+		shown_group_id: Object,
 		hideIfc: Boolean,
 		screenshot: {
 			flag: Number, 
@@ -703,6 +704,10 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
 	}
 
+	if (data.viewpoint && data.viewpoint.shown_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
+	}
+
 	return Promise.all(groupCheckPromises).then(groups => {
 
 		for (let i = 0; groups && i < groups.length; i++) {
@@ -1149,6 +1154,7 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
 	cleaned.highlighted_group_id = cleaned.highlighted_group_id ? uuidToString(cleaned.highlighted_group_id) : undefined;
 	cleaned.hidden_group_id = cleaned.hidden_group_id ? uuidToString(cleaned.hidden_group_id) : undefined;
+	cleaned.shown_group_id = cleaned.shown_group_id ? uuidToString(cleaned.shown_group_id) : undefined;
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
@@ -1408,7 +1414,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							if (groupObject.ifc_guid) {
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
 									"@": {
-										ifcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guid
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1435,12 +1441,46 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 											DefaultVisibility: true
 										}
 									};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component = [];
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
 							if (groupObject.ifc_guid) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component.push({
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										ifcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
+							}
+						}
+					}
+				})
+			);
+		}
+
+		if (_.get(vp, "shown_group_id")) {
+			let shownGroupId = _.get(vp, "shown_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
+										"@": {
+											DefaultVisibility: false
+										}
+									};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
+									"@": {
+										IfcGuid: groupObject.ifc_guid
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1905,13 +1945,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											let objectModel = model;
 
 											if (settings.federate) {
-												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].ifcGuid];
+												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
 											}
 
 											highlightedObjects.push({
 												account: account,
 												model: objectModel,
-												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].ifcGuid
+												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
 											});
 										}
 									}
@@ -1933,24 +1973,50 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 								if (vpComponents[i].Visibility) {
 									let hiddenObjects = [];
+									let shownObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										let componentsToHide = [];
+										let componentsToShow = [];
+
 										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
-											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
-												let objectModel = model;
-
-												if (settings.federate) {
-													objectModel = ifcToModelMap[vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid];
-												}
-
-												hiddenObjects.push({
-													account: account,
-													model: objectModel,
-													ifc_guid: vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid
-												});
+											componentsToShow = vpComponents[i].Visibility[j].Component;
+											if (vpComponents[i].Visibility[j].Exceptions) {
+												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
 											}
 										} else {
-											systemLogger.logError("Visibility where DefaultVisibility is false currently unsupported for BCF import!");
+											componentsToHide = vpComponents[i].Visibility[j].Component;
+											if (vpComponents[i].Visibility[j].Exceptions) {
+												componentsToShow = vpComponents[i].Visibility[j].Exceptions[0].Component;
+											}
+										}
+
+										for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
+											let objectModel = model;
+
+											if (settings.federate) {
+												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
+											}
+
+											hiddenObjects.push({
+												account: account,
+												model: objectModel,
+												ifc_guid: componentsToHide[k]["@"].IfcGuid
+											});
+										}
+
+										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
+											let objectModel = model;
+
+											if (settings.federate) {
+												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
+											}
+
+											shownObjects.push({
+												account: account,
+												model: objectModel,
+												ifc_guid: componentsToShow[k]["@"].IfcGuid
+											});
 										}
 									}
 
@@ -1964,6 +2030,20 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										groupPromises.push(
 											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
 												vp.hidden_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+
+									if (shownObjects.length > 0) {
+										let shownObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: shownObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
+												vp.shown_group_id = utils.uuidToString(group._id);
 											})
 										);
 									}
