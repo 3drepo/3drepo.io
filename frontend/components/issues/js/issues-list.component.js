@@ -168,7 +168,7 @@
 					case "importBCF":
 						var file = document.createElement("input");
 						file.setAttribute("type", "file");
-						file.setAttribute("accept", ".zip,.bcfzip");
+						file.setAttribute("accept", ".zip,.bcfzip,.bcf");
 						file.click();
 
 						file.addEventListener("change", function () {
