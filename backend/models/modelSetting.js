@@ -201,7 +201,10 @@ schema.statics.populateUsers = function(account, permissions){
 
 	const User = require("./user");
 
-	return User.findByUserName(account).then(user => {
+/*	
+ *	FIXME: instead of checking within subscriptions, we just need to check if the user has the team_member role of 
+ *	this account.
+ *	return User.findByUserName(account).then(user => {
 
 		const subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 
@@ -215,7 +218,7 @@ schema.statics.populateUsers = function(account, permissions){
 
 		return permissions;
 
-	});
+	});*/ 
 
 };
 

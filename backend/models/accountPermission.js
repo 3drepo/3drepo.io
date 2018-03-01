@@ -43,9 +43,11 @@
 
 		_check(user, permission){
 
-			if(!this.user.customData.billing.subscriptions.findByAssignedUser(user)){
+			/*
+			 * FIXME: this needs to check team_members
+			 * if(!this.user.customData.billing.subscriptions.findByAssignedUser(user)){
 				return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-			}
+			}*/
 
 			const isPermissionInvalid = permission.permissions && 
 				_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;

@@ -18,13 +18,13 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const Subscriptions = require("./subscriptions");
 const billingAddressInfo = require("./billingAddress");
 const moment = require("moment");
 const Subscription = require("./subscription");
 const vat = require("./vat");
 const utils = require("../utils");
 const C = require("../constants");
+const config = require("../config");
 const Paypal = require("./paypal.js");
 const Invoice = require("./invoice.js");
 const responseCodes = require("../response_codes.js");
@@ -34,13 +34,7 @@ const systemLogger = require("../logger.js").systemLogger;
 let getSubscription = Subscription.getSubscription;
 
 let billingSchema = mongoose.Schema({
-	subscriptions: { 
-		type: [Subscriptions.schema], 
-		get: function (subs) { 
-			//console.log('subs', subs)
-			return new Subscriptions(this._parent, this.billingUser, this.billingInfo, subs); 
-		}
-	},
+	subscriptions: Object,
 	billingInfo: { type: billingAddressInfo, default: {}  },
 	//global billing info
 	billingAgreementId: String,
@@ -304,6 +298,68 @@ billingSchema.methods.executeBillingAgreement = function(user){
 
 
 };
+
+billingSchema.methods.getActiveSubscriptions = function() {
+	let res = { basic: config.subscription.basic};
+
+	Object.keys(this.subscriptions).forEach(key => {
+		if(key === "paypal") {
+			res.paypal = [];
+			this.subscriptions.paypal.forEach( ppPlan => {
+				if( ppPlan.expiryDate || ppPlan.expiryDate > this.now) {
+					res.paypal.push(ppPlan);
+				}
+			});
+		}
+		else {
+			if(!this.subscriptions[key].expiryDate || 
+				this.subscriptions[key].expiryDate > this.now) {
+				res[key] = this.subscriptions[key];
+			}
+
+		}
+	});
+
+	return res;
+}
+
+billingSchema.methods.getSubscriptionLimits = function() {
+	let sumLimits = {
+		spaceLimit: 0,
+		collaboratorLimit: 0
+	};
+
+	
+	Object.keys(this.subscriptions).forEach(key => {
+		if(key === "paypal") {
+			res.paypal = [];
+			this.subscriptions.paypal.forEach( ppPlan => {
+				const plan = config.subscriptions.plans[ppPlan.plan];
+				if( plan &&
+					(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
+
+					spaceLimit += plan.data;													if(sumLimits.collaborators !== "unlimited") {
+						sumLimits.collaboratorLimits = plan.collaborators === "unlimited"? 
+							"unlimited" : sumLimits.collaborators + plan.collaborators;
+					}
+				}
+			});
+		}
+		else {
+			if(!this.subscriptions[key].expiryDate || 
+				this.subscriptions[key].expiryDate > this.now) {
+				spaceLimit += this.subscriptions[key].data;							
+				if(sumLimits.collaborators !== "unlimited") {
+					sumLimits.collaboratorLimits = this.subscriptions[key].collaborators === "unlimited"? 
+						"unlimited" : sumLimits.collaborators + this.subscriptions[key].collaborators;
+				}
+			}
+
+		}
+	});
+
+	return sumLimits;
+}
 
 billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 	const User = require('./user');

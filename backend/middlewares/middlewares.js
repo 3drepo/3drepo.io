@@ -65,7 +65,7 @@
 		//console.log('checking free space');
 		return User.findByUserName(account).then( dbUser => {
 
-			limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
+			limits = dbUser.customData.billing.getSubscriptionLimits();
 			return User.historyChunksStats(account);
 
 		}).then(stats => {
@@ -93,7 +93,7 @@
 
 		return User.findByUserName(account).then( dbUser => {
 
-			limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
+			limits = dbUser.customData.billing.getSubscriptionLimits();
 
 			return ModelSetting.findById({account}, model);
 

@@ -29,17 +29,6 @@ const subscriptions = {
 		freeTrial: 1, //month
 		currency: "GBP",
 		amount: 100
-	},
-	"BASIC" : {
-		plan: "BASIC",
-		limits: {
-			spaceLimit: 209715200, //bytes
-			collaboratorLimit: 0,
-		},
-		billingCycle: -1, //month
-		freeTrial: 0, //month
-		currency: "GBP",
-		amount: 0
 	}
 };
 
@@ -51,10 +40,6 @@ function getSubscription(plan) {
 	return subscriptions[plan];
 }
 
-function getBasicPlan() {
-	return subscriptions["BASIC"];
-}
-
 function getAll() {
 	return subscriptionsArr;
 }
@@ -62,5 +47,4 @@ function getAll() {
 module.exports = {
 	getAll,
 	getSubscription,
-	getBasicPlan
 };

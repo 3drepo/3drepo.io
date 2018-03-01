@@ -176,19 +176,6 @@ Subscriptions.prototype.removePendingDeleteSubscription = function(){
 	}
 };
 
-Subscriptions.prototype.getActiveSubscriptions = function (options) {
-	options = options || {};
-
-	//console.log('buySubscription - jumping into subscriptions.js and calling getActiveSubscriptions');
-	const basicPlan = Subscription.getBasicPlan().plan;
-	return this.subscriptions.filter(sub => {
-		let basicCond = options.skipBasic ? sub.plan !== basicPlan : true;
-		let pendingDeleteCond = options.excludePendingDelete ? !sub.pendingDelete : true;
-		let inCurrentAgreementCond = options.excludeNotInAgreement ? sub.inCurrentAgreement : true;
-
-		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > this.now || !sub.expiredAt) && inCurrentAgreementCond;
-	});
-};
 
 Subscriptions.prototype.getAllInAgreementSubscriptions = function () {
 
@@ -297,23 +284,6 @@ Subscriptions.prototype.changeSubscriptions = function (plans) {
 	});
 };
 
-Subscriptions.prototype.getSubscriptionLimits = function(options) {
-
-	let subscriptions = this.getActiveSubscriptions(options);
-
-	let sumLimits = {
-		spaceLimit: 0, 
-		collaboratorLimit: 0
-	};
-
-	subscriptions.forEach(sub => {
-		sumLimits.spaceLimit += sub.limits.spaceLimit;
-		sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
-	});
-
-	return sumLimits;
-
-};
 
 Subscriptions.prototype.activateSubscriptions = function() {
 	// Activate a created subscription

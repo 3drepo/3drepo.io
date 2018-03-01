@@ -188,7 +188,9 @@
 
 		let subscriptions;
 
-		return User.findByUserName(account.account).then(user => {
+/*		
+ *		FIXME: this should look at whether the user has the team member role.
+ *		return User.findByUserName(account.account).then(user => {
 			
 			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
 			return Project.find(account, query);
@@ -201,7 +203,7 @@
 
 			return projects;
 
-		});
+		});*/
 	}
 
 

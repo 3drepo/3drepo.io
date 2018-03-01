@@ -61,12 +61,10 @@ function createSubscription(req, res, next) {
 
 function listSubscriptions(req, res, next) {
 
-	console.log(config.subscription);
-
 	let responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(user => {
-			let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			let subscriptions = user.customData.billing.getActiveSubscriptions();
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		})

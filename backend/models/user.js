@@ -646,7 +646,7 @@ function _findModelDetails(dbUserCache, username, model){
 function _calSpace(user){
 	"use strict";
 
-	let quota = user.customData.billing.subscriptions.getSubscriptionLimits();
+	let quota = user.customData.billing.getSubscriptionLimits();
 
 	return User.historyChunksStats(user.user).then(stats => {
 
