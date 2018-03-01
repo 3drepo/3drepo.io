@@ -61,6 +61,8 @@ function createSubscription(req, res, next) {
 
 function listSubscriptions(req, res, next) {
 
+	console.log(config.subscription);
+
 	let responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(user => {
